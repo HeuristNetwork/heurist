@@ -725,7 +725,7 @@
     //
     function recordSearchMenuItems($system, $menuitems, &$result){
         
-        $menuitems = prepareIds($menuitems);
+        $menuitems = prepareIds($menuitems, true);
         $isRoot = (count($result)==0);
         if($isRoot){
             if(!($system->defineConstant('RT_CMS_HOME') &&
@@ -739,7 +739,7 @@
                 if($menuitems[0]==0){
                     //find first home record
                     $query = 'SELECT rec_ID from Records '
-                    .'WHERE (not r0.rec_FlagTemporary) AND rec_RecTypeID='.RT_CMS_HOME;
+                    .'WHERE (not rec_FlagTemporary) AND rec_RecTypeID='.RT_CMS_HOME;
                     $res = mysql__select_value($system->get_mysqli(), $query);
                     if($res==null){
                         return $system->addError(HEURIST_ERROR, 

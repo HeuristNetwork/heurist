@@ -56,6 +56,13 @@
         
             $res = $dbRecDetails->detailsReplace();
 
+        }else if(@$_REQUEST['a'] == 'addreplace'){ //returns
+        
+                $res = $dbRecDetails->detailsReplace();
+                if($res['passed']==1 && $res['undefined']==1){
+                    $res = $dbRecDetails->detailsAdd();
+                }
+            
         }else if(@$_REQUEST['a'] == 'delete'){
 
             $res = $dbRecDetails->detailsDelete();

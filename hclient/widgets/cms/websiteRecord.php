@@ -81,8 +81,9 @@ All other elements (#main-xxx) are optional.
 INITIALIZATION workflow:
 On server side:
 1. It loads Home page record 
-2. If there is DT_POPUP_TEMPLATE field, it executes smarty template, otherwise
-page html structure and cotent of #main-header is generated in websiteRecord.php
+2. If there is DT_POPUP_TEMPLATE field, it executes smarty template (both header and content), 
+   If there is DT_CMS_HEADER field, it sets header content from this field, 
+otherwise page html structure and cotent of #main-header is generated in websiteRecord.php
 
 On client side
 1. HAPI initialization, DB defintions load -> onHapiInit -> onPageInit
@@ -510,6 +511,9 @@ $(document).ready(function() {
         window.hWin.HEURIST4.msg.bringCoverallToFront(ele);
         ele.show();
     
+        $('body').find('#main-menu').hide(); //will be visible after menu init
+        $('body').find('#main-pagetitle').show();
+    
 //console.log('webpage doc ready '+(window.hWin.HAPI4)+'    '+(new Date().getTime() / 1000 - _time_debug));
         _time_debug = new Date().getTime() / 1000;
     
@@ -643,13 +647,18 @@ if ($page_template!=null && substr($page_template,-4,4)=='.tpl') {
     include dirname(__FILE__).'/../../viewers/smarty/showReps.php';
     
 }else{
-
-    print $rec_id.'<br>';
 ?>
 
     <div class="ent_wrapper">
     <div id="main-header" class="ent_header ui-heurist-header2" <?php print $image_banner?'style="background-image:url(\''.$image_banner.'\');background-repeat: repeat-x;background-size:auto 170px;"':'' ?>>
     
+<?php
+        
+    $page_header = defined('DT_CMS_HEADER')?__getValue($rec, DT_CMS_HEADER, null):null; 
+    if($page_header!=null && $page_header!=''){
+        print $page_header;        
+    } else {
+?>    
 	    <div style="float:left;min-height:80px;" id="main-logo">
             <a href="#" style="text-decoration:none;">
         <?php print $image_logo?'<img style="max-height:80px" src="'.$image_logo.'">'
@@ -679,17 +688,23 @@ if ($page_template!=null && substr($page_template,-4,4)=='.tpl') {
                 <a href="mailto:<?php echo @$site_owner['ugr_eMail']; ?>">site owner</a>
             </div>    
         </div>
-        
+<!--        
 	    <div id="main-menu" style="float:left;display:none;width:100%;min-height:40px;padding-top:16px;color:black;font-size:1.1em;">
         </div>
+-->        
+<div id="main-menu" class="mceNonEditable" style="float:left;width:100%;min-height:40px;padding-top:16px;color:black;font-size:1.1em;" data-heurist-app-id="heurist_Navigation" data-generated="1">
+<div class="widget-design-header" style="padding: 10px;"><img style="vertical-align: middle;" src="../../assets/h4_icon_35x35.png" height="22" /> <strong>navigation</strong><a class="edit" style="padding: 0 10px;" title="Click to edit" href="#">edit</a>  <a class="remove" href="#">remove</a> height:50px width:100%</div>
+<span class="widget-options" style="font-style: italic; display: none;">{"menu_recIDs":"<?php print $rec_id;?>","use_next_level":true,"orientation":"horizontal","init_at_once":true}</span></div>        
 
 <?php        
+    }//header
+
 if(!$edit_Available && $system->is_member(2)){
         print '<a href="'.HEURIST_BASE_URL.'?db='.$system->dbname().'&cms='.$rec_id.'" id="btn_editor" target="_blank" '
         .'style="position:absolute;right:40px; top:100px;" class="cms-button">Web site editor</a>';
 }
     ?>  
-        <div id="main-pagetitle" class="ui-heurist-bg-light">loading...</div>       
+        <div id="main-pagetitle" class="ui-heurist-bg-light" style="display:none">loading...</div>       
     </div>
     <div class="ent_content_full ui-heurist-bg-light" style="top:190px;padding: 5px;" id="main-content-container">
         <div id="main-content" data-homepageid="<?php print $rec_id;?>" 

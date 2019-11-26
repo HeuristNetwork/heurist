@@ -358,6 +358,10 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
     */
     public function detailsAdd(){
 
+        if( !@$this->data['val'] && @$this->data['rVal']){
+            $this->data['val'] = $this->data['rVal'];
+        }
+        
         if (!(@$this->data['val'] || @$this->data['geo'] || @$this->data['ulfID'])){
             $this->system->addError(HEURIST_INVALID_REQUEST, "Insufficent data passed");
             return false;
@@ -482,7 +486,7 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
             }else if(@$this->data['a'] == 'replace'){ //returns
             
                 $res = $this->detailsReplace();
-                
+
             }else if(@$this->data['a'] == 'delete'){
                 
                 $res = $this->detailsDelete(true);
@@ -641,7 +645,7 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
                 if(!recordUpdateTitle($this->system, $recID, null, null)){
                     $sqlErrors[$recID] = 'Cannot update record title';
                 }
-        }
+        }      
         
         //assign special system tags
         $this->_assignTagsAndReport('processed', $processedRecIDs, $baseTag);

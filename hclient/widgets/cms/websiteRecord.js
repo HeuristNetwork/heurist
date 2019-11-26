@@ -31,6 +31,10 @@ function hCmsEditing(_options) {
     var inlineEditorConfig;
     var is_edit_widget_open = false;
 
+    var is_header_editor = false;
+    var header_content_raw = null;
+    var header_content_generated = true;
+    
     // define tinymce configuration
     // init main menu with listener __iniLoadPageById
     // init main-logo and editor buttons
@@ -87,7 +91,8 @@ function hCmsEditing(_options) {
                 });
                 */
                 editor.on('init', function(e) {
-                    last_save_content = __getEditorContent();//keep value to restore
+                    if(!is_header_editor)
+                        last_save_content = __getEditorContent();//keep value to restore
                     __initWidgetEditLinks(null);
                     
                     //adjust height
@@ -149,11 +154,16 @@ function hCmsEditing(_options) {
             var topmenu = $('#main-menu');
             topmenu.attr('data-heurist-app-id','heurist_Navigation');
             
+            header_content_generated = (topmenu.attr('data-generated')==1);
+            topmenu.attr('data-generated', 0);
+            
+            header_content_raw = $("#main-header").html();
+            
             window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, "#main-header",
                 {heurist_Navigation:{menu_recIDs:home_pageid
                 , use_next_level:true
                 , orientation:'horizontal'
-                , onmenuselect:__iniLoadPageById
+                , onmenuselect:__iniLoadPageById    //load page on select menu item
                 //aftermenuselect: afterPageLoad,  //function in header websiteRecord.php
                 , toplevel_css:{background:bg_color}  //'rgba(112,146,190,0.7)' ,color:'white','margin-right':'24px'
                 }} ); 
@@ -219,7 +229,15 @@ function hCmsEditing(_options) {
     function __iniLoadPageById( pageid ){                    
      
        var edited_content = __getEditorContent();
-       if( edited_content!=null && last_save_content != edited_content ){ //was_modified
+       
+       var is_changed = (edited_content!=null);
+       if(is_header_editor){
+            is_changed = is_changed && header_content_raw != edited_content;
+       }else{
+            is_changed = is_changed && last_save_content != edited_content;
+       }
+       
+       if( is_changed ){ //was_modified
             
             var $dlg2 = window.hWin.HEURIST4.msg.showMsgDlg(
                 '<br>Web page content has been modified',
@@ -262,7 +280,8 @@ function hCmsEditing(_options) {
                             pagetitle.empty();
                         }        
                         pagetitle.addClass("webpageheading");
-                        $('#main-pagetitle').empty().append(pagetitle);
+                        pagetitle.appendTo($('#main-pagetitle'));
+                        $('#main-pagetitle').empty().show();
                         
                         //assign content to editor
                         $('.tinymce-body').val($('#main-content').html());
@@ -317,10 +336,21 @@ function hCmsEditing(_options) {
         var newval = (_isDirectEditMode()) ?$('.tinymce-body').val() :__getEditorContent();
         
         //send data to server
-        var request = {a: 'replace',
+        var request;
+        
+        if(is_header_editor){
+            
+            request = {a: 'addreplace',
+                    recIDs: home_pageid,
+                    dtyID: window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_HEADER'],
+                    rVal: newval};
+        }else{
+            request = {a: 'replace',
                     recIDs: current_pageid,
                     dtyID: window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION'],
                     rVal: newval};
+        }
+                                        
         
         window.hWin.HAPI4.RecordMgr.batch_details(request, function(response){
                 if(response.status == hWin.ResponseStatus.OK){
@@ -330,10 +360,14 @@ function hCmsEditing(_options) {
                         
                     }else{
 
-                        last_save_content = newval;
                         window.hWin.HEURIST4.msg.showMsgFlash('saved');
                         
-                        was_modified = true;     
+                        if(!is_header_editor){
+                            last_save_content = newval;
+                            was_modified = true;     
+                        }else{
+                            header_content_raw = newval;
+                        }
                         if($.isFunction(need_close)){
                             need_close.call();
                         }else if (need_close===true){
@@ -362,6 +396,25 @@ function hCmsEditing(_options) {
             $('#btn_inline_editor4').show();
             $('#btn_inline_editor').text('Edit page content');
             $('#btn_inline_editor3').text('source');
+            
+            if(is_header_editor){
+                
+                
+                $('#main-header').html(header_content_raw);
+                
+                //reinit widgtets in header
+                window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, "#main-header",
+                    {heurist_Navigation:{menu_recIDs:home_pageid
+                    , use_next_level:true
+                    , orientation:'horizontal'
+                    , onmenuselect:__iniLoadPageById
+                    //, toplevel_css:{background:bg_color}
+                }} );                 
+                //restore 
+                $('.tinymce-body').val(last_save_content); 
+                last_save_content = null;
+            }
+            is_header_editor = false;
             
             if(new_pageid>0){
                 __loadPageById( new_pageid );   
@@ -1174,9 +1227,45 @@ function hCmsEditing(_options) {
     }
     
     //
+    // opens tinymce for website header
+    //
+    function _editHeaderContent(){
+        
+        if(header_content_generated){
+            window.hWin.HEURIST4.msg.showMsgDlg('<br>'
++'If you decided to edit header manually, you have to define entire layout '
++'(title, logo etc) directly. Only main menu will be generated based on menu '
++'records linked to home page record. You can always reset to auto generation '
++'of header by clearing field "Web site header" in home page record. Proceed?',            
+                function(){
+                    header_content_generated = false;
+                    _editHeaderContent();    
+                });
+        }
+        
+        $('#btn_inline_editor').hide();
+        $('#btn_inline_editor3').hide();
+        $('#btn_inline_editor4').hide();
+        $('#main-content').parent().css('overflow-y','hidden');
+        $('#main-content').hide();
+        $('#edit_mode').val(1).click();//to disable left panel
+        
+        last_save_content = $('.tinymce-body').val();
+        $('.tinymce-body').val(header_content_raw);
+        
+        $('.tinymce-body').show();
+        
+        is_header_editor = true;
+        
+        tinymce.init(inlineEditorConfig);
+    }
+    
+    //
     // opens tinymce for cotent editor
     //
     function _editPageContent(){
+        
+        is_header_editor = false;
      
                     $('#btn_inline_editor').hide();
                     $('#btn_inline_editor3').hide();
@@ -1209,7 +1298,15 @@ function hCmsEditing(_options) {
        if(allow_close_dialog) return true;
 
        var edited_content = __getEditorContent();
-       if( edited_content!=null && last_save_content != edited_content ){ //was_modified
+       
+       var is_changed = (edited_content!=null);
+       if(is_header_editor){
+            is_changed = is_changed && header_content_raw != edited_content;
+       }else{
+            is_changed = is_changed && last_save_content != edited_content;
+       }
+       
+       if( is_changed ){ //was_modified
             
             var $dlg2 = window.hWin.HEURIST4.msg.showMsgDlg(
                 '<br>Web page content has been modified',
@@ -1250,6 +1347,10 @@ function hCmsEditing(_options) {
             _editPageContent();
         },
 
+        editHeaderContent: function(){
+            _editHeaderContent();
+        },
+        
         onEditorExit: function( callback ){
             return _onEditorExit( callback );
         },

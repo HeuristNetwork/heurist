@@ -1110,16 +1110,22 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
 
             //custom/user heurist theme
             var custom_theme_div = $dlg.find('#custom_theme_div');
+            
+            var $btn_edit_clear2 = $('<span>')
+            .addClass("smallbutton ui-icon ui-icon-circlesmall-close")
+            .attr('tabindex', '-1')
+            .attr('title', 'Reset default color settings')
+            .appendTo( custom_theme_div )
+            .css({'line-height': '20px',cursor:'pointer',
+                outline: 'none','outline-style':'none', 'box-shadow':'none',  'border-color':'transparent'})
+                .on( { click: function(){ window.hWin.HEURIST4.msg.showMsgDlg('<br>Are you sure?',
+                    function(){$dlg.find('#custom_theme').val('');}); }});
+                
             var $btn_edit_switcher2 = $( '<span>open editor</span>', {title: 'Open theme editor'})
-                .addClass('smallbutton btn_add_term')
-                .css({'line-height': '20px','vertical-align':'top',cursor:'pointer','text-decoration':'underline'})
+                .addClass('smallbutton')
+                .css({'line-height': '20px',cursor:'pointer','text-decoration':'underline'})
                 .appendTo( custom_theme_div );
-
-            var $btn_edit_clear2 = $( '<span>reset colors</span>', {title: 'Reset default color settings'})
-                .addClass('smallbutton btn_add_term')
-                .css({'line-height': '20px','vertical-align':'top',cursor:'pointer','text-decoration':'underline'})
-                .appendTo(custom_theme_div )
-                .on( { click: function(){ $dlg.find('#custom_theme').val(''); } });
+                
                 
             function __openThemeDialog(){
                     var current_val = window.hWin.HEURIST4.util.isJSON( $dlg.find('#custom_theme').val() );
@@ -1135,6 +1141,17 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
             
             //map symbology editor            
             $dlg.find('#map_default_style').attr('readonly','readonly');
+            
+            var $btn_edit_clear = $('<span>')
+            .addClass("smallbutton ui-icon ui-icon-circlesmall-close")
+            .attr('tabindex', '-1')
+            .attr('title', 'Reset default symbology')
+            .appendTo( $dlg.find('#map_default_style_div') )
+            .css({'line-height': '20px',cursor:'pointer',
+                outline: 'none','outline-style':'none', 'box-shadow':'none',  'border-color':'transparent'})
+                .on( { click: function(){ window.hWin.HEURIST4.msg.showMsgDlg('<br>Are you sure?',
+                    function(){$dlg.find('#map_default_style').val('');}); }});
+            
             var $btn_edit_switcher = $( '<span>open editor</span>', {title: 'Open symbology editor'})
                 .addClass('smallbutton btn_add_term')
                 .css({'line-height': '20px','vertical-align':'top',cursor:'pointer','text-decoration':'underline'})

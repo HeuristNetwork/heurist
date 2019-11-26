@@ -128,9 +128,11 @@ function editCMS(home_page_record_id, header_or_content_field_id, main_callback)
                 },
                 beforeClose:function(){
                     var preview_frame = edit_dialog.find('#web_preview');
-                    return preview_frame[0].contentWindow.cmsEditing.onEditorExit(function(){
-                        edit_dialog.dialog('close');    
-                    });
+                    if(preview_frame[0].contentWindow.cmsEditing){
+                        return preview_frame[0].contentWindow.cmsEditing.onEditorExit(function(){
+                            edit_dialog.dialog('close');    
+                        });
+                    }
                 }});
 
 
@@ -236,6 +238,7 @@ function editCMS(home_page_record_id, header_or_content_field_id, main_callback)
     //
     function _initWebSiteEditor(need_refresh_preview, request){
         
+console.log('!!!!');
             if(window.hWin.HEURIST4.util.isnull(request))
             {
                 var request = {a:'cms_menu'};
@@ -360,6 +363,10 @@ function editCMS(home_page_record_id, header_or_content_field_id, main_callback)
                                                 _editHomePageRecord();
                                             });
                                             
+                                            edit_dialog.find('#btn_edit_header_content').button().click(function(){
+                                                var preview_frame = edit_dialog.find('#web_preview');
+                                                preview_frame[0].contentWindow.cmsEditing.editHeaderContent();
+                                            });
                                             edit_dialog.find('#btn_edit_page_content').button({icon:'ui-icon-pencil'}).click(function(){
                                                 var preview_frame = edit_dialog.find('#web_preview');
                                                 //preview_frame[0].contentWindow.editPageContent();

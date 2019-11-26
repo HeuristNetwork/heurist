@@ -2403,7 +2403,7 @@ console.log('onpaste');
         {
 
             var $btn_clear = $('<span>')
-            .addClass("smallbutton ui-icon ui-icon-circlesmall-close")//   ui-icon
+            .addClass("smallbutton ui-icon ui-icon-circlesmall-close btn_input_clear")//   ui-icon
             .attr('tabindex', '-1')
             .attr('title', 'Clear entered value')
             .attr('data-input-id', $input.attr('id'))
