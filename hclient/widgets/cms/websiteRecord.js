@@ -1224,6 +1224,11 @@ function hCmsEditing(_options) {
                                         __iniLoadPageById( current_pageid );
                                 }
                     }});
+    }    
+    
+    
+    function _resetHeaderContent(){
+        
     }
     
     //
@@ -1351,6 +1356,10 @@ function hCmsEditing(_options) {
             _editHeaderContent();
         },
         
+        resetHeaderContent: function (){
+            _resetHeaderContent();    
+        },
+       
         onEditorExit: function( callback ){
             return _onEditorExit( callback );
         },

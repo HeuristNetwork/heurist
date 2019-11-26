@@ -580,8 +580,8 @@ $.widget( "heurist.editing_input", {
                 
                   
                 var $btn_edit_switcher = $( '<span>html</span>', {title: 'Show/hide Rich text editor'})
-                    //.addClass('smallicon ui-icon ui-icon-gear btn_add_term')
-                    .addClass('smallbutton btn_add_term')
+                    //.addClass('smallicon ui-icon ui-icon-gear btn_add_term')      btn_add_term
+                    .addClass('smallbutton')
                     .css({'line-height': '20px','vertical-align':'top',cursor:'pointer','text-decoration':'underline'})
                     .appendTo( $inputdiv );
                                 
@@ -648,17 +648,34 @@ $.widget( "heurist.editing_input", {
                 
                 if( isCMS_content ){
                     
-                    var $cms_dialog = window.hWin.HEURIST4.msg.getPopupDlg();
-                    if($cms_dialog.find('.main_cms').length>0){
+                    var fname = (this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_HEADER'])
+                                ?'header':'page content';
                     
+                    var div_prompt = $('<div style="line-height:20px"><b>Please use the Edit '
+                        + fname
+                        + ' link in the <span>website editor</span> to edit this field</b></div>')
+                        .insertBefore($input);
+                    
+                    $input.hide();
+                    
+                    $btn_edit_switcher.text('edit html as text')
+                    this._on( $btn_edit_switcher, { click: function(){
                         $btn_edit_switcher.hide();
-                        
+                        $input.show();
+                    }});
+                    
+                    
+                    var $cms_dialog = window.hWin.HEURIST4.msg.getPopupDlg();
+                    if($cms_dialog.find('.main_cms').length>0){ 
+                        //opened from cms editor
+                        //$btn_edit_switcher.hide();
                     }else{
                     
-                        $btn_edit_switcher.text('website editor')
+                        div_prompt.find('span')
+                            .css({cursor:'pointer','text-decoration':'underline'})
                             .attr('data-cms-edit', 1)
                             .attr('data-cms-field', this.options.dtID)
-                            .attr('title','Edit website content in the website editor to edit this field');   
+                            .attr('title','Edit website content in the website editor');   
                             
                     }
                     /*    

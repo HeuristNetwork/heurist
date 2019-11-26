@@ -1,4 +1,4 @@
--- Heurist Definitions Exchange File generated: 25 Nov 2019 @ 14:39
+-- Heurist Definitions Exchange File generated: 26 Nov 2019 @ 15:20
 -- Installation = https://heuristplus.sydney.edu.au/heurist/
 -- Database = Heurist_Core_Definitions
 -- Program Version: 5.1.9
@@ -1558,7 +1558,7 @@
 ('926','Supplementary logo image','Please document the nature of this detail type (field)) ...','file','A second logo which can be positioned separately from the main logo. Top right by default.', 'Please provide an extended description for display on rollover ...','','open','2', 'Supplementary logo image','926','1', '0','','', '',0,'1','viewable', '0',''),
 ('927','Customisation Javascript','Please document the nature of this detail type (field)) ...','blocktext','Custom JS to manage visibility and workflow for special behaviours. Please see Heurist widget API documentation.', 'Please provide an extended description for display on rollover ...','','open','2', 'Customisation Javascript','927','1', '0','','', '',0,'1','viewable', '0',''),
 ('928','Type of page','Please document the nature of this detail type (field)) ...','enum','Indicates whether the page is standalone or part of our CMS system', 'Please provide an extended description for display on rollover ...','','open','2', 'Type of page','928','1', '0','6252','', '',0,'1','viewable', '0',''),
-('929','HTML for website header Leave it blank to use default header','Please document the nature of this detail type (field)) ...','blocktext','HTML for website header. Leave it blank to use default header (logo followed by website title, with menu underneath)', 'Please provide an extended description for display on rollover ...','','open','2', 'HTML for website header Leave it blank to use default header','929','1', '0','','', '',0,'1','viewable', '0',''),
+('929','HTML for website header','Please document the nature of this detail type (field)) ...','blocktext','HTML for website header. Define website title, logo, background, menu, menu position etc.', 'Please provide an extended description for display on rollover ...','','open','2', 'HTML for website header','929','1', '0','','', '',0,'1','viewable', '0',''),
 >>EndData>>
 
  
@@ -1887,7 +1887,7 @@
 ('2525', '51', '80', 'Main Menu', '', '', '006', '0', '0', '', '0', '0', '', 'optional', 'viewable', 'open', 'open', '0', '', '1', '0', '1', '1', '', '', '0', '0', '', '0', '0', '', '', '0'),
 ('2526', '52', '928', 'Type of page', 'Indicates whether the page is standalone or part of our CMS system', 'Please provide an extended description for display on rollover ...', '002', '0', '0', '6253', '0', '0', '', 'recommended', 'viewable', 'open', 'open', '0', '', '', '0', '1', '1', '', '', '0', '0', '', '0', '0', '', '', '0'),
 ('2527', '51', '177', 'Custom website colour scheme', 'Color scheme for html elements and widgets', '', '019', '100', '8', '', '0', '0', '', 'optional', 'viewable', 'open', 'open', '0', '', '1', '0', '1', '1', '', '', '0', '0', '', '0', '0', '', '', '0'),
-('2529', '51', '929', 'HTML for website header Leave it blank to use default header', 'HTML for website header. Leave it blank to use default header (logo followed by website title, with menu underneath)', 'Please provide an extended description for display on rollover ...', '018', '100', '8', '', '0', '0', '', 'optional', 'viewable', 'open', 'open', '0', '', '1', '0', '1', '1', '', '', '0', '0', '', '0', '0', '', '', '0'),
+('2529', '51', '929', 'HTML for website header', 'HTML for website header. Define website title, logo, background, menu, menu position etc.', 'Please provide an extended description for display on rollover ...', '018', '100', '8', '', '0', '0', '', 'optional', 'viewable', 'open', 'open', '0', '', '1', '0', '1', '1', '', '', '0', '0', '', '0', '0', '', '', '0'),
 >>EndData>>
 
  

@@ -367,6 +367,10 @@ console.log('!!!!');
                                                 var preview_frame = edit_dialog.find('#web_preview');
                                                 preview_frame[0].contentWindow.cmsEditing.editHeaderContent();
                                             });
+                                            edit_dialog.find('#btn_reset_header_content').click(function(){
+                                                var preview_frame = edit_dialog.find('#web_preview');
+                                                preview_frame[0].contentWindow.cmsEditing.resetHeaderContent();
+                                            });
                                             edit_dialog.find('#btn_edit_page_content').button({icon:'ui-icon-pencil'}).click(function(){
                                                 var preview_frame = edit_dialog.find('#web_preview');
                                                 //preview_frame[0].contentWindow.editPageContent();
