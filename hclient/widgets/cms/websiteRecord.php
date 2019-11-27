@@ -191,6 +191,7 @@ if(!($rec['rec_RecTypeID']==RT_CMS_HOME || $rec['rec_RecTypeID']==RT_CMS_PAGE ||
     exit();
 }
 
+$website_title = __getValue($rec, DT_NAME);
 $image_icon = __getFile($rec, DT_THUMBNAIL, HEURIST_BASE_URL.'favicon.ico');
 $image_logo = __getFile($rec, DT_FILE_RESOURCE, null); 
 $image_altlogo = null;
@@ -242,7 +243,7 @@ function __getValue(&$menu_rec, $id){
 ?>
 <html>
 <head>
-	<title><?php print __getValue($rec, DT_NAME);?></title>
+	<title><?php print $website_title;?></title>
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
     <meta name="keywords" content="Heurist, Digital Humanities, Humanities Data, Research Data, Database Management, Academic data, Open Source, Free software, FOSS, University of Sydney,<?=$meta_keywords?>">
     <meta name="description" content="<?=$meta_description?>">
@@ -342,6 +343,8 @@ function onPageInit(success)
 _time_debug = new Date().getTime() / 1000;
         
     if(!success) return;
+    
+    $('#main-menu').hide();
     
     //cfg_widgets is from layout_defaults.js 
     window.hWin.HAPI4.LayoutMgr.init(cfg_widgets, null);
@@ -488,6 +491,9 @@ _time_debug = new Date().getTime() / 1000;
             success = false;
         }
         
+        //substitute values in header
+        initHeaderElements();
+        
         onPageInit(success);
         
         if(window.hWin.HAPI4.sysinfo.host_logo && $('#host_info').length>0){
@@ -502,6 +508,50 @@ _time_debug = new Date().getTime() / 1000;
         }
     });
 }
+
+
+//
+//substitute values in header
+//
+function initHeaderElements(){   
+/*
+$image_logo  -> #main-logo
+$image_altlogo -> #main-logo-alt
+$website_title -> #main-title>h2 
+*/
+  //main logo image
+  if($('#main-logo').length>0){
+            $('#main-logo').empty();
+            $('<a href="#" style="text-decoration:none;"><?php print $image_logo
+            ?'<img style="max-height:80px" src="'.$image_logo.'">'
+            :'<div style="text-align:center;display:block;width:250px;padding: 20px 10px;background:white;">'
+            .'<h2 style="color:red;margin:4px">Logo</h2><div style="color:black">Set this as Website header/layout</div></div>';?></a>')
+            .appendTo($('#main-logo'));
+  }
+  <?php if($image_altlogo){ ?>
+  if($('#main-logo-alt').length>0){
+            $('#main-logo-alt').css({'background-size':'contain','background-image':'url(\'<?php print $image_altlogo;?>\')'});
+  }
+  <?php } ?>
+            
+  <?php if($website_title){ ?>
+  if($('#main-title').length>0){
+      $('#main-title').empty();
+      $('<h2 style="font-size:1.7em;"><?php print $website_title;?></h2>').appendTo($('#main-title'));
+  }
+  <?php } ?>
+
+  /*main menu element not found - add default one
+  if($('#main-menu').length==0 && $('#main-header').length>0){
+      
+        $('<div id="main-menu" class="mceNonEditable" style="float:left;width:100%;min-height:40px;padding-top:16px;color:black;font-size:1.1em;" data-heurist-app-id="heurist_Navigation" data-generated="1">'
+            +'<div class="widget-design-header" style="padding: 10px;"><img style="vertical-align: middle;" src="../../assets/h4_icon_35x35.png" height="22" /> <strong>navigation</strong><a class="edit" style="padding: 0 10px;" title="Click to edit" href="#">edit</a>  <a class="remove" href="#">remove</a> height:50px width:100%</div>'
+            +'<span class="widget-options" style="font-style: italic; display: none;">{"menu_recIDs":"<?php print $rec_id;?>","use_next_level":true,"orientation":"horizontal","init_at_once":true}</span>'
+        +'</div>').appendTo($('#main-header'));
+                    
+  }*/
+
+} //initHeaderElements
 
 var gtag = null;//google log
 //init hapi    
@@ -539,6 +589,7 @@ $(document).ready(function() {
 */
         }else{
             // Not standalone, use HAPI from parent window
+            initHeaderElements();
             onPageInit( true );
         }
 });    
@@ -659,21 +710,11 @@ if ($page_template!=null && substr($page_template,-4,4)=='.tpl') {
         print $page_header;        
     } else {
 ?>    
-	    <div style="float:left;min-height:80px;" id="main-logo">
-            <a href="#" style="text-decoration:none;">
-        <?php print $image_logo?'<img style="max-height:80px" src="'.$image_logo.'">'
-            :'<div style="text-align:center;display:block;width:250px;padding: 20px 10px;background:white;">'
-            .'<h2 style="color:red;margin:4px">Logo</h2><div style="color:black">Set this as Website header/layout</div></div>';?>
-            </a>
-        </div>
+	    <div id="main-logo" class="mceNonEditable" style="float:left;min-height:80px;"></div>
         
-        <?php print $image_altlogo?'<div id="main-logo-alt" style="float:right;min-height: 73px;min-width: 130px;margin: 7px 4px 0 0;background-size: contain;'
-            .'background-image:url(\''.$image_altlogo.'\');"></div>'
-            :'';?>
+        <div id="main-logo-alt" class="mceNonEditable" style="float:right;min-height: 73px;min-width: 130px;margin: 7px 4px 0 0;"></div>
         
-        <div id="main-title" style="float:left;padding-left:20px;vertical-align:middle;">
-            <h2 style="font-size:1.7em;"><?php print __getValue($rec, DT_NAME);?></h2>
-        </div>
+        <div id="main-title" class="mceNonEditable" style="float:left;padding-left:20px;vertical-align:middle;"></div>
         
         <div id="main-host" style="float:right;margin-top: 15px">
             <div id="host_info" style="float:right;line-height:38px;height:40px;margin-right: 15px;">
@@ -688,11 +729,11 @@ if ($page_template!=null && substr($page_template,-4,4)=='.tpl') {
                 <a href="mailto:<?php echo @$site_owner['ugr_eMail']; ?>">site owner</a>
             </div>    
         </div>
-
+        
         <div id="main-menu" class="mceNonEditable" style="float:left;width:100%;min-height:40px;padding-top:16px;color:black;font-size:1.1em;" data-heurist-app-id="heurist_Navigation" data-generated="1">
             <div class="widget-design-header" style="padding: 10px;"><img style="vertical-align: middle;" src="../../assets/h4_icon_35x35.png" height="22" /> <strong>navigation</strong><a class="edit" style="padding: 0 10px;" title="Click to edit" href="#">edit</a>  <a class="remove" href="#">remove</a> height:50px width:100%</div>
             <span class="widget-options" style="font-style: italic; display: none;">{"menu_recIDs":"<?php print $rec_id;?>","use_next_level":true,"orientation":"horizontal","init_at_once":true}</span>
-        </div>        
+        </div>
 
 <?php        
     }//header

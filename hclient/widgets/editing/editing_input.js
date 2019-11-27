@@ -649,11 +649,16 @@ $.widget( "heurist.editing_input", {
                 if( isCMS_content ){
                     
                     var fname = (this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_HEADER'])
-                                ?'header':'page content';
+                                ?'Custom header':'Edit page content';
+                                
+                    var fstatus = (window.hWin.HEURIST4.util.isempty(value))
+                    ?'No custom header defined'
+                    :'Delete html from this field to use default page header.';
                     
-                    var div_prompt = $('<div style="line-height:20px"><b>Please use the Edit '
+                    var div_prompt = $('<div style="line-height:20px"><b>Please use the '
                         + fname
-                        + ' link in the <span>website editor</span> to edit this field</b></div>')
+                        + ' button in the <span>website editor</span> to edit this field. '
+                        + fstatus+'</b></div>')
                         .insertBefore($input);
                     
                     $input.hide();

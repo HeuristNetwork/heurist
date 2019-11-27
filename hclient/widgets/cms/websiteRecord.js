@@ -43,6 +43,7 @@ function hCmsEditing(_options) {
              
         //window.hWin.HEURIST4.msg.bringCoverallToFront(ele);
         main_content.show();
+        $('#main-menu').hide();
         
         //cfg_widgets is from layout_defaults=.js 
         window.hWin.HAPI4.LayoutMgr.init(cfg_widgets, null);
@@ -155,9 +156,11 @@ function hCmsEditing(_options) {
             topmenu.attr('data-heurist-app-id','heurist_Navigation');
             
             header_content_generated = (topmenu.attr('data-generated')==1);
-            topmenu.attr('data-generated', 0);
+            topmenu.attr('data-generated', 0).show();
             
             header_content_raw = $("#main-header").html();
+            
+            topmenu.hide();
             
             window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, "#main-header",
                 {heurist_Navigation:{menu_recIDs:home_pageid
@@ -168,7 +171,7 @@ function hCmsEditing(_options) {
                 , toplevel_css:{background:bg_color}  //'rgba(112,146,190,0.7)' ,color:'white','margin-right':'24px'
                 }} ); 
             
-            $('#main-menu').show()
+            topmenu.show();
             
             //init home page content
             __iniLoadPageById( init_pageid>0?init_pageid:home_pageid );
@@ -401,6 +404,14 @@ function hCmsEditing(_options) {
                 
                 
                 $('#main-header').html(header_content_raw);
+                
+                if($('#main-header').find('#main-menu').length==0){
+                    window.hWin.HEURIST4.msg.showMsgDlg(
+                        '<p>Warning: You have not specified the main menu in your html using '
+                        +'&lt;div id="main menu"&gt;.</p>'
+                        +'<p>The main menu defined in the CMS_Home record will therefore not be displayed '
+                        +'(you may have specified another menu with the menu widget).</p>');
+                }
                 
                 //reinit widgtets in header
                 window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, "#main-header",
@@ -1226,8 +1237,42 @@ function hCmsEditing(_options) {
                     }});
     }    
     
-    
-    function _resetHeaderContent(){
+    //
+    //
+    //
+    function _resetHeaderContent( is_force ){
+        
+        if(is_force!==true){
+            window.hWin.HEURIST4.msg.showMsgDlg(
+'<p>Content for custom header is going to be deleted. Default header will be added to this website</p>'
++'<p>Remove cutom header?</p>',            
+                function(){
+                    _resetHeaderContent(true);    
+                });
+                return;
+        }
+        
+        window.hWin.HEURIST4.msg.bringCoverallToFront($('body').find('.ent_wrapper'));        
+        var request = {a: 'delete',
+                    recIDs: home_pageid,
+                    dtyID: window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_HEADER']};
+        
+        window.hWin.HAPI4.RecordMgr.batch_details(request, function(response){
+                if(response.status == hWin.ResponseStatus.OK){
+                    if(response.data.noaccess==1){
+                        window.hWin.HEURIST4.msg.showMsgErr('It appears you have not enough rights to edit this record');
+                    }else{
+                        window.hWin.HEURIST4.msg.showMsgFlash('cleared');
+                        //refresh
+                        location.reload();
+                        //__iniLoadPageById( home_pageid );
+                    }
+                }else{
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                }
+                window.hWin.HEURIST4.msg.sendCoverallToBack();
+        });                                        
+        
         
     }
     
@@ -1237,15 +1282,17 @@ function hCmsEditing(_options) {
     function _editHeaderContent(){
         
         if(header_content_generated){
-            window.hWin.HEURIST4.msg.showMsgDlg('<br>'
-+'If you decided to edit header manually, you have to define entire layout '
-+'(title, logo etc) directly. Only main menu will be generated based on menu '
-+'records linked to home page record. You can always reset to auto generation '
-+'of header by clearing field "Web site header" in home page record. Proceed?',            
+            window.hWin.HEURIST4.msg.showMsgDlg(
+'<p>If you decide to use a custom page header, you must define all elements for the page header (title, logo etc) in the html. '
++'Fields from the CMS_Home record can be referenced (see the default header html which is inserted automatically).</p>'
++'<p>You can reset the page header to auto generation simply by deleting all the html in Source view or clearing '
++'the "Custom page header (html)" field in the CMS_Home record.</p>' 
++'<p>Create custom page header?</p>',            
                 function(){
                     header_content_generated = false;
                     _editHeaderContent();    
                 });
+                return;
         }
         
         $('#btn_inline_editor').hide();
