@@ -253,6 +253,11 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                 for(var k in direct){
                     var targetID = direct[k].targetID;
                     
+                    if(!headers[targetID]){
+                        //there is not such record in database
+                        continue;                                            
+                    }
+                    
                     window.hWin.HEURIST4.ui.createRecordLinkInfo(this.editForm, 
                                 {rec_ID: targetID, 
                                  rec_Title: headers[targetID][0], 

@@ -1088,6 +1088,12 @@ $.widget( "heurist.editing_input", {
 
                                         //verify that target rectype is satisfy to constraints and trmID allowed
                                         var targetID = direct[k].targetID;
+                                        
+                                        if(!headers[targetID]){
+                                            //there is not such record in database
+                                            continue;                                            
+                                        }
+                                        
                                         var targetRectypeID = headers[targetID][1];
                                         if( headers[targetID]['used_in_reverse']!=1 &&
                                            (ptrset.length==0 || 
@@ -1130,6 +1136,12 @@ $.widget( "heurist.editing_input", {
                                 
                                         //verify that target rectype is satisfy to constraints and trmID allowed
                                         var targetID = reverse[k].sourceID;
+                                        
+                                        if(!headers[targetID]){
+                                            //there is not such record in database
+                                            continue;                                            
+                                        }
+                                        
                                         var targetRectypeID = headers[targetID][1];
                                         
                                         if (headers[targetID]['used_in_direct']!=1 && (ptrset.length==0) ||

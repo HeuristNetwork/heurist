@@ -934,6 +934,12 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 for(var k in direct){
                     if(direct[k]['trmID']>0){ //relation    
                         var targetID = direct[k].targetID;
+                        
+                        if(!headers[targetID]){
+                            //there is not such record in database
+                            continue;                                            
+                        }
+                        
                         sRel_Ids.push(targetID);
                         
                         if(sRel_Ids.length<25){
@@ -954,6 +960,11 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 for(var k in reverse){
                     if(reverse[k]['trmID']>0){ //relation    
                         var sourceID = reverse[k].sourceID;
+                        if(!headers[sourceID]){
+                            //there is not such record in database
+                            continue;                                            
+                        }
+                        
                         sRel_Ids.push(sourceID);
                         
                         if(sRel_Ids.length<25){
@@ -988,6 +999,12 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 for(var k in reverse){
                     if(!(reverse[k]['trmID']>0)){ //links    
                         var sourceID = reverse[k].sourceID;
+                        
+                        if(!headers[sourceID]){
+                            //there is not such record in database
+                            continue;                                            
+                        }
+                        
                         sLink_Ids.push(sourceID);
                         
                         if(sLink_Ids.length<25){
