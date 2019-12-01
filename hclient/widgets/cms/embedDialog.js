@@ -61,11 +61,44 @@ $.widget( "heurist.embedDialog", {
     //
     _init: function() {
         
+        var that = this;
+        
         this.RT_CMS_MENU = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'];
         this.DT_CMS_PAGETYPE = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_PAGETYPE'];
+        
         if (!(this.RT_CMS_MENU>0 && this.DT_CMS_PAGETYPE>0)){
-            window.hWin.HEURIST4.msg.showMsgDlg('You have to synch your database definitions '
-                +'with Heurist Core Definitions (record type "Web Menu/Page")');
+            var $dlg2 = window.hWin.HEURIST4.msg.showMsgDlg('You will need record types '
+            +'99-52 (Web manu/page) with field 2-928 (Page type) which are available as part of Heurist_Core_Definitions. '
+            +'Click "Import" to get these definitions',
+                        {'Import':function(){
+                            var $dlg2 = window.hWin.HEURIST4.msg.getMsgDlg();
+                            $dlg2.dialog('close');
+            
+                            //import recctype 51 (CMS Home page) from Heurist_Core_Definitions        
+                            window.hWin.HEURIST4.msg.bringCoverallToFront();
+                            window.hWin.HEURIST4.msg.showMsgFlash('Import definitions', 10000);
+                            
+                            //synch record type from Database #2 Heurist_Core_Definitions
+                            window.hWin.HAPI4.SystemMgr.import_definitions(2, 52,
+                                function(response){    
+                                    window.hWin.HEURIST4.msg.sendCoverallToBack(); 
+                                    var $dlg2 = window.hWin.HEURIST4.msg.getMsgFlashDlg();
+                                    if($dlg2.dialog('instance')) $dlg2.dialog('close');
+
+                                    if(response.status == window.hWin.ResponseStatus.OK){
+                                        that._init(); //call itself again
+                                    }else{
+                                        window.hWin.HEURIST4.msg.showMsgErr(response);     
+                                    }
+                                });
+                            
+                        },
+                        'Cancel':function(){
+                                var $dlg2 = window.hWin.HEURIST4.msg.getMsgDlg();
+                                $dlg2.dialog('close');}
+                        },
+                                'Definitions required');
+            
             return;
         }
         
@@ -75,9 +108,6 @@ $.widget( "heurist.embedDialog", {
         if(this.options.isdialog){  //show this widget as popup dialog
             this._initDialog();
         }
-        
-        //init layout
-        var that = this;
         
         //load html from file
         if(this._need_load_content && this.options.htmlContent){        
