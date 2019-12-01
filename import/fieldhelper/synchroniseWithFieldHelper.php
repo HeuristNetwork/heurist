@@ -65,7 +65,14 @@ if(!defined('RT_MEDIA_RECORD')){
     }
 }
 
-
+/*
+<Name0>
+<Annotation>
+<latitude>
+<longitude>
+<filename>
+<extension>
+*/
 
 
 $titleDT = (defined('DT_NAME')?DT_NAME:0);

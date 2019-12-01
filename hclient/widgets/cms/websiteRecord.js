@@ -1347,41 +1347,44 @@ function hCmsEditing(_options) {
     //
     function _onEditorExit( callback ){
         
-       if(allow_close_dialog) return true;
+        if(!allow_close_dialog)
+        {
 
-       var edited_content = __getEditorContent();
-       
-       var is_changed = (edited_content!=null);
-       if(is_header_editor){
-            is_changed = is_changed && header_content_raw != edited_content;
-       }else{
-            is_changed = is_changed && last_save_content != edited_content;
-       }
-       
-       if( is_changed ){ //was_modified
-            
-            var $dlg2 = window.hWin.HEURIST4.msg.showMsgDlg(
-                '<br>Web page content has been modified',
+            var edited_content = __getEditorContent();
+
+            var is_changed = (edited_content!=null);
+            if(is_header_editor){
+                is_changed = is_changed && header_content_raw != edited_content;
+            }else{
+                is_changed = is_changed && last_save_content != edited_content;
+            }
+
+            if( is_changed ){ //was_modified
+
+                var $dlg2 = window.hWin.HEURIST4.msg.showMsgDlg(
+                    '<br>Web page content has been modified',
                     {'Save':function(){
-                        allow_close_dialog = true;
-                        __saveChanges( callback );
-                        var $dlg2 = window.hWin.HEURIST4.msg.getMsgDlg();
-                        $dlg2.dialog('close');},
-                        'Cancel':function(){
+                            allow_close_dialog = true;
+                            __saveChanges( callback );
                             var $dlg2 = window.hWin.HEURIST4.msg.getMsgDlg();
                             $dlg2.dialog('close');},
-                        'Abandon changes':function(){
+                    'Cancel':function(){
+                            var $dlg2 = window.hWin.HEURIST4.msg.getMsgDlg();
+                            $dlg2.dialog('close');},
+                    'Abandon changes':function(){
                             allow_close_dialog = true;
                             var $dlg2 = window.hWin.HEURIST4.msg.getMsgDlg();
                             $dlg2.dialog('close');
                             callback.call();
-                        }},
-                                'Content modified');
-            //$dlg2.parents('.ui-dialog').css('font-size','1.2em');    
-            return false;
-        }else{
-            return true;
-        }        
+                    }},
+                    'Content modified');
+                //$dlg2.parents('.ui-dialog').css('font-size','1.2em');    
+                return false;  //wait not close
+            }
+            
+        }
+        callback.call(this, false);
+        return true; //ok to close
     }
     //public members
     var that = {

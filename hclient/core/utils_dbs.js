@@ -786,7 +786,14 @@ window.hWin.HEURIST4.dbs = {
         for (var id in entities) 
         if(id>0){
             var def = entities[id];
-            if(def['commonFields'][idx_ccode] == concept_code){
+            var isOK = false;
+            if(def['commonFields']){
+                isOK = def['commonFields'][idx_ccode] == concept_code;
+            }else{
+                isOK = def[idx_ccode] == concept_code;
+            }
+            
+            if(isOK){
                 if(sall){
                     res.push(id);
                 }else{

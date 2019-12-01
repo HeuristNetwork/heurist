@@ -2493,10 +2493,20 @@ window.hWin.HEURIST4.ui = {
 
     //
     // show record action dialog
+    // options 
+    // record_id
+    //  -1 create set of records for website
+    //  -2 create webpage record for embed
+    // field_id - to open editor of specific field for edit_input
+    // callback
+    // webpage_title  -title for new embed page
     //
-    showEditCMSDialog: function( home_page_record_id, header_or_content_field_id, main_callback ){
+    showEditCMSDialog: function( options ){
         //todo optionally load dynamically editCMS.js
-        editCMS(  home_page_record_id, header_or_content_field_id, main_callback );
+        if( window.hWin.HEURIST4.util.isNumber( options ) ){
+            options = {record_id:options};
+        }
+        editCMS(  options );
     },
     
     //
@@ -2526,7 +2536,9 @@ window.hWin.HEURIST4.ui = {
         
         }else{
             
-            var path = window.hWin.HAPI4.baseURL + 'hclient/widgets/record/';
+            var path = window.hWin.HAPI4.baseURL + 'hclient/widgets/'
+                +(actionName=='embedDialog'?'cms/':'record/');
+            
             var scripts = [ path+actionName+'.js'];
             if(actionName=='recordAdd'){
                 scripts= [path+'recordAccess.js', path+'recordAdd.js'];

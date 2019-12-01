@@ -726,7 +726,7 @@
     function recordSearchMenuItems($system, $menuitems, &$result){
         
         $menuitems = prepareIds($menuitems, true);
-        $isRoot = (count($result)==0);
+        $isRoot = (count($result)==0); //find any first CMS_HOME
         if($isRoot){
             if(!($system->defineConstant('RT_CMS_HOME') &&
                  $system->defineConstant('DT_CMS_MENU') && 
@@ -746,9 +746,28 @@
                             'Can not find website home record');                    
                     }
                 }else{
-                    //find parent home record
-                    $res = recordSearchFindParent($system, 
-                        $menuitems[0], RT_CMS_HOME, array(DT_CMS_MENU,DT_CMS_TOP_MENU));
+                    $root_rec_id = $menuitems[0];
+                    $isWebPage = false;
+                    
+                    //check that this is single web page (for embed)
+                    if($system->defineConstant('DT_CMS_PAGETYPE') && 
+                        $system->defineConstant('RT_CMS_MENU'))
+                    {
+                        $rec = recordSearchByID($system, $root_rec_id, array(DT_CMS_PAGETYPE), 'rec_ID,rec_RecTypeID');
+                        if(@$rec['rec_RecTypeID']==RT_CMS_MENU && is_array(@$rec['details'][DT_CMS_PAGETYPE])){
+                            //get term id by concept code
+                            $val = array_shift($rec['details'][DT_CMS_PAGETYPE]);
+                            $isWebPage = ($val==ConceptCode::getTermLocalID('2-6254'));
+                        }
+                    }
+                    
+                    if($isWebPage){
+                        return recordSearch($system, array('q'=>array('ids'=>$root_rec_id), 'detail'=>'detail'));
+                    }else{
+                        //find parent home record
+                        $res = recordSearchFindParent($system, 
+                            $root_rec_id, RT_CMS_HOME, array(DT_CMS_MENU,DT_CMS_TOP_MENU));
+                    }
                 }
                 if($res===false){
                     return $system->getError();   
@@ -757,7 +776,7 @@
                 }
             }
         }
-
+        
         $rec_IDs = array();
 
         foreach ($menuitems as $rec_ID){   
@@ -794,6 +813,7 @@
         }else if ($isRoot) {
             return $system->addError(HEURIST_INVALID_REQUEST, 'Root record id is not specified');
         }
+        
         
         if($isRoot){
             //return recordset
@@ -1915,6 +1935,7 @@ $loop_cnt++;
         return $record;
     }    
     
+    
 //------------------------
     function recordSearchByID($system, $id, $need_details = true, $fields = null) 
     {
@@ -1980,7 +2001,12 @@ $loop_cnt++;
         if(is_array($need_details) && count($need_details)>0 ){
             
             if(is_numeric($need_details[0]) && $need_details[0]>0){ //
-                $squery = $squery. ' AND dtl_DetailTypeID in ('.implode(',',$need_details).')';
+                if(count($need_details)==1){
+                    $squery = $squery. ' AND dtl_DetailTypeID = '.$need_details[0];
+                }else{
+                    $squery = $squery. ' AND dtl_DetailTypeID in ('.implode(',',$need_details).')';    
+                }
+                
             }else{
                 $squery = $squery. ' AND dty_Type in ("'.implode('","',$need_details).'")';
             }

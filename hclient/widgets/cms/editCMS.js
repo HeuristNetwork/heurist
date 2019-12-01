@@ -17,8 +17,13 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-function editCMS(home_page_record_id, header_or_content_field_id, main_callback){
+function editCMS( options ){
         
+    var home_page_record_id = options.record_id,
+        header_or_content_field_id = options.field_id, //to open editor of specific field for edit_input
+        main_callback = options.callback,
+        webpage_title = options.webpage_title;
+    
     var RT_CMS_HOME = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME'],
      RT_CMS_MENU = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'],
      RT_CMS_PAGE = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_PAGE'],
@@ -49,7 +54,7 @@ function editCMS(home_page_record_id, header_or_content_field_id, main_callback)
                                 if($dlg2.dialog('instance')) $dlg2.dialog('close');
 
                                 if(response.status == window.hWin.ResponseStatus.OK){
-                                    editCMS(home_page_record_id, header_or_content_field_id, main_callback); //call itself again
+                                    editCMS( options ); //call itself again
                                 }else{
                                     window.hWin.HEURIST4.msg.showMsgErr(response);     
                                 }
@@ -71,6 +76,9 @@ function editCMS(home_page_record_id, header_or_content_field_id, main_callback)
     var was_something_edited = false;
     var remove_menu_records = false;
     var open_page_on_init = -1;
+    var home_page_record_title = '';
+    
+    var isWebPage = false; //single page website/embed otherwise website with menu
     
     var edit_buttons = [
         {text:window.hWin.HR('Close'), 
@@ -121,7 +129,7 @@ function editCMS(home_page_record_id, header_or_content_field_id, main_callback)
 
     var edit_dialog = window.hWin.HEURIST4.msg.showMsgDlgUrl(window.hWin.HAPI4.baseURL
         +'hclient/widgets/cms/editCMS.html',
-                edit_buttons,window.hWin.HR('Define Website'),
+                edit_buttons, window.hWin.HR('Define Website'),
                 {open:onDialogInit, width:dim.w*0.95, height:dim.h*0.95, isPopupDlg:true, 
                 close:function(){
                     edit_dialog.empty();//dialog('destroy');
@@ -129,9 +137,16 @@ function editCMS(home_page_record_id, header_or_content_field_id, main_callback)
                 beforeClose:function(){
                     var preview_frame = edit_dialog.find('#web_preview');
                     if(preview_frame[0].contentWindow.cmsEditing){
-                        return preview_frame[0].contentWindow.cmsEditing.onEditorExit(function(){
-                            edit_dialog.dialog('close');    
+                        //check that everything is saved
+                        var res = preview_frame[0].contentWindow.cmsEditing.onEditorExit(
+                        function( need_close_explicitly ){
+                            //exit allowed
+                            if(need_close_explicitly!==false) edit_dialog.dialog('close');    
+                            if($.isFunction(main_callback) && home_page_record_id>0){
+                                   main_callback( home_page_record_id, home_page_record_title ); 
+                            }
                         });
+                        return res;
                     }
                 }});
 
@@ -159,7 +174,9 @@ function editCMS(home_page_record_id, header_or_content_field_id, main_callback)
         }
     };    
 
-
+    //
+    // creare set of website records (if new), otherwise proceed to _initWebSiteEditor
+    //
     function onDialogInit(){
         
             web_link = edit_dialog.parent().find('.ui-dialog-buttonpane').find('#web_link');
@@ -172,14 +189,20 @@ function editCMS(home_page_record_id, header_or_content_field_id, main_callback)
 
             if(home_page_record_id<0){
                 
+                isWebPage = (home_page_record_id==-2);
+                
                 //create new set of records - website template -----------------------
                 window.hWin.HEURIST4.msg.bringCoverallToFront(edit_dialog.parents('.ui-dialog')); 
-                window.hWin.HEURIST4.msg.showMsgFlash('Creating the set of website records', 10000);
+                window.hWin.HEURIST4.msg.showMsgFlash(
+                (isWebPage
+                ?'Creating default layout (webpage) record'
+                :'Creating the set of website records')
+                , 10000);
 
                 var session_id = Math.round((new Date()).getTime()/1000); //for progress
 
                 var request = { action: 'import_records',
-                    filename: 'websiteStarterRecords.xml',
+                    filename: isWebPage?'webpageStarterRecords.xml':'websiteStarterRecords.xml',
                     is_cms_init: 1,
                     //session: session_id,
                     id: window.hWin.HEURIST4.util.random()
@@ -193,15 +216,35 @@ function editCMS(home_page_record_id, header_or_content_field_id, main_callback)
                     if(response.status == window.hWin.ResponseStatus.OK){
                         $('#spanRecCount2').text(response.data.count_imported);
                         
-                        window.hWin.HEURIST4.msg.showMsgDlg(
-                        '<p>To save you time we have created a set of commonly used menu entries and web pages with dummy content.</p>'
-                        +'<p>Please use <b>Menu &amp; pages</b> on the left to delete the menu entries you don\'t need or to rename them '
-                        +'(don\'t forget to change the title of the page which is generally a longer version of the menu label). You can also add new ones.</p>'
-                        +'<p>The pages can be edited by navigating to the page in the preview above and clicking '
-                        +'<b>Edit page content</b> (either the button on the left or the link on the right of the page)</p>');
-   
-
-                        _initWebSiteEditor( true, { q:"ids:"+response.data.ids.join(',') } );
+                        if(isWebPage){
+                            //update title of webpage
+                            if(!window.hWin.HEURIST4.util.isempty(webpage_title)){
+                                
+                                var page_recid = response.data.ids[0];
+                                
+                                var request = {a: 'replace',
+                                        recIDs: page_recid,
+                                        dtyID: window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'],
+                                        rVal: webpage_title};
+                                window.hWin.HAPI4.RecordMgr.batch_details(request, function(response){
+                                    if(response.status == hWin.ResponseStatus.OK){
+                                        _initWebSiteEditor( true, { q:"ids:"+page_recid } );
+                                    }else{
+                                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                                    }
+                                });
+                                return;
+                            }
+                        }else{
+                            window.hWin.HEURIST4.msg.showMsgDlg(
+                            '<p>To save you time we have created a set of commonly used menu entries and web pages with dummy content.</p>'
+                            +'<p>Please use <b>Menu &amp; pages</b> on the left to delete the menu entries you don\'t need or to rename them '
+                            +'(don\'t forget to change the title of the page which is generally a longer version of the menu label). You can also add new ones.</p>'
+                            +'<p>The pages can be edited by navigating to the page in the preview above and clicking '
+                            +'<b>Edit page content</b> (either the button on the left or the link on the right of the page)</p>');
+                            
+                            _initWebSiteEditor( true, { q:"ids:"+response.data.ids.join(',') } );
+                        }
 
                     }else{
                         window.hWin.HEURIST4.msg.showMsgErr(response);
@@ -238,7 +281,6 @@ function editCMS(home_page_record_id, header_or_content_field_id, main_callback)
     //
     function _initWebSiteEditor(need_refresh_preview, request){
         
-console.log('!!!!');
             if(window.hWin.HEURIST4.util.isnull(request))
             {
                 var request = {a:'cms_menu'};
@@ -270,41 +312,31 @@ console.log('!!!!');
                 function(response){
                     
                     var no_access = false;
-                    
+                    var treedata = [];
+                                    
                     if(response.status == window.hWin.ResponseStatus.OK){
                         var resdata = new hRecordSet(response.data);
                         
-                        var treedata = [];
-                        
-                        function __getTreeData(parent_id, menuitems){
-                            
-                            var resitems = [];
-                            
-                            if(!window.hWin.HEURIST4.util.isnull(menuitems)){   
-
-                                 for(var m=0; m<menuitems.length; m++){
-                                        
-                                        var menu_rec = resdata.getById(menuitems[m]);
-                                      
-                                        var $res = {};  
-                                        $res['key'] = menuitems[m];
-                                        $res['title'] = resdata.fld(menu_rec, DT_NAME);
-                                        $res['parent_id'] = parent_id; //reference to parent menu(or home)
-                                        $res['page_id'] = resdata.fld(menu_rec, DT_CMS_PAGE);
-                                        $res['expanded'] = true;
-                                        
-                                        var menuitems2 = resdata.values(menu_rec, DT_CMS_MENU);
-//console.log($res);                                        
-                                        $res['children'] = __getTreeData(menuitems[m], menuitems2);
-                                      
-                                        resitems.push($res);
-                                 }
-                            }
-                            return resitems;
-                        } //__getTreeData
-                        
-
                         var idx, records = resdata.getRecords();
+                        
+                        //this is standalone webpage for embedding
+                        if(resdata.length()==1){
+                           var record = resdata.getFirstRecord(); 
+                           if(resdata.fld(record, 'rec_RecTypeID') == RT_CMS_MENU){
+                               isWebPage = true;
+                               home_page_record_id    = resdata.fld(record, 'rec_ID');
+                               home_page_record_title = resdata.fld(record, DT_NAME);
+
+                               no_access = !(window.hWin.HAPI4.is_admin() 
+                                                || window.hWin.HAPI4.is_member(resdata.fld(record,'rec_OwnerUGrpID')));
+
+                               _initWebPageEditor( need_refresh_preview, no_access );
+                           }
+                        }
+                        
+                        if(!isWebPage){
+                        
+                        //fill tree data
                         for(idx in records){
                             if(idx)
                             {
@@ -319,6 +351,7 @@ console.log('!!!!');
                                     open_page_on_init = (home_page_record_id>0)?home_page_record_id:-1;
                                     home_page_record_id  = resdata.fld(record, 'rec_ID');
                                     orig_site_name = resdata.fld(record, DT_NAME);
+                                    home_page_record_title = orig_site_name;//resdata.fld(record, DT_NAME);
                                     
                                     /*
                                     var eled = edit_dialog.find('#web_Name').val(orig_site_name)
@@ -347,16 +380,6 @@ console.log('!!!!');
 
                                     var btn_refresh = edit_dialog.find('#btn_refresh');
                                     if(!btn_refresh.button('instance')){
-                                    
-                                        /*    
-                                        var themeSwitcher = edit_dialog.find("#web_Theme").themeswitcher(
-                                            {imageLocation: "external/jquery-theme-switcher/images/",
-                                            initialText: currentTheme.charAt(0).toUpperCase() + currentTheme.slice(1),
-                                            currentTheme: currentTheme,
-                                            onSelect: function(){
-                                                currentTheme = this.currentTheme;
-                                        }});
-                                        */
                                         
                                         if(!no_access){
                                             edit_dialog.find('#btn_edit_home').button().click(function(){
@@ -393,77 +416,8 @@ console.log('!!!!');
                                             });
                                             
                                             var preview_frame = edit_dialog.find('#web_preview');
-                                            preview_frame.on({load:function(){
-                                                //coverall for left side panel by invocation from websiteRecord.js
-                                                preview_frame[0].contentWindow.cmsEditing.onEditPageContent = function(is_exit, widgets, dest){
-                                                    
-                                                    var curtain = edit_dialog.find('.ui-layout-west').find('.coverall-div-bare'); 
-                                                    
-                                                    if(is_exit){
-                                                        curtain.remove();
-                                                    }else if(dest=='remove'){
-                                                        curtain.find('a[widgetid="'+widgets+'"]').parent('li').remove();
-                                                            
-                                                    }else{
-                                                        if(curtain.length==0){ //add curtain
-                                                            curtain = $('<div>').addClass('coverall-div-bare')
-                                                                  .css({'zIndex':9999,background:'rgba(0,0,0,0.6)'})
-                                                                  .appendTo(edit_dialog.find('.ui-layout-west'));
-                                                        }
-                                                        var wlist = null;
-                                                        if(dest=='add'){
-                                                            wlist = curtain.find('ul');
-                                                            widgets = [widgets];
-                                                        }
-                                                        if(!wlist || wlist.length==0){
-                                                            curtain.empty();
-                                                            if(widgets.length>0){
-                                                                wlist = $('<ul>').appendTo(
-                                                                $('<div><h4>Widgets on page</h4><span class="heurist-helper2">click to edit parameters</span></div>')
-                                                                  .css({background:'white', padding:'10px', 'overflow-y': 'auto',
-                                                                    position:'absolute',top:'50%',bottom:4, right:4, left:4})
-                                                                  .appendTo(curtain));
-                                                            }
-                                                        }
-
-                                                        if(widgets.length>0){
-                                                            var added = [];
-                                                            
-                                                            $(widgets).each(function(idx, ele){
-                                                                var wid = $(ele).parent().attr('id');
-                                                                if(added.indexOf(wid)<0){
-                                                                    $('<li><a href="#" widgetid="'+wid+'">'+$(ele).find('strong').text()+'</a></li>')
-                                                                        .appendTo(wlist);
-                                                                    added.push(wid);
-                                                                    
-                                                                    wlist.find('a').css({'line-height':'24px'}).click(function(event){
-                                                                        preview_frame[0].contentWindow.cmsEditing.editWidget( $(event.target).attr('widgetid') );
-                                                                        window.hWin.HEURIST4.util.stopEvent(event);
-                                                                    }).dblclick(function(e){ 
-                                                                        e.preventDefault();
-                                                                    });
-                                                                }
-                                                            });
-                                                        }
-                                                    }
-                                                };
-                                                
-                                                //find elements in preview that opens home page record editor
-                                                var d = $(preview_frame[0].contentWindow.document);
-                                                d.find( "#btn_inline_editor4").click();
-                                                
-                                                /*
-                                                d.find( "#edit_mode").on({click:function(event){
-                                                        if($(event.target).val()==1){
-                                                            $('<div>').addClass('coverall-div-bare')
-                                                                .css({'zIndex':9999999999,background:'rgba(0,0,0,0.6)'})
-                                                                .appendTo(edit_dialog.find('.ui-layout-west'));
-                                                        }else{
-                                                            edit_dialog.find('.ui-layout-west').find('.coverall-div-bare').remove();
-                                                        }
-                                                }});
-                                                */
-                                            }});
+                                            preview_frame.on({load:_onLoadWebPreview});
+                                            
                                         }//no access
 
                                         
@@ -520,6 +474,34 @@ console.log('!!!!');
                                     if(need_refresh_preview){
                                         btn_refresh.click(); //reload home page    
                                     }
+                                    
+                                    
+                                    function __getTreeData(parent_id, menuitems){
+                                        
+                                        var resitems = [];
+                                        
+                                        if(!window.hWin.HEURIST4.util.isnull(menuitems)){   
+
+                                             for(var m=0; m<menuitems.length; m++){
+                                                    
+                                                    var menu_rec = resdata.getById(menuitems[m]);
+                                                  
+                                                    var $res = {};  
+                                                    $res['key'] = menuitems[m];
+                                                    $res['title'] = resdata.fld(menu_rec, DT_NAME);
+                                                    $res['parent_id'] = parent_id; //reference to parent menu(or home)
+                                                    $res['page_id'] = resdata.fld(menu_rec, DT_CMS_PAGE);
+                                                    $res['expanded'] = true;
+                                                    
+                                                    var menuitems2 = resdata.values(menu_rec, DT_CMS_MENU);
+            //console.log($res);                                        
+                                                    $res['children'] = __getTreeData(menuitems[m], menuitems2);
+                                                  
+                                                    resitems.push($res);
+                                             }
+                                        }
+                                        return resitems;
+                                    } //__getTreeData
                                     
                                     var topmenu = resdata.values(record, DT_CMS_TOP_MENU);
                                     treedata = __getTreeData(home_page_record_id, topmenu);
@@ -808,6 +790,9 @@ console.log('!!!!');
                             tree_element.fancytree(fancytree_options).addClass('tree-cms');
                         }
                         
+                        
+                        }//!isWebPage
+                        
                         if(no_access){
 
                             var eles = edit_dialog.find('.ui-layout-west');
@@ -835,8 +820,7 @@ console.log('!!!!');
                         
                         
                     }
-                    
-                    else{
+                    else{ //request for cms records fails
                         window.hWin.HEURIST4.msg.showMsgErr(response);
                         edit_dialog.dialog('close');
                     }
@@ -847,6 +831,137 @@ console.log('!!!!');
         
     } //_initWebSiteEditor
     
+    //
+    // init interface for standalone web page (Heurist embed)
+    //
+    function _initWebPageEditor( need_refresh_preview, no_access ){
+        
+        edit_dialog.parent().find('.ui-dialog-title').text( window.hWin.HR('Define Webpage') );
+        
+        edit_dialog.find('.cms').children().hide();
+        edit_dialog.find('.cms > .for_web_page').css('display','inline-block');//show();
+        
+        var btn_refresh = edit_dialog.find('#btn_refresh');
+        if(!btn_refresh.button('instance')){
+        
+            if(!no_access){
+                edit_dialog.find('#btn_edit_page_content').button({icon:'ui-icon-pencil'}).click(function(){
+                    var preview_frame = edit_dialog.find('#web_preview');
+                    //preview_frame[0].contentWindow.editPageContent();
+                    preview_frame[0].contentWindow.cmsEditing.editPageContent();
+                });
+                edit_dialog.find('#btn_edit_page_record').button().click(function(){
+                    var preview_frame = edit_dialog.find('#web_preview');
+                    //preview_frame[0].contentWindow.editPageRecord();
+                    preview_frame[0].contentWindow.cmsEditing.editPageRecord();
+                });
+               
+                var preview_frame = edit_dialog.find('#web_preview');
+                preview_frame.on({load:_onLoadWebPreview});
+            }//no access
+            
+            //reload preview
+            btn_refresh.button({icon:'ui-icon-refresh'}).click(function(){
+
+                var surl = window.hWin.HAPI4.baseURL+
+                    'hclient/widgets/cms/websiteRecord.php?edit=1&db='+window.hWin.HAPI4.database+'&recid='+home_page_record_id;
+
+                //load new content to iframe
+                edit_dialog.find('#web_preview').attr('src', surl);                                            
+            });
+            
+            var url = window.hWin.HAPI4.baseURL+
+                        '?db='+window.hWin.HAPI4.database+'&website&id='+home_page_record_id
+                        
+            //open preview in new tab
+            edit_dialog.find('#btn_preview').button({icon:'ui-icon-extlink'}).click(function(){
+                    window.open(url, '_blank');
+            });
+            
+            web_link.html('<b>Webpage URL:</b>&nbsp;<a href="'+url+'" target="_blank" style="color:blue">'+url+'</a>');
+        }
+        
+        if(need_refresh_preview){
+            btn_refresh.click(); //reload home page    
+        }
+    }
+    
+    //
+    // on open tinymce editor - loads list of widgets
+    //
+    function _onLoadWebPreview(){
+        
+        var preview_frame = edit_dialog.find('#web_preview');
+                    //coverall for left side panel by invocation from websiteRecord.js
+                    preview_frame[0].contentWindow.cmsEditing.onEditPageContent = function(is_exit, widgets, dest){
+                        
+                        var curtain = edit_dialog.find('.ui-layout-west').find('.coverall-div-bare'); 
+                        
+                        if(is_exit){
+                            curtain.remove();
+                        }else if(dest=='remove'){
+                            curtain.find('a[widgetid="'+widgets+'"]').parent('li').remove();
+                                
+                        }else{
+                            if(curtain.length==0){ //add curtain
+                                curtain = $('<div>').addClass('coverall-div-bare')
+                                      .css({'zIndex':9999,background:'rgba(0,0,0,0.6)'})
+                                      .appendTo(edit_dialog.find('.ui-layout-west'));
+                            }
+                            var wlist = null;
+                            if(dest=='add'){
+                                wlist = curtain.find('ul');
+                                widgets = [widgets];
+                            }
+                            if(!wlist || wlist.length==0){
+                                curtain.empty();
+                                if(widgets.length>0){
+                                    wlist = $('<ul>').appendTo(
+                                    $('<div><h4>Widgets on page</h4><span class="heurist-helper2">click to edit parameters</span></div>')
+                                      .css({background:'white', padding:'10px', 'overflow-y': 'auto',
+                                        position:'absolute',top:'50%',bottom:4, right:4, left:4})
+                                      .appendTo(curtain));
+                                }
+                            }
+
+                            if(widgets.length>0){
+                                var added = [];
+                                
+                                $(widgets).each(function(idx, ele){
+                                    var wid = $(ele).parent().attr('id');
+                                    if(added.indexOf(wid)<0){
+                                        $('<li><a href="#" widgetid="'+wid+'">'+$(ele).find('strong').text()+'</a></li>')
+                                            .appendTo(wlist);
+                                        added.push(wid);
+                                        
+                                        wlist.find('a').css({'line-height':'24px'}).click(function(event){
+                                            preview_frame[0].contentWindow.cmsEditing.editWidget( $(event.target).attr('widgetid') );
+                                            window.hWin.HEURIST4.util.stopEvent(event);
+                                        }).dblclick(function(e){ 
+                                            e.preventDefault();
+                                        });
+                                    }
+                                });
+                            }
+                        }
+                    };
+                    
+                    //find elements in preview that opens home page record editor
+                    var d = $(preview_frame[0].contentWindow.document);
+                    d.find( "#btn_inline_editor4").click();
+                    
+                    /*
+                    d.find( "#edit_mode").on({click:function(event){
+                            if($(event.target).val()==1){
+                                $('<div>').addClass('coverall-div-bare')
+                                    .css({'zIndex':9999999999,background:'rgba(0,0,0,0.6)'})
+                                    .appendTo(edit_dialog.find('.ui-layout-west'));
+                            }else{
+                                edit_dialog.find('.ui-layout-west').find('.coverall-div-bare').remove();
+                            }
+                    }});
+                    */
+    }
     
     //
     // Select or create new menu item for website

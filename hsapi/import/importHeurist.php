@@ -126,6 +126,10 @@ private static function readDataFile($filename, $type=null, $validate=true){
 private static function hmlToJson($filename){
 
     $xml_doc = simplexml_load_file($filename);
+    if($xml_doc==null || is_string($xml_doc)){
+        self::$system->addError(HEURIST_ACTION_BLOCKED, 'It appears that xml is corrupted.');
+        return null;
+    }
     if($xml_doc==null || is_string($xml_doc) || !$xml_doc->database){
         self::$system->addError(HEURIST_ACTION_BLOCKED, 'It appears that xml is corrupted. Element "database" is missing');
         return null;

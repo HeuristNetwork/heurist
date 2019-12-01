@@ -2560,8 +2560,8 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
         $(this.element).find('span[data-cms-edit="1"]').click(function(event){
             that._saveEditAndClose(null, function(){
                 that.closeEditDialog();
-                window.hWin.HEURIST4.ui.showEditCMSDialog( that._currentEditID,  
-                    $(event.target).attr('data-cms-field'));
+                window.hWin.HEURIST4.ui.showEditCMSDialog( {record_id:that._currentEditID,  
+                    field_id:$(event.target).attr('data-cms-field')} );
             });
         });
         

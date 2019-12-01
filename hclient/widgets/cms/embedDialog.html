@@ -1,0 +1,55 @@
+
+<fieldset id="div_layout">
+    <div id="div_header" style="padding: 0.2em; width: 100%; display:block;">
+        <p>This function gives you the code to embed Heurist widgets (search, saved filters, results lists, custom reports, maps, timelines, network diagrams etc.) in a third-party website using an iframe, or rendered as a standalone web page.</p>
+        <p>Choose a layout for your page from the list below (you will have the opportunity to edit the layout if you wish, but note that any changes will apply to all embeds that use the layout).</p>
+    </div>
+    <div style="padding: 0.2em; width: 100%;" class="input">
+        <div class="header" style="padding: 0 16px 0 16px;">
+            <label for="sel_layout">Page layout:</label>
+        </div>
+        <select id="sel_layout" class="text ui-widget-content ui-corner-all" style="max-width:30em"></select>
+    </div>
+
+    <div style="padding: 0.2em; width: 100%;display:none" class="input" id="div_layout_name">
+        <div class="header" style="padding: 0 16px 0 16px;">
+            <label for="layout_name">Title to identify this layout::</label>
+        </div>
+        <input id="layout_name" class="text ui-widget-content ui-corner-all" style="max-width:30em"></select>
+        <div class="heurist-helper1">Not displayed on website</div>
+    </div>
+    
+</fieldset>
+
+<div id="div_embed" class="content_div" style="display: none;">
+<!--
+    <p>
+        One or more saved facet (or ordinary) searches can be embedded into an iframe in a website using the following code:
+    </p>
+    <p style="padding:1em 0 1em 0;font-size:0.9em">
+        For more than one search, separate the IDs by commas (the searches will appear as buttons). Enclose within &lt;code&gt; &lt;/code&gt; 
+        for Wordpress sites (the use of &lt;code&gt; may need to be enabled for your site).
+        The URL can also be opened on its own in a separate tab. Note that ordinary searches can also be embedded simply through
+        specifying the URL obtained when the search is run in the Heurist interface.
+    </p>
+-->
+    <p style="padding:1em 0 1em 0;font-size:0.9em">Copy the following html code into your page where you want to place the search result,
+        or use the URL on its own. The search result will be generated live from the database using the current search criteria.</p>
+    <label style="font-size:0.9em">Readable code:</label>
+    <textarea id="code-textbox" onclick="select(); if (window.clipboardData) clipboardData.setData('Text', value);" style="border: 1px dotted gray; padding: 3px; margin: 2; font-family: times; width: 100%; height: 60px;" readonly=""></textarea>
+    <!--
+    Use the web-safe version if the readable version does not work
+    <label style="font-size:0.9em">Web-safe code:</label>
+    <textarea id="code-textbox2" onclick="select(); if (window.clipboardData) clipboardData.setData('Text', value);" style="border: 1px dotted gray; padding: 3px; margin: 2; font-family: times; width: 100%; height: 40px;" readonly=""></textarea>
+    -->
+    <label style="font-size:0.9em">URL:</label>
+    <textarea id="code-textbox3" onclick="select(); if (window.clipboardData) clipboardData.setData('Text', value);" style="border: 1px dotted gray; padding: 3px; margin: 2; font-family: times; width: 100%; height: 40px;" readonly=""></textarea>
+<!--
+    <p style="padding-top:1em">Note: records will only appear according to visibility what is applied to current user and group permissions.
+        Result set could therefore be limited or empty.</p>
+-->
+    <p>Define addtional parameter "searchIDs" for given URL to override the list of available saved filters in "Saved searches" widget</p>
+    <p/>
+    <button id="btnEditLayout">Edit layout</button>
+
+</div>

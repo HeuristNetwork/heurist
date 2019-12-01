@@ -166,7 +166,9 @@ $hasAccess = ($system->is_admin() || $system->is_member($rec['rec_OwnerUGrpID'])
 
 $site_owner = user_getDbOwner($mysqli); //info about user #2
 
-//output content of particular page - just title and content
+//-----------------------------------------------
+//if REQUEST has parameter "field" - this is special request for content of particular field 
+// by default it returns value of DT_EXTENDED_DESCRIPTION - content of web page
 if(@$_REQUEST['field']){ 
     
     if($_REQUEST['field']>1){
@@ -179,6 +181,7 @@ if(@$_REQUEST['field']){
         
         exit( $field_content );
     }else{
+        //default value - content of page
         exit('<h2>'.__getValue($rec, DT_NAME).'</h2>'
                             .__getValue($rec, DT_EXTENDED_DESCRIPTION));
     }
@@ -190,6 +193,8 @@ if(!($rec['rec_RecTypeID']==RT_CMS_HOME || $rec['rec_RecTypeID']==RT_CMS_PAGE ||
     include ERROR_REDIR;
     exit();
 }
+
+$isWebPage = ($rec['rec_RecTypeID']==RT_CMS_MENU); //standalone web page - Heurist embed
 
 $website_title = __getValue($rec, DT_NAME);
 $image_icon = __getFile($rec, DT_THUMBNAIL, HEURIST_BASE_URL.'favicon.ico');
@@ -697,6 +702,19 @@ if ($page_template!=null && substr($page_template,-4,4)=='.tpl') {
 
     include dirname(__FILE__).'/../../viewers/smarty/showReps.php';
     
+}else if($isWebPage){
+//WEB PAGE - EMBED
+?>
+<div class="ent_wrapper">
+    <div class="ent_content_full ui-heurist-bg-light" style="padding: 5px; top:0px" id="main-content-container">
+        <div id="main-content" data-homepageid="<?php print $rec_id;?>" 
+                               data-viewonly="<?php print ($hasAccess)?0:1;?>">
+        </div>
+    </div>
+</div>    
+<?php
+        
+//WEB SITE      
 }else{
 ?>
 

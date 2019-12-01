@@ -783,7 +783,11 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                         window.hWin.HEURIST4.msg.showMsgFlash('No websites defined',2000);
                     }
                 });
-                
+
+        }else if(action == "menu-cms-embed"){
+
+            window.hWin.HEURIST4.ui.showRecordActionDialog('embedDialog');
+            
         }else if(action == "menu-database-properties"){
 
                             window.hWin.HEURIST4.ui.showEntityDialog('sysIdentification');
