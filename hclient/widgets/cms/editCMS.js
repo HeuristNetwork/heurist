@@ -870,6 +870,13 @@ function editCMS( options ){
                 edit_dialog.find('#web_preview').attr('src', surl);                                            
             });
             
+            //
+            //
+            //
+            edit_dialog.find('#btn_embed_dialog').button().click(function(){
+                window.hWin.HEURIST4.ui.showRecordActionDialog('embedDialog',{layout_rec_id: home_page_record_id});
+            });
+            
             var url = window.hWin.HAPI4.baseURL+
                         '?db='+window.hWin.HAPI4.database+'&website&id='+home_page_record_id
                         
