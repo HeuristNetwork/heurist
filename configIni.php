@@ -62,8 +62,9 @@ of the codebase and rename it to index.html
 
 // *** DO NOT CHANGE VERSION NUMBER, THIS IS SET BY THE HEURIST DEVELOPMENT TEAM ***
 
-$version = "5.1.9"; // sets current program version number, determined by Heurist development lead
+$version = "5.1.10"; // sets current program version number, determined by Heurist development lead
 
+// h5.1.10 4 Dec 2019 Support KMZ, other KML nad mapping fixes, new map symbology function, improved website generator including custom header section and single page for embedding in iframe, automate welcome letter, improve hml import, many bug fixes
 // h5.1.9 11 Nov 2019 Improved automatic date correction, compatibility issues with MySQL 8, big rationalisation of colour settings across all code, finalise HML import and template export, location inheritance from Place in Leaflet
 // h5.1.8 : 23 Oct 2019 HML(XML) import from Heurist DB or external including all relationships, HML template generator, Custom JS in website home pages, fixes to chld record conversion & Leaflet mapping, smarty report for info popups, cosmetics and imporved error messages. 
 // h5.1.7 : 6 Sep 2019  Major work on website designer, add background maps to digitiser, entity buttons above search field, small improvements to CSV import and Leaflet maps, custom report for View record popup
