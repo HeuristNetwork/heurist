@@ -183,28 +183,9 @@ ob_start();
 echo json_encode($response);
 $output = gzencode(ob_get_contents(),6); 
 ob_end_clean(); 
+
+$system->setResponseHeader();    
 header('Content-Encoding: gzip');
-header('Content-type: application/json;charset=UTF-8');
 echo $output; 
 unset($output);   
-
-/*
-error_log($_SERVER['REQUEST_URI']);
-error_log($_SERVER["HTTP_ORIGIN"]);
-if (isset($_SERVER["HTTP_ORIGIN"]) === true) {
-    $origin = $_SERVER["HTTP_ORIGIN"];
-    $allowed_origins = array(
-        "https://november1918.adelaide.edu.au"
-    );
-    if (in_array($origin, $allowed_origins, true) === true) {
-        header('Access-Control-Allow-Origin: ' . $origin);
-        header('Access-Control-Allow-Credentials: true');
-        //header('Access-Control-Allow-Methods: POST');
-        header('Access-Control-Allow-Headers: Content-Type');
-    }
-}
-header('Content-type: application/json;charset=UTF-8');
-
-print json_encode($response)
-*/
 ?>

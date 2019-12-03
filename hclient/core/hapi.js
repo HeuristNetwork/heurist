@@ -22,7 +22,7 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-function hAPI(_db, _oninit) { //, _currentUser
+function hAPI(_db, _oninit, _baseURL) { //, _currentUser
     var _className = "HAPI",
     _version   = "0.4",
     _database = null, //same as public property  @toremove      
@@ -39,9 +39,10 @@ function hAPI(_db, _oninit) { //, _currentUser
     *
     * @param _db - database name, if omit it takes from url parameter
     * @param _oninit - callback function, obtain parameter true if initialization is successeful
+    * @param _baseURL - defined for embed mode only when location of heurist client is differend from heurist server 
     *
     */
-    function _init(_db, _oninit){ //, _currentUser) {
+    function _init(_db, _oninit, _baseURL){ //, _currentUser) {
     
         //@todo - take  database from URL
         if(_db){
@@ -54,7 +55,7 @@ function hAPI(_db, _oninit) { //, _currentUser
         var installDir = window.hWin.location.pathname.replace(/(((\?|admin|applications|common|context_help|export|hapi|hclient|hsapi|import|records|redirects|search|viewers|help|ext|external)\/.*)|(index.*|test.php))/, ""); // Upddate in 2 places this file and 6 other files if changed
         //TODO: top directories - admin|applications|common| ... are defined in SEVEN separate locations. Rationalise.
         that.installDir = installDir; //to detect development or production version 
-        that.baseURL = window.hWin.location.protocol + '//'+window.hWin.location.host + installDir;
+        that.baseURL = _baseURL?_baseURL:window.hWin.location.protocol + '//'+window.hWin.location.host + installDir;
 
         // TODO: This is actually a proto URL rather than a base URL. Rename.
         that.iconBaseURL = that.baseURL + 'hsapi/dbaccess/rt_icon.php?db='+_database+'&id=';
@@ -1585,6 +1586,6 @@ prof =Profile
 
     }
 
-    _init(_db, _oninit); //, _currentUser);
+    _init(_db, _oninit, _baseURL); //, _currentUser);
     return that;  //returns object
 }

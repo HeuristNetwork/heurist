@@ -55,6 +55,7 @@ if($layout_theme==null || $layout_theme=='' || $layout_theme=="heurist" || $layo
 <!-- Heurist Color Themes -->
 <style id="heurist_color_theme">
 <?php
-    include PDIR.'hclient/framecontent/initPageTheme.php';
+//was PDIR.
+    include dirname(__FILE__).'/initPageTheme.php';
 ?>
 </style>

@@ -94,7 +94,7 @@
         $response = array("status"=>HEURIST_OK, "data"=> $res);
     }
     
-    header('Content-type: application/json'); //'text/javascript');
+    $system->setResponseHeader(); //UTF-8?? apparently need to remove
     print json_encode($response);
     exit();
 ?>
