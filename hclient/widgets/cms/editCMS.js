@@ -836,16 +836,16 @@ function editCMS( options ){
     //
     function _initWebPageEditor( need_refresh_preview, no_access ){
         
-        edit_dialog.parent().find('.ui-dialog-title').text( window.hWin.HR('Define Webpage') );
+        edit_dialog.parent().find('.ui-dialog-title').text( window.hWin.HR('Define layout for embedding in an indpendent website') );
         
         edit_dialog.find('.cms').children().hide();
         edit_dialog.find('.cms > .for_web_page').css('display','inline-block');//show();
         
-        var btn_refresh = edit_dialog.find('#btn_refresh');
+        var btn_refresh = edit_dialog.find('#btn_refresh2');
         if(!btn_refresh.button('instance')){
         
             if(!no_access){
-                edit_dialog.find('#btn_edit_page_content').button({icon:'ui-icon-pencil'}).click(function(){
+                edit_dialog.find('#btn_edit_page_content2').button({icon:'ui-icon-pencil'}).click(function(){
                     var preview_frame = edit_dialog.find('#web_preview');
                     //preview_frame[0].contentWindow.editPageContent();
                     preview_frame[0].contentWindow.cmsEditing.editPageContent();
@@ -868,6 +868,13 @@ function editCMS( options ){
 
                 //load new content to iframe
                 edit_dialog.find('#web_preview').attr('src', surl);                                            
+            });
+            
+            //
+            //
+            //
+            edit_dialog.find('#btn_embed_dialog').button().click(function(){
+                window.hWin.HEURIST4.ui.showRecordActionDialog('embedDialog',{layout_rec_id: home_page_record_id});
             });
             
             var url = window.hWin.HAPI4.baseURL+

@@ -19,7 +19,7 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_REQUEST)){
+if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_REQUEST) || array_key_exists('embed', $_REQUEST)){
     
     $recid = 0;
     if(@$_REQUEST['recID']){
@@ -33,14 +33,22 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
         $format = $_REQUEST['fmt'];    
     }elseif(@$_REQUEST['format']){
         $format = $_REQUEST['format'];        
-    }else if (array_key_exists('website', $_REQUEST)) {
+    }else if (array_key_exists('website', $_REQUEST) || array_key_exists('embed', $_REQUEST)
+        || (array_key_exists('field', $_REQUEST) && $_REQUEST['field']>0) ) 
+    {
         $format = 'website';
-        define('PDIR','');
+        
+        if(array_key_exists('embed', $_REQUEST)){
+            define('PDIR','https://heuristplus.sydney.edu.au/h5-ao/');
+        }else{
+            define('PDIR','');    
+        }
         include dirname(__FILE__).'/hclient/widgets/cms/websiteRecord.php';
         exit();
-    if(@$_REQUEST['field']>0){
-        $redirect = $redirect.'&field='.$_REQUEST['field'];    
-    }
+        
+        if(@$_REQUEST['field']>0){
+            $redirect = $redirect.'&field='.$_REQUEST['field'];    
+        }
         
         
     }else if (array_key_exists('field', $_REQUEST) && $_REQUEST['field']>0) {
@@ -48,6 +56,7 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
     }else{
         $format = 'xml';
     }
+    
     header('Location: redirects/resolver.php?db='.@$_REQUEST['db'].'&recID='.$recid.'&fmt='.$format);
     return;
     

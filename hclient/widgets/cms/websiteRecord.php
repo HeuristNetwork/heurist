@@ -98,8 +98,9 @@ On client side
     
 */    
     
-if(!defined('PDIR')) define('PDIR','../../../');  //need for proper path to js and css    
-
+if(!defined('PDIR')) {
+    define('PDIR','../../../');  //need for proper path to js and css           
+}
 
 require_once(dirname(__FILE__).'/../../framecontent/initPageMin.php'); //without client hapi
 require_once(dirname(__FILE__).'/../../../hsapi/dbaccess/db_recsearch.php');
@@ -170,21 +171,27 @@ $site_owner = user_getDbOwner($mysqli); //info about user #2
 //if REQUEST has parameter "field" - this is special request for content of particular field 
 // by default it returns value of DT_EXTENDED_DESCRIPTION - content of web page
 if(@$_REQUEST['field']){ 
+        
+//error_log('set respone header in redirect '.$_REQUEST['field'].'  '.$_SERVER['REQUEST_URI']);
+//error_log(' orig:'.@$_SERVER['HTTP_ORIGIN'].'  ref:'.@$_SERVER['HTTP_REFERER']);    
+    
+    $system->setResponseHeader('text/html');
     
     if($_REQUEST['field']>1){
         
         $field_content = __getValue($rec, $_REQUEST['field']);
         
         if (trim($field_content)!='' && $_REQUEST['field']==DT_CMS_SCRIPT && !$system->is_js_acript_allowed()) {
-            exit('alert("Execution of custom script not allowed for this database")');   
+           print 'alert("Execution of custom script not allowed for this database")';   
+        }else{
+            print $field_content;
         }
-        
-        exit( $field_content );
     }else{
         //default value - content of page
-        exit('<h2>'.__getValue($rec, DT_NAME).'</h2>'
-                            .__getValue($rec, DT_EXTENDED_DESCRIPTION));
+        print '<h2>'.__getValue($rec, DT_NAME).'</h2>'
+                            .__getValue($rec, DT_EXTENDED_DESCRIPTION);
     }
+    exit();
 }
 //-----------------------
 
@@ -197,7 +204,7 @@ if(!($rec['rec_RecTypeID']==RT_CMS_HOME || $rec['rec_RecTypeID']==RT_CMS_PAGE ||
 $isWebPage = ($rec['rec_RecTypeID']==RT_CMS_MENU); //standalone web page - Heurist embed
 
 $website_title = __getValue($rec, DT_NAME);
-$image_icon = __getFile($rec, DT_THUMBNAIL, HEURIST_BASE_URL.'favicon.ico');
+$image_icon = __getFile($rec, DT_THUMBNAIL, (array_key_exists('embed', $_REQUEST)?PDIR:HEURIST_BASE_URL).'favicon.ico');
 $image_logo = __getFile($rec, DT_FILE_RESOURCE, null); 
 $image_altlogo = null;
 if(defined('DT_CMS_ALTLOGO')) $image_altlogo = __getFile($rec, DT_CMS_ALTLOGO, null); 
@@ -222,7 +229,7 @@ function __getFile(&$rec, $id, $def){
     
     if(is_array($file)){
         $file = array_shift($file);
-        $file = HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&file='.$file['fileid'];
+        $file = (array_key_exists('embed', $_REQUEST)?PDIR:HEURIST_BASE_URL).'?db='.HEURIST_DBNAME.'&file='.$file['fileid'];
     }else{
         $file = $def;
     }
@@ -257,7 +264,7 @@ function __getValue(&$menu_rec, $id){
     
 <?php
 
-if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
+if (($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1')&& !@$_REQUEST['embed'])  {
     ?>
     <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-ui.js"></script>
@@ -273,7 +280,10 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
     <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery-ui-iconfont-master/jquery-ui.icon-font.css" />
     
     <!-- CSS -->
-    <?php include PDIR.'hclient/framecontent/initPageCss.php'; ?>
+    <?php 
+        //PDIR.
+        include dirname(__FILE__).'/../../framecontent/initPageCss.php'; 
+    ?>
    
     <!-- link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/tinymce/skins/lightgray/content.min.css"/ -->
 
@@ -303,7 +313,9 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/viewers/resultList.js"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/viewers/recordListExt.js"></script>
 
-    
+<?php 
+if(!array_key_exists('embed', $_REQUEST)){
+?>    
     <!-- need only for symbology edit $system->is_member(2) -->    
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editing2.js"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editSymbology.js"></script>
@@ -321,6 +333,7 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
     <script type="text/javascript" src="<?php echo PDIR;?>admin/structure/import/importStructure.js"></script>
     
 <?php
+}    
 $edit_Available = (@$_REQUEST['edit']==1);
 if($edit_Available){
 ?>
@@ -359,14 +372,11 @@ _time_debug = new Date().getTime() / 1000;
     $( "#main-logo").click(function(event){
               loadHomePageContent(<?php print $rec_id?>);
     });
-    //$( "#main-logo").click(); 
-    
     
     setTimeout(function(){
         //init main menu
         //add menu definitions to main-menu
         var bg_color = $('#main-header').css('background');
-//console.log('>>>')+bg_color;           
 
         var topmenu = $('#main-menu');
         topmenu.attr('data-heurist-app-id','heurist_Navigation');
@@ -558,8 +568,12 @@ $website_title -> #main-title>h2
 
 } //initHeaderElements
 
-var gtag = null;//google log
+
+var gtag = null;//google log - DO NOT REMOVE
+
+//
 //init hapi    
+//
 $(document).ready(function() {
     
         var ele = $('body').find('#main-content');
@@ -574,24 +588,7 @@ $(document).ready(function() {
     
         // Standalone check
         if(!window.hWin.HAPI4){
-            window.hWin.HAPI4 = new hAPI('<?php echo $_REQUEST['db']?>', onHapiInit);
-            
-/*            
-            // In case of standalone page
-            //load minimum set of required scripts
-            $.getMultiScripts(['localization.js'], '<?php echo PDIR;?>hclient/core/')
-            .done(function() {
-                // all done
-                window.hWin.HAPI4 = new hAPI('<?php echo $_REQUEST['db']?>', onHapiInit);
-
-            }).fail(function(error) {
-                // one or more scripts failed to load
-                onHapiInit(false);
-
-            }).always(function() {
-                // always called, both on success and error
-            });
-*/
+            window.hWin.HAPI4 = new hAPI('<?php echo $_REQUEST['db']?>', onHapiInit<?php print (array_key_exists('embed', $_REQUEST)?",'".PDIR."'":'');?>);
         }else{
             // Not standalone, use HAPI from parent window
             initHeaderElements();

@@ -32,6 +32,7 @@ $.widget( "heurist.embedDialog", {
         helpContent: null,
         
         //parameters
+        layout_rec_id: 0,
         
         //listeners
         onInitFinished:null,  //event listener when dialog is fully inited - use to perform initial search with specific parameters
@@ -147,15 +148,32 @@ $.widget( "heurist.embedDialog", {
         var that = this;
 
         this.selectRecordScope = this.element.find('#sel_layout');
-        if(this.selectRecordScope.length>0){
+        
+        if(this.options.layout_rec_id>0){
             
-            this._on( this.element.find('#layout_name'), { keyup: this._onRecordScopeChange } );        
-            this._on( this.selectRecordScope, { change: this._onRecordScopeChange } );        
-            var ele =this.element.find('#btnEditLayout');
+            this._fillEmbedForm()
+            
+        }else if(this.selectRecordScope.length>0){
+            
+            window.hWin.HEURIST4.ui.initHSelect(this.selectRecordScope, false);
+            
+            this._on( this.selectRecordScope, { change: function(){
+                if(this.selectRecordScope.val()>0){
+                    window.hWin.HEURIST4.ui.showEditCMSDialog( this.selectRecordScope.val() );
+                    that.closeDialog();
+                }
+            }} );        
+            var ele = this.element.find('#btnCreateLayout');
+            ele.button();
+            this._on( ele, { click: this._createNewLayout } );        
+            
+            /*
+            ele =this.element.find('#btnEditLayout');
             ele.button();
             this._on( ele, { click: function(){
                 window.hWin.HEURIST4.ui.showEditCMSDialog( this.selectRecordScope.val() );
             } } );        
+            */
             
             
             this._fillSelectLayout();
@@ -205,14 +223,15 @@ $.widget( "heurist.embedDialog", {
                     css:{'float':'right','margin-left':'30px'}, 
                     click: function() { 
                         that.closeDialog();
-                    }},
+                    }}
+                    /*,
                  {text:window.hWin.HR('Next'),
                     id:'btnDoAction',
                     disabled:'disabled',
                     css:{'float':'right'},  
                     click: function() { 
                             that.doAction(); 
-                    }}
+                    }}*/
                  ];
     },
 
@@ -257,7 +276,7 @@ $.widget( "heurist.embedDialog", {
                 height: options['height'],
                 width:  options['width'],
                 modal:  (options['modal']!==false),
-                title: window.hWin.HEURIST4.util.isempty(options['title'])?'':options['title'], //title will be set in  initControls as soon as entity config is loaded
+                title: window.hWin.HEURIST4.util.isempty(options['title'])?'Embedding code':options['title'],
                 position: position,
                 beforeClose: options.beforeClose,
                 resizeStop: function( event, ui ) {//fix bug
@@ -305,73 +324,67 @@ $.widget( "heurist.embedDialog", {
             this._as_dialog.dialog("close");
         }
     },
-
-    //
-    //either open website editor or show embed panel
-    //
-    doAction: function(){
+    
+    _fillEmbedForm: function(){
         
-        //either open website editor
-        if(this.selectRecordScope.val()==0){
-            
-            var that = this;
-            //create new web page
-            window.hWin.HEURIST4.ui.showEditCMSDialog({
-                record_id:-2, 
-                webpage_title: this.element.find('#layout_name').val(),
-                callback: function(rec_id, rec_title){
-                    that._fillSelectLayout(rec_id);
-                 /*if(rec_id>0){
-                    window.hWin.HEURIST4.ui.addoption(
-                                this.selectRecordScope[0],
-                                    rec_id,
-                                    rec_title );
-                    this.selectRecordScope.val(rec_id);
-                 }*/
-            }});
+        //show embed panel
+        this.element.find('#div_layout').hide();
+        this.element.find('#div_embed').show();
         
-        }else{
+        var rec_id = this.options.layout_rec_id;
             
-            if(this.element.find('#div_layout').is(':visible')){
-            
-                var rec_id = this.selectRecordScope.val();
-                
-                var query = window.hWin.HAPI4.baseURL+
+        var query = window.hWin.HAPI4.baseURL+
                     '?db='+window.hWin.HAPI4.database+'&website&id='+rec_id;
                 
                 //searchIDs=
                 
-                this.element.find('#code-textbox3').val(query);
+        this.element.find('#code-textbox3').val(query);
+        
+        this.element.find('#code-textbox').val('<iframe src=\'' + query +
+                    '\' width="100%" height="700" frameborder="0"></iframe>');
                 
-                this.element.find('#code-textbox').val('<iframe src=\'' + query +
-            '\' width="100%" height="700" frameborder="0"></iframe>');
-                
-                //or show embed panel
-                this.element.find('#div_layout').hide();
-                this.element.find('#div_embed').show();
+    },
+
+    //
+    //either open website editor or show embed panel
+    //
+    _createNewLayout: function(){
+        
+        //either open website editor
+        if(this.selectRecordScope.val()>0){
+            this.options.layout_rec_id = this.selectRecordScope.val();
+            this._fillEmbedForm();            
+        }else{
             
-                this.element.parents('.ui-dialog').find('#btnDoAction').button({label:'Back'});
+            var layout_name = this.element.find('#layout_name').val();
+            
+            if(window.hWin.HEURIST4.util.isempty(layout_name)){
+                
+                window.hWin.HEURIST4.msg.showMsgFlash('Specify name of new layout',1000);
                 
             }else{
                 
-                //or show embed panel
-                this.element.find('#div_layout').show();
-                this.element.find('#div_embed').hide();
-            
-                this.element.parents('.ui-dialog').find('#btnDoAction').button({label:'Next'});
+                var that = this;
+                //create new web page
+                window.hWin.HEURIST4.ui.showEditCMSDialog({
+                    record_id:-2, webpage_title: layout_name});
+                /*
+                    callback: function(rec_id, rec_title){
+                        if(rec_id>0){
+                            window.hWin.HEURIST4.ui.addoption(that.selectRecordScope[0],
+                                        rec_id,rec_title);
+                            that.selectRecordScope.val(rec_id);
+                            that.doAction();
+                        }
+                });*/
+                this.closeDialog();
             }
+            
+            
         }
     },
 
     //  -----------------------------------------------------
-    //
-    //  after save event handler
-    //
-    _afterActionEvenHandler: function( context ){
-        
-            
-    },
-
     //
     // Loads all RT_CMS_MENU with DT_CMS_PAGETYPE==2-6254
     //
@@ -382,7 +395,7 @@ $.widget( "heurist.embedDialog", {
         var opt, selScope = this.selectRecordScope.get(0);
 
         window.hWin.HEURIST4.ui.addoption(selScope, '', 'select...');
-        window.hWin.HEURIST4.ui.addoption(selScope, 0, 'Create new layout');
+        //window.hWin.HEURIST4.ui.addoption(selScope, 0, 'Create new layout');
         
         var idx_ccode = window.hWin.HEURIST4.terms.fieldNamesToIndex.trm_ConceptID;
         
@@ -411,7 +424,7 @@ $.widget( "heurist.embedDialog", {
                         
                         if(init_value>0) that.selectRecordScope.val(init_value);    
                         if(selScope.selectedIndex<0) selScope.selectedIndex=0;
-                        that._onRecordScopeChange();
+                        that.selectRecordScope.hSelect("refresh");
                     }else{
                         window.hWin.HEURIST4.msg.showMsgErr(response);
                         that.closeDialog(true);
@@ -422,25 +435,5 @@ $.widget( "heurist.embedDialog", {
         this.element.find('#layout_name').val('');
     },
 
-    //
-    //
-    //    
-    _onRecordScopeChange: function () 
-    {
-        var isdisabled = (this.selectRecordScope.val()=='');
- 
-        var d1 = this.element.find('#div_layout_name');
-        if(this.selectRecordScope.val()==='0'){
-            d1.show();
-            isdisabled = (this.element.parents('.ui-dialog').find('#layout_name').val().length<4);  
-        }else{
-            d1.hide();
-        }
-        
-        window.hWin.HEURIST4.util.setDisabled( this.element.parents('.ui-dialog').find('#btnDoAction'), isdisabled );
-        
-        return isdisabled;
-    }
-    
 });
 

@@ -419,6 +419,6 @@ if( $system->init(@$_REQUEST['db']) ){
 }
 
 // Return the response object as JSON
-header('Content-type: application/json;charset=UTF-8');
+$system->setResponseHeader();
 print json_encode($response);
 ?>

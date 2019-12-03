@@ -1521,5 +1521,28 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
         return $is_NOT_allowed;
     }
     
+    //
+    // Define response header. For embed mode (see websiteRecord) it sets allowed 
+    // origin domain to allow proper execution of heurist scripts from third-party 
+    // servers. This feature is disabled as a risky approach and possible issue 
+    // to support the code on third-party servers.
+    //
+    public function setResponseHeader($content_type=null){
+        
+        /*  remove this remark to enable embedding our code to third-partys server
+        $allowed = array('http://heurist.sydney.edu.au', 'https://epigraphia.efeo.fr', 'https://november1918.adelaide.edu.au'); 
+        if(isset($_SERVER['HTTP_ORIGIN']) && in_array($_SERVER['HTTP_ORIGIN'], $allowed, true) === true){
+            header('Access-Control-Allow-Origin: '.$_SERVER['HTTP_ORIGIN']);
+            header('Access-Control-Allow-Credentials: true');
+            header('Access-Control-Allow-Headers: Content-Type');
+        }
+        */
+        
+        if(!$content_type){
+            header('Content-type: application/json;charset=UTF-8');
+        }else{
+            header('Content-type: '.$content_type);
+        }
+    }
 }
 ?>

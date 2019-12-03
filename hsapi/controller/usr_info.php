@@ -302,8 +302,9 @@
         $response = $system->getError();
     }else{
         $response = array("status"=>HEURIST_OK, "data"=> $res);
-    }
         
-header('Content-type: application/json;charset=UTF-8');
+    }
+    
+$system->setResponseHeader();    
 print json_encode($response);
 ?>

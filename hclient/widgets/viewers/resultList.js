@@ -1613,10 +1613,15 @@ $.widget( "heurist.resultList", {
                         
                         $('<iframe>').appendTo(ele).addClass('loading').attr('src', infoURL).on('load',function(){ 
                             var ele2 = that.div_content.find('.record-expand-info');
+                            var h = 400;
+
+                            try{
+                                h = $(this.contentWindow.document).height();
+                                h = Math.min(h+10, 400);
+                            }catch(e){
+                                console.log(e);
+                            }
                             
-                            var h = $(this.contentWindow.document).height();
-                            
-                            var h = Math.min(h+10, 400);
                             ele2.removeClass('loading').animate({height:h},300);
                         });
                         
