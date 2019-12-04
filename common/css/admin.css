@@ -101,6 +101,7 @@ body.popup #page-inner {
 .adminSection ul.menu li a {
 	color:#666;
 }
+/*
 .ui-icon {
 	width:16px;
 	height:10px;
@@ -113,6 +114,7 @@ body.popup #page-inner {
 .ui-icon.headerselected {
 	background-image:url(../images/sub_heading_saved_search.png);
 }
+*/
 .contentframe {
 	border: none;
 	bottom: 0px;
