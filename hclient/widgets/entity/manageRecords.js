@@ -2415,17 +2415,21 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
 
             $('<div style="display:table;min-width:575px;width:100%">'
              +'<div style="display:table-cell;text-align:left;padding:20px 0px 5px 35px;">'
-                +'<span class="btn-edit-rt">Modify structure</span>'
-                +'<span class="btn-edit-rt-titlemask">Edit title mask</span>'
-                +'<span class="btn-edit-rt-template">Template</span>'
-                +'<span class="btn-bugreport">Bug report</span>'
-                
-                +'<div style="display:inline-block;padding-left:50px">'
+             
+                +'<div style="display:inline-block;padding-left:20px">'
                     +'<label><input type="checkbox" class="chb_show_help" '
                         +(ishelp_on?'checked':'')+'/>Show help</label><span style="display:inline-block;width:40px"></span>'
                     +'<label><input type="checkbox" class="chb_opt_fields" '
                         +(isfields_on?'checked':'')+'/>Optional fields</label>'
                 +'</div>'
+             
+                +'<div style="padding-right:50px;float:right">'
+                    +'<span class="btn-edit-rt" style="font-size:larger">Modify structure</span>'
+                    +'<span class="btn-edit-rt-titlemask">Edit title mask</span>'
+                    +'<span class="btn-edit-rt-template">Template</span>'
+                    +'<span class="btn-bugreport">Bug report</span>'
+                +'</div>'
+                
              +'</div></div>').insertBefore(this.editForm.first('fieldset'));
 /*            
             $('<div style="display:table;min-width:575px;width:100%">'
