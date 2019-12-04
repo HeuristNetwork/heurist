@@ -718,9 +718,12 @@ $.widget( "heurist.editing_input", {
         }
         else if(this.detailType=='enum' || this.detailType=='relationtype'){//--------------------------------------
 
-            var dwidth = this.f('rst_DisplayWidth');
-            if(parseFloat(dwidth)>0){
-                dwidth = dwidth+'ex';
+            var dwidth;
+            if(this.configMode && this.configMode.entity!='records'){
+                dwidth = this.f('rst_DisplayWidth');
+                if(parseFloat(dwidth)>0){
+                    dwidth = dwidth+'ex';
+                }
             }
 
             $input = $('<select>').uniqueId()
@@ -2443,7 +2446,7 @@ console.log('onpaste');
             .attr('data-input-id', $input.attr('id'))
             .appendTo( $inputdiv )
             //.button({icons:{primary: "ui-icon-circlesmall-close"},text:false});
-            .css({position: 'absolute', 'margin-top': '3px',
+            .css({'margin-top': '3px', position: 'absolute',
                  cursor:'pointer',             //'font-size':'2em',
 //outline_suppress does not work - so list all these props here explicitely                
                     outline: 'none','outline-style':'none', 'box-shadow':'none',  'border-color':'transparent'
@@ -2452,7 +2455,7 @@ console.log('onpaste');
             // bind click events
             this._on( $btn_clear, {
                 click: function(e){
-
+                                            
                     if(that.is_disabled) return;
 
                     var input_id = $(e.target).attr('data-input-id');  //parent(). need if button

@@ -1535,11 +1535,13 @@ window.hWin.HEURIST4.ui = {
             var dminwidth = selObj.css('min-width');    
             if(dminwidth=='0px' || window.hWin.HEURIST4.util.isempty(dminwidth)) dminwidth = '10em';
 
-            menu.hSelect( "menuWidget" ).css( {'padding':0,'background':'#F4F2F4','zIndex':9999999 });
-                        
-            menu.hSelect( "menuWidget" ).addClass('heurist-selectmenu overflow').css({'max-height':'300px','font-size':'12px'});
+            var menuwidget = menu.hSelect( "menuWidget" );
+            menuwidget.css( {'padding':0,'background':'#F4F2F4','zIndex':9999999 });
+            menuwidget.addClass('heurist-selectmenu overflow').css({'max-height':'300px','font-size':'12px'});
+            
             menu.hSelect( "widget" ).css({'padding':0,'background':'#FFF', 'font-size':'1.1em',
                 width:(dwidth?dwidth:'auto'),'min-width':dminwidth }); //,'min-width':'16em''#F4F2F4'
+                
         }
         return selObj;
     },           

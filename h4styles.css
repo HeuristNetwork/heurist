@@ -266,15 +266,15 @@ fieldset.ontop > div > .input-cell{
     margin-right: 0.4em;
 }
 
+div.input-div{
+    padding-right:20px;
+}
+
 div.input-div:hover > .btn_input_clear, .btn_input_clear:hover {
     display: inline-block;
 }
 div.input-div > .btn_input_clear, .btn_input_clear {
     display: none;
-}
-
-div.input-div{
-    /*padding-bottom:0.2em;*/
 }
 
 div.image_input{

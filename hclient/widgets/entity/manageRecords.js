@@ -2602,24 +2602,31 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
         //if show optional is off and all fields in section between headers are invisible
         var isfields_on = this.usrPreferences['optfields']==true || this.usrPreferences['optfields']=='true';
         if(!isfields_on){
-            var sep = null;
-            var need_show_hint = false;
+            var sep = null; //current separator(header)
+            //var need_show_hint = false;
         
             this.editForm.children().each(function(){
                 
-                $(this).is('fieldset')
+                //$(this).is('fieldset')
                 
                 if($(this).is('h4.separator')){
-                    if(sep!=null && need_show_hint){
-                        $('<span class="show_optional_hint" style="padding-left: 184px;">'
-                        +'This section contains optional fields.</span>')
-                            .insertAfter(sep.next());
-                    }
                     sep = $(this);
-                    need_show_hint = true;
-                }else if($(this).is('fieldset') && !$(this).is(':visible')){
-                    //hidden check for optional
-                    need_show_hint = need_show_hint && ($(this).find('div > div.optional').length>0);
+                }else if($(this).is('fieldset') && sep!=null){
+                    
+                    //!$(this).is(':visible') && 
+                    if($(this).children(':visible').length==0){ //none visible
+                         
+                        //fieldset may have invisible fields: optional or forbidden
+                        var need_show_hint = ($(this).find('div > div.optional').length>0);
+                    
+                        //if all fields are hidden and there are optional
+                        if(need_show_hint){
+                            $('<span class="show_optional_hint" style="padding-left: 184px;">'
+                            +'This section contains optional fields.</span>')
+                                .insertAfter(sep.next());   //insert after helper
+                        }
+                    }
+                    sep = null;
                 }
                 
             });
