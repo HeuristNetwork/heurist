@@ -136,19 +136,19 @@ if($islist || (array_key_exists("id", $_REQUEST) && $_REQUEST["id"]!="")){
     if($islist){
 
             $_REQUEST['detail'] = 'ids'; // return ids only
-            //$_REQUEST['limit'] = 1000;
 
             $result = recordSearch($system, $_REQUEST); //see db_recsearch.php
         
             if(!(@$result['status']==HEURIST_OK && @$result['data']['reccount']>0)){
-                //$error_msg = $system->getError();
-                //$error_msg = $error_msg[0]['message'];
+                $error_msg = $system->getError();
+                $error_msg = $error_msg[0]['message'];
+                print $error_msg;
                 print '</Document></kml>';
                 return;
             }
             $result = $result['data'];
             $rec_ids = $result['records'];
-            $rec_ids = array_slice($rec_ids,0,1000);
+            $rec_ids = array_slice($rec_ids,0,(@$_REQUEST['limit']>0)?$_REQUEST['limit']:100000);
 
             $squery = $squery." from Records ".$detTable." where rec_ID in (".implode(",", $rec_ids).") ".$ourwhere;
             $squery2 = $squery2." from Records ".$detTable2." where rec_ID in (".implode(",", $rec_ids).") ".$ourwhere2;
