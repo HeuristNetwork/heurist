@@ -60,7 +60,7 @@ function sendEmail_NewDatabase($user_record, $database_name, $source_database){
     
     if(strtolower(substr($user_record['ugr_eMail'], -3)) === '.fr'){
         $message =  str_replace('&lt;FrenchNoteIfFrance&gt;',
-        'Je m\'excuse du fait que ce mel soit en anglais. Vous pouvez cependant me r&eacute;pondre en fran&ccedil;ais.'
+        '<p>Je m\'excuse du fait que ce mel soit en anglais. Vous pouvez cependant me r&eacute;pondre en fran&ccedil;ais.</p>'
         ,$message);
     }else{
         $message =  str_replace('&lt;FrenchNoteIfFrance&gt;','',$message);
