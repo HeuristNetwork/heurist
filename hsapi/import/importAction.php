@@ -1805,7 +1805,8 @@ private static function doInsertUpdateRecord($recordId, $import_table, $recordTy
                 print "</div>";
             }
         }else{
-            error_log( $out["message"].'  '.print_r($out["sysmsg"], true) );
+            error_log( 'IMPORT CSV: '.($recordId>0?('rec#'.$recordId):'new record')
+                .$out["message"].'  '.print_r($out["sysmsg"], true) );
         }
 
         self::$rep_skipped++;

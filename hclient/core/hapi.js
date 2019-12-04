@@ -250,6 +250,8 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
     *   get_defs_all
     * 
     *   get_url_content_type - resolve mimetype for given url
+    * 
+    *   versionCheck - checks client software version and database version
     *
     * @returns {Object}
     */
@@ -749,6 +751,64 @@ prof =Profile
                         callback(response);
                     }
                 });
+            },
+            
+            //
+            //
+            //
+            versionCheck: function(){
+
+                //@todo define parameter in layout "production=true"
+                var lt = window.hWin.HAPI4.sysinfo['layout'];
+                if(! (lt=='Beyond1914' ||  lt=='UAdelaide' ||
+                    lt=='DigitalHarlem' || lt=='DigitalHarlem1935' || lt=='WebSearch' )){
+
+                    var version_in_cache = window.hWin.HAPI4.get_prefs_def('version_in_cache', null); 
+
+                    //
+                    // version of code to compare with server provided - to avoid caching issue
+                    //
+                    if(window.hWin.HAPI4.has_access() && window.hWin.HAPI4.sysinfo['version']){
+                        if(version_in_cache){
+                            var res = window.hWin.HEURIST4.util.versionCompare(version_in_cache, 
+                                window.hWin.HAPI4.sysinfo['version']);   
+                            if(res<0){ // -1=older code in cache, -2=newer code in cache, +1=same code version in cache
+                                // show lock popup that forces to clear cache
+                                window.hWin.HEURIST4.msg.showMsgDlgUrl(window.hWin.HAPI4.baseURL+'hclient/widgets/dropdownmenus/versionCheckMsg.html',
+                                    {}/* no buttons */,null,
+                                    {hideTitle:true, closeOnEscape:false,
+                                        open:function( event, ui ) {
+                                            var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
+                                            $dlg.find('#version_cache').text(version_in_cache);
+                                            $dlg.find('#version_srv').text(window.hWin.HAPI4.sysinfo['version']);
+                                }});
+                                return true;
+                            }
+                        }
+                        window.hWin.HAPI4.save_pref('version_in_cache', window.hWin.HAPI4.sysinfo['version']); 
+
+                        var res = window.hWin.HEURIST4.util.versionCompare(window.hWin.HAPI4.sysinfo.db_version_req, 
+                            window.hWin.HAPI4.sysinfo.db_version);   
+                        if(res==-2){ //-2= db_version_req newer
+                            // show lock popup that forces to upgrade database
+                            window.hWin.HEURIST4.msg.showMsgDlgUrl(window.hWin.HAPI4.baseURL+'hclient/widgets/dropdownmenus/versionDbCheckMsg.html',
+                                {'Upgrade':function(){
+                                    //console.log(window.hWin.HAPI4.baseURL+'admin/setup/dbupgrade/upgradeDatabase.php?db='+window.hWin.HAPI4.database);                                   
+                                    top.location.href = (window.hWin.HAPI4.baseURL+'admin/setup/dbupgrade/upgradeDatabase.php?db='+window.hWin.HAPI4.database);
+                                }},null,
+                                {hideTitle:false, closeOnEscape:false,
+                                    open:function( event, ui ) {
+                                        var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
+                                        $dlg.find('#version_db').text(window.hWin.HAPI4.sysinfo.db_version);
+                                        $dlg.find('#version_min_db').text(window.hWin.HAPI4.sysinfo.db_version_req);
+                                        $dlg.find('#version_srv').text(window.hWin.HAPI4.sysinfo['version']);
+                            }});
+
+                        }
+                    }
+
+                }  
+                return false;                
             }
 
             /*

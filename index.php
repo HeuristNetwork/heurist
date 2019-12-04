@@ -273,116 +273,73 @@ _time_debug = new Date().getTime() / 1000;
                 }else if(window.hWin.HAPI4.sysinfo.db_total_records<1){
                     //IJ request 2018-12-11 showTipOfTheDay(false);
                 }
-                
                
-               //@todo define parameter in layout "production=true"
-               var lt = window.hWin.HAPI4.sysinfo['layout'];
-               if(! (lt=='Beyond1914' ||  lt=='UAdelaide' ||
-                     lt=='DigitalHarlem' || lt=='DigitalHarlem1935' || lt=='WebSearch' )){
+                var lt = window.hWin.HAPI4.sysinfo['layout'];
+                if(! (lt=='Beyond1914' ||  lt=='UAdelaide' ||
+                    lt=='DigitalHarlem' || lt=='DigitalHarlem1935' || lt=='WebSearch' )){                
 
-                   var version_in_cache = window.hWin.HAPI4.get_prefs_def('version_in_cache', null); 
+                    if( window.hWin.HAPI4.SystemMgr.versionCheck() ) {
+                        //version is old 
+                        return;
+                    }
 
-                   //
-                   // version of code to compare with server provided - to avoid caching issue
-                   //
-                   if(window.hWin.HAPI4.has_access() && window.hWin.HAPI4.sysinfo['version']){
-                       if(version_in_cache){
-                           var res = window.hWin.HEURIST4.util.versionCompare(version_in_cache, 
-                                                                              window.hWin.HAPI4.sysinfo['version']);   
-                           if(res<0){ // -1=older code in cache, -2=newer code in cache, +1=same code version in cache
-                               // show lock popup that forces to clear cache
-                               window.hWin.HEURIST4.msg.showMsgDlgUrl(window.hWin.HAPI4.baseURL+'hclient/widgets/dropdownmenus/versionCheckMsg.html',
-                                   {}/* no buttons */,null,
-                                   {hideTitle:true, closeOnEscape:false,
-                                       open:function( event, ui ) {
-                                           var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
-                                           $dlg.find('#version_cache').text(version_in_cache);
-                                           $dlg.find('#version_srv').text(window.hWin.HAPI4.sysinfo['version']);
-                               }});
+                    var editRecID = window.hWin.HEURIST4.util.getUrlParameter('edit_id', window.location.search);
+                    if(editRecID>0){
+                        //edit record
+                        window.hWin.HEURIST4.ui.openRecordEdit(editRecID, null);
+                    }else
+                        if(window.hWin.HEURIST4.util.getUrlParameter('rec_rectype', window.location.search) ||
+                            (window.hWin.HEURIST4.util.getUrlParameter('t', window.location.search) && 
+                                window.hWin.HEURIST4.util.getUrlParameter('u', window.location.search)))
+                        {
+                            //add new record from bookmarklet  - see recordEdit.php as alternative, it opens record editor in separate window
+                            var url = window.hWin.HEURIST4.util.getUrlParameter('u', window.location.search);
 
-                           }
-                       }
-                       window.hWin.HAPI4.save_pref('version_in_cache', window.hWin.HAPI4.sysinfo['version']); 
-                       
-                       var res = window.hWin.HEURIST4.util.versionCompare(window.hWin.HAPI4.sysinfo.db_version_req, 
-                                                                          window.hWin.HAPI4.sysinfo.db_version);   
-                       if(res==-2){ //-2= db_version_req newer
-                           // show lock popup that forces to upgrade database
-                           window.hWin.HEURIST4.msg.showMsgDlgUrl(window.hWin.HAPI4.baseURL+'hclient/widgets/dropdownmenus/versionDbCheckMsg.html',
-                               {'Upgrade':function(){
-//console.log(window.hWin.HAPI4.baseURL+'admin/setup/dbupgrade/upgradeDatabase.php?db='+window.hWin.HAPI4.database);                                   
-top.location.href = (window.hWin.HAPI4.baseURL+'admin/setup/dbupgrade/upgradeDatabase.php?db='+window.hWin.HAPI4.database);
-                               }},null,
-                               {hideTitle:false, closeOnEscape:false,
-                                   open:function( event, ui ) {
-                                       var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
-                                       $dlg.find('#version_db').text(window.hWin.HAPI4.sysinfo.db_version);
-                                       $dlg.find('#version_min_db').text(window.hWin.HAPI4.sysinfo.db_version_req);
-                                       $dlg.find('#version_srv').text(window.hWin.HAPI4.sysinfo['version']);
-                           }});
-
-                       }
-                       
-                   }
-                   
-                   
-                   var editRecID = window.hWin.HEURIST4.util.getUrlParameter('edit_id', window.location.search);
-                   if(editRecID>0){
-                       //edit record
-                       window.hWin.HEURIST4.ui.openRecordEdit(editRecID, null);
-                   }else
-                   if(window.hWin.HEURIST4.util.getUrlParameter('rec_rectype', window.location.search) ||
-                        (window.hWin.HEURIST4.util.getUrlParameter('t', window.location.search) && 
-                         window.hWin.HEURIST4.util.getUrlParameter('u', window.location.search)))
-                   {
-                       //add new record from bookmarklet  - see recordEdit.php as alternative, it opens record editor in separate window
-                       var url = window.hWin.HEURIST4.util.getUrlParameter('u', window.location.search);
-                       
-                       var new_record_params = {
-                            RecTypeID: window.hWin.HEURIST4.util.getUrlParameter('rec_rectype', window.location.search)
-                                                    || window.hWin.HEURIST4.util.getUrlParameter('rt', window.location.search),
-                            OwnerUGrpID: window.hWin.HEURIST4.util.getUrlParameter('rec_owner', window.location.search),
-                            NonOwnerVisibility: window.hWin.HEURIST4.util.getUrlParameter('rec_visibility', window.location.search),
-                            tag: window.hWin.HEURIST4.util.getUrlParameter('tag', window.location.search)
+                            var new_record_params = {
+                                RecTypeID: window.hWin.HEURIST4.util.getUrlParameter('rec_rectype', window.location.search)
+                                || window.hWin.HEURIST4.util.getUrlParameter('rt', window.location.search),
+                                OwnerUGrpID: window.hWin.HEURIST4.util.getUrlParameter('rec_owner', window.location.search),
+                                NonOwnerVisibility: window.hWin.HEURIST4.util.getUrlParameter('rec_visibility', window.location.search),
+                                tag: window.hWin.HEURIST4.util.getUrlParameter('tag', window.location.search)
                                 ||window.hWin.HEURIST4.util.getUrlParameter('k', window.location.search),
-                            Title:  window.hWin.HEURIST4.util.getUrlParameter('t', window.location.search),
-                            URL:  url,
-                            ScratchPad:  window.hWin.HEURIST4.util.getUrlParameter('d', window.location.search)
-                       };
-                       
-                       //default rectype for bookmarklet addition
-                       if(url && !(new_record_params['RecTypeID']>0)){
-                           
-                           if(window.hWin.HAPI4.sysinfo['dbconst']['RT_INTERNET_BOOKMARK']>0) {
-                               new_record_params['RecTypeID']  = window.hWin.HAPI4.sysinfo['dbconst']['RT_INTERNET_BOOKMARK'];
-                           }else if(window.hWin.HAPI4.sysinfo['dbconst']['RT_NOTE']>0) {
-                               new_record_params['RecTypeID']  = window.hWin.HAPI4.sysinfo['dbconst']['RT_NOTE'];
-                           }
-                       }
-                       
-                       
-                       //add new record
-                       window.hWin.HEURIST4.ui.openRecordEdit(-1, null, {new_record_params:new_record_params});
-                       
-                   }else if(window.hWin.HAPI4.sysinfo.db_has_active_dashboard>0) {
-                       
-                       var _supress_dashboard = (window.hWin.HEURIST4.util.getUrlParameter('cms', window.hWin.location.search)>0);
-                       //show dashboard (another place - after login in profle_login.js)
-                       var prefs = window.hWin.HAPI4.get_prefs_def('prefs_sysDashboard', {showonstartup:1});
-                       if(_supress_dashboard!==true && prefs.showonstartup==1){
-                           var _keep = window.hWin.HAPI4.sysinfo.db_has_active_dashboard;
-                           window.hWin.HAPI4.sysinfo.db_has_active_dashboard=0;
-                           $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE); //hide button
-                           
-                           window.hWin.HEURIST4.ui.showEntityDialog('sysDashboard',
-                            {onClose:function(){
-                                $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE);
-                            }});
-                            setTimeout(function(){window.hWin.HAPI4.sysinfo.db_has_active_dashboard = _keep;},1000);
-                       }
-                                
-                   }
-               }
+                                Title:  window.hWin.HEURIST4.util.getUrlParameter('t', window.location.search),
+                                URL:  url,
+                                ScratchPad:  window.hWin.HEURIST4.util.getUrlParameter('d', window.location.search)
+                            };
+
+                            //default rectype for bookmarklet addition
+                            if(url && !(new_record_params['RecTypeID']>0)){
+
+                                if(window.hWin.HAPI4.sysinfo['dbconst']['RT_INTERNET_BOOKMARK']>0) {
+                                    new_record_params['RecTypeID']  = window.hWin.HAPI4.sysinfo['dbconst']['RT_INTERNET_BOOKMARK'];
+                                }else if(window.hWin.HAPI4.sysinfo['dbconst']['RT_NOTE']>0) {
+                                    new_record_params['RecTypeID']  = window.hWin.HAPI4.sysinfo['dbconst']['RT_NOTE'];
+                                }
+                            }
+
+
+                            //add new record
+                            window.hWin.HEURIST4.ui.openRecordEdit(-1, null, {new_record_params:new_record_params});
+
+                        }else if(window.hWin.HAPI4.sysinfo.db_has_active_dashboard>0) {
+
+                            var _supress_dashboard = (window.hWin.HEURIST4.util.getUrlParameter('cms', window.hWin.location.search)>0);
+                            //show dashboard (another place - after login in profle_login.js)
+                            var prefs = window.hWin.HAPI4.get_prefs_def('prefs_sysDashboard', {showonstartup:1});
+                            if(_supress_dashboard!==true && prefs.showonstartup==1){
+                                var _keep = window.hWin.HAPI4.sysinfo.db_has_active_dashboard;
+                                window.hWin.HAPI4.sysinfo.db_has_active_dashboard=0;
+                                $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE); //hide button
+
+                                window.hWin.HEURIST4.ui.showEntityDialog('sysDashboard',
+                                    {onClose:function(){
+                                        $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE);
+                                }});
+                                setTimeout(function(){window.hWin.HAPI4.sysinfo.db_has_active_dashboard = _keep;},1000);
+                            }
+
+                        }
+                }
                 
                 
                 //perform search in the case that parameter "q" is defined

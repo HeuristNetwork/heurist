@@ -136,8 +136,13 @@ function doLogin(isforsed){
 
                                     $dlg.dialog( "close" );
                                     
-                                    if(!(window.hWin.HAPI4.sysinfo['layout']=='DigitalHarlem' 
-                                        || window.hWin.HAPI4.sysinfo['layout']=='DigitalHarlem1935')){
+                                    if( window.hWin.HAPI4.SystemMgr.versionCheck() ) {
+                                        //version is old 
+                                        return;
+                                    }
+                                    
+                                    var lt = window.hWin.HAPI4.sysinfo['layout']; 
+                                    if(!(lt=='DigitalHarlem' || lt=='DigitalHarlem1935' || lt=='WebSearch')){
                                     
                                         var init_search = window.hWin.HAPI4.get_prefs('defaultSearch');
                                         if(!window.hWin.HEURIST4.util.isempty(init_search)){
