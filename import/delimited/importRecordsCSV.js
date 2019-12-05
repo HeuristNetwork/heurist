@@ -3085,7 +3085,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                         var msg = ''
                           +'<table class="tbresults"><tr><td>Total rows in import table:</td><td>'+ imp_result['total']
                           +'</td></tr><tr><td>Processed:</td><td>'+ imp_result['processed']
-                          +'</td></tr><tr><td>Skipped:</td><td>'+ imp_result['skipped']
+                          +'</td></tr><tr><td'+(imp_result['skipped']>0?' style="color:red"':'')
+                            +'>Skipped:</td><td>'+ imp_result['skipped']
                           +'</td></tr><tr><td>Records added:</td><td>'+ imp_result['inserted']
                           +'</td></tr><tr><td>Records updated:</td><td>'+ imp_result['updated'];
                           
@@ -3095,6 +3096,23 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                             +' records could not be updated as you do not have adequate rights to modify them '
                             +'(workgroup administrator rights required)';
                         }   
+                        if (imp_result['skipped']>0){
+                            
+                            var suggestions = 'If you see "missed data" message you may need to make fields optional.<br>'
+                            +'If record can not be updated due wrong resource or parent links run Verify integrity to fix problems with records<br><br>';
+                            
+                            msg = msg 
+                            +'</td></tr><tr><td colspan="2" style="color:red"><br><a href="#" onclick="'
+                            +'{$(\'#div_error_import_report\').show();$(event.target).hide()}'
+                            +'">error report</a>'
+                            +'<div id="div_error_import_report" '
+                            +'style="display:none;max-width:800px;max-height:200px;overflow:auto;font-size0.7em;padding:10px;border:dotted 1px black;">'
+                            +suggestions
+                            +imp_result['skipped_details'].join('<br>')
+                            +'</div>';
+                            
+                            //skipped_details
+                        }
                           
                         msg = msg +'</td></tr></table>';
                         

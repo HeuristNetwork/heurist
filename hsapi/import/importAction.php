@@ -46,6 +46,7 @@ class ImportAction {
     private static $rep_added     = 0;
     private static $rep_updated   = 0;
     private static $rep_skipped    = 0;
+    private static $rep_skipped_details = array();
     private static $rep_permission  = 0;
     private static $rep_unique_ids = array();
     //private static $imp_session;
@@ -1774,6 +1775,8 @@ private static function doInsertUpdateRecord($recordId, $import_table, $recordTy
     
     $out = recordSave(self::$system, $record);  //see db_records.php
     
+    //$out = array('status'=>HEURIST_ERROR, 'message'=>'Fake error message');
+    
     //array("status"=>HEURIST_OK, "data"=> $recID, 'rec_Title'=>$newTitle);
     $new_recordID = null;
 
@@ -1805,8 +1808,12 @@ private static function doInsertUpdateRecord($recordId, $import_table, $recordTy
                 print "</div>";
             }
         }else{
-            error_log( 'IMPORT CSV: '.($recordId>0?('rec#'.$recordId):'new record')
-                .$out["message"].'  '.print_r($out["sysmsg"], true) );
+            if(self::$rep_skipped<100){        
+                error_log( 'IMPORT CSV: '.($recordId>0?('rec#'.$recordId):'new record')
+                    .$out["message"].'  '.print_r(@$out["sysmsg"], true) );
+                self::$rep_skipped_details[] = ($recordId>0?('record#'.$recordId):'new record')
+                        .': '.$out["message"];
+            }
         }
 
         self::$rep_skipped++;
@@ -1908,6 +1915,7 @@ public static function performImport($params, $mode_output){
     self::$rep_added     = 0;
     self::$rep_updated   = 0;
     self::$rep_skipped    = 0;
+    self::$rep_skipped_details = array();
     self::$rep_permission  = 0;
     self::$rep_unique_ids = array();
     
@@ -2536,6 +2544,7 @@ public static function performImport($params, $mode_output){
               'updated'=>self::$rep_updated,
               'total'=>$tot_count,
               'skipped'=>self::$rep_skipped,
+              'skipped_details'=>self::$rep_skipped_details,
               'permission'=>self::$rep_permission
             );   
 
