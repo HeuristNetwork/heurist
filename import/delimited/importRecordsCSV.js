@@ -1762,8 +1762,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         var h = 300
         if(currentStep==3){
             h = 300
-        }else if(currentStep==4){ //+28
-            h = 328
+        }else if(currentStep==4 || (currentStep==5 && !$('#sa_update').prop('checked')) ){ //+28
+            h = 340 //328
         }else if(currentStep==5){ //+100
             h = 400
         }
@@ -2904,7 +2904,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 sa_rectype: rtyID,
                 seq_index: currentSeqIndex,
                 mapping   : field_mapping,
-                ignore_insert: 0,
+                ignore_insert: $('#sa_insert').prop('checked')?0:1,
+                ignore_update: $('#sa_update').prop('checked')?0:1,
                 recid_field: 'field_'+key_idx //imp_session['columns'][key_idx]
             };
 
@@ -3057,7 +3058,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             sa_rectype: rtyID,
             seq_index : currentSeqIndex,
             mapping   : field_mapping,
-            ignore_insert: 0,
+            ignore_insert: $('#sa_insert').prop('checked')?0:1,
+            ignore_update: $('#sa_update').prop('checked')?0:1,
             utm_zone  : UTMzone,
             recid_field: 'field_'+key_idx, //imp_session['columns'][key_idx]
             //0 - Retain existing values and append distinct new data as repeat values
@@ -4034,15 +4036,37 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             
                 var rtyID = imp_session['sequence']['rectype'];
                 var counts = _getInsertUpdateCounts(currentSeqIndex);
+                
+                var to_be_inserted = counts[2];
+                var to_be_updated = counts[0];
+                var both_insert_and_update = (to_be_updated>0 && to_be_inserted>0);
+
+                window.hWin.HEURIST4.util.setDisabled($('#sa_insert'), !both_insert_and_update);
+                window.hWin.HEURIST4.util.setDisabled($('#sa_update'), !both_insert_and_update);
+                if(!both_insert_and_update || 
+                   (!$('#sa_insert').prop('checked') && !$('#sa_update').prop('checked'))
+                ){
+                    $('#sa_insert').prop('checked', (to_be_inserted>0));
+                    $('#sa_update').prop('checked', (to_be_updated>0));
+                }
+                $('#btnImportStart').button({label:('Start '
+                    +($('#sa_insert').prop('checked')?'Insert':'')
+                    +($('#sa_insert').prop('checked')&&$('#sa_update').prop('checked')?'/':'')
+                    +($('#sa_update').prop('checked')?'Update':''))});
+                $('#head_step3').text('step 3: '
+                    +($('#sa_insert').prop('checked')?'INSERT':'')
+                    +($('#sa_insert').prop('checked')&&$('#sa_update').prop('checked')?'/':'')
+                    +($('#sa_update').prop('checked')?'UPDATE':''));   
+                
                
                 var shelp = 'Now select the columns which you wish to import into fields in the <b>'
-                + window.hWin.HEURIST4.rectypes.names[rtyID]
+                + (window.hWin.HEURIST4.rectypes.names[rtyID]?window.hWin.HEURIST4.rectypes.names[rtyID]:'')
                 + '</b>  records which are '
-                + (counts[2]>0?'created ':'')
-                + ((counts[0]>0 && counts[2]>0)?' or ':'')
-                + (counts[0]>0?'updated':'')
-                + (counts[2]>0?'. Since new records are to be created, make sure you select all relevant columns; '
-                                +'all Required fields must be mapped to a column.':'');
+                + (to_be_inserted>0 ?'created ':'')
+                + (both_insert_and_update?' or ':'')
+                + (to_be_updated>0 ?'updated':'')
+                + (to_be_inserted>0 ?'. Since new records are to be created, make sure you select all relevant columns; '
+                                +'all Required fields should be mapped to a column.':'');
                 
                 shelp = shelp + '<br><br>Note that no changes are made to the database when you click the Prepare button.';
                 
@@ -4052,10 +4076,18 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 window.hWin.HEURIST4.util.setDisabled($('#btnImportStart'), true);
             }else{ //import
             
+                window.hWin.HEURIST4.util.setDisabled($('#sa_insert'), true);
+                window.hWin.HEURIST4.util.setDisabled($('#sa_update'), true);
+            
                 $('h2.step5').css('display','inline-block');
                 window.hWin.HEURIST4.util.setDisabled($('#btnPrepareStart'), true);
                 window.hWin.HEURIST4.util.setDisabled($('#btnImportStart'), false);
                 //$('#divImportSettingHelp').html();
+                
+                if(!$('#sa_update').prop('checked')){
+                    $('#divImportSetting').hide();
+                }
+                
             }
             
             _adjustTablePosition();

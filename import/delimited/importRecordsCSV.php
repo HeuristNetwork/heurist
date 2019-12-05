@@ -475,7 +475,7 @@ If you have missing data for Required fields, you may find it convenient to set 
                     Match Again</div>
                     
                 <h2 class="step4" style="display:none;">step 2: FIELDS TO IMPORT</h2>
-                <h2 class="step5" style="display:none;">step 3: INSERT/UPDATE</h2>
+                <h2 class="step5" style="display:none;" id="head_step3">step 3: INSERT/UPDATE</h2>
                     
                 <div id="btnNextRecType2" style="display:none" class="skip_step" 
                     title="All input rows have been matched to existing records. This probably means that you are simply matching existing records and don't need to update them">
@@ -512,12 +512,17 @@ If you have missing data for Required fields, you may find it convenient to set 
             <div class="heurist-helper1" id="divMatchingSettingHelp" style="display:block;padding-top:1em;padding-bottom:3px;">
             </div>
         </div>
-        <div  id="divPrepareSetting" class="step4 step-ctrls" style="display:none">
+        <div  id="divInsertUpdateSetting" class="step4 step5 step-ctrls" style="display:none">
+            <label><input type="checkbox" checked="checked" id="sa_insert" class="text" onchange="{importRecordsCSV.onUpdateModeSet()}">&nbsp;
+            Create new records</label>
+            <label><input type="checkbox" checked="checked" id="sa_update" class="text" onchange="{importRecordsCSV.onUpdateModeSet()}">&nbsp;
+            Update existing records</label>
+        </div>
+        <div  id="divPrepareSetting" class="step4 step-ctrls" style="display:none;top:205px">
             <div class="heurist-helper1" id="divPrepareSettingHelp" style="display:block;">
             </div>
         </div>
-        
-        <div  id="divImportSetting" class="step5 step-ctrls" style="display:none">
+        <div  id="divImportSetting" class="step5 step-ctrls" style="display:none;top:205px">
             <div class="heurist-helper1" id="divImportSettingHelp" style="display:block;padding-bottom:1em">
                 You are now ready to update the database. This step applies the changes you have prepared and is not (easily) reversible.            
             </div>
@@ -542,7 +547,7 @@ If you have missing data for Required fields, you may find it convenient to set 
         </div>
 <!-- end radiogroup setting divs -->     
 
-        <div id="divFieldMapping2" class="step4" style="display:none;position:absolute;bottom:37px">
+        <div id="divFieldMapping2" class="step4" style="display:none;position:absolute;bottom:32px">
             <table class="tbresults" style="display:inline-block">
                 <tbody>
                                     <tr>

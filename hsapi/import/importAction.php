@@ -679,7 +679,8 @@ public static function assignRecordIds($params){
 * sa_rectype - record type
 * seq_index - sequence
 * recid_field
-* ignore_insert
+* ignore_insert - ignore new records
+* ignore_update - ignore records to be updated
 * mapping
 * 
 * @param mixed $mysqli
@@ -723,6 +724,7 @@ public static function validateImport($params) {
     $import_table = $imp_session['import_table'];
     $id_field = @$params['recid_field']; //record ID field is always defined explicitly
     $ignore_insert = (@$params['ignore_insert']==1); //ignore new records
+    $ignore_update = (@$params['ignore_update']==1); //ignore update records
 
     $cnt_update_rows = 0;
     $cnt_insert_rows = 0;
@@ -831,25 +833,27 @@ public static function validateImport($params) {
         }
 
         // find records to update
-        $select_query = "SELECT count(DISTINCT ".$id_field.") FROM ".$import_table
-        ." left join Records on rec_ID=".$id_field." WHERE rec_ID is not null and ".$id_field.">0";
-        $cnt = mysql__select_value($mysqli, $select_query);
-        if($cnt>0){
-            
-                $imp_session['validation']['count_update'] = $cnt;
-                $imp_session['validation']['count_update_rows'] = $cnt;
-                //find first 100 records to display
-                $select_query = "SELECT ".$id_field.", imp_id, ".implode(",",$sel_query)
-                ." FROM ".$import_table
-                ." left join Records on rec_ID=".$id_field
-                ." WHERE rec_ID is not null and ".$id_field.">0"
-                ." ORDER BY ".$id_field." LIMIT 5000";
-                $imp_session['validation']['recs_update'] = mysql__select_all($mysqli, $select_query);
+        if(!$ignore_update){
+            $select_query = "SELECT count(DISTINCT ".$id_field.") FROM ".$import_table
+            ." left join Records on rec_ID=".$id_field." WHERE rec_ID is not null and ".$id_field.">0";
+            $cnt = mysql__select_value($mysqli, $select_query);
+            if($cnt>0){
+                
+                    $imp_session['validation']['count_update'] = $cnt;
+                    $imp_session['validation']['count_update_rows'] = $cnt;
+                    //find first 100 records to display
+                    $select_query = "SELECT ".$id_field.", imp_id, ".implode(",",$sel_query)
+                    ." FROM ".$import_table
+                    ." left join Records on rec_ID=".$id_field
+                    ." WHERE rec_ID is not null and ".$id_field.">0"
+                    ." ORDER BY ".$id_field." LIMIT 5000";
+                    $imp_session['validation']['recs_update'] = mysql__select_all($mysqli, $select_query);
 
-        }else if($cnt==null){
-            self::$system->addError(HEURIST_DB_ERROR,
-                    'SQL error: Cannot execute query to calculate number of records to be updated!', $mysqli->error);
-            return false;
+            }else if($cnt==null){
+                self::$system->addError(HEURIST_DB_ERROR,
+                        'SQL error: Cannot execute query to calculate number of records to be updated!', $mysqli->error);
+                return false;
+            }
         }
 
         if(!$ignore_insert){
@@ -1069,7 +1073,11 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
         if($ignore_insert){
             $only_for_specified_id = " (".$id_field." > 0) AND ";
         }else{
-            $only_for_specified_id = " (".$id_field."!='') AND ";//otherwise it does not for skip matching " (NOT(".$id_field." is null OR ".$id_field."='')) AND ";
+            if($ignore_update){
+                $only_for_specified_id = " (NOT(".$id_field." > 0 OR ".$id_field."='')) AND ";
+            }else{
+                $only_for_specified_id = " (".$id_field."!='') AND ";//otherwise it does not for skip matching " (NOT(".$id_field." is null OR ".$id_field."='')) AND ";
+            }
         }
     }else{
         $only_for_specified_id = "";
@@ -2021,14 +2029,17 @@ public static function performImport($params, $mode_output){
     . ", imp_id "  //last field is row# - imp_id
     . " FROM ".$import_table;
 
-    $ignore_insert = ($params['ignore_insert']==1);
+    $ignore_insert = (@$params['ignore_insert']==1); //ignore new records
+    $ignore_update = (@$params['ignore_update']==1); //ignore update records
 
     if($id_field){  //index field defined - add to list of columns
         $id_field_idx = count($field_types); //last one
 
         if($ignore_insert){
             $select_query = $select_query." WHERE (".$id_field.">0) ";  //use records with defined value in index field
-        }else{
+        }else if($ignore_update){
+            $select_query = $select_query." WHERE (NOT(".$id_field." > 0 OR ".$id_field."='')) ";
+        }else {
             $select_query = $select_query." WHERE (".$id_field."!='') "; //ignore empty values
         }
         $select_query = $select_query." ORDER BY ".$id_field;
@@ -2125,13 +2136,18 @@ public static function performImport($params, $mode_output){
                         //record id is changed - save data
                         //$recordId is already set 
                         if($previos_recordId!=null && count($details)>0){ //perform import action
-
+                        
+                            $allow_operation = ! (($recordId>0) ?$ignore_update:$ignore_insert);
+                            if($allow_operation){
+                                
                             //$details = retainExisiting($details, $details2, $params, $recordTypeStructure, $idx_reqtype);
                             //import detail is sorted by rec_id -0 thus it is possible to assign the same recId for several imp_id
                             $new_id = self::doInsertUpdateRecord($recordId, $import_table, $recordType, $csv_mvsep, 
                                                         $details, $id_field, $prev_ismulti_id?$prev_recid_in_idfield:null, $mode_output);
                             
                             if($prev_recid_in_idfield!=null) $pairs[$prev_recid_in_idfield] = $new_id;//new_A                            
+                            
+                            }
                         }
                         $prev_recid_in_idfield = $recid_in_idfield; //ugly
                         $prev_ismulti_id = $ismulti_id;
@@ -2517,9 +2533,14 @@ public static function performImport($params, $mode_output){
 
         if($id_field && count($details)>0 && $recordId!=null){ //action for last record
             //$details = retainExisiting($details, $details2, $params, $recordTypeStructure, $idx_reqtype);
-            $new_id = self::doInsertUpdateRecord($recordId, $import_table, $recordType, $csv_mvsep, 
-                                                $details, $id_field, $ismulti_id?$recid_in_idfield:null,  $mode_output);
-            if($recid_in_idfield!=null) $pairs[$recid_in_idfield] = $new_id;//new_A
+            $allow_operation = ! (($recordId>0) ?$ignore_update:$ignore_insert);
+            if($allow_operation){
+            
+                $new_id = self::doInsertUpdateRecord($recordId, $import_table, $recordType, $csv_mvsep, 
+                                                    $details, $id_field, $ismulti_id?$recid_in_idfield:null,  $mode_output);
+                if($recid_in_idfield!=null) $pairs[$recid_in_idfield] = $new_id;//new_A
+            
+            }
         }
         if(!$id_field){
             array_push($imp_session['uniqcnt'], self::$rep_added);
