@@ -37,7 +37,8 @@ class VerifyValue {
     private static $initialized = false;
 
     private static $dtyIDDefs = array();  //list of allowed terms for particular detail type ID
-    private static $dtyIDDefs_labels = array();
+    private static $dtyIDDefs_labels = array();  //with hierarchy
+    private static $dtyIDDefs_labels_plain = array(); //without hierarchy
     private static $dtyIDDefs_codes = array();
     private static $terms = array();
 
@@ -61,6 +62,7 @@ class VerifyValue {
     public static function reset(){
         self::$dtyIDDefs = array();  //list of allowed terms for particular detail type ID
         self::$dtyIDDefs_labels = array();
+        self::$dtyIDDefs_labels_plain = array();
         self::$dtyIDDefs_codes = array();
         
         self::$terms = null;
@@ -154,13 +156,15 @@ public static function isValidTermLabel($defs, $defs_nonsel, $label, $dtyID, $is
 
     if($dtyID==null || !@self::$dtyIDDefs_labels[$dtyID]){
         
-        $withHierarchy = true;//(strpos($label,'.')>0);
+        //label may have fullstop in its own name - so we always search with and without hierarchy
+        $withHierarchy = true;//(strpos($label,'.')>0); 
     
         self::initialize();
         if(self::$terms==null)  self::$terms = dbs_GetTerms(self::$system);
         $allowed_terms = self::getAllowedTerms($defs, $defs_nonsel, $dtyID);
         
         $allowed_labels = array();
+        $allowed_labels_plain = array();
         
         $idx_label = self::$terms['fieldNamesToIndex']['trm_Label'];
     
@@ -168,26 +172,30 @@ public static function isValidTermLabel($defs, $defs_nonsel, $label, $dtyID, $is
         $domain = @self::$terms['termsByDomainLookup']['relation'][$allowed_terms[0]]?'relation':'enum';
         $list = self::$terms['termsByDomainLookup'][$domain];
         foreach($allowed_terms as $term_id){
-           if($withHierarchy){
-                $allowed_labels[$term_id] = getTermFullLabel(self::$terms, $list[$term_id], $domain, false);//returns term with parent
+           /*if($withHierarchy){
            }else{
-                $allowed_labels[$term_id] = $list[$term_id][$idx_label] ;    
-           } 
+           }*/ 
+           $allowed_labels[$term_id] = getTermFullLabel(self::$terms, $list[$term_id], $domain, false);//returns term with parent
+           $allowed_labels_plain[$term_id] = $list[$term_id][$idx_label];    
            //remove last point
            $allowed_labels[$term_id] = trim($allowed_labels[$term_id],'.');
         }
     
         if($isStripAccents && is_array($allowed_labels)){
             array_walk($allowed_labels, 'trim_lower_accent2');
+            
+            array_walk($allowed_labels_plain, 'trim_lower_accent2');
         }
         
         //keep for future use
         if($dtyID!=null){
             self::$dtyIDDefs_labels[$dtyID] = $allowed_labels;
+            self::$dtyIDDefs_labels_plain[$dtyID] = $allowed_labels_plain;
         }
         
     }else{
         $allowed_labels = self::$dtyIDDefs_labels[$dtyID];
+        $allowed_labels_plain = self::$dtyIDDefs_labels_plain[$dtyID];
     }
     
     //check if given label among allowed
@@ -200,6 +208,9 @@ public static function isValidTermLabel($defs, $defs_nonsel, $label, $dtyID, $is
 
     if(count($allowed_labels)>0){
         $term_ID = array_search($label, $allowed_labels, true);
+        if(!($term_ID>0)){
+            $term_ID = array_search($label, $allowed_labels_plain, true);
+        }
     }else{
         return false;
         //$term_ID = getTermByLabel($label); //db_structure
