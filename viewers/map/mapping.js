@@ -1400,7 +1400,8 @@ $.widget( "heurist.mapping", {
             }
             def_style = this.setStyleDefaultValues(def_style, true);
         }else{
-            def_style = {iconType:'rectype', color:'#00b0f0', fillColor:'#00b0f0', weight:3, opacity:1, 
+            //'#00b0f0' - lighy blue
+            def_style = {iconType:'rectype', color:'#ff0000', fillColor:'#ff0000', weight:3, opacity:1, 
                     fillOpacity:0.2, iconSize:18, stroke:true, fill:true};
         }
         
