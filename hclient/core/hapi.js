@@ -764,15 +764,16 @@ prof =Profile
                     lt=='DigitalHarlem' || lt=='DigitalHarlem1935' || lt=='WebSearch' )){
 
                     var version_in_cache = window.hWin.HAPI4.get_prefs_def('version_in_cache', null); 
+                    var need_exit = false;
 
                     //
                     // version of code to compare with server provided - to avoid caching issue
                     //
                     if(window.hWin.HAPI4.has_access() && window.hWin.HAPI4.sysinfo['version']){
                         if(version_in_cache){
-                            var res = window.hWin.HEURIST4.util.versionCompare(version_in_cache, 
-                                window.hWin.HAPI4.sysinfo['version']);   
-                            if(res<0){ // -1=older code in cache, -2=newer code in cache, +1=same code version in cache
+                            need_exit = (window.hWin.HEURIST4.util.versionCompare(version_in_cache, 
+                                window.hWin.HAPI4.sysinfo['version'])<0);   
+                            if(need_exit){ // -1=older code in cache, -2=newer code in cache, +1=same code version in cache
                                 // show lock popup that forces to clear cache
                                 window.hWin.HEURIST4.msg.showMsgDlgUrl(window.hWin.HAPI4.baseURL+'hclient/widgets/dropdownmenus/versionCheckMsg.html',
                                     {}/* no buttons */,null,
@@ -782,10 +783,10 @@ prof =Profile
                                             $dlg.find('#version_cache').text(version_in_cache);
                                             $dlg.find('#version_srv').text(window.hWin.HAPI4.sysinfo['version']);
                                 }});
-                                return true;
                             }
                         }
-                        window.hWin.HAPI4.save_pref('version_in_cache', window.hWin.HAPI4.sysinfo['version']); 
+                        window.hWin.HAPI4.save_pref('version_in_cache', window.hWin.HAPI4.sysinfo['version']);
+                        if(need_exit) return true;
 
                         var res = window.hWin.HEURIST4.util.versionCompare(window.hWin.HAPI4.sysinfo.db_version_req, 
                             window.hWin.HAPI4.sysinfo.db_version);   
