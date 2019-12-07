@@ -53,11 +53,11 @@
     require_once (dirname(__FILE__).'/../dbaccess/db_recsearch.php');
     require_once (dirname(__FILE__).'/../dbaccess/utils_db.php');
     require_once (dirname(__FILE__).'/../structure/dbsTerms.php');
-    require_once(dirname(__FILE__).'/../../common/php/Temporal.php');
-    require_once(dirname(__FILE__).'/../../admin/verification/verifyValue.php');
+    require_once (dirname(__FILE__).'/../../common/php/Temporal.php');
+    require_once (dirname(__FILE__).'/../../admin/verification/verifyValue.php');
 
     require_once (dirname(__FILE__).'/../../vendor/autoload.php'); //for geoPHP
-    require_once(dirname(__FILE__).'/../../viewers/map/Simplify.php');
+    require_once (dirname(__FILE__).'/../../viewers/map/Simplify.php');
     
     
     $response = array();
@@ -692,11 +692,14 @@ function output_CSV($system, $data, $params){
 //
 // output records as json or xml 
 //
+// $data - recordSearch response
+//
 // $parmas 
 //    format - json|geojson|xml|gephi
 //    defs  0|1  include database definitions
 //    file  0|1
 //    zip   0|1
+//    depth 0|1|2|...all  
 //
 // @todo if output if file and zip - output datatabase,defintions and records as separate files
 //      split records by 1000 entries chunks
@@ -711,9 +714,9 @@ function output_Records($system, $data, $params){
 
     $data = $data['data'];
     
-    if(@$data['memory_warning']){
+    if(@$data['memory_warning']){ //memory overflow in recordSearch
         $records = array(); //@todo
-    }else if(!(@$data['reccount']>0)){
+    }else if(!(@$data['reccount']>0)){   //empty response
         $records = array();
     }else{
         $records = $data['records'];
@@ -724,7 +727,7 @@ function output_Records($system, $data, $params){
     
     $error_log = array();
     $error_log[] = 'Total rec count '.count($records);
-
+    
     $tmp_destination = tempnam(HEURIST_SCRATCHSPACE_DIR, "exp");    
     //$fd = fopen('php://temp/maxmemory:1048576', 'w');  //less than 1MB in memory otherwise as temp file 
     $fd = fopen($tmp_destination, 'w');  //less than 1MB in memory otherwise as temp file 
@@ -837,9 +840,20 @@ XML;
     }else{
         $retrieve_fields = null;
     }
+
+    //
+    //
+    //    
+    if(@$params['depth']){
+        $max_depth = (@$params['depth']=='all') ?9999:intval(@$params['depth']);
+    }
+    if($max_depth>0){
+        //search direct and reverse links 
+        recordSearchRelatedIds($system, $records, 0, 0, $max_depth);
+    }
     
     $idx = 0;
-    while ($idx<count($records)){
+    while ($idx<count($records)){   //loop by record ids
     
         $recID = $records[$idx];
         $idx++;
@@ -878,6 +892,7 @@ XML;
                 fwrite($fd, $comma.json_encode($record)); //as is
             }
             $comma = ',';
+            
         }else if($params['format']=='gephi'){ 
             
             $name   = htmlspecialchars($record['rec_Title']);                               

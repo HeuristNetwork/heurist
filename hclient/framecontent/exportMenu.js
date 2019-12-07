@@ -265,14 +265,37 @@ function hexportMenu() {
             
             var script; 
             var params = '';
+            if($('#followPointers').is(':checked')){
+
+                if(opts.ignoreFollowPointers!==true){
+                window.hWin.HEURIST4.msg.showMsgDlg(
+'<p>The records you are exporting contain pointers to other records which are not in your current results set. These records may additionally point to other records.</p>'                
++'<p>Heurist follows the chain of related records, which will be included in the XML or JSON output.</p>'
++'<p>To disable this feature and eport current result only uncheck "Follow pointers"</p>'
++'<p>Continue?"</p>',
+                    function(){ opts.ignoreFollowPointers=true; _exportRecords( opts ); });
+                    
+                    return;
+                }
+
+                
+                
+                
+                params =  'depth=all';
+            }else{
+                params =  'depth='+(opts.includeRelated?1:0);
+            }
+            
+            
             if(opts.format=='hml'){
                 script = 'export/xml/flathml.php';                
-                params =  'depth='+(opts.includeRelated?1:0)
-                          + (opts.multifile?'&multifile=1':'');    
+                
+                //multifile is for HuNI  
+                params =  params + (opts.multifile?'&multifile=1':'');  
                
             }else{
                 script = 'hsapi/controller/record_output.php';
-                params = 'format='+opts.format+'&defs=0&extended='+($('#extendedJSON').is(':checked')?2:1);
+                params = params + '&format='+opts.format+'&defs=0&extended='+($('#extendedJSON').is(':checked')?2:1);
             }
             
             if(opts.save_as_file){          

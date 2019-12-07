@@ -382,7 +382,14 @@ if (!isset($SELIDS_FILTERS)) {
     $selectedIDs = array_keys($selectedIDs);
 }
 
-$MAX_DEPTH = (@$_REQUEST['depth'] ? intval($_REQUEST['depth']) : (count(array_merge(array_keys($PTRTYPE_FILTERS), array_keys($RELTYPE_FILTERS), array_keys($RECTYPE_FILTERS), array_keys($SELIDS_FILTERS))) > 0 ? max(array_merge(array_keys($PTRTYPE_FILTERS), array_keys($RELTYPE_FILTERS), array_keys($RECTYPE_FILTERS), array_keys($SELIDS_FILTERS))) : 0)); // default to only one level
+if(@$_REQUEST['depth']=='all'){
+    $MAX_DEPTH = 9999;    
+}else{
+    $MAX_DEPTH = (@$_REQUEST['depth'] ? intval($_REQUEST['depth']) 
+            : (count(array_merge(array_keys($PTRTYPE_FILTERS), array_keys($RELTYPE_FILTERS), array_keys($RECTYPE_FILTERS), 
+                array_keys($SELIDS_FILTERS))) > 0 ? max(array_merge(array_keys($PTRTYPE_FILTERS), array_keys($RELTYPE_FILTERS), 
+                array_keys($RECTYPE_FILTERS), array_keys($SELIDS_FILTERS))) : 0)); // default to only one level
+}
 
 
 // handle special case for collection where ids are stored in teh session.

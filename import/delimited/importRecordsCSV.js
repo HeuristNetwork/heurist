@@ -4065,7 +4065,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 + (to_be_inserted>0 ?'created ':'')
                 + (both_insert_and_update?' or ':'')
                 + (to_be_updated>0 ?'updated':'')
-                + (to_be_inserted>0 ?'. Since new records are to be created, make sure you select all relevant columns; '
+                + (to_be_inserted>0 && $('#sa_insert').prop('checked') 
+                        ?'. Since new records are to be created, make sure you select all relevant columns; '
                                 +'all Required fields should be mapped to a column.':'');
                 
                 shelp = shelp + '<br><br>Note that no changes are made to the database when you click the Prepare button.';

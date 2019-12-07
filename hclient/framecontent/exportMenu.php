@@ -85,9 +85,11 @@ require_once(dirname(__FILE__)."/initPage.php");
                 title="Generate JSON for current set of search results (current query)">
                 <span class="ui-icon ui-icon-extlink export-popup"></span><span class="export-popup" style="padding-right:10px">feed</span>
                 JSON</a>
-           <label><input type="checkbox" id="extendedJSON" checked/>&nbsp;&nbsp;Include concept codes and names</label>  
+           <label style="font-size:smaller;"><input type="checkbox" id="extendedJSON" checked/>&nbsp;&nbsp;Include concept codes and names</label>  
 
-           <div class="prompt" style="font-style: italic;padding-left:110px;width:400px">XML and JSon exported from a registered Heurist database can be imported directly into any other Heurist database even if the structure is different. Use this to migrate selected or complete data, including between different servers.</div>
+           <div class="prompt" style="font-style: italic;padding-left:110px;width:400px">
+                XML and JSon exported from a registered Heurist database can be imported directly into any other Heurist database even if the structure is different. Use this to migrate selected or complete data, including between different servers.
+           </div>
         </div>
 
         <br>
@@ -132,6 +134,8 @@ require_once(dirname(__FILE__)."/initPage.php");
         </div>
         
         <br>
+        <div style="padding-left:108px;font-size:smaller"><label><input type="checkbox" id="followPointers" checked/>Follow all pointers</label></div>
+        
         <div class="heurist-prompt" style="padding:6px">
             Allow popup window in your browser preferences
         </div>

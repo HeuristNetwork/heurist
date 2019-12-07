@@ -413,6 +413,74 @@
          }
          return $params;
     }
+
+    /**
+    * search all related (links and releationship) records for given set of records
+    * it searches links recursively and adds found records into original array
+    * 
+    * @param mixed $system
+    * @param mixed $ids
+    * @param mixed $direction  -  1 direct/ -1 reverse/ 0 both
+    */
+    function recordSearchRelatedIds($system, &$ids, $direction=0, $depth=0, $max_depth=1, $new_level_ids=null){
+        
+        if($depth>=$max_depth) return;
+        
+        if($new_level_ids==null) $new_level_ids = $ids;
+        
+        if(!($direction==1||$direction==-1)){
+            $direction = 0;
+        }
+        
+        //$links = recordSearchRelated($system, $ids, $direction, false);
+        $mysqli = $system->get_mysqli();
+        
+        $res1 = null; $res2 = null;
+        
+        if($direction>=0){
+            //find all target related records
+            $query = 'SELECT rl_TargetID FROM recLinks where rl_SourceID in ('
+                                               .implode(',',$new_level_ids).')';
+            $res = $mysqli->query($query);
+            if ($res){
+                $res1 = array();
+                while ($row = $res->fetch_row()){
+                    $id = intval($row[0]);     
+                    if(!in_array($id, $ids)) array_push($res1, $id);
+                }
+                $res->close();
+            }
+        }
+        
+        if($direction<=0){
+            $query = 'SELECT rl_SourceID FROM recLinks where rl_TargetID in ('
+                                               .implode(',',$new_level_ids).')';
+            $res = $mysqli->query($query);
+            if ($res){
+                $res2 = array();
+                while ($row = $res->fetch_row()){
+                    $id = intval($row[0]);     
+                    if(!in_array($id, $ids)) array_push($res2, $id);
+                }
+                $res->close();
+            }
+        }
+        
+        if(is_array($res1) && is_array($res2)){
+            $res = array_merge_unique($res1, $res2);
+        }else if(is_array($res1) && count($res1)>0){
+            $res = $res1;
+        }else{
+            $res = $res2;
+        }
+        
+        //find new level
+        if(is_array($res) && count($res)>0){
+            $ids = array_merge_unique($ids, $res);
+            recordSearchRelatedIds($system, $ids, $direction, $depth+1, $max_depth, $res);
+        }
+        return;    
+    }
     
     /**
     * Finds all related record IDs for given set record IDs
