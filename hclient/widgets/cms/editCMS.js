@@ -22,7 +22,8 @@ function editCMS( options ){
     var home_page_record_id = options.record_id,
         header_or_content_field_id = options.field_id, //to open editor of specific field for edit_input
         main_callback = options.callback,
-        webpage_title = options.webpage_title;
+        webpage_title = options.webpage_title,
+        webpage_private = (options.webpage_private==true);
     
     var RT_CMS_HOME = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME'],
      RT_CMS_MENU = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'],
@@ -175,7 +176,7 @@ function editCMS( options ){
     };    
 
     //
-    // creare set of website records (if new), otherwise proceed to _initWebSiteEditor
+    // create set of website records (if new), otherwise proceed to _initWebSiteEditor
     //
     function onDialogInit(){
         
@@ -204,11 +205,12 @@ function editCMS( options ){
                 var request = { action: 'import_records',
                     filename: isWebPage?'webpageStarterRecords.xml':'websiteStarterRecords.xml',
                     is_cms_init: 1,
+                    is_cms_public: (webpage_private===true)?0:1 ,
                     //session: session_id,
                     id: window.hWin.HEURIST4.util.random()
                 };
 
-                //create default set of records for website
+                //create default set of records for website see importController
                 window.hWin.HAPI4.doImportAction(request, function( response ){
                     
                     window.hWin.HEURIST4.msg.sendCoverallToBack();
@@ -236,6 +238,7 @@ function editCMS( options ){
                                 return;
                             }
                         }else{
+
                             window.hWin.HEURIST4.msg.showMsgDlg(
                             '<p>To save you time we have created a set of commonly used menu entries and web pages with dummy content.</p>'
                             +'<p>Please use <b>Menu &amp; pages</b> on the left to delete the menu entries you don\'t need or to rename them '

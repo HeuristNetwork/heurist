@@ -407,7 +407,7 @@ public static function importDefintions($filename, $session_id){
 //
 // $is_cms_init - if true this is creation of set of records for website - it adds info text for webpage content
 //
-public static function importRecords($filename, $session_id, $is_cms_init=false){
+public static function importRecords($filename, $session_id, $is_cms_init=false, $make_public=true){
     
     self::initialize();
     
@@ -446,7 +446,9 @@ public static function importRecords($filename, $session_id, $is_cms_init=false)
 <p> </p>
 EOD;
         }
-        
+        else{
+           $make_public = true;
+        }
 
         $mysqli = self::$system->get_mysqli();
     
@@ -606,7 +608,7 @@ EOD;
             
             
             $record['OwnerUGrpID'] = 1;
-            $record['NonOwnerVisibility'] = 'public';
+            $record['NonOwnerVisibility'] = ($make_public)?'public':'viewable';
             
             $record['details'] = array();
             
