@@ -124,13 +124,20 @@ if(!($rec_id>0)) $rec_id = @$_REQUEST['recid'];
 if(!($rec_id>0)) $rec_id = @$_REQUEST['id'];
 if(!($rec_id>0))
 {
+    
+    /*
+    if($system->has_access()){ //logged in 
+        recordGetOwnerVisibility
+    }
+    */
+    
     $rec_id = mysql__select_value($mysqli, 'select rec_ID from Records '
     .' WHERE rec_FlagTemporary=0 AND rec_NonOwnerVisibility="public" '
     .' AND rec_RecTypeID='.RT_CMS_HOME.' limit 1');
     
     if(!($rec_id>0)){
         //@todo find first record of 99-51 rectype
-        $message = 'Parameter recID not defined';
+        $message = 'Parameter recID not defined or this website is not yet publicly visible';
         include ERROR_REDIR;
         exit();
     }

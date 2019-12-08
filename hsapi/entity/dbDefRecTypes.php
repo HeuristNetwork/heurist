@@ -468,11 +468,21 @@ WHERE
             $query = 'SELECT r0.rec_ID '
                 .'FROM Records r0 WHERE (not r0.rec_FlagTemporary) '
                 .'AND (r0.rec_NonOwnerVisibility!="public") '
-                .'AND (r0.rec_RecTypeID in ('.RT_CMS_HOME.','.RT_CMS_MENU.'))';
+                .'AND (r0.rec_RecTypeID='.RT_CMS_HOME.')';
 
             $res2 = mysql__select_list2($this->system->get_mysqli(), $query);
+            if($res2==null) $res2 = array();
             
-            $res = array('all'=>$res, 'private'=>$res2);
+            $query = 'SELECT r0.rec_ID '
+                .'FROM Records r0 WHERE (not r0.rec_FlagTemporary) '
+                .'AND (r0.rec_NonOwnerVisibility!="public") '
+                .'AND (r0.rec_RecTypeID='.RT_CMS_MENU.')';
+
+            $res3 = mysql__select_list2($this->system->get_mysqli(), $query);
+            if($res3==null) $res3 = array();
+            
+            $res = array('all'=>$res, 'private_home'=>count($res2), 'private_menu'=>count($res3), 
+                'private'=>array_merge($res2, $res3));
             
         }
         

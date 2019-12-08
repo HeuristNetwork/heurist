@@ -278,12 +278,21 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                         var aPriv = response.data['private'];
 
                         if(aPriv.length>0){
+                            var cnt_home = response.data['private_home'];
+                            var cnt_menu = response.data['private_menu'];
+                            
                             that.sMsgCmsPrivate = 
-                            '<div class="ui-state-error" style="margin-top:10px;padding:4px">'
-                            +'This database has '+aPriv.length
+                            '<div style="margin-top:10px;padding:4px">'
+                            
++((cnt_home>0)?('<p>Note: There are '+cnt_home+' non-public CMS website records. These websites are not visible to the public.</p>'):'')                            
++((cnt_menu>0)?('<p>Warning: There are '+cnt_menu+' non-public CMS menu/page records. Database login is required to see these pages in the website.'):'')                            
+                            
+                            /*+'This database has '+aPriv.length
                             +' CMS records which are hidden from public view - '
                             +'parts of your website(s) will not be visible to visitors '
-                            +'who are not logged in to the database.<br><br>'
+                            +'who are not logged in to the database'*/
+                            
+                            +'<br>'
                             +'<a target="_blank" href="'+window.hWin.HAPI4.baseURL
                             +'?db='+window.hWin.HAPI4.database+'&q=ids:'+aPriv.join(',')+'">Click here</a>'
                             +' to view these records and set their visibility '
@@ -713,31 +722,39 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
 
         }else if(action == "menu-cms-create"){
 
-                var RT_CMS_HOME = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME'];
-                
-                that._getCountWebSiteRecords(function(){
-                    
-                    if(RT_CMS_HOME>0 && that.cms_home_records_count>0){
-                        
-                        sMsg = 'You already have '+
-                            ((that.cms_home_records_count==1)?'a website'
-                                    :(that.cms_home_records_count+' websites'))+
-                            '. Are you sure you want to create an additional site?';
-                            
-                        if(that.sMsgCmsPrivate!=''){
-                            sMsg = sMsg + that.sMsgCmsPrivate;    
-                        }
-                            
-                    }else{
-                        sMsg = 'Are you sure you want to create a site?';
+            var RT_CMS_HOME = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME'];
+
+            that._getCountWebSiteRecords(function(){
+
+                if(RT_CMS_HOME>0 && that.cms_home_records_count>0){
+
+                    sMsg = 'You already have '+
+                    ((that.cms_home_records_count==1)?'a website'
+                        :(that.cms_home_records_count+' websites'))+
+                    '. Are you sure you want to create an additional site?';
+
+                    if(that.sMsgCmsPrivate!=''){
+                        sMsg = sMsg + that.sMsgCmsPrivate;    
                     }
-                    
-                    window.hWin.HEURIST4.msg.showMsgDlg(sMsg,
-                            function(){ window.hWin.HEURIST4.ui.showEditCMSDialog( -1 ); });
-                    
+
+                }else{
+                    sMsg = 'Are you sure you want to create a site?';
                 }
-                );
-                
+
+                sMsg = sMsg 
+                + '<p>Check the box if you wish to keep your website private '
+                + '<br><input type="checkbox"> hide website (can be changed later)</p>';
+
+                var $dlg = window.hWin.HEURIST4.msg.showMsgDlg(sMsg,
+                    function(){ 
+                        var chb = $dlg.find('input[type="checkbox"]');
+                        var is_private = chb.is(':checked');
+                        window.hWin.HEURIST4.ui.showEditCMSDialog({record_id:-1, webpage_private:is_private}); 
+                    },'New website');
+
+                }
+            );
+
 
         }else if(action == "menu-cms-edit"){
 
@@ -748,7 +765,8 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                         
                         if(that.sMsgCmsPrivate!=''){
                             var $dlg = window.hWin.HEURIST4.msg.showMsgDlg(that.sMsgCmsPrivate,
-                               {Continue:function(){ $dlg.dialog('close'); that._select_CMS_Home( false ); }});
+                               {Continue:function(){ $dlg.dialog('close'); that._select_CMS_Home( false ); }},
+                               'Non-public website records');
                         }else{
                             that._select_CMS_Home( false );    
                         }
@@ -770,7 +788,8 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                         
                         if(that.sMsgCmsPrivate!=''){
                             var $dlg = window.hWin.HEURIST4.msg.showMsgDlg(that.sMsgCmsPrivate,
-                               {Continue:function(){ $dlg.dialog('close'); that._select_CMS_Home( true ); }});
+                               {Continue:function(){ $dlg.dialog('close'); that._select_CMS_Home( true ); }},
+                               'Non-public website records');
                         }else{
                             that._select_CMS_Home( true );
                         }

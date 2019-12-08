@@ -648,7 +648,39 @@
         }
         
     }
-    
+
+    //
+    //  returns SQL owner/visibility conditions for given user/group
+    //    
+    function recordGetOwnerVisibility($system, $ugrID){
+        
+        $is_db_owner = ($ugrID==2);
+        
+        $where2 = '';
+        
+        if(!$is_db_owner){
+        
+            $where2 = '(rec_NonOwnerVisibility="public")'; // in ("public","pending")
+            
+            if($ugrID>0){ //logged in 
+                $mysqli = $system->get_mysqli();
+                $wg_ids = user_getWorkgroups($this->mysqli, $ugrID);
+                array_push($wg_ids, $ugrID);
+                array_push($wg_ids, 0); // be sure to include the generic everybody workgroup
+                
+                //$this->from_clause = $this->from_clause.' LEFT JOIN usrRecPermissions ON rcp_RecID=r0.rec_ID ';
+                
+                $where2 = $where2.' OR (rec_NonOwnerVisibility="viewable")'; 
+                // and (rcp_UGrpID is null or rcp_UGrpID in ('.join(',', $wg_ids).')))';
+                                
+                $where2 = '( '.$where2.' OR rec_OwnerUGrpID in (' . join(',', $wg_ids).') )';
+            }
+        }
+        
+        return $where2;
+        
+    }
+   
     //
     // returns only first relationship type ID for 2 given records
     //
