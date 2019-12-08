@@ -70,9 +70,12 @@ $.widget( "heurist.svs_list", {
         if(!window.hWin.HEURIST4.util.isArrayNotEmpty(this.options.allowed_svsIDs))
             this._setOptionFromUrlParam('allowed_svsIDs', 'searchIDs');
 
-        var isPublished = (this.options.searchTreeMode>=0);
+        var isPublished = window.hWin.HEURIST4.util.isArrayNotEmpty(this.options.allowed_UGrpID)
+            || window.hWin.HEURIST4.util.isArrayNotEmpty(this.options.allowed_svsIDs)
+            || (this.options.searchTreeMode>=0);
             
         if( isPublished ){
+            if(!(this.options.searchTreeMode>=0)) this.options.searchTreeMode = 0;
             this.options.buttons_mode = (this.options.searchTreeMode==0);
         }
             
@@ -1764,7 +1767,7 @@ $.widget( "heurist.svs_list", {
                         svs_ID: svs_ID,
                         query_name:qname, 
                         params:params, 
-                        showresetbutton:this.options.showresetbutton,
+                        showresetbutton:(this.options.showresetbutton!==false),
                         search_realm:this.options.search_realm};
                     
                     
