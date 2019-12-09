@@ -96,7 +96,7 @@
 &lt;td style=&quot;width: 22.3844&#37;;&quot;&gt;
 &lt;div id=&quot;mywidget_4743&quot; class=&quot;mceNonEditable&quot; style=&quot;background: white; position: relative; top: 0px; border: px solid gray; height: 100&#37;; width: 100&#37;;&quot; data-heurist-app-id=&quot;heurist_SearchTree&quot;&gt;
 &lt;div class=&quot;widget-design-header&quot; style=&quot;padding: 10px;&quot;&gt;&lt;img style=&quot;vertical-align: middle;&quot; src=&quot;https://heuristplus.sydney.edu.au/h5-alpha/hclient/assets/h4_icon_35x35.png&quot; height=&quot;22&quot; /&gt; &lt;strong&gt;saved searches&lt;/strong&gt;&lt;a class=&quot;edit&quot; style=&quot;padding: 0 10px;&quot; title=&quot;Click to edit&quot; href=&quot;#&quot;&gt;edit&lt;/a&gt;  &lt;a class=&quot;remove&quot; href=&quot;#&quot;&gt;remove&lt;/a&gt; height: 100&#37; width: 100&#37;&lt;/div&gt;
-&lt;span class=&quot;widget-options&quot; style=&quot;font-style: italic; display: none;&quot;&gt;{&quot;buttons_mode&quot;:true,&quot;allowed_UGrpID&quot;:&quot;3&quot;,&quot;init_at_once&quot;:true,&quot;search_realm&quot;:&quot;sr1&quot;}&lt;/span&gt;&lt;/div&gt;
+&lt;span class=&quot;widget-options&quot; style=&quot;font-style: italic; display: none;&quot;&gt;{&quot;buttons_mode&quot;:true,&quot;allowed_UGrpID&quot;:&quot;1&quot;,&quot;init_at_once&quot;:true,&quot;search_realm&quot;:&quot;sr1&quot;}&lt;/span&gt;&lt;/div&gt;
 &lt;/td&gt;
 &lt;td style=&quot;width: 46.8701&#37;;&quot;&gt;
 &lt;div id=&quot;mywidget_5097&quot; class=&quot;mceNonEditable&quot; style=&quot;background: white; position: relative; border: 0px solid gray; height: 600px; width: 100&#37;;&quot; data-heurist-app-id=&quot;heurist_Map&quot;&gt;

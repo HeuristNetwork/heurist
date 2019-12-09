@@ -1004,9 +1004,10 @@ function hCmsEditing(_options) {
                             
                         });
                        var selval = __getSearchTreeMode();
-                       if(!(selval==0 || selval==1 || selval==2)){
+                       if(window.hWin.HEURIST4.util.isempty(selval)
+                            || !(selval==0 || selval==1 || selval==2)){
                            selval = 0;
-                           ele_rb.value(0);
+                           dele.find('#heurist_SearchTreeMode1').prop('checked',true);
                        }
                        
                        
