@@ -483,7 +483,7 @@ EOD;
         
         $dbsource_is_registered = (@$data['heurist']['database']['id']>0);
                             
-        if(defined('HEURIST_DBID')){ //registered
+        if(defined('HEURIST_DBID')){ //target is registered
             $dbsource_is_same = ( !$dbsource_is_registered || 
                             @$data['heurist']['database']['id']==HEURIST_DBID);
         }else{
@@ -725,10 +725,11 @@ EOD;
                             $file_entity->setRecords(null);
                             $dtl_UploadedFileID = $file_entity->save();   //it returns ulf_ID
                            
-                       }else if(!$dbsource_is_same) { //do not copy file for the same database
+                       }else if(!$dbsource_is_same || !defined('HEURIST_DBID')) { //do not copy file for the same database
+                       
                             //download to scratch folder
                             $tmp_file = HEURIST_SCRATCH_DIR.$value['ulf_OrigFileName'];
-                            
+                            //source on the same server as target
                             if(strpos($source_url, HEURIST_SERVER_URL)===0 && @$value['fullPath'])
                             {
                                 if (file_exists(HEURIST_FILESTORE_ROOT.$source_db.'/'.$value['fullPath'])) {
@@ -737,6 +738,7 @@ EOD;
                             }
                             else
                             {
+                                //$fileURL = @$value['url'];
                                 $remote_path = $file_URL = $source_url.'?db='.$source_db
                                         .'&file='.$value['ulf_ObfuscatedFileID']; //download
                                 saveURLasFile($remote_path, $tmp_file);
