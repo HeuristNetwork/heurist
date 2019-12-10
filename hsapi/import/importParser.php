@@ -959,6 +959,5 @@ public static function simpleCsvParser($params){
     
 }
 
-
 } //end class
 ?>

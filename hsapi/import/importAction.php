@@ -981,9 +981,9 @@ public static function validateImport($params) {
             }
             if($field_name1 && $field_name2){
                 array_push($query_num, $field_name1);
-                array_push($query_num_where, "(NOT($field_name1 is null or $field_name1='') and NOT($field_name1 REGEXP ".$numeric_regex."))");
+                array_push($query_num_where, "(NOT($field_name1 is null or $field_name1='' or $field_name1='NULL') and NOT($field_name1 REGEXP ".$numeric_regex."))");
                 array_push($query_num, $field_name2);
-                array_push($query_num_where, "(NOT($field_name2 is null or $field_name2='') and NOT($field_name2 REGEXP ".$numeric_regex."))");
+                array_push($query_num_where, "(NOT($field_name2 is null or $field_name2='' or $field_name2='NULL') and NOT($field_name2 REGEXP ".$numeric_regex."))");
                 
                 //if UTM zone is not specified need validate for possible UTM values
                 // northing, easting
@@ -1022,17 +1022,17 @@ public static function validateImport($params) {
                     " defTerms $trm1 on ($trm1.trm_Code=$field_name OR "
                     ." $trm1.trm_Label=$field_name OR $trm1.trm_Label=SUBSTRING_INDEX($field_name,'.',-1))"
                     );
-                array_push($query_enum_where, "(".$trm1.".trm_Label is null and not ($field_name is null or $field_name=''))");
+                array_push($query_enum_where, "(".$trm1.".trm_Label is null and not ($field_name is null or $field_name='' or $field_name='NULL'))");
             }else if($ft_vals[$idx_fieldtype] == "resource"){
                 array_push($query_res, $field_name);
                 $trm1 = "rec".count($query_res);
                 array_push($query_res_join, " Records $trm1 on $trm1.rec_ID=$field_name ");
-                array_push($query_res_where, "(".$trm1.".rec_ID is null and not ($field_name is null or $field_name=''))");
+                array_push($query_res_where, "(".$trm1.".rec_ID is null and not ($field_name is null or $field_name='' or $field_name='NULL'))");
 
             }else if($ft_vals[$idx_fieldtype] == "float" ||  $ft_vals[$idx_fieldtype] == "integer") {
 
                 array_push($query_num, $field_name);
-                array_push($query_num_where, "(NOT($field_name is null or $field_name='') and NOT($field_name REGEXP ".$numeric_regex."))");
+                array_push($query_num_where, "(NOT($field_name is null or $field_name='' or $field_name='NULL') and NOT($field_name REGEXP ".$numeric_regex."))");
 
 
 
@@ -1041,12 +1041,12 @@ public static function validateImport($params) {
                 array_push($query_date, $field_name);
                 if($ft_vals[$idx_fieldtype] == "year"){
                     array_push($query_date_where, "(concat('',$field_name * 1) != $field_name "
-                        ."and not ($field_name is null or $field_name=''))");
+                        ."and not ($field_name is null or $field_name='' or $field_name='NULL'))");
                 }else{
                     array_push($query_date_where, "(str_to_date($field_name, '%Y-%m-%d %H:%i:%s') is null "
                         ."and str_to_date($field_name, '%d/%m/%Y') is null "
                         ."and str_to_date($field_name, '%d-%m-%Y') is null "
-                        ."and not ($field_name is null or $field_name=''))");
+                        ."and not ($field_name is null or $field_name='' or $field_name='NULL'))");
                 }
 
             }
@@ -1392,7 +1392,7 @@ private static function validateEnumerations($query, $imp_session, $fields_check
             foreach($values as $idx=>$r_value){
                 $r_value2 = trim_lower_accent($r_value);
           
-                if($r_value2!=''){
+                if($r_value2!='' && $r_value2!='null'){
 
                     $is_termid = false;
                     if(ctype_digit($r_value2)){ //value is numeric try to compare with trm_ID
@@ -1480,7 +1480,7 @@ private static function validateResourcePointers($mysqli, $query, $imp_session,
             $values = self::getMultiValues($row[$field_idx], $imp_session['csv_enclosure'], $imp_session['csv_mvsep']);
             foreach($values as $idx=>$r_value){
                 $r_value2 = trim($r_value);
-                if($r_value2!=""){
+                if(!($r_value2=='' || $r_value2=='NULL' || $r_value2<0)){        // && $r_value2>0
 
                     if (!VerifyValue::isValidPointer($dt_def[$idx_pointer_types], $r_value2, $dt_id ))
                     {//not found
@@ -1541,7 +1541,7 @@ private static function validateNumericField($mysqli, $query, $imp_session, $fie
             $newvalue = array();
             $values = self::getMultiValues($row[$field_idx], $imp_session['csv_enclosure'], $imp_session['csv_mvsep']);
             foreach($values as $idx=>$r_value){
-                if($r_value!=null && trim($r_value)!=""){
+                if($r_value!=null && trim($r_value)!='' && trim($r_value2)!='NULL'){
 
                     if(!is_numeric($r_value)){
                         $is_error = true;
@@ -1600,7 +1600,7 @@ private static function validateDateField($query, $imp_session, $fields_checked,
             $newvalue = array();
             $values = self::getMultiValues($row[$field_idx], $imp_session['csv_enclosure'], $imp_session['csv_mvsep']);
             foreach($values as $idx=>$r_value){
-                if($r_value!=null && trim($r_value)!=""){
+                if($r_value!=null && trim($r_value)!='' && trim($r_value)!='NULL'){
 
 
                     if( is_numeric($r_value) && ($r_value=='0' || intval($r_value)) ){
@@ -2245,7 +2245,7 @@ public static function performImport($params, $mode_output){
                                 $r_value = trim_lower_accent($r_value);
 
                                 
-                                if($r_value!=""){
+                                if($r_value!='' && $r_value!='null'){
 
                                     //value is numeric - check for trm_ID    
                                     if(ctype_digit($r_value)
@@ -2388,7 +2388,7 @@ public static function performImport($params, $mode_output){
 
                                 $value = trim($r_value);
 
-                                if($value!="") {
+                                if($value!='' && $value!='NULL') {
                                     if($fieldtype_type == "date") {
                                         //$value = strtotime($value);
                                         //$value = date('Y-m-d H:i:s', $value);
@@ -2397,6 +2397,8 @@ public static function performImport($params, $mode_output){
                                         $value = str_replace("\\r", "\r", $value);
                                         $value = str_replace("\\n", "\n", $value);
                                     }
+                                }else{
+                                    $value = null;
                                 }
                             }
 
