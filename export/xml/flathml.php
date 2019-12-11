@@ -163,7 +163,7 @@ if(!$intofile){
             if($rectype_templates){
                 $filename = 'Template_'.$_REQUEST['db'].'_'.date("YmdHis").'.hml';
             }else{
-                $filename = 'Export_'.$_REQUEST['db'].'_'.date("YmdHis").'.hml';    
+                $filename = 'Export_'.$_REQUEST['db'].'_'.date("YmdHis").'.xml';    
             }
 
             header('Content-disposition: attachment; filename='.$filename);

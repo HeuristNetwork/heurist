@@ -41,6 +41,13 @@ function hexportMenu() {
         parentdiv.find('li').addClass('ui-menu-item');
                 
        _initLinks(parentdiv);
+       
+       if( window.hWin.HAPI4.sysinfo.db_registeredid>0 ){
+            $('#divWarnAboutReg').hide();    
+       }else{
+            $('#divWarnAboutReg').show();    
+       }
+       
     }
     
     
@@ -236,6 +243,8 @@ function hexportMenu() {
 
         var q = "",
         layoutString,rtFilter,relFilter,ptrFilter;
+        
+        var isEntireDb = false;
 
         if(opts.isAll){
 
@@ -249,6 +258,10 @@ function hexportMenu() {
                     q = q + '&rules=' + encodeURIComponent(window.hWin.HEURIST4.current_query_request.rules);
                 }
                 */
+                        
+                isEntireDb = (window.hWin.HAPI4.currentRecordset && 
+                    window.hWin.HAPI4.currentRecordset.length()==window.hWin.HAPI4.sysinfo.db_total_records);
+                    
             }
 
         }else{    //selected only
@@ -267,21 +280,22 @@ function hexportMenu() {
             var params = '';
             if($('#followPointers').is(':checked')){
 
-                if(opts.ignoreFollowPointers!==true){
-                window.hWin.HEURIST4.msg.showMsgDlg(
-'<p>The records you are exporting contain pointers to other records which are not in your current results set. These records may additionally point to other records.</p>'                
-+'<p>Heurist follows the chain of related records, which will be included in the XML or JSON output. The total number of records exported will therefore exceed the results count indicated.</p>'
-+'<p>To disable this feature and eport current result only uncheck "Follow pointers"</p>'
-+'<p>Continue?"</p>',
-                    function(){ opts.ignoreFollowPointers=true; _exportRecords( opts ); });
-                    
-                    return;
+                if(isEntireDb){
+                    params =  'depth=0';
+                }else {
+                    if(opts.ignoreFollowPointers!==true){
+                        window.hWin.HEURIST4.msg.showMsgDlg(
+    '<p>The records you are exporting may contain pointers to other records which are not in your current results set. These records may additionally point to other records.</p>'                
+    +'<p>Heurist follows the chain of related records, which will be included in the XML or JSON output. The total number of records exported will therefore exceed the results count indicated.</p>'
+    +'<p>To disable this feature and export current result only uncheck "Follow pointers"</p>'
+    +'<p>Continue?</p>',
+                        function(){ opts.ignoreFollowPointers=true; _exportRecords( opts ); });
+                        
+                        return;
+                    }
+                    params =  'depth=all';
                 }
-
                 
-                
-                
-                params =  'depth=all';
             }else{
                 params =  'depth='+(opts.includeRelated?1:0);
             }

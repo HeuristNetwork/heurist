@@ -304,6 +304,9 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                         if($.isFunction(callback)) callback(that);
                     }
                 });
+        }else{
+            this.cms_home_records_count = 0;
+            if($.isFunction(callback)) callback(this);
         }   
     },
     
