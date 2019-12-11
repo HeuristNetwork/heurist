@@ -382,6 +382,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
 
     //
     // fill given element with error message and highlight it
+    // message - error message that overrides default message
     //
     checkLength: function( input, title, message, min, max ) {
         var message_text = window.hWin.HEURIST4.msg.checkLength2( input, title, min, max );

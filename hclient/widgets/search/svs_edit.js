@@ -393,7 +393,7 @@ function hSvsEdit(args) {
                         svs_ugrid = window.hWin.HAPI4.currentUser.ugr_ID;
                     }
 
-                    var bValid = window.hWin.HEURIST4.msg.checkLength( svs_name, "Name", message, 3, 64 );
+                    var bValid = window.hWin.HEURIST4.msg.checkLength( svs_name, "Name", null, 3, 64 );
 
                     if(bValid){
                         

@@ -413,7 +413,7 @@ $.widget( "heurist.search_faceted_wiz", {
             
                 var svs_name = this.step0.find('#svs_Name');
                 var message = this.step0.find('.messages');
-                var bValid = window.hWin.HEURIST4.msg.checkLength( svs_name, "Name", message, 3, 64 );
+                var bValid = window.hWin.HEURIST4.msg.checkLength( svs_name, "Name", null, 3, 64 );
                 if(!bValid){
                     svs_name.focus();
                     //window.hWin.HEURIST4.msg.showMsgFlash(window.hWin.HR("Define Saved search name"), 2000, "Required", svs_name);
@@ -425,7 +425,7 @@ $.widget( "heurist.search_faceted_wiz", {
                 }
                 
                 var svs_title = this.step0.find('#svs_Title');
-                bValid = window.hWin.HEURIST4.msg.checkLength( svs_title, 'Title', message, 0, 64 );
+                bValid = window.hWin.HEURIST4.msg.checkLength( svs_title, 'Title', null, 0, 64 );
                 if(!bValid){
                     svs_title.focus();                
                     return;
@@ -1556,7 +1556,7 @@ $.widget( "heurist.search_faceted_wiz", {
         var allFields = $dlg.find('input');
         allFields.removeClass( "ui-state-error" );
 
-        var bValid = window.hWin.HEURIST4.msg.checkLength( svs_name, "Name", message, 3, 64 );
+        var bValid = window.hWin.HEURIST4.msg.checkLength( svs_name, "Name", null, 3, 64 );
         if(!bValid){
             this._showStep(0);
             return false;

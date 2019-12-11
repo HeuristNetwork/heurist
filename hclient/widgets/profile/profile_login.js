@@ -97,7 +97,7 @@ function doLogin(isforsed){
 
                 if(isreset){
                     var rusername = $dlg.find('#reset_username');
-                    if(window.hWin.HEURIST4.msg.checkLength( rusername, "username", message, 1, 0 ))
+                    if(window.hWin.HEURIST4.msg.checkLength( rusername, "username", null, 1, 0 ))
                     {
                         window.hWin.HAPI4.SystemMgr.reset_password({username: rusername.val()}, function(response){
                             if(response.status == window.hWin.ResponseStatus.OK){
@@ -118,8 +118,8 @@ function doLogin(isforsed){
                         session_type = session_type.val();
                     }
 
-                    var bValid = window.hWin.HEURIST4.msg.checkLength( username, "username", message, 1 )
-                    && window.hWin.HEURIST4.msg.checkLength( password, "password", message, 1 );         //3,63
+                    var bValid = window.hWin.HEURIST4.msg.checkLength( username, "username", null, 1 )
+                    && window.hWin.HEURIST4.msg.checkLength( password, "password", null, 1 );         //3,63
 
                     if ( bValid ) {
 

@@ -1525,7 +1525,7 @@ map.data.addListener('mouseover', function(event) {
             var layer_name = $dlg_edit_layer.find("#layer_name");
             var message = $dlg_edit_layer.find('.messages');
 
-            var bValid = window.hWin.HEURIST4.msg.checkLength( layer_name, "Name", message, 1, 30 );
+            var bValid = window.hWin.HEURIST4.msg.checkLength( layer_name, "Name", null, 1, 30 );
 
             if(bValid){
 
@@ -1662,7 +1662,7 @@ map.data.addListener('mouseover', function(event) {
             var layer_name = $dlg_edit_layer.find("#layer_name");
             var message = $dlg_edit_layer.find('.messages');
 
-            var bValid = window.hWin.HEURIST4.msg.checkLength( layer_name, "Name", message, 1, 30 );
+            var bValid = window.hWin.HEURIST4.msg.checkLength( layer_name, "Name", null, 1, 30 );
 
             if(bValid){
                 var new_title =  layer_name.val();
