@@ -581,7 +581,8 @@ class DbRecUploadedFiles extends DbEntityBase
                 $fileinfo = pathinfo($tmp_name);
                 
                 $file = new \stdClass();
-                $file->original_name = $newname?$newname:$fileinfo['filename'];
+                //name with ext
+                $file->original_name = $newname?$newname:$fileinfo['basename']; //was filename
                 $file->name = $file->original_name;
                 $file->size = filesize($tmp_name); //fix_integer_overflow
                 $file->type = @$fileinfo['extension'];

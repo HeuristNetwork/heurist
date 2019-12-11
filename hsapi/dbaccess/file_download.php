@@ -99,6 +99,7 @@ if($db){
             $params = $fileinfo['ulf_Parameters'];  //ulf_Parameters - not used anymore (for backward capability only)
             $originalFileName = $fileinfo['ulf_OrigFileName'];
             $fileSize = $fileinfo['ulf_FileSizeKB'];
+            $fileExt = $fileinfo['ulf_MimeExt'];
 
             if( @$_REQUEST['mode']=='tag'){
                 
@@ -112,6 +113,21 @@ if($db){
 //DEBUG error_log($filepath.'  '.file_exists($filepath).'  '.$mimeType);  
               
                 if(file_exists($filepath)){
+                    
+                    //fix issue if original name is without ext
+                    if(@$_REQUEST['embed']!=1){
+                        $finfo = pathinfo($originalFileName);
+                        $ext = @$finfo['extension'];
+                        if($ext==null || $ext==''){
+                            $finfo = pathinfo($filepath); 
+                            if(@$finfo['extension']){
+                                $originalFileName = $originalFileName.'.'.@$finfo['extension'];   
+                            }else if($fileExt){
+                                $originalFileName = $originalFileName.'.'.$fileExt;   
+                            }
+                        }    
+                    }
+                    
                     downloadFile($mimeType, $filepath, @$_REQUEST['embed']==1?null:$originalFileName);
                 }else if($external_url){
 //DEBUG error_log('External '.$external_url);                
