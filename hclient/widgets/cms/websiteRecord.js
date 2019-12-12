@@ -689,6 +689,7 @@ function hCmsEditing(_options) {
                             cont.find('#menu_recIDs').editing_input('getValues') );
                 }
             
+                //find input elements and fill opts with values
                 cont.find('input').each(function(idx, item){
                     item = $(item);
                     if(item.attr('name')){
@@ -711,6 +712,18 @@ function hCmsEditing(_options) {
                     opts['reload_for_recordset'] = true;
                     opts['url'] = 'viewers/smarty/showReps.php?publish=1&debug=0&template='
                         +encodeURIComponent(opts['template'])+'&[query]';
+                }
+                
+                var selval = opts.searchTreeMode;
+                if(window.hWin.HEURIST4.util.isempty(opts.allowed_UGrpID)){ //groups are not defined
+                        
+                    if(selval==1){
+                          window.hWin.HEURIST4.msg.showMsgErr('For "tree" mode you have to select groups to be displayed');
+                          return false;
+                    }else if (window.hWin.HEURIST4.util.isempty(opts.allowed_svsIDs) && selval==0) { //individual searches are not defined
+                          window.hWin.HEURIST4.msg.showMsgErr('For "button" mode you have to select either groups or individual searches');
+                          return false;
+                    }
                 }
                 
             }
@@ -874,22 +887,26 @@ function hCmsEditing(_options) {
                     var widgetid = 'mywidget_'+window.hWin.HEURIST4.util.random();
                     var  content = __prepareWidgetDiv( widgetid, widgetid_edit );            
                     
-                    if(!window.hWin.HEURIST4.util.isempty(widgetid_edit)){  //edit
-                        /*  old way it does not activeate noneditable
-                        var ele = $(content).appendTo($('body'));
-                        tinymce.activeEditor.dom.replace( ele[0], tinymce.activeEditor.dom.get(widgetid_edit) );
-                        */
+                    if(content!==false){
                         
-                        tinymce.activeEditor.selection.select( tinymce.activeEditor.dom.get(widgetid_edit) );
-                        tinymce.activeEditor.insertContent(content);
-                        
-                    }else{  //replace
-                        tinymce.activeEditor.insertContent(content);
+                        if(!window.hWin.HEURIST4.util.isempty(widgetid_edit)){  //edit
+                            /*  old way it does not activeate noneditable
+                            var ele = $(content).appendTo($('body'));
+                            tinymce.activeEditor.dom.replace( ele[0], tinymce.activeEditor.dom.get(widgetid_edit) );
+                            */
+                            
+                            tinymce.activeEditor.selection.select( tinymce.activeEditor.dom.get(widgetid_edit) );
+                            tinymce.activeEditor.insertContent(content);
+                            
+                        }else{  //replace
+                            tinymce.activeEditor.insertContent(content);
+                        }
+                        __initWidgetEditLinks(widgetid); //activate edit/remove links
+                
+                        //var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();            
+                        $dlg.dialog( "close" );
                     }
-                    __initWidgetEditLinks(widgetid); //activate edit/remove links
-            
-                    //var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();            
-                    $dlg.dialog( "close" );
+                    
                 }; 
                 
         buttons[window.hWin.HR('Cancel')]  = function() {
