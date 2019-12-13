@@ -87,7 +87,7 @@
                 <creatorType label="Contributor" value="contributor" h3id="2-15"/>
                 <creatorType label="Editor" value="editor" h3id="3-1028.3-102.2-15.2-10.2-1"/>
                 <creatorType label="Series Editor" value="seriesEditor" h3id="3-1028.3-102.3-1018.3-104.3-1013.2-10.2-1"/>
-                <creatorType label="Translator" value="translator" />
+                <creatorType label="Translator" value="translator" h3id="2-15"/>
             </field>
         </typeMap>
 

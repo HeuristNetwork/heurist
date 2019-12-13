@@ -185,6 +185,7 @@ $rtDefines = array(
     'RT_RELATION' => array(2, 1),
     'RT_INTERNET_BOOKMARK' => array(2, 2),
     'RT_NOTE' => array(2, 3),
+    'RT_ORGANIZATION' => array(2, 4),
     'RT_MEDIA_RECORD' => array(2, 5),
     'RT_AGGREGATION' => array(2, 6),
     'RT_COLLECTION' => array(2, 6), // duplicate naming

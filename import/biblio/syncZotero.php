@@ -537,12 +537,16 @@ if($step=="1"){  //first step - info about current status
                             $key = @$mapping_dt[$ctype];
                             if(!$key) continue;
 
-                            if(!is_array($key)){
-                                $key = array($key, RT_PERSON, 0);
-                            }
-
                             $prop = 'name';
                             $title = @$creator->$prop;
+
+                            if(!is_array($key)){
+                                if(!$title){
+                                    $key = array($key, RT_PERSON, 0);
+                                }else{
+                                    $key = array($key, RT_ORGANIZATION, 0);
+                                }
+                            }
 
                             if(!$title){
                                 $prop = 'lastName';
