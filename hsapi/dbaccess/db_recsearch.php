@@ -189,7 +189,9 @@
 
             if($dt_type=="date"){
 
-                    $details_where = $details_where." AND (cast(getTemporalDateString(".$select_field.") as DATETIME) is not null  OR cast(getTemporalDateString(".$select_field.") as SIGNED) is not null)";
+                    $details_where = $details_where.' AND (cast(getTemporalDateString('.$select_field.') as DATETIME) is not null '
+                    .'OR (cast(getTemporalDateString('.$select_field.') as SIGNED) is not null  AND '
+                        .'cast(getTemporalDateString('.$select_field.') as SIGNED) !=0) )';
                 
                     //for dates we search min and max values to provide data to slider
                     //@todo facet_groupby   by year, day, month, decade, century
