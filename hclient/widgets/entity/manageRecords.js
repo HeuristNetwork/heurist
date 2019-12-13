@@ -2107,7 +2107,7 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
                 
                 var ele = $('<div><div class="edit-button" style="background:#f48642 !important;margin: 40px auto;width:200px;padding:10px;border-radius:4px;">'
                             +'<h2 style="display:inline-block;color:white">View-only mode</h2>&nbsp;&nbsp;'
-                            +'<a href="#" style="color:white">edit</a><span><br>Not enough rights</span></div></div>')
+                            +'<a href="#" style="color:white">edit</a><span><br>click to dismiss</span></div></div>')
                        .addClass('coverall-div-bare')
                        .css({top:'30px', 'text-align':'center','zIndex':9999999999, height:'auto'}) //, bottom: '40px', 'background':'red'
                        .appendTo(dlged);
@@ -2135,6 +2135,9 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
                        
                 if(no_access){
                     ele.find('a').hide();
+                    ele.find('.edit-button').button().click(function(){
+                        ele.remove();
+                    });
                 }else{       
                     //find('a')
                     ele.find('.edit-button').button().click(function(){
