@@ -496,8 +496,6 @@
                 if(defined('DT_PARENT_ENTITY') && !$suppress_parent_child){
                     if(@$values['dtl_ParentChild']==true){
                         
-                        
-                        
                             // $dtl_Value  is id of child record 
                             $res = addReverseChildToParentPointer($mysqli, $dtl_Value, $recID, $addedByImport, false);
                             

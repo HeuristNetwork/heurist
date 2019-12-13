@@ -520,6 +520,8 @@ EOD;
         
         $def_dts  = $defs['detailtypes']['typedefs'];
         $idx_type = $def_dts['fieldNamesToIndex']['dty_Type'];
+        $def_rst  = $defs['rectypes']['typedefs'];
+        $idx_parent = $def_rst['dtFieldNamesToIndex']['rst_CreateChildIfRecPtr'];
         
         $file_entity = new DbRecUploadedFiles(self::$system, null);
         $file_entity->setNeedTransaction(false);
@@ -532,6 +534,8 @@ EOD;
         $keep_rectypes = array(); //keep rectypes for furhter rectitle update
         $recid_already_checked = array(); //keep verified H-ID resource records
         
+        $parent_child_links = array(); //keep parent_id => child_id
+        
         //term 
         $enum_fields = array(); //source rec id -> field type id -> field value (term label)
         $enum_fields_values = array(); //rectype -> field id -> value
@@ -539,6 +543,8 @@ EOD;
         $is_rollback = false;
         $keep_autocommit = mysql__begin_transaction($mysqli);    
         $mysqli->query('SET FOREIGN_KEY_CHECKS = 0');
+        
+        self::$system->defineConstant('DT_PARENT_ENTITY');
         
         foreach($records as $record_src){
             
@@ -565,7 +571,7 @@ EOD;
                 $cnt_ignored++;                
                 continue; 
             }
-        
+            
             // prepare records - replace all fields, terms, record types to local ones
             // keep record IDs in resource fields to replace them later
             $record = array();
@@ -637,6 +643,10 @@ EOD;
                     //@todo - add to report
                     continue;
                 }
+                if($dty_ID==DT_PARENT_ENTITY){ //ignore
+                    contunue;
+                }
+                
                 
                 $def_field = $def_dts[$ftId]['commonFields'];
                 
@@ -778,7 +788,12 @@ EOD;
                    if(!@$resource_fields[$record_src['rec_ID']][$ftId]){
                        $resource_fields[$record_src['rec_ID']][$ftId] = array();
                    }
+                   $is_parent = ($def_rst[$recTypeID]['dtFields'][$ftId][$idx_parent]==1);
+                   
                    foreach($values as $value){
+                       
+                       $resourse_id = null;
+                       
                        if(is_array($value)){
                            $value = $value['id'];    
                        }
@@ -786,7 +801,7 @@ EOD;
                            $value = substr($value,5);
                            
                            if($recid_already_checked[$value]){
-                               $new_values[] = $value;
+                               $resourse_id = $value;
                            }else
                            if(is_numeric($value) && $value>0){
                                //check existence
@@ -795,7 +810,7 @@ EOD;
                                         .$value)>0);
                                if($is_found){
                                    $recid_already_checked[]  = $value;
-                                   $new_values[] = $value;    
+                                   $resourse_id = $value;    
                                }else{
                                    $resource_notfound[] = $value;
                                }
@@ -813,7 +828,14 @@ EOD;
                                }
                            }
                            $resource_fields[$record_src['rec_ID']][$ftId][] = $value;    
-                           $new_values[] = $value;
+                           $resourse_id = $value;
+                       }
+                       
+                       if($resourse_id!=null){
+                           $new_values[] = $resourse_id;
+                           if($is_parent && $record_src['rec_ID']!=null){
+                               $parent_child_links[] = array('parent'=>$record_src['rec_ID'], 'child'=>$resourse_id);
+                           }
                        }
                        
                    }
@@ -834,10 +856,10 @@ EOD;
                 
                 if(count($new_values)>0)
                     $record['details'][$ftId] = $new_values; 
-            }
+            }//for details
             
             
-            //add original id
+            //keep original id
             if(defined('DT_ORIGINAL_RECORD_ID') && $record_src_original_id!=null){
                 if(!is_array(@$record['details'][DT_ORIGINAL_RECORD_ID])){
                     $record['details'][DT_ORIGINAL_RECORD_ID] = array();
@@ -965,6 +987,29 @@ EOD;
                             }
                         }//for
                     }
+                }//for
+            }
+            //create reverse child to parent links if required
+            if(!$is_rollback && count($parent_child_links)>0){
+                
+                foreach($parent_child_links as $idx=>$link){
+                    
+                    $parent_id = $link['parent'];
+                    $child_id = $link['child'];
+                    
+                    $child_id = @$records_corr[$child_id];
+                    $parent_id = @$records_corr[$parent_id];
+                    
+                    if($parent_id>0 && $child_id>0){
+                        $res = addReverseChildToParentPointer($mysqli, $child_id, $parent_id, 1, false);
+                                
+                        if($res<0){
+                            $syserror = $mysqli->error;
+                            self::$system->addError(HEURIST_DB_ERROR, 'Cannot insert reverse pointer for child record', $syserror);
+                            $is_rollback = true;
+                            break;   
+                        }   
+                    }             
                 }//for
             }
             if(!$is_rollback){ 
