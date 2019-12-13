@@ -463,7 +463,7 @@ WHERE
                 .'FROM Records r0 WHERE (not r0.rec_FlagTemporary) '
                 .'AND (r0.rec_RecTypeID='.RT_CMS_HOME.')';
             
-            $res = mysql__select_value($this->system->get_mysqli(), $query);
+            $res = mysql__select_value($this->system->get_mysqli(), $query); //total count
             
             $query = 'SELECT r0.rec_ID '
                 .'FROM Records r0 WHERE (not r0.rec_FlagTemporary) '
@@ -482,7 +482,7 @@ WHERE
             if($res3==null) $res3 = array();
             
             $res = array('all'=>$res, 'private_home'=>count($res2), 'private_menu'=>count($res3), 
-                'private'=>array_merge($res2, $res3));
+                'private'=>array_merge($res2, $res3), 'private_home_ids'=>$res2);
             
         }
         

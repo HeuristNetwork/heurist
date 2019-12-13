@@ -27,6 +27,7 @@ $.widget( "heurist.mainMenu", {
     
     menues:{},
     cms_home_records_count:0,
+    cms_home_private_records_ids:0,
     sMsgCmsPrivate:'',
 
     _current_query_string:'',
@@ -280,11 +281,19 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                         if(aPriv.length>0){
                             var cnt_home = response.data['private_home'];
                             var cnt_menu = response.data['private_menu'];
+                            var s1 = '';                          
+                            if(cnt_home>0){
+                                if(cnt_home==1){
+                                    that.cms_home_private_records_ids = response.data['private_home_ids'][0];
+                                    s1 = '<p>Note: CMS website record is non-public. This website is not visible to the public.</p>';        
+                                }else{
+                                    s1 = '<p>Note: There are '+cnt_home+' non-public CMS website records. These websites are not visible to the public.</p>';
+                                }
+                            }            
                             
                             that.sMsgCmsPrivate = 
                             '<div style="margin-top:10px;padding:4px">'
-                            
-+((cnt_home>0)?('<p>Note: There are '+cnt_home+' non-public CMS website records. These websites are not visible to the public.</p>'):'')                            
++s1                            
 +((cnt_menu>0)?('<p>Warning: There are '+cnt_menu+' non-public CMS menu/page records. Database login is required to see these pages in the website.'):'')                            
                             
                             /*+'This database has '+aPriv.length
@@ -306,6 +315,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                 });
         }else{
             this.cms_home_records_count = 0;
+            this.cms_home_private_records_ids = 0;
             if($.isFunction(callback)) callback(this);
         }   
     },
@@ -1440,10 +1450,12 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
             return;
         }
         
-        if(window.hWin.HEURIST4.rectypes.counts && window.hWin.HEURIST4.rectypes.counts[RT_CMS_HOME]==1){
+        if(this.cms_home_records_count==1){ 
+//window.hWin.HEURIST4.rectypes.counts && window.hWin.HEURIST4.rectypes.counts[RT_CMS_HOME]==1
 
             if(is_view_mode){
-                this._openCMS();
+                
+                this._openCMS( this.cms_home_private_records_ids );
             }else{
                 window.hWin.HEURIST4.ui.showEditCMSDialog( 0 ); //load the only entry at once
             }

@@ -164,6 +164,8 @@ if(!$hasAccess){
     exit();
 } 
 
+$showWarnAboutPublic = !$edit_Available && ($rec['rec_NonOwnerVisibility'] != 'public');
+
 $hasAccess = ($system->is_admin() || $system->is_member($rec['rec_OwnerUGrpID']));
 
 $site_owner = user_getDbOwner($mysqli); //info about user #2
@@ -704,7 +706,13 @@ if ($page_template!=null && substr($page_template,-4,4)=='.tpl') {
 //WEB PAGE - EMBED
 ?>
 <div class="ent_wrapper">
-    <div class="ent_content_full ui-heurist-bg-light" style="padding: 5px; top:0px" id="main-content-container">
+<?php
+    if($showWarnAboutPublic){
+        print '<div style="top:0;height:20px;position:absolute;text-align:center;width:100%;color:red;">Web page record is not public. It will not be visible to the public</div>';  
+    }
+?>
+    <div class="ent_content_full ui-heurist-bg-light" style="padding: 5px; top:<?php echo ($showWarnAboutPublic)?20:0; ?>px" 
+                    id="main-content-container">
         <div id="main-content" data-homepageid="<?php print $rec_id;?>" 
                                data-viewonly="<?php print ($hasAccess)?0:1;?>">
         </div>
@@ -720,6 +728,9 @@ if ($page_template!=null && substr($page_template,-4,4)=='.tpl') {
     <div id="main-header" class="ent_header ui-heurist-header2" <?php print $image_banner?'style="background-image:url(\''.$image_banner.'\');background-repeat: repeat-x;background-size:auto 170px;"':'' ?>>
     
 <?php
+    if($showWarnAboutPublic){
+      print '<div style="position: absolute;text-align: center;width: 100%;color: red;>Web site record is not public. It will not be visible to the public</div>';  
+    }
         
     $page_header = defined('DT_CMS_HEADER')?__getValue($rec, DT_CMS_HEADER, null):null; 
     if($page_header!=null && $page_header!=''){
