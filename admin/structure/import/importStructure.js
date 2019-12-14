@@ -976,7 +976,8 @@ $.widget( "heurist.importStructure", {
     //  MAIN METHOD
     //
     startImport: function(){
-
+        
+        
         this.panel_rty_structure.css({visibility:'hidden'});
         /*
         if(this.dlgRtTree) {
@@ -1001,7 +1002,7 @@ $.widget( "heurist.importStructure", {
                 var report = ''
                 
                 if( window.hWin.HEURIST4.util.isArrayNotEmpty(response.report.added) ){
-                    report = '<br>Added: ';
+                    report = 'Added: ';
                     for(idx in response.report.added){
                         report += (window.hWin.HEURIST4.rectypes.names[response.report.added[idx]]+', ');    
                     }
@@ -1012,7 +1013,7 @@ $.widget( "heurist.importStructure", {
                     for(idx in response.report.updated){
                         report += (window.hWin.HEURIST4.rectypes.names[response.report.updated[idx]]+', ');    
                     }
-                    report = report.substr(0,report.length-2)+'<br>';
+                    report = report.substr(0,report.length-2);
                 }
                 
                 /* Detail report

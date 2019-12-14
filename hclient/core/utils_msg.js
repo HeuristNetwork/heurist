@@ -316,9 +316,6 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         if(options.title){
             options.title = window.hWin.HR(options.title);
         }
-        if(!(options.height>0)){
-            options.height = 90;
-        }
 
         $.extend(options, {
             resizable: false,
@@ -339,11 +336,19 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         }
 
         $dlg.dialog(options);
+        
+        if(!(options.height>0)){
+            var height = $(content).height()+90;
+            //options.height = $(content).height();//90;
+            $dlg.dialog({height:height});
+        }
+           
+        
         content.position({ my: "center center", at: "center center", of: $dlg });
         
         //var hh = hideTitle?0:$dlg.parent().find('.ui-dialog-titlebar').height() + $dlg.height() + 20; 
         
-        $dlg.dialog("option", "buttons", null);      
+        //$dlg.dialog("option", "buttons", null);      
         
         if(hideTitle)
             $dlg.parent().find('.ui-dialog-titlebar').hide();
