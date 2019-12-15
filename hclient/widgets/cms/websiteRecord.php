@@ -164,6 +164,7 @@ if(!$hasAccess){
     exit();
 } 
 
+$edit_Available = (@$_REQUEST['edit']==1);
 $showWarnAboutPublic = !$edit_Available && ($rec['rec_NonOwnerVisibility'] != 'public');
 
 $hasAccess = ($system->is_admin() || $system->is_member($rec['rec_OwnerUGrpID']));
@@ -337,7 +338,7 @@ if(!array_key_exists('embed', $_REQUEST)){
     
 <?php
 }    
-$edit_Available = (@$_REQUEST['edit']==1);
+
 if($edit_Available){
 ?>
     <script src="<?php echo PDIR;?>external/tinymce/tinymce.min.js"></script>
@@ -372,7 +373,7 @@ _time_debug = new Date().getTime() / 1000;
     
     
     //reload home page content by click on logo
-    $( "#main-logo").click(function(event){
+    $("#main-logo").click(function(event){
               loadHomePageContent(<?php print $rec_id?>);
     });
     
@@ -729,7 +730,7 @@ if ($page_template!=null && substr($page_template,-4,4)=='.tpl') {
     
 <?php
     if($showWarnAboutPublic){
-      print '<div style="position: absolute;text-align: center;width: 100%;color: red;>Web site record is not public. It will not be visible to the public</div>';  
+      print '<div style="position: absolute;text-align: center;width: 100%;color: red;">Web site record is not public. It will not be visible to the public</div>';  
     }
         
     $page_header = defined('DT_CMS_HEADER')?__getValue($rec, DT_CMS_HEADER, null):null; 
