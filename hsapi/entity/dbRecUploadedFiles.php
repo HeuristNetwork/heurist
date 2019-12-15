@@ -429,7 +429,7 @@ class DbRecUploadedFiles extends DbEntityBase
                 }
             }
             
-            //if there is file to be ccopied                        
+            //if there is file to be copied                        
             if(@$this->records[$rec_idx]['ulf_TempFile']){ 
                     
                     $ulf_ID = $this->records[$rec_idx]['ulf_ID'];

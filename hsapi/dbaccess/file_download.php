@@ -12,6 +12,14 @@
 *   tag - returns html wrap iframe with embed player, video, audio or img tag 
 * size - width and height for html tag
 * 
+* Notes about thumbnails
+*    for uploaded file - thumbnail is created in 
+*           external/jquery-file-upload/server/UploadHandler.php create_scaled_image() 
+*           on time of uploading and after registration it is copied to our filethumbs folder
+*    for remote file - thumbnail is created on first request file_download.php?thumb=  it uses common/php/resizeImage.php
+*    if record has an rec_URL thumbnail is created with third-party snapshot generator see utils_file.php generate_thumbnail()
+* 
+* 
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
 * @copyright   (C) 2005-2019 University of Sydney
