@@ -225,7 +225,8 @@ $.widget( "heurist.search", {
         this.div_search_input = $('<div>')
         .addClass('div-table-cell')       
         .appendTo( this.div_search );
-        
+
+        //promt to be shown when input is empty        
         this.input_search_prompt = $( "<span>" )
         .text(this._is_publication?'':window.hWin.HR("enter search/filter or use filter builder at right"))
         .addClass('graytext')
@@ -237,7 +238,17 @@ $.widget( "heurist.search", {
                 this.input_search.focus()
         }} );
 
-        
+        //promt to be shown when input has complex search expression (json search)
+        this.input_search_prompt2 = $( "<span>" )
+        .html('<span>'+window.hWin.HR("Filter set")+'</span>&nbsp;&nbsp;<span class="ui-icon ui-icon-eye"/>')
+        .css({'font-size':'1.5em', 'width':'370', height:'20px','background':'#F4F2F4', 'padding':'10', 
+              'position': 'absolute'})
+        .appendTo( this.div_search_input );
+        this._on( this.input_search_prompt2, {click: function(){
+                this.input_search_prompt2.hide();
+                this.input_search.focus()
+        }} );
+
         this.input_search = $( "<textarea>" )
         .css({'margin-right':'0.2em', 'height':'41px', 
             'max-height':'70px',
@@ -253,6 +264,7 @@ $.widget( "heurist.search", {
         
         // AAAA
         this._on( this.input_search, {
+            click: function(){ this.input_search_prompt2.hide(); }, 
             keyup: this._showhide_input_prompt, 
             change: this._showhide_input_prompt
             });
@@ -845,6 +857,7 @@ $.widget( "heurist.search", {
     _showhide_input_prompt:function() {
                 if(this.input_search.val()==''){
                     this.input_search_prompt.show();    
+                    this.input_search_prompt2.hide();    
                 }else{
                     this.input_search_prompt.hide();     
                 }
@@ -1137,11 +1150,18 @@ $.widget( "heurist.search", {
                         qs = data.q;
                     }
 
-                    if(!window.hWin.HEURIST4.util.isempty(qs) && qs.length<10000){
-                        that.input_search.val(qs);
-                        that.options.search_domain = data.w;
-                        that.query_request = data;
-                        that._refresh();
+                    if(!window.hWin.HEURIST4.util.isempty(qs)){
+                        
+                        if(qs.length<10000){
+                            that.input_search.val(qs);
+                            that.options.search_domain = data.w;
+                            that.query_request = data;
+                            that._refresh();
+                        }
+                        if( true || window.hWin.HEURIST4.util.isJSON(data.q) || qs.length>100 ){
+                            that.input_search_prompt2.css({width:(that.input_search.width()-30),
+                                height:(that.input_search.height()-10)}).show();
+                        }
                     }
                 }
 
@@ -1748,6 +1768,9 @@ $.widget( "heurist.search", {
         }
         this.input_search.val(q);
         this.input_search.change();
+        
+        this.input_search_prompt2.css({width:(this.input_search.width()-30),
+                                height:(this.input_search.height()-10)}).show();
 
         e = window.hWin.HEURIST4.util.stopEvent(e);
     }
