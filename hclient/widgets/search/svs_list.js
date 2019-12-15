@@ -798,7 +798,10 @@ $.widget( "heurist.svs_list", {
             }
 
         }
-
+        else{
+            
+            $('<span style="padding:10px">No searches defined</span>').appendTo(this.accordeon);
+        }
         this.accordeon.show();
         
         //if the only search - start search at once
