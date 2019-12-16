@@ -89,7 +89,7 @@
     $search_params['w'] = @$params['w'];
     
     if(@$params['format']=='gephi'){
-        $search_params['limit'] = 1000;
+        $search_params['limit'] = (@$params['limit']>0)?$params['limit']:null;
     }else
     if(!(@$params['offset'] || @$params['limit'])){
         $search_params['needall'] = 1;  //search without limit of returned record count
@@ -849,7 +849,13 @@ XML;
     }
     if($max_depth>0){
         //search direct and reverse links 
-        recordSearchRelatedIds($system, $records, 0, 0, $max_depth);
+        if($params['format']=='gephi' && @$params['limit']>0){
+           $limit = $params['limit'];  
+        }else{
+           $limit = 0; 
+        }
+        
+        recordSearchRelatedIds($system, $records, 0, 0, $max_depth, $limit);
     }
     
     $idx = 0;

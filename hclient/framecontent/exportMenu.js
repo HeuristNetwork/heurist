@@ -310,6 +310,10 @@ function hexportMenu() {
             }else{
                 script = 'hsapi/controller/record_output.php';
                 params = params + '&format='+opts.format+'&defs=0&extended='+($('#extendedJSON').is(':checked')?2:1);
+                
+                if(opts.format=='gephi' && $('#limitGEPHI').is(':checked')){
+                    params = params + '&limit=1000';    
+                }
             }
             
             if(opts.save_as_file){          

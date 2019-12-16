@@ -121,11 +121,12 @@ require_once(dirname(__FILE__)."/initPage.php");
         <div id="menu-export-gephi" class="export-item">
             <button class="export-button">GEPHI</button>
             <a href="#" oncontextmenu="return false;" 
-                data-logaction="exp_GEPHI"
+                data-logaction="exp_GEPHI"  style="padding-right:30px"
                 data-action="menu-export-gephi"
                 title="Generate GEPHI for current set of search results (current query + expansion)">
                 <span class="ui-icon ui-icon-extlink export-popup"></span><span class="export-popup" style="padding-right:10px">feed</span>
                 GEPHI</a>
+                <label style="font-size:smaller;"><input type="checkbox" id="limitGEPHI"/>&nbsp;&nbsp;Limit gephi output with 1000 nodes</label>
         </div>
 
         <div id="menu-export-hml-multifile" class="export-item">

@@ -424,7 +424,7 @@
     * @param mixed $ids
     * @param mixed $direction  -  1 direct/ -1 reverse/ 0 both
     */
-    function recordSearchRelatedIds($system, &$ids, $direction=0, $depth=0, $max_depth=1, $new_level_ids=null){
+    function recordSearchRelatedIds($system, &$ids, $direction=0, $depth=0, $max_depth=1, $limit=0, $new_level_ids=null){
         
         if($depth>=$max_depth) return;
         
@@ -479,7 +479,13 @@
         //find new level
         if(is_array($res) && count($res)>0){
             $ids = array_merge_unique($ids, $res);
-            recordSearchRelatedIds($system, $ids, $direction, $depth+1, $max_depth, $res);
+            
+            if($limit>0 && count($ids)>=$limit){
+                $ids = array_slice($ids,0,$limit);
+            }else{
+                recordSearchRelatedIds($system, $ids, $direction, $depth+1, $max_depth, $limit, $res);    
+            }
+            
         }
         return;    
     }
