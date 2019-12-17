@@ -1363,6 +1363,9 @@
         if ($new_title) {
             $new_title = trim($new_title);
             if($new_title!=''){
+                
+                if(strlen($new_title)>1023) $new_title = substr($new_title,0,1023);
+                
                 $date_mod = date('Y-m-d H:i:s');
                 
                 $query = "UPDATE Records set rec_Modified=?, rec_Title=? where rec_ID=".$recID;

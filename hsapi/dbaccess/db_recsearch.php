@@ -359,7 +359,7 @@
             $res = $mysqli->query($query);
             if (!$res){
                 $response = $system->addError(HEURIST_DB_ERROR, $savedSearchName
-                        .'Facet query error(B). Parameters:'.print_r($params, true), $mysqli->error);
+                        .'Facet query error(B). '.$query);// 'Parameters:'.print_r($params, true), $mysqli->error);
                         //'.$query.' 
             }else{
                 $data = array();
