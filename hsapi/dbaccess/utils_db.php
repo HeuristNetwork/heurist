@@ -1072,7 +1072,9 @@ $query = 'CREATE TABLE sysDashboard ('
     //
     // works with temporary table sysSessionProgress that allows trace long server side process like smarty report or csv import
     //
-    function mysql__update_progress($mysqli, $session_id, $is_init, $value){
+    function mysql__update_progress2($mysqli, $session_id, $is_init, $value){
+        
+        if($session_id==null) return;
         
         $res = null;
         $need_close = false;
@@ -1096,23 +1098,28 @@ $query = 'CREATE TABLE sysDashboard ('
         }
         
         if($value=='REMOVE'){
-            $mysqli->query("DELETE FROM sysSessionProgress where stp_ID=".$session_id);
+            //$mysqli->query("DELETE FROM sysSessionProgress where stp_ID=".$session_id);
         }else{
-            //write 
-            if($is_init){
-                $query = "insert into sysSessionProgress values (".$session_id.",'".$value."')";
+            
+            $query = "select stp_Data from sysSessionProgress where stp_ID=".$session_id;
+            $res = mysql__select_value($mysqli, $query);
+            if($value!=null && $res!='terminate'){
+                //write 
+                if($res==null){
+error_log('INSERTED '.$session_id.'  '.$value);                                        
+                    $query = "insert into sysSessionProgress values (".$session_id.",'".$value."')";
+                }else{
+                    
+                list($execution_counter, $tot)  = explode(',',$value);
+                if ($execution_counter>0 && intdiv($execution_counter,500) == $execution_counter/500){
+error_log('UPDATED '.$session_id.'  '.$value);                    
+                }
+                    
+    //error_log('upd_prog '.$session_id.'  '.$value);                    
+                    $query = "update sysSessionProgress set stp_Data='".$value."' where stp_ID=".$session_id;
+                }
                 $mysqli->query($query);
                 $res = $value;
-            }else{
-                
-                $query = "select stp_Data from sysSessionProgress where stp_ID=".$session_id;
-                $res = mysql__select_value($mysqli, $query);
-  
-                if($res!='terminate' && $value!=null){
-//error_log('upd_prog '.$session_id.'  '.$value);                    
-                    $query = "update sysSessionProgress set stp_Data='".$value."' where stp_ID=".$session_id;
-                    $mysqli->query($query);
-                }
             }
             //$mysqli->commit();
         }
@@ -1122,6 +1129,38 @@ $query = 'CREATE TABLE sysDashboard ('
 //error_log('get_prog '.$session_id.'  '.$res);                    
         }
 
+        return $res;
+    }    
+    
+    function mysql__update_progress($mysqli, $session_id, $is_init, $value){
+        
+        if($session_id==null) return null;
+        
+        if(!defined('HEURIST_SCRATCH_DIR')) return null;
+        
+        $res = null;
+        
+        $session_file = HEURIST_SCRATCH_DIR.'session'.$session_id;
+        $is_ex = file_exists($session_file);
+        
+        if($value=='REMOVE'){
+            if($is_ex) unlink($session_file);
+        }else{
+            //get    
+            if($is_ex) $res = file_get_contents($session_file);
+            
+            if($value!=null && $res!='terminate'){
+                file_put_contents($session_file, $value);
+                $res = $value;
+            }
+            /*            
+                list($execution_counter, $tot)  = explode(',',$value);
+                if ($execution_counter>0 && intdiv($execution_counter,500) == $execution_counter/500){
+error_log('UPDATED '.$session_id.'  '.$value);                    
+                }
+            */    
+        }
+   
         return $res;
     }    
 ?>

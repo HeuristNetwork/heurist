@@ -106,7 +106,7 @@ function hImportRecords(_max_upload_size) {
 
                 //!!! $('#upload_form_div').show();                
                 //pbar_div.hide();       //hide progress bar
-                _hideProgress(0, -1);
+                //_hideProgress(0, -1);
                 response = response.result;
                 if(response.status==window.hWin.ResponseStatus.OK){  //after upload
                     var data = response.data;
@@ -345,21 +345,33 @@ function hImportRecords(_max_upload_size) {
             };
             
             _showProgress( session_id, 2 );
+            
+            /*
+            setTimeout(function(){
+                _hideProgress(3);
+            },4000);
+            return;
+            */
                    
             window.hWin.HAPI4.doImportAction(request, function( response ){
                     
                     if(response.status == window.hWin.ResponseStatus.OK){
                         _hideProgress(3);
-                        $('#spanRecCount2').html(
-                            response.data.count_imported+'  records have been imported.<br>'
+                        
+                        var sMsg = response.data.count_imported+'  records have been imported.<br>'
                             +(response.data.count_ignored>0
                               ?(response.data.count_ignored+'  records have been ignored - record type not determined.<br>')
                               :'')
                             +(response.data.resource_notfound && response.data.resource_notfound.length>0
                               ?(response.data.resource_notfound.length+' resource records not found: '
                                     +response.data.resource_notfound.join(',')+ '<br>')
-                              :'')
-                        );
+                              :'');
+                        if(response.data.details_empty && response.data.details_empty.length>0){
+                            sMsg =  sMsg + (response.data.details_empty.length+' source records with empty details: '
+                                    +response.data.details_empty.join(',')+ '<br>')
+                        }     
+                        
+                        $('#spanRecCount2').html(sMsg);
                         //window.hWin.HEURIST4.msg.showMsgDlg('Imported '+response.data+' records');
                     }else{
                         _hideProgress(2);
@@ -378,10 +390,10 @@ function hImportRecords(_max_upload_size) {
         var progressCounter = 0;        
         var progress_url = window.hWin.HAPI4.baseURL + "viewers/smarty/reportProgress.php";
 
-        $('body > div:not(.loading)').hide();
+        $('body > div:not(.loading)').hide();//hide all except loading
         $('.loading').show();
         
-        $('body').css('cursor','progress');
+        $('body').css('cursor', 'progress');
 
         var pbar = $('#progressbar');
         var progressLabel = pbar.find('.progress-label').text('');
@@ -408,7 +420,7 @@ function hImportRecords(_max_upload_size) {
                 window.hWin.HEURIST4.util.sendRequest(progress_url, request, null, function(response){
                     
                     if(!response || response.status==window.hWin.ResponseStatus.UNKNOWN_ERROR){
-                        if(progressInterval!=null) _hideProgress( currentStep );
+                        //if(progressInterval!=null) _hideProgress( currentStep );
                         //console.log(response+'  '+session_id);                   
                     }else{
                         
@@ -439,7 +451,7 @@ function hImportRecords(_max_upload_size) {
                 },'text');
               
             
-            }, 1000);                
+            }, 2000);                
             
         }
         

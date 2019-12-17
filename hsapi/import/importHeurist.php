@@ -408,12 +408,19 @@ public static function importDefintions($filename, $session_id){
 // $is_cms_init - if true this is creation of set of records for website - it adds info text for webpage content
 //
 public static function importRecords($filename, $session_id, $is_cms_init=false, $make_public=true){
-    
+
     self::initialize();
+
+    $mysqli = self::$system->get_mysqli();
+                       
+    //init progress
+    mysql__update_progress($mysqli, $session_id, true, '0,1');
+                          
     
     $res = false;
     $cnt_imported = 0;
     $cnt_ignored = 0;
+    $rec_ids_details_empty = array();
     $resource_notfound = array();
     
     $data = self::readDataFile( $filename );
@@ -450,8 +457,6 @@ EOD;
            $make_public = true;
         }
 
-        $mysqli = self::$system->get_mysqli();
-    
         $execution_counter = 0;
         
         $tot_count = 0;
@@ -462,10 +467,8 @@ EOD;
             $tot_count = count($data['heurist']['records']);  
         } 
         
-        if($session_id!=null){ //init progress
-            mysql__update_progress($mysqli, $session_id, true, '0,'.$tot_count);
-        }
-            
+        //init progress
+        mysql__update_progress($mysqli, $session_id, false, '0,'.$tot_count);
         
         $imp_rectypes = $data['heurist']['database']['rectypes'];
         
@@ -510,6 +513,7 @@ EOD;
             if(!$res2){
                 $err = self::$system->getError();
                 if($err && $err['status']!=HEURIST_NOT_FOUND){
+                    mysql__update_progress($mysqli, $session_id, false, 'REMOVE');
                     return false;
                 }
                 self::$system->clearError();  
@@ -617,6 +621,12 @@ EOD;
             $record['NonOwnerVisibility'] = ($make_public)?'public':'viewable';
             
             $record['details'] = array();
+            
+            if(@$record_src['details']==null){
+                array_push($rec_ids_details_empty, $record_src['rec_ID']); 
+                //error_log('Details not defefined for source record '.$record_src['rec_ID']);
+                continue;
+            }
             
             foreach($record_src['details'] as $dty_ID => $values){
                 
@@ -788,7 +798,12 @@ EOD;
                    if(!@$resource_fields[$record_src['rec_ID']][$ftId]){
                        $resource_fields[$record_src['rec_ID']][$ftId] = array();
                    }
-                   $is_parent = ($def_rst[$recTypeID]['dtFields'][$ftId][$idx_parent]==1);
+                   $is_parent = false;
+                   if(@$def_rst[$recTypeID]['dtFields'][$ftId]!=null){
+                       //error_log("Field $idx_parent not defined for rt $recTypeID dt $ftId");
+                       $is_parent = ($def_rst[$recTypeID]['dtFields'][$ftId][$idx_parent]==1);
+                   }
+                   
                    
                    foreach($values as $value){
                        
@@ -872,6 +887,7 @@ EOD;
             // note: we need to suppress creation of reverse 247 pointer for parent-child links
             
             //no transaction, suppress parent-child
+            //DEBUG $out = array('status'=>HEURIST_OK, 'data'=>1);
             $out = recordSave(self::$system, $record, false, true);  //see db_records.php
 
             if ( @$out['status'] != HEURIST_OK ) {
@@ -892,8 +908,13 @@ EOD;
         
             if($session_id!=null){
                 $session_val = $execution_counter.','.$tot_count;
+                $current_val = null;
                 //check for termination and set new value
-                $current_val = mysql__update_progress($mysqli, $session_id, false, $session_val);
+                if (intdiv($execution_counter,100) == $execution_counter/100){
+                    $current_val = mysql__update_progress($mysqli, $session_id, false, $session_val);
+//error_log($session_id.'  '.$current_val);                    
+                }
+                
                 if($current_val && $current_val=='terminate'){ //session was terminated from client side
                     //need rollback
                     self::$system->addError(HEURIST_ACTION_BLOCKED, 'Operation has been terminatated');
@@ -1031,20 +1052,19 @@ EOD;
                 if($keep_autocommit===true) $mysqli->autocommit(TRUE);
                 $res = array('count_imported'=>$cnt_imported, 
                              'count_ignored'=>$cnt_ignored, //rectype not found 
+                             'details_empty'=>$rec_ids_details_empty, 
                              'resource_notfound'=>$resource_notfound  ); //if value is H-ID-nnn
                 if(count($records_corr)<1000){
                     $res['ids'] = array_values($records_corr);    
                 }
         }
         $mysqli->query('SET FOREIGN_KEY_CHECKS = 1');
-
             
-        if($session_id!=null){//finish
-            mysql__update_progress($mysqli, $session_id, false, 'REMOVE');
-        }
-        
     }//$data
 
+    //finish progress session
+    mysql__update_progress($mysqli, $session_id, false, 'REMOVE');
+        
     return $res;
 }
 
