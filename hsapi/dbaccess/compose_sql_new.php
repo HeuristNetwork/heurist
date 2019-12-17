@@ -649,7 +649,7 @@ class HPredicate {
     var $greaterthan = false;
 
     var $allowed = array('title','t','modified','url','notes','type','ids','id','count','cnt',
-            'f','field','linked_to','linkedfrom','related','related_to','relatedfrom','links','plain',
+            'f','field','linked_to','linkedto','linkedfrom','related','related_to','relatedto','relatedfrom','links','plain',
             'addedby','owner','access');
     /*
     notes, n:        record heder notes (scratchpad)
@@ -747,7 +747,12 @@ class HPredicate {
 
                 $eq = ($this->negate)? '!=' : '=';
                 if (is_numeric($this->value)) {
-                    $res = "$eq ".intval($this->value);
+                    if(intval($this->value)==0){
+                        return null;
+                    }else{
+                        $res = "$eq ".intval($this->value);    
+                    }
+                    
                 }
                 else if (preg_match('/^\d+(?:,\d*)+$/', $this->value)) {
                     // comma-separated list of defRecTypes ids
@@ -794,6 +799,7 @@ class HPredicate {
                 return $res;
 
             case 'linked_to':
+            case 'linkedto':
 
                 return $this->predicateLinkedTo();
 
@@ -806,6 +812,7 @@ class HPredicate {
                 return $this->predicateRelated();
 
             case 'related_to':
+            case 'relatedto':
 
                 return $this->predicateRelatedTo();
 
@@ -1132,10 +1139,25 @@ class HPredicate {
                     //$val = " IN (SELECT rec_ID FROM ".$this->query->from_clause." WHERE".$this->query->where_clause.")";
                 }
             }
-
-            $where = "r$p.rec_ID=$rl.rl_SourceID AND ".
-            (($this->field_id) ?"$rl.rl_DetailTypeID=".$this->field_id :"$rl.rl_RelationID is null")
-            ." AND $rl.rl_TargetID".$val;
+            
+            if($this->field_id==7){ //special case for relationship records
+                //relation record linked to specific target or source
+                
+                $where = "r$p.rec_ID=$rl.rl_RelationID "
+                ." AND $rl.rl_DetailTypeID IS NULL "
+                ." AND $rl.rl_SourceID".$val;
+                
+            }else if($this->field_id==5){ //special case for relationship records
+            
+                $where = "r$p.rec_ID=$rl.rl_RelationID "
+                ." AND $rl.rl_DetailTypeID IS NULL "
+                ." AND $rl.rl_TargetID".$val;
+                
+            }else{
+                $where = "r$p.rec_ID=$rl.rl_SourceID AND ".
+                (($this->field_id) ?"$rl.rl_DetailTypeID=".$this->field_id :"$rl.rl_RelationID is null")
+                ." AND $rl.rl_TargetID".$val;
+            }
 
             return array("from"=>"recLinks ".$rl, "where"=>$where);
         
@@ -1181,9 +1203,25 @@ class HPredicate {
             }
         }
 
-        $where = "r$p.rec_ID=$rl.rl_TargetID AND ".
-        (($this->field_id) ?"$rl.rl_DetailTypeID=".$this->field_id :"$rl.rl_RelationID is null")
-        ." AND $rl.rl_SourceID".$val;
+        if($this->field_id==5){ //special case for relationship records
+            //find target or source linked from relation record
+            
+            $where = "r$p.rec_ID=$rl.rl_TargetID "
+            ." AND $rl.rl_DetailTypeID IS NULL "
+            ." AND $rl.rl_RelationID".$val;
+
+        }else if($this->field_id==7){ //special case for relationship records
+
+            $where = "r$p.rec_ID=$rl.rl_SourceID "
+            ." AND $rl.rl_DetailTypeID IS NULL "
+            ." AND $rl.rl_RelationID".$val;
+            
+        }else{
+        
+            $where = "r$p.rec_ID=$rl.rl_TargetID AND ".
+            (($this->field_id) ?"$rl.rl_DetailTypeID=".$this->field_id :"$rl.rl_RelationID is null")
+            ." AND $rl.rl_SourceID".$val;
+        }
 
         return array("from"=>"recLinks ".$rl, "where"=>$where);
     }

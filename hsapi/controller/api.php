@@ -83,8 +83,8 @@ if($method=='save' || $method=='add'){
     }
 }else{
     
-    if(@$_REQUEST['limit']==null || $_REQUEST['limit']>50 || $_REQUEST['limit']<1){
-        $_REQUEST['limit']=50;
+    if(@$_REQUEST['limit']==null || $_REQUEST['limit']>100 || $_REQUEST['limit']<1){
+        $_REQUEST['limit']=100;
     }
     
 }

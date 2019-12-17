@@ -412,9 +412,16 @@ $.widget( "heurist.search_faceted", {
            if( !window.hWin.HEURIST4.util.isnull(field['var']) && field['code']){
                //create new query and add new parameter
                var code = field['code'];
-//console.log(code);               
+
+              code = code.split(':');
                
-               code = code.split(':');
+               var dtid = code[code.length-1];
+               var linktype = dtid.substr(0,2);
+               if(linktype=='lt' || linktype=='lf' || linktype=='rt' || linktype=='rf'){
+                   //unconstrained link
+                   code.push('0');         //!!!!!!!!
+                   code.push('title');
+               }
                
                field['id']   = code[code.length-1];
                field['rtid'] = code[code.length-2];
@@ -430,9 +437,10 @@ $.widget( "heurist.search_faceted", {
                                 var pref = '';
                                 var qp = {};
                                 
-                                qp['t'] = code[idx];
-                                res.push(qp);
-                                
+                                if(code[idx]>0){ //if 0 - unconstrained
+                                    qp['t'] = code[idx];
+                                    res.push(qp);
+                                }
                                 
                                 var fld = code[idx-1]; //link field
                                 if(fld.indexOf('lf')==0){
@@ -461,7 +469,6 @@ $.widget( "heurist.search_faceted", {
                        }else{}*/
                        field['facet'] = __crt( code.length-2 );
                        
-//console.log('res = '+field['facet']);                       
                }
                
                
@@ -484,7 +491,7 @@ $.widget( "heurist.search_faceted", {
                     qarr.push(predicat);
                     
                     if(window.hWin.HEURIST4.util.isArray(val)){
-                        return val;
+                         return val;
                     }else{
                          return qarr;
                     }
@@ -498,7 +505,9 @@ $.widget( "heurist.search_faceted", {
                         var dtid = code[j+1];
                         
                         //add recordtype
-                        curr_level = __checkEntry(curr_level,"t",rtid);
+                        if(rtid>0){
+                            curr_level = __checkEntry(curr_level,"t",rtid);
+                        }
                         
                         var linktype = dtid.substr(0,2);
                         var slink = null;
@@ -518,7 +527,7 @@ $.widget( "heurist.search_faceted", {
                         var key, val;                         
                         if(slink!=null){
 
-                            var rtid_linked = code[j+2];
+                            var rtid_linked = code[j+2];  //linked record type, if null or 0 - unconstrained
                             key  = slink+rtid_linked+":"+dtid.substr(2); //rtid need to distinguish links/relations for various recordtypes
                             val = [];
                         }else{
@@ -534,7 +543,7 @@ $.widget( "heurist.search_faceted", {
                         }
                         curr_level = __checkEntry(curr_level, key, val);
            
-//console.log(curr_level);                     
+
                         j=j+2;
                     }               
                
@@ -674,7 +683,7 @@ $.widget( "heurist.search_faceted", {
            function(event){
                that.options.params.add_filter = ele.find('input').val();
                //$(event.target).parents('.input-cell').find('input').val();  
-//console.log(that.options.params.add_filter);               
+
                that.doSearch();
            }});   
            
@@ -1124,6 +1133,7 @@ $.widget( "heurist.search_faceted", {
         for(;i< this.options.params.facets.length; i++)
         {
             var field = this.options.params.facets[i];
+            
             if(i>field_index && field['isfacet']!=that._FT_INPUT && field['facet']){
                 
                 if(field['type']=='enum' && field['groupby']=='firstlevel' && 
@@ -1194,8 +1204,6 @@ $.widget( "heurist.search_faceted", {
                     
                 }
      
-//DBG console.log(field);
-                
                 var query, needcount = 2;
                 if( (typeof field['facet'] === 'string') && (field['facet'] == '$IDS') ){ //this is field form target record type
                 
@@ -1241,9 +1249,6 @@ $.widget( "heurist.search_faceted", {
                 
                 //var count_query = window.hWin.HEURIST4.util.cloneJSON( this.options.params.q );
                 this._fillQueryWithValues( count_query, i );
-//console.log( 'count_query' );                
-//console.log( count_query );   
-
                         
                 /* alas, ian want to get count on every step
                 if( (!window.hWin.HEURIST4.util.isnull(field['selectedvalue'])) 
@@ -1283,7 +1288,6 @@ $.widget( "heurist.search_faceted", {
                     step_level = 1; //always full value for this type of facet
                 }
         
-//DEBUG console.log(query);
                 var fieldid = field['id'];
                 if(fieldid==9 && that._use_multifield){
                     fieldid = '9,10,11';
@@ -1322,8 +1326,6 @@ $.widget( "heurist.search_faceted", {
                 }
                 
 
-//DBG console.log(request);                
-                
                 window.HAPI4.RecordMgr.get_facets(request, function(response){ 
                     if(response.request_id != that._request_id){
                         //ignore results of passed sequence
@@ -1349,8 +1351,6 @@ $.widget( "heurist.search_faceted", {
         
                 if(response.status == window.hWin.ResponseStatus.OK){
 
-                    
-//DEBUG if(response.dbg_query) console.log(response.dbg_query);
                     
                     if(keep_cache && response.count_query){
                         response.count_query = window.hWin.HEURIST4.util.hashString(JSON.stringify(response.count_query));

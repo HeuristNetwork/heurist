@@ -275,7 +275,8 @@
                     $res = $mysqli->query($query);
                     if (!$res){
                         return $system->addError(HEURIST_DB_ERROR, $savedSearchName
-                        .'Facet query error. Parameters:'.print_r($params, true), $mysqli->error);
+                        .'Facet query error(A). Parameters:'.print_r($params, true), $mysqli->error);
+                        //'.$query.' 
                     }else{
                         $row = $res->fetch_row();
                         
@@ -358,7 +359,8 @@
             $res = $mysqli->query($query);
             if (!$res){
                 $response = $system->addError(HEURIST_DB_ERROR, $savedSearchName
-                        .'Facet query error. Parameters:'.print_r($params, true), $mysqli->error);
+                        .'Facet query error(B). Parameters:'.print_r($params, true), $mysqli->error);
+                        //'.$query.' 
             }else{
                 $data = array();
 

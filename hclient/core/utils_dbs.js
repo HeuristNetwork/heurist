@@ -625,7 +625,7 @@ window.hWin.HEURIST4.dbs = {
                             }
                             
                             if($pointerRecTypeId=="" || $rectype_ids.length==0){ //unconstrainded
-
+                                                    //
                                 $res = __getRecordTypeTree( null, $recursion_depth+1, $mode, $fieldtypes, $pointer_fields);
                                 //$res['constraint'] = 0;
 
@@ -745,7 +745,6 @@ window.hWin.HEURIST4.dbs = {
         var res = [];
         
         rectypeids = (!$.isArray(rectypeids)?rectypeids.split(','):rectypeids);    
-        
         //create hierarchy tree 
         for (var k=0; k<rectypeids.length; k++) {
             var rectypeID = rectypeids[k];
