@@ -426,7 +426,7 @@ public static function importRecords($filename, $session_id, $is_cms_init=false,
         
         if($is_cms_init){
             self::$system->defineConstant('RT_CMS_HOME');
-            self::$system->defineConstant('RT_CMS_PAGE');
+            //self::$system->defineConstant('RT_CMS_PAGE');
             self::$system->defineConstant('DT_EXTENDED_DESCRIPTION');
             $value_cms_info = <<<'EOD'
 <p>-----</p>
@@ -841,7 +841,7 @@ EOD;
                    }
 //"2552":{"7462":{"id":"1326","type":"98","title":"Record to imported","hhash":null}}}                   
                 }else{
-                    if($is_cms_init 
+                    /*if($is_cms_init 
                         && ($record['RecTypeID']==RT_CMS_PAGE) //  || $record['RecTypeID']==RT_CMS_HOME
                         && $ftId==DT_EXTENDED_DESCRIPTION){
                             
@@ -849,7 +849,7 @@ EOD;
                             $values[$idx] = $value.$value_cms_info;
                             break;
                         }
-                    }
+                    }*/
                     
                     $new_values = $values;      
                 }
