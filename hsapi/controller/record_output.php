@@ -743,7 +743,7 @@ function output_Records($system, $data, $params){
     //OPEN BRACKETS
     if($params['format']=='geojson'){
 
-        if($params['leaflet']){
+        if(@$params['leaflet']){
             fwrite($fd, '{"geojson":');         
         }
         
@@ -835,7 +835,7 @@ XML;
     
     $comma = '';
     
-    if($params['leaflet']){ //get only limited set of fields 
+    if(@$params['leaflet']){ //get only limited set of fields 
         $retrieve_fields = "rec_ID,rec_RecTypeID,rec_Title";
     }else{
         $retrieve_fields = null;
@@ -844,6 +844,7 @@ XML;
     //
     //
     //    
+    $max_depth = 0;
     if(@$params['depth']){
         $max_depth = (@$params['depth']=='all') ?9999:intval(@$params['depth']);
     }
@@ -944,7 +945,7 @@ XML;
         
         fwrite($fd, ']');
         
-        if($params['leaflet']){ //return 2 array - pure geojson and timeline items
+        if(@$params['leaflet']){ //return 2 array - pure geojson and timeline items
            fwrite($fd, ',"timeline":'.json_encode($timeline_data).'}');
         }
         

@@ -426,7 +426,7 @@
     * @param mixed $ids
     * @param mixed $direction  -  1 direct/ -1 reverse/ 0 both
     */
-    function recordSearchRelatedIds($system, &$ids, $direction=0, $depth=0, $max_depth=1, $limit=0, $new_level_ids=null){
+    function recordSearchRelatedIds($system, &$ids, $direction=0, $depth=0, $max_depth=1, $limit=0, $new_level_ids=null, $temp_ids=null){
         
         if($depth>=$max_depth) return;
         
@@ -440,15 +440,36 @@
         $mysqli = $system->get_mysqli();
         
         $res1 = null; $res2 = null;
+
+        if($temp_ids==null){
+            //find temp relationship records (rt#1)
+            $relRT = ($system->defineConstant('RT_RELATION')?RT_RELATION:0);
+            $query = 'SELECT rec_ID FROM Records '
+                      .' where rec_RecTypeID='.$relRT.' AND rec_FlagTemporary=1';
+            $temp_ids = mysql__select_list2($mysqli, $query);
+        }
         
         if($direction>=0){
+            
             //find all target related records
-            $query = 'SELECT rl_TargetID FROM recLinks where rl_SourceID in ('
-                                               .implode(',',$new_level_ids).')';
+            $query = 'SELECT rl_TargetID, rl_RelationID FROM recLinks, Records '
+                  .' where rl_SourceID in ('.implode(',',$new_level_ids).') '
+                  .' AND rl_TargetID=rec_ID AND rec_FlagTemporary=0';
             $res = $mysqli->query($query);
             if ($res){
                 $res1 = array();
+                
                 while ($row = $res->fetch_row()){
+                    
+                    $id = intval($row[1]);     
+                    if($id>0){
+                        if(in_array($id, $temp_ids)){ //is temporary
+                            continue;     //exclude temporary
+                        }else if(!in_array($id, $ids)){
+                            array_push($res1, $id); //add relationship record   
+                        }
+                    }
+                    
                     $id = intval($row[0]);     
                     if(!in_array($id, $ids)) array_push($res1, $id);
                 }
@@ -457,12 +478,24 @@
         }
         
         if($direction<=0){
-            $query = 'SELECT rl_SourceID FROM recLinks where rl_TargetID in ('
-                                               .implode(',',$new_level_ids).')';
+            $query = 'SELECT rl_SourceID, rl_RelationID FROM recLinks, Records where rl_TargetID in ('
+                                               .implode(',',$new_level_ids).') '
+                  .' AND rl_SourceID=rec_ID AND rec_FlagTemporary=0';
             $res = $mysqli->query($query);
             if ($res){
                 $res2 = array();
+                
                 while ($row = $res->fetch_row()){
+                    
+                    $id = intval($row[1]);     
+                    if($id>0){
+                        if(in_array($id, $temp_ids)){ //is temporary
+                            continue;
+                        }else if(!in_array($id, $ids)){
+                            array_push($res2, $id);   
+                        }
+                    }
+
                     $id = intval($row[0]);     
                     if(!in_array($id, $ids)) array_push($res2, $id);
                 }
@@ -470,7 +503,7 @@
             }
         }
         
-        if(is_array($res1) && is_array($res2)){
+        if(is_array($res1) && is_array($res2) && count($res1)>0 && count($res2)>0){
             $res = array_merge_unique($res1, $res2);
         }else if(is_array($res1) && count($res1)>0){
             $res = $res1;
@@ -485,7 +518,7 @@
             if($limit>0 && count($ids)>=$limit){
                 $ids = array_slice($ids,0,$limit);
             }else{
-                recordSearchRelatedIds($system, $ids, $direction, $depth+1, $max_depth, $limit, $res);    
+                recordSearchRelatedIds($system, $ids, $direction, $depth+1, $max_depth, $limit, $res, $temp_ids);    
             }
             
         }
