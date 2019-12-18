@@ -62,7 +62,7 @@ of the codebase and rename it to index.html
 
 // *** DO NOT CHANGE VERSION NUMBER, THIS IS SET BY THE HEURIST DEVELOPMENT TEAM ***
 
-$version = "5.1.10"; // sets current program version number, determined by Heurist development lead
+$version = "5.1.11"; // sets current program version number, determined by Heurist development lead
 
 // h5.1.10 4 Dec 2019 Support KMZ, other KML nad mapping fixes, new map symbology function, improved website generator including custom header section and single page for embedding in iframe, automate welcome letter, improve hml import, many bug fixes
 // h5.1.9 11 Nov 2019 Improved automatic date correction, compatibility issues with MySQL 8, big rationalisation of colour settings across all code, finalise HML import and template export, location inheritance from Place in Leaflet
