@@ -2512,7 +2512,10 @@ window.hWin.HEURIST4.ui = {
     },
     
     //
-    // show record action dialog
+    // show action dialog based on 
+    //   recordAction widgets (see widget/records) or 
+    //   cms/embedDialog widget
+    //   
     //
     showRecordActionDialog: function(actionName, options){
 

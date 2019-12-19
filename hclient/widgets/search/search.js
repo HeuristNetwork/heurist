@@ -573,7 +573,15 @@ $.widget( "heurist.search", {
             //.addClass('truncate');
             this.btn_select_owner.find('.ui-button-icon').css('vertical-align','baseline');
             
-            
+/*
+            this.btn_lookup_TEMP = $( "<button>")
+            .css({'font-size':'0.8em'})
+            .appendTo( this.div_add_record )
+            .button({label: 'lookup'})
+            .click( function(){ 
+                    window.hWin.HEURIST4.ui.showRecordActionDialog('recordLookup');            
+            });
+*/            
             
             /*
             this.select_rectype_addrec = $('<select>')   

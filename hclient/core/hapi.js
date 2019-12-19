@@ -1027,6 +1027,14 @@ prof =Profile
             }
 
             //
+            //
+            //
+            ,lookup_external_service: function(request, callback){
+                // start search
+                _callserver('record_lookup', request, callback);
+            }
+            
+            //
             // load kml in geojson format
             // request
             //  recID - record id that has reference to kml file or has kml snippet
@@ -1035,9 +1043,9 @@ prof =Profile
             ,load_kml_as_geojson: function(request, callback){
                 request['format'] = 'geojson';
                 // start search
-                _callserver('record_kml', request, callback);    //standard search
+                _callserver('record_kml', request, callback);
             }
-            
+
             //
             // load kml in geojson format
             // request
@@ -1047,7 +1055,7 @@ prof =Profile
             ,load_shp_as_geojson: function(request, callback){
                 request['format'] = 'geojson'; //or wkt
                 // start search
-                _callserver('record_shp', request, callback);    //standard search
+                _callserver('record_shp', request, callback);
             }
 
             /**

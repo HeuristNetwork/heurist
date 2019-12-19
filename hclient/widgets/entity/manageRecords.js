@@ -1745,7 +1745,6 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             that._currentEditID = that._getField('rec_ID');;
             that._currentEditRecTypeID = rectypeID;
             
-            
             if(that._isInsert && response.allowCreateIndependentChildRecord!==true &&!(that.options.parententity>0)){
                 //special verification - prevent unparented records
                 //IMHO it should be optional
@@ -2427,9 +2426,10 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
                 +'</div>'
              
                 +'<div style="padding-right:50px;float:right">'
-                    +'<span class="btn-edit-rt" style="font-size:larger">Modify structure</span>'
-                    +'<span class="btn-edit-rt-titlemask">Edit title mask</span>'
-                    +'<span class="btn-edit-rt-template">Template</span>'
+                    +'<span class="btn-lookup-values" style="font-size:larger" title="Lookup external service">Lookup value</span>'
+                    +'<span class="btn-edit-rt btns-admin-only" style="font-size:larger">Modify structure</span>'
+                    +'<span class="btn-edit-rt-titlemask btns-admin-only">Edit title mask</span>'
+                    +'<span class="btn-edit-rt-template btns-admin-only">Template</span>'
                     +'<span class="btn-bugreport">Bug report</span>'
                 +'</div>'
                 
@@ -2466,6 +2466,8 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
 
             var btn_css = {'font-weight': 'bold', color:'#7D9AAA', background:'#ecf1fb' };
             if(window.hWin.HAPI4.is_admin()){
+                
+                this.element.find('.btns-admin-only').show();
 
                 this.element.find('.btn-edit-rt').button({icon:'ui-icon-gear'}).css(btn_css)
                         .click(function(){that.editRecordType();});
@@ -2478,8 +2480,56 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
                             window.hWin.HEURIST4.ui.showRecordActionDialog('recordTemplate',{recordType:that._currentEditRecTypeID});});
                 
             }else{
-                this.element.find('.btn-config4-container').hide();
+                this.element.find('.btns-admin-only').hide();
             }
+            
+            //lookup external values
+            //there is 3d party service for lookup values
+            var notfound = true;
+            var service_config = window.hWin.HAPI4.sysinfo['service_config'];
+            if(window.hWin.HEURIST4.util.isArrayNotEmpty(service_config)){
+                
+                
+                for(var i=0;i<service_config.length; i++){
+                    var cfg = service_config[i];    
+                    if(cfg.rty_ID == this._currentEditRecTypeID){   //@todo many services
+                        notfound = false;            
+            
+                        this.element.find('.btn-lookup-values').button().show()
+                        .css(btn_css).click(function(){ 
+                            window.hWin.HEURIST4.ui.showRecordActionDialog('recordLookup',
+                                {mapping: cfg, onClose:function(recset){
+                                    if(recset){
+//console.log(recset.getFirstRecord());
+                                        var rec = recset.getFirstRecord();
+                                        // loop all fields in selected values
+                                        // find field in edit form
+                                        // assign value
+                                        var fields = recset.getFields();
+                                        for(var k=2; k<fields.length; k++){
+                                            var dt_id = cfg.fields[fields[k]];
+                                            if(dt_id>0)
+                                            {
+                                                var newval = recset.fld(rec, fields[k]);
+                                                newval = window.hWin.HEURIST4.util.isnull(newval)?'':newval;
+                                                that._editing.setFieldValueByName( dt_id, newval );
+                                                //var ele_input = that._editing.getFieldByName(dt_id );
+                                            }
+                                        }
+                                    }
+                                }});
+                        });
+                        
+                    }
+                }
+            }
+            if(notfound){
+                this.element.find('.btn-lookup-values').hide();    
+            }
+            
+            
+            
+            
             //bug report
             this.element.find('.btn-bugreport').button({icon:'ui-icon-bug'})
                 .css(btn_css).click(function(){ window.hWin.HEURIST4.ui.showEntityDialog('sysBugreport'); });

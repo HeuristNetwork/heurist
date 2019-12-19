@@ -678,17 +678,24 @@ window.hWin.HEURIST4.util = {
     // this method is used 
     // 1) for call H3 scripts in H4 code
     // 2) in case hapi is not inited 
+    // 3) for third-party web services
     //
     sendRequest: function(url, request, caller, callback, dataType, timeout){
         
-        if(!request.db && window.hWin && window.hWin.HAPI4){
-            request.db = window.hWin.HAPI4.database;
+        var action = '';
+        
+        if(request){
+        
+            if(!request.db && window.hWin && window.hWin.HAPI4){
+                request.db = window.hWin.HAPI4.database;
+            }
+            
+            var action = url.substring(url.lastIndexOf('/')+1);
+            if(action.indexOf('.php')>0) {
+                action = action.substring(0,action.indexOf('.php'));   
+            }
         }
         
-        var action = url.substring(url.lastIndexOf('/')+1);
-        if(action.indexOf('.php')>0) {
-            action = action.substring(0,action.indexOf('.php'));   
-        }
         var request_code = {script:action, action:''};
         
         //note jQuery ajax does not properly in the loop - success callback does not work often

@@ -1,0 +1,12 @@
+[{
+    "rty_ID": "3-1009",
+    "service":"tlcmap",
+    "fields":{ 
+      "properties.name": "2-1",  
+      "geometry": "2-28",
+      "properties.id": "2-26",
+      "state": "2-234",
+      "LGA": "2-2",
+      "description": "2-4"
+    }    
+}]
