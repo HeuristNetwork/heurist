@@ -62,8 +62,8 @@
     
     }else if($action=='usr_log'){
         
-        $system->initPathConstants(@$_REQUEST['db']);
-        $system->user_LogActivity(@$_REQUEST['activity'], @$_REQUEST['suplementary']);
+        $system->initPathConstants(@$_REQUEST['db']);                                
+        $system->user_LogActivity(@$_REQUEST['activity'], @$_REQUEST['suplementary'], @$_REQUEST['user']);
         $res = true;
         
         if(@$_REQUEST['activity']=='impEmails'){

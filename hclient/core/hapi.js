@@ -588,7 +588,7 @@ prof =Profile
                 
                     activity = activity.replace('_','');
                     
-                    var request = {a:'usr_log', activity:activity, suplementary:suplementary};
+                    var request = {a:'usr_log', activity:activity, suplementary:suplementary, user: window.hWin.HAPI4.user_id()};
                     _callserver('usr_info', request);
                 
                 }

@@ -1404,10 +1404,15 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
     //
     //
     //    
-    public function user_LogActivity($action, $suplementary = ''){
+    public function user_LogActivity($action, $suplementary = '', $user_id=null){
+        
+         if($user_id==null){
+             $this->login_verify( false );
+             $user_id = $this->get_user_id();
+         }
         
          $now = new DateTime();
-         $info =  array($this->get_user_id(), $action, $now->format('Y-m-d H:i:s'), $suplementary);
+         $info =  array($user_id, $action, $now->format('Y-m-d H:i:s'), $suplementary);
         
          file_put_contents ( HEURIST_FILESTORE_DIR.'userInteraction.log' , implode(',', $info)."\n", FILE_APPEND );
         

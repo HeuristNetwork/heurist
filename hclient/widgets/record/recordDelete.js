@@ -183,8 +183,8 @@ $.widget( "heurist.recordDelete", $.heurist.recordAction, {
                     that.doAction(true);
                     },'Confirm');
             return;
-        }            
-            
+        }   
+        
         window.hWin.HEURIST4.util.setDisabled( this.element.parents('.ui-dialog').find('#btnDoAction'), true );
             
             var scope = [], 
@@ -208,6 +208,8 @@ $.widget( "heurist.recordDelete", $.heurist.recordAction, {
                 request['rec_RecTypeID'] = rec_RecTypeID;
             }
                 
+            window.hWin.HAPI4.SystemMgr.user_log('delete_Record', (scope.length+' recs: '+request.ids.substr(0,100)));
+            
                                                               
                 
             window.hWin.HAPI4.RecordMgr.remove(request, 
