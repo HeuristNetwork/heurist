@@ -90,7 +90,7 @@ $.widget( "heurist.recordLookup", $.heurist.recordAction, {
                
                pagesize:(this.options.pagesize>0) ?this.options.pagesize: 9999999999999,
                empty_remark: '<div style="padding:1em 0 1em 0">Nothing found</div>',
-               renderer: this._rendereResultList
+               renderer: this._rendererResultList
                /*
                searchfull: function(arr_ids, pageno, callback){
                    that._recordListGetFullData(arr_ids, pageno, callback);
@@ -109,6 +109,11 @@ $.widget( "heurist.recordLookup", $.heurist.recordAction, {
                             window.hWin.HEURIST4.util.setDisabled( 
                                 this.element.parents('.ui-dialog').find('#btnDoAction'), 
                                 (selected_recs && selected_recs.length()!=1));
+                        },
+                "resultlistondblclick": function(event, selected_recs){
+                            if(selected_recs && selected_recs.length()==1){
+                                this.doAction();                                
+                            }
                         }
                 //,"resultlistonaction": this._onActionListener        
                 });
@@ -119,13 +124,33 @@ $.widget( "heurist.recordLookup", $.heurist.recordAction, {
             'click':this._doSearch
         });
         
+        this._on(this.element.find('input'),{
+            'keypress':this.startSearchOnEnterPress
+        });
+        
+        
         return this._super();
     },
     
     //
     //
     //
-    _rendereResultList: function(recordset, record){
+    startSearchOnEnterPress: function(e){
+        
+        var code = (e.keyCode ? e.keyCode : e.which);
+        if (code == 13) {
+            window.hWin.HEURIST4.util.stopEvent(e);
+            e.preventDefault();
+            this._doSearch();
+        }
+
+    },
+    
+    
+    //
+    //
+    //
+    _rendererResultList: function(recordset, record){
         
         function fld(fldname, width){
             var s = recordset.fld(record, fldname);

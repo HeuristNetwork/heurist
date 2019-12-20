@@ -2257,10 +2257,9 @@ $.widget( "heurist.resultList", {
                     }else{
                         this._recordDivOnClick(event);
                     }
-
-                    
-
-
+                }else{
+                    var selected_recs = this.getSelected( false );
+                    this._trigger( "ondblclick", null, selected_recs );
                 }
             }
         });
