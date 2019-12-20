@@ -437,7 +437,7 @@ You can edit the record type structure by clicking on the name in the list below
                 }
             }
 
-            $res = $mysqli->query('select dtl_RecID, dty_Name, a.rec_Title, a.rec_RecTypeID
+            $res = $mysqli->query('select dtl_RecID, dty_Name, a.rec_Title, a.rec_RecTypeID, dtl_Value
                 from recDetails
                 left join defDetailTypes on dty_ID = dtl_DetailTypeID
                 left join Records a on a.rec_ID = dtl_RecID and a.rec_FlagTemporary!=1
@@ -478,7 +478,7 @@ You can edit the record type structure by clicking on the name in the list below
                 </div>
                 <table>
                     <tr>
-                        <td colspan="5">
+                        <td colspan="6">
                             <label><input type=checkbox onclick="{mark_all_by_name(event.target, 'recCB');}">Mark all</label>
                         </td>
                     </tr>
@@ -494,6 +494,7 @@ You can edit the record type structure by clicking on the name in the list below
                                     <img src='../../common/images/external_link_16x16.gif' title='Click to edit record'>
                                 </a></td>
                             <td class="truncate" style="max-width:400px"><?=strip_tags($row['rec_Title']) ?></td>
+                            <td><?= $row['dtl_Value'] ?></td>
                             <td><?= $row['dty_Name'] ?></td>
                         </tr>
                         <?php
@@ -1253,7 +1254,7 @@ src="<?php echo HEURIST_BASE_URL.'common/images/16x16.gif'?>">&nbsp;<?= $row['dt
                 left join defDetailTypes on dty_ID = rst_DetailTypeID
                 left join defRecTypes on rty_ID = rec_RecTypeID
                 where rec_FlagTemporary!=1 and rst_RequirementType='required' and (dtl_Value is null or dtl_Value='')
-                and dtl_UploadedFileID is null and dtl_Geo is null and dty_Type!='separator'
+                and dtl_UploadedFileID is null and dtl_Geo is null and dty_Type!='separator' and dty_Type!='relmarker'
             order by rec_ID");
 
             $bibs = array();
