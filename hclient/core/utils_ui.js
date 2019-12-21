@@ -2053,15 +2053,23 @@ window.hWin.HEURIST4.ui = {
                         
                         + (info['rec_IsChildRecord']==1
                             ?'<span style="font-size:0.8em;color:#999999;padding:4px 2px;display:table-cell;min-width: 5ex;">child</span>':'')
-                        + (isEdit?'<span style="display:table-cell;"><span class="ui-icon ui-icon-triangle-1-e"/></span>':'') //padding-top:3px;
+                        + (isEdit?'<span style="display:table-cell;vertical-align: bottom"><span class="ui-icon ui-icon-triangle-1-e"/></span>':'') //padding-top:3px;
+                        
                         + '<span style="display:table-cell;vertical-align:top;">'  //;padding-top:2px;
-                        + '<img src="'+ph_gif+'" style="margin-right:10px;background-image:url(\''    //vertical-align:top;margin-top:2px;
-                        + top.HAPI4.iconBaseURL+info['rec_RecTypeID']    //rectype icon
-                        + '\');"/>'
+                        + '<img src="'+ph_gif+'" style="margin-right:10px;'
+                        + ((info['rec_RecTypeID']>0)?
+                            'background-image:url(\''    //vertical-align:top;margin-top:2px;
+                            + top.HAPI4.iconBaseURL+info['rec_RecTypeID'] + '\');'   //rectype icon
+                           :'') 
+                        + '"/>'
                         //2017-11-08 no more link here
                         //+ '<a target=_new href="#" data-recID="'+info['rec_ID'] +'">'
                         //+ window.hWin.HEURIST4.util.htmlEscape(info['rec_Title'])+'</a>'
-                        + '</span><span class="related_record_title" data-recID="'
+                        + '</span>'
+                        
+                        +'<span class="related_record_title'
+                            +((info['rec_RecTypeID']>0)?'':' ui-state-error')
+                            +'" data-recID="'
                                         +info['rec_ID']
                                         +'" style="display:table-cell;">'  //padding-top:4px;
                         + rec_Title
@@ -2236,6 +2244,8 @@ window.hWin.HEURIST4.ui = {
         var btn_edit = ele.find('div.btn-edit');
         if(btn_edit.length>0){
             
+            if(info['rec_RecTypeID']>0){
+            
             btn_edit.button({text:false, label:top.HR('Edit linked record'),
                             icons:{primary:'ui-icon-pencil'}})
                         .attr('data-recID', info['rec_ID'])
@@ -2261,6 +2271,10 @@ window.hWin.HEURIST4.ui = {
                 );
                             
                         });
+                        
+            }else{
+                btn_edit.hide();    
+            }
         }
         
         $(container).find('.add-rel-button').hide();

@@ -2665,10 +2665,18 @@ console.log('onpaste');
                                                  
                                        ele.show();
                                        ele.parent().find('.sel_link').show();
-                                       ele.parent().find('.sel_link2').hide();
+                                       ele.parent().find('.sel_link2').hide(); //hide big button to select new link
                                                  
                                     }else{
-                                        that._removeInput( ele.attr('id') );
+                                        //it was that._removeInput( ele.attr('id') );
+                                        window.hWin.HEURIST4.ui.createRecordLinkInfo(ele, 
+                                                {rec_ID: value, 
+                                                 rec_Title: 'Missed record #'+value, 
+                                                 rec_RecTypeID: 0,
+                                                 rec_IsChildRecord: isChildRecord
+                                                 }, selector_function);
+                                        ele.show();
+                                        ele.parent().find('.sel_link2').hide(); //hide big button to select new link
                                     }
                                     //window.hWin.HEURIST4.ui.setValueAndWidth(ele, rec_Title);
                                 }
