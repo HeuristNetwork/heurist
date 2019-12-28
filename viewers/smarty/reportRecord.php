@@ -36,6 +36,21 @@ class ReportRecord {
        
        $this->loaded_recs = array();
     }    
+
+    //
+    //
+    //
+    public function constant($name, $smarty_obj=null) {
+        if(defined($name)){
+            return constant($name);  
+        }else{
+            if(strpos($name,'RT_')===0 || strpos($name,'DT_')===0){
+                if($this->system->defineConstant($name)) return constant($name);  
+            }
+            
+            return null;  
+        }
+    }
     
     //
     // this method is used in smarty template in main loop to access record info by record ID
