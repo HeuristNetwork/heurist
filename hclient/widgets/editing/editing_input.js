@@ -2671,7 +2671,7 @@ console.log('onpaste');
                                         //it was that._removeInput( ele.attr('id') );
                                         window.hWin.HEURIST4.ui.createRecordLinkInfo(ele, 
                                                 {rec_ID: value, 
-                                                 rec_Title: 'Missed record #'+value, 
+                                                 rec_Title: 'Target record '+value+' does not exist', 
                                                  rec_RecTypeID: 0,
                                                  rec_IsChildRecord: isChildRecord
                                                  }, selector_function);
