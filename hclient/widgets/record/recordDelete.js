@@ -167,7 +167,7 @@ $.widget( "heurist.recordDelete", $.heurist.recordAction, {
     //
     //
     //
-    doAction: function( isconfirm ){
+    doAction: function( isconfirm, check_source ){
 
         var scope_val = this.selectRecordScope.val();
         
@@ -210,11 +210,47 @@ $.widget( "heurist.recordDelete", $.heurist.recordAction, {
                 
             window.hWin.HAPI4.SystemMgr.user_log('delete_Record', (scope.length+' recs: '+request.ids.substr(0,100)));
             
-                                                              
+            //check source links   
+            if(check_source!==true){                            
+                request['check_links'] = true;                   
+            }
                 
             window.hWin.HAPI4.RecordMgr.remove(request, 
                     function(response){
                         if(response.status == window.hWin.ResponseStatus.OK){
+                            
+                            if(response.data.source_links_count>0 && response.data.source_links){
+                                
+                                    var $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
+'<p>You are asking to delete '+scope.length+' records ('
++'<a href="'+window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database+'&q=ids:'+scope.join(',')
++'" target="_blank">see list</a>)'
++' which are the target of record pointer fields in other'
++' records (<a href="'+window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database
+                +'&q=ids:'+response.data.source_links+'" target="_blank">see list</a>). '
++'This will also delete child records (if any) which may, in rare circumstances, themselves be the targets of record'
++' pointer fields from records other than their parent.</p>'
+
++'<p>Deleting records which are targets of record pointer fields will delete the record pointer field values, which may render the records'
++' containing them invalid. If you wish to delete the selected records (and their children, if any), check the box below.</p>'
+
++'<p><label><input type="checkbox"> Delete records</label> which are the target of a record pointer field (along with their children, '
++'if any) and delete the record pointer alues which reference them. This may cause data loss. '
++'If you do this, please use Verify > Verify integrity to fix up affected records.', 
+function(){
+    that.doAction(true, true);
+},
+{title:'Deleting target records ('+response.data.source_links_count+')',yes:'Delete records',no:'Cancel'});
+    
+  var btn = $dlg.parent().find('button:contains("Delete records")');
+  var chb = $dlg.find('input[type="checkbox"]').change(function(){
+      window.hWin.HEURIST4.util.setDisabled(btn, !chb.is(':checked') );
+  })
+  window.hWin.HEURIST4.util.setDisabled(btn, true);
+                                
+                                
+                                return;
+                            }
 
                             that._context_on_close = (response.data.deleted>0);
                             

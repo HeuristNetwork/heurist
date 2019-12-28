@@ -7,15 +7,21 @@
     * recordSearchMinMax - Find minimal and maximal values for given detail type and record type
     * recordSearchFacets - returns counts for facets for given query
     * 
+    * recordSearchRelatedIds - search all related (links and releationship) records for given set of records recursively
     * recordSearchRelated
-    * recordSearchPermissions
-    * recordGetRelationshipType
-    * recordGetLinkedRecords
-    * recordGetRelationship
+    * recordSearchPermissions  - all view group permissions for given set of records
+    * recordGetOwnerVisibility
+    * recordGetRelationshipType - returns only first relationship type ID for 2 given records
+    * recordGetRelationship - returns relrecord (RT#1) for given pair of records (id or full record)
+    * recordGetLinkedRecords - returns all linked record and their types (for update titles)
+    * recordSearchMenuItems - returns all CMS records for given CMS home record
     * 
-    * recordSearch
-    * recordSearchByID
-    * recordSearchDetails
+    * recordSearchFindParent - find parent record for rec_ID with given record type
+    * 
+    * recordSearch - MAIN method - parses query and searches for heurist records
+    * recordSearchByID - returns header (and details)
+    * recordSearchDetails - returns details for given rec id
+    * recordSearchGeoDetails - find geo in linked places 
     * recordSearchPersonalTags
     * 
     *
@@ -436,7 +442,6 @@
             $direction = 0;
         }
         
-        //$links = recordSearchRelated($system, $ids, $direction, false);
         $mysqli = $system->get_mysqli();
         
         $res1 = null; $res2 = null;
@@ -526,15 +531,18 @@
     }
     
     /**
-    * Finds all related record IDs for given set record IDs
+    * Finds all related (and linked) record IDs for given set record IDs
     *
     * @param mixed $system
     * @param mixed $ids -
     * @param mixed $direction -  1 direct/ -1 reverse/ 0 both
+    * @param mixed $need_headers - if "true" returns array of titles,ownership,visibility for linked records
+    *                              if "ids" returns ids only 
+    * @param mixed $link_type 0 all, 1 links, 2 relations
     *
-    * @return array of direct and reverse links (record id, relation type (termid), detail id)
+    * @return array of direct and reverse links (record id, relation type (termid), detail id)  
     */
-    function recordSearchRelated($system, $ids, $direction=0, $need_headers=true){
+    function recordSearchRelated($system, $ids, $direction=0, $need_headers=true, $link_type=0){
 
         if(!@$ids){
             return $system->addError(HEURIST_INVALID_REQUEST, "Invalid search request");
@@ -545,14 +553,28 @@
         if(!($direction==1||$direction==-1)){
             $direction = 0;
         }
+        if(!($link_type>=0 && $link_type<3)){
+            $link_type = 0;
+        }
+        if($link_type==2){ //relations only
+            $sRelCond  = 'AND (rl_RelationID IS NOT NULL)';
+        }else if($link_type==1){ //links only
+            $sRelCond  = 'AND (rl_RelationID IS NULL)';
+        }else{
+            $sRelCond = '';
+        }
         
         $rel_ids = array(); //relationship records (rt #1)
 
         $direct = array();
         $reverse = array();
         $headers = array(); //record title and type for main record
+        $direct_ids = array(); //sources
+        $reverse_ids = array(); //targets
 
         $mysqli = $system->get_mysqli();
+        
+        //query to find start and end date for relationship
         $system->defineConstant('DT_START_DATE');
         $system->defineConstant('DT_END_DATE');
         $query_rel = 'SELECT rec_ID, d2.dtl_Value t2, d3.dtl_Value t3 from Records '
@@ -561,69 +583,82 @@
             .' WHERE rec_ID=';
         
         
-        //find all target related records
-        $query = 'SELECT rl_SourceID, rl_TargetID, rl_RelationTypeID, rl_DetailTypeID, rl_RelationID FROM recLinks '
-            .'where rl_SourceID in ('.$ids.') order by rl_SourceID';
-
-        $res = $mysqli->query($query);
-        if (!$res){
-            return $system->addError(HEURIST_DB_ERROR, "Search query error on related records. Query ".$query, $mysqli->error);
-        }else{
-                while ($row = $res->fetch_row()) {
-                    $relation = new stdClass();
-                    $relation->recID = intval($row[0]);
-                    $relation->targetID = intval($row[1]);
-                    $relation->trmID = intval($row[2]);
-                    $relation->dtID  = intval($row[3]);
-                    $relation->relationID  = intval($row[4]);
-                    
-                    if($relation->relationID>0) {
-                        $vals = mysql__select_row($mysqli, $query_rel.$relation->relationID);
-                        if($vals!=null){
-                            $relation->dtl_StartDate = $vals[1];
-                            $relation->dtl_EndDate = $vals[2];
+        
+        if($direction>=0){
+        
+            //find all target related records
+            $query = 'SELECT rl_SourceID, rl_TargetID, rl_RelationTypeID, rl_DetailTypeID, rl_RelationID FROM recLinks '
+                .'where rl_SourceID in ('.$ids.') '.$sRelCond.' order by rl_SourceID';
+                
+            $res = $mysqli->query($query);
+            if (!$res){
+                return $system->addError(HEURIST_DB_ERROR, "Search query error on related records. Query ".$query, $mysqli->error);
+            }else{
+                    while ($row = $res->fetch_row()) {
+                        $relation = new stdClass();
+                        $relation->recID = intval($row[0]);
+                        $relation->targetID = intval($row[1]);
+                        $relation->trmID = intval($row[2]);
+                        $relation->dtID  = intval($row[3]);
+                        $relation->relationID  = intval($row[4]);
+                        
+                        if($relation->relationID>0) {
+                            $vals = mysql__select_row($mysqli, $query_rel.$relation->relationID);
+                            if($vals!=null){
+                                $relation->dtl_StartDate = $vals[1];
+                                $relation->dtl_EndDate = $vals[2];
+                            }
                         }
+                        
+                        array_push($rel_ids, intval($row[1]));
+                        array_push($direct, $relation);
                     }
-                    
-                    array_push($rel_ids, intval($row[1]));
-                    array_push($direct, $relation);
-                }
-                $res->close();
+                    $res->close();
+                    if($need_headers=='ids'){
+                        $direct_ids = $rel_ids;
+                    }
+            }
+        
         }
 
-        //find all reverse related records
-        $query = 'SELECT rl_TargetID, rl_SourceID, rl_RelationTypeID, rl_DetailTypeID, rl_RelationID FROM recLinks '
-            .'where rl_TargetID in ('.$ids.') order by rl_TargetID';
+        if($direction<=0){
+            
+            //find all reverse related records
+            $query = 'SELECT rl_TargetID, rl_SourceID, rl_RelationTypeID, rl_DetailTypeID, rl_RelationID FROM recLinks '
+                .'where rl_TargetID in ('.$ids.') '.$sRelCond.' order by rl_TargetID';
 
 
-        $res = $mysqli->query($query);
-        if (!$res){
-            return $system->addError(HEURIST_DB_ERROR, "Search query error on reverse related records. Query ".$query, $mysqli->error);
-        }else{
-                while ($row = $res->fetch_row()) {
-                    $relation = new stdClass();
-                    $relation->recID = intval($row[0]);
-                    $relation->sourceID = intval($row[1]);
-                    $relation->trmID = intval($row[2]);
-                    $relation->dtID  = intval($row[3]);
-                    $relation->relationID  = intval($row[4]);
-                    
-                    if($relation->relationID>0) {
-                        $vals = mysql__select_row($mysqli, $query_rel.$relation->relationID);
-                        if($vals!=null){
-                            $relation->dtl_StartDate = $vals[1];
-                            $relation->dtl_EndDate = $vals[2];
+            $res = $mysqli->query($query);
+            if (!$res){
+                return $system->addError(HEURIST_DB_ERROR, "Search query error on reverse related records. Query ".$query, $mysqli->error);
+            }else{
+                    while ($row = $res->fetch_row()) {
+                        $relation = new stdClass();
+                        $relation->recID = intval($row[0]);
+                        $relation->sourceID = intval($row[1]);
+                        $relation->trmID = intval($row[2]);
+                        $relation->dtID  = intval($row[3]);
+                        $relation->relationID  = intval($row[4]);
+                        
+                        if($relation->relationID>0) {
+                            $vals = mysql__select_row($mysqli, $query_rel.$relation->relationID);
+                            if($vals!=null){
+                                $relation->dtl_StartDate = $vals[1];
+                                $relation->dtl_EndDate = $vals[2];
+                            }
                         }
+                        
+                        array_push($reverse, $relation);
+                        array_push($rel_ids, intval($row[1]));
+                        array_push($reverse_ids, intval($row[1]));
                     }
-                    
-                    array_push($reverse, $relation);
-                    array_push($rel_ids, intval($row[1]));
-                }
-                $res->close();
+                    $res->close();
+            }
+        
         }
         
         //find all rectitles and record types for main recordset AND all related records
-        if($need_headers){
+        if($need_headers===true){
             
             if(!is_array($ids)){
                 $ids = explode(',',$ids);
@@ -645,8 +680,13 @@
             
         }
         
-        $response = array("status"=>HEURIST_OK,
+        if($need_headers=='ids'){
+            $response = array("status"=>HEURIST_OK,
+                     "data"=> array("direct"=>$direct_ids, "reverse"=>$reverse_ids, "headers"=>$headers));
+        }else{
+            $response = array("status"=>HEURIST_OK,
                      "data"=> array("direct"=>$direct, "reverse"=>$reverse, "headers"=>$headers));
+        }
 
 
         return $response;
@@ -747,7 +787,7 @@
     }
     
     //
-    // return linked record ids and their types
+    // return linked record ids and their types (for update linked record titles)
     //
     function recordGetLinkedRecords($system, $recordID){
 
@@ -785,8 +825,9 @@
         
         
     }
+    
     //
-    // returns relationship records(s) for given source and target records
+    // returns relationship records(s) (RT#1) for given source and target records
     //
     function recordGetRelationship($system, $sourceID, $targetID, $search_request=null){
 
@@ -819,7 +860,7 @@
                     if(@$search_request['detail']=='ids'){
                         return $ids;
                     }else if(!@$search_request['detail']){
-                        $search_request['detail'] = detail; //returns all details
+                        $search_request['detail'] = 'detail'; //returns all details
                     }
                 }
 

@@ -620,19 +620,22 @@
         */
     }//recordSave
 
+
     /**
+    * removes heurist record and all dependent entries
+    * (note heurist record will be kept in sysArchive)
     * 
-    *
-    * @param mixed $mysqli
-    * @param mixed $user
+    * @param mixed $system
     * @param mixed $recids
+    * @param mixed $need_transaction - false when record are removed for user/group/rectype deletion
+    * @param mixed $check_source_links - prevents action if there are target records that points to given record
     */
-    function recordDelete($system, $recids, $need_transaction=true){
+    function recordDelete($system, $recids, $need_transaction=true, $check_source_links=false){
 
         $recids = prepareIds($recids);
         if(count($recids)>0){
             
-            //narrow by record type
+            /*narrow by record type
             $rec_RecTypeID = @$params['rec_RecTypeID'];
             if($rec_RecTypeID>0){ 
                 $recids = mysql__select_list2($mysqli, 'SELECT rec_ID from Records where rec_ID in ('
@@ -642,8 +645,7 @@
                     $this->system->addError(HEURIST_NOT_FOUND, 'No record found for provided record type');
                     return false;
                 }
-            }
-            
+            }*/
             
             $rectypes = array();
             $noaccess_count = 0;
@@ -661,10 +663,22 @@
             }
             if(count($recids)==1 && $noaccess_count==1){
                 return $system->getError();    
+            //}else if(count($recids)==$noaccess_count){
             }else{
                 $system->clearError();    
             }
             
+            //find reverse links to given set of ids
+            if($check_source_links && count($allowed_recids)>0){
+                $links = recordSearchRelated($system, $allowed_recids, -1, 'ids', 1);
+                
+                if($links['status']==HEURIST_OK && count(@$links['data']['reverse'])>0){
+                    return array('status'=>HEURIST_OK, 
+                        'data'=> array( 'source_links_count'=>count($links['data']['reverse']),
+                         'source_links'=>implode(',',$links['data']['reverse']) ));
+                }
+            }
+        
             
             $is_error = false;
             $mysqli = $system->get_mysqli();
@@ -686,7 +700,7 @@
             $mysqli->query('set @suppress_update_trigger=NULL');
                         
             foreach ($allowed_recids as $recID) {
-                $stat = deleteOneRecord($mysqli, $recID, $rectypes[$recID]);
+                $stat = deleteOneRecord($system, $recID, $rectypes[$recID]);
                 
                 if( array_key_exists('error', $stat) ){
                     $msg_error = $stat['error'];
@@ -888,7 +902,7 @@
     //
     //
     //
-    function deleteOneRecord($mysqli, $id, $rectype){
+    function deleteOneRecord($system, $id, $rectype){
         
         $bkmk_count = 0;
         $rels_count = 0;
@@ -904,6 +918,16 @@
             $child_records = mysql__select_assoc2($mysqli, $query);
         }
 
+        //find target records where resource field points to record to be deleted
+        $links = recordSearchRelated($system, array($id), -1, false, 1);
+        if($links['status']==HEURIST_OK && count(@$links['data']['reverse'])>0){
+            $links = $links['data']['reverse'];
+        }else{
+            $links = null;
+        }
+        
+        $mysqli = $system->get_mysqli();
+        
         while(true){
                 $mysqli->query('SET foreign_key_checks = 0');
                 //
@@ -914,6 +938,15 @@
                 $mysqli->query('delete from Records where rec_ID = ' . $id);
                 if ($mysqli->error) break;
                 array_push($deleted, $id);
+                
+                //remove pointer fields
+                if($links){
+                    foreach ($links as $relation) {
+                        $mysqli->query('delete from recDetails where dtl_RecID = ' . $relation->sourceID
+                        .' and dtl_DetailTypeID = '.$relation->dtID.' and dtl_Value='.$id);
+                        if ($mysqli->error) break;
+                    }
+                }
                
                 ElasticSearch::deleteRecordIndexEntry(HEURIST_DBNAME, $rectype, $id);
                 
@@ -964,7 +997,7 @@
                 $refs_res = $mysqli->query('select rec_ID from recDetails left join defDetailTypes on dty_ID=dtl_DetailTypeID left join Records on rec_ID=dtl_RecID where dty_Type="resource" and dtl_Value='.$id.' and rec_RecTypeID='.RT_RELATION);
                 if($refs_res){
                     while ($row = $refs_res->fetch_assoc()) {
-                        $res = deleteOneRecord($mysqli, $row['rec_ID'], RT_RELATION);
+                        $res = deleteOneRecord($system, $row['rec_ID'], RT_RELATION);
                         if( array_key_exists('error', $res) ){
                             $msg_error = $res['error'];
                             break;
@@ -983,7 +1016,7 @@
                 
                 if(count($child_records)>0){
                     foreach ($child_records as $recid => $rectypeid) {
-                        $res = deleteOneRecord($mysqli, $recid, $rectypeid);
+                        $res = deleteOneRecord($system, $recid, $rectypeid);
                         if( array_key_exists('error', $res) ){
                             $msg_error = 'Cannot delete child records'.$res['error'];
                             break;
