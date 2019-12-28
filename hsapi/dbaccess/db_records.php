@@ -400,6 +400,9 @@
                 $keep_autocommit = mysql__begin_transaction($mysqli);
             }
 
+                
+            $mysqli->query('set @suppress_update_trigger=1');
+            
             $query = "UPDATE Records set rec_Modified=?, rec_RecTypeID=?, rec_OwnerUGrpID=?, rec_NonOwnerVisibility=?,"
             ."rec_URL=?, rec_ScratchPad=?, rec_FlagTemporary=? "
             ." where rec_ID=".$recID;
@@ -429,6 +432,13 @@
             array_shift($owner_grps); //remove first
             updateUsrRecPermissions($mysqli, $recID, $access_grps, $owner_grps);
 
+            if($system->get_user_id()>0){
+                //set current user for stored procedures (log purposes)
+                $mysqli->query('set @logged_in_user_id = '.$system->get_user_id());
+            }
+            $mysqli->query('set @suppress_update_trigger=NULL');
+            
+            
             //delete ALL existing details
             $query = "DELETE FROM recDetails where dtl_RecID=".$recID;
             if(!$mysqli->query($query)){
@@ -668,6 +678,12 @@
             $msg_error = '';
             
             $system->defineConstant('RT_RELATION');
+                        
+            if($system->get_user_id()>0){
+                //set current user for stored procedures (log purposes)
+                $mysqli->query('set @logged_in_user_id = '.$system->get_user_id());
+            }
+            $mysqli->query('set @suppress_update_trigger=NULL');
                         
             foreach ($allowed_recids as $recID) {
                 $stat = deleteOneRecord($mysqli, $recID, $rectypes[$recID]);

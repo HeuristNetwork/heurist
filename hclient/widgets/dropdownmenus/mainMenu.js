@@ -857,8 +857,12 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
             
             if(that.isResultSetEmpty()) return;
             window.hWin.HEURIST4.ui.showRecordActionDialog('recordExportCSV');
+
+        }else 
+        if(action == "menu-records-archive"){
             
-            
+            window.hWin.HEURIST4.ui.showRecordActionDialog('recordArchive');
+        
         }else 
         if(action == "menu-export-hml-resultset" || action == "menu-export-hml-multifile"){
             

@@ -772,7 +772,7 @@ DELIMITER $$
 	CREATE
 	DEFINER=CURRENT_USER 
 	TRIGGER `delete_record_trigger`
-	AFTER DELETE ON `Records`
+	BEFORE DELETE ON `Records`
 	FOR EACH ROW
 	begin 
     

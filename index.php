@@ -114,7 +114,7 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
         <script type="text/javascript" src="hclient/widgets/record/recordAddLink.js"></script>
         <script type="text/javascript" src="hclient/widgets/record/recordExportCSV.js"></script>
         <script type="text/javascript" src="hclient/widgets/record/recordTemplate.js"></script>
-        <script type="text/javascript" src="hclient/widgets/record/recordLookup.js"></script>
+        <script type="text/javascript" src="hclient/widgets/record/recordArchive.js"></script>
         
         
         <!-- DOCUMENTATION TODO: explain this -->
