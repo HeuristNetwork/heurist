@@ -38,12 +38,12 @@ define('SORT_ID', 'id');
 //defined in const.php define('DT_RELATION_TYPE', 6);
 
 $mysqli = null;
+$currUserID = 0;
 
 
 /**
 * Use the supplied _REQUEST variables (or $params if supplied) to construct a query starting with $query prefix
 *
-* @param System $system
 * @param mixed $query  -  prefix (usually SELECT with list of fields)
 * @param mixed $params
 *
@@ -86,7 +86,6 @@ function compose_sql_query($db, $select_clause, $params, $currentUser=null) {
 /**
 * Use the supplied _REQUEST variables (or $params if supplied) to construct a query starting with $query prefix
 *
-* @param System $system
 * @param mixed $query  -  prefix (usually SELECT with list of fields)
 * @param mixed $params
 *
@@ -120,7 +119,7 @@ sortby:
 */
 function get_sql_query_clauses($db, $params, $currentUser=null) {
 
-    global $mysqli;
+    global $mysqli, $currUserID;
 
     $mysqli = $db;
 
@@ -2819,7 +2818,11 @@ class DateModifiedPredicate extends DatePredicate {
 
 class WorkgroupPredicate extends Predicate {
     function makeSQL() {
-        global $mysqli;
+        global $mysqli, $currUserID;
+        
+        if(strtolower($this->value)=='currentuser' || strtolower($this->value)=='current_user'){
+            $this->value = $currUserID;
+        }
 
         $eq = ($this->parent->negate)? '!=' : '=';
         if (is_numeric($this->value)) {
