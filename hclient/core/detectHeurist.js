@@ -19,7 +19,7 @@ function _detectHeurist( win ){
     }
 }
 //detect wether this window is top most or inside frame
-window.hWin = _detectHeurist(window);
+if(!window.hWin) window.hWin = _detectHeurist(window);
 
 if(!window.hWin.ResponseStatus){
     
