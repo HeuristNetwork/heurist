@@ -287,6 +287,10 @@ if (($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1')
     <?php 
         //PDIR.
         include dirname(__FILE__).'/../../framecontent/initPageCss.php'; 
+        
+        if(!$edit_Available){
+            print '<script>window.hWin = window;</script>';
+        }
     ?>
    
     <!-- link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/tinymce/skins/lightgray/content.min.css"/ -->
@@ -294,6 +298,7 @@ if (($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1')
 <script>
     var _time_debug = new Date().getTime() / 1000;
 //    console.log('webpage start');
+    
 </script>
     
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>
@@ -338,7 +343,6 @@ if(!array_key_exists('embed', $_REQUEST)){
     
 <?php
 }    
-
 if($edit_Available){
 ?>
     <script src="<?php echo PDIR;?>external/tinymce/tinymce.min.js"></script>

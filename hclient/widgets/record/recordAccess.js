@@ -45,8 +45,10 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
         
         var fieldSelect = this.element.find('#sel_Ownership');
         window.hWin.HEURIST4.ui.createUserGroupsSelect(fieldSelect[0], null,  //take groups of current user
-                [{key:0, title:'Any logged-in user'}, 
-                 {key:window.hWin.HAPI4.currentUser['ugr_ID'], title:window.hWin.HAPI4.currentUser['ugr_FullName']}]);
+                [{key:0, title:'Any logged-in user'},
+                 {key:'current_user', title:'Current user'},
+                 {key:window.hWin.HAPI4.currentUser['ugr_ID'], title:window.hWin.HAPI4.currentUser['ugr_FullName']}
+                 ]);
               
               
         fieldSelect.change(function(){

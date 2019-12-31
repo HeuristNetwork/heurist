@@ -112,6 +112,7 @@ select
 $mysqli = null;
 $wg_ids = null; //groups current user is member
 $publicOnly = false;
+$currUserID = 0;
 
 //keep params for debug only!
 $params_global;
@@ -141,7 +142,7 @@ $top_query;
 //
 function get_sql_query_clauses_NEW($db, $params, $currentUser=null){
 
-    global $mysqli, $wg_ids, $publicOnly, $params_global, $top_query;
+    global $mysqli, $wg_ids, $currUserID, $publicOnly, $params_global, $top_query;
     
     $params_global = $params;
 
@@ -1496,7 +1497,7 @@ class HPredicate {
     */
     function getFieldValue(  ){
 
-        global $mysqli, $params_global;
+        global $mysqli, $params_global, $currUserID;
         
         $this->case_sensitive = false;
 
@@ -1589,12 +1590,16 @@ class HPredicate {
             
             if($this->pred_type=='addedby' || $this->pred_type=='owner')
             {
+                
+                
                 //if value is not numeric (user id), find user id by user login name
                 $values = explode(',',$this->value);
                 $userids = array();
                 foreach($values as $username){
                     if(is_numeric($username)){
                         $userids[] = $username;        
+                    }else if(strtolower($username)=='currentuser' || strtolower($username)=='current_user'){
+                        $userids[] = $currUserID;
                     }else{
                          $username = mysql__select_value($mysqli, 'select ugr_ID from sysUGrps where ugr_Name = "'
                                 .$mysqli->real_escape_string($username).'" limit 1');

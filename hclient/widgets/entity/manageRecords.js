@@ -863,7 +863,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     .click(function(){
 
            //
-           //
+           // change ownership
            //             
            function __assignOwnerAccess(context){
 
@@ -873,6 +873,9 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     var vals = ele.editing_input('getValues');
                     
                     if(vals[0]!=context.OwnerUGrpID){
+                        if(context.OwnerUGrpID=='current_user') 
+                            context.OwnerUGrpID = window.hWin.HAPI4.user_id();
+                        
                         ele.editing_input('setValue',[context.OwnerUGrpID]);
                         ele.editing_input('isChanged', true);
                         
@@ -1554,7 +1557,11 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             }
             
             function __onAddNewRecord(){
-
+                
+                if(that.options.new_record_params['OwnerUGrpID']=='current_user') {
+                    that.options.new_record_params.OwnerUGrpID = window.hWin.HAPI4.user_id();
+                }
+                
                 if(that.options.new_record_params['details']){                     
                     //need to use save because method "add" inserts only header
                     window.hWin.HAPI4.RecordMgr.saveRecord( that.options.new_record_params,
@@ -1611,6 +1618,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 
                 if(!(that.options.new_record_params.OwnerUGrpID>=0)){
                     that.options.new_record_params.OwnerUGrpID = add_rec_prefs[1];    
+                }else if (that.options.new_record_params.OwnerUGrpID=='current_user') {
+                    that.options.new_record_params.OwnerUGrpID = window.hWin.HAPI4.user_id();
                 }
                 if (!(window.hWin.HAPI4.is_admin() || window.hWin.HAPI4.is_member(add_rec_prefs[1]))) {
                     that.options.new_record_params.OwnerUGrpID = 0; //default to eveyone window.hWin.HAPI4.currentUser['ugr_ID'];    
