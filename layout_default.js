@@ -48,6 +48,7 @@ var cfg_widgets = [
     {id:'heurist_mainMenu', name:'Main Menu', widgetname:'mainMenu', script:'hclient/widgets/dropdownmenus/mainMenu.js'},
     {id:'heurist_resultList', name:'Search Result', widgetname:'resultList', script:'hclient/widgets/viewers/resultList.js'},
     {id:'heurist_resultListExt', name:'&nbsp;&nbsp;&nbsp;', widgetname:'recordListExt', script:'hclient/widgets/viewers/recordListExt.js'},
+    {id:'heurist_resultListCollection', name:'Records Collection', widgetname:'resultListCollection', script:'hclient/widgets/viewers/resultListCollection.js'},
 
     {id:'heurist_Map', name:'Map-Timeline', title:'Map and timeline', widgetname:'app_timemap', script:'hclient/widgets/viewers/app_timemap.js'},  // map in iframe
     {id:'heurist_Map2', name:'Map new', title:'Map and timeline', widgetname:'app_timemap', script:'hclient/widgets/viewers/app_timemap.js'},  // map in iframe

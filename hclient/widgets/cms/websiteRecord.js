@@ -951,7 +951,7 @@ function hCmsEditing(_options) {
                             s = s + '\nheight:50px;\nwidth:400px;';        
                        }else {
                            s = s + 'border:1px solid gray;'
-                           if(val=='heurist_Navigation'){
+                           if(val=='heurist_Navigation' || val=='heurist_resultListCollection'){
                                 s = s + '\nheight:50px;\nwidth:100%;';        
                            }else if(val=='heurist_SearchTree'){
                                 s = s + '\nheight:100%;\nwidth:300px;';        

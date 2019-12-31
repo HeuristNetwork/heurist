@@ -16,6 +16,7 @@
             <option value="heurist_Search" data-name="search">Search field (with standard query builder)</option>
             <option value="heurist_SearchTree" data-name="saved searches">Saved searches (simple &amp; facet searches)</option>
             <option value="heurist_resultList" data-name="results list">Search results (list or thumbnails)</option>
+            <option value="heurist_resultListCollection" data-name="collection">Records collection</option>
             <option value="heurist_Map" data-name="map/timeline">Map and timeline</option>
             <option value="heurist_Graph" data-name="network diagram">Network graph</option>
             <option value="heurist_resultListExt" data-name="custom report">Custom report</option>
@@ -124,6 +125,20 @@
         <input name="show_url_as_link" type="checkbox" checked/>
     </div>
 
+    <div  class="heurist_resultListCollection">
+        <div class="header"><label>Instructions</label></div>
+        <input name="instructionText" value="Please search for the map document" size="60"/>
+    </div>
+    <div  class="heurist_resultListCollection">
+        <div class="header"><label>Action</label></div>
+        <label><input id="rsc_Mode1" type="radio" name="action_mode" value="map" checked/>Create Map</label>&nbsp;
+        <label><input id="rsc_Mode2" type="radio" name="action_mode" value="filter" disabled="disabled"/>Save as search</label>
+    </div>
+    <div  class="heurist_resultListCollection">
+        <div class="header"><label>Target database</label></div>
+        <input name="target_db" value=""/>
+    </div>
+    
 
     <!-- mapping -->    
     <div class="heurist_Map">

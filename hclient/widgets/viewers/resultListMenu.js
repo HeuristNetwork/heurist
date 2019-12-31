@@ -170,9 +170,9 @@ $.widget( "heurist.resultListMenu", {
         this.menu_Collected.remove();
         this.btn_Recode.remove();
         this.menu_Recode.remove();
-        this.btn_Shared.reSmove();
+        this.btn_Shared.remove();
         this.menu_Shared.remove();
-        this.btn_Reorder.reSmove();
+        this.btn_Reorder.remove();
         this.divMainMenuItems.remove();
     },
 
