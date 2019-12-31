@@ -617,7 +617,7 @@ CREATE TABLE sysIdentification (
   sys_eMailImapPassword varchar(40) default NULL COMMENT 'password for imap email server',
   sys_IncomingEmailAddresses varchar(4000) default NULL COMMENT 'Comma-sep list of incoming email addresses for archiving emails visible to all admins',
   sys_TargetEmailAddresses varchar(255) default NULL COMMENT 'Comma-sep list for selecting target for sending records as data, see also ugr_TargetEmailAddresses',
-  sys_UGrpsDatabase varchar(63) default NULL COMMENT 'Full name of SQL database containing user tables, null = use internal users/groups tables',
+  sys_UGrpsDatabase varchar(63) default NULL COMMENT 'Comma-delimited list of databases which share user credentials (synched on user addition). Databases must mutually specify one-another',
   sys_OwnerGroupID smallint(5) unsigned NOT NULL default '1' COMMENT 'Workgroup which owns/administers this database, 1 by default',
   sys_dbName varchar(63) NOT NULL default 'Please enter a DB name ...' COMMENT 'A short descriptive display name for this database, distinct from the name in the URL',
   sys_dbOwner varchar(250) default NULL COMMENT 'Information on the owner of the database, may be a URL reference',
