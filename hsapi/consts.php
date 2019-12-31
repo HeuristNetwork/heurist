@@ -243,6 +243,7 @@ $rtDefines = array(
     'RT_MAP_DOCUMENT' => array(3, 1019), // HeuristReferenceSet DB 3: Map document, layers and queries for new map function Oct 2014
     'RT_MAP_LAYER' => array(3, 1020),     
     'RT_QUERY_SOURCE' => array(3, 1021),  //RT_MAPABLE_QUERY
+    'RT_TLCMAP_DATASET' => array(1271, 54),     
 
     //Web content
     'RT_WEB_CONTENT' => array(1147, 25),

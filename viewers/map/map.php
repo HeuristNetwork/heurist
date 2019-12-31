@@ -351,6 +351,7 @@ $system->defineConstants();
                                 $msg = "Map Document";
                                 break;
                             case "RT_MAP_LAYER":
+                            case "RT_TLCMAP_DATASET":
                                 $msg = "Heurist Map Layer";
                                 break;
                         }

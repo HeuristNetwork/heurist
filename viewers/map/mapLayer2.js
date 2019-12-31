@@ -54,7 +54,8 @@ function hMapLayer2( _options ) {
         var rectypeID = _recordset.fld(_record, 'rec_RecTypeID');
 
         if(rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_LAYER'] 
-           || rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_QUERY_SOURCE']){
+            || rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_TLCMAP_DATASET']
+            || rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_QUERY_SOURCE']){
                
                
              if(options.recordset){

@@ -33,6 +33,7 @@ function hMapDocument( _options )
     },
     
     RT_MAP_DOCUMENT = 0,
+    RT_TLCMAP_DATASET = 0,
     RT_MAP_LAYER = 0,
     DT_MAP_LAYER = 0,
     DT_DATA_SOURCE = 0,
@@ -61,6 +62,7 @@ function hMapDocument( _options )
         options.container = $(options.container);
         
         RT_MAP_DOCUMENT = window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_DOCUMENT'];
+        RT_TLCMAP_DATASET = window.hWin.HAPI4.sysinfo['dbconst']['RT_TLCMAP_DATASET'];
         RT_MAP_LAYER = window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_LAYER'];
         DT_MAP_LAYER = window.hWin.HAPI4.sysinfo['dbconst']['DT_MAP_LAYER'];
         DT_DATA_SOURCE = window.hWin.HAPI4.sysinfo['dbconst']['DT_DATA_SOURCE'];
@@ -123,7 +125,9 @@ function hMapDocument( _options )
                 {
                     var record = records[idx];
                     
-                    if(resdata.fld(record, 'rec_RecTypeID')==RT_MAP_LAYER){ //ignore sources
+                    if(resdata.fld(record, 'rec_RecTypeID')==RT_MAP_LAYER
+                        || resdata.fld(record, 'rec_RecTypeID')==RT_TLCMAP_DATASET)
+                    { //ignore sources
                         var recID  = resdata.fld(record, 'rec_ID'),
                         recName = resdata.fld(record, 'rec_Title');
                         
@@ -152,13 +156,20 @@ function hMapDocument( _options )
 
 //{"any":[{"ids":mapdoc_id},{"all":{"t":RT_MAP_LAYER,"linkedfrom":mapdoc_id}}]},    //mapdoc and layer linked to given mapdoc     
 //{"t":RT_MAP_LAYER,"linkedfrom":mapdoc_id},  //layers linked to given mapdoc
-        
+
             var request = {
                         q:{"t":RT_MAP_LAYER,"linkedfrom":mapdoc_id},  //layers linked to given mapdoc
                         rules:[{"query":"linkedfrom:"+RT_MAP_LAYER+"-"+DT_DATA_SOURCE}], //data sources linked to layers
                         w: 'a',
                         detail: 'detail',
                         source: 'map_document'};
+
+            if(RT_TLCMAP_DATASET>0){
+                request['q'] = {"t":RT_MAP_LAYER+','+RT_TLCMAP_DATASET,"linkedfrom":mapdoc_id};
+                request['q'] = [{"query":"linkedfrom:"+DT_DATA_SOURCE}];
+            }
+
+        
             //perform search        
             window.hWin.HAPI4.RecordMgr.search(request,
                 function(response){
@@ -213,7 +224,8 @@ function hMapDocument( _options )
                 var record = records[idx];
                 var recID  = resdata.fld(record, 'rec_ID');
                 
-                if(resdata.fld(record, 'rec_RecTypeID')==RT_MAP_LAYER){
+                if(resdata.fld(record, 'rec_RecTypeID')==RT_MAP_LAYER
+                    ||resdata.fld(record, 'rec_RecTypeID')==RT_TLCMAP_DATASET){
                     
                     var datasource_recID = resdata.fld(record, DT_DATA_SOURCE);    
 
@@ -260,8 +272,8 @@ function hMapDocument( _options )
             if(!$.isArray(rec_ids)) rec_ids = [rec_ids];
         
             var request = {
-                        q: {"ids":rec_ids.join(',')}, 
-                        rules:[{"query":"linkedfrom:"+RT_MAP_LAYER+"-"+DT_DATA_SOURCE}], //data sources linked to layers
+                        q: {"ids":rec_ids.join(',')},  //+RT_MAP_LAYER+"-" 
+                        rules:[{"query":"linkedfrom:"+DT_DATA_SOURCE}], //data sources linked to layers
                         w: 'a',
                         detail: 'detail',
                         source: 'map_document'};
@@ -282,7 +294,8 @@ function hMapDocument( _options )
                                 
                                 map_documents_content[mapdoc_id].addRecord2(recID, record);
                                 
-                                if(resdata.fld(record, 'rec_RecTypeID')==RT_MAP_LAYER)
+                                if(resdata.fld(record, 'rec_RecTypeID')==RT_MAP_LAYER 
+                                    || resdata.fld(record, 'rec_RecTypeID')==RT_TLCMAP_DATASET)
                                 {
                                     var datasource_recID = resdata.fld(record, DT_DATA_SOURCE);    
                                     var datasource_record = resdata.getById( datasource_recID );
@@ -614,7 +627,8 @@ function hMapDocument( _options )
                 if(idx)
                 {
                     var record = records[idx];
-                    if(resdata.fld(record, 'rec_RecTypeID')==RT_MAP_LAYER && record['layer']){
+                    var rtype = resdata.fld(record, 'rec_RecTypeID');
+                    if( (rtype==RT_MAP_LAYER || rtype==RT_TLCMAP_DATASET) && record['layer']){
                         (record['layer']).setVisibility( is_visibile );
                     }
                 }
@@ -633,7 +647,8 @@ function hMapDocument( _options )
                     if(idx)
                     {
                         var record = records[idx];
-                        if(resdata.fld(record, 'rec_RecTypeID')==RT_MAP_LAYER && record['layer']){
+                        var rtype = resdata.fld(record, 'rec_RecTypeID');
+                        if( (rtype==RT_MAP_LAYER || rtype==RT_TLCMAP_DATASET) && record['layer']){
                             (record['layer']).removeLayer();
                             delete record['layer'];
                         }
@@ -703,7 +718,8 @@ function hMapDocument( _options )
                         if(idx)
                         {
                             var record = records[idx];
-                            if(resdata.fld(record, 'rec_RecTypeID')==RT_MAP_LAYER && record['layer']){
+                            var rtype = resdata.fld(record, 'rec_RecTypeID');
+                            if( (rtype==RT_MAP_LAYER || rtype==RT_TLCMAP_DATASET) && record['layer']){
                                 ids.push((record['layer']).getNativeId());
                             }
                         }
@@ -727,7 +743,7 @@ function hMapDocument( _options )
                             edit_mode: 'popup',
                             selectOnSave: true, //it means that select popup will be closed after add/edit is completed
                             title: window.hWin.HR('Select or create a layer record'),
-                            rectype_set: RT_MAP_LAYER,
+                            rectype_set: [RT_MAP_LAYER, RT_TLCMAP_DATASET],
                             parententity: 0,
                             
                             onselect:function(event, data){
