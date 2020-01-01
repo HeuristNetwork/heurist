@@ -50,16 +50,19 @@ $.widget( "heurist.resultListCollection", {
         this._collectionURL = window.hWin.HAPI4.baseURL + "hsapi/utilities/manageCollection.php";
 
         this.element
-        .css('font-size', '1.3em')
         // prevent double click to select text
         .disableSelection();
         
-        this.labelCollectionInfo = $('<div style="display:inline-block;padding:4px 2px 4px 14px">').appendTo(this.element);
+        //padding:4px 2px 4px 14px
+        this.labelCollectionInfo = $('<div style="display:inline-block;vertical-align:bottom;min-height:21px;font-weight:bold;padding-right:30px">')
+                .appendTo(this.element);
         this.labelInstruction = $('<div>').text(this.options.instructionText)
                             .addClass('heurist-helper2').css({float:'right',padding:'4px'}).appendTo(this.element);
         
         //create set of buttons
-        this.divMainMenuItems = $('<ul>').addClass('horizontalmenu').appendTo(this.element);
+        this.divMainMenuItems = $('<ul>').addClass('horizontalmenu')
+                .css({display:'inline-block','font-style':'italic'})
+                .appendTo(this.element);
 
         this._initBtn('Add');
         this._initBtn('Remove');
@@ -149,8 +152,10 @@ $.widget( "heurist.resultListCollection", {
             text: window.hWin.HR(label), href:'#'
         });//IJ 2015-06-26 .css('font-weight','bold');
         
-        this['btn_'+name] = $('<li data-action="'+name+'">').append(link)
-        .appendTo( this.divMainMenuItems );
+        this['btn_'+name] = $('<li data-action="'+name+'">')
+            .css({background: 'lightgray','margin-right':'10px'})
+            .append(link)
+            .appendTo( this.divMainMenuItems );
 
         
         this._on( this['btn_'+name], {
@@ -193,7 +198,13 @@ $.widget( "heurist.resultListCollection", {
 
         }else if(action == "Action"){
 
-            //this.collectionSave();
+            if(this.options.action_mode=='map'){
+                
+                this.createMapSpace();
+            }else{
+                this.collectionSave();
+            }
+            
         }
 
     },
@@ -288,10 +299,15 @@ $.widget( "heurist.resultListCollection", {
                     window.open(url, "_blank");    
                 }    
                 
+        }else{
+            window.hWin.HEURIST4.msg.showMsgFlash('Please add records to the collection for list');
         }
 
     },
 
+    //
+    //
+    //
     collectionSave: function(){
 
         if(!Hul.isempty(this._collection)){
@@ -305,6 +321,42 @@ $.widget( "heurist.resultListCollection", {
             }
         }
 
+    },
+    
+    
+    //
+    //
+    //
+    createMapSpace: function(){
+
+        if(!Hul.isempty(this._collection)){
+            
+            //create virtual record set for temporal mapspace
+            
+            
+            //open
+            var url = window.hWin.HAPI4.baseURL 
+            +'viewers/map/mapPreview.php?db='+window.hWin.HAPI4.database
+            +'&ids='+this._collection.join(",");
+
+            var init_params = {'ids': this._collection.join(",") };
+
+            window.hWin.HEURIST4.msg.showDialog(url, {height:'900', width:'1000',
+                window: window.hWin,  //opener is top most heurist window
+                dialogid: 'map_preview_dialog',
+                params: init_params,
+                title: window.hWin.HR('Preview mapspace'),
+                class:'ui-heurist-bg-light',
+                callback: function(location){
+                    if( !window.hWin.HEURIST4.util.isempty(location) ){
+                        
+                    }
+                }
+            } );
+        
+        }else{
+            window.hWin.HEURIST4.msg.showMsgFlash('Please add records to the collection for map');
+        }
     },
     
     collectionOnUpdate: function(that, results) {
@@ -325,7 +377,9 @@ $.widget( "heurist.resultListCollection", {
             Hul.sendRequest(this._collectionURL, params, this, this.collectionOnUpdate);
         }else{
             //window.hWin.HR('Collected')
-            this.labelCollectionInfo.html( window.hWin.HR('Collection') + (this._collection.length>0?':'+this._collection.length:''));
+            this.labelCollectionInfo.html( window.hWin.HR('Collection') 
+                + ': '+ (this._collection.length>0?this._collection.length:'0')
+                + ' datasets');
         }
     }
 

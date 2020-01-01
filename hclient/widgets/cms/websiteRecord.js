@@ -946,12 +946,14 @@ function hCmsEditing(_options) {
                    if(is_initial_set){
                        s = 'background:white;\nposition:relative;\n';
 
-                       if(val=='heurist_Search'){
+                       if(val=='heurist_resultListCollection'){
+                            s = s + 'border:0px;'
+                       }else if(val=='heurist_Search'){
                             s = s + 'border:0px solid gray;'
                             s = s + '\nheight:50px;\nwidth:400px;';        
                        }else {
                            s = s + 'border:1px solid gray;'
-                           if(val=='heurist_Navigation' || val=='heurist_resultListCollection'){
+                           if(val=='heurist_Navigation'){
                                 s = s + '\nheight:50px;\nwidth:100%;';        
                            }else if(val=='heurist_SearchTree'){
                                 s = s + '\nheight:100%;\nwidth:300px;';        

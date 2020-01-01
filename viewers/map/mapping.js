@@ -389,6 +389,10 @@ $.widget( "heurist.mapping", {
         this.mapManager.createNewMapDocument( event );
     },
 
+    createVirtualMapDocument: function( layer_ids ) 
+    {
+        this.mapManager.createVirtualMapDocument( layer_ids );
+    },
     
     //
     //
@@ -1808,7 +1812,7 @@ $.widget( "heurist.mapping", {
         function __parseval(val){
             if(val===false || val===true) return val;
             if(!window.hWin.HEURIST4.util.isempty(val)){
-                val = val.toLowerCase();
+                if(typeof val == 'string') val = val.toLowerCase();
                 return !(val==0 || val=='off' || val=='no' || val=='n');
             }else{
                 return false;

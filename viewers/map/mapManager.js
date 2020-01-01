@@ -50,7 +50,8 @@ L.control.manager = function(opts) {
 }
 
 //--------------------------------
-
+// add map doc control - see createNewMapDocument
+//
 L.Control.Addmapdoc = L.Control.extend({
     
     _mapwidget: null,
@@ -69,12 +70,14 @@ L.Control.Addmapdoc = L.Control.extend({
     
     onAdd: function(map) {
         
+        if ( !$.isFunction($('body').hMapPublish) ) return;
+        
         var container = L.DomUtil.create('div','leaflet-bar');
 
         L.DomEvent
           .disableClickPropagation(container)
           .disableScrollPropagation(container);
-        
+          
         this.mapPublish = new hMapPublish({container: $(container), mapwidget:this._mapwidget});
         
         $('<a>').attr('title', window.hWin.HR('Create new map document'))
@@ -260,6 +263,9 @@ function hMapManager( _options )
 
     }
     
+    //
+    //  adds new mapdocument record
+    //
     function _createNewMapDocument(event){
         
                     window.hWin.HEURIST4.util.stopEvent(event);
@@ -343,20 +349,20 @@ function hMapManager( _options )
             if(resdata==null){
 
                 var $res = {};  
-                $res['key'] = 1236;
-                $res['title'] = 'TTTTTTEST';
+                $res['key'] = 99999999;
+                $res['title'] = 'temp';
                 $res['type'] = 'mapdocument';
                 $res['lazy'] = true;
                     
             }else{
 
-            var rec = resdata.getFirstRecord();
-        
-            var $res = {};  
-            $res['key'] = resdata.fld(rec, 'rec_ID');
-            $res['title'] = resdata.fld(rec, 'rec_Title');
-            $res['type'] = 'mapdocument';
-            $res['lazy'] = true;
+                var rec = resdata.getFirstRecord();
+            
+                var $res = {};  
+                $res['key'] = resdata.fld(rec, 'rec_ID');
+                $res['title'] = resdata.fld(rec, 'rec_Title');
+                $res['type'] = 'mapdocument';
+                $res['lazy'] = true;
         
             }
             
@@ -933,8 +939,18 @@ function hMapManager( _options )
             
         },
         
+        //
+        // adds new mapdoc record
+        //
         createNewMapDocument: function(event){
             _createNewMapDocument(event);
+        },
+
+        //
+        // creates virtual mapspace
+        //
+        createVirtualMapDocument: function(layer_ids){
+            mapDocuments.createVirtualMapDocument(layer_ids);
         },
         
         // 

@@ -29,7 +29,7 @@ function hMapDocument( _options )
     // default options
     options = {
         container:null,  //@todo all ui via mapcontrol
-        mapwidget:null, 
+        mapwidget:null,  //reference back to mapping.js
     },
     
     RT_MAP_DOCUMENT = 0,
@@ -158,18 +158,28 @@ function hMapDocument( _options )
 //{"t":RT_MAP_LAYER,"linkedfrom":mapdoc_id},  //layers linked to given mapdoc
 
             var request = {
-                        q:{"t":RT_MAP_LAYER,"linkedfrom":mapdoc_id},  //layers linked to given mapdoc
-                        rules:[{"query":"linkedfrom:"+RT_MAP_LAYER+"-"+DT_DATA_SOURCE}], //data sources linked to layers
                         w: 'a',
                         detail: 'detail',
-                        source: 'map_document'};
+                        source: 'map_document',
+                        rules: [{"query":"linkedfrom:"+RT_MAP_LAYER+"-"+DT_DATA_SOURCE}]
+            };
 
+
+            if($.isArray(mapdoc_id)){ //this is load of temp mapspace with given set of layers
+                //"t":RT_MAP_LAYER+','+RT_TLCMAP_DATASET,
+                request['q'] = {"ids":mapdoc_id.join(',')};
+                mapdoc_id = 'temp';
+            }else{
+                if(RT_TLCMAP_DATASET>0){
+                    request['q'] = {"t":RT_MAP_LAYER+','+RT_TLCMAP_DATASET,"linkedfrom":mapdoc_id};
+                }else{
+                    request['q'] = {"t":RT_MAP_LAYER,"linkedfrom":mapdoc_id};  //layers linked to given mapdoc
+                }
+            }
             if(RT_TLCMAP_DATASET>0){
-                request['q'] = {"t":RT_MAP_LAYER+','+RT_TLCMAP_DATASET,"linkedfrom":mapdoc_id};
-                request['q'] = [{"query":"linkedfrom:"+DT_DATA_SOURCE}];
+                request['rules'].push({"query":"linkedfrom:"+RT_TLCMAP_DATASET+"-"+DT_DATA_SOURCE});
             }
 
-        
             //perform search        
             window.hWin.HAPI4.RecordMgr.search(request,
                 function(response){
@@ -198,16 +208,16 @@ function hMapDocument( _options )
     function _openMapDocument(mapdoc_id, deferred){
         
         //get list of layers and datasets
-        if(!map_documents_content[mapdoc_id]){
+        if($.isArray(mapdoc_id) || !map_documents_content[mapdoc_id]){ //if array this is set of layers for temp mapspace
             //map doc is not loaded yet
-            _loadMapDocumentContent(mapdoc_id, deferred);
+            _loadMapDocumentContent(mapdoc_id, deferred);    
             return;
         }else if(map_documents_content[mapdoc_id]=='error'){
             //prevent loop
             return;
         }
         
-        if(DT_ZOOM_KM_POINT>0){
+        if(DT_ZOOM_KM_POINT>0 && mapdoc_id!='temp'){
             var record2 = map_documents.getById( mapdoc_id );
             var val = map_documents.fld(record2, DT_ZOOM_KM_POINT);
             if(parseFloat(val)>0){
@@ -258,6 +268,8 @@ function hMapDocument( _options )
         if(deferred){
             var treedata = _getTreeData(mapdoc_id);
             deferred.resolve( treedata ); //returns data to fancytree to render child layers for given mapdocument
+        }else if(mapdoc_id=='temp'){
+            that.zoomToMapDocument(mapdoc_id);
         }
                                 
     }
@@ -431,6 +443,25 @@ function hMapDocument( _options )
         },
         
         //
+        //
+        //
+        createVirtualMapDocument: function(layer_ids){
+            that.closeMapDocument('temp'); //clear old one
+            if(!$.isArray(layer_ids)){
+                if(window.hWin.HEURIST4.util.isNumber(layer_ids)){
+                    layer_ids = [parseInt(layer_ids)];
+                }else{
+                    layer_ids = layer_ids.split(',');
+                }
+            }
+            if(window.hWin.HEURIST4.util.isArrayNotEmpty(layer_ids)){
+                _openMapDocument(layer_ids);    
+            }
+            
+            //if(map_documents==null) _loadMapDocuments(); //init list of mapdocs
+        },
+        
+        //
         //returns layer record or mapdocument record
         //
         getLayer: function(mapdoc_id, rec_id){
@@ -439,7 +470,7 @@ function hMapDocument( _options )
                 var _record = null;
                 if(rec_id>0){
                     _record = (map_documents_content[mapdoc_id]).getById( rec_id );
-                }else{
+                }else if(map_documents) {
                     _record = map_documents.getById( mapdoc_id );
                 }
                 if(_record) return _record; 
@@ -693,14 +724,18 @@ function hMapDocument( _options )
         //
         zoomToMapDocument: function(mapdoc_id){
 
+            var mapdoc_extent = null;
             
-            var record2 = map_documents.getById( mapdoc_id );
+            if(map_documents!=null && mapdoc_id!='temp'){
+            
+                var record2 = map_documents.getById( mapdoc_id );
 
-            var mapdoc_extent = window.hWin.HEURIST4.geo.getWktBoundingBox(
-                        map_documents.getFieldGeoValue(record2, DT_GEO_OBJECT));
-            if(mapdoc_extent==null){
-                mapdoc_extent = window.hWin.HEURIST4.geo.getHeuristBookmarkBoundingBox(
-                        map_documents.fld(record2, DT_MAP_BOOKMARK));
+                mapdoc_extent = window.hWin.HEURIST4.geo.getWktBoundingBox(
+                            map_documents.getFieldGeoValue(record2, DT_GEO_OBJECT));
+                if(mapdoc_extent==null){
+                    mapdoc_extent = window.hWin.HEURIST4.geo.getHeuristBookmarkBoundingBox(
+                            map_documents.fld(record2, DT_MAP_BOOKMARK));
+                }
             }    
                 
             if(mapdoc_extent!=null){

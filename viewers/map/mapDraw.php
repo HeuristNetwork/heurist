@@ -210,7 +210,7 @@ console.log('load google map api')
                         
                        var is_checked = $(e.target).is(':checked');
                        var el_name = $(e.target).attr('id');
-console.log(el_name+'  '+is_checked);
+//console.log(el_name+'  '+is_checked);
                        var el_text = $(e.target).parents('#get-set-coordinates').find('#geodata_textarea');
 
 
