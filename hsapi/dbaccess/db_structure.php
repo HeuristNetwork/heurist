@@ -138,7 +138,7 @@
                 $dty_ConceptID = "if(dty_OriginatingDBID, concat(cast(dty_OriginatingDBID as char(5)),'-',cast(dty_IDInOriginatingDB as char(5))), '') as dty_ConceptID";
             }
             array_push($colNames, $dty_ConceptID); 
-
+            
         $query = "select " . join(",", $colNames) .
         " from defRecStructure".
         " left join defDetailTypes on rst_DetailTypeID = dty_ID".

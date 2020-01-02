@@ -70,7 +70,7 @@ private static function readDataFile($filename, $type=null, $validate=true){
         // and setting default path should only occur where no file path is specified.
         if(strpos($filename,'websiteStarterRecords')===0 || strpos($filename,'webpageStarterRecords')===0){
             $filename = HEURIST_DIR.'hclient/widgets/cms/'.$filename;
-        }else{
+        }else if (!file_exists($filename)) {
             $filename = HEURIST_SCRATCH_DIR.$filename;    
         }
         
@@ -402,6 +402,63 @@ public static function importDefintions($filename, $session_id){
     }
     
     return $res;
+}
+
+/**
+    Import records from another database on the same server
+    
+1. saves import file into scratch folder - see record_output
+2. 
+
+    
+*/
+public static function importRecordsFromDatabase($params, $session_id){
+    
+    self::initialize();
+    
+//1. saves import file into scratch folder - see record_output
+    $remote_path = HEURIST_BASE_URL.'hsapi/controller/record_output.php?format=json&depth=0&db='
+            .$params['source_db'];//.'&q='.$query;
+    
+    $search_params = array();        
+    if(@$params['recID']>0){
+        $params['q'] = 'ids:'.$params['recID'];
+    }else if(@$params['ids']){
+        $params['q'] = 'ids:'.implode(',', prepareIds($params['ids']));
+    }
+    $remote_path = $remote_path.'&q='.$params['q'];
+
+    if(@$params['rules']!=null){
+        $remote_path = $remote_path.'&rules='.$params['rules'];
+        if(@$params['rulesonly']==true || @$params['rulesonly']==1){
+            $remote_path = $remote_path.'&rulesonly=1';
+        }
+    }
+    
+    //convert tlcmap dataset to map layer and parent mapspace
+    if(@$params['tlcmapspace']!=null){
+        $remote_path = $remote_path.'&tlcmap='.urlencode($params['tlcmapspace']);    
+    }
+    
+
+    $heurist_path = tempnam(HEURIST_SCRATCH_DIR, "_temp_"); // . $file_id;
+
+    $filesize = saveURLasFile($remote_path, $heurist_path);
+
+//2. import records
+    if($filesize>0 && file_exists($heurist_path)){
+        //
+        $res = self::importRecords($heurist_path, $session_id);
+        
+        unlink($heurist_path);
+        
+        return $res;
+    }else{
+        self::$system->addError(HEURIST_ERROR, 
+            'Cannot download records from '.$params['source_db'].'.  '.$remote_path.' to '.$heurist_path);
+        return false;
+    }
+    
 }
 
 //

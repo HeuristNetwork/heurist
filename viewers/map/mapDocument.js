@@ -50,6 +50,7 @@ function hMapDocument( _options )
     
     map_documents = null, //recordset - all loaded documents
     map_documents_content = {}, //mapdoc_id=>recordset with all layers and datasources of document
+    //mapdoc_id - 0 current search, temp temporal mapspace, or record id
     
     _uniqueid = 1;   
     
@@ -194,7 +195,7 @@ function hMapDocument( _options )
                     }else {
                         map_documents_content[mapdoc_id] = 'error';
                         window.hWin.HEURIST4.msg.showMsgErr(response);
-                        if(deferred) deferred.reject( ); //deferred.resolve( [] );
+                        if(deferred) deferred.reject(); //deferred.resolve( [] );
                     }
 
                 }
@@ -268,8 +269,6 @@ function hMapDocument( _options )
         if(deferred){
             var treedata = _getTreeData(mapdoc_id);
             deferred.resolve( treedata ); //returns data to fancytree to render child layers for given mapdocument
-        }else if(mapdoc_id=='temp'){
-            that.zoomToMapDocument(mapdoc_id);
         }
                                 
     }
@@ -445,7 +444,7 @@ function hMapDocument( _options )
         //
         //
         //
-        createVirtualMapDocument: function(layer_ids){
+        createVirtualMapDocument: function(layer_ids, deferred){
             that.closeMapDocument('temp'); //clear old one
             if(!$.isArray(layer_ids)){
                 if(window.hWin.HEURIST4.util.isNumber(layer_ids)){
@@ -455,7 +454,10 @@ function hMapDocument( _options )
                 }
             }
             if(window.hWin.HEURIST4.util.isArrayNotEmpty(layer_ids)){
-                _openMapDocument(layer_ids);    
+                _openMapDocument(layer_ids, deferred);    
+                return;
+            }else{
+                return;
             }
             
             //if(map_documents==null) _loadMapDocuments(); //init list of mapdocs
@@ -476,6 +478,13 @@ function hMapDocument( _options )
                 if(_record) return _record; 
             }
             return null;
+        },
+
+        //
+        // returns all records for given mapspace
+        //
+        getMapDocumentRecordset: function(mapdoc_id){
+            return map_documents_content[mapdoc_id];
         },
         
         

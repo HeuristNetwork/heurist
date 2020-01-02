@@ -55,107 +55,138 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
 
 <script type="text/javascript">
 
-            var mapping, initial_layers, menu_datasets, btn_datasets, zoom_with_delay = true;
+    var mapping, initial_layers, target_database;
 
-            // Callback function on map initialization
-            function onPageInit(success){
-                
-                if(!success) return;
-
-                /* init helper (see utils.js)
-                window.hWin.HEURIST4.ui.initHelper( $('#btn_help'), 
-                            'Mapping Drawing Overview', 
-                            '../../context_help/mapping_drawing.html #content');
-                */            
-
-                handleApiReady();
-/*
-                if (typeof window.hWin.google === 'object' && typeof window.hWin.google.maps === 'object') {
-console.log('google map api: already loaded')                    
-                    handleApiReady();
-                }else{                            
-console.log('load google map api')                    
-                    $.getScript('https://maps.googleapis.com/maps/api/js?key=AIzaSyDtYPxWrA7CP50Gr9LKu_2F08M6eI8cVjk'
-                    +'&libraries=drawing,geometry&callback=handleApiReady');                                           
-                    //AIzaSyCan9ZqKPnKXuzdb2-pmES_FVW2XerN-eE
-                }
-*/
-            } //onPageInit
-            
-            function handleApiReady(){
-         
-                
-                
-                var layout_params = {};
-                layout_params['notimeline'] = '1';
-                layout_params['nocluster'] = '1'
-            
-                layout_params['controls'] = 'legend';//',bookmark,geocoder,draw';
-                layout_params['legend'] = 'basemaps';//',mapdocs';
-                layout_params['published'] = 1;//'1';
-                
-                initial_layers = window.hWin.HEURIST4.util.getUrlParameter('ids', location.search);
+    // Callback function on map initialization
+    function onPageInit(success){
         
-                mapping = $('#map_container').mapping({
-                    element_map: '#map_digitizer',
-                    layout_params:layout_params,
-                    oninit: onMapInit
-                });                
-                
-                //initialize buttons
-                $('#save-button').button().on({click:function()
-                {
-                    /*
-                    var res = mapping.mapping( 'drawGetWkt', true);
-                    
-                    if( !window.hWin.HEURIST4.util.isempty(res) ){    
-                        //type code is not required for new code. this is for backward capability
-                        var typeCode = 'm';
-                        if(res.indexOf('GEOMETRYCOLLECTION')<0 && res.indexOf('MULTI')<0){
-                            if(res.indexOf('LINESTRING')>=0){
-                                typeCode = 'l';
-                            }else if(res.indexOf('POLYGON')>=0){
-                                typeCode = 'pl';
-                            }else {
-                                typeCode = 'p';
-                            }
-                            
-                        }
-                        window.close({type:typeCode, wkt:res});    
-                    }
-                    */
-                }});
+        if(!success) return;
+
+        /* init helper (see utils.js)
+        window.hWin.HEURIST4.ui.initHelper( $('#btn_help'), 
+                    'Mapping Drawing Overview', 
+                    '../../context_help/mapping_drawing.html #content');
+        */            
+
+        handleApiReady();
+/*
+        if (typeof window.hWin.google === 'object' && typeof window.hWin.google.maps === 'object') {
+console.log('google map api: already loaded')                    
+            handleApiReady();
+        }else{                            
+console.log('load google map api')                    
+            $.getScript('https://maps.googleapis.com/maps/api/js?key=AIzaSyDtYPxWrA7CP50Gr9LKu_2F08M6eI8cVjk'
+            +'&libraries=drawing,geometry&callback=handleApiReady');                                           
+            //AIzaSyCan9ZqKPnKXuzdb2-pmES_FVW2XerN-eE
+        }
+*/
+    } //onPageInit
+    
+    function handleApiReady(){
+ 
+        
+        
+        var layout_params = {};
+        layout_params['notimeline'] = '1';
+        layout_params['nocluster'] = '1'
+    
+        layout_params['controls'] = 'legend';//',bookmark,geocoder,draw';
+        layout_params['legend'] = 'basemaps';//',mapdocs';
+        layout_params['published'] = 1;//'1';
+        
+        initial_layers = window.hWin.HEURIST4.util.getUrlParameter('ids', location.search);
+        target_database = window.hWin.HEURIST4.util.getUrlParameter('target_db', location.search);
+
+        mapping = $('#map_container').mapping({
+            element_map: '#map_digitizer',
+            layout_params:layout_params,
+            oninit: onMapInit
+        });                
+        
+        //initialize buttons
+        $('#save-button').button().on({click:function()
+        {
+            _exportMapSpace();
+        }});
+    }
+    
+    //
+    // called from showDialog
+    //
+    function assignParameters(params){
+        
+        if(params && params['ids']){
+            initial_layers = params['ids'];
+            if(params['target_db']){
+               target_database = params['target_db']; 
+            }
+        }else{
+            initial_layers = null;
+        }
+        onMapInit();
+    } 
+    
+    //
+    //
+    //           
+    function onMapInit(){
+        if(initial_layers){ //create virtual mapspace
+            //mapping.mapping( 'drawLoadWKT', initial_wkt, true);
+            mapping.mapping( 'createVirtualMapDocument', initial_layers);
+        }
+    }
+            
+            
+    //
+    // export layers and datasource to target database
+    //
+    function _exportMapSpace(){
+        
+            if(!window.hWin.HEURIST4.msg.checkLength($('#mapspace_name'),'','Define name of map',3,120)){
+                return;
             }
             
-            //
-            // called from showDialog
-            //
-            function assignParameters(params){
-                
-                zoom_with_delay = false;
-                if(params && params['ids']){
-                    initial_layers = params['ids'];
-                }else{
-                    initial_layers = null;
-                }
-                onMapInit();
-            } 
-            
-            //
-            //
-            //           
-            function onMapInit(){
-                if(initial_layers){ //create virtual mapspace
-                
-                    //mapping.mapping( 'drawLoadWKT', initial_wkt, true);
-                    mapping.mapping( 'createVirtualMapDocument', initial_layers);
-               
-                    if(zoom_with_delay){
-                        //setTimeout(function(){ mapping.mapping( 'drawZoomTo' ); }, 3000);
-                    }
-                    
-                }
+            var recordset = mapping.mapping( 'getMapDocumentRecordset', 'temp');
+            if(recordset==null || recordset.length()==0){
+                window.hWin.HEURIST4.msg.showMsgFlash('Temp mapspace is empty');
+                return;    
             }
+            
+            //check login t target database            
+            
+
+            //$('#divStep2').hide();
+            var session_id = Math.round((new Date()).getTime()/1000);  //for progress
+        
+            var request = { 
+                source_db: window.hWin.HAPI4.database,
+                db: target_database,
+                ids: recordset.getIds(),
+                tlcmapspace: $('#mapspace_name').val(),
+                action: 'import_records',
+                session: session_id,
+                id: window.hWin.HEURIST4.util.random()
+            };
+            
+            //todo _showProgress( session_id, 2 );
+                   
+            window.hWin.HAPI4.doImportAction(request, function( response ){
+                    
+                    if(response.status == window.hWin.ResponseStatus.OK){
+                        //_hideProgress(3);
+                        
+                        //response.data.count_imported
+                        var sMsg = 'Map saved. Exported '+response.data.count_imported
++' records. "Please go to My Maps" &gt; to edit the styling, to obtain the URL,'
++'or to obtain a snippet of html which will allow you to embed this map in an external website';
+                        
+                        window.hWin.HEURIST4.msg.showMsgDlg(sMsg);
+                    }else{
+                        //_hideProgress(2);
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                    }
+                });
+    }        
 
         </script>
         <style type="text/css">
@@ -176,7 +207,7 @@ console.log('load google map api')
                 </div>
                 <div style="padding:6px">
                     <label>Map title</label>
-                    <input size="60"/>
+                    <input size="60" id="mapspace_name"/>
                     <button id="save-button">Save Map</button>
                 </div>
             </div>

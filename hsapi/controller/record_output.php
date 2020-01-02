@@ -155,6 +155,12 @@
     $system->defineConstant('DT_START_DATE');
     $system->defineConstant('DT_END_DATE');
     $system->defineConstant('DT_SYMBOLOGY');
+
+    $system->defineConstant('RT_TLCMAP_DATASET');
+    $system->defineConstant('RT_MAP_LAYER');
+    $system->defineConstant('RT_MAP_DOCUMENT');
+    $system->defineConstant('DT_NAME');
+    $system->defineConstant('DT_MAP_LAYER');
         
     if($is_csv){
         
@@ -740,6 +746,16 @@ function output_Records($system, $data, $params){
     $fd_links = null;
     $links_cnt = 0;
     
+    //convert TLCMAP dataset to MAP_LAYER 
+    $is_tlc_export = ($params['tlcmap']!=null && defined('RT_TLCMAP_DATASET'));
+    $maplayer_fields = null;
+    $maplayer_records = array();
+    if($is_tlc_export){
+        //get list of detail types for MAP_LAYER
+        $maplayer_fields = mysql__select_list2($system->get_mysqli(),
+            'select rst_DetailTypeID from defRecStructure where rst_RecTypeID='.RT_MAP_LAYER);        
+    }
+    
     //OPEN BRACKETS
     if($params['format']=='geojson'){
 
@@ -859,14 +875,40 @@ XML;
         recordSearchRelatedIds($system, $records, 0, 0, $max_depth, $limit);
     }
     
+    //$is_constructed_record = false;
+    
     $idx = 0;
     while ($idx<count($records)){   //loop by record ids
     
         $recID = $records[$idx];
+        if(is_array($recID)){//$is_constructed_record
+            $record = $records[$idx];
+            $recID = $record['rec_ID'];
+        }else{
+            $record = recordSearchByID($system, $recID, ($params['format']!='gephi'), $retrieve_fields );
+        }
         $idx++;
-        $record = recordSearchByID($system, $recID, ($params['format']!='gephi'), $retrieve_fields );
         
         $rty_ID = $record['rec_RecTypeID'];
+        
+        if($is_tlc_export && $rty_ID==RT_TLCMAP_DATASET){
+            $record['rec_RecTypeID'] = RT_MAP_LAYER;
+            $rty_ID = RT_MAP_LAYER;
+            $new_details = array();
+            //remove redundant fields from RT_TLCMAP_DATASET
+            foreach($record["details"] as $dty_ID => $values){
+                if(in_array($dty_ID, $maplayer_fields)){
+                    $new_details[$dty_ID] = $values;                    
+                }
+            }
+            $record["details"] = $new_details;
+            
+            array_push($maplayer_records, $record['rec_ID']);
+            
+            //@todo - add db parameter for query datasource
+            //@todo - convert uploaded images to external url
+            
+        }
         
         if(!@$rt_counts[$rty_ID]){
             $rt_counts[$rty_ID] = 1;
@@ -935,6 +977,22 @@ XML;
             array_to_xml($record, $xml);
             //array_walk_recursive($record, array ($xml , 'addChild'));
             fwrite($fd, substr($xml->asXML(),38));
+        }
+        
+        
+        if($is_tlc_export && $idx==count($records)){
+            //add constructed mapspace record
+            $record['rec_ID'] = 999999999;
+            $record['rec_RecTypeID'] = RT_MAP_DOCUMENT;
+            $record['rec_Title'] = $params['tlcmap'];
+            $record['rec_URL'] = ''; 
+            $record['rec_ScratchPad'] = '';
+            $record["details"] = array(
+                DT_NAME=>array('1'=>$params['tlcmap']),
+                DT_MAP_LAYER=>array('2'=>implode(',', $maplayer_records))
+            );
+            $records[$idx] = $record;
+            $is_tlc_export = false; //avoid infinite loop
         }
     }//while records
     

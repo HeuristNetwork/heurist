@@ -217,8 +217,16 @@ if(!$system->init(@$_REQUEST['db'])){
         }else if($action=='import_records'){
             
             //returns count of imported records
-            $res = ImportHeurist::importRecords(@$_REQUEST['filename'], @$_REQUEST['session']
-                , @$_REQUEST['is_cms_init']==1, @$_REQUEST['is_cms_public']!=0);
+            if(@$_REQUEST['filename']!=null){
+                //filename - source hml or json file (in scratch), session - unique id for progress
+                $res = ImportHeurist::importRecords(@$_REQUEST['filename'], @$_REQUEST['session']
+                    , @$_REQUEST['is_cms_init']==1, @$_REQUEST['is_cms_public']!=0);
+            }else{
+                
+                $res = ImportHeurist::importRecordsFromDatabase(@$_REQUEST,
+                    @$_REQUEST['session'], @$_REQUEST['is_cms_public']!=0);
+                
+            }
             
         }else{
             $system->addError(HEURIST_INVALID_REQUEST, "Action parameter is missing or incorrect");                

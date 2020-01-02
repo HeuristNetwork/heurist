@@ -34,7 +34,7 @@ $.widget( "heurist.resultListCollection", {
         action_Function: null,
         
         action_mode: 'map', //or filter
-        instructionText: 'Please search for the map document',
+        instructionText: '',
         target_db: ''
     },
 
@@ -56,12 +56,10 @@ $.widget( "heurist.resultListCollection", {
         //padding:4px 2px 4px 14px
         this.labelCollectionInfo = $('<div style="display:inline-block;vertical-align:bottom;min-height:21px;font-weight:bold;padding-right:30px">')
                 .appendTo(this.element);
-        this.labelInstruction = $('<div>').text(this.options.instructionText)
-                            .addClass('heurist-helper2').css({float:'right',padding:'4px'}).appendTo(this.element);
         
         //create set of buttons
         this.divMainMenuItems = $('<ul>').addClass('horizontalmenu')
-                .css({display:'inline-block','font-style':'italic'})
+                .css({display:'inline-block','font-style':'italic','font-size':'0.8em'})
                 .appendTo(this.element);
 
         this._initBtn('Add');
@@ -75,6 +73,8 @@ $.widget( "heurist.resultListCollection", {
             this.options.search_realm = this.options.resultList.resultList('option', 'search_realm');
         } 
         
+        this.labelInstruction = $('<div>').text(this.options.instructionText)
+                            .addClass('heurist-helper2').css({padding:'4px'}).appendTo(this.element); //float:'right',
         //-----------------------     listener of global events
         var sevents = window.hWin.HAPI4.Event.ON_REC_SELECT; //+'  competency'
 
@@ -328,18 +328,23 @@ $.widget( "heurist.resultListCollection", {
     //
     //
     createMapSpace: function(){
-
+        
+        if(!this.options.target_db){
+            
+            window.hWin.HEURIST4.msg.showMsgErr('Wrong configuration. Target database for mapspace is not defined');
+            
+        }else
         if(!Hul.isempty(this._collection)){
             
             //create virtual record set for temporal mapspace
             
-            
             //open
             var url = window.hWin.HAPI4.baseURL 
             +'viewers/map/mapPreview.php?db='+window.hWin.HAPI4.database
-            +'&ids='+this._collection.join(",");
+            +'&ids='+this._collection.join(",")
+            +'&target_db='+this.options.target_db;
 
-            var init_params = {'ids': this._collection.join(",") };
+            var init_params = {'ids': this._collection.join(","), target_db:this.options.target_db};
 
             window.hWin.HEURIST4.msg.showDialog(url, {height:'900', width:'1000',
                 window: window.hWin,  //opener is top most heurist window

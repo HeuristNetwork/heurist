@@ -368,6 +368,9 @@ $.widget( "heurist.mapping", {
         
     },
     
+    
+
+    //----------------  @todo return mapManager and call these methods directly?
     //
     //
     //
@@ -393,6 +396,12 @@ $.widget( "heurist.mapping", {
     {
         this.mapManager.createVirtualMapDocument( layer_ids );
     },
+    
+    getMapDocumentRecordset: function( mapdoc_id ){
+        return this.mapManager.getMapDocumentRecordset( mapdoc_id);
+    },
+    
+    //--------------------
     
     //
     //

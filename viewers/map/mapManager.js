@@ -70,7 +70,7 @@ L.Control.Addmapdoc = L.Control.extend({
     
     onAdd: function(map) {
         
-        if ( !$.isFunction($('body').hMapPublish) ) return;
+        //if ( !$.isFunction($('body').hMapPublish) ) return;
         
         var container = L.DomUtil.create('div','leaflet-bar');
 
@@ -123,12 +123,11 @@ function hMapManager( _options )
     var _className = "MapManager",
     _version   = "0.4",
 
-    // default options
-    // default options
     options = {
-        container:null,  //@todo all ui via mapcontrol
+        container:null,  
         mapwidget:null,   
-        visible_panels:null
+        visible_panels:null,
+        hasTempMap: false  //show hide this panel
     },
         
     mapDocuments = null, //hMapDocument for db map docs,  Note: mapdocument with index=0 is search results
@@ -181,6 +180,9 @@ function hMapManager( _options )
         $('<div>').attr('grpid','basemaps').addClass('svs-acordeon outline_suppress')
                 .append( _defineHeader('Base Maps', 'basemaps'))
                 .append( _defineContent('basemaps') ).appendTo(options.container);        
+        $('<div>').attr('grpid','tempmap').addClass('svs-acordeon outline_suppress')
+                .append( _defineHeader('Temp Map', 'tempmap'))
+                .append( _defineContent('tempmap') ).appendTo(options.container);        
                 
         //init list of accordions
         var keep_status = window.hWin.HAPI4.get_prefs('map_control_status');
@@ -294,14 +296,14 @@ function hMapManager( _options )
 
         var content = null;
         
-        if(groupID=='search'){
+        if(groupID=='search' || groupID=='tempmap'){
             
             content = $('<div>');
             
-            var resdata = mapDocuments.getTreeData(0);
+            var resdata = mapDocuments.getTreeData((groupID=='search')?0:'temp');
             
             _refreshMapDocumentTree( resdata, content )
-
+        
         }else if(groupID=='basemaps'){
             // load list of predefined base layers 
             // see extensive list in leaflet-providers.js
@@ -608,7 +610,7 @@ function hMapManager( _options )
             var isEditAllowed = options.mapwidget.mapping('option','isEditAllowed');
             
             var actionspan = '<div class="svs-contextmenu3" '
-                    +(mapdoc_id>=0?('" data-mapdoc="'+mapdoc_id+'"'):'')
+                    +((mapdoc_id>=0 || mapdoc_id=='temp')?('" data-mapdoc="'+mapdoc_id+'"'):'')
                     +(recid>0?('" data-recid="'+recid+'"'):'')+'>'
                 +'<span class="ui-icon ui-icon-arrow-4-diag" '
                     +((item.data.type=='mapdocument' && !item.data.extent)?'style="color:gray"':'')
@@ -666,7 +668,7 @@ function hMapManager( _options )
                             
                             if(recid>0){
                                 
-                                if(mapdoc_id>=0){
+                                if(mapdoc_id>=0 || mapdoc_id=='temp'){
                                     var layer_rec = mapDocuments.getLayer(mapdoc_id, recid);
                                     if(layer_rec) (layer_rec['layer']).zoomToLayer();
                                 } 
@@ -886,9 +888,11 @@ function hMapManager( _options )
            
         },
         
+        //
         // params = [basemaps,search,mapdocuments|onedoc]
         //
-        updatePanelVisibility: function(params){
+        updatePanelVisibility: function(params)
+        {
             if(params){
                 options.visible_panels = params; //array of visible panels
             }
@@ -897,6 +901,10 @@ function hMapManager( _options )
             function __set(val){
                 var is_visible = (options.visible_panels.indexOf('all')>=0 || options.visible_panels.indexOf(val)>=0);
                 var ele = options.container.find('.svs-acordeon[grpid="'+val+'"]');
+                if(val=='tempmap'){
+                    is_visible = options.hasTempMap;
+                }
+                
                 if(is_visible){
                     ele.show();
                 }else{
@@ -908,6 +916,7 @@ function hMapManager( _options )
                 __set('basemaps');            
                 __set('search');            
                 __set('mapdocs'); 
+                __set('tempmap'); 
                 options.container.find('.ui-resizable-handle').show();
             }else{
                 options.container.children('div').hide(); 
@@ -950,7 +959,29 @@ function hMapManager( _options )
         // creates virtual mapspace
         //
         createVirtualMapDocument: function(layer_ids){
-            mapDocuments.createVirtualMapDocument(layer_ids);
+            
+            options.hasTempMap = false;
+            var dfd = new $.Deferred();
+            mapDocuments.createVirtualMapDocument(layer_ids, dfd);
+            
+            $.when( dfd.promise() ).done(
+                function(data){
+                    options.hasTempMap = true;
+                    //refresh list of tempmap
+                    var grp_div = options.container.find('.svs-acordeon[grpid="tempmap"]');
+                    _defineContent('tempmap', null, grp_div.find('.ui-accordion-content'));
+                    that.updatePanelVisibility();
+                    that.setHeight();
+                    
+                    setTimeout(function(){
+                        mapDocuments.zoomToMapDocument('temp');
+                    },500);
+                }
+            );
+            
+            
+            
+            
         },
         
         // 
@@ -959,6 +990,14 @@ function hMapManager( _options )
         getSymbology: function(mapdoc_id, layer_id) {
             return mapDocuments.getSymbology( mapdoc_id, layer_id );
         },
+        
+        //
+        //
+        //
+        getMapDocumentRecordset: function(mapdoc_id){
+            return mapDocuments.getMapDocumentRecordset(mapdoc_id);
+        },
+
         //
         // returns list of mapdocuments ids
         // mode - all|loaded|visible
@@ -977,7 +1016,7 @@ function hMapManager( _options )
             });
             return res;
         },
-
+        
         //
         // adds new layer to search results mapdoc
         // data - recordset, heurist query or json
