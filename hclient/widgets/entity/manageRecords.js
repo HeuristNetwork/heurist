@@ -1616,11 +1616,11 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     add_rec_prefs.push(''); //groups visibility
                 }
                 
-                if(!(that.options.new_record_params.OwnerUGrpID>=0)){
-                    that.options.new_record_params.OwnerUGrpID = add_rec_prefs[1];    
-                }else if (that.options.new_record_params.OwnerUGrpID=='current_user') {
+                if (that.options.new_record_params.OwnerUGrpID=='current_user') {
                     that.options.new_record_params.OwnerUGrpID = window.hWin.HAPI4.user_id();
-                }
+                }else if(!(that.options.new_record_params.OwnerUGrpID>=0)){
+                    that.options.new_record_params.OwnerUGrpID = add_rec_prefs[1];    
+                } 
                 if (!(window.hWin.HAPI4.is_admin() || window.hWin.HAPI4.is_member(add_rec_prefs[1]))) {
                     that.options.new_record_params.OwnerUGrpID = 0; //default to eveyone window.hWin.HAPI4.currentUser['ugr_ID'];    
                 }
