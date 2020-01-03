@@ -448,7 +448,7 @@ public static function importRecordsFromDatabase($params, $session_id){
 //2. import records
     if($filesize>0 && file_exists($heurist_path)){
         //
-        $res = self::importRecords($heurist_path, $session_id);
+        $res = self::importRecords($heurist_path, $session_id, false, true, self::$system->get_user_id() );
         
         unlink($heurist_path);
         
@@ -464,7 +464,7 @@ public static function importRecordsFromDatabase($params, $session_id){
 //
 // $is_cms_init - if true this is creation of set of records for website - it adds info text for webpage content
 //
-public static function importRecords($filename, $session_id, $is_cms_init=false, $make_public=true){
+public static function importRecords($filename, $session_id, $is_cms_init=false, $make_public=true, $owner_id=1){
 
     self::initialize();
 
@@ -674,7 +674,7 @@ EOD;
             $record['Title'] = @$record_src['rec_Title'];
             
             
-            $record['OwnerUGrpID'] = 1;
+            $record['OwnerUGrpID'] = $owner_id;
             $record['NonOwnerVisibility'] = ($make_public)?'public':'viewable';
             
             $record['details'] = array();

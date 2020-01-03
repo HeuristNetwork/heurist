@@ -1,5 +1,5 @@
 /**
-* filename: leaflet layers
+* filename: LEAFLET layers
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -254,7 +254,7 @@ function hMapLayer2( _options ) {
 
         if(request.q){
 
-            request = {
+            var server_request = {
                 q: request.q,
                 rules: request.rules,
                 w: request.w,
@@ -264,8 +264,12 @@ function hMapLayer2( _options ) {
                 zip: 1,
                 format:'geojson'};
                 
+            if(!window.hWin.HEURIST4.util.isempty(request.db)){
+                server_request.db = request.db;
+            }
+                
             //perform search        
-            window.hWin.HAPI4.RecordMgr.search_new(request,
+            window.hWin.HAPI4.RecordMgr.search_new(server_request,
                 function(response){
 
                     var geojson_data = null;

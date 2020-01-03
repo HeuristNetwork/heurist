@@ -1832,7 +1832,37 @@ $.widget( "heurist.search", {
     , _doLogin: function(){
 
         if(typeof doLogin !== "undefined" && $.isFunction(doLogin)){  // already loaded in index.php
-            doLogin(this.options.isloginforced);
+            doLogin(false, function(is_logged){
+                
+                if(is_logged){
+                    
+                    //@todo move to some widget in ON_CREDENTIALS listener
+                    var lt = window.hWin.HAPI4.sysinfo['layout']; 
+                    if(!(lt=='DigitalHarlem' || lt=='DigitalHarlem1935' || lt=='WebSearch')){
+                    
+                        var init_search = window.hWin.HAPI4.get_prefs('defaultSearch');
+                        if(!window.hWin.HEURIST4.util.isempty(init_search)){
+                            var request = {q: init_search, w: 'a', f: 'map', source:'init' };
+                            setTimeout(function(){
+                                window.hWin.HAPI4.SearchMgr.doSearch(window.hWin.document, request);
+                            }, 3000);
+                        }
+                        
+                        
+                        if(window.hWin.HAPI4.sysinfo.db_has_active_dashboard>0) {
+                           //show dashboard
+                           var prefs = window.hWin.HAPI4.get_prefs_def('prefs_sysDashboard', {showonstartup:1});
+                           if(prefs.showonstartup==1)
+                                    window.hWin.HEURIST4.ui.showEntityDialog('sysDashboard');
+                        }
+                        
+                    }
+                    
+                }else{
+                    window.hWin.location  = window.HAPI4.baseURL;
+                }
+                
+            });
         }else{
             //var that = this;
             $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/profile/profile_login.js', this._doLogin );

@@ -337,6 +337,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                     return; 
                 }
                 
+                //verify locally
                 function __verify( is_expired ){
                     
                         if(window.hWin.HAPI4.has_access(requiredLevel)){ 
@@ -395,9 +396,9 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                     }
                 }
                 
-                //MODE1 verify locally only
-                if(false){
-                    __verify(); //verification on server temporarely disabled
+                
+                if(false){ //MODE1 verify locally only
+                    __verify(); 
                 
                 }else{
                     //MODE2 verify via server each time

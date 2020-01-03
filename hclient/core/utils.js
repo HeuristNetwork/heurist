@@ -437,7 +437,7 @@ window.hWin.HEURIST4.util = {
         
         var type = -1;
         
-        var domain = null, rules = '', rulesonly = 0, notes = '', primary_rt = null, viewmode = '';
+        var domain = null, rules = '', rulesonly = 0, notes = '', primary_rt = null, viewmode = '', db='';
         if(qsearch){
             
             
@@ -448,7 +448,7 @@ window.hWin.HEURIST4.util = {
                 notes   = window.hWin.HEURIST4.util.getUrlParameter('notes', qsearch);
                 viewmode = window.hWin.HEURIST4.util.getUrlParameter('viewmode', qsearch);
                 qsearch = window.hWin.HEURIST4.util.getUrlParameter('q', qsearch);
-                
+                db = window.hWin.HEURIST4.util.getUrlParameter('db', qsearch);
                 
             }else{ //it may be aquery in form of json
             
@@ -467,6 +467,9 @@ window.hWin.HEURIST4.util = {
                     if(r.q){
                         qsearch = r.q;
                     }
+                    if(r.db){
+                        db = r.db;
+                    }
                     domain = r.w?r.w:'all';
                     primary_rt = r.primary_rt; 
                     rulesonly = r.rulesonly;
@@ -483,9 +486,14 @@ window.hWin.HEURIST4.util = {
         
         domain = (domain=='b' || domain=='bookmark')?'bookmark':'all';
         
-        return {q:qsearch, w:domain, rules:rules, rulesonly:rulesonly, notes:notes, 
+        var res = {q:qsearch, w:domain, rules:rules, rulesonly:rulesonly, notes:notes, 
                         primary_rt:primary_rt, viewmode:viewmode, type:type};    
         
+        if(!window.hWin.HEURIST4.util.isempty(db)){
+            res.db = db;
+        }
+        
+        return res;
     },
 
     //

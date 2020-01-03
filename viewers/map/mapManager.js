@@ -249,8 +249,8 @@ function hMapManager( _options )
             $header.contextmenu(context_opts);
         }
         */
-        
-         if(domain=='mapdocs'){
+         var isPublished = options.mapwidget.mapping('option','isPublished');
+         if(domain=='mapdocs' && !isPublished){
              
             var append_link = $('<a title="create new map document">',{href:'#'})
                 .html('<span class="ui-icon ui-map-document" style="width:22px">'

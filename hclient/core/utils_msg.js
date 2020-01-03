@@ -214,7 +214,9 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
     getMsgDlg: function(){
         var $dlg = $( "#dialog-common-messages" );
         if($dlg.length==0){
-            $dlg = $('<div>',{id:'dialog-common-messages'}).css({'min-wdith':'380px','max-width':'640px'}).appendTo('body');
+            $dlg = $('<div>',{id:'dialog-common-messages'}).css({'min-wdith':'380px','max-width':'640px'})
+                .appendTo( $('body') ); //
+                //$(window.hWin.document['body'])
         }
         return $dlg.removeClass('ui-heurist-border');
     },
@@ -222,7 +224,8 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
     getMsgFlashDlg: function(){
         var $dlg = $( "#dialog-flash-messages" );
         if($dlg.length==0){
-            $dlg = $('<div>',{id:'dialog-flash-messages'}).css({'min-wdith':'380px','max-width':'640px'}).appendTo('body');
+            $dlg = $('<div>',{id:'dialog-flash-messages'}).css({'min-wdith':'380px','max-width':'640px'})
+                .appendTo('body'); //$(window.hWin.document)
         }
         return $dlg.removeClass('ui-heurist-border');
     },
@@ -235,7 +238,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         var $dlg = $( '#'+element_id );
         if($dlg.length==0){
             $dlg = $('<div>',{id:element_id})
-                .css({'padding':'2em','min-wdith':'380px'}).appendTo('body'); //,'max-width':'640px'
+                .css({'padding':'2em','min-wdith':'380px'}).appendTo('body'); //,'max-width':'640px' //$(window.hWin.document)
             $dlg.removeClass('ui-heurist-border');
         }
         return $dlg;

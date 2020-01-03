@@ -18,10 +18,12 @@
 */
 
 //isforsed - if true - it is not possible to get out from login other than switch database
-function doLogin(isforsed){
+function doLogin(isforsed, callback, parentwin){
 
 
-    var login_dialog = $('#heurist-login-dialog');
+    if(!parentwin) parentwin = window.hWin;
+    
+    var login_dialog = $(parentwin.document['body']).find('#heurist-login-dialog');
 
     function _setMessage(text){
         var message = login_dialog.find('.messages');
@@ -38,7 +40,9 @@ function doLogin(isforsed){
     if(login_dialog.length<1)  // login_dialog.is(':empty') )
     {
 
-        login_dialog = $( '<div id="heurist-login-dialog">' ).addClass('ui-heurist-bg-light').appendTo( $('body') );
+        login_dialog = $( '<div id="heurist-login-dialog">' )
+            .addClass('ui-heurist-bg-light')
+            .appendTo( $(parentwin.document['body']) );
 
         var $dlg = login_dialog;
 
@@ -47,6 +51,9 @@ function doLogin(isforsed){
                             +window.hWin.HEURIST4.util.random(), 
             function(){ 
 
+                
+            $dlg.find('#span-database').text(window.hWin.HAPI4.database);
+            
             //find all labels and apply localization
             $dlg.find('label').each(function(){
                 $(this).html(window.hWin.HR($(this).html()));
@@ -59,7 +66,12 @@ function doLogin(isforsed){
             $dlg.find('#span-owner-email').html('<a href="mailto:'
                     +window.hWin.HAPI4.sysinfo.dbowner_email+'">'+window.hWin.HAPI4.sysinfo.dbowner_email+'</a>');
             
-            $dlg.find('#span-reccount').text(window.hWin.HAPI4.sysinfo.db_total_records+' records');
+//console.log(window.hWin.HAPI4.sysinfo.db_total_records);            
+            if(window.hWin.HAPI4.sysinfo.db_total_records && window.hWin.HAPI4.sysinfo.db_total_records>=0){
+                $dlg.find('#span-reccount').text(window.hWin.HAPI4.sysinfo.db_total_records+' records');
+            }else{
+                $dlg.find('#span-reccount').text('');
+            }
             
 
             if(false){
@@ -132,7 +144,8 @@ function doLogin(isforsed){
                                     window.hWin.HAPI4.setCurrentUser(response.data.currentUser);
                                     window.hWin.HAPI4.sysinfo = response.data.sysinfo;
 
-                                    $(document).trigger(window.hWin.HAPI4.Event.ON_CREDENTIALS, [window.hWin.HAPI4.currentUser]);
+                                    $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_CREDENTIALS, 
+                                                    [window.hWin.HAPI4.currentUser]);
 
                                     $dlg.dialog( "close" );
                                     
@@ -141,25 +154,8 @@ function doLogin(isforsed){
                                         return;
                                     }
                                     
-                                    var lt = window.hWin.HAPI4.sysinfo['layout']; 
-                                    if(!(lt=='DigitalHarlem' || lt=='DigitalHarlem1935' || lt=='WebSearch')){
-                                    
-                                        var init_search = window.hWin.HAPI4.get_prefs('defaultSearch');
-                                        if(!window.hWin.HEURIST4.util.isempty(init_search)){
-                                            var request = {q: init_search, w: 'a', f: 'map', source:'init' };
-                                            setTimeout(function(){
-                                                window.hWin.HAPI4.SearchMgr.doSearch(document, request);
-                                            }, 3000);
-                                        }
-                                        
-                                        
-                                        if(window.hWin.HAPI4.sysinfo.db_has_active_dashboard>0) {
-                                           //show dashboard
-                                           var prefs = window.hWin.HAPI4.get_prefs_def('prefs_sysDashboard', {showonstartup:1});
-                                           if(prefs.showonstartup==1)
-                                                    window.hWin.HEURIST4.ui.showEntityDialog('sysDashboard');
-                                        }
-                                        
+                                    if($.isFunction(callback)){
+                                            callback(true);
                                     }
                                     
                                     //that._refresh();
@@ -195,8 +191,8 @@ function doLogin(isforsed){
                 _setMessage();
             });
 
-            var arr_buttons = [{text:'<b>'+window.hWin.HR('Login')+'</b>', click: __doLogin, id:'btn_login2'}];
-            if(isforsed && window.hWin.HAPI4.sysinfo.registration_allowed==1){
+            var arr_buttons = [{text:('<b>'+window.hWin.HR('Login')+'</b>'), click: __doLogin, id:'btn_login2'}];
+            if(window.hWin.HAPI4.sysinfo.registration_allowed==1){ //isforsed && 
                 arr_buttons.push({text:window.hWin.HR('Register'), click: doRegister, id:'btn_register'});
             }
             arr_buttons.push({text:window.hWin.HR('Cancel'), click: function() {    //isforsed?'Change database':
@@ -215,9 +211,13 @@ function doLogin(isforsed){
                 buttons: arr_buttons,
                 close: function() {
                     allFields.val( "" ).removeClass( "ui-state-error" );
+                    
+                    if($.isFunction(callback)){
+                        callback(window.hWin.HAPI4.has_access());
+                    }else
                     if( isforsed && !window.hWin.HAPI4.has_access() ){
                         //redirect to select database
-                        window.location  = window.HAPI4.baseURL; //+ "hsapi/utilities/list_databases.php";
+                        window.hWin.location  = window.HAPI4.baseURL; //+ "hsapi/utilities/list_databases.php";
                     }
                 },
                 open: function() {

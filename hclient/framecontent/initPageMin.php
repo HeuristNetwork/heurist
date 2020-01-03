@@ -1,6 +1,6 @@
 <?php
 /**
-* Minimal initialization for page
+* Minimal initialization for page (without client side/HAPI)
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org

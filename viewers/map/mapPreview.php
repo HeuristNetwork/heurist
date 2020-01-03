@@ -108,6 +108,7 @@ console.log('load google map api')
         {
             _exportMapSpace();
         }});
+        
     }
     
     //
@@ -124,12 +125,27 @@ console.log('load google map api')
             initial_layers = null;
         }
         onMapInit();
+        
     } 
     
     //
     //
     //           
     function onMapInit(){
+
+        if(target_database){
+            //load check login 
+            var ele = $('#checklogin');
+            ele.attr('src', null);
+            ele.attr('src', window.hWin.HAPI4.baseURL
+                +'hclient/framecontent/initPageLogin.php?db='+target_database);
+                
+        }else{
+            window.hWin.HEURIST4.msg.showMsgErr('Target database not defined. '
+            +'It is not possiblle to perform this operation'); 
+        }
+        
+
         if(initial_layers){ //create virtual mapspace
             //mapping.mapping( 'drawLoadWKT', initial_wkt, true);
             mapping.mapping( 'createVirtualMapDocument', initial_layers);
@@ -175,15 +191,25 @@ console.log('load google map api')
                     if(response.status == window.hWin.ResponseStatus.OK){
                         //_hideProgress(3);
                         
+                        var cnt = (response.data.count_imported-1)/2;
+                        
                         //response.data.count_imported
-                        var sMsg = 'Map saved. Exported '+response.data.count_imported
-+' records. "Please go to My Maps" &gt; to edit the styling, to obtain the URL,'
+                        var sMsg = '<b>Map saved.</b><br>'
++' Exported 1 map document,'+cnt+' map layers, '+cnt+' datasets. '                       
++' records. Please go to <b>My Maps</b> to edit the styling, to obtain the URL,'
 +'or to obtain a snippet of html which will allow you to embed this map in an external website';
                         
-                        window.hWin.HEURIST4.msg.showMsgDlg(sMsg);
+                        window.hWin.HEURIST4.msg.showMsgDlg(sMsg,null,'Export completed');
+                        window.close();
                     }else{
-                        //_hideProgress(2);
-                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                        if(response && response.status==window.hWin.ResponseStatus.REQUEST_DENIED){
+                            var ele = $('#checklogin');
+                            ele[0].contentWindow.verify_credentials();
+                        }else{
+                            //_hideProgress(2);
+                            window.hWin.HEURIST4.msg.showMsgErr(response);
+                        }
+                                
                     }
                 });
     }        
@@ -205,11 +231,12 @@ console.log('load google map api')
                 <div class="heurist-helper1" style="font-size:0.8em">
                     To save this map for future access or embedding in websites, enter a title and click Save Map. We suggest using a concise but informative title. The map layers and style can be edited later.
                 </div>
-                <div style="padding:6px">
+                <div style="padding:6px;display:inline-block">
                     <label>Map title</label>
                     <input size="60" id="mapspace_name"/>
                     <button id="save-button">Save Map</button>
                 </div>
+                <iframe id="checklogin" style="width:10px !important; height:10px !important"></iframe>
             </div>
             <div class="ent_content_full" id="map_container" style="top:60px">
                 <div id="map_digitizer"></div>

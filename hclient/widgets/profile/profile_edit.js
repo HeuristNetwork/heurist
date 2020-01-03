@@ -86,7 +86,7 @@ $.widget( "heurist.profile_edit", {
                             $("#contactDetails").html(window.hWin.HR('Email to')+': System Administrator '+
                                 '<a href="mailto:'+window.hWin.HAPI4.sysinfo.sysadmin_email+'">'+window.hWin.HAPI4.sysinfo.sysadmin_email+'</a>');
                         }else{
-                            $("#contactDetails").html(window.hWin.HR('Email to')+': '+window.hWin.HAPI4.sysinfo.dbowner_name+'  '+
+                            $("#contactDetails").html(window.hWin.HR('Email database owner')+': '+window.hWin.HAPI4.sysinfo.dbowner_name+'  '+
                                 '<a href="mailto:'+window.hWin.HAPI4.sysinfo.dbowner_email+'">'+window.hWin.HAPI4.sysinfo.dbowner_email+'</a>');
                         }
                         

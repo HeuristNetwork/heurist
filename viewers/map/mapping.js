@@ -1858,7 +1858,7 @@ $.widget( "heurist.mapping", {
 
         //maxClusterRadius
         this.isMarkerClusterEnabled = !__parseval(params['nocluster']);
-        this.options.isPublished = __parseval(params['published']);
+        this.options.isPublished = __parseval(params['published']) || !window.hWin.HAPI4.has_access();
         this.options.isEditAllowed = !this.options.isPublished || __parseval(params['editstyle']);
         
         this.options.map_rollover = __parseval(params['map_rollover']);
