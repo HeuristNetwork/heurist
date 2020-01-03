@@ -757,9 +757,10 @@ function DetailTypeManager() {
 
                     var k;
                     for (k in aUsage) {
-                        url = "structure/fields/editRecStructure.html?db="+db+"&rty_ID="+aUsage[k];
+                        url = "admin/structure/fields/editRecStructure.html?db="+db+"&rty_ID="+aUsage[k];
                         textTip = textTip + "<li><a href='#' onClick='"
-                        +"window.hWin.HEURIST4.msg.showDialog(\""+url+"\",{\"close-on-blur\": false,\"no-resize\": false,height: 520,width: 640})'>"+window.hWin.HEURIST4.rectypes.names[aUsage[k]]+"</a></li>";
+                        +"window.hWin.HEURIST4.msg.showDialog(\""+url
+                        +"\",{\"close-on-blur\": false,\"no-resize\": false,height: 580,width: 1100})'>"+window.hWin.HEURIST4.rectypes.names[aUsage[k]]+"</a></li>";
                     }
                     textTip = textTip + "</ul>";
                 }
