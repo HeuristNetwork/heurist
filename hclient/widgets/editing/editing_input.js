@@ -332,7 +332,7 @@ $.widget( "heurist.editing_input", {
         var val = this.f('rst_FieldConfig');
         if(!window.hWin.HEURIST4.util.isempty(val)){
             val = window.hWin.HEURIST4.util.isJSON(val);
-            if(val!==false){
+            if(val!==false && this.configMode.entity){
                 this.configMode.initial_filter = val.initial_filter;
                 this.configMode.search_form_visible = val.search_form_visible;
             }
