@@ -747,7 +747,7 @@ function output_Records($system, $data, $params){
     $links_cnt = 0;
     
     //convert TLCMAP dataset to MAP_LAYER 
-    $is_tlc_export = ($params['tlcmap']!=null && defined('RT_TLCMAP_DATASET'));
+    $is_tlc_export = (@$params['tlcmap']!=null && defined('RT_TLCMAP_DATASET'));
     $maplayer_fields = null;
     $maplayer_records = array();
     if($is_tlc_export){

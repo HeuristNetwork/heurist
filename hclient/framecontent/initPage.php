@@ -52,6 +52,8 @@ if(!$isSystemInited){
     exit();
 }
 
+$login_warning = 'To perform this action you must be logged in';
+
 //
 // to limit access to particular page
 // define const in the very begining of your php code  just before require_once(dirname(__FILE__)."/initPage.php");
