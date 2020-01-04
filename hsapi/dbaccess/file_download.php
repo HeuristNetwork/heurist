@@ -122,7 +122,7 @@ if($db){
               
                 if(file_exists($filepath)){
                     
-                    //fix issue if original name is without ext
+                    //fix issue if original name does not have ext
                     if(@$_REQUEST['embed']!=1){
                         $finfo = pathinfo($originalFileName);
                         $ext = @$finfo['extension'];
