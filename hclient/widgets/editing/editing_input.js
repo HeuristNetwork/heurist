@@ -25,6 +25,7 @@ $.widget( "heurist.editing_input", {
         varid:null,  //id to create imput id, otherwise it is combination of index and detailtype id
         recID: null,  //record id for current record - required for relation marker and file
         recordset:null, //reference to parent recordset
+        editing:null, //reference to parent editing form
 
         //field desription is taken from window.hWin.HEURIST4.rectypes
         rectypes: null,  // reference to window.hWin.HEURIST4.rectypes - defRecStructure
@@ -1055,7 +1056,6 @@ $.widget( "heurist.editing_input", {
                     };
                     
                     
-                
                     var sRels = '';
                     if(that.options.recordset){
                     
@@ -1372,6 +1372,17 @@ $.widget( "heurist.editing_input", {
         
                     popup_options.width = Math.max(usrPreferences.width,710);
                     popup_options.height = Math.max(usrPreferences.height,600);
+                    
+                    if(this.options.editing && that.configMode.entity=='records'){
+                        
+                        var ele = that.options.editing.getFieldByName('rec_OwnerUGrpID');
+                        var vals = ele.editing_input('getValues');
+                        ele = that.options.editing.getFieldByName('rec_NonOwnerVisibility');
+                        var vals2 = ele.editing_input('getValues');
+                        popup_options.new_record_params = {};
+                        popup_options.new_record_params['ro'] = vals[0];
+                        popup_options.new_record_params['rv'] = vals2[0];
+                    }
                     
                     //init related/liked records selection dialog
                     window.hWin.HEURIST4.ui.showEntityDialog(that.configMode.entity, popup_options);

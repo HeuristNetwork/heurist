@@ -291,6 +291,7 @@ function hEditing(_options) {
                         
                         fields[idx].recID = recID;
                         fields[idx].recordset = recdata;
+                        fields[idx].editing = that;
                         fields[idx].change = _onChange;
                         fields[idx].is_insert_mode = _is_insert;
                         
