@@ -1257,6 +1257,14 @@ $.widget( "heurist.resultList", {
         + '</div>'
             :'')
         
+        + ((rectypeID==window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_DOCUMENT'])
+            ?
+        '<div title="Click to embed" '
+        + 'class="rec_view_link_ext ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" '
+        + 'role="button" aria-disabled="false">'
+        + '<span class="ui-button-icon-primary ui-icon ui-icon-globe"/><span class="ui-button-text"/>'
+        + '</div>'
+            :'')
         
         + '</div>';
 
@@ -1466,8 +1474,15 @@ $.widget( "heurist.resultList", {
             }
             if($target.parents('.rec_view_link_ext').length>0){
                 if(this._currentRecordset){
-                    var url = this._currentRecordset.fld( this._currentRecordset.getById(selected_rec_ID), 'rec_URL' );
-                    if(url) window.open(url, "_new");
+                    var record = this._currentRecordset.getById(selected_rec_ID)
+                    var rectypeID = this._currentRecordset.fld(record, 'rec_RecTypeID' );
+                    //show embed dialog
+                    if(rectypeID==window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_DOCUMENT']){
+                        this.openEmbedDialog( selected_rec_ID );
+                    }else{
+                        var url = this._currentRecordset.fld(record, 'rec_URL' );
+                        if(url) window.open(url, "_new");
+                    }
                 }
                 return;
             }
@@ -1634,7 +1649,31 @@ $.widget( "heurist.resultList", {
 
         this.triggerSelection();
     },
+    
+    //
+    //
+    //
+    openEmbedDialog: function( record_id ){
 
+        if(typeof hMapPublish !== "undefined" && $.isFunction(hMapPublish) ){        
+            if(!this.mapPublish) {
+                this.mapPublish = new hMapPublish( {mapwidget:null} );                        
+            }
+            this.mapPublish.openPublishDialog( record_id );
+        }else{
+            var that = this;
+            $.getScript(window.hWin.HAPI4.baseURL+'viewers/map/mapPublish.js?t'
+                        +window.hWin.HEURIST4.util.random(),  
+                function(){ 
+                        that.openEmbedDialog( record_id );
+                }
+            );        
+        }
+    },
+
+    //
+    //
+    //
     triggerSelection: function(){
 
 

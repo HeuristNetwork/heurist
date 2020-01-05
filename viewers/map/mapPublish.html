@@ -2,7 +2,7 @@
         <p>Embed this Map (plus timeline) in your own web page. Enclose within &lt;code&gt; &lt;/code&gt; for Wordpress sites (the use of &lt;code&gt; may need to be enabled for your site).</p>
         
         <div style="border: 1px solid lightgray;border-radius:4px;padding:6px;">
-        <p><span style="min-width: 105px;display: inline-block;text-align: right;">Include:</span>
+        <p class="with_query"><span style="min-width: 105px;display: inline-block;text-align: right;">Include:</span>
             <label><input type="checkbox" id="m_query" checked>current query</label>&nbsp;
             <label><input type="checkbox" id="m_mapdocs" checked>opened map documents</label></p>
         <p><span style="min-width: 105px;display: inline-block;text-align: right;">Controls:</span>
@@ -40,5 +40,5 @@
         <textarea id="code-textbox3" onclick="select(); if (window.clipboardData) clipboardData.setData('Text', value);" style="border: 1px dotted gray; padding: 3px; margin: 2; font-family: times; width: 100%; height: 40px;" readonly=""></textarea>
         
         <p style="padding-top:1em">Note: records will only appear on the map if they include geographic objects. You may get an empty or sparsely populated map if the search results do not contain map data. Records must have public status - private records will not appear on the map, which could therefore be empty. </p>
-        <p style="padding-top:1em"><button id="btnExportKML">Create KML for Google Earth</button></p>
+        <p  class="with_query" style="padding-top:1em"><button id="btnExportKML">Create KML for Google Earth</button></p>
 </div>

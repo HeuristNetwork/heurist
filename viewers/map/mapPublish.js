@@ -143,7 +143,8 @@ function hMapPublish( _options )
     _version   = "0.4",
     options = {
         //container:null,
-        //mapwidget:null,   
+        //mapwidget:null, 
+        //mapdocument_id:null  
     },
     popupelement = null,
     popupdialog = null;
@@ -171,8 +172,11 @@ function hMapPublish( _options )
     
     function _initControls(){
         
-        //popupelement = options.container.find('#map-embed-dialog');
         popupelement = popupdialog.find('#map-embed-dialog');
+        
+        if(!options.mapwidget){
+            popupelement.find('.with_query').hide();    
+        }
         
         popupelement.find('input[type="checkbox"]').on({change:function(){
             _fillUrls();
@@ -190,35 +194,43 @@ function hMapPublish( _options )
 
     function _fillUrls(){
 
-        var hquery = options.mapwidget.current_query_layer['original_heurist_query'];
         var base_url = window.hWin.HAPI4.baseURL+'viewers/map/map_leaflet.php';
         var params_search,params_search_encoded;
         var layout_params = {};
         
-        if($(popupelement).find("#m_query").is(':checked')){
-            params_search = window.hWin.HEURIST4.util.composeHeuristQuery2(hquery, false);
-            params_search_encoded = window.hWin.HEURIST4.util.composeHeuristQuery2(hquery, true);
+        if(options.mapwidget){
+            var hquery = (options.mapwidget)?options.mapwidget.current_query_layer['original_heurist_query']:'';
+            
+            if($(popupelement).find("#m_query").is(':checked')){
+                params_search = window.hWin.HEURIST4.util.composeHeuristQuery2(hquery, false);
+                params_search_encoded = window.hWin.HEURIST4.util.composeHeuristQuery2(hquery, true);
+            }else{
+                params_search = '?';
+                params_search_encoded = '?';
+            }
+        
+            if($(popupelement).find("#m_mapdocs").is(':checked')){
+                var mapdocs = options.mapwidget.getMapDocuments('visible');
+                if(mapdocs.length>0){
+                    layout_params['mapdocument'] = mapdocs.join(',');
+                }
+            }
         }else{
             params_search = '?';
             params_search_encoded = '?';
+            
+            layout_params['mapdocument'] = options.mapdocument_id;
         }
         params_search_encoded = params_search_encoded + (params_search=='?'?'':'&')+'db='+window.hWin.HAPI4.database;
         params_search = params_search + (params_search=='?'?'':'&')+'db='+window.hWin.HAPI4.database;
-        
-        
-        if($(popupelement).find("#m_mapdocs").is(':checked')){
-            var mapdocs = options.mapwidget.getMapDocuments('visible');
-            if(mapdocs.length>0){
-                layout_params['mapdocument'] = mapdocs.join(',');
-            }
-        }
         
         //parameters for controls
         layout_params['notimeline'] = !$(popupelement).find("#use_timeline").is(':checked');
         layout_params['nocluster'] = !$(popupelement).find("#use_cluster").is(':checked');
         layout_params['editstyle'] = $(popupelement).find("#editstyle").is(':checked');
         //layout_params['extent'] =  @todo
-        if($(popupelement).find("#basemap").is(':checked') && options.mapwidget.basemaplayer_name!='MapBox'){//MapBox is default
+        if($(popupelement).find("#basemap").is(':checked') && 
+                    options.mapwidget && options.mapwidget.basemaplayer_name!='MapBox'){//MapBox is default
             layout_params['basemap'] = options.mapwidget.basemaplayer_name;
         }
         
@@ -268,13 +280,15 @@ function hMapPublish( _options )
         getVersion: function () {return _version;},
 
 
-        openPublishDialog: function(){
+        openPublishDialog: function( mapdoc_id ){
+            
+            options.mapdocument_id = mapdoc_id;
         
             popupdialog = window.hWin.HEURIST4.msg.showMsgDlgUrl(window.hWin.HAPI4.baseURL+'viewers/map/mapPublish.html?t'
                 +window.hWin.HEURIST4.util.random(), 
                     null, window.hWin.HR('Publish Map'), 
             {  container:'map-publish-popup',
-               height: 680,
+               height: mapdoc_id>0?600:680,
                width: 700,
                close: function(){
                     popupdialog.dialog('destroy');       
