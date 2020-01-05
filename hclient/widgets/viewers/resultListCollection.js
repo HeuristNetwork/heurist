@@ -346,7 +346,7 @@ $.widget( "heurist.resultListCollection", {
 
             var init_params = {'ids': this._collection.join(","), target_db:this.options.target_db};
 
-            window.hWin.HEURIST4.msg.showDialog(url, {height:'900', width:'1000',
+            window.hWin.HEURIST4.msg.showDialog(url, {height:'600', width:'1000',
                 window: window.hWin,  //opener is top most heurist window
                 dialogid: 'map_preview_dialog',
                 params: init_params,

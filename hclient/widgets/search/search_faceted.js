@@ -187,7 +187,7 @@ $.widget( "heurist.search_faceted", {
         }
 
         //"font-size":"0.7em",
-        this.div_toolbar = $( "<div>" ).css({"float":"right","padding-top":"0.3em","padding-right":"0.6em"})
+        this.div_toolbar = $( "<div>" ).css({'font-size': '0.9em',"float":"right","padding-top":"0.3em","padding-right":"0.6em"})
                 .appendTo( this.div_header );
 
         this.btn_submit = $( "<button>", { text: window.hWin.HR("Submit") })
@@ -196,7 +196,7 @@ $.widget( "heurist.search_faceted", {
         
         this.btn_reset = $( "<button>", {title:window.hWin.HR("Clear all fields / Reset all the filters to their initial states") })
         .appendTo( this.div_toolbar )
-        .button({label: window.hWin.HR("RESET FILTERS"), icon: 'ui-icon-arrowreturnthick-1-w', iconPosition:'end' }).hide();
+        .button({label: window.hWin.HR("Reset all"), icon: 'ui-icon-arrowreturnthick-1-w', iconPosition:'end' }).hide();
         
         this.btn_save = $( "<button>", { text: window.hWin.HR("Save state") })
         .appendTo( this.div_toolbar )
@@ -207,7 +207,7 @@ $.widget( "heurist.search_faceted", {
         .appendTo( this.div_toolbar )
         .button({icon: "ui-icon-close", iconPosition:'end', label:window.hWin.HR("Close")});
 
-        this.btn_close.find('.ui-icon-close').css({'font-size': '1.3em', right: 0});
+        this.btn_close.find('.ui-icon-close').css({right: 0}); //'font-size': '1.3em', 
         
         this._on( this.btn_submit, { click: "doSearch" });
         this._on( this.btn_reset, { click: "doResetAll" });
@@ -666,12 +666,12 @@ $.widget( "heurist.search_faceted", {
            var ele = $("<div>").html(
            '<div class="header" title="" style="vertical-align: top; display: block; width: 100%; padding: 5px;">'
                 +'<h4 style="display:inline-block;margin:0;">'+lbl+'</h4></div>'
-                +'<div style=" padding:5px 0 10px 21px;display: block;">'
+                +'<div style=" padding:5px 0 20px 21px;display: block;">'
                     +'<div class="input-div" style="display: inline-block;">'
                     +'<input class="ui-widget-content ui-corner-all" autocomplete="disabled" autocorrect="off" autocapitalize="none" spellcheck="false" style="width: 150px;">'
                     +'</div><button title="To clear previous search click the RESET button" class="smallbutton ui-button ui-corner-all ui-widget ui-button-icon-only">'
                         +'<span class="ui-button-icon ui-icon ui-icon-search"></span><span class="ui-button-icon-space"> </span></button>'
-                    +'</div>').css({'border-bottom': '1px solid lightgray'}).appendTo($fieldset);
+                    +'</div>').css({'border-bottom': '1px solid lightgray','margin-bottom':'10px'}).appendTo($fieldset);
                         
                         
            /*ele.find(".start-search") class="input-cell"

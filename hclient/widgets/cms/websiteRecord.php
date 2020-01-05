@@ -420,7 +420,7 @@ _time_debug = new Date().getTime() / 1000;
         $(document).trigger(window.hWin.HAPI4.Event.ON_SYSTEM_INITED, []);
         
         var itop = $('#main-header').height(); //[0].scrollHeight;
-        $('#btn_editor').css({top:itop-70, right:40});
+        $('#btn_editor').css({top:itop-70, right:20});
         
     },300);
     
@@ -568,11 +568,14 @@ $website_title -> #main-title>h2
             .'<h2 style="color:red;margin:4px">Logo</h2><div style="color:black">Set this as Website header/layout</div></div>';?></a>')
             .appendTo($('#main-logo'));
   }
-  <?php if($image_altlogo){ ?>
+  
   if($('#main-logo-alt').length>0){
-            $('#main-logo-alt').css({'background-size':'contain','background-image':'url(\'<?php print $image_altlogo;?>\')'});
-  }
+  <?php if($image_altlogo){ ?>
+      $('#main-logo-alt').css({'background-size':'contain','background-image':'url(\'<?php print $image_altlogo;?>\')'}).show();
+  <?php }else{ ?>
+      $('#main-logo-alt').hide();
   <?php } ?>
+  }
             
   <?php if($website_title){ ?>
   if($('#main-title').length>0){
@@ -660,6 +663,7 @@ body{
 #main-pagetitle{
     position: absolute;
     padding: 15 0 5 10;
+    top:150px;
     bottom: 0;
     left: 0;
     right: 0;
@@ -766,7 +770,7 @@ if ($page_template!=null && substr($page_template,-4,4)=='.tpl') {
         <div id="main-title" class="mceNonEditable" style="float:left;padding-left:20px;vertical-align:middle;"></div>
         
         <div id="main-host" style="float:right;margin-top: 15px">
-            <div id="host_info" style="float:right;line-height:38px;height:40px;margin-right: 15px;">
+            <div id="host_info" style="float:right;line-height:38px;height:40px;margin-right: 0px;">
             </div>
             <div style="float:right;padding:0 10px;height:40px;line-height: 38px;">  <!-- background: white; color:black;-->
             <a href="http://HeuristNetwork.org" target="_blank" style="text-decoration:none;"   
