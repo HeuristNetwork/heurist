@@ -18,12 +18,14 @@
 */
 
 //isforsed - if true - it is not possible to get out from login other than switch database
-function doLogin(isforsed, callback, parentwin){
+function doLogin(isforsed, callback, parentwin, dialog_id){
 
 
     if(!parentwin) parentwin = window.hWin;
     
-    var login_dialog = $(parentwin.document['body']).find('#heurist-login-dialog');
+    if(!dialog_id) dialog_id = 'heurist-login-dialog';
+    
+    var login_dialog = $(parentwin.document['body']).find('#'+dialog_id);
 
     function _setMessage(text){
         var message = login_dialog.find('.messages');
@@ -40,7 +42,7 @@ function doLogin(isforsed, callback, parentwin){
     if(login_dialog.length<1)  // login_dialog.is(':empty') )
     {
 
-        login_dialog = $( '<div id="heurist-login-dialog">' )
+        login_dialog = $( '<div id="'+dialog_id+'">' )
             .addClass('ui-heurist-bg-light')
             .appendTo( $(parentwin.document['body']) );
 
@@ -191,7 +193,7 @@ function doLogin(isforsed, callback, parentwin){
                 _setMessage();
             });
 
-            var arr_buttons = [{text:('<b>'+window.hWin.HR('Login')+'</b>'), click: __doLogin, id:'btn_login2'}];
+            var arr_buttons = [{html:('<b>'+window.hWin.HR('Login')+'</b>'), click: __doLogin, id:'btn_login2'}];
             if(window.hWin.HAPI4.sysinfo.registration_allowed==1){ //isforsed && 
                 arr_buttons.push({text:window.hWin.HR('Register'), click: doRegister, id:'btn_register'});
             }
@@ -219,6 +221,7 @@ function doLogin(isforsed, callback, parentwin){
                         //redirect to select database
                         window.hWin.location  = window.HAPI4.baseURL; //+ "hsapi/utilities/list_databases.php";
                     }
+                    $dlg.remove();
                 },
                 open: function() {
                     isreset = false;
@@ -229,10 +232,12 @@ function doLogin(isforsed, callback, parentwin){
                     $dlg.find("#fld_login").show();
                     _setMessage();
                 }
+                //position:{ my: "center center", at: "center center", of: $(top.document) }
             });
 
             $dlg.dialog("open");
-            $dlg.parent().addClass('ui-dialog-heurist');
+            $dlg.addClass('ui-dialog-heurist').css({'font-size':'0.8em'});
+            $dlg.parent().position({ my: "center center", at: "center center", of: $(top.document) });
 
             /*if(isforsed){
             var left_pane = $("div").css('float','left').appendTo( $dlg.find(".ui-dialog-buttonpane") );

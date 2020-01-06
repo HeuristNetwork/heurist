@@ -69,17 +69,14 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
         */            
 
         handleApiReady();
-/*
-        if (typeof window.hWin.google === 'object' && typeof window.hWin.google.maps === 'object') {
-console.log('google map api: already loaded')                    
-            handleApiReady();
-        }else{                            
-console.log('load google map api')                    
-            $.getScript('https://maps.googleapis.com/maps/api/js?key=AIzaSyDtYPxWrA7CP50Gr9LKu_2F08M6eI8cVjk'
-            +'&libraries=drawing,geometry&callback=handleApiReady');                                           
-            //AIzaSyCan9ZqKPnKXuzdb2-pmES_FVW2XerN-eE
-        }
-*/
+
+        /*
+        $(window).on("beforeunload",  function() { 
+console.log('beforeunload MAPPEVIEW');
+            return;
+        });
+        */
+        
     } //onPageInit
     
     function handleApiReady(){
@@ -134,7 +131,7 @@ console.log('load google map api')
     function onMapInit(){
 
         if(target_database){
-            //load check login 
+            //load check login iframe
             var ele = $('#checklogin');
             ele.attr('src', null);
             ele.attr('src', window.hWin.HAPI4.baseURL

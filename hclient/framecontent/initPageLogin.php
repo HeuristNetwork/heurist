@@ -47,7 +47,6 @@ if (($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1')
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js" integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
 <?php
 }
-    include dirname(__FILE__).'/initPageCss.php'; 
 ?>
     <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery-ui-iconfont-master/jquery-ui.icon-font.css" />
     <script>window.hWin = window;</script>
@@ -59,6 +58,9 @@ if (($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1')
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_msg.js"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/localization.js"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/profile/profile_login.js"></script>    
+<?php
+    include dirname(__FILE__).'/initPageCss.php'; 
+?>    
 <script>  
 var login_warning = ''
 var requiredLevel = 1; //1-admin, 2-owner, 0 logged in
@@ -100,12 +102,23 @@ function verify_credentials(){
         }
 
         if(msg!=''){
-            window.parent.hWin.HEURIST4.msg.showMsgErr(msg+'<br> Database: '+window.hWin.HAPI4.database);            
+            /*
+            $(window).on("beforeunload",  function() { 
+                    console.log('beforeunload initPageLogin');
+            });
+            */
             
-            //window.hWin.HEURIST4.msg.showMsgErr(msg+'<br> Database: '+window.hWin.HAPI4.database);            
-            doLogin(false, function(is_logged){
-                //window.hWin.HAPI4.verify_credentials(function(){}, login_level_req);
-            }, window.parent);        
+            var win_mappreview = window.parent.hWin;
+            var $dlg2 = win_mappreview.HEURIST4.msg.showMsgDlg(msg+'<br> Database: '+window.hWin.HAPI4.database,
+                {OK:
+                function(){
+                    //$dlg = window.hWin.HEURIST4.msg.getMsgDlg();            
+                    $dlg2.dialog( "close" );
+                    //window.hWin.HEURIST4.msg.showMsgErr(msg+'<br> Database: '+window.hWin.HAPI4.database);            
+                    doLogin(false, function(is_logged){
+                        //window.hWin.HAPI4.verify_credentials(function(){}, login_level_req);
+                    }, win_mappreview, 'heurist-clearinghouse-login-dialog');
+                }}); 
         }
     }        
 }

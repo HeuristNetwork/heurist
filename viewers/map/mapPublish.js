@@ -17,7 +17,9 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
-
+if((typeof L !=='undefined') && L.Control)
+{
+    
 L.Control.Publish = L.Control.extend({
     
     mapPublish: null,
@@ -129,7 +131,7 @@ L.control.help = function(opts) {
     return new L.Control.Help(opts);
 }
 
-
+}
 //        
 // create accordion with 3(4) panes
 // load prededifned list of base layers
