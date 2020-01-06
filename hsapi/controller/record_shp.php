@@ -107,10 +107,15 @@
                 try {
                 
                     if($dbf_file && file_exists($dbf_file)){
-                        $shapeFile = new ShapeFile(array(
+                        
+                        $files = array(
                             'shp'   => $shp_file,
-                            'shx'   => $shx_file,
-                            'dbf'   => $dbf_file));
+                            'dbf'   => $dbf_file);
+                            
+                        if($shx_file && file_exists($shx_file)){
+                            $files['shx'] = $shx_file;    
+                        }
+                        $shapeFile = new ShapeFile($files);
                     }else if(file_exists($shp_file)){
                         $shapeFile = new ShapeFile($shp_file);
                     }else{
