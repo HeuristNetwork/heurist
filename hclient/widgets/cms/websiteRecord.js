@@ -282,9 +282,9 @@ function hCmsEditing(_options) {
                         if(pageid==home_pageid){
                             pagetitle.empty();
                         }        
+                        $('#main-pagetitle').empty().show();
                         pagetitle.addClass("webpageheading");
                         pagetitle.appendTo($('#main-pagetitle'));
-                        $('#main-pagetitle').empty().show();
                         
                         //assign content to editor
                         $('.tinymce-body').val($('#main-content').html());

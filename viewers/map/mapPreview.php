@@ -188,16 +188,23 @@ console.log('beforeunload MAPPEVIEW');
                     if(response.status == window.hWin.ResponseStatus.OK){
                         //_hideProgress(3);
                         
-                        var cnt = (response.data.count_imported-1)/2;
-                        
-                        //response.data.count_imported
-                        var sMsg = '<b>Map saved.</b><br>'
-+' Exported 1 map document,'+cnt+' map layers, '+cnt+' datasets. '                       
-+' records. Please go to <b>My Maps</b> to edit the styling, to obtain the URL,'
-+'or to obtain a snippet of html which will allow you to embed this map in an external website';
-                        
-                        window.hWin.HEURIST4.msg.showMsgDlg(sMsg,null,'Export completed');
-                        window.close();
+                        var cnt = response.data.count_imported-1;
+                        if(cnt % 2 > 0){
+
+                            window.hWin.HEURIST4.msg.showMsgDlg('It appears that some of datasource records are not public and hence they are not exported. Please make sure that all datasets and datasources are public and repeat this operation. Do not forget to remove wrong mapspace', null, 'Error');
+
+                        }else{
+                            
+                            cnt = cnt/2;
+                            //response.data.count_imported
+                            var sMsg = '<br><p>'
+    +' Exported 1 map document,'+cnt+' map layers, '+cnt+' datasets.</p><br>'                       
+    +'<p>Please go to <b>My Maps</b> to edit the styling, to obtain the URL,'
+    +' or to obtain a snippet of html which will allow you to embed this map in an external website</p>';
+                            
+                            window.hWin.HEURIST4.msg.showMsgDlg(sMsg,null,'Map saved');
+                            window.close();
+                        }
                     }else{
                         if(response && response.status==window.hWin.ResponseStatus.REQUEST_DENIED){
                             var ele = $('#checklogin');
