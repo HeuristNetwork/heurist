@@ -624,39 +624,52 @@ div .selected_last{
     border-collapse: collapse;
     border-radius: 3px 3px 3px 3px;
     box-shadow: 0 1px 2px #BBBBBB;
-    display: inline-block; /* !important; */
+    display: block; /*inline-block !important; */
     font-size: 0.8em !important;
     height: 36px;
     margin: 6px;
     position: relative;
-    width: 128px;
+    height: 64px;
+    /*
+    height: 36px;
+    width: 128px;*/
 }
 .icons div.recordDiv:hover{
     z-index:10;
     -moz-box-shadow:0px 3px 8px #666;
     -webkit-box-shadow:0px 3px 8px #666;
     box-shadow:0px 3px 8px #666;
+    height:68px;
+    /*
     height:42px;
-    width:144px;
-    margin:0px -2px;
+    width:144px;   -2px */
+    margin:0px;
 }
 
 .icons .recordDiv .recTypeThumb {
+    /*
     top:2px;
     height: 30px;
     width: 30px;
+    */
+    top:2px;
+    height: 58px;
+    width: 58px;
 }
 .icons .recordDiv:hover .recTypeThumb {
-    height:36px;
+    /*height:36px;*/
+    width: 60px;
 }
 
 .icons .recordDiv .recordTitle {
     bottom: 0.1em;
-    top: 0.3em;
-    left: 42px;
+    /*top: 0.3em;*/
+    top: 22px;
+    left: 64px;
     right: 1px;
 
     white-space: normal;
+    font-size:1.2em;
 }
 
 .icons .recordDiv .recordSelector {
@@ -666,6 +679,11 @@ div .selected_last{
 }
 
 .icons .recordIcons {
+   /* display: none; */
+   position: absolute;
+   left: 64px;
+}
+.icons .rt-icon{
     display: none;
 }
 

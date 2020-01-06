@@ -472,8 +472,8 @@ $.widget( "heurist.resultList", {
         )
         .appendTo( this.div_toolbar );
         
-        this.view_mode_selector.find('button[value="list"]').button({icon: "ui-icon-list", showLabel:false, label:window.hWin.HR('list')}).css('font-size','1em');
-        this.view_mode_selector.find('button[value="icons"]').button({icon: "ui-icon-view-icons-b", showLabel:false, label:window.hWin.HR('icons')}).css('font-size','1em');
+        this.view_mode_selector.find('button[value="list"]').button({icon: "ui-icon-menu", showLabel:false, label:window.hWin.HR('list')}).css('font-size','1em');
+        this.view_mode_selector.find('button[value="icons"]').button({icon: "ui-icon-list", showLabel:false, label:window.hWin.HR('icons')}).css('font-size','1em'); //ui-icon-view-icons-b
         this.view_mode_selector.find('button[value="thumbs"]').button({icon: "ui-icon-view-icons", showLabel:false, label:window.hWin.HR('thumbs')}).css('font-size','1em');
         this.view_mode_selector.find('button[value="thumbs3"]').button({icon: "ui-icon-stop", showLabel:false, label:window.hWin.HR('thumbs3')}).css('font-size','1em');
         this.view_mode_selector.controlgroup();
