@@ -967,7 +967,7 @@ EOD;
                 $session_val = $execution_counter.','.$tot_count;
                 $current_val = null;
                 //check for termination and set new value
-                if (intdiv($execution_counter,100) == $execution_counter/100){
+                if ($execution_counter % 100 == 0) { //(intdiv($execution_counter,100) == $execution_counter/100){
                     $current_val = mysql__update_progress($mysqli, $session_id, false, $session_val);
 //error_log($session_id.'  '.$current_val);                    
                 }

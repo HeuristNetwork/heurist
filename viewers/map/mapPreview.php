@@ -165,8 +165,51 @@ console.log('beforeunload MAPPEVIEW');
                 return;    
             }
             
-            //check login t target database            
-            
+            //check that all layers and datasource records are public
+            var not_public = [], cnt_dt = 0, cnt_ds = 0;
+            var idx, records = recordset.getRecords();
+            for(idx in records){
+                if(idx)
+                {
+                    var record = records[idx];
+                    if(recordset.fld(record, 'rec_NonOwnerVisibility')!='public'){
+                        
+                        var recName = recordset.fld(record, 'rec_Title');
+                        var recType = recordset.fld(record, 'rec_RecTypeID');
+                        
+                        if(recType==RT_MAP_LAYER || recType==RT_TLCMAP_DATASET){
+                            recType = 'dataset';
+                            cnt_dt++;
+                        }else{
+                            recType = 'datasource';
+                            cnt_ds++;
+                        }
+                        not_public.push(recName+' ('+recType+')');
+                    }
+                }
+            }
+            if(not_public.length>0){
+                
+                var is_sglr = (not_public.length==1);
+                
+                var sMsg = '<p>The following '
+                +((cnt_dt>0)?('dataset registration'+(cnt_dt>1?'s':'')):'') 
+                + ((cnt_dt>0 && cnt_ds>0)?' and ':'')
+                +((cnt_ds>0)?('data source record'+(cnt_ds>1?'s':'')):'') 
+                +(is_sglr?' is ':' are ')
++' not marked as publicly visible and cannot therefore be included in your saved map. '
++(is_sglr?'It is':'They are')+' visible to you as either the owner or because the owner has made '
++(is_sglr?'it':'them')+' visible to logged-in users.</p><p>'
++ not_public.join('<br>')
++'</p><p>Please remove '+(is_sglr?'this dataset':'these datasets')
++' from your map and try saving the map again.</p>'
++'Please ask the dataset owner(s) to make '+(is_sglr?'this data source':'these data sources')+' publicly visible. '
++'If you do not know the owner, please advise the system administrator ('
++'<a href="mailto:'+window.hWin.HAPI4.sysinfo.dbowner_email+'">'+window.hWin.HAPI4.sysinfo.dbowner_email+'</a>)</p>';
+                
+                window.hWin.HEURIST4.msg.showMsgErr( sMsg );
+                return;
+            }
 
             //$('#divStep2').hide();
             var session_id = Math.round((new Date()).getTime()/1000);  //for progress
@@ -198,7 +241,7 @@ console.log('beforeunload MAPPEVIEW');
                             cnt = cnt/2;
                             //response.data.count_imported
                             var sMsg = '<br><p>'
-    +' Exported 1 map document,'+cnt+' map layers, '+cnt+' datasets.</p><br>'                       
+    +' Exported 1 map document,'+cnt+' map layers, '+cnt+' datasets.</p>'                       
     +'<p>Please go to <b>My Maps</b> to edit the styling, to obtain the URL,'
     +' or to obtain a snippet of html which will allow you to embed this map in an external website</p>';
                             
