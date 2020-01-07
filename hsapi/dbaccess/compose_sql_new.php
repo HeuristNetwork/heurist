@@ -327,7 +327,7 @@ class HQuery {
                     }
                     
                     $where2_conj = ' or ';
-                }else if ($this->search_domain != BOOKMARK){ //database owner can search everything
+                }else if ($this->search_domain != BOOKMARK){ //database owner can search everything (including hidden)
                     $wg_ids = array();
                 }
                 

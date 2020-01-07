@@ -210,31 +210,55 @@ function get_sql_query_clauses($db, $params, $currentUser=null) {
     }
 
     $where2 = '';
-    if($query->recVisibilityType && $query->recVisibilityType!="hidden"){
-        $where2 = '(TOPBIBLIO.rec_NonOwnerVisibility="'.$query->recVisibilityType.'")';  //'pending','public','viewable'
-    }else{
-        $where2_conj = '';
-        if($query->recVisibilityType){ //hidden
-            $where2 = '(TOPBIBLIO.rec_NonOwnerVisibility="hidden")';
-            $where2_conj = ' and ';
-        }else if($currUserID!=2){ //not database owner
-        
-            $where2 = '(TOPBIBLIO.rec_NonOwnerVisibility in ("public","pending"))';
-            if ($currUserID>0){ //logged in
+    $where2_conj = '';
+    
+    if($query->recVisibilityType && $currUserID>0){
+    
+        if($query->recVisibilityType=="public"){
+            $where2 = '(TOPBIBLIO.rec_NonOwnerVisibility="'.$query->recVisibilityType.'")';  //'pending','public','viewable'
+        }else{
             
+            if($query->recVisibilityType=='viewable'){
+                
+                $query->from_clause = $query->from_clause.' LEFT JOIN usrRecPermissions ON rcp_RecID=TOPBIBLIO.rec_ID ';
+                //if there is entry for record in usrRecPermissions current user must be member of allowed groups
+                $where2 = '(TOPBIBLIO.rec_NonOwnerVisibility="viewable" and (rcp_UGrpID is null or rcp_UGrpID in ('
+                            .join(',', $wg_ids).')))';
+                $where2_conj = ' and ';
+            }else{
+                $where2 = '(TOPBIBLIO.rec_NonOwnerVisibility="'.$query->recVisibilityType.'")';
+                $where2_conj = ' and ';
+            } 
+            
+            if(count($wg_ids)>0){
+                $where2 = '( '.$where2.$where2_conj.'TOPBIBLIO.rec_OwnerUGrpID in (' . join(',', $wg_ids).') )';
+            }
+        }
+        
+        
+    }else{
+        //visibility type not defined - show records visible for current user
+        if($currUserID!=2){
+            $where2 = '(TOPBIBLIO.rec_NonOwnerVisibility in ("public","pending"))'; //any can see public
+            
+            if ($currUserID>0){ //logged in can see viewable
                 $query->from_clause = $query->from_clause.' LEFT JOIN usrRecPermissions ON rcp_RecID=TOPBIBLIO.rec_ID ';
                 //if there is entry for record in usrRecPermissions current user must be member of allowed groups
                 $where2 = $where2.' or (TOPBIBLIO.rec_NonOwnerVisibility="viewable" and (rcp_UGrpID is null or rcp_UGrpID in ('
                         .join(',', $wg_ids).')))';
             }
-            
             $where2_conj = ' or ';
+            
+        }else if ($search_domain != BOOKMARK){ //database owner can search everything (including hidden)
+            $wg_ids = array();
         }
-
+        
         if(count($wg_ids)>0 && $currUserID>0){
-            $where2 = '( '.$where2.$where2_conj.'TOPBIBLIO.rec_OwnerUGrpID in (' . join(',', $wg_ids).') )';
+                //for hidden
+                $where2 = '( '.$where2.$where2_conj.'TOPBIBLIO.rec_OwnerUGrpID in (' . join(',', $wg_ids).') )';
         }
     }
+    
     if($where2!=''){
         $where_clause = $where_clause . ' and ' . $where2;
     }
@@ -478,6 +502,10 @@ class Query {
     function addVisibilityTypeRestriction($visibility_type) {
         if ($visibility_type){
             $visibility_type = strtolower($visibility_type);
+            if ($visibility_type[0] == '-') {
+                $negate = true;
+                $visibility_type = substr($visibility_type, 1);
+            }
             if(in_array($visibility_type,array('viewable','hidden','pending','public')))
             {
                 $this->recVisibilityType = $visibility_type;
