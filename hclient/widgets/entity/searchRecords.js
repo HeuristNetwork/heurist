@@ -79,7 +79,8 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
                 $('<button>')
                     .button({label: window.hWin.HR('Add')+' '+ name.trim(), icon: "ui-icon-plus"})
                     .attr('data-rtyid', rectypeID)
-                    .css({'font-size':'11px',display:'inline-block',width:200})
+                    .css({'font-size':'11px',display:'inline-block',width:200,'text-align':'left'})
+                    .addClass('truncate')
                     .click(function(e) {
                         that._trigger( "onaddrecord", null, $(e.target).attr('data-rtyid') );
                     })
