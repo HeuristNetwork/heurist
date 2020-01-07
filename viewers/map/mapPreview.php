@@ -139,7 +139,7 @@ console.log('beforeunload MAPPEVIEW');
                 
         }else{
             window.hWin.HEURIST4.msg.showMsgErr('Target database not defined. '
-            +'It is not possiblle to perform this operation'); 
+                +'It is not possiblle to perform this operation'); 
         }
         
 
@@ -224,12 +224,13 @@ console.log('beforeunload MAPPEVIEW');
                 id: window.hWin.HEURIST4.util.random()
             };
             
-            //todo _showProgress( session_id, 2 );
+            window.hWin.HEURIST4.msg.bringCoverallToFront($('body'));
                    
             window.hWin.HAPI4.doImportAction(request, function( response ){
+                
+                    window.hWin.HEURIST4.msg.sendCoverallToBack();
                     
                     if(response.status == window.hWin.ResponseStatus.OK){
-                        //_hideProgress(3);
                         
                         var cnt = response.data.count_imported-1;
                         if(cnt % 2 > 0){
@@ -253,14 +254,13 @@ console.log('beforeunload MAPPEVIEW');
                             var ele = $('#checklogin');
                             ele[0].contentWindow.verify_credentials();
                         }else{
-                            //_hideProgress(2);
                             window.hWin.HEURIST4.msg.showMsgErr(response);
                         }
                                 
                     }
                 });
-    }        
-
+    } 
+    
         </script>
         <style type="text/css">
             #map_digitizer {

@@ -26,6 +26,7 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
         var that = this;
 
         //-----------------
+        this.element.css('min-width','700px');
         this.selectRectype = this.element.find('#sel_rectypes');
 
 
@@ -44,6 +45,15 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
             topOption =  window.hWin.HR('Any Record Type');
         }*/
         
+        var rt_list = this.options.rectype_set;
+        var is_expand_rt_list = false;
+        if(!window.hWin.HEURIST4.util.isempty(rt_list)){
+            if(!window.hWin.HEURIST4.util.isArray(rt_list)){
+                rt_list = rt_list.split(',');
+            }
+            is_expand_rt_list = (rt_list.length>1 && rt_list.length<10);
+        }
+        
         this.selectRectype.empty();
         window.hWin.HEURIST4.ui.createRectypeSelect(this.selectRectype.get(0), 
             this.options.rectype_set, 
@@ -52,50 +62,92 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
                 :'',  // (this.options.parententity>0)?window.hWin.HR('select record type')
             false);
             
+        this.btn_add_record = this.element.find('#btn_add_record');    
+        this.btn_select_rt = this.element.find( "#btn_select_rt");
             
+        if(is_expand_rt_list){
+            
+            this.btn_select_rt.hide();
+            this.btn_add_record.hide();
+            var cont = this.btn_add_record.parent();
+            
+            for(var idx=0; idx<rt_list.length; idx++){
+                
+                var rectypeID = rt_list[idx];
+                var name = window.hWin.HEURIST4.rectypes.names[rectypeID];
+                
+                $('<button>')
+                    .button({label: window.hWin.HR('Add')+' '+ name.trim(), icon: "ui-icon-plus"})
+                    .attr('data-rtyid', rectypeID)
+                    .css({'font-size':'11px',display:'inline-block',width:200})
+                    .click(function(e) {
+                        that._trigger( "onaddrecord", null, $(e.target).attr('data-rtyid') );
+                    })
+                    .appendTo(cont);
 
-        this.btn_add_record = this.element.find('#btn_add_record')
-        .button({label: window.hWin.HR("Add Record"), icon: "ui-icon-plus"})
-        .click(function(e) {
-            if(that.selectRectype.val()>0){
-                that._trigger( "onaddrecord", null, that.selectRectype.val() );
-            }else{
-                that.btn_select_rt.click();
+                $('<button>')
+                    .button({label:window.hWin.HR("Filter by record type"), icon: "ui-icon-carat-1-s", showLabel:false})
+                    .attr('data-rtyid', rectypeID)
+                    .css({'font-size':'11px',display:'inline-block',width:20})
+                    .click(function(e) {
+                        var el = $(e.target);
+                        el = el.is('button') ?el :el.parents('button');
+                        var rtyid = el.attr('data-rtyid'); 
+                        
+                        that.selectRectype.val( rtyid ).change();
+                        //that.startSearch();//
+                    })
+                    .appendTo(cont);
+                
             }
-        });  
+            
+        }else{
+            
+            this.btn_add_record
+            .button({label: window.hWin.HR("Add Record"), icon: "ui-icon-plus"})
+            .click(function(e) {
+                if(that.selectRectype.val()>0){
+                    that._trigger( "onaddrecord", null, that.selectRectype.val() );
+                }else{
+                    that.btn_select_rt.click();
+                }
+            });  
 
-        this.btn_select_rt = this.element.find( "#btn_select_rt")
-            .button({label:window.hWin.HR("Select record type"), icon: "ui-icon-carat-1-s", showLabel:false});
+            this.btn_select_rt
+                .button({label:window.hWin.HR("Select record type"), icon: "ui-icon-carat-1-s", showLabel:false});
+                
+           //open and adjust position of dropdown    
+            this._on( this.btn_select_rt, {
+                    click:  function(){
+                    this.selectRectype.hSelect('open');
+                    this.selectRectype.hSelect('menuWidget').position({my: "left top", at: "left bottom", of: this.btn_add_record });
+                    return false;
+                        
+                }});
+           
+           //adjust position of dropdown    
+           this.sel_rectypes_btn = this.element.find( "#sel_rectypes-button");
+           this._on( this.sel_rectypes_btn, {
+                    click:  function(){
+                    this.selectRectype.hSelect('menuWidget').position({my: "left top", at: "left bottom", of: this.sel_rectypes_btn });
+                }});
+                
+            this.btn_add_record.parent().controlgroup();
             
-       //open and adjust position of dropdown    
-        this._on( this.btn_select_rt, {
-                click:  function(){
-                this.selectRectype.hSelect('open');
-                this.selectRectype.hSelect('menuWidget').position({my: "left top", at: "left bottom", of: this.btn_add_record });
-                return false;
-                    
-            }});
-       
-       //adjust position of dropdown    
-       this.sel_rectypes_btn = this.element.find( "#sel_rectypes-button");
-       this._on( this.sel_rectypes_btn, {
-                click:  function(){
-                this.selectRectype.hSelect('menuWidget').position({my: "left top", at: "left bottom", of: this.sel_rectypes_btn });
-            }});
             
-        this.btn_add_record.parent().controlgroup();
         
+        }//is_expand_rt_list    
         
         function __onSelectRecType(sel){
+            if(that.btn_add_record.is(':visible')){
                 if(sel.val()>0){
                     lbl = window.hWin.HR('Add')+' '+ sel.find( "option:selected" ).text().trim();
                 }else{
                     lbl = window.hWin.HR("Add Record");
                 }
                 that.btn_add_record.button('option','label',lbl);
-                
+            }
         }
-        
         //force search if rectype_set is defined
         this._on( this.selectRectype, {
             change: function(event){

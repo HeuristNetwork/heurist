@@ -95,7 +95,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         //-----------------
         var sh = 0;
         if(hasSearchForm && this.searchForm.is(':visible')){
-            sh = 13;
+            sh = 15;
             if(hasSearchForm){
                 if(this.options.parententity){
                     sh = 14;  
