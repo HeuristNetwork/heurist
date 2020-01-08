@@ -26,7 +26,7 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
         var that = this;
 
         //-----------------
-        this.element.css('min-width','700px');
+        //this.element.css('min-width','700px');
         this.selectRectype = this.element.find('#sel_rectypes');
 
 
@@ -79,7 +79,7 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
                 $('<button>')
                     .button({label: window.hWin.HR('Add')+' '+ name.trim(), icon: "ui-icon-plus"})
                     .attr('data-rtyid', rectypeID)
-                    .css({'font-size':'11px',display:'inline-block',width:200,'text-align':'left'})
+                    .css({'font-size':'11px',display:'inline-block',width:190,'text-align':'left','margin-bottom':6})
                     .addClass('truncate')
                     .click(function(e) {
                         that._trigger( "onaddrecord", null, $(e.target).attr('data-rtyid') );
@@ -87,9 +87,9 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
                     .appendTo(cont);
 
                 $('<button>')
-                    .button({label:window.hWin.HR("Filter by record type"), icon: "ui-icon-carat-1-s", showLabel:false})
+                    .button({label:window.hWin.HR("Filter by record type"), icon: "ui-icon-search", showLabel:false})
                     .attr('data-rtyid', rectypeID)
-                    .css({'font-size':'11px',display:'inline-block',width:20})
+                    .css({'font-size':'11px',display:'inline-block',width:20,'margin-right':10,'margin-bottom':6})
                     .click(function(e) {
                         var el = $(e.target);
                         el = el.is('button') ?el :el.parents('button');
