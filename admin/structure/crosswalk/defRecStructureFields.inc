@@ -8,6 +8,7 @@ $flds = "`rst_ID`, `rst_RecTypeID`,
             `rst_OriginatingDBID`, `rst_IDInOriginatingDB`,
             `rst_MaxValues`, `rst_MinValues`, `rst_InitialRepeats`, `rst_DisplayDetailTypeGroupID`,
             `rst_FilteredJsonTermIDTree`, `rst_PtrFilteredIDs`, `rst_CreateChildIfRecPtr`,
+            `rst_PointerMode`, `rst_PointerBrowseFilter`,
             `rst_OrderForThumbnailGeneration`, `rst_TermIDTreeNonSelectableIDs`, 
             `rst_ShowDetailCertainty`, `rst_ShowDetailAnnotation`, `rst_NumericLargestValueUsed`, `rst_EntryMask`,
             `rst_LocallyModified` ";

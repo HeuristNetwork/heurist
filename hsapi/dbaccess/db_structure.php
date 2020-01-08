@@ -126,7 +126,7 @@
             "if(rst_FilteredJsonTermIDTree is not null and CHAR_LENGTH(rst_FilteredJsonTermIDTree)>0,rst_FilteredJsonTermIDTree,dty_JsonTermIDTree) as rst_FilteredJsonTermIDTree",
             //here we check for an override in the recTypeStrucutre for Pointer types which is a subset of the detailType dty_PtrTargetRectypeIDs
             "if(rst_PtrFilteredIDs is not null and CHAR_LENGTH(rst_PtrFilteredIDs)>0,rst_PtrFilteredIDs,dty_PtrTargetRectypeIDs) as rst_PtrFilteredIDs",
-            "rst_CreateChildIfRecPtr",
+            "rst_CreateChildIfRecPtr", "rst_PointerMode", "rst_PointerBrowseFilter",
             "rst_OrderForThumbnailGeneration", "rst_TermIDTreeNonSelectableIDs", "rst_Modified", "rst_LocallyModified",
             "dty_TermIDTreeNonSelectableIDs",
             "dty_FieldSetRectypeID",
@@ -875,7 +875,8 @@ function dbs_GetRectypeConstraint($system) {
             "rst_DisplayWidth", "rst_DisplayHeight",
             "rst_DefaultValue", "rst_RecordMatchOrder", "rst_CalcFunctionID", "rst_RequirementType", "rst_NonOwnerVisibility",
             "rst_Status", "rst_OriginatingDBID", "rst_MaxValues", "rst_MinValues", "rst_DisplayDetailTypeGroupID",
-            "rst_FilteredJsonTermIDTree", "rst_PtrFilteredIDs", "rst_CreateChildIfRecPtr", "rst_OrderForThumbnailGeneration", "rst_TermIDTreeNonSelectableIDs",
+            "rst_FilteredJsonTermIDTree", "rst_PtrFilteredIDs", "rst_CreateChildIfRecPtr", "rst_PointerMode",
+            "rst_PointerBrowseFilter", "rst_OrderForThumbnailGeneration", "rst_TermIDTreeNonSelectableIDs",
             "rst_Modified", "rst_LocallyModified", "dty_TermIDTreeNonSelectableIDs", "dty_FieldSetRectypeID", "dty_Type", "dty_ConceptID");
     }
 

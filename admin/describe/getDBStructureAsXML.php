@@ -502,6 +502,7 @@ function print_row($row,$fmt,$flds) {
             $rst_FilteredJsonTermIDTree = html_escape($row['rst_FilteredJsonTermIDTree']);
             $rst_TermIDTreeNonSelectableIDs = html_escape($row['rst_TermIDTreeNonSelectableIDs']);
             $rst_PtrFilteredIDs = html_escape($row['rst_PtrFilteredIDs']);
+            $rst_PointerBrowseFilter = html_escape($row['rst_PointerBrowseFilter']);
             print "<rst>";
             print "<rst_ID>$row[rst_ID]</rst_ID>".
             "<rst_RecTypeID>$row[rst_RecTypeID]</rst_RecTypeID>".
@@ -527,6 +528,8 @@ function print_row($row,$fmt,$flds) {
             "<rst_FilteredJsonTermIDTree>$rst_FilteredJsonTermIDTree</rst_FilteredJsonTermIDTree>".
             "<rst_PtrFilteredIDs>$rst_PtrFilteredIDs</rst_PtrFilteredIDs>".
             "<rst_CreateChildIfRecPtr>$row[rst_CreateChildIfRecPtr]</rst_CreateChildIfRecPtr>".
+            "<rst_PointerMode>$row[rst_PointerMode]</rst_PointerMode>".
+            "<rst_PointerBrowseFilter>$rst_PointerBrowseFilter</rst_PointerBrowseFilter>".
             "<rst_OrderForThumbnailGeneration>$row[rst_OrderForThumbnailGeneration]</rst_OrderForThumbnailGeneration>".
             "<rst_TermIDTreeNonSelectableIDs>$rst_TermIDTreeNonSelectableIDs</rst_TermIDTreeNonSelectableIDs>".
             "<rst_LocallyModified>$row[rst_LocallyModified]</rst_LocallyModified>";

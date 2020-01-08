@@ -581,6 +581,7 @@ function print_row($row,$fmt) {
             $rst_PtrFilteredIDs = $mysqli->real_escape_string($row['rst_PtrFilteredIDs']);
             $rst_CalcFieldMask = $mysqli->real_escape_string($row['rst_CalcFieldMask']);
             $rst_EntryMask = $mysqli->real_escape_string($row['rst_EntryMask']);
+            $rst_PointerBrowseFilter = $mysqli->real_escape_string($row['rst_PointerBrowseFilter']); 
             print "('$row[rst_ID]',
             '$row[rst_RecTypeID]',
             '$row[rst_DetailTypeID]',
@@ -607,6 +608,8 @@ function print_row($row,$fmt) {
             '$rst_FilteredJsonTermIDTree',
             '$rst_PtrFilteredIDs',
             '$row[rst_CreateChildIfRecPtr]',
+            '$row[rst_PointerMode]',
+            '$rst_PointerBrowseFilter',
             '$row[rst_OrderForThumbnailGeneration]',
             '$rst_TermIDTreeNonSelectableIDs',
             '$row[rst_ShowDetailCertainty]',

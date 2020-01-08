@@ -92,6 +92,8 @@ copy_IconAndThumb_FromLibrary
         "rst_FilteredJsonTermIDTree"=>"s",
         "rst_PtrFilteredIDs"=>"s",
         "rst_CreateChildIfRecPtr"=>"i",
+        "rst_PointerMode"=>"s",
+        "rst_PointerBrowseFilter"=>"s",
         "rst_OrderForThumbnailGeneration"=>"i",
         "rst_TermIDTreeNonSelectableIDs"=>"s",
         "rst_Modified"=>"s",
@@ -601,6 +603,8 @@ copy_IconAndThumb_FromLibrary
 		$arr_target[$ri['rst_FilteredJsonTermIDTree']] = null;
 		$arr_target[$ri['rst_PtrFilteredIDs']] = null;
         $arr_target[$ri['rst_CreateChildIfRecPtr']] = '0';
+        $arr_target[$ri['rst_PointerMode']] = 'addorbrowse';
+        $arr_target[$ri['rst_PointerBrowseFilter']] = null;
         
         $arr_target[$ri['rst_OrderForThumbnailGeneration']] = null;
 		$arr_target[$ri['rst_TermIDTreeNonSelectableIDs']] = null;

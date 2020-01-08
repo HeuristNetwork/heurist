@@ -676,6 +676,25 @@
             }
         }
         
+        //verify that required column exists in sysUGrps
+        $query = "SHOW COLUMNS FROM `defRecStructure` LIKE 'rst_PointerMode'";
+        $res = $mysqli->query($query);
+        $row_cnt = $res->num_rows;
+        if($res) $res->close();
+        if(!$row_cnt){ //column not defined
+            //alter table
+             $query = "ALTER TABLE `defRecStructure` ADD COLUMN `rst_PointerMode` enum('addorbrowse','addonly','browseonly') DEFAULT 'addorbrowse' COMMENT 'When adding record pointer values, default or null = show both add and browse, otherwise only allow add or only allow browse-for-existing' AFTER `rst_CreateChildIfRecPtr`, ADD COLUMN `rst_PointerBrowseFilter` varchar(255)  DEFAULT NULL COMMENT 'When adding record pointer values, defines a Heurist filter to restrict the list of target records browsed' AFTER `rst_CreateChildIfRecPtr`;";
+             
+            $res = $mysqli->query($query);
+            if(!$res){
+                $system->addError(HEURIST_DB_ERROR, 'Cannot modify defRecStructure to add rst_PointerMode and rst_PointerBrowseFilter', $mysqli->error);
+                return false;
+            }
+            $report[] = 'defRecStructure: rst_PointerMode and rst_PointerBrowseFilter added';
+        }
+        
+        
+        
         $query = "SHOW COLUMNS FROM `defTerms` LIKE 'trm_SemanticReferenceURL'";
         $res = $mysqli->query($query);
         $row_cnt = $res->num_rows;

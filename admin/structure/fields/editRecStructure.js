@@ -203,6 +203,8 @@ function EditRecStructure() {
                         '',
                         conceptCode,
                         aval[fi.rst_CreateChildIfRecPtr],
+                        aval[fi.rst_PointerMode], 
+                        aval[fi.rst_PointerBrowseFilter],
                         aval[fi.rst_DisplayHeight]]);
                     //statusLock]);   last column stores edited values and show either delete or lock image
                 }
@@ -221,7 +223,7 @@ function EditRecStructure() {
                         "rst_DisplayName", "dty_Type", "rst_RequirementType",
                         "rst_DisplayWidth", "rst_MinValues", "rst_MaxValues", "rst_DefaultValue", "rst_Status",
                         "rst_NonOwnerVisibility", "rst_DisplayHelpText", "rst_values", "conceptCode", 
-                        "rst_CreateChildIfRecPtr", "rst_DisplayHeight"]
+                        "rst_CreateChildIfRecPtr", "rst_PointerMode", "rst_PointerBrowseFilter", "rst_DisplayHeight"]
                 }
             });
 
@@ -2102,6 +2104,8 @@ function EditRecStructure() {
                 arr_target[rst.rst_FilteredJsonTermIDTree] = null;
                 arr_target[rst.rst_PtrFilteredIDs] = null;
                 arr_target[rst.rst_CreateChildIfRecPtr] = 0;
+                arr_target[rst.rst_PointerMode] = 'addorbrowse',
+                arr_target[rst.rst_PointerBrowseFilter] = null,
                 arr_target[rst.rst_TermIDTreeNonSelectableIDs] = null;
                 arr_target[rst.rst_CalcFunctionID] = null;
                 arr_target[rst.rst_Status] = "open";
