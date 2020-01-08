@@ -20,8 +20,12 @@
 //isforsed - if true - it is not possible to get out from login other than switch database
 function doLogin(isforsed, callback, parentwin, dialog_id){
 
-
-    if(!parentwin) parentwin = window.hWin;
+    var is_secondary_parent = false;
+    if(!parentwin){
+        parentwin = window.hWin;  
+    }else{
+        is_secondary_parent = true; //to reduce font in popup
+    } 
     
     if(!dialog_id) dialog_id = 'heurist-login-dialog';
     
@@ -155,10 +159,11 @@ function doLogin(isforsed, callback, parentwin, dialog_id){
                                         //version is old 
                                         return;
                                     }
-                                    
+                                    /*
                                     if($.isFunction(callback)){
                                             callback(true);
                                     }
+                                    */
                                     
                                     //that._refresh();
                                 }else if(response.status == window.hWin.ResponseStatus.REQUEST_DENIED){
@@ -236,7 +241,7 @@ function doLogin(isforsed, callback, parentwin, dialog_id){
             });
 
             $dlg.dialog("open");
-            $dlg.addClass('ui-dialog-heurist').css({'font-size':'0.8em'});
+            if(is_secondary_parent)$dlg.addClass('ui-dialog-heurist').css({'font-size':'0.8em'});
             $dlg.parent().position({ my: "center center", at: "center center", of: $(top.document) });
 
             /*if(isforsed){
