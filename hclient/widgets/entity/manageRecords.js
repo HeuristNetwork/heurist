@@ -95,7 +95,19 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         //-----------------
         var sh = 0;
         if(hasSearchForm && this.searchForm.is(':visible')){
-            sh = 17;
+            
+            var rt_list = this.options.rectype_set;
+            var is_expand_rt_list = false;
+            if(!window.hWin.HEURIST4.util.isempty(rt_list)){
+                if(!window.hWin.HEURIST4.util.isArray(rt_list)){
+                    rt_list = rt_list.split(',');
+                }
+                cnt = rt_list.length;
+            }else{
+                cnt = 1;
+            }            
+            
+            sh = (cnt<4)?13:((cnt<7)?15:17);
             if(hasSearchForm){
                 if(this.options.parententity){
                     sh = 14;  
