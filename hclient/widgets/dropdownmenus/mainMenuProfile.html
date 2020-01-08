@@ -71,19 +71,5 @@
 <li>-</li>
 
 <li style="padding-left:5px;">
-    <a href="#"
-    onclick="{ 
-        window.hWin.HAPI4.SystemMgr.logout(
-            function(response){
-                if(response.status == window.hWin.ResponseStatus.OK){
-                    window.hWin.HAPI4.setCurrentUser(null);
-                    $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_CREDENTIALS);
-                    //that._refresh();
-                }else{
-                    window.hWin.HEURIST4.msg.showMsgErr(response);
-                }
-            }
-        );
-    return false;}"
-    title="Log out Heurist">Log out</a>
+    <a href="#" id="menu-profile-logout" title="Log out Heurist">Log out</a>
 </li>

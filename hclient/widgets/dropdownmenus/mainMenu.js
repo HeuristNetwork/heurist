@@ -958,6 +958,9 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         }else
         if(action == "menu-profile-import"){  //for admin only
             that._importUsers();
+        }else
+        if(action == "menu-profile-logout"){ 
+            that.logout();
         }else 
         if(action == "menu-database-refresh"){
             that._refreshLists( true );
