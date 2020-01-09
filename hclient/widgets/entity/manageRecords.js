@@ -411,11 +411,13 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 popup_options = {selectOnSave: this.options.selectOnSave, 
                                  parententity: this.options.parententity,
                                  new_record_params:{RecTypeID:this._currentEditRecTypeID}};
-                                 
-                if(this.options.new_record_params['ro']>=0) 
-                        popup_options.new_record_params['OwnerUGrpID'] = this.options.new_record_params['ro'];
-                if(!window.hWin.HEURIST4.util.isempty(this.options.new_record_params['rv'])) 
-                        popup_options.new_record_params['NonOwnerVisibility'] = this.options.new_record_params['rv'];
+                   
+                if(this.options.new_record_params){                 
+                    if(this.options.new_record_params['ro']>=0) 
+                            popup_options.new_record_params['OwnerUGrpID'] = this.options.new_record_params['ro'];
+                    if(!window.hWin.HEURIST4.util.isempty(this.options.new_record_params['rv'])) 
+                            popup_options.new_record_params['NonOwnerVisibility'] = this.options.new_record_params['rv'];
+                }
                                  
                 if(this.options.select_mode!='manager' && this.options.selectOnSave){ 
                     //this is select form that all addition of new record

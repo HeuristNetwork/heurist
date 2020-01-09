@@ -654,6 +654,8 @@ function EditRecStructure() {
                         
                         '<div class="input-row"><div class="input-header-cell">Field name:</div>'+
                             '<div class="input-cell">'+
+                                '<input id="ed_rty_ID" type="hidden" value="'+rty_ID+'">'+
+                                '<input id="ed_dty_ID" type="hidden" value="'+_rst_ID+'">'+
                                 '<input id="ed_dty_Name" style="width:200px;" maxlength="255" onchange="_onDispNameChange(event)" '+
                                     'onkeypress="window.hWin.HEURIST4.ui.preventChars(event)" '+
                                     //'onblur="setTimeout(function(){$(\'.list_div\').hide()},200)" '+
@@ -773,6 +775,8 @@ function EditRecStructure() {
                         // Name / prompt
                         '<div class="input-row"><div class="input-header-cell">Prompt (display name):</div>'+
                             '<div class="input-cell">'+
+                                '<input id="ed_rty_ID" type="hidden" value="'+rty_ID+'">'+
+                                '<input id="ed_dty_ID" type="hidden" value="'+rst_ID+'">'+
                                 '<input id="ed'+rst_ID+'_rst_DisplayName" style="width:200px;" onchange="_onDispNameChange(event)" '+
                                     'onkeypress="window.hWin.HEURIST4.ui.preventChars(event)" maxlength="255" '+
                                     'title="The name of the field, displayed next to the field in data entry and used to identify the field in report formats, analyses and so forth"/>'+
@@ -1473,8 +1477,9 @@ function EditRecStructure() {
                             edt.value = 'increment_new_values_by_1';
                             
                          }else if(values[dti]=='resource') {
-                            if($('#pointerDefValue'+__rst_ID).editing_input('instance')){
-                                edt.value = $('#pointerDefValue'+__rst_ID).editing_input('getValues');    
+                            var ele = $('#pointerDefValue'+__rst_ID).find('div.def_values')
+                            if(ele.editing_input('instance')){
+                                edt.value = ele.editing_input('getValues');    
                             }else{
                                 edt.value = '';
                             }
@@ -1708,43 +1713,6 @@ function EditRecStructure() {
                         recreateRecTypesPreview(rst_type,
                             window.hWin.HEURIST4.detailtypes.typedefs[rst_ID].commonFields[window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex.dty_PtrTargetRectypeIDs]);
 
-                        var edt_def = Dom.get('ed'+rst_ID+'_rst_DefaultValue');
-                        edt_def.parentNode.parentNode.style.display = "none";
-                        
-                        if(rst_type === "resource") {
-                        
-                            var dtID = rst_ID;
-                            var dtFields = window.hWin.HEURIST4.util.cloneJSON(window.hWin.HEURIST4.rectypes.typedefs[rty_ID].dtFields[rst_ID]);
-                            var fi = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex;
-                            dtFields[fi['rst_DisplayName']] = 'Default Value:';
-                            dtFields[fi['rst_RequirementType']] = 'optional';
-                            dtFields[fi['rst_MaxValues']] = 1;
-                            dtFields[fi['rst_DisplayHelpText']] = '';
-                            dtFields[fi['rst_DisplayWidth']] = 25; //
-                      
-                            var ed_options = {
-                                recID: -1,
-                                dtID: dtID,
-                                //rectypeID: rectypeID,
-                                rectypes: window.hWin.HEURIST4.rectypes,
-                                values: [edt_def.value],
-                                readonly: false,
-
-                                showclear_button: true,
-                                //input_width: '350px',
-                                //detailtype: field['type']  //overwrite detail type from db (for example freetext instead of memo)
-                                dtFields:dtFields
-
-                            };
-                            
-                            var ele = $('#pointerDefValue'+rst_ID);
-
-                            ele.empty().editing_input(ed_options); //init
-                            
-                            ele.find('.input-div').css('font-size','0.8em');
-                            ele.find('.editint-inout-repeat-button').css('min-width',0);
-                            ele.find('.header').css({'width': '190px','text-align': 'right'});
-                        }
 
                         
                         
@@ -3780,6 +3748,53 @@ function recreateRecTypesPreview(type, value) {
         divRecType.title = "";
     }
     divRecType.innerHTML = txt;
+    
+    
+    var rty_ID = Dom.get("ed_rty_ID").value;
+    var rst_ID = Dom.get("ed_dty_ID").value;
+    var edt_def = Dom.get('ed'+rst_ID+'_rst_DefaultValue');
+    
+    var fieldType = window.hWin.HEURIST4.detailtypes.typedefs[rst_ID].commonFields[window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex.dty_Type];
+    
+    edt_def.parentNode.parentNode.style.display = "none";
+    
+    if(fieldType === "resource") {
+    
+        var dtID = rst_ID;
+        var dtFields = window.hWin.HEURIST4.util.cloneJSON(window.hWin.HEURIST4.rectypes.typedefs[rty_ID].dtFields[rst_ID]);
+        var fi = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex;
+        dtFields[fi['rst_DisplayName']] = 'Default Value:';
+        dtFields[fi['rst_RequirementType']] = 'optional';
+        dtFields[fi['rst_MaxValues']] = 1;
+        dtFields[fi['rst_DisplayHelpText']] = '';
+        dtFields[fi['rst_DisplayWidth']] = 25; //
+  
+        var ed_options = {
+            recID: -1,
+            dtID: dtID,
+            //rectypeID: rectypeID,
+            rectypes: window.hWin.HEURIST4.rectypes,
+            values: [edt_def.value],
+            readonly: false,
+
+            showclear_button: true,
+            //input_width: '350px',
+            //detailtype: field['type']  //overwrite detail type from db (for example freetext instead of memo)
+            dtFields:dtFields
+
+        };
+        
+        var ele2 = $('#pointerDefValue'+rst_ID);
+
+        ele2.empty();
+        var ele = $('<div>').addClass('def_values').appendTo(ele2);
+        ele.editing_input(ed_options); //init
+        
+        ele.find('.input-div').css('font-size','0.8em');
+        ele.find('.editint-inout-repeat-button').css('min-width',0);
+        ele.find('.header').css({'width': '190px','text-align': 'right'});
+    }
+    
 }
 
 //
@@ -3900,7 +3915,7 @@ function onDetTypeChange()
     }
     if(dty_Type=='resource' || dty_Type=='relmarker'){
         ele2.show();
-        recreateRecTypesPreview(dty_Type, $("#ed_dty_PtrTargetRectypeIDs").val())
+        recreateRecTypesPreview(dty_Type, $("#ed_dty_PtrTargetRectypeIDs").val() );
     }else{
         ele2.hide();
         $("#ed_dty_PtrTargetRectypeIDs").val('');
@@ -4024,7 +4039,7 @@ function onSelectRectype()
                 callback: function(recordTypesSelected) {
                     if(!Hul.isnull(recordTypesSelected)) {
                         document.getElementById("ed_dty_PtrTargetRectypeIDs").value = recordTypesSelected;
-                        recreateRecTypesPreview(type, recordTypesSelected);
+                        recreateRecTypesPreview(type, recordTypesSelected );
                     }
                 }
             });
@@ -4317,6 +4332,7 @@ function _onAddEditFieldType(dty_ID, rty_ID){
                     }*/
 
                     //refresh the local heurist
+                    if(context.rectypes) window.hWin.HEURIST4.rectypes = context.rectypes;
                     window.hWin.HEURIST4.detailtypes = context.detailtypes;
                     _cloneHEU = null;
                     

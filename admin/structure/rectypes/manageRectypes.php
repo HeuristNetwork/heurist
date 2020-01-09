@@ -150,7 +150,7 @@ if(@$_REQUEST['popup']!=1){
 <div id="formGroupEditor2" style="display:none">
     <div class="input-row required">
         <div class="input-header-cell" style="display:inline-block;text-align:right;width:100px">Name: </div>
-        <div class="input-cell" style="display: inline-block"><input id="edName" style="width:150px"/></div>
+        <div class="input-cell" style="display: inline-block"><input id="edGroupName" style="width:150px"/></div>
     </div>
     <br>
     <div class="input-row required">

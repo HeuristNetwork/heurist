@@ -349,6 +349,7 @@ else
                     }
                 }
 
+                $rv['rectypes'] = dbs_GetRectypeStructures($system, null, 2);
                 $rv['detailtypes'] = dbs_GetDetailTypes($system);
                 break;
 

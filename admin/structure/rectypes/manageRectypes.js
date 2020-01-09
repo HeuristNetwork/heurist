@@ -1536,7 +1536,7 @@ function RectypeManager() {
     function _doGroupEdit(event, grpID){
         
         var popele = $('#formGroupEditor2');
-        var edName = popele.find('#edName');
+        var edName = popele.find('#edGroupName');
         var edDescription = popele.find('#edDescription');
         var $dlg_pce = null;
         

@@ -938,6 +938,7 @@ function DetailTypeEditor() {
                 if(!error){
                     
                     var dty_ID = Math.abs(Number(context.result[0]));
+                    window.hWin.HEURIST4.rectypes = context.rectypes;
                     window.hWin.HEURIST4.detailtypes = context.detailtypes;
                     window.close(context);
                 }
