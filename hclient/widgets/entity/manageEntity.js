@@ -887,6 +887,10 @@ $.widget( "heurist.manageEntity", {
             
         }
     },
+
+    getDialog: function(){
+        return (this.options.isdialog) ?this._as_dialog :null;
+    },
     
     //
     // close dialog

@@ -1276,6 +1276,15 @@ $.widget( "heurist.editing_input", {
                         .addClass('sel_link2').css({'max-width':'300px'}) //, 'background': 'lightgray'})
                         .appendTo( $inputdiv );
             
+            var s_action = '';
+            var pointerMode = that.f('rst_PointerMode');
+            if(pointerMode=='addonly'){
+                s_action = 'create';
+            }else if(pointerMode=='browseonly'){
+                s_action = 'select';
+            }else{
+                s_action = 'select or create';
+            }
             
             var popup_options = {
                             select_mode: (this.configMode.csv==true?'select_multi':'select_single'),
@@ -1283,9 +1292,11 @@ $.widget( "heurist.editing_input", {
                             edit_mode: 'popup',
                             selectOnSave: true, //it means that select popup will be closed after add/edit is completed
                             title: window.hWin.HR((isparententity)
-                                ?'CHILD record pointer: select or create a linked child record'
-                                :'Record pointer: Select or create a linked record'),
+                                ?('CHILD record pointer: '+s_action+' a linked child record')
+                                :('Record pointer: '+s_action+' a linked record')),
                             rectype_set: that.f('rst_PtrFilteredIDs'),
+                            pointer_mode: pointerMode,
+                            pointer_filter: that.f('rst_PointerBrowseFilter'),
                             parententity: (isparententity)?that.options.recID:0,
                             
                             onselect:function(event, data){
@@ -1386,7 +1397,7 @@ $.widget( "heurist.editing_input", {
                         popup_options.new_record_params['rv'] = vals2[0];
                     }
                     
-                    //init related/liked records selection dialog
+                    //init related/liked records selection dialog - selectRecord
                     window.hWin.HEURIST4.ui.showEntityDialog(that.configMode.entity, popup_options);
             }
 

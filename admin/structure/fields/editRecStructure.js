@@ -889,6 +889,18 @@ function EditRecStructure() {
                         '</div></div>'+
 
                         '<div class="input-row" id="pointerDefValue'+rst_ID+'"></div>'+
+
+                        '<div class="input-row"><div class="input-header-cell">Pointer mode:</div>'+
+                                '<div class="input-cell">'+
+                        '<select id="ed'+rst_ID+'_rst_PointerMode" onchange="onPointerModeChange(event,'+rst_ID+')">'+
+                        '<option value="addorbrowse">add or browse</option>'+
+                        '<option value="addonly">add only</option>'+
+                        '<option value="browseonly">browse only</option>'+ 
+                        '</select>'+
+                            '<span><label class="input-header-cell" style="padding-top:0px">Browse&nbsp;Filter:</label>'+
+                                '<input id="ed'+rst_ID+'_rst_PointerBrowseFilter" style="width:300px"/></span>'+
+                        '</div></div>'+
+
                         
                         '<div class="input-row"><div class="input-header-cell">Create new records as children:</div>'+
                         
@@ -1734,6 +1746,14 @@ function EditRecStructure() {
                         //$(edt).parent('.input-row').hide();
                     }
                     
+                }else if(fieldnames[k] === "rst_PointerMode"){ // || fieldnames[k] === "rst_PointerBrowseFilter"){
+                    if(rst_type === "resource"){
+                        edt.parentNode.parentNode.style.display = "block";
+                        onPointerModeChange(values[k], rst_ID);
+                        //edt.value
+                    }else{
+                        edt.parentNode.parentNode.style.display = "none";
+                    }
                     
                 }else if(rst_type === "relationtype"){
 
@@ -3491,6 +3511,26 @@ function onRepeatValueChange(evt){
     if(el_max.value<el_min.value){
         el_max.value=el_min.value;
     }
+}
+
+function onPointerModeChange(evt, rst_ID){
+    
+    if(evt.target){
+        var ele = evt.target;
+        value = ele.options[ele.selectedIndex].value;
+    }else{
+        value = evt;
+    }
+    
+    var ele2 = document.getElementById('ed'+rst_ID+'_rst_PointerBrowseFilter');
+    
+    if(value=='addonly'){
+        ele2.parentNode.style.display = "none";
+    }else{
+        ele2.parentNode.style.display = "inline-block";
+    }
+    
+    
 }
 
 function onCreateChildIfRecPtr(event,rst_ID, rty_ID){

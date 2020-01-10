@@ -98,27 +98,40 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             
             var rt_list = this.options.rectype_set;
             var is_expand_rt_list = false;
+            var is_only_rt = false;
             if(!window.hWin.HEURIST4.util.isempty(rt_list)){
                 if(!window.hWin.HEURIST4.util.isArray(rt_list)){
                     rt_list = rt_list.split(',');
                 }
                 cnt = rt_list.length;
+                is_only_rt = (cnt==1);
             }else{
                 cnt = 1;
             }            
             
             sh = (cnt<4)?13:((cnt<7)?15:17);
-            if(hasSearchForm){
-                if(this.options.parententity){
-                    sh = 14;  
-                    this.searchForm.height((sh+2.5)+'em').css('border','none');    
-                }else{
-                    this.searchForm.height((sh+4.5)+'em').css('border','none');    
-                    sh++;
-                }
+            
+            if(this.options.pointer_mode == 'addonly'){
+                this.options.height = (cnt<4)?146:((cnt<7)?166:196);
+                $dlg = this.getDialog();
+                $dlg.dialog('option', 'height', this.options.height);
+                this.recordList.hide();    
+            }else if(is_only_rt && this.options.pointer_mode == 'browseonly'){
+                sh = sh - 6;
             }
+            
+            if(this.options.parententity){
+                //sh = 14;  
+                this.searchForm.height((sh+2.5)+'em').css('border','none');    
+            }else{
+                this.searchForm.height((sh+4.5)+'em').css('border','none');    
+                sh++;
+            }
+            
         }
-        this.recordList.css('top', sh+'em');
+        
+        this.recordList.css('top', sh+'em');    
+        
 
         var that = this;
         
@@ -1505,7 +1518,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             
         window.hWin.HEURIST4.msg.showDialog(url, {
             height: body.innerHeight()*0.9,
-            width: 860,
+            width: 960,
             padding: '0px',
             title: window.hWin.HR('Edit record structure'),
             afterclose: function(){

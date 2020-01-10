@@ -28,30 +28,16 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
         //-----------------
         this.element.css('min-width','700px');
         this.selectRectype = this.element.find('#sel_rectypes');
-
-
-        /*
-        var rectypeList = this.options.rectype_set;
-        var topOption = null;
-        if(!window.hWin.HEURIST4.util.isempty(rectypeList)){
-
-            if(!window.hWin.HEURIST4.util.isArray(rectypeList)){
-                rectypeList = rectypeList.split(',');
-            }
-        }else{
-            rectypeList = [];
-        }
-        if(rectypeList.length==0){
-            topOption =  window.hWin.HR('Any Record Type');
-        }*/
         
         var rt_list = this.options.rectype_set;
         var is_expand_rt_list = false;
+        var is_only_rt = false;
         if(!window.hWin.HEURIST4.util.isempty(rt_list)){
             if(!window.hWin.HEURIST4.util.isArray(rt_list)){
                 rt_list = rt_list.split(',');
             }
             is_expand_rt_list = (rt_list.length>1 && rt_list.length<10);
+            is_only_rt = (rt_list.length==1);
         }
         
         this.selectRectype.empty();
@@ -64,6 +50,15 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
             
         this.btn_add_record = this.element.find('#btn_add_record');    
         this.btn_select_rt = this.element.find( "#btn_select_rt");
+        
+        var is_browse = (that.options.pointer_mode == 'browseonly');
+        if(that.options.pointer_mode != 'addorbrowse'){
+            $('#row_helper > .heurist-table-helper1').css('visibility','hidden');    
+        }
+        if(that.options.pointer_mode == 'addonly'){
+                this.element.find('.not-addonly').hide();
+        }
+        
             
         if(is_expand_rt_list){
             
@@ -77,38 +72,51 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
                 var name = window.hWin.HEURIST4.rectypes.names[rectypeID];
                 
                 $('<button>')
-                    .button({label: window.hWin.HR('Add')+' '+ name.trim(), icon: "ui-icon-plus"})
+                    .button({label: (is_browse?'':window.hWin.HR('Add'))+' '+ name.trim(), 
+                             icon: is_browse?'ui-icon-search':"ui-icon-plus"})
                     .attr('data-rtyid', rectypeID)
-                    .css({'font-size':'11px',display:'inline-block',width:190,'text-align':'left','margin':'3px 0px'})
+                    .css({'font-size':'11px',display:'inline-block',width:190,'text-align':'left','margin':'6px 0px 3px 8px'})
                     .addClass('truncate')
                     .click(function(e) {
-                        that._trigger( "onaddrecord", null, $(e.target).attr('data-rtyid') );
+                        
+                        var rtyid = $(e.target).attr('data-rtyid');
+                        if(is_browse){
+                            that.selectRectype.val( rtyid ).hSelect('refresh');
+                            that.selectRectype.change();
+                        }else{
+                            that._trigger( "onaddrecord", null, rtyid );    
+                        }
                     })
                     .appendTo(cont);
 
-                $('<button>')
-                    .button({label:window.hWin.HR("Filter by record type"), icon: "ui-icon-search", showLabel:false})
-                    .attr('data-rtyid', rectypeID)
-                    .css({'font-size':'11px',display:'inline-block',width:20,'margin-right':10,'margin':'3px 5px 3px 0'})
-                    .click(function(e) {
-                        var el = $(e.target);
-                        el = el.is('button') ?el :el.parents('button');
-                        var rtyid = el.attr('data-rtyid'); 
-                        
-                        that.selectRectype.val( rtyid ).hSelect('refresh');
-                        that.selectRectype.change();
-                        //that.startSearch();//
-                    })
-                    .appendTo(cont);
+                if(this.options.pointer_mode == 'addorbrowse'){
+                                
+                    $('<button>')
+                        .button({label:window.hWin.HR("Filter by record type"), icon: "ui-icon-search", showLabel:false})
+                        .attr('data-rtyid', rectypeID)
+                        .css({'font-size':'11px',display:'inline-block',width:20,'margin-right':10,'margin':'6px 0 3px 0'})
+                        .click(function(e) {
+                            var el = $(e.target);
+                            el = el.is('button') ?el :el.parents('button');
+                            var rtyid = el.attr('data-rtyid'); 
+                            
+                            that.selectRectype.val( rtyid ).hSelect('refresh');
+                            that.selectRectype.change();
+                            //that.startSearch();//
+                        })
+                        .appendTo(cont);
+                    
+                }
                 
             }
             
         }else{
             
             this.btn_add_record
-            .button({label: window.hWin.HR("Add Record"), icon: "ui-icon-plus"})
+            .button({label: window.hWin.HR(is_browse?"Search Record":"Add Record"), 
+                        icon: is_browse?null:"ui-icon-plus"})
             .click(function(e) {
-                if(that.selectRectype.val()>0){
+                if(!is_browse && that.selectRectype.val()>0){
                     that._trigger( "onaddrecord", null, that.selectRectype.val() );
                 }else{
                     that.btn_select_rt.click();
@@ -136,16 +144,23 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
                 
             this.btn_add_record.parent().controlgroup();
             
-            
+            if(is_only_rt){
+                if(that.options.pointer_mode == 'addonly'){
+                    that._trigger( "onaddrecord", null, that.selectRectype.val() );
+                }else if (is_browse) {
+                    this.element.find('#row_addbtn').hide();
+                    this.element.find('#row_helper').hide();
+                }
+            }
         
         }//is_expand_rt_list    
         
         function __onSelectRecType(sel){
             if(that.btn_add_record.is(':visible')){
                 if(sel.val()>0){
-                    lbl = window.hWin.HR('Add')+' '+ sel.find( "option:selected" ).text().trim();
+                    lbl = window.hWin.HR(is_browse?'Select':'Add')+' '+ sel.find( "option:selected" ).text().trim();
                 }else{
-                    lbl = window.hWin.HR("Add Record");
+                    lbl = window.hWin.HR(is_browse?"Search Record":"Add Record");
                 }
                 that.btn_add_record.button('option','label',lbl);
             }
@@ -248,7 +263,10 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
         
         if(this.element.find('#cb_bookmarked').is(':checked')){
             domain = 'b';
-        }            
+        }       
+        
+        qobj = window.hWin.HEURIST4.util.mergeHeuristQuery(qobj, 
+                            (this.options.pointer_filter?this.options.pointer_filter:''));
         
         if(qstr==''){
             this._trigger( "onresult", null, {recordset:new hRecordSet()} );
