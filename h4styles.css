@@ -531,7 +531,7 @@ div .selected_last{
     font-size: 0.9em !important;
     margin: 6px;
 
-    height: 128px;
+    height: 136px;
     width: 128px;
     overflow: visible;
     padding: 0;
@@ -543,7 +543,7 @@ div .selected_last{
     -moz-box-shadow:0px 3px 8px #666;
     -webkit-box-shadow:0px 3px 8px #666;
     box-shadow:0px 3px 8px #666;
-    height:134px;
+    height:140px;
     width:134px;
     margin:3px;
 }
@@ -552,7 +552,9 @@ div .selected_last{
     bottom: 2px;
     left: 3px;
     right: 3px;
-    height: 24px;
+    font-size: 9px;
+    line-height: 10px;
+    height: 32px;    
 }
 
 .thumbs .recordDiv .recordSelector {
@@ -834,7 +836,7 @@ div .selected_last{
 /*   */
 
 .thumbs3 .recordDiv {
-    height: 178px;
+    height: 194px;
     width: 178px;
 }
 
@@ -847,17 +849,18 @@ div .selected_last{
     -moz-box-shadow:0px 3px 8px #666;
     -webkit-box-shadow:0px 3px 8px #666;
     box-shadow:0px 3px 8px #666;
-    height:184px;
+    height:198px;
     width:184px;
     margin:3px;
 }
 
 .thumbs3 .recordDiv .recordTitle {
     bottom: 1px;
-    left: 33px;
+    left: 3px;
     right: 3px;
-    height: 24px;
-    width: 150px;
+    font-size: 10px;
+    line-height: 12px;
+    height: 38px;    
 }
 
 .thumbs3 .recordDiv .recordSelector {
