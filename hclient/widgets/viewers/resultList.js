@@ -41,7 +41,7 @@ $.widget( "heurist.resultList", {
         show_savefilter: false,
         show_counter: true,
         show_viewmode: true,
-        show_inner_header: false,   // show title of current search in header (above toolbar)
+        show_inner_header: false, // show title of current search in header (above toolbar)
         header_class: null,       //class name for menu
         show_url_as_link:false,
 
@@ -184,7 +184,7 @@ $.widget( "heurist.resultList", {
                             }else{
                                 that._currentSavedFilterID = 0;
                                 if(data.qname>0 || window.hWin.HEURIST4.util.isempty(data.qname)){
-                                    new_title = window.hWin.HR(that.options.title || 'Filtered Result');            
+                                    new_title = window.hWin.HR('Filtered Result');            
                                 }else{
                                     new_title = window.hWin.HR(data.qname);
                                 }
@@ -337,7 +337,7 @@ $.widget( "heurist.resultList", {
         .css({'padding':'0.7em 0 0 20px', 'font-size': '1.17em'})   //padding left to align to search input field
         .appendTo(this.div_header);
         
-        this.setHeaderText('<h3 style="margin:0">'+window.hWin.HR('Filtered Result')+'</h3>');
+        this.setHeaderText(window.hWin.HR('Filtered Result'));
         
         //add label to display number of selected, button and selected onlu checkbox
         if(this.options.select_mode=='select_multi'){
@@ -863,7 +863,7 @@ $.widget( "heurist.resultList", {
             */
 
             if(this.div_header!=null) {
-                this.setHeaderText('<h3 style="margin:0">'+new_title+'</h3>');
+                this.setHeaderText(new_title);
             }
             if(new_title==''){
                 this.triggerSelection();
@@ -2480,7 +2480,9 @@ $.widget( "heurist.resultList", {
     },
     
     setHeaderText: function(newtext, headercss){
-        this.div_header.find('div.result-list-header').html(newtext);
+        var stext = '<h3 style="margin:0">'+(this.options.title ?this.options.title :newtext)+'</h3>';
+        if(this.options.title && newtext) stext = stext +  '<h4 style="margin:0;font-size:0.9em">'+newtext+'</h4>';
+        this.div_header.find('div.result-list-header').html( stext );
         if(headercss){
             this.div_header.css(headercss);    
             this._adjustHeadersPos();
