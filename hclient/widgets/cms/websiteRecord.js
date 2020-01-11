@@ -631,7 +631,8 @@ function hCmsEditing(_options) {
                     var mapdoc_id = $dlg.find('select[name="mapdocument"]').val();
                     if(mapdoc_id>0) opts['mapdocument'] = mapdoc_id;
                     
-            }else if (widget_name=='heurist_Groups'){
+            }else 
+            if (widget_name=='heurist_Groups'){
                 
                 //find all inputs with class = tabs
                 var header = '<ul>';
@@ -712,6 +713,11 @@ function hCmsEditing(_options) {
                     opts['reload_for_recordset'] = true;
                     opts['url'] = 'viewers/smarty/showReps.php?publish=1&debug=0&template='
                         +encodeURIComponent(opts['template'])+'&[query]';
+                }else if(widget_name=='heurist_resultList'){
+                    opts['show_toolbar'] = opts['show_counter'] || opts['show_viewmode'];
+                    if(window.hWin.HEURIST4.util.isempty(opts['recordview_onselect'])){
+                        opts['recordview_onselect']  = 'inline'; //default value    
+                    } 
                 }
                 
                 var selval = opts.searchTreeMode;

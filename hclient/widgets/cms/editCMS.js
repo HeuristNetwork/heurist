@@ -1,5 +1,5 @@
 /*
-* editCMS.js - edit map symbol properties 
+* editCMS.js - 
 * 
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org

@@ -721,8 +721,8 @@ class AndLimb {
                 return new TagPredicate($this, $pred_val);
             else if (defined('stype')  &&  stype == 'all')
                 return new AnyPredicate($this, $pred_val);
-                else    // title search is default search
-                    return new TitlePredicate($this, $pred_val);
+            else    // title search is default search
+                return new TitlePredicate($this, $pred_val);
         }
 
         $pred_type = substr($text, 0, $colon_pos);
