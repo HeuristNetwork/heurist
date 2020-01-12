@@ -1342,18 +1342,27 @@ $.widget( "heurist.search", {
     */
     , showSearchAssistant: function() {
         
+        if(event && (event.detail === 2)){
+            //ignore dbl click
+            return;
+        }
+                
         var that = this;
 
         if(!this.search_assistant){ //not loadaed yet
         
             //load template
-            this.search_assistant = $( "<div>" )
-                .addClass('text ui-corner-all ui-widget-content ui-heurist-bg-light heurist-quick-search')  // menu-or-popup
+            this.search_assistant = $( "<div>" );
+            
+            this.search_assistant.addClass('text ui-corner-all ui-widget-content ui-heurist-bg-light heurist-quick-search')  // menu-or-popup
                 //.css({position:'absolute', zIndex:9999})
                 .appendTo( this.element ) //document.find('body')
                 .hide()
                 .load(window.hWin.HAPI4.baseURL+"hclient/widgets/search/search_quick.html?t="+(new Date().getTime()), 
                 function(){ that.showSearchAssistant(); } );
+            return;
+        }else if (this.search_assistant.find('.sa_termvalue').length==0){
+            //not loaded yet
             return;
         }
 
