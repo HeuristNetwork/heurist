@@ -68,7 +68,7 @@
 
             } else if (($action=="d" || $action=="delete") && @$_REQUEST['ids']){
 
-                $response = recordDelete($system, $_REQUEST['ids'], true, $_REQUEST['check_links']);
+                $response = recordDelete($system, $_REQUEST['ids'], true, @$_REQUEST['check_links']);
 
             } else if ($action=="access"){
 

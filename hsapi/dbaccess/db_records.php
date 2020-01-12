@@ -908,12 +908,13 @@
         $rels_count = 0;
         $deleted = array();
         $msg_error = '';
+        $mysqli = $system->get_mysqli();
         
         //get list if child records
         $query = 'SELECT dtl_Value FROM recDetails, defRecStructure WHERE dtl_RecID='
         .$id.' AND dtl_DetailTypeID=rst_DetailTypeID AND rst_CreateChildIfRecPtr=1 AND rst_RecTypeID='.$rectype;
         $child_records = mysql__select_list2($mysqli, $query);
-        if(count($child_records)>0){
+        if(is_array($child_records) && count($child_records)>0){
             $query = 'SELECT rec_ID, rec_RecTypeID FROM Records WHERE rec_ID in ('.implode(',',$child_records).')';    
             $child_records = mysql__select_assoc2($mysqli, $query);
         }
@@ -925,8 +926,6 @@
         }else{
             $links = null;
         }
-        
-        $mysqli = $system->get_mysqli();
         
         while(true){
                 $mysqli->query('SET foreign_key_checks = 0');
@@ -1014,7 +1013,7 @@
                 }
                 
                 
-                if(count($child_records)>0){
+                if(is_array($child_records) && count($child_records)>0){
                     foreach ($child_records as $recid => $rectypeid) {
                         $res = deleteOneRecord($system, $recid, $rectypeid);
                         if( array_key_exists('error', $res) ){
