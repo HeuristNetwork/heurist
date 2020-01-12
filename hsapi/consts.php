@@ -244,6 +244,7 @@ $rtDefines = array(
     'RT_MAP_LAYER' => array(3, 1020),     
     'RT_QUERY_SOURCE' => array(3, 1021),  //RT_MAPABLE_QUERY
     'RT_TLCMAP_DATASET' => array(1271, 54),     
+    'RT_BOUNDING_BOX' => array(1271, 938),  //tlcmap dataset bounding box
 
     //Web content
     'RT_WEB_CONTENT' => array(1147, 25),

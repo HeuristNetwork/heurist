@@ -161,6 +161,10 @@
     $system->defineConstant('RT_MAP_DOCUMENT');
     $system->defineConstant('DT_NAME');
     $system->defineConstant('DT_MAP_LAYER');
+    $system->defineConstant('DT_MAP_BOOKMARK');
+    $system->defineConstant('DT_ZOOM_KM_POINT');
+    $system->defineConstant('RT_BOUNDING_BOX'); //tlc bbox
+    $system->defineConstant('DT_GEO_OBJECT');
         
     if($is_csv){
         
@@ -754,6 +758,10 @@ function output_Records($system, $data, $params){
         //get list of detail types for MAP_LAYER
         $maplayer_fields = mysql__select_list2($system->get_mysqli(),
             'select rst_DetailTypeID from defRecStructure where rst_RecTypeID='.RT_MAP_LAYER);        
+        //get default values for mapspace
+        $mapdoc_defaults = mysql__select_assoc2($system->get_mysqli(),
+            'select rst_DetailTypeID, rst_DefaultValue from defRecStructure where rst_RecTypeID='.RT_MAP_DOCUMENT
+            .' AND rst_DetailTypeID in ('.DT_MAP_BOOKMARK.','.DT_ZOOM_KM_POINT.')' );        
     }
     
     //OPEN BRACKETS
@@ -903,7 +911,9 @@ XML;
             }
             $record["details"] = $new_details;
             
-            array_push($maplayer_records, $record['rec_ID']);
+            //{"id":"287","type":"29","title":"Region cities","hhash":null}            
+            $midx = (count($maplayer_records)+5);
+            $maplayer_records[$midx] = array('id'=>$record['rec_ID']);
             
             //@todo - add db parameter for query datasource
             //@todo - convert uploaded images to external url
@@ -989,8 +999,12 @@ XML;
             $record['rec_ScratchPad'] = '';
             $record["details"] = array(
                 DT_NAME=>array('1'=>$params['tlcmap']),
-                DT_MAP_LAYER=>array('2'=>implode(',', $maplayer_records))
+                DT_MAP_BOOKMARK=>array('2'=>$mapdoc_defaults[DT_MAP_BOOKMARK]),
+                DT_ZOOM_KM_POINT=>array('3'=>$mapdoc_defaults[DT_ZOOM_KM_POINT]),
+                //1271-938  2-28 BBOX  4
+                DT_MAP_LAYER=>$maplayer_records
             );
+            
             $records[$idx] = $record;
             $is_tlc_export = false; //avoid infinite loop
         }
