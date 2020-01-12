@@ -59,6 +59,7 @@
     require_once (dirname(__FILE__).'/../../vendor/autoload.php'); //for geoPHP
     require_once (dirname(__FILE__).'/../../viewers/map/Simplify.php');
     
+    require_once(dirname(__FILE__).'/../import/GpointConverter.php');
     
     $response = array();
 
@@ -163,7 +164,7 @@
     $system->defineConstant('DT_MAP_LAYER');
     $system->defineConstant('DT_MAP_BOOKMARK');
     $system->defineConstant('DT_ZOOM_KM_POINT');
-    $system->defineConstant('RT_BOUNDING_BOX'); //tlc bbox
+    $system->defineConstant('DT_BOUNDING_BOX'); //tlc bbox
     $system->defineConstant('DT_GEO_OBJECT');
         
     if($is_csv){
@@ -754,6 +755,7 @@ function output_Records($system, $data, $params){
     $is_tlc_export = (@$params['tlcmap']!=null && defined('RT_TLCMAP_DATASET'));
     $maplayer_fields = null;
     $maplayer_records = array();
+    $maplayer_extents = array();
     if($is_tlc_export){
         //get list of detail types for MAP_LAYER
         $maplayer_fields = mysql__select_list2($system->get_mysqli(),
@@ -907,6 +909,10 @@ XML;
             foreach($record["details"] as $dty_ID => $values){
                 if(in_array($dty_ID, $maplayer_fields)){
                     $new_details[$dty_ID] = $values;                    
+            //get extent
+                }
+                if($dty_ID==DT_BOUNDING_BOX || $dty_ID==DT_GEO_OBJECT){
+                    array_push($maplayer_extents, $values);
                 }
             }
             $record["details"] = $new_details;
@@ -914,6 +920,7 @@ XML;
             //{"id":"287","type":"29","title":"Region cities","hhash":null}            
             $midx = (count($maplayer_records)+5);
             $maplayer_records[$midx] = array('id'=>$record['rec_ID']);
+            
             
             //@todo - add db parameter for query datasource
             //@todo - convert uploaded images to external url
@@ -991,6 +998,49 @@ XML;
         
         
         if($is_tlc_export && $idx==count($records)){
+            //calculate extent of mapdocument
+            $zoomKm = 0;
+            $mbookmark = null;
+            $mbox = array();
+            foreach($maplayer_extents as $dtl_ID=>$values){
+                foreach($values as $value){
+                    if(is_array($value) && @$value['geo']){
+                        $wkt = $value['geo']['wkt'];
+                        $bbox = getExtentFromWkt($wkt);  
+                        if($bbox!=null){
+                            if( !@$mbox['maxy'] || $mbox['maxy']<$bbox['maxy'] ){
+                                $mbox['maxy'] = $bbox['maxy'];
+                            }        
+                            if( !@$mbox['maxx'] || $mbox['maxx']<$bbox['maxx'] ){
+                                $mbox['maxx'] = $bbox['maxx'];
+                            }        
+                            if( !@$mbox['miny'] || $mbox['miny']>$bbox['miny'] ){
+                                $mbox['miny'] = $bbox['miny'];
+                            }        
+                            if( !@$mbox['minx'] || $mbox['minx']>$bbox['minx'] ){
+                                $mbox['minx'] = $bbox['minx'];
+                            }        
+                        }
+                    }
+                }
+            }
+            if(count($mbox)==4){
+                
+                $gPoint = new GpointConverter();
+                $gPoint->setLongLat($mbox['minx'], $mbox['miny']);
+                $zoomKm = round($gPoint->distanceFrom($mbox['maxx'], $mbox['miny'])/100000,0);
+                
+                
+                $mbookmark = 'Extent,'.$mbox['miny'].','.$mbox['minx']
+                             .','.$mbox['maxy'].','.$mbox['maxx'].',1800,2050';
+                
+                $mbox = array($mbox['minx'].' '.$mbox['miny'], $mbox['minx'].' '.$mbox['maxy'], 
+                                $mbox['maxx'].' '.$mbox['maxy'], $mbox['maxx'].' '.$mbox['miny'], 
+                                  $mbox['minx'].' '.$mbox['miny']);
+                $mbox = 'POLYGON(('.implode(',',$mbox).'))';
+                
+            }
+            
             //add constructed mapspace record
             $record['rec_ID'] = 999999999;
             $record['rec_RecTypeID'] = RT_MAP_DOCUMENT;
@@ -999,9 +1049,9 @@ XML;
             $record['rec_ScratchPad'] = '';
             $record["details"] = array(
                 DT_NAME=>array('1'=>$params['tlcmap']),
-                DT_MAP_BOOKMARK=>array('2'=>$mapdoc_defaults[DT_MAP_BOOKMARK]),
-                DT_ZOOM_KM_POINT=>array('3'=>$mapdoc_defaults[DT_ZOOM_KM_POINT]),
-                //1271-938  2-28 BBOX  4
+                DT_MAP_BOOKMARK=>array('2'=>($mbookmark!=null?$mbookmark:$mapdoc_defaults[DT_MAP_BOOKMARK])),
+                DT_ZOOM_KM_POINT=>array('3'=>($zoomKm>0?$zoomKm:$mapdoc_defaults[DT_ZOOM_KM_POINT])),
+                DT_GEO_OBJECT=>array('4'=>($mbookmark!=null?array('geo'=>array("type"=>"pl", "wkt"=>$mbox)):null)),
                 DT_MAP_LAYER=>$maplayer_records
             );
             
@@ -1664,6 +1714,16 @@ function getGeoJsonFeature($record, $extended=false, $simplify=false, $leaflet_m
 
     return $res;
 
+}
+
+function getExtentFromWkt($wkt)
+{
+        $bbox = null;
+        $geom = geoPHP::load($wkt, 'wkt');
+        if(!$geom->isEmpty()){
+            $bbox = $geom->getBBox();
+        }
+        return $bbox;
 }
 
 //
