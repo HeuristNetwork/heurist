@@ -349,7 +349,6 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_DATA_SOURCE' => array(3, 1083),
     'DT_MINIMUM_ZOOM' => array(3, 1085), // from Jan 2017 uses DT_MINIMUM_ZOOM and DT_MAXIMUM_ZOOM for both maps and layers
     'DT_MAXIMUM_ZOOM' => array(3, 1086), // prior Jan 2017 some databases used one, some used the other. Either now used for setting.
-    'DT_BOUNDING_BOX' => array(1271, 938),  //tlcmap dataset bounding box
     // Shape
     'DT_ZIP_FILE' => array(3, 1072),
     'DT_SHAPE_FILE' => array(3, 1069),

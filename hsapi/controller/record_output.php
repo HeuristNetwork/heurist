@@ -164,7 +164,6 @@
     $system->defineConstant('DT_MAP_LAYER');
     $system->defineConstant('DT_MAP_BOOKMARK');
     $system->defineConstant('DT_ZOOM_KM_POINT');
-    $system->defineConstant('DT_BOUNDING_BOX'); //tlc bbox
     $system->defineConstant('DT_GEO_OBJECT');
         
     if($is_csv){
@@ -911,7 +910,7 @@ XML;
                     $new_details[$dty_ID] = $values;                    
             //get extent
                 }
-                if($dty_ID==DT_BOUNDING_BOX || $dty_ID==DT_GEO_OBJECT){
+                if($dty_ID==DT_GEO_OBJECT){
                     array_push($maplayer_extents, $values);
                 }
             }
