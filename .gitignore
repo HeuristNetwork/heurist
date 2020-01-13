@@ -221,3 +221,4 @@ vendor/
 #PHPStorm
 .idea/*
 *.zip
+composer.lock
