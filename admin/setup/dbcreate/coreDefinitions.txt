@@ -1,4 +1,4 @@
--- Heurist Definitions Exchange File generated: 08 Jan 2020 @ 13:10
+-- Heurist Definitions Exchange File generated: 12 Jan 2020 @ 13:26
 -- Installation = https://heuristplus.sydney.edu.au/heurist/
 -- Database = Heurist_Core_Definitions
 -- Program Version: 5.1.11
@@ -2035,6 +2035,7 @@
 ('shar','application/x-shar', '0','','Unix Shell Archive',''),
 ('shp','application/octet-stream', '0','','ArcView Shape File',''),
 ('shs','application/octet-stream', '0','','Shell Scrap File',''),
+('shx','application/octet-stream', '0','','Shapefile index',''),
 ('silo','model/mesh', '0','','',''),
 ('sit','application/x-stuffit', '0','','StuffIt compressed',''),
 ('skd','application/x-koan', '0','','',''),
@@ -2097,7 +2098,7 @@
 ('xwd','image/x-xwindowdump', '0','image.gif','X Window Dump',''),
 ('xyz','application/octet-stream', '0','','Tinker Cartesian Coordinates',''),
 ('youtube','video/youtube', '0','','Youtube Video',''),
-('zip','application/zip', '0','zip.gif','ZIP compressed',''),
+('zip','application/x-zip-compressed', '0','zip.gif','ZIP compressed',''),
 >>EndData>>
 
  
@@ -2213,5 +2214,9 @@
 ('VIE','VI','Vietnamese',''),
 ('YID','YI','Yiddish',''),
 >>EndData>>
+
+ 
+
+ 
 
 >>EndOfFile>>
