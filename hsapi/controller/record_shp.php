@@ -92,9 +92,9 @@ use Shapefile\ShapefileReader;
 
                 if(DT_SHAPE_FILE>0 && @$record["details"][DT_SHAPE_FILE]){
                     
-                    $shp_file = fileRetrievePath(array_shift($record["details"][DT_SHAPE_FILE]));
-                    $dbf_file = fileRetrievePath(array_shift($record["details"][DT_DBF_FILE]));
-                    $shx_file = fileRetrievePath(array_shift($record["details"][DT_SHX_FILE]));
+                    $shp_file = fileRetrievePath(array_shift($record["details"][DT_SHAPE_FILE]),'shp',false);
+                    $dbf_file = fileRetrievePath(array_shift($record["details"][DT_DBF_FILE]),'dbf',false);
+                    $shx_file = fileRetrievePath(array_shift($record["details"][DT_SHX_FILE]),'shx',false);
                     
                 }else if(DT_ZIP_FILE>0 && @$record["details"][DT_ZIP_FILE]){
                     $shp_file = fileRetrievePath(array_shift($record["details"][DT_ZIP_FILE]),'shp',true);
@@ -230,13 +230,17 @@ function fileRetrievePath($fileinfo, $need_ext=null, $isArchive=false){
         
     }else if($external_url){
         //tempnam(HEURIST_SCRATCH_DIR, 'remote_shp.zip');
-        $filepath = tempnam(HEURIST_SCRATCH_DIR.'_remote_');
+        $filepath = tempnam(HEURIST_SCRATCH_DIR, '_remote_');
+        /*if(!$isArchive && $need_ext!=null){
+            //change tmp to required extension
+            $filepath = substr($filepath,-3,3).$need_ext;    
+        }*/
         saveURLasFile($external_url, $filepath);
     }    
     
     if(file_exists($filepath)){
         
-        if($need_ext!==null){
+        if($isArchive){ //$need_ext!==null){
             $destination = HEURIST_SCRATCH_DIR;//.$system->get_user_id().'/';
             
             $files = unzipArchiveFlat($filepath, $destination);
@@ -250,7 +254,8 @@ function fileRetrievePath($fileinfo, $need_ext=null, $isArchive=false){
                             $ext = strtolower($path_parts['extension']);
                             if(file_exists($filename) && $need_ext==$ext)
                             {
-                                return $filename;
+                                //returns only one shp file name, others are assuming
+                                return $filename; 
                             }
                         }
                 }
