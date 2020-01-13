@@ -22,18 +22,18 @@
     require_once (dirname(__FILE__).'/../System.php');
     require_once (dirname(__FILE__).'/../dbaccess/db_recsearch.php');
     require_once (dirname(__FILE__).'/../dbaccess/utils_db.php');
-    require_once(dirname(__FILE__).'/../../viewers/map/Simplify.php');
+    require_once (dirname(__FILE__).'/../../viewers/map/Simplify.php');
+    //require_once (dirname(__FILE__).'/../../vendor/autoload.php'); //for ShapeFile
     
-    require_once (dirname(__FILE__).'/../../vendor/autoload.php'); //for ShapeFile
-/*
-    // Register autoloader
-    require_once(dirname(__FILE__).'../../external/php/ShapeFileAutoloader.php');
-    \ShapeFile\ShapeFileAutoloader::register();
-*/    
-    // Import classes
-    use \ShapeFile\ShapeFile;
-    use \ShapeFile\ShapeFileException;
-    
+// Register autoloader
+require_once('../../vendor/gasparesganga/php-shapefile/src/Shapefile/ShapefileAutoloader.php');
+Shapefile\ShapefileAutoloader::register();
+
+// Import classes
+use Shapefile\Shapefile;
+use Shapefile\ShapefileException;
+use Shapefile\ShapefileReader; 
+
     $response = array();
 
     $system = new System();
@@ -115,9 +115,10 @@
                         if($shx_file && file_exists($shx_file)){
                             $files['shx'] = $shx_file;    
                         }
-                        $shapeFile = new ShapeFile($files);
+                        $shapeFile = new ShapefileReader($files);
                     }else if(file_exists($shp_file)){
-                        $shapeFile = new ShapeFile($shp_file);
+                        //if provide only shapefile, it finds other automatically
+                        $shapeFile = new ShapefileReader($shp_file);
                     }else{
                         $system->error_exit_api('Cannot process shp file', HEURIST_ERROR);
                     }
@@ -125,14 +126,25 @@
                     $json = array();
                     
                     // Read all the records
-                    while ($record = $shapeFile->getRecord(ShapeFile::GEOMETRY_GEOJSON_FEATURE)) { //GEOMETRY_WKT
+                    while ($record = $shapeFile->fetchRecord()){
+                        
+                        // Skip the record if marked as "deleted"
+                        if ($record->isDeleted()) {
+                            continue;
+                        }
+                        
+                        /* v2 old way
+                        $shapeFile->getRecord(Shapefile::GEOMETRY_GEOJSON_FEATURE)) { //GEOMETRY_WKT
                         if ($record['dbf']['_deleted']) continue;
+                        
+                        $record['shp']
+                        */
 
-                        $feature = json_decode($record['shp'], true);
+                        $feature = json_decode($record->getGeoJSON(false,true), true);
                         
                         if(@$params['simplify']){
                             $geo = @$feature['geometry'];
-                            if(count(@$geo['coordinates'])>0){
+                            if(is_array(@$geo['coordinates']) && count(@$geo['coordinates'])>0){
                                 
                                 if($geo['type']=='LineString'){
 
@@ -160,11 +172,15 @@
                     //header('Content-disposition: attachment; filename=output.json');
                     header('Content-Length: ' . strlen($json));
                     exit($json);
-                
+
                 } catch (ShapeFileException $e) {
                     // Print detailed error information
+error_log($e->getCode().' ('.$e->getErrorType().'): '.$e->getMessage());                    
                     //.$e->getCode().' ('.$e->getErrorType().'): '
                     $system->error_exit_api('Cannot process shp file: '.$e->getMessage(), HEURIST_ERROR);
+                } catch (Exception $e) {
+error_log($e->getCode().' ('.$e->getErrorType().'): '.$e->getMessage());                    
+                    $system->error_exit_api('Cannot init ShapeFile library: '.$e->getMessage(), HEURIST_ERROR);
                 }                
                 
     }else{
@@ -173,6 +189,25 @@
             .' does not have fields where stored reference to shp or zip file',
             HEURIST_NOT_FOUND); 
     }
+
+//
+// check file existance, readability and opens the file
+// returns file handle, or -1 not exist, -2 not readable -3 can't open
+//
+function fileOpen($file)
+{
+    if (!(file_exists($file) && is_file($file))) {
+        return -1;
+    }
+    if (!is_readable($file)) {
+        return -2;
+    }
+    $handle = fopen($file, 'rb');
+    if (!$handle) {
+        return -3;
+    }
+    return $handle;
+}
     
 //
 // $fileinfo as fileGetFullInfo
