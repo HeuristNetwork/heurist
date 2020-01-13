@@ -755,10 +755,14 @@ function output_Records($system, $data, $params){
     $maplayer_fields = null;
     $maplayer_records = array();
     $maplayer_extents = array();
+    $ds_file_fields = null; //keep ids of all file fields
     if($is_tlc_export){
         //get list of detail types for MAP_LAYER
         $maplayer_fields = mysql__select_list2($system->get_mysqli(),
             'select rst_DetailTypeID from defRecStructure where rst_RecTypeID='.RT_MAP_LAYER);        
+        //get list of field types with type "file"
+        $ds_file_fields = mysql__select_list2($system->get_mysqli(),
+            'select dty_ID from defDetailTypes where dty_Type="file"');        
         //get default values for mapspace
         $mapdoc_defaults = mysql__select_assoc2($system->get_mysqli(),
             'select rst_DetailTypeID, rst_DefaultValue from defRecStructure where rst_RecTypeID='.RT_MAP_DOCUMENT
@@ -900,30 +904,51 @@ XML;
         
         $rty_ID = $record['rec_RecTypeID'];
         
-        if($is_tlc_export && $rty_ID==RT_TLCMAP_DATASET){
-            $record['rec_RecTypeID'] = RT_MAP_LAYER;
-            $rty_ID = RT_MAP_LAYER;
-            $new_details = array();
-            //remove redundant fields from RT_TLCMAP_DATASET
-            foreach($record["details"] as $dty_ID => $values){
-                if(in_array($dty_ID, $maplayer_fields)){
-                    $new_details[$dty_ID] = $values;                    
-            //get extent
+        //change record type to layer, remove redundant fields
+        if($is_tlc_export){
+            if($rty_ID==RT_TLCMAP_DATASET){
+                $record['rec_RecTypeID'] = RT_MAP_LAYER;
+                $rty_ID = RT_MAP_LAYER;
+                $new_details = array();
+                //remove redundant fields from RT_TLCMAP_DATASET
+                foreach($record["details"] as $dty_ID => $values){
+                    if(in_array($dty_ID, $maplayer_fields)){
+                        $new_details[$dty_ID] = $values;                    
+                        
+                    }
+                    if($dty_ID==DT_GEO_OBJECT){
+                        //keep geo to calculate extent for mapdocument
+                        array_push($maplayer_extents, $values);
+                    }
                 }
-                if($dty_ID==DT_GEO_OBJECT){
-                    array_push($maplayer_extents, $values);
+                $record["details"] = $new_details;
+                
+                //{"id":"287","type":"29","title":"Region cities","hhash":null}            
+                $midx = (count($maplayer_records)+5);
+                $maplayer_records[$midx] = array('id'=>$record['rec_ID']);
+                
+            }else{
+                //@todo - add db parameter for query datasource
+                //@todo - convert uploaded images to external url
+                /*
+                foreach($record["details"] as $dty_ID => $values){
+                    if(in_array($dty_ID, $ds_file_fields)){
+                        
+                        foreach($record["details"][$dty_ID] as $dtl_ID=>$value){
+                            //change to dowload link from source database
+                            $record["details"][$dty_ID][$dtl_ID]['file']['fullPath'] = null;
+                            $record["details"][$dty_ID][$dtl_ID]['file']['ulf_ExternalFileReference'] = 
+                                HEURIST_BASE_URL.'?db='.HEURIST_DBNAME
+                                .'&file='.$value['fileid'];
+                        }         
+                    }
                 }
+                */
+/* sample of structure                        
+http://127.0.0.1/h5-ao/?db=osmak_38&file=5a9fa3e19f000366d439dbe98779f4dd6acb858d
+{"1900":{"file":{"ulf_ID":"38","fullPath":null,"ulf_ExternalFileReference":"https:\/\/oldsaratov.ru\/sites\/default\/files\/styles\/post_image\/public\/photos\/2012-05\/radishchevskiymuzeyleontevy.jpg","fxm_MimeType":"image\/jpeg","ulf_Parameters":null,"ulf_OrigFileName":"_remote","ulf_FileSizeKB":"0","ulf_ObfuscatedFileID":"486e821f21de3d4876b255f839834f458eee05af","ulf_Description":"","ulf_Added":"2020-01-13 14:10:03","ulf_MimeExt":"jpg"},"fileid":"486e821f21de3d4876b255f839834f458eee05af"}}                        
+*/
             }
-            $record["details"] = $new_details;
-            
-            //{"id":"287","type":"29","title":"Region cities","hhash":null}            
-            $midx = (count($maplayer_records)+5);
-            $maplayer_records[$midx] = array('id'=>$record['rec_ID']);
-            
-            
-            //@todo - add db parameter for query datasource
-            //@todo - convert uploaded images to external url
-            
         }
         
         if(!@$rt_counts[$rty_ID]){

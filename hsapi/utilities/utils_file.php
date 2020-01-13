@@ -974,6 +974,7 @@ function loadRemoteURLContentWithRange($url, $range, $bypassProxy = true, $timeo
     curl_setopt($ch, CURLOPT_FAILONERROR, true);
     curl_setopt($ch, CURLOPT_AUTOREFERER, true);
     //curl_setopt($ch, CURLOPT_REFERER, HEURIST_SERVER_URL);    
+    //curl_setopt($curl, CURLOPT_HTTPHEADER, array('Expect:'));
     
     if($range){
         curl_setopt($ch, CURLOPT_RANGE, $range);
