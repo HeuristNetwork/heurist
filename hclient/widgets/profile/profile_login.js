@@ -199,8 +199,11 @@ function doLogin(isforsed, callback, parentwin, dialog_id){
             });
 
             var arr_buttons = [{html:('<b>'+window.hWin.HR('Login')+'</b>'), click: __doLogin, id:'btn_login2'}];
+            //!is_secondary_parent && 
             if(window.hWin.HAPI4.sysinfo.registration_allowed==1){ //isforsed && 
-                arr_buttons.push({text:window.hWin.HR('Register'), click: doRegister, id:'btn_register'});
+                arr_buttons.push({text:window.hWin.HR('Register'), click: function(){
+                    doRegister( parentwin );   
+                }, id:'btn_register'});
             }
             arr_buttons.push({text:window.hWin.HR('Cancel'), click: function() {    //isforsed?'Change database':
                 $( this ).dialog( "close" );
@@ -258,20 +261,28 @@ function doLogin(isforsed, callback, parentwin, dialog_id){
     }
 }
 
-function doRegister(){
+function doRegister( parentwin ){
 
-    if($.isFunction($('body').profile_edit)){
+    var is_secondary_parent = false;
+    if(!parentwin){
+        parentwin = window.hWin;  
+    }else{
+        is_secondary_parent = true;
+    } 
+    var $doc = $(parentwin.document['body']);
+
+    if($.isFunction($doc.profile_edit)){
 
         var profile_edit_dialog = $('#heurist-profile-dialog');
         if(profile_edit_dialog.length<1){
-            profile_edit_dialog = $( '<div id="heurist-profile-dialog">' ).addClass('ui-heurist-bg-light').appendTo( $('body') );
+            profile_edit_dialog = $( '<div id="heurist-profile-dialog">' ).addClass('ui-heurist-bg-light').appendTo( $doc );
         }
-        profile_edit_dialog.profile_edit({'ugr_ID': window.hWin.HAPI4.currentUser.ugr_ID});
-
+        profile_edit_dialog.profile_edit({'ugr_ID': window.hWin.HAPI4.currentUser.ugr_ID, 'parentwin': parentwin});
+        
     }else{
         $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/profile/profile_edit.js', function() {
-            if($.isFunction($('body').profile_edit)){
-                doRegister();
+            if($.isFunction($doc.profile_edit)){
+                doRegister( parentwin );
             }else{
                 window.hWin.HEURIST4.msg.showMsgErr('Widget "Profile edit" cannot be loaded!');
             }

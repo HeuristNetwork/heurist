@@ -17,6 +17,7 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
+ onblur="autofill_login(this.value)"
 -->
 
 
@@ -37,7 +38,7 @@
     </div>
     <div>
         <div class="header"><label for="ugr_eMail">Email</label></div>
-        <input type="text" name="ugr_eMail" id="ugr_eMail" class="text ui-widget-content ui-corner-all mandatory" style="width:20em" onblur="autofill_login(this.value)"/>
+        <input type="text" name="ugr_eMail" id="ugr_eMail" class="text ui-widget-content ui-corner-all mandatory" style="width:20em"/>
     </div>
     <div>
         <div class="header"><label for="ugr_Name">Login name</label></div>
@@ -112,8 +113,8 @@
     
     <div class="mode-registration" style="height:40px">
         <div class="header"></div>
-        <input type="checkbox" id="agree" onClick="enable_register(this.checked)" style="margin-top:20px">
-        <label for="agree"><b>I have read and agree to the Terms and Conditions of Use below</b></label>
+        <input type="checkbox" id="cbAgree" style="margin-top:20px">
+        <label for="cbAgree"><b>I have read and agree to the Terms and Conditions of Use below</b></label>
     </div>
     
 </fieldset>

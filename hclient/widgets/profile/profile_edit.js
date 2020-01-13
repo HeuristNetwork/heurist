@@ -28,6 +28,7 @@ $.widget( "heurist.profile_edit", {
         ugr_ID:0,
         edit_data: {},
         isregistration: false,
+        parentwin: null,
 
         needclear: true, //clear input everytime for registration
 
@@ -37,6 +38,10 @@ $.widget( "heurist.profile_edit", {
 
     // the widget's constructor
     _create: function() {
+        
+        if(!this.options.parentwin){
+            this.options.parentwin = window.hWin;  
+        }
 
         // prevent double click to select text
         this.element.disableSelection();
@@ -115,7 +120,7 @@ $.widget( "heurist.profile_edit", {
                                 }
                             },
                             open: function(){
-                                enable_register(!that.options.isregistration);
+                                that.enable_register(!that.options.isregistration);
                             }
                         });
                     }
@@ -136,6 +141,11 @@ $.widget( "heurist.profile_edit", {
         if(key==='ugr_ID'){
             this.options.ugr_ID = value;
             this._init();
+        }else if(key==='parentwin'){
+            this.options.parentwin = value;
+            if(!this.options.parentwin){
+                this.options.parentwin = window.hWin;  
+            }
         }
     },
 
@@ -179,10 +189,10 @@ $.widget( "heurist.profile_edit", {
                             if(that.options.edit_data && that.options.edit_data['ugr_ID']==that.options.ugr_ID){
                                 that._fromDataToUI();
                             }else{
-                                window.hWin.HEURIST4.msg.showMsgErr("Unexpected user data obtained from server");
+                                that.options.parentwin.HEURIST4.msg.showMsgErr("Unexpected user data obtained from server");
                             }
                         }else{
-                            window.hWin.HEURIST4.msg.showMsgErr(response, true);
+                            that.options.parentwin.HEURIST4.msg.showMsgErr(response, true);
                         }
                     }
                 );
@@ -233,13 +243,21 @@ $.widget( "heurist.profile_edit", {
         //always reset captcha
         this.edit_form.find('#ugr_Captcha').val('');
 
-
+        this._on(this.edit_form.find('#ugr_eMail'),{'blur':function(){
+            this.autofill_login( this.edit_form.find('#ugr_eMail').val() );
+        }});
+        this._on(this.edit_form.find('#cbAgree'),{'change':function(){
+            this.enable_register( this.edit_form.find('#cbAgree').is(':checked') );
+        }});
+        
         if(this.options.isdialog){
             this.edit_form.dialog('option', 'title',
                 Number(this.options.ugr_ID)>0 ? window.hWin.HR('Edit profile')+': '+this.options.edit_data['ugr_FirstName'] + ' ' + this.options.edit_data['ugr_LastName'] //this.options.edit_data['ugr_FullName']
                 : window.hWin.HR('Registration')  );
             this.edit_form.dialog("open");
             this.edit_form.parent().addClass('ui-dialog-heurist');
+            //css({'font-size':'0.8em'});
+            this.edit_form.parent().position({ my: "center center", at: "center center", of: $(top.document) });
 
         }
     },
@@ -258,6 +276,8 @@ $.widget( "heurist.profile_edit", {
     },
 
     _doSave: function(){
+        
+        var parentWin = this.options.parentwin;
 
         var that = this;
         var allFields = this.edit_form.find('input, textarea');
@@ -276,7 +296,7 @@ $.widget( "heurist.profile_edit", {
         	var ele = this.edit_form.find("#ugr_Captcha");
         	var val = ele.val().trim().replace(/\s+/g,'');
         	
-            var ss = window.hWin.HEURIST4.msg.checkLength2( ele, '', 1, 0 );
+            var ss = parentWin.HEURIST4.msg.checkLength2( ele, '', 1, 0 );
             if(ss!=''){
                 err_text = err_text + ', Humanity check';
             }else{
@@ -288,18 +308,18 @@ $.widget( "heurist.profile_edit", {
             // validate email
             // From jquery.validate.js (by joern), contributed by Scott Gonzalez: http://projects.scottsplayground.com/email_address_validation/
             var email = this.edit_form.find("#ugr_eMail");
-            var bValid = window.hWin.HEURIST4.msg.checkEmail(email);
+            var bValid = parentWin.HEURIST4.msg.checkEmail(email);
             if(!bValid){
                 err_text = err_text + ', '+window.hWin.HR('Email does not appear to be valid');
             }
 
             // validate login
             var login = this.edit_form.find("#ugr_Name");
-            if(!window.hWin.HEURIST4.msg.checkRegexp( login, /^[a-z]([0-9a-z_@.])+$/i)){
+            if(!parentWin.HEURIST4.msg.checkRegexp( login, /^[a-z]([0-9a-z_@.])+$/i)){
                 err_text = err_text + ', '+window.hWin.HR('User name should contain ')
                     +'a-z, 0-9, _, @ and begin with a letter';   // "Username may consist of a-z, 0-9, _, @, begin with a letter."
             }else{
-                var ss = window.hWin.HEURIST4.msg.checkLength2( login, "user name", 3, 60 );
+                var ss = parentWin.HEURIST4.msg.checkLength2( login, "user name", 3, 60 );
                 if(ss!=''){
                     err_text = err_text + ', '+ss;
                 }
@@ -312,10 +332,10 @@ $.widget( "heurist.profile_edit", {
                 password.addClass( "ui-state-error" );
             }else  if(password.val()!=''){
                 /* restrict password to alphanumeric only - removed at 2016-04-29
-                if(!window.hWin.HEURIST4.msg.checkRegexp( password, /^([0-9a-zA-Z])+$/)){  //allow : a-z 0-9
+                if(!parentWin.HEURIST4.msg.checkRegexp( password, /^([0-9a-zA-Z])+$/)){  //allow : a-z 0-9
                     err_text = err_text + ', '+window.hWin.HR('Wrong password format');
                 }else{*/
-                var ss = window.hWin.HEURIST4.msg.checkLength2( password, "password", 3, 16 );
+                var ss = parentWin.HEURIST4.msg.checkLength2( password, "password", 3, 16 );
                 if(ss!=''){
                     err_text = err_text + ', '+ss;
                 }
@@ -355,21 +375,24 @@ $.widget( "heurist.profile_edit", {
 
             }else{
 
+                that.enable_register(false);
+                
                 window.hWin.HAPI4.SystemMgr.user_save( that.options.edit_data,
                     function(response){
+                        that.enable_register(true);
                         var  success = (response.status == window.hWin.ResponseStatus.OK);
                         if(success){
                             if(that.options.isdialog){
                                 that.edit_form.dialog("close");
                                 if(that.options.isregistration){
-                                    window.hWin.HEURIST4.msg.showMsgDlgUrl(window.hWin.HAPI4.baseURL+"hclient/widgets/profile/profile_regmsg.html?t="+(new Date().getTime()),null,'Confirmation');
+                                    parentWin.HEURIST4.msg.showMsgDlgUrl(window.hWin.HAPI4.baseURL+"hclient/widgets/profile/profile_regmsg.html?t="+(new Date().getTime()),null,'Confirmation');
                                 }else{
-                                    window.hWin.HEURIST4.msg.showMsgDlg("User information saved");
+                                    parentWin.HEURIST4.msg.showMsgDlg("User information saved");
                                 }
 
                             }
                         }else{
-                            window.hWin.HEURIST4.msg.showMsgErr(response, !that.options.isregistration);
+                            parentWin.HEURIST4.msg.showMsgErr(response, !that.options.isregistration);
                             if(that.options.isregistration){
                                 that.edit_form.find("#ugr_Captcha").val('');
                                 that._refreshCaptcha();
@@ -381,7 +404,7 @@ $.widget( "heurist.profile_edit", {
             }
 
         }else{
-            window.hWin.HEURIST4.msg.showMsgErr(err_text);
+            parentWin.HEURIST4.msg.showMsgErr(err_text);
             /*var message = $dlg.find('.messages');
             message.html(err_text).addClass( "ui-state-highlight" );
             setTimeout(function() {
@@ -393,28 +416,30 @@ $.widget( "heurist.profile_edit", {
 
     open:function(){
         this.edit_form.dialog("open");
-    }
+    },
 
+    //these functions is used in edit_profile.html
+    autofill_login: function (value){
+        var ele = this.edit_form.find('#ugr_Name');
+        if(ele && ele.val()==''){
+            ele.val(value);
+        }
+    },
+    
+    enable_register: function (value){
+        var that = this;
+        var ele = this.edit_form.parent().find('#btn_save');
+        if(ele){
+            if(value){
+                ele.removeAttr("disabled");
+                ele.removeClass("ui-button-disabled ui-state-disabled");
+            } else {
+                ele.attr("disabled", "disabled");
+                ele.addClass("ui-button-disabled ui-state-disabled");
+            }
+        }
+    }
+    
 
 });
 
-//these functions is used in edit_profile.html
-function autofill_login(value){
-    var ele = $('#ugr_Name');
-    if(ele && ele.val()==''){
-        ele.val(value);
-    }
-}
-function enable_register(value){
-    var that = this;
-    var ele = $('#btn_save');
-    if(ele){
-        if(value){
-            ele.removeAttr("disabled");
-            ele.removeClass("ui-button-disabled ui-state-disabled");
-        } else {
-            ele.attr("disabled", "disabled");
-            ele.addClass("ui-button-disabled ui-state-disabled");
-        }
-    }
-}
