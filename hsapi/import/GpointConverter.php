@@ -585,6 +585,7 @@ class GpointConverter
      */
     public function distanceFrom($lon1, $lat1)
     { 
+        $lon1 = deg2rad($lon1); $lat1 = deg2rad($lat1);
         $lon2 = deg2rad($this->Long()); $lat2 = deg2rad($this->Lat());
  
         $theta = $lon2 - $lon1;
