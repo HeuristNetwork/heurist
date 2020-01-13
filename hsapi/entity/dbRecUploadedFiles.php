@@ -295,9 +295,9 @@ class DbRecUploadedFiles extends DbEntityBase
             $mimetypeExt = strtolower($fieldvalues['ulf_MimeExt']);
             $mimeType = mysql__select_value($this->system->get_mysqli(), 
                     'select fxm_Mimetype from defFileExtToMimetype where fxm_Extension="'.addslashes($mimetypeExt).'"');
-
+                    
             if(!$mimeType){
-                    $this->system->addError(HEURIST_ACTION_BLOCKED, 'Extension: '.$mimetypeExt.'. '.$this->error_ext);
+                    $this->system->addError(HEURIST_ACTION_BLOCKED, 'Extension: '.$mimetypeExt.'<br> '.$this->error_ext);
                     return false;
             }
             
@@ -355,8 +355,29 @@ class DbRecUploadedFiles extends DbEntityBase
                     return false;
             }else
             if(strpos($mimeType,'/')>0){ //this is mimetype - find extension
-                $this->records[$idx]['ulf_MimeExt'] = mysql__select_value($this->system->get_mysqli(), 
+                $fileExtension = mysql__select_value($this->system->get_mysqli(), 
                     'select fxm_Extension from defFileExtToMimetype where fxm_Mimetype="'.addslashes($mimeType).'"');
+
+                if($fileExtension==null && $this->records[$idx]['ulf_OrigFileName'] != '_remote'){
+                    //mimetype not found - try to get extension from name
+                    $extension = strtolower(pathinfo($this->records[$idx]['ulf_OrigFileName'], PATHINFO_EXTENSION));
+                    if($extension){
+                        $fileExtension = mysql__select_value($this->system->get_mysqli(), 
+                            'select fxm_Extension from defFileExtToMimetype where fxm_Extension="'.addslashes($extension).'"');
+                        if($fileExtension==null){
+                            //still not found
+                            $this->system->addError(HEURIST_ACTION_BLOCKED, 'Neither mimetype: '.$mimeType
+                                    .' nor extension '.$extension.' are registered in database.<br><br>'.$this->error_ext);
+                            return false;
+                        }    
+                    }
+                }
+                if($fileExtension==null){
+                    $this->system->addError(HEURIST_ACTION_BLOCKED, 'File mimetype is detected as: '.$mimeType
+                        .'. It is not registered in database.<br><br>'.$this->error_ext);
+                    return false;
+                }
+                $this->records[$idx]['ulf_MimeExt'] = $fileExtension;
             }
 
             if(!@$this->records[$idx]['ulf_FileSizeKB']) {

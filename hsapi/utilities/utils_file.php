@@ -43,11 +43,12 @@
     
     fileCopy
     fileSave
+    fileOpen - check existance, readability, opens and returns file handle, or -1 not exist, -2 not readable -3 can't open
     
     generate_thumbnail 
     
     saveURLasFile  loadRemoteURLContent + fileSave
-    @todo? fileRetrievePath   returns fullpath to file is storage, or to tempfile, 
+    @todo move from record_shp? fileRetrievePath returns fullpath to file is storage, or to tempfile, 
                    if it requires it extracts zip archive to tempfile or download remote url to tempfile
     
     getRelativePath
