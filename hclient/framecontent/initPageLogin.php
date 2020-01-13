@@ -63,7 +63,7 @@ if (($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1')
 ?>    
 <script>  
 var login_warning = ''
-var requiredLevel = 1; //1-admin, 2-owner, 0 logged in
+var requiredLevel = 0; //1-admin, 2-owner, 0 logged in
 //
 //
 //
@@ -82,10 +82,10 @@ function onHapiInit(success){
      echo 'window.hWin.HAPI4.sysinfo.db_has_active_dashboard = '.$db_has_active_dashboard.';';
 ?>
     
-    verify_credentials();
+    verify_credentials( false );
 }
 
-function verify_credentials(){
+function verify_credentials( show_warning ){
     
     if(window.hWin.HAPI4.has_access(requiredLevel)){ 
         
@@ -97,28 +97,36 @@ function verify_credentials(){
            msg += ' as database administrator';// of group "Database Managers"' 
         }else if(requiredLevel==2){
            msg += ' as database onwer';
-        }else{
-           msg = ''; 
+        //}else if(requiredLevel!=0){
+        //   msg = ''; 
         }
-
         if(msg!=''){
             /*
             $(window).on("beforeunload",  function() { 
                     console.log('beforeunload initPageLogin');
             });
             */
-            
             var win_mappreview = window.parent.hWin;
-            var $dlg2 = win_mappreview.HEURIST4.msg.showMsgDlg(msg+'<br> Database: '+window.hWin.HAPI4.database,
-                {OK:
-                function(){
-                    //$dlg = window.hWin.HEURIST4.msg.getMsgDlg();            
-                    $dlg2.dialog( "close" );
-                    //window.hWin.HEURIST4.msg.showMsgErr(msg+'<br> Database: '+window.hWin.HAPI4.database);            
-                    doLogin(false, function(is_logged){
-                        //window.hWin.HAPI4.verify_credentials(function(){}, login_level_req);
-                    }, win_mappreview, 'heurist-clearinghouse-login-dialog');
-                }}); 
+            if(show_warning){
+                
+                var $dlg2 = win_mappreview.HEURIST4.msg.showMsgDlg(msg+'<br> Database: '+window.hWin.HAPI4.database,
+                    {OK:
+                    function(){
+                        //$dlg = window.hWin.HEURIST4.msg.getMsgDlg();            
+                        $dlg2.dialog( "close" );
+                        //window.hWin.HEURIST4.msg.showMsgErr(msg+'<br> Database: '+window.hWin.HAPI4.database);            
+                        doLogin(false, function( is_logged ) {
+                            //window.hWin.HAPI4.verify_credentials(function(){}, login_level_req);
+                        }, win_mappreview, 'heurist-clearinghouse-login-dialog');
+                    }}); 
+            }else{
+                //show login dialog at once
+                doLogin(false, function(is_logged){
+                            //window.hWin.HAPI4.verify_credentials( true );
+                        }, win_mappreview, 'heurist-clearinghouse-login-dialog');
+            }
+            
+            
         }
     }        
 }

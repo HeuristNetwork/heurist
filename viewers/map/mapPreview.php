@@ -93,11 +93,12 @@ console.log('beforeunload MAPPEVIEW');
         
         initial_layers = window.hWin.HEURIST4.util.getUrlParameter('ids', location.search);
         target_database = window.hWin.HEURIST4.util.getUrlParameter('target_db', location.search);
+        
 
         mapping = $('#map_container').mapping({
             element_map: '#map_digitizer',
-            layout_params:layout_params,
-            oninit: onMapInit
+            layout_params:layout_params
+            //oninit: onMapInit
         });                
         
         //initialize buttons
@@ -106,6 +107,10 @@ console.log('beforeunload MAPPEVIEW');
             _exportMapSpace();
         }});
         
+    }
+    
+    function onFirstInit(){
+        onMapInit();
     }
     
     //
@@ -129,17 +134,11 @@ console.log('beforeunload MAPPEVIEW');
     //
     //           
     function onMapInit(){
-
-        if(target_database){
-            //load check login iframe
-            var ele = $('#checklogin');
-            ele.attr('src', null);
-            ele.attr('src', window.hWin.HAPI4.baseURL
-                +'hclient/framecontent/initPageLogin.php?db='+target_database);
-                
-        }else{
+        
+        if(!target_database){
             window.hWin.HEURIST4.msg.showMsgErr('Target database not defined. '
-                +'It is not possiblle to perform this operation'); 
+                +'It is not possiblle to perform this operation');
+            window.close(); 
         }
         
 
@@ -147,6 +146,15 @@ console.log('beforeunload MAPPEVIEW');
             //mapping.mapping( 'drawLoadWKT', initial_wkt, true);
             mapping.mapping( 'createVirtualMapDocument', initial_layers);
         }
+        
+        setTimeout(function(){
+            //load check login iframe
+            var ele = $('#checklogin');
+            ele.attr('src', null);
+            ele.attr('src', window.hWin.HAPI4.baseURL
+                +'hclient/framecontent/initPageLogin.php?db='+target_database);
+        },500);
+        
     }
             
             

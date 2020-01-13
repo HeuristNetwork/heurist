@@ -515,7 +515,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                     
                     $dlg.dialog('open');  
                    
-                    if(options['params']) {
+                    if(options['params'] && $.isFunction(content.assignParameters)) {
                         content.assignParameters(options['params']);
                     }
                     
@@ -648,6 +648,10 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                         var onloadCallback = options['onpopupload'];
                         if(onloadCallback){
                                 onloadCallback.call(opener, $dosframe[0]);
+                        }
+                        
+                        if($.isFunction(content.onFirstInit)) {
+                            content.onFirstInit();
                         }
 
                 });
