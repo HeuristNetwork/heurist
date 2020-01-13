@@ -112,7 +112,7 @@
                         $geojson_adapter = new GeoJSON(); 
                         $json = $geojson_adapter->write($geom, true); 
                         
-                        if(count($json['coordinates'])>0){
+                        if(@$json['coordinates'] && count($json['coordinates'])>0){
                             
                             if(@$params['simplify']){
                                 
