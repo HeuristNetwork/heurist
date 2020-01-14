@@ -655,7 +655,7 @@ function EditRecStructure() {
                         '<div class="input-row"><div class="input-header-cell">Field name:</div>'+
                             '<div class="input-cell">'+
                                 '<input id="ed_rty_ID" type="hidden" value="'+rty_ID+'">'+
-                                '<input id="ed_dty_ID" type="hidden" value="'+_rst_ID+'">'+
+                                '<input id="ed_rst_ID" type="hidden" value="'+_rst_ID+'">'+
                                 '<input id="ed_dty_Name" style="width:200px;" maxlength="255" onchange="_onDispNameChange(event)" '+
                                     'onkeypress="window.hWin.HEURIST4.ui.preventChars(event)" '+
                                     //'onblur="setTimeout(function(){$(\'.list_div\').hide()},200)" '+
@@ -776,7 +776,7 @@ function EditRecStructure() {
                         '<div class="input-row"><div class="input-header-cell">Prompt (display name):</div>'+
                             '<div class="input-cell">'+
                                 '<input id="ed_rty_ID" type="hidden" value="'+rty_ID+'">'+
-                                '<input id="ed_dty_ID" type="hidden" value="'+rst_ID+'">'+
+                                '<input id="ed_rst_ID" type="hidden" value="'+rst_ID+'">'+
                                 '<input id="ed'+rst_ID+'_rst_DisplayName" style="width:200px;" onchange="_onDispNameChange(event)" '+
                                     'onkeypress="window.hWin.HEURIST4.ui.preventChars(event)" maxlength="255" '+
                                     'title="The name of the field, displayed next to the field in data entry and used to identify the field in report formats, analyses and so forth"/>'+
@@ -3791,7 +3791,7 @@ function recreateRecTypesPreview(type, value) {
     
     
     var rty_ID = Dom.get("ed_rty_ID").value;
-    var rst_ID = Dom.get("ed_dty_ID").value;
+    var rst_ID = Dom.get("ed_rst_ID").value;
     var edt_def = Dom.get('ed'+rst_ID+'_rst_DefaultValue');
     
     var fieldType = window.hWin.HEURIST4.detailtypes.typedefs[rst_ID].commonFields[window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex.dty_Type];
