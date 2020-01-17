@@ -116,10 +116,10 @@ if($mode=='2' && file_exists($folder.".zip") ){
                     </label>
                 </div>
                 
-                <div class="input-row">
+                <div class="input-row" style="display:none;">
                     <label 
                         title="Adds documents describing Heurist structure and data formats - check this box if the output is for long-term archiving">
-                        <input type="checkbox" name="include_docs" value="1">
+                        <input type="checkbox" name="include_docs" value="1" checked>
                         Include background documentation for archiving
                     </label>
                 </div>
@@ -304,11 +304,15 @@ onClick="{ document.getElementById('buttons').style.visibility = 'hidden';  docu
             if(!$res){
                 print "Directory may be non-writeable or zip function is not installed on server (error code 127) - please consult system adminstrator";
             } else {
-                print "<p>Your data have been backed up in ".$folder
-                ."<br><br>If you are unable to download from the link below, ask your system administrator to send you the content of this folder</p>";
-                print "<br><br><div class='lbl_form'></div>".
-                "<a href='exportMyDataPopup.php/".HEURIST_DBNAME.".zip?db=".HEURIST_DBNAME."&mode=2".
-                "' target='_blank' style='color:blue; font-size:1.2em'>Click here to download your data as a zip archive</a>";
+?>                
+<p>Your data have been backed up in <?php echo $folder;?></p>
+<br><br><div class='lbl_form'></div>
+    <a href='exportMyDataPopup.php/<?php echo HEURIST_DBNAME;?>.zip?db=<?php echo HEURIST_DBNAME;?>&mode=2"
+        target='_blank' style='color:blue; font-size:1.2em'>Click here to download your data as a zip archive</a>
+
+<span class="heurist-helper1">
+<br><br>Note: If this file fails to download properly (eg. "Failed … file incomplete") the file is too large to download. Please ask your system administrator (<?php echo HEURIST_MAIL_TO_ADMIN; ?>) to send it to you via a large file transfer service</span>        
+<?php                
             }
 
             print '</div><script>document.getElementById("divProgress").style.display="none";</script>';
