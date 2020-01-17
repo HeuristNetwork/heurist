@@ -33,7 +33,7 @@ $EXPAND_REV_PTR, revexpand   yes|no
 $WOOT, woot default to not output text content
 $USEXINCLUDELEVEL, hinclude  default to not output xinclude format for related records until beyound 99 degrees of separation
 $USEXINCLUDE hinclude default to not output xinclude format for related records
-$INCLUDE_FILE_CONTENT fc default to expand xml file content
+$INCLUDE_FILE_CONTENT fc default NOT expand xml file content
 
 */
 
@@ -326,7 +326,10 @@ $USEXINCLUDELEVEL = array_key_exists('hinclude', $_REQUEST) && is_numeric($_REQU
 //default to not output xinclude format for related records until beyound 99 degrees of separation
 $USEXINCLUDE = array_key_exists('hinclude', $_REQUEST) ? true : false; //default to not output xinclude format for related records
 $OUTPUT_STUBS = @$_REQUEST['stub'] == '1' ? true : false; //default to not output stubs
-$INCLUDE_FILE_CONTENT = (@$_REQUEST['fc'] && $_REQUEST['fc'] == - 1 ? false : (@$_REQUEST['fc'] && is_numeric($_REQUEST['fc']) ? $_REQUEST['fc'] : 0)); // default to expand xml file content
+$INCLUDE_FILE_CONTENT = (@$_REQUEST['fc'] && $_REQUEST['fc'] == - 1 
+            ? false 
+            : (@$_REQUEST['fc'] && is_numeric($_REQUEST['fc']) ? $_REQUEST['fc'] : false)); // default NOT expand xml file content
+//before 2020-01-17 $INCLUDE_FILE_CONTENT=0 - include for level 0            
 //TODO: supress loopback by default unless there is a filter.
 $SUPRESS_LOOPBACKS = (@$_REQUEST['slb'] && $_REQUEST['slb'] == 0 ? false : true); // default to supress loopbacks or gives oneside of a relationship record  ARTEM:NOT USED ANYMORE
 $FRESH = (@$_REQUEST['f'] && $_REQUEST['f'] == 1 ? true : false);
