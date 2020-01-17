@@ -564,6 +564,8 @@
     
         
         if(!$is_insert){
+            $mysqli->query('set @suppress_update_trigger=1');
+
             removeReverseChildToParentPointer($system, $recID, $rectype);    
 
             //find all relationship records and update FlagTemporary and record title
@@ -601,7 +603,8 @@
                     $res = recordUpdateTitle($system, $linkRecID, $masks[$linkRecTypeID], null);
                 }
             }
-        }
+            $mysqli->query('set @suppress_update_trigger=NULL');
+        }//update flagtemporary and title for related,linked records
         
         if($use_transaction){
             $mysqli->commit();
@@ -1414,13 +1417,14 @@
                 
                 if(strlen($new_title)>1023) $new_title = substr($new_title,0,1023);
                 
-                $date_mod = date('Y-m-d H:i:s');
+                //$date_mod = date('Y-m-d H:i:s'); rec_Modified=?, 
                 
-                $query = "UPDATE Records set rec_Modified=?, rec_Title=? where rec_ID=".$recID;
+                $query = "UPDATE Records set rec_Title=? where rec_ID=".$recID;
 
                 $stmt = $mysqli->prepare($query);
 
-                $stmt->bind_param('ss', $date_mod, $new_title);
+                //$stmt->bind_param('ss', $date_mod, $new_title);
+                $stmt->bind_param('s', $new_title);
                 if(!$stmt->execute()){
                     $syserror = $mysqli->error;
                     $stmt->close();
@@ -1524,32 +1528,10 @@
                 $err_msg = '';
                 
                 if(!(is_array($dtl_Value) || $det_types[$dtyID]=='geo' || $det_types[$dtyID]=='file')){
-                    $dtl_Value = trim($dtl_Value);
-                    $len  = strlen($dtl_Value);  //number of bytes
-                    $len2 = mb_strlen($dtl_Value); //number of characters
-                    $lim = ($len-$len2<200)?64000:32768;
-                    $lim2 = ($len-$len2<200)?64:32;
-                    /*
-                    if($len>10000){
-                        $stmt_size->bind_param('s', $dtl_Value);
-                        if($stmt_size->execute()){
-                            $stmt_size->bind_result($str_size);
-                            $stmt_size->fetch();
-                            if($str_size>65535){
-                                $len = $str_size;
-                            }
-                        }
-                    }
-                    */
-                    if($len>$lim){ //65535){  32768
-                        $err_msg = 'The data in field (#'.$dtyID
-                        .') exceeds the maximum size for a field of '.$lim2.'Kbytes. '
-                        .'Note that this does not mean '.$lim2.'K characters, '
-                        .'as Unicode uses multiple bytes per character.';
-                        break;
-                    }
+                    $rval = $mysqli->real_escape_string( $dtl_Value );
+                    $err_msg = checkMaxLength('#'.$dtyID, $rval);
+                    if($err_msg!=null) break;
                 }
-                
 
                 switch ($det_types[$dtyID]) {
 

@@ -357,7 +357,11 @@ function hCmsEditing(_options) {
         
         window.hWin.HAPI4.RecordMgr.batch_details(request, function(response){
                 if(response.status == hWin.ResponseStatus.OK){
-                    
+                    if(response.data.errors==1){
+                        var errs = response.data.errors_list;
+                        var errMsg = errs[Object.keys(errs)[0]];
+                        window.hWin.HEURIST4.msg.showMsgErr( errMsg );
+                    }else
                     if(response.data.noaccess==1){
                         window.hWin.HEURIST4.msg.showMsgErr('It appears you have not enough rights to edit this record');
                         
