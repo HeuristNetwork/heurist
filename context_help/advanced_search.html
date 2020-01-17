@@ -77,7 +77,7 @@
         </ul>
 
         <p>
-            Sorting can be by ID, title (default), by web address, by date added or modified, by any of the public data fields or by popularity (star rating).
+            Sorting can be by ID, title (default), by web address, by date added or modified, by any of the data fields or by popularity (star rating).
         </p>
 
         <h4>How to use it</h4>
@@ -174,6 +174,13 @@
                         or a user ID, for example <span class="search_term">user:224</span>.
                     </td>
                 </tr>
+               <tr>
+                    <td style="vertical-align: top; text-align: right;"><span class="search_term">visibility:<i>xxx</i></span></td>
+                    <td>
+                        Search for records which have the visibility set to a specific value.<br>
+                        The values accepted are public, pending, viewable, hidden, for example <span class="search_term">{"access":"public"}</span>. viewable indicates viewable by any logged-in user, hidden indicates visible only to the owner. Use -public to find all records which are not publicly visible. You can also use simple searches such as <span class="search_term">vt:public</span> or <span class="search_term">vt:hiden</span> but negation is not supported.
+                    </td>
+                </tr>
 
                 <tr>
                     <td style="vertical-align: top; text-align: right;"><span class="search_term">url:<i>xxx</i></span></td>
@@ -223,11 +230,9 @@
             </tbody>
         </table>
 
-        <h4>Public Data Fields</h4>
+        <h4>Data Fields</h4>
 
-        The Public Data Fields are the set of fields which are defined for each of the record types (book, journal, historical event,
-        person, research group, institution, C14 date etc.) and appear on the Public
-        Info tab of the editing form (pale blue background). They vary between record types, however different record types may
+        Data fields vary between record types, however different record types may
         (and often do) share some of the same fields.
 
         <br>&nbsp;
@@ -237,7 +242,7 @@
                 <tr>
                     <td style="vertical-align: top; text-align: right;"><span class="search_term">all:<i>xxx</i></span></td>
                     <td>
-                        Search for records containing <i>xxx</i> in any of the public data fields.
+                        Search for records containing <i>xxx</i> in any of the data fields.
                     </td>
                 </tr>
 
