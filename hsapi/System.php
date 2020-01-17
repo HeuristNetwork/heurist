@@ -448,7 +448,7 @@ error_log(print_r($_REQUEST, true));
         $folders['smarty-templates']  = array('SMARTY_TEMPLATES','', false, true);
         $folders['entity']        = array(null,'used to store icons and images for users,groups,terms');
         $folders['backup']        = array(null,'used to write files for user data dump');
-        $folders['term-icons']    = array('TERM_ICON','used for images illustrating terms', true, true); //todo move to entity
+        //$folders['term-icons']    = array('TERM_ICON','used for images illustrating terms', true, true); //todo move to entity
         $folders['rectype-icons'] = array('ICON','used for record type icons and thumbnails', true, true); //todo move to entity
         $folders['settings']      = array('SETTING','', false, true);
         
