@@ -537,9 +537,23 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
         
         $mysqli = $this->system->get_mysqli();
 
+        $rval = $mysqli->real_escape_string($this->data['rVal']);
+        
+        $err_msg = checkMaxLength($dtyName, $rval);
+        if($err_msg!=null){
+            $this->system->addError(HEURIST_INVALID_REQUEST, $err_msg);
+            return false;
+        }
+        
+        
         if(!@$this->data['sVal']){    //value to be replaced
-            $searchClause = '1=1';
+            //all except geo and file
+            //$searchClause = '1=1';
             $replace_all_occurences = true;  
+
+            $types = mysql__select_list2($mysqli, 'select dty_ID from defDetailTypes where dty_Type = "file" OR dty_Type = "geo"');
+            $searchClause = 'dtl_DetailTypeID NOT IN ('.implode(',',$types).')';
+            
         }else{
             
             $basetype = mysql__select_value($mysqli, 'select dty_Type from defDetailTypes where dty_ID = '.$dtyID);

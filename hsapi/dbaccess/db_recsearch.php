@@ -680,7 +680,7 @@
             
         }
         
-        if($need_headers=='ids'){
+        if($need_headers==='ids'){
             $response = array("status"=>HEURIST_OK,
                      "data"=> array("direct"=>$direct_ids, "reverse"=>$reverse_ids, "headers"=>$headers));
         }else{
