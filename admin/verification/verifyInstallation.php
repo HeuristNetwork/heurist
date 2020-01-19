@@ -87,12 +87,12 @@ require_once (dirname(__FILE__).'/../../hsapi/dbaccess/utils_db.php');
             if (extension_loaded("gd")) {print "gd ok<br />";} else {print "gd MISSING<br />";}
             if (extension_loaded("pdo")) {print "pdo ok<br />";} else {print "pdo MISSING<br />";}
             if (extension_loaded("mbstring")) {print "php-mbstring ok<br />";} else {print "php-mbstring MISSING<br />";}
-            if (extension_loaded("mysql")) {print "mysql ok<br />";} else {print "mysql MISSING<br />";}
+            //if (extension_loaded("mysql")) {print "mysql ok<br />";} else {print "mysql MISSING<br />";}
             if (extension_loaded("mysqli")) {print "mysqli ok<br />";} else {print "mysqli MISSING<br />";}
             if (extension_loaded("json")) {print "json ok<br />";} else {print "json MISSING<br />";}
             if (extension_loaded("session")) {print "session ok<br />";} else {print "session MISSING<br />";}
             if (extension_loaded("dom")) {print "dom ok<br />";} else {print "dom MISSING<br />";}
-             if (extension_loaded("curl")) {print "curl ok<br />";} else {print "curl MISSING<br />";}
+            if (extension_loaded("curl")) {print "curl ok<br />";} else {print "curl MISSING<br />";}
             if (extension_loaded("xsl")) {print "xsl ok<br />";} else {print "xsl MISSING<br />";}
             if (extension_loaded("simpleXML")) {print "simpleXML ok<br />";} else {print "simpleXML MISSING<br />";}
             if (extension_loaded("xml")) {print "xml ok<br />";} else {print "xml MISSING<br />";}
