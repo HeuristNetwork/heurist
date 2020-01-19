@@ -1322,48 +1322,6 @@
 
     }
 
-    /*
-    function recordVerifyRequiredFields($mysqli, $recID, $rectype)
-    {
-
-    $query = "select rst_ID, rst_DetailTypeID, rst_DisplayName".
-    " from defRecStructure".
-    " left join recDetails on dtl_RecID=$recID and rst_DetailTypeID=dtl_DetailTypeID".
-    " where rst_RecTypeID=$rectype and rst_RequirementType='required' and dtl_ID is null";
-
-    $res = $mysqli->query($query);
-    $res->
-    if($res){
-    $rec = $res->fetch_assoc();
-    }
-    $res->close();
-    if(!isset($rec)){
-    return $system->addError(HEURIST_DB_ERROR, 'Cannot get record', $mysqli->error);
-    }
-
-    // check that all the required fields are present
-    $res = mysql_query("select rst_ID, rst_DetailTypeID, rst_DisplayName".
-    " from defRecStructure".
-    " left join recDetails on dtl_RecID=$recordID and rst_DetailTypeID=dtl_DetailTypeID".
-    " where rst_RecTypeID=$rectype and rst_RequirementType='required' and dtl_ID is null");
-    if (mysql_num_rows($res) > 0) {
-    //        $log .= "- testing missing detatils ";
-    $missed = "";
-    while ($row = mysql_fetch_row($res)) {
-    $missed = $missed.$row[2]." ";
-    }
-    // at least one missing field
-    if($modeImport==2){
-    warnSaveRec("record is missing required field(s): ".$missed);
-    }else{
-    errSaveRec("record is missing required field(s): ".$missed);
-    return $msgInfoSaveRec;
-    }
-    }
-    return true;
-    }
-    */
-
 
     /**
     * Calculate and update title mask
@@ -1538,6 +1496,7 @@
                     case "freetext":
                     case "blocktext":
                     case "date":
+                        $len  = strlen(trim($dtl_Value));
                         $isValid = ($len > 0); //preg_match("/\\S/", $dtl_Value);
                         if(!$isValid ){
                             $err_msg = 'Value is empty';  
