@@ -59,6 +59,8 @@ $.widget( "heurist.resultList", {
         renderer: null,    // custom renderer function to draw item
         rendererHeader: null,   // renderer function to draw header for list view-mode (for content)
         rendererGroupHeader: null,   // renderer function for group header (see groupByField)
+        
+        recordDivClass: null, //additional class that modifies recordDiv appearance see "public" in h4styles.css
         // smarty template or url (or todo function) to draw inline record details when recordview_onselect='inline'. (LINE view mode only)
         rendererExpandDetails: null, 
 
@@ -1208,9 +1210,12 @@ $.widget( "heurist.resultList", {
                      
 
         }
+        
+        var btn_icon_only = this.options.recordDivClass?'':' ui-button-icon-only';
 
         // construct the line or block
-        var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" '+pwd+' rectype="'+rectypeID+'" bkmk_id="'+bkm_ID+'">'
+        var html = '<div class="recordDiv '+this.options.recordDivClass
+        +'" id="rd'+recID+'" recid="'+recID+'" '+pwd+' rectype="'+rectypeID+'" bkmk_id="'+bkm_ID+'">'
         + html_thumb
         
         + '<div class="recordIcons logged-in-only">' //recid="'+recID+'" bkmk_id="'+bkm_ID+'">'
@@ -1235,15 +1240,15 @@ $.widget( "heurist.resultList", {
         + '</div>'  // Replace ui-icon-pencil with ui-icon-extlink and swap position when this is finished 
 
         + '<div title="Click to view record (opens in popup)" '
-        + 'class="rec_view_link ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" '
+        + 'class="rec_view_link ui-button ui-widget ui-state-default ui-corner-all'+btn_icon_only+'" '
         + 'role="button" aria-disabled="false">'
-        + '<span class="ui-button-icon-primary ui-icon ui-icon-comment"/><span class="ui-button-text"/>'
+        + '<span class="ui-button-text">View</span><span class="ui-button-icon-primary ui-icon ui-icon-comment"/>'
         + '</div>'
 
         + '<div title="Click to edit record" '
-        + 'class="rec_edit_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" '
+        + 'class="rec_edit_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all'+btn_icon_only+'" '
         + 'role="button" aria-disabled="false" data-key="edit">'
-        + '<span class="ui-button-icon-primary ui-icon ui-icon-pencil" style="color:gray"/><span class="ui-button-text"/>'
+        + '<span class="ui-button-text">Edit</span><span class="ui-button-icon-primary ui-icon ui-icon-pencil"/>'
         + '</div>'
 
         // Icons at end allow editing and viewing data for the record when the Record viewing tab is not visible
@@ -1251,18 +1256,18 @@ $.widget( "heurist.resultList", {
         + ((!this.options.show_url_as_link && fld('rec_URL'))
             ?
         '<div title="Click to view external link (opens in new window)" '
-        + 'class="rec_view_link_ext ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" '
+        + 'class="rec_view_link_ext ui-button ui-widget ui-state-default ui-corner-all'+btn_icon_only+'" '
         + 'role="button" aria-disabled="false">'
-        + '<span class="ui-button-icon-primary ui-icon ui-icon-extlink"/><span class="ui-button-text"/>'
+        + '<span class="ui-button-text">Link</span><span class="ui-button-icon-primary ui-icon ui-icon-extlink"/>'
         + '</div>'
             :'')
         
         + ((rectypeID==window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_DOCUMENT'])
             ?
         '<div title="Click to embed" '
-        + 'class="rec_view_link_ext ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" '
+        + 'class="rec_view_link_ext ui-button ui-widget ui-state-default ui-corner-all'+btn_icon_only+'" '
         + 'role="button" aria-disabled="false">'
-        + '<span class="ui-button-icon-primary ui-icon ui-icon-globe"/><span class="ui-button-text"/>'
+        + '<span class="ui-button-text">Embed</span><span class="ui-button-icon-primary ui-icon ui-icon-globe"/>'
         + '</div>'
             :'')
         

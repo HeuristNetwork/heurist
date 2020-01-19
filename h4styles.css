@@ -387,6 +387,10 @@ div.recordDiv:hover {
     background:-webkit-gradient(linear, left top, left bottom, from(#EDF5FF), to(#EDF5FF));
 }
 
+/*
+rec_edit_link
+rec_actions  see specific manage entities
+*/
 
 div.recordDiv:hover  .rec_edit_link, 
     div.recordDiv:hover  .rec_edit_link_ext, 
@@ -418,6 +422,7 @@ h3 > #rec_add_link,
     display: none;
     height: 16px;
     width: 16px;
+    color: gray;
 }
 
 div.recordDiv  .rec_actions {
@@ -453,6 +458,42 @@ div.recordDiv > .rec_view_link {
 .list  .rec_view_link,
 .list  .rec_view_link_ext {
     top: 5px !important;
+}
+
+div.recordDiv .ui-button-text{
+    display: none;    
+}
+div.recordDiv.public .ui-button-text{
+    display: inline-block;    
+    line-height: 16px;
+    padding: 0px 4px;
+}
+
+div.recordDiv.public  .rec_edit_link, 
+    div.recordDiv.public  .rec_view_link,
+    div.recordDiv.public  .rec_view_link_ext {
+    text-align:left;
+    color: black;
+    display: block;    
+    width: 53px;
+    padding: 0px;
+}
+.icons div.recordDiv.public .rec_edit_link, 
+.icons div.recordDiv.public .rec_view_link,
+.icons div.recordDiv.public .rec_view_link_ext {
+    top:22px !important;
+}
+div.recordDiv.public .rec_edit_link{
+    right: 60px;
+}
+div.recordDiv.public .rec_edit_link_ext{
+    display:none;
+}
+div.recordDiv.public  .rec_view_link_ext {
+    right: 120px;
+}
+div.recordDiv.public > .recordIcons > span {
+    display: none !important;    
 }
 
 div.recordDiv:hover > .rec_action_link{
@@ -498,7 +539,7 @@ div .selected_last{
     margin: 0;
     left: 0;
     right: 0;
-    top: 4px;
+    top: 22px;
     height: 96px;
     opacity: 0.5;
 }
@@ -531,7 +572,7 @@ div .selected_last{
     font-size: 0.9em !important;
     margin: 6px;
 
-    height: 136px;
+    height: 154px;
     width: 128px;
     overflow: visible;
     padding: 0;
@@ -543,7 +584,7 @@ div .selected_last{
     -moz-box-shadow:0px 3px 8px #666;
     -webkit-box-shadow:0px 3px 8px #666;
     box-shadow:0px 3px 8px #666;
-    height:140px;
+    height:158px;
     width:134px;
     margin:3px;
 }
@@ -735,6 +776,9 @@ div .selected_last{
     white-space: nowrap;
     text-overflow: ellipsis;
 }
+.list .recordDiv.public .recordTitle {
+    left: 28px;
+}
 .list .recordDiv .recordTitle2 {
     left: 54px;
 }
@@ -836,7 +880,7 @@ div .selected_last{
 /*   */
 
 .thumbs3 .recordDiv {
-    height: 194px;
+    height: 212px;
     width: 178px;
 }
 
@@ -849,7 +893,7 @@ div .selected_last{
     -moz-box-shadow:0px 3px 8px #666;
     -webkit-box-shadow:0px 3px 8px #666;
     box-shadow:0px 3px 8px #666;
-    height:198px;
+    height:216px;
     width:184px;
     margin:3px;
 }
