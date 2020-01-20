@@ -24,6 +24,7 @@ function hPublishDialog( _options )
     _version   = "0.4",
     options = {
         //container:null,
+        mode: null, //mapspace, mapquery, smarty, graph, websearch
         mapwidget:null, 
         mapdocument_id:null  
     },
@@ -34,33 +35,84 @@ function hPublishDialog( _options )
         
         popupelement = popupdialog.find('#map-embed-dialog');
         
-        if(!options.mapwidget){
-            popupelement.find('.with_query').hide();    
-        }
+        popupelement.find('.modes').hide();
         
-        popupelement.find('input[type="checkbox"]').on({change:function(){
-            _fillUrls();
-        }});
+        popupelement.find('.'+options.mode).show();    
+        
+        if(options.mode=='mapspace' || options.mode=='mapquery')
+        {
+            popupelement.find('input[type="checkbox"]').on({change:function(){
+                _updateUrls();
+            }});
+            
+            var $select = popupelement.find('#map_template');
+            
+            window.hWin.HEURIST4.ui.createTemplateSelector( $select, [{key:'',title:'Defaut map popup'}] );
+            $select.on({change:function(){
+                _updateUrls();
+            }});  
+            
+            popupelement.find("#btnExportKML").button().click(_exportKML);
+            
+            _updateUrls();      
+        }else{
+            if(options.mode=='smarty'){
+                popupelement.find("#btnScheduleSmarty").button().click(_scheduleSmarty);
+                popupelement.find("#lbl_mode2").text('javascript wrap');
+            }
+            
+            _fillUrls();      
+        }
         
         popupelement.find('input[type="radio"]').on({change:function(event){
             var val = $(event.target).val();
             $(popupelement).find('textarea[id^="code-textbox-"]').hide();
             $(popupelement).find('#code-textbox-'+val).show()
         }});
-        
-        var $select = popupelement.find('#map_template');
-        
-        window.hWin.HEURIST4.ui.createTemplateSelector( $select, [{key:'',title:'Defaut map popup'}] );
-        $select.on({change:function(){
-            _fillUrls();
-        }});        
-        
+            
         popupelement = popupelement[0];
-        
-        popupdialog.height($(popupelement).height()+50);
+        popupdialog.height($(popupelement).height()+15);
     }
 
+    //
+    //
+    //
     function _fillUrls(){
+        //URL
+        $(popupelement).find("#code-url").val(options.url); 
+        $(popupelement).find("#link-url").attr('href', options.url); 
+
+        
+        if(options.mode=='smarty'){
+
+            $(popupelement).find("#code-textbox-embed").val('<iframe src=\'' + options.url +
+                '\' width="80%" height="70%" frameborder="0"></iframe>');
+
+            $(popupelement).find("#code-textbox-websafe").val(
+                '<script type="text/javascript" src="'+options.url+'&mode=js"><'+'/script>'+
+                '<noscript>'+
+                '<iframe width="80%" height="70%" frameborder="0" src=\''+options.url+'\'>'+
+                '</iframe>'+
+                '</noscript>');            
+            
+        }else{
+            
+            //readable code        
+            $(popupelement).find("#code-textbox-embed").val('<iframe src=\'' + options.url +
+                    '\' width="800" height="650" frameborder="0"></iframe>');
+
+            //web safe - encoded
+            $(popupelement).find("#code-textbox-websafe").val('<iframe src=\'' + options.url_encoded +
+            '\' width="800" height="650" frameborder="0"></iframe>');
+            
+        }
+
+    }
+    
+    //
+    //
+    //
+    function _updateUrls(){
 
         var base_url = window.hWin.HAPI4.baseURL+'viewers/map/map_leaflet.php';
         var params_search,params_search_encoded;
@@ -127,19 +179,56 @@ function hPublishDialog( _options )
                 url_enc = url_enc + '&'+key+'='+(layout_params[key]===true?1:encodeURIComponent(layout_params[key]));
             }
         }
+        
+        options.url = url;
+        options.url_encoded = url_enc;
+        
+        _fillUrls()
 
-        //URL
-        $(popupelement).find("#code-url").val(url); 
-        $(popupelement).find("#link-url").attr('href', url); 
-
-        //readable code        
-        $(popupelement).find("#code-textbox-embed").val('<iframe src=\'' + url +
-            '\' width="800" height="650" frameborder="0"></iframe>');
-
-        //web safe - encoded
-        $(popupelement).find("#code-textbox-websafe").val('<iframe src=\'' + url_enc +
-        '\' width="800" height="650" frameborder="0"></iframe>');
     }
+    
+    
+    //
+    //
+    //
+    function _exportKML(){
+
+        if(options.mapwidget){
+            var hquery = (options.mapwidget)?options.mapwidget.current_query_layer['original_heurist_query']:'';
+            var query = window.hWin.HEURIST4.util.composeHeuristQuery2(window.hWin.HEURIST4.current_query_request, false);
+            if(query=='?'){
+                window.hWin.HEURIST4.msg.showMsgDlg("Define filter and apply to database");
+            }else{
+                query = query + '&a=1&depth=1&db='+window.hWin.HAPI4.database;
+                var url_kml = window.hWin.HAPI4.baseURL+"export/xml/kml.php" + query;
+                var win = window.open(url_kml, "_new");
+            }
+        }
+    }
+    
+    //
+    //
+    //
+    function _scheduleSmarty(event){
+        
+        popupdialog.dialog('close');
+                        
+        $(event.target).off('click');
+
+        var body = $(window.hWin.document).find('body');
+        var dim = {h:body.innerHeight(), w:body.innerWidth()};
+
+        window.hWin.HEURIST4.msg.showDialog(options.url_schedule, 
+        {   "close-on-blur": false,
+            "no-resize": false,
+            height: 480,
+            width: dim.w*0.9,
+            callback: null
+        });
+        
+        
+    }
+    
     
 
     //public members
@@ -152,12 +241,23 @@ function hPublishDialog( _options )
         openPublishDialog: function( new_options ){
             
             options = new_options; //.mapdocument_id = mapdoc_id;
+            
+            var sTitle = 'Publish/Embed';
+            if(options.mode=='mapspace' || options.mode=='mapquery'){
+                sTitle = 'Publish Map';
+            }else if(options.mode=='websearch'){
+                sTitle = 'Embedding searches';
+            }else if(options.mode=='smarty'){
+                sTitle = 'Publish report';
+            }else if(options.mode=='graph'){
+                sTitle = 'Publish Network Diagram';
+            }
         
             popupdialog = window.hWin.HEURIST4.msg.showMsgDlgUrl(window.hWin.HAPI4.baseURL
                 + 'hclient/framecontent/publishDialog.html?t'
                 + window.hWin.HEURIST4.util.random(), 
-                    null, window.hWin.HR('Publish Map'), 
-            {  container:'map-publish-popup',
+                    null, window.hWin.HR(sTitle), 
+            {  container:'embed-publish-popup',
                height: 600, // options.mapdocument_id>0?600:680,
                width: 700,
                close: function(){
@@ -167,7 +267,6 @@ function hPublishDialog( _options )
                },
                open: function(){
                     _initControls();
-                    _fillUrls();
                }
             });        
         

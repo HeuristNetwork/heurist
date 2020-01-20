@@ -1483,7 +1483,7 @@ $.widget( "heurist.resultList", {
                     var rectypeID = this._currentRecordset.fld(record, 'rec_RecTypeID' );
                     //show embed dialog
                     if(rectypeID==window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_DOCUMENT']){
-                        window.hWin.HEURIST4.ui.showPublishDialog({mapdocument_id: selected_rec_ID});
+                        window.hWin.HEURIST4.ui.showPublishDialog({mode:'mapspace',mapdocument_id: selected_rec_ID});
                     }else{
                         var url = this._currentRecordset.fld(record, 'rec_URL' );
                         if(url) window.open(url, "_new");

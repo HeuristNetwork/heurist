@@ -78,8 +78,6 @@ L.Control.Addmapdoc = L.Control.extend({
           .disableClickPropagation(container)
           .disableScrollPropagation(container);
           
-        this.mapPublish = new hMapPublish({container: $(container), mapwidget:this._mapwidget});
-        
         $('<a>').attr('title', window.hWin.HR('Create new map document'))
             .html('<span class="ui-icon ui-map-document" style="width:22px;margin:2px 0px">'
 +'<span class="ui-icon ui-icon-plus" style="position:absolute;bottom:-2px;right:0px;font-size:12px;color:white;text-shadow: 2px 2px gray" />'

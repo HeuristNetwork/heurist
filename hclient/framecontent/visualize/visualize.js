@@ -1256,21 +1256,19 @@ function showEmbedDialog(){
     query = query + ((query=='?')?'':'&') + 'db='+window.hWin.HAPI4.database;
     var url = window.hWin.HAPI4.baseURL+'hclient/framecontent/visualize/springDiagram.php' + query;
 
-    //document.getElementById("linkTimeline").href = url;
-
-    document.getElementById("code-textbox").value = '<iframe src=\'' + url +
-    '\' width="800" height="650" frameborder="0"></iframe>';
-
-    //document.getElementById("linkKml").href = url_kml;
-
     //encode
     query = window.hWin.HEURIST4.util.composeHeuristQuery2(window.hWin.HEURIST4.current_query_request, true);
     query = query + ((query=='?')?'':'&') + 'db='+window.hWin.HAPI4.database;
-    url = window.hWin.HAPI4.baseURL+'hclient/framecontent/visualize/springDiagram.php' + query;
-    document.getElementById("code-textbox2").value = '<iframe src=\'' + url +
+    var url_enc = window.hWin.HAPI4.baseURL+'hclient/framecontent/visualize/springDiagram.php' + query;
+
+    window.hWin.HEURIST4.ui.showPublishDialog({mode:'graph', url: url, url_encoded: url_enc});
+    
+/*   
+    document.getElementById("code-textbox").value = '<iframe src=\'' + url +
     '\' width="800" height="650" frameborder="0"></iframe>';
-    
-    
+
+    document.getElementById("code-textbox2").value = '<iframe src=\'' + url_enc +
+    '\' width="800" height="650" frameborder="0"></iframe>';
     
     var $dlg = $("#embed-dialog");
 
@@ -1282,4 +1280,5 @@ function showEmbedDialog(){
         resizable: false,
         title: window.hWin.HR('Publish Network Diagram')
     });
+*/    
 }            

@@ -2023,26 +2023,9 @@ $.widget( "heurist.svs_list", {
     //
     _showEmbedDialog: function(svs_ID){
         
-        if(!this.embed_dialog){
-            var that = this;
-            this.embed_dialog = $('<div>').appendTo( this.element );
-            this.embed_dialog.load(window.hWin.HAPI4.baseURL+'hclient/widgets/search/svs_embed_dialog.html', function(){that._showEmbedDialog(svs_ID)});
-            return;
-        }
-        
         var query = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database+'&ll=WebSearch&views=list,map&searchIDs='+svs_ID;
         
-        this.embed_dialog.find("#code-textbox3").val(query);
-        
-        this.embed_dialog.find("#code-textbox").val('<iframe src=\'' + query +
-        '\' width="100%" height="700" frameborder="0"></iframe>');
-        
-        window.hWin.HEURIST4.msg.showElementAsDialog({
-            element: this.embed_dialog[0],
-            height: 420,
-            width: 700,
-            title: window.hWin.HR('Embedding searchs')
-        });
+        window.hWin.HEURIST4.ui.showPublishDialog({mode:'websearch', url: query, url_encoded: query});
     }
     
 

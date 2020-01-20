@@ -2113,7 +2113,25 @@ this_id       : "term"
 
         var template_file = $('#selTemplates').val();
         if(window.hWin.HEURIST4.util.isempty(template_file)) return;
+        
+        var mode = window.hWin.HAPI4.get_prefs('showSelectedOnlyOnMapAndSmarty'); //not used
+        var squery = window.hWin.HEURIST4.util.composeHeuristQueryFromRequest( _currentQuery, true );
 
+        var q = 'hquery='+encodeURIComponent(squery)+'&template='+template_file;
+        
+        
+        var params = {mode:'smarty'};
+        params.url_schedule = window.hWin.HAPI4.baseURL + "export/publish/manageReports.html?"
+                                    + q + "&db="+window.hWin.HAPI4.database;
+
+        params.url = window.hWin.HAPI4.baseURL + "viewers/smarty/showReps.php?"+
+            squery.replace('"','%22') + '&publish=1&debug=0&template='+encodeURIComponent(template_file);
+        
+        
+        window.hWin.HEURIST4.ui.showPublishDialog( params );
+        
+        
+/*
         if(!embed_dialog){
             embed_dialog = $('#smarty_publish_dialg');
             embed_dialog.load(window.hWin.HAPI4.baseURL+'viewers/smarty/repMenu.html', 
@@ -2123,12 +2141,8 @@ this_id       : "term"
             return;
         }
         
-        var mode = window.hWin.HAPI4.get_prefs('showSelectedOnlyOnMapAndSmarty'); //not used
-        var squery = window.hWin.HEURIST4.util.composeHeuristQueryFromRequest( _currentQuery, true );
         
         //init and fill ui
-        var surl = window.hWin.HAPI4.baseURL + "viewers/smarty/showReps.php?"+
-            squery.replace('"','%22') + '&publish=1&debug=0&template='+encodeURIComponent(template_file);
 
         embed_dialog.find("#linkOpenInNewWindow").attr('href', surl);
 
@@ -2171,7 +2185,7 @@ this_id       : "term"
                 width: 600,
                 title: window.hWin.HR('Publish report')
         });        
-        
+*/        
         
         
     }

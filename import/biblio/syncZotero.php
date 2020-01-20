@@ -1197,19 +1197,6 @@ function addRecordFromZotero($recId, $recordType, $rec_URL, $details, $zotero_it
         
         $out = recordSave($system, $record);  //see db_records.php
         
-/*
-        if($recId){
-            //sice we do not know dtl_ID - remove all details for updated record
-            $query = "DELETE FROM recDetails where dtl_RecID=".$recId;
-            $res = mysql_query($query);
-
-            if(!$res){
-                $syserror = mysql_error();
-                print "<div style='color:red'> Error: Cannot delete record details ".$syserror."</div>";
-                return;
-            }
-        }
-*/
     if ( @$out['status'] != HEURIST_OK ) {
            print "<div style='color:red'> Error: ".$out["message"]."</div>";
     }else{
