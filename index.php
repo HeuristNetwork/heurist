@@ -173,6 +173,7 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
         
         <script type="text/javascript" src="<?php echo PDIR;?>admin/structure/import/importStructure.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>viewers/map/mapPublish.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/framecontent/publishDialog.js"></script>
 
         <link rel="stylesheet" type="text/css" href="external/jquery.fancybox/jquery.fancybox.css" />
         <script type="text/javascript" src="external/jquery.fancybox/jquery.fancybox.js"></script>

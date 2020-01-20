@@ -1,5 +1,8 @@
 <div id="map-embed-dialog" style="font-size:0.9em">
-        <p>Embed this Map (plus timeline) in your own web page. Enclose within &lt;code&gt; &lt;/code&gt; for Wordpress sites (the use of &lt;code&gt; may need to be enabled for your site).</p>
+        <p style="margin:0">
+        This function provides a basic search + results + map component. However we strongly recommend the web page builder available in the Website menu, which allows you to design a web page which you can embed in another website or CMS, using many of the widgets that make up the Heurist interface. This gives a great deal of control over the presentation, along with much greater functionality than available here.
+        </p>
+        <p>Enclose within &lt;code&gt; &lt;/code&gt; for Wordpress sites (the use of &lt;code&gt; may need to be enabled for your site).</p>
         
         <div style="border: 1px solid lightgray;border-radius:4px;padding:4px">
         <div class="with_query"><span style="min-width: 105px;display: inline-block;text-align: right;">Include:</span>
@@ -38,10 +41,11 @@
         <textarea id="code-textbox-embed" onclick="select(); if (window.clipboardData) clipboardData.setData('Text', value);" style="border: 1px dotted gray; padding: 3px; margin: 2; font-family: times; width: 100%; height: 60px;" readonly=""></textarea>
         <textarea id="code-textbox-websafe" onclick="select(); if (window.clipboardData) clipboardData.setData('Text', value);" style="border: 1px dotted gray; padding: 3px; margin: 2; font-family: times; width: 100%; height: 40px;display:none" readonly=""></textarea>
         
-        <br>
+        <div style="padding-top:10px">
         <a href="#" id="link-url" style="outline:0" target="_blank" onclick="setTimeout(window.close, 200);">
             Open in new window<span class="ui-icon ui-icon-extlink"></span>
         </a>
+        </div>
         <span style="display:none">
         <label style="font-size:0.9em">URL:</label>
         <textarea id="code-url" onclick="select(); if (window.clipboardData) clipboardData.setData('Text', value);" style="border: 1px dotted gray; padding: 3px; margin: 2; font-family: times; width: 100%; height: 40px;" readonly=""></textarea>

@@ -1,5 +1,5 @@
 /**
-* mapPublish.js - publish map dialogue
+* publishDialog.js - publish/embed dialogue for map, mapspace, savedsearch, smarty, visualization graph
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -17,161 +17,18 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
-if((typeof L !=='undefined') && L.Control)
-{
-    
-L.Control.Publish = L.Control.extend({
-    
-    mapPublish: null,
-    _container: null,
-    _mapwidget: null,
-    
-    initialize: function(options) {
 
-        options = options || {};
-        
-        L.Util.setOptions(this, options);
-        
-        this._mapwidget = options.mapwidget;
-        
-        L.Control.prototype.initialize.call(this, this.options);
-    },
-
-    
-    onAdd: function(map) {
-        
-        var container = this._container = L.DomUtil.create('div','leaflet-bar');
-
-        L.DomEvent
-          .disableClickPropagation(container)
-          .disableScrollPropagation(container);
-        
-        //this.mapPublish = new hMapPublish({container: $(container), mapwidget:this._mapwidget});
-        
-        $('<a>').attr('title', window.hWin.HR('Publish Map'))
-            .css({'width':'22px','height':'22px','border-radius': '2px','cursor':'pointer','margin':'0.1px'})
-            .addClass('ui-icon ui-icon-globe')
-            .appendTo(container);
-        
-        L.DomEvent
-            .on(container, 'click', this._onClick, this);
-        
-        return container;
-    },
-
-    onRemove: function(map) {
-        // Nothing to do here
-    },
-    
-    _onClick: function(map) {
-        
-       window.hWin.HEURIST4.ui.showPublishDialog( {mapwidget:this._mapwidget} );
-       //this.mapPublish.openPublishDialog();
-        
-       
-    }
-});
-
-L.control.publish = function(opts) {
-    return new L.Control.Publish(opts);
-}
-
-//HELP control
-
-L.Control.Help = L.Control.extend({
-    
-    _container: null,
-    _mapwidget: null,
-    
-    initialize: function(options) {
-
-        options = options || {};
-        
-        L.Util.setOptions(this, options);
-        
-        this._mapwidget = options.mapwidget;
-        
-        L.Control.prototype.initialize.call(this, this.options);
-    },
-
-    
-    onAdd: function(map) {
-        
-        var container = this._container = L.DomUtil.create('div','leaflet-bar');
-
-        L.DomEvent
-          .disableClickPropagation(container)
-          .disableScrollPropagation(container);
-        
-        $('<a>').attr('title', window.hWin.HR('Help'))
-            .css({'width':'22px','height':'22px','border-radius': '2px','cursor':'pointer','margin':'0.1px'})
-            .addClass('ui-icon ui-icon-help')
-            .appendTo(container);
-        
-        window.hWin.HEURIST4.ui.initHelper(container, null, 
-                window.hWin.HAPI4.baseURL+'context_help/mapping_overview.html #content',
-                { my: "center center", at: "center center", of: $(window.hWin.document).find('body') },true);
-        
-        /*L.DomEvent
-            .on(container, 'click', this._onClick, this);*/
-        
-        return container;
-    },
-
-    onRemove: function(map) {
-        // Nothing to do here
-    },
-    
-    _onClick: function(map) {
-       //show help popup 
-       //this.mapPublish.openPublishDialog();
-    }
-});
-
-L.control.help = function(opts) {
-    return new L.Control.Help(opts);
-}
-
-}
-//        
-// create accordion with 3(4) panes
-// load prededifned list of base layers
-// call refresh map documents
-//        
-//$.widget( "heurist.mapmanager", {
-    
-function hMapPublish( _options )
+function hPublishDialog( _options )
 {    
-    var _className = "MapPublish",
+    var _className = "PublishDialog",
     _version   = "0.4",
     options = {
         //container:null,
-        //mapwidget:null, 
-        //mapdocument_id:null  
+        mapwidget:null, 
+        mapdocument_id:null  
     },
     popupelement = null,
     popupdialog = null;
-        
-    // Any time the widget is called with no arguments or with only an option hash, 
-    // the widget is initialized; this includes when the widget is created.
-    function _init ( _options ) {
-        options = $.extend(options, _options);
-        
-        
-        /* OLD
-        var ele = $('<div>').appendTo(options.container);
-        //create div
-        ele.load(window.hWin.HAPI4.baseURL+'viewers/map/mapPublish.html?t'
-            +window.hWin.HEURIST4.util.random(), 
-        function(response, status, xhr){
-            if ( status == "error" ) {
-                window.hWin.HEURIST4.msg.showMsgErr(response);
-            }else{
-                _initControls();
-            }
-        });
-        */
-    }
     
     function _initControls(){
         
@@ -199,6 +56,8 @@ function hMapPublish( _options )
         }});        
         
         popupelement = popupelement[0];
+        
+        popupdialog.height($(popupelement).height()+50);
     }
 
     function _fillUrls(){
@@ -290,15 +149,16 @@ function hMapPublish( _options )
         getVersion: function () {return _version;},
 
 
-        openPublishDialog: function( mapdoc_id ){
+        openPublishDialog: function( new_options ){
             
-            options.mapdocument_id = mapdoc_id;
+            options = new_options; //.mapdocument_id = mapdoc_id;
         
-            popupdialog = window.hWin.HEURIST4.msg.showMsgDlgUrl(window.hWin.HAPI4.baseURL+'viewers/map/mapPublish.html?t'
-                +window.hWin.HEURIST4.util.random(), 
+            popupdialog = window.hWin.HEURIST4.msg.showMsgDlgUrl(window.hWin.HAPI4.baseURL
+                + 'hclient/framecontent/publishDialog.html?t'
+                + window.hWin.HEURIST4.util.random(), 
                     null, window.hWin.HR('Publish Map'), 
             {  container:'map-publish-popup',
-               height: mapdoc_id>0?600:680,
+               height: 600, // options.mapdocument_id>0?600:680,
                width: 700,
                close: function(){
                     popupdialog.dialog('destroy');       
@@ -326,7 +186,6 @@ function hMapPublish( _options )
 
     }
 
-    _init( _options );
     return that;  //returns object
 };
 

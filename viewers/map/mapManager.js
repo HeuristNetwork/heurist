@@ -228,7 +228,8 @@ function hMapManager( _options )
         options.container.addClass('ui-widget-content')
             .css({'margin-right':'5px','font-size':'0.97em'});
             
-        that.updatePanelVisibility();
+        _onExpand(); //expand at once
+        //that.updatePanelVisibility();
     }
 
     //
