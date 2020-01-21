@@ -750,7 +750,7 @@ if ($page_template!=null && substr($page_template,-4,4)=='.tpl') {
 ?>
 
     <div class="ent_wrapper">
-    <div id="main-header" class="ent_header ui-heurist-header2" <?php print $image_banner?'style="background-image:url(\''.$image_banner.'\');background-repeat: repeat-x;background-size:auto 170px;"':'' ?>>
+    <div id="main-header" class="ent_header ui-heurist-header2" <?php print $image_banner?'style="background-image:url(\''.$image_banner.'\') !important;background-repeat: repeat-x !important;background-size:auto 170px !important;"':'' ?>>
     
 <?php
     if($showWarnAboutPublic){
