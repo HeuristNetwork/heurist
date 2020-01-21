@@ -395,7 +395,7 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
             $dtl['dtl_Value'] = $this->data['val'];
         }
         if(@$this->data['geo']){
-            $dtl['dtl_Geo'] = array("geomfromtext(\"" . $this->data['geo'] . "\")");  
+            $dtl['dtl_Geo'] = array("ST_GeomFromText(\"" . $this->data['geo'] . "\")");  
         }
         if(@$this->data['ulfID']){
             $dtl['dtl_UploadedFileID'] = $this->data['ulfID'];

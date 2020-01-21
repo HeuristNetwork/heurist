@@ -1720,7 +1720,7 @@ $loop_cnt=1;
                                 $detail_query = 'select dtl_RecID,'
                                 .'dtl_DetailTypeID,'     // 0
                                 .'dtl_Value,'            // 1
-                                .'AsWKT(dtl_Geo), dtl_UploadedFileID, '
+                                .'ST_asWKT(dtl_Geo), dtl_UploadedFileID, '
                                 .$ulf_fields
                                 .' FROM recDetails '
                                 . ' left join recUploadedFiles as f on f.ulf_ID = dtl_UploadedFileID '
@@ -1730,7 +1730,7 @@ $loop_cnt=1;
                                 
                                 if($find_places_for_geo){ //find location in linked Place records
                                     $detail_query = $detail_query . 'UNION  '
-                                    .'SELECT rl_SourceID,dtl_DetailTypeID,dtl_Value,AsWKT(dtl_Geo), rl_TargetID, 0, 0 '
+                                    .'SELECT rl_SourceID,dtl_DetailTypeID,dtl_Value,ST_asWKT(dtl_Geo), rl_TargetID, 0, 0 '
                                     .' FROM recDetails, recLinks, Records '
                                     .' WHERE dtl_DetailTypeID='. DT_GEO_OBJECT
                                     .' AND dtl_RecID=rl_TargetID AND rl_TargetID=rec_ID AND rec_RecTypeID in ('. join(',', $rectypes_as_place)
@@ -1751,7 +1751,7 @@ $loop_cnt=1;
                                 $detail_query = 'select dtl_RecID,'
                                 .'dtl_DetailTypeID,'     // 0
                                 .'dtl_Value,'            // 1
-                                .'AsWKT(dtl_Geo),'    // 2
+                                .'ST_asWKT(dtl_Geo),'    // 2
                                 .'dtl_UploadedFileID,'   // 3
                                 .$ulf_fields   
                                 .' from recDetails
@@ -2170,7 +2170,7 @@ $loop_cnt++;
         "select dtl_ID,
         dtl_DetailTypeID,
         dtl_Value,
-        AsWKT(dtl_Geo) as dtl_Geo,
+        ST_asWKT(dtl_Geo) as dtl_Geo,
         dtl_UploadedFileID,
         dty_Type,
         rec_ID,
@@ -2278,7 +2278,7 @@ $loop_cnt++;
         if($system->defineConstant('RT_PLACE') && $system->defineConstant('DT_GEO_OBJECT')){
 
             //$recID = $record["rec_ID"];     
-            $squery = 'SELECT rl_SourceID,dtl_DetailTypeID,dtl_Value,AsWKT(dtl_Geo) as dtl_Geo, rl_TargetID,dtl_ID'
+            $squery = 'SELECT rl_SourceID,dtl_DetailTypeID,dtl_Value,ST_asWKT(dtl_Geo) as dtl_Geo, rl_TargetID,dtl_ID'
                                         .' FROM recDetails, recLinks, Records '
                                         .' WHERE dtl_DetailTypeID='. DT_GEO_OBJECT
                                         .' AND dtl_RecID=rl_TargetID AND rl_TargetID=rec_ID AND rec_RecTypeID='.RT_PLACE

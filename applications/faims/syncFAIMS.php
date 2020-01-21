@@ -285,7 +285,7 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
 
             print "<br>";
             /* THIS IS ORIGINAL BRIAN QUERY TO RETRIEVE SPATIAL DATA
-            $query = "SELECT uuid, AsWKT(transform(casttosingle(geospatialcolumn), 3857)) as Coordinate, group_concat(attributename||': '||freetext, ', ') as note
+            $query = "SELECT uuid, ST_asWKT(transform(casttosingle(geospatialcolumn), 3857)) as Coordinate, group_concat(attributename||': '||freetext, ', ') as note
             FROM aentvalue
             JOIN attributekey USING (attributeid)
             LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)
@@ -761,7 +761,7 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
                     }else{
 
                         $query3 = "SELECT count(*) FROM archentity ae where ae.AEntTypeID="
-                        .$attrID." and AsWKT(transform(casttosingle(ae.geospatialcolumn), 4326)) is not null";
+                        .$attrID." and ST_asWKT(transform(casttosingle(ae.geospatialcolumn), 4326)) is not null";
                         $hasgeo = $dbfaims->query($query3);
                         $hasgeo = $hasgeo->fetchArray(SQLITE3_NUM);
 
@@ -890,7 +890,7 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
                     }else{
 
                         $query3 = "SELECT count(*) FROM Relationship ae where ae.RelnTypeID="
-                        .$attrID." and AsWKT(transform(casttosingle(ae.geospatialcolumn), 4326)) is not null";
+                        .$attrID." and ST_asWKT(transform(casttosingle(ae.geospatialcolumn), 4326)) is not null";
                         $hasgeo = $dbfaims->query($query3);
                         $hasgeo = $hasgeo->fetchArray(SQLITE3_NUM);
 
@@ -917,7 +917,7 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
 
             print "<h3>Update records in H3 accoring to the most current Record set in FAIMS</h3><br>";
 
-            $query = "select uuid, aenttimestamp, aenttypeid, AsWKT(transform(geometryn(geospatialcolumn, 1), 4326)) as Coordinate, freetext, vocabid, attributeid, measure, Certainty
+            $query = "select uuid, aenttimestamp, aenttypeid, ST_asWKT(transform(geometryn(geospatialcolumn, 1), 4326)) as Coordinate, freetext, vocabid, attributeid, measure, Certainty
             from latestnondeletedaentvalue join latestnondeletedarchent using (uuid) ORDER BY uuid asc";
 
 
@@ -1069,7 +1069,7 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
 
             print "<h3>Update special records  for FAIMS relationship category 'Container'</h3><br>";
 
-            $query = "SELECT ae.RelationshipID, ae.RelnTimestamp, ae.RelnTypeID, AsWKT(transform(casttosingle(ae.geospatialcolumn), 4326)) as Coordinate,
+            $query = "SELECT ae.RelationshipID, ae.RelnTimestamp, ae.RelnTypeID, ST_asWKT(transform(casttosingle(ae.geospatialcolumn), 4326)) as Coordinate,
             av.freeText, av.VocabID, av.AttributeID, null, av.Certainty
             FROM RelnValue av
             JOIN (SELECT RelationshipID, attributeid, max(RelnValueTimestamp) as RelnValueTimestamp, max(RelnTimestamp) as RelnTimestamp, Relationship.deleted as entDel, RelnValue.deleted as valDel

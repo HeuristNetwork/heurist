@@ -458,12 +458,12 @@
         
         $query = 'INSERT INTO recDetails '.
         '(dtl_RecID, dtl_DetailTypeID, dtl_Value, dtl_AddedByImport, dtl_UploadedFileID, dtl_Geo) '.
-        "VALUES ($recID, ?, ?, $addedByImport, ?, geomfromtext(?) )";
+        "VALUES ($recID, ?, ?, $addedByImport, ?, ST_GeomFromText(?) )";
         $stmt = $mysqli->prepare($query);
 
         /* $query_geo = "INSERT INTO recDetails ".
         "(dtl_RecID, dtl_DetailTypeID, dtl_Value, dtl_AddedByImport, dtl_Geo) ".
-        "VALUES ($recID, ?, ?, $addedByImport, geomfromtext(?) )";
+        "VALUES ($recID, ?, ?, $addedByImport, ST_GeomFromText(?) )";
         $stmt_geo = $mysqli->prepare($query2); */
 
         if ($stmt) {
@@ -1643,7 +1643,7 @@
                             }
                         }
 
-                        $res = mysql__select_value($mysqli, "select AsWKT(geomfromtext('".addslashes($dtl_Geo)."'))");
+                        $res = mysql__select_value($mysqli, "select ST_asWKT(ST_GeomFromText('".addslashes($dtl_Geo)."'))");
                         if($res){
                             $dtl_Value = $geoType;
                             $isValid = true;
@@ -1651,7 +1651,7 @@
                             $err_msg = 'Geo WKT value '.substr(htmlspecialchars($dtl_Geo),0,15).'... is not valid';
                         }
                         /*
-                        $res = $mysqli->query("select AsWKT(geomfromtext('".addslashes($dtl_Geo)."'))");
+                        $res = $mysqli->query("select ST_asWKT(ST_GeomFromText('".addslashes($dtl_Geo)."'))");
                         if ($res){
                         if($res->fetch_row()){
                         $dtl_Value = $geoType;

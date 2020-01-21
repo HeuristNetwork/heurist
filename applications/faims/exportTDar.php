@@ -328,7 +328,7 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
             }
             //END OF TERMS
 
-            $squery = "select rec_ID, dtl_DetailTypeID, dtl_Value, if(dtl_Geo is null, null, AsWKT(dtl_Geo)) as dtl_Geo, ulf_ID, ulf_FilePath, ulf_FileName, ulf_OrigFileName, ulf_MimeExt, trm_Label "; //, trm_Description
+            $squery = "select rec_ID, dtl_DetailTypeID, dtl_Value, if(dtl_Geo is null, null, ST_asWKT(dtl_Geo)) as dtl_Geo, ulf_ID, ulf_FilePath, ulf_FileName, ulf_OrigFileName, ulf_MimeExt, trm_Label "; //, trm_Description
             $ourwhere = " and (dtl_RecID=rec_ID) ";
             $detTable = ", recDetails left join recUploadedFiles on ulf_ID = dtl_UploadedFileID left join defTerms on trm_ID = dtl_Value ";
             $order = "rec_ID, dtl_DetailTypeID";

@@ -230,7 +230,7 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                                 array_push($counts,0);
                             }
                             $details = array();
-                            $res = $mysqli->query('select dtl_DetailTypeID, dtl_Value, dtl_ID, dtl_UploadedFileID, if(dtl_Geo is not null, AsWKT(dtl_Geo), null) as dtl_Geo, trm_Label
+                            $res = $mysqli->query('select dtl_DetailTypeID, dtl_Value, dtl_ID, dtl_UploadedFileID, if(dtl_Geo is not null, ST_AsWKT(dtl_Geo), null) as dtl_Geo, trm_Label
                                 from recDetails  left join defTerms on trm_ID = dtl_Value
                                 where dtl_RecID = ' . $records[$index]['rec_ID'] . '
                             order by dtl_DetailTypeID, dtl_ID');
@@ -645,7 +645,7 @@ function do_fix_dupe()
     
     $master_details = array();
     $res = $mysqli->query('select dtl_DetailTypeID, dtl_Value, dtl_ID, dtl_UploadedFileID, '
-      .' if(dtl_Geo is not null, AsWKT(dtl_Geo), null) as dtl_Geo, trm_Label'
+      .' if(dtl_Geo is not null, ST_asWKT(dtl_Geo), null) as dtl_Geo, trm_Label'
       .' from recDetails  left join defTerms on trm_ID = dtl_Value '
       .' where dtl_RecID = ' . $master_rec_id . ' order by dtl_DetailTypeID, dtl_ID');
       

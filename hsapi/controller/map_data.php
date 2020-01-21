@@ -29,7 +29,7 @@ $recordQuery = "SELECT * FROM Records r INNER JOIN defRecTypes d ON r.rec_RecTyp
 $recordWhere = '(not r.rec_FlagTemporary) and ((not r.rec_NonOwnerVisibility="hidden") or '
 . 'rec_OwnerUGrpID = 0 )';
 
-$detailQuery = "SELECT dtl_DetailTypeID, dtl_Value, rf.ulf_ObfuscatedFileID, AsWKT(dtl_Geo) as dtl_Geo "
+$detailQuery = "SELECT dtl_DetailTypeID, dtl_Value, rf.ulf_ObfuscatedFileID, ST_asWKT(dtl_Geo) as dtl_Geo "
 ."FROM recDetails rd LEFT JOIN recUploadedFiles rf on rf.ulf_ID=rd.dtl_UploadedFileID WHERE rd.dtl_RecID=";
 
 

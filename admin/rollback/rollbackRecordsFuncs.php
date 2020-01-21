@@ -132,7 +132,7 @@ function getDetailHistory ($ard_id, $up_to_version) {
 	// return deltas from archiveDetails, latest first
 	$deltas = array();
 	$res = mysql_query("
-		select ard_ID, ard_Ver, ard_DetailTypeID, ard_Value, ard_UploadedFileID, AsWKT(ard_Geo) as ard_Geo
+		select ard_ID, ard_Ver, ard_DetailTypeID, ard_Value, ard_UploadedFileID, ST_asWKT(ard_Geo) as ard_Geo
 		from archiveDetails
 		where ard_ID = $ard_id
 		and ard_Ver <= $up_to_version
@@ -197,7 +197,7 @@ function getDetailRollbacks ($rec_id, $version) {
 				where dtl_ID = $ard_id
 				and dtl_Value " . ($ard_val ? "= '" . mysql_real_escape_string($ard_val) . "'" : "is null") . "
 				and dtl_UploadedFileID " . ($ard_file_id ? "= $ard_file_id" : "is null") . "
-				and AsWKT(dtl_Geo) " . ($ard_geo ? "= '$ard_geo'" : "is null")
+				and ST_asWKT(dtl_Geo) " . ($ard_geo ? "= '$ard_geo'" : "is null")
 			);
 			if (mysql_num_rows($res) == 0) {
 				array_push($updates, $potential_update);
@@ -244,7 +244,7 @@ function rollRecordBack ($rec_id, $changes) {
 		$rd_id       = $update["ard_ID"];
 		$rd_val      = $update["ard_Value"] ? "'" . mysql_real_escape_string($update["ard_Value"]) . "'" : "null";
 		$rd_file_id  = $update["ard_UploadedFileID"] ? $update["ard_UploadedFileID"] : "null";
-		$rd_geo      = $update["ard_Geo"] ? "geomfromtext('" . $update["ard_Geo"] . "')" : "null";
+		$rd_geo      = $update["ard_Geo"] ? "ST_GeomFromText('" . $update["ard_Geo"] . "')" : "null";
 		mysql_query("
 			update recDetails
 			set dtl_Value = $rd_val, dtl_UploadedFileID = $rd_file_id, dtl_Geo = $rd_geo
@@ -262,7 +262,7 @@ function rollRecordBack ($rec_id, $changes) {
 		$rd_type     = $insert["ard_DetailTypeID"];
 		$rd_val      = $insert["ard_Value"] ? "'" . mysql_real_escape_string($insert["ard_Value"]) . "'" : "null";
 		$rd_file_id  = $insert["ard_UploadedFileID"] ? $insert["ard_UploadedFileID"] : "null";
-		$rd_geo      = $insert["ard_Geo"] ? "geomfromtext('" . $insert["ard_Geo"] . "')" : "null";
+		$rd_geo      = $insert["ard_Geo"] ? "ST_GeomFromText('" . $insert["ard_Geo"] . "')" : "null";
 		mysql_query("
 			insert into recDetails (dtl_RecID, dtl_DetailTypeID, dtl_Value, dtl_UploadedFileID, dtl_Geo)
 			values ($rec_id, $rd_type, $rd_val, $rd_file_id, $rd_geo)

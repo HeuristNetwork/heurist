@@ -107,8 +107,8 @@ class DbSysDashboard extends DbEntityBase
             }
         }  
         
-        //compose query
-        $query = 'SELECT SQL_CALC_FOUND_ROWS DISTINCT '.implode(',', $this->data['details'])
+        //compose query   DISTINCT
+        $query = 'SELECT SQL_CALC_FOUND_ROWS '.implode(',', $this->data['details'])
         .' FROM '.implode(',', $from_table);
 
          if(count($where)>0){
