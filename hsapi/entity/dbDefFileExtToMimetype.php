@@ -120,7 +120,7 @@ class DbDefFileExtToMimetype extends DbEntityBase
         $is_ids_only = (count($this->data['details'])==1);
             
         //compose query
-        $query = 'SELECT SQL_CALC_FOUND_ROWS DISTINCT '.implode(',', $this->data['details'])
+        $query = 'SELECT SQL_CALC_FOUND_ROWS  '.implode(',', $this->data['details'])
                 .' FROM defFileExtToMimetype';
 
          if(count($where)>0){

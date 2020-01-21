@@ -129,7 +129,7 @@ class DbSysImportFiles extends DbEntityBase
         $from_table = $this->config['tableName'];
             
         //compose query
-        $query = 'SELECT SQL_CALC_FOUND_ROWS DISTINCT '.implode(',', $this->data['details']).' FROM '.$from_table;
+        $query = 'SELECT SQL_CALC_FOUND_ROWS  '.implode(',', $this->data['details']).' FROM '.$from_table;
 
          if(count($where)>0){
             $query = $query.' WHERE '.implode(' AND ',$where);

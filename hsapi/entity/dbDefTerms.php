@@ -157,7 +157,7 @@ class DbDefTerms extends DbEntityBase
         $is_ids_only = (count($this->data['details'])==1);
             
         //compose query
-        $query = 'SELECT SQL_CALC_FOUND_ROWS DISTINCT '.implode(',', $this->data['details']).' FROM defTerms';
+        $query = 'SELECT SQL_CALC_FOUND_ROWS  '.implode(',', $this->data['details']).' FROM defTerms';
 
          if(count($where)>0){
             $query = $query.' WHERE '.implode(' AND ',$where);

@@ -130,14 +130,14 @@ class DbSysDatabases extends DbEntityBase
         
             if($current_user_email){    //for specific user (presents in user table)
                 //compose query
-                $query = 'SELECT SQL_CALC_FOUND_ROWS DISTINCT '
+                $query = 'SELECT SQL_CALC_FOUND_ROWS  '
                 .'sys_Database, sys_dbRegisteredID, '//'concat(sys_dbVersion,".",sys_dbSubVersion,".",sys_dbSubSubVersion) as sys_Version, '
                 .'sys_dbName, sys_AllowRegistration, sus_Role, ' //sys_dbOwner, sys_dbDescription, 
                 .'(select count(distinct sus_Email) from Heurist_DBs_index.sysUsers where sys_Database=sus_Database) as sus_Count '        
                 .' from Heurist_DBs_index.sysIdentifications '
                 .' LEFT JOIN Heurist_DBs_index.sysUsers on sys_Database=sus_Database and sus_Email="'.$current_user_email.'"';
             }else{  //all databases
-                $query = 'SELECT SQL_CALC_FOUND_ROWS DISTINCT '
+                $query = 'SELECT SQL_CALC_FOUND_ROWS  '
                 .'sys_Database, sys_dbRegisteredID, '//'concat(sys_dbVersion,".",sys_dbSubVersion,".",sys_dbSubSubVersion) as sys_Version, '
                 .'sys_dbName, sys_AllowRegistration, "" as sus_Role, ' //sys_dbOwner, sys_dbDescription, 
                 .'0 as sus_Count '        
