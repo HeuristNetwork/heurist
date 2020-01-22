@@ -713,10 +713,12 @@ if($step=="1"){  //first step - info about current status
     
         print '<span><br>Please '.CONTACT_HEURIST_TEAM.' - to request a mapping for each of the undefined record types.</span>';
         
-        print '<script>window.hWin.HEURIST4.msg.showMsgErr("Warning: '.$tot_erros
-            .' errors were encountered. Please scan the log to see what problems have been encountered. '
+        print '<script>window.hWin.HEURIST4.msg.showMsgDlg("Warning: '.$tot_erros
+            .' errors were encountered. Please check the errors (in red at the end of the list of records synchronised)'
+            .' to see what problems have been encountered. '
             .'Since we depend on a third party things can change, which may throw out our synchronisation. '
-            .'Please submit a bug report (Settings > Bug report) if you think there is something wrong with the Zotero import.");</script>';
+            .'Please submit a bug report (Settings > Bug report) if you think there is something wrong with the Zotero import."'
+            .',null,"Zotero synchronisation errors");</script>';
     }
 
     if(count($unresolved_pointers)>0){
