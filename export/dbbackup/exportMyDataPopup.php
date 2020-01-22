@@ -307,8 +307,8 @@ onClick="{ document.getElementById('buttons').style.visibility = 'hidden';  docu
 ?>                
 <p>Your data have been backed up in <?php echo $folder;?></p>
 <br><br><div class='lbl_form'></div>
-    <a href='exportMyDataPopup.php/<?php echo HEURIST_DBNAME;?>.zip?db=<?php echo HEURIST_DBNAME;?>&mode=2"
-        target='_blank' style='color:blue; font-size:1.2em'>Click here to download your data as a zip archive</a>
+    <a href="exportMyDataPopup.php/<?php echo HEURIST_DBNAME;?>.zip?db=<?php echo HEURIST_DBNAME;?>&mode=2"
+        target="_blank" style="color:blue; font-size:1.2em">Click here to download your data as a zip archive</a>
 
 <span class="heurist-helper1">
 <br><br>Note: If this file fails to download properly (eg. "Failed … file incomplete") the file is too large to download. Please ask your system administrator (<?php echo HEURIST_MAIL_TO_ADMIN; ?>) to send it to you via a large file transfer service</span>        
