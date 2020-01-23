@@ -49,8 +49,12 @@ $.widget( "heurist.app_timemap", {
     _events: null,
 
     recordset_changed: true,
+    
+    //whether mapping widget is inited (frame is loaded)
     map_inited: false,
-    map_curr_search_inited: false,
+    
+    //it is  set to true for addSearchResult to avoid multiple mapqueries @todo REVISE
+    map_curr_search_inited: false,  
     map_cache_got: false, 
 
     map_resize_timer: 0,
@@ -119,7 +123,7 @@ $.widget( "heurist.app_timemap", {
                     if(!((data && data.search_realm=='mapping_recordset') || 
                         that._isSameRealm(data))) return;
                  
-                 /* DEBUG
+/* DEBUG
 if( data.search_realm=='mapping_recordset'){
 //console.log('listner '+data.search_realm);                    
 if(data.recordset=='show_all'){
@@ -216,6 +220,7 @@ console.log(re);
             if( this.mapframe.attr('src') ){  //frame already loaded
                 this._initmap();
             }else {
+                //need to load map.php into frame
 
                 this.loadanimation(true);
                 
@@ -288,7 +293,7 @@ console.log(re);
             this.mapframe.attr('src', null);
         }
     },
-
+    
     //
     // called as soon as map.php is loaded into iframe and on _refresh (after search finished)
     //
@@ -346,6 +351,7 @@ console.log(re);
                 }
                 
                 if(!this.map_inited){
+                    //assign listener
                
                     mapping.mapping('option','onselect',function(selected ) {
                             $(that.document).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT,

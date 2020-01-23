@@ -121,6 +121,12 @@ $.widget( "heurist.mapping", {
         zoomToPointInKM: 5
     },
     
+    /* expremental 
+    isHamburgIslamicImpire: false,
+    hie_places_with_events: [],
+    hie_places_wo_events_style: null,
+    */
+    
     //reference to google or leaflet map
     
     //main elements
@@ -1096,7 +1102,7 @@ $.widget( "heurist.mapping", {
             
             var  that = this;
 
-            //get all markers within layer group and apply new style
+            //get all markers (fill all_markers) within layer group and apply new style
             function __extractMarkers(layer, parent_layer, feature)
             {
                 //var feature = layer.feature;    
@@ -1120,7 +1126,15 @@ $.widget( "heurist.mapping", {
                         layer.bindTooltip(function (layer) {
                             return layer.feature.properties.rec_Title;
                         })
-                    }                
+                    }              
+                    
+                    /* expremental HARDCODE for HIE
+                    if(that.isHamburgIslamicImpire){
+                        if( window.hWin.HEURIST4.util.findArrayIndex(layer.feature.properties.rec_ID, that.hie_places_with_events)<0 ){ 
+                        //that.hie_places_with_events.indexOf(layer.feature.properties.rec_ID)<0){
+                            layer.feature.style = that.hie_places_wo_events_style;
+                        }
+                    }*/
 
                     that.all_markers[layer_id].push( layer );
                 }
@@ -1502,6 +1516,17 @@ $.widget( "heurist.mapping", {
         //feature.style - individual style (set in symbology field per record)
         //feature.default_style - style of parent heurist layer (can be changed via legend)
         var use_style = feature.style || feature.default_style;
+       
+                
+        /* expremental HARDCODE for HIE
+        if(this.isHamburgIslamicImpire){
+            if( window.hWin.HEURIST4.util.findArrayIndex(feature.properties.rec_ID, this.hie_places_with_events)<0 ){ 
+            //if(that.hie_places_with_events.indexOf(child_layer.feature.properties.rec_ID)<0){
+                use_style = this.hie_places_wo_events_style;
+            }
+        }
+        */
+       
         
         //change color for selected features
         if( feature.properties && this.selected_rec_ids.indexOf( feature.properties.rec_ID )>=0){
@@ -1558,8 +1583,8 @@ $.widget( "heurist.mapping", {
             this.vistimeline.timeline('setSelection', this.selected_rec_ids);
         }
         
-        //center (and zoom) on map
-        console.log('selected '+this.selected_rec_ids.length+' markers '+this.highlightedMarkers.length);
+//center (and zoom) on map
+//console.log('selected '+this.selected_rec_ids.length+' markers '+this.highlightedMarkers.length);
         if (is_external===true){
             this.zoomToSelection();        
         }
@@ -1862,6 +1887,19 @@ $.widget( "heurist.mapping", {
         this.options.isEditAllowed = !this.options.isPublished || __parseval(params['editstyle']);
         
         this.options.map_rollover = __parseval(params['map_rollover']);
+
+        //special case - till thematic map is not developed - for custom style
+        /* expremental 
+        this.isHamburgIslamicImpire = (params['search_realm']=='hie_places');
+        if(this.isHamburgIslamicImpire){
+            this.hie_places_with_events = 
+        [122030,121870,121869,121974,121125,132793,121915,121948,121124,121978,122012,121878,121880,121873,121130,122006,121913,121924,121891,122021,121934,131700,132092,121972,121958,132244,121956,121968,121893,121923,121876,122041,121908,121885,132090,121999,122044,121998,121992,121904,122025,121946,121906,131680,121882,121895,131828,132197,121988,121921,121940,121986,122008,121961,132715,122010,122035,132030,121966,121976,121917,121984,121911,132053,132098,121919,121126,121849,122003,121899,121928,132112,121936,121954,121127,132214,121950,121932,132543,131882,121194,132745,122037,122016,121964,121980,121926,121887,121129,122039,122019,122014,121990,121952,132088,121897,132757,121883,121875,121889,131652,133081,131865,121902,121997,131934,121982,121942,121930,131643,132138,132013,121970];
+            this.hie_places_wo_events_style =
+            {"iconType":"iconfont","iconFont":"location","iconSize":"12","stroke":"1","color":"#4f6128","weight":"0","fillColor":"#4f6128","fillOpacity":"0.1"};
+        }
+        */
+            
+
         
         //show/hide map or timeline
         var nomap = __parseval(params['nomap']);

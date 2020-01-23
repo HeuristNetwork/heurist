@@ -332,8 +332,7 @@
                     while(strpos($qclauses["from"], 'Records '.$tab.'_0')>0){
                         $tab = $tab.'_0';
                     }
-                    //DISTINCT
-                    $select_clause = "SELECT $select_field as rng, count( ".$tab.".rec_ID) as cnt ";
+                    $select_clause = "SELECT $select_field as rng, count(DISTINCT ".$tab.".rec_ID) as cnt ";
                     
                     if($grouporder_clause==""){
                             $grouporder_clause = " GROUP BY $select_field ORDER BY $select_field";
@@ -1202,8 +1201,8 @@
 
         }else if($is_ids_only){
 
-            //DISTINCT
-            $select_clause = 'select SQL_CALC_FOUND_ROWS rec_ID ';
+            //
+            $select_clause = 'select SQL_CALC_FOUND_ROWS DISTINCT rec_ID ';
 
         }else{
 
