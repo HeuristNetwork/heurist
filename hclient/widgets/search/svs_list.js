@@ -1194,6 +1194,9 @@ $.widget( "heurist.svs_list", {
                             break;
                         case "copycb":
                             break;    
+                        case "query":
+                            that._getFilterString(node.key, $(node.li));
+                            break;    
                         case "embed":   //EMBED
                             //show popup with link
                             if(!node.folder && node.key>0){
@@ -1379,7 +1382,8 @@ $.widget( "heurist.svs_list", {
                     {title: "New RuleSet", cmd: "addSearch3", uiIcon: "ui-icon-shuffle" },
                     {title: "Edit", cmd: "rename", uiIcon: "ui-icon-pencil" }, // <kbd>[F2]</kbd>
                     {title: "----"},
-                    {title: "Copy to clipboard", cmd: "copycb", uiIcon: "ui-icon-copy" }, 
+                    //{title: "Copy to clipboard", cmd: "copycb", uiIcon: "ui-icon-copy" }, 
+                    {title: "Get filter+rules", cmd: "query", uiIcon: "ui-icon-copy" }, 
                     {title: "Embed", cmd: "embed", uiIcon: "ui-icon-globe" }, 
                     {title: "----"},
                     {title: "New folder", cmd: "addFolder", uiIcon: "ui-icon-folder-open" }, // <kbd>[Ctrl+Shift+N]</kbd>
@@ -1986,7 +1990,7 @@ $.widget( "heurist.svs_list", {
     //
     //
     //
-    _getFilterString: function( svs_ID ){
+    _getFilterStrin_OLD: function( svs_ID ){
         
         var svs = window.hWin.HAPI4.currentUser.usr_SavedSearch[svs_ID];
         if(svs ){
@@ -2017,6 +2021,75 @@ $.widget( "heurist.svs_list", {
         }
         
     },
+    
+    //
+    //  open dialog to copy filter+rules as json query
+    //
+    _getFilterString: function(svs_ID, pos_element){
+
+        var svs = window.hWin.HAPI4.currentUser.usr_SavedSearch[svs_ID];
+        if(!svs) return;
+        
+        var qsearch = svs[_QUERY];
+        var prms = Hul.parseHeuristQuery(qsearch); //url to json
+        if(prms.type!=3){
+            
+            
+            var crules = window.hWin.HEURIST4.util.cleanRules( prms.rules );                                                      prms.rules = crules==null?'':crules; //JSON.stringify(crules);
+            
+            prms.db = window.hWin.HAPI4.database;
+            var res = Hul.hQueryStringify(prms); //json to string
+        
+            /*
+            var req = {q:filter, rules:$dlg.find('#svs_Rules').val()
+                                    , db:window.hWin.HAPI4.database};
+            
+            if($dlg.find('#svs_RulesOnly').is(':checked')){
+                req['rulesonly'] = 1;
+            }     
+            if($dlg.find('#svs_UGrpID')=='bookmark'){
+                req['w'] = 'b';
+            }     
+            
+            var res = Hul.hQueryStringify(req);
+            */
+            
+            var buttons = {};
+            buttons[window.hWin.HR('Copy')]  = function() {
+                
+                var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();            
+                var target = $dlg.find('#dlg-prompt-value')[0];
+                target.focus();
+                target.setSelectionRange(0, target.value.length);
+                var succeed;
+                try {
+                    succeed = document.execCommand("copy");
+                    
+                    $dlg.dialog( "close" );
+                } catch(e) {
+                    succeed = false;
+                    alert('Not supported by browser');
+                }                            
+                
+            }; 
+            buttons[window.hWin.HR('Close')]  = function() {
+                var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();            
+                $dlg.dialog( "close" );
+            };
+            
+            //var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
+            window.hWin.HEURIST4.msg.showPrompt(
+            '<label>Edit and copy the string and paste into the Mappable Query filter field</label>'
+            + '<textarea id="dlg-prompt-value" class="text ui-corner-all" '
+            + ' style="min-width: 200px; margin-left:0.2em" rows="4" cols="50">'
+            +res
+            +'</textarea>',null,null,
+            {width:450, buttons:buttons,
+                my:'left top', at:'right bottom', of: pos_element}
+            );
+        }
+    },
+
     
     //
     //

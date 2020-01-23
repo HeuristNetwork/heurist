@@ -530,7 +530,7 @@ window.hWin.HEURIST4.util = {
             var r = window.hWin.HEURIST4.util.isJSON(request.q);
             if(r!==false){
                 if(r.facets) return ''; //faceted search not allowed for map queries
-                res['q'] = JSON.stringify(r);
+                res['q'] = r; //JSON.stringify(r);
             }else{
                 res['q'] = request.q;
             }
@@ -541,22 +541,24 @@ window.hWin.HEURIST4.util = {
             var r = window.hWin.HEURIST4.util.isJSON(request.rules);
             if(r!==false){
                 if(r.facets) return ''; //faceted search not allowed for map queries
-                res['rules'] = JSON.stringify(r);
+                res['rules'] = r; //JSON.stringify(r);
             }else{
                 res['rules'] = request.rules;
             }
         }
 
-        if(!window.hWin.HEURIST4.util.isempty(request.w) && (request.w=='a' || request.w=='all')){
-                res['w'] = request.w;
-        }
-        
-        if(!(window.hWin.HEURIST4.util.isempty(request.w) || request.w=='a' || request.w=='all')){
+        if(!window.hWin.HEURIST4.util.isempty(request.w) && !(request.w=='a' || request.w=='all')){
                 res['w'] = request.w;
         }
         
         if(request.rulesonly==1 || request.rulesonly==true){
                 res['rulesonly'] = 1;
+        }
+
+        if(request.database){
+                res['db'] = request.database;
+        }else if(request.db){
+                res['db'] = request.db;
         }
         
         

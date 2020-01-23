@@ -496,13 +496,16 @@ function hSvsEdit(args) {
                     }
                 }
 
-                
+                //
+                //  open dialog to copy filter+rules as json query
+                //
                 function __getFilterString(){
                     
                     var filter = $dlg.find('#svs_Query').val();
                     if(filter.trim()!=''){
                         
-                        var req = {q:filter, rules:$dlg.find('#svs_Rules').val()};
+                        var req = {q:filter, rules:$dlg.find('#svs_Rules').val()
+                                                , db:window.hWin.HAPI4.database};
                         
                         if($dlg.find('#svs_RulesOnly').is(':checked')){
                             req['rulesonly'] = 1;
@@ -567,7 +570,8 @@ function hSvsEdit(args) {
                     resizable: false,
                     title: window.hWin.HR(isRules?'Edit RuleSet':'Save filter criteria'),
                     buttons: [
-                        {text:window.hWin.HR('Get filter + rules as string'), click: __getFilterString, css:{'margin-right':'60px'} },
+                        {text:window.hWin.HR('Get filter + rules as string'), 
+                            click: __getFilterString, css:{'margin-right':'60px'} },
                         {text:window.hWin.HR('Save'), click: __doSave, css:{'margin-right':'10px'}},
                         {text:window.hWin.HR('Cancel'), click: function() {
                             $( this ).dialog( "close" );
