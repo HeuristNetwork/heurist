@@ -248,6 +248,7 @@ function hMapLayer2( _options ) {
                                     window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY']);
         var layer_popup_template = _recordset.fld(options.rec_layer || _record, 
                                     window.hWin.HAPI4.sysinfo['dbconst']['DT_POPUP_TEMPLATE']);
+        var origination_db = null;
         
         var query = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_QUERY_STRING']);
         var request = window.hWin.HEURIST4.util.parseHeuristQuery(query);
@@ -264,8 +265,10 @@ function hMapLayer2( _options ) {
                 zip: 1,
                 format:'geojson'};
                 
-            if(!window.hWin.HEURIST4.util.isempty(request.db)){
+            //dataset origination db can be different from map heurist instance    
+            if(!window.hWin.HEURIST4.util.isempty(request.db) && request.db!=window.hWin.HAPI4.database){
                 server_request.db = request.db;
+                origination_db = request.db;
             }
                 
             //perform search        
@@ -290,6 +293,7 @@ function hMapLayer2( _options ) {
                                     timeline_data: timeline_data,
                                     layer_style: layer_style,
                                     popup_template: layer_popup_template,
+                                    origination_db: origination_db,
                                     dataset_name:_recordset.fld(options.rec_layer || _record, 'rec_Title'),  //name for timeline
                                     preserveViewport:options.preserveViewport });
                                                          

@@ -3,7 +3,6 @@
 @todo Later?
 KML is loaded as a single collection (without access to particular feature) Need to use our kml parser to parse and load each kml' placemark individually
 Altough our kml parser supports Placemarks only. It means no external links, image overlays and other complex kml features. 
-SHP loader not done (it seems there are leaflet plugin) 
 Selector map tool (rectangle and polygon/lasso)
 Editor map tool (to replace mapDraw.js based on gmap)
 Thematic mapping
@@ -576,6 +575,7 @@ $.widget( "heurist.mapping", {
     //      preserveViewport
     //      layer_style
     //      popup_template   - smarty template for popup info
+    //      origination_db
     //
     addGeoJson: function(options){
             
@@ -595,6 +595,7 @@ $.widget( "heurist.mapping", {
                     default_style: null
                     , layer_name: dataset_name
                     , popup_template: popup_template
+                    , origination_db: options.origination_db
                     //The onEachFeature option is a function that gets called on each feature before adding it to a GeoJSON layer. A common reason to use this option is to attach a popup to features when they are clicked.
                    /* 
                     , onEachFeature: function(feature, layer) {
@@ -1346,18 +1347,23 @@ $.widget( "heurist.mapping", {
                         that.main_popup.closePopup();
                         return;
                     }
+                    //take database from dataset origination database
+                    var db = layer.options.origination_db!=null
+                                    ?layer.options.origination_db
+                                    :window.hWin.HAPI4.database;
+                        
                     
                     if(that.mapPopUpTemplate || layer.options.popup_template){
                         
                         popupURL = window.hWin.HAPI4.baseURL + 'viewers/smarty/showReps.php?publish=1&debug=0&q=ids:'
                                 + layer.feature.properties.rec_ID
-                                + '&db='+window.hWin.HAPI4.database+'&template='
+                                + '&db='+db+'&template='
                                 + encodeURIComponent(layer.options.popup_template || that.mapPopUpTemplate);
                         
                     }else{
                         popupURL = window.hWin.HAPI4.baseURL + 'viewers/record/renderRecordData.php?mapPopup=1&recID='
                                 +layer.feature.properties.rec_ID
-                                +'&db='+window.hWin.HAPI4.database+'&ll='
+                                +'&db='+db+'&ll='
                                 +window.hWin.HAPI4.sysinfo['layout'];
                     }  
                 }              
