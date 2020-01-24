@@ -426,7 +426,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                                  new_record_params:{RecTypeID:this._currentEditRecTypeID}};
                    
                 if(this.options.new_record_params){                 
-                    if(this.options.new_record_params['ro']>=0) 
+                    if(this.options.new_record_params['ro']>=0 || this.options.new_record_params['ro']=='current_user') 
                             popup_options.new_record_params['OwnerUGrpID'] = this.options.new_record_params['ro'];
                     if(!window.hWin.HEURIST4.util.isempty(this.options.new_record_params['rv'])) 
                             popup_options.new_record_params['NonOwnerVisibility'] = this.options.new_record_params['rv'];
@@ -1562,10 +1562,19 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 that.options.new_record_params = {};  
             }else{ 
                 //short version of new record params (backward capability)
-                if(that.options.new_record_params['rt']>0) that.options.new_record_params['RecTypeID'] = that.options.new_record_params['rt'];
-                if(that.options.new_record_params['ro']>=0) that.options.new_record_params['OwnerUGrpID'] = that.options.new_record_params['ro'];
-                if(!window.hWin.HEURIST4.util.isempty(that.options.new_record_params['rv'])) 
-                        that.options.new_record_params['NonOwnerVisibility'] = that.options.new_record_params['rv'];
+                if(that.options.new_record_params['rt']>0){ 
+                    that.options.new_record_params['RecTypeID'] = that.options.new_record_params['rt'];
+                    that.options.new_record_params['rt'] = null;
+                }
+                if(that.options.new_record_params['ro']>=0 || that.options.new_record_params['ro']=='current_user'){
+                    that.options.new_record_params['OwnerUGrpID'] = that.options.new_record_params['ro'];    
+                    that.options.new_record_params['ro'] = null;
+                }
+                if(!window.hWin.HEURIST4.util.isempty(that.options.new_record_params['rv'])){
+                    that.options.new_record_params['NonOwnerVisibility'] = that.options.new_record_params['rv'];
+                    that.options.new_record_params['rv'] = null;
+                }
+                        
                 if(!window.hWin.HEURIST4.util.isempty(that.options.new_record_params['url']))  
                         that.options.new_record_params['URL'] = that.options.new_record_params['url'];
                 if(!window.hWin.HEURIST4.util.isempty(that.options.new_record_params['desc'])) 
@@ -2468,11 +2477,13 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
                 +'</div>'
              
                 +'<div style="padding-right:50px;float:right">'
-                    +'<span class="btn-lookup-values" style="font-size:larger" title="Lookup external service">Lookup value</span>'
                     +'<span class="btn-edit-rt btns-admin-only" style="font-size:larger">Modify structure</span>'
                     +'<span class="btn-edit-rt-titlemask btns-admin-only">Edit title mask</span>'
                     +'<span class="btn-edit-rt-template btns-admin-only">Template</span>'
                     +'<span class="btn-bugreport">Bug report</span>'
+                +'</div>'
+                +'<div class="btn-lookup-values" style="padding-top:10px;padding-left: 24px;">'
+                    //+'<span style="font-size:larger" title="Lookup external service">Lookup value</span>'
                 +'</div>'
                 
              +'</div></div>').insertBefore(this.editForm.first('fieldset'));
@@ -2528,6 +2539,8 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
             //lookup external values
             //there is 3d party service for lookup values
             var notfound = true;
+            var lookup_div = this.element.find('.btn-lookup-values');
+            lookup_div.empty();
             var service_config = window.hWin.HAPI4.sysinfo['service_config'];
             if(window.hWin.HEURIST4.util.isArrayNotEmpty(service_config)){
                 
@@ -2536,13 +2549,22 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
                     var cfg = service_config[i];    
                     if(cfg.rty_ID == this._currentEditRecTypeID){   //@todo many services
                         notfound = false;            
-            
-                        this.element.find('.btn-lookup-values').button().show()
-                        .css(btn_css).click(function(){ 
+                        
+                        var btn = $('<div>')
+                            .button({label:cfg.label?cfg.label:('Lookup '+cfg.service) })
+                            .attr('data-cfg', i).css('padding-right','4px')
+                            .appendTo(lookup_div);
+                        
+                        this._on(btn, {click:
+                            function(event){ 
+                                
+                                var idx = $(event.target).attr('data-cfg');
+                                
+                                var cfg = window.hWin.HAPI4.sysinfo['service_config'][idx];
+                                
                             window.hWin.HEURIST4.ui.showRecordActionDialog('recordLookup',
                                 {mapping: cfg, onClose:function(recset){
                                     if(recset){
-//console.log(recset.getFirstRecord());
                                         var rec = recset.getFirstRecord();
                                         // loop all fields in selected values
                                         // find field in edit form
@@ -2560,13 +2582,15 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
                                         }
                                     }
                                 }});
-                        });
+                        }});
                         
                     }
                 }
             }
             if(notfound){
-                this.element.find('.btn-lookup-values').hide();    
+                lookup_div.hide();    
+            }else{
+                lookup_div.show();    
             }
             
             
