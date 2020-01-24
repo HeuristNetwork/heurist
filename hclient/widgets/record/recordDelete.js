@@ -115,6 +115,9 @@ $.widget( "heurist.recordDelete", $.heurist.recordAction, {
         return this._super();
     },
     
+    //
+    // not implemented
+    //
     _onLinkedCount:function(){
         
             var cnt_selected = this._currentRecordsetSelIds.length;
@@ -176,6 +179,30 @@ $.widget( "heurist.recordDelete", $.heurist.recordAction, {
         var that = this;       
             
         if(isconfirm!==true){
+            
+            var recset = this.recordList.resultList('getRecordSet');           
+            var r1 = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME'];
+            var r2 = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'];
+            var cnt = 0;
+            recset.each(function(recID, record){
+                var rt = this.fld(record, 'rec_RecTypeID');
+                if(rt==r1 || rt==r2){
+                    cnt++;
+                }
+            });
+            if(cnt>0){
+            window.hWin.HEURIST4.msg.showMsgDlg(
+                '<span class="ui-icon ui-icon-alert" style="display:inline-block">&nbsp;</span>&nbsp;'
+                +'<b>Potential harm to website</b>'
+        +'<p>There are '+cnt+' CMS website records among the records being deleted.'
+        +'Deleting them may irreparably damage the website generated from this database.</p>'
+        +'<p>Are you sure you want to delete these records?</p>',
+                function(){
+                    that.doAction(true);
+                    },'Confirm');
+                return;        
+            }
+            
             window.hWin.HEURIST4.msg.showMsgDlg(
                 '<span class="ui-icon ui-icon-alert" style="display:inline-block">&nbsp;</span>&nbsp;'
                 +'Please confirm that you really wish to delete the selected records, <br/>along with all associated bookmarks?', 
