@@ -641,7 +641,7 @@ $.widget( "heurist.editing_input", {
                 }
 
 
-                var isCMS_content = (( //this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_PAGE'] || 
+                var isCMS_content = (( 
                          this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'] ||
                          this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME']) &&
                         (this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION'] || 

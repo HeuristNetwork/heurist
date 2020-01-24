@@ -133,8 +133,7 @@
         // ACCESS -------------
         // for CMS rectypes by default public and owner is Database owners group
         if (//($system->defineConstant('RT_CMS_HOME') && $rectype==RT_CMS_HOME)||
-            ($system->defineConstant('RT_CMS_MENU') && $rectype==RT_CMS_MENU)||
-            ($system->defineConstant('RT_CMS_PAGE') && $rectype==RT_CMS_PAGE))
+            ($system->defineConstant('RT_CMS_MENU') && $rectype==RT_CMS_MENU))
         {  
             $access = 'public';
             $owner_grps = array(1); 

@@ -994,7 +994,6 @@ function hCmsEditing(_options) {
                                     dty_Type:"resource", rst_MaxValues:0,
                                     rst_DisplayName: 'Top menu items', rst_DisplayHelpText:'',
                                     rst_PtrFilteredIDs: [window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'],
-                                              window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_PAGE'],
                                               window.hWin.HAPI4.sysinfo['dbconst']['RT_WEB_CONTENT']],
                                     rst_FieldConfig: {entity:'records', csv:false}
                                 }
