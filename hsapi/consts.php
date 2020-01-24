@@ -249,8 +249,7 @@ $rtDefines = array(
     'RT_WEB_CONTENT' => array(1147, 25),
     
     'RT_CMS_HOME' => array(99, 51),  
-    'RT_CMS_MENU' => array(99, 52),  
-    'RT_CMS_PAGE' => array(99, 53)  
+    'RT_CMS_MENU' => array(99, 52)
 );
 
 /** DETAIL TYPE DEFINITIONS */
@@ -320,10 +319,13 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_MEDIA_REFERENCE' => array(3, 508), //*******************ERROR  THIS IS MISSING
     'DT_TEI_DOCUMENT_REFERENCE' => array(3, 1045), //TODO : change DT_XML_DOCUMENT_REFERENCE with new update.
     'DT_ORDER' => array(1147, 94), //order of web content - origin DH
+    
+    'DT_EXTERNAL_ID' => array(2, 581), //external non heurist record id
     // Spatial & mapping
     'DT_KML_FILE' => array(3, 1044),
     'DT_KML' => array(3, 1036),
     'DT_MAP_IMAGE_LAYER_REFERENCE' => array(3, 1043),
+    'DT_MAP_IMAGE_WORLDFILE' => array(3, 1095),
     'DT_SHOW_IN_MAP_BG_LIST' => array(3, 679), // DEPRECATED  show image layer or kml in map background list
     'DT_ALTERNATE_NAME' => array(3, 1009),
     'DT_FULL_IMAG_URL' => array(70, 603), //TODO: remove from code

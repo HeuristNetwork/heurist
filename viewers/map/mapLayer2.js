@@ -151,7 +151,11 @@ function hMapLayer2( _options ) {
          var image_url = window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database + '&file='+
                     imageFile[0];
                     
-         var image_extent = _getBoundingBox();
+         var worldFileData = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_MAP_IMAGE_WORLDFILE']);
+         
+         var image_extent = null; //window.hWin.HEURIST4.geo.parseWorldFile( worldFileData, image_width, image_height);
+         
+         if(image_extent==null) image_extent = _getBoundingBox();
          
           
          _nativelayer_id = options.mapwidget.mapping('addImageOverlay', 

@@ -28,6 +28,8 @@ parseCoordinates - old way for DH
 
 simplePointsToWKT -  coordinate pairs to WKT
 
+parseWorldFile -  worldfile data to bbox
+
 */
 
 if (!window.hWin.HEURIST4){
@@ -598,6 +600,7 @@ window.hWin.HEURIST4.geo = {
     
     //
     // geodata = _recordset.getFieldGeoValue(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_OBJECT']);           
+    // WKT to Shapes to bbox array
     //    
     getWktBoundingBox: function(geodata){
       
@@ -792,6 +795,45 @@ window.hWin.HEURIST4.geo = {
             return {type:'',summary:''};
         }
         
+    },
+    
+    //
+    //
+    //
+    parseWorldFile: function (data, image_width, image_height){
+        if(data){
+            var lines = data.split('\r\n');
+            if(!(lines && lines.length>5)) lines = data.split('\n');
+        
+            if(lines && lines.length>5){
+                var nums = [];
+                for(var i=0; i<lines.length; i++){
+                    if(window.hWin.HEURIST4.util.isNumber(lines[i])){
+                        nums.push( lines[i] );
+                    }
+                }
+                if(nums.length>5){
+/*                    
+(W-E)/(width pixels)
+0
+0
+(N-S)/(width pixels)
+West+.5*abs((W-E)/(width pixels))
+North-.5*abs((N-S)/(height pixels))
+*/
+                    //num[3] is always negative
+                    var xmin = nums[4] - 0.5 * num[0];
+                    var ymax = nums[5] + 0.5 * num[3];
+                    var xmax = xmin + num[0] * img_width;
+                    var ymin = xmin + num[3] * img_height;
+                    
+                    return [[ymin,xmin],[ymax,xmax]];
+                }
+            }
+        
+            
+        }
+        return null;
     }
     
 }

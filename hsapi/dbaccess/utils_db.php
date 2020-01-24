@@ -693,8 +693,6 @@
             $report[] = 'defRecStructure: rst_PointerMode and rst_PointerBrowseFilter added';
         }
         
-        
-        
         $query = "SHOW COLUMNS FROM `defTerms` LIKE 'trm_SemanticReferenceURL'";
         $res = $mysqli->query($query);
         $row_cnt = $res->num_rows;

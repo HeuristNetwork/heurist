@@ -1929,7 +1929,7 @@ window.hWin.HEURIST4.ui = {
     },
     
     //
-    //  
+    //  Opens record edit or viewer
     //
     openRecordInPopup:function(rec_ID, query_request, isEdit, popup_options){
     
