@@ -673,7 +673,7 @@ $.widget( "heurist.search_faceted", {
                 +'<h4 style="display:inline-block;margin:0;">'+lbl+'</h4></div>'
                 +'<div style=" padding:5px 0 20px 21px;display: block;">'
                     +'<div class="input-div" style="display: inline-block;">'
-                    +'<img style="display:none" width="150" height="150"/>'
+                    +'<img class="map_snapshot" style="display:none" width="150" height="150"/>'
                     +'</div>'
                     +'<button title="Click this button to set and apply spatial search limits" class="ui-button ui-corner-all ui-widget define_spatial" style="height:18px">'
                         +'<span class="ui-button-icon ui-icon ui-icon-globe"></span><span class="ui-button-text">Define</span></button>'
@@ -684,21 +684,22 @@ $.widget( "heurist.search_faceted", {
            this._on( ele.find('button.reset_spatial'), { click:                         
            function(event){
                 //ele.find('input').val('');  
+                that.element.find('.map_snapshot').attr('src',null).hide();
                 that.options.params.spatial_filter = null;
                 that.doSearch();
            }});
                         
-           this._on( ele.find('button.define_spatial'), { click:                         
+           this._on( [ele.find('button.define_spatial')[0],that.element.find('.map_snapshot')[0]],
+            { click:                         
            function(event){
                 
-                var inpt = ele.find('input');
                 //open map digitizer - returns WKT rectangle 
                 var rect_wkt = that.options.params.spatial_filter;
                 var url = window.hWin.HAPI4.baseURL 
                 +'viewers/map/mapDraw.php?db='+window.hWin.HAPI4.database
-                +'&geofilter=1&wkt='+rect_wkt;
+                +'&geofilter=1&need_screenshot=1&wkt='+rect_wkt;
 
-                var wkt_params = {'wkt': rect_wkt};
+                var wkt_params = {wkt: rect_wkt, geofilter:true, need_screenshot:true};
 
                 window.hWin.HEURIST4.msg.showDialog(url, {height:'900', width:'1000',
                     window: window.hWin,  //opener is top most heurist window
@@ -710,6 +711,11 @@ $.widget( "heurist.search_faceted", {
                         if( !window.hWin.HEURIST4.util.isempty(location) ){
                             //that.newvalues[$input.attr('id')] = location
                             //inpt.val(location.wkt);
+                            if(location.imgData){
+                                that.element.find('.map_snapshot').attr('src',location.imgData).show();
+                            }else{
+                                that.element.find('.map_snapshot').attr('src',null).hide();
+                            }
                             that.options.params.spatial_filter = {geo:location.wkt};
                             that.doSearch();
                         }

@@ -1715,7 +1715,7 @@ $.widget( "heurist.search", {
                 +'viewers/map/mapDraw.php?db='+window.hWin.HAPI4.database
                 +'&geofilter=1&wkt='+rect_wkt;
 
-                var wkt_params = {'wkt': rect_wkt};
+                var wkt_params = {wkt: rect_wkt, geofilter:true};
 
                 window.hWin.HEURIST4.msg.showDialog(url, {height:'900', width:'1000',
                     window: window.hWin,  //opener is top most heurist window

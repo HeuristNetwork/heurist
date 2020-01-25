@@ -47,6 +47,7 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
 <?php
 }
 ?>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dom-to-image/2.6.0/dom-to-image.js"></script>
 <!-- leaflet plugins -->
 <script src="<?php echo PDIR;?>external/leaflet/leaflet-providers.js"></script>
 <script src="<?php echo PDIR;?>external/leaflet/bookmarks/Leaflet.Bookmarks.min.js"></script>
@@ -73,7 +74,7 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
 
         <script type="text/javascript">
 
-            var mapping, initial_wkt,
+            var mapping, initial_wkt, need_screenshot = false, is_geofilter=false,
                 menu_datasets, btn_datasets, zoom_with_delay = true;
 
             // Callback function on map initialization
@@ -105,8 +106,11 @@ console.log('load google map api')
                 
                 // Mapping data
                 //mapping = new hMappingDraw('map_digitizer', initial_wkt);
-                var is_geofilter = window.hWin.HEURIST4.util.getUrlParameter('geofilter', location.search);
+                is_geofilter = window.hWin.HEURIST4.util.getUrlParameter('geofilter', location.search);
                 is_geofilter = (is_geofilter==1 || is_geofilter=='true');
+                
+                need_screenshot = window.hWin.HEURIST4.util.getUrlParameter('need_screenshot', location.search);
+                need_screenshot = (need_screenshot==1 || need_screenshot=='true');
                 
                 var layout_params = {};
                 layout_params['notimeline'] = '1';
@@ -228,6 +232,8 @@ console.log('load google map api')
             //
             //
             function getWktAndClose(){
+                
+                    $('.rightpanel').hide();
 
                     var res = mapping.mapping( 'drawGetWkt', true);
                     
@@ -244,7 +250,57 @@ console.log('load google map api')
                             }
                             
                         }
-                        window.close({type:typeCode, wkt:res});    
+                        
+                        if( need_screenshot ){
+                            mapping.mapping( 'drawZoomTo' );
+
+                            function filterNode(node) {
+                                if (node instanceof Text) {
+                                    return true;
+                                }
+                                return [
+                                    "div",
+                                    "span",
+                                    "p",
+                                    "i",
+                                    "img",
+                                    "svg",
+                                    "g",
+                                    "path"
+                                    /*
+                                    "strong",
+                                    "main",
+                                    "aside",
+                                    "article",
+                                    "pre",
+                                    "code",
+                                    "time",
+                                    "address",
+                                    "header",
+                                    "footer"
+                                    */
+                                ].includes(node.tagName.toLowerCase()) || /^h[123456]$/i.test(node.tagName);
+}
+                            setTimeout(function(){  
+                            try{
+                                domtoimage
+                                .toPng(document.getElementById('map_digitizer'),{
+                                    filter: filterNode
+                                })
+                                .then(function (dataUrl) {
+                                    window.close({type:typeCode, wkt:res, imgData:dataUrl});        
+                                });                                
+                            }catch(e){
+                                window.close({type:typeCode, wkt:res});        
+                            }
+                                
+                            }, 2000);    
+                        }else{
+                            window.close({type:typeCode, wkt:res});        
+                        }
+                        
+                        
+                        
                     }
             }
             
@@ -260,6 +316,8 @@ console.log('load google map api')
                 }else{
                     initial_wkt = null;
                 }
+                
+                need_screenshot = params && params['need_screenshot'];
                                 
                 onMapInit();
             } 
@@ -268,6 +326,16 @@ console.log('load google map api')
             //
             //           
             function onMapInit(){
+                
+                if(is_geofilter){
+                    $('#rightpanel').hide();
+                    $('#rightpanel_filter').show();
+                    $('#cbAllowMulti').prop('checked', false);
+                }else{
+                    $('#rightpanel').show();
+                    $('#rightpanel_filter').hide();
+                }
+
                 
                 if(initial_wkt){ //params && params['wkt']
                 
@@ -395,7 +463,7 @@ console.log('load google map api')
         <div style="height:100%; width:100%;">
 
             <div id="map_container">
-                <div id="map_digitizer">Mapping</div>
+                <div id="map_digitizer">...</div>
             </div>
 
             <div id="rightpanel" class="rightpanel">
