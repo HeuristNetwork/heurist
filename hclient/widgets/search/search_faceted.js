@@ -107,11 +107,15 @@ title_hierarchy - show hierarchy in facet header
 sup_filter - suplementary filter that is set in design time
 add_filter - additional filter that can be set in run time 
 add_filter_original - original search string for add_filter if it is json
+spatial_filter  - spatial filter (optional)
 search_on_reset - search for empty form (on reset and on init)
 
 ui_prelim_filter_toggle   - allow toggle on/off sup_filter
 ui_prelim_filter_toggle_mode - direct or reverse mode (0|1)
 ui_prelim_filter_toggle_label - label on UI
+
+ui_spatial_filter - show spatial filter
+ui_spatial_filter_label
 
 ui_additional_filter - show search everything input (for add_filter)
 ui_additional_filter_label
@@ -284,6 +288,8 @@ $.widget( "heurist.search_faceted", {
         this._super( key, value );
         if(key=='add_filter'){
             this.options.params.add_filter = value;
+        }else if(key=='spatial_filter'){
+            this.options.params.spatial_filter = value;
         }else if(key=='add_filter_original'){
             this.options.params.add_filter_original = value;
         }
@@ -291,7 +297,7 @@ $.widget( "heurist.search_faceted", {
     
     _setOptions: function( options ) {
         this._superApply( arguments );
-        if(window.hWin.HEURIST4.util.isnull(options['add_filter'])){
+        if(window.hWin.HEURIST4.util.isnull(options['add_filter']) && window.hWin.HEURIST4.util.isnull(options['spatial_filter'])){
             this.cached_counts = [];
             //this._refresh();
             this.doReset();
@@ -554,6 +560,7 @@ $.widget( "heurist.search_faceted", {
    }
 
     ,doResetAll: function(){
+        this.options.params.spatial_filter = null;
         this.options.params.add_filter = null;
         this.options.params.add_filter_original = null;
         this.doReset();
@@ -653,6 +660,63 @@ $.widget( "heurist.search_faceted", {
            }else{
                this._use_sup_filter = true;
            }
+       }
+       
+       if(this.options.params.ui_spatial_filter){
+           
+           var lbl = that.options.params.ui_spatial_filter_label
+                        ?that.options.params.ui_spatial_filter_label
+                        :window.hWin.HR('Map Search');
+                        
+           var ele = $("<div>").html(
+           '<div class="header" title="" style="vertical-align: top; display: block; width: 100%; padding: 5px;">'
+                +'<h4 style="display:inline-block;margin:0;">'+lbl+'</h4></div>'
+                +'<div style=" padding:5px 0 20px 21px;display: block;">'
+                    +'<div class="input-div" style="display: inline-block;">'
+                    +'<img style="display:none" width="150" height="150"/>'
+                    +'</div>'
+                    +'<button title="Click this button to set and apply spatial search limits" class="ui-button ui-corner-all ui-widget define_spatial" style="height:18px">'
+                        +'<span class="ui-button-icon ui-icon ui-icon-globe"></span><span class="ui-button-text">Define</span></button>'
+                    +'<button title="Click this button to reset spatial search limits" class="ui-button ui-corner-all ui-widget reset_spatial" style="height:18px">'
+                        +'<span class="ui-button-icon ui-icon ui-icon-close"></span><span class="ui-button-text">reset</span></button>'
+                    +'</div>').css({'border-bottom': '1px solid lightgray','margin-bottom':'10px'}).appendTo($fieldset);
+                        
+           this._on( ele.find('button.reset_spatial'), { click:                         
+           function(event){
+                //ele.find('input').val('');  
+                that.options.params.spatial_filter = null;
+                that.doSearch();
+           }});
+                        
+           this._on( ele.find('button.define_spatial'), { click:                         
+           function(event){
+                
+                var inpt = ele.find('input');
+                //open map digitizer - returns WKT rectangle 
+                var rect_wkt = that.options.params.spatial_filter;
+                var url = window.hWin.HAPI4.baseURL 
+                +'viewers/map/mapDraw.php?db='+window.hWin.HAPI4.database
+                +'&geofilter=1&wkt='+rect_wkt;
+
+                var wkt_params = {'wkt': rect_wkt};
+
+                window.hWin.HEURIST4.msg.showDialog(url, {height:'900', width:'1000',
+                    window: window.hWin,  //opener is top most heurist window
+                    dialogid: 'map_digitizer_filter_dialog',
+                    params: wkt_params,
+                    title: window.hWin.HR('Heurist spatial search'),
+                    class:'ui-heurist-bg-light',
+                    callback: function(location){
+                        if( !window.hWin.HEURIST4.util.isempty(location) ){
+                            //that.newvalues[$input.attr('id')] = location
+                            //inpt.val(location.wkt);
+                            that.options.params.spatial_filter = {geo:location.wkt};
+                            that.doSearch();
+                        }
+                    }
+                } );
+           }});   
+           
        }
 
        if(this.options.params.ui_additional_filter){
@@ -1035,6 +1099,7 @@ $.widget( "heurist.search_faceted", {
             
             if(isform_empty && 
                 window.hWin.HEURIST4.util.isempty(this.options.params.add_filter) && 
+                window.hWin.HEURIST4.util.isempty(this.options.params.spatial_filter) &&
                 !this.options.params.search_on_reset){
                 
                 if(true){
@@ -1061,7 +1126,8 @@ $.widget( "heurist.search_faceted", {
             //add additional/supplementary filter
             this._current_query = window.hWin.HEURIST4.util.mergeHeuristQuery(query, 
                             (this._use_sup_filter)?this.options.params.sup_filter:'', 
-                            this.options.params.add_filter);
+                            this.options.params.add_filter,
+                            this.options.params.spatial_filter);
             
             
 //{"f:10":"1934-12-31T23:59:59.999Z<>1935-12-31T23:59:59.999Z"}            
@@ -1148,7 +1214,8 @@ $.widget( "heurist.search_faceted", {
                     //replace with current query   - @todo check for empty 
                     subs_value = window.hWin.HEURIST4.util.mergeHeuristQuery(this._first_query, 
                                     (this._use_sup_filter)?this.options.params.sup_filter:'',
-                                    this.options.params.add_filter);
+                                    this.options.params.add_filter,
+                                    this.options.params.spatial_filter);
                 }else{
                     //replace with list of ids
                     subs_value = window.hWin.HEURIST4.util.mergeHeuristQuery(this._first_query,
@@ -1214,7 +1281,8 @@ $.widget( "heurist.search_faceted", {
                         //add additional/supplementary filter
                         query = window.hWin.HEURIST4.util.mergeHeuristQuery(query, 
                                         (this._use_sup_filter)?this.options.params.sup_filter:'',   //suplementary filter defined in wiz
-                                        this.options.params.add_filter);  //dynaminc addition filter
+                                        this.options.params.add_filter,
+                                        this.options.params.spatial_filter);  //dynaminc addition filter
 
                         
                     }else{

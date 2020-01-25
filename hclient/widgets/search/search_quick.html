@@ -21,7 +21,7 @@
 
 <fieldset class="ui-heurist-header1">
     <div>
-        <div class="header_narrow"><label>Record type</label></div>
+        <div class="header_narrow" style="width:100px"><label>Record type</label></div>
         <select class="text ui-widget-content ui-corner-all sa_rectype" 
                 style="min-width:220px" tabindex="-1"></select>
     </div>
@@ -56,6 +56,13 @@
             <option value="1">Descending (Z..A, 9..1)</option>
         </select>
     </div>
+    <div>
+        <div class="header_narrow"><label>Spatial search</label></div>
+        <button class="sa_spatial" style="min-width:170px;max-width:170px;margin-right:10px" title="Click this button to set and apply spatial search limits">Draw rectangle/polygon</button>
+        <button class="sa_spatial_clear" style="min-width:40px;max-width: 40px">reset</button>
+        <input type="hidden" class="sa_spatial_val" />
+    </div>
+    
 <!--    <div>
         <div class="header"><label for="sa_sortasc">Sort Ascending:</label></div>
         <input type="checkbox" name="sa_sortasc" id="sa_sortasc" class="ui-widget-content ui-corner-all" />

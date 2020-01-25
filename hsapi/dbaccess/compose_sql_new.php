@@ -57,6 +57,7 @@ cnt:field id  search for number of field instances
 
 latitude, lat:
 longitude, long, lng:
+geo:  
 
 hhash:
 
@@ -650,7 +651,7 @@ class HPredicate {
     var $greaterthan = false;
 
     var $allowed = array('title','t','modified','url','notes','type','ids','id','count','cnt',
-            'f','field','linked_to','linkedto','linkedfrom','related','related_to','relatedto','relatedfrom','links','plain',
+            'f','field','geo','linked_to','linkedto','linkedfrom','related','related_to','relatedto','relatedfrom','links','plain',
             'addedby','owner','access');
     /*
     notes, n:        record heder notes (scratchpad)
@@ -772,6 +773,10 @@ class HPredicate {
                 if(!$this->field_id) return null;
                 $this->pred_type = strtolower($this->pred_type);
                 
+            case 'geo':
+                
+                return $this->predicateSpatial();
+
             case 'field':
             case 'f':
 
@@ -843,7 +848,25 @@ class HPredicate {
 
         return $val;
     }
+    
+    //
+    //
+    //
+    function predicateSpatial(){
+        
+        $p = "rd".$this->qlevel.".";
+        $p = "";
+        
+        $res = "exists (select dtl_ID from recDetails $p "
+            .' where r'.$this->qlevel.'.rec_ID='.$p.'dtl_RecID AND '
+            .$p.'dtl_Geo is not null AND ST_Contains(ST_GeomFromText(\''.$this->value.'\'), '
+            .$p.'dtl_Geo) limit 1)';  //MBRContains
+        return array("where"=>$res);
+    }
 
+    //
+    //
+    //
     function predicateField(){
         global $mysqli;
 

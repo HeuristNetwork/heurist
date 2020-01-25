@@ -2011,6 +2011,8 @@ $.widget( "heurist.mapping", {
                     {
                         that.drawnItems = L.featureGroup().addTo(that.nativemap);
                         
+                        var is_geofilter = (controls.indexOf('drawfilter')>=0);
+                        
                           /*
                         L.Edit.PolyVerticesEdit = L.Edit.PolyVerticesEdit.extend(
                            {
@@ -2066,18 +2068,21 @@ $.widget( "heurist.mapping", {
                                         message: '<strong>Oh snap!<strong> you can\'t draw that!' // Message that will show when intersect
                                     },
                                 },
-                                polyline: {
-                                    shapeOptions: {
-                                        //color: '#f357a1',
-                                        weight: 4
-                                    }                                    
-                                },
-                                circlemarker: false,
                                 rectangle: {
                                     shapeOptions: {
                                         clickable: true
                                     }
-                                }                                
+                                },                                
+                                polyline:!is_geofilter?
+                                        {
+                                            shapeOptions: {
+                                                //color: '#f357a1',
+                                                weight: 4
+                                            }                                    
+                                        }:false,
+                                circle: !is_geofilter,
+                                circlemarker: false,
+                                marker: !is_geofilter
                             }
                         }); 
                         

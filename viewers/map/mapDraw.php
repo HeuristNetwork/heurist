@@ -73,7 +73,8 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
 
         <script type="text/javascript">
 
-            var mapping, initial_wkt, menu_datasets, btn_datasets, zoom_with_delay = true;
+            var mapping, initial_wkt,
+                menu_datasets, btn_datasets, zoom_with_delay = true;
 
             // Callback function on map initialization
             function onPageInit(success){
@@ -104,13 +105,26 @@ console.log('load google map api')
                 
                 // Mapping data
                 //mapping = new hMappingDraw('map_digitizer', initial_wkt);
+                var is_geofilter = window.hWin.HEURIST4.util.getUrlParameter('geofilter', location.search);
+                is_geofilter = (is_geofilter==1 || is_geofilter=='true');
                 
                 var layout_params = {};
                 layout_params['notimeline'] = '1';
                 layout_params['nocluster'] = '1'
             
                 layout_params['controls'] = 'legend,bookmark,geocoder,draw';
-                layout_params['legend'] = 'basemaps,mapdocs';
+                layout_params['legend'] = 'basemaps,mapdocs,off';
+
+                if(is_geofilter){
+                    layout_params['controls'] += ',drawfilter';
+                    $('#rightpanel').hide();
+                    $('#rightpanel_filter').show();
+                    $('#cbAllowMulti').prop('checked', false);
+                }else{
+                    $('#rightpanel').show();
+                    $('#rightpanel_filter').hide();
+                }
+                
                 
                 initial_wkt = window.hWin.HEURIST4.util.getUrlParameter('wkt', location.search);
         
@@ -124,28 +138,7 @@ console.log('load google map api')
                 });                
                 
                 //initialize buttons
-                $('#save-button').button().on({click:function()
-                {
-
-                    var res = mapping.mapping( 'drawGetWkt', true);
-                    
-                    if( !window.hWin.HEURIST4.util.isempty(res) ){    
-                        //type code is not required for new code. this is for backward capability
-                        var typeCode = 'm';
-                        if(res.indexOf('GEOMETRYCOLLECTION')<0 && res.indexOf('MULTI')<0){
-                            if(res.indexOf('LINESTRING')>=0){
-                                typeCode = 'l';
-                            }else if(res.indexOf('POLYGON')>=0){
-                                typeCode = 'pl';
-                            }else {
-                                typeCode = 'p';
-                            }
-                            
-                        }
-                        window.close({type:typeCode, wkt:res});    
-                    }
-
-                }});
+                $('.save-button').button().on({click:getWktAndClose});
                 
                 $('#view-button').button().click(function(){
                        mapping.mapping('getSetMapBounds', true);
@@ -156,7 +149,7 @@ console.log('load google map api')
                 $('#delete-all-button').button().on({click:function(){
                        mapping.mapping( 'drawClearAll' );
                 }});
-                $('#cancel-button').button().on({click:function(){
+                $('.cancel-button').button().on({click:function(){
                        window.close();
                 }});
                 // paste geojson -> map
@@ -232,6 +225,30 @@ console.log('load google map api')
             }
             
             //
+            //
+            //
+            function getWktAndClose(){
+
+                    var res = mapping.mapping( 'drawGetWkt', true);
+                    
+                    if( !window.hWin.HEURIST4.util.isempty(res) ){    
+                        //type code is not required for new code. this is for backward capability
+                        var typeCode = 'm';
+                        if(res.indexOf('GEOMETRYCOLLECTION')<0 && res.indexOf('MULTI')<0){
+                            if(res.indexOf('LINESTRING')>=0){
+                                typeCode = 'l';
+                            }else if(res.indexOf('POLYGON')>=0){
+                                typeCode = 'pl';
+                            }else {
+                                typeCode = 'p';
+                            }
+                            
+                        }
+                        window.close({type:typeCode, wkt:res});    
+                    }
+            }
+            
+            //
             // called from showDialog
             //
             function assignParameters(params){
@@ -243,6 +260,7 @@ console.log('load google map api')
                 }else{
                     initial_wkt = null;
                 }
+                                
                 onMapInit();
             } 
             
@@ -261,11 +279,9 @@ console.log('load google map api')
                
 //console.log('zoom '+zoom_with_delay);
 
-
                     if(zoom_with_delay){
                         setTimeout(function(){ mapping.mapping( 'drawZoomTo' ); }, 3000);
                     }
-                    
                     
                 }else{
                     $('#cbAllowMulti').prop('checked',false);
@@ -346,7 +362,7 @@ console.log('load google map api')
             background: #eee;
           }         
           
-            #rightpanel{
+            .rightpanel{
                 text-align:center;
                 position: absolute;
                 top: 50px;
@@ -354,11 +370,11 @@ console.log('load google map api')
                 right: 0px;
                 bottom: 0px;
             }
-            #rightpanel > div{
+            .rightpanel > div{
                 width:100%;
                 padding:0.2em;
             }   
-            #rightpanel > div > button{
+            .rightpanel > div > button{
                 width:14em;
             }   
             #coords1 {
@@ -382,7 +398,7 @@ console.log('load google map api')
                 <div id="map_digitizer">Mapping</div>
             </div>
 
-            <div id="rightpanel">
+            <div id="rightpanel" class="rightpanel">
                 <!--
                 <label style="display:inline-block;">Draw color:</label>
                 <div style="width:auto !important;display:inline-block;height: 14px" id="color-palette"></div>
@@ -405,14 +421,14 @@ console.log('load google map api')
                     <button id="delete-button">Clear Selected</button>
                 </div> 
                 <div>
-                    <button id="cancel-button">Cancel</button>
+                    <button class="cancel-button">Cancel</button>
                 </div>
                 
                 <div style="padding-top:20px">
                     <button id="view-button">Remember view</button>
                 </div>
                 <div style="padding-top:20px">
-                    <button id="save-button" style="font-weight:bold;font-size:1.1em">Save</button>
+                    <button class="save-button" style="font-weight:bold;font-size:1.1em">Save</button>
                 </div> 
                 
                 <div style="position:absolute;bottom:5;text-align:left;padding:10px;">
@@ -426,6 +442,18 @@ console.log('load google map api')
                     <textarea id="coords1">Click on the map. The code for the selected shape you create will be presented here.</textarea>
                     <button id="apply-coords-button" style="margin-top:10px">Apply Coordinates</button>
                 </div> 
+            </div>            
+            
+            <div id="rightpanel_filter" class="rightpanel" style="display:none">
+                <div style="padding-top:20px">
+                    <button class="save-button" style="font-weight:bold;font-size:1.05em">Filter</button>
+                </div> 
+                <div style="padding-top:20px">
+                    <button class="cancel-button">Cancel</button>
+                </div>
+                <div style="position:absolute;bottom:5;text-align:left;padding:10px;">
+                    Add rectangle or polygon by selecting a drawing tool on the left
+                </div>
             </div>            
         </div>
         

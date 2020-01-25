@@ -53,6 +53,20 @@ The facets can, however, be based on attributes of other record types linked fro
 
 <div>
     <div class="header">
+        <label for="svs_SpatialFilter">Show spatial filter</label>
+    </div>
+    <input name="svs_SpatialFilter" id="svs_SpatialFilter" class="text ui-widget-content ui-corner-all" type="checkbox"
+            style="display:inline-block;margin:0" title="Allow draw and apply spatial search limits"/>
+        <div class="header svs_SpatialFilter" style="vertical-align:top;display:inline-block;font-size:smaller;padding: 7px">
+            <label for="svs_SpatialFilterLabel">Label on user interface</label></div>
+        <div style="padding-top:5px;display:inline-block;" class="svs_SpatialFilter">
+            <input type="text" name="svs_SpatialFilterLabel" id="svs_SpatialFilterLabel" class="text ui-widget-content ui-corner-all"
+                maxlength="40" size="40" />
+        </div>    
+</div>
+
+<div>
+    <div class="header">
         <label for="svs_AdditionalFilter">Show simple search</label>
     </div>
     <input name="svs_AdditionalFilter" id="svs_AdditionalFilter" class="text ui-widget-content ui-corner-all" type="checkbox"

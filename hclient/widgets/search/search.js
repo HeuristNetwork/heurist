@@ -1282,10 +1282,13 @@ $.widget( "heurist.search", {
             var select_coord1 = this.search_assistant.find(".sa_coord1");
             var select_coord2 = this.search_assistant.find(".sa_coord2");
             var sortasc =  this.search_assistant.find('.sa_sortasc');
+            var spatial_val =  this.search_assistant.find('.sa_spatial_val');
 
             if( (select_rectype && select_rectype.val()) || 
                 (select_fieldtype && select_fieldtype.val()) || 
-                (select_fieldvalue && select_fieldvalue.val())){
+                (select_fieldvalue && select_fieldvalue.val()) || 
+                (spatial_val && spatial_val.val()) 
+               ){
                
                 this.calcShowSimpleSearch();
                 qsearch = this.input_search.val();
@@ -1704,6 +1707,39 @@ $.widget( "heurist.search", {
             }
         });
         
+        that._on( that.search_assistant.find(".sa_spatial"), {
+            click: function(event){
+                //open map digitizer - returns WKT rectangle 
+                var rect_wkt = that.search_assistant.find(".sa_spatial_val").val();
+                var url = window.hWin.HAPI4.baseURL 
+                +'viewers/map/mapDraw.php?db='+window.hWin.HAPI4.database
+                +'&geofilter=1&wkt='+rect_wkt;
+
+                var wkt_params = {'wkt': rect_wkt};
+
+                window.hWin.HEURIST4.msg.showDialog(url, {height:'900', width:'1000',
+                    window: window.hWin,  //opener is top most heurist window
+                    dialogid: 'map_digitizer_filter_dialog',
+                    params: wkt_params,
+                    title: window.hWin.HR('Heurist spatial search'),
+                    class:'ui-heurist-bg-light',
+                    callback: function(location){
+                        if( !window.hWin.HEURIST4.util.isempty(location) ){
+                            //that.newvalues[$input.attr('id')] = location
+                            that.search_assistant.find(".sa_spatial_val").val(location.wkt);
+                            that.calcShowSimpleSearch();
+                        }
+                    }
+                } );
+            }
+        });
+        that._on( that.search_assistant.find(".sa_spatial_clear"), {
+            click: function(event){
+                that.search_assistant.find(".sa_spatial_val").val('');
+                that.calcShowSimpleSearch();
+            }
+        });
+        
         that._on( sortasc, {
             click: function(event){
                 //window.hWin.HEURIST4.util.stopEvent(event);
@@ -1723,7 +1759,8 @@ $.widget( "heurist.search", {
         
         var q = this.search_assistant.find(".sa_rectype").val(); if(q) q = "t:"+q;
         var fld = this.search_assistant.find(".sa_fieldtype").val(); 
-        var ctn = '';
+        var ctn = '';  //field value
+        var spatial = '';
         
         if(fld=='latitude' || fld=='longitude'){
             var coord1 = this.search_assistant.find(".sa_coord1").val();
@@ -1775,12 +1812,19 @@ $.widget( "heurist.search", {
                 }
             }
         }
+        
+        if(this.search_assistant.find(".sa_spatial_val").val()){
+            spatial = ' geo:'+this.search_assistant.find(".sa_spatial_val").val();  
+        }
 
         var asc = (this.search_assistant.find(".sa_sortasc").val()==1?"-":'') ; //($("#sa_sortasc:checked").length > 0 ? "" : "-");
         var srt = this.search_assistant.find(".sa_sortby").val();
         srt = (srt == "t" && asc == "" ? "" : ("sortby:" + asc + (isNaN(srt)?"":"f:") + srt));
 
-        q = (q? (fld?q+" ": q ):"") + (fld?fld: (ctn?" all:":"")) + (ctn?(isNaN(Number(ctn))?'"'+ctn+'"':ctn):"") + (srt? " " + srt : "");
+        q = (q? (fld?q+" ": q ):"") + (fld?fld: (ctn?" all:":"")) 
+                 + (ctn?(isNaN(Number(ctn))?'"'+ctn+'"':ctn):"")
+                 + spatial
+                 + (srt? " " + srt : "");
         if(!q){
             q = "sortby:t";
         }

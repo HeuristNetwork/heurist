@@ -226,8 +226,12 @@ function hMapManager( _options )
         options.container.addClass('ui-widget-content')
             .css({'margin-right':'5px','font-size':'0.97em'});
             
-        _onExpand(); //expand at once
-        //that.updatePanelVisibility();
+        if($.isArray(options.visible_panels) && options.visible_panels.indexOf('off')<0){
+            _onExpand(); //expand at once
+        }else{
+            that.updatePanelVisibility();  
+        }
+        //
     }
 
     //

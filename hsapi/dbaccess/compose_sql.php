@@ -429,7 +429,7 @@ class Query {
         $this->sort_tables = array();
 
         // Find any 'vt:' phrases in the query, and pull them out.   vt - visibility type
-        while (preg_match('/\\G([^"]*(?:"[^"]*"[^"]*)*)\\b(vt:(?:f:|field:)?"[^"]+"\\S*|vt:\\S*)/', $text, $matches)) {
+        while (preg_match('/\\G([^"]*(?:"[^"]*"[^"]*)*)\\b(vt:(?:f:|field:|geo:)?"[^"]+"\\S*|vt:\\S*)/', $text, $matches)) {
             $this->addVisibilityTypeRestriction(substr($matches[2],3));
             $text = preg_replace('/\bvt:\S+/i', '', $text);
             //$text = $matches[1] . substr($text, strlen($matches[1])+strlen($matches[2]));
@@ -609,7 +609,11 @@ class OrLimb {
         if (substr_count($text, '"') % 2 != 0) $text .= '"';    // unmatched quote
 
         //ORIGINAL if (preg_match_all('/(?:[^" ]+|"[^"]*")+(?= |$)/', $text, $matches)) {
-
+        
+        //"geo:\"POLYGON((37.5
+        /*if(strpos($text,"geo:")===0){
+            $this->addAndLimb($text);
+        }else*/
         // split by spaces - exclude text inside quotes and parentheses
         if (preg_match_all('/(?:[^"( ]+|["(][^")]*[")])+(?= |$)/', $text, $matches)) {
 
@@ -879,6 +883,9 @@ class AndLimb {
             case 'owner':
                 return new WorkgroupPredicate($this, $pred_val);
 
+            case 'geo':
+                return new SpatialPredicate($this, $pred_val);
+                
             case 'latitude':
             case 'lat':
                 return new LatitudePredicate($this, $pred_val);
@@ -2866,6 +2873,14 @@ class WorkgroupPredicate extends Predicate {
     }
 }
 
+class SpatialPredicate extends Predicate {
+    
+    function makeSQL() {
+        return "exists (select dtl_ID from recDetails bd
+            where bd.dtl_RecID=TOPBIBLIO.rec_ID and bd.dtl_Geo is not null
+            and ST_Contains(ST_GeomFromText('".$this->value."'), bd.dtl_Geo) limit 1)";  //MBRContains
+    }
+}
 
 class LatitudePredicate extends Predicate {
     
@@ -2882,13 +2897,13 @@ class LatitudePredicate extends Predicate {
             // see if the northernmost point of the bounding box lies south of the given latitude
             return "exists (select * from recDetails bd
             where bd.dtl_RecID=TOPBIBLIO.rec_ID and bd.dtl_Geo is not null
-            and y( PointN( ExteriorRing( Envelope(bd.dtl_Geo) ), 4 ) ) $op " . floatval($this->value) . " limit 1)";
+            and ST_Y( ST_PointN( ST_ExteriorRing( ST_Envelope(bd.dtl_Geo) ), 4 ) ) $op " . floatval($this->value) . " limit 1)";
         }
         else if ($op!='' && $op[0] == '>') {
             // see if the SOUTHERNmost point of the bounding box lies north of the given latitude
             return "exists (select * from recDetails bd
             where bd.dtl_RecID=TOPBIBLIO.rec_ID and bd.dtl_Geo is not null
-            and y( StartPoint( ExteriorRing( Envelope(bd.dtl_Geo) ) ) ) $op " . floatval($this->value) . " limit 1)";
+            and ST_Y( ST_StartPoint( ST_ExteriorRing( ST_Envelope(bd.dtl_Geo) ) ) ) $op " . floatval($this->value) . " limit 1)";
 
         }
         else if ($this->parent->exact) {
@@ -2896,7 +2911,7 @@ class LatitudePredicate extends Predicate {
             // see if there is a Point with this exact latitude
             return "exists (select * from recDetails bd
             where bd.dtl_RecID=TOPBIBLIO.rec_ID and bd.dtl_Geo is not null and bd.dtl_Value = 'p'
-            and y(bd.dtl_Geo) $op " . floatval($this->value) . " limit 1)";
+            and ST_Y(bd.dtl_Geo) $op " . floatval($this->value) . " limit 1)";
         }
         else {
             //Envelope - Bounding rect
@@ -2904,11 +2919,11 @@ class LatitudePredicate extends Predicate {
             
             if (strpos($this->value,"<>")>0) {
                 $vals = explode("<>", $this->value);
-                $match_pred = 'y( Centroid( Envelope(bd.dtl_Geo) ) ) between '.floatval($vals[0]).' and '.floatval($vals[1]).' ';
+                $match_pred = 'ST_Y( ST_Centroid( ST_Envelope(bd.dtl_Geo) ) ) between '.floatval($vals[0]).' and '.floatval($vals[1]).' ';
             }else{
                 // see if this latitude passes through the bounding box
-                $match_pred = floatval($this->value)." between y( StartPoint( ExteriorRing( Envelope(bd.dtl_Geo) ) ) )
-                        and y( PointN( ExteriorRing( Envelope(bd.dtl_Geo) ), 4 ) )";
+                $match_pred = floatval($this->value)." between ST_Y( ST_StartPoint( ST_ExteriorRing( ST_Envelope(bd.dtl_Geo) ) ) )
+                        and ST_Y( ST_PointN( ST_ExteriorRing( ST_Envelope(bd.dtl_Geo) ), 4 ) )";
             }
             
             return "exists (select * from recDetails bd
@@ -2932,13 +2947,13 @@ class LongitudePredicate extends Predicate {
             // see if the westernmost point of the bounding box lies east of the given longitude
             return "exists (select * from recDetails bd
             where bd.dtl_RecID=TOPBIBLIO.rec_ID and bd.dtl_Geo is not null
-            and x( PointN( ExteriorRing( Envelope(bd.dtl_Geo) ), 4 ) ) $op " . floatval($this->value) . " limit 1)";
+            and ST_X( ST_PointN( ST_ExteriorRing( ST_Envelope(bd.dtl_Geo) ), 4 ) ) $op " . floatval($this->value) . " limit 1)";
         }
         else if ($op!='' && $op[0] == '>') {
             // see if the EASTERNmost point of the bounding box lies west of the given longitude
             return "exists (select * from recDetails bd
             where bd.dtl_RecID=TOPBIBLIO.rec_ID and bd.dtl_Geo is not null
-            and x( StartPoint( ExteriorRing( Envelope(bd.dtl_Geo) ) ) ) $op " . floatval($this->value) . " limit 1)";
+            and ST_X( ST_StartPoint( ST_ExteriorRing( ST_Envelope(bd.dtl_Geo) ) ) ) $op " . floatval($this->value) . " limit 1)";
 
         }
         else if ($this->parent->exact) {
@@ -2946,17 +2961,17 @@ class LongitudePredicate extends Predicate {
             // see if there is a Point with this exact longitude
             return "exists (select * from recDetails bd
             where bd.dtl_RecID=TOPBIBLIO.rec_ID and bd.dtl_Geo is not null and bd.dtl_Value = 'p'
-            and x(bd.dtl_Geo) $op " . floatval($this->value) . " limit 1)";
+            and ST_X(bd.dtl_Geo) $op " . floatval($this->value) . " limit 1)";
         }
         else {
             
             if (strpos($this->value,"<>")>0) {
                 $vals = explode("<>", $this->value);
-                $match_pred = 'x( Centroid( Envelope(bd.dtl_Geo) ) ) between '.floatval($vals[0]).' and '.floatval($vals[1]).' ';
+                $match_pred = 'ST_X( ST_Centroid( ST_Envelope(bd.dtl_Geo) ) ) between '.floatval($vals[0]).' and '.floatval($vals[1]).' ';
             }else{
                 // see if this longitude passes through the bounding box
-                $match_pred = floatval($this->value)." between x( StartPoint( ExteriorRing( Envelope(bd.dtl_Geo) ) ) )
-                        and x( PointN( ExteriorRing( Envelope(bd.dtl_Geo) ), 2 ) )";
+                $match_pred = floatval($this->value)." between ST_X( ST_StartPoint( ST_ExteriorRing( ST_Envelope(bd.dtl_Geo) ) ) )
+                        and ST_X( PointN( ST_ExteriorRing( ST_Envelope(bd.dtl_Geo) ), 2 ) )";
             }
             
             return "exists (select * from recDetails bd
