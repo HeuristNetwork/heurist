@@ -1031,6 +1031,9 @@ function editCMS( options ){
         
     }
 
+    //
+    //
+    //
     function removeMenuEntry(parent_id, menu_id, records_to_del, callback){
 
         //delete detail from parent menu
@@ -1042,6 +1045,8 @@ function editCMS( options ){
         window.hWin.HAPI4.RecordMgr.batch_details(request, function(response){
                 if(response.status == hWin.ResponseStatus.OK){
                     if(records_to_del && records_to_del.length>0){
+                        
+                        //delete children 
                         window.hWin.HAPI4.RecordMgr.remove({ids:records_to_del},
                              function(response){
                                 if(response.status == hWin.ResponseStatus.OK){
@@ -1064,6 +1069,9 @@ function editCMS( options ){
         
     }
     
+    //
+    //
+    //
     function renameEntry(rec_id, newvalue, callback){
 
         var request = {a: 'replace',

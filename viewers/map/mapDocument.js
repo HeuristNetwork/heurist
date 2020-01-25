@@ -119,7 +119,7 @@ function hMapDocument( _options )
         var treedata = [];
         
         var resdata = map_documents_content[mapdoc_id];
-        if(resdata){
+        if(resdata){ //we may use resdata.each
             var idx, records = resdata.getRecords();
             for(idx in records){
                 if(idx)
@@ -178,6 +178,7 @@ function hMapDocument( _options )
                 }
             }
             if(RT_TLCMAP_DATASET>0){
+                //additional rule for tlc datasets
                 request['rules'].push({"query":"linkedfrom:"+RT_TLCMAP_DATASET+"-"+DT_DATA_SOURCE});
             }
 

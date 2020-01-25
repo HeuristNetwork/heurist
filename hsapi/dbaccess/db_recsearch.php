@@ -15,6 +15,7 @@
     * recordGetRelationship - returns relrecord (RT#1) for given pair of records (id or full record)
     * recordGetLinkedRecords - returns all linked record and their types (for update titles)
     * recordSearchMenuItems - returns all CMS records for given CMS home record
+    * not implemented recordSearchMapDocItems - returns all layers and datasource records for given map document record
     * 
     * recordSearchFindParent - find parent record for rec_ID with given record type
     * 

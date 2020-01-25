@@ -59,10 +59,12 @@ $.widget( "heurist.recordLookup", $.heurist.recordAction, {
             this.options.mapping = {
               rty_ID: 12,//'3-1009'
               service: 'tlcmap',
+              label: 'Lookup in AGHP',
               fields:{ 
                   'properties.name': 1, //'2-1',  
                   'geometry': 28, //'2-28',
-                  'properties.id': 26, //'2-26', //original id
+                  //'properties.id': 26, //'2-26', //original id
+                  'properties.id': 26,   // 2-581  //external id
                   'state': 234, //'2-234',
                   'LGA': 2, //'2-2',
                   'description': 4 //'2-4'

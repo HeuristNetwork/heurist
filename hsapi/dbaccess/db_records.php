@@ -681,7 +681,6 @@
                 }
             }
         
-            
             $is_error = false;
             $mysqli = $system->get_mysqli();
             if($need_transaction){

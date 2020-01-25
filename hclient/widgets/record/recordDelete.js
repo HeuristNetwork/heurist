@@ -21,6 +21,7 @@ $.widget( "heurist.recordDelete", $.heurist.recordAction, {
 
     // default options
     options: {
+        map_document_id: null, //special case - remove mapdocument and all its dependencies
     
         height: 340,
         width:  640,
@@ -44,18 +45,20 @@ $.widget( "heurist.recordDelete", $.heurist.recordAction, {
         this.header_div = this.element.find('#div_header').css({'line-height':'21px'});
 
         //search for linked counts        
-        this._onLinkedCount();
+        //this._onLinkedCount();
             
         if(cnt_selected > 8){
             this.element.find('#div_1').show();
         }            
         
         if (window.hWin.HAPI4.is_admin()) {
-            this.element.find('#div_2').show();
-            this.element.find('#div_2 > a').attr('href',
+            if(cnt_selected>0){
+                this.element.find('#div_2').show();
+                this.element.find('#div_2 > a').attr('href',
                              window.hWin.HAPI4.baseURL+'admin/verification/combineDuplicateRecords.php?db='
                              + window.hWin.HAPI4.database
                              +'&bib_ids=' + this._currentRecordsetSelIds.join(','));
+            }
         } else {
             this.element.find('#div_3').show();
         }
@@ -99,9 +102,16 @@ $.widget( "heurist.recordDelete", $.heurist.recordAction, {
                         });
         
         
-        var scope = this._currentRecordset.getSubSetByIds(this._currentRecordsetSelIds);
+console.log('!!!!');        
+        if(this.options.map_document_id>0){
+            //find mapdocument content
+            this._findMapDocumentContent();
+        }else{
+            var scope = this._currentRecordset.getSubSetByIds(this._currentRecordsetSelIds);
+            this.recordList.resultList('updateResultSet', scope, null); //render
+        }
         
-        this.recordList.resultList('updateResultSet', scope, null); //render
+        
         
         //adjust height
         var that = this;
@@ -116,6 +126,58 @@ $.widget( "heurist.recordDelete", $.heurist.recordAction, {
     },
     
     //
+    //
+    //
+    _findMapDocumentContent: function(){
+        
+        var mapdoc_id = this.options.map_document_id;
+        
+        var RT_TLCMAP_DATASET = window.hWin.HAPI4.sysinfo['dbconst']['RT_TLCMAP_DATASET'],
+            RT_MAP_LAYER = window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_LAYER'],
+            DT_MAP_LAYER = window.hWin.HAPI4.sysinfo['dbconst']['DT_MAP_LAYER'],
+            DT_DATA_SOURCE = window.hWin.HAPI4.sysinfo['dbconst']['DT_DATA_SOURCE'];
+        
+            var request = {
+                        w: 'a',
+                        detail: 'header',
+                        source: 'map_document',
+                        rules: [{"query":"linkedfrom:"+RT_MAP_LAYER+"-"+DT_DATA_SOURCE}]
+            };
+            
+            if(RT_TLCMAP_DATASET>0){
+                    request['q'] = {"any":[{"ids":mapdoc_id},{"t":RT_MAP_LAYER+','+RT_TLCMAP_DATASET,"linkedfrom":mapdoc_id}]};
+            }else{
+                    request['q'] = {"any":[{"ids":mapdoc_id},{"t":RT_MAP_LAYER,"linkedfrom":mapdoc_id}]};  //layers linked to given mapdoc
+            }
+
+            if(RT_TLCMAP_DATASET>0){
+                //additional rule for tlc datasets
+                request['rules'].push({"query":"linkedfrom:"+RT_TLCMAP_DATASET+"-"+DT_DATA_SOURCE});
+            }
+            
+            var that = this;
+
+            //perform search        
+            window.hWin.HAPI4.RecordMgr.search(request,
+                function(response){
+                    
+                    if(response.status == window.hWin.ResponseStatus.OK){
+                        var resdata = new hRecordSet(response.data);
+                        
+                        that.recordList.resultList('updateResultSet', resdata, null); //render
+
+                        window.hWin.HEURIST4.util.setDisabled( that.element.parents('.ui-dialog').find('#btnDoAction'), false );
+                        
+                    }else {
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                    }
+
+                }
+            );           
+        
+    },
+    
+    /*
     // not implemented
     //
     _onLinkedCount:function(){
@@ -153,6 +215,7 @@ $.widget( "heurist.recordDelete", $.heurist.recordAction, {
             
         }
     },
+    */
     
     _destroy: function() {
         // remove generated elements
@@ -172,9 +235,9 @@ $.widget( "heurist.recordDelete", $.heurist.recordAction, {
     //
     doAction: function( isconfirm, check_source ){
 
-        var scope_val = this.selectRecordScope.val();
-        
-        if (scope_val=='')  return;
+        var scope_val = 'current';
+        //var scope_val = this.selectRecordScope.val();
+        //if (scope_val=='')  return;
         
         var that = this;       
             
@@ -217,7 +280,7 @@ $.widget( "heurist.recordDelete", $.heurist.recordAction, {
             var scope = [], 
             rec_RecTypeID = 0;
             
-            if(scope_val == 'selected'){
+            if(false){ //}scope_val == 'selected'){
                 scope = this._currentRecordsetSelIds;
             }else { //(scope_val == 'current'
                 scope = this._currentRecordset.getIds();
@@ -235,13 +298,13 @@ $.widget( "heurist.recordDelete", $.heurist.recordAction, {
                 request['rec_RecTypeID'] = rec_RecTypeID;
             }
                 
-            window.hWin.HAPI4.SystemMgr.user_log('delete_Record', (scope.length+' recs: '+request.ids.substr(0,100)));
             
             //check source links   
             if(check_source!==true){                            
                 request['check_links'] = true;                   
             }
-                
+            window.hWin.HAPI4.SystemMgr.user_log('delete_Record', (scope.length+' recs: '+request.ids.substr(0,100)));
+            
             window.hWin.HAPI4.RecordMgr.remove(request, 
                     function(response){
                         if(response.status == window.hWin.ResponseStatus.OK){

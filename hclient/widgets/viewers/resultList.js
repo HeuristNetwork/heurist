@@ -1234,21 +1234,23 @@ $.widget( "heurist.resultList", {
         + '</div>'
 
         + '<div title="Click to edit record (opens in new tab)" '
-        + ' class="rec_edit_link_ext logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only"'
+        + ' class="rec_edit_link_ext action-button logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only"'
         + ' role="button" aria-disabled="false" data-key="edit_ext">'
         + '<span class="ui-button-icon-primary ui-icon ui-icon-newwin"/><span class="ui-button-text"/>'
         + '</div>'  // Replace ui-icon-pencil with ui-icon-extlink and swap position when this is finished 
 
         + '<div title="Click to view record (opens in popup)" '
-        + 'class="rec_view_link ui-button ui-widget ui-state-default ui-corner-all'+btn_icon_only+'" '
+        + 'class="rec_view_link action-button ui-button ui-widget ui-state-default ui-corner-all'+btn_icon_only+'" '
         + 'role="button" aria-disabled="false">'
-        + '<span class="ui-button-text">View</span><span class="ui-button-icon-primary ui-icon ui-icon-comment"/>'
+        + '<span class="ui-button-text">View</span>'
+        + '<span class="ui-button-icon-primary ui-icon ui-icon-comment"/>'
         + '</div>'
 
         + '<div title="Click to edit record" '
-        + 'class="rec_edit_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all'+btn_icon_only+'" '
+        + 'class="rec_edit_link action-button logged-in-only ui-button ui-widget ui-state-default ui-corner-all'+btn_icon_only+'" '
         + 'role="button" aria-disabled="false" data-key="edit">'
-        + '<span class="ui-button-text">Edit</span><span class="ui-button-icon-primary ui-icon ui-icon-pencil"/>'
+        + '<span class="ui-button-text">Edit</span>'
+        + '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"/>'
         + '</div>'
 
         // Icons at end allow editing and viewing data for the record when the Record viewing tab is not visible
@@ -1256,18 +1258,26 @@ $.widget( "heurist.resultList", {
         + ((!this.options.show_url_as_link && fld('rec_URL'))
             ?
         '<div title="Click to view external link (opens in new window)" '
-        + 'class="rec_view_link_ext ui-button ui-widget ui-state-default ui-corner-all'+btn_icon_only+'" '
+        + 'class="rec_view_link_ext action-button ui-button ui-widget ui-state-default ui-corner-all'+btn_icon_only+'" '
         + 'role="button" aria-disabled="false">'
-        + '<span class="ui-button-text">Link</span><span class="ui-button-icon-primary ui-icon ui-icon-extlink"/>'
+        + '<span class="ui-button-text">Link</span>'
+        + '<span class="ui-button-icon-primary ui-icon ui-icon-extlink"/>'
         + '</div>'
             :'')
         
         + ((rectypeID==window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_DOCUMENT'])
             ?
         '<div title="Click to embed" '
-        + 'class="rec_view_link_ext ui-button ui-widget ui-state-default ui-corner-all'+btn_icon_only+'" '
+        + 'class="rec_view_link_ext action-button ui-button ui-widget ui-state-default ui-corner-all'+btn_icon_only+'" '
         + 'role="button" aria-disabled="false">'
-        + '<span class="ui-button-text">Embed</span><span class="ui-button-icon-primary ui-icon ui-icon-globe"/>'
+        + '<span class="ui-button-text">Embed</span>'
+        + '<span class="ui-button-icon-primary ui-icon ui-icon-globe"/>'
+        + '</div>'
+        + '<div title="Click to delete" '
+        + 'class="rec_delete action-button ui-button ui-widget ui-state-default ui-corner-all'+btn_icon_only+'" '
+        + 'role="button" aria-disabled="false">'
+        + '<span class="ui-button-text">Delete</span>'
+        + '<span class="ui-button-icon-primary ui-icon ui-icon-trash"/>'
         + '</div>'
             :'')
         
@@ -1491,6 +1501,30 @@ $.widget( "heurist.resultList", {
                 }
                 return;
             }
+            if($target.parents('.rec_delete').length>0){
+                if(this._currentRecordset){
+                    var record = this._currentRecordset.getById(selected_rec_ID)
+                    var rectypeID = this._currentRecordset.fld(record, 'rec_RecTypeID' );
+                    //show embed dialog
+                    if(rectypeID==window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_DOCUMENT']){
+
+                        window.hWin.HEURIST4.ui.showRecordActionDialog('recordDelete', {
+                            map_document_id: selected_rec_ID,
+                            title: 'Delete map document and associated map layers and data sources',
+                            onClose:
+                           function( context ){
+                               if(context){
+                                   // refresh search
+                                   window.hWin.HAPI4.SearchMgr.doSearch( this, this._query_request );
+                               }
+                           }
+                        });
+                        
+                    }
+                }
+                return;
+            }
+            
         }
 
         //select/deselect on click

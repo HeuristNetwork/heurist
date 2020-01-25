@@ -105,10 +105,17 @@
 
         $response = recordSearchRelated($system, $_REQUEST['ids'], @$_REQUEST['direction']);
 
-    }else if(@$_REQUEST['a'] == 'cms_menu'){  //retrieve 
+    }else if(@$_REQUEST['a'] == 'cms_menu'){  //retrieve all child cms entries for given menu entries
         
         $resids = array();
         $response = recordSearchMenuItems($system, $_REQUEST['ids'], $resids);
+        
+    /* not implemented
+    }else if(@$_REQUEST['a'] == 'map_document'){  //retrieve all layers and datasource records fro given map document
+        
+        $resids = array();
+        $response = recordSearchMapDocItems($system, $_REQUEST['ids'], $resids);
+    */
     }else {
         
         if(@$_REQUEST['remote'] == 'master'){

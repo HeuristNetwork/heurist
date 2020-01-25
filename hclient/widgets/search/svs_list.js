@@ -2035,7 +2035,8 @@ $.widget( "heurist.svs_list", {
         if(prms.type!=3){
             
             
-            var crules = window.hWin.HEURIST4.util.cleanRules( prms.rules );                                                      prms.rules = crules==null?'':crules; //JSON.stringify(crules);
+            var crules = window.hWin.HEURIST4.util.cleanRules( prms.rules );                                                      
+            prms.rules = crules==null?'':crules; //JSON.stringify(crules);
             
             prms.db = window.hWin.HAPI4.database;
             var res = Hul.hQueryStringify(prms); //json to string
