@@ -1713,7 +1713,8 @@ $.widget( "heurist.search", {
                 var rect_wkt = that.search_assistant.find(".sa_spatial_val").val();
                 var url = window.hWin.HAPI4.baseURL 
                 +'viewers/map/mapDraw.php?db='+window.hWin.HAPI4.database
-                +'&geofilter=1&wkt='+rect_wkt;
+                +'&geofilter=1&wkt='
+                + (window.hWin.HEURIST4.util.isempty(rect_wkt)?'null':rect_wkt);
 
                 var wkt_params = {wkt: rect_wkt, geofilter:true};
 

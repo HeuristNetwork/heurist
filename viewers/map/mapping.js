@@ -2407,9 +2407,11 @@ $.widget( "heurist.mapping", {
         }
         
         if(msg!=null){
-            if(show_warning){
+            if(show_warning===true){
                     window.hWin.HEURIST4.msg.showMsgDlg(msg);    
-            }else{
+            }else if(show_warning===false){
+                    res = false;
+            }else {
                     res = msg;
             }
         }

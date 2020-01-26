@@ -75,7 +75,8 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
         <script type="text/javascript">
 
             var mapping, initial_wkt, need_screenshot = false, is_geofilter=false,
-                menu_datasets, btn_datasets, zoom_with_delay = true;
+                menu_datasets, btn_datasets, zoom_with_delay = true,
+                sMsgDigizeSearch = 'Digitise search area as a rectangle or polygon';
 
             // Callback function on map initialization
             function onPageInit(success){
@@ -213,7 +214,7 @@ console.log('load google map api')
 
                        if(el_name=='get-coord-wkt' && is_checked){
                            
-                            var res = mapping.mapping( 'drawGetWkt', false);
+                            var res = mapping.mapping( 'drawGetWkt', 'messsage');
                             el_text.val(res);    
                            
                        }else{
@@ -235,9 +236,9 @@ console.log('load google map api')
                 
                     $('.rightpanel').hide();
 
-                    var res = mapping.mapping( 'drawGetWkt', true);
+                    var res = mapping.mapping( 'drawGetWkt', false );
                     
-                    if( !window.hWin.HEURIST4.util.isempty(res) ){    
+                    if( res!==false ){    
                         //type code is not required for new code. this is for backward capability
                         var typeCode = 'm';
                         if(res.indexOf('GEOMETRYCOLLECTION')<0 && res.indexOf('MULTI')<0){
@@ -300,7 +301,22 @@ console.log('load google map api')
                         }
                         
                         
+                        return;
                         
+                    }
+                    else if(is_geofilter){
+                        window.hWin.HEURIST4.msg.showMsgFlash(sMsgDigizeSearch, 2000);
+                    }else{
+                        window.hWin.HEURIST4.msg.showMsgFlash('You have to draw a shape', 2000);
+                    }
+                    
+                    if(is_geofilter){
+                        $('#rightpanel').hide();
+                        $('#rightpanel_filter').show();
+                        $('#cbAllowMulti').prop('checked', false);
+                    }else{
+                        $('#rightpanel').show();
+                        $('#rightpanel_filter').hide();
                     }
             }
             
@@ -326,7 +342,7 @@ console.log('load google map api')
             //
             //           
             function onMapInit(){
-                
+           
                 if(is_geofilter){
                     $('#rightpanel').hide();
                     $('#rightpanel_filter').show();
@@ -337,7 +353,7 @@ console.log('load google map api')
                 }
 
                 
-                if(initial_wkt){ //params && params['wkt']
+                if( !window.hWin.HEURIST4.util.isempty(initial_wkt) && initial_wkt!='undefined' ){ //params && params['wkt']
                 
                     if(initial_wkt.indexOf('GEOMETRYCOLLECTION')>=0 || initial_wkt.indexOf('MULTI')>=0){
                         $('#cbAllowMulti').prop('checked',true);
@@ -360,6 +376,9 @@ console.log('load google map api')
                         setTimeout(function(){ mapping.mapping('getSetMapBounds', false); }, 3000);
                     }
                     
+                    if(is_geofilter){
+                        window.hWin.HEURIST4.msg.showMsgFlash(sMsgDigizeSearch, 2000);
+                    }
                 }
             }
             
@@ -443,7 +462,7 @@ console.log('load google map api')
                 padding:0.2em;
             }   
             .rightpanel > div > button{
-                width:14em;
+                width:13em;
             }   
             #coords1 {
                 padding: 5px;
@@ -520,7 +539,7 @@ console.log('load google map api')
                     <button class="cancel-button">Cancel</button>
                 </div>
                 <div style="position:absolute;bottom:5;text-align:left;padding:10px;">
-                    Add rectangle or polygon by selecting a drawing tool on the left
+                    Digitise search area as a rectangle or polygon by selecting a drawing tool on the left
                 </div>
             </div>            
         </div>
