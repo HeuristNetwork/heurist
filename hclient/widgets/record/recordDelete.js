@@ -101,6 +101,7 @@ $.widget( "heurist.recordDelete", $.heurist.recordAction, {
                         //"resultlistonaction": this._onActionListener        
                         });
         
+console.log(this.options.map_document_id);
         if(this.options.map_document_id>0){
             //find mapdocument content
             this._findMapDocumentContent();
@@ -131,6 +132,7 @@ $.widget( "heurist.recordDelete", $.heurist.recordAction, {
         var mapdoc_id = this.options.map_document_id;
         
         var RT_TLCMAP_DATASET = window.hWin.HAPI4.sysinfo['dbconst']['RT_TLCMAP_DATASET'],
+            RT_MAP_DOCUMENT = window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_DOCUMENT'],
             RT_MAP_LAYER = window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_LAYER'],
             DT_MAP_LAYER = window.hWin.HAPI4.sysinfo['dbconst']['DT_MAP_LAYER'],
             DT_DATA_SOURCE = window.hWin.HAPI4.sysinfo['dbconst']['DT_DATA_SOURCE'];
@@ -139,18 +141,19 @@ $.widget( "heurist.recordDelete", $.heurist.recordAction, {
                         w: 'a',
                         detail: 'header',
                         source: 'map_document',
-                        rules: [{"query":"linkedfrom:"+RT_MAP_LAYER+"-"+DT_DATA_SOURCE}]
+                        q: {"ids":mapdoc_id}
+                        //rules: [{"query":"linkedfrom:"+RT_MAP_LAYER+"-"+DT_DATA_SOURCE}]
             };
             
+            
             if(RT_TLCMAP_DATASET>0){
-                    request['q'] = {"any":[{"ids":mapdoc_id},{"t":RT_MAP_LAYER+','+RT_TLCMAP_DATASET,"linkedfrom":mapdoc_id}]};
+                    //request['q'] = {"any":[{"ids":mapdoc_id},{"t":RT_MAP_LAYER+','+RT_TLCMAP_DATASET,"linkedfrom":mapdoc_id}]};
+                    request['rules'] = [{"query":"t:"+RT_MAP_LAYER+","+RT_TLCMAP_DATASET+" linkedfrom:"+RT_MAP_DOCUMENT+"-"+DT_MAP_LAYER
+                                        ,"levels":[{"query":"linkedfrom:"+RT_MAP_LAYER+"-"+DT_DATA_SOURCE},
+                                                   {"query":"linkedfrom:"+RT_TLCMAP_DATASET+"-"+DT_DATA_SOURCE}]}];
             }else{
-                    request['q'] = {"any":[{"ids":mapdoc_id},{"t":RT_MAP_LAYER,"linkedfrom":mapdoc_id}]};  //layers linked to given mapdoc
-            }
-
-            if(RT_TLCMAP_DATASET>0){
-                //additional rule for tlc datasets
-                request['rules'].push({"query":"linkedfrom:"+RT_TLCMAP_DATASET+"-"+DT_DATA_SOURCE});
+                    request['rules'] = [{"query":"t:"+RT_MAP_LAYER+" linkedfrom:"+RT_MAP_DOCUMENT+"-"+DT_MAP_LAYER
+                                        ,"levels":[{"query":"linkedfrom:"+RT_MAP_LAYER+"-"+DT_DATA_SOURCE}]}];
             }
             
             var that = this;
