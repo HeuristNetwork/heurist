@@ -101,8 +101,6 @@ $.widget( "heurist.recordDelete", $.heurist.recordAction, {
                         //"resultlistonaction": this._onActionListener        
                         });
         
-        
-console.log('!!!!');        
         if(this.options.map_document_id>0){
             //find mapdocument content
             this._findMapDocumentContent();
@@ -280,7 +278,8 @@ console.log('!!!!');
             var scope = [], 
             rec_RecTypeID = 0;
             
-            if(false){ //}scope_val == 'selected'){
+            /*
+            if(scope_val == 'selected'){
                 scope = this._currentRecordsetSelIds;
             }else { //(scope_val == 'current'
                 scope = this._currentRecordset.getIds();
@@ -288,6 +287,9 @@ console.log('!!!!');
                     rec_RecTypeID = scope_val;
                 }   
             }
+            */
+            var scope = this.recordList.resultList('getRecordSet').getIds();           
+
         
             var request = {
                 'request_id' : window.hWin.HEURIST4.util.random(),
@@ -297,7 +299,6 @@ console.log('!!!!');
             if(rec_RecTypeID>0){
                 request['rec_RecTypeID'] = rec_RecTypeID;
             }
-                
             
             //check source links   
             if(check_source!==true){                            
