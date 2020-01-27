@@ -62,11 +62,10 @@ of the codebase and rename it to index.html
 
 // *** DO NOT CHANGE VERSION NUMBER, THIS IS SET BY THE HEURIST DEVELOPMENT TEAM ***
 
-$version = "5.1.13"; // sets current program version number, determined by Heurist development lead
+$version = "5.1.12"; // sets current program version number, determined by Heurist development lead
 
 // dates below are the date of release of the given version, and list changes since last release
 
-//h5.1.13 27 Jan 2020 Smarty can reference CSS in a record, fix data archive and auditing, new result set display style with better buttons, Protected records, spatial search specifications in facet searches, autiomatic map thumbnail capture
 // h5.1.12 14 Jan 2020 (5.1.11 included) Improvements to HML import, new functiosn on website editor (record collector, data source fixes for shapefiles, standalone pages for iframe, exrtra parameters on widgets, web map embed dialgue with parameters), multi-database shared login, block deletion of pointer targets, revise change audit data saved, gazeteer or other source lookup, results list image+long title, revise record poitner field edit
 // h5.1.10 4 Dec 2019 Support KMZ, other KML nad mapping fixes, new map symbology function, improved website generator including custom header section and single page for embedding in iframe, automate welcome letter, improve hml import, many bug fixes
 // h5.1.9 11 Nov 2019 Improved automatic date correction, compatibility issues with MySQL 8, big rationalisation of colour settings across all code, finalise HML import and template export, location inheritance from Place in Leaflet

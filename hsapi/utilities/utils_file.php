@@ -197,7 +197,7 @@
         $check = folderExists($folder, true);
         
         if($check==-2){
-            $swarn = 'Cannot access folder (it, or a subdirectory, is not writeable) '. $folder .'  '.$message.'<br>';
+            $swarn = 'Cannot access folder (it is not writeable) '. $folder .'  '.$message.'<br>';
         }else if($check==-1){
             if (!mkdir($folder, 0777, true)) {
                 $swarn = 'Unable to create folder '. $folder .'  '.$message.'<br>';
