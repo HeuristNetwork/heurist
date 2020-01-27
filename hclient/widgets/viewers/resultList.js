@@ -1128,6 +1128,8 @@ $.widget( "heurist.resultList", {
         11 .'bkm_PwdReminder ';
         11  thumbnailURL - may not exist
         */
+        
+        var is_logged = window.hWin.HAPI4.has_access();
 
         var recID = fld('rec_ID');
         var rectypeID = fld('rec_RecTypeID');
@@ -1228,7 +1230,7 @@ $.widget( "heurist.resultList", {
 
 
         // it is useful to display the record title as a rollover in case the title is too long for the current display area
-        + '<div title="dbl-click to edit : '+recTitle_strip_all+'" class="recordTitle">'
+        + '<div title="'+(is_logged?('dbl-click to edit : '+recTitle_strip_all):'')+'" class="recordTitle">'
         +     (this.options.show_url_as_link && fld('rec_URL') ?("<a href='"+fld('rec_URL')+"' target='_blank'>"
             + recTitle_strip1 + "</a>") :recTitle_strip2)
         + '</div>'
@@ -1274,7 +1276,7 @@ $.widget( "heurist.resultList", {
         + '<span class="ui-button-icon-primary ui-icon ui-icon-globe"/>'
         + '</div>'
         + '<div title="Click to delete" '
-        + 'class="rec_delete action-button ui-button ui-widget ui-state-default ui-corner-all'+btn_icon_only+'" '
+        + 'class="rec_delete action-button logged-in-only ui-button ui-widget ui-state-default ui-corner-all'+btn_icon_only+'" '
         + 'role="button" aria-disabled="false">'
         + '<span class="ui-button-text">Delete</span>'
         + '<span class="ui-button-icon-primary ui-icon ui-icon-trash"/>'
