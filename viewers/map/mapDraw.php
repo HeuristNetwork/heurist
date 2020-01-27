@@ -462,7 +462,7 @@ console.log('load google map api')
                 padding:0.2em;
             }   
             .rightpanel > div > button{
-                width:13em;
+                width:12em;
             }   
             #coords1 {
                 padding: 5px;

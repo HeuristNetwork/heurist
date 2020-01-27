@@ -23,6 +23,8 @@
 
 require_once(dirname(__FILE__)."/../../admin/verification/verifyValue.php");
 require_once(dirname(__FILE__)."/../../hsapi/dbaccess/db_records.php");
+require_once(dirname(__FILE__).'/../../hsapi/dbaccess/dbRecDetails.php');
+
 
 /*
 main methods
@@ -406,11 +408,6 @@ public static function importDefintions($filename, $session_id){
 
 /**
     Import records from another database on the same server
-    
-1. saves import file into scratch folder - see record_output
-2. 
-
-    
 */
 public static function importRecordsFromDatabase($params, $session_id){
     
@@ -435,11 +432,11 @@ public static function importRecordsFromDatabase($params, $session_id){
         }
     }
     
-    //convert tlcmap dataset to map layer and parent mapspace
+    //convert tlcmap dataset to map layer and creates parent mapspace
+    // see record_output.php
     if(@$params['tlcmapspace']!=null){
         $remote_path = $remote_path.'&tlcmap='.urlencode($params['tlcmapspace']);    
     }
-    
 
     $heurist_path = tempnam(HEURIST_SCRATCH_DIR, "_temp_"); // . $file_id;
 
@@ -449,6 +446,20 @@ public static function importRecordsFromDatabase($params, $session_id){
     if($filesize>0 && file_exists($heurist_path)){
         //
         $res = self::importRecords($heurist_path, $session_id, false, true, self::$system->get_user_id() );
+    
+        if(@$params['tlcmapshot'] && $res!==false){
+            //find map document among imported records
+            self::$system->defineConstant('RT_MAP_DOCUMENT');
+            $mysqli = self::$system->get_mysqli();           
+            $map_doc_rec_id = mysql__select_value($mysqli, 
+                'select rec_ID from Records where rec_ID in ('
+                .implode(',',$res['ids']).') and rec_RecTypeID='.RT_MAP_DOCUMENT);
+            
+            if($map_doc_rec_id>0){
+                //save snapshot as mapspace thumbnail
+                self::saveMapDocumentSnapShot($map_doc_rec_id, $params['tlcmapshot']);
+            }
+        }
         
         unlink($heurist_path);
         
@@ -461,9 +472,51 @@ public static function importRecordsFromDatabase($params, $session_id){
     
 }
 
+// 
+// save snapshot as mapspace thumbnail
+// $ids - record ids of all mapdocument records
+// $tlcmapshot - base64 encoded image
 //
-// $is_cms_init - if true this is creation of set of records for website - it adds info text for webpage content
+//1. find mapdocument among ids
+//2. save encoded image as file and register it
+//3. add DT_THUMBNAIL detail to mapdocume record
 //
+public static function saveMapDocumentSnapShot($rec_ID, $tlcmapshot){
+
+    if(($rec_ID>0) && self::$system->defineConstant('DT_THUMBNAIL')){
+        //$mysqli = self::$system->get_mysqli();           
+
+        //2. save encoded image as file and register it
+        $entity = new DbRecUploadedFiles(self::$system, array('entity'=>'recUploadedFiles'));
+        $ulf_ID = $entity->registerImage($tlcmapshot, 'map_snapshot_'.$rec_ID); //it returns ulf_ID
+        if( is_bool($ulf_ID) && !$ulf_ID ){
+            return false;
+        }
+        if(is_array($ulf_ID)){
+            $ulf_ID = $ulf_ID[0];
+        }
+
+        //3. add DT_THUMBNAIL detail to mapdocume record
+        $dbRecDetails = new DbRecDetails(self::$system, array('ulfID'=>$ulf_ID, dtyID=>DT_THUMBNAIL, 'recIDs'=>$rec_ID));
+        $res = $dbRecDetails->detailsAdd();
+
+        return $res;
+    }else{
+        return false;
+    }
+}
+
+/*
+ $is_cms_init - if true this is a creation of set of records for website - it adds info text for webpage content
+
+returns array 
+    ids
+    count_imported
+    count_ignored  - rectype not found 
+    details_empt - details are empty
+    resource_notfound
+
+*/
 public static function importRecords($filename, $session_id, $is_cms_init=false, $make_public=true, $owner_id=1){
 
     self::initialize();

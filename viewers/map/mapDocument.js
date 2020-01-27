@@ -736,7 +736,7 @@ function hMapDocument( _options )
 
             var mapdoc_extent = null;
             
-            if(map_documents!=null && mapdoc_id!='temp'){
+            if(map_documents!=null && mapdoc_id!='temp'){ //for temp always zoom to real extent
             
                 var record2 = map_documents.getById( mapdoc_id );
 
@@ -753,9 +753,10 @@ function hMapDocument( _options )
                     options.mapwidget.mapping('zoomToBounds', mapdoc_extent);
                 
             }else{
+                //find all layer ids and zoom to summary extent
+                
                 var resdata = map_documents_content[mapdoc_id];
             
-                //find all layer ids and zoom to summary extent
                 var ids = [];
                 if(resdata){
                     var idx, records = resdata.getRecords();

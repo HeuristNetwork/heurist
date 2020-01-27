@@ -961,7 +961,7 @@ function hMapManager( _options )
         //
         // creates virtual mapspace
         //
-        createVirtualMapDocument: function(layer_ids){
+        createVirtualMapDocument: function(layer_ids, dfd_top){
             
             options.hasTempMap = false;
             var dfd = new $.Deferred();
@@ -978,6 +978,8 @@ function hMapManager( _options )
                     
                     setTimeout(function(){
                         mapDocuments.zoomToMapDocument('temp');
+                        
+                        if(dfd_top) dfd_top.resolve();
                     },500);
                 }
             );

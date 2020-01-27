@@ -45,6 +45,7 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
 }
 ?>
 <!-- leaflet plugins -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dom-to-image/2.6.0/dom-to-image.js"></script>
 <script src="<?php echo PDIR;?>external/leaflet/leaflet-providers.js"></script>
 <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery.fancytree/skin-themeroller/ui.fancytree.css" />
         
@@ -55,7 +56,7 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
 
 <script type="text/javascript">
 
-    var mapping, initial_layers, target_database;
+    var mapping, initial_layers, target_database, tlcmap_snapshot=null;
 
     // Callback function on map initialization
     function onPageInit(success){
@@ -143,8 +144,46 @@ console.log('beforeunload MAPPEVIEW');
         
 
         if(initial_layers){ //create virtual mapspace
+        
             //mapping.mapping( 'drawLoadWKT', initial_wkt, true);
-            mapping.mapping( 'createVirtualMapDocument', initial_layers);
+            var dfd = new $.Deferred();            
+            mapping.mapping( 'createVirtualMapDocument', initial_layers, dfd);
+            
+            //create map snapshot
+            $.when( dfd.promise() ).done(
+                function(data){
+
+                    function filterNode(node) {
+                        if (node instanceof Text) {
+                            return true;
+                        }
+                        return [
+                            "div",
+                            "span",
+                            "p",
+                            "i",
+                            "img",
+                            "svg",
+                            "g",
+                            "path"
+                        ].includes(node.tagName.toLowerCase()) || /^h[123456]$/i.test(node.tagName);
+                    }
+                    setTimeout(function(){  
+                        try{
+                            domtoimage
+                            .toPng(document.getElementById('map_container'),{
+                                filter: filterNode
+                            })
+                            .then(function (dataUrl) {
+                                //dataUrl - base64 upload to server and register 
+                                tlcmap_snapshot = dataUrl;
+                            });                                
+                        }catch(e){
+                        }
+
+                        }, 2000);                    
+                }
+            );
         }
         
         setTimeout(function(){
@@ -225,8 +264,9 @@ console.log('beforeunload MAPPEVIEW');
             var request = { 
                 source_db: window.hWin.HAPI4.database,
                 db: target_database,
-                ids: recordset.getIds(),
-                tlcmapspace: $('#mapspace_name').val(),
+                ids: recordset.getIds(),  //layers and datasource
+                tlcmapspace: $('#mapspace_name').val(), //name of mapdocument
+                tlcmapshot: tlcmap_snapshot, //base64 encoded image to be saved as mapdocument thumb
                 action: 'import_records',
                 session: session_id,
                 id: window.hWin.HEURIST4.util.random()
@@ -254,7 +294,7 @@ console.log('beforeunload MAPPEVIEW');
     +'<p>Please go to <b>My Maps</b> to edit the styling, to obtain the URL,'
     +' or to obtain a snippet of html which will allow you to embed this map in an external website</p>';
                             
-                            window.hWin.HEURIST4.msg.showMsgDlg(sMsg,null,'Map saved');
+                            window.hWin.HEURIST4.msg.showMsgDlg(sMsg,null, 'Map saved');
                             window.close();
                         }
                     }else{

@@ -222,7 +222,7 @@ if(!$system->init(@$_REQUEST['db'])){
                 $res = ImportHeurist::importRecords(@$_REQUEST['filename'], @$_REQUEST['session']
                     , @$_REQUEST['is_cms_init']==1, @$_REQUEST['is_cms_public']!=0);
             }else{
-                
+                //direct import from another database (the same server)
                 $res = ImportHeurist::importRecordsFromDatabase(@$_REQUEST,
                     @$_REQUEST['session'], @$_REQUEST['is_cms_public']!=0);
                 

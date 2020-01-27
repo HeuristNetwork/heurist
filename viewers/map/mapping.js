@@ -397,9 +397,9 @@ $.widget( "heurist.mapping", {
         this.mapManager.createNewMapDocument( event );
     },
 
-    createVirtualMapDocument: function( layer_ids ) 
+    createVirtualMapDocument: function( layer_ids, dfd ) 
     {
-        this.mapManager.createVirtualMapDocument( layer_ids );
+        this.mapManager.createVirtualMapDocument( layer_ids, dfd );
     },
     
     getMapDocumentRecordset: function( mapdoc_id ){
