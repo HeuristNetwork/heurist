@@ -119,6 +119,8 @@ class System {
                             $this->mysqli->query('set @logged_in_user_id = '.$this->get_user_id());
                         }
                         
+                        //ONLY_FULL_GROUP_BY,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO
+                        $this->mysqli->query('SET GLOBAL sql_mode = \'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION\'');
                     }
                     // consts
                     // @todo constants inited once in initPage for index (main) page only
