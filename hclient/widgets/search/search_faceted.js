@@ -679,7 +679,7 @@ $.widget( "heurist.search_faceted", {
                         +'<span class="ui-button-icon ui-icon ui-icon-arrowreturnthick-1-w"></span>'
                         +'<span class="ui-button-text"> </span></button>'                    
                     +'</div>'
-                    +'<button title="Click this button to set and apply spatial search limits" class="ui-button ui-corner-all ui-widget define_spatial" style="height:18px">'
+                    +'<button title="Click this button to set and apply spatial search limits" class="ui-button ui-corner-all ui-widget define_spatial" style="height:20px">'
                         +'<span class="ui-button-icon ui-icon ui-icon-globe"></span>'
                         +'&nbsp;<span class="ui-button-text" style="font-size:11px">Define</span></button>'
                     +'</div>').css({'border-bottom': '1px solid lightgray','margin-bottom':'10px'}).appendTo($fieldset);
