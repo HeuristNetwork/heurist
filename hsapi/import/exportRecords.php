@@ -751,9 +751,12 @@ private static function _getGeoJsonFeature($record, $extended=false, $simplify=f
                     }else if($value['geo']['type']='c'){
                     //@todo convert circle to polygone
                     }*/
-                    $json = self::_getJsonFromWkt($wkt, $simplify);
-                    if($json){
-                       $geovalues[] = $json; 
+                    try{
+                        $json = self::_getJsonFromWkt($wkt, $simplify);
+                        if($json){
+                           $geovalues[] = $json; 
+                        }
+                    }catch(Exception $e){
                     }
 
                     $val = $wkt;

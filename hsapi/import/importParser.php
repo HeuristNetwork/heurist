@@ -199,10 +199,12 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
     self::initialize();
     
     $is_kml_data = (@$params["kmldata"]===true);
+    $is_csv_data = (@$params["csvdata"]===true);
+    $extension = null;
     
     if($is_kml_data){
         $extension = 'kml';
-    }else{
+    }else if(!$is_csv_data) {
     
         $s = null;
         if(!$encoded_filename){
@@ -280,7 +282,6 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
                     unlink( $filename );
                 }
             }
-            
         }
         
         if($is_kml_data){
@@ -437,6 +438,8 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
 
         if($csv_delimiter=='tab') {
             $csv_delimiter = "\t";
+        }else if($csv_delimiter==null) {
+            $csv_delimiter = ",";
         }
         
         $lb = null;
@@ -451,10 +454,17 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
             $lb = "\r";
         }
         
-        $handle = @fopen($encoded_filename, "r");
-        if (!$handle) {
-            self::$system->addError(HEURIST_ERROR, 'Temporary file '.$encoded_filename.' could not be read');                
-            return false;
+        if($is_csv_data){
+            $limitMBs = 10 * 1024 * 1024;
+            $handle = fopen("php://temp/maxmemory:$limitMBs", 'r+');
+            fputs($handle, $encoded_filename);
+            rewind($handle);            
+        }else{
+            $handle = @fopen($encoded_filename, "r");
+            if (!$handle) {
+                self::$system->addError(HEURIST_ERROR, 'Temporary file '.$encoded_filename.' could not be read');                
+                return false;
+            }
         }
         //fgetcsv и str_getcsv depends on server locale
         // it is possible to set it in  /etc/default/locale (Debian) or /etc/sysconfig/i18n (CentOS)  LANG="en_US.UTF-8"
@@ -1006,11 +1016,13 @@ public static function convertParsedToRecords($parsed, $mapping, $rec_RecTypeID=
         $record = array('rec_ID'=>'C'.$idx,'rec_RecTypeID'=>$rec_RecTypeID, 'rec_Title'=>'');    
         
         $detail = array();
+        $lat  = null;
+        $long = null;
         foreach($mapping as $dty_ID=>$column){
             
             $dty_ID = array_search($column, $mapping);
             //$dty_ID = @$mapping[$column];
-            if($dty_ID>0){
+            if($dty_ID>0 || $dty_ID=='longitude' || $dty_ID=='latitude'){
                 $col_index = array_search($column, $fields);
                 if($col_index>=0){
                     $detailValue = $entry[$col_index]; 
@@ -1025,13 +1037,28 @@ public static function convertParsedToRecords($parsed, $mapping, $rec_RecTypeID=
                         $record['rec_Title'] = $detailValue;    
                     }else if($dty_ID==DT_EXTENDED_DESCRIPTION){
                         $record['Description'] = $detailValue;    
+                    }else if($dty_ID=='longitude'){
+                        $long = $detailValue;
+                    }else if($dty_ID=='latitude'){
+                        $lat = $detailValue;
                     }
                     
-                    $detail[$dty_ID][0] = $detailValue;
+                    if($dty_ID>0){
+                        $detail[$dty_ID][0] = $detailValue;
+                    }
                 }
             }
-        
         }
+        
+        if(is_numeric($lat) && is_numeric($long)){
+            $detail[DT_GEO_OBJECT][0] = array(
+                                "geo" => array(
+                                    "type" => '',
+                                    "wkt" => $value = "POINT(".$long." ".$lat.")"
+                                )
+                            );
+        }
+        
         $record['details'] = $detail;
         $records[$idx] = $record;
     }
