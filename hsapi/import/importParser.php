@@ -192,24 +192,31 @@ public static function encodeAndGetPreview($upload_file_name, $params){
 //    csv_mvsep,csv_delimiter,csv_linebreak,csv_enclosure
 //
 // read file, remove spaces, convert dates, validate identifies/integers, find memo and multivalues
-// if there are no errors invokes  saveToDatabase - to save prepared csv into database
+// if there are no errors and $limit=0 invokes  saveToDatabase - to save prepared csv into database
 //
 public static function parseAndValidate($encoded_filename, $original_filename, $limit, $params){
 
     self::initialize();
     
-    $s = null;
-    if(!$encoded_filename){
-        $encoded_filename = '';
-        $s = ' not defined';
-    }else if (! file_exists($encoded_filename)) $s = ' does not exist';
-    else if (! is_readable($encoded_filename)) $s = ' is not readable';
-    if($s){
-        self::$system->addError(HEURIST_ERROR, 'Temporary file '.$encoded_filename. $s);                
-        return false;
-    }
+    $is_kml_data = (@$params["kmldata"]===true);
     
-    $extension = strtolower(pathinfo($encoded_filename, PATHINFO_EXTENSION));
+    if($is_kml_data){
+        $extension = 'kml';
+    }else{
+    
+        $s = null;
+        if(!$encoded_filename){
+            $encoded_filename = '';
+            $s = ' not defined';
+        }else if (! file_exists($encoded_filename)) $s = ' does not exist';
+        else if (! is_readable($encoded_filename)) $s = ' is not readable';
+        if($s){
+            self::$system->addError(HEURIST_ERROR, 'Temporary file '.$encoded_filename. $s);                
+            return false;
+        }
+        
+        $extension = strtolower(pathinfo($encoded_filename, PATHINFO_EXTENSION));
+    }
     $isKML = ($extension=='kml' || $extension=='kmz');
     
     $err_colnums = array();
@@ -276,8 +283,13 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
             
         }
         
-        
-        $kml_content = file_get_contents($encoded_filename);
+        if($is_kml_data){
+            $kml_content =  $encoded_filename;    
+            $encoded_filename = null;
+        }else{
+            $kml_content = file_get_contents($encoded_filename);
+        }
+            
 
         // Change tags to lower-case
         preg_match_all('%(</?[^? ><![]+)%m', $kml_content, $result, PREG_PATTERN_ORDER);
@@ -297,7 +309,7 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
         //@
         $xmlobj->loadXML($kml_content);
         if ($xmlobj === false) {
-            self::$system->addError(HEURIST_ERROR, 'Invalid KML file '.$encoded_filename);                
+            self::$system->addError(HEURIST_ERROR, 'Invalid KML '.($is_kml_data?'data':('file '.$encoded_filename)));                
             return false;
         }
         
@@ -310,6 +322,11 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
                 if($properties==null) continue;
                 if($line_no==0){
                     $fields = array_keys($properties);
+                    //always add geometry, timestamp, timespan_begin, timespan_end
+                    if(!@$fields['geometry']) $fields[] = 'geometry';
+                    if(!@$fields['timestamp']) $fields[] = 'timestamp';
+                    if(!@$fields['timespan_begin']) $fields[] = 'timespan_begin';
+                    if(!@$fields['timespan_end']) $fields[] = 'timespan_end';
                     
                     $header = $fields;
                     $len = count($fields);                    
@@ -398,7 +415,7 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
                     }                
                 
           }//foreach
-        }        
+        }//for placemarks        
         
         
         $csv_enclosure = '"';
@@ -757,6 +774,15 @@ private static function parseKMLPlacemark($placemark, &$geom_types){
               }
             }
           }
+          elseif ($node_name == 'timespan'){
+            foreach ($child->childNodes as $timedata) {
+                if ($timedata->nodeName == 'begin') {
+                    $properties['timespan_begin'] = preg_replace('/\n\s+/',' ',trim($timedata->textContent));
+                }else if ($timedata->nodeName == 'end') {
+                    $properties['timespan_end'] = preg_replace('/\n\s+/',' ',trim($timedata->textContent));
+                }
+            }
+          }
           elseif (!in_array($node_name, $textnodes))
           {
             $properties[$child->nodeName] = preg_replace('/\n\s+/',' ',trim($child->textContent));
@@ -821,6 +847,8 @@ private static function saveToDatabase($preproc){
     if(strpos($filename,"'")>0){
         $filename = str_replace("'","\\'",$filename);
     }
+    ;
+    $mysqli->query('SET GLOBAL local_infile = true');
     //load file into table  LOCAL
     $query = "LOAD DATA LOCAL INFILE '".$filename."' INTO TABLE ".$import_table
     ." CHARACTER SET UTF8"
@@ -958,6 +986,59 @@ public static function simpleCsvParser($params){
     return $response;
     
 }
+
+//
+// Converts data prepared by parseAndValidate to record format recordSearchByID/recordSearchDetails
+// $parsed - parseAndValidate output 
+// $mapping - $dtyID=> column name in $parsed['fields']
+//
+public static function convertParsedToRecords($parsed, $mapping, $rec_RecTypeID=null){
+    
+    $fields = $parsed['fields'];
+    $values = $parsed['values'];
+    if($rec_RecTypeID==null){
+      $rec_RecTypeID = 12;//RT_PLACE;   
+    } 
+    $records = array();
+    
+    foreach($values as $idx=>$entry){
+        
+        $record = array('rec_ID'=>'C'.$idx,'rec_RecTypeID'=>$rec_RecTypeID, 'rec_Title'=>'');    
+        
+        $detail = array();
+        foreach($mapping as $dty_ID=>$column){
+            
+            $dty_ID = array_search($column, $mapping);
+            //$dty_ID = @$mapping[$column];
+            if($dty_ID>0){
+                $col_index = array_search($column, $fields);
+                if($col_index>=0){
+                    $detailValue = $entry[$col_index]; 
+                    if($dty_ID==DT_GEO_OBJECT){
+                            $detailValue = array(
+                                "geo" => array(
+                                    "type" => '',
+                                    "wkt" => $detailValue
+                                )
+                            );
+                    }else if($dty_ID==DT_NAME){
+                        $record['rec_Title'] = $detailValue;    
+                    }else if($dty_ID==DT_EXTENDED_DESCRIPTION){
+                        $record['Description'] = $detailValue;    
+                    }
+                    
+                    $detail[$dty_ID][0] = $detailValue;
+                }
+            }
+        
+        }
+        $record['details'] = $detail;
+        $records[$idx] = $record;
+    }
+    
+    return $records;    
+}
+
 
 } //end class
 ?>

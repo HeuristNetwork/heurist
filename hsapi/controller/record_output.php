@@ -28,7 +28,7 @@
     * 
     * prefs for geojson, json
     *   extended 0 as is (in heurist internal format), 1 - interpretable, 2 include concept code and labels
-    *   leaflet - true|false returns strict geojson and timeline data as two separate arrays, withoud details, only header fields rec_ID, RecTypeID and rec_Title
+    *   leaflet - true|false returns strict geojson and timeline data as two separate arrays, without details, only header fields rec_ID, RecTypeID and rec_Title
     *   simplify  true|false simplify  paths with more than 1000 vertices 
     * 
     *
@@ -184,102 +184,8 @@
             $system->error_exit_api();
         }
         
-        //output_Data($stream, $params);
     }
 exit();
-
-
-// NOT USED
-// output data as 
-//           zip  : 0|1  compress
-//           file : 0|1  output as file or ptintout
-//           db   : database name for file name
-//
-function output_Data($params, $stream=null, $tmpfile=null){
-    
-    $error_log = array();
-    $mimetype = 'application/'.$params['format'];
-/*
-    $out = false;
-
-    if($stream==null){
-        array_push($error_log, "Output stream is not defined");
-    }else{
-        rewind($stream);
-        $out = stream_get_contents($stream);
-        fclose($stream);
-    }
-
-    if($out===false || strlen($out)==0){
-        array_push($error_log, "Output stream is empty");
-        $out = array('error'=>$error_log );
-    }
-    $error_log = array();
-*/
- 
-    if(@$params['file']!=1){
-        //printout
-        if(@$params['zip']==1){
-            ob_start(); 
-            echo $out;
-            $output = gzencode(ob_get_contents(),6); 
-            ob_end_clean(); 
-            header('Content-Encoding: gzip');
-            header('Content-type: '.$mimetype.';charset=UTF-8');
-            echo $output; 
-            unset($output);   
-        }else{
-            header('Content-type: '.$mimetype.';charset=UTF-8');
-            echo $out;
-        }
-        unset($out);
-        
-    }else{ 
-        //as file
-        $filename = 'Export_'.$params['db'].'_'.date("YmdHis").'.'.$params['format'];
-        
-        if(@$params['zip']==1){
-            //as zip file
-            $zipname = 'Export_'.$system->dbname().'_'.date("YmdHis").'.zip';
-            $destination = tempnam(HEURIST_SCRATCHSPACE_DIR, "zip");
-            
-            $zip = new ZipArchive();
-            if (!$zip->open($destination, ZIPARCHIVE::OVERWRITE)) {
-                array_push($error_log, "Cannot create zip $destination");    
-            }else{
-                // add the in-memory file to the archive, giving a name
-                $zip->addFromString($filename,  $out);
-                $zip->close();
-                if(@file_exists($destination)>0){
-                    header('Content-Type: application/zip');
-                    header('Content-disposition: attachment; filename='.$zipname);
-                    header('Content-Length: ' . filesize($destination));
-                    readfile($destination);
-                    // remove the zip archive
-                    unlink($destination);    
-                }else{
-                    array_push($error_log, "Zip archive ".$destination." doesn't exist");
-                }
-            }
-            if(count($error_log)>0){
-               //can't create zip archive 
-               $out = implode(PHP_EOL, $error_log);
-               header('Content-Type: text/csv');
-               header('Content-disposition: attachment; filename=log.txt');
-               header('Content-Length: ' . strlen($out));
-               exit($out);
-            }
-            
-        }else{
-            //without compress
-            header('Content-Type: '.$mimetype);
-            header('Content-disposition: attachment; filename='.$filename);
-            header('Content-Length: ' . strlen($out));
-            exit($out);        
-        }
-    }
-    
-}
 
 /*
 $data    array('status'=>HEURIST_OK,
@@ -1431,7 +1337,7 @@ function output_HeaderOnly($system, $data, $params)
 
    
 //
-// save streams into file and zip 
+// save CSV streams into file and zip 
 //        
 function writeResults( $streams, $temp_name, $headers, $error_log ) {
   

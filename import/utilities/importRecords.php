@@ -2,7 +2,10 @@
 
     /**
     * importRecords.php
+    * user interface for
     * Inter-database import. Import from another Heurist database. Data can be in HML,XML or JSON format
+    * 
+    * via importController it calls methods in importHeurist.php
     *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
