@@ -232,8 +232,8 @@ $.widget( "heurist.timeline", {
             this.vis_timeline.itemSet.setOptions({groupOrder:function (a, b) {
                     var av = a['content'];
                     var bv = b['content'];
-                    if(av=='Current query') return -1;
-                    if(bv=='Current query') return 1;
+                    if(av=='Current results') return -1;
+                    if(bv=='Current results') return 1;
                     return av > bv ? 1 : av < bv ? -1 : 0;
                 }});
             this.vis_timeline.setGroups(groups);
