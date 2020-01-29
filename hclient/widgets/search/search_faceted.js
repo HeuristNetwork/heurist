@@ -163,6 +163,8 @@ $.widget( "heurist.search_faceted", {
     _use_sup_filter:null, 
     
     _use_multifield: false, //HIE - search for several fields per facet
+    
+    ui_spatial_filter_image:null,
 
     // the widget's constructor
     _create: function() {
@@ -241,7 +243,7 @@ $.widget( "heurist.search_faceted", {
                 
                 that.element.find('div.facet-item > a > span.truncate').width(w-100); //was 80
                 
-                that.btn_reset.button({showLabel:(w>250)});
+                if(that.btn_reset) that.btn_reset.button({showLabel:(w>250)});
                 that.btn_close.button({showLabel:(w>250)});
                   
             }else {
@@ -360,14 +362,14 @@ $.widget( "heurist.search_faceted", {
         }else{
             if(hasHistory) {
                 //if(this.div_title) this.div_title.css('width','45%');
-                if(this.options.showresetbutton){
+                if(this.options.showresetbutton && this.btn_reset){
                     this.btn_reset.show()   
                 }
                 //this.btn_save.show();  //@todo
             }else{
                 //if(this.div_title) this.div_title.css({'width':'auto', 'max-width':'90%'});
     
-                this.btn_reset.hide()   
+                if(this.btn_reset) this.btn_reset.hide()   
                 this.btn_save.hide(); 
             }
             
@@ -395,7 +397,7 @@ $.widget( "heurist.search_faceted", {
         this.btn_submit.remove();
         this.btn_close.remove();
         this.btn_save.remove();
-        this.btn_reset.remove();
+        if(this.btn_reset) this.btn_reset.remove();
         this.div_toolbar.remove();
 
         this.facets_list.remove();
@@ -560,7 +562,7 @@ $.widget( "heurist.search_faceted", {
    }
 
     ,doResetAll: function(){
-        this.options.params.spatial_filter = null;
+        // this.options.params.spatial_filter = null;
         this.options.params.add_filter = null;
         this.options.params.add_filter_original = null;
         this.doReset();
@@ -593,10 +595,14 @@ $.widget( "heurist.search_faceted", {
             }
         }
         
+        this._current_query = window.hWin.HEURIST4.util.mergeHeuristQuery(
+                            (this._use_sup_filter)?this.options.params.sup_filter:'', 
+                            //this.options.params.add_filter,
+                            this.options.params.spatial_filter);
         
-       this._current_query = null;
+        //this._current_query = null;
        // create list of queries to search facet values 
-       this._initFacetQueries();
+        this._initFacetQueries();
         
        
        if(this.facets_list) this.facets_list.empty();
@@ -618,7 +624,7 @@ $.widget( "heurist.search_faceted", {
         
         this._refreshTitle();
 
-        this.btn_reset.hide()   
+        if(this.btn_reset) this.btn_reset.hide()   
         this.btn_save.hide(); 
        
        
@@ -671,28 +677,66 @@ $.widget( "heurist.search_faceted", {
            var ele = $("<div>").html(
            '<div class="header" title="" style="vertical-align: top; display: block; width: 100%; padding: 5px;">'
                 +'<h4 style="display:inline-block;margin:0;">'+lbl+'</h4></div>'
-                +'<div style=" padding:5px 0 20px 21px;display: block;">'
+                +'<div style="padding:5px 0 20px 21px;display: block;" class="spatial_filter">'
                     +'<div class="input-div" style="display: inline-block;max-height: 120px;">'
                     +'<img class="map_snapshot" style="display:none;width:150"/>'
                     
-                    +'<button title="Click this button to reset spatial search limits" class="smallbutton ui-button ui-corner-all ui-widget reset_spatial  ui-button-icon-only" style="display:none;float:right;">'
+                    +'<button title="Click this button to reset spatial search limits" class="smallbutton ui-button ui-corner-all ui-widget reset_spatial  ui-button-icon-only" style="display:none;margin-bottom:30px">'
                         +'<span class="ui-button-icon ui-icon ui-icon-arrowreturnthick-1-w"></span>'
                         +'<span class="ui-button-text"> </span></button>'                    
                     +'</div>'
                     +'<button title="Click this button to set and apply spatial search limits" class="ui-button ui-corner-all ui-widget define_spatial" style="height:20px">'
                         +'<span class="ui-button-icon ui-icon ui-icon-globe"></span>'
                         +'&nbsp;<span class="ui-button-text" style="font-size:11px">Define</span></button>'
-                    +'</div>').css({'border-bottom': '1px solid lightgray','margin-bottom':'10px'}).appendTo($fieldset);
-                        
+                    +'</div>').css({'border-bottom': '1px solid lightgray','margin-bottom':'25px'}).appendTo($fieldset);
+                    
+           var btn_reset2 = $( "<button>", {title:window.hWin.HR("Clear all fields / Reset all the filters to their initial states") })
+           .css({float:'right','margin-top':'4px'})
+           .appendTo( ele )
+           .button({label: window.hWin.HR("Reset all"), icon: 'ui-icon-arrowreturnthick-1-w', iconPosition:'end' });
+           this._on( btn_reset2, { click: "doResetAll" });
+
+           if(this.btn_reset){
+               this.btn_reset.remove();
+               this.btn_reset = null;
+           }
+
            this._on( ele.find('button.reset_spatial'), { click:                         
            function(event){
+               __setUiSpatialFilter(null, null);
                 //ele.find('input').val('');  
-                that.element.find('.map_snapshot').attr('src',null).hide();
+                /*that.element.find('.map_snapshot').attr('src',null).hide();
                 that.element.find('.define_spatial').show();
                 that.element.find('.reset_spatial').hide();
                 that.options.params.spatial_filter = null;
+                that.ui_spatial_filter_image = null;
+                */
                 that.doSearch();
            }});
+           
+           function __setUiSpatialFilter(wkt, imagedata){
+
+                if( wkt ){
+                    if(imagedata){
+                        that.ui_spatial_filter_image = imagedata;
+                        that.element.find('.map_snapshot').attr('src',imagedata).show();
+                        that.element.find('.define_spatial').hide();
+                    }else{
+                        that.ui_spatial_filter_image = null;
+                        that.element.find('.map_snapshot').attr('src',null).hide();
+                        that.element.find('.define_spatial').show();
+                    }
+                    that.element.find('.reset_spatial').show();
+                    
+                    that.options.params.spatial_filter = (wkt['geo']) ?wkt :{geo:wkt}; 
+                }else{
+                    that.element.find('.map_snapshot').attr('src',null).hide();
+                    that.element.find('.define_spatial').show();
+                    that.element.find('.reset_spatial').hide();
+                    that.options.params.spatial_filter = null;
+                    that.ui_spatial_filter_image = null;
+                }
+           }
                         
            this._on( [ele.find('button.define_spatial')[0],that.element.find('.map_snapshot')[0]],
             { click:                         
@@ -700,6 +744,9 @@ $.widget( "heurist.search_faceted", {
                 
                 //open map digitizer - returns WKT rectangle 
                 var rect_wkt = that.options.params.spatial_filter;
+                if(rect_wkt && rect_wkt['geo']){
+                    rect_wkt = rect_wkt['geo'];
+                }
                 var url = window.hWin.HAPI4.baseURL 
                 +'viewers/map/mapDraw.php?db='+window.hWin.HAPI4.database
                 +'&geofilter=1&need_screenshot=1&wkt='
@@ -715,22 +762,27 @@ $.widget( "heurist.search_faceted", {
                     class:'ui-heurist-bg-light',
                     callback: function(location){
                         if( !window.hWin.HEURIST4.util.isempty(location) ){
-                            //that.newvalues[$input.attr('id')] = location
-                            //inpt.val(location.wkt);
+                            __setUiSpatialFilter(location.wkt, location.imgData);
+                            /*                        
                             if(location.imgData){
+                                that.ui_spatial_filter_image = location.imgData;
                                 that.element.find('.map_snapshot').attr('src',location.imgData).show();
                                 that.element.find('.define_spatial').hide();
                             }else{
+                                that.ui_spatial_filter_image = null;
                                 that.element.find('.map_snapshot').attr('src',null).hide();
                                 that.element.find('.define_spatial').show();
                             }
                             that.element.find('.reset_spatial').show();
                             that.options.params.spatial_filter = {geo:location.wkt};
+                            */
                             that.doSearch();
                         }
                     }
                 } );
            }});   
+           
+           __setUiSpatialFilter(that.options.params.spatial_filter, that.ui_spatial_filter_image);
            
        }
 
@@ -1127,7 +1179,7 @@ $.widget( "heurist.search_faceted", {
                 return;
             }else if(!this.options.ispreview && this.options.showresetbutton){
                 //this.div_title.css('width','45%');
-                this.btn_reset.show()   
+                if(this.btn_reset) this.btn_reset.show()   
                 //@todo this.btn_save.show(); 
             }
             
