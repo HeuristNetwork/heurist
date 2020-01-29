@@ -476,7 +476,10 @@ function afterPageLoad(document, pageid){
                     var func_name = 'afterPageLoad'+pageid;
                     var script = document.createElement('script');
                     script.type = 'text/javascript';
-                    script.innerHTML = 'function '+func_name +'(document, pageid){' + data + '}';
+                    script.innerHTML = 'function '+func_name 
+                    +'(document, pageid){\n'
+                    //+' console.log("run script for '+pageid+'");\n'
+                    +'try{\n' + data + '\n}catch(e){}}';
                     //s.src = "http://somedomain.com/somescript";
                     $("head").append(script);
                     page_scripts[pageid] = func_name;    
@@ -783,7 +786,8 @@ if ($page_template!=null && substr($page_template,-4,4)=='.tpl') {
         </div>
         
         <div id="main-menu" class="mceNonEditable" style="float:left;width:100%;min-height:40px;padding-top:16px;color:black;font-size:1.1em;" data-heurist-app-id="heurist_Navigation" data-generated="1">
-            <div class="widget-design-header" style="padding: 10px;"><img style="vertical-align: middle;" src="../../assets/h4_icon_35x35.png" height="22" /> <strong>navigation</strong><a class="edit" style="padding: 0 10px;" title="Click to edit" href="#">edit</a>  <a class="remove" href="#">remove</a> height:50px width:100%</div>
+            <div class="widget-design-header" style="padding: 10px;"><img style="vertical-align: middle;"
+             height="22" /> <strong>navigation</strong><a class="edit" style="padding: 0 10px;" title="Click to edit" href="#">edit</a>  <a class="remove" href="#">remove</a> height:50px width:100%</div>
             <span class="widget-options" style="font-style: italic; display: none;">{"menu_recIDs":"<?php print $rec_id;?>","use_next_level":true,"orientation":"horizontal","init_at_once":true}</span>
         </div>
 

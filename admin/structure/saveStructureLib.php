@@ -761,7 +761,7 @@ copy_IconAndThumb_FromLibrary
 						if($colName=='rst_MaxValues' && $val==0){
 							$val = null;
 						}else if($colName=='rst_Modified' && $val==''){
-                            $val = null;    
+                            $val = date('Y-m-d H:i:s');
                         }
 
                         $parameters = addParam($parameters, $rstColumnNames[$colName], $val);

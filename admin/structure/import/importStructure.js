@@ -869,7 +869,7 @@ $.widget( "heurist.importStructure", {
         if(usr_exp_level==0){ //advanced
             html = html
             + '<div title="Click to open database in new window" '
-            + 'class="rec_edit_link_ext ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" '
+            + 'class="rec_edit_link_ext ui-button action-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" '
             + 'role="button" aria-disabled="false" data-key="open">'
             + '<span class="ui-button-icon-primary ui-icon ui-icon-extlink"/><span class="ui-button-text"/>'
             + '</div>';
@@ -878,7 +878,7 @@ $.widget( "heurist.importStructure", {
         if(recID<1000){
             html = html
             + '<div title="Click to clone curated template" '
-            + 'class="rec_view_link ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" '
+            + 'class="rec_view_link ui-button  action-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" '
             + 'role="button" aria-disabled="false" data-key="clone">'
             + '<span class="ui-button-icon-primary ui-icon ui-icon-copy"/><span class="ui-button-text"/>'
             + '</div>';

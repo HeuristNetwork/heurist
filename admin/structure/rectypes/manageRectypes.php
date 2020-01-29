@@ -32,6 +32,10 @@ define('PDIR','../../../');  //need for proper path to js and css
 
 require_once(dirname(__FILE__)."/../../../hclient/framecontent/initPage.php");
 ?>
+<script type="text/javascript" src="../../../external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
+<script type="text/javascript" src="../../../external/jquery-ui-1.12.1/jquery-ui.js"></script>
+<script type="text/javascript" src="../../../hclient/core/detectHeurist.js"></script>
+<script type="text/javascript" src="../../../hclient/widgets/dropdownmenus/mainMenu.js"></script>
 
 <link rel="stylesheet" type="text/css" href="../../../external/yui/2.8.2r1/build/fonts/fonts-min.css" />
 <link rel="stylesheet" type="text/css" href="../../../external/yui/2.8.2r1/build/tabview/assets/skins/sam/tabview.css" />
@@ -87,6 +91,13 @@ require_once(dirname(__FILE__)."/../../../hclient/framecontent/initPage.php");
     text-transform: uppercase;
     padding: 10px 16px;   
 }
+
+.ent_wrapper{position:absolute;top:0;bottom:0;left:0;right: 1px;overflow:hidden;}
+.ent_header, .ent_footer, .ent_content{position:absolute; left:0; right:1px;}
+.ent_header{top:0;height:4.2em; padding:0.2em 0.5em;}
+.ent_content{top:4.8em;bottom:5.8em; overflow-y:auto;}
+.ent_footer{bottom:0px;height:5.6em;}
+
 </style>
 
         <script type="text/javascript" src="manageRectypes.js"></script>
@@ -114,37 +125,28 @@ require_once(dirname(__FILE__)."/../../../hclient/framecontent/initPage.php");
 <script type="text/javascript" src="../../../hclient/core/hintDiv.js"></script>
 <script type="text/javascript" src="../tabDragDrop.js"></script>
 
-<div>
-<?php
-if(@$_REQUEST['popup']!=1){
-?>    
-            <div class="banner"><h2>Record (Entity) Types</h2></div>
-<?php
-}
-?>    
-            <div id="page-inner" style="top:20px;">
-            
-                <h4 style="line-height:2ex;padding:15px 0">Use this function to build and extend your database by adding and modifying record (entity) types. 
-                <br/>Allows the re-use of existing fields for consistency across entity types, as well as the creation of entirely new fields. 
-                <br/>New databases are pre-populated with a range of useful record types and term (category) vocabularies.</h4>
-                <!--
-                <div style="float: right; padding-top: 15px"><label id="lblNoticeAboutChanges"
-                style="padding-left:3px; padding-right:3px; background-color:white; color:red; display: inline-block;"></label>
-                &nbsp;&nbsp;&nbsp;
-                <input id="btnSave" type="button" value="Save Changes" style="padding:2px; color:red; float: right; display: none;"/></div>
-                -->
+<div class="ent_wrapper">
+    <div class="ent_header">
+        <input id="yui-history-field" type="hidden">
 
-                <!--  style="position:absolute; z-index:0;"
-                Static markup required by the browser history utility. Note that the
-                iframe is only used on Internet Explorer. If this page is server
-                generated (by a PHP script for example), it is a good idea to create
-                the IFrame ONLY for Internet Explorer (use server side user agent sniffing) -->
+        <input type="button" id="btnVisualize" value="Visualize" style="margin-right:20em; margin-top:10px;"/>
+    
+        <input type="button" id="btnAddRecordType" value="Add new record type" class="add" style="margin-right:1em; margin-top:10px;float:none"/>
+        <input type="button" id="btnImportFromDb" value="Get from templates" class="import" style="margin-right:20em; margin-top:10px;float:none"/>
 
-                <input id="yui-history-field" type="hidden">
-
-                <div id="modelTabs" class="yui-navset yui-navset-top">
-                </div>
-            </div>
+        <input type="button" id="btnMimetypes" value="Define mime types" style="margin-right:1em; margin-top:10px;float:right"/>
+        <input type="button" id="btnFields" value="Base fields" style="margin-right:1em; margin-top:10px;float:right;"/>
+        <input type="button" id="btnReltypes" value="Relation types" style="margin-right:1em; margin-top:10px;float:right;"/>
+        <input type="button" id="btnTerms" value="Vocabularies and terms" style="margin-right:1em; margin-top:10px;float:right"/>
+    
+    </div>
+    <div id="modelTabs" class="yui-navset yui-navset-top ent_content">
+    </div>
+    <div class="ent_footer">
+        <h4 style="line-height:2ex;padding:10px">Use this function to build and extend your database by adding and modifying record (entity) types. 
+        <br/>Allows the re-use of existing fields for consistency across entity types, as well as the creation of entirely new fields. 
+        <br/>New databases are pre-populated with a range of useful record types and term (category) vocabularies.</h4>
+    </div>
 </div>
 
 <div id="formGroupEditor2" style="display:none">

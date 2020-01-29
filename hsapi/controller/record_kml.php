@@ -25,12 +25,18 @@
     
     require_once (dirname(__FILE__).'/../../vendor/autoload.php'); //for geoPHP
     require_once(dirname(__FILE__).'/../../viewers/map/Simplify.php');
+    require_once (dirname(__FILE__).'/../import/importParser.php'); //parse CSV, KML and save into import table
+    require_once (dirname(__FILE__).'/../import/exportRecords.php');
     
     $response = array();
 
     $system = new System();
     
     $params = $_REQUEST;
+    
+    $parser_parms = array();
+    
+    $input_format = null;
     
     if( ! $system->init(@$params['db']) ){
         //get error and response
@@ -39,38 +45,46 @@
     if(!(@$params['recID']>0)){
         $system->error_exit_api('recID parameter is not defined or has wrong value'); //exit from script
     }
+    $system->defineConstants();
     
-    if(!($system->defineConstant('DT_KML')&&$system->defineConstant('DT_KML_FILE'))){
-        $system->error_exit_api('Database '.$params['db'].' does not have field definitions for KML snipppet and file'); //exit from script
+    if(!(defined('DT_KML') && defined('DT_KML_FILE'))){
+        $system->error_exit_api('Database '.$params['db'].' does not have field definitions for KML/CSV snipppet and file'); //exit from script
     }
-    $system->defineConstant('DT_FILE_RESOURCE');
     
     $record = array("rec_ID"=>$params['recID']);
-    recordSearchDetails($system, $record, array(DT_KML, DT_KML_FILE, DT_FILE_RESOURCE));
+    recordSearchDetails($system, $record, true);//array(DT_KML, DT_KML_FILE, DT_FILE_RESOURCE));
     if (@$record["details"] &&
        (@$record["details"][DT_KML] || @$record["details"][DT_KML_FILE] || @$record["details"][DT_FILE_RESOURCE]))
     {
     
             if(@$record["details"][DT_KML]){
-                $kml = array_shift($record["details"][DT_KML]);   
-            }else{
+                //snippet
+                $file_content = array_shift($record["details"][DT_KML]);   
+            }
+            else
+            {
                 if(@$record["details"][DT_KML_FILE]){
-                    $kml_file =array_shift($record["details"][DT_KML_FILE]);
+                    $kml_file = array_shift($record["details"][DT_KML_FILE]);
                 }else{
-                    $kml_file =array_shift($record["details"][DT_FILE_RESOURCE]);
+                    $kml_file = array_shift($record["details"][DT_FILE_RESOURCE]);
                 }
                 $kml_file = $kml_file['file'];
                 $url = @$kml_file['ulf_ExternalFileReference'];
                 
                 if($url){
-                    $kml = loadRemoteURLContent($url, true);    
-                    if($kml===false){
-                      $system->error_exit_api('Cannot load remote kml file '.$url, HEURIST_ERROR);    
+                    $file_content = loadRemoteURLContent($url, true);    
+                    if($file_content===false){
+                      $system->error_exit_api('Cannot load remote file '.$url, HEURIST_ERROR);    
                     } 
+                    
+                    $ext = strtolower(substr($url,-4,4));
+                    
                 }else {
                     $filepath = resolveFilePath($kml_file['fullPath']);
                     
                     if (file_exists($filepath)) {
+                        
+                        $ext = strtolower(substr($filepath,-4,4));
                         
                         if(strpos(strtolower($filepath),'.kmz')==strlen($filepath)-4){
                             //check if scratch folder exists
@@ -90,75 +104,159 @@
                             }
                                 
                         }
-                        $kml = file_get_contents($filepath);
+                        $file_content = file_get_contents($filepath);
                     }else{
-                        error_log('Cannot load kml file '.$kml_file['fullPath']);                    
+                        error_log('Cannot load file '.$kml_file['fullPath']);                    
                         exit(); //@todo error return
                     }
+                }
+                
+                if($ext=='.kmz' || $ext=='.kml'){
+                    $input_format = 'kml';
+                }else if($ext=='.csv'){
+                    $input_format = 'csv';
+                }else if($ext=='.tsv'){
+                    $input_format = 'csv';
+                    $parser_parms['csv_delimiter'] = 'tab';
                 }
             }
         
             if(@$params['format']=='geojson'){
-
-                //@todo use importParser to proper kml parsing and extraction features                
-                try{
-                    $geom = geoPHP::load($kml, 'kml');
-                }catch(Exception $e){
-                    $system->error_exit_api('Cannot process kml: '.$e->getMessage(), HEURIST_ERROR);    
+                
+                //detect type of data
+                if($input_format==null){
+                    $totest = strtolower($file_content);
+                    $pos = strpos($totest,'<placemark>');
+                    if($pos!==false && $pos < strpos($totest,'</placemark>')){
+                        $input_format = 'kml';
+                    }else{
+                        $input_format = 'csv';
+                    }
                 }
-                if($geom!==false && !$geom->isEmpty()){
+                
+                /*
+                $system->defineConstant('DT_NAME');
+                $system->defineConstant('DT_EXTENDED_DESCRIPTION');
+                $system->defineConstant('DT_START_DATE');
+                $system->defineConstant('DT_END_DATE');
+                $system->defineConstant('DT_GEO_OBJECT');
+                */
+                
+                //X 2-930, Y 2-931, t1 2-932, t2 2-933, Name 2-934, Summary description 2-935
+                $mapping = array();
+                $fm_name = ConceptCode::getDetailTypeLocalID('2-934');
+                $fm_desc = ConceptCode::getDetailTypeLocalID('2-935');
+                $fm_X = ConceptCode::getDetailTypeLocalID('2-930');
+                $fm_Y = ConceptCode::getDetailTypeLocalID('2-931'); 
+                $fm_t1 = ConceptCode::getDetailTypeLocalID('2-932');
+                $fm_t2 = ConceptCode::getDetailTypeLocalID('2-933');
+                
+                
+                if($fm_name!=null && @$record["details"][$fm_name])
+                    $mapping[DT_NAME] = array_shift($record["details"][$fm_name]);
+                if($fm_desc!=null && @$record["details"][$fm_desc])
+                    $mapping[DT_EXTENDED_DESCRIPTION] = array_shift($record["details"][$fm_desc]);
+                    
+                if($fm_t1!=null && @$record["details"][$fm_t1])
+                    $mapping[DT_START_DATE] = array_shift($record["details"][$fm_t1]);
+                if($fm_t2!=null && @$record["details"][$fm_t2])
+                    $mapping[DT_END_DATE] = array_shift($record["details"][$fm_t2]);
+
+
+                if($input_format == 'kml'){
+                    $parser_parms['kmldata'] = true; 
+                    $mapping[DT_GEO_OBJECT] = 'geometry';
+                    if(!@$mapping[DT_START_DATE]) $mapping[DT_START_DATE] = 'timespan_begin';//'timespan';
+                    if(!@$mapping[DT_END_DATE]) $mapping[DT_END_DATE] = 'timespan_end';//'timespan';
+                    if(!@$mapping[DT_DATE]) $mapping[DT_DATE] = 'timestamp'; //'when'; 
+                    
+                }else{
+                    $parser_parms['csvdata'] = true; 
+                    
+                    if($fm_X!=null && @$record["details"][$fm_X])
+                        $mapping['longitude'] = array_shift($record["details"][$fm_X]);
+                    if($fm_Y!=null && @$record["details"][$fm_Y])
+                        $mapping['latitude'] = array_shift($record["details"][$fm_Y]);
+                }
+                    
+                if(!@$mapping[DT_NAME]) $mapping[DT_NAME] = 'name';
+                
+                if(count($mapping)>0){
+                    
+                    //returns csv with header
+                    $parsed = ImportParser::parseAndValidate($file_content, null, PHP_INT_MAX, $parser_parms);
+                    //'fields'=>$header, 'values'=>$parsed_values
+                    
+                    //returns records in PLACE? format recordSearchByID/recordSearchDetails
+                    $records = ImportParser::convertParsedToRecords($parsed, $mapping);
+                    
+                    //it outputs geojson and exits 
+                    $recdata = array('status'=>HEURIST_OK, 'data'=>array('reccount'=>count($records), 'records'=>$records));
+                    ExportRecords::output($recdata, array('format'=>'geojson','leaflet'=>true,'depth'=>0, 'simplify'=>true));
                     
                     
-                        $geojson_adapter = new GeoJSON(); 
-                        $json = $geojson_adapter->write($geom, true); 
+                }else{
+                    //etire kml is considered as unified map entry
+                    try{
+                        $geom = geoPHP::load($file_content, 'kml');
+                    }catch(Exception $e){
+                        $system->error_exit_api('Cannot process kml: '.$e->getMessage(), HEURIST_ERROR);    
+                    }
+                    if($geom!==false && !$geom->isEmpty()){
                         
-                        if(@$json['coordinates'] && count($json['coordinates'])>0){
+                        
+                            $geojson_adapter = new GeoJSON(); 
+                            $json = $geojson_adapter->write($geom, true); 
                             
-                            if(@$params['simplify']){
+                            if(@$json['coordinates'] && count($json['coordinates'])>0){
                                 
-                                if($json['type']=='LineString'){
+                                if(@$params['simplify']){
+                                    
+                                    if($json['type']=='LineString'){
 
-                                    simplifyCoordinates($json['coordinates']);
+                                        simplifyCoordinates($json['coordinates']);
 
-                                } else if($json['type']=='Polygon'){
-                                    for($idx=0; $idx<count($json['coordinates']); $idx++){
-                                        simplifyCoordinates($json['coordinates'][$idx]);
+                                    } else if($json['type']=='Polygon'){
+                                        for($idx=0; $idx<count($json['coordinates']); $idx++){
+                                            simplifyCoordinates($json['coordinates'][$idx]);
+                                        }
+                                    } else if ( $json['type']=='MultiPolygon' || $json['type']=='MultiLineString')
+                                    {
+                                        for($idx=0; $idx<count($json['coordinates']); $idx++) //shapes
+                                            for($idx2=0; $idx2<count($json['coordinates'][$idx]); $idx2++) //points
+                                                simplifyCoordinates($json['coordinates'][$idx][$idx2]);
                                     }
-                                } else if ( $json['type']=='MultiPolygon' || $json['type']=='MultiLineString')
-                                {
-                                    for($idx=0; $idx<count($json['coordinates']); $idx++) //shapes
-                                        for($idx2=0; $idx2<count($json['coordinates'][$idx]); $idx2++) //points
-                                            simplifyCoordinates($json['coordinates'][$idx][$idx2]);
                                 }
+                                
+                                $json = array(array(
+                                    'type'=>'Feature',
+                                    'geometry'=>$json,
+                                    'properties'=>array()
+                                ));
+                            }else if(false){
+                                
                             }
                             
-                            $json = array(array(
-                                'type'=>'Feature',
-                                'geometry'=>$json,
-                                'properties'=>array()
-                            ));
-                        }else if(false){
-                            
-                        }
-                        
-                        $json = json_encode($json);
-                        header('Content-Type: application/json');
-                        //header('Content-Type: application/vnd.geo+json');
-                        //header('Content-disposition: attachment; filename=output.json');
-                        header('Content-Length: ' . strlen($json));
-                        exit($json);
-                }else{
-                    $system->error_exit_api('No coordinates retrieved from kml file', HEURIST_ERROR);
+                            $json = json_encode($json);
+                            header('Content-Type: application/json');
+                            //header('Content-Type: application/vnd.geo+json');
+                            //header('Content-disposition: attachment; filename=output.json');
+                            header('Content-Length: ' . strlen($json));
+                            exit($json);
+                    }else{
+                        $system->error_exit_api('No coordinates retrieved from kml file', HEURIST_ERROR);
+                    }
                 }
+
                 
             }else{
                 
                 header('Content-Type: application/vnd.google-earth.kml+xml');
                 header('Content-disposition: attachment; filename=output.kml');
-                header('Content-Length: ' . strlen($kml));
-                exit($kml);
+                header('Content-Length: ' . strlen($file_content));
+                exit($file_content);
             }
     }else{
-            exit(); //nothing found
+        $system->error_exit_api('Database '.$params['db'].'. Record '.$params['recID'].' does not have data for KML/CSV snipppet or file');
     }
 ?>

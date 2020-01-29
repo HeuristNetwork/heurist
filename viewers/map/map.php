@@ -239,7 +239,7 @@ $system->defineConstants();
                                 function(selected){  //callback if something selected on map
                                 },
                                 function(){ //callback function on native map init completion
-                                    var params = {id:'main', recordset:recset, title:'Current query' };
+                                    var params = {id:'main', recordset:recset, title:'Current results' };
                                     mapping.map_control.addRecordsetLayer(params);
                                 }
                             );                        

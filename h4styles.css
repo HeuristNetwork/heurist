@@ -1154,6 +1154,20 @@ span.fancytree-checkbox{
     width:26;
 }
 
+.tree-map{
+    padding:0;
+}
+.tree-map .fancytree-checkbox{
+    margin-left:0;
+}
+.tree-map .fancytree-expander{
+    width:14px*;
+}
+.tree-map ul.fancytree-container ul{
+    padding: 0 0 0 8px !important;
+}
+
+
 .tree-cms > ul > li > .fancytree-node > .fancytree-title{
     font-weight: bold;
 }
@@ -1182,10 +1196,11 @@ span.fancytree-checkbox{
 }
 
 
-/* indent for folders */
+/* indent for folders 
 ul.fancytree-container ul{
     padding: 0 0 0 26px !important;
 }
+*/
 
 /* beginner level */
 .heurist-helper2{
@@ -1216,6 +1231,9 @@ ul.fancytree-container ul{
 }
 .svs-acordeon > h3 > .ui-accordion-header-icon{
     top:40% !important;
+}
+.svs-acordeon > h3.with_supplementals > .ui-accordion-header-icon{
+    top:9px !important;
 }
 .svs-acordeon-group{
     padding-top:1em;

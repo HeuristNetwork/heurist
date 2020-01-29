@@ -1,14 +1,14 @@
 <?php
-    /**
-    * Interface/Controller for CSV,KML parse and import 
-    *
-    * @package     Heurist academic knowledge management system
-    * @link        http://HeuristNetwork.org
-    * @copyright   (C) 2005-2019 University of Sydney
-    * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-    * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-    * @version     4.0
-    */
+/**
+* Interface/Controller for CSV,KML parse and import 
+*
+* @package     Heurist academic knowledge management system
+* @link        http://HeuristNetwork.org
+* @copyright   (C) 2005-2019 University of Sydney
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     4.0
+*/
 
 // @todo  move all session routines to csvSession.php
 // all parse routines to csvParser.php
@@ -114,7 +114,7 @@ if(!$system->init(@$_REQUEST['db'])){
    if(!$system->is_admin()){
         $response = $system->addError(HEURIST_REQUEST_DENIED, 'Administrator permissions are required');
    }else{
-       
+        //for kml step2,step3,set_primary_rectype,step3
         $action = @$_REQUEST["action"];
         $res = false;        
         
@@ -129,17 +129,18 @@ if(!$system->init(@$_REQUEST['db'])){
             
         }else if($action=='step2'){
             
+            //vaidate values(dates,int) saves into import table
             $res = ImportParser::parseAndValidate( @$_REQUEST["encoded_filename"], @$_REQUEST["original_filename"], 0, $_REQUEST);
             
         }else if($action=='step3'){ // matching - assign record ids
         
             $res = ImportAction::assignRecordIds($_REQUEST); 
                     
-        }else if($action=='step4'){ // validate import - check field values  - not implemented we use old version in importCSV_lib
+        }else if($action=='step4'){ // validate import - check field values
         
             $res = ImportAction::validateImport($_REQUEST);
         
-        }else if($action=='step5'){ // perform import  - not implemented we use old version in importCSV_lib
+        }else if($action=='step5'){ // perform import
                 
             $res = ImportAction::performImport($_REQUEST, 'json');
         
@@ -245,6 +246,10 @@ if(!$system->init(@$_REQUEST['db'])){
 }
 
 
+
+// ----------------------- OUTPUT ----------------------------------
+//
+//
 if(@$_REQUEST['output']=='csv'){
 
 

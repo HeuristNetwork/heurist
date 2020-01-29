@@ -170,12 +170,15 @@ function hMapManager( _options )
         mapDocuments = hMapDocument( { mapwidget:options.mapwidget } ); 
         
         $('<div>').attr('grpid','search').addClass('svs-acordeon outline_suppress')
+                .css('border-bottom-color','lightgray')
                 .append( _defineHeader('Result Sets', 'search'))
                 .append( _defineContent('search') ).appendTo(options.container);
         $('<div>').attr('grpid','mapdocs').addClass('svs-acordeon outline_suppress')
+                .css('border-bottom-color','lightgray')
                 .append( _defineHeader('Map Documents', 'mapdocs'))
                 .append( _defineContent('mapdocs') ).appendTo(options.container);
         $('<div>').attr('grpid','basemaps').addClass('svs-acordeon outline_suppress')
+                .css('border-bottom','none')
                 .append( _defineHeader('Base Maps', 'basemaps'))
                 .append( _defineContent('basemaps') ).appendTo(options.container);        
         $('<div>').attr('grpid','tempmap').addClass('svs-acordeon outline_suppress')
@@ -243,7 +246,7 @@ function hMapManager( _options )
         //<span class="ui-icon ui-icon-'+sIcon+'" ' + 'style="display:inline-block;padding:0 4px"></span>
         
         var $header = $('<h3 grpid="'+domain+'" class="hasmenu">' + sIcon + '<span style="vertical-align:top;">'
-            + name + '</span>')
+            + name + '</span></h3>')
             .addClass('tree-accordeon-header outline_suppress svs-header');
 
         /*    
@@ -254,7 +257,8 @@ function hMapManager( _options )
         */
          var isPublished = options.mapwidget.mapping('option','isPublished');
          if(domain=='mapdocs' && !isPublished){
-             
+
+            /*old version             
             var append_link = $('<a title="create new map document">',{href:'#'})
                 .html('<span class="ui-icon ui-map-document" style="width:22px">'
 +'<span class="ui-icon ui-icon-plus" style="position:absolute;bottom:-2px;right:-2px;font-size:12px;color:white;text-shadow: 2px 2px gray" />'
@@ -262,6 +266,16 @@ function hMapManager( _options )
                 .css({height:'26px',width: '100%',background: 'none'})
                 .click(_createNewMapDocument)
                 .appendTo($header);
+            */
+            var append_link = $('<a title="create new map document">',{href:'#'})
+                .html('Add <span class="ui-icon ui-map-document" style="width:22px">'
++'<span class="ui-icon ui-icon-plus" style="position:absolute;bottom:-2px;right:-2px;font-size:12px;color:white;text-shadow: 2px 2px gray" />'
+                +'</span>')
+                .css({'line-height':'15px',height:'14px',width:'50px',background: 'none',float:'right'})
+                .click(_createNewMapDocument)
+                .appendTo($header);
+                
+           //$header.addClass('with_supplementals');
         }
 
         return $header
@@ -371,6 +385,7 @@ function hMapManager( _options )
         
             }
             
+            //mapdoc_treeview.find('.ui-fancytree').show();
             mapdoc_treeview.find('.empty_msg').remove();
             var tree = mapdoc_treeview.fancytree("getTree");
             tree.getRootNode().addChildren( [$res] ).setSelected(true);
@@ -579,12 +594,17 @@ function hMapManager( _options )
                                     //cookieId: "fancytree-Cb3",
                                     //idPrefix: "fancytree-Cb3-"
                                 });     
+                                
+                                tree_container.addClass('tree-map');
                             
         }
         
         
+        
+        
         if(treedata.length==0){    
-            tree_container.append('<span class="empty_msg" style="font-style:italic">none</span>');
+            //tree_container.find('.ui-fancytree').hide();
+            tree_container.append('<span class="empty_msg" style="font-style:italic;padding-left:10px;line-height:10px">none</span>');
         }
         that.setHeight();
     

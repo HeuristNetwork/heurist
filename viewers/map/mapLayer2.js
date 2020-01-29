@@ -228,14 +228,33 @@ function hMapLayer2( _options ) {
                         }
                         window.hWin.HEURIST4.msg.showMsgErr(response);
                     }else{
-                    
-                        _nativelayer_id = options.mapwidget.mapping('addGeoJson', 
-                                {geojson_data: response,
-                                timeline_data: null,
-                                layer_style: layer_style,
-                                dataset_name:_recordset.fld(options.rec_layer || _record, 'rec_Title'),
-                                preserveViewport:options.preserveViewport });
-                                
+                        
+                        var geojson_data = null;
+                        var timeline_data = [];
+                        if(response['geojson'] && response['timeline']){
+                            geojson_data = response['geojson'];
+                            timeline_data = response['timeline'];   
+                        }else{
+                            geojson_data = response;
+                        }
+
+                        if( window.hWin.HEURIST4.util.isGeoJSON(geojson_data, true) 
+                            || window.hWin.HEURIST4.util.isArrayNotEmpty(timeline_data) )
+                        {
+                                                             
+                            _nativelayer_id = options.mapwidget.mapping('addGeoJson', 
+                                        {geojson_data: geojson_data,
+                                        timeline_data: timeline_data,
+                                        layer_style: layer_style,
+                                        //popup_template: layer_popup_template,
+                                        //origination_db: null,
+                                        dataset_name:_recordset.fld(options.rec_layer || _record, 'rec_Title'),  //name for timeline
+                                        preserveViewport:options.preserveViewport });
+                                                             
+                        }else {
+                            window.hWin.HEURIST4.msg.showMsgErr(response);
+                        }
+                        
                     }
                 }
             }

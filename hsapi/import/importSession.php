@@ -21,9 +21,6 @@
 */
 
 /**
-* two public methods
-* validateImport
-* performImport
 * 
 */
 class ImportSession {
