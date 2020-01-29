@@ -46,6 +46,8 @@ function RectypeManager() {
     var currentTipId,
     _rt_counts = {}, //record counts by type
     _rolloverInfo;
+    
+    var currentGroupId = 0;
 
     var _groups = [],  //for dropdown list
     myDTDrags = {},
@@ -204,6 +206,66 @@ function RectypeManager() {
                 }
             });
             
+            
+            var btnAddRecordType = Dom.get('btnAddRecordType');
+            if(btnAddRecordType){
+                btnAddRecordType.onclick = function (e) {
+                    
+                    window.hWin.HEURIST4.msg.showMsgDlg(
+                    'Before defining new record (entity) types we suggest importing suitable '+
+                    'definitions from templates (Heurist databases registered in the Heurist clearinghouse). '+
+                    'Those with registration IDs less than 1000 are templates curated by the Heurist team. '
+                    +'<br><br>'
+    +'This is particularly important for BIBLIOGRAPHIC record types - the definitions in template #6 (Bibliographic definitions) are ' 
+    +'optimally normalised and ensure compatibility with bibliographic functions such as Zotero synchronisation, Harvard format and inter-database compatibility.'                
+                    +'<br><br>Use main menu:  Structure > Browse templates'                
+                    , function(){
+                        var currentTabIndex = tabView.get('activeIndex');
+                        var grpID = tabView.getTab(currentTabIndex).get('id');
+                        _onAddEditRecordType(0, grpID);
+                    }, {title:'Confirm',yes:'Continue',no:'Cancel'});
+
+                };
+            }
+            
+            var body = $(window.hWin.document).find('body');
+            var dim = {h:body.innerHeight(), w:body.innerWidth()};
+
+            btnAddRecordType = Dom.get('btnImportFromDb');
+            if(btnAddRecordType){
+                    btnAddRecordType.onclick = function(){
+                    
+                    window.hWin.HEURIST4.ui.showImportStructureDialog({isdialog: true, 
+                    onClose:function(){
+                        //refresh
+                        _cloneHEU = null;
+                        //update groups/tabs
+                        _refreshGroups();
+                        
+                        _clearGroupAndVisibilityChanges(true);
+                    }});
+                    
+                };
+            }            
+
+            function __executeMenu(command){
+                if(window.hWin && window.hWin.HAPI4){
+                    window.hWin.HAPI4.LayoutMgr.executeCommand('mainMenu', 'menuActionById', command);
+                }
+            }
+            
+            var btn = Dom.get('btnVisualize');
+            btn.onclick = function(){__executeMenu('menu-structure-summary');window.close()}
+            btn = Dom.get('btnTerms');
+            btn.onclick = function(){__executeMenu('menu-structure-terms');}
+            btn = Dom.get('btnReltypes');
+            btn.onclick = function(){__executeMenu('menu-structure-reltypes');}
+            btn = Dom.get('btnFields');
+            btn.onclick = function(){__executeMenu('menu-structure-fields');}
+            btn = Dom.get('btnMimetypes');
+            btn.onclick = function(){__executeMenu('menu-structure-mimetypes');}
+            
+            
     }//end _init
 
     /*
@@ -240,8 +302,14 @@ function RectypeManager() {
                             +' onClick="rectypeManager.doGroupEdit(event, '
                             +grpID+')"><span class="ui-icon ui-icon-pencil" style="font-size: 10px"/></a>',      
                     content:
-                    ('<div><br>&nbsp;&nbsp;<b><span id="grp'+grpID+'_Desc">'
-                        + grpDescription + '</span></b><br>&nbsp;<hr style="width: 100%; height: 1px;"><p>' + 
+                    ('<div style="padding:6px">&nbsp;&nbsp;<b><span id="grp'+grpID+'_Desc">'
+                        + grpDescription + '</span></b>'
+                        +'<input type="hidden" id="filter'+grpID+'" value="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
+                        +'<input type="hidden" id="filter'+grpID+'vis" value="1" style="padding-top:5px;">'
+                        
+                        /*
+                        
+                        +'<br>&nbsp;<hr style="width: 100%; height: 1px;"><p>' + 
                         '<div style="float:right; display:inline-block; margin-bottom:10px;width:360px;padding-left:50px;">'+
 
                         // These are useless clutter. Filter by name was text, active only was checkbox
@@ -260,14 +328,18 @@ function RectypeManager() {
                         '" value="Add new record type" class="add" style="margin-right:1em; margin-bottom:10px;"/>'+
 
                         //'<input type="button" id="btnAddFieldType'+grpID+'" value="Add Field Type" style="float:right;"/>'+
-                        '</div></div>'+
-                        '<div id="tabContainer'+grpID+'"></div>'+
-                        '<div style="position:absolute;bottom:8px;right:425px;">'+
+                        '</div>
+                        */
+                        +'</div>'
+                        +'<div id="tabContainer'+grpID+'"></div>'
+                        /*
+                        +'<div style="position:absolute;bottom:8px;right:425px;">'
 
                         // '<input type="button" id="btnImportFromDb'+grpID+'_2" value="Get from templates" class="import" style="margin-right:1em"/>'+
                         // '<input type="button" id="btnAddRecordType'+grpID+'_2" value="Add new record type" class="add" style="margin-right:1em"/>'+
-                        '</div>'+
-                        '</div>')
+                        +'</div>'
+                        */
+                        +'</div>')
 
             }), ind);
 
@@ -307,7 +379,7 @@ function RectypeManager() {
             Dom.get('edDescription').value = "";
 
         }else if (e.newValue!==e.prevValue)
-            {
+        {
             initTabContent(e.newValue);
         }
     }// end _handleTabChange
@@ -329,6 +401,8 @@ function RectypeManager() {
     function initTabContent(tab) {
 
         var grpID = tab.get('id');
+        
+        currentGroupId = grpID;
 
         _updateSaveNotice(grpID);
 
@@ -567,6 +641,7 @@ function RectypeManager() {
                 // Enable the row formatter
                 formatRow: myRowFormatter,
                 //selectionMode: "singlecell",
+                /*
                 paginator : new YAHOO.widget.Paginator({
                         rowsPerPage: 250, // should never be anything like this many
                         totalRecords: arr.length,
@@ -580,7 +655,7 @@ function RectypeManager() {
                         // use these in the rows-per-page dropdown
                         rowsPerPageOptions: [25, 50, 100, 250]
 
-                })
+                })*/
             };
 
             dt = new YAHOO.widget.DataTable('tabContainer'+grpID, myColumnDefs, myDataSource, myConfigs);
@@ -771,67 +846,49 @@ function RectypeManager() {
                 updateFilter();  };
 
             var btnAddRecordType = Dom.get('btnAddRecordType'+grpID);
-            btnAddRecordType.onclick = function (e) {
-                
-                window.hWin.HEURIST4.msg.showMsgDlg(
-                'Before defining new record (entity) types we suggest importing suitable '+
-                'definitions from templates (Heurist databases registered in the Heurist clearinghouse). '+
-                'Those with registration IDs less than 1000 are templates curated by the Heurist team. '
-                +'<br><br>'
-+'This is particularly important for BIBLIOGRAPHIC record types - the definitions in template #6 (Bibliographic definitions) are ' 
-+'optimally normalised and ensure compatibility with bibliographic functions such as Zotero synchronisation, Harvard format and inter-database compatibility.'                
-                +'<br><br>Use main menu:  Structure > Browse templates'                
-                , function(){
-                    var currentTabIndex = tabView.get('activeIndex');
-                    var grpID = tabView.getTab(currentTabIndex).get('id');
-                    _onAddEditRecordType(0, grpID);
-                }, {title:'Confirm',yes:'Continue',no:'Cancel'});
+            if(btnAddRecordType){
+                btnAddRecordType.onclick = function (e) {
+                    
+                    window.hWin.HEURIST4.msg.showMsgDlg(
+                    'Before defining new record (entity) types we suggest importing suitable '+
+                    'definitions from templates (Heurist databases registered in the Heurist clearinghouse). '+
+                    'Those with registration IDs less than 1000 are templates curated by the Heurist team. '
+                    +'<br><br>'
+    +'This is particularly important for BIBLIOGRAPHIC record types - the definitions in template #6 (Bibliographic definitions) are ' 
+    +'optimally normalised and ensure compatibility with bibliographic functions such as Zotero synchronisation, Harvard format and inter-database compatibility.'                
+                    +'<br><br>Use main menu:  Structure > Browse templates'                
+                    , function(){
+                        var currentTabIndex = tabView.get('activeIndex');
+                        var grpID = tabView.getTab(currentTabIndex).get('id');
+                        _onAddEditRecordType(0, grpID);
+                    }, {title:'Confirm',yes:'Continue',no:'Cancel'});
 
-            };
-            var btnAddRecordType2 = Dom.get('btnAddRecordType'+grpID+'_2');
-            if(btnAddRecordType2) btnAddRecordType2.onclick = btnAddRecordType.onclick;
-
+                };
+                var btnAddRecordType2 = Dom.get('btnAddRecordType'+grpID+'_2');
+                if(btnAddRecordType2) btnAddRecordType2.onclick = btnAddRecordType.onclick;
+            }
+            
             var body = $(window.hWin.document).find('body');
             var dim = {h:body.innerHeight(), w:body.innerWidth()};
 
             btnAddRecordType = Dom.get('btnImportFromDb'+grpID);
-            btnAddRecordType.onclick = function(){
-                
-                window.hWin.HEURIST4.ui.showImportStructureDialog({isdialog: true, 
-                onClose:function(){
-                    //refresh
-                    _cloneHEU = null;
-                    //update groups/tabs
-                    _refreshGroups();
+            if(btnAddRecordType){
+                    btnAddRecordType.onclick = function(){
                     
-                    _clearGroupAndVisibilityChanges(true);
-                }});
-                
-            };
-            btnAddRecordType2 = Dom.get('btnImportFromDb'+grpID+'_2');
-            if(btnAddRecordType2) btnAddRecordType2.onclick = btnAddRecordType.onclick
-
-            //-------
-/*Remarked temporarely 2016-05-11
-            btnAddRecordType = Dom.get('btnImportFromTemplate'+grpID);
-            btnAddRecordType.onclick = function(){
-                var sURL = window.hWin.HAPI4.baseURL + "admin/structure/import/annotatedTemplate.php?popup=1&db="+ window.hWin.HAPI4.database +
-                "&grpId="+grpID;
-
-                window.hWin.HEURIST4.msg.showDialog(sURL,{
-                    "close-on-blur": false,
-                    "no-resize": false,
-                    title: 'Browse templates',
-                    height: dim.h*0.95,
-                    width: dim.w*0.95,
-                    //callback: _import_complete
-                });
-
-
-            };
-            btnAddRecordType2 = Dom.get('btnImportFromTemplate'+grpID+'_2');
-            btnAddRecordType2.onclick = btnAddRecordType.onclick
-*/
+                    window.hWin.HEURIST4.ui.showImportStructureDialog({isdialog: true, 
+                    onClose:function(){
+                        //refresh
+                        _cloneHEU = null;
+                        //update groups/tabs
+                        _refreshGroups();
+                        
+                        _clearGroupAndVisibilityChanges(true);
+                    }});
+                    
+                };
+                btnAddRecordType2 = Dom.get('btnImportFromDb'+grpID+'_2');
+                if(btnAddRecordType2) btnAddRecordType2.onclick = btnAddRecordType.onclick
+            }
 
             /*var btnAddFieldType = Dom.get('btnAddFieldType'+grpID);
             btnAddFieldType.onclick = function (e) {

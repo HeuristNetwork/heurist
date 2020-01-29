@@ -55,6 +55,7 @@ function hLayout(args) {
         }
         return null;
     }
+
     
 
     /**
@@ -1396,6 +1397,13 @@ function hLayout(args) {
         appGetWidgetByName: function( widgetname ){
             return _appGetWidgetByName( widgetname );
         },
+        
+        executeCommand: function( widgetname, method, command ){
+            var app = _appGetWidgetByName( widgetname );
+            if(app && app.widget)
+                $(app.widget)[widgetname](method, command);
+        },
+    
         
         //
         //
