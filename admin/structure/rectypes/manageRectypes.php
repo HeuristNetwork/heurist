@@ -32,10 +32,8 @@ define('PDIR','../../../');  //need for proper path to js and css
 
 require_once(dirname(__FILE__)."/../../../hclient/framecontent/initPage.php");
 ?>
-<script type="text/javascript" src="../../../external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
-<script type="text/javascript" src="../../../external/jquery-ui-1.12.1/jquery-ui.js"></script>
-<script type="text/javascript" src="../../../hclient/core/detectHeurist.js"></script>
-<script type="text/javascript" src="../../../hclient/widgets/dropdownmenus/mainMenu.js"></script>
+<title>Modify Schema / Structure</title>
+<!-- script type="text/javascript" src="../../../hclient/widgets/dropdownmenus/mainMenu.js"></script -->
 
 <link rel="stylesheet" type="text/css" href="../../../external/yui/2.8.2r1/build/fonts/fonts-min.css" />
 <link rel="stylesheet" type="text/css" href="../../../external/yui/2.8.2r1/build/tabview/assets/skins/sam/tabview.css" />
@@ -94,10 +92,13 @@ require_once(dirname(__FILE__)."/../../../hclient/framecontent/initPage.php");
 
 .ent_wrapper{position:absolute;top:0;bottom:0;left:0;right: 1px;overflow:hidden;}
 .ent_header, .ent_footer, .ent_content{position:absolute; left:0; right:1px;}
-.ent_header{top:0;height:4.2em; padding:0.2em 0.5em;}
-.ent_content{top:4.8em;bottom:5.8em; overflow-y:auto;}
-.ent_footer{bottom:0px;height:5.6em;}
-
+.ent_header{top:0;height:9.2em;padding:30px 10px;min-width:999px;}
+.ent_content{top:13.8em;bottom:6.8em; overflow-y:auto;padding:0px 10px}
+.ent_footer{bottom:0px;height:5.6em;padding:20px}
+/* https://codepen.io/sosuke/pen/Pjoqqp */
+.blue-img {
+    filter: invert(62%) sepia(97%) saturate(1284%) hue-rotate(166deg) brightness(104%) contrast(103%);
+}
 </style>
 
         <script type="text/javascript" src="manageRectypes.js"></script>
@@ -126,24 +127,36 @@ require_once(dirname(__FILE__)."/../../../hclient/framecontent/initPage.php");
 <script type="text/javascript" src="../tabDragDrop.js"></script>
 
 <div class="ent_wrapper">
-    <div class="ent_header">
+    <div class="ent_header" style="text-align:center">
         <input id="yui-history-field" type="hidden">
+        
+        <div style="float:left">
+        <img src="../../../hclient/assets/fi_add.png" height="64" style="padding: 0 20px;" class="blue-img"/>
+        <input type="button" id="btnAddRecordType" value="Add new record type" class="add" style="margin-right:1em; float:none"/>
+        <input type="button" id="btnImportFromDb" value="Get from templates" class="import" style="float:none"/>
+        </div>
 
-        <input type="button" id="btnVisualize" value="Visualize" style="margin-right:20em; margin-top:10px;"/>
+        <img src="../../../hclient/assets/fi_network.png" height="64" style="padding:0 20px;" class="blue-img"/>
+        <input type="button" id="btnVisualize" value="Visualize"/>
     
-        <input type="button" id="btnAddRecordType" value="Add new record type" class="add" style="margin-right:1em; margin-top:10px;float:none"/>
-        <input type="button" id="btnImportFromDb" value="Get from templates" class="import" style="margin-right:20em; margin-top:10px;float:none"/>
-
-        <input type="button" id="btnMimetypes" value="Define mime types" style="margin-right:1em; margin-top:10px;float:right"/>
-        <input type="button" id="btnFields" value="Base fields" style="margin-right:1em; margin-top:10px;float:right;"/>
-        <input type="button" id="btnReltypes" value="Relation types" style="margin-right:1em; margin-top:10px;float:right;"/>
-        <input type="button" id="btnTerms" value="Vocabularies and terms" style="margin-right:1em; margin-top:10px;float:right"/>
-    
+        <div  style="float:right;min-width:380px">
+            <img src="../../../hclient/assets/fi_settings.png" height="64" style="padding-right: 20px;float: left;" class="blue-img"/>
+            <div>
+            <input type="button" id="btnTerms" value="Vocabularies and terms" style="margin-right:1em; margin-top:10px;"/>
+            <input type="button" id="btnFields" value="Base fields" style="margin-right:1em; margin-top:10px;"/>
+            </div>
+            <div>
+            <input type="button" id="btnReltypes" value="Relation types" style="margin-right:1em; margin-top:10px;"/>
+            <input type="button" id="btnMimetypes" value="Define mime types" style="margin-right:1em; margin-top:10px;"/>
+            </div>
+        </div>
+        <div style="position:absolute;bottom:5px;left:10px"><h1 style="font-weight: 900;">Entity (record) types</h1></div>
     </div>
-    <div id="modelTabs" class="yui-navset yui-navset-top ent_content">
+    <div class="ent_content">
+        <div id="modelTabs" class="yui-navset yui-navset-top"></div>
     </div>
     <div class="ent_footer">
-        <h4 style="line-height:2ex;padding:10px">Use this function to build and extend your database by adding and modifying record (entity) types. 
+        <h4 style="line-height:3ex;">Use this function to build and extend your database by adding and modifying record (entity) types. 
         <br/>Allows the re-use of existing fields for consistency across entity types, as well as the creation of entirely new fields. 
         <br/>New databases are pre-populated with a range of useful record types and term (category) vocabularies.</h4>
     </div>

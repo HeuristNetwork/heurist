@@ -302,7 +302,7 @@ function RectypeManager() {
                             +' onClick="rectypeManager.doGroupEdit(event, '
                             +grpID+')"><span class="ui-icon ui-icon-pencil" style="font-size: 10px"/></a>',      
                     content:
-                    ('<div style="padding:6px">&nbsp;&nbsp;<b><span id="grp'+grpID+'_Desc">'
+                    ('<div style="padding:16px">&nbsp;&nbsp;<b><span id="grp'+grpID+'_Desc">'
                         + grpDescription + '</span></b>'
                         +'<input type="hidden" id="filter'+grpID+'" value="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
                         +'<input type="hidden" id="filter'+grpID+'vis" value="1" style="padding-top:5px;">'
