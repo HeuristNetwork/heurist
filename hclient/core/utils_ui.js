@@ -1742,7 +1742,7 @@ window.hWin.HEURIST4.ui = {
 
         var $help_button = $(help_button);
 
-        if(nobutton!==true){
+        if(nobutton!==true){ //do not init button
             $help_button.button({icons: { primary: "ui-icon-circle-b-info" }, label:'Show context help', text:false});
         }
         

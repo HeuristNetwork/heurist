@@ -147,7 +147,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
 
         var $dlg;
         if(url){
-            var isPopupDlg = (options.isPopupDlg || options.container);
+            var isPopupDlg = (options && (options.isPopupDlg || options.container));
             var $dlg = isPopupDlg
                             ?window.hWin.HEURIST4.msg.getPopupDlg( options.container )
                             :window.hWin.HEURIST4.msg.getMsgDlg();
