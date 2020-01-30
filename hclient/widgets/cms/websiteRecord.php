@@ -186,7 +186,14 @@ if(@$_REQUEST['field']){
         $field_content = __getValue($rec, $_REQUEST['field']);
         
         if (trim($field_content)!='' && $_REQUEST['field']==DT_CMS_SCRIPT && !$system->is_js_acript_allowed()) {
-           print 'alert("Execution of custom script not allowed for this database")';   
+?>   
+window.hWin.HEURIST4.msg.showMsgDlg(
+'<p>This website contains javascript in the custom javascript field of the home page record.' 
++'Execution of custom javascript is only permitted in specifically authorised databases.</p> '
++'<p>Please ask the database owner either to edit the CMS HomePage and MenuPage records and clear the custom javascript fields, or to ask their ' 
++'system administrator to add this database to js_in_database_authorised.txt</p>',null,'Warning');
+<?php      
+            //print 'alert("Execution of custom script not allowed for this database")';        
         }else{
             print $field_content;
         }
@@ -214,6 +221,10 @@ $image_altlogo = null;
 if(defined('DT_CMS_ALTLOGO')) $image_altlogo = __getFile($rec, DT_CMS_ALTLOGO, null); 
 $image_banner = null;
 if(defined('DT_CMS_BANNER')) $image_banner = __getFile($rec, DT_CMS_BANNER, null); 
+
+$image_logo = $image_logo?'<img style="max-height:80px" src="'.$image_logo.'">'
+            :('<div style="text-align:center;display:block;width:250px;padding: 20px 10px;background:white;">'
+            .'<h2 style="color:red;margin:4px">Logo</h2><div style="color:black">Set this as Website header/layout</div></div>');
 
 $meta_keywords = htmlspecialchars(__getValue($rec, DT_CMS_KEYWORDS));
 $meta_description = htmlspecialchars(__getValue($rec, DT_SHORT_SUMMARY));
@@ -564,10 +575,7 @@ $website_title -> #main-title>h2
   //main logo image
   if($('#main-logo').length>0){
             $('#main-logo').empty();
-            $('<a href="#" style="text-decoration:none;"><?php print $image_logo
-            ?'<img style="max-height:80px" src="'.$image_logo.'">'
-            :'<div style="text-align:center;display:block;width:250px;padding: 20px 10px;background:white;">'
-            .'<h2 style="color:red;margin:4px">Logo</h2><div style="color:black">Set this as Website header/layout</div></div>';?></a>')
+            $('<a href="#" style="text-decoration:none;"><?php print $image_logo;?></a>')
             .appendTo($('#main-logo'));
   }
   
