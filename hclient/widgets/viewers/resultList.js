@@ -124,7 +124,7 @@ $.widget( "heurist.resultList", {
         }else{
             this.element.addClass('ui-heurist-bg-light');
         }
-        //this.element.css({'font-size':'0.7em'});
+        //this.element.css({'font-size':'0.9em'});
 
         this._initControls();
 

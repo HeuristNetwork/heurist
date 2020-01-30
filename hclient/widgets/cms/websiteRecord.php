@@ -669,6 +669,7 @@ body{
 }
 #main-menu .horizontalmenu > li.ui-menu-item > a{
    font-weight:bold !important; 
+   font-size:1.3em !important;
 }
 #main-pagetitle{
     position: absolute;
@@ -688,9 +689,6 @@ body{
 #main-menu .ui-menu > li > a.selected{
     background: black !important;
     color: white !important;
-}
-.ui-widget{
-    font-size:1em;
 }
 .cms-button{
     font-size:0.8em;

@@ -155,7 +155,7 @@ var cfg_layouts = [
             options:{has_paginator:false, btn_visible_newrecord:true, search_button_label:'Filter'} }, 
         ]},
         center:{Xminsize:300, dropable:false, apps:[{appid:'heurist_resultList', hasheader:false, 
-                     dockable:false, dragable:false, css:{'background-color':'white','font-size':'12px'}, 
+                     dockable:false, dragable:false, css:{'background-color':'white','font-size':'0.9em'}, //AO 2020-01-30 ,'font-size':'12px'
                      options:{empty_remark:null, show_menu:true, show_savefilter:true, show_inner_header:true, header_class:'ui-heurist-header2',show_url_as_link:true} }]},
         east:{size:'50%', Xminsize:300, dropable:false,
             tabs:[{dockable:true, dragable:false, resizable:false, adjust_positions:true, //css:{'font-size':'0.95em'},
