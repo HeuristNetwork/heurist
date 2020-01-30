@@ -148,14 +148,15 @@ $.widget( "heurist.search", {
             this.filter_by_entity = $('<span title="Show list of entities to filter">'
             +'by usage <span class="ui-icon ui-icon-triangle-1-s"></span></span>')  
             .addClass('graytext')
-            .css({'text-decoration':'none','padding':'0 10px','outline':0,'font-weight':'bold', 'font-size': '12px',cursor:'pointer'})
+            .css({'text-decoration':'none','padding':'0 10px','outline':0,'font-weight':'bold','font-size':'1.1em', cursor:'pointer'})
             .appendTo( $d2 ); //was div_search_help_links
         }
         
         
         this.btns_by_entity = $('<button>').button({label: window.hWin.HR("Show list of entities to filter"), 
                   showLabel:false, icon:'ui-icon-gear'})
-        .appendTo($d2);         //.css({'font-size':'1.1em'})
+        .css({'font-size':'0.915em'})     
+        .appendTo($d2);         //
         $d2.appendTo(this.div_entity_btns);
         
         //selector with checkboxes to select filter by entity buttons

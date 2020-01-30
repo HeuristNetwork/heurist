@@ -193,8 +193,8 @@ $.widget( "heurist.svs_list", {
             this.options.btn_visible_filter = false;
         }
 
-        //main container
-        this.accordeon = $( "<div>" ).css({'top':toppos+'em', 'bottom':0, 'left':'1em', 'right':'0.5em', 'position': 'absolute', 'overflow':'auto'}).appendTo( this.search_tree );
+        //main container  toppos+'em'
+        this.accordeon = $( "<div>" ).css({'top':0, 'bottom':0, 'left':'1em', 'right':'0.5em', 'position': 'absolute', 'overflow':'auto'}).appendTo( this.search_tree );
 
 
         this.edit_dialog = null;
@@ -502,16 +502,27 @@ $.widget( "heurist.svs_list", {
         var ispublished = (this.options.searchTreeMode>=0);
 
         //add db summary as a first entry
-        if(this.helper_btm && this.options.btn_visible_dbstructure && !ispublished){
-            
+        if(this.options.btn_visible_dbstructure && !ispublished && islogged)
+        {
+            var ele = $('<div>').css({padding:'10px','text-align':'center'}).insertBefore($(this.div_header.children()[0]));
+            var btn = $('<button>').button({label:window.hWin.HR('Design'),icon:'ui-icon-gear',iconPosition:'end'})
+                .css({'font-size':'1.4em','font-weight':'bold'})
+                .appendTo(ele);
+            this._on(btn,{click:this._shoRecTypeManager});
+            btn.find('.ui-icon').css({'font-size':'1.3em'});
+
+            /*            
             this.helper_btm.before(
                 $('<div>')
                 .attr('grpid',  'dbs').addClass('svs-acordeon')
                 .css('border','none')
                 .append( this._defineHeader(window.hWin.HR('Database Summary'), 'dbs').click( function(){ that._showDbSummary(); })
             ) );
+            */
 
         }
+        
+        this.accordeon.css('top',this.div_header.height());
         
         if(islogged || ispublished){
 
@@ -708,6 +719,7 @@ $.widget( "heurist.svs_list", {
         }
 
         this.accordeon.hide();
+        this.accordeon.css('top',this.div_header.height());
         this.accordeon.empty();
         this.search_tree.css('overflow','hidden');
         
@@ -1977,20 +1989,25 @@ $.widget( "heurist.svs_list", {
     }
 
     , _showDbSummary: function(){
-
+        
+        window.hWin.HAPI4.LayoutMgr.executeCommand('mainMenu', 'menuActionById', 'menu-structure-summary');
+        /*
         var url = window.hWin.HAPI4.baseURL+ "hclient/framecontent/visualize/databaseSummary.php?popup=1&db=" + window.hWin.HAPI4.database;
-
         var body = this.document.find('body');
         var dim = {h:body.innerHeight(), w:body.innerWidth()};
-
         window.hWin.HEURIST4.msg.showDialog(url, { height:dim.h*0.8, width:dim.w*0.8, title:'Database Summary',} );
+        */
 
-    },
+    }
+    
+    , _shoRecTypeManager: function(){
+        window.hWin.HAPI4.LayoutMgr.executeCommand('mainMenu', 'menuActionById', 'menu-structure-rectypes');
+    }
     
     //
     //
     //
-    _getFilterStrin_OLD: function( svs_ID ){
+    , _getFilterStrin_OLD: function( svs_ID ){
         
         var svs = window.hWin.HAPI4.currentUser.usr_SavedSearch[svs_ID];
         if(svs ){

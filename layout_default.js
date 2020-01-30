@@ -136,7 +136,7 @@ var cfg_layouts = [
     
         west:{size:260, Xminsize:150, apps:[{appid:'heurist_SearchTree', hasheader:false, 
                 css:{border:'none', 'background':'none'},
-                options:{btn_visible_dbstructure:false} }]},  //saved searches
+                options:{btn_visible_dbstructure:true} }]},  //saved searches
                 
         center:{Xminsize:300, dropable:false,
             apps:[{appid:'include_layout', name: 'AAA', layout_id:'FAP2',dragable:false,
