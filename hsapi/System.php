@@ -1468,9 +1468,21 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
         $is_allowed = false;
         $fname = realpath(dirname(__FILE__)."/../../js_in_database_authorised.txt");
         if(file_exists($fname)){
+            //ini_set('auto_detect_line_endings', true);
+            $handle = @fopen($fname, "r");
+            while (!feof($handle)) {
+                $line = trim(fgets($handle, 100));
+                if($line==$this->dbname){
+                    $is_allowed=true;
+                    break;
+                }
+            }
+            fclose($handle);
+            /*
             $databases = file_get_contents($fname);   
             $databases = explode("\n", $databases);
             $is_allowed = (array_search($this->dbname,$databases)>0);
+            */
         }
         return $is_allowed;
     }
