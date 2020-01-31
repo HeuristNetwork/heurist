@@ -95,9 +95,9 @@ require_once(dirname(__FILE__)."/../../../hclient/framecontent/initPage.php");
 .ent_header{top:0;height:9.2em;padding:30px 10px;min-width:999px;}
 .ent_content{top:13.8em;bottom:6.8em; overflow-y:auto;padding:0px 10px}
 .ent_footer{bottom:0px;height:5.6em;padding:20px}
-/* https://codepen.io/sosuke/pen/Pjoqqp */
+/* https://codepen.io/sosuke/pen/Pjoqqp*/
 .blue-img {
-    filter: invert(62%) sepia(97%) saturate(1284%) hue-rotate(166deg) brightness(104%) contrast(103%);
+    filter: invert(62%) sepia(71%) saturate(1988%) hue-rotate(178deg) brightness(108%) contrast(104%)
 }
 </style>
 
@@ -131,7 +131,7 @@ require_once(dirname(__FILE__)."/../../../hclient/framecontent/initPage.php");
         <input id="yui-history-field" type="hidden">
         
         <div style="float:left">
-        <img src="../../../hclient/assets/fi_add.png" height="64" style="padding: 0 20px;" class="blue-img"/>
+        <img src="../../../hclient/assets/fi_add.png" height="64" style="margin-left:7em; padding: 0 120px;" class="blue-img"/>
         <input type="button" id="btnAddRecordType" value="Add new record type" class="add" style="margin-right:1em; float:none"/>
         <input type="button" id="btnImportFromDb" value="Get from templates" class="import" style="float:none"/>
         </div>
@@ -139,7 +139,7 @@ require_once(dirname(__FILE__)."/../../../hclient/framecontent/initPage.php");
         <img src="../../../hclient/assets/fi_network.png" height="64" style="padding:0 20px;" class="blue-img"/>
         <input type="button" id="btnVisualize" value="Visualize"/>
     
-        <div  style="float:right;min-width:380px">
+        <div  style="margin-right:5em; float:right;min-width:380px">
             <img src="../../../hclient/assets/fi_settings.png" height="64" style="padding-right: 20px;float: left;" class="blue-img"/>
             <div>
             <input type="button" id="btnTerms" value="Vocabularies and terms" style="margin-right:1em; margin-top:10px;"/>
