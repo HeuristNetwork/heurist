@@ -384,19 +384,23 @@ function EditRecStructure() {
                         elLiner.innerHTML = oData;
                         
                         var s = oRecord.getData("rst_DisplayHelpText");
-                        s = s.trim();
                         var s1 = '', k = 0;
-                        while (k<s.length && k<500){
-                            s1 = s1 + s.substring(k,k+60) + "\n";
-                            k = k + 60;
+                        if(s){
+                            s = s.trim();
+                            while (k<s.length && k<500){
+                                s1 = s1 + s.substring(k,k+60) + "\n";
+                                k = k + 60;
+                            }
                         }
-                        s = oRecord.getData("rst_DisplayExtendedDescription");
-                        s = s.trim();
                         var s2 = ''; 
-                        k = 0;
-                        while (k<s.length && k<500){
-                            s2 = s2 + s.substring(k,k+60) + "\n";
-                            k = k + 60;
+                        s = oRecord.getData("rst_DisplayExtendedDescription");
+                        if(s){
+                            s = s.trim();
+                            k = 0;
+                            while (k<s.length && k<500){
+                                s2 = s2 + s.substring(k,k+60) + "\n";
+                                k = k + 60;
+                            }
                         }
 
                         var ccode = oRecord.getData("conceptCode");
@@ -404,8 +408,8 @@ function EditRecStructure() {
                         "ID: "+oRecord.getData("rst_ID")+
                         (ccode?("\n\nConcept code: "+ccode):'')+
                         "\n\nBase field type: "+oRecord.getData("dty_Name")+"\n\n"+
-                        "Help: "+s1+"\n"+
-                        "Ext: "+s2+"\n"+
+                        ((s1!='')?("Help: "+s1+"\n"):'')+
+                        ((s2!='')?("Ext: "+s2+"\n"):'')+
                         "For non owner: " + oRecord.getData("rst_NonOwnerVisibility");
                         
                         var type = oRecord.getData("dty_Type");
@@ -674,7 +678,7 @@ function EditRecStructure() {
                         '<div class="input-row"><div class="input-header-cell">Field name:</div>'+
                             '<div class="input-cell">'+
                                 '<input id="ed_rty_ID" type="hidden" value="'+rty_ID+'">'+
-                                '<input id="ed_rst_ID" type="hidden" value="'+_rst_ID+'">'+
+                                '<input id="ed_rst_ID" type="hidden" value="'+rst_ID+'">'+
                                 '<input id="ed_dty_Name" style="width:200px;" maxlength="255" onchange="_onDispNameChange(event)" '+
                                     'onkeypress="window.hWin.HEURIST4.ui.preventChars(event)" '+
                                     //'onblur="setTimeout(function(){$(\'.list_div\').hide()},200)" '+
@@ -3825,11 +3829,10 @@ function recreateRecTypesPreview(type, value) {
     var rst_ID = Dom.get("ed_rst_ID").value;
     var edt_def = Dom.get('ed'+rst_ID+'_rst_DefaultValue');
     
-    var fieldType = window.hWin.HEURIST4.detailtypes.typedefs[rst_ID].commonFields[window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex.dty_Type];
+    if(edt_def) edt_def.parentNode.parentNode.style.display = "none";
     
-    edt_def.parentNode.parentNode.style.display = "none";
-    
-    if(fieldType === "resource") {
+    if(rst_ID>0 && 
+window.hWin.HEURIST4.detailtypes.typedefs[rst_ID].commonFields[window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex.dty_Type] === "resource") {
     
         var dtID = rst_ID;
         var dtFields = window.hWin.HEURIST4.util.cloneJSON(window.hWin.HEURIST4.rectypes.typedefs[rty_ID].dtFields[rst_ID]);
@@ -3845,7 +3848,7 @@ function recreateRecTypesPreview(type, value) {
             dtID: dtID,
             //rectypeID: rectypeID,
             rectypes: window.hWin.HEURIST4.rectypes,
-            values: [edt_def.value],
+            values: (edt_def?[edt_def.value]:[]),
             readonly: false,
 
             showclear_button: true,
