@@ -3545,12 +3545,13 @@ function onRepeatValueChange(evt){
 
 function onPointerModeChange(evt, rst_ID){
     
-    if(evt.target){
+    if(evt && evt.target){
         var ele = evt.target;
         value = ele.options[ele.selectedIndex].value;
     }else{
         value = evt;
     }
+    if(!value) value = 'addorbrowse';
     
     var ele2 = document.getElementById('ed'+rst_ID+'_rst_PointerBrowseFilter');
     
