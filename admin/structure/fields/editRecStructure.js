@@ -382,13 +382,30 @@ function EditRecStructure() {
                             
                     formatter: function(elLiner, oRecord, oColumn, oData) {
                         elLiner.innerHTML = oData;
+                        
+                        var s = oRecord.getData("rst_DisplayHelpText");
+                        s = s.trim();
+                        var s1 = '', k = 0;
+                        while (k<s.length && k<500){
+                            s1 = s1 + s.substring(k,k+60) + "\n";
+                            k = k + 60;
+                        }
+                        s = oRecord.getData("rst_DisplayExtendedDescription");
+                        s = s.trim();
+                        var s2 = ''; 
+                        k = 0;
+                        while (k<s.length && k<500){
+                            s2 = s2 + s.substring(k,k+60) + "\n";
+                            k = k + 60;
+                        }
 
                         var ccode = oRecord.getData("conceptCode");
                         elLiner.title = 
                         "ID: "+oRecord.getData("rst_ID")+
                         (ccode?("\n\nConcept code: "+ccode):'')+
                         "\n\nBase field type: "+oRecord.getData("dty_Name")+"\n\n"+
-                        "Help: "+oRecord.getData("rst_DisplayHelpText")+"\n\n"+
+                        "Help: "+s1+"\n"+
+                        "Ext: "+s2+"\n"+
                         "For non owner: " + oRecord.getData("rst_NonOwnerVisibility");
                         
                         var type = oRecord.getData("dty_Type");
@@ -799,7 +816,7 @@ function EditRecStructure() {
                         '<div class="input-row">'+
                         '<div class="input-header-cell" style="vertical-align:top">Help text:</div>'+
                         '<div class="input-cell">'+
-                        '<textarea style="width:650px;max-width:650px" cols="450" rows="4" maxlength="255" id="ed'+rst_ID+'_rst_DisplayHelpText" '+
+                        '<textarea style="width:650px;max-width:650px" cols="450" rows="4" maxlength="1000" id="ed'+rst_ID+'_rst_DisplayHelpText" '+
                         'title="Help text displayed underneath the data entry field when help is ON"></textarea>'+
                         '<div class="prompt">Use &lt;br&gt; for new line and &lt;a href="web page URL" target=_blank&gt;Help&lt;/a&gt; for a link to a help page.</div>'+
                         
@@ -946,7 +963,7 @@ function EditRecStructure() {
                         '<div class="input-row">'+
                             '<div class="input-header-cell" style="vertical-align:top">Extended Description:</div>'+
                             '<div class="input-cell">'+
-                                '<textarea style="width:450px" maxlength="255" cols="450" rows="4" id="ed'+rst_ID+'_rst_DisplayExtendedDescription" '+
+                                '<textarea style="width:450px" maxlength="5000" cols="450" rows="4" id="ed'+rst_ID+'_rst_DisplayExtendedDescription" '+
                                 'onkeypress="removeErrorClass(this)"'+
                                 'title="An extended description of the content of this field type and references to any standards used"></textarea>'+
                                 '<div class="prompt">An extended description of the content of this field type and references to any standards used</div>'+
