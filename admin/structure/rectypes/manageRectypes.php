@@ -92,9 +92,9 @@ require_once(dirname(__FILE__)."/../../../hclient/framecontent/initPage.php");
 
 .ent_wrapper{position:absolute;top:0;bottom:0;left:0;right: 1px;overflow:hidden;}
 .ent_header, .ent_footer, .ent_content{position:absolute; left:0; right:1px;}
-.ent_header{top:0;height:9.2em;padding:30px 10px;min-width:999px;}
-.ent_content{top:13.8em;bottom:6.8em; overflow-y:auto;padding:0px 10px}
-.ent_footer{bottom:0px;height:5.6em;padding:20px}
+.ent_header{top:0;height:140px;min-width:999px;}
+.ent_content{top:140px;bottom:105px; overflow-y:auto;padding:0px 10px}
+.ent_footer{bottom:0px;height:105px;}
 /* https://codepen.io/sosuke/pen/Pjoqqp*/
 .blue-img {
     filter: invert(62%) sepia(71%) saturate(1988%) hue-rotate(178deg) brightness(108%) contrast(104%)
@@ -128,6 +128,7 @@ require_once(dirname(__FILE__)."/../../../hclient/framecontent/initPage.php");
 
 <div class="ent_wrapper">
     <div class="ent_header" style="text-align:center">
+        <div style="padding:30px 10px;">
         <input id="yui-history-field" type="hidden">
         
         <div style="float:left">
@@ -150,13 +151,14 @@ require_once(dirname(__FILE__)."/../../../hclient/framecontent/initPage.php");
             <input type="button" id="btnMimetypes" value="Define mime types" style="margin-right:1em; margin-top:10px;"/>
             </div>
         </div>
+        </div>
         <div style="position:absolute;bottom:5px;left:10px"><h1 style="font-weight: 900;">Entity (record) types</h1></div>
     </div>
     <div class="ent_content">
         <div id="modelTabs" class="yui-navset yui-navset-top"></div>
     </div>
     <div class="ent_footer">
-        <h4 style="line-height:3ex;">Use this function to build and extend your database by adding and modifying record (entity) types. 
+        <h4 style="line-height:3ex;padding:20px">Use this function to build and extend your database by adding and modifying record (entity) types. 
         <br/>Allows the re-use of existing fields for consistency across entity types, as well as the creation of entirely new fields. 
         <br/>New databases are pre-populated with a range of useful record types and term (category) vocabularies.</h4>
     </div>
