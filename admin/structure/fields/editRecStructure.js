@@ -920,8 +920,10 @@ function EditRecStructure() {
                         '<option value="addonly">add only</option>'+
                         '<option value="browseonly">browse only</option>'+ 
                         '</select>'+
-                            '<span><label class="input-header-cell" style="padding-top:0px">Browse&nbsp;Filter:</label>'+
-                                '<input id="ed'+rst_ID+'_rst_PointerBrowseFilter" style="width:300px"/></span>'+
+                            '<span><label class="input-header-cell" style="padding-top:0px">Filter&nbsp;browse&nbsp;list:</label>'+
+                                '<input id="ed'+rst_ID+'_rst_PointerBrowseFilter" style="width:300px"/><br>'+
+                                '<span class="prompt" style="float:right">Filter and/or sort list of potential target records (eg. by type, by date)</span>'+
+                                '</span>'+
                         '</div></div>'+
 
                         
