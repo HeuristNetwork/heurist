@@ -2126,8 +2126,8 @@ function EditRecStructure() {
                 arr_target[rst.rst_FilteredJsonTermIDTree] = null;
                 arr_target[rst.rst_PtrFilteredIDs] = null;
                 arr_target[rst.rst_CreateChildIfRecPtr] = 0;
-                arr_target[rst.rst_PointerMode] = 'addorbrowse',
-                arr_target[rst.rst_PointerBrowseFilter] = null,
+                arr_target[rst.rst_PointerMode] = 'addorbrowse';
+                arr_target[rst.rst_PointerBrowseFilter] = null;
                 arr_target[rst.rst_TermIDTreeNonSelectableIDs] = null;
                 arr_target[rst.rst_CalcFunctionID] = null;
                 arr_target[rst.rst_Status] = "open";
