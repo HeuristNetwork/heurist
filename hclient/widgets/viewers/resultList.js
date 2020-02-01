@@ -1155,7 +1155,7 @@ $.widget( "heurist.resultList", {
         var html_pwdrem = '';
         var pwd = window.hWin.HEURIST4.util.htmlEscape(fld('bkm_PwdReminder'));
         if(pwd){
-            html_pwdrem =  '<span class="ui-icon ui-icon-key rec_pwdrem" style="display:inline;left:14px;font-size:0.99em"></span>';
+            html_pwdrem =  '<span class="logged-in-only ui-icon ui-icon-key rec_pwdrem" style="display:inline;left:14px;font-size:0.99em"></span>';
             pwd = ' pwd="'+pwd+'" ';
         }else{
             pwd = '';
@@ -1200,7 +1200,7 @@ $.widget( "heurist.resultList", {
             var hint = __getOwnerName(owner_id)+', '+visibility;
 
             // Displays oner group ID, green if hidden, gray if visible to others, red if public visibility
-            html_owner =  '<span class="rec_owner" style="width:20px;padding-top:6;display:inline-block;color:'
+            html_owner =  '<span class="rec_owner logged-in-only" style="width:20px;padding-top:6;display:inline-block;color:'
                      + clr + '" title="' + hint + '"><b>' + (owner_id==0?'':owner_id) + '</b></span>';
             
             if(clr != 'blue')         
@@ -1220,10 +1220,10 @@ $.widget( "heurist.resultList", {
         +'" id="rd'+recID+'" recid="'+recID+'" '+pwd+' rectype="'+rectypeID+'" bkmk_id="'+bkm_ID+'">'
         + html_thumb
         
-        + '<div class="recordIcons logged-in-only">' //recid="'+recID+'" bkmk_id="'+bkm_ID+'">'
+        + '<div class="recordIcons">' //recid="'+recID+'" bkmk_id="'+bkm_ID+'">'
         +     '<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
         +     '" class="rt-icon" style="background-image: url(&quot;'+recIcon+'&quot;);"/> '
-        +     '<span class="ui-icon ui-icon-bookmark" style="color:'+(bkm_ID?'#ff8844':'#dddddd')+';display:inline-block;"></span>'
+        +     '<span class="logged-in-only ui-icon ui-icon-bookmark" style="color:'+(bkm_ID?'#ff8844':'#dddddd')+';display:inline-block;"></span>'
         +     html_owner
         +     html_pwdrem
         + '</div>'
