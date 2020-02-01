@@ -502,14 +502,21 @@ $.widget( "heurist.svs_list", {
         var ispublished = (this.options.searchTreeMode>=0);
 
         //add db summary as a first entry
-        if(this.options.btn_visible_dbstructure && !ispublished && islogged)
+        if(this.options.btn_visible_dbstructure && !ispublished)
         {
-            var ele = $('<div>').css({padding:'10px','text-align':'center'}).insertBefore($(this.div_header.children()[0]));
-            var btn = $('<button>').button({label:window.hWin.HR('Design'),icon:'ui-icon-gear',iconPosition:'end'})
-                .css({'font-size':'1.4em','font-weight':'bold'})
-                .appendTo(ele);
-            this._on(btn,{click:this._shoRecTypeManager});
-            btn.find('.ui-icon').css({'font-size':'1.3em'});
+            if(islogged){
+                if(!this.btn_dbdesign){
+                    var ele = $('<div>').css({padding:'10px','text-align':'center'}).insertBefore($(this.div_header.children()[0]));
+                    this.btn_dbdesign = $('<button>').button({label:window.hWin.HR('Design'),icon:'ui-icon-gear',iconPosition:'end'})
+                        .css({'font-size':'1.4em','font-weight':'bold'})
+                        .appendTo(ele);
+                    this._on(this.btn_dbdesign,{click:this._shoRecTypeManager});
+                    this.btn_dbdesign.find('.ui-icon').css({'font-size':'1.3em'});
+                }
+                this.btn_dbdesign.parent().show();
+            }else if(this.btn_dbdesign){
+                this.btn_dbdesign.parent().hide();
+            }
 
             /*            
             this.helper_btm.before(
@@ -722,6 +729,10 @@ $.widget( "heurist.svs_list", {
         this.accordeon.css('top',this.div_header.height());
         this.accordeon.empty();
         this.search_tree.css('overflow','hidden');
+        if(this.direct_search_div) {
+            this.direct_search_div.remove();
+            this.direct_search_div = null;    
+        }
         
         
         var i, svsIDs = Object.keys(this.loaded_saved_searches),
@@ -780,33 +791,35 @@ $.widget( "heurist.svs_list", {
             $(this.accordeon).css({'overflow':'hidden',position:'unset','padding':'4px'});
 
             //position:absolute;bottom:0px;
-            var search_div = $('<div style="height:2.5em;padding:4px;width:100%">'
-                +'<h4 style="padding:20px 0px;margin:0">Simple search</h4><label>Search everything:</label>'
-                +'&nbsp;<input id="search_query" style="display:inline-block;width:40%" type="search" value="">'
-                +'&nbsp;<button id="search_button"/></div>')
-            .insertAfter(this.accordeon);
-            var ele_search = search_div.find('#search_query'); //$(window.hWin.document).find('#search_query');
-            if(ele_search.length>0){
+            if(!this.direct_search_div){
+                this.direct_search_div = $('<div style="height:2.5em;padding:4px;width:100%">'
+                    +'<h4 style="padding:20px 0px;margin:0">Simple search</h4><label>Search everything:</label>'
+                    +'&nbsp;<input id="search_query" style="display:inline-block;width:40%" type="search" value="">'
+                    +'&nbsp;<button id="search_button"/></div>')
+                .insertAfter(this.accordeon);
+                var ele_search = this.direct_search_div.find('#search_query'); //$(window.hWin.document).find('#search_query');
+                if(ele_search.length>0){
 
-                this._on( ele_search, {
-                    keypress: function(e){
-                        var code = (e.keyCode ? e.keyCode : e.which);
-                        if (code == 13) {
-                            window.hWin.HEURIST4.util.stopEvent(e);
-                            e.preventDefault();
+                    this._on( ele_search, {
+                        keypress: function(e){
+                            var code = (e.keyCode ? e.keyCode : e.which);
+                            if (code == 13) {
+                                window.hWin.HEURIST4.util.stopEvent(e);
+                                e.preventDefault();
+                                that.doSearch(0, '', ele_search.val(), ele_search);
+                            }
+                        }
+                    });
+
+                    var btn_search = this.direct_search_div.find('#search_button')
+                    .button({icons:{primary:'ui-icon-search'},text:false})
+                    .css({width:'18px', height:'18px', 'margin-bottom': '5px'});
+                    this._on( btn_search, {
+                        click:  function(){
                             that.doSearch(0, '', ele_search.val(), ele_search);
                         }
-                    }
-                });
-
-                var btn_search = search_div.find('#search_button')
-                .button({icons:{primary:'ui-icon-search'},text:false})
-                .css({width:'18px', height:'18px', 'margin-bottom': '5px'});
-                this._on( btn_search, {
-                    click:  function(){
-                        that.doSearch(0, '', ele_search.val(), ele_search);
-                    }
-                });
+                    });
+                }
             }
 
         }
@@ -1983,9 +1996,12 @@ $.widget( "heurist.svs_list", {
         if(this.btn_search_save) this.btn_search_save.remove();
         this.accordeon.remove();
         //this.tree.remove();
+        if(this.direct_search_div) this.direct_search_div.remove();
 
         this.search_tree.remove();
         this.search_faceted.remove();
+        
+        if(this.btn_dbdesign)  this.btn_dbdesign.remove()
     }
 
     , _showDbSummary: function(){
