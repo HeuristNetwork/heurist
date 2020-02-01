@@ -87,15 +87,16 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                 
                 if(msg!='') msg = msg + '<br><br>';
                 
-                response.error_title = 'Access denied';
+                dlg_title = 'Login required to access '+window.hWin.HAPI4.database;  
                 response.sysmsg = (window.hWin.HAPI4.currentUser['ugr_ID']==0)?0:1;
 
                 if(msg=='' || (needlogin && response.sysmsg==0)){
                     msg = msg + top.HR('Session expired');
                     show_login_dlg = true;
                 }else if(response.sysmsg==0){
-                    msg = msg + 'You must be logged in';    
+                    msg = msg + 'You must be logged in';  
                 }else{ 
+                    dlg_title = 'Access denied';
                     msg = msg + 'This action is not allowed for your current permissions';    
                 } 
                 
