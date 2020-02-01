@@ -56,8 +56,13 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
             $('#row_helper > .heurist-table-helper1').css('visibility','hidden');    
         }
         if(that.options.pointer_mode == 'addonly'){
-                this.element.find('.not-addonly').hide();
+            this.element.find('.not-addonly').hide();
+            this.options.pointer_filter = '';
+        }else{
+            this.element.find('#cb_initial').prop('checked', 
+                !window.hWin.HEURIST4.util.isempty(this.options.pointer_filter));
         }
+        this.element.find('#cb_initial_filter').text(this.options.pointer_filter);
         
             
         if(is_expand_rt_list){
@@ -265,8 +270,11 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
             domain = 'b';
         }       
         
-        qobj = window.hWin.HEURIST4.util.mergeHeuristQuery(qobj, 
+        if(this.element.find('#cb_initial').is(':checked')){
+            qobj = window.hWin.HEURIST4.util.mergeHeuristQuery(qobj, 
                             (this.options.pointer_filter?this.options.pointer_filter:''));
+        }
+        
         
         if(qstr==''){
             this._trigger( "onresult", null, {recordset:new hRecordSet()} );
