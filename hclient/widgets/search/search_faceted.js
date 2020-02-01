@@ -116,6 +116,7 @@ ui_prelim_filter_toggle_label - label on UI
 
 ui_spatial_filter - show spatial filter
 ui_spatial_filter_label
+ui_spatial_filter_initial - initial spatial search
 
 ui_additional_filter - show search everything input (for add_filter)
 ui_additional_filter_label
@@ -276,6 +277,12 @@ $.widget( "heurist.search_faceted", {
             }
             }
         });
+        
+        if(that.options.params.ui_spatial_filter_initial){
+               that.options.params.spatial_filter = that.options.params.ui_spatial_filter_initial;
+               //__setUiSpatialFilter( that.options.params.ui_spatial_filter_initial, null);
+        }
+        
 
         //this._refresh();
         this.doReset();
@@ -737,7 +744,7 @@ $.widget( "heurist.search_faceted", {
                     that.ui_spatial_filter_image = null;
                 }
            }
-                        
+           
            this._on( [ele.find('button.define_spatial')[0],that.element.find('.map_snapshot')[0]],
             { click:                         
            function(event){
@@ -763,19 +770,6 @@ $.widget( "heurist.search_faceted", {
                     callback: function(location){
                         if( !window.hWin.HEURIST4.util.isempty(location) ){
                             __setUiSpatialFilter(location.wkt, location.imgData);
-                            /*                        
-                            if(location.imgData){
-                                that.ui_spatial_filter_image = location.imgData;
-                                that.element.find('.map_snapshot').attr('src',location.imgData).show();
-                                that.element.find('.define_spatial').hide();
-                            }else{
-                                that.ui_spatial_filter_image = null;
-                                that.element.find('.map_snapshot').attr('src',null).hide();
-                                that.element.find('.define_spatial').show();
-                            }
-                            that.element.find('.reset_spatial').show();
-                            that.options.params.spatial_filter = {geo:location.wkt};
-                            */
                             that.doSearch();
                         }
                     }

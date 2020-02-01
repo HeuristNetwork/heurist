@@ -659,6 +659,7 @@ $.widget( "heurist.search_faceted_wiz", {
                 
                 $dlg.find('#svs_SpatialFilter').prop('checked', this.options.params.ui_spatial_filter!==false);
                 $dlg.find('#svs_SpatialFilterLabel').val(this.options.params.ui_spatial_filter_label);
+                $dlg.find('#svs_SpatialFilterInitial').val(this.options.params.ui_spatial_filter_initial);
                 $dlg.find('#svs_AdditionalFilter').prop('checked', this.options.params.ui_additional_filter!==false);
                 $dlg.find('#svs_AdditionalFilterLabel').val(this.options.params.ui_additional_filter_label);
 
@@ -687,6 +688,7 @@ $.widget( "heurist.search_faceted_wiz", {
                 
                 $dlg.find('#svs_SpatialFilter').prop('checked', false);
                 $dlg.find('#svs_SpatialFilterLabel').val(window.hWin.HR('Map Search'));                
+                $dlg.find('#svs_SpatialFilterInitial').val('');                
                 $dlg.find('#svs_AdditionalFilter').prop('checked', false);
                 $dlg.find('#svs_AdditionalFilterLabel').val(window.hWin.HR('Search everything'));
                 
@@ -721,7 +723,39 @@ $.widget( "heurist.search_faceted_wiz", {
                     $dlg.find('.svs_SpatialFilter').hide();
                 }
             }});
-            $dlg.find('#svs_SpatialFilter').change()
+            $dlg.find('#svs_SpatialFilter').change();
+            
+            
+            this._on( [$dlg.find('#svs_SpatialFilterSet')[0],$dlg.find('#svs_SpatialFilterInitial')[0]],
+            { click:                         
+           function(event){
+                
+                //open map digitizer - returns WKT rectangle 
+                var rect_wkt = $dlg.find('#svs_SpatialFilterInitial').val();
+                
+                var url = window.hWin.HAPI4.baseURL 
+                +'viewers/map/mapDraw.php?db='+window.hWin.HAPI4.database
+                +'&geofilter=1&need_screenshot=0&wkt='
+                + (window.hWin.HEURIST4.util.isempty(rect_wkt)?'null':rect_wkt);
+
+                var wkt_params = {wkt: rect_wkt, geofilter:true, need_screenshot:false};
+
+                window.hWin.HEURIST4.msg.showDialog(url, {height:'900', width:'1000',
+                    window: window.hWin,  //opener is top most heurist window
+                    dialogid: 'map_digitizer_filter_dialog',
+                    params: wkt_params,
+                    title: window.hWin.HR('Define initial spatial search'),
+                    class:'ui-heurist-bg-light',
+                    callback: function(location){
+                        if( !window.hWin.HEURIST4.util.isempty(location) ){
+                            $dlg.find('#svs_SpatialFilterInitial').val(location.wkt)
+                        }
+                    }
+                } );
+                return false;     
+           }});   
+
+            
             
             
             if(isEdit && this.options.params.rectypes[0]==this.originalRectypeID)
@@ -1601,6 +1635,7 @@ $.widget( "heurist.search_faceted_wiz", {
         
         this.options.params.ui_spatial_filter = $dlg.find('#svs_SpatialFilter').is(':checked');
         this.options.params.ui_spatial_filter_label =$dlg.find('#svs_SpatialFilterLabel').val();
+        this.options.params.ui_spatial_filter_initial =$dlg.find('#svs_SpatialFilterInitial').val();
         
         this.options.params.ui_additional_filter = $dlg.find('#svs_AdditionalFilter').is(':checked');
         this.options.params.ui_additional_filter_label =$dlg.find('#svs_AdditionalFilterLabel').val();
