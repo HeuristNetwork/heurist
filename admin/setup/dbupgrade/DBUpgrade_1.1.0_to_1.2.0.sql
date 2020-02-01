@@ -82,9 +82,11 @@
         after `rst_NumericLargestValueUsed`;
     
     ALTER TABLE `defRecStructure` ADD COLUMN `rst_CreateChildIfRecPtr` TINYINT(1) DEFAULT 0 
-        COMMENT 'For pointer fields, flags that new records created from this field should be marked as children of the creating record' AFTER `rst_PtrFilteredIDs`,
-ADD COLUMN `rst_PointerMode` enum('addorbrowse','addonly','browseonly') DEFAULT 'addorbrowse' COMMENT 'When adding record pointer values, default or null = show both add and browse, otherwise only allow add or only allow browse-for-existing' AFTER `rst_PtrFilteredIDs`, 
-ADD COLUMN `rst_PointerBrowseFilter` varchar(255)  DEFAULT NULL COMMENT 'When adding record pointer values, defines a Heurist filter to restrict the list of target records browsed' AFTER `rst_PtrFilteredIDs`;    
+        COMMENT 'For pointer fields, flags that new records created from this field should be marked as children of the creating record' AFTER `rst_PtrFilteredIDs`;
+        
+    ALTER TABLE `defRecStructure` ADD COLUMN `rst_PointerMode` enum('addorbrowse','addonly','browseonly') DEFAULT 'addorbrowse' COMMENT 'When adding record pointer values, default or null = show both add and browse, otherwise only allow add or only allow browse-for-existing' AFTER `rst_CreateChildIfRecPtr`;
+
+    ALTER TABLE `defRecStructure` ADD COLUMN `rst_PointerBrowseFilter` varchar(255)  DEFAULT NULL COMMENT 'When adding record pointer values, defines a Heurist filter to restrict the list of target records browsed' AFTER `rst_PointerMode`;    
 
     ALTER TABLE `defRecStructure` ADD COLUMN `rst_InitialRepeats` TINYINT(1) DEFAULT 1 
         COMMENT 'Number of repeat values to be displayed for this field when a new record is first displayed' 
