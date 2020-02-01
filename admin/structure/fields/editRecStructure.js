@@ -656,7 +656,8 @@ function EditRecStructure() {
                         var ccode = obj.data.getData("conceptCode");
                         
                         var fieldType = window.hWin.HEURIST4.detailtypes.typedefs[rst_ID].commonFields[window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex.dty_Type];
-                        var allowEditBaseFieldType = (fieldType=='enum' || fieldType=='resource' || fieldType=='relmarker' || fieldType=='relationtype');
+                        var allowEditBaseFieldType = (fieldType!='separator');
+                        //(fieldType=='enum' || fieldType=='resource' || fieldType=='relmarker' || fieldType=='relationtype');
                         var allowIncrement = (fieldType=='freetext') || (fieldType=='integer') || (fieldType=='float');
                         
                         var incrementTip = (fieldType=='freetext')
@@ -965,7 +966,13 @@ function EditRecStructure() {
 
                         '<div id="options" class="hidden" style="background-color:white">'+
 
-                        
+                        '<div class="input-row">'+
+                            '<div class="input-header-cell" style="vertical-align:top">Base field name:</div>'+
+                            '<div class="input-cell">'+
+                                '<input style="width:450px" readonly id="dty_Name_'+rst_ID+'"/>'+
+                                '&nbsp;<a href="#" onclick="_onAddEditFieldType('+rst_ID+','+rty_ID+');">Edit base field</a>'+
+                            '</div>'+                        
+                        '</div>'+
                         '<div class="input-row">'+
                             '<div class="input-header-cell" style="vertical-align:top">Extended Description:</div>'+
                             '<div class="input-cell">'+
@@ -1653,6 +1660,9 @@ function EditRecStructure() {
         selstatus = Dom.get('ed'+rst_ID+'_rst_Status'),
         ext_description = Dom.get('ed'+rst_ID+'_rst_DisplayExtendedDescription'),
         dbId = Number(window.hWin.HAPI4.sysinfo['db_registeredid']);
+        
+        var dty_Name = window.hWin.HEURIST4.detailtypes.typedefs[rst_ID].commonFields[findex.dty_Name];
+        $('#dty_Name_'+rst_ID).val( dty_Name );
 
         //find original dbid
         var original_dbId = values[window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex.rst_OriginatingDBID];
@@ -4427,6 +4437,12 @@ function _onAddEditFieldType(dty_ID, rty_ID){
                         recreateRecTypesPreview(dty_ID,
                             window.hWin.HEURIST4.detailtypes.typedefs[dty_ID].commonFields[fi.dty_PtrTargetRectypeIDs]); //rst_type, null);
                     }
+                    //reassign dty_Name_ and ExtendedDescription (if not defined)
+                    $('#dty_Name_'+dty_ID).val( window.hWin.HEURIST4.detailtypes.typedefs[dty_ID].commonFields[fi.dty_Name] );
+                    if( $('#ed'+dty_ID+'_rst_DisplayExtendedDescription').val()==''){
+                        $('#ed'+dty_ID+'_rst_DisplayExtendedDescription').val( window.hWin.HEURIST4.detailtypes.typedefs[dty_ID].commonFields[fi.dty_ExtendedDescription] );
+                    }
+                    
 
                     /*detect what group
                     var grpID = window.hWin.HEURIST4.detailtypes.typedefs[dty_ID].commonFields[7];
