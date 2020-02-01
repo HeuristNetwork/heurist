@@ -92,7 +92,7 @@ require_once(dirname(__FILE__)."/../../../hclient/framecontent/initPage.php");
 
 .ent_wrapper{position:absolute;top:0;bottom:0;left:0;right: 1px;overflow:hidden;}
 .ent_header, .ent_footer, .ent_content{position:absolute; left:0; right:1px;}
-.ent_header{top:0;height:140px;min-width:999px;}
+.ent_header{top:0;height:140px;min-width:1190px;}
 .ent_content{top:140px;bottom:105px; overflow-y:auto;padding:0px 10px}
 .ent_footer{bottom:0px;height:105px;}
 /* https://codepen.io/sosuke/pen/Pjoqqp*/
@@ -132,7 +132,7 @@ require_once(dirname(__FILE__)."/../../../hclient/framecontent/initPage.php");
         <input id="yui-history-field" type="hidden">
         
         <div style="float:left">
-        <img src="../../../hclient/assets/fi_add.png" height="64" style="margin-left:7em; padding: 0 120px;" class="blue-img"/>
+        <img src="../../../hclient/assets/fi_add.png" height="64" style="padding: 0 80px;" class="blue-img"/>
         <input type="button" id="btnAddRecordType" value="Add new record type" class="add" style="margin-right:1em; float:none"/>
         <input type="button" id="btnImportFromDb" value="Get from templates" class="import" style="float:none"/>
         </div>
