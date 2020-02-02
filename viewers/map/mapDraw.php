@@ -123,11 +123,13 @@ console.log('load google map api')
                 if(is_geofilter){
                     layout_params['controls'] += ',drawfilter';
                     $('#rightpanel').hide();
-                    $('#rightpanel_filter').show();
+                    $('#spatial_filter').show();
+                    $('#map_container').css({top:'40px',right:'0px'});
                     $('#cbAllowMulti').prop('checked', false);
                 }else{
                     $('#rightpanel').show();
-                    $('#rightpanel_filter').hide();
+                    $('#spatial_filter').hide();
+                    $('#map_container').css({top:'0px',right:'200px'});
                 }
                 
                 
@@ -253,6 +255,9 @@ console.log('load google map api')
                         }
                         
                         if( need_screenshot ){
+                            
+                            window.hWin.HEURIST4.msg.bringCoverallToFront($('body'));
+                            
                             mapping.mapping( 'drawZoomTo' );
 
                             function filterNode(node) {
@@ -289,12 +294,14 @@ console.log('load google map api')
                                     filter: filterNode
                                 })
                                 .then(function (dataUrl) {
+                                    window.hWin.HEURIST4.msg.sendCoverallToBack();   
                                     window.close({type:typeCode, wkt:res, imgData:dataUrl});        
                                 });                                
                             }catch(e){
+                                window.hWin.HEURIST4.msg.sendCoverallToBack();
                                 window.close({type:typeCode, wkt:res});        
                             }
-                                
+                            
                             }, 2000);    
                         }else{
                             window.close({type:typeCode, wkt:res});        
@@ -312,11 +319,11 @@ console.log('load google map api')
                     
                     if(is_geofilter){
                         $('#rightpanel').hide();
-                        $('#rightpanel_filter').show();
+                        $('#spatial_filter').show();
                         $('#cbAllowMulti').prop('checked', false);
                     }else{
                         $('#rightpanel').show();
-                        $('#rightpanel_filter').hide();
+                        $('#spatial_filter').hide();
                     }
             }
             
@@ -345,11 +352,11 @@ console.log('load google map api')
            
                 if(is_geofilter){
                     $('#rightpanel').hide();
-                    $('#rightpanel_filter').show();
+                    $('#spatial_filter').show();
                     $('#cbAllowMulti').prop('checked', false);
                 }else{
                     $('#rightpanel').show();
-                    $('#rightpanel_filter').hide();
+                    $('#spatial_filter').hide();
                 }
 
                 
@@ -449,6 +456,14 @@ console.log('load google map api')
             background: #eee;
           }         
           
+            .toppanel{
+                text-align:center;
+                position: absolute;
+                top: 0px;
+                height: 32px;
+                right: 0px;
+                left: 0px;
+            }
             .rightpanel{
                 text-align:center;
                 position: absolute;
@@ -531,14 +546,14 @@ console.log('load google map api')
                 </div> 
             </div>            
             
-            <div id="rightpanel_filter" class="rightpanel" style="display:none">
-                <div style="padding-top:20px">
-                    <button class="save-button" style="font-weight:bold;font-size:1.05em">Filter</button>
+            <div id="spatial_filter" class="toppanel" style="display:none">
+                <div style="padding-right:20px;display:inline-block">
+                    <button class="save-button" style="font-weight:bold;font-size:1.05em"> Apply search extent</button>
                 </div> 
-                <div style="padding-top:20px">
+                <div style="padding-right:20px;display:inline-block">
                     <button class="cancel-button">Cancel</button>
                 </div>
-                <div style="position:absolute;bottom:5;text-align:left;padding:10px;">
+                <div style="display:none">
                     Digitise search area as a rectangle or polygon by selecting a drawing tool on the left
                 </div>
             </div>            

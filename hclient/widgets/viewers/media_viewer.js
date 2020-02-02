@@ -1,7 +1,5 @@
 /**
-* View data for one record: loads data progressively in order shared, private, relationships, links
-*
-* Requires hclient/widgets/rec_actions.js (must be preloaded)
+* View data for one record
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org

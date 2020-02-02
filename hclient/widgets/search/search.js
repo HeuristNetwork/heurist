@@ -1719,7 +1719,7 @@ $.widget( "heurist.search", {
 
                 var wkt_params = {wkt: rect_wkt, geofilter:true};
 
-                window.hWin.HEURIST4.msg.showDialog(url, {height:'900', width:'1000',
+                window.hWin.HEURIST4.msg.showDialog(url, {height:'540', width:'600',
                     window: window.hWin,  //opener is top most heurist window
                     dialogid: 'map_digitizer_filter_dialog',
                     params: wkt_params,

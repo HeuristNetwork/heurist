@@ -400,7 +400,7 @@ $.widget( "heurist.search_faceted", {
         
         // remove generated elements
         if(this.div_title) this.div_title.remove();
-        this.cached_counts = null;
+        this.cached_counts = [];
         this.btn_submit.remove();
         this.btn_close.remove();
         this.btn_save.remove();
@@ -684,17 +684,18 @@ $.widget( "heurist.search_faceted", {
            var ele = $("<div>").html(
            '<div class="header" title="" style="vertical-align: top; display: block; width: 100%; padding: 5px;">'
                 +'<h4 style="display:inline-block;margin:0;">'+lbl+'</h4></div>'
-                +'<div style="padding:5px 0 20px 21px;display: block;" class="spatial_filter">'
-                    +'<div class="input-div" style="display: inline-block;max-height: 120px;">'
+                +'<div style="padding-left:21px;display:inline-block;width:100%" class="spatial_filter">'  //padding:5px 0 20px 21px;
+                    +'<div style="float:left;max-height:120px;">' //class="input-div" 
                     +'<img class="map_snapshot" style="display:none;width:150"/>'
-                    
-                    +'<button title="Click this button to reset spatial search limits" class="smallbutton ui-button ui-corner-all ui-widget reset_spatial  ui-button-icon-only" style="display:none;margin-bottom:30px">'
-                        +'<span class="ui-button-icon ui-icon ui-icon-arrowreturnthick-1-w"></span>'
-                        +'<span class="ui-button-text"> </span></button>'                    
                     +'</div>'
-                    +'<button title="Click this button to set and apply spatial search limits" class="ui-button ui-corner-all ui-widget define_spatial" style="height:20px">'
-                        +'<span class="ui-button-icon ui-icon ui-icon-globe"></span>'
-                        +'&nbsp;<span class="ui-button-text" style="font-size:11px">Define</span></button>'
+                    +'<div style="display:inline-block;">'
+                        +'<button title="Click this button to set and apply spatial search limits" class="ui-button ui-corner-all ui-widget define_spatial" style="height:20px">'
+                            +'<span class="ui-button-icon ui-icon ui-icon-globe"></span>'
+                            +'&nbsp;<span class="ui-button-text" style="font-size:11px">Define</span></button>'
+                        +'<button title="Click this button to reset spatial search limits" class="smallbutton ui-button ui-corner-all ui-widget reset_spatial  ui-button-icon-only" style="display:none;">' // float: right;margin-right: 40px;
+                            +'<span class="ui-button-icon ui-icon ui-icon-arrowreturnthick-1-w"></span>'
+                            +'<span class="ui-button-text"> </span></button>'                    
+                    +'</div>'    
                     +'</div>').css({'border-bottom': '1px solid lightgray','margin-bottom':'25px'}).appendTo($fieldset);
                     
            var btn_reset2 = $( "<button>", {title:window.hWin.HR("Clear all fields / Reset all the filters to their initial states") })
@@ -726,10 +727,12 @@ $.widget( "heurist.search_faceted", {
                 if( wkt ){
                     if(imagedata){
                         that.ui_spatial_filter_image = imagedata;
+                        //that.element.find('.spatial_filter').css({'min-height':'120px'});
                         that.element.find('.map_snapshot').attr('src',imagedata).show();
                         that.element.find('.define_spatial').hide();
                     }else{
                         that.ui_spatial_filter_image = null;
+                        //that.element.find('.spatial_filter').css({'min-height':'20px'});
                         that.element.find('.map_snapshot').attr('src',null).hide();
                         that.element.find('.define_spatial').show();
                     }
@@ -761,7 +764,7 @@ $.widget( "heurist.search_faceted", {
 
                 var wkt_params = {wkt: rect_wkt, geofilter:true, need_screenshot:true};
 
-                window.hWin.HEURIST4.msg.showDialog(url, {height:'900', width:'1000',
+                window.hWin.HEURIST4.msg.showDialog(url, {height:'540', width:'600',
                     window: window.hWin,  //opener is top most heurist window
                     dialogid: 'map_digitizer_filter_dialog',
                     params: wkt_params,
@@ -1469,6 +1472,7 @@ $.widget( "heurist.search_faceted", {
         
     }
     
+ 
     //
     // draw facet values
     //
