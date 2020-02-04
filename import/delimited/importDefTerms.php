@@ -63,8 +63,8 @@ require_once(dirname(__FILE__)."/../../hclient/framecontent/initPage.php");
 <div style="width:100%;height:60%;position:absolute;top:0">
 <div style="position:absolute;left:0;right:400px; height:100%;  border-right:1px lightgray solid" id="divStep1">
     <div class="ent_header" style="height:8em;">
-        <h2>Step 1</h2>
-        <h2 style="padding-top:0.4em">Paste content in area below</h2>
+        <p><b>Step 1</b></p>
+        <p style="padding-top:0.4em">Paste content in area below (one label per line, may optionally be followed by separator and description, then separator and code)</p>
         <input type="file" id="uploadFile" style="display:none">
       <div style="padding-top:4px">
         <h2 style="display: inline-block">or</h2>
@@ -204,8 +204,8 @@ separate term and each of these values with comma or tab.
 </div>
 <div style="position:absolute;right:0px;height:100%;width:200px;"> 
     <div class="ent_header" style="height:5em;">
-        <h2>Step 3</h2>
-        <h2 style="padding-top:0.4em">Select field order<br>(Term is required)</h2>
+        <p><b>Step 3</b></p>
+        <p style="padding-top:0.4em; margin-bottom: 10px;">Select field order<br>(Term label is required)</p>
     </div>
     <fieldset class="ent_content" style="top:5em;padding-top:1em;">
            
@@ -244,7 +244,7 @@ separate term and each of these values with comma or tab.
 
 <div style="width:100%;height:40%;position:absolute;bottom:0" >
     <div class="ent_header" style="height:2em;border-bottom:none;border-top:1px solid lightgray;">
-        <h2 style="display:inline-block;padding-top:0.5em">Preview data to be imported</h2>
+        <p style="display:inline-block;padding-top:0.5em"><b>Preview data to be imported</b></p>
         <div id="preparedInfo" style="float:right"> <!-- div to show results of data preparation --></div>
     </div>
     <div class="ent_content_full" style="top:2.5em;font-size:0.9em;" id="divParsePreview">
