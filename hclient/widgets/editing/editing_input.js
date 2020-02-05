@@ -652,9 +652,14 @@ $.widget( "heurist.editing_input", {
                     var fname = (this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_HEADER'])
                                 ?'Custom header':'Edit page content';
                                 
-                    var fstatus = (window.hWin.HEURIST4.util.isempty(value))
-                    ?'No custom header defined'
-                    :'Delete html from this field to use default page header.';
+                    if (this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME'])
+                        { // Only show this for the CMS Home record type
+                        var fstatus = (window.hWin.HEURIST4.util.isempty(value))
+                        ?'No custom header defined'
+                        :'Delete html from this field to use default page header.';
+                        }
+                        else
+                        { var fstatus = '';}
                     
                     var div_prompt = $('<div style="line-height:20px"><b>Please use the '
                         + fname
