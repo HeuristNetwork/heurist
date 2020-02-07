@@ -506,7 +506,7 @@ $.widget( "heurist.svs_list", {
         {
             if(islogged){
                 if(!this.btn_dbdesign){
-                    var ele = $('<div>').css({padding:'10px','text-align':'center'}).insertBefore($(this.div_header.children()[0]));
+                    var ele = $('<div>').css({padding:'30px 10px 30px 40px'}).insertBefore($(this.div_header.children()[0]));
                     this.btn_dbdesign = $('<button>').button({label:window.hWin.HR('Design'),icon:'ui-icon-gear',iconPosition:'end'})
                         .css({'font-size':'1.4em','font-weight':'bold'})
                         .appendTo(ele);
