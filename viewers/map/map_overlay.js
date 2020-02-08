@@ -907,7 +907,7 @@ function hMappingControls( mapping, startup_mapdocument_id ) {
             /** NOTE: Snippets do not seem to be supported by the Google Maps API straight away.. */
             //console.log("KML snippet: " + source.kmlSnippet);
 
-            var fileURL = window.hWin.HAPI4.baseURL + 'hsapi/controller/record_kml.php?db='
+            var fileURL = window.hWin.HAPI4.baseURL + 'hsapi/controller/record_map_source.php?db='
                     +window.hWin.HAPI4.database+'&recID='+source.id;
             
             // Display on Google Maps

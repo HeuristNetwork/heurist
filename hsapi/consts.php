@@ -238,6 +238,7 @@ $rtDefines = array(
     'RT_PLACE' => array(3, 1009), 
     'RT_EN_PLACE' => array(1125, 25), //place for Expert Nation database
     'RT_KML_SOURCE' => array(3, 1014),
+    'RT_FILE_SOURCE' => array(2, 53), //csv tsv or dbf source
     'RT_SHP_SOURCE' => array(3, 1017),
     'RT_GEOTIFF_SOURCE' => array(3, 1018),
     'RT_MAP_DOCUMENT' => array(3, 1019), // HeuristReferenceSet DB 3: Map document, layers and queries for new map function Oct 2014
@@ -323,7 +324,7 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_EXTERNAL_ID' => array(2, 581), //external non heurist record id
     // Spatial & mapping
     'DT_KML_FILE' => array(3, 1044),
-    'DT_KML' => array(3, 1036),
+    'DT_KML' => array(3, 1036), //snippet
     'DT_MAP_IMAGE_LAYER_REFERENCE' => array(3, 1043),
     'DT_MAP_IMAGE_WORLDFILE' => array(3, 1095),
     'DT_SHOW_IN_MAP_BG_LIST' => array(3, 679), // DEPRECATED  show image layer or kml in map background list

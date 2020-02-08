@@ -72,9 +72,10 @@ function hMapLayer2( _options ) {
 
             _addImage();
 
-        }else if(rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_KML_SOURCE']){
+        }else if(rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_KML_SOURCE'] ||
+                 rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_FILE_SOURCE']){
 
-            _addKML();
+            _addFileSource();
             
         }else if(rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_SHP_SOURCE']){
             _addSHP();
@@ -203,16 +204,16 @@ function hMapLayer2( _options ) {
     
     
     //
-    // add kml
-    // files
-    // kmlSnippet
+    // add kml, csv, tsv or dbf files
+    // 
+    // or kmlSnippet
     //
-    function _addKML() {
+    function _addFileSource() {
 
         var layer_style = _recordset.fld(options.rec_layer || _record, window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY']);
         var rec_ID = _recordset.fld(_record, 'rec_ID');
             
-        //var url = window.hWin.HAPI4.baseURL + 'hsapi/controller/record_kml.php?db='
+        //var url = window.hWin.HAPI4.baseURL + 'hsapi/controller/record_map_source.php?db='
         //            +window.hWin.HAPI4.database+'&format=geojson&recID='+rec_ID;
                     
         request = {recID:rec_ID};             

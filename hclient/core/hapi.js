@@ -1044,7 +1044,7 @@ prof =Profile
             ,load_kml_as_geojson: function(request, callback){
                 request['format'] = 'geojson';
                 // start search
-                _callserver('record_kml', request, callback);
+                _callserver('record_map_source', request, callback);
             }
 
             //

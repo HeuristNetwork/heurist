@@ -1,7 +1,11 @@
 <?php
 
     /**
-    * Returns content of kml snippet field as kml output
+    * Read file map source record (KML, CSV or DBF) and returns content either file snippet or entire file
+    * 
+    * params
+    * recID
+    * format = geojson convets file to geojson 
     * 
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
@@ -47,15 +51,18 @@
     }
     $system->defineConstants();
     
+    /*
     if(!(defined('DT_KML') && defined('DT_KML_FILE'))){
         $system->error_exit_api('Database '.$params['db'].' does not have field definitions for KML/CSV snipppet and file'); //exit from script
-    }
+    }*/
     
     $record = array("rec_ID"=>$params['recID']);
-    recordSearchDetails($system, $record, true);//array(DT_KML, DT_KML_FILE, DT_FILE_RESOURCE));
+    $record = recordSearchByID($system, $params['recID'], true, "rec_ID, rec_RecTypeID");
+    //array(DT_KML, DT_KML_FILE, DT_FILE_RESOURCE));
     if (@$record["details"] &&
        (@$record["details"][DT_KML] || @$record["details"][DT_KML_FILE] || @$record["details"][DT_FILE_RESOURCE]))
     {
+            $input_format = ($record['rec_RecTypeID']==RT_KML_SOURCE)?'kml':'csv';
     
             if(@$record["details"][DT_KML]){
                 //snippet
@@ -111,7 +118,7 @@
                     }
                 }
                 
-                if($ext=='.kmz' || $ext=='.kml'){
+                if($input_format=='kml' || $ext=='.kmz' || $ext=='.kml'){
                     $input_format = 'kml';
                 }else if($ext=='.csv'){
                     $input_format = 'csv';
@@ -121,6 +128,7 @@
                 }
             }
         
+            //output format        
             if(@$params['format']=='geojson'){
                 
                 //detect type of data
@@ -152,15 +160,19 @@
                 $fm_t2 = ConceptCode::getDetailTypeLocalID('2-933');
                 
                 
-                if($fm_name!=null && @$record["details"][$fm_name])
+                if($fm_name!=null && is_array(@$record["details"][$fm_name])){
                     $mapping[DT_NAME] = array_shift($record["details"][$fm_name]);
-                if($fm_desc!=null && @$record["details"][$fm_desc])
+                }
+                if($fm_desc!=null && is_array(@$record["details"][$fm_desc])){
                     $mapping[DT_EXTENDED_DESCRIPTION] = array_shift($record["details"][$fm_desc]);
+                }
                     
-                if($fm_t1!=null && @$record["details"][$fm_t1])
+                if($fm_t1!=null && is_array(@$record["details"][$fm_t1])){
                     $mapping[DT_START_DATE] = array_shift($record["details"][$fm_t1]);
-                if($fm_t2!=null && @$record["details"][$fm_t2])
+                }
+                if($fm_t2!=null && is_array(@$record["details"][$fm_t2])){
                     $mapping[DT_END_DATE] = array_shift($record["details"][$fm_t2]);
+                }
 
 
                 if($input_format == 'kml'){
@@ -173,13 +185,18 @@
                 }else{
                     $parser_parms['csvdata'] = true; 
                     
-                    if($fm_X!=null && @$record["details"][$fm_X])
+                    if($fm_X!=null && @$record["details"][$fm_X]){
                         $mapping['longitude'] = array_shift($record["details"][$fm_X]);
-                    if($fm_Y!=null && @$record["details"][$fm_Y])
+                    }
+                    if($fm_Y!=null && @$record["details"][$fm_Y]){
                         $mapping['latitude'] = array_shift($record["details"][$fm_Y]);
+                    }
+                        
                 }
                     
-                if(!@$mapping[DT_NAME]) $mapping[DT_NAME] = 'name';
+                if(!@$mapping[DT_NAME]){
+                    $mapping[DT_NAME] = 'name';  
+                } 
                 
                 if(count($mapping)>0){
                     
@@ -251,8 +268,16 @@
                 
             }else{
                 
-                header('Content-Type: application/vnd.google-earth.kml+xml');
-                header('Content-disposition: attachment; filename=output.kml');
+                if($input_format=='kml'){
+                    header('Content-Type: application/vnd.google-earth.kml+xml');
+                    header('Content-disposition: attachment; filename=output.kml');
+                }else if($input_format=='csv'){
+                    header('Content-Type: text/csv');
+                    header('Content-disposition: attachment; filename=output.csv');
+                }else if($input_format=='dbf'){
+                    header('Content-Type: application/x-dbase');
+                    header('Content-disposition: attachment; filename=output.dbf');
+                } 
                 header('Content-Length: ' . strlen($file_content));
                 exit($file_content);
             }
