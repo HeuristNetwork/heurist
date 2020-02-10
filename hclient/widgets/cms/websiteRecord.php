@@ -402,7 +402,6 @@ _time_debug = new Date().getTime() / 1000;
     //cfg_widgets is from layout_defaults.js 
     window.hWin.HAPI4.LayoutMgr.init(cfg_widgets, null);
     
-    
     //reload home page content by click on logo
     $("#main-logo").click(function(event){
               loadHomePageContent(<?php print $rec_id?>);

@@ -34,6 +34,8 @@ function hCmsEditing(_options) {
     var is_header_editor = false;
     var header_content_raw = null;
     var header_content_generated = true;
+    var LayoutMgr = new hLayout(); //to avoid interferene with  window.hWin.HAPI4.LayoutMgr  
+
     
     // define tinymce configuration
     // init main menu with listener __iniLoadPageById
@@ -46,7 +48,7 @@ function hCmsEditing(_options) {
         $('#main-menu').hide();
         
         //cfg_widgets is from layout_defaults=.js 
-        window.hWin.HAPI4.LayoutMgr.init(cfg_widgets, null);
+        LayoutMgr.init(cfg_widgets, null);
         
 
         inlineEditorConfig = {
@@ -162,7 +164,7 @@ function hCmsEditing(_options) {
             
             topmenu.hide();
             
-            window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, "#main-header",
+            LayoutMgr.appInitFromContainer( document, "#main-header",
                 {heurist_Navigation:{menu_recIDs:home_pageid
                 , use_next_level:true
                 , orientation:'horizontal'
@@ -289,7 +291,7 @@ function hCmsEditing(_options) {
                         //assign content to editor
                         $('.tinymce-body').val($('#main-content').html());
                         //init widgets 
-                        window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, "#main-content" );
+                        LayoutMgr.appInitFromContainer( document, "#main-content" );
                         window.hWin.HEURIST4.msg.sendCoverallToBack();
                         
                         __alignButtons();
@@ -418,7 +420,7 @@ function hCmsEditing(_options) {
                 }
                 
                 //reinit widgtets in header
-                window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, "#main-header",
+                LayoutMgr.appInitFromContainer( document, "#main-header",
                     {heurist_Navigation:{menu_recIDs:home_pageid
                     , use_next_level:true
                     , orientation:'horizontal'
@@ -440,7 +442,7 @@ function hCmsEditing(_options) {
                     
                     if(was_modified){
                         $('#main-content').html(last_save_content);
-                        window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, "#main-content" );
+                        LayoutMgr.appInitFromContainer( document, "#main-content" );
                     }
                 }
             }
