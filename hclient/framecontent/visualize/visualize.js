@@ -803,7 +803,13 @@ function addLines(name, color, thickness) {
     lines.attr("class", function(d) {
             return name + " link s"+d.source.id+"r"+d.relation.id+"t"+d.target.id;
          })
-         .attr("stroke", color)
+         .attr("stroke", function (d) {
+             if(d.targetcount == 0 && name === 'bottom-lines') {
+                 return '#d9d8d6';
+             } else {
+                 return color;
+             }
+         })
          .style("stroke-dasharray", (function(d) {
              if(d.targetcount == 0) {
                 return "3, 3"; 
