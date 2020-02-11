@@ -186,7 +186,7 @@ $.widget( "heurist.mainMenu", {
         if(__include('profile')) this._initMenu('Profile', -1, this.divProfileItems);
 
         if(__include('Database')) this._initMenu('Database', -1);            
-        if(__include('Structure')) this._initMenu('Structure', 0);
+        if(__include('Structure')) this._initMenu('Structure', 0, null, 3); //3 means hidden
         if(__include('Verify')) this._initMenu('Verify', 0);
         if(__include('Import')) this._initMenu('Import', 0);
         if(__include('Website')) this._initMenu('Website', 0);
@@ -588,65 +588,6 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
 
     },
 
-
-    //
-    // NOT USED
-    //
-    _onPopupLink: function(event){
-
-        var body = $(this.document).find('body');
-        var dim = {h:body.innerHeight   (), w:body.innerWidth()},
-        link = $(event.target),
-        that = this;
-
-        var options = { title: link.html() };
-
-        if (link.hasClass('small')){
-            options.height=dim.h*0.6; options.width=dim.w*0.5;
-        }else if (link.hasClass('portrait')){
-            options.height=dim.h*0.8; options.width=dim.w*0.55;
-            if(options.width<700) options.width = 700;
-        }else if (link.hasClass('large')){
-            options.height=dim.h*0.8; options.width=dim.w*0.8;
-        }else if (link.hasClass('verylarge')){
-            options.height = dim.h*0.95;
-            options.width  = dim.w*0.95;
-        }else if (link.hasClass('fixed')){
-            options.height=dim.h*0.8; options.width=800;
-        }else if (link.hasClass('fixed2')){
-            if(dim.h>700){ options.height=dim.h*0.8;}
-            else { options.height=dim.h-40; }
-            options.width=800;
-        }else if (link.hasClass('landscape')){
-            options.height=dim.h*0.5;
-            options.width=dim.w*0.8;
-        }
-
-        var url = link.attr('href');
-        if (link.hasClass('currentquery')) {
-            url = url + that._current_query_string
-        }
-        
-        if (link.hasClass('refresh_structure')) {
-               options['afterclose'] = this._refreshLists;
-        }
-
-        
-        if(link && link.attr('data-logaction')){
-            window.hWin.HAPI4.SystemMgr.user_log(link.attr('data-logaction'));
-        }
-        
-        if(link && link.attr('data-nologin')!='1'){
-            //check if login
-            window.hWin.HAPI4.SystemMgr.verify_credentials(function(){window.hWin.HEURIST4.msg.showDialog(url, options);});  //not used
-        }else{
-            window.hWin.HEURIST4.msg.showDialog(url, options);
-        }        
-
-        event.preventDefault();
-        return false;
-    },
-    
     //
     // returns all menu entries as array - used in dropdown command selector in dashboard editor
     //

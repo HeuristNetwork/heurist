@@ -510,7 +510,7 @@ $.widget( "heurist.svs_list", {
                     this.btn_dbdesign = $('<button>').button({label:window.hWin.HR('Design schema'),icon:'ui-icon-gear',iconPosition:'end'})
                         .css({'font-size':'1.4em','font-weight':'bold'})
                         .appendTo(ele);
-                    this._on(this.btn_dbdesign,{click:this._shoRecTypeManager});
+                    this._on(this.btn_dbdesign,{click:this._showRecTypeManager});
                     this.btn_dbdesign.find('.ui-icon').css({'font-size':'1.3em'});
                 }
                 this.btn_dbdesign.parent().show();
@@ -2016,7 +2016,7 @@ $.widget( "heurist.svs_list", {
 
     }
     
-    , _shoRecTypeManager: function(){
+    , _showRecTypeManager: function(){
         window.hWin.HAPI4.LayoutMgr.executeCommand('mainMenu', 'menuActionById', 'menu-structure-rectypes');
     }
     
