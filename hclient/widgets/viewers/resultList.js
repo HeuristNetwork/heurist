@@ -1241,11 +1241,13 @@ $.widget( "heurist.resultList", {
         + '<span class="ui-button-icon-primary ui-icon ui-icon-newwin"/><span class="ui-button-text"/>'
         + '</div>'  // Replace ui-icon-pencil with ui-icon-extlink and swap position when this is finished 
 
+        /* Ian removed 5/2/2020. TODO: Need to replace with Select, Preview and Download buttons */
         + '<div title="Click to view record (opens in popup)" '
         + 'class="rec_view_link action-button ui-button ui-widget ui-state-default ui-corner-all'+btn_icon_only+'" '
         + 'role="button" aria-disabled="false">'
-        + '<span class="ui-button-text">View</span>'
+        + '<span class="ui-button-text">Preview</span>'
         + '<span class="ui-button-icon-primary ui-icon ui-icon-comment"/>'
+        
         + '</div>'
 
         + '<div title="Click to edit record" '
