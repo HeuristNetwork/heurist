@@ -259,7 +259,7 @@ if(@$_REQUEST['mode']=='2'){
     
     if(!$res){
         echo_flush ('<p style="padding-left:20px;"><h2 style="color:red">WARNING: Your database has not been cloned.</h2>'
-        .'Please '.CONTACT_SYSADMIN.' or '.CONTACT_HEURIST_TEAM.' for assistance with cloning of your database.');
+        .'Please run Verify &gt; Verify database integrity. If this does not find and fix errors, please send a bug report (Help &gt; Bug report) and we will investigate the problem.');
     }
         
 

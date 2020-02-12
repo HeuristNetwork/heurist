@@ -297,6 +297,23 @@ function hexportMenu() {
                 }
                 
             }else{
+                if ((opts.format === 'hml' || opts.format === 'json') && !opts.confirmNotFollowPointers) {
+                    window.hWin.HEURIST4.msg.showMsgDlg(
+                        '<p><span style="color:red">WARNING:</span> by allowing the export of records without following pointers, ' +
+                        'you will lose any data which is referenced by pointer fields in the exported records. ' +
+                        'This may be acceptable for simple lists eg. of places or person names, ' +
+                        'but you need to understand the nature of the exported records to be sure that you are not ' +
+                        'losing essential data.</p>' +
+                        '<p>Exporting and importing a CSV file will give you more control on what fields are exported.</p>' +
+                        '<p>Are you sure?</p>', function(){
+                            opts.confirmNotFollowPointers = true;
+                            _exportRecords(opts);
+                        }, {
+                            yes: 'Proceed',
+                            no: 'Cancel'
+                        });
+                    return;
+                }
                 params =  'depth='+(opts.includeRelated?1:0);
             }
             

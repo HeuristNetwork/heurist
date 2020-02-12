@@ -209,6 +209,7 @@ function hCmsEditing(_options) {
                         $('#btn_inline_editor4').hide();
                         $('#btn_inline_editor').text('wyswyg');
                         $('#btn_inline_editor3').text('Save');
+                        $('#btn_inline_editor5').show();
                         
                         $('#main-content').parent().css('overflow-y','hidden');
                         $('#main-content').hide();
@@ -224,8 +225,17 @@ function hCmsEditing(_options) {
                 $('<a href="#" id="btn_inline_editor4"></a>') //edit page settings
                 .appendTo($('body')).addClass('cms-button')
                 .click(_editPageRecord)
-                .show();            
-      
+                .show();
+
+        $('<a href="#" id="btn_inline_editor5">Cancel</a>')
+            .appendTo($('body'))
+            .addClass('ui-front cms-button')
+            .click(function () {
+                __hideEditor();
+                $('.tinymce-body').val($('#main-content').html());
+            })
+            .show();
+
     }//_init  
             
     //
@@ -403,6 +413,7 @@ function hCmsEditing(_options) {
             $('#btn_inline_editor').show();
             $('#btn_inline_editor3').show();
             $('#btn_inline_editor4').show();
+            $('#btn_inline_editor5').hide();
             $('#btn_inline_editor').text('Edit page content');
             $('#btn_inline_editor3').text('source');
             
@@ -474,6 +485,8 @@ function hCmsEditing(_options) {
                         top:tp,left:lp-190}).show();
             $('#btn_inline_editor3').css({position:'absolute',
                         top:tp,left:lp-40}).show();
+            $('#btn_inline_editor5').css({position:'absolute',
+                top:tp,left:lp-340}).hide();
             
             //$('#btn_inline_editor').position({my:'right top',at:'right-90 top-15',of:$('#main-content')}).show();
             //$('#btn_inline_editor3').position({my:'right top',at:'right-40 top-15',of:$('#main-content')}).show();
@@ -1353,6 +1366,7 @@ function hCmsEditing(_options) {
                     $('#btn_inline_editor').hide();
                     $('#btn_inline_editor3').hide();
                     $('#btn_inline_editor4').hide();
+                    $('#btn_inline_editor5').hide();
                     $('#btn_inline_editor').text('Edit page content');
                     $('#btn_inline_editor3').text('source');
                     
