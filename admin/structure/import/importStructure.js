@@ -206,8 +206,7 @@ $.widget( "heurist.importStructure", {
         //init record list for dbs and rty
         this.recordList_dbs
         .resultList({
-            eventbased: false, 
-            isapplication: false, //do not listent global events @todo merge with eventbased
+            eventbased: false, //do not listent global events
             multiselect: false,
             select_mode: 'select_single', // none
 

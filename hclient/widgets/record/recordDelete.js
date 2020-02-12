@@ -71,8 +71,7 @@ $.widget( "heurist.recordDelete", $.heurist.recordAction, {
         //init record list
         this.recordList
                     .resultList({
-                       eventbased: false, 
-                       isapplication: false, //do not listen global event
+                       eventbased: false, //do not listen global events
                        multiselect: true,
                        select_mode: 'select_multi',
                        view_mode: 'list',

@@ -23,7 +23,7 @@ $.widget( "heurist.svs_list", {
 
     // default options
     options: {
-        isapplication:true,  // send and recieve the global events
+
         btn_visible_dbstructure: false,  //button to open database structure graph
         btn_visible_filter: false, //filter for treeview
         btn_visible_save: false,

@@ -69,8 +69,7 @@ $.widget( "heurist.select_imagelib", {
         this.recordList
                     .resultList({
                        recordDiv_class: 'recordDiv_blue',
-                       eventbased: false, 
-                       isapplication: false, //do not listent global events @todo merge with eventbased
+                       eventbased: false, //do not listent global events
                        multiselect: false,
 
                        select_mode: 'select_single',

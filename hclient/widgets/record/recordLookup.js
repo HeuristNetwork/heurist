@@ -76,8 +76,8 @@ $.widget( "heurist.recordLookup", $.heurist.recordAction, {
         this.options.resultList = $.extend(this.options.resultList, 
         {
                recordDiv_class: 'recordDiv_blue',
-               eventbased: false, 
-               isapplication: false, //do not listent global events @todo merge with eventbased
+               eventbased: false,  //do not listent global events
+
                multiselect: false, //(this.options.select_mode!='select_single'), 
 
                select_mode: 'select_single', //this.options.select_mode,

@@ -312,8 +312,7 @@ $.widget( "heurist.manageEntity", {
                 this.options.resultList = $.extend(this.options.resultList, 
                 {
                        recordDiv_class: 'recordDiv_blue',
-                       eventbased: false, 
-                       isapplication: false, //do not listent global events @todo merge with eventbased
+                       eventbased: false, //do not listent global events
                        multiselect: (this.options.select_mode!='select_single'), //@todo replace to select_mode
 
                        select_mode: this.options.select_mode,

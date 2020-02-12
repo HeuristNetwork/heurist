@@ -31,10 +31,10 @@ $.widget( "heurist.resultList", {
         action_select:null,  //array of actions
         action_buttons:null,
                             
-        recordview_onselect: false, //false/none inline or popup - show record viewer/info on select
+        recordview_onselect: false, //false/none, inline or popup - show record viewer/info on select
         multiselect: true,    //allows highlight several records
-        isapplication: true,  //if false it does not listen global events @todo merge with eventbased
-        eventbased:true,
+
+        eventbased:true, //if false it does not listen global events
 
         show_toolbar: true,   //toolbar contains menu,savefilter,counter,viewmode and pagination
         show_menu: false,       //@todo ? - replace to action_select and action_buttons
@@ -131,13 +131,11 @@ $.widget( "heurist.resultList", {
         //-----------------------     listener of global events
         if(this.options.eventbased)
         {
-            this._events = window.hWin.HAPI4.Event.ON_CREDENTIALS + " " + window.hWin.HAPI4.Event.ON_LAYOUT_RESIZE;
-            if(this.options.isapplication){
-                this._events = this._events 
+            this._events = window.hWin.HAPI4.Event.ON_CREDENTIALS 
+                + ' ' + window.hWin.HAPI4.Event.ON_LAYOUT_RESIZE
                 + ' ' + window.hWin.HAPI4.Event.ON_REC_SEARCHSTART
                 + ' ' + window.hWin.HAPI4.Event.ON_REC_SELECT
                 + ' ' + window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH;
-            }
 
             $(this.document).on(this._events, function(e, data) {
 
@@ -380,7 +378,7 @@ $.widget( "heurist.resultList", {
         .css({'overflow-y':'auto'})
         .appendTo( this.element );
         
-        if(this._is_publication){ //make transparent
+        if(this._is_publication){ //make BG transparent
             this.div_toolbar.css({'background':'none'});
             this.div_content.css({'background':'none'});
         }else{
@@ -1699,7 +1697,7 @@ $.widget( "heurist.resultList", {
     triggerSelection: function(){
 
 
-        if(this.options.isapplication){
+        if(this.options.eventbased){
             var selected_ids = this.getSelected( true );
             $(this.document).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT, 
                 {selection:selected_ids, source:this.element.attr('id'), search_realm:this.options.search_realm} );
@@ -2522,7 +2520,6 @@ $.widget( "heurist.resultList", {
                 .resultList({
                    recordDiv_class: 'recordDiv_blue',
                    eventbased: false, 
-                   isapplication: false, //do not listent global events @todo merge with eventbased
                    multiselect: false,
                    view_mode: 'list',
                    sortable: true,

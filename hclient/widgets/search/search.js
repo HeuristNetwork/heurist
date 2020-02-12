@@ -40,8 +40,6 @@ $.widget( "heurist.search", {
         
         button_class: 'ui-heurist-btn-header1',
         
-        
-        isapplication:true,  // send and recieve the global events
         // callbacks
         onsearch: null,  //on start search
         onresult: null,   //on search result

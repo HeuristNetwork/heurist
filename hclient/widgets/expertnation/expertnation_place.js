@@ -25,7 +25,6 @@ $.widget( "heurist.expertnation_place", $.heurist.resultList, {
         this.options.searchfull = this._searchFullRecords;  //just re-render page
         this.options.navigator = 'buttons';
         
-        this.options.isapplication = false;
         this.options.eventbased = false;
         
         //this.options.renderer = _renderRecord_html;

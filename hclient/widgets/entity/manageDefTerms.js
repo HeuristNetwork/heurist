@@ -647,8 +647,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             
             this._thumbs = this.thumb_Container.resultList(
                       {
-                       eventbased: false, 
-                       isapplication: false, //do not listent global events @todo merge with eventbased
+                       eventbased: false, //do not listent global events
                        multiselect: (this.options.select_mode!='select_single'), //@todo replace to select_mode
 
                        select_mode: this.options.select_mode,
