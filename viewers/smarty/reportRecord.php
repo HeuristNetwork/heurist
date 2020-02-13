@@ -247,19 +247,22 @@ class ReportRecord {
                     //array_push($record, array(substr($key,4) => $value));
                     $record['rec'.substr($key,4)] = $value;
 
-                    if($key=="rec_RecTypeID"){ //additional field
+                    if($key=='rec_RecTypeID'){ //additional field
                         $recTypeID = $value;
-                        $record["recTypeID"] = $recTypeID;
-                        $record["recTypeName"] = $this->rtStructs['typedefs'][$value]['commonFields']
+                        $record['recTypeID'] = $recTypeID;
+                        $record['recTypeName'] = $this->rtStructs['typedefs'][$value]['commonFields']
                                                             [ $this->rtStructs['typedefs']['commonNamesToIndex']['rty_Name'] ];
-                    }else if ($key=="rec_Tags"){ 
+                    }else if ($key=='rec_Tags'){ 
                         
-                        $record["recTags"] = $value;
+                        $record['rec_Tags'] = $value;
                         
-                    }else if ($key=="rec_ID"){ //load tags and woottext once per record
+                    }else if ($key=='rec_ID'){ //load tags and woottext once per record
 
-                        $record["recWootText"] = $this->getWootText($value); //@todo load dynamically 
+                        $record['recWootText'] = htmlspecialchars($this->getWootText($value), ENT_QUOTES, 'UTF-8'); //@todo load dynamically 
                         
+                    }else if ($key == 'rec_ScratchPad'){
+                        
+                        $record['rec_ScratchPad'] = htmlspecialchars($record['rec_ScratchPad'], ENT_QUOTES, 'UTF-8');
                     }
 
                 }
@@ -624,6 +627,7 @@ class ReportRecord {
                             $res = "";
                             $origvalues = array();
                             foreach ($dtValue as $key => $value){
+                                $value = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
                                 if(strlen($res)>0) $res = $res.", ";
                                 $res = $res.$value;
                                 array_push($origvalues, $value);
@@ -643,7 +647,7 @@ class ReportRecord {
                 return $res;
             }
             else {
-                return array( $dtname=>$dtValue );
+                return array( $dtname=>htmlspecialchars($dtValue, ENT_QUOTES, 'UTF-8') );
             }
 
         }else{ //name is not defined
