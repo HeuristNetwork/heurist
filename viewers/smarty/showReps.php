@@ -325,6 +325,7 @@ function executeSmartyTemplate($system, $params){
         }
     }
     //DEBUG   
+    $smarty->registerFilter('pre','smarty_pre_filter'); //remove script tags
     $smarty->registerFilter('post','smarty_post_filter'); //to add progress support
 
     if($publishmode==0 && $session_id!=null){
@@ -352,6 +353,14 @@ function executeSmartyTemplate($system, $params){
         .'Please use publish or print to get full set of records.<br Or increase the limit in preferences</b></div>';
     }
     
+}
+
+//
+// remove all <script> tags from template
+//
+function smarty_pre_filter($tpl_source, Smarty_Internal_Template $template){
+    $s = preg_replace("/<!--#.*-->/U",'',$tpl_source);
+    return preg_replace('#<script(.*?)>(.*?)</script>#is', '', $s);    
 }
 
 //
