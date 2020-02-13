@@ -96,7 +96,7 @@
 
             $success = $mysqli->select_db($database_name_full);
             if(!$success){
-                return array(HEURIST_INVALID_REQUEST, "Could not open database ".htmlspecialchars($database_name));
+                return array(HEURIST_INVALID_REQUEST, "Could not open database ".htmlspecialchars($database_name, ENT_QUOTES, 'UTF-8'));
             }
 
             $mysqli->query('set character set "utf8"'); //was utf8mb4

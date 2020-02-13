@@ -24,9 +24,11 @@
     function sendEmail($email_to, $email_title, $email_text, $email_header, $is_utf8=false){
 
         $res = "ok";
+        
+        $email_to = filter_var($email_to, FILTER_SANITIZE_EMAIL);
 
-        if(!$email_to){
-            $res = "Mail send failed. Recipient email address is not defined.";
+        if(!filter_var($email_to, FILTER_VALIDATE_EMAIL)){
+            $res = "Mail send failed. Recipient email address is not defined or invalid.";
         }else if(!$email_text){
             $res = "Mail send failed. Message text is not defined.";
         }else {

@@ -118,13 +118,12 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             request.notes = null; //unset to reduce traffic
         }
 
-        //window.hWin.HEURIST4.ui.onInactiveReset();
-
         //remove remark to debug 
         request.DBGSESSID='425944380594800002;d=1,p=0,c=07';
         //DBGSESSID=425944380594800002;d=1,p=0,c=07
 
         var url = that.baseURL+"hsapi/controller/"+action+".php"; //+(new Date().getTime());
+        
         
         var request_code = {script:action, action:request.a};
         //note jQuery ajax does not properly in the loop - success callback does not work often
@@ -1159,7 +1158,7 @@ prof =Profile
             },
             
             //
-            // reset entity data that forces reload from server on next reequest
+            // reset entity data that forces reload from server on next request
             //
             clearEntityData: function(entityName){
                 if(!$.isEmptyObject(entity_data[entityName])){

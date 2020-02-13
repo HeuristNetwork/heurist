@@ -220,19 +220,6 @@ if(!($is_map_popup || $without_header)){
             }
         });
                     
-                    /*
-                    top.HEURIST.util.sendRequest(url, function(xhr) {
-                        var obj = xhr.responseText;
-                        //alert('!!!!'+obj);
-                        if (obj){
-                            var  elem = document.getElementById('player'+id);
-                            elem.innerHTML = obj;
-                            elem.style.display = 'block';
-                            elem = document.getElementById('lnk'+id);
-                            elem.style.display = 'block';
-                        }
-                        }, null);
-                     */
                 }
                 else{
                     hidePlayer( id );

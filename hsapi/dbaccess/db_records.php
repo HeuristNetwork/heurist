@@ -190,7 +190,8 @@
         $stmt = $mysqli->prepare($query);
 
         $currentUserId = $system->get_user_id();
-        $rec_url  = @$record['URL'];
+        $rec_url  = sanitizeURL(@$record['URL']);
+        
         $rec_scr  = @$record['ScratchPad'];
         $rec_imp  = (@$record['AddedByImport']?1:0);
         $rec_temp = (@$record['FlagTemporary']?1:0);
@@ -409,7 +410,7 @@
             $stmt = $mysqli->prepare($query);
 
             $rec_mod = date('Y-m-d H:i:s');
-            $rec_url = @$record['URL'];
+            $rec_url = sanitizeURL(@$record['URL']);
             $rec_spad = @$record['ScratchPad'];
             $rec_temp = (@$record['FlagTemporary']==1)?1:0;
 
@@ -1991,6 +1992,18 @@
         return true;
     }
 
+    //
+    //
+    //
+    function sanitizeURL($url){
+        if($url){
+            $url = filter_var($url, FILTER_SANITIZE_URL);
+            if(filter_var($url, FILTER_VALIDATE_URL)){
+                return $url;
+            }
+        }
+        return null;
+    }
     
     // @todo use DbsTerms
     // @todo REMOVE - all these functions are duplicated in DbsTerms and db_structure
