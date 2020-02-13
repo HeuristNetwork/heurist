@@ -1332,9 +1332,9 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 var rec = recordset.getFirstRecord();
                 var val = recordset.fld(rec, 'bkm_Rating');
                 sContent = 'Rating: '+((val>0) ?'*'.repeat(val) :''); 
-                val = recordset.fld(rec, 'bkm_PwdReminder');
+                val = window.hWin.HEURIST4.util.htmlEscape(recordset.fld(rec, 'bkm_PwdReminder'));
                 sContent += '<br>&nbsp;&nbsp;&nbsp;Pwd: '+((!window.hWin.HEURIST4.util.isempty(val))?val:''); 
-                val = recordset.fld(rec, 'bkm_Notes');
+                val = window.hWin.HEURIST4.util.htmlEscape(recordset.fld(rec, 'bkm_Notes'));
                 sContent += '<br>&nbsp;Notes: '+((!window.hWin.HEURIST4.util.isempty(val))
                         ?(val.substr(0,500)+(val.length>500?'...':'')):''); 
                 
