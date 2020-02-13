@@ -124,7 +124,9 @@
                 $res = true;
             } else {
                 $res = array(HEURIST_DB_ERROR, 
-                        'Unable to create database '.$db_name.' SQL error: '.$mysqli->error);
+                        'Unable to create database '
+                            .htmlspecialchars($db_name, ENT_QUOTES, 'UTF-8')
+                            .' SQL error: '.$mysqli->error);
             }
         }
         return $res;
@@ -491,7 +493,8 @@
             }else{
                 //check insert or update
                 $res = mysql__select_value($mysqli, 
-                    "SELECT $primary_field FROM $table_name WHERE $primary_field='".$rec_ID."'");
+                    "SELECT $primary_field FROM $table_name WHERE $primary_field='"
+                        .$mysqli->real_escape_string($rec_ID)."'");
                 $isinsert = ($res==null);
             }
         }
@@ -551,7 +554,9 @@
             $query2 = substr($query2,0,strlen($query2)-2).")";
             $query = $query.$query2;
         }else{
-            $query = $query." where ".$primary_field."=".($primary_field_type=='integer'?$rec_ID:"'".$rec_ID."'");
+            $val = $mysqli->real_escape_string($rec_ID);
+            $query = $query." where ".$primary_field."="
+                .($primary_field_type=='integer'?$val:("'".$val."'"));
         }
 
         $result = mysql__exec_param_query($mysqli, $query, $params);
@@ -1151,19 +1156,21 @@ $query = 'CREATE TABLE sysDashboard ('
         if($value=='REMOVE'){
             //$mysqli->query("DELETE FROM sysSessionProgress where stp_ID=".$session_id);
         }else{
+            $session_id = $mysqli->real_escape_string($session_id);
             
             $query = "select stp_Data from sysSessionProgress where stp_ID=".$session_id;
             $res = mysql__select_value($mysqli, $query);
             if($value!=null && $res!='terminate'){
+                $value = $mysqli->real_escape_string($value);
                 //write 
                 if($res==null){
-error_log('INSERTED '.$session_id.'  '.$value);                                        
+//error_log('INSERTED '.$session_id.'  '.$value);                                        
                     $query = "insert into sysSessionProgress values (".$session_id.",'".$value."')";
                 }else{
                     
                 list($execution_counter, $tot)  = explode(',',$value);
                 if ($execution_counter>0 && intdiv($execution_counter,500) == $execution_counter/500){
-error_log('UPDATED '.$session_id.'  '.$value);                    
+//error_log('UPDATED '.$session_id.'  '.$value);                    
                 }
                     
     //error_log('upd_prog '.$session_id.'  '.$value);                    

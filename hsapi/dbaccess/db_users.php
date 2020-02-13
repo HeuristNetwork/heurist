@@ -50,7 +50,7 @@
     function user_getByField($mysqli, $field, $value, $database=null){
 
         $user = null;
-        $ugr_Name = $mysqli->real_escape_string($value);
+        $value = $mysqli->real_escape_string($value);
         $query = 'select * from '.($database!=null?('`'.$database.'`.'):'').'sysUGrps where '.$field.' = "'.$value.'"';
         $res = $mysqli->query($query);
         if($res){
