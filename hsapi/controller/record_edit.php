@@ -25,7 +25,7 @@
     require_once (dirname(__FILE__).'/../dbaccess/db_records.php');
 
     $response = array();
-
+    
     $system = new System();
     if( ! $system->init(@$_REQUEST['db']) ){
 
@@ -33,6 +33,8 @@
         $response = $system->getError();
 
     }else{
+        
+        stripScriptTagInRequest($_REQUEST);
 
         $mysqli = $system->get_mysqli();
 

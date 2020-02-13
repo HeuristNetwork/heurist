@@ -34,6 +34,8 @@ require_once(dirname(__FILE__)."/../../../hsapi/System.php");
 $error_msg = '';
 $isSystemInited = false;
 
+sanitizeRequest($_REQUEST);
+
 // init main system class
 $system = new System();
 $current_user = null;

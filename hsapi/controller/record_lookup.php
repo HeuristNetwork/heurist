@@ -2,7 +2,7 @@
 
     /**
     * Lookup third party web service to return data to client side recordLookup.js
-    * It works as a proxy to avoif cross-origin issues
+    * It works as a proxy to avoid cross-origin issues
     * 
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org

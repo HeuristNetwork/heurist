@@ -29,8 +29,10 @@
     $response = array(); //"status"=>"fatal", "message"=>"OBLOM");
     $res = false;
 
-    $action = @$_REQUEST['a']; //$system->getError();
+    sanitizeRequest($_REQUEST);
      
+    $action = @$_REQUEST['a']; //$system->getError();
+    
     $system = new System();
         
     if($action=='verify_credentials'){ //just check only if logged in (db connection not required)
@@ -227,6 +229,8 @@
                 $res = $system->getTotalRecordsAndDashboard();
                         
             } else if ($action=="usr_save") {
+                
+                sanitizeRequest($_REQUEST);
 
                 $res = user_Update($system, $_REQUEST);
 
@@ -259,6 +263,8 @@
 
             } else if ($action=="svs_save"){
 
+                sanitizeRequest($_REQUEST);
+                
                 $res = svsSave($system, $_REQUEST);
 
             } else if ($action=="svs_delete" && @$_REQUEST['ids']) {
@@ -275,6 +281,7 @@
 
             } else if ($action=="svs_savetree" ) { //save saved searches tree status
 
+                sanitizeRequest($_REQUEST);
                 $res = svsSaveTreeData($system, @$_REQUEST['data']);
 
             } else if ($action=="svs_gettree" ) { //save saved searches tree status
@@ -285,6 +292,8 @@
             }else if($action == 'get_url_content_type'){
                 
                 $url = @$_REQUEST['url'];
+                
+                $url = filter_var($url, FILTER_SANITIZE_URL);
                 
                 $res = recognizeMimeTypeFromURL($mysqli, $url);
                 

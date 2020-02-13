@@ -23,6 +23,8 @@
     */
     
     /*
+    sanitizeRequest   - removes all tags fro request variables
+    stripScriptTagInRequest - removes only script tags
     get_php_bytes
     redirectToRemoteServer - redirect request to remove heurist server
     
@@ -73,6 +75,50 @@
     autoDetectSeparators
     */
 
+    
+    function sanitizeRequest(&$params){
+
+        foreach($params as $k => $v)
+        {
+            if($v!=null){
+                
+                if(is_array($v) && count($v)>0){
+                    sanitizeRequest($v);
+                    
+                }else{
+                    $v = trim($v);//so we are sure it is whitespace free at both ends
+
+                    //sanitise string
+                    $v = filter_var($v, FILTER_SANITIZE_STRING);
+               
+                }
+                $params[$k] = $v;
+            }
+        }
+        
+    }
+
+
+    function stripScriptTagInRequest(&$params){
+
+        foreach($params as $k => $v)
+        {
+            if($v!=null){
+                
+                if(is_array($v) && count($v)>0){
+                    stripScriptTagInRequest($v);
+                }else{
+                    $v = trim($v);//so we are sure it is whitespace free at both ends
+
+                    //remove script tag
+                    $v = preg_replace('#<script(.*?)>(.*?)</script>#is', '', $v);
+               
+                }
+                $params[$k] = $v;
+            }
+        }//for
+    }
+    
     //
     // 
     //

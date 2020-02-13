@@ -666,7 +666,31 @@ window.hWin.HEURIST4.util = {
         }
         
     },
+    
+    //
+    //
+    //
+    stripScripts: function(s) {
 
+        //jquery way        
+        return $('<div>').append($.parseHTML(s)).html();
+        
+        //vanilla way
+        /*
+        var div = document.createElement('div');
+        div.innerHTML = s;
+        var scripts = div.getElementsByTagName('script');
+        var i = scripts.length;
+        while (i--) {
+            scripts[i].parentNode.removeChild(scripts[i]);
+        }
+        return div.innerHTML;
+        */
+    },
+
+    //
+    //
+    //
     isObject: function (a)
     {
         return Object.prototype.toString.apply(a) === '[object Object]';
