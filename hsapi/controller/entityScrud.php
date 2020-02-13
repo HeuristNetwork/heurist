@@ -42,7 +42,7 @@
     require_once (dirname(__FILE__).'/../entity/dbSysImportFiles.php');
     require_once (dirname(__FILE__).'/../entity/dbRecThreadedComments.php');
     require_once (dirname(__FILE__).'/../entity/dbRecUploadedFiles.php');
-    //require_once (dirname(__FILE__).'/../entity/dbRecords.php');
+    require_once (dirname(__FILE__).'/../entity/dbRecords.php');
     require_once (dirname(__FILE__).'/../entity/dbUsrBookmarks.php');
     require_once (dirname(__FILE__).'/../entity/dbUsrReminders.php');
     require_once (dirname(__FILE__).'/../entity/dbUsrSavedSearches.php');
