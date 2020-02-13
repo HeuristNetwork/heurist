@@ -714,7 +714,7 @@ $.widget( "heurist.editing_input", {
                 //what is visible initially
                 if( !isCMS_content && this.options.dtID != window.hWin.HAPI4.sysinfo['dbconst']['DT_KML'] ) {
                     var nodes = $.parseHTML(value);
-                    if(nodes && (nodes.length>1 || nodes[0].nodeName!='#text')){ //if it has html show editor at once
+                    if(nodes && (nodes.length>1 || (nodes[0] && nodes[0].nodeName!='#text'))){ //if it has html show editor at once
                              setTimeout(__showEditor,500); 
                     }
                 }
