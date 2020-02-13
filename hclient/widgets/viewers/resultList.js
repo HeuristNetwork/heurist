@@ -60,7 +60,7 @@ $.widget( "heurist.resultList", {
         rendererHeader: null,   // renderer function to draw header for list view-mode (for content)
         rendererGroupHeader: null,   // renderer function for group header (see groupByField)
         
-        recordDivClass: null, //additional class that modifies recordDiv appearance see "public" in h4styles.css
+        recordDivClass: null, //additional class that modifies recordDiv appearance (see for example "public" in h4styles.css)
         // smarty template or url (or todo function) to draw inline record details when recordview_onselect='inline'. (LINE view mode only)
         rendererExpandDetails: null, 
 
@@ -1099,7 +1099,7 @@ $.widget( "heurist.resultList", {
     //
     _renderRecord_html: function(recordset, record){
 
-        //call external function to render
+        //call external/custom function to render
         if($.isFunction(this.options.renderer)){
             return this.options.renderer.call(this, recordset, record);
         }
@@ -1133,7 +1133,7 @@ $.widget( "heurist.resultList", {
         var rectypeID = fld('rec_RecTypeID');
         var bkm_ID = fld('bkm_ID');
         var recTitle = fld('rec_Title'); 
-        var recTitle_strip_all = window.hWin.HEURIST4.util.htmlEscape(recTitle);
+        var recTitle_strip_all = window.hWin.HEURIST4.util.stripTags(recTitle);
         var recTitle_strip1 = window.hWin.HEURIST4.util.stripTags(recTitle,'u, i, b, strong');
         var recTitle_strip2 = window.hWin.HEURIST4.util.stripTags(recTitle,'a, u, i, b, strong');
         var recIcon = fld('rec_Icon');
@@ -1230,9 +1230,13 @@ $.widget( "heurist.resultList", {
         // it is useful to display the record title as a rollover in case the title is too long for the current display area
         + '<div title="'+(is_logged?('dbl-click to edit : '+recTitle_strip_all):'')+'" class="recordTitle">'
         +     (this.options.show_url_as_link && fld('rec_URL') ?("<a href='"+fld('rec_URL')+"' target='_blank'>"
-            + recTitle_strip1 + "</a>") :recTitle_strip2)
+            + recTitle_strip1 + "</a>") :recTitle_strip2)  
         + '</div>'
 
+        
+        //action button container
+        //+ '<div class="action-button-container">' 
+        
         + '<div title="Click to edit record (opens in new tab)" '
         + ' class="rec_edit_link_ext action-button logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only"'
         + ' role="button" aria-disabled="false" data-key="edit_ext">'
@@ -1282,6 +1286,8 @@ $.widget( "heurist.resultList", {
         + '<span class="ui-button-icon-primary ui-icon ui-icon-trash"/>'
         + '</div>'
             :'')
+        
+        //+ '</div>' //END action button container
         
         + '</div>';
 
@@ -1451,7 +1457,8 @@ $.widget( "heurist.resultList", {
         var ispwdreminder = $target.hasClass('rec_pwdrem'); //this is password reminder click
         if (ispwdreminder){
             var pwd = $rdiv.attr('pwd');
-            var $dlg = window.hWin.HEURIST4.msg.showMsgDlg(pwd, null, "Password reminder", 
+            var $dlg = window.hWin.HEURIST4.msg.showMsgDlg(window.hWin.HEURIST4.util.htmlEscape(pwd),
+                    null, "Password reminder", 
                 {my: "left top", at: "left bottom", of: $target, modal:false}
             );
             $dlg.addClass('password-reminder-popup'); //class all these popups on refresh
@@ -2509,7 +2516,9 @@ $.widget( "heurist.resultList", {
         }
     },
     
-    
+    //
+    //
+    //
     setOrderAndSaveAsFilter: function(){
                     
         if(!this.sortResultList){
