@@ -38,16 +38,6 @@ id - record id
     
     $system->initPathConstants($db);
     
-    //$path = HEURIST_ICON_DIR; 
-    /*if(substr($rectype_id,-5,5) == "m.png") {
-        if(substr($rectype_id,0,4)=='term'){
-            $rectype_id = substr($rectype_id, 4);
-            $path = HEURIST_TERM_ICON_DIR;
-        }
-        $rectype_id = substr($rectype_id,0,-5) . ".png";   
-    }
-    else */
-    
     if(@$_REQUEST['ent']=='term'){    //FOR H3 UI
     
         $term_id = @$_REQUEST['id'];
@@ -188,6 +178,7 @@ function imagepalettetotruecolor(&$img)
 function create_rt_icon_with_bg( $rectype_id,  $color_new, $circle_color, $bg_circle_color ){ //}, $bg_color ) {
 
     if(substr($rectype_id,0,4)=='term'){
+        //icons for DH
         $rectype_id = substr($rectype_id, 4);
         $path = HEURIST_TERM_ICON_DIR;
     }else{

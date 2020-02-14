@@ -257,7 +257,7 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
 
     if($limit==0){ //if limit no defined prepare data and write into temp csv file
         //get filename for prepared filename with converted dates and removed spaces
-        $prepared_filename = tempnam(HEURIST_FILESTORE_DIR.'scratch/', $encoded_filename);  //HEURIST_SCRATCHSPACE_DIR
+        $prepared_filename = tempnam(HEURIST_FILESTORE_DIR.'scratch/', $encoded_filename);  //HEURIST_SCRATCH_DIR
         if (!is_writable($prepared_filename)) {
             self::$system->addError(HEURIST_ERROR, 'Cannot save prepared data: '.$prepared_filename);                
             return false;

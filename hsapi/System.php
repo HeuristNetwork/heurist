@@ -456,7 +456,8 @@ error_log(print_r($_REQUEST, true));
         $folders = array();
         $folders['filethumbs']   = array('THUMB','used to store thumbnails for uploaded files', true, true);
         $folders['file_uploads'] = array('FILES','used to store uploaded files by default');
-        $folders['scratch']      = array('SCRATCH','used to store temporary files');
+        //besides we have HEURIST_SCRATCHSPACE_DIR == sys temp dir
+        $folders['scratch']      = array('SCRATCH','used to store temporary files', false); 
         $folders['hml-output']   = array('HML','used to write published records as hml files', true);
         $folders['html-output']  = array('HTML','used to write published records as generic html files', true);
         $folders['generated-reports'] = array(null,'used to write generated reports');
@@ -469,7 +470,7 @@ error_log(print_r($_REQUEST, true));
         
         // do not create
         $folders['documentation_and_templates'] = array('','', false, true);
-        $folders['term-images']    = array('','', false, true); //for digital harlem
+        $folders['term-images']    = array('TERM_ICON','', false, true); //for digital harlem
         $folders['faims']    = array('',''); 
         
         return $folders;
@@ -568,7 +569,9 @@ error_log(print_r($_REQUEST, true));
                 }else{
                     if($folder[0]!=null){
                         define('HEURIST_'.$folder[0].'_DIR', $dir);
-                        define('HEURIST_'.$folder[0].'_URL', HEURIST_FILESTORE_URL.$folder_name.'/');
+                        if($allowWebAccess){
+                            define('HEURIST_'.$folder[0].'_URL', HEURIST_FILESTORE_URL.$folder_name.'/');
+                        }
                     }
                 }
             
