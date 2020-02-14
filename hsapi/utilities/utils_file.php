@@ -25,6 +25,8 @@
     /*
     sanitizeRequest   - removes all tags fro request variables
     stripScriptTagInRequest - removes only script tags
+    purifyHTML - clean html with HTMLPurifier
+    
     get_php_bytes
     redirectToRemoteServer - redirect request to remove heurist server
     
@@ -118,6 +120,33 @@
             }
         }//for
     }
+
+    //
+    //
+    //    
+    function purifyHTML(&$params, $purifier = null){
+        
+        if($purifier==null){
+
+            $config = HTMLPurifier_Config::createDefault();
+            $config->set('Cache', 'SerializerPath', HEURIST_SCRATCHSPACE_DIR);
+            $purifier = new HTMLPurifier($config);
+        }
+
+        foreach($params as $k => $v)
+        {
+            if($v!=null){
+                
+                if(is_array($v) && count($v)>0){
+                    purifyHTML($v, $purifier);
+                }else{
+                    $v = $purifier->purify($v);
+                }
+                $params[$k] = $v;
+            }
+        }//for
+    }
+
     
     //
     // 
