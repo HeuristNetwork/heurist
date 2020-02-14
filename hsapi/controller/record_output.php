@@ -644,7 +644,7 @@ function output_Records($system, $data, $params){
     $error_log = array();
     $error_log[] = 'Total rec count '.count($records);
     
-    $tmp_destination = tempnam(HEURIST_SCRATCHSPACE_DIR, "exp");    
+    $tmp_destination = tempnam(HEURIST_SCRATCHSPACE_DIR, "exp"); //system temp folder
     //$fd = fopen('php://temp/maxmemory:1048576', 'w');  //less than 1MB in memory otherwise as temp file 
     $fd = fopen($tmp_destination, 'w');  //less than 1MB in memory otherwise as temp file 
     if (false === $fd) {

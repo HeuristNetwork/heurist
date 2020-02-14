@@ -35,8 +35,6 @@ require_once(dirname(__FILE__).'/../../hsapi/System.php');
 require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_structure.php');
 require_once('saveStructureLib.php');
 
-stripScriptTagInRequest($_REQUEST);
-
 $system = new System();
 
 $rv = array();
@@ -93,6 +91,9 @@ else
     
         $mysqli = $system->get_mysqli();
     
+    
+        purifyHTML($_REQUEST);
+        //stripScriptTagInRequest($_REQUEST);
     
         $data = @$_REQUEST['data'];
         //decode and unpack data

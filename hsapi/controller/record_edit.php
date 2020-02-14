@@ -24,6 +24,8 @@
     require_once (dirname(__FILE__).'/../System.php');
     require_once (dirname(__FILE__).'/../dbaccess/db_records.php');
 
+    require_once (dirname(__FILE__).'/../../vendor/ezyang/htmlpurifier/library/HTMLPurifier.auto.php');
+
     $response = array();
     
     $system = new System();
@@ -34,7 +36,8 @@
 
     }else{
         
-        stripScriptTagInRequest($_REQUEST);
+        purifyHTML($_REQUEST);
+        //stripScriptTagInRequest($_REQUEST);
 
         $mysqli = $system->get_mysqli();
 
