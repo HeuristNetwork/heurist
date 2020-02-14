@@ -53,6 +53,7 @@ require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_recsearch.php');
 require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_files.php');
 
 require_once(dirname(__FILE__).'/../../vendor/autoload.php'); //for geoPHP
+require_once(dirname(__FILE__).'/../../vendor/ezyang/htmlpurifier/library/HTMLPurifier.auto.php');
 
 $outputfile = null;
 $isJSout = false;
@@ -91,6 +92,8 @@ executeSmartyTemplate - main routine
 smarty_post_filter - SMARTY callback: adds a small piece of code in main loop with function smarty_function_progress - need to    
                         maintain progress
 smarty_output_filter - SMARTY callback:  calls save_report_output2
+smarty_output_filter_strip_js  - purify html and strip js
+
 save_report_output2  - save report output as file (if there is parameter output)
 */
 
@@ -274,6 +277,8 @@ function executeSmartyTemplate($system, $params){
     ini_set( 'display_errors' , 'false'); // 'stdout' );
     $smarty->error_reporting = 0;
 
+    $need_output_filter = true;
+    
     if($template_body)
     {	//execute template from string - modified template in editor
         //error report level: 1 notices, 2 all, 3 debug mode
@@ -320,13 +325,18 @@ function executeSmartyTemplate($system, $params){
         
         if($outputfile!=null){
             $smarty->registerFilter('output', 'smarty_output_filter');  //to preform output into file
+            $need_output_filter = false;
         }else if($isJSout){
             $smarty->registerFilter('output', 'smarty_output_js_filter');
+            $need_output_filter = false;
         }
     }
-    //DEBUG   
-    $smarty->registerFilter('pre','smarty_pre_filter'); //remove script tags
-    $smarty->registerFilter('post','smarty_post_filter'); //to add progress support
+    if($need_output_filter){
+        $smarty->registerFilter('output', 'smarty_output_filter_strip_js');
+    }
+    
+    //$smarty->registerFilter('pre','smarty_pre_filter'); //before compilation: remove script tags
+    $smarty->registerFilter('post','smarty_post_filter'); //after compilation: to add progress support
 
     if($publishmode==0 && $session_id!=null){
         mysql__update_progress($mysqli, $session_id, true, '0,'.count($results));
@@ -385,11 +395,24 @@ function smarty_post_filter($tpl_source, Smarty_Internal_Template $template)
 }
 
 //
+// Strip js and clean html
+//
+function smarty_output_filter_strip_js($tpl_source, Smarty_Internal_Template $template){
+
+    $config = HTMLPurifier_Config::createDefault();
+    $config->set('Cache', 'SerializerPath', HEURIST_SCRATCHSPACE_DIR);
+    $purifier = new HTMLPurifier($config);
+    
+    return $purifier->purify($tpl_source);
+    
+}
+
+//
 // SMARTY callback:  calls save_report_output2
 //
 function smarty_output_filter($tpl_source, Smarty_Internal_Template $template)
 {
-    save_report_output2($tpl_source);
+    save_report_output2( smarty_output_filter_strip_js($tpl_source, $template) );
 }
 
 //
@@ -401,7 +424,7 @@ function save_report_output2($tpl_source){
 
     $errors = null;
     $res_file = null;
-
+    
     if($publishmode<2){ //save into file - otherwise download with given file name
     //$publishmode = (array_key_exists("publish", $gparams))? intval($gparams['publish']):0;
     try{
@@ -529,7 +552,7 @@ function save_report_output2($tpl_source){
 //
 function smarty_output_js_filter($tpl_source, Smarty_Internal_Template $template)
 {
-    return add_javascript_wrap4($tpl_source);
+    return add_javascript_wrap4( smarty_output_filter_strip_js($tpl_source, $template) );
 }
 function add_javascript_wrap4($tpl_source)
 {

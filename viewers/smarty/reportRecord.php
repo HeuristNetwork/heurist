@@ -258,11 +258,11 @@ class ReportRecord {
                         
                     }else if ($key=='rec_ID'){ //load tags and woottext once per record
 
-                        $record['recWootText'] = htmlspecialchars($this->getWootText($value), ENT_QUOTES, 'UTF-8'); //@todo load dynamically 
+                        $record['recWootText'] = $this->getWootText($value); //htmlspecialchars(, ENT_QUOTES, 'UTF-8'); //@todo load dynamically 
                         
                     }else if ($key == 'rec_ScratchPad'){
                         
-                        $record['rec_ScratchPad'] = htmlspecialchars($record['rec_ScratchPad'], ENT_QUOTES, 'UTF-8');
+                        //$record['rec_ScratchPad'] = htmlspecialchars($record['rec_ScratchPad'], ENT_QUOTES, 'UTF-8');
                     }
 
                 }
@@ -627,7 +627,7 @@ class ReportRecord {
                             $res = "";
                             $origvalues = array();
                             foreach ($dtValue as $key => $value){
-                                $value = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+                                //$value = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
                                 if(strlen($res)>0) $res = $res.", ";
                                 $res = $res.$value;
                                 array_push($origvalues, $value);
@@ -647,7 +647,8 @@ class ReportRecord {
                 return $res;
             }
             else {
-                return array( $dtname=>htmlspecialchars($dtValue, ENT_QUOTES, 'UTF-8') );
+                return array( $dtname=>$dtValue );
+                //return array( $dtname=>htmlspecialchars($dtValue, ENT_QUOTES, 'UTF-8') );
             }
 
         }else{ //name is not defined
