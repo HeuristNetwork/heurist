@@ -282,6 +282,7 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_ORIGINAL_RECORD_ID' => array(2, 36),
     'DT_FILE_RESOURCE' => array(2, 38),
     'DT_THUMBNAIL' => array(2, 39),
+    //xslt not used
     'DT_FILTER_STRING' => array(2, 40),
     'DT_FILE_TYPE' => array(2, 41),
     'DT_ANNOTATION_RESOURCE' => array(2, 42),
@@ -290,8 +291,8 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_END_WORD' => array(2, 45),
     'DT_START_ELEMENT' => array(2, 46),
     'DT_END_ELEMENT' => array(2, 47),
-    'DT_LAYOUT_STRING' => array(2, 48),
-    'DT_TRANSFORM_RESOURCE' => array(2, 50),
+    'DT_LAYOUT_STRING' => array(2, 48),    
+    'DT_TRANSFORM_RESOURCE' => array(2, 50), 
     'DT_PROPERTY_VALUE' => array(2, 51),
     'DT_TOOL_TYPE' => array(2, 52),
     'DT_RECORD_TYPE' => array(2, 53),
@@ -300,6 +301,7 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_COLOUR' => array(2, 56),
     'DT_DRAWING' => array(2, 59),
     'DT_COUNTER' => array(2, 60),
+    //xslt not used
     'DT_FILE_NAME' => array(2, 62),
     'DT_FILE_FOLDER' => array(2, 63),
     'DT_FILE_EXT' => array(2, 64),
@@ -376,6 +378,4 @@ $dtDefines = array('DT_NAME' => array(2, 1),
 ); //TODO: add email magic numbers
 
 //---------------------------------
-
-
 ?>

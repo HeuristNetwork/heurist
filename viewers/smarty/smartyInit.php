@@ -25,7 +25,7 @@
     //require_once(SMARTY_DIR.'Smarty.class.php');
 
     $smarty = new Smarty();
-
+    
     //check folder existance and create new folders if they are missing
     if(!folderCreate(HEURIST_SMARTY_TEMPLATES_DIR, true)){
         die('Failed to create folder for smarty templates');

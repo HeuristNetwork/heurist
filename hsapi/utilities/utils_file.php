@@ -25,6 +25,7 @@
     /*
     sanitizeRequest   - removes all tags fro request variables
     stripScriptTagInRequest - removes only script tags
+    getHTMLPurifier
     purifyHTML - clean html with HTMLPurifier
     
     get_php_bytes
@@ -123,14 +124,31 @@
 
     //
     //
+    //
+    function getHTMLPurifier(){
+
+            $config = HTMLPurifier_Config::createDefault();
+            $config->set('Cache', 'SerializerPath', HEURIST_SCRATCHSPACE_DIR);
+            $config->set('CSS.AllowImportant', true);
+            $config->set('CSS.AllowTricky', true);
+            $config->set('CSS.Proprietary', true);
+            $config->set('CSS.Trusted', true);
+            $def = $config->getHTMLDefinition(true);
+            $def->addAttribute('div', 'id', 'Text');            
+            $def->addAttribute('div', 'data-heurist-app-id', 'Text');            
+            $def->addAttribute('div', 'data-inited', 'Text');
+            $def->addAttribute('a', 'data-ref', 'Text');
+            
+            return new HTMLPurifier($config);
+        
+    }
+    //
+    //
     //    
     function purifyHTML(&$params, $purifier = null){
         
         if($purifier==null){
-
-            $config = HTMLPurifier_Config::createDefault();
-            $config->set('Cache', 'SerializerPath', HEURIST_SCRATCHSPACE_DIR);
-            $purifier = new HTMLPurifier($config);
+            $purifier = getHTMLPurifier();
         }
 
         foreach($params as $k => $v)

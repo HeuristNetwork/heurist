@@ -26,6 +26,7 @@ require_once (dirname(__FILE__).'/../System.php');
 require_once (dirname(__FILE__).'/../dbaccess/db_records.php');
 require_once (dirname(__FILE__).'/../dbaccess/db_recsearch.php');
 require_once (dirname(__FILE__).'/../utilities/titleMask.php');
+require_once (dirname(__FILE__).'/../../vendor/ezyang/htmlpurifier/library/HTMLPurifier.auto.php');
 
 class DbRecDetails
 {
@@ -65,6 +66,8 @@ class DbRecDetails
     
     private $session_id = null;
     
+    private $not_putify = null;
+    private $purifier = null;
     
     function __construct( $system, $data ) {
        $this->system = $system;
@@ -77,6 +80,21 @@ class DbRecDetails
        
        //refresh list of current user groups
        $this->system->get_user_group_ids(null, true);
+    }
+    
+    function initPutifier(){
+        if($this->purifier==null){
+            $not_purify = array();
+            if($this->system->defineConstant('DT_CMS_SCRIPT')){ array_push($not_purify, DT_CMS_SCRIPT); }
+            if($this->system->defineConstant('DT_CMS_CSS')){ array_push($not_purify, DT_CMS_CSS); }
+            if($this->system->defineConstant('DT_SYMBOLOGY')){ array_push($not_purify, DT_SYMBOLOGY); }
+            if($this->system->defineConstant('DT_KML')){ array_push($not_purify, DT_KML); }
+            if($this->system->defineConstant('DT_QUERY_STRING')){ array_push($not_purify, DT_QUERY_STRING); }
+            if($this->system->defineConstant('DT_SERVICE_URL')){ array_push($not_purify, DT_SERVICE_URL); }
+            
+            $this->not_purify = $not_purify;
+            $this->purifier = getHTMLPurifier();
+        }
     }
 
     //
@@ -392,7 +410,14 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
         $baseTag = "~add field $dtyName $now"; //name of tag assigned to modified records
         
         if(@$this->data['val']){
-            $dtl['dtl_Value'] = $this->data['val'];
+            
+            $this->initPutifier();
+            if(!in_array($dtyID, $this->not_purify)){
+                $dtl['dtl_Value'] = $this->purifier->purify( $this->data['val'] );                                
+            }else{
+                $dtl['dtl_Value'] = $this->data['val'];    
+            }
+            
         }
         if(@$this->data['geo']){
             $dtl['dtl_Geo'] = array("ST_GeomFromText(\"" . $this->data['geo'] . "\")");  
@@ -544,7 +569,9 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
             $this->system->addError(HEURIST_INVALID_REQUEST, $err_msg);
             return false;
         }
+        $basetype = mysql__select_value($mysqli, 'select dty_Type from defDetailTypes where dty_ID = '.$dtyID);
         
+        $partialReplace = false;
         
         if(!@$this->data['sVal']){    //value to be replaced
             //all except geo and file
@@ -556,7 +583,6 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
             
         }else{
             
-            $basetype = mysql__select_value($mysqli, 'select dty_Type from defDetailTypes where dty_ID = '.$dtyID);
             switch ($basetype) {
                 case "freetext":
                 case "blocktext":
@@ -591,6 +617,8 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
                      
         $baseTag = "~replace field $dtyName $now";
         
+        $this->initPutifier();
+        
         foreach ($this->recIDs as $recID) {
             //get matching detail value for record if there is one
             $query = "SELECT dtl_ID, dtl_Value FROM recDetails WHERE dtl_RecID = $recID and dtl_DetailTypeID = $dtyID and $searchClause";
@@ -616,7 +644,15 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
                 }
          
                 $dtl['dtl_ID'] = $dtlID;  //detail type id
-                $dtl['dtl_Value'] = $newVal;
+                
+                if(($basetype=='freetext' || $basetype='blocktext')
+                    && !in_array($dtyID, $this->not_purify)){
+                    $dtl['dtl_Value'] = $this->purifier->purify( $newVal );                                
+                }else{
+                    $dtl['dtl_Value'] = $newVal;        
+                }
+                
+                
                 $ret = mysql__insertupdate($mysqli, 'recDetails', 'dtl', $dtl);
             
                 if (!is_numeric($ret)) {

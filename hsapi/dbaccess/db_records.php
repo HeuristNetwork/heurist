@@ -41,6 +41,7 @@
     require_once(dirname(__FILE__).'/../entity/dbRecUploadedFiles.php');
     require_once (dirname(__FILE__).'/../utilities/titleMask.php');
     require_once (dirname(__FILE__).'/../../records/index/elasticSearch.php');
+    require_once (dirname(__FILE__).'/../../vendor/ezyang/htmlpurifier/library/HTMLPurifier.auto.php');
 
     $recstructures = array();
     $detailtypes   = array();
@@ -1467,6 +1468,16 @@
         //$query_size = 'select LENGTH(?)';
         //$stmt_size = $mysqli->prepare($query_size);
         
+        //list of field ids that will not html purified
+        $not_purify = array();
+        if($system->defineConstant('DT_CMS_SCRIPT')){ array_push($not_purify, DT_CMS_SCRIPT); }
+        if($system->defineConstant('DT_CMS_CSS')){ array_push($not_purify, DT_CMS_CSS); }
+        if($system->defineConstant('DT_SYMBOLOGY')){ array_push($not_purify, DT_SYMBOLOGY); }
+        if($system->defineConstant('DT_KML')){ array_push($not_purify, DT_KML); }
+        if($system->defineConstant('DT_QUERY_STRING')){ array_push($not_purify, DT_QUERY_STRING); }
+        if($system->defineConstant('DT_SERVICE_URL')){ array_push($not_purify, DT_SERVICE_URL); }
+        $purifier = getHTMLPurifier();
+        
         //2. verify (value, termid, file id, resource id) and prepare details (geo field). verify required field presence
         $insertValues = array();
         $errorValues = array();
@@ -1494,12 +1505,21 @@
 
                     case "freetext":
                     case "blocktext":
+                        $len  = strlen(trim($dtl_Value));
+                        $isValid = ($len > 0); //preg_match("/\\S/", $dtl_Value);
+                        if(!$isValid ){
+                            $err_msg = 'Value is empty';  
+                        }else if(!in_array($dtyID, $not_purify)){
+                            $dtl_Value = $purifier->purify($dtl_Value);                                
+                        }
+                        break;
+                    
                     case "date":
                         $len  = strlen(trim($dtl_Value));
                         $isValid = ($len > 0); //preg_match("/\\S/", $dtl_Value);
                         if(!$isValid ){
                             $err_msg = 'Value is empty';  
-                        }else if($det_types[$dtyID]=='date'){
+                        }else{
                             //yesterday, today, tomorrow, now
                             $sdate = strtolower(trim($dtl_Value));
                             if($sdate=='today'){
