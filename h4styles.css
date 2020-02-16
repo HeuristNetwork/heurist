@@ -392,60 +392,43 @@ rec_edit_link
 rec_actions  see specific manage entities
 */
 
-div.recordDiv:hover  .action-button,
-div.recordDiv:hover  .rec_actions 
+div.recordDiv:hover .rec_actions 
 {
     display: inline-block;
 }
 
-h3:hover > #rec_add_link, 
-    div.recordDiv:hover > .action-button,
-    div.recordDiv:hover > .rec_actions
+div.recordDiv:hover > .action-button-container,
+div.recordDiv:hover > .rec_actions
 {
     display: block;
 }
+div.recordDiv  > .action-button-container,
+div.recordDiv  .rec_actions {
+    display: none;
+}
+div.recordDiv.public  > .action-button-container{
+    display: block;
+}
+
 .list .recordDiv:hover .recordTitle{
     right:80px;
 }
 
-h3 > #rec_add_link, 
-    div.recordDiv  .action-button {
-    display: none;
+div.recordDiv  .action-button {
     height: 16px;
     width: 16px;
     color: gray;
 }
 
-div.recordDiv  .rec_actions {
-    display: none;
-    position: absolute;
-    /*top: 2px;*/
-    right: 2px;
-}
-
-div.recordDiv > .action-button {
+div.recordDiv > .action-button-container,
+div.recordDiv  .rec_actions
+{
     position: absolute;
     top: 2px;
-}
-
-div.recordDiv > .rec_delete {
-    display:none !important;
-    right: 102px;
-}
-div.recordDiv > .rec_view_link_ext {
-    right: 76px;
-}
-div.recordDiv > .rec_edit_link{
-    right: 50px;
-}
-div.recordDiv > .rec_edit_link_ext{
-    right: 26px;
-}
-div.recordDiv > .rec_view_link {
     right: 2px;
 }
 
-.list .action-button {
+.list .action-button-container {
     top: 5px !important;
 }
 
@@ -454,64 +437,48 @@ div.recordDiv .ui-button-text{
     font-size: 9px;
     vertical-align: bottom;    
 }
-.thumbs div.recordDiv .ui-button-text,
+.list div.recordDiv.public .ui-button-text,
+.thumbs div.recordDiv.public .ui-button-text,
 .thumbs3 div.recordDiv .ui-button-text{
     display: none !important;    
 }
 
-div.recordDiv.public .ui-button-text{
+/* show button text for public mode */
+.icons div.recordDiv.public .ui-button-text{
     display: inline-block;    
     line-height: 16px;
     padding: 0px 4px;
 }
-
+.icons div.recordDiv.public .action-button{ 
+    width: 58px;
+    padding: 2px;
+}
 div.recordDiv.public .action-button{ 
     text-align:left;
     color: black;
-    display: block;    
-    width: 53px;
+    /* slightly bigger buttons */
+    width: 20px;
+    padding: 2px;
+}
+div.recordDiv.public .action-button > .ui-button-icon-primary{
+    padding: 3px;
+}
+.icons div.recordDiv.public .action-button > .ui-button-icon-primary{
     padding: 0px;
 }
-.thumbs div.recordDiv.public .action-button,
-.thumbs3 div.recordDiv.public .action-button{
-    width: 20px;
-    padding-top: 2px;
-}
 
-.icons div.recordDiv.public .action-button {
+.icons div.recordDiv.public .action-button-container {
     top:22px !important;
-}
-div.recordDiv.public .rec_edit_link{
-    right: 60px;
 }
 div.recordDiv.public .rec_edit_link_ext{
     display:none;
 }
-div.recordDiv.public .rec_view_link_ext {
-    right: 120px;
-}
-div.recordDiv.public .rec_delete {
-    display:block !important;
-    right: 180px;
-}
+/* hide bookmark icons for public */
 div.recordDiv.public > .recordIcons > span {
     display: none !important;    
 }
 
-.thumbs div.recordDiv > .rec_edit_link,
-.thumbs3 div.recordDiv > .rec_edit_link{
-    right: 25px;
-}
-.thumbs div.recordDiv > .rec_view_link_ext,
-.thumbs3 div.recordDiv > .rec_view_link_ext {
-    right: 50px;
-}
-.thumbs div.recordDiv > .rec_delete,
-.thumbs3 div.recordDiv > .rec_delete {
-    right: 75px;
-}
-
-
+/* actions for user list */
 div.recordDiv:hover > .rec_action_link{
     visibility:visible;
 }
@@ -527,6 +494,20 @@ div .selected, div .selected:hover{
     background: -moz-linear-gradient(center top , #E6F8FD, #BEE4F8) repeat scroll 0 0 transparent;
     background: -webkit-gradient(linear, left top, left bottom, from(#E6F8FD), to(#BEE4F8));
     border-color: #62A7F8;
+}
+
+div.collected > .recordTitle {
+    /*
+    background: -moz-linear-gradient(center top , #e6fdeb, #bef8cd) repeat scroll 0 0 transparent;
+    background: -webkit-gradient(linear, left top, left bottom, from(#e6fdeb), to(#bef8cd));
+    */
+    text-shadow: 0px 0px 9px #00ff00 !important;
+}
+div.collected  span.toadd {
+    display:none !important;   
+}
+div.collected  span.toremove {
+    display:inline-block !important;   
 }
 
 div .selected_last{
@@ -626,14 +607,7 @@ div .selected_last{
     position: absolute;
     /*width: 20px;*/
 }
-.thumbs .rec_edit_link_ext {
-    bottom: 1px;
-    right: 1px;
-}
-.thumbs .rec_edit_link {
-    bottom: 1px;
-    right: 17px;
-}
+
 .thumbs .recordDiv .rec_owner{
     display: inline;
     /*padding-left:5px;*/
@@ -730,7 +704,13 @@ div .selected_last{
     white-space: normal;
     font-size:1.2em;
 }
-
+.list .recordDiv.public .recordTitle{
+    right: 64px;
+}
+.icons .recordDiv.public .recordTitle {
+    right: 124px;
+}
+    
 .icons .recordDiv .recordSelector {
     bottom: 1px;
     right: 3px;
@@ -745,16 +725,6 @@ div .selected_last{
 .icons .rt-icon{
     display: none;
 }
-
-.icons .rec_edit_link_ext {
-    right: 1px;
-    top: 1px;
-}
-.icons .rec_edit_link {
-    right: 17px;
-    top: 1px;
-}
-
 
 /* LIST VIEW */
 
@@ -934,14 +904,6 @@ div .selected_last{
     left: 3px;
     position: absolute;
     /*width: 20px;*/
-}
-.thumbs3 .rec_edit_link_ext {
-    bottom: 17px;
-    right: 1px;
-}
-.thumbs3 .rec_edit_link {
-    bottom: 1px;
-    right: 1px;
 }
 
 .thumbs3 .recordDiv .rec_owner{

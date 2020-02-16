@@ -39,15 +39,12 @@ $.widget( "heurist.resultListCollection", {
     },
 
     _selection: null,     //current set of selected records (not just ids)
-    _collection:null,
-    _collectionURL:null,
+    _collection: null,
 
     // the widget's constructor
     _create: function() {
 
         var that = this;
-
-        this._collectionURL = window.hWin.HAPI4.baseURL + "hsapi/utilities/manageCollection.php";
 
         this.element
         // prevent double click to select text
@@ -60,14 +57,32 @@ $.widget( "heurist.resultListCollection", {
         //create set of buttons
         this.divMainMenuItems = $('<ul>').addClass('horizontalmenu')
                 .css({display:'inline-block','font-style':'italic','font-size':'0.8em'})
-                .appendTo(this.element);
+                .appendTo($('<div style="display:inline-block;vertical-align:bottom">').appendTo(this.element));
 
         this._initBtn('Add');
         this._initBtn('Remove');
         this._initBtn('Clear');
-        this._initBtn('List');
-        this._initBtn('Action');
+        //this._initBtn('List');
+        
+        if(this.options.action_mode=='map'){
+
+            var btn = $('<button>',{
+                text: window.hWin.HR(this.options.action_Label), 
+            }).button()
+            .css({'font-weight':'bold', 'font-style':'italic', padding:'10px', 'margin-right':'10px'})
+            .appendTo( this.element );
+            
+            this['btn_'+name] = btn;
+                
+            this._on( this['btn_'+name], {
+                    click : this.createMapSpace
+                });
+        }else{
+            this._initBtn('Action');    
+        }
+        
         this.divMainMenuItems.menu();
+        
         
         if(this.options.resultList){ //has the same realm as parent recultList
             this.options.search_realm = this.options.resultList.resultList('option', 'search_realm');
@@ -76,7 +91,8 @@ $.widget( "heurist.resultListCollection", {
         this.labelInstruction = $('<div>').text(this.options.instructionText)
                             .addClass('heurist-helper2').css({padding:'4px'}).appendTo(this.element); //float:'right',
         //-----------------------     listener of global events
-        var sevents = window.hWin.HAPI4.Event.ON_REC_SELECT; //+'  competency'
+        var sevents = window.hWin.HAPI4.Event.ON_REC_SELECT+' '
+                        +window.hWin.HAPI4.Event.ON_REC_COLLECT;
 
         $(window.hWin.document).on(sevents, function(e, data) {
 
@@ -90,12 +106,16 @@ $.widget( "heurist.resultListCollection", {
                         that._selection = window.hWin.HAPI4.getSelection(data.selection, false);
                     }
                 }
+            }else if(e.type == window.hWin.HAPI4.Event.ON_REC_COLLECT){
+                
+                that.collectionRender( data.collection );
             }
         });
 
         this._refresh();
 
-        this.collectionRender();
+        //get collection
+        window.hWin.HEURIST4.collection.collectionUpdate();
     }, //end _create
 
     //
@@ -177,24 +197,25 @@ $.widget( "heurist.resultListCollection", {
 
         if(action == "Add"){
 
-            this.collectionAdd();
+            window.hWin.HEURIST4.collection.collectionAdd(null, this._selection);
+            this.selectNone();
 
         }else if(action == "Remove"){
 
-            this.collectionDel();
-
+            window.hWin.HEURIST4.collection.collectionDel(null, this._selection);
+            this.selectNone();
 
         }else if(action == "Clear"){
 
-            this.collectionClear();
+            window.hWin.HEURIST4.collection.collectionClear();
 
         }else if(action == "List"){
 
-            this.collectionShow();
+            window.hWin.HEURIST4.collection.collectionShow();
 
         }else if(action == "Save"){
 
-            this.collectionSave(); //save collection as saved filter
+            window.hWin.HEURIST4.collection.collectionSave();
 
         }else if(action == "Action"){
 
@@ -202,34 +223,13 @@ $.widget( "heurist.resultListCollection", {
                 
                 this.createMapSpace();
             }else{
-                this.collectionSave();
+                window.hWin.HEURIST4.collection.collectionSave();
             }
             
         }
 
     },
     
-    //
-    //
-    //
-    getSelectionIds: function(msg, limit){
-
-        var recIDs_list = [];
-        if (this._selection!=null) {
-            recIDs_list = this._selection.getIds();
-        }
-
-        if (recIDs_list.length == 0 && !Hul.isempty(msg)) {
-            window.hWin.HEURIST4.msg.showMsgDlg(msg);
-            return null;
-        }else if (limit>0 && recIDs_list.length > limit) {
-            window.hWin.HEURIST4.msg.showMsgDlg("The number of selected records is above the limit in "+limit);
-        }else{
-            return recIDs_list;
-        }
-
-    },
-
     //
     // reset selection
     //    
@@ -241,89 +241,6 @@ $.widget( "heurist.resultListCollection", {
     
 
     //-------------------------------------- COLLECTIONS -------------------------------
-
-    collectionAdd: function(){
-
-        var recIDs_list = this.getSelectionIds("Please select at least one record to add to collection basket");
-        if(Hul.isempty(recIDs_list)) return;
-
-        var recIDs = recIDs_list.join(',')
-        
-        /*
-        var url = window.hWin.HAPI4.baseURL + "?db=" + window.hWin.HAPI4.database + "&q=ids:"+recIDs;    
-        if(url.length>10000){
-                    window.hWin.HEURIST4.msg.showMsgDlg(
-'Collections are saved as a list of record IDs. The URL generated by this collection would exceed the maximum allowable URL length by of' 
-+'2083 characters. Please save the current collection as a saved search (which allows a much larger number of records), or add fewer records.', null, window.hWin.HR('Warning'));
-        }
-        */
-        
-        var params = {db:window.hWin.HAPI4.database, fetch:1, add:recIDs};
-
-        Hul.sendRequest(this._collectionURL, params, this, this.collectionOnUpdate);
-
-        this.selectNone();
-    },
-
-    collectionDel: function(){
-
-        var recIDs_list = this.getSelectionIds("Please select at least one record to remove from collection basket");
-        if(Hul.isempty(recIDs_list)) return;
-
-        var params = {db:window.hWin.HAPI4.database, fetch:1, remove:recIDs_list.join(",")};
-
-        Hul.sendRequest(this._collectionURL, params, this, this.collectionOnUpdate);
-
-        this.selectNone();
-    },
-
-    collectionClear: function(){
-
-        var params = {db:window.hWin.HAPI4.database, clear:1};
-
-        Hul.sendRequest(this._collectionURL, params, this, this.collectionOnUpdate);
-    },
-
-    collectionShow: function(){
-
-        if(!Hul.isempty(this._collection)){
-
-                var url = window.hWin.HAPI4.baseURL + "?db=" + window.hWin.HAPI4.database + "&q=ids:"+this._collection.join(',');
-            
-                if(url.length>2083){
-                    window.hWin.HEURIST4.msg.showMsgDlg(
-'Collections are saved as a list of record IDs. The URL generated by this collection would exceed the maximum allowable URL length by of' 
-+'2083 characters. Please save the current collection as a saved search (which allows a much larger number of records), or add fewer records.', null, window.hWin.HR('Warning'));
-                    
-                }else{
-                    window.open(url, "_blank");    
-                }    
-                
-        }else{
-            window.hWin.HEURIST4.msg.showMsgFlash('Please add records to the collection for list');
-        }
-
-    },
-
-    //
-    //
-    //
-    collectionSave: function(){
-
-        if(!Hul.isempty(this._collection)){
-
-            var  app = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('svs_list');  //window.hWin.HAPI4.LayoutMgr.appGetWidgetById('ha13');
-            if(app && app.widget){
-                //call method editSavedSearch - save collection as search
-
-                // mode, groupID, svsID, squery
-                $(app.widget).svs_list('editSavedSearch', 'saved', null, null, 'ids:'+this._collection.join(","));
-            }
-        }
-
-    },
-    
-    
     //
     //
     //
@@ -363,31 +280,13 @@ $.widget( "heurist.resultListCollection", {
             window.hWin.HEURIST4.msg.showMsgFlash('Please add records to the collection for map');
         }
     },
-    
-    collectionOnUpdate: function(that, results) {
-        if(!Hul.isnull(results)){
-            if(results.status == window.hWin.ResponseStatus.UNKNOWN_ERROR){
-                window.hWin.HEURIST4.msg.showMsgErr(results);
-            }else{
-                that._collection = Hul.isempty(results.ids)?[]:results.ids;
-                that.collectionRender();
-            }
-        }
-    },
 
-    collectionRender: function() {
-        if(Hul.isnull(this._collection))
-        {
-            var params = {db:window.hWin.HAPI4.database, fetch:1};
-            Hul.sendRequest(this._collectionURL, params, this, this.collectionOnUpdate);
-        }else{
-            //window.hWin.HR('Collected')
-            this.labelCollectionInfo.html( window.hWin.HR('Collection') 
-                + ': '+ (this._collection.length>0?this._collection.length:'0')
-                + ' datasets');
-        }
+    collectionRender: function(_collection) {
+        
+        this._collection = _collection;
+
+        this.labelCollectionInfo.html( window.hWin.HR('Collection: ') + 
+                (_collection && _collection.length>0?_collection.length:'0') + ' datasets');
     }
-
-
 
 });

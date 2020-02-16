@@ -30,17 +30,13 @@ $.widget( "heurist.resultListMenu", {
         search_realm: null
     },
 
-    _query_request: {}, //keep current query request
+    _query_request: {},   //keep current query request
     _selection: null,     //current set of selected records (not just ids)
-    _collection:null,
-    _collectionURL:null,
 
     // the widget's constructor
     _create: function() {
 
         var that = this;
-
-        this._collectionURL = window.hWin.HAPI4.baseURL + "hsapi/utilities/manageCollection.php";
 
         this.element
         .css('font-size', '1.3em')
@@ -73,7 +69,8 @@ $.widget( "heurist.resultListMenu", {
         //-----------------------     listener of global events
         var sevents = window.hWin.HAPI4.Event.ON_CREDENTIALS+' '
                  +window.hWin.HAPI4.Event.ON_REC_SEARCHSTART+' '
-                 +window.hWin.HAPI4.Event.ON_REC_SELECT; //+'  competency'
+                 +window.hWin.HAPI4.Event.ON_REC_COLLECT+' '
+                 +window.hWin.HAPI4.Event.ON_REC_SELECT;
 
         $(window.hWin.document).on(sevents, function(e, data) {
 
@@ -87,6 +84,10 @@ $.widget( "heurist.resultListMenu", {
                     that._query_request = jQuery.extend({}, data); //keep current query request
                 }
 
+            }else if(e.type == window.hWin.HAPI4.Event.ON_REC_COLLECT){
+                
+                that.collectionRender( data.collection );
+                
             }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SELECT){
 
                 if(data && data.source!=that.element.attr('id') && that._isSameRealm(data)) {
@@ -104,9 +105,8 @@ $.widget( "heurist.resultListMenu", {
 
         this._refresh();
 
-        this.collectionRender();
-        //setTimeout(function(){that.collectionRender();}, 2500);
-
+        //get collection
+        window.hWin.HEURIST4.collection.collectionUpdate();
 
     }, //end _create
 
@@ -157,7 +157,10 @@ $.widget( "heurist.resultListMenu", {
     // custom, widget-specific, cleanup.
     _destroy: function() {
 
-        $(window.hWin.document).off(window.hWin.HAPI4.Event.ON_CREDENTIALS+' '+window.hWin.HAPI4.Event.ON_REC_SEARCHSTART+' '+window.hWin.HAPI4.Event.ON_REC_SELECT); //+' '+window.hWin.HAPI4.Event.ON_COMPETENCY
+        $(window.hWin.document).off(window.hWin.HAPI4.Event.ON_CREDENTIALS+' '
+            +window.hWin.HAPI4.Event.ON_REC_SEARCHSTART+' '
+            +window.hWin.HAPI4.Event.ON_REC_COLLECT+' '
+            +window.hWin.HAPI4.Event.ON_REC_SELECT); 
 
         // remove generated elements
         if(this.btn_Search){
@@ -469,24 +472,25 @@ console.log(menu.find('.ui-menu-item').css('padding'));
 
         }else if(action == "menu-collected-add"){
 
-            this.collectionAdd();
+            window.hWin.HEURIST4.collection.collectionAdd(null, this._selection);
+            this.selectNone();
 
         }else if(action == "menu-collected-del"){
 
-            this.collectionDel();
-
+            window.hWin.HEURIST4.collection.collectionDel(null, this._selection);
+            this.selectNone();
 
         }else if(action == "menu-collected-clear"){
 
-            this.collectionClear();
+            window.hWin.HEURIST4.collection.collectionClear();
 
         }else if(action == "menu-collected-show"){
 
-            this.collectionShow();
+            window.hWin.HEURIST4.collection.collectionShow();
 
         }else if(action == "menu-collected-save"){
 
-            this.collectionSave();
+            window.hWin.HEURIST4.collection.collectionSave();
 
         }
 
@@ -556,13 +560,13 @@ console.log(menu.find('.ui-menu-item').css('padding'));
 
     selectAll: function(){
         this._selection = window.hWin.HAPI4.getSelection('all', false);
-        $(this.document).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT, 
+        $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT, 
             {selection:"all", source:this.element.attr('id'), search_realm:this.options.search_realm} );
     },
 
     selectNone: function(){
         this._selection = null;
-        $(this.document).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT, 
+        $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT, 
             {selection:null, source:this.element.attr('id'), search_realm:this.options.search_realm} );
     },
 
@@ -577,109 +581,14 @@ console.log(menu.find('.ui-menu-item').css('padding'));
     },
 
     //-------------------------------------- COLLECTIONS -------------------------------
-
-    collectionAdd: function(){
-
-        var recIDs_list = this.getSelectionIds("Please select at least one record to add to collection basket");
-        if(Hul.isempty(recIDs_list)) return;
-
-        var recIDs = recIDs_list.join(',')
+    //
+    // render counter
+    //
+    collectionRender: function(_collection) {
         
-        /*
-        var url = window.hWin.HAPI4.baseURL + "?db=" + window.hWin.HAPI4.database + "&q=ids:"+recIDs;    
-        if(url.length>10000){
-                    window.hWin.HEURIST4.msg.showMsgDlg(
-'Collections are saved as a list of record IDs. The URL generated by this collection would exceed the maximum allowable URL length by of' 
-+'2083 characters. Please save the current collection as a saved search (which allows a much larger number of records), or add fewer records.', null, window.hWin.HR('Warning'));
-        }
-        */
-        
-        var params = {db:window.hWin.HAPI4.database, fetch:1, add:recIDs};
-
-        Hul.sendRequest(this._collectionURL, params, this, this.collectionOnUpdate);
-
-        this.selectNone();
+        this.menu_Collected_link.html( window.hWin.HR('Collected') + 
+                (_collection && _collection.length>0?':'+_collection.length:''));
     },
-
-    collectionDel: function(){
-
-        var recIDs_list = this.getSelectionIds("Please select at least one record to remove from collection basket");
-        if(Hul.isempty(recIDs_list)) return;
-
-        var params = {db:window.hWin.HAPI4.database, fetch:1, remove:recIDs_list.join(",")};
-
-        Hul.sendRequest(this._collectionURL, params, this, this.collectionOnUpdate);
-
-        this.selectNone();
-    },
-
-    collectionClear: function(){
-
-        var params = {db:window.hWin.HAPI4.database, clear:1};
-
-        Hul.sendRequest(this._collectionURL, params, this, this.collectionOnUpdate);
-    },
-
-    collectionShow: function(){
-
-        if(!Hul.isempty(this._collection)){
-
-            if(true){
-                var url = window.hWin.HAPI4.baseURL + "?db=" + window.hWin.HAPI4.database + "&q=ids:"+this._collection.join(',');
-            
-                if(url.length>2083){
-                    window.hWin.HEURIST4.msg.showMsgDlg(
-'Collections are saved as a list of record IDs. The URL generated by this collection would exceed the maximum allowable URL length by of' 
-+'2083 characters. Please save the current collection as a saved search (which allows a much larger number of records), or add fewer records.', null, window.hWin.HR('Warning'));
-                    
-                }else{
-                    window.open(url, "_blank");    
-                }    
-                
-            }else{
-                this._query_request.w = 'all';
-                that.reloadSearch('ids:'+this._collection.join(","));
-            }
-        }
-
-    },
-
-    collectionSave: function(){
-
-        if(!Hul.isempty(this._collection)){
-
-            var  app = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('svs_list');  //window.hWin.HAPI4.LayoutMgr.appGetWidgetById('ha13');
-            if(app && app.widget){
-                //call method editSavedSearch - save collection as search
-
-                // mode, groupID, svsID, squery
-                $(app.widget).svs_list('editSavedSearch', 'saved', null, null, 'ids:'+this._collection.join(","));
-            }
-        }
-
-    },
-    collectionOnUpdate: function(that, results) {
-        if(!Hul.isnull(results)){
-            if(results.status == window.hWin.ResponseStatus.UNKNOWN_ERROR){
-                window.hWin.HEURIST4.msg.showMsgErr(results);
-            }else{
-                that._collection = Hul.isempty(results.ids)?[]:results.ids;
-                that.collectionRender();
-            }
-        }
-    },
-
-    collectionRender: function() {
-        if(Hul.isnull(this._collection))
-        {
-            var params = {db:window.hWin.HAPI4.database, fetch:1};
-            Hul.sendRequest(this._collectionURL, params, this, this.collectionOnUpdate);
-        }else{
-            //window.hWin.HR('Collected')
-            this.menu_Collected_link.html( window.hWin.HR('Collected') + (this._collection.length>0?':'+this._collection.length:''));
-        }
-    },
-
 
     //-------------------------------------- RELATION, MERGE -------------------------------
     fixDuplicatesPopup: function(){

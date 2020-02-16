@@ -38,6 +38,7 @@ $.widget( "heurist.resultList", {
 
         show_toolbar: true,   //toolbar contains menu,savefilter,counter,viewmode and pagination
         show_menu: false,       //@todo ? - replace to action_select and action_buttons
+        support_collection: false,
         show_savefilter: false,
         show_counter: true,
         show_viewmode: true,
@@ -135,6 +136,7 @@ $.widget( "heurist.resultList", {
                 + ' ' + window.hWin.HAPI4.Event.ON_LAYOUT_RESIZE
                 + ' ' + window.hWin.HAPI4.Event.ON_REC_SEARCHSTART
                 + ' ' + window.hWin.HAPI4.Event.ON_REC_SELECT
+                + ' ' + window.hWin.HAPI4.Event.ON_REC_COLLECT
                 + ' ' + window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH;
 
             $(this.document).on(this._events, function(e, data) {
@@ -150,6 +152,12 @@ $.widget( "heurist.resultList", {
                     }
                     that._refresh();
 
+                }else 
+                if(e.type == window.hWin.HAPI4.Event.ON_REC_COLLECT){
+                
+                    //if(!that._isSameRealm(data)) return;
+                    that.setCollected( data.collection );
+                
                 }else 
                 if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCHSTART)
                 {
@@ -500,8 +508,6 @@ $.widget( "heurist.resultList", {
         //.css({'float':'right','padding':'0.6em 0.5em 0 0','font-style':'italic'})
         .appendTo( this.div_toolbar );
 
-        
-
         if(this.options.show_menu){
             if($.isFunction($('body').resultListMenu)){
                 this.div_actions = $('<div>')
@@ -845,7 +851,8 @@ $.widget( "heurist.resultList", {
         
 
         if(this.div_content){
-            this.div_content.find('div.recordTitle').tooltip('destroy');
+            var eles = this.div_content.find('div.recordTitle');
+            if(eles.length>0) eles.tooltip('destroy');
             
             var $allrecs = this.div_content.find('.recordDiv');
             this._off( $allrecs, "click");
@@ -1235,22 +1242,7 @@ $.widget( "heurist.resultList", {
 
         
         //action button container
-        //+ '<div class="action-button-container">' 
-        
-        + '<div title="Click to edit record (opens in new tab)" '
-        + ' class="rec_edit_link_ext action-button logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only"'
-        + ' role="button" aria-disabled="false" data-key="edit_ext">'
-        + '<span class="ui-button-icon-primary ui-icon ui-icon-newwin"/><span class="ui-button-text"/>'
-        + '</div>'  // Replace ui-icon-pencil with ui-icon-extlink and swap position when this is finished 
-
-        /* Ian removed 5/2/2020. TODO: Need to replace with Select, Preview and Download buttons */
-        + '<div title="Click to view record (opens in popup)" '
-        + 'class="rec_view_link action-button ui-button ui-widget ui-state-default ui-corner-all'+btn_icon_only+'" '
-        + 'role="button" aria-disabled="false">'
-        + '<span class="ui-button-text">Preview</span>'
-        + '<span class="ui-button-icon-primary ui-icon ui-icon-comment"/>'
-        
-        + '</div>'
+        + '<div class="action-button-container">' 
 
         + '<div title="Click to edit record" '
         + 'class="rec_edit_link action-button logged-in-only ui-button ui-widget ui-state-default ui-corner-all'+btn_icon_only+'" '
@@ -1258,6 +1250,31 @@ $.widget( "heurist.resultList", {
         + '<span class="ui-button-text">Edit</span>'
         + '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"/>'
         + '</div>'
+
+        + '<div title="Click to edit record (opens in new tab)" '
+        + ' class="rec_edit_link_ext action-button logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only"'
+        + ' role="button" aria-disabled="false" data-key="edit_ext">'
+        + '<span class="ui-button-icon-primary ui-icon ui-icon-newwin"/><span class="ui-button-text"/>'
+        + '</div>'  // Replace ui-icon-pencil with ui-icon-extlink and swap position when this is finished 
+        
+        /* Ian removed 5/2/2020. TODO: Need to replace with Select, Preview and Download buttons */
+        + ((this.options.recordview_onselect===false || this.options.recordview_onselect==='none')
+          ?('<div title="Click to view record (opens in popup)" '
+        + 'class="rec_view_link action-button ui-button ui-widget ui-state-default ui-corner-all'+btn_icon_only+'" '
+        + 'role="button" aria-disabled="false">'
+        + '<span class="ui-button-text">Preview</span>'
+        + '<span class="ui-button-icon-primary ui-icon ui-icon-comment"/>'
+        + '</div>'):'')
+        
+        + ((this.options.support_collection)
+          ?('<div title="Click to collect/remove from collection" '
+        + 'class="rec_collect action-button ui-button ui-widget ui-state-default ui-corner-all'+btn_icon_only+'" '
+        + 'role="button" aria-disabled="false">'
+        + '<span class="ui-button-text toadd" style="min-width: 28px;">Collect</span>'
+        + '<span class="ui-button-text toremove" style="display:none;min-width: 28px;">Remove</span>'
+        + '<span class="ui-button-icon-primary ui-icon ui-icon-circle-plus toadd" style="font-size:11px"></span>'
+        + '<span class="ui-button-icon-primary ui-icon ui-icon-circle-minus toremove" style="display:none;font-size:11px"></span>'
+        + '</div>'):'')
 
         // Icons at end allow editing and viewing data for the record when the Record viewing tab is not visible
         // TODO: add an open-in-new-search icon to the display of a record in the results list
@@ -1287,7 +1304,7 @@ $.widget( "heurist.resultList", {
         + '</div>'
             :'')
         
-        //+ '</div>' //END action button container
+        + '</div>' //END action button container
         
         + '</div>';
 
@@ -1495,7 +1512,7 @@ $.widget( "heurist.resultList", {
                         width: (lt=='WebSearch'?(window.hWin.innerWidth*0.9):700),
                         height: 800, title:'Record Info'});
                 return;
-            }
+            }else
             if($target.parents('.rec_view_link_ext').length>0){
                 if(this._currentRecordset){
                     var record = this._currentRecordset.getById(selected_rec_ID)
@@ -1509,7 +1526,7 @@ $.widget( "heurist.resultList", {
                     }
                 }
                 return;
-            }
+            }else 
             if($target.parents('.rec_delete').length>0){
                 if(this._currentRecordset){
                     var record = this._currentRecordset.getById(selected_rec_ID)
@@ -1532,8 +1549,16 @@ $.widget( "heurist.resultList", {
                     }
                 }
                 return;
+            }else 
+            if($target.parents('.rec_collect').length>0){
+
+                if($rdiv.hasClass('collected')){
+                    window.hWin.HEURIST4.collection.collectionDel(selected_rec_ID);        
+                }else{
+                    window.hWin.HEURIST4.collection.collectionAdd(selected_rec_ID);
+                }
+                return;
             }
-            
         }
 
         //select/deselect on click
@@ -1791,6 +1816,30 @@ $.widget( "heurist.resultList", {
             }
         }
 
+    },
+    
+    //
+    //
+    //
+    setCollected: function(collection){
+        
+        this.div_content.find('.collected').removeClass('collected');
+        
+        if(this.options.support_collection){
+
+            if(window.hWin.HEURIST4.util.isArrayNotEmpty(collection)){
+    
+                this.div_content.find('.recordDiv').each(function(ids, rdiv){
+                    var rec_id = $(rdiv).attr('recid');
+                    var idx = window.hWin.HEURIST4.util.findArrayIndex(rec_id, collection);
+                    if(idx>=0){ 
+                        $(rdiv).addClass('collected');
+                    }
+                });
+            }else if(collection==null){
+                window.hWin.HEURIST4.collection.collectionUpdate();
+            }
+        }
     },
 
 
@@ -2419,10 +2468,12 @@ $.widget( "heurist.resultList", {
 
         }
 
+        
+        this.setCollected( null );
 
         this._trigger( "onpagerender", null, this );
         
-        //@toto replace it to event listener in manageRecUploadedFiles
+        //@todo replace it to event listener in manageRecUploadedFiles
         if($.isFunction(this.options.onPageRender)){
             this.options.onPageRender.call(this);
         }
@@ -2608,7 +2659,7 @@ $.widget( "heurist.resultList", {
     //
     callResultListMenu:function( action ){
         if(this.div_actions){
-                this.div_actions.resultListMenu('menuActionHandler', action);
+            this.div_actions.resultListMenu('menuActionHandler', action);
         }
     }
     
