@@ -157,11 +157,13 @@
         <input id="mapcluster_count" name="mapcluster_count" style="max-width: 35px;" type="number" min="2" step="1" value="2"
             title="The minimum number of markers to be in a cluster before the markers are hidden and a count is shown"/>&nbsp;
 -->         
-        <label for="mapcluster_zoom">Disable at zoom: </label>
-        <select id="mapcluster_zoom" name="mapcluster_zoom" style="max-width:80px;"
+    </div>
+    <div>
+        <div class="header"><label for="mapcluster_zoom">Stop clustering closer than: </label></div>
+        <select id="mapcluster_zoom" name="mapcluster_zoom" style="width:450px;"
             title="The maximum zoom level that a marker can be part of a cluster. Level 1 = ~10,000km (15 deg.) to ~65,000 km (equator). 
      Level 18 = ~50m (15 deg.) to ~250m (equator)"> 
-            <option value="1">Level 1 (zoomed out)</option>
+            <option value="1">Level 1 (Worldwide)</option>
             <option value="2">Level 2</option>
             <option value="3">Level 3</option>
             <option value="4">Level 4</option>
@@ -170,7 +172,7 @@
             <option value="7">Level 7</option>
             <option value="8">Level 8</option>
             <option value="9">Level 9</option>
-            <option value="10">Level 10</option>
+            <option value="10">Level 10 (City scale)</option>
             <option value="11">Level 11</option>
             <option value="12">Level 12</option>
             <option value="13">Level 13</option>
@@ -178,7 +180,7 @@
             <option value="15">Level 15</option>
             <option value="16">Level 16</option>
             <option value="17">Level 17</option>
-            <option value="18">Level 18 (zoomed in)</option>
+            <option value="18">Level 18 (Zoomed right in)</option>
         </select>    
         <!--
         <input id="mapcluster_zoom" name="mapcluster_zoom" style="max-width: 35px;" type="number" min="1" max="18" step="1" value="18"

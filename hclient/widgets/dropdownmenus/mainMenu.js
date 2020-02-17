@@ -1066,6 +1066,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
             prefs['userCompetencyLevel'] = window.hWin.HAPI4.get_prefs_def('userCompetencyLevel', 2);
             prefs['searchQueryInBrowser'] = window.hWin.HAPI4.get_prefs_def('searchQueryInBrowser', 1);
             prefs['mapcluster_on'] = window.hWin.HAPI4.get_prefs_def('mapcluster_on', 1);
+            prefs['mapcluster_zoom'] = window.hWin.HAPI4.get_prefs_def('mapcluster_zoom', 12);
             prefs['entity_btn_on'] = window.hWin.HAPI4.get_prefs_def('entity_btn_on', 1);
             
             var map_controls = window.hWin.HAPI4.get_prefs_def('mapcontrols', 'bookmark,geocoder,selector,print,publish');
@@ -1239,7 +1240,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                             
                                 if(reload_map){
                                     //reload map frame forcefully
-                                    var app = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('app_timemap');
+                                    var app = window.hWin.HAPI4.LayoutMgr.appGetWidgetById('heurist_Map2');
                                     if(app && app.widget){
                                         $(app.widget).app_timemap('reloadMapFrame'); //call method
                                     }
