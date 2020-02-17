@@ -29,8 +29,6 @@
     $response = array(); //"status"=>"fatal", "message"=>"OBLOM");
     $res = false;
 
-    sanitizeRequest($_REQUEST);
-     
     $action = @$_REQUEST['a']; //$system->getError();
     
     $system = new System();
@@ -263,8 +261,7 @@
 
             } else if ($action=="svs_save"){
 
-                sanitizeRequest($_REQUEST);
-                
+                stripScriptTagInRequest($_REQUEST);
                 $res = svsSave($system, $_REQUEST);
 
             } else if ($action=="svs_delete" && @$_REQUEST['ids']) {
@@ -281,7 +278,7 @@
 
             } else if ($action=="svs_savetree" ) { //save saved searches tree status
 
-                sanitizeRequest($_REQUEST);
+                stripScriptTagInRequest($_REQUEST);
                 $res = svsSaveTreeData($system, @$_REQUEST['data']);
 
             } else if ($action=="svs_gettree" ) { //save saved searches tree status
