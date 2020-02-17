@@ -470,7 +470,7 @@ error_log(print_r($_REQUEST, true));
         
         // do not create
         $folders['documentation_and_templates'] = array('','', false, true);
-        $folders['term-images']    = array('TERM_ICON','', false, true); //for digital harlem
+        $folders['term-images']    = array('TERM_ICON','', true, true); //for digital harlem
         $folders['faims']    = array('',''); 
         
         return $folders;
