@@ -128,7 +128,7 @@
     function getHTMLPurifier(){
 
             $config = HTMLPurifier_Config::createDefault();
-            $config->set('Cache', 'SerializerPath', HEURIST_SCRATCHSPACE_DIR);
+            $config->set('Cache.SerializerPath', HEURIST_SCRATCHSPACE_DIR);
             $config->set('CSS.AllowImportant', true);
             $config->set('CSS.AllowTricky', true);
             $config->set('CSS.Proprietary', true);
