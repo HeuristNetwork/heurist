@@ -106,7 +106,7 @@ $mysqli = $system->get_mysqli();
         <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-ui.js"></script>
         
         <!-- CSS -->
-        <?php include PDIR.'hclient/framecontent/initPageCss.php'; ?>
+        <?php include dirname(__FILE__).'/../../../hclient/framecontent/initPageCss.php'; ?>
 
         <style type="text/css">
             .success { font-weight: bold; color: green; margin-left: 3px; }

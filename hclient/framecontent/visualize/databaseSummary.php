@@ -329,7 +329,7 @@ defRecTypeGroups rg where rg.rtg_ID=d.rty_RecTypeGroupID
                     </div>
                 </div>
                 <div class="ent_wrapper" style="left:0px">
-                    <?php include PDIR."hclient/framecontent/visualize/visualize.html";?>
+                    <?php include dirname(__FILE__).'/visualize.html';?>
                 </div>
         </div>    
 

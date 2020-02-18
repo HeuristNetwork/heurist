@@ -65,7 +65,7 @@ if(@$_REQUEST['db']){
         <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-ui.js"></script>
 
         <!-- CSS -->
-        <?php include PDIR.'hclient/framecontent/initPageCss.php'; ?>
+        <?php include dirname(__FILE__).'/../../../hclient/framecontent/initPageCss.php'; ?>
 
         <!-- Heurist JS -->
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>        

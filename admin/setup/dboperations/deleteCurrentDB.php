@@ -34,7 +34,7 @@ require_once(dirname(__FILE__).'/../../../records/index/elasticSearch.php');
         <link rel=icon href="<?php echo PDIR;?>favicon.ico" type="image/x-icon">
         
         <!-- CSS -->
-        <?php include PDIR.'hclient/framecontent/initPageCss.php'; ?>
+        <?php include dirname(__FILE__).'/../../../hclient/framecontent/initPageCss.php'; ?>
         <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery-ui-iconfont-master/jquery-ui.icon-font.css" />
 
         <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>

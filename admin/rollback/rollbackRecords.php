@@ -41,7 +41,7 @@
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
         
         <!-- CSS -->
-        <?php include PDIR.'hclient/framecontent/initPageCss.php'; ?>
+        <?php include dirname(__FILE__).'/../../hclient/framecontent/initPageCss.php'; ?>
         
         <link rel="icon" href="<?php echo PDIR;?>favicon.ico" type="image/x-icon">
         <link rel="shortcut icon" href="<?php echo PDIR;?>favicon.ico" type="image/x-icon">

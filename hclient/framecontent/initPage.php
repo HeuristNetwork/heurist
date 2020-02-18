@@ -174,7 +174,7 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
 <?php } ?>
 
 <!-- CSS -->
-<?php include PDIR.'hclient/framecontent/initPageCss.php'; ?>
+<?php include dirname(__FILE__).'/initPageCss.php'; ?>
 
 <script type="text/javascript">
 

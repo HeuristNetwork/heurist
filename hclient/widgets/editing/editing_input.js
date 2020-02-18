@@ -1757,10 +1757,9 @@ $.widget( "heurist.editing_input", {
                         
                         var $datepicker = $tinpt.datepicker({
                             /*showOn: "button",
-                            showButtonPanel: false,
                             buttonImage: "ui-icon-calendar",
                             buttonImageOnly: true,*/
-                            showButtonPanel: false,
+                            showButtonPanel: true,
                             changeMonth: true,
                             changeYear: true,
                             dateFormat: 'yy-mm-dd',

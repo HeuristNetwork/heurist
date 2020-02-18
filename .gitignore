@@ -222,3 +222,4 @@ vendor/
 .idea/*
 *.zip
 composer.lock
+*.lock

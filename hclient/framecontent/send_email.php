@@ -28,7 +28,7 @@
 
 define('PDIR','../../');  //need for proper path to js and css    
 
-require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
+require_once(dirname(__FILE__).'/initPageMin.php');
 require_once(dirname(__FILE__).'/../../hsapi/utilities/utils_mail.php');
 
 // POST request
@@ -66,7 +66,7 @@ if(isset($_POST['data'])) {
   <title>Bulk email sender</title>
 
   <!-- CSS -->
-  <?php include PDIR.'hclient/framecontent/initPageCss.php'; ?>
+  <?php include dirname(__FILE__).'/initPageCss.php'; ?>
 
   <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
   <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>

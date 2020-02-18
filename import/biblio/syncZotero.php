@@ -98,7 +98,7 @@ if($fh_data==null || is_string($fh_data)){
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>
 
         <!-- CSS -->
-        <?php include PDIR.'hclient/framecontent/initPageCss.php'; ?>
+        <?php include dirname(__FILE__).'/../../hclient/framecontent/initPageCss.php'; ?>
 
         <script>
             function __showLoading(){

@@ -58,7 +58,7 @@ if(!isset($message)){
         <link rel=icon href="<?php echo PDIR;?>favicon.ico" type="image/x-icon">
 
         <!-- CSS -->
-        <?php include PDIR.'hclient/framecontent/initPageCss.php'; ?>
+        <?php include dirname(__FILE__).'/initPageCss.php'; ?>
         <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/jquery-ui-iconfont-master/jquery-ui.icon-font.css" />
     </head>
     <body style="padding:44px;" class="ui-heurist-header1">

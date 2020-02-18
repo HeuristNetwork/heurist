@@ -81,7 +81,7 @@ $rtysWithInvalidRectypeConstraint = @$lists["rt_defvalues"];
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>
         
         <!-- CSS -->
-        <?php include PDIR.'hclient/framecontent/initPageCss.php'; ?>
+        <?php include dirname(__FILE__).'/../../hclient/framecontent/initPageCss.php'; ?>
         
         <script type=text/javascript>
             

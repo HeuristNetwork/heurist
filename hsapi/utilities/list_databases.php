@@ -53,7 +53,7 @@ if($system->get_mysqli()!=null) { //server is connected
         <link rel=icon href="<?php echo PDIR?>favicon.ico" type="image/x-icon">
 
         <!-- CSS -->
-        <?php include PDIR.'hclient/framecontent/initPageCss.php'; ?>
+        <?php include dirname(__FILE__).'/../../hclient/framecontent/initPageCss.php'; ?>
 
         <script type="text/javascript">
         </script>

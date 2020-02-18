@@ -42,7 +42,7 @@ require_once(dirname(__FILE__)."/../../../hclient/framecontent/initPageMin.php")
         <script type="text/javascript" src="../../../external/jquery.fancytree/jquery.fancytree-all.min.js"></script>
 
         <!-- CSS -->
-        <?php include PDIR.'hclient/framecontent/initPageCss.php'; ?>
+        <?php include dirname(__FILE__).'/../../../hclient/framecontent/initPageCss.php'; ?>
         
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>        
         
