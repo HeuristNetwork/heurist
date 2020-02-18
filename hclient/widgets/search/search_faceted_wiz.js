@@ -631,7 +631,11 @@ $.widget( "heurist.search_faceted_wiz", {
                 svs_rules_only.prop('checked', (this.options.params.rulesonly==1 || this.options.params.rulesonly==true));
                 svs_filter.val( this.options.params.sup_filter?this.options.params.sup_filter:'' ).trigger('keyup');
                 
-                this.options.params = $.parseJSON(svs[1]);
+                this.options.params = window.hWin.HEURIST4.util.isJSON(svs[1]);
+                if(!this.options.params){
+                    window.hWin.HEURIST4.msg.showMsgDlg(window.hWin.HR('Cannot initialise edit for faceted search due to corrupted parameters. Please remove and re-create this search.'), null, "Error");
+                    return;
+                }
 
                 this.options.domain = this.options.params.domain;
 

@@ -229,7 +229,6 @@
             } else if ($action=="usr_save") {
                 
                 sanitizeRequest($_REQUEST);
-
                 $res = user_Update($system, $_REQUEST);
 
             } else if ($action=="usr_get" && is_numeric(@$_REQUEST['UGrpID'])) {

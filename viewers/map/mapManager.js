@@ -187,10 +187,12 @@ function hMapManager( _options )
                 
         //init list of accordions
         var keep_status = window.hWin.HAPI4.get_prefs('map_control_status');
+        if(keep_status){
+            keep_status = window.hWin.HEURIST4.util.isJSON(keep_status);   
+        }
         if(!keep_status) {
             keep_status = { 'search':true };
         }
-        else keep_status = $.parseJSON(keep_status);
         
         var cdivs = options.container.find('.svs-acordeon');
         $.each(cdivs, function(i, cdiv){
