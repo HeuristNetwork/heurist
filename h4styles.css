@@ -496,13 +496,17 @@ div .selected, div .selected:hover{
     border-color: #62A7F8;
 }
 
-div.collected > .recordTitle {
-    /*
+div.collected {
     background: -moz-linear-gradient(center top , #e6fdeb, #bef8cd) repeat scroll 0 0 transparent;
     background: -webkit-gradient(linear, left top, left bottom, from(#e6fdeb), to(#bef8cd));
-    */
-    text-shadow: 0px 0px 9px #00ff00 !important;
+    /* > .recordTitle
+    text-shadow: 0px 0px 9px #00ff00 !important;*/
 }
+div.collected.selected {
+    background: -moz-linear-gradient(center top , #c1e8e3, #80e8da) repeat scroll 0 0 transparent;
+    background: -webkit-gradient(linear, left top, left bottom, from(#c1e8e3), to(#80e8da));
+}
+
 div.collected  span.toadd {
     display:none !important;   
 }

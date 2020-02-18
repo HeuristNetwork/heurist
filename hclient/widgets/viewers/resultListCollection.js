@@ -60,7 +60,7 @@ $.widget( "heurist.resultListCollection", {
                 .appendTo($('<div style="display:inline-block;vertical-align:bottom">').appendTo(this.element));
 
         this._initBtn('Add');
-        this._initBtn('Remove');
+        //this._initBtn('Remove');
         this._initBtn('Clear');
         //this._initBtn('List');
         
@@ -69,7 +69,8 @@ $.widget( "heurist.resultListCollection", {
             var btn = $('<button>',{
                 text: window.hWin.HR(this.options.action_Label), 
             }).button()
-            .css({'font-weight':'bold', 'font-style':'italic', padding:'10px', 'margin-right':'10px'})
+            .css({'font-weight':'bold', 'font-style':'italic', padding:'10px', 'margin-right':'10px',
+                'background':'lightgray', 'font-size':'1.2em'})
             .appendTo( this.element );
             
             this['btn_'+name] = btn;
