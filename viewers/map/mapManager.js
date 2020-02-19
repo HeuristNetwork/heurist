@@ -669,16 +669,22 @@ function hMapManager( _options )
                 }else if(mapdoc_id>0){
                     
                     actionspan +=
-                        '<span class="ui-icon ui-icon-pencil" title="Change symbology and behaviour of map layer"></span>'
+                        '<span class="ui-icon ui-icon-pencil" title="Change symbology and behaviour of map layer"></span>';
                     
                     
                 }else{
                     
+                    if(recid<9000000){
+                    actionspan +=
+                        '<span class="ui-icon ui-icon-pencil" title="Change symbology and behaviour of map layer"></span>'
+                        +'<span class="ui-icon ui-icon-trash" title="Remove map layer"></span>';
+                    
+                    }else{
                     actionspan +=
                         '<span class="ui-icon ui-icon-pencil" title="Change symbology"></span>'
                         +'<span class="ui-icon ui-icon-arrowstop-1-s" title="Save result set as layer"></span>'
                         +'<span class="ui-icon ui-icon-trash" title="Remove map layer"></span>';
-                    
+                    }
                 }
 
             }
@@ -751,7 +757,7 @@ function hMapManager( _options )
                             
                         }else if(ele.hasClass('ui-icon-pencil')){
                             
-                                if(mapdoc_id>0){
+                                if(mapdoc_id>0 || recid<9000000){
 
                                     __in_progress();
                                     //edit layer or mapdocument record
