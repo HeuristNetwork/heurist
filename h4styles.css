@@ -490,13 +490,13 @@ div.recordDiv > .rec_action_link{
     right: 0px;
 }
 
-div .selected, div .selected:hover{
+div .selected, div.selected:hover{
     background: -moz-linear-gradient(center top , #E6F8FD, #BEE4F8) repeat scroll 0 0 transparent;
     background: -webkit-gradient(linear, left top, left bottom, from(#E6F8FD), to(#BEE4F8));
     border-color: #62A7F8;
 }
 
-div.collected {
+div.collected, div.collected:hover {
     background: -moz-linear-gradient(center top , #e6fdeb, #bef8cd) repeat scroll 0 0 transparent;
     background: -webkit-gradient(linear, left top, left bottom, from(#e6fdeb), to(#bef8cd));
     /* > .recordTitle

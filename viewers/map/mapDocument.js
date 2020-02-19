@@ -52,7 +52,7 @@ function hMapDocument( _options )
     map_documents_content = {}, //mapdoc_id=>recordset with all layers and datasources of document
     //mapdoc_id - 0 current search, temp temporal mapspace, or record id
     
-    _uniqueid = 1;   
+    _uniqueid = 9000000;   
     
     // Any time the widget is called with no arguments or with only an option hash, 
     // the widget is initialized; this includes when the widget is created.
@@ -113,6 +113,7 @@ function hMapDocument( _options )
     
     //
     // returns content of mapdocument in fancytree data format
+    // converts recordset to treeview data
     //
     function _getTreeData( mapdoc_id ){
         
@@ -132,13 +133,21 @@ function hMapDocument( _options )
                         var recID  = resdata.fld(record, 'rec_ID'),
                         recName = resdata.fld(record, 'rec_Title');
                         
+                        
                         var $res = {};  
                         $res['key'] = recID;
                         $res['title'] = recName;
                         $res['type'] = 'layer';
                         $res['mapdoc_id'] = mapdoc_id; //reference to parent mapdoc
-                        $res['selected'] = true;
-
+                        
+                        var layer_rec = that.getLayer(mapdoc_id, recID);
+                        if(layer_rec){
+                            $res['selected'] = (layer_rec['layer']).isVisible();  
+                        }else{
+                            $res['selected'] = false;
+                        } 
+                        
+                        
                         treedata.push($res);
                     }
                 }
@@ -149,7 +158,7 @@ function hMapDocument( _options )
     
 
     //
-    // load all linked layers and dataset records for given map document
+    // load all linked layers, tlcmapdataset and datasources records for given map document
     // invoked from _openMapDocument and call the same method when data are recieved from server side
     // deferred object is required for treeview, it returns treeview data
     //    
@@ -277,6 +286,9 @@ function hMapDocument( _options )
     //
     // adds layer and datasource records to mapdocument recordset, adds map on map, refresh tree
     //
+    // mapdoc_id - target map document
+    // rec_ids - array of layer record ids, or single layer record id
+    //
     function _addLayerRecord(mapdoc_id, rec_ids, callback){
         
             if(!(map_documents_content[mapdoc_id] && map_documents_content[mapdoc_id].isA("hRecordSet") )) return;
@@ -284,8 +296,8 @@ function hMapDocument( _options )
             if(!$.isArray(rec_ids)) rec_ids = [rec_ids];
         
             var request = {
-                        q: {"ids":rec_ids.join(',')},  //+RT_MAP_LAYER+"-" 
-                        rules:[{"query":"linkedfrom:"+DT_DATA_SOURCE}], //data sources linked to layers
+                        q: {"ids":rec_ids.join(',')},  
+                        rules:[{"query":"linkedfrom:"+RT_MAP_LAYER+"-"+DT_DATA_SOURCE}], //data sources linked to layers
                         w: 'a',
                         detail: 'detail',
                         source: 'map_document'};
@@ -297,31 +309,39 @@ function hMapDocument( _options )
                         var resdata = new hRecordSet(response.data);
                         
                         //add to map_document recordset
-                        var idx, records = resdata.getRecords();
-                        for(idx in records){
-                            if(idx)
-                            {
-                                var record = records[idx];
-                                var recID  = resdata.fld(record, 'rec_ID');
+                        //var idx, records = resdata.getRecords();
+                        resdata.each(function(recID, record){
+                            
+                                if(!map_documents_content[mapdoc_id].getById(recID)){
+                                    //not exists in this mapdocument
                                 
-                                map_documents_content[mapdoc_id].addRecord2(recID, record);
-                                
-                                if(resdata.fld(record, 'rec_RecTypeID')==RT_MAP_LAYER 
-                                    || resdata.fld(record, 'rec_RecTypeID')==RT_TLCMAP_DATASET)
-                                {
-                                    var datasource_recID = resdata.fld(record, DT_DATA_SOURCE);    
-                                    var datasource_record = resdata.getById( datasource_recID );
+                                    var record2 = {rec_ID:recID,  
+                                              rec_Title: resdata.fld(record, 'rec_Title'), 
+                                              rec_RecTypeID: resdata.fld(record, 'rec_RecTypeID'),  
+                                              d: record['d']};
                                     
-                                    //creates and add layer to nativemap
-                                    //returns mapLayer object
-                                    record['source_rectype'] = resdata.fld(datasource_record, 'rec_RecTypeID'); //for icon in legend
-                                    record['layer'] = new hMapLayer2({rec_layer: record, 
-                                                                      rec_datasource: datasource_record, 
-                                                                      mapdoc_recordset: resdata, //need to get fields
-                                                                      mapwidget: options.mapwidget});
+                                    
+                                    map_documents_content[mapdoc_id].addRecord2(recID, record2);
+                                    
+                                    if(resdata.fld(record, 'rec_RecTypeID')==RT_MAP_LAYER 
+                                        || resdata.fld(record, 'rec_RecTypeID')==RT_TLCMAP_DATASET)
+                                    {
+                                        var datasource_recID = resdata.fld(record, DT_DATA_SOURCE);    
+                                        var datasource_record = resdata.getById( datasource_recID );
+                                        
+                                        //creates and add layer to nativemap
+                                        //returns mapLayer object
+                                        record2['source_rectype'] = resdata.fld(datasource_record, 'rec_RecTypeID'); //for icon in legend
+                                        record2['layer'] = new hMapLayer2({rec_layer: record, 
+                                                                          rec_datasource: datasource_record, 
+                                                                          mapdoc_recordset: resdata, //need to get fields
+                                                                          mapwidget: options.mapwidget,
+                                                                          not_init_atonce:true});
+                                    }
                                 }
-                            }
-                        }//for
+                            
+                        });
+                                
                         
                         if($.isFunction(callback)){
                             callback.call(that, _getTreeData(mapdoc_id));
@@ -542,6 +562,7 @@ function hMapDocument( _options )
                     delete _record['layer']; //clear
                 }
             }else{
+                //add new layer to mapdocument
                 _record = {rec_ID:_uniqueid,  rec_Title:dataset_name, rec_RecTypeID:RT_MAP_LAYER,  d:{}};
                 recset.setFld(_record, DT_QUERY_STRING, curr_request);
                 _record = recset.addRecord(_uniqueid, _record);
@@ -558,6 +579,7 @@ function hMapDocument( _options )
                         new hMapLayer2({rec_datasource: _record, 
                                         mapdoc_recordset: recset, //need to get fields
                                         mapwidget: options.mapwidget,  //need to call back addGeoJson when data ara obtained from server
+                                        mapdocument_id: mapdoc_id,
                                         preserveViewport:preserveViewport })); //zoom to current search 
                                               
                                               
@@ -709,8 +731,8 @@ function hMapDocument( _options )
                 if(layer_rec){
                     (layer_rec['layer']).removeLayer();
                     delete layer_rec['layer']; 
-                    (map_documents_content[mapdoc_id]).removeRecord( rec_id );
                 } 
+                (map_documents_content[mapdoc_id]).removeRecord( rec_id );
             }
         },
         
@@ -827,6 +849,32 @@ function hMapDocument( _options )
             popup_options.height = usrPreferences.height;
             
             window.hWin.HEURIST4.ui.showEntityDialog('records', popup_options);
+        },
+        
+        //
+        // adds new layers (by record ids) to mapdcoument
+        //
+        addLayerRecords: function(mapdoc_id, layers_ids, callback ){
+
+            var to_remove = [];
+            //remove from map_document
+            map_documents_content[mapdoc_id].each(function(recID, record){
+                 if(recID<9000000 && window.hWin.HEURIST4.util.findArrayIndex(recID, layers_ids)<0){
+                     var rtype = record['rec_RecTypeID'];
+                     if(rtype==RT_MAP_LAYER || rtype==RT_TLCMAP_DATASET){
+                         to_remove.push(recID);
+                     }
+                 }
+            });
+            for (var idx=0; idx<to_remove.length; idx++){
+                that.removeLayer(mapdoc_id, to_remove[idx]);    
+            }
+            
+            if(window.hWin.HEURIST4.util.isArrayNotEmpty(layers_ids)){
+                _addLayerRecord(mapdoc_id, layers_ids, callback);
+            }else{
+                callback.call();
+            }
         },
         
         //

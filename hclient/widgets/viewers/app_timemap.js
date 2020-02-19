@@ -342,7 +342,7 @@ console.log(re);
                         
                     }else{
                         
-                        
+                        //add layer to virtual mapdocument
                         mapping.mapping('addSearchResult', that.options.recordset, 'Current query', that.options.preserveViewport);
                         that.options.preserveViewport = false; //restore it before each call if require
                         that.map_cache_got = true; //@todo need to check that search is really performed

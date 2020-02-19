@@ -180,6 +180,8 @@
         //header('Content-type: application/json;charset=UTF-8');
         //echo json_encode($out);
         
+        //@todo replace with ExportRecords::output
+        
         if(!output_Records($system, $response, $params)){
             $system->error_exit_api();
         }
@@ -767,6 +769,7 @@ XML;
 
     //CONTENT
     $timeline_data = [];
+    $layers_record_ids = [];
     
     $comma = '';
     
@@ -873,6 +876,11 @@ http://127.0.0.1/h5-ao/?db=osmak_38&file=5a9fa3e19f000366d439dbe98779f4dd6acb858
                         $feature['when'] = null;
                         unset($feature['when']);
                    }
+                   
+                   if( (defined('RT_TLCMAP_DATASET') && $rty_ID==RT_TLCMAP_DATASET) || $rty_ID==RT_MAP_LAYER){
+                        array_push($layers_record_ids, $recID);    
+                   }
+                   
                    if(!@$feature['geometry']) continue;
             }
 
@@ -998,7 +1006,8 @@ XML;
         fwrite($fd, ']');
         
         if(@$params['leaflet']){ //return 2 array - pure geojson and timeline items
-           fwrite($fd, ',"timeline":'.json_encode($timeline_data).'}');
+           fwrite($fd, ',"timeline":'.json_encode($timeline_data));
+           fwrite($fd, ',"layers_ids":'.json_encode($layers_record_ids).'}');
         }
         
     }else if(@$params['restapi']==1){

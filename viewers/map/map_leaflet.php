@@ -259,7 +259,7 @@ if(true || $_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0
         
             var request = window.hWin.HEURIST4.util.parseHeuristQuery(location.search );
             if( !window.hWin.HEURIST4.util.isempty(request['q']) ){
-                //do not zoom to current search if mapdoc is defined
+                //do not zoom to current search if mapdoc is defined - preserve viewport
                 mapwdiget.mapping('addSearchResult', request, 'Current results', with_mapdoc);
             }
         

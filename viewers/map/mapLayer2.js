@@ -36,9 +36,12 @@ function hMapLayer2( _options ) {
     };
 
     var _record,     //datasource record
-        _recordset;
+        _recordset,  //referense to map document recordset
+        _parent_mapdoc = null; //map document id
         
     var _nativelayer_id = 0;
+    
+    var is_inited = false;
 
     //
     //
@@ -49,7 +52,18 @@ function hMapLayer2( _options ) {
 
         _recordset = options.mapdoc_recordset;
         _record = options.rec_datasource;
-
+        _parent_mapdoc = options.mapdocument_id;
+        
+        if(options.not_init_atonce) return;
+        
+        _addLayerToMap();
+        
+    }
+    
+    function _addLayerToMap()
+    {
+        is_inited = true;
+        
         //detect layer type
         var rectypeID = _recordset.fld(_record, 'rec_RecTypeID');
 
@@ -301,9 +315,11 @@ function hMapLayer2( _options ) {
 
                     var geojson_data = null;
                     var timeline_data = [];
+                    var layers_ids = [];
                     if(response['geojson'] && response['timeline']){
                         geojson_data = response['geojson'];
                         timeline_data = response['timeline'];   
+                        if(response['layers_ids']) layers_ids = response['layers_ids'];   
                     }else{
                         geojson_data = response;
                     }
@@ -324,6 +340,12 @@ function hMapLayer2( _options ) {
                     }else {
                         window.hWin.HEURIST4.msg.showMsgErr(response);
                     }
+                    
+                    //there are layers and tlcmapdatasets among result set
+                    if( _parent_mapdoc==0 ){ // && window.hWin.HEURIST4.util.isArrayNotEmpty(layers_ids)
+                        options.mapwidget.mapping('addLayerRecords', layers_ids);
+                    } 
+                    
 
                 }
             );          
@@ -382,10 +404,20 @@ function hMapLayer2( _options ) {
         isA: function (strClass) {return (strClass === _className);},
         getVersion: function () {return _version;},
 
+        isVisible: function(){
+            return is_inited;
+                // && _nativelayer_id>0 && 
+                //options.mapwidget.mapping('isLayerVisibile', _nativelayer_id);
+        },
+        
         setVisibility:function(isvisible){
-
-            if(_nativelayer_id>0){
-                options.mapwidget.mapping('setLayerVisibility', _nativelayer_id, isvisible);
+              
+            if(is_inited){
+                if(_nativelayer_id>0){
+                    options.mapwidget.mapping('setLayerVisibility', _nativelayer_id, isvisible);
+                }
+            }else{
+                _addLayerToMap();    
             }
             
         },

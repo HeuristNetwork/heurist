@@ -363,6 +363,18 @@ function hMapManager( _options )
     }
     
     //
+    //
+    //
+    function _refreshSearchContent(){
+        
+            var grp_div = options.container.find('.svs-acordeon[grpid="search"]');
+            _defineContent('search', null, grp_div.find('.ui-accordion-content'));
+            //defineContent( 'search' );
+            that.setHeight();
+        
+    }
+    
+    //
     // adds new mapdoc entry in mapdoc tree
     //
     function _addToMapDocumentTree( resdata ){
@@ -1053,11 +1065,8 @@ function hMapManager( _options )
         {
             var record = mapDocuments.addSearchResult( 0, data, dataset_name, preserveViewport );
             
-            //refresh search results 
-            var grp_div = options.container.find('.svs-acordeon[grpid="search"]');
-            _defineContent('search', null, grp_div.find('.ui-accordion-content'));
-            //defineContent( 'search' );
-            that.setHeight();
+            //refresh search results
+            _refreshSearchContent(); 
             
             return record;
         },
@@ -1070,12 +1079,20 @@ function hMapManager( _options )
             var record = mapDocuments.addRecordSet( 0, recset, dataset_name );
             
             //refresh search results 
-            var grp_div = options.container.find('.svs-acordeon[grpid="search"]');
-            _defineContent('search', null, grp_div.find('.ui-accordion-content'));
-            //defineContent( 'search' );
-            that.setHeight();
+            _refreshSearchContent(); 
             
             return record;
+            
+        },
+        
+        //
+        //
+        //
+        addLayerRecords: function( layers_ids ) {
+            
+            mapDocuments.addLayerRecords( 0, layers_ids, function(){
+                _refreshSearchContent();     
+            } );
             
         },
         

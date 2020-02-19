@@ -49,6 +49,7 @@ Thematic mapping
 *   loadBaseMap
     addSearchResult - loads geojson data based on heurist query, recordset or json to current search (see addGeoJson)
     addRecordSet - converts recordset to geojson
+    addLayerRecords - add layer records to search result mapdocument
     addGeoJson - adds geojson layer to map, apply style and trigger timeline update
     addTileLayer - adds image tile layer to map
     addImageOverlay - adds image overlay to map
@@ -464,6 +465,13 @@ $.widget( "heurist.mapping", {
         //it is not piblish recordset since it is prepared localy 
         this.current_query_layer = null;
         this.mapManager.addRecordSet( recset, dataset_name );
+    },
+    
+    //
+    // add layer records to search result
+    //
+    addLayerRecords: function(layers_ids){
+        this.mapManager.addLayerRecords( layers_ids );    
     },
     
     //
@@ -1018,6 +1026,15 @@ $.widget( "heurist.mapping", {
         }
     },
     
+    isLayerVisibile: function(layer_id){
+        var affected_layer = this.all_layers[layer_id];
+        if(affected_layer){
+            return this.nativemap.hasLayer(affected_layer);
+        }else{
+            return false;
+        }
+    },
+    
     //
     // returns style for layer (defined in layer record or via legend)
     //
@@ -1438,7 +1455,6 @@ $.widget( "heurist.mapping", {
                     fillOpacity:0.2, iconSize:18, stroke:true, fill:true};
         }
         
-        
         if(!style) style = {};
         if(!style.iconType || style.iconType=='default') style.iconType = def_style.iconType;
         style.iconSize = (style.iconSize>0) ?parseInt(style.iconSize) :def_style.iconSize; //((style.iconType=='circle')?9:18);
@@ -1537,7 +1553,9 @@ $.widget( "heurist.mapping", {
         //change color for selected features
         if( feature.properties && this.selected_rec_ids.indexOf( feature.properties.rec_ID )>=0){
             use_style = window.hWin.HEURIST4.util.cloneJSON( use_style );
-            use_style.color = '#ffff00';  //yellow for selection
+            use_style.color = '#62A7F8'; //'#ffff00';  //yellow for selection
+            use_style.fillColor = '#e6fdeb';
+            use_style.fillOpacity = 0.3;
         }
         
         return use_style;
@@ -1575,7 +1593,7 @@ $.widget( "heurist.mapping", {
                 var radius = iconSize/2+3;
                 //iconSize = ((layer instanceof L.CircleMarker) ?(iconSize+2) :(iconSize/2+4));
                 
-                var new_layer = L.circleMarker(layer.getLatLng(), {color:'rgba(255,255,0,0.3)'} );    
+                var new_layer = L.circleMarker(layer.getLatLng(), {color: '#62A7F8'} );   //'rgba(38,60,97,1)' rgba(255,255,0,0.3) yellow circle 
                 new_layer.setRadius(radius);
                 new_layer.addTo( this.nativemap );
                 new_layer.bringToBack();
