@@ -84,6 +84,8 @@ require_once(dirname(__FILE__).'/reportRecord.php');
 if( (@$_REQUEST['q'] || @$_REQUEST['recordset']) &&
 (array_key_exists('template',$_REQUEST) || array_key_exists('template_body',$_REQUEST)))
 {
+    $is_jsallowed = $system->is_js_acript_allowed();
+    
     executeSmartyTemplate($system, $_REQUEST);
 }
 
@@ -398,12 +400,27 @@ function smarty_post_filter($tpl_source, Smarty_Internal_Template $template)
 // Strip js and clean html
 //
 function smarty_output_filter_strip_js($tpl_source, Smarty_Internal_Template $template){
-
-    $config = HTMLPurifier_Config::createDefault();
-    $config->set('Cache', 'SerializerPath', HEURIST_SCRATCHSPACE_DIR);
-    $purifier = new HTMLPurifier($config);
     
-    return $purifier->purify($tpl_source);
+    global $is_jsallowed;
+    
+    if($is_jsallowed){
+        
+        return $tpl_source;
+        
+    }else{
+
+        $config = HTMLPurifier_Config::createDefault();
+        $config->set('Cache', 'SerializerPath', HEURIST_SCRATCHSPACE_DIR);
+        $config->set('CSS.Trusted', true);
+        //$config->set('HTML.Trusted', true);
+        //$config->set('Filter.ExtractStyleBlocks', true);
+        $purifier = new HTMLPurifier($config);
+        
+        $res = $purifier->purify($tpl_source);
+        
+        //$styles = $purifier->context->get('StyleBlocks');
+        return $res;
+    }
     
 }
 

@@ -127,12 +127,23 @@
     //
     function getHTMLPurifier(){
 
-            $config = HTMLPurifier_Config::createDefault();
+            $config = HTMLPurifier_Config::createDefault();  
+            //$config->set('Cache.DefinitionImpl', null);
             $config->set('Cache.SerializerPath', HEURIST_SCRATCHSPACE_DIR);
             $config->set('CSS.AllowImportant', true);
             $config->set('CSS.AllowTricky', true);
             $config->set('CSS.Proprietary', true);
             $config->set('CSS.Trusted', true);
+            /*$config->set('Core.AcceptFullDocuments',false);
+            $config->set('Core.HiddenElements',array (
+                    'script' => true,
+                    'style' => false,
+                    'head' => false,
+                    ));
+            $config->set('HTML.Trusted', true);
+            $config->set('HTML.Allowed', array('head'=>true,'style'=>true));
+            $config->set('HTML.AllowedElements', array('head'=>true,'style'=>true));
+            */
             $def = $config->getHTMLDefinition(true);
             $def->addAttribute('div', 'id', 'Text');            
             $def->addAttribute('div', 'data-heurist-app-id', 'Text');            

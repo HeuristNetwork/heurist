@@ -322,6 +322,11 @@ function ShowReps() {
     //
     function _showProgress( session_id ){
 
+        if(!(session_id>0)) {
+             _hideProgress();
+             return;
+        }
+       
         var progressCounter = 0;        
         var progress_url = window.hWin.HAPI4.baseURL + "viewers/smarty/reportProgress.php";
 
