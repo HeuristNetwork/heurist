@@ -30,9 +30,8 @@
     * Get all saved searches for given list of ids
     *
     * @param mixed $system
-    * @param mixed $ugrID - if not defined it searches all
     */
-    function svsGetByIds($system, $rec_ids=null, $ugrID=null){
+    function svsGetByIds($system, $rec_ids=null){
 
         if ($rec_ids) {
 
@@ -72,8 +71,9 @@
     *
     * @param mixed $system
     * @param mixed $ugrID - if not defined it searches all
+    * @param $keep_order - keep order as define in groups tree
     */
-    function svsGetByUser($system, $ugrID=null){
+    function svsGetByUser($system, $ugrID=null, $keep_order=false){
 
         $mysqli = $system->get_mysqli();
         
@@ -85,10 +85,10 @@
             //if( $groups && count($groups)>0){
             
             $ugr_groups = $system->get_user_group_ids(null, true); //always get latest
-                
+            
             $current_User = $system->getCurrentUser();
             if($current_User && @$current_User['ugr_Groups'] && count(array_keys($current_User['ugr_Groups']))>0 ){
-                $ugrID = implode(',', array_keys($current_User['ugr_Groups'])).",".$ugrID;
+                $ugrID = implode(',', array_keys($current_User['ugr_Groups'])).','.$ugrID;
             }
             if($system->is_admin()){ //returns guest searches for admin
                 $ugrID = $ugrID.',0';
@@ -99,28 +99,57 @@
         }
         
         if(!$ugrID) {
-            $ugrID = 0; //get saved searches for guest
+            $ugrID = '0,5'; //get saved searches for guest and websearches
         }
-
-
         
+        if($keep_order){
+            $order = array();
+            $query = 'SELECT ugr_NavigationTree FROM `sysUGrps` WHERE ugr_ID in ('.$ugrID.')';
+            $res = $mysqli->query($query);
+            if($res){
+                while ($row = $res->fetch_row()) {
+                     svsGetOrderFromTree(json_decode($row[0],true), $order);
+                }
+            }
+        }
+        
+        $query = 'SELECT svs_ID, svs_Name, svs_Query, svs_UGrpID FROM usrSavedSearches WHERE svs_UGrpID in ('.$ugrID.')';
 
-        $query = "SELECT svs_ID, svs_Name, svs_Query, svs_UGrpID FROM usrSavedSearches WHERE svs_UGrpID in (".$ugrID.")";
+        if($keep_order && count($order)){
+            $query = $query.' order by FIELD(svs_ID,'.implode(',',$order).')';
+        }
 
 //error_log($query);        
         $res = $mysqli->query($query);
 
         if ($res){
+            $order = array();
             $result = array();
             while ($row = $res->fetch_row()){
                 $id = array_shift($row);
                 $result[$id] = $row;
+                array_push($order, $id);
             }
             $res->close();
-            return $result;
+            if($keep_order){
+                return array('order'=>$order, 'svs'=>$result);                
+            }else{
+                return $result;    
+            }
         }else{
             $system->addError(HEURIST_DB_ERROR, 'Cannot get saved searches', $mysqli->error);
             return false;
+        }
+    }
+
+    function svsGetOrderFromTree($tree, &$order){
+        
+        foreach($tree as $key=>$value){
+            if($key=='children'){
+                svsGetOrderFromTree($value, $order);
+            }else if (@$value['key']>0 && @$value['folder']!==true){
+                array_push($order, $value['key']);
+            }
         }
     }
 
@@ -268,7 +297,8 @@
         //load personal treeviews - rules, my filters (all) and bookmarks
         $groups = $system->get_user_group_ids();
 
-        if(@$grpID>0 && $system->is_member($grpID)){ // array_search($grpID, $groups)){
+        // 5 - websearch
+        if(@$grpID>0 && ($system->is_member($grpID) || $grpID==5) ){ // array_search($grpID, $groups)){
             $where = ' = '.$grpID;
         }else if(is_array($groups)){
             $where =  ' in ('.implode(',',$groups).')';

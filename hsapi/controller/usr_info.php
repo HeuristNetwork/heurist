@@ -270,9 +270,9 @@
             } else if ($action=="svs_get" ) {
 
                 if(@$_REQUEST['svsIDs']){
-                    $res = svsGetByIds($system, $_REQUEST['svsIDs'], @$_REQUEST['UGrpID']);
+                    $res = svsGetByIds($system, $_REQUEST['svsIDs']);
                 }else{
-                    $res = svsGetByUser($system, @$_REQUEST['UGrpID']);
+                    $res = svsGetByUser($system, @$_REQUEST['UGrpID'], @$_REQUEST['keep_order']);
                 }
 
             } else if ($action=="svs_savetree" ) { //save saved searches tree status

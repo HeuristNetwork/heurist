@@ -39,6 +39,7 @@ $.widget( "heurist.svs_list", {
     },
 
     loaded_saved_searches: null,   //loaded searches for button mode - based on options.allowed_XXX
+    svs_order: null,
     search_faceted: null,
 
     currentSearch: null,
@@ -687,13 +688,19 @@ $.widget( "heurist.svs_list", {
         var that = this;
         if(!this.loaded_saved_searches){  //find all saved searches for current user
         
+            that.svs_order = null;
+        
             if(this.options.allowed_svsIDs.length>0 || this.options.allowed_UGrpID.length>0){
 
+                //if allowed_svsIDs is defined it has precendece over allowed_UGrpID
                 window.hWin.HAPI4.SystemMgr.ssearch_get( {svsIDs: this.options.allowed_svsIDs,
-                    UGrpID: this.options.allowed_UGrpID},
+                    UGrpID: this.options.allowed_UGrpID, keep_order:true},
                     function(response){
                         if(response.status == window.hWin.ResponseStatus.OK){
-                            that.loaded_saved_searches = response.data; //svs_id=>array()
+                            
+                            that.svs_order = response.data.order;
+                            
+                            that.loaded_saved_searches = response.data.svs; //svs_id=>array()
                             
                             /*
                             if(!window.hWin.HAPI4.currentUser.usr_SavedSearch){
@@ -738,11 +745,11 @@ $.widget( "heurist.svs_list", {
         }
         
         
-        var i, svsIDs = Object.keys(this.loaded_saved_searches),
+        var i, svsIDs = this.svs_order, //Object.keys(this.loaded_saved_searches),
             visible_cnt = 0, visible_svsID;
 
             
-        if(svsIDs.length>0){ 
+        if(svsIDs && svsIDs.length>0){ 
             
             //$('<h4 style="padding:20px 0px;margin:0">Focussed searches</h4>').appendTo(this.accordeon);
 
