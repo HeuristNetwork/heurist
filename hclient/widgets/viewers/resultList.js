@@ -996,8 +996,8 @@ $.widget( "heurist.resultList", {
                                 var $al = $('<a href="#">')
                                 .text(window.hWin.HR('Click here to search the whole database'))
                                 .appendTo($emptyres);
-                                this._on(  $al, {
-                                    click: this._doSearch4
+                                that._on(  $al, {
+                                    click: that._doSearch4
                                 });
                             }
                             var q = that._query_request.q, rt = 0;

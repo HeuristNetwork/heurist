@@ -2408,6 +2408,48 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
                             }
                       }
                       
+                }else if(changed_element.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_DATA_SOURCE']){
+                    //get name and bbox and assign to map layer fields
+                    var val = changed_element.getValues();
+                    if(val && val.length>0 && !window.hWin.HEURIST4.util.isempty( val[0] )){
+                        var _recID = val[0];
+                        var dtId_Name = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'];
+                        var dtId_Geo = window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_OBJECT'];
+                        //find values
+                        var that = this;
+                        var ele = that._editing.getFieldByName( dtId_Name );
+                        var vals = ele.editing_input('getValues');
+                        var sName = vals[0];
+                        ele = that._editing.getFieldByName( dtId_Geo );
+                        vals = ele.editing_input('getValues');
+                        var sGeo = vals[0];
+                        if(window.hWin.HEURIST4.util.isempty(sName) ||
+                           window.hWin.HEURIST4.util.isempty(sGeo)){
+                               
+                          
+                               
+                           //search for values    
+                           window.hWin.HAPI4.RecordMgr.search({q: 'ids:'+_recID, w: "e", f:"complete", l:1}, 
+                                function(response){ 
+                               
+                                    if(response!=null && response.status == window.hWin.ResponseStatus.OK){
+                                        var recset = new hRecordSet(response.data);
+                                        var rec = recset.getFirstRecord();
+                                        if(window.hWin.HEURIST4.util.isempty(sName)){
+                                            var val = recset.fld(rec, dtId_Name);    
+                                            that._editing.setFieldValueByName(dtId_Name, val);
+                                        }
+                                        
+                                        if(window.hWin.HEURIST4.util.isempty(sGeo)){
+                                            var val = recset.fld(rec, dtId_Geo);    
+                                            that._editing.setFieldValueByName(dtId_Geo, val);
+                                        }                                                
+                                    }
+                                
+                                });
+                        }
+                    }
+                    
                     
                 }else{
                     //if this is parent-child pointer AUTOSAVE
