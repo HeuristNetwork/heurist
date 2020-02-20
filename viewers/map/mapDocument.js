@@ -141,7 +141,7 @@ function hMapDocument( _options )
                         $res['mapdoc_id'] = mapdoc_id; //reference to parent mapdoc
                         
                         var layer_rec = that.getLayer(mapdoc_id, recID);
-                        if(layer_rec){
+                        if(layer_rec && mapdoc_id==0){
                             $res['selected'] = (layer_rec['layer']).isVisible();  
                         }else{
                             $res['selected'] = false;
@@ -173,7 +173,6 @@ function hMapDocument( _options )
                         source: 'map_document',
                         rules: [{"query":"linkedfrom:"+RT_MAP_LAYER+"-"+DT_DATA_SOURCE}]
             };
-
 
             if($.isArray(mapdoc_id)){ //this is load of temp mapspace with given set of layers
                 //"t":RT_MAP_LAYER+','+RT_TLCMAP_DATASET,
@@ -301,6 +300,12 @@ function hMapDocument( _options )
                         w: 'a',
                         detail: 'detail',
                         source: 'map_document'};
+                        
+            if(RT_TLCMAP_DATASET>0){
+                //additional rule for tlc datasets
+                request['rules'].push({"query":"linkedfrom:"+RT_TLCMAP_DATASET+"-"+DT_DATA_SOURCE});
+            }
+                        
             //perform search        
             window.hWin.HAPI4.RecordMgr.search(request,
                 function(response){

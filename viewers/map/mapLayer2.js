@@ -405,9 +405,9 @@ function hMapLayer2( _options ) {
         getVersion: function () {return _version;},
 
         isVisible: function(){
-            return is_inited;
-                // && _nativelayer_id>0 && 
-                //options.mapwidget.mapping('isLayerVisibile', _nativelayer_id);
+            return is_inited
+                 && _nativelayer_id>0 && 
+                 options.mapwidget.mapping('isLayerVisibile', _nativelayer_id);
         },
         
         setVisibility:function(isvisible){
