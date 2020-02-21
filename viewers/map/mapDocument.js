@@ -119,6 +119,8 @@ function hMapDocument( _options )
         
         var treedata = [];
         
+        var limit_for_search = 11;
+        
         var resdata = map_documents_content[mapdoc_id];
         if(resdata){ //we may use resdata.each
             var idx, records = resdata.getRecords();
@@ -133,7 +135,6 @@ function hMapDocument( _options )
                         var recID  = resdata.fld(record, 'rec_ID'),
                         recName = resdata.fld(record, 'rec_Title');
                         
-                        
                         var $res = {};  
                         $res['key'] = recID;
                         $res['title'] = recName;
@@ -147,11 +148,23 @@ function hMapDocument( _options )
                             $res['selected'] = false;
                         } 
                         
-                        
                         treedata.push($res);
                     }
                 }
             }//for
+            
+            if(mapdoc_id==0 && treedata.length > limit_for_search){
+                //remove invisible 
+                var i = 0;
+                while(i<treedata.length && treedata.length > limit_for_search){
+                    if(!treedata[i]['selected'] && treedata[i]['key']<9000000){
+                        treedata.splice(i,1);
+                    }else{
+                        i++;
+                    }
+                }
+            }
+            
         }
         return treedata;
     }
