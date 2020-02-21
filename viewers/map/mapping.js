@@ -468,10 +468,18 @@ $.widget( "heurist.mapping", {
     },
     
     //
-    // add layer records to search result
+    // add layer records to search result - add all layer/dataset records
+    // (see hMapLayer2._addQueryLayer)
     //
     addLayerRecords: function(layers_ids){
         this.mapManager.addLayerRecords( layers_ids );    
+    },
+    
+    //
+    // show/hide dataset
+    //
+    setLayersVisibility: function (_selection){
+        this.mapManager.setLayersVisibility( _selection );
     },
     
     //

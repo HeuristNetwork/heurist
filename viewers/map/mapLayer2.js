@@ -41,7 +41,8 @@ function hMapLayer2( _options ) {
         
     var _nativelayer_id = 0;
     
-    var is_inited = false;
+    var is_inited = false,
+        is_visible = false;
 
     //
     //
@@ -63,6 +64,7 @@ function hMapLayer2( _options ) {
     function _addLayerToMap()
     {
         is_inited = true;
+        is_visible = true;
         
         //detect layer type
         var rectypeID = _recordset.fld(_record, 'rec_RecTypeID');
@@ -341,7 +343,7 @@ function hMapLayer2( _options ) {
                         window.hWin.HEURIST4.msg.showMsgErr(response);
                     }
                     
-                    //there are layers and tlcmapdatasets among result set
+                    //check if there are layers and tlcmapdatasets among result set
                     if( _parent_mapdoc==0 ){ // && window.hWin.HEURIST4.util.isArrayNotEmpty(layers_ids)
                         options.mapwidget.mapping('addLayerRecords', layers_ids);
                     } 
@@ -405,18 +407,23 @@ function hMapLayer2( _options ) {
         getVersion: function () {return _version;},
 
         isVisible: function(){
+            return is_visible;
+            /* it works
             return is_inited
                  && _nativelayer_id>0 && 
                  options.mapwidget.mapping('isLayerVisibile', _nativelayer_id);
+            */                 
         },
         
         setVisibility:function(isvisible){
+            
+            is_visible = isvisible;
               
             if(is_inited){
                 if(_nativelayer_id>0){
                     options.mapwidget.mapping('setLayerVisibility', _nativelayer_id, isvisible);
                 }
-            }else{
+            }else if(isvisible) {
                 _addLayerToMap();    
             }
             

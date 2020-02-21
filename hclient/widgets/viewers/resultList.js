@@ -1287,6 +1287,23 @@ $.widget( "heurist.resultList", {
         + '<span class="ui-button-icon-primary ui-icon ui-icon-extlink"/>'
         + '</div>'
             :'')
+
+        + ((rectypeID==window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_LAYER'] ||
+            rectypeID==window.hWin.HAPI4.sysinfo['dbconst']['RT_TLCMAP_DATASET'])
+            ?
+        '<div title="Click to show/hide on map" '
+        + 'class="rec_expand_on_map action-button ui-button ui-widget ui-state-default ui-corner-all'+btn_icon_only+'" '
+        + 'role="button" aria-disabled="false">'
+        + '<span class="ui-button-text">On Map</span>'
+        + '<span class="ui-button-icon-primary ui-icon ui-icon-globe"/>'
+        + '</div>'
+        +'<div title="Download dataset" '
+        + 'class="rec_download action-button ui-button ui-widget ui-state-default ui-corner-all'+btn_icon_only+'" '
+        + 'role="button" aria-disabled="false">'
+        + '<span class="ui-button-text">Save as</span>'
+        + '<span class="ui-button-icon-primary ui-icon ui-icon-arrowstop-1-s"/>'
+        + '</div>'
+            :'')
         
         + ((rectypeID==window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_DOCUMENT'])
             ?
@@ -1513,9 +1530,22 @@ $.widget( "heurist.resultList", {
                         height: 800, title:'Record Info'});
                 return;
             }else
+            if($target.parents('.rec_expand_on_map').length>0){
+                if(this._currentRecordset){
+                    
+                    //var record = this._currentRecordset.getById(selected_rec_ID);
+            
+                    $(this.document).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT, 
+                    {selection:[selected_rec_ID], 
+                        dataset_visibility: true, 
+                        source:this.element.attr('id'), search_realm:this.options.search_realm} );
+                    
+                }            
+                return;            
+            }else
             if($target.parents('.rec_view_link_ext').length>0){
                 if(this._currentRecordset){
-                    var record = this._currentRecordset.getById(selected_rec_ID)
+                    var record = this._currentRecordset.getById(selected_rec_ID);
                     var rectypeID = this._currentRecordset.fld(record, 'rec_RecTypeID' );
                     //show embed dialog
                     if(rectypeID==window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_DOCUMENT']){
@@ -1722,6 +1752,7 @@ $.widget( "heurist.resultList", {
 
         this.triggerSelection();
     },
+    
     
     //
     //

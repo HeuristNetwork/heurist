@@ -370,6 +370,11 @@ function hMapManager( _options )
             var grp_div = options.container.find('.svs-acordeon[grpid="search"]');
             _defineContent('search', null, grp_div.find('.ui-accordion-content'));
             //defineContent( 'search' );
+            
+            //hide invisible layers and allow max 5 entries
+            
+            
+            
             that.setHeight();
         
     }
@@ -1092,7 +1097,7 @@ function hMapManager( _options )
         },
         
         //
-        //
+        //  add entries into search result mapdocument and refresh legend
         //
         addLayerRecords: function( layers_ids ) {
             
@@ -1100,6 +1105,31 @@ function hMapManager( _options )
                 _refreshSearchContent();     
             } );
             
+        },
+
+        //
+        // 
+        //
+        setLayersVisibility: function (_selection){
+            
+            function __setVis(recID, record){
+                  
+                    var layer_rec = mapDocuments.getLayer(0, recID);
+                    if(layer_rec){
+                        var is_visible = (layer_rec['layer']).isVisible();
+                        (layer_rec['layer']).setVisibility( !is_visible );  
+                    } 
+                    
+            }
+            
+            if($.isArray(_selection)){
+                for(var i=0; i<_selection.length; i++){
+                     __setVis(_selection[i]);
+                }
+            }else{
+                _selection.each(_selection);
+            }
+            _refreshSearchContent();
         },
         
         //

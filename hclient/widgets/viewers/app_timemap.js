@@ -168,7 +168,11 @@ console.log(re);
                         //console.log("_doVisualizeSelection");
                         if(data.reset){
                             that.option("selection",  null);
+                        }else if(data.dataset_visibility){
+                            
+                            that._setLayersVisibility( window.hWin.HAPI4.getSelection(data.selection, true) );
                         }else{
+                            
                             that._doVisualizeSelection( window.hWin.HAPI4.getSelection(data.selection, true) );
                         }
                     }
@@ -427,6 +431,27 @@ console.log(re);
         }
     }
 
+    //
+    // show (expand) layer/dataset or hide it on map
+    //
+    , _setLayersVisibility: function (selection) {
+
+        if(window.hWin.HEURIST4.util.isnull(this.options.recordset)) return;
+
+        if(!this.element.is(':visible')
+            || window.hWin.HEURIST4.util.isnull(this.mapframe) || this.mapframe.length < 1){
+            return;
+        }
+
+        if (this.mapframe[0].contentWindow.mapping) {
+            var  mapping = this.mapframe[0].contentWindow.mapping;  
+
+            if(this.options.leaflet){ //leaflet
+                mapping.mapping('setLayersVisibility', selection);
+            }
+            
+        }        
+    }
 
 
     // events bound via _on are removed automatically

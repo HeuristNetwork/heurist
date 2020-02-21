@@ -452,6 +452,7 @@ div.recordDiv .ui-button-text{
 .icons div.recordDiv.public .action-button{ 
     width: 58px;
     padding: 2px;
+    margin: 2px;
 }
 div.recordDiv.public .action-button{ 
     text-align:left;
@@ -468,7 +469,8 @@ div.recordDiv.public .action-button > .ui-button-icon-primary{
 }
 
 .icons div.recordDiv.public .action-button-container {
-    top:22px !important;
+    top:6px !important;
+    max-width:140px;
 }
 div.recordDiv.public .rec_edit_link_ext{
     display:none;
@@ -712,7 +714,7 @@ div .selected_last{
     right: 64px;
 }
 .icons .recordDiv.public .recordTitle {
-    right: 124px;
+    right: 140px;
 }
     
 .icons .recordDiv .recordSelector {
