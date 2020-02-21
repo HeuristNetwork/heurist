@@ -544,7 +544,7 @@ $.widget( "heurist.svs_list", {
                 this.helper_btm.before(
                     $('<div>')
                     .attr('grpid',  'bookmark').addClass('svs-acordeon')
-                    .addClass('heurist-bookmark-search')  //need tp find from preferences
+                    .addClass('heurist-bookmark-search')  //need find in preferences
                     .css('display', (window.hWin.HAPI4.get_prefs('bookmarks_on')=='1')?'block':'none')
                     .append( this._defineHeader(window.hWin.HR('My Bookmarks'), 'bookmark'))
                     .append( this._defineContent('bookmark') ) );

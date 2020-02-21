@@ -333,7 +333,38 @@ if(!($is_map_popup || $without_header)){
                 } 
                 ?>
             }
+            
+            
+            function showHidePrivateInfo( event ){
+                
+                var prefVal = 0;
+                if(window.hWin && window.hWin.HAPI4){
+                    prefVal = window.hWin.HAPI4.get_prefs('recordData_PrivateInfo');
+                }
+                if(event!=null){
+                    prefVal = (prefVal!=1)?1:0;
+                }         
+                
+                if(prefVal==1){
+                    $('#link_showhide_private').text('less...');
+                    $('.morePrivateInfo').show();
+                    setTimeout(function(){
+                        window.scrollTo(0, document.body.scrollHeight || document.documentElement.scrollHeight);
+                        },200);
+                }else{
+                    $('#link_showhide_private').text('more...');
+                    $('.morePrivateInfo').hide();
+                }
+                //$(event.target).parents('.detailRowHeader').hide();
+                if(event!=null && window.hWin && window.hWin.HAPI4){
+                    window.hWin.HAPI4.save_pref('recordData_PrivateInfo', prefVal);    
+                }
+            }            
 
+            $(document).ready(function() {
+                showHidePrivateInfo(null);
+            });
+            
             /*NOT USED
             //on document load onLoad="add_sid();"
             function add_sid() {
@@ -383,6 +414,7 @@ else if(!$is_map_popup){
                         +':'+(''+date.getMinutes()).padStart(2, "0")
                         +':'+(''+date.getSeconds()).padStart(2, "0");
             }
+
 </script>
 <?php
 } 
@@ -623,13 +655,14 @@ function print_private_details($bib) {
         .$system->get_user_id().' where rtl_RecID='.$bib['rec_ID']
         .' and tag_UGrpID is not null and ugl_ID is not null order by rtl_Order',0,0);
 
-    print '<div class="detailRowHeader" style="float:left;padding-bottom:40px"><a href="#" oncontextmenu="return false;" ';
-    print 'onClick="$(\'.morePrivateInfo\').show();$(event.target).parents(\'.detailRowHeader\').hide();';
-    print 'setTimeout(function(){window.scrollTo(0, document.body.scrollHeight || document.documentElement.scrollHeight);},200);';
-    print '">more...</a></div>';
-    print '<div class="detailRowHeader morePrivateInfo" style="float:left;padding-bottom:40px 0 20px;display:none;">';
-        
+    //show or hide private details depends on preferences            
     ?>
+    <div class="detailRowHeader" style="float:left;padding:10px">
+        <a href="#" oncontextmenu="return false;" id="link_showhide_private" 
+            onClick="showHidePrivateInfo(event)">more...</a>
+    </div>
+    <div class="detailRowHeader morePrivateInfo" style="float:left;padding:0 0 20px 0;display:none;border:none;">
+        
     <div class="detailRow fieldRow"<?php echo $is_map_popup?' style="display:none"':''?>>
         <div class=detailType>Cite as</div><div class="detail<?php echo ($is_map_popup?' truncate" style="max-width:400px;"':'"');?>>
             <a target=_blank class="external-link" 

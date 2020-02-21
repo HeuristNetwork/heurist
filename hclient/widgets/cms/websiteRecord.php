@@ -90,7 +90,7 @@ On client side
 2. onPageInit: init LayoutMgr, init main menu in #main-menu element
 3. loadHomePageContent(pageid): Loads content of page into #main-content and 
    calls widget initialization width LayoutMgr.appInitFromContainer
-4. If database configration permits only:
+4. If database configuration permits only:
    After widgets initialization it loads javascript (field 2-927) and incapsulate 
    this code into afterPageLoad function. The purpose of this script is additional 
    configuration of widgets on page (that can not be set via cms editor) - mainly
@@ -502,6 +502,7 @@ function afterPageLoad(document, pageid){
         }
         
         if(page_scripts[pageid] !== false){
+            //execute custom script
             window[page_scripts[pageid]]( document, pageid );    
         }
         
