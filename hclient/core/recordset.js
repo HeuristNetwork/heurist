@@ -55,6 +55,10 @@ function hRecordSet(initdata) {
     */
     function _init(response) {
         
+        if($.isArray(response)){
+            response = {entityName:'Records',count:response.length,offset:0,records:response};
+        }
+        
         if(response){
 
             that.entityName = response.entityName;           
@@ -1187,6 +1191,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
             _setFieldValue(record, fldName, value);  
         },
 
+        //
         // assign value of field from one record to another
         //
         transFld: function(recordTo, recordFrom, fldName, isNoNull){

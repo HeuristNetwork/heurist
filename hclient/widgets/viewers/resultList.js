@@ -26,7 +26,7 @@ $.widget( "heurist.resultList", {
     options: {
         view_mode: null, // list|icons|thumbs   @toimplement detail, condenced
 
-        select_mode:null,//manager, select_single, select_multi
+        select_mode:null,//none, manager, select_single, select_multi
         selectbutton_label:'Select',
         action_select:null,  //array of actions
         action_buttons:null,
@@ -82,7 +82,7 @@ $.widget( "heurist.resultList", {
         recordDiv_class:null,  //additional class for even entries recordDiv
         
         search_realm:  null,  //accepts search/selection events from elements of the same realm only
-        search_initial: null  //query string or svs_ID for initial search
+        search_initial: null  //NOT USED query string or svs_ID for initial search
     },
 
     _is_publication:false, //this is CMS publication - take css from parent
@@ -1592,6 +1592,9 @@ $.widget( "heurist.resultList", {
         }
 
         //select/deselect on click
+        if(this.options.select_mode=='none'){
+          //do nothing
+        }else 
         if(this.options.select_mode=='select_multi'){
             
             if($rdiv.hasClass('selected')){
@@ -1612,7 +1615,6 @@ $.widget( "heurist.resultList", {
             this._updateInfo();
 
         }else{
-
 
             this.div_content.find('.selected_last').removeClass('selected_last');
 

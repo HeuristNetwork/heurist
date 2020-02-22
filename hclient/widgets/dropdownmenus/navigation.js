@@ -23,7 +23,7 @@ $.widget( "heurist.navigation", {
     options: {
        menu_recIDs:[],  //top level menu records
        orientation: 'horizontal', //vertical
-       use_next_level: false,
+       use_next_level: false,  //if top level consists of the single entry use next level of menues
        onmenuselect: null,
        aftermenuselect: null,
        toplevel_css:null  //css for top level items
@@ -223,7 +223,10 @@ $.widget( "heurist.navigation", {
             this.divMainMenuItems.children('li.ui-menu-item').children('a').css(this.options.toplevel_css);
         }
         
-        
+        //
+        // if onmenuselect function define it is used for action
+        // otherwise it loads content to page_target (#main-content by default)
+        //
         this.divMainMenuItems.find('a').addClass('truncate').click(function(event){
 
             var pageid = $(event.target).attr('data-pageid');
@@ -312,43 +315,72 @@ $.widget( "heurist.navigation", {
                            
                            
                     }else{
+                        
                         //load page content to page_target element 
-                        
                         if(page_target[0]!='#') page_target = '#'+page_target;
-                        
-                        if(pageCss && Object.keys(pageCss).length>0){
-                            if(!that.pageStyles_original[page_target]){ //keep to restore
-                                that.pageStyles_original[page_target] = $(page_target).clone();
-                                //document.getElementById(page_target.substr(1)).style;//$(page_target).css();
-                            }
-                            $(page_target).css(pageCss);
-                        }else if(that.pageStyles_original[page_target]){ //restore
-                            //document.getElementById(page_target.substr(1)).style = that.pageStyles_original[page_target];
-                            $(page_target).replaceWith(that.pageStyles_original[page_target]);                            
-                        }
 
-                        $(page_target).empty().load(page_url,
-                            function(){
-                                
-                                var pagetitle = $($(page_target).children()[0]);
-                                if(pagetitle.is('h2')){
-                                    if(page_target=='#main-content')
-                                    {   //move page title
-                                        pagetitle.addClass("webpageheading");
-                                        $('#main-pagetitle').empty().append(pagetitle);
-                                    }else{
-                                        pagetitle.remove();
+                        var continue_load_page = function() {
+                        
+                            if(pageCss && Object.keys(pageCss).length>0){
+                                if(!that.pageStyles_original[page_target]){ //keep to restore
+                                    that.pageStyles_original[page_target] = $(page_target).clone();
+                                    //document.getElementById(page_target.substr(1)).style;//$(page_target).css();
+                                }
+                                $(page_target).css(pageCss);
+                            }else if(that.pageStyles_original[page_target]){ //restore
+                                //document.getElementById(page_target.substr(1)).style = that.pageStyles_original[page_target];
+                                $(page_target).replaceWith(that.pageStyles_original[page_target]);                            
+                            }
+
+                            $(page_target).empty().load(page_url,
+                                function(){
+                                    
+                                    var pagetitle = $($(page_target).children()[0]);
+                                    if(pagetitle.is('h2')){
+                                        if(page_target=='#main-content')
+                                        {   //move page title
+                                            pagetitle.addClass("webpageheading");
+                                            $('#main-pagetitle').empty().append(pagetitle);
+                                        }else{
+                                            pagetitle.remove();
+                                        }
                                     }
-                                }
-                                window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, page_target );
-                                //window.hWin.HEURIST4.msg.sendCoverallToBack();
-                                if($.isFunction(that.options.aftermenuselect)){
-                                    that.options.aftermenuselect( document, pageid );
-                                    /*setTimeout(function(){
-                                        that.options.aftermenuselect( pageid );
-                                    },2000);*/
-                                }
-                        });
+                                    window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, page_target );
+                                    //window.hWin.HEURIST4.msg.sendCoverallToBack();
+                                    if($.isFunction(that.options.aftermenuselect)){
+                                        that.options.aftermenuselect( document, pageid );
+                                        /*setTimeout(function(){
+                                            that.options.aftermenuselect( pageid );
+                                        },2000);*/
+                                    }
+                            });
+                        };
+
+                        //before load we trigger  function
+                        
+                        var event_assigned = false;
+
+                        $.each($._data( $( page_target )[0], "events"), function(eventname, event) {
+                            if(eventname=='onexitpage'){
+                                event_assigned = true;
+                                return false;
+                            }
+                            /*
+            var ele = $('#main-content').find('div[widgetid="heurist_resultListCollection"]');
+            if(ele.length>0 && ele.search('instance')) ele.resultListCollection('warningOnExit');
+                            
+                            console.log(eventname);
+                            $.each(event, function(j, h) {
+                                console.log("- " + h.handler);
+                            });
+                            */
+                        });                        
+
+                        if(event_assigned){
+                            $( page_target ).trigger( "onexitpage", continue_load_page );
+                        }else{
+                            continue_load_page();
+                        }
                     }                
                 }
             }
