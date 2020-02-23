@@ -20,6 +20,7 @@
 */
 
 /*
+getWktBoundingBox
 wktValueToShapes
 prepareGeoJSON  json to timemap
 wktValueToDescription
@@ -605,7 +606,14 @@ window.hWin.HEURIST4.geo = {
     getWktBoundingBox: function(geodata){
       
          if(geodata && geodata[0]){
-            var shape = window.hWin.HEURIST4.geo.wktValueToShapes( geodata[0].wkt, geodata[0].geotype, 'google' );
+            
+            var shape =  null; 
+            if($.isPlainObject(geodata[0]) && geodata[0].wkt){
+                shape = window.hWin.HEURIST4.geo.wktValueToShapes( geodata[0].wkt, geodata[0].geotype, 'google' );
+            }else{
+                shape = window.hWin.HEURIST4.geo.wktValueToShapes( geodata[0], null, 'google' );
+            }
+             
             if(shape && shape._extent){
                 var extent = shape._extent;
                 return [[extent.ymin,extent.xmin],[extent.ymax,extent.xmax]];
@@ -617,7 +625,57 @@ window.hWin.HEURIST4.geo = {
     },
 
     //
-    // geodata = _recordset.getFieldGeoValue(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_OBJECT']);           
+    //
+    //
+    mergeBoundingBox: function(extents){
+        
+        var isset = false;
+        var minLat = 9999, maxLat = -9999, minLng = 9999, maxLng = -9999;
+        $(extents).each(function(idx, item){
+            
+            var isValid = ($.isArray(item) && item.length==2 && 
+                $.isNumeric(item[0][0]) && $.isNumeric(item[0][1]) &&
+                Math.abs(item[0][1])<=180.0 && Math.abs(item[0][0])<=90.0);
+            
+            if(isValid){
+                if (item[0][0] < minLat) minLat = item[0][0];
+                if (item[1][0] > maxLat) maxLat = item[1][0];
+                if (item[0][1] < minLng) minLng = item[0][1];
+                if (item[1][1] > maxLng) maxLng = item[1][1];
+                isset = true;
+            }
+        });
+        
+        return isset ?[[minLat, minLng],[maxLat, maxLng]] :null;
+    },
+
+    boundingBoxToWKT: function(extent){
+
+        var isValid = ($.isArray(extent) && extent.length==2 && 
+                $.isNumeric(extent[0][0]) && $.isNumeric(extent[0][1]) &&
+                Math.abs(extent[0][1])<=180.0 && Math.abs(extent[0][0])<=90.0);
+        if(isValid){
+            var geojson = {type:'Feature', geometry:{type:'Polygon', 
+                    coordinates:
+            [[[extent[0][1],extent[0][0]],
+              [extent[0][1],extent[1][0]],
+              [extent[1][1],extent[1][0]],
+              [extent[1][1],extent[0][0]],
+              [extent[0][1],extent[0][0]]
+            ]]}};                        
+            
+            return stringifyWKT( geojson );
+        }else{
+            return null;
+        }
+    },
+    
+    isEqualBoundingBox: function(ext1, ext2){
+        return false;    
+    },
+    
+    //
+    // Convert mapdocument bookamark string to bbox
     //    
     getHeuristBookmarkBoundingBox: function(geodata){
       

@@ -2426,8 +2426,6 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
                         if(window.hWin.HEURIST4.util.isempty(sName) ||
                            window.hWin.HEURIST4.util.isempty(sGeo)){
                                
-                          
-                               
                            //search for values    
                            window.hWin.HAPI4.RecordMgr.search({q: 'ids:'+_recID, w: "e", f:"complete", l:1}, 
                                 function(response){ 
@@ -2450,6 +2448,56 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
                         }
                     }
                     
+                }else if(changed_element.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_MAP_LAYER']){
+                    
+                    var recIds = changed_element.getValues();
+                    if(recIds && recIds.length>0 && recIds[0]>0){
+console.log('!!!!');
+                            //mapdocument extent
+                            var that = this;
+                            var ele = that._editing.getFieldByName( dtId_Geo );
+                            if(ele){
+                                var mapdoc_extent = null;
+                                var dtId_Geo = window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_OBJECT'];
+                                
+                                var vals = ele.editing_input('getValues');
+                                if(vals[0]) mapdoc_extent = window.hWin.HEURIST4.geo.getWktBoundingBox(vals);
+                            
+                                //search for values    
+                                window.hWin.HAPI4.RecordMgr.search({q: 'ids:'+recIds.join(','), w: "e", f:dtId_Geo}, 
+                                    function(response){ 
+
+                                        if(response!=null && response.status == window.hWin.ResponseStatus.OK){
+                                            var summary_ext = [];
+                                            var recset = new hRecordSet(response.data);
+                                            recset.each(function(recID, rec){
+                                                var layer_extent2 = recset.fld(rec, dtId_Geo);
+                                                var layer_extent = window.hWin.HEURIST4.geo.getWktBoundingBox([layer_extent2]);
+                                                                    //recset.getFieldGeoValue(rec, dtId_Geo)); 
+                                                if(layer_extent){
+                                                    summary_ext.push( layer_extent );
+                                                }
+                                            });
+                                            summary_ext = window.hWin.HEURIST4.geo.mergeBoundingBox(summary_ext);
+                                            summary_ext = window.hWin.HEURIST4.geo.boundingBoxToWKT(summary_ext);
+                                            if(summary_ext){
+                                                that._editing.setFieldValueByName(dtId_Geo, 'pl '+summary_ext);
+                                                /*if(mapdoc_extent)
+                                                {
+                                                    if(!window.hWin.HEURIST4.geo.isEqualBoundingBox(mapdoc_extent, summary_ext))
+                                                    {
+                                                    }
+                                                }else{
+                                                    
+                                                }*/ 
+                                            }
+                                        }
+
+                                });
+                            
+                            }
+
+                    }
                     
                 }else{
                     //if this is parent-child pointer AUTOSAVE

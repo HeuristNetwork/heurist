@@ -145,7 +145,7 @@ function hMapDocument( _options )
                         if(layer_rec && mapdoc_id==0){
                             $res['selected'] = (layer_rec['layer']).isVisible();  
                         }else{
-                            $res['selected'] = false;
+                            $res['selected'] = true;
                         } 
                         
                         treedata.push($res);
@@ -788,11 +788,12 @@ function hMapDocument( _options )
                 }
             }    
                 
-            if(mapdoc_extent!=null){
+            if(mapdoc_extent!=null){ 
 
                     options.mapwidget.mapping('zoomToBounds', mapdoc_extent);
                 
             }else{
+                //neither bbox nor bookmark are defined
                 //find all layer ids and zoom to summary extent
                 
                 var resdata = map_documents_content[mapdoc_id];

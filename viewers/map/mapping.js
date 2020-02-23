@@ -895,7 +895,7 @@ $.widget( "heurist.mapping", {
     },
 
     //
-    // get summary bunds for set of TOP layers
+    // get summary bounds for set of TOP layers
     //
     getBounds: function(layer_ids){
         
@@ -2430,7 +2430,7 @@ $.widget( "heurist.mapping", {
     },
 
     //
-    //
+    // Get draw aa json and convert to WKT string
     //
     drawGetWkt: function( show_warning ){
         
