@@ -74,7 +74,8 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
 
         <script type="text/javascript">
 
-            var mapping, initial_wkt, need_screenshot = false, is_geofilter=false,
+            var mapping, initial_wkt, imageurl, imageOverlay=null, 
+                need_screenshot = false, is_geofilter=false,
                 menu_datasets, btn_datasets, zoom_with_delay = true,
                 sMsgDigizeSearch = 'Digitise search area as a rectangle or polygon';
 
@@ -328,16 +329,48 @@ console.log('load google map api')
             }
             
             //
+            //
+            //
+            function refreshImageOverlay( is_reset ){
+                if(imageurl){
+                    
+                    mapping.mapping('drawSetStyleTransparent');
+                    
+                    var image_extent =  mapping.mapping('drawGetBounds');
+                    
+                    if(imageOverlay==null){
+                        imageOverlay = mapping.mapping('addImage2', imageurl, image_extent);
+                        imageOverlay.setOpacity(0.5);
+                    }else{
+                        if(is_reset){
+                             imageOverlay.setUrl( imageurl );
+                        }
+                        imageOverlay.setBounds(image_extent);
+                    }
+                    
+                }else if(imageOverlay!=null){
+                    imageOverlay.remove();
+                    imageOverlay = null;
+                }
+            }
+            
+            //
             // called from showDialog
             //
             function assignParameters(params){
                 
-                zoom_with_delay = false;
+                //temp zoom_with_delay = false;
                 
                 if(params && params['wkt']){
                     initial_wkt = params['wkt'];
                 }else{
                     initial_wkt = null;
+                }
+                
+                if(params && params['imageurl']){
+                    imageurl = params['imageurl'];   
+                }else{
+                    imageurl = null;
                 }
                 
                 need_screenshot = params && params['need_screenshot'];
@@ -368,10 +401,12 @@ console.log('load google map api')
                 
                     mapping.mapping( 'drawLoadWKT', initial_wkt, true);
                
-//console.log('zoom '+zoom_with_delay);
-
                     if(zoom_with_delay){
-                        setTimeout(function(){ mapping.mapping( 'drawZoomTo' ); }, 3000);
+                        setTimeout(function(){ 
+                                mapping.mapping( 'drawZoomTo' ); 
+                                    
+                                refreshImageOverlay( true );
+                        }, 2000);
                     }
                     
                 }else{
@@ -380,7 +415,7 @@ console.log('load google map api')
                     
                     //zoom to saved extent
                     if(zoom_with_delay){
-                        setTimeout(function(){ mapping.mapping('getSetMapBounds', false); }, 3000);
+                        setTimeout(function(){ mapping.mapping('getSetMapBounds', false); }, 2000);
                     }
                     
                     if(is_geofilter){
@@ -406,6 +441,9 @@ console.log('load google map api')
                 var res = mapping.mapping( 'drawGetJson',  e);
                 if(window.hWin.HEURIST4.util.isGeoJSON(res)){
                     $('#coords1').text(JSON.stringify(res));
+                    
+                    refreshImageOverlay( false ); //repos
+                    
                 }else{
                     $('#coords1').text('');
                 }

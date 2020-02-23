@@ -2348,11 +2348,27 @@ console.log('onpaste');
                         if(that.is_disabled) return;
                     
                         var url = window.hWin.HAPI4.baseURL 
-                            +'viewers/map/mapDraw.php?db='+window.hWin.HAPI4.database
-                            +'&wkt='+that.newvalues[$input.attr('id')]; //$input.val();
+                            +'viewers/map/mapDraw.php?db='+window.hWin.HAPI4.database;
+                            //+'&wkt='+that.newvalues[$input.attr('id')]; //$input.val();
                        
-                       var wkt_params = {'wkt': that.newvalues[$input.attr('id')] };
-                        
+                        var wkt_params = {'wkt': that.newvalues[$input.attr('id')] };
+
+                        if(this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_GEOTIFF_SOURCE']){
+
+                            var ele = that.options.editing.getFieldByName(window.hWin.HAPI4.sysinfo['dbconst']['DT_FILE_RESOURCE']);
+                            var vals = ele.editing_input('getValues');
+                            if($.isArray(vals) && vals.length>0){
+                                vals = vals[0];
+                                if(vals['ulf_ExternalFileReference']){
+                                    wkt_params['imageurl'] = vals['ulf_ExternalFileReference'];
+                                }else{
+                                    wkt_params['imageurl'] = window.hWin.HAPI4.baseURL
+                                        +'?db='+window.hWin.HAPI4.database
+                                        +'&file='+vals['ulf_ObfuscatedFileID'];
+                                }
+                            }
+                        }
+
                         window.hWin.HEURIST4.msg.showDialog(url, {height:'900', width:'1000',
                             window: window.hWin,  //opener is top most heurist window
                             dialogid: 'map_digitizer_dialog',

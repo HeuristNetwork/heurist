@@ -764,8 +764,9 @@ $.widget( "heurist.search_faceted", {
                 }
                 var url = window.hWin.HAPI4.baseURL 
                 +'viewers/map/mapDraw.php?db='+window.hWin.HAPI4.database
-                +'&geofilter=1&need_screenshot=1&wkt='
-                + (window.hWin.HEURIST4.util.isempty(rect_wkt)?'null':rect_wkt);
+                +'&geofilter=1';
+                //&need_screenshot=1&wkt='
+                //+ (window.hWin.HEURIST4.util.isempty(rect_wkt)?'null':rect_wkt);
 
                 var wkt_params = {wkt: rect_wkt, geofilter:true, need_screenshot:true};
 

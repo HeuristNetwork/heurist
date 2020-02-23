@@ -1042,6 +1042,10 @@ $.widget( "heurist.mapping", {
             return false;
         }
     },
+
+    addImage2: function( imageurl, image_extent ){
+        return L.imageOverlay(imageurl, image_extent).addTo(this.nativemap);    
+    },
     
     //
     // returns style for layer (defined in layer record or via legend)
@@ -2513,6 +2517,13 @@ $.widget( "heurist.mapping", {
         return res_gjson;
     },
     
+    drawGetBounds: function(){
+        if(this.drawnItems) {
+            return this.drawnItems.getBounds(); 
+        }else{
+            return null;
+        }
+    },
     
     //
     // set draw style
@@ -2526,6 +2537,27 @@ $.widget( "heurist.mapping", {
             
             that.map_draw_style = new_style; 
              
+            that.drawSetStyle2( new_style );
+            
+         });
+
+    },
+                       
+    drawSetStyleTransparent: function(){
+        
+        var current_value = this.map_draw_style;
+        
+        current_value.fillOpacity = 0;
+        
+        this.drawSetStyle2( current_value );
+        
+    },
+    
+    
+    drawSetStyle2: function(new_style){
+        
+        var that = this;
+        
             that.map_draw.setDrawingOptions({
                 polygon: {shapeOptions: new_style},
                 rectangle: {shapeOptions:new_style},
@@ -2546,13 +2578,6 @@ $.widget( "heurist.mapping", {
                       layer.setStyle(new_style);
                 }
             });
-
-            
-            
-         });
-
     }
-                       
-    
     
 });

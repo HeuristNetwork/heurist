@@ -2408,7 +2408,8 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
                             }
                       }
                       
-                }else if(changed_element.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_DATA_SOURCE']){
+                }else if(changed_element.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_DATA_SOURCE'])
+                {
                     //get name and bbox and assign to map layer fields
                     var val = changed_element.getValues();
                     if(val && val.length>0 && !window.hWin.HEURIST4.util.isempty( val[0] )){
@@ -2448,11 +2449,11 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
                         }
                     }
                     
-                }else if(changed_element.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_MAP_LAYER']){
+                }else if(changed_element.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_MAP_LAYER'])
+                {
                     
                     var recIds = changed_element.getValues();
                     if(recIds && recIds.length>0 && recIds[0]>0){
-console.log('!!!!');
                             //mapdocument extent
                             var that = this;
                             var ele = that._editing.getFieldByName( dtId_Geo );

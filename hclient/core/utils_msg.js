@@ -651,8 +651,12 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                                 onloadCallback.call(opener, $dosframe[0]);
                         }
                         
-                        if($.isFunction(content.onFirstInit)) {
+                        if($.isFunction(content.onFirstInit)) {  //see mapPreview
                             content.onFirstInit();
+                        }
+                        
+                        if(options['params'] && $.isFunction(content.assignParameters)) {
+                            content.assignParameters(options['params']);
                         }
 
                 });
