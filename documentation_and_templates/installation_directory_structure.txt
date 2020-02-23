@@ -16,14 +16,14 @@ Heurist directory:    /var/www/html/HEURIST  (HEURIST may be installed in any we
 
 ---------------------------------------------------------------------------------------------------------
 
-VERSION 4 (June  2015 onwards) and version 5 (early 2018 onwards - replace h4 with h5 or just heurist)
+VERSION 4 (June  2015 onwards) and version 5 (early 2018 onwards)
 
 SUMMARY:
 
     /var/www/html                           Optional: place simlinks in web root to shorten URL paths
 
-                    h4                      Simlink to .../HEURIST/h4
-                    h4-xx                   Simlinks to .../HEURIST/h4-ao, h4-ij, h4-alpha, h4-beta etc.
+                    heurist                 Simlink to .../HEURIST/heurist
+                    h5-xx                   Simlinks to .../HEURIST/h5-ao, h5-ij, h5-alpha, h5-beta etc.
 
     /var/www/html/HEURIST/                  All Heurist files in this directory (file store normally a simlink))
 
@@ -36,23 +36,22 @@ SUMMARY:
                                             Supplied as move_to_parent_as_heuristConfigIni.php in Heurist codebase root
                                             (file is moved and renamed by installation script)
 
-                    h4                      Production instance
+                    heurist                 Production instance
                         help                Simlink to ../HEURIST_SUPPORT/help
                         external            Simlink to ../HEURIST_SUPPORT/external (3rd party code for older code (pre vsn 4))
-                        ext                 Simlink to ../HEURIST_SUPPORT/external-h4 (3rd party code for newer code (vsn 4 on))
+                        ext                 Simlink to ../HEURIST_SUPPORT/external-h5 (3rd party code for newer code (vsn 4 on))
                         vendor              Simlink to ../HEURIST_SUPPORT/vendor (3rd party code using composer (vsn 5 on))
 
-                    h4-xx                  Alpha, beta, etc. instances
+                    h5-xx                  Alpha, beta, etc. instances
                         help                Simlink to ../HEURIST_SUPPORT/help
-                        external            Simlink to ../HEURIST_SUPPORT/external
-                        ext                 Simlink to ../HEURIST_SUPPORT/external-h4
+                        ext                 Simlink to ../HEURIST_SUPPORT/external-h5
                         vendor              Simlink to ../HEURIST_SUPPORT/vendor
 
                     HEURIST_SUPPORT         Download from link on Google Code site
                         help                directory
                         external            directory
-                        external-h4         directory
-                        vendor         directory
+                        external-h5         directory
+                        vendor              directory
 
                     HEURIST_FILESTORE       Simlink to actual location of file store
                                             eg. /srv/HEURIST_FILESTORE
@@ -60,11 +59,11 @@ SUMMARY:
 
 ---------------------------------------------------------------------------------------------------------
 
-Heurist instances:      .../HEURIST/h4
-                        .../HEURIST/h4-beta
-                        .../HEURIST/h4-alpha
-                        .../HEURIST/h4-ao
-                        .../HEURIST/h4-ij
+Heurist instances:      .../HEURIST/heurist
+                        .../HEURIST/h5-beta
+                        .../HEURIST/h5-alpha
+                        .../HEURIST/h5-ao
+                        .../HEURIST/h5-ij
 
             These are normally database-compatible, allowing switch between instances eg. to access
             a new feature or where a bug is encountered in an old feature. Exceptionally there will
@@ -81,7 +80,7 @@ Master configuration:    .../HEURIST/heuristConfigIni.php
             installed. This file is copied from move_to_parent_as_heuristConfigIni.php in the root
             of the Heurist codebase
 
-Support files:          .../HEURIST/HEURIST_SUPPORT/  external, external-h4, and help
+Support files:          .../HEURIST/HEURIST_SUPPORT/  external, external-h5, and help
 
             These directories are simlinked as external, ext, and help in the root of each Heurist
             instance, so that they are shared and need not be copied with each update and/or can be
@@ -109,15 +108,15 @@ Home page:              .../HEURIST/index.html
             pages (HeuristNetwork.org). This file is provided as move_to_parent_as_index.html in the root
             of the Heurist codebase.
 
-            Note: index.html expects the main installation of Heurist to be in subdirectory .../HEURIST/h4
+            Note: index.html expects the main installation of Heurist to be in subdirectory .../HEURIST/heurist
                   as it looks in this path to find its CSS files. Edit path if there is no Heurist installation
                   in this location.
 
 File permissions:
 
-            Suggested ownership of all data and program files is www-data:www-data or apache:apache with write access
-            to the filestore for owner and group. On some systems (notably with a separate file server)you may
-            need to use nobody
+            Suggested ownership of all data and program files is apache:apache or www-data:www-data (Debian) 
+            with write access to the filestore for owner and group. On some systems (notably with a separate 
+            file server)you may need to use nobody
 
 
 -----------------------------------------------------------------------------------------------------------------
@@ -158,12 +157,3 @@ You may also use the following (modify if the filestore has been moved)
     </Directory>
 
 -----------------------------------------------------------------------------------------------------------------
-
-For USyd-supported installations only:
-
-Sync script:        .../HEURIST/sync_heurist_from_USyd_VS2.sh
-
-            Uses rsync to create and/or update a specified version (h4, h4-ao, h4-ij, h4-alpha, h4-beta)
-            of Heurist from the USyd VS2 virtual server. Requires sudo access to VS2
-            Also sets ownership and permissions on the copied files. Includes simlinks to support directories.
-
