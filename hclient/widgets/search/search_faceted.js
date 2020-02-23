@@ -117,6 +117,7 @@ ui_prelim_filter_toggle_label - label on UI
 ui_spatial_filter - show spatial filter
 ui_spatial_filter_label
 ui_spatial_filter_initial - initial spatial search
+ui_spatial_filter_init - apply spatial search at once
 
 ui_additional_filter - show search everything input (for add_filter)
 ui_additional_filter_label
@@ -278,7 +279,8 @@ $.widget( "heurist.search_faceted", {
             }
         });
         
-        if(that.options.params.ui_spatial_filter_initial){
+        //apply spacial filter at once
+        if(that.options.params.ui_spatial_filter_initial && that.options.params.ui_spatial_filter_init){
                that.options.params.spatial_filter = that.options.params.ui_spatial_filter_initial;
                //__setUiSpatialFilter( that.options.params.ui_spatial_filter_initial, null);
         }
@@ -569,7 +571,7 @@ $.widget( "heurist.search_faceted", {
    }
 
     ,doResetAll: function(){
-        // this.options.params.spatial_filter = null;
+        //this.options.params.spatial_filter = null;
         this.options.params.add_filter = null;
         this.options.params.add_filter_original = null;
         this.doReset();
@@ -753,7 +755,10 @@ $.widget( "heurist.search_faceted", {
            function(event){
                 
                 //open map digitizer - returns WKT rectangle 
-                var rect_wkt = that.options.params.spatial_filter;
+                var rect_wkt = that.options.params.spatial_filter
+                        ?that.options.params.spatial_filter
+                        :that.options.params.ui_spatial_filter_initial;
+                
                 if(rect_wkt && rect_wkt['geo']){
                     rect_wkt = rect_wkt['geo'];
                 }
@@ -778,6 +783,11 @@ $.widget( "heurist.search_faceted", {
                     }
                 } );
            }});   
+           
+           if(that.options.params.ui_spatial_filter_init && !that.options.params.spatial_filter){
+               that.options.params.spatial_filter = that.options.params.ui_spatial_filter_initial;
+               that.options.params.ui_spatial_filter_init = false;
+           }
            
            __setUiSpatialFilter(that.options.params.spatial_filter, that.ui_spatial_filter_image);
            

@@ -2270,7 +2270,7 @@ $.widget( "heurist.mapping", {
     },
     
     //
-    //
+    //  force_clear - remove all current shapes on map
     //
     drawLoadWKT: function(wkt, force_clear){
         
@@ -2344,15 +2344,34 @@ $.widget( "heurist.mapping", {
                     if(lg instanceof L.Polygon){
                         
                         var coords = lg.getLatLngs();
+                        function __isRect( coords ){
+                                if(coords.length==4){
+                                     var l1 = Math.round(coords[0].distanceTo(coords[2]));
+                                     var l2 = Math.round(coords[1].distanceTo(coords[3]));
+                                     return (l1==l2);
+                                }
+                                return false;
+                        }
+                        
 
                         if(coords.length>0 && coords[0] instanceof L.LatLng ){
-                            coords.push(coords[0]);
-                            __addDrawItem(new L.Polygon(coords));
+                            //simple polygon
+                            if(__isRect( coords )){
+                                __addDrawItem(new L.Rectangle(coords));
+                            }else{
+                                coords.push(coords[0]); //add last
+                                __addDrawItem(new L.Polygon(coords));
+                            }
                         }else{
+                            //multipolygon
                             if($.isArray(coords) && coords.length==1) coords = coords[0];
                             if(coords.length>0 && coords[0] instanceof L.LatLng ){
-                                coords.push(coords[0]);
-                                __addDrawItem(new L.Polygon(coords));
+                                if(__isRect( coords )){
+                                    __addDrawItem(new L.Rectangle(coords));
+                                }else{
+                                    coords.push(coords[0]);
+                                    __addDrawItem(new L.Polygon(coords));
+                                }
                             }else{
                                 for(var i=0;i<coords.length;i++){
                                       coords[i].push(coords[i][0]);

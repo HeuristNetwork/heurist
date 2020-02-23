@@ -662,6 +662,7 @@ $.widget( "heurist.search_faceted_wiz", {
                 $dlg.find('#svs_SearchOnReset').prop('checked', this.options.params.search_on_reset);
                 
                 $dlg.find('#svs_SpatialFilter').prop('checked', this.options.params.ui_spatial_filter!==false);
+                $dlg.find('#svs_SpatialFilterInit').prop('checked', this.options.params.ui_spatial_filter_init!==false);
                 $dlg.find('#svs_SpatialFilterLabel').val(this.options.params.ui_spatial_filter_label);
                 $dlg.find('#svs_SpatialFilterInitial').val(this.options.params.ui_spatial_filter_initial);
                 $dlg.find('#svs_AdditionalFilter').prop('checked', this.options.params.ui_additional_filter!==false);
@@ -691,6 +692,7 @@ $.widget( "heurist.search_faceted_wiz", {
                 $dlg.find('#svs_SearchOnReset').prop('checked', true);
                 
                 $dlg.find('#svs_SpatialFilter').prop('checked', false);
+                $dlg.find('#svs_SpatialFilterInit').prop('checked', false);
                 $dlg.find('#svs_SpatialFilterLabel').val(window.hWin.HR('Map Search'));                
                 $dlg.find('#svs_SpatialFilterInitial').val('');                
                 $dlg.find('#svs_AdditionalFilter').prop('checked', false);
@@ -1638,6 +1640,7 @@ $.widget( "heurist.search_faceted_wiz", {
         this.options.params.ui_prelim_filter_toggle_label = $dlg.find('#svs_PrelimFilterToggleLabel').val();
         
         this.options.params.ui_spatial_filter = $dlg.find('#svs_SpatialFilter').is(':checked');
+        this.options.params.ui_spatial_filter_init = $dlg.find('#svs_SpatialFilterInit').is(':checked');
         this.options.params.ui_spatial_filter_label =$dlg.find('#svs_SpatialFilterLabel').val();
         this.options.params.ui_spatial_filter_initial =$dlg.find('#svs_SpatialFilterInitial').val();
         
