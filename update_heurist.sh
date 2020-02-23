@@ -79,10 +79,6 @@ $2 curl -O# https://heuristplus.sydney.edu.au/HEURIST/DISTRIBUTION/HEURIST_SUPPO
 $2 tar -xjf help.tar.bz2
 $2 rm -f help.tar.bz2
 
-# Add simlink to vendor directory which is new in 5.1.x
-# cd /var/www/html/HEURIST/$1
-# $2 ln -s /var/www/html/HEURIST/HEURIST_SUPPORT/vendor
-
 # No longer used
 $2 rm -f exemplars.tar.bz2
 
