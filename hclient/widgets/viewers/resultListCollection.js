@@ -112,6 +112,32 @@ $.widget( "heurist.resultListCollection", {
                 that.collectionRender( data.collection );
             }
         });
+        
+        this.recordList = $('<div>')
+                .css({'font-size':'9px',position:'relative',height:'80px'})
+                .hide().appendTo(this.element);
+        
+        this.recordList.resultList( {
+                       eventbased: false, //do not listent global events
+                       select_mode: 'none',
+                       show_toolbar: false,
+                       view_mode: 'list',
+                       renderer:function( recordset, record ){
+                           var recIcon = window.hWin.HAPI4.iconBaseURL +
+                              recordset.fld(record, 'rec_RecTypeID') + '.png';
+                           var recTitle = recordset.fld(record, 'rec_Title'); 
+                           var recTitle_strip2 = window.hWin.HEURIST4.util.stripTags(recTitle);
+                           
+                           return '<div class="recordDiv" style="height:18px;padding:0px 2px;"><div class="recordIcons">'
+        +     '<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
+        +     '" class="rt-icon" style="background-image: url(&quot;'+recIcon+'&quot;);"/></div>'
+        + '<div class="recordTitle" style="left:22px;top:4px">' + recTitle_strip2 + '</div>'
+        + '</div>';
+                           
+                       }
+            
+        } );
+        
 
         this._refresh();
 
@@ -163,6 +189,7 @@ $.widget( "heurist.resultListCollection", {
         this.labelCollectionInfo.remove();
         this.labelInstruction.remove();
         
+        this.recordList.remove();
     },
 
     _initBtn: function(name){
@@ -288,6 +315,44 @@ $.widget( "heurist.resultListCollection", {
 
         this.labelCollectionInfo.html( window.hWin.HR('Collection: ') + 
                 (_collection && _collection.length>0?_collection.length:'0') + ' datasets');
+                
+        if(_collection && _collection.length>0){
+            this.recordList.resultList('updateResultSet', new hRecordSet(_collection));
+            this.recordList.show();
+        }else{
+            this.recordList.hide();
+        }
+                
+    },
+    
+    warningOnExit: function( callback_continue ){
+
+        var col = this._collection; //window.hWin.HEURIST4.collection.collectionGet();
+        if( col && col.length>0 ){
+            
+                var that = this, $dlg, buttons = {};
+                buttons['Save Map'] = function(){ 
+                    that.createMapSpace();
+                    $dlg.dialog('close'); 
+                }; 
+                buttons['Continue'] = function(){ 
+                    callback_continue();
+                    $dlg.dialog('close'); 
+                };
+            
+            
+            $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
+                '<h4>Records have been collected</h4>'
+                +'<p>Do you want to save these as a map to appear in My Maps?</p>'
+                +'<p>(you don\'t have to save a map now, the collection is remembered in any case for later use)</p>',
+                buttons,
+                {title:'Confirm'});
+
+        }else{
+            callback_continue();
+        }
+
     }
+    
 
 });

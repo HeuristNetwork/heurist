@@ -424,7 +424,7 @@ _time_debug = new Date().getTime() / 1000;
             }} );
             
         $('#main-menu').show();
-        //load home page content $( "#main-logo").click(); 
+        //inital load HOME page content $( "#main-logo").click(); 
         loadHomePageContent(<?php print $rec_id?>);
         
         $(document).trigger(window.hWin.HAPI4.Event.ON_SYSTEM_INITED, []);
@@ -467,6 +467,8 @@ function loadHomePageContent(pageid){
 var page_scripts = {}; //pageid:functionname   cache to avoid call server every time on page load 
 //
 // Executes custom javascript defined in field DT_CMS_SCRIPT
+// it wraps this script into function afterPageLoad[RecID] and adds this script into head
+// then it executes this function
 //
 function afterPageLoad(document, pageid){
     
@@ -500,7 +502,11 @@ function afterPageLoad(document, pageid){
                 
             page_scripts[pageid] = false;
         }
-        
+
+        //script may have event listener that is triggered on page exit
+        //disable it
+        $( "#main-content" ).off( "onexitpage");
+
         if(page_scripts[pageid] !== false){
             //execute custom script
             window[page_scripts[pageid]]( document, pageid );    

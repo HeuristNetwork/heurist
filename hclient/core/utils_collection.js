@@ -154,6 +154,11 @@ window.hWin.HEURIST4.collection = {
                             params, this, 
                             __collectionOnUpdate);
     }
+    /*
+    collectionGet: function(){
+        return window.hWin.HEURIST4.collection._collection;  
+    }
+    */
 
 }
 }
