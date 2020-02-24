@@ -151,6 +151,8 @@ $.widget( "heurist.mapping", {
     main_popup: null,
     mapPopUpTemplate: null,
     
+    currentDrawMode:'none',  //full,image,filter 
+    
     //
     drawnItems: null,
     //default draw style
@@ -2041,7 +2043,7 @@ $.widget( "heurist.mapping", {
                     {
                         that.drawnItems = L.featureGroup().addTo(that.nativemap);
                         
-                        var is_geofilter = (controls.indexOf('drawfilter')>=0);
+                        //var is_geofilter = (controls.indexOf('drawfilter')>=0);
                         
                           /*
                         L.Edit.PolyVerticesEdit = L.Edit.PolyVerticesEdit.extend(
@@ -2078,43 +2080,7 @@ $.widget( "heurist.mapping", {
                                     })
                           });            
                           */
-                        that.map_draw = new L.Control.Draw({
-                            position: 'topleft',
-                            edit: {
-                                featureGroup: that.drawnItems,
-                                poly: {
-                                    allowIntersection: false
-                                }
-                            },
-                            draw: {
-                                polygon: {
-                                    allowIntersection: false,
-                                    showArea: true,
-                                    shapeOptions: {
-                                        //color: '#bada55'
-                                    },
-                                    drawError: {
-                                        color: '#e1e100', // Color the shape will turn when intersects
-                                        message: '<strong>Oh snap!<strong> you can\'t draw that!' // Message that will show when intersect
-                                    },
-                                },
-                                rectangle: {
-                                    shapeOptions: {
-                                        clickable: true
-                                    }
-                                },                                
-                                polyline:!is_geofilter?
-                                        {
-                                            shapeOptions: {
-                                                //color: '#f357a1',
-                                                weight: 4
-                                            }                                    
-                                        }:false,
-                                circle: !is_geofilter,
-                                circlemarker: false,
-                                marker: !is_geofilter
-                            }
-                        }); 
+                        that.drawSetControls( that.options.drawMode );
                         
                         that.nativemap.tb_del = new L.EditToolbar.Delete(that.nativemap, {featureGroup: that.drawnItems});
                         that.nativemap.tb_del.enable();
@@ -2146,12 +2112,13 @@ $.widget( "heurist.mapping", {
                                if($.isFunction(that.options.ondrawend)){
                                    that.options.ondrawend.call(that, e);
                                }
-                        });                    
+                        });     
+                        
                     }
                     
                 }
                 
-                if(!that['map_'+val]._map) that['map_'+val].addTo(that.nativemap);
+                if(that['map_'+val] && !that['map_'+val]._map) that['map_'+val].addTo(that.nativemap);
             }else if(that['map_'+val]){
                 that['map_'+val].remove();
             }
@@ -2165,7 +2132,8 @@ $.widget( "heurist.mapping", {
         //__controls('scale');
         if(controls.indexOf('draw')>=0){
              __controls('draw');   
-        }else if(!this.options.isPublished){
+        }else
+        if(!this.options.isPublished){
             __controls('publish');
             __controls('addmapdoc');    
         }
@@ -2578,6 +2546,89 @@ $.widget( "heurist.mapping", {
                       layer.setStyle(new_style);
                 }
             });
+    },
+    
+    //
+    // mode full - all draw controls
+    //      filter - rectangle and polygon only
+    //      image  - rectangle only
+    //      none
+    //
+    drawSetControls: function( mode ){
+        
+        var that = this;
+        
+        if(this.currentDrawMode == mode) return;
+
+        if(this.currentDrawMode=='image'){
+            that.nativemap.off('draw:editmove draw:editmove');
+        }
+        
+        this.currentDrawMode = mode;
+        
+        if(this.map_draw){
+            //remove previous
+            this.map_draw.remove();
+            this.map_draw = null;
+            //this.nativemap.removeControl( this.map_draw ); 
+        }
+        
+        if( mode == 'none' || mode == null ) return;
+
+        //
+        // create new control
+        // 
+        this.map_draw = new L.Control.Draw({
+            position: 'topleft',
+            edit: {
+                featureGroup: that.drawnItems,
+                poly: {
+                    allowIntersection: false
+                }
+            },
+            draw: {
+                polygon: (mode=='image')?false:{
+                    allowIntersection: false,
+                    showArea: true,
+                    shapeOptions: {
+                        //color: '#bada55'
+                    },
+                    drawError: {
+                        color: '#e1e100', // Color the shape will turn when intersects
+                        message: '<strong>Oh snap!<strong> you can\'t draw that!' // Message that will show when intersect
+                    },
+                },
+                rectangle: {
+                    shapeOptions: {
+                        clickable: true
+                    }
+                },                                
+                polyline: (mode=='full')?
+                        {
+                            shapeOptions: {
+                                //color: '#f357a1',
+                                weight: 4
+                            }                                    
+                        }:false,
+                circle: (mode=='full'),
+                circlemarker: false,
+                marker: (mode=='full')
+            }
+        }); 
+        
+        this.map_draw.addTo( this.nativemap );
+        
+        if(this.currentDrawMode=='image'){
+            
+            that.nativemap.on('draw:editmove draw:editresize', function (e) {
+                   if($.isFunction(that.options.ondrawend)){
+                       that.options.ondrawend.call(that, e);
+                   }
+            });     
+            
+            this.drawSetStyleTransparent();
+        }
+        
     }
     
 });

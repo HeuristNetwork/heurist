@@ -108,11 +108,10 @@ console.log('load google map api')
                 
                 // Mapping data
                 //mapping = new hMappingDraw('map_digitizer', initial_wkt);
-                is_geofilter = window.hWin.HEURIST4.util.getUrlParameter('geofilter', location.search);
-                is_geofilter = (is_geofilter==1 || is_geofilter=='true');
-                
-                need_screenshot = window.hWin.HEURIST4.util.getUrlParameter('need_screenshot', location.search);
-                need_screenshot = (need_screenshot==1 || need_screenshot=='true');
+                //is_geofilter = window.hWin.HEURIST4.util.getUrlParameter('geofilter', location.search);
+                //is_geofilter = (is_geofilter==1 || is_geofilter=='true');
+                //need_screenshot = window.hWin.HEURIST4.util.getUrlParameter('need_screenshot', location.search);
+                //need_screenshot = (need_screenshot==1 || need_screenshot=='true');
                 
                 var layout_params = {};
                 layout_params['notimeline'] = '1';
@@ -121,28 +120,16 @@ console.log('load google map api')
                 layout_params['controls'] = 'legend,bookmark,geocoder,draw';
                 layout_params['legend'] = 'basemaps,mapdocs,off';
 
-                if(is_geofilter){
-                    layout_params['controls'] += ',drawfilter';
-                    $('#rightpanel').hide();
-                    $('#spatial_filter').show();
-                    $('#map_container').css({top:'40px',right:'0px'});
-                    $('#cbAllowMulti').prop('checked', false);
-                }else{
-                    $('#rightpanel').show();
-                    $('#spatial_filter').hide();
-                    $('#map_container').css({top:'0px',right:'200px'});
-                }
-                
-                
                 initial_wkt = window.hWin.HEURIST4.util.getUrlParameter('wkt', location.search);
-        
+                
                 mapping = $('#map_container').mapping({
                     element_map: '#map_digitizer',
-                    layout_params:layout_params,
+                    layout_params: layout_params,
                     oninit: onMapInit,
                     ondraw_addstart: onMapDrawAdd,
                     ondraw_editstart: onMapDraw,
-                    ondrawend:  onMapDraw
+                    ondrawend:  onMapDraw,
+                    drawMode: 'full' //(is_geofilter?'filter':'full')
                 });                
                 
                 //initialize buttons
@@ -318,7 +305,8 @@ console.log('load google map api')
                         window.hWin.HEURIST4.msg.showMsgFlash('You have to draw a shape', 2000);
                     }
                     
-                    if(is_geofilter){
+                    //restore controls
+                    if(is_geofilter || imageurl){
                         $('#rightpanel').hide();
                         $('#spatial_filter').show();
                         $('#cbAllowMulti').prop('checked', false);
@@ -334,18 +322,24 @@ console.log('load google map api')
             function refreshImageOverlay( is_reset ){
                 if(imageurl){
                     
-                    mapping.mapping('drawSetStyleTransparent');
-                    
                     var image_extent =  mapping.mapping('drawGetBounds');
                     
-                    if(imageOverlay==null){
-                        imageOverlay = mapping.mapping('addImage2', imageurl, image_extent);
-                        imageOverlay.setOpacity(0.5);
+                    if(image_extent==null){
+                        if(imageOverlay!=null){
+                            imageOverlay.remove();
+                            imageOverlay = null;
+                        }  
                     }else{
-                        if(is_reset){
-                             imageOverlay.setUrl( imageurl );
+                        if(imageOverlay==null){
+                            //mapping.mapping('drawSetStyleTransparent');
+                            imageOverlay = mapping.mapping('addImage2', imageurl, image_extent);
+                            imageOverlay.setOpacity(0.5);
+                        }else{
+                            if(is_reset){
+                                imageOverlay.setUrl( imageurl );
+                            }
+                            imageOverlay.setBounds(image_extent);
                         }
-                        imageOverlay.setBounds(image_extent);
                     }
                     
                 }else if(imageOverlay!=null){
@@ -373,6 +367,7 @@ console.log('load google map api')
                     imageurl = null;
                 }
                 
+                is_geofilter = params && params['geofilter'];
                 need_screenshot = params && params['need_screenshot'];
                                 
                 onMapInit();
@@ -382,16 +377,25 @@ console.log('load google map api')
             //
             //           
             function onMapInit(){
-           
-                if(is_geofilter){
+
+                if(is_geofilter || imageurl){
                     $('#rightpanel').hide();
                     $('#spatial_filter').show();
+                    $('#map_container').css({top:'40px',right:'0px'});
                     $('#cbAllowMulti').prop('checked', false);
+                    
+                    if(imageurl){
+                        $('#spatial_filter .save-button').button({label:'Apply image extent'});
+                    }else{
+                        $('#spatial_filter .save-button').button({label:'Apply search extent'});
+                    }
+                    
                 }else{
                     $('#rightpanel').show();
                     $('#spatial_filter').hide();
+                    $('#map_container').css({top:'0px',right:'200px'});
                 }
-
+                
                 
                 if( !window.hWin.HEURIST4.util.isempty(initial_wkt) && initial_wkt!='undefined' ){ //params && params['wkt']
                 
@@ -422,6 +426,13 @@ console.log('load google map api')
                         window.hWin.HEURIST4.msg.showMsgFlash(sMsgDigizeSearch, 2000);
                     }
                 }
+                
+                //define draw controls for particular needs
+                var mode = 'full';
+                if(imageurl) mode = 'image'
+                else if (is_geofilter) mode = 'filter';
+                mapping.mapping( 'drawSetControls', mode );
+               
             }
             
             //

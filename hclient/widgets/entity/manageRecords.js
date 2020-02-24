@@ -2416,14 +2416,19 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
                         var _recID = val[0];
                         var dtId_Name = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'];
                         var dtId_Geo = window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_OBJECT'];
+                        var sName = '', sGeo = '';
                         //find values
                         var that = this;
                         var ele = that._editing.getFieldByName( dtId_Name );
-                        var vals = ele.editing_input('getValues');
-                        var sName = vals[0];
+                        if(ele){
+                            var vals = ele.editing_input('getValues');
+                            sName = vals[0];
+                        }
                         ele = that._editing.getFieldByName( dtId_Geo );
-                        vals = ele.editing_input('getValues');
-                        var sGeo = vals[0];
+                        if(ele){
+                            var vals = ele.editing_input('getValues');
+                            sGeo = vals[0];
+                        }
                         if(window.hWin.HEURIST4.util.isempty(sName) ||
                            window.hWin.HEURIST4.util.isempty(sGeo)){
                                
