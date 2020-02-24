@@ -130,6 +130,9 @@ class Simplify {
 
 }
 
+//
+//
+//
 function simplifyCoordinates(&$orig_points){
     
     if(count($orig_points)>1000){

@@ -123,7 +123,11 @@ use Shapefile\ShapefileReader;
                         $system->error_exit_api('Cannot process shp file', HEURIST_ERROR);
                     }
                     
-                    $json = array();
+                    //$json = array();
+                    $tmp_destination = tempnam(HEURIST_SCRATCHSPACE_DIR, "exp");    
+                    $fd = fopen($tmp_destination, 'w');  //less than 1MB in memory otherwise as temp file 
+                    fwrite($fd, '[');
+                    $rec_cnt = 0;
                     
                     // Read all the records
                     while ($record = $shapeFile->fetchRecord()){
@@ -140,7 +144,8 @@ use Shapefile\ShapefileReader;
                         $record['shp']
                         */
 
-                        $feature = json_decode($record->getGeoJSON(false,true), true);
+                        $feature = json_decode($record->getGeoJSON(false, true), true);
+                        unset($record);
                         
                         if(@$params['simplify']){
                             $geo = @$feature['geometry'];
@@ -162,16 +167,48 @@ use Shapefile\ShapefileReader;
                                 }
                             }    
                         } 
-                         
-                        $json[] = $feature;
-                    }                    
-                
-                    $json = json_encode($json);
-                    header('Content-Type: application/json');
-                    //header('Content-Type: application/vnd.geo+json');
-                    //header('Content-disposition: attachment; filename=output.json');
-                    header('Content-Length: ' . strlen($json));
-                    exit($json);
+                        
+                        //$json[] = $feature;
+                        
+                        if($rec_cnt>0) fwrite($fd, ',');
+                        fwrite($fd, json_encode($feature));
+                        $rec_cnt++;
+                        if(memory_get_usage()>104857600){//100M //$rec_cnt>20 || 
+                            break;
+                        }
+                    }//for records                    
+ 
+                    fwrite($fd, ']');
+                    if(true){
+                        
+                        if(true){                    
+                            $output = gzencode(file_get_contents($tmp_destination), 6); 
+                            header('Content-Encoding: gzip');
+                        }else{
+                            $output = file_get_contents($tmp_destination);
+                        }
+                        fclose($fd);
+                        
+                        header( 'Content-Type: application/json');    
+                        //header('Content-Length: ' . strlen($output));
+                        unlink($tmp_destination);
+                        
+                        echo $output; 
+                        unset($output);   
+                    
+                    }else{
+
+                        fclose($fd);
+                        unlink($tmp_destination);
+                        $json = json_encode($json);
+                        header('Content-Type: application/json');
+                        //header('Content-Type: application/vnd.geo+json');
+                        //header('Content-disposition: attachment; filename=output.json');
+                        header('Content-Length: ' . strlen($json));
+                        exit($json);
+                    
+                    }
+                    
 
                 } catch (ShapeFileException $e) {
                     // Print detailed error information
