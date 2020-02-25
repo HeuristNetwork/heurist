@@ -107,7 +107,7 @@
     }
 
     /**
-    * put your comment there...
+    * Generate new passowrd and send it by email
     *
     * @param mixed $system
     * @param mixed $ugr_Name
@@ -419,6 +419,8 @@
                             $rv = user_EmailAboutNewUser($system, $new_recID);
                         }else if($recID<1 || $is_approvement){
                             $rv = user_EmailApproval($system, $new_recID, $tmp_password, $is_approvement);
+                            
+                            user_SyncCommonCredentials($system,  $new_recID, $is_approvement);
                         }
                         if(!$rv){
                             return false;
@@ -480,8 +482,72 @@
         return $res;
     }
 
-    // @todo - to be implemented
-    function changeRole($grpID, $recIds, $newRole, $oldRole, $needCheck, $updateSession){
+    //
+    // sync (add) user into databases listed in sys_UGrpsDatabase 
+    //
+    function user_SyncCommonCredentials($system, $userID, $is_approvement){
+        
+        $dbname_full = $system->dbname_full();
+        $mysqli = $system->get_mysqli();
+        //1. find sys_UGrpsDatabase in this database
+        $linked_dbs = mysql__select_value($mysqli, 'select sys_UGrpsDatabase from sysIdentification');
+        if($linked_dbs)
+        {
+            
+            $userEmail = mysql__select_value($mysqli, 'select ugr_eMail from sysUGrps where ugr_ID='.$userID);
+            
+            $linked_dbs = explode(',', $linked_dbs);
+            foreach ($linked_dbs as $ldb){
+                if(strpos($ldb, HEURIST_DB_PREFIX)!==0){
+                    $ldb = HEURIST_DB_PREFIX.$ldb;
+                }
+                
+                $dbname = mysql__select_value($mysqli, 
+                    'SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = \''
+                        .$mysqli->real_escape_string($ldb).'\'');
+                if(!$dbname) continue;
+                
+                //2. find sys_UGrpsDatabase in linked database - this database must be in list
+                $linked_dbs2 = mysql__select_value($mysqli, 'select sys_UGrpsDatabase from '.$ldb.'.sysIdentification');
+                if(!$linked_dbs2) continue; //this database is not mutually linked
+                $linked_dbs2 = explode(',', $linked_dbs2);
+                foreach ($linked_dbs2 as $ldb2){
+                    if(strpos($ldb2, HEURIST_DB_PREFIX)!==0){
+                        $ldb2 = HEURIST_DB_PREFIX.$ldb2;
+                    }
+                    if( strcasecmp($dbname_full, $ldb2)==0 ){
+                        //yes database is mutually linked
+                        //3. find user email in linked database
+                        $userEmail_in_linkedDB = mysql__select_value($mysqli, 'select ugr_eMail from '
+                                .$ldb.'.sysUGrps where ugr_eMail="'.$userEmail.'"');
+                        if(!$userEmail_in_linkedDB){
+                            //add new user to linked database
+
+                            $fields = 'ugr_LongName,ugr_Description,ugr_Password,ugr_eMail,'.
+                            'ugr_FirstName,ugr_LastName,ugr_Department,ugr_Organisation,ugr_City,'.
+                            'ugr_State,ugr_Postcode,ugr_Interests,ugr_Enabled,ugr_LastLoginTime,'.
+                            'ugr_MinHyperlinkWords,ugr_IsModelUser,'.  //ugr_LoginCount,
+                            'ugr_IncomingEmailAddresses,ugr_TargetEmailAddresses,ugr_URLs,ugr_FlagJT';
+
+                            $query1 = "insert into $ldb.sysUGrps (ugr_Type,ugr_Name,$fields) ".
+                            "SELECT ugr_Type,ugr_eMail,$fields ".
+                            "FROM sysUGrps where ugr_ID=".$userID;                            
+
+
+                        }else if($is_approvement){
+                            //enable user
+                            $query1 = "update $ldb.sysUGrps set ugr_Enabled='y' where ugr_ID=".$userID;                            
+                        }
+
+                        $res = $mysqli->query($query1);
+                        break;
+                    }
+                }
+            }
+        }
+        
+        
+        
     }
 
     /**

@@ -86,7 +86,7 @@
                 $system->initPathConstants(@$_REQUEST['db']);
                 $system->user_LogActivity('Logout');
 
-                if($system->logout()){
+                if($system->doLogout()){
                     $res = true;
                 }
         }
@@ -199,7 +199,7 @@
                 $password = @$_REQUEST['password'];
                 $session_type = @$_REQUEST['session_type'];
 
-                if($system->login($username, $password, $session_type)){
+                if($system->doLogin($username, $password, $session_type)){
                     $res = $system->getCurrentUserAndSysInfo( true ); //including reccount and dashboard entries
                     
                     checkDatabaseFunctions($mysqli);
@@ -222,7 +222,8 @@
                         $res = (@$$varname==$password)?'ok':'wrong';
                     }
 
-            } else if ($action=="sys_info_count") { 
+            }
+              else if ($action=="sys_info_count") { 
                 
                 $res = $system->getTotalRecordsAndDashboard();
                         

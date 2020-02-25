@@ -1196,6 +1196,8 @@ if($cres==false){
             $reload_user_from_db = true;            
             $userID = $user['ugr_ID'];
         }else{
+            
+            $userID = @$_SESSION[$this->dbname_full]['ugr_ID'];
         
             $reload_user_from_db = ($user==true);  //reload user unconditionally
             
@@ -1212,7 +1214,19 @@ if($cres==false){
             }*/
         }
         
+        if($userID == null){
+            //some databases may share credentials
+            //check that there is session for linked databases
+            //if such session exists find email in linked database
+            //by this email find user id in this database and establish new session
+
+            $userID = $this->doLoginByLinkedSession();
+        
+            $reload_user_from_db = ($userID!=null);
+        }
+        
         $islogged = ($userID != null);
+        
         if($islogged){
             
             if(@$_SESSION[$this->dbname_full]['need_refresh']) {
@@ -1286,6 +1300,63 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
         }
         return $islogged;
     }
+    
+    /**
+    * some databases may share credentials
+    * check that there is a session for linked databases
+    * if such session exists find email in linked database
+    * by this email find user id in this database and establish new session
+    * 
+    * return userid in this database
+    */
+    private function doLoginByLinkedSession(){
+        //1. find sys_UGrpsDatabase in this database
+        $linked_dbs = mysql__select_value($this->mysqli, 'select sys_UGrpsDatabase from sysIdentification');
+        if($linked_dbs)
+        {
+        
+            $linked_dbs = explode(',', $linked_dbs);
+            foreach ($linked_dbs as $ldb){
+                //2. check if session exists 
+                if(strpos($ldb, HEURIST_DB_PREFIX)!==0){
+                    $ldb = HEURIST_DB_PREFIX.$ldb;
+                }
+                
+                $userID_in_linkedDB = @$_SESSION[$ldb]['ugr_ID'];
+                
+                if( $userID_in_linkedDB>0 ){
+                    //3. find sys_UGrpsDatabase in linked database - this database must be in list
+                    $linked_dbs2 = mysql__select_value($this->mysqli, 'select sys_UGrpsDatabase from '.$ldb.'.sysIdentification');
+                    if(!$linked_dbs2) continue; //this database is not mutually linked
+                    $linked_dbs2 = explode(',', $linked_dbs2);
+                    foreach ($linked_dbs2 as $ldb2){
+                        if(strpos($ldb2, HEURIST_DB_PREFIX)!==0){
+                            $ldb2 = HEURIST_DB_PREFIX.$ldb2;
+                        }
+                        if( strcasecmp($this->dbname_full, $ldb2)==0 ){
+                            //yes database is mutually linked
+                            //4. find user email in linked database
+                            $userEmail_in_linkedDB = mysql__select_value($this->mysqli, 'select ugr_eMail from '
+                                .$ldb.'.sysUGrps where ugr_ID='.$userID_in_linkedDB);
+
+                            //5. find user by email in this database
+                            if($userEmail_in_linkedDB){
+                                $user = user_getByField($this->get_mysqli(), 'ugr_eMail', $userEmail_in_linkedDB);       
+                                if(null != $user && $user['ugr_Type']=='user' && $user['ugr_Enabled']=='y') {
+                                    //6. success - establed new session
+                                    $this->doLoginSession($user['ugr_ID'], 'public');
+                                    return $user['ugr_ID'];
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        return null;
+        
+    }
 
     /**
     * Find user by name and password and keeps user info in current_User and in session
@@ -1296,7 +1367,7 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
     *
     * @return  TRUE if login is success
     */
-    public function login($username, $password, $session_type){
+    public function doLogin($username, $password, $session_type){
 
         if($username && $password){
             
@@ -1320,36 +1391,8 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
                     return false;
 
                 }else if ( $superuser || crypt($password, $user['ugr_Password']) == $user['ugr_Password'] ) {
-
-                    $time = 0;
-                    if($session_type == 'public'){
-                        $time = 0;
-                    }else if($session_type == 'shared'){
-                        $time = time() + 24*60*60;     //day
-                    }else if ($session_type == 'remember') {
-                        $time = time() + 30*24*60*60;  //30 days
-                        $_SESSION[$this->dbname_full]['keepalive'] = true; //refresh time on next entry
-                    }
                     
-                    //$time = time() + 30;
-                
-                    //update cookie expire time
-                    $is_https = (@$_SERVER['HTTPS']!=null && $_SERVER['HTTPS']!='');
-                    $session_id = session_id();
-                    $cres = setcookie('heurist-sessionid', $session_id, $time, '/', '', $is_https );  //login
-
-//if($time==0)                    
-//error_log('login '.$session_type.'  '.$session_id);                
-                    
-                    if(!$cres){
-                        
-                    }
-
-                    $_SESSION[$this->dbname_full]['ugr_ID'] = $user['ugr_ID'];
-                    //$this->login_verify( $user ); //save data into session
-                    
-                    //update login time in database
-                    user_updateLoginTime($this->mysqli, $user['ugr_ID']);
+                    $this->doLoginSession($user['ugr_ID'], $session_type);
 
                     return true;
                 }else{
@@ -1367,13 +1410,47 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
             return false;
         }
     }
+    
+    //
+    // establish new session 
+    //
+    private function doLoginSession($userID, $session_type){
+        
+        $time = 0;
+        if($session_type == 'public'){
+            $time = 0;
+        }else if($session_type == 'shared'){
+            $time = time() + 24*60*60;     //day
+        }else if ($session_type == 'remember') {
+            $time = time() + 30*24*60*60;  //30 days
+            $_SESSION[$this->dbname_full]['keepalive'] = true; //refresh time on next entry
+        }
+        
+        //$time = time() + 30;
+    
+        //update cookie expire time
+        $is_https = (@$_SERVER['HTTPS']!=null && $_SERVER['HTTPS']!='');
+        $session_id = session_id();
+        $cres = setcookie('heurist-sessionid', $session_id, $time, '/', '', $is_https );  //login
 
+//if($time==0)                    
+//error_log('login '.$session_type.'  '.$session_id);                
+        if(!$cres){
+            
+        }
+
+        $_SESSION[$this->dbname_full]['ugr_ID'] = $userID;
+        
+        //update login time in database
+        user_updateLoginTime($this->mysqli, $userID);
+
+    }
 
 
     /**
     * Clears cookie and destroy session and current_User info
     */
-    public function logout(){
+    public function doLogout(){
         
         $this->start_my_session(false);
 

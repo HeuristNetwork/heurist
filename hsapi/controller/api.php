@@ -102,7 +102,7 @@ if ($entities[$requestUri[2]]=='System') {
     
     if($requestUri[2]==='login'){
         
-        if(!$system->login(@$_REQUEST['fields']['login'], @$_REQUEST['fields']['password'], 'shared'))
+        if(!$system->doLogin(@$_REQUEST['fields']['login'], @$_REQUEST['fields']['password'], 'shared'))
         {
             $system->error_exit_api();
         }else{
@@ -113,7 +113,7 @@ if ($entities[$requestUri[2]]=='System') {
         }
         
     }else if($requestUri[2]==='logout'){
-        $system->logout();
+        $system->doLogout();
     }
 
 }

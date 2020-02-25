@@ -333,11 +333,14 @@ class DbSysUsers extends DbEntityBase
                         $rv = user_EmailAboutNewUser($this->system, $ugr_ID);
                     }else if($is_new || $is_approvement){ //this is approvement or registration FOR user
                         $rv = user_EmailApproval($this->system, $ugr_ID, $this->records[$idx]['tmp_password'], $is_approvement);
+                        
+                        user_SyncCommonCredentials($this->system,  $ugr_ID, $is_approvement);
                     }
                     if(!$rv){
                         //cannot sent email 
                         //return false;
                     }
+                    
                 }
             }
         }        
