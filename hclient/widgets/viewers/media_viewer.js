@@ -80,7 +80,7 @@ $.widget( "heurist.media_viewer", {
                     }else if(mimeType && mimeType=='application/pdf'){
 
                         var fileURL_forembed = window.hWin.HAPI4.baseURL
-                                + 'hsapi/dbaccess/file_download.php?db=' 
+                                + 'hsapi/controller/file_download.php?db=' 
                                 + window.hWin.HAPI4.database + '&embed=1&file='+obf_recID;
                                 
                         /* inline html  */

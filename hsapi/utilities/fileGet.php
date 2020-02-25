@@ -1,6 +1,6 @@
 <?php
 /**
-* @todo move to controller
+* @todo move to controller?
 * Service 
 * For Entities (for recUploadFiles see file_download.php)
 * 
@@ -181,6 +181,12 @@ if($filename){ //download from scratch
 
         //entity id either not defined or requested file doesn't exist
         //editmode: empty gif (0) or add image gif (1) or default icon/thumb for entity (2), or (check)  'ok' if it exists or '' missing
+        
+        //what return by default?
+        // 3 (or check) - return "ok" if file exists otherwise "not found"
+        // 2 - entity default icon or thumb
+        // 1 - returns image with invitation "add image"
+        // otherwise it returns empty image placeholder (100x100 or 16x16 for icons)
         $default_mode = @$_REQUEST['def'] ?$_REQUEST['def']:2;
 
                    

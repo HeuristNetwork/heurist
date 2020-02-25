@@ -569,7 +569,9 @@ $.widget( "heurist.editing_input", {
             .appendTo( $inputdiv );
 
             
-            if( this.options.dtID != window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY']){
+            if( this.options.dtID != window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY']
+            && this.options.dtID != window.hWin.HAPI4.sysinfo['dbconst']['DT_MAP_IMAGE_WORLDFILE'])
+            {
                 
                 var eid = $input.attr('id')+'_editor';
                 
@@ -1391,7 +1393,7 @@ $.widget( "heurist.editing_input", {
                     popup_options.width = Math.max(usrPreferences.width,710);
                     popup_options.height = Math.max(usrPreferences.height,600);
                     
-                    if(this.options.editing && that.configMode.entity=='records'){
+                    if(that.options.editing && that.configMode.entity=='records'){
                         
                         var ele = that.options.editing.getFieldByName('rec_OwnerUGrpID');
                         var vals = ele.editing_input('getValues');
@@ -2085,7 +2087,7 @@ $.widget( "heurist.editing_input", {
                            $input_img.find('img').css({'max-height':'320px','max-width':'320px'});
                        }
                          
-                        window.hWin.HAPI4.checkImageUrl(this.configMode.entity, this.options.recID, 
+                        window.hWin.HAPI4.checkImage(this.configMode.entity, this.options.recID, 
                             this.configMode.version,
                             function(response){
                                   if(response.data=='ok'){
@@ -2454,6 +2456,20 @@ console.log('onpaste');
                 }
              
         }//end color/symbol editor
+        else if( this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_MAP_IMAGE_WORLDFILE']){
+            
+                    var $btn_edit_switcher = $( '<span>calculate extent</span>', 
+                    {title: 'Get image extent based on worldfile parameters and image width and height'})
+                        //.addClass('smallicon ui-icon ui-icon-gear btn_add_term')
+                        .addClass('smallbutton btn_add_term')
+                        .css({'line-height': '20px','vertical-align':'top',cursor:'pointer','text-decoration':'underline'})
+                        .appendTo( $inputdiv );
+                    
+                    this._on( $btn_edit_switcher, { click: function(){
+                        calculateImageExtentFromWorldFile( that.options.editing );
+                    }});
+            
+        }
 
 
         

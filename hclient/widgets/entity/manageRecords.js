@@ -2394,8 +2394,6 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
                    changed_element.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_IMAGE_SOURCE']){
                        
                       //check extension - only mbtiles allowed
-//console.log(changed_element.getValues());
-                      
                       var val = changed_element.getValues();
                       if(val && val.length>0 && !window.hWin.HEURIST4.util.isempty(val[0])){
                             var ext = window.hWin.HEURIST4.util.getFileExtension(val[0]['ulf_OrigFileName']);
@@ -2410,7 +2408,9 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
                       
                 }else if(changed_element.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_DATA_SOURCE'])
                 {
-                    //get name and bbox and assign to map layer fields
+                    //
+                    //get name and bbox from map source and assign to map layer fields
+                    //
                     var val = changed_element.getValues();
                     if(val && val.length>0 && !window.hWin.HEURIST4.util.isempty( val[0] )){
                         var _recID = val[0];
@@ -2456,15 +2456,17 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
                     
                 }else if(changed_element.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_MAP_LAYER'])
                 {
-                    
+                    //
+                    // calculate summary extent of all layers and assign to map document extent
+                    //
                     var recIds = changed_element.getValues();
                     if(recIds && recIds.length>0 && recIds[0]>0){
                             //mapdocument extent
                             var that = this;
+                            var dtId_Geo = window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_OBJECT'];
                             var ele = that._editing.getFieldByName( dtId_Geo );
                             if(ele){
                                 var mapdoc_extent = null;
-                                var dtId_Geo = window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_OBJECT'];
                                 
                                 var vals = ele.editing_input('getValues');
                                 if(vals[0]) mapdoc_extent = window.hWin.HEURIST4.geo.getWktBoundingBox(vals);
@@ -2501,8 +2503,10 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
 
                                 });
                             
+                            }else{
+                                window.hWin.HEURIST4.msg.showMsgErr('Map document record must have Bounding Box field! '
+                                    +'Please correct record type structure.');
                             }
-
                     }
                     
                 }else{

@@ -1598,6 +1598,9 @@ prof =Profile
                 return null;
         }
 
+        //
+        //
+        //
         , getImageUrl: function(entityName, recID, version, def, database){
                 
             //if file not found return empty gif (0) or add image gif (1) or default icon/thumb for entity (2)
@@ -1611,17 +1614,34 @@ prof =Profile
                     +'&def='+def;
         }
 
-        , checkImageUrl: function(entityName, recID, version, callback){
-
-            var request = {
-                    db:window.hWin.HAPI4.database,
-                    entity: entityName,
-                    id:recID,
-                    version:version,
-                    def: 'check'};
+        //
+        //
+        //
+        , checkImage: function(entityName, recID, version, callback){
             
-            window.hWin.HEURIST4.util.sendRequest(window.hWin.HAPI4.baseURL + 'hsapi/utilities/fileGet.php', 
-                        request, null, callback);
+            if(entityName=='Records'){
+
+                var request = {
+                        db: window.hWin.HAPI4.database,
+                        file: recID,  //ulf_ID
+                        mode: 'size' };
+                
+                window.hWin.HEURIST4.util.sendRequest(window.hWin.HAPI4.baseURL + 'hsapi/controller/file_download.php', 
+                            request, null, callback);
+                            
+            }else{
+
+                var request = {
+                        db:window.hWin.HAPI4.database,
+                        entity: entityName,
+                        id:recID,
+                        version: version,
+                        def: 'check'};
+                
+                window.hWin.HEURIST4.util.sendRequest(window.hWin.HAPI4.baseURL + 'hsapi/utilities/fileGet.php', 
+                            request, null, callback);
+                        
+            }
         }
 
         //

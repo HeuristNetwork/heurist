@@ -10,7 +10,9 @@
 * mode  
 *   page - return
 *   tag - returns html wrap iframe with embed player, video, audio or img tag 
+*   size - returns width and height (for images only!)
 * size - width and height for html tag
+* embed - for player
 * 
 * Notes about thumbnails
 *    for uploaded file - thumbnail is created in 
@@ -117,9 +119,12 @@ if($db){
             {
 
                 $filepath = resolveFilePath($filepath);
+                
+                if( @$_REQUEST['mode']=='size'){ //get width and height for image file
 
-//DEBUG error_log($filepath.'  '.file_exists($filepath).'  '.$mimeType);  
-              
+                    fileGetWidthHeight($filepath, $external_url, $mimeType);
+
+                }else
                 if(file_exists($filepath)){
                     
                     //fix issue if original name does not have ext

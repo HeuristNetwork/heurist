@@ -649,6 +649,9 @@ window.hWin.HEURIST4.geo = {
         return isset ?[[minLat, minLng],[maxLat, maxLng]] :null;
     },
 
+    //
+    //
+    //
     boundingBoxToWKT: function(extent){
 
         var isValid = ($.isArray(extent) && extent.length==2 && 
@@ -855,9 +858,15 @@ window.hWin.HEURIST4.geo = {
         
     },
     
-    //
-    //
-    //
+
+    /*
+    0 X pixel width
+    1
+    2
+    3 Y pixel width
+    4 topleft pixel X
+    5 topleft pixel Y
+    */    
     parseWorldFile: function (data, image_width, image_height){
         if(data){
             var lines = data.split('\r\n');
@@ -867,7 +876,7 @@ window.hWin.HEURIST4.geo = {
                 var nums = [];
                 for(var i=0; i<lines.length; i++){
                     if(window.hWin.HEURIST4.util.isNumber(lines[i])){
-                        nums.push( lines[i] );
+                        nums.push( parseFloat(lines[i]) );
                     }
                 }
                 if(nums.length>5){
@@ -880,15 +889,14 @@ West+.5*abs((W-E)/(width pixels))
 North-.5*abs((N-S)/(height pixels))
 */
                     //num[3] is always negative
-                    var xmin = nums[4] - 0.5 * num[0];
-                    var ymax = nums[5] + 0.5 * num[3];
-                    var xmax = xmin + num[0] * img_width;
-                    var ymin = xmin + num[3] * img_height;
+                    var xmin = nums[4] - 0.5 * nums[0];
+                    var ymax = nums[5] + 0.5 * nums[3];
+                    var xmax = xmin + nums[0] * image_width;
+                    var ymin = ymax + nums[3] * image_height;
                     
-                    return [[ymin,xmin],[ymax,xmax]];
+                    return window.hWin.HEURIST4.geo.boundingBoxToWKT([[ymin,xmin],[ymax,xmax]]);
                 }
             }
-        
             
         }
         return null;

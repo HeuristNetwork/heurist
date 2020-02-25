@@ -62,7 +62,7 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
     return;
     
 }else if (@$_REQUEST['file'] || @$_REQUEST['thumb'] || @$_REQUEST['rurl']){
-    header( 'Location: hsapi/dbaccess/file_download.php?'.$_SERVER['QUERY_STRING'] );
+    header( 'Location: hsapi/controller/file_download.php?'.$_SERVER['QUERY_STRING'] );
     return;
 }else if (@$_REQUEST['logo']){
     $host_logo = realpath(dirname(__FILE__)."/../organisation_logo.jpg");
@@ -157,7 +157,7 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/select_folders.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editing_input.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editing2.js"></script>
-        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editSymbology.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editing_exts.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/editing/editTheme.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/cms/editCMS.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>external/js/evol.colorpicker.js" charset="utf-8"></script>

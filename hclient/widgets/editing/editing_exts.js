@@ -1,5 +1,7 @@
 /*
-* editSymbology.js - edit map symbol properties 
+* editng_exts.js - extension for editing_input
+*  1) edit map symbol properties 
+*  2) calculate image extents from worldfile
 * 
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -334,3 +336,81 @@ function editSymbology(current_value, mode_edit, callback){
 
                 
 }//end editSymbology
+
+
+//
+//
+//
+function calculateImageExtentFromWorldFile(_editing){
+
+    if(!_editing) return;
+
+    var ulf_ID = null, worldFile = null;
+    
+    //
+    // calculate extent based on worldfile parameters
+    //
+    var dtId_File = window.hWin.HAPI4.sysinfo['dbconst']['DT_FILE_RESOURCE'];
+    var ele = _editing.getFieldByName( dtId_File );
+    if(ele){
+        var val = ele.editing_input('getValues');
+        if(val && val.length>0){
+            ulf_ID = val[0]['ulf_ObfuscatedFileID'];    
+        }
+    }
+    var dtId_WorldFile = window.hWin.HAPI4.sysinfo['dbconst']['DT_MAP_IMAGE_WORLDFILE'];
+    ele = _editing.getFieldByName( dtId_WorldFile );
+    if(ele){
+        var val = ele.editing_input('getValues');
+        if(val && val.length>0 && !window.hWin.HEURIST4.util.isempty( val[0] )){
+            worldFile = val[0];    
+        }
+    }
+
+    if(ulf_ID && worldFile){
+
+        var dtId_Geo = window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_OBJECT'];
+        ele = _editing.getFieldByName( dtId_Geo );
+        if(!ele){
+            window.hWin.HEURIST4.msg.showMsgErr('Image map source record must have Bounding Box field! '
+                +'Please correct record type structure.');
+        }else{
+
+            window.hWin.HEURIST4.msg.showMsgDlg(
+                '<p>Recalculate image extent based on these parameters and image dimensions. Proceed?</p>'+
+                '<p>Also, you can define extent directly by drawing rectangle in map digitizer</p>',
+                function() {
+                    //get image dimensions
+                    window.hWin.HAPI4.checkImage('Records', ulf_ID, 
+                        null,
+                        function(response){
+                            if(response!=null && response.status == window.hWin.ResponseStatus.OK){
+                                if($.isPlainObject(response.data) && 
+                                    response.data.width>0 && response.data.height>0)
+                                {
+                                    var extentWKT = window.hWin.HEURIST4.geo.parseWorldFile(worldFile, 
+                                        response.data.width, response.data.height);
+
+                                    if(extentWKT){
+                                        _editing.setFieldValueByName(dtId_Geo, 'pl '+extentWKT);
+                                    }else{
+                                        window.hWin.HEURIST4.msg.showMsgErr( 'Can not calculate image extent. Verify your worldfile parameters' );
+                                    }
+
+                                }else{
+                                    window.hWin.HEURIST4.msg.showMsgErr( response.data );                            
+                                }
+                            }
+                    });
+
+                },
+                {title:'Calculate image extent',yes:'Proceed',no:'Cancel'});
+
+        }                    
+    }else if(!ulf_ID){
+        window.hWin.HEURIST4.msg.showMsgFlash('Define image file first');
+    }else if(!worldFile){
+        window.hWin.HEURIST4.msg.showMsgFlash('Define valid worldfile parameters first');
+    }
+
+}

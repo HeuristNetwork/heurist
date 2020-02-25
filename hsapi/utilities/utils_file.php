@@ -664,6 +664,8 @@
 
 
     //
+    // Generates thumbnail for given URL
+    //
     // returns temp file path or array with error messahe 
     //    
     function generate_thumbnail($sURL){

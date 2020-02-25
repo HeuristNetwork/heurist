@@ -7,15 +7,24 @@
 * file - prefix for functions
 * 
 * 
-* fileRegister
-* fileGetByObfuscatedId - get id by obfuscated id
+* fileRegister - register file in recUploadedFiles
+* fileGetByObfuscatedId - get id by obfuscated id (NOT USED)
 * fileGetByFileName
 * fileGetFullInfo  - local paths, external links, mimetypes and parameters (mediatype and source)
-* fileGetThumbnailURL - URL to thumbnail for given record ID
+* fileGetThumbnailURL - URL to thumbnail for given record ID and specified bg color
 * getImageFromFile - return image object for given file
 * getPrevailBackgroundColor2  - not used
 * getPrevailBackgroundColor 
-*
+* 
+* fileGetPlayerTag - produce appropriate html tag to view media content
+* getPlayerURL  - get player url for youtube, vimeo, soundcloud
+* 
+* @todo move to utils_file.php
+* resolveFilePath  
+* downloadViaProxy
+* downloadFile
+* 
+* 
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
 * @copyright   (C) 2005-2019 University of Sydney
@@ -218,7 +227,7 @@ function fileGetThumbnailURL($system, $recID, $get_bgcolor){
         if(file_exists(HEURIST_THUMB_DIR . $thumbfile)){
             $thumb_url = HEURIST_THUMB_URL.$thumbfile;
         }else{
-            //hsapi/dbaccess/file_download.php
+            //it will be redirected to hsapi/controller/file_download.php
             $thumb_url = HEURIST_BASE_URL."?db=".HEURIST_DBNAME."&thumb=".$fileid;
         }
         
@@ -391,6 +400,8 @@ function getPrevailBackgroundColor($filename){
 }
 
 /**
+* @TODO there are places with the same code - 1) use this function everywhere 2) move to utils_file.php
+* 
 * resolve path relatively db root or file_uploads
 * 
 * @param mixed $path
@@ -703,5 +714,64 @@ function youtube_id_from_url($url) {
     # https://www.youtube.com/watch?v=nn5hCEMyE-E
     preg_match("/^(?:http(?:s)?:\/\/)?(?:www\.)?(?:m\.)?(?:youtu\.be\/|youtube\.com\/(?:(?:watch)?\?(?:.*&)?v(?:i)?=|(?:embed|v|vi|user)\/))([^\?&\"'>]+)/", $url, $matches);
     return $matches[1];    
+}
+
+
+//
+//
+//
+function fileGetWidthHeight($filepath, $external_url, $mimeType){
+
+    $type_media = null;
+    $ext = null;
+    if($mimeType && strpos($mimeType, '/')!=false){
+        list($type_media, $ext) = explode('/', $mimeType);
+    }
+
+    $image = null;
+    
+    if($type_media=='image'){
+    
+        if(file_exists($filepath)){
+            
+            $image = getImageFromFile($filepath);
+            
+        }else if($external_url){
+
+            //the same code as in resizeImage get_remote_image    
+            $data = loadRemoteURLContent($external_url, false); //from utils_file.php
+            if($data){
+                try{    
+                    $image = imagecreatefromstring($data);
+                }catch(Exception  $e){
+                    $image = false;
+                    $res = 'Cant get remote image';
+                }
+            }
+        }
+    
+        if($image){
+
+            try{    
+                $imgw = imagesx($image);
+                $imgh = imagesy($image);
+
+                $res = array('width'=>$imgw,'height'=>$imgh);
+                
+            }catch(Exception  $e){
+                
+                $res = 'Cant get image dimensions';
+            }
+        }else{
+            $res = 'Cant load image file to get dimensions';
+        }
+        
+    }else{
+        $res = 'Resource is not an image';
+    }
+
+    header('Content-type: application/json;charset=UTF-8');
+    $response = array('status'=>HEURIST_OK, 'data'=>$res);
+    print json_encode($response);
 }
 ?>
