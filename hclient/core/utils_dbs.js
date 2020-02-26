@@ -805,8 +805,9 @@ window.hWin.HEURIST4.dbs = {
 
     //
     // returns array of record types that are resources for given record type
+    // need_separate - returns separate array for linked and related 
     //
-    getLinkedRecordTypes: function ($rt_ID, db_structure){
+    getLinkedRecordTypes: function ($rt_ID, db_structure, need_separate){
         
         if(!db_structure){
             db_structure = window.hWin.HEURIST4;
@@ -819,6 +820,7 @@ window.hWin.HEURIST4.dbs = {
         var $fi_rectypes = $alldetails['dtFieldNamesToIndex']['rst_PtrFilteredIDs'];
         
         var $arr_rectypes = [];
+        var res = {'linkedto':[],'relatedto':[]};
         
         var $details = $dbs_rtStructs['typedefs'][$rt_ID]['dtFields'];
         if($details) {
@@ -840,6 +842,11 @@ window.hWin.HEURIST4.dbs = {
                                         $dbs_rtStructs['typedefs'][$recTypeId]){
                                             
                                             $arr_rectypes.push( $recTypeId );
+                                            
+                                            if(need_separate){
+                                                var t1 = ($dtValue[$fi_type]=='resource')?'linkedto':'relatedto';
+                                                res[t1].push( $recTypeId );
+                                            }
                                     }
                                 }                            
                             } 
@@ -848,10 +855,10 @@ window.hWin.HEURIST4.dbs = {
             }
         }
         
-        return  $arr_rectypes;
+        return  need_separate ?res :$arr_rectypes;
         
     },
-
+    
     //
     // returns array of record types that points to given record type
     // rt_id => field id
@@ -912,7 +919,37 @@ window.hWin.HEURIST4.dbs = {
         
         return  $arr_rectypes;
         
+    },
+    
+    //
+    //
+    //
+    hasFields: function( $rt_ID, fieldtype, db_structure ){
+        
+        if(!db_structure){
+            db_structure = window.hWin.HEURIST4;
+        }
+        
+        var $dbs_rtStructs = db_structure.rectypes;
+        //find all DIREreverse links (pointers and relation that point to selected rt_ID)
+        var $alldetails = $dbs_rtStructs['typedefs'];
+        var $fi_type = $alldetails['dtFieldNamesToIndex']['dty_Type'];
+
+        var $details = $dbs_rtStructs['typedefs'][$rt_ID]['dtFields'];
+        if($details) {
+            for (var $dtID in $details) {
+                
+                var $dtValue = $details[$dtID];
+        
+                if(($dtValue[$fi_type]==fieldtype)){
+                    return true;
+                }
+            }
+        }
+        return false;
     }
+
+
     
 }//end dbs
 

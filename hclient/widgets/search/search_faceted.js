@@ -159,6 +159,7 @@ $.widget( "heurist.search_faceted", {
     _first_query:[], //query for all empty values
     _isInited: true,
     _current_query: null,
+    _hasLocation: null, //has primary rt geo fields or linked location - for spatial search
     
     _currentRecordset:null,
     
@@ -607,7 +608,7 @@ $.widget( "heurist.search_faceted", {
         this._current_query = window.hWin.HEURIST4.util.mergeHeuristQuery(
                             (this._use_sup_filter)?this.options.params.sup_filter:'', 
                             //this.options.params.add_filter,
-                            this.options.params.spatial_filter);
+                            this._prepareSpatial(this.options.params.spatial_filter));
         
         //this._current_query = null;
        // create list of queries to search facet values 
@@ -1199,7 +1200,7 @@ $.widget( "heurist.search_faceted", {
             this._current_query = window.hWin.HEURIST4.util.mergeHeuristQuery(query, 
                             (this._use_sup_filter)?this.options.params.sup_filter:'', 
                             this.options.params.add_filter,
-                            this.options.params.spatial_filter);
+                            this._prepareSpatial(this.options.params.spatial_filter));
             
             
 //{"f:10":"1934-12-31T23:59:59.999Z<>1935-12-31T23:59:59.999Z"}            
@@ -1287,7 +1288,7 @@ $.widget( "heurist.search_faceted", {
                     subs_value = window.hWin.HEURIST4.util.mergeHeuristQuery(this._first_query, 
                                     (this._use_sup_filter)?this.options.params.sup_filter:'',
                                     this.options.params.add_filter,
-                                    this.options.params.spatial_filter);
+                                    this._prepareSpatial(this.options.params.spatial_filter));
                 }else{
                     //replace with list of ids
                     subs_value = window.hWin.HEURIST4.util.mergeHeuristQuery(this._first_query,
@@ -1354,7 +1355,7 @@ $.widget( "heurist.search_faceted", {
                         query = window.hWin.HEURIST4.util.mergeHeuristQuery(query, 
                                         (this._use_sup_filter)?this.options.params.sup_filter:'',   //suplementary filter defined in wiz
                                         this.options.params.add_filter,
-                                        this.options.params.spatial_filter);  //dynaminc addition filter
+                                        this._prepareSpatial(this.options.params.spatial_filter));  //dynaminc addition filter
 
                         
                     }else{
@@ -2396,8 +2397,51 @@ if(!detailtypes[dtID]){
                 that._input_fields['$X'+field['var']] = inpt;
         
         
+    },
+    
+    //
+    // if main record type has linked or related place rectype search by location
+    // if main field has geo field search by this field
+    // otherwise ignore spatial search 
+    //
+    _prepareSpatial: function(wkt){
+       
+       if(!window.hWin.HEURIST4.util.isempty(wkt))
+       {
+           if(this._hasLocation==null){
+                this._hasLocation = 'none';   
+   
+                var primary_rt = this.options.params.rectypes[0];
+                
+                if(window.hWin.HEURIST4.dbs.hasFields(primary_rt, 'geo', null)){
+                    this._hasLocation = 'yes';
+                }else{
+                    var RT_PLACE  = window.hWin.HAPI4.sysinfo['dbconst']['RT_PLACE'];
+                    
+                    
+                    var linked_rt = window.hWin.HEURIST4.dbs.getLinkedRecordTypes(primary_rt, null, true);
+                    if ( window.hWin.HEURIST4.util.findArrayIndex(RT_PLACE, linked_rt['linkedto'])>=0 )
+                    {
+                        this._hasLocation = 'linkedto';   
+                    }else 
+                    if ( window.hWin.HEURIST4.util.findArrayIndex(RT_PLACE, linked_rt['relatedto'])>=0 )
+                    {
+                        this._hasLocation = 'relatedto';
+                    }
+                }
+           }
+           
+           if(this._hasLocation=='yes'){ 
+                return wkt;           
+           }else if(this._hasLocation!='none'){
+               var res = {};
+               res[this._hasLocation] = wkt;
+               return res;
+           }           
+       }
+        
+       return null; 
     }
-
 
     
 });
