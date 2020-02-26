@@ -130,6 +130,7 @@
             $config = HTMLPurifier_Config::createDefault();  
             //$config->set('Cache.DefinitionImpl', null);
             $config->set('Cache.SerializerPath', HEURIST_SCRATCHSPACE_DIR);
+            //$config->set('Core.EscapeNonASCIICharacters', true);
             $config->set('CSS.AllowImportant', true);
             $config->set('CSS.AllowTricky', true);
             $config->set('CSS.Proprietary', true);
@@ -170,6 +171,7 @@
                     purifyHTML($v, $purifier);
                 }else{
                     $v = $purifier->purify($v);
+                    //$v = htmlspecialchars_decode($v);
                 }
                 $params[$k] = $v;
             }

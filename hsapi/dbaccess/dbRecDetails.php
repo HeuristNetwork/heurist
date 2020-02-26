@@ -413,7 +413,8 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
             
             $this->initPutifier();
             if(!in_array($dtyID, $this->not_purify)){
-                $dtl['dtl_Value'] = $this->purifier->purify( $this->data['val'] );                                
+                $s = $this->purifier->purify( $this->data['val']);                                
+                $dtl['dtl_Value'] = htmlspecialchars_decode( $s );
             }else{
                 $dtl['dtl_Value'] = $this->data['val'];    
             }
@@ -647,7 +648,8 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
                 
                 if(($basetype=='freetext' || $basetype='blocktext')
                     && !in_array($dtyID, $this->not_purify)){
-                    $dtl['dtl_Value'] = $this->purifier->purify( $newVal );                                
+                    $s = $this->purifier->purify( $newVal );                                
+                    $dtl['dtl_Value'] = htmlspecialchars_decode( $s );
                 }else{
                     $dtl['dtl_Value'] = $newVal;        
                 }

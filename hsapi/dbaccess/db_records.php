@@ -1510,7 +1510,8 @@
                         if(!$isValid ){
                             $err_msg = 'Value is empty';  
                         }else if(!in_array($dtyID, $not_purify)){
-                            $dtl_Value = $purifier->purify($dtl_Value);                                
+                            $dtl_Value = $purifier->purify($dtl_Value);
+                            $dtl_Value = htmlspecialchars_decode( $dtl_Value );
                         }
                         break;
                     
