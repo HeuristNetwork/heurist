@@ -2429,6 +2429,10 @@ if(!detailtypes[dtID]){
                         this._hasLocation = 'relatedto';
                     }
                 }
+                
+                if(this._hasLocation == 'none'){
+                    window.hWin.HEURIST4.msg.showMsgFlash('There is no spatial data to filter on. Please ask the owner of the filter to hide the spatial component.',4000);
+                }
            }
            
            if(this._hasLocation=='yes'){ 
