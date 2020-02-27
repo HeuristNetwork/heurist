@@ -309,6 +309,7 @@ $.widget( "heurist.search_faceted", {
     
     _setOptions: function( options ) {
         this._superApply( arguments );
+        this._hasLocation = null;
         if(window.hWin.HEURIST4.util.isnull(options['add_filter']) && window.hWin.HEURIST4.util.isnull(options['spatial_filter'])){
             this.cached_counts = [];
             //this._refresh();
