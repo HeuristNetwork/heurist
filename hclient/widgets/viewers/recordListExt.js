@@ -110,14 +110,14 @@ $.widget( "heurist.recordListExt", {
                 that._refresh();
             }
         });
-        if(!this.options.is_single_selection){
+        //if(!this.options.is_single_selection){
             
             if(this.options.is_frame_based){
                 this.dosframe.on('load', function(){
                     that.onLoadComplete();
                 });
             }
-        }
+        //}
         
 
 
@@ -209,7 +209,20 @@ $.widget( "heurist.recordListExt", {
 
                 if(recIDs_list.length>0){
                     var recID = recIDs_list[recIDs_list.length-1];
-                    newurl = this.options.url.replace("[recID]", recID).replace("[dbname]",  window.hWin.HAPI4.database);
+                    
+                    newurl = this.options.url;
+                    
+                    if(newurl.indexOf('[recID]')>0){
+                        newurl = newurl.replace("[recID]", recID);
+                    }else{
+                        newurl = newurl.replace("[query]", ('q=ids:'+recID));
+                    }
+                    if(newurl.indexOf('[dbname]')>0){
+                        newurl = newurl.replace('[dbname]', window.hWin.HAPI4.database);
+                    }else if(newurl.indexOf('db=')<0){
+                        newurl = newurl + '&db=' + window.hWin.HAPI4.database;    
+                    }
+                    
                 }
             }
             if(newurl==null){
@@ -260,7 +273,7 @@ $.widget( "heurist.recordListExt", {
             if (window.hWin.HEURIST4.util.isArrayNotEmpty(this.options.selection)) {
                 var recIDs_list = this.options.selection;
                 if(!window.hWin.HEURIST4.util.isempty(recIDs_list.length)){
-
+                    //NOT USED
                     query_string_sel = 'db=' + window.hWin.HAPI4.database
                     + '&w=' + window.hWin.HEURIST4.util.isnull(this._query_request)?this._query_request.w:'all'
                     + '&q=ids:'+recIDs_list.join(',');
