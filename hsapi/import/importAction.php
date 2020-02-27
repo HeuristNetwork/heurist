@@ -2311,17 +2311,30 @@ public static function performImport($params, $mode_output){
                                 //WARNING MILTIVALUE IS NOT SUPPORTED
                                 $long = $r_value;
                                 
-                            }else if($fieldtype_type=="file"){ //it is assumed that value is remote url
-                            
+                            }else if($fieldtype_type=="file"){ 
+                                //value can be remote url 
+                                //obfuscation id (from same database)  (default)
+                                //ulf_ID (from same database)
+
                                 $ulf_ID = null;
+                                $is_url = false;
                                 
-                                //find if url is already registered
-                                $file_query = 'SELECT ulf_ID FROM recUploadedFiles WHERE ulf_ExternalFileReference="'
-                                                        .$r_value.'"';
+                                if(is_numeric($r_value) && intval($r_value)>0){ //ulf_UD
+                                    $file_query = 'SELECT ulf_ID FROM recUploadedFiles WHERE $ulf_ID='.$r_value;
+                                }else if(strpos($r_value,'http')===0){
+                                    //find if url is already registered
+                                    $is_url = true;
+                                    $file_query = 'SELECT ulf_ID FROM recUploadedFiles WHERE ulf_ExternalFileReference="'
+                                                            .self::$mysqli->real_escape_string($r_value).'"';
+                                }else {
+                                    $file_query = 'SELECT ulf_ID FROM recUploadedFiles WHERE ulf_ObfuscatedFileID="'
+                                        .self::$mysqli->real_escape_string($r_value).'"';
+                                }
+                                
                                 $fres = mysql__select_value(self::$mysqli, $file_query);
                                 if($fres>0){
                                     $ulf_ID = $fres;
-                                }else{
+                                }else if($is_url) {
                                     //otherwise register as new 
                                     
                                     $extension = null;
