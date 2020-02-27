@@ -50,7 +50,7 @@ HEADER:
     #main-title>h2  - field "Website title" (99-51.2-1)
     #main-host      - information about host and heurist. Content defined in Heurist settings
     #main-menu      - generated based on linked Menu/Page records (99-52)
-    #main-pagetitle>.webpageheading - loaded Page title "Menu label" (99-52.2-1)
+    #main-pagetitle>.webpageheading - loaded Page title "Menu label" (99-52.2-1) hidden if 99-952
         
 You may overwrite default styles for these elements in field "Website CSS" (99-51.99-46).
 Background image for #main_header is defiend in field "Banner image" (99-51.99-951).
@@ -228,6 +228,7 @@ $image_logo = $image_logo?'<img style="max-height:80px" src="'.$image_logo.'">'
 
 $meta_keywords = htmlspecialchars(__getValue($rec, DT_CMS_KEYWORDS));
 $meta_description = htmlspecialchars(__getValue($rec, DT_SHORT_SUMMARY));
+$show_pagetitle = (ConceptCode::getTermConceptID(__getValue($rec, DT_CMS_PAGETITLE))!=='99-5447');
 
 //custom styles - mainly to override positions/visibility for #main-xxx elements
 $site_css = __getValue($rec, DT_CMS_CSS);
@@ -465,6 +466,13 @@ function loadHomePageContent(pageid){
 ?>
 <script>
 var page_scripts = {}; //pageid:functionname   cache to avoid call server every time on page load 
+
+var is_show_pagetitle = false;
+<?php if($show_pagetitle){ ?>
+        is_show_pagetitle = true;
+<?php } ?>        
+    
+
 //
 // Executes custom javascript defined in field DT_CMS_SCRIPT
 // it wraps this script into function afterPageLoad[RecID] and adds this script into head
@@ -626,8 +634,13 @@ $(document).ready(function() {
         ele.show();
     
         $('body').find('#main-menu').hide(); //will be visible after menu init
-        $('body').find('#main-pagetitle').show();
-    
+        
+        if(is_show_pagetitle){
+            $('body').find('#main-pagetitle').show();
+        }else{
+            $('body').find('#main-pagetitle').hide();
+        }
+            
 //console.log('webpage doc ready '+(window.hWin.HAPI4)+'    '+(new Date().getTime() / 1000 - _time_debug));
         _time_debug = new Date().getTime() / 1000;
     
@@ -670,7 +683,7 @@ body{
 }
 #main-header{
     /*background:rgb(112,146,190);*/
-    height:180px;   
+    height:<?php echo $show_pagetitle?'180px':'140px'?>;   
     padding: 0.5em;
     padding-bottom:0;
 }
@@ -814,7 +827,7 @@ if(!$edit_Available && $system->is_member(2)){
     ?>  
         <div id="main-pagetitle" class="ui-heurist-bg-light" style="display:none">loading...</div>       
     </div>
-    <div class="ent_content_full ui-heurist-bg-light" style="top:190px;padding: 5px;" id="main-content-container">
+    <div class="ent_content_full ui-heurist-bg-light" style="top:<?php echo $show_pagetitle?'190px':'150px'?>;padding: 5px;" id="main-content-container">
         <div id="main-content" data-homepageid="<?php print $rec_id;?>" 
             <?php print ($open_page_on_init>0)?'data-initid="'.$open_page_on_init.'"':''; ?> 
             data-viewonly="<?php print ($hasAccess)?0:1;?>">

@@ -294,7 +294,9 @@ function hCmsEditing(_options) {
                         if(pageid==home_pageid){
                             pagetitle.empty();
                         }        
-                        $('#main-pagetitle').empty().show();
+                        if(is_show_pagetitle){
+                            $('#main-pagetitle').empty().show();
+                        }
                         pagetitle.addClass("webpageheading");
                         pagetitle.appendTo($('#main-pagetitle'));
                         
