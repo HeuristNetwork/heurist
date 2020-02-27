@@ -297,7 +297,13 @@ $.widget( "heurist.resultList", {
         this._renderStartupMessageComposedFromRecord();
         
         // 
-        if(false){
+        if(this.options.search_initial){
+            
+            var request = {q:this.options.search_initial, w: 'a', detail: 'ids', 
+                        source:'init', search_realm: this.options.search_realm };
+            window.hWin.HAPI4.SearchMgr.doSearch(window.hWin.document, request);
+            
+        }else if(false){
             this.updateResultSet(recordset); // render records if search in this realm has been performed earlier
         }
         
