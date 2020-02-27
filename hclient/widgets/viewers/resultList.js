@@ -24,7 +24,7 @@ $.widget( "heurist.resultList", {
 
     // default options
     options: {
-        view_mode: null, // list|icons|thumbs   @toimplement detail, condenced
+        view_mode: null, // list|icons|thumbs|preview(thumbs3)|horizontal
 
         select_mode:null,//none, manager, select_single, select_multi
         selectbutton_label:'Select',
@@ -36,7 +36,7 @@ $.widget( "heurist.resultList", {
 
         eventbased:true, //if false it does not listen global events
 
-        show_toolbar: true,   //toolbar contains menu,savefilter,counter,viewmode and pagination
+        show_toolbar: true,   //toolbar contains menu,savefilter,counter,viewmode and paginathorizontalion
         show_menu: false,       //@todo ? - replace to action_select and action_buttons
         support_collection: false,
         show_savefilter: false,
@@ -61,7 +61,7 @@ $.widget( "heurist.resultList", {
         rendererHeader: null,   // renderer function to draw header for list view-mode (for content)
         rendererGroupHeader: null,   // renderer function for group header (see groupByField)
         
-        recordDivClass: null, //additional class that modifies recordDiv appearance (see for example "public" in h4styles.css)
+        recordDivClass: '', //additional class that modifies recordDiv appearance (see for example "public" in h4styles.css)
         // smarty template or url (or todo function) to draw inline record details when recordview_onselect='inline'. (LINE view mode only)
         rendererExpandDetails: null, 
 
@@ -772,11 +772,13 @@ $.widget( "heurist.resultList", {
     //
     applyViewMode: function(newmode, forceapply){
 
-        var allowed = ['list','icons','thumbs','thumbs3'];
+        
+        var allowed = ['list','icons','thumbs','thumbs3','horizontal'];
 
         if(window.hWin.HEURIST4.util.isempty(newmode) || allowed.indexOf(newmode)<0) {
             newmode = window.hWin.HAPI4.get_prefs('rec_list_viewmode_'+this.options.entityName);
         }
+        //TEMP if(newmode=='thumbs3') newmode = 'horizontal';
 
         if(!this.div_content.hasClass(newmode) || forceapply===true){
             
@@ -800,8 +802,33 @@ $.widget( "heurist.resultList", {
                 }
                 newmode = this.options.view_mode;
             }
-            this.div_content.removeClass('list icons thumbs thumbs3');
+            this.div_content.removeClass('list icons thumbs thumbs3 horizontal');
             this.div_content.addClass(newmode);
+            
+            if(newmode=='horizontal'){
+                this._on(this.div_content,
+                        {'mousewheel':this._recordDivNavigateUpDown
+                /*
+                function(event) {
+                    if(event.originalEvent){
+                        this.scrollLeft += (event.originalEvent.deltaY);
+                        event.preventDefault();
+                    }
+                }*/
+                });
+                
+                var h = this.div_content.height();
+                    h = (((h<60) ?60 :((h>200)?230:h))-30) + 'px';
+                this.div_content.find('.recordDiv').css({
+                    height: h,
+                    width: h,
+                    'min-width': h
+                });
+                
+            }else{
+                this.div_content.find('.recordDiv').attr('style',null);
+                this._off(this.div_content, 'mousewheel');
+            }
         }
         
         //show hide table header
@@ -1151,9 +1178,13 @@ $.widget( "heurist.resultList", {
         //get thumbnail if available for this record, or generic thumbnail for record type
         var html_thumb = '';
         if(fld('rec_ThumbnailURL')){
-            html_thumb = '<div class="recTypeThumb realThumb" style="background-image: url(&quot;'+ fld('rec_ThumbnailURL') + '&quot;);opacity:1"></div>';
+            html_thumb = '<div class="recTypeThumb realThumb" title="'+
+                recTitle_strip_all+'" style="background-image: url(&quot;'
+                + fld('rec_ThumbnailURL') + '&quot;);opacity:1"></div>';
         }else{
-            html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'+ window.hWin.HAPI4.iconBaseURL + 'thumb/th_' + rectypeID + '.png&quot;);"></div>';
+            html_thumb = '<div class="recTypeThumb" title="'
+                +recTitle_strip_all+'" style="background-image: url(&quot;'
+                + window.hWin.HAPI4.iconBaseURL + 'thumb/th_' + rectypeID + '.png&quot;);"></div>';
         }
 
         // Show a key icon and popup if there is a password reminder string
@@ -1218,7 +1249,8 @@ $.widget( "heurist.resultList", {
 
         }
         
-        var btn_icon_only = this.options.recordDivClass?'':' ui-button-icon-only';
+        var btn_icon_only = window.hWin.HEURIST4.util.isempty(this.options.recordDivClass)
+                                ?' ui-button-icon-only':'';
 
         // construct the line or block
         var html = '<div class="recordDiv '+this.options.recordDivClass
@@ -1235,7 +1267,7 @@ $.widget( "heurist.resultList", {
 
 
         // it is useful to display the record title as a rollover in case the title is too long for the current display area
-        + '<div title="'+(is_logged?('dbl-click to edit : '+recTitle_strip_all):'')+'" class="recordTitle">'
+        + '<div title="'+(is_logged?'dbl-click to edit: ':'')+recTitle_strip_all+'" class="recordTitle">'
         +     (this.options.show_url_as_link && fld('rec_URL') ?("<a href='"+fld('rec_URL')+"' target='_blank'>"
             + recTitle_strip1 + "</a>") :recTitle_strip2)  
         + '</div>'
@@ -1374,8 +1406,23 @@ $.widget( "heurist.resultList", {
     //
     //
     _recordDivNavigateUpDown:function(event){
-          var key = event.which || event.keyCode;
-          if(key==38 || key==40){
+        
+          //this is scroll event  
+          var key;
+          if(event.originalEvent && event.originalEvent.deltaY){
+              key = (event.originalEvent.deltaY>0)?40:38;
+          }else{
+              key = event.which || event.keyCode;
+              if(this.options.view_mode=='horizontal'){
+                        if (key == 37) { 
+                            key = 38;
+                        }else if (key == 39) { //right
+                            key=40;
+                        }
+              }
+          }
+          
+          if(key==38 || key==40){ //up and down
               
               var curr_sel = null;
               
@@ -1405,15 +1452,28 @@ $.widget( "heurist.resultList", {
                 event.target = curr_sel[0];
                 this._recordDivOnClick(event);
                 
-                var spos = this.div_content.scrollTop();
-                var spos2 = curr_sel.position().top;
-                var offh = spos2 + curr_sel.height() - this.div_content.height() + 10;
-               
-                if(spos2 < 0){
-                    this.div_content.scrollTop(spos+spos2);
-                }else if ( offh > 0 ) {
-                    this.div_content.scrollTop( spos + offh );
+                if(this.options.view_mode=='horizontal'){
+                    var spos = this.div_content.scrollLeft();
+                    var spos2 = curr_sel.position().left;
+                    var offh = spos2 + curr_sel.width() - this.div_content.width() + 10;
+                   
+                    if(spos2 < 0){
+                        this.div_content.scrollLeft(spos+spos2);
+                    }else if ( offh > 0 ) {
+                        this.div_content.scrollLeft( spos + offh );
+                    }
+                }else{
+                    var spos = this.div_content.scrollTop();
+                    var spos2 = curr_sel.position().top;
+                    var offh = spos2 + curr_sel.height() - this.div_content.height() + 10;
+                   
+                    if(spos2 < 0){
+                        this.div_content.scrollTop(spos+spos2);
+                    }else if ( offh > 0 ) {
+                        this.div_content.scrollTop( spos + offh );
+                    }
                 }
+                
                 window.hWin.HEURIST4.util.stopEvent(event);
                 
                 return false;
@@ -1676,7 +1736,7 @@ $.widget( "heurist.resultList", {
         }
         
         //$.isFunction(this.options.renderer) && 
-        if(this.options.recordview_onselect=='inline'){ // && this.options.view_mode=='list'
+        if(this.options.view_mode!='horizontal' && this.options.recordview_onselect=='inline'){ // && this.options.view_mode=='list'
 
             var exp_div = this.div_content.find('.record-expand-info');
             var is_already_opened = (exp_div.attr('data-recid')==$rdiv.attr('recid'));
@@ -2287,6 +2347,9 @@ $.widget( "heurist.resultList", {
             }
         }
         
+        //special div for horizontal
+        html = '<div>'+html+'</div>';
+        
         this.div_content[0].innerHTML += html;
         
         if(this.options.groupByField){ //init show/hide btn for groups
@@ -2337,6 +2400,13 @@ $.widget( "heurist.resultList", {
 
         if(this.options.select_mode!='select_multi'){
             this.div_content.find('.recordSelector').hide();
+            
+            if(this.options.view_mode == 'horizontal'){
+                //always select first div for horizontal viewmode
+                var ele = this.div_content.find('.recordDiv:first');//.addClass('selected');
+                if(ele.length>0) this._recordDivOnClick({target:ele[0]});
+            }            
+            
         }else if(this._currentMultiSelection!=null) { //highlight retained selected records
 
             for(idx=0; idx<rec_onpage.length; idx++){
@@ -2349,6 +2419,7 @@ $.widget( "heurist.resultList", {
                 }
             }
         }
+        
 
         /*var lastdiv = this.div_content.last( ".recordDiv" ).last();
         this._on( lastdiv.nextAll(), {
@@ -2364,6 +2435,15 @@ $.widget( "heurist.resultList", {
                 if(idx % 2 ==0){
                     $(item).addClass(that.options.recordDiv_class);    
                 }
+            });
+        }
+        if(this.options.view_mode == 'horizontal'){
+            var h = this.div_content.height();
+                h = (((h<60) ?60 :((h>200)?230:h))-30) + 'px';
+            $allrecs.css({
+                        height: h,
+                        width: h,
+                        'min-width': h
             });
         }
         
