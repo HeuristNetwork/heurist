@@ -466,6 +466,8 @@ function updateRectype($commonNames, $rtyID, $rt) {
                 if($colName == "rty_TitleMask"){
                     //array_push($parameters, ""); //empty title mask - store only canonical!
                     $val = TitleMask::execute($val, $rtyID, 1, null, _ERR_REP_SILENT);//make coded
+                }else if($colName == "rty_Status"){
+                    if($val==null || $val=='') $val = 'open';
                 }
 
                 $parameters = addParam($parameters, $rtyColumnNames[$colName], $val);
