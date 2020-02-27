@@ -953,7 +953,7 @@ div .selected_last{
 }
 .horizontal.div-result-list-content > div{
     display: table;
-    border-spacing: 10px;
+    border-spacing: 2px;
 }
 
 .horizontal .recordDiv {
