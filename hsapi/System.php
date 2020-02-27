@@ -1454,13 +1454,6 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
         
         $this->start_my_session(false);
 
-        //clear     
-        $is_https = (@$_SERVER['HTTPS']!=null && $_SERVER['HTTPS']!='');
-        //$session_id = session_id();
-        $cres = setcookie('heurist-sessionid', '', time() - 3600, '/', '', $is_https);  //logout
-        $this->current_User = null;
-        session_destroy();
-        
         unset($_SESSION[$this->dbname_full]['ugr_ID']);
         unset($_SESSION[$this->dbname_full]['ugr_Name']);
         unset($_SESSION[$this->dbname_full]['ugr_FullName']);
@@ -1474,6 +1467,16 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
                 unset($_SESSION[$h3session]['user_realname']);
             }
         }
+        
+        // clear
+        // even if user is logged to different databases he has the only session per browser
+        // it means logout exits all databases
+        $is_https = (@$_SERVER['HTTPS']!=null && $_SERVER['HTTPS']!='');
+        //$session_id = session_id();
+        $cres = setcookie('heurist-sessionid', '', time() - 3600, '/', '', $is_https);  //logout
+        $this->current_User = null;
+        session_destroy();
+        
         session_write_close();
         return true;
     }
