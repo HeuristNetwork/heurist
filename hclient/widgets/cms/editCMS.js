@@ -477,6 +477,7 @@ function editCMS( options ){
                                         btn_refresh.click(); //reload home page    
                                     }
                                     
+                                    var ids_was_added = [], ids_recurred = [];
                                     
                                     function __getTreeData(parent_id, menuitems){
                                         
@@ -487,19 +488,25 @@ function editCMS( options ){
                                              for(var m=0; m<menuitems.length; m++){
                                                     
                                                     var menu_rec = resdata.getById(menuitems[m]);
-                                                  
-                                                    var $res = {};  
-                                                    $res['key'] = menuitems[m];
-                                                    $res['title'] = resdata.fld(menu_rec, DT_NAME);
-                                                    $res['parent_id'] = parent_id; //reference to parent menu(or home)
-                                                    $res['page_id'] = resdata.fld(menu_rec, DT_CMS_PAGE);
-                                                    $res['expanded'] = true;
                                                     
-                                                    var menuitems2 = resdata.values(menu_rec, DT_CMS_MENU);
-            //console.log($res);                                        
-                                                    $res['children'] = __getTreeData(menuitems[m], menuitems2);
-                                                  
-                                                    resitems.push($res);
+                                                    if(ids_was_added.indexOf(menuitems[m])>=0){
+                                                        //already was included
+                                                        ids_recurred.push(menuitems[m]);
+                                                    }else{
+                                                        var $res = {};  
+                                                        $res['key'] = menuitems[m];
+                                                        $res['title'] = resdata.fld(menu_rec, DT_NAME);
+                                                        $res['parent_id'] = parent_id; //reference to parent menu(or home)
+                                                        $res['page_id'] = resdata.fld(menu_rec, DT_CMS_PAGE);
+                                                        $res['expanded'] = true;
+                                                        
+                                                        var menuitems2 = resdata.values(menu_rec, DT_CMS_MENU);
+                //console.log($res);                                        
+                                                        ids_was_added.push(menuitems[m]);
+                                                        resitems.push($res);
+                                                        
+                                                        $res['children'] = __getTreeData(menuitems[m], menuitems2);
+                                                    }
                                              }
                                         }
                                         return resitems;
@@ -507,6 +514,20 @@ function editCMS( options ){
                                     
                                     var topmenu = resdata.values(record, DT_CMS_TOP_MENU);
                                     treedata = __getTreeData(home_page_record_id, topmenu);
+                                    
+                                    if(ids_recurred.length>0){
+                                        var s = [];
+                                        for(var i=0;i<ids_recurred.length;i++){
+                                            s.push(ids_recurred[i]+' '
+                                                +resdata.fld(resdata.getById(ids_recurred[i]), DT_NAME));
+                                        }
+                                        window.hWin.HEURIST4.msg.showMsgDlg('Some menu items are recurred.<p>'
+                                        +(s.join('<br>'))
+                                        +'<p>How to fix:<ul><li>Open in record editor</li>'
+                                        +'<li>Find parent menu(es) in "Linked From" section</li>'
+                                        +'<li>Open parent menu record and remove link this record</li></ul>');
+                                    }
+                                    
                                     break;
                                 }
                             }

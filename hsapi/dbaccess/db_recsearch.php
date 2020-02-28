@@ -965,7 +965,7 @@
         $rec_IDs = array();
 
         foreach ($menuitems as $rec_ID){   
-            if(!in_array($rec_ID, $result)){
+            if(!in_array($rec_ID, $result)){ //to avoid recursion
                 array_push($result, $rec_ID);
                 array_push($rec_IDs, $rec_ID);
             }

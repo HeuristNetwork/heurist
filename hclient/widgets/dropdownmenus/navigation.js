@@ -94,7 +94,8 @@ $.widget( "heurist.navigation", {
                 var resdata = new hRecordSet(response.data);
                 that._onGetMenuData(resdata);   
             }else{
-                window.hWin.HEURIST4.msg.showMsgErr(response);
+                $('<p class="ui-state-error">Can\'t init menu: '+response.message+'</p>').appendTo(that.divMainMenu);
+                //window.hWin.HEURIST4.msg.showMsgErr(response);
             }
         });
     },
@@ -117,6 +118,7 @@ $.widget( "heurist.navigation", {
             DT_CMS_TARGET = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_TARGET'];//target element on page or popup
             
         var that = this;
+        var ids_was_added = [], ids_recurred = [];
         
         function __getMenuContent(parent_id, menuitems, lvl){
             
@@ -125,62 +127,83 @@ $.widget( "heurist.navigation", {
             for(var i=0; i<menuitems.length; i++){
                 
                 var record = resdata.getById(menuitems[i])
+
+                if(ids_was_added.indexOf(menuitems[i])>=0){
+                    //already was included
+                    ids_recurred.push(menuitems[i]);
+                }else{
                 
-                var menuName = resdata.fld(record, DT_NAME);
-                var menuTitle = resdata.fld(record, DT_SHORT_SUMMARY);
-                var recType = resdata.fld(record, 'rec_RecTypeID');
-                var page_id; //record id to be load into content
-                
-                if(recType == RT_CMS_MENU || recType == DT_CMS_TOP_MENU){
-                    page_id = resdata.fld(record, DT_CMS_PAGE);
-                    if(!(page_id>0)){
-                        //pointer to page not defined - take content from menu record
+                    var menuName = resdata.fld(record, DT_NAME);
+                    var menuTitle = resdata.fld(record, DT_SHORT_SUMMARY);
+                    var recType = resdata.fld(record, 'rec_RecTypeID');
+                    var page_id = menuitems[i]; //resdata.fld(record, 'rec_ID');
+                    
+                    /*
+                    if(recType == RT_CMS_MENU || recType == DT_CMS_TOP_MENU){
+                        page_id = resdata.fld(record, DT_CMS_PAGE);
+                        if(!(page_id>0)){
+                            //pointer to page not defined - take content from menu record
+                            page_id = resdata.fld(record, 'rec_ID');
+                        }
+                    }else{
                         page_id = resdata.fld(record, 'rec_ID');
                     }
-                }else{
-                    page_id = resdata.fld(record, 'rec_ID');
-                }
-                
-                //target and position
-                var pageTarget = resdata.fld(record, DT_CMS_TARGET);
-                var pageStyle = resdata.fld(record, DT_CMS_CSS);
-                if(pageStyle){
-                    that.pageStyles[page_id] = window.hWin.HEURIST4.util.cssToJson(pageStyle);    
-                }
-                
-                res = res + '<li><a href="#" style="padding:2px 1em" data-pageid="'
-                                + page_id + '"'
-                                + (pageTarget?' data-target="' + pageTarget +'"':'')
-                                + ' title="'+window.hWin.HEURIST4.util.htmlEscape(menuTitle)+'">'
-                                +window.hWin.HEURIST4.util.htmlEscape(menuName)+'</a>';
-                
-                var subres = '';
-                var submenu = resdata.values(record, DT_CMS_MENU);
-                if(!submenu){
-                    submenu = resdata.values(record, DT_CMS_TOP_MENU);
-                }
-                if(submenu){
-                    if(!$.isArray(submenu)) submenu = submenu.split(',');
+                    */
                     
-                    if(submenu.length>0){                          
-                        subres = __getMenuContent(record, submenu, lvl+1);
-                        if(subres!='')
-                            res = res + '<ul style="min-width:200px"' 
-                                        + (lvl==0?' class="level-1"':'') + '>'+subres+'</ul>';
+                    //target and position
+                    var pageTarget = resdata.fld(record, DT_CMS_TARGET);
+                    var pageStyle = resdata.fld(record, DT_CMS_CSS);
+                    if(pageStyle){
+                        that.pageStyles[page_id] = window.hWin.HEURIST4.util.cssToJson(pageStyle);    
                     }
-                }
-                res = res + '</li>';
+                    
+                    res = res + '<li><a href="#" style="padding:2px 1em" data-pageid="'
+                                    + page_id + '"'
+                                    + (pageTarget?' data-target="' + pageTarget +'"':'')
+                                    + ' title="'+window.hWin.HEURIST4.util.htmlEscape(menuTitle)+'">'
+                                    +window.hWin.HEURIST4.util.htmlEscape(menuName)+'</a>';
+                    
+                    ids_was_added.push(page_id);
+                    
+                    var subres = '';
+                    var submenu = resdata.values(record, DT_CMS_MENU);
+                    if(!submenu){
+                        submenu = resdata.values(record, DT_CMS_TOP_MENU);
+                    }
+                    if(submenu){
+                        if(!$.isArray(submenu)) submenu = submenu.split(',');
+                        
+                        if(submenu.length>0){                          
+                            subres = __getMenuContent(record, submenu, lvl+1);
+                            if(subres!='')
+                                res = res + '<ul style="min-width:200px"' 
+                                            + (lvl==0?' class="level-1"':'') + '>'+subres+'</ul>';
+                        }
+                    }
+                    res = res + '</li>';
+                    
+                    if(lvl==0 && menuitems.length==1 && that.options.use_next_level){
+                            return subres;    
+                    }
                 
-                if(lvl==0 && menuitems.length==1 && that.options.use_next_level){
-                        return subres;    
                 }
-                
             }//for
             
             return res;
         }//__getMenuContent   
         
         var menu_content = __getMenuContent(0, this.options.menu_recIDs, 0);     
+        
+        if(ids_recurred.length>0){
+            var s = [];
+            for(var i=0;i<ids_recurred.length;i++){
+                s.push(ids_recurred[i]+' '
+                    +resdata.fld(resdata.getById(ids_recurred[i]), DT_NAME));
+            }
+            window.hWin.HEURIST4.msg.showMsgDlg('Some menu items are recurred.<p>'
+            +(s.join('<br>'))
+            +'</p>Ask webstite author to fix this issue');
+        }
         
         $(menu_content).appendTo(this.divMainMenuItems);
         
