@@ -698,9 +698,13 @@ $.widget( "heurist.svs_list", {
                     function(response){
                         if(response.status == window.hWin.ResponseStatus.OK){
                             
-                            that.svs_order = response.data.order;
-                            
-                            that.loaded_saved_searches = response.data.svs; //svs_id=>array()
+                            if(response.data.order && response.data.svs){
+                                that.svs_order = response.data.order;
+                                that.loaded_saved_searches = response.data.svs; //svs_id=>array()
+                            }else{
+                                that.loaded_saved_searches = response.data; //svs_id=>array()
+                                that.svs_order = Object.keys(that.loaded_saved_searches);
+                            }
                             
                             /*
                             if(!window.hWin.HAPI4.currentUser.usr_SavedSearch){

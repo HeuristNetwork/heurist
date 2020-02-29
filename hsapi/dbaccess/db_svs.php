@@ -108,14 +108,18 @@
             $res = $mysqli->query($query);
             if($res){
                 while ($row = $res->fetch_row()) {
-                     svsGetOrderFromTree(json_decode($row[0],true), $order);
+                     $treedata = json_decode($row[0],true);
+                     if($treedata!=null && is_array($treedata)){
+                        svsGetOrderFromTree($treedata, $order);    
+                     }
+                     
                 }
             }
         }
         
         $query = 'SELECT svs_ID, svs_Name, svs_Query, svs_UGrpID FROM usrSavedSearches WHERE svs_UGrpID in ('.$ugrID.')';
 
-        if($keep_order && count($order)){
+        if($keep_order && count($order)>0){
             $query = $query.' order by FIELD(svs_ID,'.implode(',',$order).')';
         }
 
@@ -142,12 +146,17 @@
         }
     }
 
+    //
+    //
+    //
     function svsGetOrderFromTree($tree, &$order){
         
         foreach($tree as $key=>$value){
             if($key=='children'){
                 svsGetOrderFromTree($value, $order);
-            }else if (@$value['key']>0 && @$value['folder']!==true){
+            }
+            else if (is_array($value) && @$value['key']>0 && @$value['folder']!==true)
+            {
                 array_push($order, $value['key']);
             }
         }
