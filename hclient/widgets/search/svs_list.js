@@ -1892,7 +1892,7 @@ $.widget( "heurist.svs_list", {
                     request.search_realm = this.options.search_realm;
                     
                     window.hWin.HAPI4.SystemMgr.user_log('search_Record_savedfilter');
-
+                    
                     //get hapi and perform search
                     window.hWin.HAPI4.SearchMgr.doSearch( this, request );
                 }

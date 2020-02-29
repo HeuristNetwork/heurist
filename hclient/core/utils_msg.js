@@ -133,7 +133,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                     $dlg.dialog( "close" );
                     if(show_login_dlg){
                             window.hWin.HAPI4.setCurrentUser(null);
-                            $(top.document).trigger(window.hWin.HAPI4.Event.ON_CREDENTIALS);
+                            $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_CREDENTIALS);
                     }
                 }; 
         window.hWin.HEURIST4.msg.showMsgDlg(msg, buttons, dlg_title, ext_options);

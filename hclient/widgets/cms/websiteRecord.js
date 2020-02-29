@@ -303,6 +303,7 @@ function hCmsEditing(_options) {
                         //assign content to editor
                         $('.tinymce-body').val($('#main-content').html());
                         //init widgets 
+                        
                         LayoutMgr.appInitFromContainer( document, "#main-content" );
                         window.hWin.HEURIST4.msg.sendCoverallToBack();
                         

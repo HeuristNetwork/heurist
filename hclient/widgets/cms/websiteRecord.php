@@ -300,7 +300,7 @@ if (($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1')
         //PDIR.
         include dirname(__FILE__).'/../../framecontent/initPageCss.php'; 
         
-        if(!$edit_Available){
+        if(true || !$edit_Available){ //creates new instance of heurist
             print '<script>window.hWin = window;</script>';
         }
     ?>

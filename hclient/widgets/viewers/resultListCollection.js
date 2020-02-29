@@ -113,6 +113,8 @@ $.widget( "heurist.resultListCollection", {
             }
         });
         
+        
+        // small result list to display collected records
         this.recordList = $('<div>')
                 .css({'font-size':'9px',position:'relative',height:'80px'})
                 .hide().appendTo(this.element);

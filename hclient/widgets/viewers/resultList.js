@@ -139,6 +139,12 @@ $.widget( "heurist.resultList", {
                 + ' ' + window.hWin.HAPI4.Event.ON_REC_COLLECT
                 + ' ' + window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH;
 
+            /*    
+            this.document[0].addEventListener('start_search', function(event) {
+                   console.log('CUSTOM EVENT!!!!');
+                });
+            */    
+                
             $(this.document).on(this._events, function(e, data) {
 
                 if(e.type == window.hWin.HAPI4.Event.ON_LAYOUT_RESIZE){
@@ -301,7 +307,7 @@ $.widget( "heurist.resultList", {
             
             var request = {q:this.options.search_initial, w: 'a', detail: 'ids', 
                         source:'init', search_realm: this.options.search_realm };
-            window.hWin.HAPI4.SearchMgr.doSearch(window.hWin.document, request);
+            window.hWin.HAPI4.SearchMgr.doSearch(this.document, request);
             
         }else if(false){
             this.updateResultSet(recordset); // render records if search in this realm has been performed earlier

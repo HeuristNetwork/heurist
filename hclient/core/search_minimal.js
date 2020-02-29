@@ -101,6 +101,12 @@ function hSearchMinimal() {
 
             window.hWin.HAPI4.currentRecordset = null;
             if(!window.hWin.HEURIST4.util.isnull(_owner_doc)){
+                
+                /*$(_owner_doc)[0].dispatchEvent(new CustomEvent("start_search", {
+                  bubbles: true,
+                  detail: 'some data'
+                }));*/
+
                 $(_owner_doc).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCHSTART, [ request ]); //global app event  
             }
 

@@ -684,7 +684,7 @@ $.widget( "heurist.search", {
         //-----------------------
 
         //global listeners
-        $(window.hWin.document).on(
+        $(this.document).on(
             window.hWin.HAPI4.Event.ON_CREDENTIALS+' '
                 +window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE, function(e, data) {
                     
@@ -695,7 +695,7 @@ $.widget( "heurist.search", {
                 that._refresh();
             }
         });
-        $(window.hWin.document).on(
+        $(this.document).on(
             window.hWin.HAPI4.Event.ON_REC_SEARCHSTART
             + ' ' + window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH
             + ' ' + window.hWin.HAPI4.Event.ON_REC_UPDATE
@@ -1895,7 +1895,7 @@ $.widget( "heurist.search", {
                         if(!window.hWin.HEURIST4.util.isempty(init_search)){
                             var request = {q: init_search, w: 'a', f: 'map', source:'init' };
                             setTimeout(function(){
-                                window.hWin.HAPI4.SearchMgr.doSearch(window.hWin.document, request);
+                                window.hWin.HAPI4.SearchMgr.doSearch(window.hWin.document, request);//initial search
                             }, 3000);
                         }
                         if(window.hWin.HAPI4.sysinfo.db_has_active_dashboard>0) {
