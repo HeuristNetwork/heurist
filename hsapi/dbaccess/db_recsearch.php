@@ -1050,6 +1050,51 @@
     */
     function recordSearch($system, $params)
     {
+        
+        //if $params['q'] has svsID it means search by saved filter - all parameters will be taken from saved filter
+        // {"svs":5}
+        if(@$params['q']){
+
+            $svsID = null;
+            $query_json = json_decode(@$params['q'], true);
+            if(is_array($query_json) && count($query_json)>0){
+                $svsID = @$query_json['svs'];
+            }else{
+                list($predicate, $svsID) = explode(':', $params['q']);
+                if(!($predicate=='svs' && $svsID>0)){
+                    $svsID = null;
+                }
+            }
+            if($svsID>0){
+            
+                $mysqli = $system->get_mysqli();
+                $vals = mysql__select_row($mysqli,
+                    'SELECT svs_Name, svs_Query FROM usrSavedSearches WHERE svs_ID='.$mysqli->real_escape_string( $svsID ));        
+
+                if($vals){
+                    $query = $vals[1];
+                    $params['qname'] = $vals[0];
+                    
+                    if(strpos($query, '?')===0){
+                        parse_str(substr($query,1), $new_params);
+
+                        if(@$new_params['q']) { $params['q'] = @$new_params['q']; }
+                        if(@$new_params['rules']) { $params['rules'] = @$new_params['rules']; }
+                        if(@$new_params['w']) { $params['w'] = @$new_params['w']; }
+                        if(@$new_params['notes']) { $params['notes'] = @$new_params['notes']; }
+                        
+                        return recordSearch($system, $params);
+
+                    }else{
+                        //this is faceted search - it is not supported
+                        return $system->addError(HEURIST_ERROR, 'Saved search '
+                            .$params['qname']
+                            .'<br> It is not possible to run faceted search as a query string');
+                    }
+                }                
+            }
+        }
+        
 
         $memory_limit = get_php_bytes('memory_limit');
         
@@ -1507,8 +1552,12 @@
                 $aquery = get_sql_query_clauses($mysqli, $params, $currentUser);   //!!!! IMPORTANT CALL OR compose_sql_query at once
             }
             
-
-            
+            if(@$aquery['error']){
+                return $system->addError(HEURIST_ERROR, 'Unable to construct valid SQL query. '.@$aquery['error'], null);
+            }
+            if(!isset($aquery["where"]) || trim($aquery["where"])===''){
+                return $system->addError(HEURIST_ERROR, 'Invalid search request; unable to construct valid SQL query', null);
+            }
 
             if($is_count_only || ($is_ids_only && @$params['needall']) || !$system->has_access() ){ //not logged in
                 $search_detail_limit = PHP_INT_MAX;
@@ -1517,10 +1566,6 @@
                 $search_detail_limit = $system->user_GetPreference('search_detail_limit'); //limit for map/timemap output
             }
 
-
-            if(!isset($aquery["where"]) || trim($aquery["where"])===''){
-                return $system->addError(HEURIST_DB_ERROR, "Invalid search request; unable to construct valid SQL query", null);
-            }
 
             $query =  $select_clause.$aquery["from"]." WHERE ".$aquery["where"].$aquery["sort"].$aquery["limit"].$aquery["offset"];
 

@@ -150,7 +150,13 @@ function get_sql_query_clauses_NEW($db, $params, $currentUser=null){
     $mysqli = $db;
 
     if(!$params) $params = array();//$_REQUEST;
-
+    
+    if(is_array(@$params['q'])){
+        $query_json = $params['q'];
+    }else{
+        $query_json = json_decode(@$params['q'], true);
+    }
+    
     // 1. DETECT CURRENT USER AND ITS GROUPS, if not logged search only all records (no bookmarks) ----------------------
     $wg_ids = array(); //may be better use $system->get_user_group_ids() ???
     if($currentUser && @$currentUser['ugr_ID']>0){
@@ -186,13 +192,6 @@ function get_sql_query_clauses_NEW($db, $params, $currentUser=null){
         $wg_ids = array();    
     }
     
-    
-    if(is_array(@$params['q'])){
-        $query_json = $params['q'];
-    }else{
-        $query_json = json_decode(@$params['q'], true);
-    }
-
     
     $query = new HQuery( "0", $query_json, $search_domain, $currUserID );
     $top_query = $query;

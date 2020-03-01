@@ -780,7 +780,7 @@ class AndLimb {
             case 'ids':
                 return new BibIDPredicate($this, $pred_val);
 
-            case 'fc':
+            case 'fc':  //field counter
 
                 $colon_pos = strpos($raw_pred_val, ':');
                 if (! $colon_pos) {
