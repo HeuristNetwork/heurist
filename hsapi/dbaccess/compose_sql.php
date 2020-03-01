@@ -2639,11 +2639,11 @@ class AllLinksPredicate  extends Predicate {
         
             $ids = prepareIds($source_rty_ID);
             if(count($ids)>1){
-                $add_where1 = $add_where1.'and rl1.rl_TargetID in ('.implode(',',$ids).')';
-                $add_where2 = $add_where2.'and rl2.rl_SourceID in ('.implode(',',$ids).')';
+                $add_where1 = $add_where1.' and rl1.rl_TargetID in ('.implode(',',$ids).')';
+                $add_where2 = $add_where2.' and rl2.rl_SourceID in ('.implode(',',$ids).')';
             }else if(count($ids)>0){
-                $add_where1 = $add_where1.'and rl1.rl_TargetID = '.$ids[0];
-                $add_where2 = $add_where2.'and rl2.rl_SourceID = '.$ids[0];
+                $add_where1 = $add_where1.' and rl1.rl_TargetID = '.$ids[0];
+                $add_where2 = $add_where2.' and rl2.rl_SourceID = '.$ids[0];
             }else{
                 return '(1=0)';
             }
