@@ -646,6 +646,7 @@ function hCmsEditing(_options) {
                     }
                     layout_params['published'] = 1;
                     layout_params['template'] = $dlg.find('select[name="map_template"]').val();
+                    layout_params['basemap'] = $dlg.find('input[name="map_basemap"]').val();
                 
                     opts['layout_params'] = layout_params;
                     opts['leaflet'] = true;
@@ -834,6 +835,10 @@ function hCmsEditing(_options) {
                         if(opts.layout_params['template']){
                             $dlg.find('select[name="map_template"]').attr('data-template', opts.layout_params['template']);        
                         }
+                        if(opts.layout_params['basemap']){
+                            $dlg.find('input[name="map_basemap"]').val(opts.layout_params['basemap']);        
+                        }
+                        
                     }
                     if(opts['mapdocument']>0){
                         $dlg.find('select[name="mapdocument"]').attr('data-mapdocument', opts['mapdocument']);        
