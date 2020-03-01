@@ -960,6 +960,8 @@ div .selected_last{
     height: 200px;
     min-width: 200px;
     display: table-cell;
+    border: 1px solid lightblue;
+    padding: 3px;
 }
 
 .horizontal .recordDiv .recTypeThumb{
