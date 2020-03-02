@@ -546,13 +546,15 @@ function downloadFile($mimeType, $filename, $originalFileName=null){
 // output the appropriate html tag to view media content
 //
 //
-function fileGetPlayerTag($fileid, $mimeType, $params, $external_url, $size=null){ 
+function fileGetPlayerTag($fileid, $mimeType, $params, $external_url, $size=null, $style=null){ 
 
     $result = '';    
     
     $is_video = (strpos($mimeType,"video/")===0 || strpos($params,"video")!==false);
     $is_audio = (strpos($mimeType,"audio/")===0 || strpos($params,"audio")!==false);
     $is_image = (strpos($mimeType,"image/")===0);
+    
+    if($style==null) $style='';
 
     if($external_url){
         $filepath = $external_url;  //external 
@@ -564,7 +566,7 @@ function fileGetPlayerTag($fileid, $mimeType, $params, $external_url, $size=null
 
     if ( $is_video ) {
 
-        if($size==null || $size==''){
+        if(($size==null || $size=='') && $style==''){
             $size = 'width="640" height="360"';
         }
 
@@ -576,7 +578,7 @@ function fileGetPlayerTag($fileid, $mimeType, $params, $external_url, $size=null
 
             $playerURL = getPlayerURL($mimeType, $external_url);
 
-            $result = '<iframe '.$size.' src="'.$playerURL.'" frameborder="0" '
+            $result = '<iframe '.$size.$style.' src="'.$playerURL.'" frameborder="0" '
             . ' webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>';                        
 
         }else{
@@ -584,7 +586,7 @@ function fileGetPlayerTag($fileid, $mimeType, $params, $external_url, $size=null
             //$player = HEURIST_BASE_URL."external/mediaelement/flashmediaelement.swf";
 
             //preload="none"
-            $result = '<video '.$size.' controls="controls">'
+            $result = '<video '.$size.$style.' controls="controls">'
             .'<source type="'.$mimeType.'" src="'.$filepath.'"'
                 .($external_url?'':' data-id="'.$fileid.'"')
                 .'/>'
@@ -610,13 +612,13 @@ function fileGetPlayerTag($fileid, $mimeType, $params, $external_url, $size=null
         || strpos($external_url, 'soundcloud.com')>0)
         {
 
-            if($size==null || $size==''){
+            if(($size==null || $size=='') && $style==''){
                 $size = 'width="640" height="166"';
             }
 
             $playerURL = getPlayerURL($mimeType, $external_url);
 
-            $result = '<iframe '.$size.' src="'.$playerURL.'" frameborder="0"></iframe>';                        
+            $result = '<iframe '.$size.$style.' src="'.$playerURL.'" frameborder="0"></iframe>';                        
 
         }else{
             $result = '<audio controls="controls">'
@@ -628,10 +630,10 @@ function fileGetPlayerTag($fileid, $mimeType, $params, $external_url, $size=null
     }else 
         if($is_image){
 
-            if($size==null || $size==''){
+            if(($size==null || $size=='') && $style==''){
                 $size = 'width="300"';
             }
-            $result = '<img '.$size.' src="'.$filepath.'"'
+            $result = '<img '.$size.$style.' src="'.$filepath.'"'
                 .($external_url?'':' data-id="'.$fileid.'"')
                 .'/>';
 
@@ -645,7 +647,7 @@ function fileGetPlayerTag($fileid, $mimeType, $params, $external_url, $size=null
 
     }else{
         //not media - show thumb with download link
-        $result = '<a href="'.$filepath.'" target="_blank"><img src="'.$thumb_url.'"/></a>';
+        $result = '<a href="'.$filepath.'" target="_blank"><img src="'.$thumb_url.'" '.$style.'/></a>';
 
         /*                
         if($size==null || $size==''){

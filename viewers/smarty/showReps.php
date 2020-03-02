@@ -661,43 +661,56 @@ function smarty_function_wrap($params, &$smarty)
         if(array_key_exists('lbl',$params) && $params['lbl']!=""){
             $label = $params['lbl'];
         }
-        $width = "";
-        $mapsize = "width=200";
+        $size = '';
+        $mapsize = '';
+        $style = '';
+        
+        if(array_key_exists('style',$params) && $params['style']!=""){
+        
+            $style = ' style="'.$params['style'].'"';
+            
+        }else{            
+            
+            $width = "";
+            $mapsize = "width=200";
 
-        if(array_key_exists('width',$params) && $params['width']!=""){
-            $width = $params['width'];
-            if(is_numeric($width)<0){
-                $width = $width."px";
-                $mapsize = "width=".$width;
+            if(array_key_exists('width',$params) && $params['width']!=""){
+                $width = $params['width'];
+                if(is_numeric($width)<0){
+                    $width = $width."px";
+                    $mapsize = "width=".$width;
+                }
             }
-        }
-        $height = "";
-        if(array_key_exists('height',$params) && $params['height']!=""){
-            $height = $params['height'];
-            if(is_numeric($height)<0){
-                $height = $height."px";
-                $mapsize = $mapsize."&height=".$height;
+            $height = "";
+            if(array_key_exists('height',$params) && $params['height']!=""){
+                $height = $params['height'];
+                if(is_numeric($height)<0){
+                    $height = $height."px";
+                    $mapsize = $mapsize."&height=".$height;
+                }
             }
-        }
-        if(!(strpos($mapsize,"&")>0)){
-            $mapsize = $mapsize."&height=200";
-        }
+            if(!(strpos($mapsize,"&")>0)){
+                $mapsize = $mapsize."&height=200";
+            }
 
-        $size = "";
-        if($width=="" && $height==""){
-            $size = "width=".(($dt=='geo')?"200px":"'300px'");
-        }else {
-            if($width!=""){
-                $size = "width='".$width."'";
-            }
-            if($height!=""){
-                $size = $size." height='".$height."'";
+            $size = "";
+            if($width=="" && $height==""){
+                if($mode!='thumbnail'){
+                    $size = "width=".(($dt=='geo')?"200px":"'300px'");
+                }
+            }else {
+                if($width!=""){
+                    $size = "width='".$width."'";
+                }
+                if($height!=""){
+                    $size = $size." height='".$height."'";
+                }
             }
         }
 
         if($dt=="url"){
 
-            return "<a href='".$params['var']."' target='_blank'>".$params['var']."</a>";
+            return "<a href='".$params['var']."' target='_blank' $style>".$params['var']."</a>";
 
         }else if($dt=="file"){
             //insert image or link
@@ -724,13 +737,13 @@ function smarty_function_wrap($params, &$smarty)
                 if($mode=="link") {
 
                     $sname = (!$originalFileName || $originalFileName=='_remote')?$external_url:$originalFileName;
-                    $sres = $sres."<a href='".$file_URL."' target='_blank' title='".$fileinfo['ulf_Description']."'>".$sname."</a>";
+                    $sres = $sres."<a href='".$file_URL."' target='_blank' title='".$fileinfo['ulf_Description']."' $style>".$sname."</a>";
                     
                 }else 
                 if($mode=="thumbnail" ){
 
                     $sres = $sres."<a href='".$file_URL."' target='_blank'>".
-                    "<img src='".$file_thumbURL."' title='".$fileinfo['ulf_Description']."'/></a>";
+                    "<img src='".$file_thumbURL."' title='".$fileinfo['ulf_Description']."' $size $style/></a>";
 
                 }else{ //player is default
 
@@ -739,7 +752,7 @@ function smarty_function_wrap($params, &$smarty)
                     $params = $fileinfo['ulf_Parameters'];  //ulf_Parameters - not used anymore (for backward capability only)
                     
                     //$sres = $sres.getPlayerTag($value['nonce'], $value['mimeType'], $value['URL'], $size);
-                    $sres = $sres.fileGetPlayerTag($file_nonce, $mimeType, $params, $external_url, $size); //see db_files
+                    $sres = $sres.fileGetPlayerTag($file_nonce, $mimeType, $params, $external_url, $size, $style); //see db_files
                     
                     /*
                     if($type_media == 'image'){
