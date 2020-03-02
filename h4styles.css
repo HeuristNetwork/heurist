@@ -986,6 +986,18 @@ div .selected_last{
 {
     display:none !important;    
 }
+/*
+.horizontal .recordDiv .recordTitle{
+    height: 61%;
+    left: 10px;
+    right: 10px;
+    bottom: 0px;        
+    display: block !important;
+    font-weight: bold;
+    font-size: larger;
+    text-align: center;
+}
+*/
 
 /* dashboard */
 .thumbs .dashboard.recordDiv .recordTitle {
@@ -1116,7 +1128,7 @@ div.saved-search > .edit-delete-buttons, .recordDiv > .edit-delete-buttons {
     display: inline-block;
     float: left;
     width: auto;
-    font-weight: n;
+    margin: 0px 2px;
 }
 
 

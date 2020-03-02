@@ -214,7 +214,8 @@ $.widget( "heurist.search_faceted", {
         this.btn_close = $( "<button>", { 
                     title:window.hWin.HR("Close this facet search and return to the list of saved searches") })
         .appendTo( this.div_toolbar )
-        .button({icon: "ui-icon-close", iconPosition:'end', label:window.hWin.HR("Close")});
+        .button({icon: "ui-icon-close", iconPosition:'end', 
+            label:window.hWin.HR("Show all available searches")}); //was Close
 
         this.btn_close.find('.ui-icon-close').css({right: 0}); //'font-size': '1.3em', 
         
@@ -371,7 +372,7 @@ $.widget( "heurist.search_faceted", {
             this.btn_save.hide(); 
             this.btn_close.hide(); 
         }else{
-            if(hasHistory) {
+            if(hasHistory && !this.options.params.ui_spatial_filter) {
                 //if(this.div_title) this.div_title.css('width','45%');
                 if(this.options.showresetbutton && this.btn_reset){
                     this.btn_reset.show()   
@@ -709,8 +710,8 @@ $.widget( "heurist.search_faceted", {
            this._on( btn_reset2, { click: "doResetAll" });
 
            if(this.btn_reset){
-               this.btn_reset.remove();
-               this.btn_reset = null;
+               this.btn_reset.hide();
+               //this.btn_reset = null;
            }
 
            this._on( ele.find('button.reset_spatial'), { click:                         
@@ -1184,7 +1185,7 @@ $.widget( "heurist.search_faceted", {
                     window.hWin.HEURIST4.msg.showMsgErr('Define at least one search criterion');
                 }
                 return;
-            }else if(!this.options.ispreview && this.options.showresetbutton){
+            }else if(!this.options.ispreview && this.options.showresetbutton && !this.options.params.ui_spatial_filter){
                 //this.div_title.css('width','45%');
                 if(this.btn_reset) this.btn_reset.show()   
                 //@todo this.btn_save.show(); 

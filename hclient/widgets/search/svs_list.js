@@ -782,7 +782,7 @@ $.widget( "heurist.svs_list", {
                 if(sname.toLowerCase().indexOf('placeholder')===0) continue;
 
                 $('<button>', {text: sname, 'data-svs-id':svsID})
-                .css({'width':'100%','margin-top':'0.4em','max-width':'300px','text-align':'left'})
+                .css({'width':'100%','margin-top':'0.8em','max-width':'300px','text-align':'left'})
                 .button({icons:{primary: iconBtn}}).on("click", function(event){
 
                     var svs_ID = $(this).attr('data-svs-id');
