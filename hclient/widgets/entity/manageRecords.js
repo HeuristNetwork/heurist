@@ -2504,8 +2504,10 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
                                 });
                             
                             }else{
-                                window.hWin.HEURIST4.msg.showMsgErr('Map document record must have Bounding Box field! '
-                                    +'Please correct record type structure.');
+                                window.hWin.HEURIST4.msg.showMsgErr('<p>Map document record must have Bounding Box field! '
+                                    +'Please refresh record type structure.</p>'
+                                    +'<p>Go to Design Structure > Get from template > Heurist_Core_Definitions then check the Show All'
+                                    +' checkbox and download Heurist Map Document from the Spatial and Mapping section.</p>');
                             }
                     }
                     
