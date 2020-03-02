@@ -951,9 +951,14 @@ div .selected_last{
 .horizontal .div-result-list-content{
     overflow: hidden auto;
 }
+.horizontal::-webkit-scrollbar-thumb{
+    background-color: lightblue;
+    outline: 1px solid blue;    
+}
 .horizontal.div-result-list-content > div{
     display: table;
     border-spacing: 2px;
+    padding-top: 10px;
 }
 
 .horizontal .recordDiv {
