@@ -861,7 +861,7 @@ $.widget( "heurist.importStructure", {
         + '</div>'
         + '<div class="recordTitle" style="left:40px !important">'
         +     recTitle 
-        + '</div>';
+        + '</div><div class="action-button-container">';
         
         
         var usr_exp_level = window.hWin.HAPI4.get_prefs_def('userCompetencyLevel', 2);
@@ -874,7 +874,7 @@ $.widget( "heurist.importStructure", {
             + '</div>';
         }
 
-        if(recID<1000){
+        if(false && recID<1000){
             html = html
             + '<div title="Click to clone curated template" '
             + 'class="rec_view_link ui-button  action-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" '
@@ -883,7 +883,7 @@ $.widget( "heurist.importStructure", {
             + '</div>';
         }                                                         
 
-        html = html + '</div>';
+        html = html + '</div></div>';
 
         return html;
 
