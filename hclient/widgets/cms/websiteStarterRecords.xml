@@ -1,17 +1,17 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <hml xmlns="http://heuristnetwork.org" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://heuristnetwork.org/reference/scheme_hml.xsd">
 <database id="2">Heurist_Core_Definitions</database>
-<query q="t:51,52" db="Heurist_Core_Definitions" depth="0"/>
-<dateStamp>2019-11-18T16:19:30+00:00</dateStamp>
+<query q="t:51,52" db="Heurist_Core_Definitions" depth="all"/>
+<dateStamp>2020-03-02T13:44:02+00:00</dateStamp>
 <resultCount>39</resultCount>
 <records>
 <record visibility="public" visnote="no login required" selected="no" depth="0">
 <id>64</id>
 <type id="52" conceptID="99-52">CMS Menu Entry</type>
-<citeAs>https://heuristplus.sydney.edu.au/h5-ao/?recID=64&amp;db=Heurist_Core_Definitions</citeAs>
+<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=64&amp;db=Heurist_Core_Definitions</citeAs>
 <title>&lt;b&gt; . About&lt;/b&gt; [ Project background, Historical context, Project aims, Project timeline, Fieldwork locations, Sources]</title>
 <added>2019-07-21 21:54:06</added>
-<modified>2019-09-07 19:58:17</modified>
+<modified>2019-11-26 21:08:14</modified>
 <workgroup id="2">johnson</workgroup>
 <detail conceptID="2-1" name="Page / Menu name" id="1" basename="Name / Title">About</detail>
 <detail conceptID="2-3" name="Menu rollover description" id="3" basename="Short summary">This page contains a summary of the project aims, theory, methods and results</detail>
@@ -30,10 +30,10 @@
 <record visibility="public" visnote="no login required" selected="no" depth="0">
 <id>118</id>
 <type id="52" conceptID="99-52">CMS Menu Entry</type>
-<citeAs>https://heuristplus.sydney.edu.au/h5-ao/?recID=118&amp;db=Heurist_Core_Definitions</citeAs>
+<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=118&amp;db=Heurist_Core_Definitions</citeAs>
 <title>&lt;b&gt; . Contacts&lt;/b&gt;</title>
 <added>2019-07-31 09:40:20</added>
-<modified>2019-09-07 09:47:19</modified>
+<modified>2019-11-26 21:08:14</modified>
 <workgroup id="0">public</workgroup>
 <detail conceptID="2-1" name="Page / Menu name" id="1" basename="Name / Title">Contacts</detail>
 <detail conceptID="2-4" name="HTML content" id="4" basename="Extended description">&lt;p&gt;Use this page to provide contact and location information for the project.&lt;/p&gt;
@@ -45,10 +45,10 @@
 <record visibility="public" visnote="no login required" selected="no" depth="0">
 <id>88</id>
 <type id="52" conceptID="99-52">CMS Menu Entry</type>
-<citeAs>https://heuristplus.sydney.edu.au/h5-ao/?recID=88&amp;db=Heurist_Core_Definitions</citeAs>
+<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=88&amp;db=Heurist_Core_Definitions</citeAs>
 <title>&lt;b&gt; . Contribute&lt;/b&gt; [ Information submission, Volunteer, Employment, Fieldwork]</title>
 <added>2019-07-31 09:08:08</added>
-<modified>2019-09-07 09:09:27</modified>
+<modified>2019-11-26 21:08:14</modified>
 <workgroup id="0">public</workgroup>
 <detail conceptID="2-1" name="Page / Menu name" id="1" basename="Name / Title">Contribute</detail>
 <detail conceptID="2-4" name="HTML content" id="4" basename="Extended description">&lt;p&gt;Use this page to describe ways for the public / other researchers to participate in or contribute to the project.&lt;/p&gt;
@@ -64,7 +64,7 @@
 <record visibility="public" visnote="no login required" selected="no" depth="0">
 <id>66</id>
 <type id="52" conceptID="99-52">CMS Menu Entry</type>
-<citeAs>https://heuristplus.sydney.edu.au/h5-ao/?recID=66&amp;db=Heurist_Core_Definitions</citeAs>
+<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=66&amp;db=Heurist_Core_Definitions</citeAs>
 <title>&lt;b&gt; . Directors&lt;/b&gt;</title>
 <added>2019-07-21 21:54:06</added>
 <modified>2019-09-07 09:14:14</modified>
@@ -80,37 +80,37 @@
 <record visibility="public" visnote="no login required" selected="no" depth="0">
 <id>65</id>
 <type id="52" conceptID="99-52">CMS Menu Entry</type>
-<citeAs>https://heuristplus.sydney.edu.au/h5-ao/?recID=65&amp;db=Heurist_Core_Definitions</citeAs>
+<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=65&amp;db=Heurist_Core_Definitions</citeAs>
 <title>&lt;b&gt; . Discover (search)&lt;/b&gt;</title>
 <added>2019-07-21 21:54:06</added>
-<modified>2019-09-07 09:45:20</modified>
+<modified>2020-03-02 13:09:29</modified>
 <workgroup id="2">johnson</workgroup>
 <detail conceptID="2-1" name="Page / Menu name" id="1" basename="Name / Title">Discover (search)</detail>
 <detail conceptID="2-3" name="Menu rollover description" id="3" basename="Short summary">Search functions to search and display contents of the database represented by/in this website</detail>
-<detail conceptID="2-4" name="HTML content" id="4" basename="Extended description">&lt;p&gt;This page is set up as a container for database searches.Replace these instructions with your own introduction.&lt;/p&gt;
-&lt;p&gt;We suggest using a table (supplied below) or if you have the knowledge, &amp;lt;div&amp;gt; ... &amp;lt;/div&amp;gt;, to contain the search field or list of saved searches&lt;br /&gt;and the results list and visualisation (map, timeline, network diagram, report etc.).&lt;/p&gt;
-&lt;p&gt;Click on [Edit page content] in the website editor, then the &lt;span style=&quot;text-decoration: underline;&quot;&gt;edit&lt;/span&gt; link to set the list of saved searches you want to display on the left, &lt;br /&gt;and to set the parameters of each of the components eg. map in the middle and list of results on the right.&lt;/p&gt;
-&lt;table style=&quot;height: 500px; width: 100&#37;; border-collapse: collapse; border-color: slateblue;&quot; border=&quot;3&quot;&gt;
-&lt;tbody&gt;
-&lt;tr&gt;
-&lt;td style=&quot;width: 22.3844&#37;;&quot;&gt;
-&lt;div id=&quot;mywidget_4743&quot; class=&quot;mceNonEditable&quot; style=&quot;background: white; position: relative; top: 0px; border: px solid gray; height: 100&#37;; width: 100&#37;;&quot; data-heurist-app-id=&quot;heurist_SearchTree&quot;&gt;
-&lt;div class=&quot;widget-design-header&quot; style=&quot;padding: 10px;&quot;&gt;&lt;img style=&quot;vertical-align: middle;&quot; src=&quot;https://heuristplus.sydney.edu.au/h5-alpha/hclient/assets/h4_icon_35x35.png&quot; height=&quot;22&quot; /&gt; &lt;strong&gt;saved searches&lt;/strong&gt;&lt;a class=&quot;edit&quot; style=&quot;padding: 0 10px;&quot; title=&quot;Click to edit&quot; href=&quot;#&quot;&gt;edit&lt;/a&gt;  &lt;a class=&quot;remove&quot; href=&quot;#&quot;&gt;remove&lt;/a&gt; height: 100&#37; width: 100&#37;&lt;/div&gt;
-&lt;span class=&quot;widget-options&quot; style=&quot;font-style: italic; display: none;&quot;&gt;{&quot;buttons_mode&quot;:true,&quot;allowed_UGrpID&quot;:&quot;1&quot;,&quot;init_at_once&quot;:true,&quot;search_realm&quot;:&quot;sr1&quot;}&lt;/span&gt;&lt;/div&gt;
-&lt;/td&gt;
-&lt;td style=&quot;width: 46.8701&#37;;&quot;&gt;
-&lt;div id=&quot;mywidget_5097&quot; class=&quot;mceNonEditable&quot; style=&quot;background: white; position: relative; border: 0px solid gray; height: 600px; width: 100&#37;;&quot; data-heurist-app-id=&quot;heurist_Map&quot;&gt;
-&lt;div class=&quot;widget-design-header&quot; style=&quot;padding: 10px;&quot;&gt;&lt;img style=&quot;vertical-align: middle;&quot; src=&quot;https://heuristplus.sydney.edu.au/h5-alpha/hclient/assets/h4_icon_35x35.png&quot; height=&quot;22&quot; /&gt; &lt;strong&gt;map/timeline&lt;/strong&gt;&lt;a class=&quot;edit&quot; style=&quot;padding: 0 10px;&quot; title=&quot;Click to edit&quot; href=&quot;#&quot;&gt;edit&lt;/a&gt;  &lt;a class=&quot;remove&quot; href=&quot;#&quot;&gt;remove&lt;/a&gt; height: 600px width: 100&#37;&lt;/div&gt;
-&lt;span class=&quot;widget-options&quot; style=&quot;font-style: italic; display: none;&quot;&gt;{&quot;layout_params&quot;:{&quot;notimeline&quot;:false,&quot;nocluster&quot;:false,&quot;editstyle&quot;:true,&quot;controls&quot;:&quot;legend,bookmark,geocoder,selector,print&quot;,&quot;published&quot;:1,&quot;template&quot;:&quot;&quot;},&quot;leaflet&quot;:true,&quot;init_at_once&quot;:true,&quot;search_realm&quot;:&quot;sr1&quot;}&lt;/span&gt;&lt;/div&gt;
-&lt;/td&gt;
-&lt;td style=&quot;width: 30.7454&#37;;&quot;&gt;
-&lt;div id=&quot;mywidget_1018&quot; class=&quot;mceNonEditable&quot; style=&quot;background: white; position: relative; border: 0px solid gray; height: 600px; width: 100&#37;;&quot; data-heurist-app-id=&quot;heurist_resultList&quot;&gt;
-&lt;div class=&quot;widget-design-header&quot; style=&quot;padding: 10px;&quot;&gt;&lt;img style=&quot;vertical-align: middle;&quot; src=&quot;https://heuristplus.sydney.edu.au/h5-alpha/hclient/assets/h4_icon_35x35.png&quot; height=&quot;22&quot; /&gt; &lt;strong&gt;results list&lt;/strong&gt;&lt;a class=&quot;edit&quot; style=&quot;padding: 0 10px;&quot; title=&quot;Click to edit&quot; href=&quot;#&quot;&gt;edit&lt;/a&gt;  &lt;a class=&quot;remove&quot; href=&quot;#&quot;&gt;remove&lt;/a&gt; height: 600px width: 100&#37;&lt;/div&gt;
-&lt;span class=&quot;widget-options&quot; style=&quot;font-style: italic; display: none;&quot;&gt;{&quot;show_toolbar&quot;:true,&quot;show_counter&quot;:true,&quot;show_viewmode&quot;:true,&quot;show_inner_header&quot;:false,&quot;recordview_onselect&quot;:true,&quot;show_url_as_link&quot;:true,&quot;view_mode&quot;:&quot;list&quot;,&quot;init_at_once&quot;:true,&quot;search_realm&quot;:&quot;sr1&quot;}&lt;/span&gt;&lt;/div&gt;
-&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/tbody&gt;
-&lt;/table&gt;</detail>
+<detail conceptID="2-4" name="HTML content" id="4" basename="Extended description">&lt;p&gt;&lt;strong&gt;Remove thse instructions&lt;/strong&gt;, or replace them with your instructions for users.&lt;/p&gt;
+&lt;p&gt;This page is set up as a container for database searches. We suggest using&lt;/p&gt;
+&lt;div&gt;s (or a table) to position the widgets: &lt;br /&gt;search, results list and visualisation (map, timeline, network diagram, report etc.).
+&lt;p&gt; &lt;/p&gt;
+&lt;p&gt;Click on [Edit page content] in the website editor, then the &lt;span style=&quot;text-decoration:underline;&quot;&gt;edit&lt;/span&gt; link to set the list of saved searches you want to display on the left, &lt;br /&gt;and to set the parameters of each of the components eg. map in the middle and list of results on the right.&lt;/p&gt;
+
+&lt;div style=&quot;position:relative;height:500px;width:100&#37;;border-color:#6A5ACD;&quot;&gt;
+
+&lt;div id=&quot;mywidget_4743&quot; class=&quot;mceNonEditable&quot; style=&quot;background:#FFFFFF;position:absolute;top:0px;width:310px;bottom:0px;&quot; data-heurist-app-id=&quot;heurist_SearchTree&quot;&gt;
+&lt;div class=&quot;widget-design-header&quot; style=&quot;padding:10px;&quot;&gt;&lt;img style=&quot;vertical-align:middle;&quot; src=&quot;https://heuristplus.sydney.edu.au/h5-alpha/hclient/assets/h4_icon_35x35.png&quot; alt=&quot;h4_icon_35x35.png&quot; height=&quot;22&quot; /&gt; &lt;strong&gt;saved searches&lt;/strong&gt;&lt;a class=&quot;edit&quot; style=&quot;padding:0 10px;&quot; title=&quot;Click to edit&quot; href=&quot;#&quot;&gt;edit&lt;/a&gt;  &lt;a class=&quot;remove&quot; href=&quot;#&quot;&gt;remove&lt;/a&gt; height: 100&#37; width: 100&#37;&lt;/div&gt;
+&lt;span class=&quot;widget-options&quot; style=&quot;font-style:italic;display:none;&quot;&gt;{&quot;buttons_mode&quot;:true,&quot;allowed_UGrpID&quot;:&quot;3&quot;,&quot;init_at_once&quot;:true,&quot;search_realm&quot;:&quot;sr1&quot;}&lt;/span&gt;&lt;/div&gt;
+
+&lt;div class=&quot;ent_wrapper&quot; style=&quot;top:0px;bottom:0px;left:310px;&quot;&gt;
+
+&lt;div id=&quot;mywidget_5097&quot; class=&quot;mceNonEditable&quot; style=&quot;background:#FFFFFF;position:absolute;top:0px;width:50&#37;;left:0px;bottom:0;&quot; data-heurist-app-id=&quot;heurist_Map&quot;&gt;
+&lt;div class=&quot;widget-design-header&quot; style=&quot;padding:10px;&quot;&gt;&lt;img style=&quot;vertical-align:middle;&quot; src=&quot;https://heuristplus.sydney.edu.au/h5-alpha/hclient/assets/h4_icon_35x35.png&quot; alt=&quot;h4_icon_35x35.png&quot; height=&quot;22&quot; /&gt; &lt;strong&gt;map/timeline&lt;/strong&gt;&lt;a class=&quot;edit&quot; style=&quot;padding:0 10px;&quot; title=&quot;Click to edit&quot; href=&quot;#&quot;&gt;edit&lt;/a&gt;  &lt;a class=&quot;remove&quot; href=&quot;#&quot;&gt;remove&lt;/a&gt; height: 600px width: 100&#37;&lt;/div&gt;
+&lt;span class=&quot;widget-options&quot; style=&quot;font-style:italic;display:none;&quot;&gt;{&quot;layout_params&quot;:{&quot;notimeline&quot;:false,&quot;nocluster&quot;:false,&quot;editstyle&quot;:true,&quot;controls&quot;:&quot;legend,bookmark,geocoder,selector,print&quot;,&quot;published&quot;:1,&quot;template&quot;:&quot;&quot;},&quot;leaflet&quot;:true,&quot;init_at_once&quot;:true,&quot;search_realm&quot;:&quot;sr1&quot;}&lt;/span&gt;&lt;/div&gt;
+
+&lt;div id=&quot;mywidget_1018&quot; class=&quot;mceNonEditable&quot; style=&quot;background:#FFFFFF;position:absolute;top:0px;width:50&#37;;right:1px;bottom:0;&quot; data-heurist-app-id=&quot;heurist_resultList&quot;&gt;
+&lt;div class=&quot;widget-design-header&quot; style=&quot;padding:10px;&quot;&gt;&lt;img style=&quot;vertical-align:middle;&quot; src=&quot;https://heuristplus.sydney.edu.au/h5-alpha/hclient/assets/h4_icon_35x35.png&quot; alt=&quot;h4_icon_35x35.png&quot; height=&quot;22&quot; /&gt; &lt;strong&gt;results list&lt;/strong&gt;&lt;a class=&quot;edit&quot; style=&quot;padding:0 10px;&quot; title=&quot;Click to edit&quot; href=&quot;#&quot;&gt;edit&lt;/a&gt;  &lt;a class=&quot;remove&quot; href=&quot;#&quot;&gt;remove&lt;/a&gt; height: 600px width: 100&#37;&lt;/div&gt;
+&lt;span class=&quot;widget-options&quot; style=&quot;font-style:italic;display:none;&quot;&gt;{&quot;show_toolbar&quot;:true,&quot;show_counter&quot;:true,&quot;show_viewmode&quot;:true,&quot;show_inner_header&quot;:false,&quot;recordview_onselect&quot;:true,&quot;show_url_as_link&quot;:true,&quot;view_mode&quot;:&quot;list&quot;,&quot;init_at_once&quot;:true,&quot;search_realm&quot;:&quot;sr1&quot;}&lt;/span&gt;&lt;/div&gt;
+
+&lt;/div&gt;
+&lt;/div&gt;</detail>
 <detail conceptID="99-948" name="Keywords" id="914" basename="Keywords">Search, Filter, Facets, Facet search, Advanced search, Dynamic search</detail>
 <detail conceptID="99-952" name="Show page title" id="920" basename="Show page title" termID="6249" termConceptID="99-5446" ParentTerm="Yes-No">Yes</detail>
 <reversePointer id="912" conceptID="99-742" basename="CMS Menus" name="Top level menus">63</reversePointer>
@@ -118,7 +118,7 @@
 <record visibility="public" visnote="no login required" selected="no" depth="0">
 <id>124</id>
 <type id="52" conceptID="99-52">CMS Menu Entry</type>
-<citeAs>https://heuristplus.sydney.edu.au/h5-ao/?recID=124&amp;db=Heurist_Core_Definitions</citeAs>
+<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=124&amp;db=Heurist_Core_Definitions</citeAs>
 <title>&lt;b&gt; . Employment&lt;/b&gt;</title>
 <added>2019-07-31 09:45:16</added>
 <modified>2019-09-07 09:16:13</modified>
@@ -133,7 +133,7 @@
 <record visibility="public" visnote="no login required" selected="no" depth="0">
 <id>132</id>
 <type id="52" conceptID="99-52">CMS Menu Entry</type>
-<citeAs>https://heuristplus.sydney.edu.au/h5-ao/?recID=132&amp;db=Heurist_Core_Definitions</citeAs>
+<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=132&amp;db=Heurist_Core_Definitions</citeAs>
 <title>&lt;b&gt; . Events&lt;/b&gt;</title>
 <added>2019-07-31 09:57:51</added>
 <modified>2019-09-07 09:12:58</modified>
@@ -148,7 +148,7 @@
 <record visibility="public" visnote="no login required" selected="no" depth="0">
 <id>86</id>
 <type id="52" conceptID="99-52">CMS Menu Entry</type>
-<citeAs>https://heuristplus.sydney.edu.au/h5-ao/?recID=86&amp;db=Heurist_Core_Definitions</citeAs>
+<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=86&amp;db=Heurist_Core_Definitions</citeAs>
 <title>&lt;b&gt; . FAQ&lt;/b&gt;</title>
 <added>2019-07-31 09:07:05</added>
 <modified>2019-09-07 09:46:04</modified>
@@ -163,7 +163,7 @@
 <record visibility="public" visnote="no login required" selected="no" depth="0">
 <id>120</id>
 <type id="52" conceptID="99-52">CMS Menu Entry</type>
-<citeAs>https://heuristplus.sydney.edu.au/h5-ao/?recID=120&amp;db=Heurist_Core_Definitions</citeAs>
+<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=120&amp;db=Heurist_Core_Definitions</citeAs>
 <title>&lt;b&gt; . Fieldwork locations&lt;/b&gt;</title>
 <added>2019-07-31 09:41:54</added>
 <modified>2019-09-07 09:11:39</modified>
@@ -179,7 +179,7 @@
 <record visibility="public" visnote="no login required" selected="no" depth="0">
 <id>126</id>
 <type id="52" conceptID="99-52">CMS Menu Entry</type>
-<citeAs>https://heuristplus.sydney.edu.au/h5-ao/?recID=126&amp;db=Heurist_Core_Definitions</citeAs>
+<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=126&amp;db=Heurist_Core_Definitions</citeAs>
 <title>&lt;b&gt; . Fieldwork&lt;/b&gt;</title>
 <added>2019-07-31 09:46:55</added>
 <modified>2019-09-07 09:16:26</modified>
@@ -194,7 +194,7 @@
 <record visibility="public" visnote="no login required" selected="no" depth="0">
 <id>84</id>
 <type id="52" conceptID="99-52">CMS Menu Entry</type>
-<citeAs>https://heuristplus.sydney.edu.au/h5-ao/?recID=84&amp;db=Heurist_Core_Definitions</citeAs>
+<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=84&amp;db=Heurist_Core_Definitions</citeAs>
 <title>&lt;b&gt; . Gallery&lt;/b&gt;</title>
 <added>2019-07-31 09:04:57</added>
 <modified>2019-09-07 09:17:17</modified>
@@ -210,7 +210,7 @@
 <record visibility="public" visnote="no login required" selected="no" depth="0">
 <id>112</id>
 <type id="52" conceptID="99-52">CMS Menu Entry</type>
-<citeAs>https://heuristplus.sydney.edu.au/h5-ao/?recID=112&amp;db=Heurist_Core_Definitions</citeAs>
+<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=112&amp;db=Heurist_Core_Definitions</citeAs>
 <title>&lt;b&gt; . Historical context&lt;/b&gt;</title>
 <added>2019-07-31 09:35:18</added>
 <modified>2019-09-07 09:11:03</modified>
@@ -225,10 +225,10 @@
 <record visibility="public" visnote="no login required" selected="no" depth="0">
 <id>104</id>
 <type id="52" conceptID="99-52">CMS Menu Entry</type>
-<citeAs>https://heuristplus.sydney.edu.au/h5-ao/?recID=104&amp;db=Heurist_Core_Definitions</citeAs>
+<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=104&amp;db=Heurist_Core_Definitions</citeAs>
 <title>&lt;b&gt; . How to ...&lt;/b&gt; [ FAQ, Searching, Mapping]</title>
 <added>2019-07-31 09:24:20</added>
-<modified>2019-09-07 09:46:53</modified>
+<modified>2019-11-26 21:08:14</modified>
 <workgroup id="0">public</workgroup>
 <detail conceptID="2-1" name="Page / Menu name" id="1" basename="Name / Title">How to ...</detail>
 <detail conceptID="2-4" name="HTML content" id="4" basename="Extended description">&lt;p&gt;Use this page to provide instructions on how to use the database searches, maps,&lt;/p&gt;
@@ -244,7 +244,7 @@
 <record visibility="public" visnote="no login required" selected="no" depth="0">
 <id>90</id>
 <type id="52" conceptID="99-52">CMS Menu Entry</type>
-<citeAs>https://heuristplus.sydney.edu.au/h5-ao/?recID=90&amp;db=Heurist_Core_Definitions</citeAs>
+<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=90&amp;db=Heurist_Core_Definitions</citeAs>
 <title>&lt;b&gt; . Information submission&lt;/b&gt;</title>
 <added>2019-07-31 09:10:59</added>
 <modified>2019-09-07 09:10:01</modified>
@@ -259,7 +259,7 @@
 <record visibility="public" visnote="no login required" selected="no" depth="0">
 <id>108</id>
 <type id="52" conceptID="99-52">CMS Menu Entry</type>
-<citeAs>https://heuristplus.sydney.edu.au/h5-ao/?recID=108&amp;db=Heurist_Core_Definitions</citeAs>
+<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=108&amp;db=Heurist_Core_Definitions</citeAs>
 <title>&lt;b&gt; . Mapping&lt;/b&gt;</title>
 <added>2019-07-31 09:28:47</added>
 <modified>2019-09-07 09:47:08</modified>
@@ -274,7 +274,7 @@
 <record visibility="public" visnote="no login required" selected="no" depth="0">
 <id>98</id>
 <type id="52" conceptID="99-52">CMS Menu Entry</type>
-<citeAs>https://heuristplus.sydney.edu.au/h5-ao/?recID=98&amp;db=Heurist_Core_Definitions</citeAs>
+<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=98&amp;db=Heurist_Core_Definitions</citeAs>
 <title>&lt;b&gt; . Methods&lt;/b&gt;</title>
 <added>2019-07-31 09:18:49</added>
 <modified>2019-08-29 21:02:10</modified>
@@ -287,7 +287,7 @@
 <record visibility="public" visnote="no login required" selected="no" depth="0">
 <id>136</id>
 <type id="52" conceptID="99-52">CMS Menu Entry</type>
-<citeAs>https://heuristplus.sydney.edu.au/h5-ao/?recID=136&amp;db=Heurist_Core_Definitions</citeAs>
+<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=136&amp;db=Heurist_Core_Definitions</citeAs>
 <title>&lt;b&gt; . News &amp; Blogs&lt;/b&gt;</title>
 <added>2019-07-31 10:01:35</added>
 <modified>2019-09-07 09:12:14</modified>
@@ -302,10 +302,10 @@
 <record visibility="public" visnote="no login required" selected="no" depth="0">
 <id>128</id>
 <type id="52" conceptID="99-52">CMS Menu Entry</type>
-<citeAs>https://heuristplus.sydney.edu.au/h5-ao/?recID=128&amp;db=Heurist_Core_Definitions</citeAs>
+<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=128&amp;db=Heurist_Core_Definitions</citeAs>
 <title>&lt;b&gt; . News and events&lt;/b&gt; [ Newsletters, Events, Of interest, Press, News &amp; Blogs]</title>
 <added>2019-07-31 09:48:33</added>
-<modified>2019-09-07 09:12:02</modified>
+<modified>2019-11-26 21:08:14</modified>
 <workgroup id="0">public</workgroup>
 <detail conceptID="2-1" name="Page / Menu name" id="1" basename="Name / Title">News and events</detail>
 <detail conceptID="2-4" name="HTML content" id="4" basename="Extended description">&lt;p&gt;Use this page to outline sources of news about the project, the types of events organised, newsletters, blogs and other public information sources.&lt;/p&gt;
@@ -322,7 +322,7 @@
 <record visibility="public" visnote="no login required" selected="no" depth="0">
 <id>130</id>
 <type id="52" conceptID="99-52">CMS Menu Entry</type>
-<citeAs>https://heuristplus.sydney.edu.au/h5-ao/?recID=130&amp;db=Heurist_Core_Definitions</citeAs>
+<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=130&amp;db=Heurist_Core_Definitions</citeAs>
 <title>&lt;b&gt; . Newsletters&lt;/b&gt;</title>
 <added>2019-07-31 09:50:24</added>
 <modified>2019-09-07 09:12:41</modified>
@@ -337,7 +337,7 @@
 <record visibility="public" visnote="no login required" selected="no" depth="0">
 <id>134</id>
 <type id="52" conceptID="99-52">CMS Menu Entry</type>
-<citeAs>https://heuristplus.sydney.edu.au/h5-ao/?recID=134&amp;db=Heurist_Core_Definitions</citeAs>
+<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=134&amp;db=Heurist_Core_Definitions</citeAs>
 <title>&lt;b&gt; . Of interest&lt;/b&gt;</title>
 <added>2019-07-31 09:59:37</added>
 <modified>2019-09-07 09:13:11</modified>
@@ -352,7 +352,7 @@
 <record visibility="public" visnote="no login required" selected="no" depth="0">
 <id>102</id>
 <type id="52" conceptID="99-52">CMS Menu Entry</type>
-<citeAs>https://heuristplus.sydney.edu.au/h5-ao/?recID=102&amp;db=Heurist_Core_Definitions</citeAs>
+<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=102&amp;db=Heurist_Core_Definitions</citeAs>
 <title>&lt;b&gt; . Other resources&lt;/b&gt;</title>
 <added>2019-07-31 09:21:45</added>
 <modified>2019-09-07 09:19:24</modified>
@@ -368,7 +368,7 @@
 <record visibility="public" visnote="no login required" selected="no" depth="0">
 <id>80</id>
 <type id="52" conceptID="99-52">CMS Menu Entry</type>
-<citeAs>https://heuristplus.sydney.edu.au/h5-ao/?recID=80&amp;db=Heurist_Core_Definitions</citeAs>
+<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=80&amp;db=Heurist_Core_Definitions</citeAs>
 <title>&lt;b&gt; . Partner 1&lt;/b&gt;</title>
 <added>2019-07-31 09:02:42</added>
 <modified>2019-09-07 09:16:42</modified>
@@ -384,7 +384,7 @@
 <record visibility="public" visnote="no login required" selected="no" depth="0">
 <id>82</id>
 <type id="52" conceptID="99-52">CMS Menu Entry</type>
-<citeAs>https://heuristplus.sydney.edu.au/h5-ao/?recID=82&amp;db=Heurist_Core_Definitions</citeAs>
+<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=82&amp;db=Heurist_Core_Definitions</citeAs>
 <title>&lt;b&gt; . Partner 2&lt;/b&gt;</title>
 <added>2019-07-31 09:03:56</added>
 <modified>2019-09-07 09:15:41</modified>
@@ -399,10 +399,10 @@
 <record visibility="public" visnote="no login required" selected="no" depth="0">
 <id>78</id>
 <type id="52" conceptID="99-52">CMS Menu Entry</type>
-<citeAs>https://heuristplus.sydney.edu.au/h5-ao/?recID=78&amp;db=Heurist_Core_Definitions</citeAs>
+<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=78&amp;db=Heurist_Core_Definitions</citeAs>
 <title>&lt;b&gt; . Partners&lt;/b&gt; [ Partner 1, Partner 2]</title>
 <added>2019-07-31 08:59:05</added>
-<modified>2019-09-07 09:10:15</modified>
+<modified>2019-11-26 21:08:14</modified>
 <workgroup id="0">public</workgroup>
 <detail conceptID="2-1" name="Page / Menu name" id="1" basename="Name / Title">Partners</detail>
 <detail conceptID="2-3" name="Menu rollover description" id="3" basename="Short summary">Acknowledgement and description of project partners (individuals and/or institutions)</detail>
@@ -417,7 +417,7 @@
 <record visibility="public" visnote="no login required" selected="no" depth="0">
 <id>138</id>
 <type id="52" conceptID="99-52">CMS Menu Entry</type>
-<citeAs>https://heuristplus.sydney.edu.au/h5-ao/?recID=138&amp;db=Heurist_Core_Definitions</citeAs>
+<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=138&amp;db=Heurist_Core_Definitions</citeAs>
 <title>&lt;b&gt; . Press&lt;/b&gt;</title>
 <added>2019-07-31 10:03:42</added>
 <modified>2019-09-07 09:13:24</modified>
@@ -431,7 +431,7 @@
 <record visibility="public" visnote="no login required" selected="no" depth="0">
 <id>114</id>
 <type id="52" conceptID="99-52">CMS Menu Entry</type>
-<citeAs>https://heuristplus.sydney.edu.au/h5-ao/?recID=114&amp;db=Heurist_Core_Definitions</citeAs>
+<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=114&amp;db=Heurist_Core_Definitions</citeAs>
 <title>&lt;b&gt; . Project aims&lt;/b&gt;</title>
 <added>2019-07-31 09:36:45</added>
 <modified>2019-09-07 09:11:15</modified>
@@ -446,7 +446,7 @@
 <record visibility="public" visnote="no login required" selected="no" depth="0">
 <id>110</id>
 <type id="52" conceptID="99-52">CMS Menu Entry</type>
-<citeAs>https://heuristplus.sydney.edu.au/h5-ao/?recID=110&amp;db=Heurist_Core_Definitions</citeAs>
+<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=110&amp;db=Heurist_Core_Definitions</citeAs>
 <title>&lt;b&gt; . Project background&lt;/b&gt;</title>
 <added>2019-07-31 09:31:47</added>
 <modified>2019-09-07 09:10:44</modified>
@@ -461,10 +461,10 @@
 <record visibility="public" visnote="no login required" selected="no" depth="0">
 <id>92</id>
 <type id="52" conceptID="99-52">CMS Menu Entry</type>
-<citeAs>https://heuristplus.sydney.edu.au/h5-ao/?recID=92&amp;db=Heurist_Core_Definitions</citeAs>
+<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=92&amp;db=Heurist_Core_Definitions</citeAs>
 <title>&lt;b&gt; . Project outputs&lt;/b&gt; [ Gallery, Publications, Tools, Methods, Teaching resources, Other resources]</title>
 <added>2019-07-31 09:13:17</added>
-<modified>2019-09-07 09:17:07</modified>
+<modified>2019-11-26 21:08:14</modified>
 <workgroup id="0">public</workgroup>
 <detail conceptID="2-1" name="Page / Menu name" id="1" basename="Name / Title">Project outputs</detail>
 <detail conceptID="2-4" name="HTML content" id="4" basename="Extended description">&lt;p&gt;A page to describe the outputs of the project - may include publications, methods, tools, public websites, community resources etc.&lt;/p&gt;
@@ -483,10 +483,10 @@
 <record visibility="public" visnote="no login required" selected="no" depth="0">
 <id>67</id>
 <type id="52" conceptID="99-52">CMS Menu Entry</type>
-<citeAs>https://heuristplus.sydney.edu.au/h5-ao/?recID=67&amp;db=Heurist_Core_Definitions</citeAs>
+<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=67&amp;db=Heurist_Core_Definitions</citeAs>
 <title>&lt;b&gt; . Project Team&lt;/b&gt; [ Directors, Staff, Volunteers]</title>
 <added>2019-07-21 21:54:06</added>
-<modified>2019-09-07 09:13:59</modified>
+<modified>2019-11-26 21:08:14</modified>
 <workgroup id="2">johnson</workgroup>
 <detail conceptID="2-1" name="Page / Menu name" id="1" basename="Name / Title">Project Team</detail>
 <detail conceptID="2-3" name="Menu rollover description" id="3" basename="Short summary">A page about members of the team involved in the project.</detail>
@@ -502,7 +502,7 @@
 <record visibility="public" visnote="no login required" selected="no" depth="0">
 <id>116</id>
 <type id="52" conceptID="99-52">CMS Menu Entry</type>
-<citeAs>https://heuristplus.sydney.edu.au/h5-ao/?recID=116&amp;db=Heurist_Core_Definitions</citeAs>
+<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=116&amp;db=Heurist_Core_Definitions</citeAs>
 <title>&lt;b&gt; . Project timeline&lt;/b&gt;</title>
 <added>2019-07-31 09:38:13</added>
 <modified>2019-09-07 09:11:26</modified>
@@ -517,7 +517,7 @@
 <record visibility="public" visnote="no login required" selected="no" depth="0">
 <id>94</id>
 <type id="52" conceptID="99-52">CMS Menu Entry</type>
-<citeAs>https://heuristplus.sydney.edu.au/h5-ao/?recID=94&amp;db=Heurist_Core_Definitions</citeAs>
+<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=94&amp;db=Heurist_Core_Definitions</citeAs>
 <title>&lt;b&gt; . Publications&lt;/b&gt;</title>
 <added>2019-07-31 09:16:00</added>
 <modified>2019-09-07 09:17:34</modified>
@@ -533,7 +533,7 @@
 <record visibility="public" visnote="no login required" selected="no" depth="0">
 <id>106</id>
 <type id="52" conceptID="99-52">CMS Menu Entry</type>
-<citeAs>https://heuristplus.sydney.edu.au/h5-ao/?recID=106&amp;db=Heurist_Core_Definitions</citeAs>
+<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=106&amp;db=Heurist_Core_Definitions</citeAs>
 <title>&lt;b&gt; . Searching&lt;/b&gt;</title>
 <added>2019-07-31 09:26:17</added>
 <modified>2019-09-07 09:46:31</modified>
@@ -549,7 +549,7 @@
 <record visibility="public" visnote="no login required" selected="no" depth="0">
 <id>140</id>
 <type id="52" conceptID="99-52">CMS Menu Entry</type>
-<citeAs>https://heuristplus.sydney.edu.au/h5-ao/?recID=140&amp;db=Heurist_Core_Definitions</citeAs>
+<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=140&amp;db=Heurist_Core_Definitions</citeAs>
 <title>&lt;b&gt; . Sources&lt;/b&gt;</title>
 <added>2019-07-31 10:05:54</added>
 <modified>2019-09-07 09:11:50</modified>
@@ -564,7 +564,7 @@
 <record visibility="public" visnote="no login required" selected="no" depth="0">
 <id>68</id>
 <type id="52" conceptID="99-52">CMS Menu Entry</type>
-<citeAs>https://heuristplus.sydney.edu.au/h5-ao/?recID=68&amp;db=Heurist_Core_Definitions</citeAs>
+<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=68&amp;db=Heurist_Core_Definitions</citeAs>
 <title>&lt;b&gt; . Staff&lt;/b&gt;</title>
 <added>2019-07-21 21:54:06</added>
 <modified>2019-09-07 09:14:25</modified>
@@ -580,7 +580,7 @@
 <record visibility="public" visnote="no login required" selected="no" depth="0">
 <id>100</id>
 <type id="52" conceptID="99-52">CMS Menu Entry</type>
-<citeAs>https://heuristplus.sydney.edu.au/h5-ao/?recID=100&amp;db=Heurist_Core_Definitions</citeAs>
+<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=100&amp;db=Heurist_Core_Definitions</citeAs>
 <title>&lt;b&gt; . Teaching resources&lt;/b&gt;</title>
 <added>2019-07-31 09:20:10</added>
 <modified>2019-09-07 09:19:00</modified>
@@ -596,7 +596,7 @@
 <record visibility="public" visnote="no login required" selected="no" depth="0">
 <id>96</id>
 <type id="52" conceptID="99-52">CMS Menu Entry</type>
-<citeAs>https://heuristplus.sydney.edu.au/h5-ao/?recID=96&amp;db=Heurist_Core_Definitions</citeAs>
+<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=96&amp;db=Heurist_Core_Definitions</citeAs>
 <title>&lt;b&gt; . Tools&lt;/b&gt;</title>
 <added>2019-07-31 09:17:48</added>
 <modified>2019-09-07 09:17:46</modified>
@@ -611,7 +611,7 @@
 <record visibility="public" visnote="no login required" selected="no" depth="0">
 <id>122</id>
 <type id="52" conceptID="99-52">CMS Menu Entry</type>
-<citeAs>https://heuristplus.sydney.edu.au/h5-ao/?recID=122&amp;db=Heurist_Core_Definitions</citeAs>
+<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=122&amp;db=Heurist_Core_Definitions</citeAs>
 <title>&lt;b&gt; . Volunteer&lt;/b&gt;</title>
 <added>2019-07-31 09:43:48</added>
 <modified>2019-09-07 09:16:01</modified>
@@ -626,7 +626,7 @@
 <record visibility="public" visnote="no login required" selected="no" depth="0">
 <id>69</id>
 <type id="52" conceptID="99-52">CMS Menu Entry</type>
-<citeAs>https://heuristplus.sydney.edu.au/h5-ao/?recID=69&amp;db=Heurist_Core_Definitions</citeAs>
+<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=69&amp;db=Heurist_Core_Definitions</citeAs>
 <title>&lt;b&gt; . Volunteers&lt;/b&gt;</title>
 <added>2019-07-21 21:54:06</added>
 <modified>2019-09-07 09:14:39</modified>
@@ -642,10 +642,10 @@
 <record visibility="public" visnote="no login required" selected="no" depth="0">
 <id>63</id>
 <type id="51" conceptID="99-51">CMS_Home</type>
-<citeAs>https://heuristplus.sydney.edu.au/h5-ao/?recID=63&amp;db=Heurist_Core_Definitions</citeAs>
+<citeAs>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?recID=63&amp;db=Heurist_Core_Definitions</citeAs>
 <title>&lt;b&gt;HOMEPAGE: Website name here&lt;/b&gt; [ Menus: About, Discover (search), News and events, Project Team, Partners, Contribute, Project outputs, How to ..., Contacts ]</title>
 <added>2019-07-21 21:54:06</added>
-<modified>2019-09-07 09:59:09</modified>
+<modified>2019-11-26 21:08:14</modified>
 <workgroup id="2">johnson</workgroup>
 <detail conceptID="2-1" name="Website title" id="1" basename="Name / Title">Website name here</detail>
 <detail conceptID="2-3" name="Website summary" id="3" basename="Short summary">Enter a concise description of the Heurist database / website here, which will be used eg. in lists of websites and in search engine discovery. 
@@ -681,12 +681,9 @@ Remember to indicate the institution and/or project, target audience and nature 
 <mimeType>image/png</mimeType>
 <fileSize units="kB">2</fileSize>
 <date>2019-07-21 21:54:06</date>
-<url>https://heuristplus.sydney.edu.au/h5-ao/?db=Heurist_Core_Definitions&amp;file=68340b50eadbc527a054473b44462de5e4a439a2</url>
+<url>https://heuristplus.sydney.edu.au/HEURIST/h5-ao/?db=Heurist_Core_Definitions&amp;file=68340b50eadbc527a054473b44462de5e4a439a2</url>
 </file>
 </detail>
-<detail conceptID="99-948" name="Keywords" id="914" basename="Keywords">Digital Humanities, Heurist, Research, Database, Open Data</detail>
-<detail conceptID="99-952" name="Show page titles" id="920" basename="Show page title" termID="6249" termConceptID="99-5446" ParentTerm="Yes-No">Yes</detail>
-<detail conceptID="2-923" name="Main menu location" id="923" basename="Main menu location" termID="6251" termConceptID="2-6251" ParentTerm="Website main menu location vocab">Top of page, horizontal</detail>
 <detail conceptID="99-742" name="Top level menus" id="912" basename="CMS Menus" isRecordPointer="true">64</detail>
 <detail conceptID="99-742" name="Top level menus" id="912" basename="CMS Menus" isRecordPointer="true">65</detail>
 <detail conceptID="99-742" name="Top level menus" id="912" basename="CMS Menus" isRecordPointer="true">128</detail>
@@ -696,6 +693,9 @@ Remember to indicate the institution and/or project, target audience and nature 
 <detail conceptID="99-742" name="Top level menus" id="912" basename="CMS Menus" isRecordPointer="true">92</detail>
 <detail conceptID="99-742" name="Top level menus" id="912" basename="CMS Menus" isRecordPointer="true">104</detail>
 <detail conceptID="99-742" name="Top level menus" id="912" basename="CMS Menus" isRecordPointer="true">118</detail>
+<detail conceptID="99-948" name="Keywords" id="914" basename="Keywords">Digital Humanities, Heurist, Research, Database, Open Data</detail>
+<detail conceptID="99-952" name="Show page titles" id="920" basename="Show page title" termID="6249" termConceptID="99-5446" ParentTerm="Yes-No">Yes</detail>
+<detail conceptID="2-923" name="Main menu location" id="923" basename="Main menu location" termID="6251" termConceptID="2-6251" ParentTerm="Website main menu location vocab">Top of page, horizontal</detail>
 </record>
 </records>
 <recordCount>39</recordCount>

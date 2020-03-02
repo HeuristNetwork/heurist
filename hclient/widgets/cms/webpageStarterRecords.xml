@@ -17,30 +17,30 @@
             <workgroup id="2">johnson</workgroup>
             <detail id="1" conceptID="2-1" basename="Name / Title" name="Menu label">Discover (search)</detail>
             <detail id="3" conceptID="2-3" basename="Short summary" name="Menu rollover description">Search functions to search and display contents of the database represented by/in this website</detail>
-            <detail id="4" conceptID="2-4" basename="Extended description" name="HTML content">&lt;p&gt;This page is set up as a container for database searches.Replace these instructions with your own introduction.&lt;/p&gt;
-                &lt;p&gt;We suggest using a table (supplied below) or if you have the knowledge, &amp;lt;div&amp;gt; ... &amp;lt;/div&amp;gt;, to contain the search field or list of saved searches&lt;br /&gt;and the results list and visualisation (map, timeline, network diagram, report etc.).&lt;/p&gt;
-                &lt;p&gt;Click on [Edit page content] in the website editor, then the &lt;span style=&quot;text-decoration: underline;&quot;&gt;edit&lt;/span&gt; link to set the list of saved searches you want to display on the left, &lt;br /&gt;and to set the parameters of each of the components eg. map in the middle and list of results on the right.&lt;/p&gt;
-                &lt;table style=&quot;height: 500px; width: 100&#37;; border-collapse: collapse; border-color: slateblue;&quot; border=&quot;3&quot;&gt;
-                &lt;tbody&gt;
-                &lt;tr&gt;
-                &lt;td style=&quot;width: 22.3844&#37;;&quot;&gt;
-                &lt;div id=&quot;mywidget_4743&quot; class=&quot;mceNonEditable&quot; style=&quot;background: white; position: relative; top: 0px; border: px solid gray; height: 100&#37;; width: 100&#37;;&quot; data-heurist-app-id=&quot;heurist_SearchTree&quot;&gt;
-                &lt;div class=&quot;widget-design-header&quot; style=&quot;padding: 10px;&quot;&gt;&lt;img style=&quot;vertical-align: middle;&quot; src=&quot;https://heuristplus.sydney.edu.au/h5-alpha/hclient/assets/h4_icon_35x35.png&quot; height=&quot;22&quot; /&gt; &lt;strong&gt;saved searches&lt;/strong&gt;&lt;a class=&quot;edit&quot; style=&quot;padding: 0 10px;&quot; title=&quot;Click to edit&quot; href=&quot;#&quot;&gt;edit&lt;/a&gt;  &lt;a class=&quot;remove&quot; href=&quot;#&quot;&gt;remove&lt;/a&gt; height: 100&#37; width: 100&#37;&lt;/div&gt;
-                &lt;span class=&quot;widget-options&quot; style=&quot;font-style: italic; display: none;&quot;&gt;{&quot;buttons_mode&quot;:true,&quot;allowed_UGrpID&quot;:&quot;3&quot;,&quot;init_at_once&quot;:true,&quot;search_realm&quot;:&quot;sr1&quot;}&lt;/span&gt;&lt;/div&gt;
-                &lt;/td&gt;
-                &lt;td style=&quot;width: 46.8701&#37;;&quot;&gt;
-                &lt;div id=&quot;mywidget_5097&quot; class=&quot;mceNonEditable&quot; style=&quot;background: white; position: relative; border: 0px solid gray; height: 600px; width: 100&#37;;&quot; data-heurist-app-id=&quot;heurist_Map&quot;&gt;
-                &lt;div class=&quot;widget-design-header&quot; style=&quot;padding: 10px;&quot;&gt;&lt;img style=&quot;vertical-align: middle;&quot; src=&quot;https://heuristplus.sydney.edu.au/h5-alpha/hclient/assets/h4_icon_35x35.png&quot; height=&quot;22&quot; /&gt; &lt;strong&gt;map/timeline&lt;/strong&gt;&lt;a class=&quot;edit&quot; style=&quot;padding: 0 10px;&quot; title=&quot;Click to edit&quot; href=&quot;#&quot;&gt;edit&lt;/a&gt;  &lt;a class=&quot;remove&quot; href=&quot;#&quot;&gt;remove&lt;/a&gt; height: 600px width: 100&#37;&lt;/div&gt;
-                &lt;span class=&quot;widget-options&quot; style=&quot;font-style: italic; display: none;&quot;&gt;{&quot;layout_params&quot;:{&quot;notimeline&quot;:false,&quot;nocluster&quot;:false,&quot;editstyle&quot;:true,&quot;controls&quot;:&quot;legend,bookmark,geocoder,selector,print&quot;,&quot;published&quot;:1,&quot;template&quot;:&quot;&quot;},&quot;leaflet&quot;:true,&quot;init_at_once&quot;:true,&quot;search_realm&quot;:&quot;sr1&quot;}&lt;/span&gt;&lt;/div&gt;
-                &lt;/td&gt;
-                &lt;td style=&quot;width: 30.7454&#37;;&quot;&gt;
-                &lt;div id=&quot;mywidget_1018&quot; class=&quot;mceNonEditable&quot; style=&quot;background: white; position: relative; border: 0px solid gray; height: 600px; width: 100&#37;;&quot; data-heurist-app-id=&quot;heurist_resultList&quot;&gt;
-                &lt;div class=&quot;widget-design-header&quot; style=&quot;padding: 10px;&quot;&gt;&lt;img style=&quot;vertical-align: middle;&quot; src=&quot;https://heuristplus.sydney.edu.au/h5-alpha/hclient/assets/h4_icon_35x35.png&quot; height=&quot;22&quot; /&gt; &lt;strong&gt;results list&lt;/strong&gt;&lt;a class=&quot;edit&quot; style=&quot;padding: 0 10px;&quot; title=&quot;Click to edit&quot; href=&quot;#&quot;&gt;edit&lt;/a&gt;  &lt;a class=&quot;remove&quot; href=&quot;#&quot;&gt;remove&lt;/a&gt; height: 600px width: 100&#37;&lt;/div&gt;
-                &lt;span class=&quot;widget-options&quot; style=&quot;font-style: italic; display: none;&quot;&gt;{&quot;show_toolbar&quot;:true,&quot;show_counter&quot;:true,&quot;show_viewmode&quot;:true,&quot;show_inner_header&quot;:false,&quot;recordview_onselect&quot;:true,&quot;show_url_as_link&quot;:true,&quot;view_mode&quot;:&quot;list&quot;,&quot;init_at_once&quot;:true,&quot;search_realm&quot;:&quot;sr1&quot;}&lt;/span&gt;&lt;/div&gt;
-                &lt;/td&gt;
-                &lt;/tr&gt;
-                &lt;/tbody&gt;
-                &lt;/table&gt;</detail>
+            <detail id="4" conceptID="2-4" basename="Extended description" name="HTML content">&lt;p&gt;&lt;strong&gt;Remove thse instructions&lt;/strong&gt;, or replace them with your instructions for users.&lt;/p&gt;
+&lt;p&gt;This page is set up as a container for database searches. We suggest using&lt;/p&gt;
+&lt;div&gt;s (or a table) to position the widgets: &lt;br /&gt;search, results list and visualisation (map, timeline, network diagram, report etc.).
+&lt;p&gt; &lt;/p&gt;
+&lt;p&gt;Click on [Edit page content] in the website editor, then the &lt;span style=&quot;text-decoration:underline;&quot;&gt;edit&lt;/span&gt; link to set the list of saved searches you want to display on the left, &lt;br /&gt;and to set the parameters of each of the components eg. map in the middle and list of results on the right.&lt;/p&gt;
+
+&lt;div style=&quot;position:relative;height:500px;width:100&#37;;border-color:#6A5ACD;&quot;&gt;
+
+&lt;div id=&quot;mywidget_4743&quot; class=&quot;mceNonEditable&quot; style=&quot;background:#FFFFFF;position:absolute;top:0px;width:310px;bottom:0px;&quot; data-heurist-app-id=&quot;heurist_SearchTree&quot;&gt;
+&lt;div class=&quot;widget-design-header&quot; style=&quot;padding:10px;&quot;&gt;&lt;img style=&quot;vertical-align:middle;&quot; src=&quot;https://heuristplus.sydney.edu.au/h5-alpha/hclient/assets/h4_icon_35x35.png&quot; alt=&quot;h4_icon_35x35.png&quot; height=&quot;22&quot; /&gt; &lt;strong&gt;saved searches&lt;/strong&gt;&lt;a class=&quot;edit&quot; style=&quot;padding:0 10px;&quot; title=&quot;Click to edit&quot; href=&quot;#&quot;&gt;edit&lt;/a&gt;  &lt;a class=&quot;remove&quot; href=&quot;#&quot;&gt;remove&lt;/a&gt; height: 100&#37; width: 100&#37;&lt;/div&gt;
+&lt;span class=&quot;widget-options&quot; style=&quot;font-style:italic;display:none;&quot;&gt;{&quot;buttons_mode&quot;:true,&quot;allowed_UGrpID&quot;:&quot;3&quot;,&quot;init_at_once&quot;:true,&quot;search_realm&quot;:&quot;sr1&quot;}&lt;/span&gt;&lt;/div&gt;
+
+&lt;div class=&quot;ent_wrapper&quot; style=&quot;top:0px;bottom:0px;left:310px;&quot;&gt;
+
+&lt;div id=&quot;mywidget_5097&quot; class=&quot;mceNonEditable&quot; style=&quot;background:#FFFFFF;position:absolute;top:0px;width:50&#37;;left:0px;bottom:0;&quot; data-heurist-app-id=&quot;heurist_Map&quot;&gt;
+&lt;div class=&quot;widget-design-header&quot; style=&quot;padding:10px;&quot;&gt;&lt;img style=&quot;vertical-align:middle;&quot; src=&quot;https://heuristplus.sydney.edu.au/h5-alpha/hclient/assets/h4_icon_35x35.png&quot; alt=&quot;h4_icon_35x35.png&quot; height=&quot;22&quot; /&gt; &lt;strong&gt;map/timeline&lt;/strong&gt;&lt;a class=&quot;edit&quot; style=&quot;padding:0 10px;&quot; title=&quot;Click to edit&quot; href=&quot;#&quot;&gt;edit&lt;/a&gt;  &lt;a class=&quot;remove&quot; href=&quot;#&quot;&gt;remove&lt;/a&gt; height: 600px width: 100&#37;&lt;/div&gt;
+&lt;span class=&quot;widget-options&quot; style=&quot;font-style:italic;display:none;&quot;&gt;{&quot;layout_params&quot;:{&quot;notimeline&quot;:false,&quot;nocluster&quot;:false,&quot;editstyle&quot;:true,&quot;controls&quot;:&quot;legend,bookmark,geocoder,selector,print&quot;,&quot;published&quot;:1,&quot;template&quot;:&quot;&quot;},&quot;leaflet&quot;:true,&quot;init_at_once&quot;:true,&quot;search_realm&quot;:&quot;sr1&quot;}&lt;/span&gt;&lt;/div&gt;
+
+&lt;div id=&quot;mywidget_1018&quot; class=&quot;mceNonEditable&quot; style=&quot;background:#FFFFFF;position:absolute;top:0px;width:50&#37;;right:1px;bottom:0;&quot; data-heurist-app-id=&quot;heurist_resultList&quot;&gt;
+&lt;div class=&quot;widget-design-header&quot; style=&quot;padding:10px;&quot;&gt;&lt;img style=&quot;vertical-align:middle;&quot; src=&quot;https://heuristplus.sydney.edu.au/h5-alpha/hclient/assets/h4_icon_35x35.png&quot; alt=&quot;h4_icon_35x35.png&quot; height=&quot;22&quot; /&gt; &lt;strong&gt;results list&lt;/strong&gt;&lt;a class=&quot;edit&quot; style=&quot;padding:0 10px;&quot; title=&quot;Click to edit&quot; href=&quot;#&quot;&gt;edit&lt;/a&gt;  &lt;a class=&quot;remove&quot; href=&quot;#&quot;&gt;remove&lt;/a&gt; height: 600px width: 100&#37;&lt;/div&gt;
+&lt;span class=&quot;widget-options&quot; style=&quot;font-style:italic;display:none;&quot;&gt;{&quot;show_toolbar&quot;:true,&quot;show_counter&quot;:true,&quot;show_viewmode&quot;:true,&quot;show_inner_header&quot;:false,&quot;recordview_onselect&quot;:true,&quot;show_url_as_link&quot;:true,&quot;view_mode&quot;:&quot;list&quot;,&quot;init_at_once&quot;:true,&quot;search_realm&quot;:&quot;sr1&quot;}&lt;/span&gt;&lt;/div&gt;
+
+&lt;/div&gt;
+&lt;/div&gt;</detail>
             <detail id="914" conceptID="2-914" basename="Keywords" name="Keywords">Search, Filter, Facets, Facet search, Advanced search, Dynamic search</detail>
             <detail id="928" conceptID="2-928" basename="Type of page" name="Type of page" termID="6254" termConceptID="2-6254" ParentTerm="Type of web page/menu">Standalone web page</detail>
             <reversePointer id="912" conceptID="2-912" type="CMS Menus" name="Top level menus">63</reversePointer>
