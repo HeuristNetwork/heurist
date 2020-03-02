@@ -103,7 +103,7 @@ window.hWin.HEURIST4.geo = {
                     function _isvalid_pnt(pnt){
                             var isValid = ($.isArray(pnt) && pnt.length==2 && 
                                 $.isNumeric(pnt[0]) && $.isNumeric(pnt[1]) &&
-                                Math.abs(pnt[0])<=180.0 && Math.abs(pnt[1])<=90.0);
+                                Math.abs(pnt[0])<=360.0 && Math.abs(pnt[1])<=90.0);
                             if(isValid && resdata._extent){
                                 if(pnt[0]<resdata._extent.xmin) resdata._extent.xmin = pnt[0];
                                 if(pnt[0]>resdata._extent.xmax) resdata._extent.xmax = pnt[0];
@@ -635,7 +635,7 @@ window.hWin.HEURIST4.geo = {
             
             var isValid = ($.isArray(item) && item.length==2 && 
                 $.isNumeric(item[0][0]) && $.isNumeric(item[0][1]) &&
-                Math.abs(item[0][1])<=180.0 && Math.abs(item[0][0])<=90.0);
+                Math.abs(item[0][1])<=360.0 && Math.abs(item[0][0])<=90.0);
             
             if(isValid){
                 if (item[0][0] < minLat) minLat = item[0][0];
@@ -656,7 +656,7 @@ window.hWin.HEURIST4.geo = {
 
         var isValid = ($.isArray(extent) && extent.length==2 && 
                 $.isNumeric(extent[0][0]) && $.isNumeric(extent[0][1]) &&
-                Math.abs(extent[0][1])<=180.0 && Math.abs(extent[0][0])<=90.0);
+                Math.abs(extent[0][1])<=360.0 && Math.abs(extent[0][0])<=90.0);
         if(isValid){
             var geojson = {type:'Feature', geometry:{type:'Polygon', 
                     coordinates:
