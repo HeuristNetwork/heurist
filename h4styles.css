@@ -991,9 +991,9 @@ div .selected_last{
 {
     display:none !important;    
 }
-/*
-.horizontal .recordDiv .recordTitle{
-    height: 61%;
+
+.horizontal .recordDiv .recordTitleInPlaceOfThumb{
+    height: 95%;
     left: 10px;
     right: 10px;
     bottom: 0px;        
@@ -1002,7 +1002,10 @@ div .selected_last{
     font-size: larger;
     text-align: center;
 }
-*/
+.horizontal .recordDiv .rectypeThumb{
+    opacity: 0.2;
+}
+
 
 /* dashboard */
 .thumbs .dashboard.recordDiv .recordTitle {

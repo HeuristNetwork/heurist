@@ -790,7 +790,8 @@ $.widget( "heurist.resultList", {
         if(window.hWin.HEURIST4.util.isempty(newmode) || allowed.indexOf(newmode)<0) {
             newmode = window.hWin.HAPI4.get_prefs('rec_list_viewmode_'+this.options.entityName);
         }
-        //TEMP if(newmode=='thumbs3') newmode = 'horizontal';
+        //TEMP 
+        //if(newmode=='thumbs3') newmode = 'horizontal';
 
         if(!this.div_content.hasClass(newmode) || forceapply===true){
             
@@ -1188,13 +1189,14 @@ $.widget( "heurist.resultList", {
 
 
         //get thumbnail if available for this record, or generic thumbnail for record type
-        var html_thumb = '';
+        var html_thumb = '', rectypeTitleClass = '';
         if(fld('rec_ThumbnailURL')){
             html_thumb = '<div class="recTypeThumb realThumb" title="'+
                 recTitle_strip_all+'" style="background-image: url(&quot;'
                 + fld('rec_ThumbnailURL') + '&quot;);opacity:1"></div>';
         }else{
-            html_thumb = '<div class="recTypeThumb" title="'
+            rectypeTitleClass = 'recordTitleInPlaceOfThumb';
+            html_thumb = '<div class="recTypeThumb rectypeThumb" title="'
                 +recTitle_strip_all+'" style="background-image: url(&quot;'
                 + window.hWin.HAPI4.iconBaseURL + 'thumb/th_' + rectypeID + '.png&quot;);"></div>';
         }
@@ -1279,7 +1281,7 @@ $.widget( "heurist.resultList", {
 
 
         // it is useful to display the record title as a rollover in case the title is too long for the current display area
-        + '<div title="'+(is_logged?'dbl-click to edit: ':'')+recTitle_strip_all+'" class="recordTitle">'
+        + '<div title="'+(is_logged?'dbl-click to edit: ':'')+recTitle_strip_all+'" class="recordTitle '+rectypeTitleClass+'">'
         +     (this.options.show_url_as_link && fld('rec_URL') ?("<a href='"+fld('rec_URL')+"' target='_blank'>"
             + recTitle_strip1 + "</a>") :recTitle_strip2)  
         + '</div>'
