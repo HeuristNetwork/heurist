@@ -1464,7 +1464,7 @@ $.widget( "heurist.editing_input", {
             }
                 
             $gicon = $('<span class="ui-icon ui-icon-triangle-1-e sel_link" '
-            +'style="display:inline-block;vertical-align:top;margin-left:8px;margin-top:5px;cursor:hand"></span>')
+            +'style="display:inline-block;vertical-align:top;margin-left:8px;margin-top:2px;cursor:hand"></span>')
             .insertBefore( $input );
             
             $input.addClass('entity_selector').css({'margin-left': '-24px'});
@@ -2988,7 +2988,7 @@ console.log('onpaste');
     //
     // recreate input elements and assign values
     //
-    setValue: function(values){
+    setValue: function(values, make_as_nochanged){
 
         //clear ALL previous inputs
         this.input_cell.find('.input-div').remove();
@@ -3007,7 +3007,7 @@ console.log('onpaste');
                 var inpt_id = this._addInput(values[i]);
             }
         }
-        if (isReadOnly) {
+        if (isReadOnly || (make_as_nochanged==true)) {
             this.options.values = values;
         }
 
@@ -3035,6 +3035,13 @@ console.log('onpaste');
         {
             if($input.attr('radiogroup')>0){
                 res = $input.find('input:checked').val();
+            }else if(this.detailType=='boolean'){
+                if($.isArray(this.configMode) && this.configMode.length==2) {
+                    res = this.configMode[ $input.is(':checked')?0:1 ];
+                }else{
+                    res = $input.is(':checked') ?$input.val() :0;        
+                }       
+                
             }else{
                 res = $input.val();    
             }

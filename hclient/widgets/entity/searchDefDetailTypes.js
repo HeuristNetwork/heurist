@@ -106,9 +106,11 @@ $.widget( "heurist.searchDefDetailTypes", $.heurist.searchEntity, {
             
             this.input_sort_type = this.element.find('#input_sort_type');
             if(this.input_sort_type.val()=='recent'){
-                request['sort:rty_Modified'] = '-1' 
+                request['sort:dty_Modified'] = '-1' 
+            }else if(this.input_sort_type.val()=='type'){
+                request['sort:dty_Type'] = '1' 
             }else{
-                request['sort:rty_Name'] = '1';   
+                request['sort:dty_Name'] = '1';   
             }
   
             if(this.options.use_cache){

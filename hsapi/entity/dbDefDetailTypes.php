@@ -249,9 +249,14 @@ class DbDefDetailTypes extends DbEntityBase
             }
             
             //$query = $query.", dty_LocallyModified=IF(dty_OriginatingDBID>0,1,0)"
-            //!!!! todo $this->records[$idx]['dty_LocallyModified'] = 
+            if(@$this->records[$idx]['dty_LocallyModified']==null){
+                $this->records[$idx]['dty_LocallyModified'] = 0; //default value for new
+            }
+            if(@$this->records[$idx]['dty_IDInOriginatingDB']==''){
+                $this->records[$idx]['dty_IDInOriginatingDB'] = 0;
+            }
 
-            $this->records[$idx]['dty_Modified'] = null; //reset
+            $this->records[$idx]['dty_Modified'] = date('Y-m-d H:i:s'); //reset
 
             $this->records[$idx]['is_new'] = (!(@$this->records[$idx]['dty_ID']>0));
         }

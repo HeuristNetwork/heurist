@@ -29,6 +29,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     _keepYPos: 0,
     
     //this.options.selectOnSave - special case when open edit record from select popup
+    //this.options.allowAdminToolbar  - if false hide ModifyStructure, Edit title mask and others
 
     usrPreferences:{},
     defaultPrefs:{
@@ -271,7 +272,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                          $__dlg.parent('.ui-dialog').css({
                                 top: dlged.position().top+dlged.height()-200,
                                 left:that._toolbar.find('#btnPrev').position().left});    
-                    }else{
+                    }else if(this._toolbar) {
                         this._toolbar.find('#divNav').html( (idx+1)+'/'+order.length);
                         
                         window.hWin.HEURIST4.util.setDisabled(this._toolbar.find('#btnPrev'), (idx==0));
@@ -545,28 +546,30 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             
             if(this._toolbar){
                 this._toolbar.find('.ui-dialog-buttonset').css({'width':'100%','text-align':'right'});
+            
+                if(this._toolbar.find('#divNav3').length===0){
+                        //padding-left:10em;
+                        $('<div id="divNav3" style="font-weight:bold;display:inline-block;text-align:right">Save then</div>')
+                            .insertBefore(this._toolbar.find('#btnRecDuplicate'));
+                }
             }
             
-            
-            if(this._toolbar.find('#divNav3').length===0){
-                    //padding-left:10em;
-                    $('<div id="divNav3" style="font-weight:bold;display:inline-block;text-align:right">Save then</div>')
-                        .insertBefore(this._toolbar.find('#btnRecDuplicate'));
-            }
             
             var recset = this.recordList.resultList('getRecordSet');
             if(recset && recset.length()>1 && recID>0){
-                this._toolbar.find('#btnPrev').css({'display':'inline-block'});
-                this._toolbar.find('#btnNext').css({'display':'inline-block'});
-                if(this._toolbar.find('#divNav').length===0){
-                    $('<div id="divNav2" style="display:inline-block;font-weight:bold;padding:0.8em 1em;text-align:right">Step through filtered subset</div>')
+                if(this._toolbar){
+                    this._toolbar.find('#btnPrev').css({'display':'inline-block'});
+                    this._toolbar.find('#btnNext').css({'display':'inline-block'});
+                    if(this._toolbar.find('#divNav').length===0){
+                        $('<div id="divNav2" style="display:inline-block;font-weight:bold;padding:0.8em 1em;text-align:right">Step through filtered subset</div>')
                         .insertBefore(this._toolbar.find('#btnPrev'));
                         
-                    $('<div id="divNav" style="display:inline-block;font-weight:bold;padding-top:0.8em;min-width:40px;text-align:center">')
+                        $('<div id="divNav" style="display:inline-block;font-weight:bold;padding-top:0.8em;min-width:40px;text-align:center">')
                         .insertBefore(this._toolbar.find('#btnNext'));
+                    }
                 }
                 this._navigateToRec(0); //reload
-            }else{
+            }else if(this._toolbar){
                 this._toolbar.find('#btnPrev').hide();
                 this._toolbar.find('#btnNext').hide();
                 this._toolbar.find('#divNav').hide();
@@ -1774,6 +1777,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         if(response==null || response.status == window.hWin.ResponseStatus.OK){
             
             //response==null means reload/refresh edit form
+            var allowCreateIndependentChildRecord = false;
             
             if(response){ // && response.length()>0
                 that._currentEditRecordset = new hRecordSet(response.data);
@@ -1786,6 +1790,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 }else{
                     that._isInsert = response.is_insert;     
                 }                
+                allowCreateIndependentChildRecord = (response.allowCreateIndependentChildRecord!==true);
             }
             
             var rectypeID = that._getField('rec_RecTypeID');
@@ -1796,7 +1801,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             that._currentEditID = that._getField('rec_ID');;
             that._currentEditRecTypeID = rectypeID;
             
-            if(that._isInsert && response.allowCreateIndependentChildRecord!==true &&!(that.options.parententity>0)){
+            if(that._isInsert && allowCreateIndependentChildRecord &&!(that.options.parententity>0)){
                 //special verification - prevent unparented records
                 //IMHO it should be optional
                 // 1. if rectype is set as target for one of Parent/child pointer fields 
@@ -1824,7 +1829,7 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
 [{text:'Cancel', click: function(){ $dlg.dialog( "close" ); that.closeEditDialog(); }},
  {text:'Create independent record', click: function(){
                             $dlg.dialog( "close" ); 
-                            response.allowCreateIndependentChildRecord = true;
+                            allowCreateIndependentChildRecord = true;
                             that._initEditForm_step4(response)   }} ],{title:'Child record type'}        
                      );
                      
@@ -2172,7 +2177,7 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
                 that._editing.setDisabled(true);
                 
                 eles = dlged.find('.ui-layout-east > .editFormSummary');
-                if(no_access){
+                if(no_access && eles.length>0){
                     eles.css({'background-image': 'url('+window.hWin.HAPI4.baseURL+'hclient/assets/non-editable-watermark.png)'});                    
                 }else{
                     eles.css({'background':'lightgray'});    
@@ -2197,9 +2202,12 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
                         dlged.find('.ui-layout-center > div').css({'background':'none'});
                         dlged.find('.ui-layout-center').css({'background':'none'});
                         var eles = dlged.find('.ui-layout-east > .editFormSummary')
-                        eles.css({'background':'none'});
+                        if(eles.length>0){
+                            eles.css({'background':'none'});   
+                            eles.find('.coverall-div-bare').remove();
+                        }
                         //remove screen
-                        eles.find('.coverall-div-bare').remove();
+                        
                     });
                     ele.find('span').hide(); //how no enough rights
                 }
@@ -2530,29 +2538,30 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
         }
         
         //show/hide save buttons
-        var ele = this._toolbar;
-        /*ele.find('#btnRecCancel').css('visibility', mode);
-        ele.find('#btnRecSaveAndNew').css('visibility', mode);
-        ele.find('#btnRecSave').css('visibility', mode);
-        ele.find('#btnRecSaveAndClose').css('visibility', mode);*/
+        if(this._toolbar){
+            var ele = this._toolbar;
+            /*ele.find('#btnRecCancel').css('visibility', mode);
+            ele.find('#btnRecSaveAndNew').css('visibility', mode);
+            ele.find('#btnRecSave').css('visibility', mode);
+            ele.find('#btnRecSaveAndClose').css('visibility', mode);*/
+            
+            //window.hWin.HEURIST4.util.setDisabled(ele.find('#btnRecDuplicate'), (mode=='hidden'));
+            //window.hWin.HEURIST4.util.setDisabled(ele.find('#btnRecSaveAndNew'), (mode=='hidden'));
+            
+            window.hWin.HEURIST4.util.setDisabled(ele.find('#btnRecCancel'), (mode=='hidden'));
+            window.hWin.HEURIST4.util.setDisabled(ele.find('#btnRecSaveAndClose'), (mode=='hidden'));
+            
+            //window.hWin.HEURIST4.util.setDisabled(ele.find('#btnRecSave'), (mode=='hidden'));
+            
+            //save buton is always enabled - just greyout in nonchanged state
+            if(mode=='hidden'){
+                ele.find('#btnRecSave').css({opacity: '.35'});  //addClass('ui-state-disabled'); 
+            }else{
+                ele.find('#btnRecSave').css({opacity: '1'}); //.removeClass('ui-state-disabled'); // ui-button-disabled
+            }
         
-        //window.hWin.HEURIST4.util.setDisabled(ele.find('#btnRecDuplicate'), (mode=='hidden'));
-        //window.hWin.HEURIST4.util.setDisabled(ele.find('#btnRecSaveAndNew'), (mode=='hidden'));
-        
-        window.hWin.HEURIST4.util.setDisabled(ele.find('#btnRecCancel'), (mode=='hidden'));
-        window.hWin.HEURIST4.util.setDisabled(ele.find('#btnRecSaveAndClose'), (mode=='hidden'));
-        
-        //window.hWin.HEURIST4.util.setDisabled(ele.find('#btnRecSave'), (mode=='hidden'));
-        
-        //save buton is always enabled - just greyout in nonchanged state
-        if(mode=='hidden'){
-            ele.find('#btnRecSave').css({opacity: '.35'});  //addClass('ui-state-disabled'); 
-        }else{
-            ele.find('#btnRecSave').css({opacity: '1'}); //.removeClass('ui-state-disabled'); // ui-button-disabled
         }
-        
-        
-        //ele.find('#btnRecReload').css('visibility', !mode);
+
     },
     
     //
@@ -2566,7 +2575,8 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
         var ishelp_on = (this.usrPreferences['help_on']==true || this.usrPreferences['help_on']=='true');
         var isfields_on = this.usrPreferences['optfields']==true || this.usrPreferences['optfields']=='true';
 
-        if(this.element.find('.chb_opt_fields').length==0){  //not inited yet
+        if( this.element.find('.chb_opt_fields').length==0 )
+        {  //not inited yet
 
             $('<div style="display:table;min-width:575px;width:100%">'
              +'<div style="display:table-cell;text-align:left;padding:20px 0px 5px 35px;">'
@@ -2620,7 +2630,8 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
             var that = this;    
 
             var btn_css = {'font-weight': 'bold', color:'#7D9AAA', background:'#ecf1fb' };
-            if(window.hWin.HAPI4.is_admin()){
+            if(window.hWin.HAPI4.is_admin() && this.options.allowAdminToolbar!==false)
+            {
                 
                 this.element.find('.btns-admin-only').show();
 

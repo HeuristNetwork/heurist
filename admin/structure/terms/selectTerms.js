@@ -89,8 +89,10 @@ function SelectTerms(_isFilterMode, _isWindowMode) {
 				var _dt_id = Hul.getUrlParameter('dtname', location.search);
                 
 				if(!Hul.isnull(_dt_id)){
-					if(_dt_id<0){
-						Dom.get("dtyName").innerHTML = "<h2 class='dtyName'>New Field Type</h2>";
+                    if(isNaN(Number(_dt_id))){
+                        Dom.get("dtyName").innerHTML = '<h2 class="dtyName">'+_dt_id+'</h2>';
+                    }else if(_dt_id<0){
+						Dom.get("dtyName").innerHTML = '<h2 class="dtyName">New Field Type</h2>';
 					}else{
 						Dom.get("dtyName").innerHTML = _getTitle(_dt_id);
 					}

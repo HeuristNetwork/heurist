@@ -173,7 +173,7 @@ function doReport($row){
 	$params["mode"] 	= $format;
 	$params["publish"] 	= $publish;
 	$params["rps_id"] 	= $row['rps_ID'];
-
+    
 	executeSmartyTemplate($system, $params); //in showReps
 }
 ?>

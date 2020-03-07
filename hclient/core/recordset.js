@@ -1309,7 +1309,8 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
         */
         each: function( callback ){
         
-            for(recID in records){
+            for(var i=0; i<order.length; i++){
+                var recID = order[i];
                 var record = records[recID];
                 var res = callback.call(that, recID, record);
                 if(res === false){
@@ -1318,7 +1319,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
             }
             
         },
-        
+            
         /**
         * Returns recordSet with the same field and structure definitions
         * 
@@ -1403,7 +1404,9 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                         }else
                         if(struct[idx]['dtID']==fieldname){
                               var res = struct[idx]['dtFields']['dty_Type'];  
-                              return (res=='resource' || res=='enum')?'integer':res;
+                              return (res=='resource' 
+                                    || (res=='enum' && that.entityName=='Records') )
+                                        ?'integer':res;
                         }
                     }
                     return null;
@@ -1428,7 +1431,8 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                         
                         if(dataTypes[fieldName]=='freetext' 
                             || dataTypes[fieldName]=='blocktext' 
-                            || dataTypes[fieldName]=='integer')
+                            || dataTypes[fieldName]=='integer'
+                            || dataTypes[fieldName]=='enum')
                         {
                             request[fieldName] = request[fieldName].toLowerCase();
                             
@@ -1448,7 +1452,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                                 request[fieldName] = request[fieldName].substring(1);
                                 isgreat[fieldName] = true;
                             }else 
-                            if(dataTypes[fieldName]=='integer'){
+                            if(dataTypes[fieldName]=='integer' || dataTypes[fieldName]=='enum'){
                                 isexact[fieldName] = true;    
                             }
                             
@@ -1473,7 +1477,8 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                     if(fieldName.indexOf('sort:')<0 && request.hasOwnProperty(fieldName)){
                         if(dataTypes[fieldName]=='freetext' 
                             || dataTypes[fieldName]=='blocktext'
-                            || dataTypes[fieldName]=='integer'){
+                            || dataTypes[fieldName]=='integer'
+                            || dataTypes[fieldName]=='enum'){
                                 
                             var fldvalue = this.fld(record,fieldName);
                             
@@ -1482,7 +1487,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                                 break;                            
                             }else{
                                 var cmp_value;
-                                if(dataTypes[fieldName]=='integer'){
+                                if(dataTypes[fieldName]=='integer' || dataTypes[fieldName]=='float'){
                                     fldvalue = Number(fldvalue);
                                     cmp_value = Number(request[fieldName]);
                                 }else{

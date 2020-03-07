@@ -1186,6 +1186,7 @@ prof =Profile
 
                     );
                 }else{
+                    //take from cache
                     if($.isFunction(callback)){
                         callback(entity_data[entityName]);
                     }else{

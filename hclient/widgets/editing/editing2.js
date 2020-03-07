@@ -184,6 +184,12 @@ function hEditing(_options) {
                 if( $.isPlainObject(fields[idx]) && fields[idx].groupType){ //this is group
                 //  window.hWin.HEURIST4.util.isArrayNotEmpty(fields[idx].children)
                     
+                    if(fields[idx].groupHidden){ //this group is hidden all fields goes to previous group
+
+                        __createGroup(fields[idx].children, groupContainer, fieldContainer);
+                        continue;                        
+                    }
+                    
                     if(fields[idx].groupType != currGroupType){ //create new group container and init previous
                         //init previous one 
                         if(groupEle!=null){
@@ -236,14 +242,24 @@ function hEditing(_options) {
                     }else{
                         if(is_header_visible){
                              $('<h4>').text(headerText).addClass('separator').appendTo(groupContainer);
-                             var div_prompt = $('<div>').text(headerHelpText).css('padding-left','80px').addClass('heurist-helper1').appendTo(groupContainer);
+                             
+                             var div_prompt = $('<div>').text(headerHelpText).css('padding-left','80px')
+                                .addClass('heurist-helper1').appendTo(groupContainer);
                              //see applyCompetencyLevel
                              //if(window.hWin.HAPI4.get_prefs('help_on')!=1){div_prompt.hide();}
                         }
                         fieldContainer.appendTo(groupContainer);
                     }
+
+                    if(headerHelpText!=''){
+                         var div_prompt = $('<div>').text(headerHelpText).css('padding-left','80px')
+                            .addClass('heurist-helper1')
+                            .appendTo(fieldContainer);
+                    }
                         
                     __createGroup(fields[idx].children, groupContainer, fieldContainer);
+                    
+                    
                 }//has children
                 else{ //this is entry field 
                 
@@ -359,7 +375,7 @@ function hEditing(_options) {
     }
 
     //
-    //
+    // returns array with at least one empty value
     //
     function _getValue(dtID){
         var idx, ele, values = [];
@@ -547,13 +563,15 @@ function hEditing(_options) {
         },
 
         //
+        // is_changed == false do not set flag as modified
         //
-        //
-        setFieldValueByName:function(fieldName, value){
+        setFieldValueByName:function(fieldName, value, is_changed){
             var ele = _getFieldByName(fieldName);
             if(ele && ele.editing_input('instance')){
-                ele.editing_input('setValue', $.isArray(value)?value:[value]);
-                ele.editing_input('isChanged', true);
+                ele.editing_input('setValue', $.isArray(value)?value:[value], (is_changed===false));
+                if(is_changed!==false){
+                    ele.editing_input('isChanged', true);    
+                }
             }
         },
         

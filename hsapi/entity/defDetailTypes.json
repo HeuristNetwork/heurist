@@ -58,22 +58,13 @@
                     }
                 },
                 {
-                    "dtID": "dty_ExtendedDescription",
-                    "dtFields":{
-                        "dty_Type":"blocktext",
-                        "dty_Size":5000,
-                        "rst_DisplayWidth":60,
-                        "rst_DisplayName":"Extended description:",
-                        "rst_DisplayHelpText": "An extended description of the content of this field type and references to any standards used"
-                    }
-                },
-                {
                     "dtID": "dty_Type",
                     "dtFields":{
                         "dty_Type":"enum",
                         "rst_DisplayName":"Data type:",
                         "rst_DisplayHelpText": "The type of data to be recorded in this field. Note: in most cases this cannot be changed once set", 
                         "rst_RequirementType":"required",
+                        "rst_DefaultValue":"freetext",
                         "rst_FieldConfig":[
                             {"key":"blocktext", "title":"Memo (multi-line)"},
                             {"key":"boolean", "title":"Boolean (T/F)"},
@@ -97,6 +88,7 @@
                         "dty_Role":"virtual",
                         "rst_DisplayName":"Input type:",
                         "rst_DisplayHelpText": "Define specific subtype", 
+                        "rst_DefaultValue":"text",
                         "rst_FieldConfig":["text","password","color"]
                     }
                 },
@@ -107,7 +99,8 @@
                         "dty_Role":"virtual",
                         "rst_DisplayName":"Input type:",
                         "rst_DisplayHelpText": "Define specific subtype", 
-                        "rst_FieldConfig":["text","query","editor"]
+                        "rst_DefaultValue":"text",
+                        "rst_FieldConfig":["text","query","editor","symbology"]
                     }
                 },
                 {
@@ -121,26 +114,23 @@
                 },
                 {  "dtID": "dty_Mode_enum",
                     "dtFields":{
-                        "dty_Type":"enum",
+                        "dty_Type":"freetext",
                         "dty_Role":"virtual",
                         "rst_DisplayName":"Vocabulary (terms):",
-                        "rst_DisplayHelpText": "The set of terms which may be selected for this field", 
-                        "rst_FieldConfig": {"entity":"DefTerms","filter_group":"enum","button_browse":true}
-                    }
-                },
-                {
-                    "dtID": "dty_Mode_resource",
-                    "dtFields":{
-                        "dty_Type":"resource",
-                        "dty_Role":"virtual",
-                        "rst_DisplayName":"Target record types:",
-                        "rst_DisplayHelpText": "The set of record types to which this field can point (for pointer fields and relationship markers. If undefined, it can point to any record type.", 
-                        "rst_FieldConfig": {"entity":"DefRecTypes","csv":true}
+                        "rst_DisplayHelpText": "The set of terms which may be selected for this field"
                     }
                 },
                 {  "dtID": "dty_JsonTermIDTree",
                     "dtFields":{
-                        "dty_Type":"enum",
+                        "dty_Type":"freetext",
+                        "rst_DisplayName":"Terms:",
+                        "rst_Display":"hidden"
+                    }
+                },
+                {  "dtID": "dty_TermIDTreeNonSelectableIDs",
+                    "dtFields":{
+                        "dty_Type":"freetext",
+                        "rst_DisplayName":"Term headers:",
                         "rst_Display":"hidden"
                     }
                 },
@@ -148,22 +138,38 @@
                     "dtID": "dty_PtrTargetRectypeIDs",
                     "dtFields":{
                         "dty_Type":"resource",
-                        "rst_Display":"hidden"
+                        "rst_Display":"hidden",
+                        "rst_DisplayName":"Target record types:",
+                        "rst_DisplayHelpText": "The set of record types to which this field can point (for pointer fields and relationship markers. If undefined, it can point to any record type.", 
+                        "rst_FieldConfig": {"entity":"DefRecTypes","csv":true}
                     }
                 },
                 {
                     "groupHeader": "Additional",
                     "groupType": "accordion",
-                    "groupStye": null,
+                    "groupHelpText":"",
+                    "groupHidden": false,
+                    "groupStyle": null,
                     "children":[
                 
                 {
+                    "dtID": "dty_ExtendedDescription",
+                    "dtFields":{
+                        "dty_Type":"blocktext",
+                        "dty_Size":5000,
+                        "rst_DisplayWidth":60,
+                        "rst_DisplayName":"Extended description:",
+                        "rst_DisplayHelpText": "An extended description of the content of this field type and references to any standards used"
+                    }
+                },
+                {
                     "dtID": "dty_DetailTypeGroupID",
                     "dtFields":{
-                        "dty_Type":"enum",
+                        "dty_Type":"resource",
                         "rst_DisplayName":"Group:",
                         "rst_DisplayHelpText": "Field type group", 
-                        "rst_FieldConfig": {"entity":"DefDetailTypeGrpous","button_browse":true}
+                        "rst_FieldConfig": {"entity":"defDetailTypeGroups","button_browse":true},
+                        "rst_RequirementType":"required"
                     }
                 },
                 {
@@ -174,7 +180,7 @@
                         "rst_DisplayHelpText": "'Reserved' for the system, cannot be changed; 'Approved' for community standards; 'Pending' for work in progress; 'Open' for freely modifiable/personal record types", 
                         "rst_DisplayExtendedDescription":"",
                         "rst_DisplayWidth":25,
-                        "rst_DefaultValue":"",
+                        "rst_DefaultValue":"open",
                         "rst_RequirementType":"optional",
                         "rst_MaxValues":1,
                         "rst_FieldConfig":["reserved","approved","pending","open"]
@@ -186,9 +192,9 @@
                         "dty_Type":"enum",
                         "rst_DisplayName":"Non-owner visibility:",
                         "rst_DisplayHelpText": "Hidden = visible only to owners, Viewable = any logged in user, Public = visible to non-logged in viewers", 
-                        "rst_DisplayExtendedDescription":"",
+                        "rst_DisplayExtendedDescription":"viewable",
                         "rst_DisplayWidth":25,
-                        "rst_DefaultValue":"",
+                        "rst_DefaultValue":"viewable",
                         "rst_RequirementType":"optional",
                         "rst_MaxValues":1,
                         "rst_FieldConfig":["hidden","viewable","public"]
@@ -201,9 +207,10 @@
                         "rst_DisplayName":"Show in lists:",
                         "rst_DisplayHelpText": "Show this field type in pulldown lists etc. (always visible in field management screen)", 
                         "rst_DisplayExtendedDescription":"",
-                        "rst_DefaultValue":"",
+                        "rst_DefaultValue":"1",
                         "rst_RequirementType":"optional",
-                        "rst_MaxValues":1
+                        "rst_MaxValues":1,
+                        "rst_FieldConfig":["1","0"]
                     }
                 },
                 {
@@ -218,7 +225,8 @@
                 {  "dtID": "dty_LocallyModified",
                     "dtFields":{
                         "dty_Type":"integer",
-                        "rst_Display":"hidden"
+                        "rst_Display":"hidden",
+                        "rst_DefaultValue":"0"
                     }
                 },
                 {  "dtID": "dty_OriginatingDBID",
@@ -230,8 +238,8 @@
                 {  "dtID": "dty_IDInOriginatingDB",
                     "dtFields":{
                         "dty_Type":"integer",
-                        "rst_Display":"hidden"
-                    }
+                        "rst_Display":"hidden",
+                        "rst_DefaultValue":0                   }
                 }
                 ]}                
      ]

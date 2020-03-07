@@ -1,5 +1,5 @@
 /**
-* manageDefDetailTypes.js - main widget to manage defDetailTypes
+* manageDefDetailTypes.js - main widget for field types
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -34,19 +34,20 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         
         //this.options.select_return_mode = 'recordset';
         this.options.edit_need_load_fullrecord = false; //true;
-        this.options.edit_height = 640;
         this.options.height = 640;
+        this.options.edit_width = 800;
+        this.options.edit_height = 640;
 
         if(this.options.edit_mode=='editonly'){
             this.options.edit_mode = 'editonly';
             this.options.select_mode = 'manager';
             this.options.layout_mode = 'editonly';
-            this.options.width = 790;
             //this.options.height = 640;
         }else
         //for selection mode set some options
         if(this.options.select_mode!='manager'){
-            this.options.width = (isNaN(this.options.width) || this.options.width<750)?750:this.options.width;                           //this.options.edit_mode = 'none';
+            this.options.width = (isNaN(this.options.width) || this.options.width<750)?750:this.options.width;                           
+            //this.options.edit_mode = 'none';
         }
         if(this.options.edit_mode == 'inline' && this.options.select_mode=='manager'){
             this.options.width = 1290;
@@ -68,30 +69,6 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
     
     },
         
-    /*  
-    // invoked from _init after load entity config    
-    //
-    _initControls: function() {
-        
-        if(!this._super()){
-            return false;
-        }
-
-        this._entityIDfield = 'dty_ID';
-
-        // init search header
-        this.searchForm.searchDefDetailTypes(this.options);
-            
-        this._on( this.searchForm, {
-                "searchdefdetailtypesonresult": this.updateRecordList
-                });
-        this.recordList.css('top','5.5em');
-                
-        this.recordList.resultList('option', 'show_toolbar', false);
-    },
-    */
-    
-    
     //  
     // invoked from _init after load entity config    
     //
@@ -489,8 +466,26 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                        for(var idx in virtual_fields){
                            $(virtual_fields[idx]).hide();
                        }
+//this._editing.getFieldByName('dty_TermIDTreeNonSelectableIDs').hide();
+//this._editing.getFieldByName('dty_JsonTermIDTree').hide();
                        
-                       this._editing.getFieldByName('dty_Mode_'+dt_type).show();
+                       var ele = this._editing.getFieldByName('dty_PtrTargetRectypeIDs');
+                       
+                       if(dt_type!=='resource'){
+                           ele.hide();
+                           ele = this._editing.getFieldByName('dty_Mode_'+dt_type);
+                           
+                           if(dt_type=='enum'){
+//this._editing.getFieldByName('dty_TermIDTreeNonSelectableIDs').show();
+//this._editing.getFieldByName('dty_JsonTermIDTree').show();
+                                this._activateEnumControls(ele);
+                           }
+                       }
+
+                       if(ele && ele.length>0) ele.show();
+                       
+                       
+                       
                     
                 }
                 
@@ -501,6 +496,282 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
 
     },    
     
+    _activateEnumControls: function( ele ){
+        
+            var ele = ele.find('.input-div');
+            
+            if(ele.find('#enumVocabulary').length>0) return; //already inited
+            
+            this.enum_container = ele;
+            
+            $('<div style="line-height:2ex;padding-top:4px">'
+                    +'<label style="text-align:left;line-height:19px;vertical-align:top">'
+                    +'<input type="radio" value="vocabulary" name="enumType" style="vertical-align: top;">&nbsp;Use a vocabulary</label> '
+                    +'<div id="enumVocabulary" style="display:inline-block;padding-left:4px;">'
+                        +'<select id="selVocab" class="sel_width"></select>'
+                        +'<span id="termsPreview1"></span>'
+                        +'<div style="font-size:smaller">'
+                            +'<a href="#" id="add_vocabulary">add a vocabulary</a>&nbsp;'
+                            +'<a href="#" id="add_terms" style="padding-left:10px">add terms to vocabulary</a>&nbsp;'
+                            +'<a href="#" id="show_terms_1" style="padding-left:10px">edit terms tree</a>'
+                        +'</div>'
+                    +'</div>'
+            +'</div><div style="padding-top:4px">'
+                    +'<label style="text-align:left;line-height: 12px;">'
+                    +'<input type="radio" value="individual" name="enumType" style="margin-top:0px">&nbsp;Select terms individually</label> '
+                    +'<div  id="enumIndividual" style="display:none;padding-left:4px;">'
+                        +'<input type="button" value="Select terms" id="btnSelectTerms" style="margin-right:4px"/>'                    
+                        +'<span id="termsPreview2"></span>'
+                        +'<a href="#" id="show_terms_2">edit terms tree</a>'
+                    +'</div>'
+                    +'<div style="font-style:italic;padding: 4px 0px">'
+                        +'Warning: Advanced users only - list must be updated manually if relevant new terms added</div>'
+            +'</div>').appendTo(this.enum_container);
+                
+            //create event listeneres
+            this._on(this.enum_container.find('input[name="enumType"]'),{change:
+                function(event){
+                    if($(event.target).val()=='individual'){
+                        this.enum_container.find('#enumIndividual').css('display','inline-block');//show();
+                        this.enum_container.find('#enumVocabulary').hide();
+                    }else{
+                        this.enum_container.find('#enumIndividual').hide();
+                        this.enum_container.find('#enumVocabulary').css('display','inline-block');//show();
+                    }
+                }});
+            this._on(this.enum_container.find('#add_vocabulary'),{click: this._onAddVocabOrTerms});
+            this._on(this.enum_container.find('#add_terms'),{click: this._onAddVocabOrTerms});
+            this._on(this.enum_container.find('#show_terms_1'),{click: this._showOtherTerms});
+            this._on(this.enum_container.find('#show_terms_2'),{click: this._showOtherTerms});
+            
+            this.enum_container.find('#btnSelectTerms').button();
+            this._on(this.enum_container.find('#btnSelectTerms'),{click: this._onSelectTerms});
+            
+            this._recreateTermsVocabSelector();
+            //this._recreateTermsPreviewSelector();
+    },
+    
+    /**
+    * _onAddVocabOrTerms
+    *
+    * Add new vocabulary or add child to currently selected
+    */
+    _onAddVocabOrTerms: function(event){
+        
+        var is_add_vocab = ($(event.target).attr('id')=='add_vocabulary');
+
+        
+        var term_type = this._editing.getValue('dty_Type')[0];
+        var dt_name = this._editing.getValue('dty_Name')[0];
+
+        if(term_type!="enum"){
+            term_type="relation";
+        }
+
+        var vocab_id =  this.enum_container.find("#selVocab").val();
+        var is_frist_time = true;
+        var that = this;
+
+        var sURL = window.hWin.HAPI4.baseURL +
+        "admin/structure/terms/editTermForm.php?treetype="+term_type
+            +"&parent="+(is_add_vocab?0:vocab_id)
+            +"&db="+window.hWin.HAPI4.database;
+            
+        window.hWin.HEURIST4.msg.showDialog(sURL, {
+
+            "close-on-blur": false,
+            "no-resize": true,
+            noClose: true, //hide close button
+            title: 'Edit Vocabulary',
+            height: 340,
+            width: 700,
+            onpopupload:function(dosframe){
+                //define name for new vocabulary as field name + vocab
+                var ele = $(dosframe.contentDocument).find('#trmName');
+                if(is_add_vocab && is_frist_time){
+                    is_frist_time = false;
+                    if( !window.hWin.HEURIST4.util.isempty(dt_name)){
+                        ele.val( dt_name+' vocab' );    
+                    }
+                }
+                ele.focus();
+            },
+            callback: function(context) {
+                if(context!="") {
+
+                    if(context=="ok"){    //after edit term tree
+                        that._recreateTermsVocabSelector();
+                        //that._recreateTermsPreviewSelector();
+                    }else if(!window.hWin.HEURIST4.util.isempty(context)) { //after add new vocab
+                        that._editing.setFieldValueByName('dty_JsonTermIDTree', context);
+                        that._editing.setFieldValueByName('dty_TermIDTreeNonSelectableIDs', '');
+                        that._recreateTermsVocabSelector();
+                        //that._recreateTermsPreviewSelector();
+                    }
+                }
+            }
+        });
+
+    },
+
+    /**
+    * _onSelectTerms
+    *
+    * Shows a popup window where user can select terms to create a term tree as wanted
+    */
+    _onSelectTerms: function(){
+
+        var dt_name = this._editing.getValue('dty_Name')[0];
+        var allTerms = this._editing.getValue('dty_JsonTermIDTree')[0];
+        var disTerms = this._editing.getValue('dty_TermIDTreeNonSelectableIDs')[0];
+        
+        var term_type = this._editing.getValue('dty_Type')[0];
+        if(term_type!="enum"){
+            term_type="relation";
+        }
+
+        var sURL = window.hWin.HAPI4.baseURL +
+        "admin/structure/terms/selectTerms.html?dtname="+dt_name+"&datatype="+term_type
+            +"&all="+allTerms+"&dis="+disTerms+"&db="+window.hWin.HAPI4.database;
+            
+        var that = this;
+
+        window.hWin.HEURIST4.msg.showDialog(sURL, {
+            "close-on-blur": false,
+            "no-resize": true,
+            noClose: true, //hide close button
+            title: 'Select terms',
+            height: 500,
+            width: 750,
+            callback: function(editedTermTree, editedDisabledTerms) {
+                if(editedTermTree || editedDisabledTerms) {
+                    //update hidden fields
+                    that._editing.setFieldValueByName('dty_JsonTermIDTree', editedTermTree);
+                    that._editing.setFieldValueByName('dty_TermIDTreeNonSelectableIDs', editedDisabledTerms);
+                    that._recreateTermsPreviewSelector();
+                }
+            }
+        });
+
+    },
+
+    _showOtherTerms:function(event){
+
+        var term_type = this._editing.getValue('dty_Type')[0];
+        if(term_type!="enum"){
+            term_type="relation";
+        }
+
+        var sURL = window.hWin.HAPI4.baseURL + "admin/structure/terms/editTerms.php?"+
+        "popup=1&treetype="+term_type+"&db="+window.hWin.HAPI4.database;
+
+        var vocab_id = 0;
+
+        var is_vocab = ($(event.target).attr('id')=='show_terms_1');
+        if(is_vocab){
+            var vocab_id =  this.enum_container.find("#selVocab").val();
+            sURL = sURL + '&vocabid='+vocab_id;
+        }
+
+        var that = this;
+        
+        window.hWin.HEURIST4.msg.showDialog(sURL, {
+            "close-on-blur": false,
+            "no-resize": false,
+            title: (term_type=='relation')?'Manage Relationship types':'Manage Terms',
+            height: (term_type=='relation')?820:780,
+            width: 950,
+            afterclose: function() {
+                that._recreateTermsVocabSelector();
+                //_recreateTermsPreviewSelector();
+            }
+        });
+
+    },    
+    
+    //
+    //
+    //
+    _recreateTermsVocabSelector: function(){
+        
+        var allTerms = this._editing.getValue('dty_JsonTermIDTree')[0];
+        
+        var term_type = this._editing.getValue('dty_Type')[0];
+        if(term_type!="enum"){
+            term_type="relation";
+        }
+        
+        var defaultTermID = null;
+        if(window.hWin.HEURIST4.util.isNumber(allTerms)){
+            defaultTermID = allTerms; //vocabulary
+            this.enum_container.find('input[name="enumType"][value="vocabulary"]').prop('checked',true).trigger('change');
+                    
+            var orig_selector = this.enum_container.find("#selVocab");
+                    
+            var selnew = window.hWin.HEURIST4.ui.createTermSelectExt2(orig_selector[0], 
+            {vocabsOnly:true, datatype:term_type, topOptions:'select...', useHtmlSelect:false, defaultTermID:defaultTermID })
+
+            this._off(orig_selector, 'change');
+            this._on(orig_selector, {change: function(event){
+                this._editing.setFieldValueByName('dty_JsonTermIDTree', $(event.target).val());
+                this._editing.setFieldValueByName('dty_TermIDTreeNonSelectableIDs', '');
+                this._recreateTermsPreviewSelector();
+            }});
+            
+        }else{
+            this.enum_container.find('input[name="enumType"][value="individual"]').prop('checked',true).trigger('change');
+        }
+        
+        
+        //el_sel.onchange =  _changeVocabulary;
+        //el_sel.style.maxWidth = '120px';
+        this._recreateTermsPreviewSelector();
+        
+    },
+    
+    //
+    //
+    //
+    _recreateTermsPreviewSelector: function(){
+
+        var allTerms = this._editing.getValue('dty_JsonTermIDTree')[0];
+
+        //remove old selector
+        var preview_sel = this.enum_container.find("#termsPreview1");
+        
+        preview_sel.empty();
+        this.enum_container.find('#termsPreview2').empty();
+
+        if(!window.hWin.HEURIST4.util.isempty(allTerms)) {
+
+            var disTerms = this._editing.getValue('dty_TermIDTreeNonSelectableIDs')[0];
+            
+            var term_type = this._editing.getValue('dty_Type')[0];
+            if(term_type!="enum"){
+                term_type="relation";
+            }
+            
+            var new_selector = window.hWin.HEURIST4.ui.createTermSelectExt2(null,
+                {datatype:term_type, termIDTree:allTerms, headerTermIDsList:disTerms,
+                    defaultTermID:null, topOptions:false, supressTermCode:true, useHtmlSelect:false});
+            
+            new_selector.css({'backgroundColor':'#cccccc','min-width':'120px','max-width':'120px','margin':'0px 4px'})
+                    .change(function(event){event.target.selectedIndex=0;}).show();
+            
+            //append to first preview
+            preview_sel
+                .append($('<label style="width:60px;min-width:60px">Preview</label>'))
+                .append(new_selector); 
+            preview_sel.css({'padding-left':'10px'});
+            //append to second preview    
+            $('#termsPreview2')
+                .append($('<label style="width:60px;min-width:60px">Preview</label>'))
+                .append(new_selector.clone());
+        }
+        
+    },
+
+    //--------------------------------------------------------------------------
     //
     // update list after save (refresh)
     //
