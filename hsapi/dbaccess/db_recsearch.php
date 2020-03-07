@@ -1056,7 +1056,7 @@
         if(@$params['q']){
 
             $svsID = null;
-            $query_json = json_decode(@$params['q'], true);
+            $query_json = is_array(@$params['q']) ?$params['q'] :json_decode(@$params['q'], true);
             if(is_array($query_json) && count($query_json)>0){
                 $svsID = @$query_json['svs'];
             }else{
