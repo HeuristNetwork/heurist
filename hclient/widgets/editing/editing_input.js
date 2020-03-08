@@ -54,6 +54,7 @@ $.widget( "heurist.editing_input", {
     //newvalues:{},  //keep actual value for resource (recid) and file (ulfID)
     detailType:null,
     configMode:null, //configuration settings, mostly for enum and resource types (from field rst_FieldConfig)
+    customClasses:null, //custom classes to manipulate visibility and styles in editing
     
     isFileForRecord:false,
     entity_image_already_uploaded: false,
@@ -80,6 +81,14 @@ $.widget( "heurist.editing_input", {
             this.options.rectypeID = this.options.recordset.fld(this.options.recordset.getFirstRecord(), 'rec_RecTypeID');
         }
 
+        
+        //custom classes to manipulate visibility and styles in editing space separated
+        this.customClasses = this.f('rst_Class'); 
+        if(!window.hWin.HEURIST4.util.isempty(this.customClasses)){
+            this.element.addClass(this.customClasses);
+        }
+        
+        //configuration settings, mostly for enum and resource types (from field rst_FieldConfig)
         this.configMode = this.f('rst_FieldConfig');
         if(!window.hWin.HEURIST4.util.isempty(this.configMode)){
             this.configMode = window.hWin.HEURIST4.util.isJSON(this.configMode);
@@ -420,7 +429,12 @@ $.widget( "heurist.editing_input", {
                                 this.f('dty_Type')=='blocktext' || this.f('dty_Type')=='resource'))   
                                     val = this.f('dty_Type')=='freetext'?20:80;  //default minimum width for input fields in ex
         }
-        return val;
+        if(window.hWin.HEURIST4.util.isempty(val)){
+            return null;
+        }else{
+            return val;    
+        }
+        
 
         /*}else{
         var rfrs = this.options.rectypes.typedefs[this.options.rectypeID].dtFields[this.options.dtID];

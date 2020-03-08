@@ -491,15 +491,41 @@ function hEditing(_options) {
     // returns array of input elements for field value
     // 
     function _getFieldByValue(fieldName, value){
+        var idx, ele, ress = [], val;
+        if(value==='[not empty]'){
+            for (idx in editing_inputs) {
+                ele = $(editing_inputs[idx]);
+                val = ele.editing_input('f', fieldName)
+                if(!window.hWin.HEURIST4.util.isempty(val)){
+                    ress.push(ele);
+                }
+            }
+        }else{
+            for (idx in editing_inputs) {
+                ele = $(editing_inputs[idx]);
+                if(ele.editing_input('f', fieldName)  == value){
+                    ress.push(ele);
+                }
+            }
+        }
+        
+        return ress;
+    }
+
+    //
+    // returns array of input elements for field value
+    // 
+    function _getFieldByClass(className){
         var idx, ele, ress = [];
         for (idx in editing_inputs) {
             ele = $(editing_inputs[idx]);
-            if(ele.editing_input('f', fieldName)  == value){
+            if(ele.hasClass(className)){
                 ress.push(ele);
             }
         }
         return ress;
     }
+
         
     //
     // returns array of input elements for given field
@@ -587,6 +613,10 @@ function hEditing(_options) {
         //
         getFieldByValue:function(fieldName, value){
             return _getFieldByValue(fieldName, value);
+        },
+        
+        getFieldByClass:function(className){
+            return _getFieldByClass(className);
         },
         
         isModified: function(){

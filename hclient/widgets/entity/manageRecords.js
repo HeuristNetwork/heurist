@@ -1861,9 +1861,8 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
                 that._as_dialog.dialog('option','title', dialog_title); 
             }
                 
-             
             
-            
+       
             //@todo - move it inside editing
             //convert structure - 
             var fields = window.hWin.HEURIST4.util.cloneJSON(that.options.entity.fields);
@@ -1894,7 +1893,20 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
                 fi_help =  fi['rst_DisplayHelpText'],
                 fi_reqtype =  fi['rst_RequirementType'],
                 fi_ptrs = fi['rst_PtrFilteredIDs'],
-                fi_maxval = fi['rst_MaxValues']; //need for proper repeat
+                fi_maxval = fi['rst_MaxValues'], //need for proper repeat
+                fi_extdesc = fi['rst_DisplayExtendedDescription']; //keep UI structure
+
+
+            //THERE ARE 2 ways of grouping 
+            // 1) NEW: UI is stored in  DT_ENTITY_STRUCTURE
+            // 2) OLD: structure is plain is defined by "separator" fields
+            var treeData = false;
+            var DT_ENTITY_STRUCTURE  = Number(window.hWin.HAPI4.sysinfo['dbconst']['DT_ENTITY_STRUCTURE']);
+            if(DT_ENTITY_STRUCTURE>0 && rfrs[DT_ENTITY_STRUCTURE]){
+                treeData = window.hWin.HEURIST4.util.isJSON(rfrs[DT_ENTITY_STRUCTURE][fi_extdesc]);    
+            }
+
+
             
             var s_fields = []; //sorted fields
             var fields_ids = [];
@@ -1905,7 +1917,9 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
                     fields_ids.push(Number(dt_ID));  //fields in structure
                 }
             }
-
+            
+            //----------------
+            
             //add non-standard fields that are not in structure
             var field_in_recset = that._currentEditRecordset.getDetailsFieldTypes();
 
@@ -2019,6 +2033,7 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
                     }else{
                     
                         if(addhead==0){                    
+                            //fake header
                             var rfr = that._getFakeRectypeField(9999999);
                             rfr[fi_name] = 'Non-standard fields for this record type';
                             rfr[fi_type] = 'separator';
@@ -2035,7 +2050,7 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
 
             //sort by order
             s_fields.sort(function(a,b){ return a[fi_order]<b[fi_order]?-1:1});
-
+            
             
             var group_fields = null;
             

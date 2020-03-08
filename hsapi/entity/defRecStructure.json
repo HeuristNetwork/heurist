@@ -79,7 +79,7 @@
                         "rst_DisplayWidth":60,
                         "rst_DisplayHeight":3,
                         "rst_DisplayHelpText": "Use &lt;br&gt; for new line and &lt;a href=&quot;web page URL&quot; target=_blank&gt;Help&lt;/a&gt; for a link to a help page.", 
-                        "rst_RequirementType":"required"
+                        "rst_RequirementType":"recommended"
                     }
                 },
                 {
@@ -109,7 +109,6 @@
                 {  "dtID": "rst_MaxValues",
                     "dtFields":{
                         "dty_Type":"integer",
-                        "dty_Depend":"1",
                         "rst_Display":"hidden",
                         "rst_DefaultValue":"1",
                         "rst_DisplayName":"Maximum values:",
@@ -145,7 +144,7 @@
                     "dtFields":{
                         "dty_Type":"integer",
                         "dty_Size":3,
-                        "dty_Depend":"1",
+                        "rst_Class":"freetext blocktext",
                         "rst_DisplayName": "Field width:",
                         "rst_DisplayHelpText": "Display width of this field in the data entry form (does not limit maximum data length)",
                         "rst_RequirementType":"optional",
@@ -158,7 +157,7 @@
                     "dtFields":{
                         "dty_Type":"integer",
                         "dty_Size":3,
-                        "dty_Depend":"1",
+                        "rst_Class":"blocktext",
                         "rst_DisplayName": "Height:",
                         "rst_DisplayHelpText": "Display height in rows of this field in the data entry form",
                         "rst_RequirementType":"optional",
@@ -170,6 +169,7 @@
                     "dtFields":{
                         "dty_Type":"enum",
                         "dty_Role":"virtual",
+                        "rst_Class":"enum relmarker relationtype",
                         "rst_Display":"hidden",
                         "rst_DisplayName":"Terms list preview:",
                         "rst_DisplayHelpText": "The list of terms available for selection as values for this field"
@@ -196,7 +196,7 @@
                     "dtFields":{
                         "dty_Type":"resource",
                         "dty_Role":"virtual",
-                        "dty_Depend":"1",
+                        "rst_Class":"resource relmarker",
                         "rst_Display":"hidden",
                         "rst_DisplayName":"Can point to:",
                         "rst_DisplayHelpText": "Determines which record types this pointer field can point to. It is preferable to select target record types than to leave the pointer unconstrained", 
@@ -208,7 +208,7 @@
                     "dtFields":{
                         "dty_Type":"enum",
                         "rst_Display":"hidden",
-                        "dty_Depend":"1",
+                        "rst_Class":"resource",
                         "rst_DisplayName":"Pointer mode:",
                         "rst_DisplayHelpText": "", 
                         "rst_DefaultValue":"addorbrowse",
@@ -222,8 +222,9 @@
                     "dtID": "rst_PointerBrowseFilter",
                     "dtFields":{
                         "dty_Type":"freetext",
-                        "dty_Depend":"1",
+                        "rst_Class":"resource",
                         "rst_Display":"hidden",
+                        "rst_DisplayWidth":60,
                         "rst_DisplayName":"Filter browse list:",
                         "rst_DisplayHelpText": "Filter and/or sort list of potential target records (eg. by type, by date)"
                     }
@@ -232,7 +233,7 @@
                     "dtID": "rst_CreateChildIfRecPtr",
                     "dtFields":{
                         "dty_Type":"boolean",
-                        "dty_Depend":"1",
+                        "rst_Class":"resource",
                         "rst_Display":"hidden",
                         "rst_DisplayName":"Create new records as children:",
                         "rst_DisplayHelpText": "New records created via this field become child records. Click &quot;i&quot; for further information.",
@@ -242,7 +243,6 @@
                 {  "dtID": "rst_DefaultValue",
                     "dtFields":{
                         "dty_Type":"freetext",
-                        "dty_Depend":"1",
                         "rst_Display":"hidden",
                         "rst_DisplayName":"Default Value:",
                         "rst_DisplayHelpText": "Select or enter the default value to be inserted automatically into new records"
@@ -252,6 +252,7 @@
                     "dtFields":{
                         "dty_Type":"enum",
                         "dty_Role":"virtual",
+                        "rst_Class":"separator",
                         "rst_DisplayName":"Group/separator type:",
                         "rst_DefaultValue": "group",
                         "rst_FieldConfig": ["group","accordion","tab"]
@@ -263,51 +264,51 @@
                     "groupStyle": null,
                     "children":[
                 
-                {
-                    "dtID": "rst_DisplayExtendedDescription",
-                    "dtFields":{
-                        "dty_Type":"blocktext",
-                        "dty_Size":5000,
-                        "rst_DisplayWidth":60,
-                        "rst_DisplayName":"Extended description:",
-                        "rst_DisplayHelpText": "An extended description of the content of this field type and references to any standards used"
+                    {
+                        "dtID": "rst_DisplayExtendedDescription",
+                        "dtFields":{
+                            "dty_Type":"blocktext",
+                            "dty_Size":5000,
+                            "rst_DisplayWidth":60,
+                            "rst_DisplayName":"Extended description:",
+                            "rst_DisplayHelpText": "An extended description of the content of this field type and references to any standards used"
+                        }
+                    },
+                    {
+                        "dtID": "rst_Status",
+                        "dtFields":{
+                            "dty_Type":"enum",
+                            "rst_DisplayName":"Status:",
+                            "rst_DisplayHelpText": "Determines the degree of authority assigned to this field - reserved is used for internal Heurist definitions, open is the lowest level", 
+                            "rst_DisplayExtendedDescription":"",
+                            "rst_DisplayWidth":25,
+                            "rst_DefaultValue":"open",
+                            "rst_RequirementType":"optional",
+                            "rst_MaxValues":1,
+                            "rst_FieldConfig":["approved","pending","open"]
+                        }
+                    },
+                    {
+                        "dtID": "rst_NonOwnerVisibility",
+                        "dtFields":{
+                            "dty_Type":"enum",
+                            "rst_DisplayName":"Non-owner visibility:",
+                            "rst_DisplayHelpText": "Determines whether the field can be viewed by users other than the record owner/owner group", 
+                            "rst_DisplayExtendedDescription":"viewable",
+                            "rst_DisplayWidth":25,
+                            "rst_DefaultValue":"viewable",
+                            "rst_RequirementType":"optional",
+                            "rst_MaxValues":1,
+                            "rst_FieldConfig":["hidden","viewable","public","pending"]
+                        }
+                    },
+                    {  "dtID": "rst_LocallyModified",
+                        "dtFields":{
+                            "dty_Type":"integer",
+                            "rst_Display":"hidden",
+                            "rst_DefaultValue":"0"
+                        }
                     }
-                },
-                {
-                    "dtID": "rst_Status",
-                    "dtFields":{
-                        "dty_Type":"enum",
-                        "rst_DisplayName":"Status:",
-                        "rst_DisplayHelpText": "Determines the degree of authority assigned to this field - reserved is used for internal Heurist definitions, open is the lowest level", 
-                        "rst_DisplayExtendedDescription":"",
-                        "rst_DisplayWidth":25,
-                        "rst_DefaultValue":"open",
-                        "rst_RequirementType":"optional",
-                        "rst_MaxValues":1,
-                        "rst_FieldConfig":["approved","pending","open"]
-                    }
-                },
-                {
-                    "dtID": "rst_NonOwnerVisibility",
-                    "dtFields":{
-                        "dty_Type":"enum",
-                        "rst_DisplayName":"Non-owner visibility:",
-                        "rst_DisplayHelpText": "Determines whether the field can be viewed by users other than the record owner/owner group", 
-                        "rst_DisplayExtendedDescription":"viewable",
-                        "rst_DisplayWidth":25,
-                        "rst_DefaultValue":"viewable",
-                        "rst_RequirementType":"optional",
-                        "rst_MaxValues":1,
-                        "rst_FieldConfig":["hidden","viewable","public","pending"]
-                    }
-                },
-                {  "dtID": "rst_LocallyModified",
-                    "dtFields":{
-                        "dty_Type":"integer",
-                        "rst_Display":"hidden",
-                        "rst_DefaultValue":"0"
-                    }
-                }
                 ]}                
      ]
 }

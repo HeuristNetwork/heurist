@@ -1046,7 +1046,9 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
             if(idx>-1){
                 res[fields[idx]] = record[fields[idx]];
             }
-            res['d'] = window.hWin.HEURIST4.util.cloneJSON(record['d']); 
+            if(record['d']){
+                res['d'] = window.hWin.HEURIST4.util.cloneJSON(record['d']);     
+            }
         }else{
             res = window.hWin.HEURIST4.util.cloneJSON(record);
         }
@@ -1191,6 +1193,11 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
             _setFieldValue(record, fldName, value);  
         },
 
+        setFldById: function(recID, fldName, value){
+            if(records[recID])
+                _setFieldValue(records[recID], fldName, value);  
+        },
+        
         //
         // assign value of field from one record to another
         //
@@ -1716,6 +1723,9 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
             return rectypes;
         },
         
+        //
+        // set fields defintions
+        //
         getFields: function(){
             return fields;
         },
@@ -1899,6 +1909,15 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                 return this.addRecord(recID, record);
             }
         },
+        
+        //
+        // returns record as JSON object
+        //
+        getRecord:function(recID){
+            var record = this.getById(recID);
+            return _getAllFields(record);
+        },
+
         
         getDetailsFieldTypes:function(){
             return _getDetailsFieldTypes();    

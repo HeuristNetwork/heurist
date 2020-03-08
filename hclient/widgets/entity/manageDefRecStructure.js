@@ -26,6 +26,8 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
     //    
     _init: function() {
         
+        this.DT_ENTITY_STRUCTURE = window.hWin.HAPI4.sysinfo['dbconst']['DT_ENTITY_STRUCTURE'];
+        
         this.options.rty_ID = 4;//is required
         this.options.previewEditor = null; // record editor for preview
         
@@ -188,15 +190,19 @@ dty_TermIDTreeNonSelectableIDs
         //if such treeview data is missed creates new one based on header/separators and rst_DisplayOrder
 
         var treeData = false;
+        var record = recset.getById(this.DT_ENTITY_STRUCTURE);
+        if(record){
+            treeData = window.hWin.HEURIST4.util.isJSON(recset.fld(record, 'rst_DisplayExtendedDescription'));    
+        }
+        
+        /*
         recset.each(function(dty_ID, record){
-            
-            if(recset.fld(record, 'dty_Type')=='separator'){
+            if(recset.fld(record, 'dty_Type')=='separator' && dty_ID==this.DT_ENTITY_STRUCTURE){
                 treeData = window.hWin.HEURIST4.util.isJSON(recset.fld(record, 'rst_DisplayExtendedDescription'));
-                if(treeData!==false){
-                    return false;
-                }
+                return false; //exit
             }
         });
+        */
         //if such treeview data is missed creates new one based on header/separators and rst_DisplayOrder
         if(!treeData){
             //order by rts_DisplayOrder
@@ -211,16 +217,23 @@ dty_TermIDTreeNonSelectableIDs
             treeData = [];
             
             var groupIdx = -1;
+            var seps = [];
             
             recset.each(function(dty_ID, record){
                 
                 var node = {title: recset.fld(record,'rst_DisplayName'), key: dty_ID};
                 
                 if(recset.fld(record, 'dty_Type')=='separator'){
+                    
+                    node['key'] = 9000000+seps.length;
+                    //debug node['title'] = node['key']+' '+node['title'];
                     node['folder'] = true;
+                    node['data'] = {help:recset.fld(record,'rst_DisplayHelpText'), type:'group'};
                     node['children'] = [];
                     groupIdx = treeData.length;
                     treeData.push( node );
+                    seps.push(dty_ID);
+                    
                 }else{
                     if(groupIdx<0){
                         treeData.push( node );    
@@ -229,6 +242,32 @@ dty_TermIDTreeNonSelectableIDs
                     }
                 }
             });
+            
+            //replace old separator with new fake ones with id>9M
+            for(var i=0; i<seps.length; i++){
+               var record = recset.getById(seps[i]);
+               recset.removeRecord(seps[i]); 
+               var newid = 9000000+i;
+               recset.setFld(record,'rst_ID',newid);
+               recset.setFld(record,'rst_DetailTypeID',newid);
+               recset.setFld(record,'rst_SeparatorType','group');
+               
+               recset.removeRecord(seps[i]);
+               recset.addRecord(newid, record);
+            }
+            //add new service separator that will keep rt structure
+            recset.addRecord(this.DT_ENTITY_STRUCTURE,{
+                rst_ID: this.DT_ENTITY_STRUCTURE, 
+                rst_RecTypeID: this.options.rty_ID, 
+                rst_DetailTypeID: this.DT_ENTITY_STRUCTURE,
+                rst_DisplayName: 'Record type structure', 
+                rst_DisplayHelpText: '',
+                rst_DefaultValue: 'group',
+                dty_Type: 'separator',
+                rst_RequirementType: 'forbidden',  //it will not be visible
+                rst_DisplayExtendedDescription: JSON.stringify(treeData)}); 
+                
+            this.recordList.resultList('updateResultSet', recset);
         }
         
         //init treeview
@@ -273,12 +312,7 @@ dty_TermIDTreeNonSelectableIDs
             activate: function(event, data) {
                 
                 that.selectedRecords([data.node.key]);
-                that._onActionListener(event, {action:'edit'}); //default action of selection
-                
-                if (!that.options.edit_dialog){
-                }
-                
-                //console.log('click on '+data.node.key+' '+data.node.title);
+                that._onActionListener(event, {action:'edit'}); //default action of selection    
             }
         };
 
@@ -313,10 +347,19 @@ dty_TermIDTreeNonSelectableIDs
         fancytree_options['filter'] = { highlight:false, mode: "hide" };  
 */
             this._treeview = this.element.find('.treeView').fancytree(fancytree_options); //was recordList
+            
+            
 
             setTimeout(function(){
                 $.each( that.element.find('.treeView .fancytree-node'), function( idx, item ){
                     that.__defineActionIcons(item);
+                    
+                    var tree = that._treeview.fancytree('getTree');
+                    tree.visit(function(node){
+                        if(node.folder) node.setExpanded(true);
+                        
+                    });
+                    //since v2.3 tree.expandAll();
                 });
                 }, 500);  
 
@@ -350,6 +393,8 @@ dty_TermIDTreeNonSelectableIDs
                         if(ele.hasClass('ui-icon-plus')){
                             //td _doAddChild(false);
                         }else if(ele.hasClass('ui-icon-folder')){
+                            
+                            that._addNewSeparator();
 
                         }else if(ele.hasClass('ui-icon-trash')){
                             that._onActionListener(null, 'delete');
@@ -613,9 +658,7 @@ dty_TermIDTreeNonSelectableIDs
                 {text:window.hWin.HR('Save and Close'), id:'btnRecSaveAndClose',  //save editor and show preview
                       accesskey:"C",
                       css:{'font-weight':'bold','float':'right',display:'none'},
-                      click: function() { that._saveEditAndClose( null, function(recID){
-                        that._showRecordEditorPreview(recID);  
-                      }  ); }},
+                      click: function() { that._saveEditAndClose( null, 'close' ); }},
                 {text:window.hWin.HR('Delete'), id:'btnRecDelete',
                       css:{'float':'right',display:'none'},
                       click: function() { that._onActionListener(null, 'delete'); }},
@@ -625,19 +668,52 @@ dty_TermIDTreeNonSelectableIDs
             return btns;
     },    
     
-    _showBaseFieldEditor: function( dtyID ){
+    //
+    //
+    //
+    _addNewSeparator: function(){
         
-        if(dtyID>0){
-            //load field editor 
-            
-            
+/*
+        var newnode = 
+        
+        var tree = this._treeview.fancytree("getTree");
+        var node = tree.getActiveNode();
+        if(node){
+            //add after this node
+            tree.addNode(newnode, 'after');
         }else{
-            //add new field to this record type structure
-            
-            
+            node = tree.getRootNode()   
+            tree.addNode(newnode);
+        }
+                            
+*/
+        
+    },
+    
+    //
+    //
+    //
+    _showBaseFieldEditor: function( arg ){
+        
+        if(isNaN(parseInt(arg))){
+            dtyID = this._currentEditID;
+            if(!(dtyID>0)) return;
+        }else{
+            dtyID = arg;
         }
         
+        var popup_options = {
+                select_mode: 'manager',
+                edit_mode: 'editonly', //only edit form is visible, list is hidden
+                rec_ID: (dtyID>0)?dtyID:-1
+            };
         
+        if(!(dtyID>0)){
+            //add new field to this record type structure
+            popup_options['newFiedForRty'] = true;
+        }
+        
+        window.hWin.HEURIST4.ui.showEntityDialog('DefDetailTypes', popup_options);
     },
     
     //
@@ -656,15 +732,26 @@ dty_TermIDTreeNonSelectableIDs
                 var that = this.previewEditor;
                 
                 var options = {
-                    select_mode: 'manager',
-                    edit_mode: 'editonly',
-                    in_popup_dialog: true,
+                        select_mode: 'manager',
+                        edit_mode: 'editonly',
+                        in_popup_dialog: false,
+                        allowAdminToolbar: false,
+                        new_record_params: {RecTypeID: this.options.rty_ID},
+                        layout_mode:'<div class="ent_wrapper editor">'
+                            + '<div class="ent_content_full recordList"  style="display:none;"/>'
+
+                            + '<div class="ent_header editHeader"></div>'
+                            + '<div class="editFormDialog ent_content">'
+                                    + '<div class="ui-layout-center"><div class="editForm"/></div>'
+                                    + '<div class="ui-layout-east"><div class="editFormSummary">....</div></div>'
+                            + '</div>'
+                        +'</div>',
                     onInitFinished:function(){
-                            //that.manageRecords('addEditRecord',-1); //call widget method
+                            that.manageRecords('addEditRecord',-1); //call widget method
                     }
                 }                
                 
-                this.previewEditor.manageDefDetailTypes( options ).addClass('ui-widget');
+                this.previewEditor.manageRecords( options ).addClass('ui-widget');
             }else{
                 this.previewEditor.manageRecords('reloadEditForm');
             }
@@ -717,7 +804,14 @@ dty_TermIDTreeNonSelectableIDs
             //$(elements[0]).change(); //trigger for current type
         }
 
-        //this._editing.setModified(false);
+        if(this._editing.getValue('dty_Type')=='separator'){
+            this.editForm.find('.ui-accordion').hide()    
+        }else{
+            var ele = $('<span style="font-style:italic;padding:5px">'
+                +'To change terms list or target entity types: <a href="#">Edit base field definitions</a></span>')
+                .appendTo(this.editForm);
+            this._on(ele.find('a'),{click: this._showBaseFieldEditor}); 
+        }
 
     },    
     
@@ -730,23 +824,25 @@ dty_TermIDTreeNonSelectableIDs
                        for(var idx in virtual_fields){
                            $(virtual_fields[idx]).hide();
                        }
-                       depended_fields = this._editing.getFieldByValue("dty_Depend","1");
+                       
+                       //hide all 
+                       depended_fields = this._editing.getFieldByValue("rst_Class","[not empty]");
                        for(var idx in depended_fields){
                            $(depended_fields[idx]).hide();
                        }
+                       //show specific
+                       depended_fields = this._editing.getFieldByClass(dt_type);
+                       for(var idx in depended_fields){
+                           $(depended_fields[idx]).show();
+                       }
                        
                        if(dt_type=='separator'){
-
-                           this._editing.getFieldByName('rst_SeparatorType').show();    
-                           this._editing.getFieldByName('rst_Repeatability').hide();
                            this._editing.getFieldByName('rst_RequirementType').hide();
-
-
                        }else{
 
                            this._editing.getFieldByName('rst_RequirementType').show();
                            this._editing.getFieldByName('rst_Repeatability').show();
-
+/*
                            if(dt_type=='freetext' || dt_type=='blocktext'){
                                this._editing.getFieldByName('rst_DisplayWidth').show();
                                if(dt_type=='blocktext'){
@@ -766,6 +862,11 @@ dty_TermIDTreeNonSelectableIDs
                                this._editing.getFieldByName('rst_PointerBrowseFilter').show();
                                this._editing.getFieldByName('rst_CreateChildIfRecPtr').show();
                            }
+*/
+
+                           if(dt_type=='enum' || dt_type=='relmarker' || dt_type=='relationtype'){
+                               this._recreateTermsPreviewSelector();
+                           }
 
                            var maxval = parseInt(this._editing.getValue('rst_MaxValues')[0]);
                            var res = 'repeatable';
@@ -778,6 +879,8 @@ dty_TermIDTreeNonSelectableIDs
                            this._editing.setFieldValueByName('rst_Repeatability', res, false);
                            if(maxval>1){
                                this._editing.getFieldByName('rst_MaxValues').show();
+                           }else{
+                               this._editing.getFieldByName('rst_MaxValues').hide();
                            }
 
                        }
@@ -819,6 +922,69 @@ dty_TermIDTreeNonSelectableIDs
         
     },
 
+    
+    
+    //-----------------------------------------------------
+    //
+    // special case for separator field
+    // 1. update content of data field in treeview for this separator
+    // 2. get treeview.toDict
+    // 3. save this json in ExtDescription of field 2-57 ("Header 1") 
+    //
+    _saveEditAndClose: function( fields, afterAction ){
+
+
+            if(window.hWin.HAPI4.is_callserver_in_progress()) {
+                //console.log('prevent repeatative call')
+                return;   
+            }
+        
+            if(!fields){
+                fields = this._getValidatedValues(); 
+            }
+            if(fields==null) return; //validation failed
+            
+            if(fields['dty_Type']=='separator'){
+                
+                // 1. update content of data field in treeview for this separator
+                var separator_id = fields['rst_ID'];
+                
+                var treeview = this._treeview.fancytree("getTree");
+                if(treeview){
+                    var node = treeview.getNodeByKey( String(separator_id) );
+                    if(node){
+                        node.setTitle( fields['rst_DisplayName'] ); 
+                        node.data = {help:fields['rst_DisplayHelpText'], type:fields['rst_SeparatorType']};   
+                    } 
+                }
+                // 2. update in recordset 
+                recset.setRecord(separator_id, fields);
+                
+                
+                // 3. get treeview.toDict
+                var recset = this.getRecordSet()
+                var treeData = treeview.toDict(false);
+                recset.setFldById(this.DT_ENTITY_STRUCTURE, 'rst_DisplayExtendedDescription', JSON.stringify(treeData));
+                // 4. save this json in ExtDescription of field 2-57 ("Header 1") 
+                fields = recset.getRecord(this.DT_ENTITY_STRUCTURE);
+                
+                if(afterAction=='close'){
+                    afterAction = function( recID ){
+                        that._showRecordEditorPreview( separator_id ); //refresh 
+                    };
+                }
+                
+            }else{
+                if(afterAction=='close'){
+                    afterAction = function( recID ){
+                        that._showRecordEditorPreview(recID);  
+                    };
+                }
+            }
+                
+            //save record    
+            this._super( fields, afterAction );                
+    },    
     //--------------------------------------------------------------------------
     //
     // update list after save (refresh)

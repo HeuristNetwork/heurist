@@ -35,14 +35,15 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         //this.options.select_return_mode = 'recordset';
         this.options.edit_need_load_fullrecord = false; //true;
         this.options.height = 640;
-        this.options.edit_width = 800;
+        this.options.edit_width = 850;
         this.options.edit_height = 640;
 
         if(this.options.edit_mode=='editonly'){
             this.options.edit_mode = 'editonly';
             this.options.select_mode = 'manager';
             this.options.layout_mode = 'editonly';
-            //this.options.height = 640;
+            this.options.width = 850;
+            this.options.height = 680;
         }else
         //for selection mode set some options
         if(this.options.select_mode!='manager'){
