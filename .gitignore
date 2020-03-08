@@ -223,3 +223,5 @@ vendor/
 *.zip
 composer.lock
 *.lock
+*.lock
+composer.lock
