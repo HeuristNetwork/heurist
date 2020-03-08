@@ -100,7 +100,7 @@ $.widget( "heurist.recordDelete", $.heurist.recordAction, {
                         //"resultlistonaction": this._onActionListener        
                         });
         
-console.log(this.options.map_document_id);
+//console.log(this.options.map_document_id);
         if(this.options.map_document_id>0){
             //find mapdocument content
             this._findMapDocumentContent();

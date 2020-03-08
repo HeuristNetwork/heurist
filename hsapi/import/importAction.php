@@ -2354,12 +2354,18 @@ public static function performImport($params, $mode_output){
                                                 $path = $ap['path'];
                                                 if($path){
                                                     $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+                                                    if($extension=='php' || $extension=='asp'){
+                                                        $extension = null;
+                                                    }
                                                 }
                                             }
                                     }
    
                                     if(!$extension){   
                                         $mimeType = loadRemoteURLContentType($r_value);
+                                        if(strpos($mimeType,';')>0){
+                                            list($mimeType, $charset) = explode(';',$mimeType);
+                                        }
                                         if($mimeType!=null && $mimeType!==false){
                                             $ext_query = 'SELECT fxm_Extension FROM defFileExtToMimetype WHERE fxm_MimeType="'
                                                         .$mimeType.'"';
@@ -2372,7 +2378,7 @@ public static function performImport($params, $mode_output){
                                             $ulf_ID = mysql__insertupdate(self::$mysqli, 'recUploadedFiles', 'ulf', 
                                                 array("ulf_ID"=>0,
                                                     'ulf_OrigFileName'=>'_remote',
-                                                    'ulf_UploaderUGrpID'=> get_user_id(),
+                                                    'ulf_UploaderUGrpID'=> self::$system->get_user_id(),
                                                     //'ulf_ObfuscatedFileID'=>$nonce,
                                                     'ulf_ExternalFileReference'=>$r_value,      
                                                     'ulf_MimeExt'=>$extension,
