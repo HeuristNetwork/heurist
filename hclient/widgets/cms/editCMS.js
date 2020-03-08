@@ -923,6 +923,7 @@ function editCMS( options ){
         
         var preview_frame = edit_dialog.find('#web_preview');
                     //coverall for left side panel by invocation from websiteRecord.js
+        if(preview_frame[0].contentWindow.cmsEditing){
                     preview_frame[0].contentWindow.cmsEditing.onEditPageContent = function(is_exit, widgets, dest){
                         
                         var curtain = edit_dialog.find('.ui-layout-west').find('.coverall-div-bare'); 
@@ -975,10 +976,10 @@ function editCMS( options ){
                             }
                         }
                     };
-                    
-                    //find elements in preview that opens home page record editor
-                    var d = $(preview_frame[0].contentWindow.document);
-                    d.find( "#btn_inline_editor4").click();
+        }
+        //find elements in preview that opens home page record editor
+        var d = $(preview_frame[0].contentWindow.document);
+        d.find( "#btn_inline_editor4").click();
                     
                     /*
                     d.find( "#edit_mode").on({click:function(event){

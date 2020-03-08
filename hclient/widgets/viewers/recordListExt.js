@@ -25,13 +25,13 @@ $.widget( "heurist.recordListExt", {
     // default options
     options: {
         title: '',
-        is_single_selection: false, //work with the only record
+        is_single_selection: false, //work with the only record - reloads content on every selection event
         recordset: null,
         selection: null,  //list of selected record ids
         url:null,               //
         is_frame_based: true,
         
-        reload_for_recordset: false, //refresh every time recordset is changed
+        reload_for_recordset: false, //refresh every time recordset is changed - for smarty report from CMS
         search_realm: null,
         search_initial: null  //NOT USED query string or svs_ID for initial search
     },
@@ -67,6 +67,7 @@ $.widget( "heurist.recordListExt", {
             {
                 if(!window.hWin.HAPI4.has_access()){ //logout
                     that.options.recordset = null;
+that._dout('credentiasl');                    
                     that._refresh();
                 }
             }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH){ 
@@ -74,6 +75,8 @@ $.widget( "heurist.recordListExt", {
                 if(!that._isSameRealm(data)) return;
                 
                 that.options.recordset = data.recordset; //hRecordSet
+                
+that._dout('search finised');                
                 that._refresh();
                 that.loadanimation(false);
 
@@ -97,6 +100,7 @@ $.widget( "heurist.recordListExt", {
                         that.options.selection = sel;
                         //that.option("selection", sel);
                     }
+that._dout('selected');                    
                     that._refresh();
                 }
             }
@@ -107,6 +111,7 @@ $.widget( "heurist.recordListExt", {
 
         this.element.on("myOnShowEvent", function(event){
             if( event.target.id == that.element.attr('id')){
+that._dout('myOnShowEvent');                
                 that._refresh();
             }
         });
@@ -130,6 +135,8 @@ $.widget( "heurist.recordListExt", {
         this._current_url = newurl;
         this.loadanimation(true);
         
+this._dout('load '+this.options.is_frame_based+'  '+newurl);
+        
         if(this.options.is_frame_based){
             this.dosframe.attr('src', newurl);
         }else{
@@ -141,9 +148,10 @@ $.widget( "heurist.recordListExt", {
     onLoadComplete: function(){
         this.loadanimation(false);
         if(!this.options.reload_for_recordset){
-            this._refresh();
+//this._dout('onLoadComplete');                
+//          this._refresh();
         }
-        this._trigger( 'loadcomplete', null, null );
+//2020-03-08        this._trigger( 'loadcomplete', null, null );
     },
     
     //
@@ -156,6 +164,7 @@ $.widget( "heurist.recordListExt", {
         if(request.q!=''){
             this.loadanimation(true);
         }
+this._dout('update dataset '+request.q);        
         this._refresh();
     },
     
@@ -171,6 +180,13 @@ $.widget( "heurist.recordListExt", {
         // _super and _superApply handle keeping the right this-context
         //this._superApply( arguments );
         //this._refresh();
+    },
+    
+    _dout: function(msg){
+        return;
+        if(this.options.url  && this.options.url.indexOf('renderRecordData')>0){
+            console.log(msg);
+        }
     },
     
     /*
@@ -196,10 +212,14 @@ $.widget( "heurist.recordListExt", {
             $('a[href="#'+id+'"]').html(this.options.title);
         }
 
-        //refesh if element is visible only - otherwise it costs much resources
-        if(!this.element.is(':visible') || window.hWin.HEURIST4.util.isempty(this.options.url)) return;
+this._dout('refresh '+this.element.is(':visible'));            
 
-        if(this.options.is_single_selection){
+        //refesh if element is visible only - otherwise it costs much resources
+        if(!this.element.is(':visible') || window.hWin.HEURIST4.util.isempty(this.options.url)){
+            return;  
+        } 
+
+        if(this.options.is_single_selection){ //reload content on every selection event
 
             var newurl = null;
 
