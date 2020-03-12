@@ -109,6 +109,7 @@ class DbEntityBase
     //
     public function setData($data){
         $this->data = $data; 
+        $this->records = null;
     }
 
     public function getData(){

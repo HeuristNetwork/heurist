@@ -852,7 +852,7 @@ EOD;
                             $fileinfo = array('entity'=>'recUploadedFiles', 'fields'=>$value);
                             
                             $file_entity->setData($fileinfo);
-                            $file_entity->setRecords(null);
+                            $file_entity->setRecords(null); //reset
                             $dtl_UploadedFileID = $file_entity->save();   //it returns ulf_ID
                            
                        }else if(!$dbsource_is_same || !defined('HEURIST_DBID')) { //do not copy file for the same database
