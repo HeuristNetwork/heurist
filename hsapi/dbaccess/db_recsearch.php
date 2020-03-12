@@ -1059,7 +1059,7 @@
             $query_json = is_array(@$params['q']) ?$params['q'] :json_decode(@$params['q'], true);
             if(is_array($query_json) && count($query_json)>0){
                 $svsID = @$query_json['svs'];
-            }else{
+            }else if(@$params['q'] && strpos($params['q'],':')>0){
                 list($predicate, $svsID) = explode(':', $params['q']);
                 if(!($predicate=='svs' && $svsID>0)){
                     $svsID = null;
