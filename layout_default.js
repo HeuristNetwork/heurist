@@ -278,9 +278,9 @@ var cfg_layouts = [
             //{appid:'heurist_Search', hasheader:false, css:{position:'absolute', top:'0', height:'0', border:'none', display:'none'}, options:{has_paginator:false, isloginforced:false} },
             {appid:'dh_search', options:{UGrpID:1007}, hasheader:false, css:{border:'none', 'background':'none'} }]},  //faceted/forms searches
         center:{minsize:300, dropable:false,
-            tabs:[{dockable:false, dragable:false, resizable:false,
+            tabs:[{dockable:false, dragable:false, resizable:false, adjust_positions:true,
                 apps:[
-                    {appid:'heurist_Map', options:{layout:['map','timeline'], startup:61557, eventbased:false} } //mapping
+                    {appid:'heurist_Map', options:{layout:['map','timeline'], mapdocument:61557, eventbased:false} } //mapping
                     ,{appid:'heurist_resultList', hasheader:true, name: 'List', 
                         options:{empty_remark:null, title:'List', show_viewmode:false, eventbased:false} }
                     //,{appid:'heurist_Frame', hasheader:true, name: 'DH Blog', options:{url: 'http://digitalharlemblog.wordpress.com/'} }
@@ -316,9 +316,9 @@ var cfg_layouts = [
             //{appid:'heurist_Search', hasheader:false, css:{position:'absolute', top:'0', height:'0', border:'none', display:'none'}, options:{has_paginator:false, isloginforced:false} },
             {appid:'dh_search', options:{UGrpID:1010}, hasheader:false, css:{border:'none', 'background':'none'} }]},  //faceted/forms searches
         center:{minsize:300, dropable:false,
-            tabs:[{dockable:false, dragable:false, resizable:false,
+            tabs:[{dockable:false, dragable:false, resizable:false, adjust_positions:true,
                 apps:[
-                    {appid:'heurist_Map', options:{layout:['map','timeline'], startup:61557, eventbased:false} } //mapping
+                    {appid:'heurist_Map', options:{layout:['map','timeline'], mapdocument:61557, eventbased:false} } //mapping
                     ,{appid:'heurist_resultList', hasheader:true, name: 'List', 
                         options:{empty_remark:null, title:'List', show_viewmode:false, eventbased:false} }
                     //,{appid:'heurist_Frame', hasheader:true, name: 'DH Blog', options:{url: 'http://digitalharlemblog.wordpress.com/'} }

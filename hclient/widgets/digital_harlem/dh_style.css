@@ -269,3 +269,7 @@ div.infowindow a:hover {
     left: 2px;
     height: 50px;
 }
+
+.recordDiv .recTypeThumb{
+    top:0px;
+}

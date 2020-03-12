@@ -44,7 +44,8 @@ id - record id
         
         //if(substr($term_id,-4,4) != ".png") $term_id = $term_id . ".png";  
     
-        $filename = HEURIST_FILESTORE_DIR . 'term-images/'.$term_id;
+        //$filename = HEURIST_FILESTORE_DIR . 'term-images/'.$term_id;
+        $filename = HEURIST_TERM_ICON_DIR.$term_id;
         
         $exts = array('png','jpg','jpeg','gif');
         foreach ($exts as $ext){
