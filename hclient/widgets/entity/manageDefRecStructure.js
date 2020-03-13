@@ -26,6 +26,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
     //    
     _init: function() {
         
+        //special header field stores UI structure
         this.DT_ENTITY_STRUCTURE = window.hWin.HAPI4.sysinfo['dbconst']['DT_ENTITY_STRUCTURE'];
         
         this.options.rty_ID = 4;//is required
@@ -195,14 +196,7 @@ dty_TermIDTreeNonSelectableIDs
             treeData = window.hWin.HEURIST4.util.isJSON(recset.fld(record, 'rst_DisplayExtendedDescription'));    
         }
         
-        /*
-        recset.each(function(dty_ID, record){
-            if(recset.fld(record, 'dty_Type')=='separator' && dty_ID==this.DT_ENTITY_STRUCTURE){
-                treeData = window.hWin.HEURIST4.util.isJSON(recset.fld(record, 'rst_DisplayExtendedDescription'));
-                return false; //exit
-            }
-        });
-        */
+
         //if such treeview data is missed creates new one based on header/separators and rst_DisplayOrder
         if(!treeData){
             //order by rts_DisplayOrder
@@ -243,7 +237,8 @@ dty_TermIDTreeNonSelectableIDs
                 }
             });
             
-            //replace old separator with new fake ones with id>9M
+            //add fake records to keep group header data (id>9M)
+            /*
             for(var i=0; i<seps.length; i++){
                var record = recset.getById(seps[i]);
                recset.removeRecord(seps[i]); 
@@ -268,6 +263,7 @@ dty_TermIDTreeNonSelectableIDs
                 rst_DisplayExtendedDescription: JSON.stringify(treeData)}); 
                 
             this.recordList.resultList('updateResultSet', recset);
+            */
         }
         
         //init treeview
@@ -347,20 +343,58 @@ dty_TermIDTreeNonSelectableIDs
         fancytree_options['filter'] = { highlight:false, mode: "hide" };  
 */
             this._treeview = this.element.find('.treeView').fancytree(fancytree_options); //was recordList
-            
-            
 
             setTimeout(function(){
-                $.each( that.element.find('.treeView .fancytree-node'), function( idx, item ){
-                    that.__defineActionIcons(item);
-                    
                     var tree = that._treeview.fancytree('getTree');
-                    tree.visit(function(node){
-                        if(node.folder) node.setExpanded(true);
-                        
+                    //add missed fields
+                    //if some fields were added in old ui they are missed in tree data - need to add them manually
+                    recset.each(function(dty_ID, record){
+                        if(recset.fld(record,'dty_Type')!='separator')
+                        {
+                            var node = tree.getNodeByKey(String(dty_ID));
+                            if(!node){
+                                node = {title: recset.fld(record,'rst_DisplayName'), key: dty_ID};
+                                tree.getRootNode().addNode(node);
+                            }
+                        }
                     });
-                    //since v2.3 tree.expandAll();
-                });
+                    
+                    //add fake records to keep group header data (id>9M)
+                    tree.visit(function(node){
+                        if(node.folder){
+                            node.setExpanded(true);//since v2.3 tree.expandAll();
+
+                            var record = {
+                                rst_ID: node.key, 
+                                rst_RecTypeID: that.options.rty_ID, 
+                                rst_DetailTypeID: node.key,
+                                rst_DisplayName: node.title, 
+                                rst_DisplayHelpText: (node.data && node.data.help)?node.data.help:'',
+                                rst_SeparatorType: (node.data && node.data.type)?node.data.type:'group',
+                                dty_Type: 'separator'
+                            };
+                            recset.addRecord(node.key, record);
+                        }
+                    });
+                    //add/update new service separator that will keep rt structure
+                    recset.addRecord(that.DT_ENTITY_STRUCTURE,{
+                        rst_ID: that.DT_ENTITY_STRUCTURE, 
+                        rst_RecTypeID: that.options.rty_ID, 
+                        rst_DetailTypeID: that.DT_ENTITY_STRUCTURE,
+                        rst_DisplayName: 'Record type structure', 
+                        rst_DisplayHelpText: '',
+                        rst_DefaultValue: 'group',
+                        dty_Type: 'separator',
+                        rst_RequirementType: 'forbidden',  //it will not be visible
+                        rst_DisplayExtendedDescription: JSON.stringify(tree.toDict(false))}); 
+                        
+                    that.recordList.resultList('updateResultSet', recset);
+                    
+                    
+                    //add and init action icons
+                    $.each( that.element.find('.treeView .fancytree-node'), function( idx, item ){
+                        that.__defineActionIcons(item);
+                    });
                 }, 500);  
 
 
@@ -384,6 +418,7 @@ dty_TermIDTreeNonSelectableIDs
                    +'<span class="ui-icon ui-icon-arrowthick-1-e" title="Repeatability"></span>'
                    +'</div>').appendTo(item);
                    
+               var that = this;
                    
                actionspan.find('.ui-icon').click(function(event){
                     var ele = $(event.target);
@@ -933,6 +968,7 @@ dty_TermIDTreeNonSelectableIDs
     //
     _saveEditAndClose: function( fields, afterAction ){
 
+            var that = this;
 
             if(window.hWin.HAPI4.is_callserver_in_progress()) {
                 //console.log('prevent repeatative call')
@@ -958,11 +994,10 @@ dty_TermIDTreeNonSelectableIDs
                     } 
                 }
                 // 2. update in recordset 
+                var recset = this.getRecordSet();
                 recset.setRecord(separator_id, fields);
                 
-                
                 // 3. get treeview.toDict
-                var recset = this.getRecordSet()
                 var treeData = treeview.toDict(false);
                 recset.setFldById(this.DT_ENTITY_STRUCTURE, 'rst_DisplayExtendedDescription', JSON.stringify(treeData));
                 // 4. save this json in ExtDescription of field 2-57 ("Header 1") 

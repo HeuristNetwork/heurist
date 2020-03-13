@@ -1767,6 +1767,86 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         return ffr;
     },
     
+               
+    //
+    //
+    //     
+    _prepareFieldForEditor: function (rfr){                    
+
+            var fieldNames = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNames;
+            var fi_type = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex.dty_Type;
+            var fi_maxval = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex.rst_MaxValues;
+            
+            var idx, dtFields = {};
+            
+            for(idx in rfr){
+                if(idx>=0){
+                    dtFields[fieldNames[idx]] = rfr[idx];
+                    
+                    if(idx==fi_type){
+                        if(dtFields[fieldNames[idx]]=='file'){
+                            dtFields['rst_FieldConfig'] = {"entity":"records", "accept":".png,.jpg,.gif", "size":200};
+                        }
+                    }else if(idx==fi_maxval){
+                        if(window.hWin.HEURIST4.util.isnull(dtFields[fieldNames[idx]])){
+                            dtFields[fieldNames[idx]] = 0;
+                        }
+                    }
+                }
+            }//for
+            
+            return dtFields;
+    },                        
+    
+    //
+    //
+    //
+    _createFieldsForEditing: function( treeData ){
+        
+        var fields = [];
+        
+        if($.isArray(treeData)){
+            
+            for(var i=0; i<treeData.length; i++){
+                
+                var node = treeData[i];
+                            
+                if(node.children){
+                    //add new group
+                    // "title":"Primary information!","data":{"help":"","type":"group"}
+                    
+                    var dtGroup = {
+                        groupHeader: node.title,
+                        groupHelpText: (node.data && node.data.help)?node.data.help:'',
+                        groupTitleVisible: true,
+                        groupType:  (node.data && node.data.type)?node.data.type:'group', //accordion, tabs, group
+                        groupStyle: {},
+                        children: this._createFieldsForEditing( node.children )
+                    };
+                    
+                    fields.push( dtGroup );
+                    
+                }else if(node.key>0){
+                    
+                    var rectypeID = this._getField('rec_RecTypeID');
+                    var dt_ID = node.key;
+
+                    var rectypes = window.hWin.HEURIST4.rectypes;
+                    var rfrs = rectypes.typedefs[rectypeID].dtFields;
+
+                    fields.push({ dtID: dt_ID, dtFields:this._prepareFieldForEditor(rfrs[dt_ID]) });
+                    
+                }else if(node['dt_ID']>0){
+
+                    fields.push({ dtID: node['dt_ID'], dtFields:this._prepareFieldForEditor(node) }  );            
+                }
+                
+            }//for
+        }
+        return fields;
+        
+    },
+    
     //
     // prepare fields and init editing
     //
@@ -1863,9 +1943,9 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
                 
             
        
-            //@todo - move it inside editing
+            //@todo ? - move it inside editing
             //convert structure - 
-            var fields = window.hWin.HEURIST4.util.cloneJSON(that.options.entity.fields);
+            var fields = window.hWin.HEURIST4.util.cloneJSON(that.options.entity.fields); //retuns record header field rec_XXXX
             var fieldNames = rectypes.typedefs.dtFieldNames;
             var fi = rectypes.typedefs.dtFieldNamesToIndex;
             var dt_ID;
@@ -1898,17 +1978,24 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
 
 
             //THERE ARE 2 ways of grouping 
-            // 1) NEW: UI is stored in  DT_ENTITY_STRUCTURE
+            // 1) NEW: UI is stored in  DT_ENTITY_STRUCTURE (former header field)
             // 2) OLD: structure is plain is defined by "separator" fields
             var treeData = false;
             var DT_ENTITY_STRUCTURE  = Number(window.hWin.HAPI4.sysinfo['dbconst']['DT_ENTITY_STRUCTURE']);
             if(DT_ENTITY_STRUCTURE>0 && rfrs[DT_ENTITY_STRUCTURE]){
                 treeData = window.hWin.HEURIST4.util.isJSON(rfrs[DT_ENTITY_STRUCTURE][fi_extdesc]);    
             }
-
-
+            //DEBUG 
+            //treeData = false;
             
-            var s_fields = []; //sorted fields
+            
+            // fields - json for editing that describes edit form
+            // fields_ids - fields in rt structure
+            // s_fields - sorted 
+            // field_in_recset - all fields in record
+            // treeData
+            
+            var s_fields = []; //sorted fields including hidden fields from record header 
             var fields_ids = [];
             for(dt_ID in rfrs){ //in rt structure
                 if(dt_ID>0){
@@ -2030,7 +2117,11 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
                         fieldNames.push('rst_Display');
                         s_fields.push(rfr);
                         
+                        //add as first 
+                        if(treeData) treeData[treeData.length-1].children.unshift(rfr);
+                        
                     }else{
+                        //fields that are not in rectype structure
                     
                         if(addhead==0){                    
                             //fake header
@@ -2039,70 +2130,73 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
                             rfr[fi_type] = 'separator';
                             rfr[fi_order] = 1100;
                             s_fields.push(rfr);
+                            
+                            if(treeData!==false){
+                                treeData.push(
+                                    {title:'Non-standard fields for this record type',
+                                        data:{type:'accordion'},children:[]});
+                            
+                            }
                         }
                         addhead++;
                         
                         var rfr = that._getFakeRectypeField(field_in_recset[k], 1100+addhead);
                         s_fields.push(rfr);
+                        
+                        if(treeData) treeData[treeData.length-1].children.push(rfr);
                     }
                 }
-            }//for           
-
-            //sort by order
-            s_fields.sort(function(a,b){ return a[fi_order]<b[fi_order]?-1:1});
+            }//for   
             
-            
-            var group_fields = null;
-            
-            for(var k=0; k<s_fields.length; k++){
+            if(treeData!==false){
+                //create UI from treeData that is stored in DT_ENTITY_STRUCTURE
+                var fields_detail = that._createFieldsForEditing(treeData);
+                fields = fields.concat(fields_detail);
                 
-                rfr = s_fields[k];
+            }else{
+                //create UI from rfr 
                 
-                if(rfr[fi_type]=='separator'){
-                    if(group_fields!=null){
-                        fields[fields.length-1].children = group_fields;
-                    }
-                    var dtGroup = {
-                        groupHeader: rfr[fi_name],
-                        groupHelpText: rfr[fi_help],
-                        groupTitleVisible: (rfr[fi_reqtype]!=='forbidden'),
-                        groupType: 'group', //accordion, tabs, group
-                        groupStyle: {},
-                        children:[]
-                    };
-                    fields.push(dtGroup);
-                    group_fields = [];
-                }else {
+                //sort by order
+                s_fields.sort(function(a,b){ return a[fi_order]<b[fi_order]?-1:1});
                 
-                    var dtFields = {};
-                    for(idx in rfr){
-                        if(idx>=0){
-                            dtFields[fieldNames[idx]] = rfr[idx];
-                            
-                            if(idx==fi_type){ //fieldNames[idx]=='dty_Type'){
-                                if(dtFields[fieldNames[idx]]=='file'){
-                                    dtFields['rst_FieldConfig'] = {"entity":"records", "accept":".png,.jpg,.gif", "size":200};
-                                }
-                                
-                            }else if(idx==fi_maxval){
-                                if(window.hWin.HEURIST4.util.isnull(dtFields[fieldNames[idx]])){
-                                    dtFields[fieldNames[idx]] = 0;
-                                }
-                            }
-                        }
-                    }//for
+                var group_fields = null;
+                
+                for(var k=0; k<s_fields.length; k++){
                     
-                    if(group_fields!=null){
-                        group_fields.push({"dtID": rfr['dt_ID'], "dtFields":dtFields});
+                    rfr = s_fields[k];
+                    
+                    if(rfr[fi_type]=='separator'){
+                        if(group_fields!=null){
+                            fields[fields.length-1].children = group_fields;
+                        }
+                        var dtGroup = {
+                            groupHeader: rfr[fi_name],
+                            groupHelpText: rfr[fi_help],
+                            groupTitleVisible: (rfr[fi_reqtype]!=='forbidden'),
+                            groupType: 'group', //accordion, tabs, group
+                            groupStyle: {},
+                            children:[]
+                        };
+                        fields.push(dtGroup);
+                        group_fields = [];
                     }else{
-                        fields.push({"dtID": rfr['dt_ID'], "dtFields":dtFields});
+                        
+                        var dtFields = that._prepareFieldForEditor( rfr );
+                        
+                        if(group_fields!=null){
+                            group_fields.push({"dtID": rfr['dt_ID'], "dtFields":dtFields});
+                        }else{
+                            fields.push({"dtID": rfr['dt_ID'], "dtFields":dtFields});
+                        }
                     }
+                }//for s_fields
+                //add children to last group
+                if(group_fields!=null){
+                    fields[fields.length-1].children = group_fields;
                 }
-            }//for s_fields
-            //add children to last group
-            if(group_fields!=null){
-                fields[fields.length-1].children = group_fields;
-            }
+                
+            }//if
+            
             
             that._editing.initEditForm(fields, that._currentEditRecordset, that._isInsert);
             

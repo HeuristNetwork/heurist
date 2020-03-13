@@ -1044,8 +1044,14 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
         
             for(var idx in fields)
             if(idx>-1){
-                res[fields[idx]] = record[fields[idx]];
+                //field to index
+                if(typeof record[idx]!=='undefined'){
+                    res[fields[idx]] = record[idx];    
+                }else if(record[fields[idx]]){
+                    res[fields[idx]] = record[fields[idx]];    
+                }
             }
+            
             if(record['d']){
                 res['d'] = window.hWin.HEURIST4.util.cloneJSON(record['d']);     
             }

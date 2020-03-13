@@ -216,27 +216,27 @@ function hEditing(_options) {
                     var headerHelpText = fields[idx]['groupHelpText'];
                     var is_header_visible = fields[idx]['groupTitleVisible'];
                     
-                    fieldContainer = $('<fieldset>').uniqueId();
+                    var newFieldContainer = $('<fieldset>').uniqueId();
                     if(!$.isEmptyObject(fields[idx]['groupStyle'])){
-                        fieldContainer.css(fields[idx]['groupStyle']);    
+                        newFieldContainer.css(fields[idx]['groupStyle']);    
                     }
 
                     //add header and field container
                     if(currGroupType == 'accordion'){
                          $('<h3>').text(headerText).appendTo(groupEle);
-                         fieldContainer.appendTo($('<div>').appendTo(groupEle));
+                         newFieldContainer.appendTo($('<div>').appendTo(groupEle));
                          
                          if(groupEle.parents('.editor').length==0){
-                                fieldContainer.addClass('ui-heurist-bg-light');
+                                newFieldContainer.addClass('ui-heurist-bg-light');
                          }
                          
                     }else if(currGroupType == 'tabs'){
-                         $('<li>').html('<a href="#'+fieldContainer.attr('id')+'"><span>'+headerText+'</span></a>')
+                         $('<li>').html('<a href="#'+newFieldContainer.attr('id')+'"><span>'+headerText+'</span></a>')
                                 .appendTo(groupTabHeader);
-                         $(fieldContainer).appendTo(groupEle);
+                         $(newFieldContainer).appendTo(groupEle);
                          
                          if(groupEle.parents('.editor').length==0){
-                                fieldContainer.addClass('ui-heurist-bg-light');
+                                newFieldContainer.addClass('ui-heurist-bg-light');
                          }
                          //.css({'font-size':'1em'})
                     }else{
@@ -248,16 +248,16 @@ function hEditing(_options) {
                              //see applyCompetencyLevel
                              //if(window.hWin.HAPI4.get_prefs('help_on')!=1){div_prompt.hide();}
                         }
-                        fieldContainer.appendTo(groupContainer);
+                        newFieldContainer.appendTo(groupContainer);
                     }
 
                     if(headerHelpText!=''){
                          var div_prompt = $('<div>').text(headerHelpText).css('padding-left','80px')
                             .addClass('heurist-helper1')
-                            .appendTo(fieldContainer);
+                            .appendTo(newFieldContainer);
                     }
                         
-                    __createGroup(fields[idx].children, groupContainer, fieldContainer);
+                    __createGroup(fields[idx].children, groupContainer, newFieldContainer);
                     
                     
                 }//has children
