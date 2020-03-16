@@ -107,9 +107,9 @@ if($isOutSideRequest){ //this is request from outside - redirect to master index
 // Feb 2019: Redirect old calls to new server/address.
 function __replaceToLastServe($url){
     if($url!=null){
-        if(strpos($url, 'http://heurist.sydney.edu.au')>=0){
+        if(strpos($url, 'http://heurist.sydney.edu.au')!==false){
             $url = str_replace( 'http://heurist.sydney.edu.au', HEURIST_MAIN_SERVER, $url);
-        }else if(strpos($url, 'http:///heuristplus.sydney.edu.au')>=0 || strpos($url, 'http://heuristplus.sydney.edu.au')>=0){
+        }else if(strpos($url, 'http:///heuristplus.sydney.edu.au')!==false || strpos($url, 'http://heuristplus.sydney.edu.au')!==false){
             $url = str_replace( 'http://', 'https://', $url);    
         }
          
