@@ -576,6 +576,10 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 this._toolbar.find('#divNav2').hide();
             }
             
+            if(this.options.allowAdminToolbar===false){
+               if(this.editFormSummary) this.editFormSummary.remove();//hide();  
+               this.editFormSummary = null;
+            }else
             //summary tab - specific for records only    
             if(this.editFormSummary && this.editFormSummary.length>0){    
                 
@@ -1811,7 +1815,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 
                 var node = treeData[i];
                             
-                if(node.children){
+                if(node.folder){
                     //add new group
                     // "title":"Primary information!","data":{"help":"","type":"group"}
                     

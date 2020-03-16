@@ -3285,7 +3285,7 @@ console.log('onpaste');
         
 
         var $inputdiv = $( "<div>" ).addClass('input-div')
-                .css({'font-weight':'bold'})
+                .css({'font-weight':'bold','padding-top':'4px'})
                 .insertBefore(this.input_prompt);
 
         var dwidth = this.f('rst_DisplayWidth');

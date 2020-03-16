@@ -88,7 +88,7 @@
                         "dty_Type":"enum",
                         "rst_DisplayName":"Requirement:",
                         "rst_DisplayHelpText": "Define specific subtype", 
-                        "rst_DefaultValue":"text",
+                        "rst_DefaultValue":"optional",
                         "rst_FieldConfig":[
                             {"key":"required", "title":"required"},
                             {"key":"recommended", "title":"recommended"},
@@ -255,7 +255,7 @@
                         "rst_Class":"separator",
                         "rst_DisplayName":"Group/separator type:",
                         "rst_DefaultValue": "group",
-                        "rst_FieldConfig": ["group","accordion","tab"]
+                        "rst_FieldConfig": ["group","accordion","tabs"]
                     }
                 },
                 {

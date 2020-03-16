@@ -37,7 +37,7 @@
                         "dty_Type":"freetext",
                         "dty_Role":"title",
                         "dty_Size":255,
-                        "rst_DisplayName": "Default field type name:",
+                        "rst_DisplayName": "Field name:",
                         "rst_DisplayHelpText": "A concise generic name used as a default for this field wherever it is used eg. 'creator' rather than 'artist' or 'author'. Fields may be reused in multiple record types. This name is normally overridden with a name specific to each record type in which it is used.", 
                         "rst_DisplayExtendedDescription":"",
                         "rst_DisplayWidth":60,
@@ -57,6 +57,35 @@
                         "rst_RequirementType":"required"
                     }
                 },
+{
+                    "dtID": "rst_RequirementType",
+                    "dtFields":{
+                        "dty_Type":"enum",
+                        "dty_Role":"virtual",
+                        "rst_DisplayName":"Requirement:",
+                        "rst_DisplayHelpText": "Define specific subtype", 
+                        "rst_DefaultValue":"optional",
+                        "rst_Display":"hidden",
+                        "rst_Class":"add_to_structure",
+                        "rst_FieldConfig":[
+                            {"key":"required", "title":"required"},
+                            {"key":"recommended", "title":"recommended"},
+                            {"key":"optional", "title":"optional"},
+                            {"key":"forbidden", "title":"hidden"}]
+                    }
+                },
+                {
+                    "dtID": "rst_Repeatability",
+                    "dtFields":{
+                        "dty_Type":"enum",
+                        "dty_Role":"virtual",
+                        "rst_DisplayName":"Repeatability:",
+                        "rst_DefaultValue":"single",
+                        "rst_Display":"hidden",
+                        "rst_Class":"add_to_structure",
+                        "rst_FieldConfig":["single","repeatable","limited 1","limited 2","limited 3","limited 4","limited 5"]
+                    }
+                },                
                 {
                     "dtID": "dty_Type",
                     "dtFields":{
@@ -86,6 +115,7 @@
                     "dtFields":{
                         "dty_Type":"enum",
                         "dty_Role":"virtual",
+                        "rst_Class":"freetext",
                         "rst_DisplayName":"Input type:",
                         "rst_DisplayHelpText": "Define specific subtype", 
                         "rst_DefaultValue":"text",
@@ -97,6 +127,7 @@
                     "dtFields":{
                         "dty_Type":"enum",
                         "dty_Role":"virtual",
+                        "rst_Class":"blocktext",
                         "rst_DisplayName":"Input type:",
                         "rst_DisplayHelpText": "Define specific subtype", 
                         "rst_DefaultValue":"text",
@@ -108,6 +139,7 @@
                     "dtFields":{
                         "dty_Type":"boolean",
                         "dty_Role":"virtual",
+                        "rst_Class":"date",
                         "rst_DisplayName":"Allow temporal object:",
                         "rst_DisplayHelpText": "Define specific subtype"
                     }
@@ -116,6 +148,7 @@
                     "dtFields":{
                         "dty_Type":"freetext",
                         "dty_Role":"virtual",
+                        "rst_Class":"relationtype enum relmarker",
                         "rst_DisplayName":"Vocabulary (terms):",
                         "rst_DisplayHelpText": "The set of terms which may be selected for this field"
                     }
@@ -139,6 +172,7 @@
                     "dtFields":{
                         "dty_Type":"resource",
                         "rst_Display":"hidden",
+                        "rst_Class":"resource relmarker",
                         "rst_DisplayName":"Target record types:",
                         "rst_DisplayHelpText": "The set of record types to which this field can point (for pointer fields and relationship markers. If undefined, it can point to any record type.", 
                         "rst_FieldConfig": {"entity":"DefRecTypes","csv":true}

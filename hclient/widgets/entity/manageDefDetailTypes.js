@@ -21,11 +21,16 @@
 $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
 
     _entityName:'defDetailTypes',
+    fields_list_div: null,
     
     //
     //
     //    
     _init: function() {
+
+        //allow select existing fieldtype by typing
+        //or add new field both to defDetailTypes and defRecStructure
+        //this.options.newFieldForRtyID = 0; 
         
         this.options.layout_mode = 'short';
         this.options.use_cache = true;
@@ -68,6 +73,15 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             }
         }
     
+    },
+        
+    _destroy: function() {
+        
+        if(this.fields_list_div){
+            this.fields_list_div.remove();
+        }
+    
+        this._super();
     },
         
     //  
@@ -201,14 +215,14 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
 
         var detailtypes = window.hWin.HEURIST4.detailtypes;
 
-        rdata.fields = detailtypes.typedefs.commonFieldNames;
+        rdata.fields = window.hWin.HEURIST4.util.cloneJSON(detailtypes.typedefs.commonFieldNames);
         rdata.fields.unshift('dty_ID');
 
 
         for (var r_id in detailtypes.typedefs)
         {
             if(r_id>0){
-                var dtype = detailtypes.typedefs[r_id].commonFields;
+                var dtype = window.hWin.HEURIST4.util.cloneJSON(detailtypes.typedefs[r_id].commonFields);
                 dtype.unshift(r_id);
                 rdata.records[r_id] = dtype;
                 rdata.order.push( r_id );
@@ -397,35 +411,52 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                                     
             var that = this;        
             
-            var btns = [       /*{text:window.hWin.HR('Reload'), id:'btnRecReload',icons:{primary:'ui-icon-refresh'},
-                click: function() { that._initEditForm_step3(that._currentEditID) }},  //reload edit form*/
-                      
-                {showText:true, icons:{primary:'ui-icon-plus'},text:window.hWin.HR('Define New Field Type'),
-                      css:{'margin-right':'0.5em','float':'left'}, id:'btnAddButton',
-                      click: function() { that._onActionListener(null, 'add'); }},
+            if(this.options.selectOnSave==true){
+                var btns = [               
+                            
+                    /*{text:window.hWin.HR('Save'), id:'btnRecSave',
+                          accesskey:"S",
+                          css:{'font-weight':'bold'},
+                          click: function() { that._saveEditAndClose( null, 'none' ); }},*/
+                    {text:window.hWin.HR('Save and Close'), id:'btnRecSaveAndClose',
+                          css:{'margin-left':'0.5em'},
+                          click: function() { that._saveEditAndClose( null, 'close' ); }},
+                    {text:window.hWin.HR('Cancel'), 
+                          css:{'margin-left':'0.5em'},
+                          click: function() { 
+                            that.closeDialog();
+                          }}];    
+            }else{
+                var btns = [       /*{text:window.hWin.HR('Reload'), id:'btnRecReload',icons:{primary:'ui-icon-refresh'},
+                    click: function() { that._initEditForm_step3(that._currentEditID) }},  //reload edit form*/
+                          
+                    {showText:true, icons:{primary:'ui-icon-plus'},text:window.hWin.HR('Define New Field Type'),
+                          css:{'margin-right':'0.5em','float':'left'}, id:'btnAddButton',
+                          click: function() { that._onActionListener(null, 'add'); }},
 
-                {text:window.hWin.HR('Save Order'),
-                      css:{'float':'left',display:'none'}, id:'btnApplyOrder',
-                      click: function() { that._onActionListener(null, 'save-order'); }},
-                      
-                      
-                {text:window.hWin.HR('Close'), 
-                      css:{'margin-left':'3em','float':'right'},
-                      click: function() { 
-                          that.closeDialog(); 
-                      }},
-                {text:window.hWin.HR('Drop Changes'), id:'btnRecCancel', 
-                      css:{'margin-left':'0.5em','float':'right'},
-                      click: function() { that._initEditForm_step3(that._currentEditID) }},  //reload edit form
-                {text:window.hWin.HR('Save'), id:'btnRecSave',
-                      accesskey:"S",
-                      css:{'font-weight':'bold','float':'right'},
-                      click: function() { that._saveEditAndClose( null, 'none' ); }},
-                {text:window.hWin.HR('Delete'), id:'btnRecDelete',
-                      css:{'float':'right',display:'none'},
-                      click: function() { that._onActionListener(null, 'delete'); }},
-                      
-                      ];
+                    {text:window.hWin.HR('Save Order'),
+                          css:{'float':'left',display:'none'}, id:'btnApplyOrder',
+                          click: function() { that._onActionListener(null, 'save-order'); }},
+                          
+                          
+                    {text:window.hWin.HR('Close'), 
+                          css:{'margin-left':'3em','float':'right'},
+                          click: function() { 
+                              that.closeDialog(); 
+                          }},
+                    {text:window.hWin.HR('Drop Changes'), id:'btnRecCancel', 
+                          css:{'margin-left':'0.5em','float':'right'},
+                          click: function() { that._initEditForm_step3(that._currentEditID) }},  //reload edit form
+                    {text:window.hWin.HR('Save'), id:'btnRecSave',
+                          accesskey:"S",
+                          css:{'font-weight':'bold','float':'right'},
+                          click: function() { that._saveEditAndClose( null, 'none' ); }},
+                    {text:window.hWin.HR('Delete'), id:'btnRecDelete',
+                          css:{'float':'right',display:'none'},
+                          click: function() { that._onActionListener(null, 'delete'); }},
+                          
+                          ];
+            }            
         
             return btns;
     },    
@@ -463,13 +494,26 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                 'change': function(event){
                        var dt_type = $(event.target).val();
                        
+                       //hide all 
+                       var depended_fields = this._editing.getFieldByValue("rst_Class","[not empty]");
+                       for(var idx in depended_fields){
+                           $(depended_fields[idx]).hide();
+                       }
+                       //show specific
+                       depended_fields = this._editing.getFieldByClass(dt_type);
+                       for(var idx in depended_fields){
+                           $(depended_fields[idx]).show();
+                       }
+                       if(dt_type=='enum' || dt_type=='relationtype' || dt_type=='relmarker'){
+                            var ele = this._editing.getFieldByName('dty_Mode_enum');  
+                            this._activateEnumControls(ele);
+                       }
+                       
+                       /*
                        var virtual_fields = this._editing.getFieldByValue("dty_Role","virtual");
                        for(var idx in virtual_fields){
                            $(virtual_fields[idx]).hide();
                        }
-//this._editing.getFieldByName('dty_TermIDTreeNonSelectableIDs').hide();
-//this._editing.getFieldByName('dty_JsonTermIDTree').hide();
-                       
                        var ele = this._editing.getFieldByName('dty_PtrTargetRectypeIDs');
                        
                        if(dt_type!=='resource'){
@@ -477,13 +521,11 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                            ele = this._editing.getFieldByName('dty_Mode_'+dt_type);
                            
                            if(dt_type=='enum'){
-//this._editing.getFieldByName('dty_TermIDTreeNonSelectableIDs').show();
-//this._editing.getFieldByName('dty_JsonTermIDTree').show();
                                 this._activateEnumControls(ele);
                            }
                        }
-
                        if(ele && ele.length>0) ele.show();
+                       */
                        
                        
                        
@@ -494,8 +536,132 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             
             $(elements[0]).change(); //trigger
         }
+        
+        if(this.options.newFieldForRtyID>0){
+            
+            //disable all fields except field name
+            var elements = this._editing.getInputs('dty_Name');
+            this._on( $(elements[0]), {
+                keypress: window.hWin.HEURIST4.ui.preventChars,
+                keyup: this._onFieldAddSuggestion });
+        }
+        
 
     },    
+    
+    //
+    // show dropdown for field suggestions to be added
+    //
+    _onFieldAddSuggestion: function(event){
+        
+        var input_name = $(event.target);
+        
+        //!!!! removeErrorClass(input_name);
+        
+        if(this.fields_list_div == null){
+            //init for the first time
+            this.fields_list_div = $('<div class="list_div" '
+                +'style="z-index:999999999;height:auto;max-height:200px;padding:4px;cursor:pointer;overflow-y:auto"></div>')
+                .css({border: '1px solid rgba(0, 0, 0, 0.2)', margin: '2px 0px', background:'#F4F2F4'})
+                .appendTo(this.element);
+            this.fields_list_div.hide();
+            
+            this._on( $(document), {click: function(event){
+               if($(event.target).parents('.list_div').length==0) { 
+                    this.fields_list_div.hide(); 
+               };
+            }});
+        }
+        
+        var setdis = input_name.val().length<3;
+        //this._editing.setDisabled( setdis )
+        //var ele = this._editing.getFieldByName('dty_Name');
+        //ele.editing_input('setDisabled', false);
+        //window.hWin.HEURIST4.util.setDisabled($('.initially-dis'), setdis );
+      
+        if(input_name.val().length>2){
+           
+            var rty_ID = this.options.rty_ID; 
+            var dty_ID, field_name,
+                fi = window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex;
+                
+            this.fields_list_div.empty();  
+            var is_added = false;
+            
+            var that = this;
+            //add current value as first
+            var first_ele = $('<div class="truncate"><b>'+input_name.val()+' [new]</b></div>').appendTo(this.fields_list_div)
+                            .click( function(event){
+                                window.hWin.HEURIST4.util.stopEvent(event);
+                                that.fields_list_div.hide(); 
+                                //!!!! $('#ed_dty_HelpText').focus();
+                            });
+
+
+            //find among fields that are not in current record type
+            for (dty_ID in window.hWin.HEURIST4.detailtypes.names){
+               if(dty_ID>0){ 
+                   var td = window.hWin.HEURIST4.detailtypes.typedefs[dty_ID];
+                   var deftype = td.commonFields;
+
+                   var aUsage = window.hWin.HEURIST4.detailtypes.rectypeUsage[dty_ID];
+                   
+                   field_name = window.hWin.HEURIST4.detailtypes.names[dty_ID];
+
+                   if( deftype[fi.dty_ShowInLists]!="0" && deftype[fi.dty_Type]!='separator'
+                        && ( window.hWin.HEURIST4.util.isnull(aUsage) || aUsage.indexOf(rty_ID)<0 ) 
+                        && (field_name.toLowerCase().indexOf( input_name.val().toLowerCase() )>=0) )
+                   {
+                       
+                       var ele;
+                       if(field_name.toLowerCase()==input_name.val().toLowerCase()){
+                           ele = first_ele;
+                       }else{
+                           ele = $('<div class="truncate">').appendTo(this.fields_list_div);
+                       }
+
+                       is_added = true;
+                       ele.attr('dty_ID',dty_ID)
+                           .text(field_name+' ['+ window.hWin.HEURIST4.detailtypes.lookups[deftype[fi.dty_Type]] +']')
+                           .click( function(event){
+                                window.hWin.HEURIST4.util.stopEvent(event);
+
+                                var ele = $(event.target).hide();
+                                var _dty_ID = ele.attr('dty_ID');
+                         
+                       
+                                if(_dty_ID>0){
+                                    that.fields_list_div.hide();
+                                    input_name.val('').focus();
+                                    
+                                    window.hWin.HEURIST4.msg.showMsgFlash('Field is added to record structure');
+                                    
+                                    //that.selectedRecords( [_dty_ID] );
+                                    //that._selectAndClose();
+                                    that._trigger( "onselect", null, {selection: [_dty_ID] });
+                                    that.closeDialog( true ); //force without warning
+                                    
+                                }
+                       });
+                        
+                   }
+                }
+            }
+
+            if(is_added){
+                this.fields_list_div.show();    
+                this.fields_list_div.position({my:'left top', at:'left bottom', of:input_name})
+                    //.css({'max-width':(maxw+'px')});
+                    .css({'max-width':input_name.width()+60});
+            }else{
+                this.fields_list_div.hide();
+            }
+
+      }else{
+            this.fields_list_div.hide();  
+      }
+
+    },
     
     _activateEnumControls: function( ele ){
         
@@ -779,10 +945,10 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
     _afterSaveEventHandler: function( recID, fieldvalues ){
 
         // close on addition of new record in select_single mode    
-        if(this._currentEditID<0 && this.options.select_mode=='select_single'){
-            
+        if(this._currentEditID<0 && 
+            (this.options.selectOnSave===true || this.options.select_mode=='select_single'))
+        {
                 this._selection = new hRecordSet();
-                //{fields:{}, order:[recID], records:[fieldvalues]});
                 this._selection.addRecord(recID, fieldvalues);
                 this._selectAndClose();
                 return;    
@@ -790,11 +956,11 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         }
         
         this._super( recID, fieldvalues );
-        this.getRecordSet().setRecord(recID, fieldvalues);
         
         if(this.options.edit_mode == 'editonly'){
             this.closeDialog(true); //force to avoid warning
         }else{
+            this.getRecordSet().setRecord(recID, fieldvalues);
             this.recordList.resultList('refreshPage');  
         }
     },

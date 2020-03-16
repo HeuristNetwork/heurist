@@ -181,7 +181,7 @@ function hEditing(_options) {
                 
             for (idx=0; idx<fields.length; idx++){
                 
-                if( $.isPlainObject(fields[idx]) && fields[idx].groupType){ //this is group
+                if( $.isPlainObject(fields[idx]) && fields[idx].groupType ){ //this is group
                 //  window.hWin.HEURIST4.util.isArrayNotEmpty(fields[idx].children)
                     
                     if(fields[idx].groupHidden){ //this group is hidden all fields goes to previous group
@@ -189,6 +189,7 @@ function hEditing(_options) {
                         __createGroup(fields[idx].children, groupContainer, fieldContainer);
                         continue;                        
                     }
+                    
                     
                     if(fields[idx].groupType != currGroupType){ //create new group container and init previous
                         //init previous one 
@@ -240,25 +241,31 @@ function hEditing(_options) {
                          }
                          //.css({'font-size':'1em'})
                     }else{
+                        
                         if(is_header_visible){
                              $('<h4>').text(headerText).addClass('separator').appendTo(groupContainer);
                              
+                             /*
                              var div_prompt = $('<div>').text(headerHelpText).css('padding-left','80px')
                                 .addClass('heurist-helper1').appendTo(groupContainer);
+                             */   
                              //see applyCompetencyLevel
                              //if(window.hWin.HAPI4.get_prefs('help_on')!=1){div_prompt.hide();}
                         }
+                        
                         newFieldContainer.appendTo(groupContainer);
                     }
 
                     if(headerHelpText!=''){
-                         var div_prompt = $('<div>').text(headerHelpText).css('padding-left','80px')
+                         var div_prompt = $('<div>').text(headerHelpText).css('padding-left','14px')
                             .addClass('heurist-helper1')
                             .appendTo(newFieldContainer);
                     }
                         
                     __createGroup(fields[idx].children, groupContainer, newFieldContainer);
                     
+                    //reset fieldContainer
+                    fieldContainer = null;
                     
                 }//has children
                 else{ //this is entry field 
@@ -599,6 +606,13 @@ function hEditing(_options) {
                     ele.editing_input('isChanged', true);    
                 }
             }
+        },
+        
+        //
+        //
+        //
+        getAllFields: function(){
+            return editing_inputs;    
         },
         
         //

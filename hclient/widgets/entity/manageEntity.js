@@ -818,20 +818,21 @@ $.widget( "heurist.manageEntity", {
                     //,'height':pele.height() - hr });
                 },
                 close:function(){
-
+/*
                     if(that.options.selectOnSave==true){
                         
-                        var res = that._currentEditRecordset;
+                        //var res = that._currentEditRecordset;
+                        var res = that.selectedRecords();
+                        
                         if(window.hWin.HEURIST4.util.isRecordSet(res)){
-                            //window.hWin.HAPI4.save_pref('recent_Users', this._selection.getIds(25), 25);      
                             that._trigger( "onselect", null, 
                                 {selection:  
-                                    (that.options.select_return_mode=='recordset') ?res :res.getIds()});
+                                    (this.options.select_return_mode=='recordset') ?res :res.getIds()});
                         }else{        
                             that._trigger( "onselect", null, null );
                         }
                     }
-                
+*/              
                     
                     if($.isFunction(that.options.onClose)){
                       //that.options.onClose(that._currentEditRecordset);  
@@ -897,7 +898,7 @@ $.widget( "heurist.manageEntity", {
     closeDialog: function(is_force){
         if(this.options.isdialog){
             
-            if(is_force===true){
+            if(is_force===true){ //disable warning
                 this._as_dialog.dialog('option','beforeClose',null);
             }
             
@@ -975,7 +976,7 @@ $.widget( "heurist.manageEntity", {
         }else{        
             this._trigger( "onselect", null, null );
         }
-        this.closeDialog();
+        this.closeDialog( true ); //force without warning
     },
 
     //
@@ -1132,7 +1133,7 @@ $.widget( "heurist.manageEntity", {
     //  -----------------------------------------------------
     //
     // send update request and close popup if edit is in dialog
-    // adteraction is used in overriden version of this method
+    // afteraction is used in overriden version of this method
     //
     _saveEditAndClose: function( fields, afterAction ){
 
@@ -1312,7 +1313,7 @@ $.widget( "heurist.manageEntity", {
         
         if(!this._editing){
             this._editing = new hEditing({entity:this.options.entity, container:this.editForm, onchange:function(){
-                that.onEditFormChange(this); //this is changed_element
+                that.onEditFormChange(this); //"this" is changed_element
             }}); //pass container
             this._initEditForm_step2(recID);
             
