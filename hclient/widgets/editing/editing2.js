@@ -206,6 +206,7 @@ function hEditing(_options) {
                         if(currGroupType == 'accordion'){
                             groupEle = $('<div>').appendTo(groupContainer);
                         }else if(currGroupType == 'tabs'){
+                            //header(tabs)
                             groupEle = $('<div>').appendTo(groupContainer);
                             groupTabHeader = $('<ul>').appendTo(groupEle);
                         }else{
@@ -234,6 +235,7 @@ function hEditing(_options) {
                     }else if(currGroupType == 'tabs'){
                          $('<li>').html('<a href="#'+newFieldContainer.attr('id')+'"><span>'+headerText+'</span></a>')
                                 .appendTo(groupTabHeader);
+                                
                          $(newFieldContainer).appendTo(groupEle);
                          
                          if(groupEle.parents('.editor').length==0){
@@ -319,6 +321,7 @@ function hEditing(_options) {
                         fields[idx].is_insert_mode = _is_insert;
                         
                         var inpt = $('<div>').css('display','block !important')
+                                .attr('data-dtid', fields[idx]['dtID'])
                                 .appendTo(fieldContainer).editing_input(fields[idx]);     
                         editing_inputs.push(inpt);  
                     }
@@ -331,7 +334,7 @@ function hEditing(_options) {
                 if(currGroupType == 'accordion'){
                     groupEle.accordion({heightStyle: "content", active:false, collapsible: true });
                 }else if(currGroupType == 'tabs'){
-                    groupEle.tabs();
+                    groupEle.tabs({active: 0});
                 }
             }
             

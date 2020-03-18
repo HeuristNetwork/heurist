@@ -30,6 +30,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     
     //this.options.selectOnSave - special case when open edit record from select popup
     //this.options.allowAdminToolbar  - if false hide ModifyStructure, Edit title mask and others
+    //this.options.rts_editor  - back reference to manageDefRecStructure widget
 
     usrPreferences:{},
     defaultPrefs:{
@@ -1466,7 +1467,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             +'&mode=rectype&rtID='+that._currentEditRecTypeID;
         window.open(url, '_blank');
     },
-    
+
     //
     //
     //
@@ -1491,11 +1492,11 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 }
         });
     },
-    
+
     //
     //
     //
-    editRecordType: function(){
+    editRecordType: function(is_inline){
 
         var that = this;
         
@@ -1511,31 +1512,59 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         that._saveEditAndClose( fields, function(){ //save without validation
                             that._editing.initEditForm(null, null); //clear edit form
                             that._initEditForm_step3(that._currentEditID); //reload edit form                       
-                            that.editRecordType();
+                            that.editRecordType(true);
                         })
                 }, {title:'Data have been modified', yes:window.hWin.HR('Yes') ,no:window.hWin.HR('Cancel')});   
                 return;                           
         }
         
-
-        var url = window.hWin.HAPI4.baseURL + 'admin/structure/fields/editRecStructure.html?db='+window.hWin.HAPI4.database
-            +'&rty_ID='+that._currentEditRecTypeID;
-
-        var body = $(window.hWin.document).find('body');
-            
-        window.hWin.HEURIST4.msg.showDialog(url, {
-            height: body.innerHeight()*0.9,
-            width: 960,
-            padding: '0px',
-            title: window.hWin.HR('Edit record structure'),
-            afterclose: function(){
-                that._initEditForm_step3(that._currentEditID); //reload form    
-                /*reload structure definitions w/o message
-                window.hWin.HAPI4.SystemMgr.get_defs_all( false, window.hWin.document, function(){
-                    that._initEditForm_step3(that._currentEditID); //reload form    
-                } );*/
+        if(is_inline){
+            //create new widget manageDefRecStructure
+            var $structure_editor = this.element.find('.structure_editor');
+            if($structure_editor.length==0){
+                $structure_editor = $('<div class="structure_editor" style="display:none"/>').appendTo(this.element);
+            }else{
+                $structure_editor.empty();
             }
-        });        
+            
+            var popup_options = {
+                isdialog: false,
+                container: $structure_editor,
+                select_mode: 'manager',
+                rty_ID: that._currentEditRecTypeID,
+                onClose: function()
+            {
+                $structure_editor.empty().hide();
+                that.element.find('.editor').show();
+                that._initEditForm_step3(that._currentEditID); //reload form    
+            }};
+            
+            this.element.find('.editor').hide();
+            $structure_editor.show();
+            window.hWin.HEURIST4.ui.showEntityDialog('DefRecStructure', popup_options); 
+            
+        }else{
+            var url = window.hWin.HAPI4.baseURL + 'admin/structure/fields/editRecStructure.html?db='+window.hWin.HAPI4.database
+                +'&rty_ID='+that._currentEditRecTypeID;
+
+            var body = $(window.hWin.document).find('body');
+                
+            window.hWin.HEURIST4.msg.showDialog(url, {
+                height: body.innerHeight()*0.9,
+                width: 960,
+                padding: '0px',
+                title: window.hWin.HR('Edit record structure'),
+                afterclose: function(){
+                    that._initEditForm_step3(that._currentEditID); //reload form    
+                    /*reload structure definitions w/o message
+                    window.hWin.HAPI4.SystemMgr.get_defs_all( false, window.hWin.document, function(){
+                        that._initEditForm_step3(that._currentEditID); //reload form    
+                    } );*/
+                }
+            });        
+        }
+        
+
         
     },
     
@@ -2682,6 +2711,7 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
     // 2. add menu button on top of screen
     // 3. add record title at the top
     // 4. init cms open edit listener 
+    // 5. init rts_editor action buttons 
     //    
     _afterInitEditForm: function(){
         
@@ -2749,7 +2779,7 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
                 this.element.find('.btns-admin-only').show();
 
                 this.element.find('.btn-edit-rt').button({icon:'ui-icon-gear'}).css(btn_css)
-                        .click(function(){that.editRecordType();});
+                        .click(function(){that.editRecordType(true);});
                 
                 this.element.find('.btn-edit-rt-titlemask').button({icon:'ui-icon-pencil'})
                         .css(btn_css).click(function(){that.editRecordTypeTitle();});
@@ -2893,7 +2923,7 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
         
         if(this.element.find('.btn-modify_structure').length>0){
             var that = this;
-            this.element.find('.btn-modify_structure').click(function(){that.editRecordType();});
+            this.element.find('.btn-modify_structure').click(function(){that.editRecordType(true);});
         }
 
 
@@ -2918,7 +2948,39 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
         //show-hide help text below fields - it overrides comptency level
         window.hWin.HEURIST4.ui.switchHintState2(ishelp_on, $(this.element));
         
-        
+        //5. init rts_editor action buttons 
+        if(this.options.rts_editor){
+            //var that = this;
+            $(this.element).find('div[data-dtid]').each(function(idx, item){
+                if(parseInt($(item).attr('data-dtid'))>0){
+                    var ele = $('<div><span class="ui-icon ui-icon-gear" title="edit this field"></span>'
+                    +'<span class="ui-icon ui-icon-plus" title="add new field"></span>'
+                    +'</div>')
+                    .css({'display':'table-cell','vertical-align':'top',
+                          'min-width':'32px','cursor':'pointer'})
+                    .prependTo($(item));    
+                    
+                    ele.find('span.ui-icon').on({click: function(event){
+                        var ele = $(event.target).parents('div[data-dtid]');
+                        
+                        if($(event.target).hasClass('ui-icon-plus')){
+                            that.options.rts_editor.manageDefRecStructure(
+                                'showBaseFieldEditor', -1, ele.attr('data-dtid')
+                            );
+                        }else{
+                            that.options.rts_editor.manageDefRecStructure(
+                                'editField', ele.attr('data-dtid')
+                            );
+                        }
+                        //console.log('click '+ele.attr('data-dtid') );
+                    }});
+                }
+            });
+        }
+
+        //
+        //
+        //        
         this.onEditFormChange();
         
         window.hWin.HAPI4.SystemMgr.user_log('edit_Record');
@@ -2931,16 +2993,20 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
         
         this.editForm.find('fieldset').each(function(idx,item){
             
-            if($(item).children('div:visible').length>0){
-                $(item).show();
-            }else{
-                $(item).hide();
-                $(item).children('div').each(function(){
-                    if($(this).css('display')!='none'){
-                        $(item).show();
-                        return false;
-                    }
-                });
+            //ignore accordion and tabs
+            if($(item).attr('role')!=='tabpanel'){
+            
+                if($(item).children('div:visible').length>0){
+                    $(item).show();
+                }else{
+                    $(item).hide();
+                    $(item).children('div').each(function(){
+                        if($(this).css('display')!='none'){
+                            $(item).show();
+                            return false;
+                        }
+                    });
+                }
             }
         });
         

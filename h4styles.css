@@ -1222,6 +1222,22 @@ span.fancytree-checkbox{
     display:none;
 }
 
+.tree-rts .fancytree-folder > .fancytree-title{
+    text-transform: uppercase;
+    color: #999999;
+    font-weight: bold !important;
+}
+
+.tree-rts .required{
+    color:#CC0000;
+}
+.tree-rts .recommended{
+    color:#6A7C99;
+}
+.tree-rts .forbidden{
+    color:gray;
+}
+
 
 /* indent for folders 
 ul.fancytree-container ul{

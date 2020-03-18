@@ -345,14 +345,22 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
     
     updateRecordList: function( event, data ){
         //this._super(event, data);
+        var recset = null;
         if (data){
             if(this.options.use_cache){
                 this._cachedRecordset = data.recordset;
                 //there is no filter feature in this form - thus, show list directly
             }
-            this.recordList.resultList('updateResultSet', data.recordset, data.request);
-            this._selectAndEditFirstInRecordset(data.recordset);
+            this._currentFilterRequest = data.request;
+            recset = data.recordset;
         }
+        /*else if(this.options.use_cache){
+            recset = this._cachedRecordset;
+        }*/
+        if(recset){
+            this.recordList.resultList('updateResultSet', recset, this._currentFilterRequest);    
+        }
+        
     },
         
     //
@@ -429,7 +437,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             }else{
                 var btns = [       /*{text:window.hWin.HR('Reload'), id:'btnRecReload',icons:{primary:'ui-icon-refresh'},
                     click: function() { that._initEditForm_step3(that._currentEditID) }},  //reload edit form*/
-                          
+                          /*
                     {showText:true, icons:{primary:'ui-icon-plus'},text:window.hWin.HR('Define New Field Type'),
                           css:{'margin-right':'0.5em','float':'left'}, id:'btnAddButton',
                           click: function() { that._onActionListener(null, 'add'); }},
@@ -437,7 +445,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                     {text:window.hWin.HR('Save Order'),
                           css:{'float':'left',display:'none'}, id:'btnApplyOrder',
                           click: function() { that._onActionListener(null, 'save-order'); }},
-                          
+                          */
                           
                     {text:window.hWin.HR('Close'), 
                           css:{'margin-left':'3em','float':'right'},
@@ -666,6 +674,9 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
     _activateEnumControls: function( ele ){
         
             var ele = ele.find('.input-div');
+            //remove old content
+            ele.empty();
+            
             
             if(ele.find('#enumVocabulary').length>0) return; //already inited
             
@@ -869,25 +880,27 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         }
         
         var defaultTermID = null;
-        if(window.hWin.HEURIST4.util.isNumber(allTerms)){
+        var is_vocabulary = window.hWin.HEURIST4.util.isNumber(allTerms);
+        if(is_vocabulary){
             defaultTermID = allTerms; //vocabulary
             this.enum_container.find('input[name="enumType"][value="vocabulary"]').prop('checked',true).trigger('change');
-                    
-            var orig_selector = this.enum_container.find("#selVocab");
-                    
-            var selnew = window.hWin.HEURIST4.ui.createTermSelectExt2(orig_selector[0], 
-            {vocabsOnly:true, datatype:term_type, topOptions:'select...', useHtmlSelect:false, defaultTermID:defaultTermID })
-
-            this._off(orig_selector, 'change');
-            this._on(orig_selector, {change: function(event){
-                this._editing.setFieldValueByName('dty_JsonTermIDTree', $(event.target).val());
-                this._editing.setFieldValueByName('dty_TermIDTreeNonSelectableIDs', '');
-                this._recreateTermsPreviewSelector();
-            }});
-            
         }else{
             this.enum_container.find('input[name="enumType"][value="individual"]').prop('checked',true).trigger('change');
         }
+        
+        var orig_selector = this.enum_container.find("#selVocab");
+        var selnew = window.hWin.HEURIST4.ui.createTermSelectExt2(orig_selector[0], 
+            {vocabsOnly:true, datatype:term_type, topOptions:'select...', useHtmlSelect:false, 
+                defaultTermID:is_vocabulary?defaultTermID:0 })
+
+        this._off(orig_selector, 'change');
+        this._on(orig_selector, {change: function(event){
+            this._editing.setFieldValueByName('dty_JsonTermIDTree', $(event.target).val());
+            this._editing.setFieldValueByName('dty_TermIDTreeNonSelectableIDs', '');
+            this._recreateTermsPreviewSelector();
+        }});
+    
+
         
         
         //el_sel.onchange =  _changeVocabulary;
@@ -944,6 +957,22 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
     //
     _afterSaveEventHandler: function( recID, fieldvalues ){
 
+        //update local definitions
+        var detailtypes = window.hWin.HEURIST4.detailtypes;
+        var fi = window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex;
+        if(!detailtypes.typedefs[recID]){
+            detailtypes.typedefs[recID] = {commonFields:[]};
+            var len = Object.keys(fi).length;
+            for(var i=0; i<len; i++) detailtypes.typedefs[recID].commonFields.push('');
+        }
+        //var recset = this.getRecordSet()
+        //var record = recset.getById(recID);
+        var fields = detailtypes.typedefs[recID].commonFields;
+        for(var fname in fi)
+        if(fname){
+            fields[fi[fname]] = fieldvalues[fname]; //recset.fld(record, fname);
+        }
+
         // close on addition of new record in select_single mode    
         if(this._currentEditID<0 && 
             (this.options.selectOnSave===true || this.options.select_mode=='select_single'))
@@ -960,8 +989,11 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         if(this.options.edit_mode == 'editonly'){
             this.closeDialog(true); //force to avoid warning
         }else{
-            this.getRecordSet().setRecord(recID, fieldvalues);
+            var recset = this.recordList.resultList('getRecordSet');
+            recset.setRecord(recID, fieldvalues);
             this.recordList.resultList('refreshPage');  
+            //this.getRecordSet().setRecord(recID, fieldvalues);
+            //this.updateRecordList();
         }
     },
 

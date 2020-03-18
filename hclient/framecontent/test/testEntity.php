@@ -353,7 +353,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
                 
             }
             
-            
+/*            
             var systemEntities= 
                            [{"key":"Records",title:"Records"},
                             {"key":"SysUsers",title:"Users",icon:'ui-icon-person'},
@@ -372,7 +372,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
                             {"key":"Smarty",title:"Smarty Reports"},
                             {"key":"SmartySchedule",title:"Smarty Reports Schedule"}];
             
-            
+ */           
         </script>
     </head>
 
@@ -441,9 +441,9 @@ print $targetPath.'<br>';
                             <option value="SysIdentification">Database Property</option>
                             <option value="SysDatabases">Databases</option>
                             <option value="DefRecTypes">Record Types</option>
-                            <option value="DefRecStructure" selected>Record Type Structure</option>
+                            <option value="DefRecStructure">Record Type Structure</option>
                             <option value="DefRecTypeGroups">Record Type Groups+</option>
-                            <option value="DefDetailTypes">Field Types</option>
+                            <option value="DefDetailTypes" selected>Field Types</option>
                             <option value="DefDetailTypeGroups">Field Type Groups +</option>
                             <option value="DefTerms">Terms</option>
                             <option value="DefFileExtToMimetype">Ext To Mimetype +</option>

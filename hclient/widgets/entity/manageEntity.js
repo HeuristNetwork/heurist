@@ -1512,8 +1512,10 @@ $.widget( "heurist.manageEntity", {
         
         var is_insert_mode = (recordset==null);
         //pass structure and record details
-        this._editing.initEditForm(this.options.entity.fields, recordset, is_insert_mode );
-        this._afterInitEditForm();
+        if(this._editing){
+            this._editing.initEditForm(this.options.entity.fields, recordset, is_insert_mode );
+            this._afterInitEditForm();
+        }
     },
     
     //
