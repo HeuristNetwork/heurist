@@ -1224,30 +1224,47 @@ function RectypeManager() {
     // edit strcuture (from image link in table)
     //
     function _editRecStructure(rty_ID) {
+        
+        
+        if($('#use_new_rts_editor').is(':checked')){
+            
+            var popup_options = {
+                isdialog: true,
+                select_mode: 'manager',
+                rty_ID: rty_ID,
+                onClose: function()
+            {
+            }};
+            
+            window.hWin.HEURIST4.ui.showEntityDialog('DefRecStructure', popup_options); 
+            
+        }else{
 
-        var sURL = window.hWin.HAPI4.baseURL + "admin/structure/fields/editRecStructure.html?db="+window.hWin.HAPI4.database+"&rty_ID="+rty_ID;
-        //this.location.replace(URL);
+            var sURL = window.hWin.HAPI4.baseURL + "admin/structure/fields/editRecStructure.html?db="+window.hWin.HAPI4.database+"&rty_ID="+rty_ID;
+            //this.location.replace(URL);
 
-        var body = $(window.hWin.document).find('body');
-        var dim = {h:body.innerHeight(), w:body.innerWidth()};
+            var body = $(window.hWin.document).find('body');
+            var dim = {h:body.innerHeight(), w:body.innerWidth()};
 
-        window.hWin.HEURIST4.msg.showDialog( sURL, {
-                "close-on-blur": false,
-                "no-resize": false,
-                title: 'RECORD STRUCTURE',
-                height: dim.h*0.9,
-                width: 960,
-                "no-close": true,
-                closeCallback: function(){ alert('kiki'); },
-                callback: function(context) {
-                    if(Hul.isnull(context)) {
-                        // Canceled
-                    } else {
-                        // alert("Structure is saved");
+            window.hWin.HEURIST4.msg.showDialog( sURL, {
+                    "close-on-blur": false,
+                    "no-resize": false,
+                    title: 'RECORD STRUCTURE',
+                    height: dim.h*0.9,
+                    width: 960,
+                    "no-close": true,
+                    closeCallback: function(){ alert('kiki'); },
+                    callback: function(context) {
+                        if(Hul.isnull(context)) {
+                            // Canceled
+                        } else {
+                            // alert("Structure is saved");
+                        }
+                        icon_refresh(rty_ID);
                     }
-                    icon_refresh(rty_ID);
-                }
-        });
+            });
+            
+        }
     }
 
     //art 2014-05-26 - NOT USED ANYMORE now it updates in editRectypeTitle

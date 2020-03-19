@@ -30,6 +30,7 @@ $.widget( "heurist.searchDefDetailTypes", $.heurist.searchEntity, {
         
         for (var key in window.hWin.HEURIST4.detailtypes.lookups)
         if(!window.hWin.HEURIST4.util.isempty(window.hWin.HEURIST4.detailtypes.lookups[key])){
+            if(key!='calculated')
                 vals.push({key:key,title:window.hWin.HEURIST4.detailtypes.lookups[key]});
         }
         //$.extend(vals, window.hWin.HEURIST4.detailtypes.lookups);
@@ -53,7 +54,14 @@ $.widget( "heurist.searchDefDetailTypes", $.heurist.searchEntity, {
             this.btn_add_record.hide();
             this.btn_find_record.hide();
         }else{
+            this.btn_add_record.css({'min-width':'9m','z-index':2})
+                    .button({label: window.hWin.HR("Add New Base Field"), icon: "ui-icon-plus"})
+                .click(function(e) {
+                    that._trigger( "onadd" );
+                }); 
         }
+        
+        
         
         this._on(this.input_search_type,  { change:this.startSearch });
         this._on(this.input_search_group,  { change:this.startSearch });
@@ -106,9 +114,11 @@ $.widget( "heurist.searchDefDetailTypes", $.heurist.searchEntity, {
             
             this.input_sort_type = this.element.find('#input_sort_type');
             if(this.input_sort_type.val()=='recent'){
-                request['sort:rty_Modified'] = '-1' 
+                request['sort:dty_Modified'] = '-1' 
+            }else if(this.input_sort_type.val()=='type'){
+                request['sort:dty_Type'] = '1' 
             }else{
-                request['sort:rty_Name'] = '1';   
+                request['sort:dty_Name'] = '1';   
             }
   
             if(this.options.use_cache){

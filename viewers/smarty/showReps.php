@@ -68,6 +68,7 @@ $max_allowed_depth = 2;
 $publishmode = 0;
 $execution_counter = 0;
 $execution_total_counter = 0;
+$is_jsallowed = true;
 
 $is_included = isset($system); //this script is included into other one
 
@@ -84,8 +85,6 @@ require_once(dirname(__FILE__).'/reportRecord.php');
 if( (@$_REQUEST['q'] || @$_REQUEST['recordset']) &&
 (array_key_exists('template',$_REQUEST) || array_key_exists('template_body',$_REQUEST)))
 {
-    $is_jsallowed = $system->is_js_acript_allowed();
-    
     executeSmartyTemplate($system, $_REQUEST);
 }
 
@@ -108,8 +107,9 @@ function executeSmartyTemplate($system, $params){
 
     //$smarty is inited in smartyInit.php
     global $smarty, $outputfile, $isJSout, $gparams, $max_allowed_depth, $publishmode,
-           $execution_counter, $execution_total_counter, $is_included;
+           $execution_counter, $execution_total_counter, $is_included, $is_jsallowed;
 
+           
     $isJSout     = (array_key_exists("mode", $params) && $params["mode"]=="js"); //use javascript wrap
     $outputfile  = (array_key_exists("output", $params)) ? $params["output"] :null;
     $publishmode = (array_key_exists("publish", $params))? intval($params['publish']):0;
@@ -119,6 +119,8 @@ function executeSmartyTemplate($system, $params){
         smarty_error_output( $system, null );
         return;
     }
+    
+    $is_jsallowed = $system->is_js_acript_allowed();
            
     $mysqli = $system->get_mysqli();
 

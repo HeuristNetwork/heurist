@@ -506,7 +506,8 @@ console.log('ON_CRED???');
                 this._selection.addRecord(recID, fieldvalues);
                 this._selectAndClose();
                 return;        
-        }if (this._currentEditID<0) {
+        }
+        if (this._currentEditID<0) {
             fieldvalues['ugl_Role'] = 'member';    
         }
         

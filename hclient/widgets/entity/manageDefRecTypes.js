@@ -60,7 +60,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         //this.options.select_return_mode = 'recordset';
         this.options.edit_need_load_fullrecord = true;
         this.options.edit_height = 640;
-        this.options.edit_width = 950;
+        this.options.edit_width = 1000;
         this.options.height = 640;
 
         if(this.options.edit_mode=='editonly'){

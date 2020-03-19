@@ -36,6 +36,7 @@
     require_once (dirname(__FILE__).'/../entity/dbDefRecTypeGroups.php');
     require_once (dirname(__FILE__).'/../entity/dbDefDetailTypes.php');
     require_once (dirname(__FILE__).'/../entity/dbDefRecTypes.php');
+    require_once (dirname(__FILE__).'/../entity/dbDefRecStructure.php');
     require_once (dirname(__FILE__).'/../entity/dbSysArchive.php');
     require_once (dirname(__FILE__).'/../entity/dbSysBugreport.php');
     require_once (dirname(__FILE__).'/../entity/dbSysDashboard.php');
@@ -54,7 +55,8 @@
     $system = new System();
     $entity = null;
     
-    sanitizeRequest($_REQUEST);
+    //sanitizeRequest($_REQUEST);  it brokes json strings
+    stripScriptTagInRequest($_REQUEST);
     
     if($system->init(@$_REQUEST['db'])){
     

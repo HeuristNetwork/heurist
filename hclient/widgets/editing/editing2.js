@@ -181,8 +181,15 @@ function hEditing(_options) {
                 
             for (idx=0; idx<fields.length; idx++){
                 
-                if( $.isPlainObject(fields[idx]) && fields[idx].groupType){ //this is group
+                if( $.isPlainObject(fields[idx]) && fields[idx].groupType ){ //this is group
                 //  window.hWin.HEURIST4.util.isArrayNotEmpty(fields[idx].children)
+                    
+                    if(fields[idx].groupHidden){ //this group is hidden all fields goes to previous group
+
+                        __createGroup(fields[idx].children, groupContainer, fieldContainer);
+                        continue;                        
+                    }
+                    
                     
                     if(fields[idx].groupType != currGroupType){ //create new group container and init previous
                         //init previous one 
@@ -199,6 +206,7 @@ function hEditing(_options) {
                         if(currGroupType == 'accordion'){
                             groupEle = $('<div>').appendTo(groupContainer);
                         }else if(currGroupType == 'tabs'){
+                            //header(tabs)
                             groupEle = $('<div>').appendTo(groupContainer);
                             groupTabHeader = $('<ul>').appendTo(groupEle);
                         }else{
@@ -210,40 +218,57 @@ function hEditing(_options) {
                     var headerHelpText = fields[idx]['groupHelpText'];
                     var is_header_visible = fields[idx]['groupTitleVisible'];
                     
-                    fieldContainer = $('<fieldset>').uniqueId();
+                    var newFieldContainer = $('<fieldset>').uniqueId();
                     if(!$.isEmptyObject(fields[idx]['groupStyle'])){
-                        fieldContainer.css(fields[idx]['groupStyle']);    
+                        newFieldContainer.css(fields[idx]['groupStyle']);    
                     }
 
                     //add header and field container
                     if(currGroupType == 'accordion'){
                          $('<h3>').text(headerText).appendTo(groupEle);
-                         fieldContainer.appendTo($('<div>').appendTo(groupEle));
+                         newFieldContainer.appendTo($('<div>').appendTo(groupEle));
                          
                          if(groupEle.parents('.editor').length==0){
-                                fieldContainer.addClass('ui-heurist-bg-light');
+                                newFieldContainer.addClass('ui-heurist-bg-light');
                          }
                          
                     }else if(currGroupType == 'tabs'){
-                         $('<li>').html('<a href="#'+fieldContainer.attr('id')+'"><span>'+headerText+'</span></a>')
+                         $('<li>').html('<a href="#'+newFieldContainer.attr('id')+'"><span>'+headerText+'</span></a>')
                                 .appendTo(groupTabHeader);
-                         $(fieldContainer).appendTo(groupEle);
+                                
+                         $(newFieldContainer).appendTo(groupEle);
                          
                          if(groupEle.parents('.editor').length==0){
-                                fieldContainer.addClass('ui-heurist-bg-light');
+                                newFieldContainer.addClass('ui-heurist-bg-light');
                          }
                          //.css({'font-size':'1em'})
                     }else{
+                        
                         if(is_header_visible){
                              $('<h4>').text(headerText).addClass('separator').appendTo(groupContainer);
-                             var div_prompt = $('<div>').text(headerHelpText).css('padding-left','80px').addClass('heurist-helper1').appendTo(groupContainer);
+                             
+                             /*
+                             var div_prompt = $('<div>').text(headerHelpText).css('padding-left','80px')
+                                .addClass('heurist-helper1').appendTo(groupContainer);
+                             */   
                              //see applyCompetencyLevel
                              //if(window.hWin.HAPI4.get_prefs('help_on')!=1){div_prompt.hide();}
                         }
-                        fieldContainer.appendTo(groupContainer);
+                        
+                        newFieldContainer.appendTo(groupContainer);
+                    }
+
+                    if(headerHelpText!=''){
+                         var div_prompt = $('<div>').text(headerHelpText).css('padding-left','14px')
+                            .addClass('heurist-helper1')
+                            .appendTo(newFieldContainer);
                     }
                         
-                    __createGroup(fields[idx].children, groupContainer, fieldContainer);
+                    __createGroup(fields[idx].children, groupContainer, newFieldContainer);
+                    
+                    //reset fieldContainer
+                    fieldContainer = null;
+                    
                 }//has children
                 else{ //this is entry field 
                 
@@ -296,6 +321,7 @@ function hEditing(_options) {
                         fields[idx].is_insert_mode = _is_insert;
                         
                         var inpt = $('<div>').css('display','block !important')
+                                .attr('data-dtid', fields[idx]['dtID'])
                                 .appendTo(fieldContainer).editing_input(fields[idx]);     
                         editing_inputs.push(inpt);  
                     }
@@ -308,7 +334,7 @@ function hEditing(_options) {
                 if(currGroupType == 'accordion'){
                     groupEle.accordion({heightStyle: "content", active:false, collapsible: true });
                 }else if(currGroupType == 'tabs'){
-                    groupEle.tabs();
+                    groupEle.tabs({active: 0});
                 }
             }
             
@@ -359,7 +385,7 @@ function hEditing(_options) {
     }
 
     //
-    //
+    // returns array with at least one empty value
     //
     function _getValue(dtID){
         var idx, ele, values = [];
@@ -475,15 +501,41 @@ function hEditing(_options) {
     // returns array of input elements for field value
     // 
     function _getFieldByValue(fieldName, value){
+        var idx, ele, ress = [], val;
+        if(value==='[not empty]'){
+            for (idx in editing_inputs) {
+                ele = $(editing_inputs[idx]);
+                val = ele.editing_input('f', fieldName)
+                if(!window.hWin.HEURIST4.util.isempty(val)){
+                    ress.push(ele);
+                }
+            }
+        }else{
+            for (idx in editing_inputs) {
+                ele = $(editing_inputs[idx]);
+                if(ele.editing_input('f', fieldName)  == value){
+                    ress.push(ele);
+                }
+            }
+        }
+        
+        return ress;
+    }
+
+    //
+    // returns array of input elements for field value
+    // 
+    function _getFieldByClass(className){
         var idx, ele, ress = [];
         for (idx in editing_inputs) {
             ele = $(editing_inputs[idx]);
-            if(ele.editing_input('f', fieldName)  == value){
+            if(ele.hasClass(className)){
                 ress.push(ele);
             }
         }
         return ress;
     }
+
         
     //
     // returns array of input elements for given field
@@ -547,14 +599,23 @@ function hEditing(_options) {
         },
 
         //
+        // is_changed == false do not set flag as modified
         //
-        //
-        setFieldValueByName:function(fieldName, value){
+        setFieldValueByName:function(fieldName, value, is_changed){
             var ele = _getFieldByName(fieldName);
             if(ele && ele.editing_input('instance')){
-                ele.editing_input('setValue', $.isArray(value)?value:[value]);
-                ele.editing_input('isChanged', true);
+                ele.editing_input('setValue', $.isArray(value)?value:[value], (is_changed===false));
+                if(is_changed!==false){
+                    ele.editing_input('isChanged', true);    
+                }
             }
+        },
+        
+        //
+        //
+        //
+        getAllFields: function(){
+            return editing_inputs;    
         },
         
         //
@@ -569,6 +630,10 @@ function hEditing(_options) {
         //
         getFieldByValue:function(fieldName, value){
             return _getFieldByValue(fieldName, value);
+        },
+        
+        getFieldByClass:function(className){
+            return _getFieldByClass(className);
         },
         
         isModified: function(){

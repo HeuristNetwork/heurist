@@ -29,6 +29,7 @@ getChildrenTerms - returns entire terms tree or only part of it for selected ter
 getChildrenLabels - returns all tems labels of children terms for given term
 createTermSelectExt   - create/fill SELECT for terms or returns JSON array 
 createTermSelectExt2  - the same but parameters are passed as options object
+createVocabularySelect - creatres selector with vocabularies only (top level terms)
 getTermValue - Returns label and code for term by id
 getTermDesc
 getPlainTermsList
@@ -499,8 +500,9 @@ window.hWin.HEURIST4.ui = {
             topOptions =  options.topOptions,
             needArray  =  (options.needArray===true),
             supressTermCode = options.supressTermCode,
-            useHtmlSelect  = (options.useHtmlSelect===true);
-            useIds  = (options.useIds===true);
+            useHtmlSelect  = (options.useHtmlSelect===true),
+            useIds  = (options.useIds===true),
+            vocabsOnly  = (options.vocabsOnly===true);
 
 
         if(needArray){
@@ -536,7 +538,7 @@ window.hWin.HEURIST4.ui = {
         }
                 
 
-        var headerTerms = {};
+        var headerTerms = {}; //non selectable
         for (var id in temp) {
             headerTerms[temp[id]] = temp[id];
         }
@@ -545,7 +547,8 @@ window.hWin.HEURIST4.ui = {
         //
         var isNotFirefox = (navigator.userAgent.indexOf('Firefox')<0);
 
-        function createSubTreeOptions(optgroup, parents, termSubTree, termLookupInner, defaultTermID) {
+        function createSubTreeOptions(optgroup, parents, termSubTree, termLookupInner, defaultTermID) 
+        {
             var termID;
             var localLookup = termLookupInner;
             var termName,
@@ -661,27 +664,31 @@ window.hWin.HEURIST4.ui = {
                     }
                 }
 
-                var children = [];
-                if(hasChildren){
-                    var parents2 = parents.slice();
-                    parents2.push(termName);      //depth+1
-                    children = createSubTreeOptions( new_optgroup, parents2, termSubTree[termID], localLookup, defaultTermID);
-                }
-                var k=0, cnt2 = children.length, termssearch=[];
-                for(;k<cnt2;k++){
-                    /*if(!children[k].disabled || children[k].children.length>0){
-                    termssearch.push(children[k].id);
-                    }*/
-                    termssearch = termssearch.concat( children[k].termssearch );
-                }
-                if(!isDisabled){ //} || children.length>0){
-                    termssearch.push(termID); //add itself
-                }
+                if(!vocabsOnly){
+                
+                    var children = [];
+                    if(hasChildren){
+                        var parents2 = parents.slice();
+                        parents2.push(termName);      //depth+1
+                        children = createSubTreeOptions( new_optgroup, parents2, termSubTree[termID], localLookup, defaultTermID);
+                    }
+                    var k=0, cnt2 = children.length, termssearch=[];
+                    for(;k<cnt2;k++){
+                        /*if(!children[k].disabled || children[k].children.length>0){
+                        termssearch.push(children[k].id);
+                        }*/
+                        termssearch = termssearch.concat( children[k].termssearch );
+                    }
+                    if(!isDisabled){ //} || children.length>0){
+                        termssearch.push(termID); //add itself
+                    }
 
-                reslist2.push({id:termID, text:termName, depth:depth, disabled:isDisabled, children:children, termssearch:termssearch });
-                var parent = reslist2[reslist2.length-1];
-                for(k=0;k<cnt2;k++){
-                    parent.children[k].parent = parent;
+                    reslist2.push({id:termID, text:termName, depth:depth, disabled:isDisabled, children:children, termssearch:termssearch });
+                    var parent = reslist2[reslist2.length-1];
+                    for(k=0;k<cnt2;k++){
+                        parent.children[k].parent = parent;
+                    }
+                    
                 }
             } //for
             
@@ -692,10 +699,12 @@ window.hWin.HEURIST4.ui = {
         //
         //
         var toparray = [];
-        if(window.hWin.HEURIST4.util.isArray(termIDTree)){
+        if(vocabsOnly){
+            toparray = [0]; //Object.keys(terms.treesByDomain[datatype]);
+        }else if(window.hWin.HEURIST4.util.isArray(termIDTree)){
             toparray = termIDTree;
         }else{
-            toparray = [ termIDTree ];
+            toparray = [ termIDTree ]; //vocabulary
         }
 
         var m, lenn = toparray.length;
@@ -2491,6 +2500,7 @@ window.hWin.HEURIST4.ui = {
                  entityName=='SysIdentification' ||
                  entityName=='DefDetailTypeGroups' || 
                  entityName=='DefRecTypeGroups' || 
+                 entityName=='DefRecStructure' || 
                  entityName=='SysBugreport')){ 
                 scripts.push(path+'search'+entityName+'.js');
             }

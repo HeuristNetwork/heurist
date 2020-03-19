@@ -415,7 +415,7 @@ CREATE TABLE recDetails (
   dtl_ValShortened varchar(31) NOT NULL default '' COMMENT 'Truncated version of the textual value without spaces',
   dtl_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record detail, used to get last updated date for table',
   dtl_Certainty DECIMAL( 3, 2 ) NOT NULL DEFAULT '1.0' COMMENT 'A certainty value for this observation in the range 0 to 1, where 1 indicates complete certainty',
-  dtl_Annotation VARCHAR( 250 ) CHARACTER SET utf8 COLLATE utf8_general_ci NULL COMMENT'A short note / annotation about this specific data value - may enlarge for example on the reasons for the certainty value',  
+  dtl_Annotation VARCHAR( 250 ) CHARACTER SET utf8 COLLATE utf8_general_ci NULL COMMENT 'A short note / annotation about this specific data value - may enlarge for example on the reasons for the certainty value',  
   PRIMARY KEY  (dtl_ID),
   KEY dtl_DetailtypeIDkey (dtl_DetailTypeID),
   KEY dtl_RecIDKey (dtl_RecID),
@@ -423,7 +423,7 @@ CREATE TABLE recDetails (
   KEY dtl_ValueKey (dtl_Value(63)),
   KEY dtl_UploadedFileIDKey (dtl_UploadedFileID)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='The detail (field) values for each record - public data';
-
+--CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
 -- --------------------------------------------------------
 
 --

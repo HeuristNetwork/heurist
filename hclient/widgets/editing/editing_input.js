@@ -54,6 +54,7 @@ $.widget( "heurist.editing_input", {
     //newvalues:{},  //keep actual value for resource (recid) and file (ulfID)
     detailType:null,
     configMode:null, //configuration settings, mostly for enum and resource types (from field rst_FieldConfig)
+    customClasses:null, //custom classes to manipulate visibility and styles in editing
     
     isFileForRecord:false,
     entity_image_already_uploaded: false,
@@ -80,6 +81,14 @@ $.widget( "heurist.editing_input", {
             this.options.rectypeID = this.options.recordset.fld(this.options.recordset.getFirstRecord(), 'rec_RecTypeID');
         }
 
+        
+        //custom classes to manipulate visibility and styles in editing space separated
+        this.customClasses = this.f('rst_Class'); 
+        if(!window.hWin.HEURIST4.util.isempty(this.customClasses)){
+            this.element.addClass(this.customClasses);
+        }
+        
+        //configuration settings, mostly for enum and resource types (from field rst_FieldConfig)
         this.configMode = this.f('rst_FieldConfig');
         if(!window.hWin.HEURIST4.util.isempty(this.configMode)){
             this.configMode = window.hWin.HEURIST4.util.isJSON(this.configMode);
@@ -420,7 +429,12 @@ $.widget( "heurist.editing_input", {
                                 this.f('dty_Type')=='blocktext' || this.f('dty_Type')=='resource'))   
                                     val = this.f('dty_Type')=='freetext'?20:80;  //default minimum width for input fields in ex
         }
-        return val;
+        if(window.hWin.HEURIST4.util.isempty(val)){
+            return null;
+        }else{
+            return val;    
+        }
+        
 
         /*}else{
         var rfrs = this.options.rectypes.typedefs[this.options.rectypeID].dtFields[this.options.dtID];
@@ -1464,7 +1478,7 @@ $.widget( "heurist.editing_input", {
             }
                 
             $gicon = $('<span class="ui-icon ui-icon-triangle-1-e sel_link" '
-            +'style="display:inline-block;vertical-align:top;margin-left:8px;margin-top:5px;cursor:hand"></span>')
+            +'style="display:inline-block;vertical-align:top;margin-left:8px;margin-top:2px;cursor:hand"></span>')
             .insertBefore( $input );
             
             $input.addClass('entity_selector').css({'margin-left': '-24px'});
@@ -2988,7 +3002,7 @@ console.log('onpaste');
     //
     // recreate input elements and assign values
     //
-    setValue: function(values){
+    setValue: function(values, make_as_nochanged){
 
         //clear ALL previous inputs
         this.input_cell.find('.input-div').remove();
@@ -3007,7 +3021,7 @@ console.log('onpaste');
                 var inpt_id = this._addInput(values[i]);
             }
         }
-        if (isReadOnly) {
+        if (isReadOnly || (make_as_nochanged==true)) {
             this.options.values = values;
         }
 
@@ -3035,6 +3049,13 @@ console.log('onpaste');
         {
             if($input.attr('radiogroup')>0){
                 res = $input.find('input:checked').val();
+            }else if(this.detailType=='boolean'){
+                if($.isArray(this.configMode) && this.configMode.length==2) {
+                    res = this.configMode[ $input.is(':checked')?0:1 ];
+                }else{
+                    res = $input.is(':checked') ?$input.val() :0;        
+                }       
+                
             }else{
                 res = $input.val();    
             }
@@ -3264,7 +3285,7 @@ console.log('onpaste');
         
 
         var $inputdiv = $( "<div>" ).addClass('input-div')
-                .css({'font-weight':'bold'})
+                .css({'font-weight':'bold','padding-top':'4px'})
                 .insertBefore(this.input_prompt);
 
         var dwidth = this.f('rst_DisplayWidth');

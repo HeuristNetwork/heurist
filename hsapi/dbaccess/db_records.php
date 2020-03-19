@@ -469,6 +469,10 @@
 
         if ($stmt) {
 
+            //$mysqli->query('set character_set_server = utf8mb4');
+            //$mysqli->query('set collation_server = utf8mb4_general_ci');
+
+            
             // $stmt->bind_param('isis', $dtyID, $dtl_Value, $dtl_UploadedFileID, $dtl_Geo);
             foreach ($detailValues as $values) {
 
@@ -477,7 +481,7 @@
                 if($dtl_Value) $dtl_Value = trim($dtl_Value);
                 $dtl_UploadedFileID = @$values['dtl_UploadedFileID'];
                 $dtl_Geo = @$values['dtl_Geo'];
-
+                
                 $stmt->bind_param('isis', $dtyID, $dtl_Value, $dtl_UploadedFileID, $dtl_Geo);
                 if(!$stmt->execute()){
                     $syserror = $mysqli->error;

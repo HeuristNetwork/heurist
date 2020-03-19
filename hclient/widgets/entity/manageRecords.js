@@ -29,6 +29,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     _keepYPos: 0,
     
     //this.options.selectOnSave - special case when open edit record from select popup
+    //this.options.allowAdminToolbar  - if false hide ModifyStructure, Edit title mask and others
+    //this.options.rts_editor  - back reference to manageDefRecStructure widget
 
     usrPreferences:{},
     defaultPrefs:{
@@ -271,7 +273,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                          $__dlg.parent('.ui-dialog').css({
                                 top: dlged.position().top+dlged.height()-200,
                                 left:that._toolbar.find('#btnPrev').position().left});    
-                    }else{
+                    }else if(this._toolbar) {
                         this._toolbar.find('#divNav').html( (idx+1)+'/'+order.length);
                         
                         window.hWin.HEURIST4.util.setDisabled(this._toolbar.find('#btnPrev'), (idx==0));
@@ -515,7 +517,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     null, //'prefs_'+this._entityName,
                     window.hWin.HAPI4.baseURL+'context_help/'+this.options.entity.helpContent+' #content');
         
-                this._toolbar = this._edit_dialog.parent(); //this.editFormPopup.parent();
+                this._toolbar = this._edit_dialog.parent().find('.ui-dialog-buttonpane'); //this.editFormPopup.parent();
         
             }//popup
             else { //initialize action buttons
@@ -537,42 +539,49 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     
                     this._toolbar = this.editFormToolbar;
                     this.editFormToolbar.empty();
+                    var btn_div = $('<div>').addClass('ui-dialog-buttonset').appendTo(this._toolbar);
                     for(var idx in btn_array){
-                        this._defineActionButton2(btn_array[idx], this.editFormToolbar);
+                        this._defineActionButton2(btn_array[idx], btn_div);
                     }
                 }
             }
             
             if(this._toolbar){
                 this._toolbar.find('.ui-dialog-buttonset').css({'width':'100%','text-align':'right'});
+            
+                if(this._toolbar.find('#divNav3').length===0){
+                        //padding-left:10em;
+                        $('<div id="divNav3" style="font-weight:bold;display:inline-block;text-align:right">Save then</div>')
+                            .insertBefore(this._toolbar.find('#btnRecDuplicate'));
+                }
             }
             
-            
-            if(this._toolbar.find('#divNav3').length===0){
-                    //padding-left:10em;
-                    $('<div id="divNav3" style="font-weight:bold;display:inline-block;text-align:right">Save then</div>')
-                        .insertBefore(this._toolbar.find('#btnRecDuplicate'));
-            }
             
             var recset = this.recordList.resultList('getRecordSet');
             if(recset && recset.length()>1 && recID>0){
-                this._toolbar.find('#btnPrev').css({'display':'inline-block'});
-                this._toolbar.find('#btnNext').css({'display':'inline-block'});
-                if(this._toolbar.find('#divNav').length===0){
-                    $('<div id="divNav2" style="display:inline-block;font-weight:bold;padding:0.8em 1em;text-align:right">Step through filtered subset</div>')
+                if(this._toolbar){
+                    this._toolbar.find('#btnPrev').css({'display':'inline-block'});
+                    this._toolbar.find('#btnNext').css({'display':'inline-block'});
+                    if(this._toolbar.find('#divNav').length===0){
+                        $('<div id="divNav2" style="display:inline-block;font-weight:bold;padding:0.8em 1em;text-align:right">Step through filtered subset</div>')
                         .insertBefore(this._toolbar.find('#btnPrev'));
                         
-                    $('<div id="divNav" style="display:inline-block;font-weight:bold;padding-top:0.8em;min-width:40px;text-align:center">')
+                        $('<div id="divNav" style="display:inline-block;font-weight:bold;padding-top:0.8em;min-width:40px;text-align:center">')
                         .insertBefore(this._toolbar.find('#btnNext'));
+                    }
                 }
                 this._navigateToRec(0); //reload
-            }else{
+            }else if(this._toolbar){
                 this._toolbar.find('#btnPrev').hide();
                 this._toolbar.find('#btnNext').hide();
                 this._toolbar.find('#divNav').hide();
                 this._toolbar.find('#divNav2').hide();
             }
             
+            if(this.options.allowAdminToolbar===false){
+               if(this.editFormSummary) this.editFormSummary.remove();//hide();  
+               this.editFormSummary = null;
+            }else
             //summary tab - specific for records only    
             if(this.editFormSummary && this.editFormSummary.length>0){    
                 
@@ -1459,7 +1468,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             +'&mode=rectype&rtID='+that._currentEditRecTypeID;
         window.open(url, '_blank');
     },
-    
+
     //
     //
     //
@@ -1484,11 +1493,11 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 }
         });
     },
-    
+
     //
     //
     //
-    editRecordType: function(){
+    editRecordType: function(is_inline){
 
         var that = this;
         
@@ -1504,31 +1513,68 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         that._saveEditAndClose( fields, function(){ //save without validation
                             that._editing.initEditForm(null, null); //clear edit form
                             that._initEditForm_step3(that._currentEditID); //reload edit form                       
-                            that.editRecordType();
+                            that.editRecordType(is_inline);
                         })
                 }, {title:'Data have been modified', yes:window.hWin.HR('Yes') ,no:window.hWin.HR('Cancel')});   
                 return;                           
         }
         
-
-        var url = window.hWin.HAPI4.baseURL + 'admin/structure/fields/editRecStructure.html?db='+window.hWin.HAPI4.database
-            +'&rty_ID='+that._currentEditRecTypeID;
-
-        var body = $(window.hWin.document).find('body');
-            
-        window.hWin.HEURIST4.msg.showDialog(url, {
-            height: body.innerHeight()*0.9,
-            width: 960,
-            padding: '0px',
-            title: window.hWin.HR('Edit record structure'),
-            afterclose: function(){
-                that._initEditForm_step3(that._currentEditID); //reload form    
-                /*reload structure definitions w/o message
-                window.hWin.HAPI4.SystemMgr.get_defs_all( false, window.hWin.document, function(){
-                    that._initEditForm_step3(that._currentEditID); //reload form    
-                } );*/
+        if(is_inline){
+            //create new widget manageDefRecStructure
+            var $structure_editor = this.element.find('.structure_editor');
+            if($structure_editor.length==0){
+                $structure_editor = $('<div class="structure_editor" style="display:none"/>').appendTo(this.element);
+            }else{
+                $structure_editor.empty();
             }
-        });        
+            
+            var popup_options = {
+                isdialog: false,
+                container: $structure_editor,
+                select_mode: 'manager',
+                rty_ID: that._currentEditRecTypeID,
+                external_toolbar: this._toolbar,
+                onClose: function()
+            {
+                //restore native toolbar
+                //$structure_editor.manageDefRecStructure('toolbarOverRecordEditor');
+                that._toolbar.find('.rts_editor').empty().remove();
+                that._toolbar.find('.ui-dialog-buttonset').show();
+                
+                $structure_editor.hide().remove();
+                $structure_editor = null;
+                that.element.find('.editor').show();
+                //remove rts_editor toolbar
+                
+                that._initEditForm_step3(that._currentEditID); //reload form    
+            }};
+            
+            this.element.find('.editor').hide();
+            $structure_editor.show();
+            window.hWin.HEURIST4.ui.showEntityDialog('DefRecStructure', popup_options); 
+            
+        }else{
+            var url = window.hWin.HAPI4.baseURL + 'admin/structure/fields/editRecStructure.html?db='+window.hWin.HAPI4.database
+                +'&rty_ID='+that._currentEditRecTypeID;
+
+            var body = $(window.hWin.document).find('body');
+                
+            window.hWin.HEURIST4.msg.showDialog(url, {
+                height: body.innerHeight()*0.9,
+                width: 960,
+                padding: '0px',
+                title: window.hWin.HR('Edit record structure'),
+                afterclose: function(){
+                    that._initEditForm_step3(that._currentEditID); //reload form    
+                    /*reload structure definitions w/o message
+                    window.hWin.HAPI4.SystemMgr.get_defs_all( false, window.hWin.document, function(){
+                        that._initEditForm_step3(that._currentEditID); //reload form    
+                    } );*/
+                }
+            });        
+        }
+        
+
         
     },
     
@@ -1764,6 +1810,86 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         return ffr;
     },
     
+               
+    //
+    //
+    //     
+    _prepareFieldForEditor: function (rfr){                    
+
+            var fieldNames = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNames;
+            var fi_type = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex.dty_Type;
+            var fi_maxval = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex.rst_MaxValues;
+            
+            var idx, dtFields = {};
+            
+            for(idx in rfr){
+                if(idx>=0){
+                    dtFields[fieldNames[idx]] = rfr[idx];
+                    
+                    if(idx==fi_type){
+                        if(dtFields[fieldNames[idx]]=='file'){
+                            dtFields['rst_FieldConfig'] = {"entity":"records", "accept":".png,.jpg,.gif", "size":200};
+                        }
+                    }else if(idx==fi_maxval){
+                        if(window.hWin.HEURIST4.util.isnull(dtFields[fieldNames[idx]])){
+                            dtFields[fieldNames[idx]] = 0;
+                        }
+                    }
+                }
+            }//for
+            
+            return dtFields;
+    },                        
+    
+    //
+    //
+    //
+    _createFieldsForEditing: function( treeData ){
+        
+        var fields = [];
+        
+        if($.isArray(treeData)){
+            
+            for(var i=0; i<treeData.length; i++){
+                
+                var node = treeData[i];
+                            
+                if(node.folder){
+                    //add new group
+                    // "title":"Primary information!","data":{"help":"","type":"group"}
+                    
+                    var dtGroup = {
+                        groupHeader: node.title,
+                        groupHelpText: (node.data && node.data.help)?node.data.help:'',
+                        groupTitleVisible: true,
+                        groupType:  (node.data && node.data.type)?node.data.type:'group', //accordion, tabs, group
+                        groupStyle: {},
+                        children: this._createFieldsForEditing( node.children )
+                    };
+                    
+                    fields.push( dtGroup );
+                    
+                }else if(node.key>0){
+                    
+                    var rectypeID = this._getField('rec_RecTypeID');
+                    var dt_ID = node.key;
+
+                    var rectypes = window.hWin.HEURIST4.rectypes;
+                    var rfrs = rectypes.typedefs[rectypeID].dtFields;
+
+                    fields.push({ dtID: dt_ID, dtFields:this._prepareFieldForEditor(rfrs[dt_ID]) });
+                    
+                }else if(node['dt_ID']>0){
+
+                    fields.push({ dtID: node['dt_ID'], dtFields:this._prepareFieldForEditor(node) }  );            
+                }
+                
+            }//for
+        }
+        return fields;
+        
+    },
+    
     //
     // prepare fields and init editing
     //
@@ -1774,6 +1900,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         if(response==null || response.status == window.hWin.ResponseStatus.OK){
             
             //response==null means reload/refresh edit form
+            var allowCreateIndependentChildRecord = false;
             
             if(response){ // && response.length()>0
                 that._currentEditRecordset = new hRecordSet(response.data);
@@ -1786,6 +1913,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 }else{
                     that._isInsert = response.is_insert;     
                 }                
+                allowCreateIndependentChildRecord = (response.allowCreateIndependentChildRecord!==true);
             }
             
             var rectypeID = that._getField('rec_RecTypeID');
@@ -1796,7 +1924,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             that._currentEditID = that._getField('rec_ID');;
             that._currentEditRecTypeID = rectypeID;
             
-            if(that._isInsert && response.allowCreateIndependentChildRecord!==true &&!(that.options.parententity>0)){
+            if(that._isInsert && allowCreateIndependentChildRecord &&!(that.options.parententity>0)){
                 //special verification - prevent unparented records
                 //IMHO it should be optional
                 // 1. if rectype is set as target for one of Parent/child pointer fields 
@@ -1824,7 +1952,7 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
 [{text:'Cancel', click: function(){ $dlg.dialog( "close" ); that.closeEditDialog(); }},
  {text:'Create independent record', click: function(){
                             $dlg.dialog( "close" ); 
-                            response.allowCreateIndependentChildRecord = true;
+                            allowCreateIndependentChildRecord = true;
                             that._initEditForm_step4(response)   }} ],{title:'Child record type'}        
                      );
                      
@@ -1856,12 +1984,11 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
                 that._as_dialog.dialog('option','title', dialog_title); 
             }
                 
-             
             
-            
-            //@todo - move it inside editing
+       
+            //@todo ? - move it inside editing
             //convert structure - 
-            var fields = window.hWin.HEURIST4.util.cloneJSON(that.options.entity.fields);
+            var fields = window.hWin.HEURIST4.util.cloneJSON(that.options.entity.fields); //retuns record header field rec_XXXX
             var fieldNames = rectypes.typedefs.dtFieldNames;
             var fi = rectypes.typedefs.dtFieldNamesToIndex;
             var dt_ID;
@@ -1889,9 +2016,29 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
                 fi_help =  fi['rst_DisplayHelpText'],
                 fi_reqtype =  fi['rst_RequirementType'],
                 fi_ptrs = fi['rst_PtrFilteredIDs'],
-                fi_maxval = fi['rst_MaxValues']; //need for proper repeat
+                fi_maxval = fi['rst_MaxValues'], //need for proper repeat
+                fi_extdesc = fi['rst_DisplayExtendedDescription']; //keep UI structure
+
+
+            //THERE ARE 2 ways of grouping 
+            // 1) NEW: UI is stored in  DT_ENTITY_STRUCTURE (former header field)
+            // 2) OLD: structure is plain is defined by "separator" fields
+            var treeData = false;
+            var DT_ENTITY_STRUCTURE  = Number(window.hWin.HAPI4.sysinfo['dbconst']['DT_ENTITY_STRUCTURE']);
+            if(DT_ENTITY_STRUCTURE>0 && rfrs[DT_ENTITY_STRUCTURE]){
+                treeData = window.hWin.HEURIST4.util.isJSON(rfrs[DT_ENTITY_STRUCTURE][fi_extdesc]);    
+            }
+            //DEBUG 
+            //treeData = false;
             
-            var s_fields = []; //sorted fields
+            
+            // fields - json for editing that describes edit form
+            // fields_ids - fields in rt structure
+            // s_fields - sorted 
+            // field_in_recset - all fields in record
+            // treeData
+            
+            var s_fields = []; //sorted fields including hidden fields from record header 
             var fields_ids = [];
             for(dt_ID in rfrs){ //in rt structure
                 if(dt_ID>0){
@@ -1900,7 +2047,9 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
                     fields_ids.push(Number(dt_ID));  //fields in structure
                 }
             }
-
+            
+            //----------------
+            
             //add non-standard fields that are not in structure
             var field_in_recset = that._currentEditRecordset.getDetailsFieldTypes();
 
@@ -2011,78 +2160,86 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
                         fieldNames.push('rst_Display');
                         s_fields.push(rfr);
                         
+                        //add as first 
+                        if(treeData) treeData[treeData.length-1].children.unshift(rfr);
+                        
                     }else{
+                        //fields that are not in rectype structure
                     
                         if(addhead==0){                    
+                            //fake header
                             var rfr = that._getFakeRectypeField(9999999);
                             rfr[fi_name] = 'Non-standard fields for this record type';
                             rfr[fi_type] = 'separator';
                             rfr[fi_order] = 1100;
                             s_fields.push(rfr);
+                            
+                            if(treeData!==false){
+                                treeData.push(
+                                    {title:'Non-standard fields for this record type',
+                                        data:{type:'accordion'},children:[]});
+                            
+                            }
                         }
                         addhead++;
                         
                         var rfr = that._getFakeRectypeField(field_in_recset[k], 1100+addhead);
                         s_fields.push(rfr);
+                        
+                        if(treeData) treeData[treeData.length-1].children.push(rfr);
                     }
                 }
-            }//for           
-
-            //sort by order
-            s_fields.sort(function(a,b){ return a[fi_order]<b[fi_order]?-1:1});
-
+            }//for   
             
-            var group_fields = null;
-            
-            for(var k=0; k<s_fields.length; k++){
+            if(treeData!==false){
+                //create UI from treeData that is stored in DT_ENTITY_STRUCTURE
+                var fields_detail = that._createFieldsForEditing(treeData);
+                fields = fields.concat(fields_detail);
                 
-                rfr = s_fields[k];
+            }else{
+                //create UI from rfr 
                 
-                if(rfr[fi_type]=='separator'){
-                    if(group_fields!=null){
-                        fields[fields.length-1].children = group_fields;
-                    }
-                    var dtGroup = {
-                        groupHeader: rfr[fi_name],
-                        groupHelpText: rfr[fi_help],
-                        groupTitleVisible: (rfr[fi_reqtype]!=='forbidden'),
-                        groupType: 'group', //accordion, tabs, group
-                        groupStyle: {},
-                        children:[]
-                    };
-                    fields.push(dtGroup);
-                    group_fields = [];
-                }else {
+                //sort by order
+                s_fields.sort(function(a,b){ return a[fi_order]<b[fi_order]?-1:1});
                 
-                    var dtFields = {};
-                    for(idx in rfr){
-                        if(idx>=0){
-                            dtFields[fieldNames[idx]] = rfr[idx];
-                            
-                            if(idx==fi_type){ //fieldNames[idx]=='dty_Type'){
-                                if(dtFields[fieldNames[idx]]=='file'){
-                                    dtFields['rst_FieldConfig'] = {"entity":"records", "accept":".png,.jpg,.gif", "size":200};
-                                }
-                                
-                            }else if(idx==fi_maxval){
-                                if(window.hWin.HEURIST4.util.isnull(dtFields[fieldNames[idx]])){
-                                    dtFields[fieldNames[idx]] = 0;
-                                }
-                            }
-                        }
-                    }//for
+                var group_fields = null;
+                
+                for(var k=0; k<s_fields.length; k++){
                     
-                    if(group_fields!=null){
-                        group_fields.push({"dtID": rfr['dt_ID'], "dtFields":dtFields});
+                    rfr = s_fields[k];
+                    
+                    if(rfr[fi_type]=='separator'){
+                        if(group_fields!=null){
+                            fields[fields.length-1].children = group_fields;
+                        }
+                        var dtGroup = {
+                            groupHeader: rfr[fi_name],
+                            groupHelpText: rfr[fi_help],
+                            groupTitleVisible: (rfr[fi_reqtype]!=='forbidden'),
+                            groupType: 'group', //accordion, tabs, group
+                            groupStyle: {},
+                            children:[]
+                        };
+                        fields.push(dtGroup);
+                        group_fields = [];
                     }else{
-                        fields.push({"dtID": rfr['dt_ID'], "dtFields":dtFields});
+                        
+                        var dtFields = that._prepareFieldForEditor( rfr );
+                        
+                        if(group_fields!=null){
+                            group_fields.push({"dtID": rfr['dt_ID'], "dtFields":dtFields});
+                        }else{
+                            fields.push({"dtID": rfr['dt_ID'], "dtFields":dtFields});
+                        }
                     }
+                }//for s_fields
+                //add children to last group
+                if(group_fields!=null){
+                    fields[fields.length-1].children = group_fields;
                 }
-            }//for s_fields
-            //add children to last group
-            if(group_fields!=null){
-                fields[fields.length-1].children = group_fields;
-            }
+                
+            }//if
+            
             
             that._editing.initEditForm(fields, that._currentEditRecordset, that._isInsert);
             
@@ -2172,7 +2329,7 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
                 that._editing.setDisabled(true);
                 
                 eles = dlged.find('.ui-layout-east > .editFormSummary');
-                if(no_access){
+                if(no_access && eles.length>0){
                     eles.css({'background-image': 'url('+window.hWin.HAPI4.baseURL+'hclient/assets/non-editable-watermark.png)'});                    
                 }else{
                     eles.css({'background':'lightgray'});    
@@ -2197,9 +2354,12 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
                         dlged.find('.ui-layout-center > div').css({'background':'none'});
                         dlged.find('.ui-layout-center').css({'background':'none'});
                         var eles = dlged.find('.ui-layout-east > .editFormSummary')
-                        eles.css({'background':'none'});
+                        if(eles.length>0){
+                            eles.css({'background':'none'});   
+                            eles.find('.coverall-div-bare').remove();
+                        }
                         //remove screen
-                        eles.find('.coverall-div-bare').remove();
+                        
                     });
                     ele.find('span').hide(); //how no enough rights
                 }
@@ -2530,29 +2690,30 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
         }
         
         //show/hide save buttons
-        var ele = this._toolbar;
-        /*ele.find('#btnRecCancel').css('visibility', mode);
-        ele.find('#btnRecSaveAndNew').css('visibility', mode);
-        ele.find('#btnRecSave').css('visibility', mode);
-        ele.find('#btnRecSaveAndClose').css('visibility', mode);*/
+        if(this._toolbar){
+            var ele = this._toolbar;
+            /*ele.find('#btnRecCancel').css('visibility', mode);
+            ele.find('#btnRecSaveAndNew').css('visibility', mode);
+            ele.find('#btnRecSave').css('visibility', mode);
+            ele.find('#btnRecSaveAndClose').css('visibility', mode);*/
+            
+            //window.hWin.HEURIST4.util.setDisabled(ele.find('#btnRecDuplicate'), (mode=='hidden'));
+            //window.hWin.HEURIST4.util.setDisabled(ele.find('#btnRecSaveAndNew'), (mode=='hidden'));
+            
+            window.hWin.HEURIST4.util.setDisabled(ele.find('#btnRecCancel'), (mode=='hidden'));
+            window.hWin.HEURIST4.util.setDisabled(ele.find('#btnRecSaveAndClose'), (mode=='hidden'));
+            
+            //window.hWin.HEURIST4.util.setDisabled(ele.find('#btnRecSave'), (mode=='hidden'));
+            
+            //save buton is always enabled - just greyout in nonchanged state
+            if(mode=='hidden'){
+                ele.find('#btnRecSave').css({opacity: '.35'});  //addClass('ui-state-disabled'); 
+            }else{
+                ele.find('#btnRecSave').css({opacity: '1'}); //.removeClass('ui-state-disabled'); // ui-button-disabled
+            }
         
-        //window.hWin.HEURIST4.util.setDisabled(ele.find('#btnRecDuplicate'), (mode=='hidden'));
-        //window.hWin.HEURIST4.util.setDisabled(ele.find('#btnRecSaveAndNew'), (mode=='hidden'));
-        
-        window.hWin.HEURIST4.util.setDisabled(ele.find('#btnRecCancel'), (mode=='hidden'));
-        window.hWin.HEURIST4.util.setDisabled(ele.find('#btnRecSaveAndClose'), (mode=='hidden'));
-        
-        //window.hWin.HEURIST4.util.setDisabled(ele.find('#btnRecSave'), (mode=='hidden'));
-        
-        //save buton is always enabled - just greyout in nonchanged state
-        if(mode=='hidden'){
-            ele.find('#btnRecSave').css({opacity: '.35'});  //addClass('ui-state-disabled'); 
-        }else{
-            ele.find('#btnRecSave').css({opacity: '1'}); //.removeClass('ui-state-disabled'); // ui-button-disabled
         }
-        
-        
-        //ele.find('#btnRecReload').css('visibility', !mode);
+
     },
     
     //
@@ -2560,13 +2721,15 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
     // 2. add menu button on top of screen
     // 3. add record title at the top
     // 4. init cms open edit listener 
+    // 5. init rts_editor action buttons 
     //    
     _afterInitEditForm: function(){
         
         var ishelp_on = (this.usrPreferences['help_on']==true || this.usrPreferences['help_on']=='true');
         var isfields_on = this.usrPreferences['optfields']==true || this.usrPreferences['optfields']=='true';
 
-        if(this.element.find('.chb_opt_fields').length==0){  //not inited yet
+        if( this.element.find('.chb_opt_fields').length==0 )
+        {  //not inited yet
 
             $('<div style="display:table;min-width:575px;width:100%">'
              +'<div style="display:table-cell;text-align:left;padding:20px 0px 5px 35px;">'
@@ -2580,6 +2743,7 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
              
                 +'<div style="padding-right:50px;float:right">'
                     +'<span class="btn-edit-rt btns-admin-only" style="font-size:larger">Modify structure</span>'
+                    +'<span class="btn-edit-rt2 btns-admin-only" style="font-size:larger">NEW!</span>'
                     +'<span class="btn-edit-rt-titlemask btns-admin-only">Edit title mask</span>'
                     +'<span class="btn-edit-rt-template btns-admin-only">Template</span>'
                     +'<span class="btn-bugreport">Bug report</span>'
@@ -2620,12 +2784,15 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
             var that = this;    
 
             var btn_css = {'font-weight': 'bold', color:'#7D9AAA', background:'#ecf1fb' };
-            if(window.hWin.HAPI4.is_admin()){
+            if(window.hWin.HAPI4.is_admin() && this.options.allowAdminToolbar!==false)
+            {
                 
                 this.element.find('.btns-admin-only').show();
 
                 this.element.find('.btn-edit-rt').button({icon:'ui-icon-gear'}).css(btn_css)
-                        .click(function(){that.editRecordType();});
+                        .click(function(){that.editRecordType(false);});
+                this.element.find('.btn-edit-rt2').button().css(btn_css)
+                        .click(function(){that.editRecordType(true);});
                 
                 this.element.find('.btn-edit-rt-titlemask').button({icon:'ui-icon-pencil'})
                         .css(btn_css).click(function(){that.editRecordTypeTitle();});
@@ -2769,7 +2936,7 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
         
         if(this.element.find('.btn-modify_structure').length>0){
             var that = this;
-            this.element.find('.btn-modify_structure').click(function(){that.editRecordType();});
+            this.element.find('.btn-modify_structure').click(function(){that.editRecordType(true);});
         }
 
 
@@ -2794,7 +2961,39 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
         //show-hide help text below fields - it overrides comptency level
         window.hWin.HEURIST4.ui.switchHintState2(ishelp_on, $(this.element));
         
-        
+        //5. init rts_editor action buttons 
+        if(this.options.rts_editor){
+            //var that = this;
+            $(this.element).find('div[data-dtid]').each(function(idx, item){
+                if(parseInt($(item).attr('data-dtid'))>0){
+                    var ele = $('<div><span class="ui-icon ui-icon-gear" title="edit this field"></span>'
+                    +'<span class="ui-icon ui-icon-plus" title="add new field"></span>'
+                    +'</div>')
+                    .css({'display':'table-cell','vertical-align':'top',
+                          'min-width':'32px','cursor':'pointer'})
+                    .prependTo($(item));    
+                    
+                    ele.find('span.ui-icon').on({click: function(event){
+                        var ele = $(event.target).parents('div[data-dtid]');
+                        
+                        if($(event.target).hasClass('ui-icon-plus')){
+                            that.options.rts_editor.manageDefRecStructure(
+                                'showBaseFieldEditor', -1, ele.attr('data-dtid')
+                            );
+                        }else{
+                            that.options.rts_editor.manageDefRecStructure(
+                                'editField', ele.attr('data-dtid')
+                            );
+                        }
+                        //console.log('click '+ele.attr('data-dtid') );
+                    }});
+                }
+            });
+        }
+
+        //
+        //
+        //        
         this.onEditFormChange();
         
         window.hWin.HAPI4.SystemMgr.user_log('edit_Record');
@@ -2807,16 +3006,20 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
         
         this.editForm.find('fieldset').each(function(idx,item){
             
-            if($(item).children('div:visible').length>0){
-                $(item).show();
-            }else{
-                $(item).hide();
-                $(item).children('div').each(function(){
-                    if($(this).css('display')!='none'){
-                        $(item).show();
-                        return false;
-                    }
-                });
+            //ignore accordion and tabs
+            if($(item).attr('role')!=='tabpanel'){
+            
+                if($(item).children('div:visible').length>0){
+                    $(item).show();
+                }else{
+                    $(item).hide();
+                    $(item).children('div').each(function(){
+                        if($(this).css('display')!='none'){
+                            $(item).show();
+                            return false;
+                        }
+                    });
+                }
             }
         });
         

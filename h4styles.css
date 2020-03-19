@@ -191,7 +191,7 @@ input.Temporal, .list_div {
 .entity_selector {
     cursor: hand;
     border: 1px solid rgba(0, 0, 0, 0.2);
-    padding: 3px 10px 3px 30px;
+    padding: 0px 10px 0px 30px;
     overflow-y: auto;
     line-height: 18px;
     max-height: 120px;
@@ -1220,6 +1220,22 @@ span.fancytree-checkbox{
 
 .tree-csv .fancytree-expander, .tree-facets .fancytree-expander{
     display:none;
+}
+
+.tree-rts .fancytree-folder > .fancytree-title{
+    text-transform: uppercase;
+    color: #999999;
+    font-weight: bold !important;
+}
+
+.tree-rts .required{
+    color:#CC0000;
+}
+.tree-rts .recommended{
+    color:#6A7C99;
+}
+.tree-rts .forbidden{
+    color:gray;
 }
 
 
