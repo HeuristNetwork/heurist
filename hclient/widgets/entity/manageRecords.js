@@ -517,7 +517,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     null, //'prefs_'+this._entityName,
                     window.hWin.HAPI4.baseURL+'context_help/'+this.options.entity.helpContent+' #content');
         
-                this._toolbar = this._edit_dialog.parent(); //this.editFormPopup.parent();
+                this._toolbar = this._edit_dialog.parent().find('.ui-dialog-buttonpane'); //this.editFormPopup.parent();
         
             }//popup
             else { //initialize action buttons
@@ -539,8 +539,9 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     
                     this._toolbar = this.editFormToolbar;
                     this.editFormToolbar.empty();
+                    var btn_div = $('<div>').addClass('ui-dialog-buttonset').appendTo(this._toolbar);
                     for(var idx in btn_array){
-                        this._defineActionButton2(btn_array[idx], this.editFormToolbar);
+                        this._defineActionButton2(btn_array[idx], btn_div);
                     }
                 }
             }
@@ -1512,7 +1513,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         that._saveEditAndClose( fields, function(){ //save without validation
                             that._editing.initEditForm(null, null); //clear edit form
                             that._initEditForm_step3(that._currentEditID); //reload edit form                       
-                            that.editRecordType(true);
+                            that.editRecordType(is_inline);
                         })
                 }, {title:'Data have been modified', yes:window.hWin.HR('Yes') ,no:window.hWin.HR('Cancel')});   
                 return;                           
@@ -1532,10 +1533,19 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 container: $structure_editor,
                 select_mode: 'manager',
                 rty_ID: that._currentEditRecTypeID,
+                external_toolbar: this._toolbar,
                 onClose: function()
             {
-                $structure_editor.empty().hide();
+                //restore native toolbar
+                //$structure_editor.manageDefRecStructure('toolbarOverRecordEditor');
+                that._toolbar.find('.rts_editor').empty().remove();
+                that._toolbar.find('.ui-dialog-buttonset').show();
+                
+                $structure_editor.hide().remove();
+                $structure_editor = null;
                 that.element.find('.editor').show();
+                //remove rts_editor toolbar
+                
                 that._initEditForm_step3(that._currentEditID); //reload form    
             }};
             
@@ -2733,6 +2743,7 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
              
                 +'<div style="padding-right:50px;float:right">'
                     +'<span class="btn-edit-rt btns-admin-only" style="font-size:larger">Modify structure</span>'
+                    +'<span class="btn-edit-rt2 btns-admin-only" style="font-size:larger">NEW!</span>'
                     +'<span class="btn-edit-rt-titlemask btns-admin-only">Edit title mask</span>'
                     +'<span class="btn-edit-rt-template btns-admin-only">Template</span>'
                     +'<span class="btn-bugreport">Bug report</span>'
@@ -2779,6 +2790,8 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
                 this.element.find('.btns-admin-only').show();
 
                 this.element.find('.btn-edit-rt').button({icon:'ui-icon-gear'}).css(btn_css)
+                        .click(function(){that.editRecordType(false);});
+                this.element.find('.btn-edit-rt2').button().css(btn_css)
                         .click(function(){that.editRecordType(true);});
                 
                 this.element.find('.btn-edit-rt-titlemask').button({icon:'ui-icon-pencil'})

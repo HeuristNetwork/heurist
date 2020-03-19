@@ -57,8 +57,8 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                 '<div class="ent_wrapper">'
                         +    '<div class="ent_header searchForm" style="display:none"/>'     
                         +    '<div class="ent_content_full"  style="top:0px">'
-                                +'<div class="ent_content_full recordList" style="top:0px;bottom:50%;width:320px"/>'
-                                +'<div class="ent_content_full treeView" style="top:50%;width:320px"/>' //treeview
+                                +'<div class="ent_content_full recordList" style="display:none;top:0px;bottom:50%;width:320px"/>'
+                                +'<div class="ent_content_full treeView" style="top:0;width:320px"/>' //treeview
                                 +'<div class="ent_wrapper" style="left:321px">'
                                 +    '<div class="ent_header editForm-toolbar"/>'
                                 +    '<div class="ent_content_full editForm" style="top:0px"/>'
@@ -132,6 +132,10 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                     });
             }
         }    
+        
+        if(this.options.external_toolbar){
+            this.toolbarOverRecordEditor(this.options.external_toolbar);    
+        }
         
         if(this._toolbar) this._toolbar.find('.ui-dialog-buttonset').css({'width':'100%','text-align':'right'});
         
@@ -657,27 +661,52 @@ dty_TermIDTreeNonSelectableIDs
             var canDelete = this.editForm.is(':visible') 
                             && !(this._editing && this._editing.isModified());
             
-            this._toolbar.find('#btnRecDelete').css('display', 
+            this._toolbar.find('#btnRecDelete_rts').css('display', 
                     (canDelete)?'block':'none');
-            this._toolbar.find('#btnCloseEditor').css('display', 
+            this._toolbar.find('#btnCloseEditor_rts').css('display', 
                     (canDelete)?'block':'none');
 
             var isChanged = this.editForm.is(':visible') 
                             && this._editing && this._editing.isModified();
 
-            this._toolbar.find('#btnRecPreview').css('display', 
+            this._toolbar.find('#btnRecPreview_rts').css('display', 
                     (isChanged)?'none':'block');
                     
-            this._toolbar.find('#btnRecSave').css('display', 
+            this._toolbar.find('#btnRecSave_rts').css('display', 
                     (isChanged)?'block':'none');
-            this._toolbar.find('#btnRecSaveAndClose').css('display', 
+            this._toolbar.find('#btnRecSaveAndClose_rts').css('display', 
                     (isChanged)?'block':'none');
-            this._toolbar.find('#btnRecCancel').css('display', 
+            this._toolbar.find('#btnRecCancel_rts').css('display', 
                     (isChanged)?'block':'none');
 
         }
             
     },  
+    
+    //
+    // special case when rts editor is placed over record editor (manageRecords)
+    // in this method it hides native record toolbar and replace it with rts toolbar
+    //
+    toolbarOverRecordEditor: function( re_toolbar ){
+        
+        if(re_toolbar){ //replace
+        
+            re_toolbar.find('.ui-dialog-buttonset').hide();
+            
+            var btn_array = this._getEditDialogButtons();
+            
+            this._toolbar = re_toolbar;
+            var btn_div = $('<div>').addClass('ui-dialog-buttonset rts_editor').appendTo(this._toolbar);
+            for(var idx in btn_array){
+                this._defineActionButton2(btn_array[idx], btn_div);
+            }
+        
+        }else{ //restore record edit toolbar
+            re_toolbar.find('.rts_editor').remove();
+            re_toolbar.find('.ui-dialog-buttonset').show();
+        }
+        
+    },
     
     //
     // array of buttons for toolbar
@@ -697,22 +726,22 @@ dty_TermIDTreeNonSelectableIDs
                       }}, */
                       
                 {text:window.hWin.HR('Preferences'),
-                      css:{'float':'left',display:'block'}, id:'btnPreferences', icon:'ui-icon-gear',
+                      css:{'float':'left',display:'block'}, id:'btnPreferences_rts', icon:'ui-icon-gear',
                       click: function() {  }},
                       
                 {text:window.hWin.HR('Refresh Preview'),
-                      css:{'float':'left',display:'block'}, id:'btnRecPreview',
+                      css:{'float':'left',display:'block'}, id:'btnRecPreview_rts',
                       click: function() { that._showRecordEditorPreview(); }},
                 
-                {text:window.hWin.HR('Close Dialog'), 
+                {text:window.hWin.HR(this.options.external_toolbar?'Exit Structure editor':'Close Dialog'), 
                       css:{'margin-left':'4em','float':'right'},
                       click: function() { 
                           that.closeDialog(); 
                       }},
 
                       
-                {text:window.hWin.HR('Close Field Editor'), id:'btnCloseEditor', 
-                      css:{'margin-right':'8em','float':'right'},
+                {text:window.hWin.HR('Close Field Editor'), id:'btnCloseEditor_rts', 
+                      css:{'margin-right':'8em','float':'right',display:'none'},
                       click: function() { 
 
                         if(that.previewEditor){
@@ -727,18 +756,18 @@ dty_TermIDTreeNonSelectableIDs
                           
                       }},
                       
-                {text:window.hWin.HR('Drop Changes'), id:'btnRecCancel', 
+                {text:window.hWin.HR('Drop Changes'), id:'btnRecCancel_rts', 
                       css:{'margin-left':'0.5em','float':'right',display:'none'},
                       click: function() { that._initEditForm_step3(that._currentEditID) }},  //reload edit form
-                {text:window.hWin.HR('Save'), id:'btnRecSave',
+                {text:window.hWin.HR('Save'), id:'btnRecSave_rts',
                       accesskey:"S",
                       css:{'font-weight':'bold','float':'right',display:'none'},
                       click: function() { that._saveEditAndClose( null, 'none' ); }},
-                {text:window.hWin.HR('Save and Close'), id:'btnRecSaveAndClose',  //save editor and show preview
+                {text:window.hWin.HR('Save and Close'), id:'btnRecSaveAndClose_rts',  //save editor and show preview
                       accesskey:"C",
                       css:{'font-weight':'bold','float':'right',display:'none'},
                       click: function() { that._saveEditAndClose( null, 'close' ); }},
-                {text:window.hWin.HR('Exclude'), id:'btnRecDelete', title:'Exclude field from structure',
+                {text:window.hWin.HR('Remove'), id:'btnRecDelete_rts', title:'Exclude field from structure',
                       css:{'float':'right',display:'none'},
                       click: function() { if(that._currentEditID>0) that._removeField(that._currentEditID); }}
                       
@@ -876,7 +905,7 @@ rst_LocallyModified: "1"
                     if(!parentnode) return;
                     
                     //add new node to tree
-                    parentnode.addNode({key:recID}, parentnode.folder?'child':'before');
+                    parentnode.addNode({key:recID}, parentnode.folder?'child':'after');
                     
                     that._afterSaveEventHandler(recID, fields);
                     that._saveRtStructureTree();
@@ -1031,17 +1060,6 @@ rst_LocallyModified: "1"
         }
 
         this._super();
-
-        /*hide after edit init btnRecRemove for status locked 
-        if(this._toolbar){
-            
-            this._toolbar.find('#btnRecDelete').hide();
-            this._toolbar.find('#btnRecSave').hide(); 
-            this._toolbar.find('#btnRecSaveAndClose').hide(); 
-            this._toolbar.find('#btnRecCancel').hide(); 
-            this._toolbar.find('#btnCloseEditor').show(); 
-        }
-        */
     },    
     
     //
@@ -1214,6 +1232,24 @@ rst_LocallyModified: "1"
             this._super( fields, afterAction );                
             
     },    
+    
+    //
+    //
+    //
+    closeDialog: function(is_force){
+          if(this.options.external_toolbar){
+              
+                if(is_force || this.defaultBeforeClose()){
+                    if($.isFunction(this.options.onClose)){
+                        this.options.onClose.call();
+                    } 
+                }
+              
+          }else{
+                this._super( is_force )   
+          }
+    },
+    
     //--------------------------------------------------------------------------
     //
     // update 1)list, 2)treeview and 3)preview after save (refresh)
@@ -1334,7 +1370,7 @@ rst_LocallyModified: "1"
         
         //add to treeview
         var newnode = {key:this._fakeSepIdsCounter, folder:true, title:'New header', data:{type:'group'}};
-        node = node.addNode(newnode, 'before');
+        node = node.addNode(newnode, 'after');
         node.setActive(); //start edit
      
     },
@@ -1399,6 +1435,9 @@ rst_LocallyModified: "1"
         //this._showRecordEditorPreview();
     },
     
+    //
+    //
+    //
     editField: function(recID){
         var tree = this._treeview.fancytree("getTree");
         tree.getRootNode().setActive();

@@ -28,7 +28,7 @@
 //_recordListItemRenderer    - renderer of item for resultlist
 //_recordListGetFullData     - callback function to retrieve full record info (in case we use 2 steps search: ids then list per page)  
 // _getEditDialog
-//_getEditDialogButtons  - return set of buttons fot edit popup
+//_getEditDialogButtons  - return set of buttons fot edit popup it is placed on _toolbar
 //_initDialog - init dialog widget 
 // popupDialog
 // closeDialog
@@ -549,11 +549,14 @@ $.widget( "heurist.manageEntity", {
         
     },
     
+    //
+    // define action buttons for edit toolbar
+    //
     _defineActionButton2: function(options, container){        
         
-        var btn_opts = {label:options.text, icons:options.icons};
+        var btn_opts = {label:options.text, icons:options.icons, title:options.title};
         
-        var btn = $('<div>').button(btn_opts)
+        var btn = $('<button>').button(btn_opts)
                     .click(options.click)
                     .appendTo(container);
         if(options.id){
@@ -753,23 +756,9 @@ $.widget( "heurist.manageEntity", {
 
             if(options.edit_mode == 'editonly' || options.edit_mode == 'inline'){
                 btn_array =  this._getEditDialogButtons();
+                
                 if(!options.beforeClose){
-                    options.beforeClose = function(){
-                        //show warning in case of modification
-                        if(that._editing && that._editing.isModified() && that._currentEditID!=null){
-                            var $dlg, buttons = {};
-                            buttons['Save'] = function(){ that._saveEditAndClose(null, 'close'); $dlg.dialog('close'); }; 
-                            buttons['Ignore and close'] = function(){ that._currentEditID=null; that.closeDialog(); $dlg.dialog('close'); };
-                            
-                            $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
-                                    'You have made changes to the data. Click "Save" otherwise all changes will be lost.',
-                                    buttons,
-                                    {title:'Confirm',yes:'Save',no:'Ignore and close'});
-                            return false;   
-                        }
-                        that.saveUiPreferences();
-                        return true;
-                    };
+                    options.beforeClose = this.defaultBeforeClose; 
                 }
                 
                 if ( window.hWin.HEURIST4.util.isnull(position) || $.isEmptyObject(position)){
@@ -846,12 +835,33 @@ $.widget( "heurist.manageEntity", {
             this._as_dialog = $dlg; 
             
             if(options.edit_mode == 'editonly' || options.edit_mode == 'inline'){
-                this._toolbar = this._as_dialog.parent();
+                this._toolbar = this._as_dialog.parent().find('.ui-dialog-buttonpane');
                 //assign unique identificator to get proper position of child edit dialogs
                 this._toolbar.attr('posid','edit'+this._entityName+'-'+(new Date()).getTime());
             }
                 
             
+    },
+    
+    //
+    // show warning in case of modification
+    //
+    defaultBeforeClose: function(){
+        
+        var that = this;
+        if(that._editing && that._editing.isModified() && that._currentEditID!=null){
+            var $dlg, buttons = {};
+            buttons['Save'] = function(){ that._saveEditAndClose(null, 'close'); $dlg.dialog('close'); }; 
+            buttons['Ignore and close'] = function(){ that._currentEditID=null; that.closeDialog(); $dlg.dialog('close'); };
+            
+            $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
+                    'You have made changes to the data. Click "Save" otherwise all changes will be lost.',
+                    buttons,
+                    {title:'Confirm',yes:'Save',no:'Ignore and close'});
+            return false;   
+        }
+        if($.isFunction(that.saveUiPreferences))that.saveUiPreferences();
+        return true;
     },
     
     //
@@ -1424,7 +1434,7 @@ $.widget( "heurist.manageEntity", {
                      null,  //  'prefs_'+this._entityName,
                      helpURL, false);
                      
-                this._toolbar = this._edit_dialog.parent();     
+                this._toolbar = this._edit_dialog.parent().find('.ui-dialog-buttonpane');
                      
             }else if(this.editFormToolbar.length>0){ //initialize action buttons
                 
