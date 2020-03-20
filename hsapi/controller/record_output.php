@@ -1566,7 +1566,11 @@ function getGeoJsonFeature($record, $extended=false, $simplify=false, $leaflet_m
                     }else if($value!=null){
                         //parse temporal
                         $ta = temporalToSimpleRange($value);
-                        if($ta!=null) $timevalues[] = $ta;
+                        if($ta!=null){
+                            if($ta[0]=='' && $ta[1]!='') $ta[0] = $ta[1];
+                            if($ta[3]=='' && $ta[2]!='') $ta[3] = $ta[2];
+                            $timevalues[] = $ta;
+                        } 
                     }
                 }else if(defined('DT_SYMBOLOGY') && $dty_ID==DT_SYMBOLOGY){
                     $symbology = json_decode($value,true);                    
