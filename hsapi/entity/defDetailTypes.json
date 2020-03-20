@@ -115,7 +115,8 @@
                     "dtFields":{
                         "dty_Type":"enum",
                         "dty_Role":"virtual",
-                        "rst_Class":"freetext",
+                        "rst_Class":"XXXfreetext",
+                        "rst_Display":"hidden",
                         "rst_DisplayName":"Input type:",
                         "rst_DisplayHelpText": "Define specific subtype", 
                         "rst_DefaultValue":"text",
@@ -127,7 +128,8 @@
                     "dtFields":{
                         "dty_Type":"enum",
                         "dty_Role":"virtual",
-                        "rst_Class":"blocktext",
+                        "rst_Class":"XXXblocktext",
+                        "rst_Display":"hidden",
                         "rst_DisplayName":"Input type:",
                         "rst_DisplayHelpText": "Define specific subtype", 
                         "rst_DefaultValue":"text",
@@ -139,7 +141,8 @@
                     "dtFields":{
                         "dty_Type":"boolean",
                         "dty_Role":"virtual",
-                        "rst_Class":"date",
+                        "rst_Class":"XXXdate",
+                        "rst_Display":"hidden",
                         "rst_DisplayName":"Allow temporal object:",
                         "rst_DisplayHelpText": "Define specific subtype"
                     }
@@ -149,6 +152,7 @@
                         "dty_Type":"freetext",
                         "dty_Role":"virtual",
                         "rst_Class":"relationtype enum relmarker",
+                        "rst_Display":"hidden",
                         "rst_DisplayName":"Vocabulary (terms):",
                         "rst_DisplayHelpText": "The set of terms which may be selected for this field"
                     }
@@ -173,6 +177,7 @@
                         "dty_Type":"resource",
                         "rst_Display":"hidden",
                         "rst_Class":"resource relmarker",
+                        "rst_Display":"hidden",
                         "rst_DisplayName":"Target record types:",
                         "rst_DisplayHelpText": "The set of record types to which this field can point (for pointer fields and relationship markers. If undefined, it can point to any record type.", 
                         "rst_FieldConfig": {"entity":"DefRecTypes","csv":true}

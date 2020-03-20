@@ -55,7 +55,7 @@ $.widget( "heurist.searchDefDetailTypes", $.heurist.searchEntity, {
             this.btn_find_record.hide();
         }else{
             this.btn_add_record.css({'min-width':'9m','z-index':2})
-                    .button({label: window.hWin.HR("Add New Base Field"), icon: "ui-icon-plus"})
+                    .button({label: window.hWin.HR("Define New Field Type"), icon: "ui-icon-plus"})
                 .click(function(e) {
                     that._trigger( "onadd" );
                 }); 

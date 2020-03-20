@@ -1072,6 +1072,10 @@ $.widget( "heurist.manageEntity", {
             if(this.options.list_mode=='default'){
                 this.recordList.resultList('updateResultSet', subset, request);   
             }
+            if(this.options.selection_on_init && this.options['select_mode']=='select_multi'){
+                this.recordList.resultList('setMultiSelction', this.options.selection_on_init);
+                this.options.selection_on_init = null;
+            }
         }
         return subset;
     },
@@ -1140,7 +1144,7 @@ $.widget( "heurist.manageEntity", {
             
     },
     
-    //  -----------------------------------------------------
+    //-----------------------------------------------------
     //
     // send update request and close popup if edit is in dialog
     // afteraction is used in overriden version of this method

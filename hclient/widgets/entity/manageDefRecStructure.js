@@ -370,7 +370,10 @@ dty_TermIDTreeNonSelectableIDs
                             var record = recset.getById(dty_ID);
                             if(record){
                                 var req = recset.fld(record,'rst_RequirementType');
-                                var title = recset.fld(record,'rst_DisplayName');
+                                var title = recset.fld(record,'rst_DisplayName')
+                                    +'<span style="font-size:smaller">  ('
+                                    +window.hWin.HEURIST4.detailtypes.lookups[recset.fld(record,'dty_Type')]
+                                    +')</span>';
                                 node.extraClasses = req;
                                 $(node.li).addClass(req);
                                 node.setTitle(title);
@@ -1305,7 +1308,10 @@ rst_LocallyModified: "1"
                         
                     if(node) {
     //console.log('set name '+recset.fld(record, 'rst_DisplayName'));                    
-                        node.setTitle( recset.fld(record, 'rst_DisplayName') );   
+                        node.setTitle( recset.fld(record, 'rst_DisplayName') 
+                                    +'<span style="font-size:smaller">  ('
+                                    +window.hWin.HEURIST4.detailtypes.lookups[recset.fld(record,'dty_Type')]
+                                    +')</span>');   
                         if(!node.folder){
                             var req = recset.fld(record,'rst_RequirementType');
                             node.extraClasses = req;
