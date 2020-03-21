@@ -445,7 +445,7 @@ $.widget( "heurist.editing_input", {
     
     fset: function(fieldname, value){
 
-        if(this.options['dtFields'][fieldname]){
+        if(this.options['dtFields'][fieldname] || !this.options.rectypes){
             this.options['dtFields'][fieldname] = value;
         }
         if(this.options.rectypes){ //try get by index
@@ -1407,15 +1407,17 @@ $.widget( "heurist.editing_input", {
                     popup_options.width = Math.max(usrPreferences.width,710);
                     popup_options.height = Math.max(usrPreferences.height,600);
                     
-                    if(that.options.editing && that.configMode.entity=='records'){
+                    if(pointerMode!='browseonly' && that.options.editing && that.configMode.entity=='records'){
                         
                         var ele = that.options.editing.getFieldByName('rec_OwnerUGrpID');
-                        var vals = ele.editing_input('getValues');
-                        ele = that.options.editing.getFieldByName('rec_NonOwnerVisibility');
-                        var vals2 = ele.editing_input('getValues');
-                        popup_options.new_record_params = {};
-                        popup_options.new_record_params['ro'] = vals[0];
-                        popup_options.new_record_params['rv'] = vals2[0];
+                        if(ele){
+                            var vals = ele.editing_input('getValues');
+                            ele = that.options.editing.getFieldByName('rec_NonOwnerVisibility');
+                            var vals2 = ele.editing_input('getValues');
+                            popup_options.new_record_params = {};
+                            popup_options.new_record_params['ro'] = vals[0];
+                            popup_options.new_record_params['rv'] = vals2[0];
+                        }
                     }
                     
                     //init related/liked records selection dialog - selectRecord
@@ -2903,15 +2905,22 @@ console.log('onpaste');
                 //headerTerms - disabled terms
                 headerTerms = this.f('rst_TermIDTreeNonSelectableIDs') || this.f('dty_TermIDTreeNonSelectableIDs');
             }
-
+            var dt_type = this.detailType;
+            var topOptions = true;
+            if(!window.hWin.HEURIST4.util.isempty(this.f('dty_Type'))){
+                dt_type = this.f('dty_Type');
+                //topOptions = false;
+            }
+            
             //if($input==null) $input = $('<select>').uniqueId();
             
             //this.options.useHtmlSelect native select produce double space for option  Chrome touch screen
             
             //vocabulary
             $input = window.hWin.HEURIST4.ui.createTermSelectExt2($input.get(0),
-                {datatype:this.detailType, termIDTree:allTerms, headerTermIDsList:headerTerms,
-                    defaultTermID:value, topOptions:true, supressTermCode:true, useHtmlSelect:this.options.useHtmlSelect});
+                {datatype:dt_type, termIDTree:allTerms, headerTermIDsList:headerTerms,
+                    defaultTermID:value, topOptions:topOptions, supressTermCode:true, 
+                    useHtmlSelect:this.options.useHtmlSelect});
         
             var opts = $input.find('option');      
             if(opts.length==0 || (opts.length==1 && $(opts[0]).text()=='')){
@@ -2920,10 +2929,11 @@ console.log('onpaste');
             
             //show error message on init                    
             //value is not allowed
-            if(window.hWin.HEURIST4.util.isNumber(value) && $input.val()!=value){
+            if( !window.hWin.HEURIST4.util.isempty(allTerms) &&
+                window.hWin.HEURIST4.util.isNumber(value) && $input.val()!=value){
                 
                 var terms = window.hWin.HEURIST4.terms;
-                var termLookup = terms.termsByDomainLookup[this.detailType];
+                var termLookup = terms.termsByDomainLookup[dt_type];
                 var sMsg = '';
                 if(window.hWin.HEURIST4.util.isnull(termLookup[value])){
                     sMsg = 'The term code '+value+' recorded for this field is not recognised. Please select a term from the dropdown.';

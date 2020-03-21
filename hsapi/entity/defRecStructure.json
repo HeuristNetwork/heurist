@@ -171,8 +171,8 @@
                         "dty_Role":"virtual",
                         "rst_Class":"enum relmarker relationtype",
                         "rst_Display":"hidden",
-                        "rst_DisplayName":"Terms list preview:",
-                        "rst_DisplayHelpText": "The list of terms available for selection as values for this field"
+                        "rst_DisplayName":"Terms list preview and Default Value:",
+                        "rst_DisplayHelpText": "The list of terms available for selection as values for this field. Select default value"
                     }
                 },
                 {  "dtID": "rst_FilteredJsonTermIDTree",
@@ -198,7 +198,7 @@
                         "dty_Role":"virtual",
                         "rst_Class":"resource relmarker",
                         "rst_Display":"hidden",
-                        "rst_DisplayName":"Can point to:",
+                        "rst_DisplayName":"Target record type(s):",
                         "rst_DisplayHelpText": "Determines which record types this pointer field can point to. It is preferable to select target record types than to leave the pointer unconstrained", 
                         "rst_FieldConfig": {"entity":"DefRecTypes","csv":true}
                     }
@@ -235,7 +235,7 @@
                         "dty_Type":"boolean",
                         "rst_Class":"resource",
                         "rst_Display":"hidden",
-                        "rst_DisplayName":"Create new records as children:",
+                        "rst_DisplayName":"Child records:",
                         "rst_DisplayHelpText": "New records created via this field become child records. Click &quot;i&quot; for further information.",
                         "rst_FieldConfig":["1","0"]
                     }
@@ -243,9 +243,19 @@
                 {  "dtID": "rst_DefaultValue",
                     "dtFields":{
                         "dty_Type":"freetext",
-                        "rst_Display":"hidden",
+                        "rst_Class":"freetext blocktext date float",
                         "rst_DisplayName":"Default Value:",
                         "rst_DisplayHelpText": "Select or enter the default value to be inserted automatically into new records"
+                    }
+                },
+                {  "dtID": "rst_DefaultValue_resource",
+                    "dtFields":{
+                        "dty_Type":"resource",
+                        "dty_Role":"virtual",
+                        "rst_Class":"resource",
+                        "rst_DisplayName":"Default Resource:",
+                        "rst_DisplayHelpText": "Select record to be default resource/linked record",
+                        "rst_FieldConfig": {"entity":"records"}
                     }
                 },
                 {  "dtID": "rst_SeparatorType",

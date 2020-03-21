@@ -1054,7 +1054,7 @@ rst_LocallyModified: "1"
         }
 
         if(this._editing.getValue('dty_Type')=='separator'){
-            this.editForm.find('.ui-accordion').hide()    
+            this.editForm.find('.ui-accordion').hide();
         }else{
             var ele = $('<span style="font-style:italic;padding:5px">'
                 +'To change terms list or target entity types: <a href="#">Edit base field definitions</a></span>')
@@ -1099,6 +1099,9 @@ rst_LocallyModified: "1"
                            if(dt_type=='enum' || dt_type=='relmarker' || dt_type=='relationtype'){
                                this._recreateTermsPreviewSelector();
                            }
+                           if(dt_type=='relmarker' || dt_type=='resource'){
+                               this._recreateResourceSelector();
+                           }
 
                            var maxval = parseInt(this._editing.getValue('rst_MaxValues')[0]);
                            var res = 'repeatable';
@@ -1128,20 +1131,23 @@ rst_LocallyModified: "1"
     _recreateTermsPreviewSelector: function(){
         
         var allTerms = this._editing.getValue('rst_FilteredJsonTermIDTree')[0];
+        var disTerms = null;
+        var term_type = 'enum';
+        var defval = '';
 
         //remove old content
-        var edit_ele = this._editing.getFieldByName('rst_TermPreview');
-        edit_ele.find('.input-div').empty();
+        //var edit_ele = this._editing.getFieldByName('rst_TermPreview');
+        //edit_ele.find('.input-div').empty();
 
         if(!window.hWin.HEURIST4.util.isempty(allTerms)) {
 
-            var disTerms = this._editing.getValue('dty_TermIDTreeNonSelectableIDs')[0];
+            disTerms = this._editing.getValue('dty_TermIDTreeNonSelectableIDs')[0];
             
-            var term_type = this._editing.getValue('dty_Type')[0];
+            term_type = this._editing.getValue('dty_Type')[0];
             if(term_type!="enum"){
                 term_type="relation";
             }
-            
+/*
             var new_selector = $('<select>');
             edit_ele.find('.input-div').prepend(new_selector); 
             
@@ -1151,8 +1157,44 @@ rst_LocallyModified: "1"
             
             new_selector.css({'backgroundColor':'#cccccc','min-width':'220px'})
                     .change(function(event){event.target.selectedIndex=0;});
-            
+*/            
         }
+
+        var defval = this._editing.getValue('rst_DefaultValue')[0];
+        if(!window.hWin.HEURIST4.util.isempty(allTerms) && defval){
+            this._editing.setFieldValueByName('rst_DefaultValue', '', false);
+        }
+        var ele = this._editing.getFieldByName('rst_TermPreview');
+        ele.editing_input('fset','dty_Type',(term_type!='relation')?'enum':'relationtype');
+        ele.editing_input('fset','rst_FilteredJsonTermIDTree', allTerms);
+        ele.editing_input('fset','rst_TermIDTreeNonSelectableIDs', disTerms);
+        this._editing.setFieldValueByName('rst_TermPreview', defval, false); //recreates
+
+        /*
+        var ele = this._editing.getFieldByName('rst_DefaultValue_enum');
+        var defval = this._editing.getValue('rst_DefaultValue_enum')[0];
+        ele.editing_input('fset','dty_Type',term_type!='relation'?'enum':'relationtype');
+        ele.editing_input('fset','rst_FilteredJsonTermIDTree', allTerms);
+        ele.editing_input('fset','rst_TermIDTreeNonSelectableIDs', disTerms);
+        ele.editing_input('setValue',[defval]);
+        */
+            
+        
+        
+    },
+    
+    _recreateResourceSelector: function(){
+        
+        var ptrIds = this._editing.getValue('rst_PtrFilteredIDs')[0];
+        
+        var defval = this._editing.getValue('rst_DefaultValue')[0];
+        if(!window.hWin.HEURIST4.util.isempty(ptrIds) && defval){
+            this._editing.setFieldValueByName('rst_DefaultValue', '', false);
+        }
+        var ele = this._editing.getFieldByName('rst_DefaultValue_resource');
+        ele.editing_input('fset','rst_PtrFilteredIDs', ptrIds);
+        ele.editing_input('fset','rst_PointerMode', 'browseonly');
+        this._editing.setFieldValueByName('rst_DefaultValue_resource', defval, false); //recreates
         
     },
 
@@ -1191,10 +1233,10 @@ rst_LocallyModified: "1"
 
             var treeview = this._treeview.fancytree("getTree");
             var recID = fields['rst_ID'];
-            
+            var dt_type = fields['dty_Type'];
             
             //save structure (tree) in DT_ENTITY_STRUCTURE field
-            if(fields['dty_Type']=='separator' || recID==this.DT_ENTITY_STRUCTURE)
+            if(dt_type=='separator' || recID==this.DT_ENTITY_STRUCTURE)
             {
                 var recset = this.getRecordSet();
                 
@@ -1222,7 +1264,12 @@ rst_LocallyModified: "1"
                 // 5. save DT_ENTITY_STRUCTURE in database (not fake separator field)
                 fields = recset.getRecord(this.DT_ENTITY_STRUCTURE);
                 
+            }else if(dt_type=='enum' || dt_type=='relmarker' || dt_type=='relationtype'){
+                fields['rst_DefaultValue'] = fields['rst_TermPreview'];
+            }else if(dt_type=='enum'){
+                fields['rst_DefaultValue'] = fields['rst_DefaultValue_resource'];
             }
+                
             
             if(afterAction=='close'){
                 //after save on server - close edit form and refresh preview
@@ -1324,29 +1371,6 @@ rst_LocallyModified: "1"
             }
         }
         this._dragIsAllowed = true;
-    },
-
-    //-----------------------------------------------------
-    //
-    // perform special action for virtual fields 
-    //
-    _getValidatedValues: function(){
-        
-        //fieldvalues - is object {'xyz_Field':'value','xyz_Field2':['val1','val2','val3]}
-        var fieldvalues = this._super();
-        /*
-        if(fieldvalues!=null){
-            var data_type =  fieldvalues['dty_Type'];
-            if(data_type=='freetext' || data_type=='blocktext' || data_type=='date'){
-                var val = fieldvalues['dty_Type_'+data_type];
-                
-                fieldvalues['dty_JsonTermIDTree'] = val;
-                delete fieldvalues['dty_Type_'+data_type];
-            }
-        } 
-        */
-        return fieldvalues;
-        
     },
 
     

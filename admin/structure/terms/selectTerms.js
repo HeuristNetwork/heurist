@@ -180,10 +180,11 @@ function SelectTerms(_isFilterMode, _isWindowMode) {
     
 	//
 	function _getTitle(dt_id){
-			var dtname =  "<div style='display:inline-block;font-weight:800;'>field id:</div><h2 style='display:inline-block;padding-left:5px;'>" + dt_id + '</h2>';
-			var dt = window.hWin.HEURIST4.detailtypes.typedefs[dt_id].commonFields;
+			var dtname =  "<div style='display:inline-block;font-weight:800;'>field id:</div><h2 style='display:inline-block;padding-left:5px;'>"
+                 + dt_id + '</h2>';
+			var dt = window.hWin.HEURIST4.detailtypes.typedefs[dt_id];
 			if (!Hul.isnull(dt)) {
-							dtname = dtname + " <div style='display:inline-block;font-weight:800;padding-left:20px;'>name:</div><h2 style='display:inline-block;padding-left:5px;'>"+dt[window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex.dty_Name]+"</h2>";
+							dtname = dtname + " <div style='display:inline-block;font-weight:800;padding-left:20px;'>name:</div><h2 style='display:inline-block;padding-left:5px;'>"+dt.commonFields[window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex.dty_Name]+"</h2>";
 			}
 			return dtname;
 	}

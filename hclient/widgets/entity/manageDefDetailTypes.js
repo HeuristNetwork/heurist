@@ -395,6 +395,29 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             
                 if(this._currentEditID>0)
                 {
+                    //limit list and disable in case one option
+                    var el = $(elements[0])[0];
+                    var _dty_Type = $(el).val();
+                    
+                    $(el).empty();
+                    el.disabled = false;
+                    
+                    window.hWin.HEURIST4.ui.addoption(el, _dty_Type, window.hWin.HEURIST4.detailtypes.lookups[_dty_Type]);
+
+                    if(_dty_Type=='float' || _dty_Type=='date'){
+                        window.hWin.HEURIST4.ui.addoption(el, 'freetext', window.hWin.HEURIST4.detailtypes.lookups['freetext']);
+                    }else if(_dty_Type=='freetext'){
+                        window.hWin.HEURIST4.ui.addoption(el, 'blocktext', window.hWin.HEURIST4.detailtypes.lookups['blocktext']);
+                    }else if(_dty_Type=='blocktext'){
+                        window.hWin.HEURIST4.ui.addoption(el, 'freetext', window.hWin.HEURIST4.detailtypes.lookups['freetext']);
+                    }else{
+                        el.disabled = true;
+                    }
+                    
+                    if($(el).hSelect("instance")!=undefined){
+                        $(el).hSelect("refresh"); 
+                    }
+
                     this._on( $(elements[0]), {    
                         'change': function(event){
                                var dt_type = $(event.target).val();
@@ -423,8 +446,11 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                     //change selector to button
                     var ele = this._editing.getFieldByName('dty_Type');  
                     ele = ele.find('.input-div');
+                    ele.find('.ui-selectmenu-button').hide();
                     
-                    this.set_detail_type_btn = $('<button>').button({label:'click to select data type'});
+                    this.set_detail_type_btn = $('<button>')
+                        .button({label:'click to select data type'})
+                        .css('min-width', '200px');
                     this.set_detail_type_btn.appendTo(ele);
                     
                     var that = this;
@@ -890,7 +916,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         this.enum_container.find('#termsPreview2').empty();
 
         if(!window.hWin.HEURIST4.util.isempty(allTerms)) {
-
+            
             var disTerms = this._editing.getValue('dty_TermIDTreeNonSelectableIDs')[0];
             
             var term_type = this._editing.getValue('dty_Type')[0];
@@ -980,8 +1006,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             if(fields!=null){
                 var dt_type = fields['dty_Type'];
                 //last check for constrained pointer
-                if(window.hWin.HEURIST4.util.isempty(fields['dty_PtrTargetRectypeIDs']) 
-                    && (dt_type=='resource' || dt_type=='relmarker'))
+                if(window.hWin.HEURIST4.util.isempty(fields['dty_PtrTargetRectypeIDs'])) 
                 {
                     if(dt_type=='resource')
                     {    
@@ -994,15 +1019,15 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                                 that_widget._saveEditAndClose( fields, afterAction );
                             }
                         }, {title:'Target record type(s) should be set',yes:'Continue',no:'Cancel'});
-
-                    }else{
+                        return;
+                    }else if(dt_type=='relmarker'){
                         window.hWin.HEURIST4.msg.showMsgDlg(
                             'Please select target record type. Unconstrained relationship is not allowed',null, 'Warning');
+                        return;
                     }    
-                    return;
                     
-                }else{
-                    fields['dty_PtrTargetRectypeIDs'] = '';
+                }else if(!(dt_type=='resource' || dt_type=='relmarker')){
+                        fields['dty_PtrTargetRectypeIDs'] = '';
                 }
             }
         }
@@ -1041,6 +1066,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             }
             return;
         }
+        fields['pwd_ReservedChanges'] = null;
         
         this._super( fields, afterAction );
         

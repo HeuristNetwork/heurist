@@ -178,7 +178,7 @@
                         "rst_Display":"hidden",
                         "rst_Class":"resource relmarker",
                         "rst_Display":"hidden",
-                        "rst_DisplayName":"Target record types:",
+                        "rst_DisplayName":"Target record type(s):",
                         "rst_DisplayHelpText": "The set of record types to which this field can point (for pointer fields and relationship markers. If undefined, it can point to any record type.", 
                         "rst_FieldConfig": {"entity":"DefRecTypes","csv":true}
                     }
