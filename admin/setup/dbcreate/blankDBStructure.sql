@@ -423,7 +423,7 @@ CREATE TABLE recDetails (
   KEY dtl_ValueKey (dtl_Value(63)),
   KEY dtl_UploadedFileIDKey (dtl_UploadedFileID)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='The detail (field) values for each record - public data';
---CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
+-- CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
 -- --------------------------------------------------------
 
 --
