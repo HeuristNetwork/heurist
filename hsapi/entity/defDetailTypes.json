@@ -49,10 +49,11 @@
                 {
                     "dtID": "dty_HelpText",
                     "dtFields":{
-                        "dty_Type":"freetext",
+                        "dty_Type":"blocktext",
                         "rst_DisplayName":"Default help text:",
                         "dty_Size":255,
                         "rst_DisplayWidth":60,
+                        "rst_DisplayHeight":3,
                         "rst_DisplayHelpText": "A default generic help text which may be overridden with more specific help for each record type that uses this field type", 
                         "rst_RequirementType":"required"
                     }

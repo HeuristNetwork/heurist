@@ -2028,12 +2028,11 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
             var fi_type = fi['dty_Type'],
                 fi_name = fi['rst_DisplayName'],
                 fi_order = fi['rst_DisplayOrder'],
-                fi_defval = fi['rst_DefaultValue'],
+                fi_defval = fi['rst_DefaultValue'], //keep UI structure for DT_ENTITY_STRUCTURE
                 fi_help =  fi['rst_DisplayHelpText'],
                 fi_reqtype =  fi['rst_RequirementType'],
                 fi_ptrs = fi['rst_PtrFilteredIDs'],
-                fi_maxval = fi['rst_MaxValues'], //need for proper repeat
-                fi_extdesc = fi['rst_DisplayExtendedDescription']; //keep UI structure
+                fi_maxval = fi['rst_MaxValues']; //need for proper repeat
 
 
             //THERE ARE 2 ways of grouping 
@@ -2042,7 +2041,7 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
             var treeData = false;
             var DT_ENTITY_STRUCTURE  = Number(window.hWin.HAPI4.sysinfo['dbconst']['DT_ENTITY_STRUCTURE']);
             if(DT_ENTITY_STRUCTURE>0 && rfrs[DT_ENTITY_STRUCTURE]){
-                treeData = window.hWin.HEURIST4.util.isJSON(rfrs[DT_ENTITY_STRUCTURE][fi_extdesc]);    
+                treeData = window.hWin.HEURIST4.util.isJSON(rfrs[DT_ENTITY_STRUCTURE][fi_defval]);    
             }
             //DEBUG 
             //treeData = false;

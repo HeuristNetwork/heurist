@@ -67,7 +67,11 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                         +    '<div class="ent_header searchForm" style="display:none"/>'     
                         +    '<div class="ent_content_full"  style="top:0px">'
                                 +'<div class="ent_content_full recordList" style="display:none;top:0px;bottom:50%;width:320px"/>'
-                                +'<div class="ent_content_full treeView" style="top:0;width:320px"/>' //treeview
+                                +'<div class="ent_content_full" style="top:0px;height:40px;width:320px;padding:10px 20px">' //instruction and close button
+                                    +'<span style="font-style:italic;">Drag heading or field to reposition</span>&nbsp;&nbsp;&nbsp;'
+                                    +'<button class="closeRtsEditor"/>'
+                                +'</div>'
+                                +'<div class="ent_content_full treeView" style="top:40px;width:320px"/>' //treeview
                                 +'<div class="ent_wrapper" style="left:321px">'
                                 +    '<div class="ent_header editForm-toolbar"/>'
                                 +    '<div class="ent_content_full editForm" style="top:0px"/>'
@@ -151,6 +155,9 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         this._initMenu('rep');
         this._initMenu('req');
         
+        this.btnClose = this.element.find('.closeRtsEditor').button({label:window.hWin.HR('Close')});
+        this._on(this.btnClose, {click:this.closeDialog});
+        
         return true;
     },            
     
@@ -223,9 +230,9 @@ dty_TermIDTreeNonSelectableIDs
         var treeData = false;
         var record = recset.getById(this.DT_ENTITY_STRUCTURE);
         if(record){
-            treeData = window.hWin.HEURIST4.util.isJSON(recset.fld(record, 'rst_DisplayExtendedDescription'));    
+            treeData = window.hWin.HEURIST4.util.isJSON(recset.fld(record, 'rst_DefaultValue'));    
         }
-        //debug reset treeData = false;
+        //debug reset  treeData = false;
 
         //if such treeview data is missed creates new one based on header/separators and rst_DisplayOrder
         if(!treeData){
@@ -396,7 +403,9 @@ dty_TermIDTreeNonSelectableIDs
                             //node.toggleClass( req, true );
                         }
                         
-                    });
+                    }); //visit
+                    var treeData = tree.toDict(false);
+                    that._cleanTreeStructure(treeData);
                     //add/update new service separator that will keep rt structure
                     recset.addRecord(that.DT_ENTITY_STRUCTURE,{
                         rst_ID: that.DT_ENTITY_STRUCTURE, 
@@ -404,10 +413,9 @@ dty_TermIDTreeNonSelectableIDs
                         rst_DetailTypeID: that.DT_ENTITY_STRUCTURE,
                         rst_DisplayName: 'Record type structure', 
                         rst_DisplayHelpText: '',
-                        rst_DefaultValue: 'group',
                         dty_Type: 'separator',
                         rst_RequirementType: 'forbidden',  //it will not be visible
-                        rst_DisplayExtendedDescription: JSON.stringify(tree.toDict(false))}); 
+                        rst_DefaultValue: JSON.stringify(treeData)}); 
                         
                     that.recordList.resultList('updateResultSet', recset);
                     
@@ -1183,8 +1191,8 @@ rst_LocallyModified: "1"
         if(this._editing.getValue('dty_Type')=='separator'){
             this.editForm.find('.ui-accordion').hide();
         }else{
-            var ele = $('<span style="font-style:italic;padding:5px">'
-                +'To change terms list or target entity types: <a href="#">Edit base field definitions</a></span>')
+            var ele = $('<div style="font-style:italic;padding:10px">'
+                +'To change terms list or target entity types: <a href="#">Edit base field definitions</a></div>')
                 .appendTo(this.editForm);
             this._on(ele.find('a'),{click: this.showBaseFieldEditor}); 
         }
@@ -1337,6 +1345,25 @@ rst_LocallyModified: "1"
         //that.__updateActionIcons(200);
     },
     
+    //
+    // Remove all data excect keys for fields
+    //
+    _cleanTreeStructure: function(data){
+        
+        if($.isArray(data)){
+            for(var i=0; i<data.length; i++){
+                if($.isArray(data[i].children)){
+                    this._cleanTreeStructure( data[i].children );        
+                }else{
+                    if(data[i].title) delete data[i].title;
+                    if(data[i].data) delete data[i].data;
+                }
+                if(!window.hWin.HEURIST4.util.isempty(data[i].expanded)) delete data[i].expanded;
+                if(data[i].extraClasses) delete data[i].extraClasses;
+            }
+        }
+    },
+    
     //-----------------------------------------------------
     //
     // special case for separator field
@@ -1381,12 +1408,13 @@ rst_LocallyModified: "1"
                 }
                 
                 // 3. get treeview.toDict and pur it in ExtDescription of field 2-57 ("Header 1") 
-                treeview.visit(function(node){
+                /*treeview.visit(function(node){
                         if(!node.folder){
                             node.data = {}; //remove garbage fancytree may put here
-                        }});
+                        }});*/
                 var treeData = treeview.toDict(false);
-                recset.setFldById(this.DT_ENTITY_STRUCTURE, 'rst_DisplayExtendedDescription', JSON.stringify(treeData));
+                this._cleanTreeStructure(treeData);
+                recset.setFldById(this.DT_ENTITY_STRUCTURE, 'rst_DefaultValue', JSON.stringify(treeData));
                 
                 // 5. save DT_ENTITY_STRUCTURE in database (not fake separator field)
                 fields = recset.getRecord(this.DT_ENTITY_STRUCTURE);

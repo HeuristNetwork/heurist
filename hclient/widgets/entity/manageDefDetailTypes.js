@@ -873,7 +873,8 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         }
         
         var defaultTermID = null;
-        var is_vocabulary = window.hWin.HEURIST4.util.isNumber(allTerms);
+        var is_vocabulary = window.hWin.HEURIST4.util.isempty(allTerms) ||
+                            window.hWin.HEURIST4.util.isNumber(allTerms);
         if(is_vocabulary){
             defaultTermID = allTerms; //vocabulary
             this.enum_container.find('input[name="enumType"][value="vocabulary"]').prop('checked',true).trigger('change');

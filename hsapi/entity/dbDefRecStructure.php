@@ -214,6 +214,8 @@ class DbDefRecStructure extends DbEntityBase
                 $this->records[$idx]['rst_LocallyModified'] = ($row['rst_OriginatingDBID']>0)?1:0;
             }
 
+            if(!$this->records[$idx]['rst_Status']) $this->records[$idx]['rst_Status'] = 'open';
+            
             $this->records[$idx]['rst_Modified'] = date('Y-m-d H:i:s'); //reset
 
             $this->records[$idx]['is_new'] = $isInsert;
