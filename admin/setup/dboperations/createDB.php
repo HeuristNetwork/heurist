@@ -121,8 +121,11 @@ if( isset($passwordForDatabaseCreation) && $passwordForDatabaseCreation!='' &&
         DbUtils::initialize($mysqli);
         
         //compose database name
-        $uName = trim($_REQUEST['uname']).'_';
-        if ($uName == '_') {$uName='';}; // don't double up underscore if no user prefix
+        $uName = '';
+        if(@$_REQUEST['uname']){
+            $uName = trim(@$_REQUEST['uname']).'_';
+            if ($uName == '_') {$uName='';}; // don't double up underscore if no user prefix
+        }
         
         $database_name = $uName . trim($_REQUEST['dbname']);
         $database_name_full = HEURIST_DB_PREFIX . $database_name; // all databases have common prefix then user prefix

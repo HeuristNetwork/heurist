@@ -448,7 +448,7 @@ function cloneDatabase($targetdbname, $nodata=false, $templateddb, $user_id) {
     "' title='' target=\"_new\"><strong>".$targetdbname."</strong></a></p>";
     
     //SEND EMAIL ABOUT CREATING NEW DB
-    $user_record = mysql__select_row_assoc($mysqli, 'select ugr_Name, CONCAT(ugr_FirstName," ",ugr_LastName) as ugr_FullName,'
+    $user_record = mysql__select_row_assoc($mysqli, 'select ugr_Name, ugr_FirstName, ugr_LastName,'
          .'ugr_Organisation,ugr_eMail,ugr_Interests '
          .' FROM sysUGrps WHERE ugr_ID='.($isCloneTemplate?'2':$user_id));
 
