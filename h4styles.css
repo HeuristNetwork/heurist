@@ -1228,14 +1228,14 @@ span.fancytree-checkbox{
     font-weight: bold !important;
 }
 
-.tree-rts .required{
-    color:#CC0000;
+.tree-rts .required, a.required{
+    color:#CC0000 !important;
 }
-.tree-rts .recommended{
-    color:#6A7C99;
+.tree-rts .recommended, a.recommended{
+    color:#6A7C99 !important;
 }
-.tree-rts .forbidden{
-    color:gray;
+.tree-rts .forbidden, a.forbidden{
+    color:gray !important;
 }
 
 
@@ -1952,7 +1952,7 @@ input[type="file"] {
     margin: 5px -2px;    
 }
 .ui-menu-icons .ui-menu-item {
-    padding-left: 2em !important;
+    /*padding-left: 2em !important;*/
 }
 .ui-accordion .ui-accordion-header {
     padding: .5em .5em .5em 2.2em;

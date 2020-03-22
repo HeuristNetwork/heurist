@@ -206,6 +206,9 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         return true;
     },
     
+    //
+    //
+    //
     _onActionListener:function(event, action){    
             var res = this._super(event, action)
             if(!res){
@@ -226,6 +229,9 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             return res;
     },
     
+    //
+    //
+    //
     _initDialog: function(){
         
             //restore from preferences    
@@ -238,6 +244,9 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             this._super();
     },
 
+    //
+    //
+    //
     _navigateToRec: function(dest){
         if(this._currentEditID>0){
                 var recset = this.recordList.resultList('getRecordSet');
@@ -288,6 +297,9 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     },    
     //override some editing methods
     
+    //
+    //
+    //
     _getEditDialogButtons: function(){
                                     
             var that = this;        
@@ -417,6 +429,9 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             return btns;
     },
     
+    //
+    //
+    //
     _initEditForm_step1: function(recID){
         if(this.options.edit_mode=='popup'){
 
@@ -1533,6 +1548,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 container: $structure_editor,
                 select_mode: 'manager',
                 rty_ID: that._currentEditRecTypeID,
+                rec_ID_sample: that._currentEditID,
                 external_toolbar: this._toolbar,
                 onClose: function()
             {

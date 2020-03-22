@@ -24,6 +24,10 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
     _fakeSepIdsCounter:0,
     _lockDefaultEdit: false,
     _dragIsAllowed: true,
+
+    _menuTimeoutId: -1,
+    
+    menues: {}, //popup menu for this widget
     
     //
     //
@@ -33,7 +37,12 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         //special header field stores UI structure
         this.DT_ENTITY_STRUCTURE = window.hWin.HAPI4.sysinfo['dbconst']['DT_ENTITY_STRUCTURE'];
         
-        if(!(this.options.rty_ID>0)) this.options.rty_ID = 4; //by default is required
+        if(!(this.options.rec_ID_sample>0)) {
+            this.options.rec_ID_sample = -1; //record id that will be loaded in preview
+        }
+        if(!(this.options.rty_ID>0)) {
+            this.options.rty_ID = 4; //by default is required   
+        }
         this.options.previewEditor = null; // record editor for preview
         
         this.options.layout_mode = 'short';
@@ -138,6 +147,9 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         }
         
         if(this._toolbar) this._toolbar.find('.ui-dialog-buttonset').css({'width':'100%','text-align':'right'});
+        
+        this._initMenu('rep');
+        this._initMenu('req');
         
         return true;
     },            
@@ -432,13 +444,13 @@ dty_TermIDTreeNonSelectableIDs
                var is_folder = $(item).hasClass('fancytree-folder'); 
                
                var actionspan = $('<div class="svs-contextmenu3" style="position:absolute;right:4px;display:none;padding-top:2px">'
-                   +'<span class="ui-icon ui-icon-folder" title="Add a new group/separator"></span>'               
+                   +'<span class="ui-icon ui-icon-window" title="Add a new group/separator"></span>'               
                    +'<span class="ui-icon ui-icon-plus" title="Add a new field to this record type"></span>'
                    +'<span class="ui-icon ui-icon-trash" title="'
                         +((is_folder)?'Delete header':'Exclude field from record type')+'"></span>'
                    +(is_folder?'':
-                    '<span class="ui-icon ui-icon-arrowthick-1-w" title="Requirement"></span>'
-                   +'<span class="ui-icon ui-icon-arrowthick-1-e" title="Repeatability"></span>')
+                    '<span class="ui-icon ui-icon-star" title="Requirement"></span>'
+                   +'<span class="ui-icon ui-icon-menu" title="Repeatability"></span>')
                    +'</div>').appendTo(item);
                    
                var that = this;
@@ -454,7 +466,7 @@ dty_TermIDTreeNonSelectableIDs
                            //add field   
                            that.showBaseFieldEditor(-1);
                             
-                        }else if(ele.hasClass('ui-icon-folder')){
+                        }else if(ele.hasClass('ui-icon-window')){
                             
                             //add new group/separator
                             that._addNewSeparator();
@@ -463,11 +475,13 @@ dty_TermIDTreeNonSelectableIDs
                             //different actions for separator and field
                             that._removeField();
                             
-                        }else if(ele.hasClass('ui-icon-arrowthick-1-w')){
+                        }else if(ele.hasClass('ui-icon-star')){
                             // requirement
+                            that._showMenu(that.menues['menu_req'], ele);
                             
-                        }else if(ele.hasClass('ui-icon-arrowthick-1-e')){
+                        }else if(ele.hasClass('ui-icon-menu')){
                             // repeatability
+                            that._showMenu(that.menues['menu_rep'], ele);
                             
                         }
                     },100); 
@@ -515,6 +529,112 @@ dty_TermIDTreeNonSelectableIDs
                    _onmouseexit
                );
            }
+    },
+    
+    //
+    //
+    //
+    _initMenu: function(name){
+
+        var that = this;
+        
+        var menu_content = '';
+        if(name=='req'){
+            menu_content = '<li><a href="#" data-req="required" class="required">required</a></li>'
+            +'<li><a href="#" data-req="recommended" class="recommended">recommended</a></li>'
+            +'<li><a href="#" data-req="optional">optional</a></li>'
+            +'<li><a href="#" data-req="forbidden" class="forbidden">hidden</a></li>';
+            
+        }else if(name=='rep'){
+            menu_content = '<li><a href="#" data-rep="1">single</a></li>'
+            +'<li><a href="#" data-rep="0">repeatable</a></li>'
+            +'<li><a href="#" data-rep="2">limited 2</a></li>'
+            +'<li><a href="#" data-rep="3">limited 3</a></li>'
+            +'<li><a href="#" data-rep="5">limited 5</a></li>'
+            +'<li><a href="#" data-rep="10">limited 10</a></li>';
+        }
+
+        // Load content for all menus except Database when user is logged out
+        this.menues['menu_'+name] = $('<ul>'+menu_content+'</ul>')
+            .addClass('menu-or-popup')
+            .hide()
+            .css({'position':'absolute', 'padding':'5px'})
+            .menu({select: function(event, ui){
+                    var tree = that._treeview.fancytree("getTree");
+                    var node = tree.getActiveNode();
+                    if(node){
+                        
+                        var fields = {
+                            rst_ID: node.key,
+                            rst_RecTypeID: that.options.rty_ID,
+                            rst_DetailTypeID: node.key}
+                        
+                        var ele = ui.item.find('a');
+                        newVal = ele.attr('data-rep');
+                        if(newVal>=0){
+                            fieldName = 'rst_MaxValues';
+                            //fields['rst_Repeatability']
+                        }else{
+                            newVal = ele.attr('data-req');
+                            
+                            node.extraClasses = newVal;
+                            $(node.li).addClass(newVal);
+                            node.setActive( false )
+                            fieldName = 'rst_RequirementType';
+                        }
+                            
+                        fields[fieldName] = newVal;
+
+                        that._saveEditAndClose(fields, function( recID, fields ){
+                            
+                            that._cachedRecordset.setFldById(recID, fieldName, newVal);
+                            window.hWin.HEURIST4.rectypes.typedefs[that.options.rty_ID].dtFields[recID]
+                                [window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex[fieldName]] = newVal;
+                            
+                            that._showRecordEditorPreview();
+                            
+                        });
+                    }
+                    $('.menu-or-popup').hide();
+                    return false; 
+            }})
+            .appendTo(this.element);
+
+        /*
+        this.menues['btn_'+name] = $('<li>')
+            .css({'padding-right':'1em'})
+            .append(link)
+            .appendTo( parentdiv?parentdiv:this.divMainMenuItems );
+        this._on( this.menues['btn_'+name], {
+            mouseenter : function(){_show(this.menues['menu_'+name], this.menues['btn_'+name])},
+            mouseleave : function(){_hide(this.menues['menu_'+name])}
+        });
+        */
+        this._on( this.menues['menu_'+name], {
+            //mouseenter : function(){_show(this.menues['menu_'+name], this.menues['btn_'+name])},
+            mouseleave : function(){this._hideMenu(this.menues['menu_'+name])}
+        });
+
+    },
+    
+        //show hide function
+    _hideMenu: function(ele) {
+            this._menuTimeoutId = setTimeout(function() {
+                $( ele ).hide();
+                }, 800);
+            //$( ele ).delay(800).hide();
+    },
+    
+    _showMenu: function(ele, parent) {
+            clearTimeout(this._menuTimeoutId);
+            
+            $('.menu-or-popup').hide(); //hide other
+            var menu = $( ele )
+            //.css('width', this.btn_user.width())
+            .show()
+            .position({my: "left-2 top", at: "left top", of: parent });
+            //$( document ).one( "click", function() { menu.hide(); });
+            return false;
     },
     
     
@@ -661,7 +781,12 @@ dty_TermIDTreeNonSelectableIDs
             
         if(this._toolbar){
             
-            var canDelete = this.editForm.is(':visible') 
+            //show hide buttons in treeview
+            var isEditOpen = this.editForm.is(':visible');
+            
+            this._treeview.find('.svs-contextmenu3').css('visibility', this.editForm.is(':visible')?'hidden':'visible' );
+            
+            var canDelete = isEditOpen
                             && !(this._editing && this._editing.isModified());
             
             this._toolbar.find('#btnRecDelete_rts').css('display', 
@@ -926,6 +1051,7 @@ rst_LocallyModified: "1"
     
     //
     // show record editor form - that reflect the last changes of rt structure
+    // recID - dty_ID - field that was saved
     //
     _showRecordEditorPreview: function( recID, fields ){
         
@@ -952,6 +1078,7 @@ rst_LocallyModified: "1"
                         edit_mode: 'editonly',
                         in_popup_dialog: false,
                         allowAdminToolbar: false,
+                        rec_ID: this.options.rec_ID_sample,
                         new_record_params: {RecTypeID: this.options.rty_ID},
                         layout_mode:'<div class="ent_wrapper editor">'
                             + '<div class="ent_content_full recordList"  style="display:none;"/>'
@@ -963,7 +1090,7 @@ rst_LocallyModified: "1"
                             + '</div>'
                         +'</div>',
                     onInitFinished:function(){
-                            that.manageRecords('addEditRecord',-1); //call widget method
+                            that.manageRecords('addEditRecord', this.options.rec_ID); //call widget method
                     }
                 }                
                 
