@@ -1968,8 +1968,8 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
 [{text:'Cancel', click: function(){ $dlg.dialog( "close" ); that.closeEditDialog(); }},
  {text:'Create independent record', click: function(){
                             $dlg.dialog( "close" ); 
-                            allowCreateIndependentChildRecord = true;
-                            that._initEditForm_step4(response)   }} ],{title:'Child record type'}        
+                            response.allowCreateIndependentChildRecord = true;
+                            that._initEditForm_step4(response)   }} ],{  title:'Child record type' }        
                      );
                      
                           var btn = $dlg.parent().find('button:contains("Create independent record")');
