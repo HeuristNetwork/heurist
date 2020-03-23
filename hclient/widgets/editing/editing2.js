@@ -321,8 +321,11 @@ function hEditing(_options) {
                         fields[idx].is_insert_mode = _is_insert;
                         
                         var inpt = $('<div>').css('display','block !important')
-                                .attr('data-dtid', fields[idx]['dtID'])
                                 .appendTo(fieldContainer).editing_input(fields[idx]);     
+                        if(parseInt(fields[idx]['dtID'])>0){ //for Records only
+                            inpt.attr('data-dtid', fields[idx]['dtID']);
+                        }
+                                
                         editing_inputs.push(inpt);  
                     }
                 }

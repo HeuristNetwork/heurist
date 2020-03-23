@@ -2757,6 +2757,7 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
                 +'</div>'
              
                 +'<div style="padding-right:50px;float:right">'
+                    +'<span class="btn-edit-rt-back" style="font-size:larger;display:none">Back to Whole Form</span>'
                     +'<span class="btn-edit-rt btns-admin-only" style="font-size:larger">Modify structure</span>'
                     +'<span class="btn-edit-rt2 btns-admin-only" style="font-size:larger">NEW!</span>'
                     +'<span class="btn-edit-rt-titlemask btns-admin-only">Edit title mask</span>'
@@ -2794,8 +2795,6 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
              +'</div></div>').insertBefore(this.editForm.first('fieldset'));
 */
 
-
-                
             var that = this;    
 
             var btn_css = {'font-weight': 'bold', color:'#7D9AAA', background:'#ecf1fb' };
@@ -2808,7 +2807,6 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
                         .click(function(){that.editRecordType(false);});
                 this.element.find('.btn-edit-rt2').button().css(btn_css)
                         .click(function(){that.editRecordType(true);});
-                
                 this.element.find('.btn-edit-rt-titlemask').button({icon:'ui-icon-pencil'})
                         .css(btn_css).click(function(){that.editRecordTypeTitle();});
                 
@@ -2897,7 +2895,7 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
                         .change(function( event){
                             var isfields_on = $(event.target).is(':checked');
                             that.usrPreferences['optfields'] = isfields_on;
-                            $(that.element).find('div.optional').parent().css({'display': (isfields_on?'table':'none')} ); 
+                            $(that.element).find('div.optional').parent('div[data-dtid]').css({'display': (isfields_on?'table':'none')} ); 
                             $(that.element).find('div.optional_hint').css({'display': (isfields_on?'none':'block')} ); 
                             
                             that._showHideEmptyFieldGroups();
@@ -3004,6 +3002,16 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
                     }});
                 }
             });
+            //init back button
+            if(that.options.rts_editor.manageDefRecStructure('option','external_toolbar')){
+                
+                this.element.find('.btn-edit-rt-back').button().css(btn_css).show()
+                        .click(function(){ 
+                            //that._toolbar.find('#btnClose_rts').click();  
+                            that.options.rts_editor.manageDefRecStructure('closeDialog');
+                        });                
+            }
+            
         }
 
         //

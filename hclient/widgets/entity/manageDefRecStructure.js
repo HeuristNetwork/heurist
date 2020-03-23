@@ -792,8 +792,19 @@ dty_TermIDTreeNonSelectableIDs
             //show hide buttons in treeview
             var isEditOpen = this.editForm.is(':visible');
             
-            this._treeview.find('.svs-contextmenu3').css('visibility', this.editForm.is(':visible')?'hidden':'visible' );
+            this._treeview.find('.svs-contextmenu3').css('visibility', isEditOpen?'hidden':'visible' );
+            this.editForm.find('#btnCloseEditor_rts').css('display', 
+                    (isEditOpen)?'block':'none');
             
+            var isChanged = this.editForm.is(':visible') 
+                            && this._editing && this._editing.isModified();
+            this.editForm.find('#btnRecSaveAndClose_rts').css('display', 
+                    (isChanged)?'block':'none');
+            
+            this._toolbar.find('#btnRecPreview_rts').css('display', 
+                    (isChanged)?'none':'block');
+            
+            /*           
             var canDelete = isEditOpen
                             && !(this._editing && this._editing.isModified());
             
@@ -807,6 +818,8 @@ dty_TermIDTreeNonSelectableIDs
 
             this._toolbar.find('#btnRecPreview_rts').css('display', 
                     (isChanged)?'none':'block');
+            this._toolbar.find('#btnPreferences_rts').css('display', 
+                    (isChanged)?'none':'block');
                     
             this._toolbar.find('#btnRecSave_rts').css('display', 
                     (isChanged)?'block':'none');
@@ -814,7 +827,7 @@ dty_TermIDTreeNonSelectableIDs
                     (isChanged)?'block':'none');
             this._toolbar.find('#btnRecCancel_rts').css('display', 
                     (isChanged)?'block':'none');
-
+            */
         }
             
     },  
@@ -850,17 +863,23 @@ dty_TermIDTreeNonSelectableIDs
     _getEditDialogButtons: function(){
                                     
             var that = this;   
-            
-            var btns = [       /*{text:window.hWin.HR('Reload'), id:'btnRecReload',icons:{primary:'ui-icon-refresh'},
-                click: function() { that._initEditForm_step3(that._currentEditID) }},  //reload edit form*/
-                /*      
-                {showText:true, icons:{primary:'ui-icon-plus'},text:window.hWin.HR('Add Field'),
-                      css:{'margin-right':'0.5em','float':'left'}, id:'btnAddButton',
+
+            var btns = [                       
+                {text:window.hWin.HR('Refresh Preview'),
+                    css:{'float':'left',display:'block'}, id:'btnRecPreview_rts',
+                    click: function() { that._showRecordEditorPreview(); }},
+                    
+                {text:window.hWin.HR(this.options.external_toolbar?'Back to Whole Form':'Close Dialog'), 
+                      css:{'float':'right'}, id:'btnClose_rts',
                       click: function() { 
-                          //that._onActionListener(null, 'add'); 
-                          //that.showBaseFieldEditor();
-                      }}, */
-                      
+                          that.closeDialog(); 
+                      }},
+            ];
+            
+            
+
+            /* OLD version 
+            var btns = [                       
                 {text:window.hWin.HR('Preferences'),
                       css:{'float':'left',display:'block'}, id:'btnPreferences_rts', icon:'ui-icon-gear',
                       click: function() {  }},
@@ -910,6 +929,7 @@ dty_TermIDTreeNonSelectableIDs
                       
                       
                       ];
+            */
         
             return btns;
     },    
@@ -983,34 +1003,34 @@ dty_TermIDTreeNonSelectableIDs
         var fi = window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex;
         
         var fields = {
-rst_ID: dty_ID,
-rst_RecTypeID: this.options.rty_ID,
-rst_DisplayOrder: "001",
-rst_DetailTypeID: dty_ID,
-//rst_Modified: "2020-03-16 15:31:23"
-rst_DisplayName: dtFields[fi['dty_Name']],
-rst_DisplayHelpText: dtFields[fi['dty_HelpText']],
-rst_RequirementType: "optional",
-rst_Repeatability: "single",
-rst_MaxValues: "1",  //0 repeatable
-/*
-dty_Type: dtFields[fi['dty_Type']]
-rst_DisplayWidth: "60"
-rst_DisplayHeight: "3"
-rst_TermPreview: ""
-rst_FilteredJsonTermIDTree: "497"
-dty_TermIDTreeNonSelectableIDs: ""
-rst_PtrFilteredIDs: ""
-rst_PointerMode: "addorbrowse"
-rst_PointerBrowseFilter: ""
-rst_CreateChildIfRecPtr: "0"
-rst_DefaultValue: ""
-rst_SeparatorType: ""
-rst_DisplayExtendedDescription: "Please provide an extended description for display on rollover ..."
-rst_Status: "open"
-rst_NonOwnerVisibility: "viewable"
-rst_LocallyModified: "1"    
-*/
+            rst_ID: dty_ID,
+            rst_RecTypeID: this.options.rty_ID,
+            rst_DisplayOrder: "001",
+            rst_DetailTypeID: dty_ID,
+            //rst_Modified: "2020-03-16 15:31:23"
+            rst_DisplayName: dtFields[fi['dty_Name']],
+            rst_DisplayHelpText: dtFields[fi['dty_HelpText']],
+            rst_RequirementType: "optional",
+            rst_Repeatability: "single",
+            rst_MaxValues: "1",  //0 repeatable
+            /*
+            dty_Type: dtFields[fi['dty_Type']]
+            rst_DisplayWidth: "60"
+            rst_DisplayHeight: "3"
+            rst_TermPreview: ""
+            rst_FilteredJsonTermIDTree: "497"
+            dty_TermIDTreeNonSelectableIDs: ""
+            rst_PtrFilteredIDs: ""
+            rst_PointerMode: "addorbrowse"
+            rst_PointerBrowseFilter: ""
+            rst_CreateChildIfRecPtr: "0"
+            rst_DefaultValue: ""
+            rst_SeparatorType: ""
+            rst_DisplayExtendedDescription: "Please provide an extended description for display on rollover ..."
+            rst_Status: "open"
+            rst_NonOwnerVisibility: "viewable"
+            rst_LocallyModified: "1"    
+            */
         };
         
         var that = this;
@@ -1116,6 +1136,8 @@ rst_LocallyModified: "1"
     //
     _afterInitEditForm: function(){
 
+        var that = this;
+            
         if(this.previewEditor)
         {
             if(true || this.options.showEditorInline){
@@ -1163,7 +1185,6 @@ rst_LocallyModified: "1"
             
         var edit_ele= this._editing.getFieldByName('rst_Repeatability');
         if(edit_ele){
-            var that = this;
             
             edit_ele.editing_input('option','change', function(){
                 var res = this.getValues()[0];
@@ -1191,11 +1212,55 @@ rst_LocallyModified: "1"
         if(this._editing.getValue('dty_Type')=='separator'){
             this.editForm.find('.ui-accordion').hide();
         }else{
-            var ele = $('<div style="font-style:italic;padding:10px">'
+            var ele = $('<div style="font-style:italic;padding:10px;display:inline-block">'
                 +'To change terms list or target entity types: <a href="#">Edit base field definitions</a></div>')
                 .appendTo(this.editForm);
             this._on(ele.find('a'),{click: this.showBaseFieldEditor}); 
         }
+
+        var btnCancel = $('<button>').attr('id', 'btnCloseEditor_rts')
+                .button({label:window.hWin.HR('Cancel')})
+                .css({'margin-right':'1em','float':'right',display:'none','margin-top':'2px'})
+                .appendTo(this.editForm);
+
+        var btnSave = $('<button>').attr('id', 'btnRecSaveAndClose_rts')
+                .button({label:window.hWin.HR('Save')})
+                .css({'font-weight':'bold','float':'right',display:'none','margin-top':'2px'})
+                .appendTo(this.editForm);
+            
+        this._on( btnCancel,{click: function() { 
+
+                        function __closeFormlet(){
+                            that._currentEditID = null;
+                            if(that.previewEditor){
+                                if(false){ //was modified - need reload preview @todo
+                                    that._showRecordEditorPreview();    
+                                } else {
+                                    that.editForm.hide();
+                                    that.previewEditor.show();
+                                    that.onEditFormChange();
+                                }
+                            }
+                        }
+
+                        if(that._editing && that._editing.isModified() && that._currentEditID!=null){
+                            var $dlg, buttons = {};
+                            buttons['Save'] = function(){ that._saveEditAndClose(null, 'close'); $dlg.dialog('close'); }; 
+                            buttons['Ignore and close'] = function(){ __closeFormlet(); $dlg.dialog('close'); };
+
+                            $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
+                                'You have made changes to the data. Click "Save" otherwise all changes will be lost.',
+                                buttons,
+                                {title:'Confirm',yes:'Save',no:'Ignore and close'});
+                        }else{
+                            __closeFormlet();
+                        }
+                }});
+                
+        this._on( btnSave, {click: function() { that._saveEditAndClose( null, 'close' ); }});
+        
+        
+        
 
         this._super();
     },    

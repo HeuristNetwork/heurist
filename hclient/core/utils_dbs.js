@@ -20,13 +20,29 @@
 /*
 Selectors:
 
-getChildrenTerms - returns entire terms tree or only part of it for selected termID
-getChildrenLabels - returns all tems labels of children terms for given term
-getTermValue - Returns label and code for term by id
-getTermDesc
-getPlainTermsList
-getFullTermLabel
+TERMS
 
+getChildrenLabels - returns all tems labels of children terms for given term
+getTermById
+getInverseTermById
+getTermValue - Returns label and code for term by id
+getColorFromTermValue - Returns hex color by label or code for term by id
+getTermDesc
+
+getPlainTermsList
+isTermInList
+getChildrenTerms - returns entire terms tree or only part of it for selected termID
+
+
+REECTYPES
+
+createRectypeStructureTree
+getLinkedRecordTypes
+getLinkedRecordTypesReverse
+
+hasFields - returns true if rectype has a field in its structure
+
+findByConceptCode
 */
 
 if (!window.hWin.HEURIST4){
@@ -74,6 +90,9 @@ window.hWin.HEURIST4.dbs = {
             return trm_ParentChildren;
     },
     
+    //
+    //
+    //
     getTermById: function(termID){
         
         var terms = window.hWin.HEURIST4.terms;
@@ -90,6 +109,7 @@ window.hWin.HEURIST4.dbs = {
         return term;
     },
 
+    //
     // get inverse term id
     //
     getInverseTermById: function(termID){
@@ -275,6 +295,7 @@ window.hWin.HEURIST4.dbs = {
         return window.hWin.HEURIST4.util.isnull(selectedTermID)?root:__findTerm(selectedTermID, root, termtree);
     },
     
+    //========================================================================
     /*
      
       returns rectype structure as treeview data
@@ -922,7 +943,7 @@ window.hWin.HEURIST4.dbs = {
     },
     
     //
-    //
+    // returns true if rectype has a field in its structure
     //
     hasFields: function( $rt_ID, fieldtype, db_structure ){
         
