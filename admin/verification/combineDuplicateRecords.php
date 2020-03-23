@@ -884,7 +884,7 @@ function do_fix_dupe()
             $mysqli->query("update Records set rec_Title = '" . $mysqli->real_escape_string($new_title) . "' where rec_ID = $master_rec_id");
         }
     }
-    $mysqli->query('update Records set rec_Hash = hhash(rec_ID) where rec_ID='.$master_rec_id);
+    //2020-03-23 $mysqli->query('update Records set rec_Hash = hhash(rec_ID) where rec_ID='.$master_rec_id);
 
     //reload with flag that operation is completed
     header('Location: combineDuplicateRecords.php?db='.HEURIST_DBNAME.'&finished_merge=1&bib_ids='.$_REQUEST['bib_ids']);

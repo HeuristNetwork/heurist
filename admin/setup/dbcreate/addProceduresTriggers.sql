@@ -418,18 +418,19 @@ DELIMITER ;
 -- --------recDetails
 
 
-DELIMITER $$
 
-	DROP TRIGGER IF EXISTS insert_Details_precis_trigger$$
+	DROP TRIGGER IF EXISTS insert_Details_precis_trigger;
+-- DELIMITER $$
 
-	CREATE
-	DEFINER=CURRENT_USER 
-	TRIGGER `insert_Details_precis_trigger`
-	BEFORE INSERT ON `recDetails`
-	FOR EACH ROW
-		begin set NEW.dtl_ValShortened = ifnull(NEW_LIPOSUCTION(NEW.dtl_Value), ''); end$$
+-- 	CREATE
+-- 	DEFINER=CURRENT_USER 
+-- 	TRIGGER `insert_Details_precis_trigger`
+-- 	BEFORE INSERT ON `recDetails`
+-- 	FOR EACH ROW
+--           begin set NEW.dtl_ValShortened = ifnull(NEW_LIPOSUCTION(NEW.dtl_Value), ''); end$$
+-- 
+-- DELIMITER ;
 
-DELIMITER ;
 DELIMITER $$
 
     DROP TRIGGER IF EXISTS insert_Details_trigger$$
@@ -514,7 +515,7 @@ FROM recDetails where dtl_ID=OLD.dtl_ID INTO @raw_detail;
 		if ST_AsBinary(NEW.dtl_Geo)=ST_AsBinary(OLD.dtl_Geo) then
 			set NEW.dtl_Geo = OLD.dtl_Geo;
 		end if;
-		set NEW.dtl_ValShortened = ifnull(NEW_LIPOSUCTION(NEW.dtl_Value), '');
+-- set NEW.dtl_ValShortened = ifnull(NEW_LIPOSUCTION(NEW.dtl_Value), '');
 	end$$
 
 DELIMITER ;
