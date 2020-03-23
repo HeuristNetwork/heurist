@@ -3005,11 +3005,16 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
             //init back button
             if(that.options.rts_editor.manageDefRecStructure('option','external_toolbar')){
                 
-                this.element.find('.btn-edit-rt-back').button().css(btn_css).show()
+                var btn = this.element.find('.btn-edit-rt-back');
+                if(btn){
+                    btn.button().show()
                         .click(function(){ 
                             //that._toolbar.find('#btnClose_rts').click();  
                             that.options.rts_editor.manageDefRecStructure('closeDialog');
                         });                
+                    if(btn_css) btn.css(btn_css);
+                }
+                
             }
             
         }

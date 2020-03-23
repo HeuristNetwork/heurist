@@ -1142,6 +1142,8 @@ dty_TermIDTreeNonSelectableIDs
         {
             if(true || this.options.showEditorInline){
                 
+                //place rts editor into record edit form
+                
                 var ed_ele = this.previewEditor.find('div[data-dtid='+this._currentEditID+']');
                 
                 if(ed_ele.length==0){
@@ -1199,6 +1201,16 @@ dty_TermIDTreeNonSelectableIDs
                 that.onEditFormChange();    
             });
         }
+        
+
+        var edit_ele= this._editing.getFieldByName('rst_CreateChildIfRecPtr');
+        if(edit_ele){
+            edit_ele.editing_input('option','change', function(){
+                //var input = this.getInputs()[0];
+                that.onCreateChildIfRecPtr( this );  
+            }); 
+        }
+        
         
         //fill init values of virtual fields
         //add lister for dty_Type field to show hide these fields
@@ -1693,7 +1705,133 @@ dty_TermIDTreeNonSelectableIDs
         tree.getRootNode().setActive();
         var node = tree.getNodeByKey(String(recID));
         node.setActive();
+    },
+    
+    //
+    //
+    //
+    onCreateChildIfRecPtr: function ( ed_input ){
+        
+        var rty_ID = this.options.rty_ID;
+        var dty_ID = this._currentEditID;
+        
+        var $dlg;
+        var value = ed_input.getValues()[0];   //!$(ed_input).is(':checked')
+ 
+        if(value==0){ 
+            var that = this;
+            //warning on cancel
+            $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
+                '<h3>Turning off child-record function</h3><br>'
+                +'<div><b>DO NOT DO THIS</b> if you have entered data for child records, unless you fully understand the consequences. It is likely to invalidate the titles of child records, make it hard to retrieve them or to identify what they belong to.</div><br>'
+                +'<div>If you do accidentally turn this function off, it IS possible to turn it back on again (preferably immediately …) and recover most of the information/functionality.</div><br>'
+                +'<div><label><input type="checkbox">Yes, I want to turn child-record function OFF for this field</label></div>',
+                {'Proceed':function(){ 
+                    ed_input.setValue(0, false); 
+                    that.onEditFormChange();
+                    $dlg.dialog('close'); },
+                'Cancel':function(){ ed_input.setValue(1, true); $dlg.dialog('close'); } },
+                {title:'Warning'});    
+
+        }else{
+            $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
+                '<h3>Convert existing records to children</h3><br>'
+                +'<div>Records referenced by this pointer field will become child records of the record which references them. Once allocated as a child record, the parent cannot be changed. </div><br>'
+                +'<div>WARNING: It is difficult to undo this step ie. to change a child record pointer field back to a standard pointer field.</div><br>'
+                +'<div><label><input type="checkbox">Yes, I want to turn child-record function ON for this field</label></div>',
+                {'Proceed': function(){
+
+                    window.hWin.HEURIST4.msg.showMsgFlash('converting to child records, may take up to a minute, please wait …', false);
+                    window.hWin.HEURIST4.msg.bringCoverallToFront( $(this.document).find('body') );            
+
+                    //start action - it adds reverse links and set rst_CreateChildIfRecPtr
+                    var request = {
+                        a: 'add_reverse_pointer_for_child',
+                        rtyID: rty_ID,   //rectype id
+                        dtyID: dty_ID,   //field type id 
+                        allow_multi_parent:true
+                    };
+
+                    window.hWin.HAPI4.RecordMgr.batch_details(request, function(response){
+
+                        window.hWin.HEURIST4.msg.closeMsgFlash();
+                        window.hWin.HEURIST4.msg.sendCoverallToBack();
+
+                        if(response.status == hWin.ResponseStatus.OK){
+                            //show report
+
+                            var link = '<a target="blank" href="'+window.hWin.HAPI4.baseURL + '?db='+window.hWin.HAPI4.database+'&q=ids:';
+                            var link2 = '"><img src="'+window.hWin.HAPI4.baseURL+'common/images/external_link_16x16.gif">&nbsp;';
+
+                            function __getlink(arr){
+                                return link+arr.join(',')+link2+arr.length; 
+                            }           
+
+
+                            var fi = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex;
+                            var sName = window.hWin.HEURIST4.rectypes.typedefs[rty_ID].dtFields[dty_ID][fi.rst_DisplayName];
+
+                            sMsg = '<h3>Conversion of records to child records</h3><br><b>Pointer field:'+ sName +'</b><br><br>'
+                            +'<div>'+response.data['passed']+' record pointer values were found for this field</div>'
+                            +(response.data['disambiguation']>0?('<div>'+response.data['disambiguation']+' values ignored. The same records were pointed to as a child record by more than one parent</div>'):'')
+                            +(response.data['noaccess']>0?('<div>'+response.data['noaccess']+' records cannot be converted to child records (no access rights)</div>'):'');
+
+                            if(response.data['passed']>0)
+                            {
+                                if(response.data['processedParents'] && response.data['processedParents'].length>0){
+                                    sMsg = sMsg
+                                    +'<br><div>'+__getlink(response.data['processedParents'])+' parent records</a> (records of this type with this pointer field) were processed</div>'
+                                    +((response.data['childInserted'].length>0)?('<div>'+__getlink(response.data['childInserted'])+' records</a> were converted to child records</div>'):'')
+                                    +((response.data['childUpdated'].length>0)?('<div>'+__getlink(response.data['childUpdated'])+' child records</a> changed its parent</div>'):'')
+                                    +((response.data['titlesFailed'].length>0)?('<div>'+__getlink(response.data['titlesFailed'])+' child records</a> failed to update tecord title</div>'):'');
+                                }
+                                if(response.data['childAlready'] && response.data['childAlready'].length>0){
+                                    sMsg = sMsg
+                                    +'<div>'+__getlink(response.data['childAlready'])+' child records</a> already have the required reverse pointer (OK)</div>';
+                                }
+
+                                if(response.data['childMiltiplied'] && response.data['childMiltiplied'].length>0){
+                                    sMsg = sMsg
+                                    +'<div>'+__getlink(response.data['childMiltiplied'])+' records</a> were pointed to as a child record by more than one parent (Problem)</div>'
+                                    +'<br><div>You will need to edit these records and choose which record is the parent (child records can only have one parent).</div>'
+                                    +'<div>To find these records use Verify > Verify integrity <new tab icon></div><br>'
+                                }
+                            }
+                            //sMsg = sMsg 
+                            sMsg = sMsg 
+                            +'<br>Notes<br><div>We STRONGLY recommend removing - from the record structure of the child record type(s) -  any existing field which points back to the parent record</div>'
+                            +'<br><div>You will also need to update the record title mask to use the new Parent Entity field to provide information (rather than existing fields which point back to the parent)</div>'
+                            +'<br><div>You can do both of these changes through Structure > Modify / Extend <new tab icon> or the Modify structure <new tab icon> link when editing a record.</div>';
+
+                            window.hWin.HEURIST4.msg.showMsgDlg(sMsg);
+
+                            //ed_input.setValue(1, false);
+                            //$(ed_input).prop('checked', true);
+                            window.hWin.HEURIST4.rectypes.typedefs[rty_ID].dtFields[dty_ID][fi.rst_CreateChildIfRecPtr] = 1;
+                            //save from UI to HEURIST - it is saved on server side in add_reverse_pointer_for_child
+                            //editStructure.doExpliciteCollapse(dty_ID, true);
+
+                        }else{
+                            ed_input.setValue(0, true);
+                            //$(ed_input).prop('checked', false);
+                            window.hWin.HEURIST4.msg.showMsgErr(response);
+                        }
+                    });
+                },
+                'Cancel':function(){ ed_input.setValue(0, false); $dlg.dialog('close'); } },
+                {title:'Warning'});    
+        }
+
+        //enable proceed button on checkbox mark    
+        var btn = $dlg.parent().find('button:contains("Proceed")');
+        var chb = $dlg.find('input[type="checkbox"]').change(function(){
+            window.hWin.HEURIST4.util.setDisabled(btn, !chb.is(':checked') );
+        })
+        window.hWin.HEURIST4.util.setDisabled(btn, true);
+
+        return false;
     }
+
     
     
 });
