@@ -180,8 +180,10 @@ select.ui-heurist-header2, input.ui-heurist-header2{
 }
 
 /* EDITOR CONTENT */
-.ent_wrapper.editor{
+.recordEditor, .ent_wrapper.editor{
     background-color:<?php uout('ce_bg', '#ECF1FB');?> !important;
+}
+.ent_wrapper.editor{
     font-size:0.9em;
 }
 .ent_wrapper.editor .header, .header>label{
@@ -191,8 +193,11 @@ select.ui-heurist-header2, input.ui-heurist-header2{
     background: none repeat scroll 0 0 <?php uout('ce_input', '#ffffff');?>  !important;
     border: 1px solid  <?php uout('cd_bg', '#e0dfe0' );?>;;
 }
+.separator2{
+    color: darkkhaki;/*<?php uout('ce_color', '#6A7C99');?>;*/
+}
 .ent_wrapper.editor .separator{
-    color: <?php uout('ce_helper', '#999999');?>;
+    color: darkkhaki;/*<?php uout('ce_color', '#6A7C99');?>;*/
     border-top: 1px solid <?php uout('cd_border', '#95A7B7');?>;
 }
 .ent_wrapper.editor .smallbutton{

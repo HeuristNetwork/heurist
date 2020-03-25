@@ -442,8 +442,8 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                                */
                         }
                     });
-                }else if(!this.set_detail_type_btn){
-                    //change selector to button
+                }else if(!this.set_detail_type_btn){  //change selector to button
+                    
                     var ele = this._editing.getFieldByName('dty_Type');  
                     ele = ele.find('.input-div');
                     ele.find('.ui-selectmenu-button').hide();
@@ -526,6 +526,9 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                this.set_detail_type_btn.button({label:window.hWin.HEURIST4.detailtypes.lookups[dt_type]});
                var elements = this._editing.getInputs('dty_Type');               
                $(elements[0]).val( dt_type );
+               
+               var ele = this._editing.getFieldByName('dty_Type');  
+               ele.editing_input('showErrorMsg',null);
            }
            
         
@@ -1006,6 +1009,11 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             
             if(fields!=null){
                 var dt_type = fields['dty_Type'];
+                if(window.hWin.HEURIST4.util.isempty(dt_type)){ //actually it is already checked in _getValidatedValues
+                    window.hWin.HEURIST4.msg.showMsgDlg('Field "Data type" is requirted');
+                    fields = null;
+                }else
+                
                 //last check for constrained pointer
                 if(window.hWin.HEURIST4.util.isempty(fields['dty_PtrTargetRectypeIDs'])) 
                 {

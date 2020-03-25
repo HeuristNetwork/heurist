@@ -523,16 +523,13 @@ $.widget( "heurist.editing_input", {
         
     },
     
-    
+   
+    //
+    //
+    //
     _onChange: function(event){
-        
-        this.error_message.hide();
-        $(this.element).find('.ui-state-error').each(function(idx,item){
-           if(!$(item).hasClass('heurist-prompt')){
-                $(item).removeClass('ui-state-error');    
-           }
-           
-        });
+    
+        this.showErrorMsg(null);
         
         this._setAutoWidth();
         
@@ -2954,11 +2951,18 @@ console.log('onpaste');
     //
     //
     showErrorMsg: function(sMsg){
-        if(sMsg!=''){
+        if(!window.hWin.HEURIST4.util.isempty(sMsg)){
             this.error_message.text(sMsg).show();    
         }else{
             this.error_message.hide();
             $(this.inputs).removeClass('ui-state-error');
+            
+            $(this.element).find('.ui-state-error').each(function(idx,item){
+               if(!$(item).hasClass('heurist-prompt')){
+                    $(item).removeClass('ui-state-error');    
+               }
+            });
+            
         }
     },
     
@@ -3040,7 +3044,14 @@ console.log('onpaste');
             this.showErrorMsg('Repeated value for a single value field - please correct');
         }
         
-        this._setAutoWidth();
+        this._setAutoWidth();            
+        /*
+        if(make_as_nochanged){
+            this._setAutoWidth();            
+        }else{
+            this._onChange();
+        }
+        */
     },
     
     //

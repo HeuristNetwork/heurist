@@ -29,7 +29,8 @@ function hEditing(_options) {
          recstructure,
          wasModified = 0, //0 not modified (on init), 1 was modified, 2 - finalized(not modified)
          onChangeCallBack=null,
-         entityConfig = null;
+         entityConfig = null,
+         options = {};
 
     /**
     * Initialization
@@ -60,6 +61,16 @@ function hEditing(_options) {
         }
         
         onChangeCallBack = _options.onchange;
+        
+        if(!_options.className) {
+            if($container.parents('.editor').length==0){
+                _options.className = 'ui-heurist-bg-light';
+            }else {
+                _options.className = '';
+            }
+        }
+        
+        options = _options;
         
         _initEditForm(_options.recstructure, _options.recdata);
     }
@@ -222,25 +233,25 @@ function hEditing(_options) {
                     if(!$.isEmptyObject(fields[idx]['groupStyle'])){
                         newFieldContainer.css(fields[idx]['groupStyle']);    
                     }
+                    if(parseInt(fields[idx]['dtID'])>0){ //for Records only
+                            newFieldContainer.attr('data-dtid', fields[idx]['dtID']);
+                    }
+                    
 
                     //add header and field container
                     if(currGroupType == 'accordion'){
-                         $('<h3>').text(headerText).appendTo(groupEle);
+                         $('<h3>').html('<span class="separator2">'+headerText+'</span>').appendTo(groupEle);
                          newFieldContainer.appendTo($('<div>').appendTo(groupEle));
                          
-                         if(groupEle.parents('.editor').length==0){
-                                newFieldContainer.addClass('ui-heurist-bg-light');
-                         }
+                         newFieldContainer.addClass(options.className);
                          
                     }else if(currGroupType == 'tabs'){
-                         $('<li>').html('<a href="#'+newFieldContainer.attr('id')+'"><span>'+headerText+'</span></a>')
+                         $('<li>').html('<a href="#'+newFieldContainer.attr('id')+'"><span class="separator2">'+headerText+'</span></a>')
                                 .appendTo(groupTabHeader);
                                 
                          $(newFieldContainer).appendTo(groupEle);
                          
-                         if(groupEle.parents('.editor').length==0){
-                                newFieldContainer.addClass('ui-heurist-bg-light');
-                         }
+                         newFieldContainer.addClass(options.className);
                          //.css({'font-size':'1em'})
                     }else{
                         
@@ -322,13 +333,14 @@ function hEditing(_options) {
                         
                         var inpt = $('<div>').css('display','block !important')
                                 .appendTo(fieldContainer).editing_input(fields[idx]);     
+                        //mark each field with dty_ID         
                         if(parseInt(fields[idx]['dtID'])>0){ //for Records only
                             inpt.attr('data-dtid', fields[idx]['dtID']);
                         }
                                 
                         editing_inputs.push(inpt);  
                     }
-                }
+                }//end field addition
                 
             }//for
             
@@ -343,9 +355,7 @@ function hEditing(_options) {
             
         }//end of function
 
-        if($container.parents('.editor').length==0){
-               $container.addClass('ui-heurist-bg-light');
-        }
+        $container.addClass(options.className);
 
 
         if(entityConfig && entityConfig.entityDescription){

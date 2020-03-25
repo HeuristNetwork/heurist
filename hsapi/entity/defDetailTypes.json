@@ -58,35 +58,6 @@
                         "rst_RequirementType":"required"
                     }
                 },
-{
-                    "dtID": "rst_RequirementType",
-                    "dtFields":{
-                        "dty_Type":"enum",
-                        "dty_Role":"virtual",
-                        "rst_DisplayName":"Requirement:",
-                        "rst_DisplayHelpText": "Define specific subtype", 
-                        "rst_DefaultValue":"optional",
-                        "rst_Display":"hidden",
-                        "rst_Class":"add_to_structure",
-                        "rst_FieldConfig":[
-                            {"key":"required", "title":"required"},
-                            {"key":"recommended", "title":"recommended"},
-                            {"key":"optional", "title":"optional"},
-                            {"key":"forbidden", "title":"hidden"}]
-                    }
-                },
-                {
-                    "dtID": "rst_Repeatability",
-                    "dtFields":{
-                        "dty_Type":"enum",
-                        "dty_Role":"virtual",
-                        "rst_DisplayName":"Repeatability:",
-                        "rst_DefaultValue":"single",
-                        "rst_Display":"hidden",
-                        "rst_Class":"add_to_structure",
-                        "rst_FieldConfig":["single","repeatable","limited 1","limited 2","limited 3","limited 4","limited 5"]
-                    }
-                },                
                 {
                     "dtID": "dty_Type",
                     "dtFields":{
@@ -94,7 +65,7 @@
                         "rst_DisplayName":"Data type:",
                         "rst_DisplayHelpText": "The type of data to be recorded in this field. Note: in most cases this cannot be changed once set", 
                         "rst_RequirementType":"required",
-                        "rst_DefaultValue":"freetext",
+                        "rst_DefaultValue":"",
                         "rst_FieldConfig":[
                             {"key":"blocktext", "title":"Memo (multi-line)"},
                             {"key":"boolean", "title":"Boolean (T/F)"},

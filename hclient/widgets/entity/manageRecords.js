@@ -72,6 +72,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         }else{
             this.options.width = 1200;                    
         }
+        this.options.editClassName = 'recordEditor';
 
         this.getUiPreferences();
         
@@ -1858,7 +1859,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     },                        
     
     //
-    //
+    // IJ rejects tree structure
     //
     _createFieldsForEditing: function( treeData ){
         
@@ -1875,6 +1876,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     // "title":"Primary information!","data":{"help":"","type":"group"}
                     
                     var dtGroup = {
+                        dtID: node.key,
                         groupHeader: node.title,
                         groupHelpText: (node.data && node.data.help)?node.data.help:'',
                         groupTitleVisible: true,
@@ -2039,8 +2041,8 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
             // 1) NEW: UI is stored in  DT_ENTITY_STRUCTURE (former header field)
             // 2) OLD: structure is plain is defined by "separator" fields
             var treeData = false;
-            var DT_ENTITY_STRUCTURE  = Number(window.hWin.HAPI4.sysinfo['dbconst']['DT_ENTITY_STRUCTURE']);
-            if(DT_ENTITY_STRUCTURE>0 && rfrs[DT_ENTITY_STRUCTURE]){
+            var DT_ENTITY_STRUCTURE  = Number(window.hWin.HAPI4.sysinfo['dbconst']['DT_ENTITY_STRUCTURE']); 
+            if(false && DT_ENTITY_STRUCTURE>0 && rfrs[DT_ENTITY_STRUCTURE]){ //IJ rejects tree structure
                 treeData = window.hWin.HEURIST4.util.isJSON(rfrs[DT_ENTITY_STRUCTURE][fi_defval]);    
             }
             //DEBUG 
@@ -2228,6 +2230,7 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
                             fields[fields.length-1].children = group_fields;
                         }
                         var dtGroup = {
+                            dtID: rfr['dt_ID'],
                             groupHeader: rfr[fi_name],
                             groupHelpText: rfr[fi_help],
                             groupTitleVisible: (rfr[fi_reqtype]!=='forbidden'),
@@ -3002,8 +3005,8 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
                     }});
                 }
             });
-            //init back button
-            if(that.options.rts_editor.manageDefRecStructure('option','external_toolbar')){
+            //init back button - if there is opened rts editor
+            if(this.options.rts_editor && this.options.rts_editor.manageDefRecStructure('option','external_toolbar')){
                 
                 var btn = this.element.find('.btn-edit-rt-back');
                 if(btn){

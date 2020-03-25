@@ -316,8 +316,13 @@ input.text, select.text {
     font-weight: bold;
 }
 
+/* for tabs, accordions, treeview */
+.separator2{
+    text-transform: uppercase;
+    font-weight:bold;
+}
+
 .separator {
-    border-top: 1px solid #A4B4CB;
     padding: 5px 0 5px 20px;
     text-align:left;
 }
@@ -1224,14 +1229,14 @@ span.fancytree-checkbox{
 
 .tree-rts .fancytree-folder > .fancytree-title{
     text-transform: uppercase;
-    color: #999999;
+    color: darkkhaki;
     font-weight: bold !important;
 }
 
 .tree-rts .required, a.required{
     color:#CC0000 !important;
 }
-.tree-rts .recommended, a.recommended{
+.tree-rts .recommended, .tree-rts .optional, a.recommended{
     color:#6A7C99 !important;
 }
 .tree-rts .forbidden, a.forbidden{

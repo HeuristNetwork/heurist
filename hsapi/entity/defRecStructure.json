@@ -15,16 +15,6 @@
         
         "fields": [
                 {
-                    "dtID": "rst_ID",
-                    "keyField": true,
-                    "dtFields":{
-                        "dty_Type":"integer",
-                        "dty_Role":"primary",
-                        "rst_DisplayName": "ID:",
-                        "rst_Display":"readonly"
-                    }
-                },
-                {
                     "dtID": "rst_RecTypeID",
                     "dtFields":{
                         "dty_Type":"integer",
@@ -262,7 +252,7 @@
                     "dtFields":{
                         "dty_Type":"enum",
                         "dty_Role":"virtual",
-                        "rst_Class":"separator",
+                        "rst_Class":"XXXgroup_separator",
                         "rst_DisplayName":"Group/separator type:",
                         "rst_DefaultValue": "group",
                         "rst_FieldConfig": ["group","accordion","tabs"]
@@ -317,6 +307,16 @@
                             "dty_Type":"integer",
                             "rst_Display":"hidden",
                             "rst_DefaultValue":"0"
+                        }
+                    },
+                    {
+                        "dtID": "rst_ID",
+                        "keyField": true,
+                        "dtFields":{
+                            "dty_Type":"integer",
+                            "dty_Role":"primary",
+                            "rst_DisplayName": "ID:",
+                            "rst_Display":"readonly"
                         }
                     }
                 ]}                

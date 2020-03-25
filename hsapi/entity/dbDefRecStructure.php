@@ -260,6 +260,60 @@ class DbDefRecStructure extends DbEntityBase
         
         return parent::delete();
     }
+
+    //    
+    // update order for record type
+    //
+    public function batch_action(){
+        
+        if(!(@$this->data['rtyID']>0)){
+            $this->system->addError(HEURIST_INVALID_REQUEST, 'Record type identificator not defined');
+            return false;
+        }
+        $rty_ID = $this->data['rtyID'];
+        
+        //dty_ID
+        $this->recordIDs = prepareIds(@$this->data['recID']);
+        if(count($this->recordIDs)==0){             
+            $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid field identificators');
+            return false;
+        }
+        
+        //user ids
+        $orders = prepareIds(@$this->data['orders'], true);
+        if(count($orders)==0){             
+            $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid values for fields order');
+            return false;
+        }
+        
+        $ret = true;
+        $mysqli = $this->system->get_mysqli();
+        $keep_autocommit = mysql__begin_transaction($mysqli);
+        
+        foreach ($this->recordIDs as $idx => $dty_ID){        
+            
+            $order = $orders[$idx];
+            
+            $query = 'UPDATE '.$this->config['tableName'].' SET rst_DisplayOrder='.$order
+                    .' WHERE rst_DetailTypeID='.$mysqli->real_escape_string( $dty_ID )
+                    .' AND rst_RecTypeID='.$mysqli->real_escape_string( $rty_ID  );
+            $res = $mysqli->query($query);
+                if(!$res){
+                    $ret = false;
+                    $mysqli->rollback();
+                    $this->system->addError(HEURIST_DB_ERROR, 'Can\'t set order for fields in rectord type #'.$rty_ID, $mysqli->error );
+                    break;
+                }
+        }
+        if($ret){
+            $mysqli->commit();
+        }
+        if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+            
+        return $ret;        
+    }
+    
+    
     
 }
 ?>

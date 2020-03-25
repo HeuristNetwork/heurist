@@ -37,10 +37,14 @@ function editTheme(current_value, callback){
     var _editing_symbology = new hEditing({container:editForm, 
         onchange:
         function(){
-            var isChanged = _editing_symbology.isModified();
-            var mode = isChanged?'visible':'hidden';
-            edit_dialog.parent().find('#btnRecSave').css('visibility', mode);
-
+            if(edit_dialog){
+                var ele = edit_dialog.parent().find('#btnRecSave');
+                if(ele){
+                    var isChanged = _editing_symbology.isModified();
+                    var mode = isChanged?'visible':'hidden';
+                    edit_dialog.parent().find('#btnRecSave').css('visibility', mode);
+                }
+            }
     }});
     
     var recdata = current_value ? new hRecordSet({count:1, order:[1], 

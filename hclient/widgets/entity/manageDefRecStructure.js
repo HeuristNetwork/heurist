@@ -26,6 +26,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
     _dragIsAllowed: true,
 
     _menuTimeoutId: -1,
+    _isFlat: true, //IJ rejects tree rt structure 
     
     menues: {}, //popup menu for this widget
     
@@ -41,7 +42,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             this.options.rec_ID_sample = -1; //record id that will be loaded in preview
         }
         if(!(this.options.rty_ID>0)) {
-            this.options.rty_ID = 4; //by default is required   
+            this.options.rty_ID = 4; //57; //by default is required   
         }
         this.options.previewEditor = null; // record editor for preview
         
@@ -57,6 +58,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         this.options.width = 1200;
         this.options.height = 640;
         this.options.edit_mode = 'inline';//'popup'; //editonly
+        this.options.editClassName = 'ui-widget-content';
 
         if(this.options.edit_mode=='editonly'){
             this.options.select_mode = 'manager';
@@ -68,7 +70,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                         +    '<div class="ent_content_full"  style="top:0px">'
                                 +'<div class="ent_content_full recordList" style="display:none;top:0px;bottom:50%;width:320px"/>'
                                 +'<div class="ent_content_full" style="top:0px;height:40px;width:320px;padding:10px 20px">' //instruction and close button
-                                    +'<span style="font-style:italic;">Drag heading or field to reposition</span>&nbsp;&nbsp;&nbsp;'
+                                    +'<span style="font-style:italic;">Drag heading or field to reposition<br>Select field or click gearwheek to modify</span>&nbsp;&nbsp;&nbsp;'
                                     +'<button class="closeRtsEditor"/>'
                                 +'</div>'
                                 +'<div class="ent_content_full treeView" style="top:40px;width:320px"/>' //treeview
@@ -228,11 +230,13 @@ dty_TermIDTreeNonSelectableIDs
         //if such treeview data is missed creates new one based on header/separators and rst_DisplayOrder
 
         var treeData = false;
+        /* IJ rejects tree rt structure 
         var record = recset.getById(this.DT_ENTITY_STRUCTURE);
         if(record){
             treeData = window.hWin.HEURIST4.util.isJSON(recset.fld(record, 'rst_DefaultValue'));    
         }
-        //debug reset  treeData = false;
+        //debug reset treeData = false;
+        */
 
         //if such treeview data is missed creates new one based on header/separators and rst_DisplayOrder
         if(!treeData){
@@ -249,30 +253,53 @@ dty_TermIDTreeNonSelectableIDs
             
             var groupIdx = -1;
             var seps = [];
-            
-            recset.each(function(dty_ID, record){
-                
-                var node = {title: recset.fld(record,'rst_DisplayName'), key: dty_ID};
-                
-                if(recset.fld(record, 'dty_Type')=='separator'){
+
+            if(this._isFlat){
+
+                recset.each(function(dty_ID, record){
                     
-                    node['key'] = 9000000+seps.length;
-                    //debug node['title'] = node['key']+' '+node['title'];
-                    node['folder'] = true;
-                    node['data'] = {help:recset.fld(record,'rst_DisplayHelpText'), type:'group'};
-                    node['children'] = [];
-                    groupIdx = treeData.length;
+                        var isSep = (recset.fld(record, 'dty_Type')=='separator');
+                        var title = recset.fld(record,'rst_DisplayName');
+                        if(!isSep )
+                            title = title 
+                                    +'<span style="font-size:smaller">  ('
+                                    +window.hWin.HEURIST4.detailtypes.lookups[recset.fld(record,'dty_Type')]
+                                    +')</span>';
+                                    
+                        var req = recset.fld(record,'rst_RequirementType');
+                    
+                    var node = {title: title, key: dty_ID, extraClasses:isSep?'separator2':req};
+                    node['data'] = {header:isSep, type:'group'};
                     treeData.push( node );
-                    seps.push(dty_ID);
+
+                });
+                
+            }else{
+
+                recset.each(function(dty_ID, record){
                     
-                }else{
-                    if(groupIdx<0){
-                        treeData.push( node );    
+                    var node = {title: recset.fld(record,'rst_DisplayName'), key: dty_ID};
+                    
+                    if(recset.fld(record, 'dty_Type')=='separator'){
+                        
+                        node['key'] = 9000000+seps.length;
+                        //debug node['title'] = node['key']+' '+node['title'];
+                        node['folder'] = true;
+                        node['data'] = {help:recset.fld(record,'rst_DisplayHelpText'), type:'group'};
+                        node['children'] = [];
+                        groupIdx = treeData.length;
+                        treeData.push( node );
+                        seps.push(dty_ID);
+                        
                     }else{
-                        treeData[groupIdx]['children'].push(node);
+                        if(groupIdx<0){
+                            treeData.push( node );    
+                        }else{
+                            treeData[groupIdx]['children'].push(node);
+                        }
                     }
-                }
-            });
+                });
+            }
         }
         
         //init treeview
@@ -298,17 +325,24 @@ dty_TermIDTreeNonSelectableIDs
                 }
             },
             */
-            /*
+            
             click: function(event, data){
+//console.log('click');                
                 var ele = $(event.target);
-                if(ele.hasClass('ui-icon-folder')){
-                    //add new group/separator
-                    that._addNewSeparator();
-                    window.hWin.HEURIST4.util.stopEvent(event)
+                if(!ele.hasClass('ui-icon')){
+                    if(data.node.isActive()){
+//console.log('need close');                
+                        window.hWin.HEURIST4.util.stopEvent(event);
+                        that._saveEditAndClose(null, 'close');
+                    }
                 }
-            },*/
-            activate: function(event, data) {
+                    //add new group/separator
+                    //that._addNewSeparator();
+                    //window.hWin.HEURIST4.util.stopEvent(event)
                 
+            },
+            activate: function(event, data) {
+//console.log('activ');                
                 if(data.node.key>0){
                     that.selectedRecords([data.node.key]);
                     if(!that._lockDefaultEdit)
@@ -326,7 +360,7 @@ dty_TermIDTreeNonSelectableIDs
                     return that._dragIsAllowed;
                 },
                 dragEnter: function(node, data) {
-                    return node.folder ?true :["before", "after"];
+                    return (!this._isFlat && node.folder) ?true :["before", "after"];
                 },
                 dragDrop: function(node, data) {
                     
@@ -353,6 +387,9 @@ dty_TermIDTreeNonSelectableIDs
             this._treeview = this.element.find('.treeView').addClass('tree-rts')
                                 .fancytree(fancytree_options); //was recordList
             
+            if(this._isFlat){            
+                setTimeout(function(){that.__updateActionIcons();},500);
+            }else{
             setTimeout(function(){
                     var tree = that._treeview.fancytree('getTree');
                     //add missed fields
@@ -402,8 +439,8 @@ dty_TermIDTreeNonSelectableIDs
                             }
                             //node.toggleClass( req, true );
                         }
-                        
                     }); //visit
+                    
                     var treeData = tree.toDict(false);
                     that._cleanTreeStructure(treeData);
                     //add/update new service separator that will keep rt structure
@@ -421,6 +458,7 @@ dty_TermIDTreeNonSelectableIDs
                     
                     that.__updateActionIcons();
                 }, 500);  
+            }
 
 
     },
@@ -449,7 +487,7 @@ dty_TermIDTreeNonSelectableIDs
                     $(item).css('display','block');   
                }
 
-               var is_folder = $(item).hasClass('fancytree-folder'); 
+               var is_folder = $(item).hasClass('fancytree-folder') || $(item).hasClass('separator2'); 
                
                var actionspan = $('<div class="svs-contextmenu3" style="position:absolute;right:4px;display:none;padding-top:2px">'
                    +'<span class="ui-icon ui-icon-window" title="Add a new group/separator"></span>'               
@@ -540,7 +578,7 @@ dty_TermIDTreeNonSelectableIDs
     },
     
     //
-    //
+    // init popup menu for repeatability and requirement
     //
     _initMenu: function(name){
 
@@ -587,7 +625,7 @@ dty_TermIDTreeNonSelectableIDs
                             
                             node.extraClasses = newVal;
                             $(node.li).addClass(newVal);
-                            node.setActive( false )
+                            node.setActive( false );
                             fieldName = 'rst_RequirementType';
                         }
                             
@@ -792,9 +830,22 @@ dty_TermIDTreeNonSelectableIDs
             //show hide buttons in treeview
             var isEditOpen = this.editForm.is(':visible');
             
-            this._treeview.find('.svs-contextmenu3').css('visibility', isEditOpen?'hidden':'visible' );
             this.editForm.find('#btnCloseEditor_rts').css('display', 
                     (isEditOpen)?'block':'none');
+                    
+            //show/hide action buttons in tree
+            this._treeview.find('.svs-contextmenu3').css('visibility', isEditOpen?'hidden':'visible' );
+//console.log('changed '+isEditOpen+' '+this._currentEditID);
+            if(!isEditOpen){
+                //deactivate node - add action buttons
+                var tree = this._treeview.fancytree('getTree');
+                var node = tree.getActiveNode();
+                if(node && node.key!=this._currentEditID){
+                    node.setActive(false);  
+//console.log('deactivated '+node.key);                
+                } 
+            }
+
             
             var isChanged = this.editForm.is(':visible') 
                             && this._editing && this._editing.isModified();
@@ -803,6 +854,8 @@ dty_TermIDTreeNonSelectableIDs
             
             this._toolbar.find('#btnRecPreview_rts').css('display', 
                     (isChanged)?'none':'block');
+                    
+                    
             
             /*           
             var canDelete = isEditOpen
@@ -1061,11 +1114,15 @@ dty_TermIDTreeNonSelectableIDs
                     if(!parentnode) return;
                     
                     //add new node to tree
-                    parentnode.addNode({key:recID}, parentnode.folder?'child':'after');
+                    parentnode.addNode({key:recID}, parentnode.folder?'firstChild':'after');
+                    if(parentnode.folder){
+                        parentnode.setExpanded(true);
+                    }
                     
                     that._afterSaveEventHandler(recID, fields);
                     that._saveRtStructureTree();
                     //open editor for new field
+                    that._showRecordEditorPreview();  
             
                 }else{
                     
@@ -1078,7 +1135,7 @@ dty_TermIDTreeNonSelectableIDs
     },
     
     //
-    // show record editor form - that reflect the last changes of rt structure
+    // show record editor form - it reflects the last changes of rt structure
     // recID - dty_ID - field that was saved
     //
     _showRecordEditorPreview: function( recID, fields ){
@@ -1090,12 +1147,8 @@ dty_TermIDTreeNonSelectableIDs
         //hide editor - show and updated preview
         if(this.previewEditor){
             
-            if(true || this.options.showEditorInline){
-                this.editForm.hide().appendTo(this.previewEditor.parent());
-            }
-            this.onEditFormChange();
-            
-            this.previewEditor.show();
+            this._closeFormlet();
+           
             if(!this.previewEditor.manageRecords('instance')){
                 
                 var that = this.previewEditor;
@@ -1143,32 +1196,50 @@ dty_TermIDTreeNonSelectableIDs
             if(true || this.options.showEditorInline){
                 
                 //place rts editor into record edit form
-                
+                var isHeader = false;
                 var ed_ele = this.previewEditor.find('div[data-dtid='+this._currentEditID+']');
                 
                 if(ed_ele.length==0){
+                    isHeader = true;
+                    ed_ele = this.previewEditor.find('fieldset[data-dtid='+this._currentEditID+']');
+                }
                     
+                if(ed_ele.length==0){ //popup edit  not used anymore
                     if(!this.editForm.hasClass('ent_content_full')){
-                        
+                        //put editForm back to oridinal container
                         this.editForm
                             .css({'margin-left':'0px'})
                             .addClass('ent_content_full')
                             .appendTo(this.previewEditor.parent());
                     }
+                    //open in popup editor
+                    this.options.edit_height = 250;
+                    this.showEditFormDialog(false);
+                    this._edit_dialog.dialog('option','close', function(){
+                        that._closeFormlet();
+                    });
                 }else{
                 
                     this.editForm
-                        .css({'margin-left':'60px'})
+                        .css({'margin-left':'73px'})
                         .removeClass('ent_content_full');
                     
                     var ed_cont;
                     if(this.editForm.parent().hasClass('editor-container')){
                         ed_cont = this.editForm.parent();
                     }else{
+                        //create new table div foe editor
                         ed_cont = $('<div class="editor-container" style="display:table">');
                         this.editForm.appendTo(ed_cont);
                     }
-                    ed_cont.insertAfter(ed_ele);
+                    
+                    if(isHeader){
+                        //insert as fist child for header
+                        ed_ele.prepend( ed_cont );
+                        //ed_cont.appendTo(ed_ele); //prepend
+                    }else{
+                        ed_cont.insertAfter(ed_ele);    
+                    }
                     
                     //adjust preview editor position
                     var ele_ed = this.previewEditor.find('.editFormDialog');
@@ -1198,7 +1269,7 @@ dty_TermIDTreeNonSelectableIDs
                     that._editing.getFieldByName('rst_MaxValues').show();
                 }
                 that._editing.setFieldValueByName('rst_MaxValues', res, true);
-                that.onEditFormChange();    
+                that.onEditFormChange(); //trigger change   
             });
         }
         
@@ -1220,52 +1291,42 @@ dty_TermIDTreeNonSelectableIDs
             this._onDetailTypeChange();
             //$(elements[0]).change(); //trigger for current type
         }
+        
+        var bottom_div = $('<div style="width:100%;min-height:26px">').appendTo(this.editForm);
 
         if(this._editing.getValue('dty_Type')=='separator'){
             this.editForm.find('.ui-accordion').hide();
         }else{
             var ele = $('<div style="font-style:italic;padding:10px;display:inline-block">'
                 +'To change terms list or target entity types: <a href="#">Edit base field definitions</a></div>')
-                .appendTo(this.editForm);
+                .appendTo(bottom_div);
             this._on(ele.find('a'),{click: this.showBaseFieldEditor}); 
         }
 
         var btnCancel = $('<button>').attr('id', 'btnCloseEditor_rts')
                 .button({label:window.hWin.HR('Cancel')})
                 .css({'margin-right':'1em','float':'right',display:'none','margin-top':'2px'})
-                .appendTo(this.editForm);
+                .appendTo(bottom_div);
 
         var btnSave = $('<button>').attr('id', 'btnRecSaveAndClose_rts')
                 .button({label:window.hWin.HR('Save')})
                 .css({'font-weight':'bold','float':'right',display:'none','margin-top':'2px'})
-                .appendTo(this.editForm);
+                .appendTo(bottom_div);
             
         this._on( btnCancel,{click: function() { 
 
-                        function __closeFormlet(){
-                            that._currentEditID = null;
-                            if(that.previewEditor){
-                                if(false){ //was modified - need reload preview @todo
-                                    that._showRecordEditorPreview();    
-                                } else {
-                                    that.editForm.hide();
-                                    that.previewEditor.show();
-                                    that.onEditFormChange();
-                                }
-                            }
-                        }
 
                         if(that._editing && that._editing.isModified() && that._currentEditID!=null){
                             var $dlg, buttons = {};
                             buttons['Save'] = function(){ that._saveEditAndClose(null, 'close'); $dlg.dialog('close'); }; 
-                            buttons['Ignore and close'] = function(){ __closeFormlet(); $dlg.dialog('close'); };
+                            buttons['Ignore and close'] = function(){ that._closeFormlet(); $dlg.dialog('close'); };
 
                             $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
                                 'You have made changes to the data. Click "Save" otherwise all changes will be lost.',
                                 buttons,
                                 {title:'Confirm',yes:'Save',no:'Ignore and close'});
                         }else{
-                            __closeFormlet();
+                            that._closeFormlet();
                         }
                 }});
                 
@@ -1276,6 +1337,25 @@ dty_TermIDTreeNonSelectableIDs
 
         this._super();
     },    
+    
+    
+    //
+    //
+    //
+    _closeFormlet: function() {
+                            
+        this._currentEditID = null;
+        
+        if(this._edit_dialog && this._edit_dialog.dialog('instance')){
+            this._edit_dialog.dialog('close');
+            if(this._edit_dialog) this._edit_dialog.dialog('destroy');
+            this._edit_dialog = null;
+        }
+        this.editForm.hide();
+        this.previewEditor.show();
+        this.onEditFormChange(); //after close
+    },  
+                      
     
     //
     // Event listener for dty_Type - shows/hides dependent fields
@@ -1296,7 +1376,7 @@ dty_TermIDTreeNonSelectableIDs
                            $(depended_fields[idx]).hide();
                        }
                        //show specific
-                       depended_fields = this._editing.getFieldByClass(dt_type);
+                       depended_fields = this._editing.getFieldByClass( (dt_type=='separator')?'group_separator':dt_type );
                        for(var idx in depended_fields){
                            $(depended_fields[idx]).show();
                        }
@@ -1416,20 +1496,61 @@ dty_TermIDTreeNonSelectableIDs
     //
     _saveRtStructureTree: function(){
         
-        var fields = {rst_ID: this.DT_ENTITY_STRUCTURE};
-        this._saveEditAndClose(fields, 'close');
+        if(this._isFlat){
+
+            var fi_order = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex.rst_DisplayOrder;
+
+            var recset = this._cachedRecordset;
+            var tree = this._treeview.fancytree("getTree");
+            var order = 0;
+            var that = this;
+            var dtyIDs = [];
+            var orders = [];
+            tree.visit(function(node){
+            
+                var dty_ID = node.key;
+                recset.setFldById(dty_ID, 'rst_DisplayOrder', order);
+                window.hWin.HEURIST4.rectypes.typedefs[that.options.rty_ID].dtFields[dty_ID][fi_order] = order;
+                dtyIDs.push( dty_ID );
+                orders.push( order );
+                order++;
+            });
+            //update order on server
+            var request = {};
+            request['a']        = 'action'; //batch action
+            request['entity']   = this._entityName;
+            request['rtyID']    = this.options.rty_ID;
+            request['recID']    = dtyIDs;
+            request['orders']   = orders;
+            request['request_id'] = window.hWin.HEURIST4.util.random();
+            
+            window.hWin.HAPI4.EntityMgr.doRequest(request, 
+                function(response){
+                    if(response.status == window.hWin.ResponseStatus.OK){
+                        that._dragIsAllowed = true;
+                        that._showRecordEditorPreview();  
+                    }else{
+                        window.hWin.HEURIST4.msg.showMsgErr(response);      
+                    }
+                });
+            
         
-        //that.__updateActionIcons(200);
+            
+        }else{
+            var fields = {rst_ID: this.DT_ENTITY_STRUCTURE};
+            this._saveEditAndClose(fields, 'close');
+        }
     },
     
     //
-    // Remove all data excect keys for fields
+    // for tree rt structure
+    // Remove all data excect keys for fields 
     //
     _cleanTreeStructure: function(data){
         
         if($.isArray(data)){
             for(var i=0; i<data.length; i++){
-                if($.isArray(data[i].children)){
+                if(data[i].folder || $.isArray(data[i].children)){
                     this._cleanTreeStructure( data[i].children );        
                 }else{
                     if(data[i].title) delete data[i].title;
@@ -1458,7 +1579,12 @@ dty_TermIDTreeNonSelectableIDs
             }
         
             if(!fields){
-                fields = this._getValidatedValues(); 
+                if(this._editing && this._editing.isModified() && this._currentEditID!=null){
+                    fields = this._getValidatedValues(); 
+                }else{
+                    this._closeFormlet();   
+                }
+                        
             }
             if(fields==null) return; //validation failed
 
@@ -1467,7 +1593,7 @@ dty_TermIDTreeNonSelectableIDs
             var dt_type = fields['dty_Type'];
             
             //save structure (tree) in DT_ENTITY_STRUCTURE field
-            if(dt_type=='separator' || recID==this.DT_ENTITY_STRUCTURE)
+            if( !this._isFlat &&  (dt_type=='separator' || recID==this.DT_ENTITY_STRUCTURE) )
             {
                 var recset = this.getRecordSet();
                 
@@ -1476,7 +1602,17 @@ dty_TermIDTreeNonSelectableIDs
                     if(treeview){
                         var node = treeview.getNodeByKey( String(recID) );
                         if(node){
-                            node.setTitle( fields['rst_DisplayName'] ); 
+                            
+                            var isSep = (fields['dty_Type']=='separator');
+                            var title = fields['rst_DisplayName'];
+                            if(!isSep){
+                                title = title + '<span style="font-size:smaller">  ('
+                                        +window.hWin.HEURIST4.detailtypes.lookups[fields['dty_Type']]
+                                        +')</span>';
+                            }
+                            
+                            node.setTitle( title ); 
+                            node.extraClass = isSep?'separator2':fields['rst_RequirementType'];
                             node.data = {help:fields['rst_DisplayHelpText'], type:fields['rst_SeparatorType']};   
                         } 
                     }
@@ -1551,6 +1687,12 @@ dty_TermIDTreeNonSelectableIDs
         var recset = this.getRecordSet()
         var record = recset.getById(recID);
         //recset.setRecord(recID, fieldvalues);
+
+        //if separator editor in popup - need to close it                
+        if(this._edit_dialog && this._edit_dialog.dialog('instance')){
+            this._currentEditID = null;
+            this._edit_dialog.dialog('close');
+        }
         
         //update UI
         if(this.options.edit_mode == 'editonly'){
@@ -1580,26 +1722,31 @@ dty_TermIDTreeNonSelectableIDs
             }
             
             // 3) refresh treeview
-            if(recID!==this.DT_ENTITY_STRUCTURE){
+            if(this._isFlat || recID!==this.DT_ENTITY_STRUCTURE){
                 var tree = this._treeview.fancytree("getTree");
                 if(tree){
                     var node = tree.getNodeByKey( recID );
                         
                     if(node) {
-    //console.log('set name '+recset.fld(record, 'rst_DisplayName'));                    
-                        node.setTitle( recset.fld(record, 'rst_DisplayName') 
-                                    +'<span style="font-size:smaller">  ('
+                        var isSep = recset.fld(record,'dty_Type')=='separator';
+                        var title = recset.fld(record, 'rst_DisplayName');
+                        if(!isSep){
+                            title = title + '<span style="font-size:smaller">  ('
                                     +window.hWin.HEURIST4.detailtypes.lookups[recset.fld(record,'dty_Type')]
-                                    +')</span>');   
-                        if(!node.folder){
+                                    +')</span>';
+                        }
+//console.log('set name '+recset.fld(record, 'rst_DisplayName'));                    
+                        node.setTitle( title );   
+                        if(this._isFlat || !node.folder){
                             var req = recset.fld(record,'rst_RequirementType');
-                            node.extraClasses = req;
-                            $(node.li).addClass(req);
+                            node.extraClasses = isSep?'separator2':req;
+                            $(node.li).addClass( isSep?'separator2':req );
                         }
                     }
                 }
                 //4. update action buttons
                 this.__updateActionIcons(200);
+
             }
         }
         this._dragIsAllowed = true;
@@ -1612,28 +1759,138 @@ dty_TermIDTreeNonSelectableIDs
     //
     _addNewSeparator: function(){
         
-        var tree = this._treeview.fancytree("getTree");
-        var node = tree.getActiveNode();
-        if(!node) return;
-   
-        //add to recordset        
-        this._fakeSepIdsCounter++;    
-        var recset = this._cachedRecordset;
-        var record = {
-            rst_ID: this._fakeSepIdsCounter, 
-            rst_RecTypeID: this.options.rty_ID, 
-            rst_DetailTypeID: this._fakeSepIdsCounter,
-            rst_DisplayName: 'New header', 
-            rst_DisplayHelpText: '',
-            rst_SeparatorType: 'group',
-            dty_Type: 'separator'
-        };
-        recset.addRecord(this._fakeSepIdsCounter, record);
+        if(this._isFlat){
+            
+            //THIS IS nearly exact piece of code from editRecStructure
+            
+            var rty_ID = this.options.rty_ID;
+    
+            //find seprator field type ID that is not yet added to this record strucuture
+            var that = this;
+            var ft_separator_id =  null;
+            var ft_separator_group =  window.hWin.HEURIST4.detailtypes.groups[0].id;
+            var dtypes = window.hWin.HEURIST4.detailtypes.typedefs;
+            var fi = window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex;
+            var fnames = window.hWin.HEURIST4.detailtypes.typedefs.commonFieldNames;
+            var recDetTypes = window.hWin.HEURIST4.rectypes.typedefs[rty_ID].dtFields;
+
+            var ind, k = 1;
+            for (ind in dtypes){
+                if(!window.hWin.HEURIST4.util.isnull(ind) && !isNaN(Number(ind)) ){
+                    if(dtypes[ind].commonFields[fi.dty_Type]==="separator"){
+                        k++;
+                        ft_separator_group = dtypes[ind].commonFields[fi.dty_DetailTypeGroupID];
+                        if(window.hWin.HEURIST4.util.isnull(recDetTypes[ind])){
+                            ft_separator_id = ind; //not used yet
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if(!window.hWin.HEURIST4.util.isnull(ft_separator_id)){
+                this.addNewFieldToStructure( ft_separator_id );
+            }else{ //"not used" separator field type not found - create new one
+
+                var _detailType = [];//new Array();
+
+                _detailType[fnames[fi.dty_Name]] = 'DIVIDER '+k;
+                _detailType[fnames[fi.dty_ExtendedDescription]] = '';
+                _detailType[fnames[fi.dty_Type]] = 'separator';
+                _detailType[fnames[fi.dty_OrderInGroup]] = 0;
+                _detailType[fnames[fi.dty_HelpText]] = ''; //'Dividers serve to break the data entry form up into sections';
+                _detailType[fnames[fi.dty_ShowInLists]] = 1;
+                _detailType[fnames[fi.dty_Status]] = 'open';
+                _detailType[fnames[fi.dty_DetailTypeGroupID]] = ft_separator_group;
+                _detailType[fnames[fi.dty_FieldSetRectypeID]] = null;
+                _detailType[fnames[fi.dty_JsonTermIDTree]] = null;
+                _detailType[fnames[fi.dty_TermIDTreeNonSelectableIDs]] = null;
+                _detailType[fnames[fi.dty_PtrTargetRectypeIDs]] = null;
+                _detailType[fnames[fi.dty_NonOwnerVisibility]] = 'viewable';
+
+
+                var oDetailType = {detailtype:{
+                    colNames:{common:[]},
+                    defs: {}
+                }};
+
+                oDetailType.detailtype.defs[-1] = {};
+                oDetailType.detailtype.defs[-1].common = [];
+
+                var fname;
+                for (fname in _detailType){
+                    if(!window.hWin.HEURIST4.util.isnull(fname)){
+                        oDetailType.detailtype.colNames.common.push(fname);
+                        oDetailType.detailtype.defs[-1].common.push(_detailType[fname]);
+                    }
+                }
+
+                var str = JSON.stringify(oDetailType);
+
+
+                function __addNewSeparator(response) {
+
+                    if(response.status == window.hWin.ResponseStatus.OK){
         
-        //add to treeview
-        var newnode = {key:this._fakeSepIdsCounter, folder:true, title:'New header', data:{type:'group'}};
-        node = node.addNode(newnode, 'after');
-        node.setActive(); //start edit
+                        var error = false,
+                        report = "",
+                        ind;
+    //console.log('added on server '+(new Date().getTime() / 1000 - _time_debug));            
+    //_time_debug = new Date().getTime() / 1000;                       
+                        
+                        for(ind in response.data.result){
+                            if( !window.hWin.HEURIST4.util.isnull(ind) ){
+                                var item = response.data.result[ind];
+                                if(isNaN(item)){
+                                    window.hWin.HEURIST4.msg.showMsgErr(item);
+                                    error = true;
+                                }else{
+                                    ft_separator_id = ""+Math.abs(Number(item));
+
+                                    //refresh the local heurist
+                                    window.hWin.HEURIST4.detailtypes = response.data.detailtypes;
+                                    that.addNewFieldToStructure( ft_separator_id );
+                                }
+                            }
+                        }
+                    }else{
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                    }
+                }
+                                       
+    //            _time_debug = new Date().getTime() / 1000;                       
+    //console.log('send save separator')            
+                //
+                var baseurl = window.hWin.HAPI4.baseURL + "admin/structure/saveStructure.php";
+                var request = {method:'saveDT', db:window.hWin.HAPI4.database, data:oDetailType};    //add separator
+                window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, __addNewSeparator);
+            }  
+        }else{
+        
+            var tree = this._treeview.fancytree("getTree");
+            var node = tree.getActiveNode();
+            if(!node) return;
+       
+            //add to recordset        
+            this._fakeSepIdsCounter++;    
+            var recset = this._cachedRecordset;
+            var record = {
+                rst_ID: this._fakeSepIdsCounter, 
+                rst_RecTypeID: this.options.rty_ID, 
+                rst_DetailTypeID: this._fakeSepIdsCounter,
+                rst_DisplayName: 'New header', 
+                rst_DisplayHelpText: '',
+                rst_SeparatorType: 'group',
+                dty_Type: 'separator'
+            };
+            recset.addRecord(this._fakeSepIdsCounter, record);
+            
+            //add to treeview
+            var newnode = {key:this._fakeSepIdsCounter, folder:true, title:'New header', data:{type:'group'}};
+            node = node.addNode(newnode, 'after');
+            node.setActive(); //start edit
+            
+        }
      
     },
 
@@ -1663,6 +1920,9 @@ dty_TermIDTreeNonSelectableIDs
      
     },
     
+    //
+    //
+    //
     _afterDeleteEvenHandler: function( recID ){
         
         if(recID.indexOf(this.options.rty_ID+'.')===0){
@@ -1693,8 +1953,11 @@ dty_TermIDTreeNonSelectableIDs
             node.remove();
         }
         
-        this._saveRtStructureTree();
-        //this._showRecordEditorPreview();
+        if(!this._isFlat){
+            this._saveRtStructureTree();    
+        }else{
+            this._showRecordEditorPreview();  
+        }
     },
     
     //
