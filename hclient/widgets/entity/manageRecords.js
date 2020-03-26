@@ -2742,6 +2742,8 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
     // 5. init rts_editor action buttons 
     //    
     _afterInitEditForm: function(){
+
+        var that = this;
         
         var ishelp_on = (this.usrPreferences['help_on']==true || this.usrPreferences['help_on']=='true');
         var isfields_on = this.usrPreferences['optfields']==true || this.usrPreferences['optfields']=='true';
@@ -2797,8 +2799,6 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
                 +'<span class="btn-config7 ui-icon ui-icon-bug smallicon"></span>'
              +'</div></div>').insertBefore(this.editForm.first('fieldset'));
 */
-
-            var that = this;    
 
             var btn_css = {'font-weight': 'bold', color:'#7D9AAA', background:'#ecf1fb' };
             if(window.hWin.HAPI4.is_admin() && this.options.allowAdminToolbar!==false)
@@ -2951,7 +2951,6 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
         }
         
         if(this.element.find('.btn-modify_structure').length>0){
-            var that = this;
             this.element.find('.btn-modify_structure').click(function(){that.editRecordType(true);});
         }
 

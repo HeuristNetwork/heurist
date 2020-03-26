@@ -194,10 +194,10 @@ select.ui-heurist-header2, input.ui-heurist-header2{
     border: 1px solid  <?php uout('cd_bg', '#e0dfe0' );?>;;
 }
 .separator2{
-    color: darkkhaki;/*<?php uout('ce_color', '#6A7C99');?>;*/
+    color: <?php uout('ce_helper', '#999999');?>;
 }
 .ent_wrapper.editor .separator{
-    color: darkkhaki;/*<?php uout('ce_color', '#6A7C99');?>;*/
+    color: <?php uout('ce_helper', '#999999');?>;
     border-top: 1px solid <?php uout('cd_border', '#95A7B7');?>;
 }
 .ent_wrapper.editor .smallbutton{

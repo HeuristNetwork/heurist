@@ -760,7 +760,9 @@ $.widget( "heurist.manageEntity", {
                 btn_array =  this._getEditDialogButtons();
                 
                 if(!options.beforeClose){
-                    options.beforeClose = this.defaultBeforeClose; 
+                    options.beforeClose = function(){
+                        return that.defaultBeforeClose();  
+                    } 
                 }
                 
                 if ( window.hWin.HEURIST4.util.isnull(position) || $.isEmptyObject(position)){
@@ -1201,14 +1203,14 @@ $.widget( "heurist.manageEntity", {
                             if($.isFunction(afterAction)){
                                 afterAction.call(this, recID, fields);
                             }else{
-                                that._afterSaveEventHandler( recID, fields );    
+                                that._afterSaveEventHandler( recID, fields );        
                             }
                             
                         }else{
                             window.hWin.HEURIST4.msg.showMsgErr(response);
                         }
                     });
-    },       
+    },      
 
     //  -----------------------------------------------------
     //
@@ -1341,15 +1343,16 @@ $.widget( "heurist.manageEntity", {
             
             if(this._currentEditID!=null && this._editing.isModified()){
                 var $mdlg = window.hWin.HEURIST4.msg.showMsgDlg(
-                    'You are about opening new edit form without saving data in current one. Save changes and start new edit?',
+                    'New record requested with unsaved modifications in current record. Save changes and start new edit?',
+                    //'You are about opening new edit form without saving data in current one. Save changes and start new edit?',
                     //'Data were modified in edit form. Ignore modifications and start edit the new data',
                         {
-                         'Save changes':function(){ 
+                         'Save changes and load new data':function(){ 
                             //save changes and go to next step
                             that._saveEditAndClose( null, function(){ that._initEditForm_step2(recID); } );
                             $mdlg.dialog('close');
                          },
-                         'Drop changes':function(){ 
+                         'Drop changes and load new data':function(){ 
                             //drop changes load another recrd
                             that._initEditForm_step2(recID);
                             $mdlg.dialog('close');
@@ -1424,7 +1427,7 @@ $.widget( "heurist.manageEntity", {
     },        
     
     //
-    //
+    // popup edit form in dialog
     //
     showEditFormDialog: function(init_buttons){
                 

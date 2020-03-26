@@ -385,7 +385,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             }
 
             var ele = this._editing.getFieldByName('dty_DetailTypeGroupID');
-            ele.editing_input('setValue', dty_DetailTypeGroupID, false);
+            ele.editing_input('setValue', dty_DetailTypeGroupID, true);
         }
         
         //fill init values of virtual fields

@@ -1229,7 +1229,7 @@ span.fancytree-checkbox{
 
 .tree-rts .fancytree-folder > .fancytree-title{
     text-transform: uppercase;
-    color: darkkhaki;
+    color: #999999;
     font-weight: bold !important;
 }
 

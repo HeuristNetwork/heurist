@@ -134,7 +134,7 @@
                     "dtFields":{
                         "dty_Type":"integer",
                         "dty_Size":3,
-                        "rst_Class":"freetext blocktext",
+                        "rst_Class":"freetext blocktext float",
                         "rst_DisplayName": "Field width:",
                         "rst_DisplayHelpText": "Display width of this field in the data entry form (does not limit maximum data length)",
                         "rst_RequirementType":"optional",
