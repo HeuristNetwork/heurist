@@ -319,7 +319,7 @@ function parse_query($search_domain, $text, $sort_order='', $parentquery, $currU
     // divide the query into dbl-quoted and other (note a dash(-) in front of a string is preserved and means negate)
     preg_match_all('/(-?"[^"]+")|([^" ]+)/',$text,$matches);
     $preProcessedQuery = "";
-    $connectors=array(":",">","<","=",",");
+    $connectors = array(":",">","<","=",",");
     foreach ($matches[0] as $queryPart) {
         //if the query part is not a dbl-quoted string (ignoring a preceeding dash and spaces)
         //necessary since we want double quotes to allow all characters
@@ -333,6 +333,10 @@ function parse_query($search_domain, $text, $sort_order='', $parentquery, $currU
         $addSpace = $preProcessedQuery != "" && !in_array($preProcessedQuery[strlen($preProcessedQuery)-1],$connectors) && !in_array($queryPart[0],$connectors);
         $preProcessedQuery .= ($addSpace ? " ":"").$queryPart;
     }
+    if(trim($preProcessedQuery)==''){
+        $preProcessedQuery = '"'.$text.'"';
+    }
+    
 
     $query = new Query($search_domain, $preProcessedQuery, $currUserID, $parentquery);
     $query->makeSQL();
