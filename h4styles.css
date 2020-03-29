@@ -1879,8 +1879,13 @@ input[type="file"] {
 
 /* bih red opem layout pane button */
 .prominent-cardinal-toggler{
-    background: red !important;
-    color: white;
+    background: none !important; 
+    color: black;
+}
+.prominent-cardinal-toggler div.ui-icon{
+    font-size:32px;
+    width:32px;
+    height:32px;
 }
 
 .tree-accordeon-header{

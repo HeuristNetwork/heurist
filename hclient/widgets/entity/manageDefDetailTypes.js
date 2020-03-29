@@ -508,6 +508,12 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             this._on( $(elements[0]), {
                 keypress: window.hWin.HEURIST4.ui.preventChars,
                 keyup: this._onFieldAddSuggestion });
+                
+           var depended_fields = this._editing.getFieldByClass('newFieldForRtyID');
+           for(var idx in depended_fields){
+               $(depended_fields[idx]).show();
+           }
+                
         }
         
 
@@ -546,7 +552,21 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                 var ele = this._editing.getFieldByName('dty_Mode_enum');  
                 this._activateEnumControls(ele);
            }
+           if(this.options.newFieldForRtyID>0){
+                depended_fields = this._editing.getFieldByClass('newFieldForRtyID');
+               for(var idx in depended_fields){
+                   $(depended_fields[idx]).show();
+               }
+               var ele = this._editing.getFieldByName('rst_DisplayWidth');
+               if(dt_type=='freetext' || dt_type=='blocktext' || dt_type=='float'){
+                   ele.editing_input('setValue', dt_type=='float'?10:(dt_type=='freetext'?60:100));
+                   ele.show();  
+               }else{
+                   ele.hide();  
+               }
+           }
     },
+    
     //
     // show dropdown for field suggestions to be added
     //
@@ -636,7 +656,11 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                                     
                                     //that.selectedRecords( [_dty_ID] );
                                     //that._selectAndClose();
-                                    that._trigger( "onselect", null, {selection: [_dty_ID] });
+                                    var rst_fields = {rst_RequirementType: that._editing.getValue('rst_RequirementType')[0], 
+                                                    rst_MaxValues: that._editing.getValue('rst_MaxValues')[0], 
+                                                    rst_DisplayWidth: that._editing.getValue('rst_DisplayWidth')[0] };
+                                    
+                                    that._trigger( "onselect", null, {selection: [_dty_ID], rst_fields:rst_fields });
                                     that.closeDialog( true ); //force without warning
                                     
                                 }
@@ -1114,5 +1138,25 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         return fieldvalues;
         
     },
+    
+    
+    //
+    // event handler for select-and-close (select_multi)
+    // or for any selection event for select_single
+    // triger onselect event
+    //
+    _selectAndClose: function(){
+        
+        if(this.options.newFieldForRtyID>0){
+            var rst_fields = {rst_RequirementType: this._editing.getValue('rst_RequirementType')[0], 
+                              rst_MaxValues: this._editing.getValue('rst_MaxValues')[0], 
+                              rst_DisplayWidth: this._editing.getValue('rst_DisplayWidth')[0] };
+                              
+            this._resultOnSelection = { rst_fields:rst_fields };
+        }
+        
+        this._super();
+    },
+    
 
 });

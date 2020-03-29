@@ -368,15 +368,8 @@ function hEditing(_options) {
         
         $container.fadeIn(250);
         
-        if(editing_inputs.length>0){
-            var idx, ele;
-            for (idx in editing_inputs) {
-                ele = $(editing_inputs[idx]);
-                if(ele.editing_input('focus')){
-                    break;    
-                }
-            }
-        }
+        _setFocus();
+        adjustHelpWidth();
         
         var $div_hints = $('<div>').css({'padding-top':'5px', 'padding-left': '180px'}).appendTo($container); //float: 'left'
         if($container.find('.forbidden').length>0 && window.hWin.HAPI4.is_admin()){
@@ -391,7 +384,40 @@ function hEditing(_options) {
         }
         
     }
+    
+    //
+    //
+    //
+    function _setFocus(){
+        if(editing_inputs.length>0){
+            var idx, ele;
+            for (idx in editing_inputs) {
+                ele = $(editing_inputs[idx]);
+                if(ele.editing_input('focus')){
+                    break;    
+                }
+            }
+        }
+    }
+    
+    //
+    //to reduce width of edit form set heurist-helper1 to max width of input element
+    //
+    function adjustHelpWidth(){
+        if(editing_inputs.length>0){
+            var idx, ele, maxW = 300;
+            for (idx in editing_inputs) {
+                ele = $(editing_inputs[idx]);
+                maxW = Math.max(maxW, ele.editing_input('getInputWidth'));
+            }
+        }
+        $container.find('.input-cell > .heurist-helper1').width(maxW);
+    }
+    
 
+    //
+    //
+    //
     function _save(){
         alert('save');
         return true;
@@ -588,11 +614,16 @@ function hEditing(_options) {
         initEditForm: function(_recstructure, _recdata, _is_insert){
             _initEditForm(_recstructure, _recdata, _is_insert);
         },
-
+        
+        // returns array with at least one empty value
+        //
         getValue:function(dtID){
             return _getValue(dtID);
         },
         
+        //
+        // returns all values of editing form as json
+        //
         getValues:function(needArrays){
             return _getValues(needArrays);
         },
@@ -664,6 +695,10 @@ function hEditing(_options) {
         
         setDisabled: function(mode){
             _setDisabled(mode);
+        },
+        
+        setFocus: function(){
+            _setFocus();
         }
         
         

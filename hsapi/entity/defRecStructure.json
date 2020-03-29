@@ -9,8 +9,8 @@
         
         "searchFormContent": "searchDefRecStructure.html",
         
-        "entityTitle": "Record Type Structure",
-        "entityTitlePlural": "Record Type Structures",
+        "entityTitle": "Record Type Field",
+        "entityTitlePlural": "Record Type Fields",
         "empty_remark": "",
         
         "fields": [
@@ -46,6 +46,30 @@
                     }
                 },
                 {
+                    "dtID": "dty_Type",
+                    "dtFields":{
+                        "dty_Type":"enum",
+                        "dty_Role":"virtual",
+                        "rst_Display":"hidden",
+                        "rst_DisplayName":"Data type:",
+                        "rst_DisplayHelpText": "", 
+                        "rst_DefaultValue":"freetext",
+                        "rst_FieldConfig":[
+                            {"key":"blocktext", "title":"Memo (multi-line)"},
+                            {"key":"date", "title":"Date / temporal"},
+                            {"key":"enum", "title":"Terms list"},
+                            {"key":"file", "title":"File"},
+                            {"key":"float", "title":"Numeric"},
+                            {"key":"freetext", "title":"Text (single line)"},
+                            {"key":"geo", "title":"Geospatial"},
+                            {"key":"integer", "title":"Numeric - integer"},
+                            {"key":"relmarker", "title":"Relationship marker"},
+                            {"key":"resource", "title":"Record pointer"},
+                            {"key":"separator", "title":"Header"}
+                            ]                        
+                    }
+                },
+                {
                     "dtID": "rst_DisplayName",
                     "dtFields":{
                         "dty_Type":"freetext",
@@ -77,7 +101,7 @@
                     "dtFields":{
                         "dty_Type":"enum",
                         "rst_DisplayName":"Requirement:",
-                        "rst_DisplayHelpText": "Define specific subtype", 
+                        "rst_DisplayHelpText": "Define requirement type", 
                         "rst_DefaultValue":"optional",
                         "rst_FieldConfig":[
                             {"key":"required", "title":"required"},
@@ -103,30 +127,6 @@
                         "rst_DefaultValue":"1",
                         "rst_DisplayName":"Maximum values:",
                         "rst_DisplayHelpText": "Maximum number of values per record for this detail"
-                    }
-                },
-                {
-                    "dtID": "dty_Type",
-                    "dtFields":{
-                        "dty_Type":"enum",
-                        "dty_Role":"virtual",
-                        "rst_Display":"hidden",
-                        "rst_DisplayName":"Data type:",
-                        "rst_DisplayHelpText": "The type of data to be recorded in this field. Note: in most cases this cannot be changed once set", 
-                        "rst_DefaultValue":"freetext",
-                        "rst_FieldConfig":[
-                            {"key":"blocktext", "title":"Memo (multi-line)"},
-                            {"key":"date", "title":"Date / temporal"},
-                            {"key":"enum", "title":"Terms list"},
-                            {"key":"file", "title":"File"},
-                            {"key":"float", "title":"Numeric"},
-                            {"key":"freetext", "title":"Text (single line)"},
-                            {"key":"geo", "title":"Geospatial"},
-                            {"key":"integer", "title":"Numeric - integer"},
-                            {"key":"relmarker", "title":"Relationship marker"},
-                            {"key":"resource", "title":"Record pointer"},
-                            {"key":"separator", "title":"Header"}
-                            ]                        
                     }
                 },
                 {

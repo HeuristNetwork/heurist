@@ -140,6 +140,8 @@ $.widget( "heurist.manageEntity", {
     _edit_dialog:null, //keep reference to popup dialog
     _toolbar:null,
     
+    _resultOnSelection: {}, //object that will be sent in _selectAndClose, additiontal parameter "selection" will be added
+    
     // the widget's constructor
     _create: function() {
         // prevent double click to select text
@@ -973,7 +975,7 @@ $.widget( "heurist.manageEntity", {
     // triger onselect event
     //
     _selectAndClose: function(){
-        
+
         if(this.options.isdialog && this.options.edit_mode!='editonly'){
             window.hWin.HAPI4.save_pref('select_dialog_'+this._entityName, 
                             {width: this._as_dialog.dialog('option', 'width'), 
@@ -984,9 +986,12 @@ $.widget( "heurist.manageEntity", {
         
         if(window.hWin.HEURIST4.util.isRecordSet(res)){
             //window.hWin.HAPI4.save_pref('recent_Users', this._selection.getIds(25), 25);      
-            this._trigger( "onselect", null, 
-                {selection:  
-                    (this.options.select_return_mode=='recordset') ?res :res.getIds()});
+            
+            if(!this._resultOnSelection) this._resultOnSelection = {};
+            this._resultOnSelection.selection = (this.options.select_return_mode=='recordset') ?res :res.getIds();
+            
+            this._trigger( "onselect", null, this._resultOnSelection);
+            
         }else{        
             this._trigger( "onselect", null, null );
         }
@@ -1310,6 +1315,7 @@ $.widget( "heurist.manageEntity", {
                 ele.find('#btnRecRemove').css('visibility', 'visible');    
             }*/
         }
+        
     },
     
     /*
@@ -1343,16 +1349,16 @@ $.widget( "heurist.manageEntity", {
             
             if(this._currentEditID!=null && this._editing.isModified()){
                 var $mdlg = window.hWin.HEURIST4.msg.showMsgDlg(
-                    'New record requested with unsaved modifications in current record. Save changes and start new edit?',
+                    'New '+this.options.entity.entityTitle+' requested with unsaved modifications in current '+this.options.entity.entityTitle+'.',
                     //'You are about opening new edit form without saving data in current one. Save changes and start new edit?',
                     //'Data were modified in edit form. Ignore modifications and start edit the new data',
                         {
-                         'Save changes and load new data':function(){ 
+                         'Save changes':function(){ 
                             //save changes and go to next step
                             that._saveEditAndClose( null, function(){ that._initEditForm_step2(recID); } );
                             $mdlg.dialog('close');
                          },
-                         'Drop changes and load new data':function(){ 
+                         'Drop changes':function(){ 
                             //drop changes load another recrd
                             that._initEditForm_step2(recID);
                             $mdlg.dialog('close');

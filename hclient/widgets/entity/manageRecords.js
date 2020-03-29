@@ -38,7 +38,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         height:(window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95,
         optfields:true, 
         help_on:true,
-        summary_closed:false,          
+        summary_closed:true,          
         summary_width:400, 
         summary_tabs:['0','1']},
     
@@ -604,19 +604,18 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 var layout_opts =  {
                     applyDefaultStyles: true,
                     togglerContent_open:    '<div class="ui-icon ui-icon-triangle-1-e"></div>',
-                    togglerContent_closed:  '<div class="ui-icon ui-icon-triangle-1-w"></div>',
+                    togglerContent_closed:  '<div class="ui-icon ui-icon-carat-2-w"></div>',
                     //togglerContent_open:    '&nbsp;',
                     //togglerContent_closed:  '&nbsp;',
                     east:{
                         size: this.usrPreferences.summary_width,
                         maxWidth:800,
                         spacing_open:6,
-                        spacing_closed:16,  
+                        spacing_closed:40,  
                         togglerAlign_open:'center',
                         togglerAlign_closed:'top',
-                        //togglerLength_closed:16,  //makes it square
-                        togglerAlign_closed:20,
-                        togglerLength_closed:32,  //to makes it square set to 16
+                        togglerAlign_closed:16,   //top position   
+                        togglerLength_closed:40,  //height of toggler button
                         initClosed:(this.usrPreferences.summary_closed==true || this.usrPreferences.summary_closed=='true'),
                         slidable:false,  //otherwise it will be over center and autoclose
                         contentSelector: '.editFormSummary',   

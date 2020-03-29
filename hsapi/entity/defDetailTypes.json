@@ -15,16 +15,6 @@
         
         "fields": [
                 {
-                    "dtID": "dty_ID",
-                    "keyField": true,
-                    "dtFields":{
-                        "dty_Type":"integer",
-                        "dty_Role":"primary",
-                        "rst_DisplayName": "ID:",
-                        "rst_Display":"readonly"
-                    }
-                },
-                {
                     "dtID": "dty_Modified",
                     "dtFields":{
                         "dty_Type":"date",
@@ -82,6 +72,58 @@
                             {"key":"year", "title":"Year (no mm-dd)"}]                        
                     }
                 },
+                {
+                    "dtID": "rst_RequirementType",
+                    "dtFields":{
+                        "dty_Type":"enum",
+                        "dty_Role":"virtual",
+                        "rst_Class":"newFieldForRtyID",
+                        "rst_DisplayName":"Requirement:",
+                        "rst_DisplayHelpText": "Define requirement type", 
+                        "rst_Display":"hidden",
+                        "rst_DefaultValue":"optional",
+                        "rst_FieldConfig":[
+                            {"key":"required", "title":"required"},
+                            {"key":"recommended", "title":"recommended"},
+                            {"key":"optional", "title":"optional"},
+                            {"key":"forbidden", "title":"hidden"}]
+                    }
+                },
+                {
+                    "dtID": "rst_MaxValues",
+                    "dtFields":{
+                        "dty_Type":"enum",
+                        "dty_Role":"virtual",
+                        "rst_Class":"newFieldForRtyID",
+                        "rst_DisplayName":"Repeatability:",
+                        "rst_DefaultValue":"single",
+                        "rst_Display":"hidden",
+                        "rst_DefaultValue":"1",
+                        "rst_FieldConfig":[
+                            {"key":"1", "title":"single"},
+                            {"key":"0", "title":"repeatable"},
+                            {"key":"2", "title":"limited 2"},
+                            {"key":"3", "title":"limited 3"},
+                            {"key":"5", "title":"limited 5"},
+                            {"key":"10", "title":"limited 10"}]
+                        
+                    }
+                },
+                {
+                    "dtID": "rst_DisplayWidth",
+                    "dtFields":{
+                        "dty_Type":"integer",
+                        "dty_Size":3,
+                        "dty_Role":"virtual",
+                        "rst_DisplayName": "Field width:",
+                        "rst_DisplayHelpText": "Display width of this field in the data entry form (does not limit maximum data length)",
+                        "rst_RequirementType":"optional",
+                        "rst_DisplayWidth":5,
+                        "rst_Display":"hidden",
+                        "rst_DefaultValue":100
+                    }
+                },
+                
                 {
                     "dtID": "dty_Mode_freetext",
                     "dtFields":{
@@ -251,6 +293,16 @@
                         "dty_Type":"integer",
                         "rst_Display":"hidden",
                         "rst_DefaultValue":0                   }
+                },
+                {
+                    "dtID": "dty_ID",
+                    "keyField": true,
+                    "dtFields":{
+                        "dty_Type":"integer",
+                        "dty_Role":"primary",
+                        "rst_DisplayName": "ID:",
+                        "rst_Display":"readonly"
+                    }
                 }
                 ]}                
      ]

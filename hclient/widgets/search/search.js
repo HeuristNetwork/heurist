@@ -1387,6 +1387,9 @@ $.widget( "heurist.search", {
                 modal: false,
                 resizable: false,
                 borderless: true,
+                onCloseCalback: function(){
+                    that.search_assistant.hide();
+                },
                 open: function(){
                     that._initSearchAssistant();    
                     
@@ -1402,10 +1405,12 @@ $.widget( "heurist.search", {
                               }
                         }
                         if(rt>0 && window.hWin.HEURIST4.rectypes.names[rt]){
+
                             var sel = that.search_assistant.find(".sa_rectype");
                             sel.val(rt);
                             if(sel.hSelect("instance")!=undefined){
-                                sel.hSelect("refresh"); 
+                                sel.hSelect('refresh'); 
+                                sel.change();
                             }
                         }
                     }
@@ -1512,7 +1517,7 @@ $.widget( "heurist.search", {
             $(this).html(window.hWin.HR($(this).html()));
         });
 
-        var select_rectype = $dlg.find(".sa_rectype").uniqueId();
+        var select_rectype = $dlg.find(".sa_rectype");//.uniqueId();
         var select_fieldtype = $dlg.find(".sa_fieldtype");
         var select_sortby = $dlg.find(".sa_sortby");
         var select_terms = $dlg.find(".sa_termvalue");

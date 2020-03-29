@@ -101,9 +101,6 @@ $.widget( "heurist.editing_input", {
             this.configMode= {entity:'records'};
         }
 
-//console.log('create '+this.options.dtID);        
-//console.log('vals='+this.options.values);
-
         this.isFileForRecord = (this.detailType=='file' && this.configMode.entity=='records');
         if(this.isFileForRecord){
             this.configMode = {
@@ -500,14 +497,15 @@ $.widget( "heurist.editing_input", {
     },
     
     _setAutoWidth: function(){
-
+        
+var that = this; 
         //auto width
         if ( this.detailType=='freetext' || this.detailType=='integer' || 
              this.detailType=='float' || this.detailType=='url' || this.detailType=='file'){
             $.each(this.inputs, function(index, input){ 
                 var ow = $(input).width(); //current width
                 if(ow<580){
-                    var nw = ($(input).val().length+4)+'ex';
+                    var nw = ($(input).val().length+10)+'ex';
                     $(input).css('width', nw);
                     if($(input).width()<ow) $(input).width(ow); //we can only increase - restore
                     else if($(input).width()>600){
@@ -523,6 +521,16 @@ $.widget( "heurist.editing_input", {
         
     },
     
+    //
+    // returns max width for input element
+    //
+    getInputWidth: function(){
+        var maxW = 0;
+        $.each(this.inputs, function(index, input){ 
+            maxW = Math.max(maxW, $(input).width());
+        });
+        return maxW;
+    },
    
     //
     //
@@ -2251,7 +2259,6 @@ $.widget( "heurist.editing_input", {
             },                            
     progressall: function (e, data) { //@todo to implement
         var progress = parseInt(data.loaded / data.total * 100, 10);
-//console.log(progress + '%  '+data.loaded + ' of ' + data.total);
         //$('#progress .bar').css('width',progress + '%');
         $progress_bar.progressbar( "value", progress );        
     }                            
@@ -2495,8 +2502,8 @@ console.log('onpaste');
         }else if ( this.detailType!='boolean' && this.detailType!='date' && this.detailType!='resource' ) {  
               //if the size is greater than zero
               if (parseFloat( dwidth ) > 0) 
-                  $input.css('width', Math.round(2 + Math.min(120, Number(dwidth))) + "ex"); //was *4/3
-              
+                  var nw = Math.round(2 + Math.min(120, Number(dwidth))) + "ex";
+                  $input.css('min-width', nw); //was *4/3
         }
         
         //if(this.detailType!='blocktext')
@@ -3026,7 +3033,7 @@ console.log('onpaste');
         if(!$.isArray(values)) values = [values];
 
         var isReadOnly = (this.options.readonly || this.f('rst_Display')=='readonly');
-
+        
         var i;
         for (i=0; i<values.length; i++){
             if(isReadOnly){
@@ -3289,10 +3296,13 @@ console.log('onpaste');
     //
     //
     focus: function(){
-        if(this.inputs && this.inputs.length>0){
+        if(!this.options.readonly && this.inputs && this.inputs.length>0 
+            && $(this.inputs[0]).is(':visible') 
+            && !$(this.inputs[0]).hasClass('ui-state-disabled') )
+        {
             $(this.inputs[0]).focus();   
-            return true;
-        }else{
+            return $(this.inputs[0]).is(':focus');
+        } else {
             return false;
         }
     },
