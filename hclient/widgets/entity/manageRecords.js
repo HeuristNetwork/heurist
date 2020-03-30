@@ -27,6 +27,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     _additionWasPerformed: false, //NOT USED for selectAndSave mode
     _updated_tags_selection: null,
     _keepYPos: 0,
+    _menuTimeoutId: 0,
     
     //this.options.selectOnSave - special case when open edit record from select popup
     //this.options.allowAdminToolbar  - if false hide ModifyStructure, Edit title mask and others
@@ -148,7 +149,46 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     return false;
                 }
             }
-        );        
+        ); 
+        
+        
+        if(this.options.rts_editor){
+            this.rts_actions_menu = $('<div class="rts-editor-actions" style="width:115px;display:none;padding-top:2px;background:#95A7B7 !important;'
+                    +'font-size:9px;font-weight:normal;cursor:pointer">'
+                   +'<span data-action="edit"><span class="ui-icon ui-icon-pencil" title="Edit" style="font-size:9px;font-weight:normal"/>Edit</span>'              
+                   +'<span data-action="block"><span class="ui-icon ui-icon-plus" title="Add a new group/separator" style="font-size:9px;font-weight:normal"/>Block</span>'               
+                   +'<span data-action="field"><span class="ui-icon ui-icon-plus" title="Add a new field to this record type" style="font-size:9px;font-weight:normal"/>Field</span>'
+                    +'</div>').appendTo(this.element);
+                    
+            this._on( this.rts_actions_menu, {
+                mouseover : function(){ clearTimeout(this._menuTimeoutId); },
+                mouseleave : function(){ this.rts_actions_menu.hide(); },
+                click: function(event){
+                        var dt_id = this.rts_actions_menu.attr('data-did');
+                        this.rts_actions_menu.hide();
+                        
+                        var ele = $(event.target);
+                        var action = ele.attr('data-action');
+                        if(!action) action = ele.parent().attr('data-action');
+                        
+                        if(action=='field'){
+                            that.options.rts_editor.manageDefRecStructure(
+                                'showBaseFieldEditor', -1, dt_id);
+                        }else if(action=='block'){
+                            
+                            that.options.rts_editor.manageDefRecStructure(
+                                'addNewSeparator', dt_id);
+                            
+                        }else if(action=='edit'){
+                            that.options.rts_editor.manageDefRecStructure(
+                                'editField', dt_id);
+                        }
+                    }
+            });
+                    
+        }
+
+               
         
     },
     //  
@@ -2980,13 +3020,26 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
             //var that = this;
             $(this.element).find('div[data-dtid]').each(function(idx, item){
                 if(parseInt($(item).attr('data-dtid'))>0){
-                    var ele = $('<div><span class="ui-icon ui-icon-gear" title="edit this field"></span>'
-                    +'<span class="ui-icon ui-icon-plus" title="add new field"></span>'
-                    +'</div>')
+                    var is_folder = false;
+                    var ele = $('<div><span class="ui-icon ui-icon-gear"></span></div>')
                     .css({'display':'table-cell','vertical-align':'top',
                           'min-width':'32px','cursor':'pointer'})
                     .prependTo($(item));    
                     
+                    that._on(ele,{mouseover:function(event){
+                        clearTimeout(that._menuTimeoutId);
+                        var el = $(event.target);
+                        that.rts_actions_menu
+                                .attr('data-did', el.parents('div[data-dtid]').attr('data-dtid'))
+                                .css({position:'absolute',left:'10px',top:el.position().top+25 })
+                                .show();
+                        //position({ my:'top left', at:'top left', of: el})
+                    }, mouseout: function(event){
+                        that._menuTimeoutId = setTimeout(function() {that.rts_actions_menu.hide(); }, 800);
+                    }});
+
+                    
+                    /*
                     ele.find('span.ui-icon').on({click: function(event){
                         var ele = $(event.target).parents('div[data-dtid]');
                         
@@ -3001,6 +3054,7 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
                         }
                         //console.log('click '+ele.attr('data-dtid') );
                     }});
+                    */
                 }
             });
             //init back button - if there is opened rts editor

@@ -379,7 +379,8 @@ function hSvsEdit(args) {
                     var svs_name = $dlg.find('#svs_Name');
                     var svs_query = $dlg.find('#svs_Query');
                     var svs_ugrid = $dlg.find('#svs_UGrpID');
-                    var svs_rules = $dlg.find('#svs_Rules2'); //hidden rules in full format
+                    var svs_rules = $dlg.find('#svs_Rules'); 
+                    var svs_rules_full = $dlg.find('#svs_Rules2'); //hidden rules in full format
                     var svs_rules_only = $dlg.find('#svs_RulesOnly');
                     var svs_notes = $dlg.find('#svs_Notes');
                     var svs_viewmode = $dlg.find('#svs_ViewMode');
@@ -436,9 +437,9 @@ function hSvsEdit(args) {
                             svs_ugrid = window.hWin.HAPI4.currentUser.ugr_ID; //@todo!!!! it may by rule accessible by guest
                         }*/
                         
-                        var rules_c = window.hWin.HEURIST4.util.cleanRules(svs_rules.val());  
+                        var rules_c = window.hWin.HEURIST4.util.cleanRules(svs_rules_full.val());  
                         if(rules_c!=null){ 
-                            rules = svs_rules.val();
+                            rules = svs_rules_full.val();
                         }else{
                             rules = null;
                         }

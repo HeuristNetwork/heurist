@@ -194,7 +194,7 @@ select.ui-heurist-header2, input.ui-heurist-header2{
     border: 1px solid  <?php uout('cd_bg', '#e0dfe0' );?>;;
 }
 .separator2{
-    color: <?php uout('ce_helper', '#999999');?>;
+    color: black; /* <?php uout('ce_helper', '#999999');?>; */
 }
 .ent_wrapper.editor .separator{
     color: <?php uout('ce_helper', '#999999');?>;

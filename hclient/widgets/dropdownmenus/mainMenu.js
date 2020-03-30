@@ -93,8 +93,7 @@ $.widget( "heurist.mainMenu", {
                 function(){
                     that.btn_dashboard.hide();
                     
-                   var params = 
-                        {viewmode: 'thumbs', showonstartup: 1 };
+                   var params = {viewmode: 'thumbs', showonstartup: 1 };
                     window.hWin.HAPI4.save_pref('prefs_sysDashboard', params);     
                     
                     

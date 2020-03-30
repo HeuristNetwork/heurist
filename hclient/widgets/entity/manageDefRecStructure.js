@@ -403,7 +403,7 @@ dty_TermIDTreeNonSelectableIDs
                     }
                 }
                     //add new group/separator
-                    //that._addNewSeparator();
+                    //that.addNewSeparator();
                     //window.hWin.HEURIST4.util.stopEvent(event)
                 
             },
@@ -584,7 +584,7 @@ dty_TermIDTreeNonSelectableIDs
                         }else if(action=='block'){
                             
                             //add new group/separator
-                            that._addNewSeparator();
+                            that.addNewSeparator();
 
                         }else if(action=='delete'){
                             //different actions for separator and field
@@ -1065,7 +1065,7 @@ dty_TermIDTreeNonSelectableIDs
             dtyID = this._currentEditID;
             if(!(dtyID>0)) return;
         }else{
-            //edit dpesific
+            //edit spesific
             dtyID = arg1;
         }
         
@@ -1075,7 +1075,7 @@ dty_TermIDTreeNonSelectableIDs
                 rec_ID: (dtyID>0)?dtyID:-1
             };
         
-        if(!(dtyID>0)){
+        if(!(dtyID>0)){ //new field
         
             if(arg2>0){
                 this._lockDefaultEdit = true;
@@ -1789,8 +1789,10 @@ dty_TermIDTreeNonSelectableIDs
         this._stillNeedUpdateForRecID = 0;
         //record is already updated in _saveEditAndClose
         //this._super( recID, fieldvalues );
-        if(is_usual_way)
-        window.hWin.HEURIST4.msg.showMsgFlash(this.options.entity.entityTitle+' '+window.hWin.HR('has been saved'),500);
+        if(is_usual_way){
+            //window.hWin.HEURIST4.msg.showMsgFlash(this.options.entity.entityTitle+' '+window.hWin.HR('has been saved'),500);
+        }
+            
 
 
         
@@ -1873,9 +1875,19 @@ edit form is always inline
     //
     // add new separator/group
     //
-    _addNewSeparator: function(){
+    addNewSeparator: function( after_dtid ){
         
         if(this._isFlat){
+            
+            if(after_dtid>0){
+                this._lockDefaultEdit = true;
+                var tree = this._treeview.fancytree("getTree");
+                node = tree.getNodeByKey(after_dtid);
+                if(node) node.setActive();
+            }
+            
+            this._lockDefaultEdit = false;
+            
             
             //THIS IS nearly exact piece of code from editRecStructure
             
@@ -1945,7 +1957,7 @@ edit form is always inline
 
 
                 function __addNewSeparator(response) {
-
+                    
                     if(response.status == window.hWin.ResponseStatus.OK){
         
                         var error = false,
