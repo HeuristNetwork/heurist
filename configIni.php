@@ -62,10 +62,11 @@ of the codebase and rename it to index.html
 
 // *** DO NOT CHANGE VERSION NUMBER, THIS IS SET BY THE HEURIST DEVELOPMENT TEAM ***
 
-$version = "5.2.2"; // sets current program version number, determined by Heurist development lead
+$version = "5.2.3"; // sets current program version number, determined by Heurist development lead
 
 // dates below are the date of release of the given version, and list changes since last release
 
+// h5.2.3 31 March 2020 New structure editor within record edit form, fix minor bug in quick query form
 // h5.2.2 13 March 2020 Omeka S import (wip), import fixes, Digital Harlem fixes
 // h5.2.1 8 March 2020 Fix potential exploits, sanitisation with htmlpurifier, improved record collect/widget, horizontal results list ribbon (images), improvements in leaflet map and digitser, support multimedia export/import via hash, general improvements to web widgets
 //h5.2.0 15 Feb 2020 Review security, sanitise html, block JS execution etc. 
