@@ -34,6 +34,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
     },
     
     menues: {}, //popup menu for this widget
+    _open_formlet_for_recID: 0,
     
     //
     //
@@ -393,11 +394,10 @@ dty_TermIDTreeNonSelectableIDs
             */
             
             click: function(event, data){
-//console.log('click');                
+
                 var ele = $(event.target);
                 if(!ele.hasClass('ui-icon')){
                     if(data.node.isActive()){
-//console.log('need close');                
                         window.hWin.HEURIST4.util.stopEvent(event);
                         that._saveEditAndClose(null, 'close'); //close editor on second click
                     }
@@ -408,7 +408,6 @@ dty_TermIDTreeNonSelectableIDs
                 
             },
             activate: function(event, data) {
-//console.log('activ');                
                 if(data.node.key>0){
                     that.selectedRecords([data.node.key]);
                     if(!that._lockDefaultEdit)
@@ -904,14 +903,12 @@ dty_TermIDTreeNonSelectableIDs
                     
             //show/hide action buttons in tree
             this._treeview.find('.svs-contextmenu3').css('visibility', isEditOpen?'hidden':'visible' );
-//console.log('changed '+isEditOpen+' '+this._currentEditID);
             if(!isEditOpen){
                 //deactivate node - add action buttons
                 var tree = this._treeview.fancytree('getTree');
                 var node = tree.getActiveNode();
                 if(node && node.key!=this._currentEditID){
                     node.setActive(false);  
-//console.log('deactivated '+node.key);                
                 } 
             }
 
@@ -1100,7 +1097,7 @@ dty_TermIDTreeNonSelectableIDs
                     if(window.hWin.HEURIST4.util.isRecordSet(res.selection)){
                         var recordset = res.selection;
                         var record = recordset.getFirstRecord();
-                        console.log(record);                    
+                        //console.log(record);                    
                     }
                 }
             };
@@ -1193,10 +1190,14 @@ dty_TermIDTreeNonSelectableIDs
                     }
                     
                     that._stillNeedUpdateForRecID = 0;
-                    that._afterSaveEventHandler(recID, fields); //add to structure and update tree title
+                    
+                    //update 1)recordset, 2) defintions 3)treeview 
+                    that._afterSaveEventHandler(recID, fields);
+                    
+                    //
+                    that._open_formlet_for_recID = recID;
+                    //save order  it calls _showRecordEditorPreview to update preview and open formlet field editor
                     that._saveRtStructureTree();
-
-                    that._showRecordEditorPreview();  
             
                 }else{
                     
@@ -1212,7 +1213,7 @@ dty_TermIDTreeNonSelectableIDs
     // show record editor form - it reflects the last changes of rt structure
     // recID - dty_ID - field that was saved
     //
-    _showRecordEditorPreview: function(){
+    _showRecordEditorPreview: function( openedit_for_recID ){
         
         //hide editor - show and updated preview
         if(this.previewEditor){
@@ -1222,6 +1223,7 @@ dty_TermIDTreeNonSelectableIDs
             if(!this.previewEditor.manageRecords('instance')){
                 
                 var that = this.previewEditor;
+                var that2 = this;
                 
                 var options = {
                         rts_editor: this.element,
@@ -1241,7 +1243,14 @@ dty_TermIDTreeNonSelectableIDs
                             + '</div>'
                         +'</div>',
                     onInitFinished:function(){
+                            //load record in preview
                             that.manageRecords('addEditRecord', this.options.rec_ID); //call widget method
+                    },
+                    onInitEditForm:function(){
+                        if(that2._open_formlet_for_recID>0){
+                            that2.editField( that2._open_formlet_for_recID );
+                            that2._open_formlet_for_recID = -1;
+                        }
                     }
                 }                
                 
@@ -1254,7 +1263,7 @@ dty_TermIDTreeNonSelectableIDs
     
      
     //-----
-    //
+    // for formlet
     // assign event listener for rst_Repeatability and dty_Type fields
     //
     _afterInitEditForm: function(){
@@ -1267,11 +1276,12 @@ dty_TermIDTreeNonSelectableIDs
                 
                 //place rts editor into record edit form
                 var isHeader = false;
-                var ed_ele = this.previewEditor.find('div[data-dtid='+this._currentEditID+']');
+                var ed_ele = this.previewEditor.find('fieldset[data-dtid='+this._currentEditID+']');
                 
                 if(ed_ele.length==0){
+                    ed_ele = this.previewEditor.find('div[data-dtid='+this._currentEditID+']');
+                }else{
                     isHeader = true;
-                    ed_ele = this.previewEditor.find('fieldset[data-dtid='+this._currentEditID+']');
                 }
                     
                 if(ed_ele.length==0){ //popup edit  not used anymore
@@ -1582,7 +1592,7 @@ dty_TermIDTreeNonSelectableIDs
 
     
     //
-    // trigger save DT_ENTITY_STRUCTURE
+    // trigger save DT_ENTITY_STRUCTURE or update rst_DisplayOrder for flat version
     //
     _saveRtStructureTree: function(){
         
@@ -1780,7 +1790,7 @@ dty_TermIDTreeNonSelectableIDs
     
     //--------------------------------------------------------------------------
     //
-    // update 1)list, 2)treeview and 3)preview after save (refresh)
+    // update 1)recordset, 2) defintions 3)treeview 
     //
     _afterSaveEventHandler: function( recID, fieldvalues ){
 

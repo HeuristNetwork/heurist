@@ -156,8 +156,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             this.rts_actions_menu = $('<div class="rts-editor-actions" style="width:115px;display:none;padding-top:2px;background:#95A7B7 !important;'
                     +'font-size:9px;font-weight:normal;cursor:pointer">'
                    +'<span data-action="edit"><span class="ui-icon ui-icon-pencil" title="Edit" style="font-size:9px;font-weight:normal"/>Edit</span>'              
-                   +'<span data-action="block"><span class="ui-icon ui-icon-plus" title="Add a new group/separator" style="font-size:9px;font-weight:normal"/>Block</span>'               
                    +'<span data-action="field"><span class="ui-icon ui-icon-plus" title="Add a new field to this record type" style="font-size:9px;font-weight:normal"/>Field</span>'
+                   +'<span data-action="block"><span class="ui-icon ui-icon-plus" title="Add a new group/separator" style="font-size:9px;font-weight:normal"/>Block</span>'               
                     +'</div>').appendTo(this.element);
                     
             this._on( this.rts_actions_menu, {
@@ -2321,7 +2321,7 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
             //if(that.options.parententity>0){
                 var first_set = that.editForm.find('fieldset:first');
                 first_set.show();
-                var next_ele = first_set.next();
+                var next_ele = first_set.next().next();
                 if(!next_ele.hasClass('separator')){
                     first_set.css('border-bottom','1px solid #A4B4CB');
                 }
@@ -2997,10 +2997,6 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
         //show-hide optional fields     
         $(this.element).find('div.optional').parent().css({'display': (isfields_on?'table':'none')} ); 
         $(this.element).find('div.optional_hint').css({'display': (isfields_on?'none':'block')} ); 
-        $(this.element).find('div.forbidden').parent().css({'display':'none'} ); 
-
-        //to save space - hide all fieldsets without visible fields
-        this._showHideEmptyFieldGroups();
         
         //init cms open edit listener
         $(this.element).find('span[data-cms-edit="1"]').click(function(event){
@@ -3010,10 +3006,6 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
                     field_id:$(event.target).attr('data-cms-field')} );
             });
         });
-        
-        window.hWin.HEURIST4.ui.applyCompetencyLevel(-1, this.editForm);
-        //show-hide help text below fields - it overrides comptency level
-        window.hWin.HEURIST4.ui.switchHintState2(ishelp_on, $(this.element));
         
         //5. init rts_editor action buttons 
         if(this.options.rts_editor){
@@ -3037,8 +3029,6 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
                     }, mouseout: function(event){
                         that._menuTimeoutId = setTimeout(function() {that.rts_actions_menu.hide(); }, 800);
                     }});
-
-                    
                     /*
                     ele.find('span.ui-icon').on({click: function(event){
                         var ele = $(event.target).parents('div[data-dtid]');
@@ -3072,15 +3062,42 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
                 
             }
             
+            //hide message about forbidden fields
+            $(this.element).find('.hidden_field_warning').hide();
+            
+            //show forbidden fields as disabled
+            $(this.element).find('div.forbidden').parent().css({'opacity':'0.5'} ); 
+            
+            //reduce width of header
+            $(this.element).find('.separator').css({width: '80%', display: 'inline-block'});
+            
+            
+        }else{
+            
+            $(this.element).find('div.forbidden').parent().css({'display':'none'} ); 
+
+            //to save space - hide all fieldsets without visible fields
+            this._showHideEmptyFieldGroups();
+
         }
 
+        
+        window.hWin.HEURIST4.ui.applyCompetencyLevel(-1, this.editForm);
+        //show-hide help text below fields - it overrides comptency level
+        window.hWin.HEURIST4.ui.switchHintState2(ishelp_on, $(this.element));
+        
         //
         //
         //        
         this.onEditFormChange();
         
         window.hWin.HAPI4.SystemMgr.user_log('edit_Record');
-    },
+        
+        if($.isFunction(this.options.onInitEditForm)){
+            this.options.onInitEditForm.call();
+        }
+        
+    },//END _afterInitEditForm
     
     //
     //to save space - hide all fieldsets without visible fields

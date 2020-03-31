@@ -236,7 +236,14 @@ function hEditing(_options) {
                     if(parseInt(fields[idx]['dtID'])>0){ //for Records only
                             newFieldContainer.attr('data-dtid', fields[idx]['dtID']);
                     }
-                    
+
+                    //add separator field id to sepcial div that will contain action buttons for structure editor
+                    // it is visible for Records table only
+                    if(parseInt(fields[idx]['dtID'])>0){ //for Records only
+                        $('<div>').css({'padding-left':'7px','display':'inline-block'})
+                            .attr('data-dtid', fields[idx]['dtID'])
+                            .appendTo(groupContainer);
+                    }
 
                     //add header and field container
                     if(currGroupType == 'accordion'){
@@ -374,6 +381,7 @@ function hEditing(_options) {
         var $div_hints = $('<div>').css({'padding-top':'5px', 'padding-left': '180px'}).appendTo($container); //float: 'left'
         if($container.find('.forbidden').length>0 && window.hWin.HAPI4.is_admin()){
             $('<div>').css({padding: '4px'})
+                .addClass('hidden_field_warning')
                 .html('There are hidden fields in this form. <span class="btn-modify_structure"'
                 +'  style="cursor:pointer;display:inline-block;color:#7D9AAA;">'
                 +'Modify structure</span> to enable them.').appendTo($div_hints);
