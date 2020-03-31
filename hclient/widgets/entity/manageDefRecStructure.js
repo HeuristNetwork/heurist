@@ -35,6 +35,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
     
     menues: {}, //popup menu for this widget
     _open_formlet_for_recID: 0,
+    defval_container: null,
     
     //
     //
@@ -1511,6 +1512,10 @@ dty_TermIDTreeNonSelectableIDs
                            }else{
                                this._editing.getFieldByName('rst_MaxValues').hide();
                            }
+                           
+                           if(dt_type=='freetext' || dt_type=='integer' || dt_type=='float'){
+                               this._recreateDefaultValue();
+                           }
 
                        }
                        
@@ -1575,6 +1580,9 @@ dty_TermIDTreeNonSelectableIDs
         
     },
     
+    //
+    //
+    //
     _recreateResourceSelector: function(){
         
         var ptrIds = this._editing.getValue('rst_PtrFilteredIDs')[0];
@@ -1588,6 +1596,63 @@ dty_TermIDTreeNonSelectableIDs
         ele.editing_input('fset','rst_PointerMode', 'browseonly');
         this._editing.setFieldValueByName('rst_DefaultValue_resource', defval, false); //recreates
         
+    },
+    
+    //
+    //
+    //
+    _recreateDefaultValue: function(){
+        
+        var defval = this._editing.getValue('rst_DefaultValue')[0];
+        var ele = this._editing.getFieldByName('rst_DefaultValue_inc');          
+        ele = ele.find('.input-div');
+        //remove old content
+        ele.empty();
+            
+            
+        //if(this.defval_container) return; //already inited
+        this.defval_container = ele;
+        
+        var is_increment = (defval=='increment_new_values_by_1');
+            
+        $('<div style="line-height:2ex;padding-top:4px">'
+                    +'<input type="radio" value="0" name="defvalType">'  //'+(is_increment?'':'checked="true"')+'
+                    +'<input class="text ui-widget-content ui-corner-all" autocomplete="disabled" autocorrect="off" autocapitalize="none" spellcheck="false" style="min-width: 22ex; width: 10ex;">'
+                    +'<label style="text-align:left;line-height: 12px;">'
+                    +'<input type="radio" value="1" name="defvalType" style="margin-top:0px" '
+                    +'>&nbsp;Increment value by 1</label> '   //    +(is_increment?'checked="true"':'')
+            +'</div>').appendTo(this.defval_container);
+                
+            //create event listeneres
+            this._on(this.defval_container.find('input[name="defvalType"]'),{change:
+                function(event){
+                    var ele_inpt = this.defval_container.find('input.text');
+                    var is_increment = (this.defval_container.find('input[name="defvalType"]:checked').val()=='1');
+
+                    window.hWin.HEURIST4.util.setDisabled(ele_inpt, is_increment);
+                    
+                    var res = is_increment ?'increment_new_values_by_1':ele_inpt.val();
+                    if(defval!=res){
+                        this._editing.setFieldValueByName('rst_DefaultValue', res, true);    
+                    }
+                    
+                    
+                    //var ele = this._editing.getFieldByName('rst_DefaultValue');
+                    //ele.editing_input( 'setValue',  res); 
+                    //this.onEditFormChange();
+                    
+                }});
+            this._on(this.defval_container.find('input.text'),{keyup:function(event){
+                var res = this.defval_container.find('input.text').val();
+                this._editing.setFieldValueByName('rst_DefaultValue', res, true);    
+            }});
+                
+            
+            this.defval_container.find('input[name="defvalType"][value="'+(is_increment?1:0)+'"]').prop('checked',true).change();
+            if(!is_increment){
+                this.defval_container.find('input.text').val( defval );
+            }
+            
     },
 
     
@@ -1737,6 +1802,8 @@ dty_TermIDTreeNonSelectableIDs
                 fields['rst_DefaultValue'] = fields['rst_TermPreview'];
             }else if(dt_type=='enum'){
                 fields['rst_DefaultValue'] = fields['rst_DefaultValue_resource'];
+            }else if(dt_type=='freetext' || dt_type=='integer' || dt_type=='float'){                
+                //fields['rst_DefaultValue'] = fields['rst_DefaultValue_inc'];
             }
             
             
@@ -1757,7 +1824,7 @@ dty_TermIDTreeNonSelectableIDs
     },    
     
     //
-    // 
+    // update tree on save/exit/load other record
     //
     _initEditForm_step2: function( recID ){
  

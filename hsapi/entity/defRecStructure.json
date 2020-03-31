@@ -233,7 +233,16 @@
                 {  "dtID": "rst_DefaultValue",
                     "dtFields":{
                         "dty_Type":"freetext",
-                        "rst_Class":"freetext blocktext date float",
+                        "rst_Class":"blocktext date",
+                        "rst_DisplayName":"Default Value:",
+                        "rst_DisplayHelpText": "Select or enter the default value to be inserted automatically into new records"
+                    }
+                },
+                {  "dtID": "rst_DefaultValue_inc",
+                    "dtFields":{
+                        "dty_Type":"freetext",
+                        "dty_Role":"virtual",
+                        "rst_Class":"freetext integer float",
                         "rst_DisplayName":"Default Value:",
                         "rst_DisplayHelpText": "Select or enter the default value to be inserted automatically into new records"
                     }
