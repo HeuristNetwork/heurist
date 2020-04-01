@@ -2273,7 +2273,7 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
                             groupHeader: rfr[fi_name],
                             groupHelpText: rfr[fi_help],
                             groupTitleVisible: (rfr[fi_reqtype]!=='forbidden'),
-                            groupType: 'group', //accordion, tabs, group
+                            groupType: (rfr[fi_defval]=='group'||rfr[fi_defval]=='tabs'||rfr[fi_defval]=='accordion')?rfr[fi_defval]:'group',
                             groupStyle: {},
                             children:[]
                         };

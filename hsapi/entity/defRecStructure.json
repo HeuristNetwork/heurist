@@ -261,10 +261,13 @@
                     "dtFields":{
                         "dty_Type":"enum",
                         "dty_Role":"virtual",
-                        "rst_Class":"XXXgroup_separator",
+                        "rst_Class":"group_separator",
                         "rst_DisplayName":"Group/separator type:",
                         "rst_DefaultValue": "group",
-                        "rst_FieldConfig": ["group","accordion","tabs"]
+                        "rst_FieldConfig": [
+                            {"key":"group", "title":"Block header"},
+                            {"key":"accordion", "title":"Collapsable block header"},
+                            {"key":"tabs", "title":"Tab header"}]
                     }
                 },
                 {

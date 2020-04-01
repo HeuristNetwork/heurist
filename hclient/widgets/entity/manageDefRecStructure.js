@@ -1409,6 +1409,13 @@ dty_TermIDTreeNonSelectableIDs
         var  dt_type = this._editing.getValue('dty_Type')[0];
 
         if(dt_type=='separator'){
+            
+            var sep_type = this._editing.getValue('rst_DefaultValue')[0];
+            if(!(sep_type=='accordion' || sep_type=='tabs')){
+                sep_type = 'group';
+            }
+            this._editing.setFieldValueByName( 'rst_SeparatorType', sep_type, false );
+            
             this.editForm.find('.ui-accordion').hide();
         }else{
             
@@ -1823,6 +1830,8 @@ dty_TermIDTreeNonSelectableIDs
                 fields['rst_DefaultValue'] = fields['rst_TermPreview'];
             }else if(dt_type=='enum'){
                 fields['rst_DefaultValue'] = fields['rst_DefaultValue_resource'];
+            }else if(dt_type=='separator'){
+                fields['rst_DefaultValue'] = fields['rst_SeparatorType'];
             }else if(dt_type=='freetext' || dt_type=='integer' || dt_type=='float'){                
                 //fields['rst_DefaultValue'] = fields['rst_DefaultValue_inc'];
             }

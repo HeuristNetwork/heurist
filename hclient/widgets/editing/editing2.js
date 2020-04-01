@@ -234,15 +234,15 @@ function hEditing(_options) {
                         newFieldContainer.css(fields[idx]['groupStyle']);    
                     }
                     if(parseInt(fields[idx]['dtID'])>0){ //for Records only
-                            newFieldContainer.attr('data-dtid', fields[idx]['dtID']);
-                    }
+                    
+                        newFieldContainer.attr('data-dtid', fields[idx]['dtID']);
 
-                    //add separator field id to sepcial div that will contain action buttons for structure editor
-                    // it is visible for Records table only
-                    if(parseInt(fields[idx]['dtID'])>0){ //for Records only
-                        $('<div>').css({'padding-left':'7px','display':'inline-block'})
-                            .attr('data-dtid', fields[idx]['dtID'])
-                            .appendTo(groupContainer);
+                        if(!(currGroupType == 'tabs' || currGroupType == 'accordion')){
+                            //div for gearwheel
+                            $('<div>').css({'padding-left':'7px','display':'inline-block'})
+                                .attr('data-dtid', fields[idx]['dtID'])
+                                .appendTo(groupContainer);
+                        }
                     }
 
                     //add header and field container
