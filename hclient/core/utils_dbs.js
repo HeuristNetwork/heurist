@@ -968,8 +968,127 @@ window.hWin.HEURIST4.dbs = {
             }
         }
         return false;
-    }
+    },
 
+    
+    /*
+        To facilitate access to db defintions
+        Returns rectype header or details field values
+    
+        if dty_ID is not defined it returns all fields
+        if fieldName is not defined it returns all fields as json named array
+    
+        dty_JsonTermIDTree => rst_FilteredJsonTermIDTree
+        dty_PtrTargetRectypeIDs => rst_PtrFilteredIDs 
+        dty_TermIDTreeNonSelectableIDs
+        dty_FieldSetRectypeID
+        dty_Type
+
+
+    */
+    rstField: function( rty_ID, dty_ID, fieldName ){
+        
+        var rectypes = window.hWin.HEURIST4.rectypes;
+        
+        if (!(rty_ID>0 && rectypes.typedefs[rty_ID])) return null;
+
+        
+        if (dty_ID>0 && rectypes.typedefs[rty_ID].dtFields[dty_ID]){
+            //returns rt structure or value for particular field
+            
+            if(fieldName){ //value for particular field
+                var rfi = rectypes.typedefs.dtFieldNamesToIndex;
+                
+                if(rfi[fieldName]>=0){
+                    
+                    var dfname = null;
+                    if(fieldName=='rst_FilteredJsonTermIDTree') dfname='dty_JsonTermIDTree'
+                    else if(fieldName=='rst_PtrFilteredIDs') dfname='dty_PtrTargetRectypeIDs'
+                    else if(fieldName=='dty_TermIDTreeNonSelectableIDs' ||
+                            fieldName=='dty_FieldSetRectypeID' || 
+                            fieldName=='dty_Type')
+                    {
+                        dfname=fieldName; 
+                    } 
+                    
+                    if(dfname){
+                        var detailtypes = window.hWin.HEURIST4.detailtypes;
+                        var dfi = detailtypes.typedefs.fieldNamesToIndex;
+                        
+                        return detailtypes.typedefs[dty_ID].commonFields[ dfi[dfname] ];    
+                    }else{
+                        return rectypes.typedefs[rty_ID].dtFields[dty_ID][ rfi[fieldName] ];
+                    }
+                    
+                }else{
+                    return null;
+                }
+            }else{ //field not defined - returns rt structure as json
+            
+                var res = {};
+                for(var i=0; i<rectypes.typedefs.dtFieldNames.length; i++){
+                    fieldName = rectypes.typedefs.dtFieldNames[i];
+                    res[fieldName] = window.hWin.HEURIST4.dbs.rstField(rty_ID, dty_ID, fieldName);
+                }
+                
+                return res;                
+            }
+        }else{
+            //returns all fields
+            
+            var res = {};
+
+            var dtFields = rectypes.typedefs[rty_ID].dtFields;
+            //var dty_IDs = Object.keys(fields);
+
+            for (dty_ID in dtFields)
+            {
+                if(dty_ID>0){
+                   res[dty_ID] = window.hWin.HEURIST4.dbs.rstField(rty_ID, dty_ID, null);
+                }
+            }
+            
+            return res;
+        }
+        
+        
+        
+        var rfi = rectypes.typedefs.dtFieldNamesToIndex;
+        //var rfields = window.hWin.HEURIST4.rectypes.typedefs[rty_ID].dtFields[dty_ID];
+        //var rh_fields = window.hWin.HEURIST4.rectypes.typedefs[rty_ID].commonFields;
+
+        
+        
+    },
+    
+    //
+    //
+    //
+    rtyField: function( rty_ID, fieldName ){
+
+        var rectypes = window.hWin.HEURIST4.rectypes;
+        
+        if (!(rty_ID>0 && rectypes.typedefs[rty_ID])) return null;
+        
+        var rfi = rectypes.typedefs.commonNamesToIndex;
+        
+        if(fieldName){
+            if(rfi[fieldName]>=0){
+                return rectypes.typedefs[rty_ID].commonFields[ rfi[fieldName] ];
+            }else{
+                return null;
+            }
+            
+        }else{
+            
+            var res = {};
+            for(var i=0; i<rectypes.typedefs[rty_ID].commonFieldNames.length; i++){
+                fieldName = rectypes.typedefs[rty_ID].commonFieldNames[i];
+                res[fieldName] = rectypes.typedefs[rty_ID].commonFields[ rfi[fieldName] ];
+            }
+            return res;            
+        }
+    }
 
     
 }//end dbs

@@ -130,7 +130,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             }else{
                 title = 'Manage Record Structure';    
                 if(this.options.rty_ID>0){
-                    title = title+': '+window.hWin.HEURIST4.rectypes.names[this.options.rty_ID];
+                    title = title+': '+window.hWin.HEURIST4.dbs.rtyField(this.options.rty_ID, 'rty_Name');  //rectypes.names[this.options.rty_ID];
                 }
             }
             
@@ -247,6 +247,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         var rectypes = window.hWin.HEURIST4.rectypes;
 
         rdata.fields = window.hWin.HEURIST4.util.cloneJSON(rectypes.typedefs.dtFieldNames);
+        //add fields to top
         rdata.fields.unshift('rst_RecTypeID'); 
         rdata.fields.unshift('rst_DetailTypeID'); 
         rdata.fields.unshift('rst_ID'); //add as first
@@ -702,6 +703,7 @@ dty_TermIDTreeNonSelectableIDs
 
                         that._saveEditAndClose(fields, function( recID, fields ){
                             
+                            //update only retype of maxval field
                             that._cachedRecordset.setFldById(recID, fieldName, newVal);
                             window.hWin.HEURIST4.rectypes.typedefs[that.options.rty_ID].dtFields[recID]
                                 [window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex[fieldName]] = newVal;
@@ -1056,6 +1058,9 @@ dty_TermIDTreeNonSelectableIDs
     
     //
     // Opens defDetailTypes editor
+    // arg1 - dty_ID (if -1 - add/select new field)
+    // arg1 - not defined or not integer - use current 
+    // arg2 - add new field after dty_ID 
     //
     showBaseFieldEditor: function( arg1, arg2 ){
         
@@ -1073,6 +1078,8 @@ dty_TermIDTreeNonSelectableIDs
                 rec_ID: (dtyID>0)?dtyID:-1
             };
         
+        var that = this;
+        
         if(!(dtyID>0)){ //new field
         
             if(arg2>0){
@@ -1082,7 +1089,6 @@ dty_TermIDTreeNonSelectableIDs
                 if(node) node.setActive();
             }
             
-            var that = this;
             //add new field to this record type structure
             popup_options['title'] = 'Select or Define new field';
             popup_options['newFieldForRtyID'] = this.options.rty_ID;
@@ -1103,7 +1109,22 @@ dty_TermIDTreeNonSelectableIDs
                 }
             };
             that._lockDefaultEdit = false;
+        }else{
+            popup_options['onClose'] = function(){
+                //update recordset
+                var fields = window.hWin.HEURIST4.dbs.rstField(that.options.rty_ID, dtyID);
+                that._cachedRecordset.setRecord(dtyID, fields);
+//console.log(fields);
+                //reload formlet after edit
+                that._initEditForm_step3( dtyID );
+                //make it changed
+                that._editing.setModified(true);
+                
+            }
+            
+            
         }
+        
         
         window.hWin.HEURIST4.ui.showEntityDialog('DefDetailTypes', popup_options);
     },
@@ -1113,7 +1134,7 @@ dty_TermIDTreeNonSelectableIDs
     //
     addNewFieldToStructure: function(dty_ID, rst_fields){
         
-        if(window.hWin.HEURIST4.rectypes.typedefs[this.options.rty_ID].dtFields[dty_ID]){
+        if(that._cachedRecordset.getById(dty_ID) ){ //window.hWin.HEURIST4.rectypes.typedefs[this.options.rty_ID].dtFields[dty_ID]){
             window.hWin.HEURIST4.msg.showMsgFlash('Such field already exists in structure');
             return;
         }
@@ -1392,7 +1413,7 @@ dty_TermIDTreeNonSelectableIDs
         }else{
             
             var s = '';
-            if(dt_type=='enum' || dt_type=='relmarker' || dt_type=='relationtype'){
+            if(dt_type=='enum' || dt_type=='relmarker' || dt_type=='resource' || dt_type=='relationtype'){
                 s = 'To change terms list or target entity types: ';
             }
             
@@ -1886,7 +1907,7 @@ edit form is always inline
             this._edit_dialog.dialog('close');
         }
 */        
-        //update recordset
+        //recordset was updated in manageEntity._saveEditAndClose
         var recset = this.getRecordSet()
         var record = recset.getById(recID);
         //recset.setRecord(recID, fieldvalues);

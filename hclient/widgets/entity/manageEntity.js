@@ -116,7 +116,7 @@ $.widget( "heurist.manageEntity", {
         
         //listeners
         onInitFinished:null,  //event listener when dialog is fully inited - use to perform initial search with specific parameters
-        onInitEditForm:null,  //event listener when EDIT form is fully inited - used in manageRecords._afterInitEditForm only
+        onInitEditForm:null,  //event listener when EDIT form is fully inited - used in manageRecords._afterInitEditForm only to open structure field formlet
         beforeClose:null,
         onClose:null,
         
