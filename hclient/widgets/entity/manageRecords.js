@@ -378,14 +378,13 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                               css:{'margin-left':'0.5em'},
                               click: function() { 
                                   
-                                /*A123  remarked since onselect triggered in onClose event 
+                                /*A123  remarked since onselect triggered in onClose event  */
                                 if(true || that._additionWasPerformed){
-                                    that.selectedRecords(that._currentEditRecordset);
-                                    that._selectAndClose();
+                                    that.options.select_mode = 'select_single'
+                                    that.selectedRecords(that._currentEditRecordset); //it calls that._selectAndClose();
                                 }else{
                                     that.closeEditDialog();   
-                                }*/
-                                that.closeEditDialog();
+                                }
                                   
                               }},
                         {text:window.hWin.HR('Drop Changes'), id:'btnRecCancel', 
@@ -2569,12 +2568,14 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
 
                                 that._currentEditID = null;
                                 /*A123  remarked since 
-                                 triggered in onClose event 
+                                 triggered in onClose event */
                                 if(that.options.selectOnSave==true){
-                                    that.selectedRecords(that._currentEditRecordset);
-                                    that._selectAndClose();
-                                }else*/
-                                    that.closeEditDialog();            
+                                    that.options.select_mode = 'select_single'
+                                    that.selectedRecords(that._currentEditRecordset); //it calls that._selectAndClose();
+                                }else{
+                                    that.closeEditDialog();               
+                                }
+                                    
                                 
                             }else if(afterAction=='newrecord'){
                                 that._initEditForm_step3(-1);

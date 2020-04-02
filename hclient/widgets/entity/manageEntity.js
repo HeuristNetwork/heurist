@@ -346,7 +346,7 @@ $.widget( "heurist.manageEntity", {
 
                 this._on( this.recordList, {        
                         "resultlistonselect": function(event, selected_recs){
-                                    this.selectedRecords(selected_recs);
+                                    this.selectedRecords(selected_recs); //assign
                                     
                                     if (this.options.edit_mode=='inline'){
                                             this._onActionListener(event, {action:'edit'}); //default action of selection
@@ -1023,7 +1023,7 @@ $.widget( "heurist.manageEntity", {
             this._selection = value;
             
             if(this.options.select_mode=='select_single'){
-                this._selectAndClose();
+                this._selectAndClose(); //it triggers onselect and closes dialog
             }
         }
 /*        
