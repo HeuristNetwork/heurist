@@ -36,7 +36,7 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
     }else if (array_key_exists('website', $_REQUEST) || array_key_exists('embed', $_REQUEST)
         || (array_key_exists('field', $_REQUEST) && $_REQUEST['field']>0) ) 
     {
-        $format = 'website';
+            $format = 'website';
         
         //embed - when heurist is run on page on non-heurist server
         if(array_key_exists('embed', $_REQUEST)){

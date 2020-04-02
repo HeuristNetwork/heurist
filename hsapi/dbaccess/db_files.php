@@ -640,7 +640,7 @@ function fileGetPlayerTag($fileid, $mimeType, $params, $external_url, $size=null
     }else if($mimeType=='application/pdf'){
         //error_log($filepath);                 
         $result = '<embed width="100%" height="100%" name="plugin" src="'
-        .$filepath.'&embed=1'
+        .$filepath.'&embedplayer=1'
         .'"'
         .($external_url?'':' data-id="'.$fileid.'"')
         .' type="application/pdf" internalinstanceid="9">';

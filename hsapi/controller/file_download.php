@@ -12,7 +12,7 @@
 *   tag - returns html wrap iframe with embed player, video, audio or img tag 
 *   size - returns width and height (for images only!)
 * size - width and height for html tag
-* embed - for player
+* embedplayer - for player
 * 
 * Notes about thumbnails
 *    for uploaded file - thumbnail is created in 
@@ -128,7 +128,7 @@ if($db){
                 if(file_exists($filepath)){
                     
                     //fix issue if original name does not have ext
-                    if(@$_REQUEST['embed']!=1){
+                    if(@$_REQUEST['embedplayer']!=1){
                         $finfo = pathinfo($originalFileName);
                         $ext = @$finfo['extension'];
                         if($ext==null || $ext==''){
@@ -141,7 +141,7 @@ if($db){
                         }    
                     }
                     
-                    downloadFile($mimeType, $filepath, @$_REQUEST['embed']==1?null:$originalFileName);
+                    downloadFile($mimeType, $filepath, @$_REQUEST['embedplayer']==1?null:$originalFileName);
                 }else if($external_url){
 //DEBUG error_log('External '.$external_url);                
                     header('Location: '.$external_url);  //redirect to URL (external)
