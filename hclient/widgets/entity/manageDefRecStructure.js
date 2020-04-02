@@ -556,11 +556,11 @@ dty_TermIDTreeNonSelectableIDs
 
                var is_folder = $(item).hasClass('fancytree-folder') || $(item).hasClass('separator2'); 
                
-               var actionspan = $('<div class="svs-contextmenu3" style="position:absolute;right:10px;display:none;padding-top:2px;background:#95A7B7 !important;'
+               var actionspan = $('<div class="svs-contextmenu3" style="position:absolute;right:10px;display:none;padding:2px;margin-top:0px;background:#95A7B7 !important;'
                     +'font-size:9px;font-weight:normal;text-transform:none">'
-                   +'<span data-action="block"><span class="ui-icon ui-icon-plus" title="Add a new group/separator" style="font-size:9px;font-weight:normal"/>Block</span>'               
-                   +'<span data-action="field"><span class="ui-icon ui-icon-plus" title="Add a new field to this record type" style="font-size:9px;font-weight:normal"/>Field</span>'
-                   +'<span data-action="delete"><span class="ui-icon ui-icon-close" title="'
+                   +'<span data-action="block" style="background:lightgreen;padding:4px"><span class="ui-icon ui-icon-plus" title="Add a new group/separator" style="font-size:9px;font-weight:normal"/>Block</span>'               
+                   +'<span data-action="field" style="background:#ECF1FB;padding:4px"><span class="ui-icon ui-icon-plus" title="Add a new field to this record type" style="font-size:9px;font-weight:normal"/>Field</span>'
+                   +'<span data-action="delete" style="background:red;padding:4px"><span class="ui-icon ui-icon-close" title="'
                         +((is_folder)?'Delete header':'Exclude field from record type')+'" style="font-size:9px;font-weight:normal"/>Delete</span>'
                    +(true || is_folder?'':
                     '<span class="ui-icon ui-icon-star" title="Requirement"></span>'
@@ -1134,7 +1134,7 @@ dty_TermIDTreeNonSelectableIDs
     //
     addNewFieldToStructure: function(dty_ID, rst_fields){
         
-        if(that._cachedRecordset.getById(dty_ID) ){ //window.hWin.HEURIST4.rectypes.typedefs[this.options.rty_ID].dtFields[dty_ID]){
+        if(this._cachedRecordset.getById(dty_ID) ){ //window.hWin.HEURIST4.rectypes.typedefs[this.options.rty_ID].dtFields[dty_ID]){
             window.hWin.HEURIST4.msg.showMsgFlash('Such field already exists in structure');
             return;
         }
@@ -1965,12 +1965,15 @@ edit form is always inline
                             node.extraClasses = isSep?'separator2':req;
                             $(node.li).addClass( isSep?'separator2':req );
                         }
+                        this.__defineActionIcons( $(node.li).find('.fancytree-node') );
+                        $(node.li).find('.svs-contextmenu3').css('visibility','hidden');
+                        
                     }
                 }
-                //4. update action buttons
+                /*4. update action buttons
                 if(is_usual_way){
                     this.__updateActionIcons(200);
-                }
+                }*/
                     
             }
         
