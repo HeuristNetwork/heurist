@@ -153,11 +153,13 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         
         
         if(this.options.rts_editor){
-            this.rts_actions_menu = $('<div class="rts-editor-actions" style="width:115px;display:none;padding-top:2px;background:#95A7B7 !important;'
-                    +'font-size:9px;font-weight:normal;cursor:pointer">'
-                   +'<span data-action="edit"><span class="ui-icon ui-icon-pencil" title="Edit" style="font-size:9px;font-weight:normal"/>Edit</span>'              
-                   +'<span data-action="field"><span class="ui-icon ui-icon-plus" title="Add a new field to this record type" style="font-size:9px;font-weight:normal"/>Field</span>'
-                   +'<span data-action="block"><span class="ui-icon ui-icon-plus" title="Add a new group/separator" style="font-size:9px;font-weight:normal"/>Block</span>'               
+            this.rts_actions_menu = $('<div class="rts-editor-actions" style="width:133px;display:none;padding-top:2px;background:#95A7B7 !important;'
+                    +'font-size:10px;font-weight:normal;cursor:pointer">'
+                   +'<span data-action="edit" style="background:lightblue;padding:4px">'
+                        +'<span class="ui-icon ui-icon-pencil" title="Edit" style="font-size:9px;font-weight:normal"/>Edit</span>'              
+                   +'<span data-action="field" style="background:lightcyan;padding:4px">'
+                        +'<span class="ui-icon ui-icon-plus" title="Add a new field to this record type" style="font-size:9px;font-weight:normal"/>Field</span>'
+                   +'<span data-action="block" title="Add a new group/separator" style="background:lightgreen;padding:4px;font-size:9px;font-weight:normal"><span style="font-size:11px">&nbsp;±&nbsp;&nbsp;</span>Block</span>'               
                     +'</div>').appendTo(this.element);
                     
             this._on( this.rts_actions_menu, {

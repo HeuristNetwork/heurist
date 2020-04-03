@@ -1253,6 +1253,7 @@ $.widget( "heurist.manageEntity", {
                 //for inline - reload edit page with first item in list
                 var new_recID = this._getField2(this.options.entity.keyField); 
                 if(!(new_recID>0)) new_recID = null;
+                new_recID = null;
                 this.addEditRecord(new_recID); //null - hide inline edit form 
             }
     },
@@ -1486,7 +1487,14 @@ $.widget( "heurist.manageEntity", {
     //
     reloadEditForm: function(){
         //this._initEditForm_step3(this._currentEditID);
+            
+        var keepPos = 0;            
+        if(this._editing){
+            keepPos = this._editing.getContainer().parents('.editFormDialog').scrollTop(); 
+        }
+       
         this._initEditForm_step4(null);
+        this._editing.getContainer().parents('.editFormDialog').scrollTop(keepPos);
     },
 
     //
