@@ -427,6 +427,12 @@ function cloneDatabase($targetdbname, $nodata=false, $templateddb, $user_id) {
     //TODO: Needs error report, trap error and warn or abort clone
     if($nodata){
         DbUtils::databaseCreateFolders($targetdbname);
+
+        folderRecurseCopy( HEURIST_FILESTORE_ROOT.$source_database."/smarty-templates", 
+                    HEURIST_FILESTORE_ROOT.$targetdbname."/smarty-templates" );
+        folderRecurseCopy( HEURIST_FILESTORE_ROOT.$source_database."/rectype-icons", 
+                    HEURIST_FILESTORE_ROOT.$targetdbname."/rectype-icons" );
+        
     }else{
         folderRecurseCopy( HEURIST_FILESTORE_ROOT.$source_database, HEURIST_FILESTORE_ROOT.$targetdbname );    
     }
