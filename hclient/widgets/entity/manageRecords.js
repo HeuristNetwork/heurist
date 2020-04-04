@@ -2958,12 +2958,12 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
             var ph_gif = window.hWin.HAPI4.baseURL + 'hclient/assets/16x16.gif';
             var sheader = '<div class="ui-heurist-header2" style="text-align:left;min-height:25px">'
                     + '<img src="'+ph_gif
-                        + '" width=21 height=21 style="padding:2px;'
-                        + 'background-position:center;background-repeat:no-repeat;background-size: 21px 21px;'
-                        + 'vertical-align:middle;margin-right: 10px;background-image:url(\''
-                        + window.hWin.HAPI4.iconBaseURL+this._currentEditRecTypeID
+                        + '" width=18 height=18 style="border-radius: 50%;padding:2px;background-color:white;'
+                        + 'background-position:center;background-repeat:no-repeat;background-size: 14px 14px;'
+                        + 'vertical-align:middle;margin: 2px 10px 2px 4px; background-image:url(\''
+                        + window.hWin.HAPI4.iconBaseURL+this._currentEditRecTypeID + '\');"/>' 
                         //+ 'm&color=rgb(255,255,255)\');"/>'
-                        + 's&color=rgb(0,0,0)&circle=rgb(255,255,255)\');"/>'  //draw black on white
+                        //+ 's&color=rgb(0,0,0)&circle=rgb(255,255,255)\');"/>'  //draw black on white
                     + '<span style="display:inline-block;vertical-align:middle">'
                         + window.hWin.HEURIST4.rectypes.names[this._currentEditRecTypeID]                         
                     + '</span>';
@@ -3017,8 +3017,8 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
                 if(parseInt($(item).attr('data-dtid'))>0){
                     var is_folder = false;
                     var ele = $('<div><span class="ui-icon ui-icon-gear"></span></div>')
-                    .css({'display':'table-cell','vertical-align':'top',
-                          'min-width':'32px','cursor':'pointer'})
+                    .css({'display':'table-cell','vertical-align':'top','opcaity':'0 !important',
+                          'min-width':'32px','cursor':'pointer','padding-top':'0.4em'})
                     .prependTo($(item));    
                     
                     that._on(ele,{mouseover:function(event){
@@ -3068,7 +3068,7 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
             //hide message about forbidden fields
             $(this.element).find('.hidden_field_warning').hide();
             
-            //show forbidden fields as disabled
+            //show forbidden fields as disabled - except gearwheel
             $(this.element).find('div.forbidden').parent().css({'opacity':'0.5'} ); 
             
             //reduce width of header
