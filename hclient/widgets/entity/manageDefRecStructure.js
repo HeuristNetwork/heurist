@@ -1366,10 +1366,45 @@ dty_TermIDTreeNonSelectableIDs
             }
         }
             
+        //----------
             
         var edit_ele= this._editing.getFieldByName('rst_DetailTypeID');
-        //var edit_ele= this._editing.getInputs('rst_DetailTypeID');
-        edit_ele.find('.input-div').append('<span class="ui-icon ui-icon-circle-info" style="padding-left:20px;color:gray;cursor:pointer">');
+
+        // hint with base field details
+        var dt_fields = window.hWin.HEURIST4.dbs.dtyField(this._currentEditID);
+        
+        var s = dt_fields['dty_HelpText'];
+        var s1 = '', k = 0;
+        if(s){
+            s = s.trim();
+            while (k<s.length && k<500){
+                s1 = s1 + s.substring(k,k+60) + "\n";
+                k = k + 60;
+            }
+        }
+        var s2 = ''; 
+        s = dt_fields['dty_ExtendedDescription'];
+        if(s){
+            s = s.trim();
+            k = 0;
+            while (k<s.length && k<500){
+                s2 = s2 + s.substring(k,k+60) + "\n";
+                k = k + 60;
+            }
+        }
+
+        var baseFieldDetails = 
+        "ID: "+this._currentEditID+
+        (dt_fields['dty_ConceptID']?("\n\nConcept code: "+dt_fields['dty_ConceptID']):'')+
+        "\n\nBase field type: "+dt_fields['dty_Name']+"\n\n"+
+        ((s1!='')?("Help: "+s1+"\n"):'')+
+        ((s2!='')?("Ext: "+s2+"\n"):'');
+        
+        $('<span class="ui-icon ui-icon-circle-info" style="padding-left:20px;color:gray;cursor:pointer">')
+                .attr('title', baseFieldDetails)
+                .appendTo(edit_ele.find('.input-div'));
+        
+        //----------------
             
         edit_ele= this._editing.getFieldByName('rst_Repeatability');
         if(edit_ele){

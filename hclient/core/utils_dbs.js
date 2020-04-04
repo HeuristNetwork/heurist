@@ -1012,10 +1012,12 @@ window.hWin.HEURIST4.dbs = {
                     } 
                     
                     if(dfname){
+                        return window.hWin.HEURIST4.dbs.dtyField(dty_ID, dfname);
+/*                        
                         var detailtypes = window.hWin.HEURIST4.detailtypes;
                         var dfi = detailtypes.typedefs.fieldNamesToIndex;
-                        
                         return detailtypes.typedefs[dty_ID].commonFields[ dfi[dfname] ];    
+*/                        
                     }else{
                         return rectypes.typedefs[rty_ID].dtFields[dty_ID][ rfi[fieldName] ];
                     }
@@ -1088,8 +1090,39 @@ window.hWin.HEURIST4.dbs = {
             }
             return res;            
         }
-    }
+    },
+    
+    //
+    //
+    //
+    dtyField: function( dty_ID, fieldName ){
 
+        var detailtypes = window.hWin.HEURIST4.detailtypes;
+                        
+        if (!(dty_ID>0 && detailtypes.typedefs[dty_ID])) return null;
+        
+        var dfi = detailtypes.typedefs.fieldNamesToIndex;
+        
+        if(fieldName){
+            if(dfi[fieldName]>=0){
+                return detailtypes.typedefs[rty_ID].commonFields[ dfi[fieldName] ];
+            }else{
+                return null;
+            }
+            
+        }else{
+            
+            var res = {};
+            for(var i=0; i<detailtypes.typedefs.commonFieldNames.length; i++){
+                fieldName = detailtypes.typedefs.commonFieldNames[i];
+                res[fieldName] = detailtypes.typedefs[dty_ID].commonFields[ dfi[fieldName] ];
+            }
+            return res;            
+        }
+    }
+    
+
+    
     
 }//end dbs
 
