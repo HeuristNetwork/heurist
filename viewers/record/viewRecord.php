@@ -44,6 +44,10 @@ $mysqli = $system->get_mysqli();
 $rec_id = 0;
 $bkm_ID = 0;
 
+if(!defined('ERROR_REDIR')){
+    define('ERROR_REDIR', dirname(__FILE__).'/../../hclient/framecontent/infoPage.php');
+}
+
 if (@$_REQUEST['bkmk_id']>0) {  //find record by bookmark id
 	$bkm_ID = $_REQUEST['bkmk_id'];
 	$rec_id = mysql__select_value($mysqli, 'select * from usrBookmarks where bkm_ID = ' . $bkm_ID);

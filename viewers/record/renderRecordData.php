@@ -1436,7 +1436,7 @@ function print_linked_details($bib, $link_cnt) {
        print '<div class="detailType fieldRow" style="display:none;line-height:21px">Linked from</div>';
        print '<div class="map_popup">';//
     }else{
-       print '<div class="detailRowHeader" style="float:left">Linked from'; 
+       print '<div class="detailRowHeader" style="float:left">Linked from</div><div>'; 
        if(!$is_production){
     ?>
         <div class=detailRow>

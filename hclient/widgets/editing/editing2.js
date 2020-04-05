@@ -258,6 +258,8 @@ function hEditing(_options) {
                                 
                          $(newFieldContainer).appendTo(groupEle);
                          
+                         $(newFieldContainer).append('<div style="min-height:20px">&nbsp;</div>');
+                         
                          newFieldContainer.addClass(options.className);
                          //.css({'font-size':'1em'})
                     }else{

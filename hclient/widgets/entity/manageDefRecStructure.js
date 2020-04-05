@@ -556,9 +556,9 @@ dty_TermIDTreeNonSelectableIDs
 
                var is_folder = $(item).hasClass('fancytree-folder') || $(item).hasClass('separator2'); 
                
-               var actionspan = $('<div class="svs-contextmenu3" style="position:absolute;right:10px;display:none;padding:2px;margin-top:0px;background:#95A7B7 !important;'
+               var actionspan = $('<div class="svs-contextmenu3" style="position:absolute;right:8px;display:none;padding:2px;margin-top:0px;background:#95A7B7 !important;'
                     +'font-size:9px;font-weight:normal;text-transform:none">'
-                   +'<span data-action="block" style="background:lightgreen;padding:4px"><span class="ui-icon ui-icon-plus" title="Add a new group/separator" style="font-size:9px;font-weight:normal"/>Block</span>'               
+                   +'<span data-action="block" style="background:lightgreen;padding:4px;font-size:9px;font-weight:normal" title="Add a new group/separator">&nbsp;±&nbsp;&nbsp;Block</span>'               
                    +'<span data-action="field" style="background:#ECF1FB;padding:4px"><span class="ui-icon ui-icon-plus" title="Add a new field to this record type" style="font-size:9px;font-weight:normal"/>Field</span>'
                    +'<span data-action="delete" style="background:red;padding:4px"><span class="ui-icon ui-icon-close" title="'
                         +((is_folder)?'Delete header':'Exclude field from record type')+'" style="font-size:9px;font-weight:normal"/>Delete</span>'
@@ -1349,14 +1349,14 @@ dty_TermIDTreeNonSelectableIDs
                     }
                 
                     
-                    
                     //adjust preview editor position
                     var ele_ed = this.previewEditor.find('.editFormDialog');
-                    ele_ed.scrollTop(0);
-                    var top = $(ed_cont).position().top - 60;
-                    ele_ed.scrollTop(top);
+                    setTimeout(function(){
+                        ele_ed.scrollTop(0);
+                        var top = $(ed_cont).position().top - 60;
+                        ele_ed.scrollTop(top);
+                    },200); //without timeout preview form scrolls to kept position
                 }
-                
                 this.editForm.show();
                 this._editing.setFocus();
                 
@@ -1366,7 +1366,47 @@ dty_TermIDTreeNonSelectableIDs
             }
         }
             
-        var edit_ele= this._editing.getFieldByName('rst_Repeatability');
+        //----------
+            
+        var edit_ele= this._editing.getFieldByName('rst_DetailTypeID');
+
+        // hint with base field details
+        var dt_fields = window.hWin.HEURIST4.dbs.dtyField(this._currentEditID);
+        
+        var s = dt_fields['dty_HelpText'];
+        var s1 = '', k = 0;
+        if(s){
+            s = s.trim();
+            while (k<s.length && k<500){
+                s1 = s1 + s.substring(k,k+60) + "\n";
+                k = k + 60;
+            }
+        }
+        var s2 = ''; 
+        s = dt_fields['dty_ExtendedDescription'];
+        if(s){
+            s = s.trim();
+            k = 0;
+            while (k<s.length && k<500){
+                s2 = s2 + s.substring(k,k+60) + "\n";
+                k = k + 60;
+            }
+        }
+
+        var baseFieldDetails = 
+        "ID: "+this._currentEditID+
+        (dt_fields['dty_ConceptID']?("\n\nConcept code: "+dt_fields['dty_ConceptID']):'')+
+        "\n\nBase field type: "+dt_fields['dty_Name']+"\n\n"+
+        ((s1!='')?("Help: "+s1+"\n"):'')+
+        ((s2!='')?("Ext: "+s2+"\n"):'');
+        
+        $('<span class="ui-icon ui-icon-circle-info" style="padding-left:20px;color:gray;cursor:pointer">')
+                .attr('title', baseFieldDetails)
+                .appendTo(edit_ele.find('.input-div'));
+        
+        //----------------
+            
+        edit_ele= this._editing.getFieldByName('rst_Repeatability');
         if(edit_ele){
             
             edit_ele.editing_input('option','change', function(){
@@ -1384,7 +1424,7 @@ dty_TermIDTreeNonSelectableIDs
         }
         
 
-        var edit_ele= this._editing.getFieldByName('rst_CreateChildIfRecPtr');
+        edit_ele= this._editing.getFieldByName('rst_CreateChildIfRecPtr');
         if(edit_ele){
             edit_ele.editing_input('option','change', function(){
                 //var input = this.getInputs()[0];
@@ -1410,9 +1450,16 @@ dty_TermIDTreeNonSelectableIDs
 
         if(dt_type=='separator'){
             
-            var sep_type = this._editing.getValue('rst_DefaultValue')[0];
-            if(!(sep_type=='accordion' || sep_type=='tabs')){
+            var sep_type;
+            if(window.hWin.HAPI4.database.indexOf('Casey')>=0){
                 sep_type = 'group';
+                edit_ele = this._editing.getFieldByName('rst_SeparatorType');
+                edit_ele.hide();
+            }else{
+                sep_type = this._editing.getValue('rst_DefaultValue')[0];
+                if(!(sep_type=='accordion' || sep_type=='tabs')){
+                    sep_type = 'group';
+                }
             }
             this._editing.setFieldValueByName( 'rst_SeparatorType', sep_type, false );
             
@@ -1431,7 +1478,7 @@ dty_TermIDTreeNonSelectableIDs
         }
 
         var btnCancel = $('<button>').attr('id', 'btnCloseEditor_rts')
-                .button({label:window.hWin.HR('Cancel')})
+                .button({label:window.hWin.HR('Close')})
                 .css({'margin-right':'1em','float':'right',display:'none','margin-top':'2px'})
                 .appendTo(bottom_div);
 
@@ -1721,6 +1768,7 @@ dty_TermIDTreeNonSelectableIDs
                 function(response){
                     if(response.status == window.hWin.ResponseStatus.OK){
                         that._dragIsAllowed = true;
+                        
                         that._showRecordEditorPreview();  
                     }else{
                         window.hWin.HEURIST4.msg.showMsgErr(response);      

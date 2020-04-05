@@ -95,7 +95,7 @@ require_once(dirname(__FILE__)."/../../../hclient/framecontent/initPage.php");
 .ent_header{top:0;height:140px;min-width:1190px;}
 .ent_content{top:140px;bottom:105px; overflow-y:auto;padding:0px 10px}
 .ent_footer{bottom:0px;height:105px;}
-/* https://codepen.io/sosuke/pen/Pjoqqp*/
+/* https://codepen.io/sosuke/pen/Pjoqqp */
 .blue-img {
     filter: invert(62%) sepia(71%) saturate(1988%) hue-rotate(178deg) brightness(108%) contrast(104%)
 }

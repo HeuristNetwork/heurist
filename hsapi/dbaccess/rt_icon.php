@@ -215,7 +215,9 @@ function create_rt_icon_with_bg( $rectype_id,  $color_new, $circle_color, $bg_ci
     $filename = $path . $rectype_id . ".png"; //original
     
     if(!file_exists($filename)){  //if term icon does not exist - take default icon
-        $filename = HEURIST_ICON_DIR . "3.png";
+        $color_new = null;
+        $filename = dirname(__FILE__).'/../../common/images/cross-red.png';
+        //HEURIST_ICON_DIR . "3.png";
     }
     
     if(file_exists($filename)){
