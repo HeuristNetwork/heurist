@@ -233,8 +233,7 @@ $.widget( "heurist.search", {
               'position': 'absolute'})
         .appendTo( this.div_search_input );
         this._on( this.input_search_prompt, {click: function(){
-                //AAAA  
-                this.input_search.focus()
+                this._setFocus();
         }} );
 
         //promt to be shown when input has complex search expression (json search)
@@ -246,7 +245,7 @@ $.widget( "heurist.search", {
         .appendTo( this.div_search_input );
         this._on( this.input_search_prompt2, {click: function(){
                 this.input_search_prompt2.hide();
-                this.input_search.focus()
+                this._setFocus();
         }} );
 
         this.input_search = $( "<textarea>" )
@@ -1199,12 +1198,7 @@ $.widget( "heurist.search", {
         
             window.hWin.HEURIST4.util.setDisabled(this.input_search, false);
             
-            if(this.input_search.is(':visible')) {
-                try{
-                    this.input_search.focus();
-                }catch(e){}
-            }
-            
+            this._setFocus();
             //show if there is resulst
             if(this.btn_search_save){
                 if(window.hWin.HAPI4.currentRecordset && window.hWin.HAPI4.currentRecordset.length()>0) //
@@ -1243,6 +1237,16 @@ $.widget( "heurist.search", {
         }
 
 
+
+    },
+    
+    _setFocus: function(){
+      
+        if(this.input_search.is(':visible')) {
+                try{
+                    this.input_search.focus();
+                }catch(e){}
+        }
 
     },
 
