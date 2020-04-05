@@ -1620,7 +1620,7 @@ window.hWin.HEURIST4.ui = {
             //window.hWin.HEURIST4.ui.applyCompetencyLevel( exp_level );
     }, 
       
-    // Init button that show/hide help tips
+    // Init button that show/hide help tips for popup dialog
     //
     //  usrPrefKey - prefs_entityName - context 
     //
@@ -1802,7 +1802,7 @@ window.hWin.HEURIST4.ui = {
                                     
                                 }else{
 
-                                    var div_height = Math.min(500, $(document.body).height()-$help_button.position().top);
+                                    var div_height = Math.min(400, $(document.body).height()-$help_button.position().top);
                                     var div_width  = Math.min(700, $(document.body).width() *0.8);
                                    
                                     var title = (content_title)?content_title:'Heurist context help';
@@ -1813,12 +1813,13 @@ window.hWin.HEURIST4.ui = {
                                     }
                                 
                                     if(title!='') $helper_div.dialog('option','title',title);
-                                    $helper_div.dialog('option', {width:div_width, height: div_height, position: divpos});
+                                    $helper_div.dialog('option', {width:div_width, height: 'auto', position: divpos});
                                     $helper_div.dialog( "open" );
                                     setTimeout(function(){
                                             $helper_div.find('#content').scrollTop(1);
                                     }, 1000);
-                                
+                                    
+                                    $( document ).one( "click", function() { $helper_div.dialog( "close" ); });
                                 }
                             });
                         }

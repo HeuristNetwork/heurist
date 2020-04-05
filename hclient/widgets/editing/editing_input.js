@@ -589,7 +589,8 @@ var that = this;
 
             
             if( this.options.dtID != window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY']
-            && this.options.dtID != window.hWin.HAPI4.sysinfo['dbconst']['DT_MAP_IMAGE_WORLDFILE'])
+            && this.options.dtID != window.hWin.HAPI4.sysinfo['dbconst']['DT_MAP_IMAGE_WORLDFILE']
+            && this.options.dtID > 0)
             {
                 
                 var eid = $input.attr('id')+'_editor';

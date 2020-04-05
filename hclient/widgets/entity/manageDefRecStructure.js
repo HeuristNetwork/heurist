@@ -35,6 +35,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
     
     menues: {}, //popup menu for this widget
     _open_formlet_for_recID: 0,
+    _show_optional: false,
     defval_container: null,
     
     //
@@ -65,7 +66,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         this.options.width = 1200;
         this.options.height = 640;
         this.options.edit_mode = 'inline';//'popup'; //editonly
-        this.options.editClassName = 'ui-widget-content';
+        this.options.editClassName = 'ui-heurist-bg-light'; // was 'ui-widget-content';
 
         if(this.options.edit_mode=='editonly'){
             this.options.select_mode = 'manager';
@@ -1217,6 +1218,8 @@ dty_TermIDTreeNonSelectableIDs
                     that._afterSaveEventHandler(recID, fields);
                     
                     //
+                    that._show_optional = (fields['rst_RequirementType']=='optional');
+                    //
                     that._open_formlet_for_recID = recID;
                     //save order  it calls _showRecordEditorPreview to update preview and open formlet field editor
                     that._saveRtStructureTree();
@@ -1235,7 +1238,7 @@ dty_TermIDTreeNonSelectableIDs
     // show record editor form - it reflects the last changes of rt structure
     // recID - dty_ID - field that was saved
     //
-    _showRecordEditorPreview: function( openedit_for_recID ){
+    _showRecordEditorPreview: function() {
         
         //hide editor - show and updated preview
         if(this.previewEditor){
@@ -1269,10 +1272,14 @@ dty_TermIDTreeNonSelectableIDs
                             that.manageRecords('addEditRecord', this.options.rec_ID); //call widget method
                     },
                     onInitEditForm:function(){
+                        if(that2._show_optional){
+                            that.manageRecords('showOptionalFieds', true);    
+                        }
                         if(that2._open_formlet_for_recID>0){
                             that2.editField( that2._open_formlet_for_recID );
-                            that2._open_formlet_for_recID = -1;
                         }
+                        that2._show_optional = false;
+                        that2._open_formlet_for_recID = -1;
                     }
                 }                
                 
@@ -1308,7 +1315,7 @@ dty_TermIDTreeNonSelectableIDs
                     
                 if(ed_ele.length==0){ //popup edit  not used anymore
                     if(!this.editForm.hasClass('ent_content_full')){
-                        //put editForm back to oridinal container
+                        //put editForm back to original container
                         this.editForm
                             .css({'margin-left':'0px'})
                             .addClass('ent_content_full')
@@ -1323,7 +1330,7 @@ dty_TermIDTreeNonSelectableIDs
                 }else{
                 
                     this.editForm
-                        .css({'margin-left':'73px'})
+                        .css({'margin-left':'209px'})
                         .removeClass('ent_content_full');
                     
                     var ed_cont;
@@ -1367,9 +1374,6 @@ dty_TermIDTreeNonSelectableIDs
         }
             
         //----------
-            
-        var edit_ele= this._editing.getFieldByName('rst_DetailTypeID');
-
         // hint with base field details
         var dt_fields = window.hWin.HEURIST4.dbs.dtyField(this._currentEditID);
         
@@ -1400,11 +1404,15 @@ dty_TermIDTreeNonSelectableIDs
         ((s1!='')?("Help: "+s1+"\n"):'')+
         ((s2!='')?("Ext: "+s2+"\n"):'');
         
-        $('<span class="ui-icon ui-icon-circle-info" style="padding-left:20px;color:gray;cursor:pointer">')
-                .attr('title', baseFieldDetails)
-                .appendTo(edit_ele.find('.input-div'));
-        
         //----------------
+        var edit_ele = this._editing.getFieldByName('rst_CreateChildIfRecPtr');
+
+        var help_button = $('<span style="padding-left:20px;color:gray;cursor:pointer" class="ui-icon ui-icon-circle-info"/>')
+                .appendTo(edit_ele.find('.input-div'));
+        window.hWin.HEURIST4.ui.initHelper(help_button, 'Creation of records as children', 
+                    window.hWin.HAPI4.baseURL+'context_help/parent_child_instructions.html #content'
+                    , null, true);                
+        
             
         edit_ele= this._editing.getFieldByName('rst_Repeatability');
         if(edit_ele){
@@ -1475,6 +1483,14 @@ dty_TermIDTreeNonSelectableIDs
                 +s+'<a href="#">Edit base field definitions</a></div>')
                 .appendTo(bottom_div);
             this._on(ele.find('a'),{click: this.showBaseFieldEditor}); 
+            
+            
+            $('<span style="padding-left:40px;color:gray;cursor:pointer">ID: '
+                +this._currentEditID+' <span class="ui-icon ui-icon-circle-info"/></span>')
+                .attr('title', baseFieldDetails)
+                .appendTo(bottom_div);
+        
+            
         }
 
         var btnCancel = $('<button>').attr('id', 'btnCloseEditor_rts')

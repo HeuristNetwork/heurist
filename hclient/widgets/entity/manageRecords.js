@@ -3150,6 +3150,10 @@ rectypes.names[rectypeID] + ' is defined as a child of <b>'+names
         
     },//END _afterInitEditForm
     
+    showOptionalFieds: function(isShow){
+        this.element.find('.chb_opt_fields').prop('checked', isShow).change();
+    },
+    
     //
     //to save space - hide all fieldsets without visible fields
     //
