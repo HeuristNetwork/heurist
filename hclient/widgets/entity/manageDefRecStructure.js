@@ -30,7 +30,8 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
     _stillNeedUpdateForRecID: 0,
     usrPreferences:{
         treepanel_closed: true,          
-        treepanel_width:400 
+        treepanel_width:400,
+        help_on: false
     },
     
     menues: {}, //popup menu for this widget
@@ -1354,13 +1355,30 @@ dty_TermIDTreeNonSelectableIDs
                     if(!this.editForm.parents('fieldset:first').is(':visible')){
                         this.editForm.parents('fieldset:first').show();
                     }
-                
+                    
+                    //expand accordion tab
+                    var ele = this.editForm.parents('.ui-accordion:first');
+                    if(ele.length>0){
+                        ele.accordion( 'option', 'active', 0);
+                    }else{
+                        ele = this.editForm.parents('.ui-tabs');
+                        if(ele.length>0){
+                            var tabIndex = this.editForm.parents('fieldset:first').attr('data-tabindex');
+                            ele.tabs( 'option', 'active', tabIndex);
+                        }
+                    }
                     
                     //adjust preview editor position
                     var ele_ed = this.previewEditor.find('.editFormDialog');
                     setTimeout(function(){
                         ele_ed.scrollTop(0);
                         var top = $(ed_cont).position().top - 60;
+                        
+                        var ele = that.editForm.parents('.ui-tabs');
+                        if(ele.length>0){
+                            top = top + $(ele).position().top;
+                        }
+                        
                         ele_ed.scrollTop(top);
                     },200); //without timeout preview form scrolls to kept position
                 }
@@ -1451,6 +1469,21 @@ dty_TermIDTreeNonSelectableIDs
             window.hWin.HEURIST4.util.setDisabled(ele, true);
             this._onDetailTypeChange();
         }
+        
+        
+        //add show explanation checkbox
+        var ishelp_on = (this.usrPreferences['help_on']==true || this.usrPreferences['help_on']=='true');
+        var ele = $('<div><label style="float:right;padding-right:10px"><input type="checkbox" '
+                        +(ishelp_on?'checked':'')+'/>show explanatios</label></div>').prependTo(this.editForm);
+        
+        this._on( ele.find('input'), {change: function( event){
+            var ishelp_on = $(event.target).is(':checked');
+            this.usrPreferences['help_on'] = ishelp_on;
+            window.hWin.HEURIST4.ui.switchHintState2(ishelp_on, this.editForm, '.heurist-helper3');
+        }});
+        this.editForm.find('.heurist-helper1').removeClass('heurist-helper1').addClass('heurist-helper3');
+        window.hWin.HEURIST4.ui.switchHintState2(ishelp_on, this.editForm, '.heurist-helper3');
+        
         
         var bottom_div = $('<div style="width:100%;min-height:26px">').appendTo(this.editForm);
         
@@ -1933,7 +1966,7 @@ dty_TermIDTreeNonSelectableIDs
     //
     closeDialog: function(is_force){
         
-        if($.isFunction(this.saveUiPreferences))this.saveUiPreferences();
+        if($.isFunction(this.saveUiPreferences)) this.saveUiPreferences();
 
 
         if(this.options.external_toolbar){
@@ -2416,7 +2449,8 @@ edit form is always inline
 
         var params = {
             treepanel_closed: isClosed,
-            treepanel_width: sz
+            treepanel_width: sz,
+            help_on: this.usrPreferences['help_on']
         }
         
         window.hWin.HAPI4.save_pref('prefs_'+this._entityName, params);

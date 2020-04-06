@@ -182,7 +182,7 @@ function hEditing(_options) {
         */
         
         function __createGroup(fields, groupContainer, fieldContainer){
-            var idx;
+            var idx, tab_index;
                 
             var currGroupType = null; //current accodion or tab control
             var groupTabHeader, groupEle;
@@ -223,6 +223,7 @@ function hEditing(_options) {
                         }else{
                             groupEle = null;
                         }
+                        tab_index = 0;
                     }
                     
                     var headerText = fields[idx]['groupHeader'];
@@ -242,6 +243,9 @@ function hEditing(_options) {
                             $('<div>').css({'padding-left':'7px','display':'inline-block'})
                                 .attr('data-dtid', fields[idx]['dtID'])
                                 .appendTo(groupContainer);
+                        }else{
+                            newFieldContainer.attr('data-tabindex', tab_index);
+                            tab_index++;
                         }
                     }
 

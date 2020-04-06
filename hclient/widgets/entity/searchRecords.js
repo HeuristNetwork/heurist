@@ -53,7 +53,7 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
         
         var is_browse = (that.options.pointer_mode == 'browseonly');
         if(that.options.pointer_mode != 'addorbrowse'){
-            $('#row_helper > .heurist-table-helper1').css('visibility','hidden');    
+            $('#row_helper > .heurist-helper1').css('visibility','hidden');    
         }
         if(that.options.pointer_mode == 'addonly'){
             this.element.find('.not-addonly').hide();
