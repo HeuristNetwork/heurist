@@ -62,9 +62,17 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
             this.element.find('#cb_initial').prop('checked', 
                 !window.hWin.HEURIST4.util.isempty(this.options.pointer_filter));
         }
-        this.element.find('#cb_initial_filter').text(this.options.pointer_filter);
+        if(window.hWin.HEURIST4.util.isempty(this.options.pointer_filter)){
+            this.element.find('#cb_initial_filter').text('');
+            this.element.find('.i-filter').hide();
+        }else{
+            this.element.find('#cb_initial_filter').text(this.options.pointer_filter);    
+            this.element.find('.i-filter').show();
+        }
+        
         
             
+        // create list of buttons for every rectype in this.options.rectype_set
         if(is_expand_rt_list){
             
             this.btn_select_rt.hide();
@@ -195,6 +203,10 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
                 
             __onSelectRecType(this.selectRectype);
         }else{
+            if(this.options.parentselect>0){
+                var ele = this.element.find('#row_parententity_helper3').css({'display':'table-row'});
+                ele.find('span').text( window.hWin.HEURIST4.rectypes.names[this.options.parentselect] );
+            }
             //start search
             if(this.selectRectype.val()>0){
                 this.selectRectype.change(); 
@@ -214,7 +226,7 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
         
         var ele = this.element.find('#row_parententity_helper2')
         if(ele.is(':visible')){
-            this.element.height('12em');
+            //this.element.height('12em');
             ele.hide();
         }
             

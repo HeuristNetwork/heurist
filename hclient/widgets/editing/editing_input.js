@@ -589,7 +589,8 @@ var that = this;
 
             
             if( this.options.dtID != window.hWin.HAPI4.sysinfo['dbconst']['DT_SYMBOLOGY']
-            && this.options.dtID != window.hWin.HAPI4.sysinfo['dbconst']['DT_MAP_IMAGE_WORLDFILE'])
+            && this.options.dtID != window.hWin.HAPI4.sysinfo['dbconst']['DT_MAP_IMAGE_WORLDFILE']
+            && this.options.dtID > 0)
             {
                 
                 var eid = $input.attr('id')+'_editor';
@@ -2499,7 +2500,8 @@ console.log('onpaste');
             
             $input.css('width', dwidth);
             
-        }else if ( this.detailType!='boolean' && this.detailType!='date' && this.detailType!='resource' ) {  
+        }else if ( this.detailType=='freetext' || this.detailType=='url' || this.detailType=='blocktext' ) {  
+
               //if the size is greater than zero
               if (parseFloat( dwidth ) > 0) 
                   var nw = Math.round(2 + Math.min(120, Number(dwidth))) + "ex";

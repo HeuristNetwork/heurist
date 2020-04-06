@@ -50,7 +50,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 this.options.layout_mode = //slightly modified 'short' layout
                         '<div class="ent_wrapper editor">'
                             +'<div class="ent_wrapper">'
-                                +    '<div class="ent_header searchForm"/>'     
+                                +    '<div class="ent_header searchForm" style="height:auto"/>'     
                                 +    '<div class="ent_content_full recordList"/>'
                             +'</div>'
 
@@ -113,30 +113,14 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 cnt = 1;
             }            
             
-            sh = (cnt<4)?13:((cnt<7)?15:17);
+            this._adjustResultListTop();
             
-            if(this.options.pointer_mode == 'addonly'){
-                this.options.height = (cnt<4)?146:((cnt<7)?166:196);
-                $dlg = this.getDialog();
-                $dlg.dialog('option', 'height', this.options.height);
-                this.recordList.hide();    
-            }else if(is_only_rt && this.options.pointer_mode == 'browseonly'){
-                sh = sh - 6;
-            }
-            
-            if(this.options.parententity){
-                //sh = 14;  
-                this.searchForm.height((sh+2.5)+'em').css('border','none');    
-            }else{
-                this.searchForm.height((sh+4.5)+'em').css('border','none');    
-                sh++;
-            }
-            
+        }else{
+            this.recordList.css('top', 0);    
         }
         
-        this.recordList.css('top', sh+'em');    
+        //  this.recordList.css('top', sh+'em');    
         
-
         var that = this;
         
         jQuery(document).keydown(function(event) {
@@ -208,6 +192,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         // init search header
         if(this.searchForm && this.searchForm.length>0){
             this.searchForm.addClass('ui-heurist-bg-light').searchRecords(this.options);    
+            this._adjustResultListTop();
         }
 /*        
         var iheight = 2;
@@ -235,6 +220,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         if(this.searchForm && this.searchForm.length>0){
             
             this._on( this.searchForm, {
+                "searchrecordsonstart": this._adjustResultListTop,
                 "searchrecordsonresult": this.updateRecordList,
                 "searchrecordsonaddrecord": function( event, _rectype_id ){
                     this._currentEditRecTypeID = _rectype_id;
@@ -247,6 +233,18 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         this.editForm.css({'overflow-y':'auto !important', 'overflow-x':'hidden', 'padding':'5px'});
             
         return true;
+    },
+    
+    //
+    //
+    //
+    _adjustResultListTop: function(){
+         if(this.searchForm && this.searchForm.length>0 && this.searchForm.is(':visible')){
+             this.recordList.css('top', this.searchForm.height());
+         }else{
+             this.recordList.css('top', 0); 
+         }
+        
     },
     
     //
@@ -497,8 +495,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     var that = this;
                     popup_options['onselect'] = function(event, data){
                             if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
-                               
-                                that._trigger( "onselect", null, {selection:data.selection});  
+                                that._trigger( "onselect", null, {selection:
+                                    (that.options.select_return_mode=='recordset') ?data.selection :data.selection.getIds()});
                                 that.closeDialog();
                             }
                     };
@@ -1991,6 +1989,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 var fi_type = rectypes.typedefs.dtFieldNamesToIndex.dty_Type;
                 var fi_ptr = rectypes.typedefs.dtFieldNamesToIndex.rst_PtrFilteredIDs;
                 
+                var parentRtys = [];
+                
                 for (var rtyID in rectypes.typedefs)
                 if(rtyID>0){
                     for (var dtyID in rectypes.typedefs[rtyID].dtFields){
@@ -2000,18 +2000,62 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                               
                     if(window.hWin.HEURIST4.util.findArrayIndex(rectypeID, rectypes.typedefs[rtyID].dtFields[dtyID][fi_ptr].split(','))>=0)
                     {
-                                   
-                                   
-                                   var $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
-rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.names[rtyID]
-+'.<br><br>To avoid creation of orphan records, you should only create '+rectypes.names[rectypeID]+' records from within a '+rectypes.names[rtyID]+' record'
+                        if(parentRtys.indexOf(rtyID)<0) parentRtys.push(rtyID);
+                    }
+
+                        }//if
+                    }//for
+                }
+                
+                if(parentRtys.length>0){
+                    var names = [];
+                    $(parentRtys).each(function(i,id){
+                        names.push(rectypes.names[id]);
+                    });
+                    
+                    
+                    var $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
+rectypes.names[rectypeID] + ' is defined as a child of <b>'+names
++'</b>.<br><br>To avoid creation of orphan records, you should only create '+rectypes.names[rectypeID]+' records from within a '+rectypes.names[rtyID]+' record'
 +'<br><br>If you understand the implications and still wish to create an independent, non-child record,<br> check this box <input type="checkbox"> '
 +' then click [Create independent record]',
-[{text:'Cancel', click: function(){ $dlg.dialog( "close" ); that.closeEditDialog(); }},
- {text:'Create independent record', click: function(){
+
+[
+ {text:'Create independent record', css:{'margin-right':'200px'}, click: function(){
                             $dlg.dialog( "close" ); 
                             response.allowCreateIndependentChildRecord = true;
-                            that._initEditForm_step4(response)   }} ],{  title:'Child record type' }        
+                            that._initEditForm_step4(response);   }},
+                            
+ {text:'Find or create parent record', click: function(){ 
+                            $dlg.dialog( "close" );
+ 
+            var popup_options = {
+                            select_mode: 'select_single',
+                            select_return_mode: 'ids', //'recordset'
+                            edit_mode: 'popup',
+                            selectOnSave: true, //it means that select popup will be closed after add/edit is completed
+                            title: window.hWin.HR('Select of create parent'),
+                            rectype_set: parentRtys,
+                            pointer_mode: null, //select of create
+                            pointer_filter: null,
+                            parententity: 0,
+                            parentselect: rectypeID,
+                            onClose:  function(){ if(!(that.options.parententity>0)) that.closeEditDialog(); },
+                            onselect: function(event, data){
+                                     if( data.selection && data.selection.length>0 ){
+                                        that.options.parententity  = data.selection[0];
+                                        that._initEditForm_step4(response);                                        
+                                     }else{
+                                         that.closeEditDialog();
+                                     }
+                            }
+            };
+ 
+            window.hWin.HEURIST4.ui.showEntityDialog('records', popup_options);
+ }},
+ {text:'Cancel', click: function(){ $dlg.dialog( "close" ); that.closeEditDialog(); }}
+ 
+],{  title:'Child record type' }        
                      );
                      
                           var btn = $dlg.parent().find('button:contains("Create independent record")');
@@ -2020,12 +2064,11 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
                           })
                           window.hWin.HEURIST4.util.setDisabled(btn, true);
                           
-                          return;
-                    }
-
-                        }//if
-                    }//for
+                     return;
+                    
                 }
+                
+                
             }
             
             var dialog_title = this.options['edit_title'];
@@ -3017,7 +3060,7 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
                 if(parseInt($(item).attr('data-dtid'))>0){
                     var is_folder = false;
                     var ele = $('<div><span class="ui-icon ui-icon-gear"></span></div>')
-                    .css({'display':'table-cell','vertical-align':'top','opcaity':'0 !important',
+                    .css({'display':'table-cell','vertical-align':'top',
                           'min-width':'32px','cursor':'pointer','padding-top':'0.4em'})
                     .prependTo($(item));    
                     
@@ -3069,7 +3112,11 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
             $(this.element).find('.hidden_field_warning').hide();
             
             //show forbidden fields as disabled - except gearwheel
-            $(this.element).find('div.forbidden').parent().css({'opacity':'0.5'} ); 
+            var ele_fb = $(this.element).find('div.forbidden');
+            ele_fb.css({'opacity':'0.5'}); 
+            ele_fb.next().css({'opacity':'0.5'}); 
+            ele_fb.next().next().css({'opacity':'0.5'}); 
+            //ele_fb.find('.ui-icon-gear').parent().css({'opacity':'0 !important', color:'red'});
             
             //reduce width of header
             $(this.element).find('.separator').css({width: '80%', display: 'inline-block'});
@@ -3101,6 +3148,10 @@ rectypes.names[rectypeID] + ' is defined as a child record type of '+rectypes.na
         }
         
     },//END _afterInitEditForm
+    
+    showOptionalFieds: function(isShow){
+        this.element.find('.chb_opt_fields').prop('checked', isShow).change();
+    },
     
     //
     //to save space - hide all fieldsets without visible fields

@@ -44,8 +44,8 @@
                     "dtID": "rst_DetailTypeID",
                     "dtFields":{
                         "dty_Type":"integer",
-                        "rst_Display":"readonly",
-                        "rst_DisplayName":"Base field ID"
+                        "rst_Display":"hidden",
+                        "rst_DisplayName":"ID"
                     }   
                 },
                 {
@@ -61,7 +61,7 @@
                         "dty_Type":"freetext",
                         "dty_Role":"title",
                         "dty_Size":255,
-                        "rst_DisplayName": "Prompt (display name):",
+                        "rst_DisplayName": "Field label:",
                         "rst_DisplayHelpText": "The name of the field, displayed next to the field in data entry and used to identify the field in report formats, analyses and so forth", 
                         "rst_DisplayExtendedDescription":"",
                         "rst_DisplayWidth":60,
@@ -262,7 +262,7 @@
                         "dty_Type":"resource",
                         "dty_Role":"virtual",
                         "rst_Class":"resource",
-                        "rst_DisplayName":"Default Resource:",
+                        "rst_DisplayName":"Default Value:",
                         "rst_DisplayHelpText": "Select record to be default resource/linked record",
                         "rst_FieldConfig": {"entity":"records"}
                     }
