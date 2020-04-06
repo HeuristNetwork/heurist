@@ -50,7 +50,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 this.options.layout_mode = //slightly modified 'short' layout
                         '<div class="ent_wrapper editor">'
                             +'<div class="ent_wrapper">'
-                                +    '<div class="ent_header searchForm"/>'     
+                                +    '<div class="ent_header searchForm" style="height:auto"/>'     
                                 +    '<div class="ent_content_full recordList"/>'
                             +'</div>'
 
@@ -113,30 +113,14 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 cnt = 1;
             }            
             
-            sh = (cnt<4)?13:((cnt<7)?15:17);
+            this._adjustResultListTop();
             
-            if(this.options.pointer_mode == 'addonly'){
-                this.options.height = (cnt<4)?146:((cnt<7)?166:196);
-                $dlg = this.getDialog();
-                $dlg.dialog('option', 'height', this.options.height);
-                this.recordList.hide();    
-            }else if(is_only_rt && this.options.pointer_mode == 'browseonly'){
-                sh = sh - 6;
-            }
-            
-            if(this.options.parententity){
-                //sh = 14;  
-                this.searchForm.height((sh+2.5)+'em').css('border','none');    
-            }else{
-                this.searchForm.height((sh+4.5)+'em').css('border','none');    
-                sh++;
-            }
-            
+        }else{
+            this.recordList.css('top', 0);    
         }
         
-        this.recordList.css('top', sh+'em');    
+        //  this.recordList.css('top', sh+'em');    
         
-
         var that = this;
         
         jQuery(document).keydown(function(event) {
@@ -208,6 +192,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         // init search header
         if(this.searchForm && this.searchForm.length>0){
             this.searchForm.addClass('ui-heurist-bg-light').searchRecords(this.options);    
+            this._adjustResultListTop();
         }
 /*        
         var iheight = 2;
@@ -235,6 +220,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         if(this.searchForm && this.searchForm.length>0){
             
             this._on( this.searchForm, {
+                "searchrecordsonstart": this._adjustResultListTop,
                 "searchrecordsonresult": this.updateRecordList,
                 "searchrecordsonaddrecord": function( event, _rectype_id ){
                     this._currentEditRecTypeID = _rectype_id;
@@ -247,6 +233,18 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         this.editForm.css({'overflow-y':'auto !important', 'overflow-x':'hidden', 'padding':'5px'});
             
         return true;
+    },
+    
+    //
+    //
+    //
+    _adjustResultListTop: function(){
+         if(this.searchForm && this.searchForm.length>0 && this.searchForm.is(':visible')){
+             this.recordList.css('top', this.searchForm.height());
+         }else{
+             this.recordList.css('top', 0); 
+         }
+        
     },
     
     //
@@ -2036,13 +2034,14 @@ rectypes.names[rectypeID] + ' is defined as a child of <b>'+names
                             select_return_mode: 'ids', //'recordset'
                             edit_mode: 'popup',
                             selectOnSave: true, //it means that select popup will be closed after add/edit is completed
-                            title: window.hWin.HR('PARENT record pointer: select of create a linked parent record'),
+                            title: window.hWin.HR('Select of create parent'),
                             rectype_set: parentRtys,
                             pointer_mode: null, //select of create
                             pointer_filter: null,
                             parententity: 0,
-                            
-                            onselect:function(event, data){
+                            parentselect: rectypeID,
+                            onClose:  function(){ if(!(that.options.parententity>0)) that.closeEditDialog(); },
+                            onselect: function(event, data){
                                      if( data.selection && data.selection.length>0 ){
                                         that.options.parententity  = data.selection[0];
                                         that._initEditForm_step4(response);                                        
