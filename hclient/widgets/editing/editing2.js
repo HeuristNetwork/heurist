@@ -184,7 +184,7 @@ function hEditing(_options) {
         function __createGroup(fields, groupContainer, fieldContainer){
             var idx, tab_index;
                 
-            var currGroupType = null; //current accodion or tab control
+            var currGroupType = null, currGroupHeaderClass = null; //current accodion or tab control
             var groupTabHeader, groupEle;
             
             //var groupEle,      //current accordion or tab control
@@ -207,11 +207,15 @@ function hEditing(_options) {
                         if(groupEle!=null){
                             if(currGroupType == 'accordion'){
                                 groupEle.accordion({heightStyle: "content", active:false, collapsible: true});
+                                if(currGroupHeaderClass){
+                                    groupEle.find('.ui-accordion-header').addClass(currGroupHeaderClass);
+                                }
                             }else if(currGroupType == 'tabs'){
                                 groupEle.tabs();
                             }
                         }
-                        
+                
+                        currGroupHeaderClass= fields[idx].groupHeaderClass;
                         currGroupType = fields[idx].groupType;
                         //create new accordion or tabcontrol
                         if(currGroupType == 'accordion'){
@@ -240,7 +244,7 @@ function hEditing(_options) {
 
                         if(!(currGroupType == 'tabs' || currGroupType == 'accordion')){
                             //div for gearwheel
-                            $('<div>').css({'padding-left':'7px','display':'inline-block'})
+                            $('<div>').css({'padding-left':'7px','height':'12px','display':'inline-block'})
                                 .attr('data-dtid', fields[idx]['dtID'])
                                 .appendTo(groupContainer);
                         }else{
@@ -251,34 +255,29 @@ function hEditing(_options) {
 
                     //add header and field container
                     if(currGroupType == 'accordion'){
-                         $('<h3>').html('<span class="separator2">'+headerText+'</span>').appendTo(groupEle);
-                         newFieldContainer.appendTo($('<div>').appendTo(groupEle));
-                         
-                         newFieldContainer.addClass(options.className);
-                         
+                        $('<h3>').html('<span class="separator2">'+headerText+'</span>').appendTo(groupEle);
+                        newFieldContainer.appendTo($('<div>').appendTo(groupEle));
+
+                        newFieldContainer.addClass(options.className);
+
                     }else if(currGroupType == 'tabs'){
-                         $('<li>').html('<a href="#'+newFieldContainer.attr('id')+'"><span class="separator2">'+headerText+'</span></a>')
-                                .appendTo(groupTabHeader);
-                                
-                         $(newFieldContainer).appendTo(groupEle);
-                         
-                         $(newFieldContainer).append('<div style="min-height:20px">&nbsp;</div>');
-                         
-                         newFieldContainer.addClass(options.className);
-                         //.css({'font-size':'1em'})
+                        $('<li>').html('<a href="#'+newFieldContainer.attr('id')+'"><span class="separator2">'+headerText+'</span></a>')
+                        .appendTo(groupTabHeader);
+
+                        $(newFieldContainer).appendTo(groupEle);
+
+                        $(newFieldContainer).append('<div style="min-height:20px">&nbsp;</div>');
+
+                        newFieldContainer.addClass(options.className);
+
                     }else{
-                        
-                        if(is_header_visible){
-                             $('<h4>').text(headerText).addClass('separator').appendTo(groupContainer);
-                             
-                             /*
-                             var div_prompt = $('<div>').text(headerHelpText).css('padding-left','80px')
-                                .addClass('heurist-helper1').appendTo(groupContainer);
-                             */   
-                             //see applyCompetencyLevel
-                             //if(window.hWin.HAPI4.get_prefs('help_on')!=1){div_prompt.hide();}
+
+                        var ele = $('<h4>').text(headerText).addClass('separator').appendTo(groupContainer);
+
+                        if(!is_header_visible){
+                            ele.addClass('separator-hidden').hide();
                         }
-                        
+
                         newFieldContainer.appendTo(groupContainer);
                     }
 
@@ -361,6 +360,9 @@ function hEditing(_options) {
             if(groupEle!=null){
                 if(currGroupType == 'accordion'){
                     groupEle.accordion({heightStyle: "content", active:false, collapsible: true });
+                    if(currGroupHeaderClass){
+                        groupEle.find('.ui-accordion-header').addClass(currGroupHeaderClass);
+                    }
                 }else if(currGroupType == 'tabs'){
                     groupEle.tabs({active: 0});
                 }
