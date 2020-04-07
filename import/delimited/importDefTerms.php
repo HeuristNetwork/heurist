@@ -38,6 +38,9 @@ require_once(dirname(__FILE__)."/../../hclient/framecontent/initPage.php");
         
         </script>
         <style>
+            body{
+                font-size: 12px;
+            }
             .tbmain td, .tbmain th
             {
                 border-left: 1px solid lightgray;
@@ -160,14 +163,20 @@ separate term and each of these values with comma or tab.
     
 </div>
 <div style="position:absolute;right:200px;width:200px; height:100%; border-right:1px lightgray solid">
-    <div class="ent_header" style="height:5em;">
-        <h2>Step 2</h2>
+    <div class="ent_header" style="height:10em;">
+        <p><b>Step 2</b></p>
+        <div style="padding-top:1em;">
+            <input id="csv_header" 
+                style="margin:1em 0.5em 0 0"
+                class="text ui-widget-content ui-corner-all" type="checkbox" value="1">
+            <label for="csv_header">Labels in line 1</label>
+        </div>
         <div id="btnParseData" style="position:absolute;bottom:10px;">Analyse</div>
     </div>
-    <fieldset class="ent_content_full" style="top:5em;padding-top:1em;">
+    <fieldset class="ent_content_full" style="top:10em;padding-top:1em;">
             <div>
                 <label for="csv_delimiter">Field separator:</label>
-                <select id="csv_delimiter" class="text ui-widget-content ui-corner-all" style="width:120px;">
+                <select id="csv_delimiter" class="text ui-widget-content ui-corner-all" style="width:120px;margin-left:20px">
                         <option value="," selected>comma</option>
                         <option value="tab">tab</option>
                         <option value=";">semicolon</option>
@@ -176,13 +185,13 @@ separate term and each of these values with comma or tab.
             </div>
             <div>
                 <label for="csv_enclosure">Fields enclosed in:</label>
-                <select id="csv_enclosure" class="text ui-widget-content ui-corner-all" style="width:120px;">
+                <select id="csv_enclosure" class="text ui-widget-content ui-corner-all" style="width:120px;margin-left:20px">
                         <option selected value='2'>"</option><option value="1">'</option>
                 </select>
             </div>
             <div>
                 <label for="csv_linebreak">Line separator:</label>
-                    <select id="csv_linebreak" class="text ui-widget-content ui-corner-all" style="width:120px;">
+                    <select id="csv_linebreak" class="text ui-widget-content ui-corner-all" style="width:120px;margin-left:20px">
                         <option selected value="auto">auto detect</option>
                         <option value="1">No lines</option>
                         <option value="2">No lines. Group by 2</option>
@@ -194,47 +203,41 @@ separate term and each of these values with comma or tab.
                         -->
                     </select>
             </div>
-            <div style="padding-top:1em;">
-                <input id="csv_header" 
-                    style="margin:1em 0.5em 0 0"
-                    class="text ui-widget-content ui-corner-all" type="checkbox" value="1">
-                <label for="csv_header">Labels in line 1</label>
-            </div>
     </fieldset>            
 </div>
 <div style="position:absolute;right:0px;height:100%;width:200px;"> 
-    <div class="ent_header" style="height:5em;">
+    <div class="ent_header" style="height:6em;">
         <p><b>Step 3</b></p>
         <p style="padding-top:0.4em; margin-bottom: 10px;">Select field order<br>(Term label is required)</p>
     </div>
-    <fieldset class="ent_content" style="top:5em;padding-top:1em;">
+    <fieldset class="ent_content" style="top:6em;padding-top:1em;">
            
             <div>
                 <label style="color:red">Term (Label)</label><br>
-                <select id="field_term" class="column_roles text ui-widget-content ui-corner-all" style="width:120px;">
+                <select id="field_term" class="column_roles text ui-widget-content ui-corner-all" style="width:120px;margin-left:20px">
                 </select>
             </div>
             <div>
                 <label>Standard Code</label><br>
-                <select id="field_code" class="column_roles text ui-widget-content ui-corner-all" style="width:120px;">
+                <select id="field_code" class="column_roles text ui-widget-content ui-corner-all" style="width:120px;margin-left:20px">
                 </select>
             </div>
             <div>
                 <label>Description</label><br>
-                <select id="field_desc" class="column_roles text ui-widget-content ui-corner-all" style="width:120px;">
+                <select id="field_desc" class="column_roles text ui-widget-content ui-corner-all" style="width:120px;margin-left:20px">
                 </select>
             </div>
             <div>
                 <label>Semantic/Reference URI</label><br>
-                <select id="field_uri" class="column_roles text ui-widget-content ui-corner-all" style="width:120px;">
+                <select id="field_uri" class="column_roles text ui-widget-content ui-corner-all" style="width:120px;margin-left:20px">
                 </select>
             </div>
             
             
     </fieldset> 
-    <div class="ent_footer" style="padding-left:1em">
+    <div class="ent_footer" style="padding-left:5px;height:5em">
+        <div id="preparedInfo2" style="font-weight:bold;font-size:1.1em"></div>
         <div id="btnImportData">Import</div>
-        <div id="preparedInfo2" style="display:inline-block;font-weight:bold;font-size:1.1em"></div>
     </div>
 </div>
 <div id="divCurtain" style="position:absolute;right:0px;height:100%;width:400px;" class="semitransparent">
@@ -243,9 +246,9 @@ separate term and each of these values with comma or tab.
 </div>
 
 <div style="width:100%;height:40%;position:absolute;bottom:0" >
-    <div class="ent_header" style="height:2em;border-bottom:none;border-top:1px solid lightgray;">
-        <p style="display:inline-block;padding-top:0.5em"><b>Preview data to be imported</b></p>
-        <div id="preparedInfo" style="float:right"> <!-- div to show results of data preparation --></div>
+    <div class="ent_header" style="height:2em;border-bottom:none;border-top:1px solid lightgray;padding-top:10px">
+        <b>Preview data to be imported</b>
+        <div id="preparedInfo" style="float:right;padding-right:10px"> <!-- div to show results of data preparation --></div>
     </div>
     <div class="ent_content_full" style="top:2.5em;font-size:0.9em;" id="divParsePreview">
     </div>
