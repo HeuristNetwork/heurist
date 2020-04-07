@@ -82,9 +82,9 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                 +'<div class="main-layout ent_wrapper">'
                         
                         +'<div class="ui-layout-west">'
-                                +'<div class="treeview_with_header">'
+                                +'<div class="treeview_with_header" style="background:white">'
                                     +'<div style="padding:10px 20px 4px 10px;border-bottom:1px solid lightgray">' //instruction and close button
-                                        +'<span style="font-style:italic;display:inline-block">Drag heading or field to reposition<br>Select field or click gearwheek to modify</span>&nbsp;&nbsp;&nbsp;'
+                                        +'<span style="font-style:italic;display:inline-block">Drag heading or field to reposition<br>Select field or click gearwheel to modify</span>&nbsp;&nbsp;&nbsp;'
                                         +'<button style="vertical-align:top;margin-top:4px;" class="closeRtsEditor"/>'
                                         +'<span style="position:absolute; right:4px;width:32px;top:26px;height:32px;font-size:32px;cursor:pointer" class="closeTreePanel ui-icon ui-icon-carat-2-w"/>'
                                     +'</div>'
@@ -331,13 +331,15 @@ dty_TermIDTreeNonSelectableIDs
                     
                         var isSep = (recset.fld(record, 'dty_Type')=='separator');
                         var title = recset.fld(record,'rst_DisplayName');
-                        if(!isSep )
+                        var req = recset.fld(record,'rst_RequirementType');
+                        if(!isSep ){
                             title = '<span style="padding-left:20px">' + title 
                                     +'</span><span style="font-size:smaller">  ('
                                     +window.hWin.HEURIST4.detailtypes.lookups[recset.fld(record,'dty_Type')]
                                     +')</span>';
-                                    
-                        var req = recset.fld(record,'rst_RequirementType');
+                        }else if(req=='forbidden'){
+                            title =  title + '<span style="font-size:smaller;text-transform:none;"> (hidden)</span>';
+                        }
                     
                     var node = {title: title, key: dty_ID, extraClasses:isSep?'separator2':req};
                     node['data'] = {header:isSep, type:'group'};
@@ -1473,8 +1475,8 @@ dty_TermIDTreeNonSelectableIDs
         
         //add show explanation checkbox
         var ishelp_on = (this.usrPreferences['help_on']==true || this.usrPreferences['help_on']=='true');
-        var ele = $('<div><label style="float:right;padding-right:10px"><input type="checkbox" '
-                        +(ishelp_on?'checked':'')+'/>show explanatios</label></div>').prependTo(this.editForm);
+        var ele = $('<div><label style="float:right;padding-right:30px"><input type="checkbox" '
+                        +(ishelp_on?'checked':'')+'/>show explanations</label></div>').prependTo(this.editForm);
         
         this._on( ele.find('input'), {change: function( event){
             var ishelp_on = $(event.target).is(':checked');
@@ -1503,6 +1505,11 @@ dty_TermIDTreeNonSelectableIDs
                 }
             }
             this._editing.setFieldValueByName( 'rst_SeparatorType', sep_type, false );
+
+
+            sep_type = this._editing.getValue('rst_RequirementType')[0];
+            sep_type = (sep_type=='forbidden')?sep_type:'optional';
+            this._editing.setFieldValueByName( 'rst_SeparatorRequirementType', sep_type, false );
             
             this.editForm.find('.ui-accordion').hide();
         }else{
@@ -1895,15 +1902,18 @@ dty_TermIDTreeNonSelectableIDs
                             
                             var isSep = (fields['dty_Type']=='separator');
                             var title = fields['rst_DisplayName'];
+                            var req = fields['rst_RequirementType'];
                             if(!isSep){
                                 title =  '<span style="padding-left:20px">' + title 
                                         + '</span><span style="font-size:smaller">  ('
                                         +window.hWin.HEURIST4.detailtypes.lookups[fields['dty_Type']]
                                         +')</span>';
+                            }else if(req=='forbidden'){
+                                title =  title + '<span style="font-size:smaller;text-transform:none;"> (hidden)</span>';
                             }
                             
                             node.setTitle( title ); 
-                            node.extraClass = isSep?'separator2':fields['rst_RequirementType'];
+                            node.extraClass = isSep?'separator2':req;
                             node.data = {help:fields['rst_DisplayHelpText'], type:fields['rst_SeparatorType']};   
                         } 
                     }
@@ -1929,6 +1939,7 @@ dty_TermIDTreeNonSelectableIDs
                 fields['rst_DefaultValue'] = fields['rst_DefaultValue_resource'];
             }else if(dt_type=='separator'){
                 fields['rst_DefaultValue'] = fields['rst_SeparatorType'];
+                fields['rst_RequirementType'] = fields['rst_SeparatorRequirementType'];
             }else if(dt_type=='freetext' || dt_type=='integer' || dt_type=='float'){                
                 //fields['rst_DefaultValue'] = fields['rst_DefaultValue_inc'];
             }
@@ -2050,15 +2061,18 @@ edit form is always inline
                     if(node) {
                         var isSep = recset.fld(record,'dty_Type')=='separator';
                         var title = recset.fld(record, 'rst_DisplayName');
+                        var req = recset.fld(record,'rst_RequirementType');
                         if(!isSep){
                             title =  '<span style="padding-left:20px">' + title 
                                         + '</span><span style="font-size:smaller;">  ('
                                     +window.hWin.HEURIST4.detailtypes.lookups[recset.fld(record,'dty_Type')]
                                     +')</span>';
+                        }else if(req=='forbidden'){
+                            title =  title + '<span style="font-size:smaller;text-transform:none;"> (hidden)</span>';
                         }
                         node.setTitle( title );   
                         if(this._isFlat || !node.folder){
-                            var req = recset.fld(record,'rst_RequirementType');
+                            
                             node.extraClasses = isSep?'separator2':req;
                             $(node.li).addClass( isSep?'separator2':req );
                         }
