@@ -599,7 +599,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
       
         if(input_name.val().length>2){
            
-            var rty_ID = this.options.rty_ID; 
+            var rty_ID = this.options.newFieldForRtyID; 
             var dty_ID, field_name,
                 fi = window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex;
                 
@@ -615,19 +615,23 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                                 //!!!! $('#ed_dty_HelpText').focus();
                             });
 
-
+                            
+            //list of fields that are already in record type
+            var aUsage = {};
+            if(rty_ID>0 && window.hWin.HEURIST4.rectypes.typedefs[rty_ID]){
+                aUsage = window.hWin.HEURIST4.rectypes.typedefs[rty_ID].dtFields;   
+            }
+                            
             //find among fields that are not in current record type
             for (dty_ID in window.hWin.HEURIST4.detailtypes.names){
                if(dty_ID>0){ 
                    var td = window.hWin.HEURIST4.detailtypes.typedefs[dty_ID];
                    var deftype = td.commonFields;
 
-                   var aUsage = window.hWin.HEURIST4.detailtypes.rectypeUsage[dty_ID];
-                   
                    field_name = window.hWin.HEURIST4.detailtypes.names[dty_ID];
 
                    if( deftype[fi.dty_ShowInLists]!="0" && deftype[fi.dty_Type]!='separator'
-                        && ( window.hWin.HEURIST4.util.isnull(aUsage) || aUsage.indexOf(rty_ID)<0 ) 
+                        && !aUsage[dty_ID]
                         && (field_name.toLowerCase().indexOf( input_name.val().toLowerCase() )>=0) )
                    {
                        
