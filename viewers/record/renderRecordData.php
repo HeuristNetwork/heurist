@@ -334,7 +334,9 @@ if(!($is_map_popup || $without_header)){
                 ?>
             }
             
-            
+            //
+            //
+            //
             function showHidePrivateInfo( event ){
                 
                 var prefVal = 0;
@@ -348,9 +350,11 @@ if(!($is_map_popup || $without_header)){
                 if(prefVal==1){
                     $('#link_showhide_private').text('less...');
                     $('.morePrivateInfo').show();
-                    setTimeout(function(){
-                        window.scrollTo(0, document.body.scrollHeight || document.documentElement.scrollHeight);
-                        },200);
+                    if(event!=null){
+                        setTimeout(function(){
+                            window.scrollTo(0, document.body.scrollHeight || document.documentElement.scrollHeight);
+                            },200);
+                    }
                 }else{
                     $('#link_showhide_private').text('more...');
                     $('.morePrivateInfo').hide();
@@ -611,8 +615,10 @@ function print_header_line($bib) {
     <?php 
 }
 
-
+//
 //this  function displays private info if there is any.
+// ownereship, viewability, dates, tags, rate
+//
 function print_private_details($bib) {
     global $system, $is_map_popup;
 
@@ -818,7 +824,9 @@ function print_personal_details($bkmk) {
     <?php
 }
 
-
+//
+// prints recDetails
+//
 function print_public_details($bib) {
     global $system, $terms, $is_map_popup, $without_header, $is_production, $ACCESSABLE_OWNER_IDS, $relRT;
     
@@ -1494,7 +1502,8 @@ function print_text_details($bib) {
 
 function output_chunker($val) {
     // chunk up the value so that it will be able to line-break if necessary
-    $val = htmlspecialchars($val);
+    //$val = htmlspecialchars($val);
+    $val = strip_tags($val,'<a><u><i><b><strong><h1><h2><h3><h4><p><ul><li>');
     return $val;
     /* it adds word breaker incorrectly, so Arabic words are displayed incorrecly
     return preg_replace('/(\\b.{15,20}\\b|.{20}.*?(?=[\x0-\x7F\xC2-\xF4]))/', '\\1<wbr>', $val);

@@ -48,6 +48,7 @@ $mysqli  = $system->get_mysqli();
 
 $templateddb = @$_REQUEST['templatedb'];
 $isCloneTemplate = ($templateddb!=null);
+$sErrorMsg = null;
 
 if($isCloneTemplate){ //template db must be registered with id less than 21
 
@@ -67,6 +68,40 @@ if($isCloneTemplate){ //template db must be registered with id less than 21
     }
 }else{
     $templateddb = null;
+}
+
+
+// ---- PROCESS THE COPY FUNCTION (second pass) --------------------------------------------------------------------
+
+//verify that name of database is unique
+if(@$_REQUEST['mode']=='2'){
+    
+    $targetdbname = $_REQUEST['targetdbname'];
+
+    // Avoid illegal chars in db name
+    $hasInvalid = preg_match('[\W]', $targetdbname);
+    if ($hasInvalid) {
+            $sErrorMsg = "<p><hr><p>&nbsp;<p>Requested database copy name: <b>$targetdbname</b>".
+            "<p>Sorry, only letters, numbers and underscores (_) are allowed in the database name";
+
+            $_REQUEST['mode'] = 0;
+            $_REQUEST['targetdbname'] = null;
+            unset($_REQUEST['targetdbname']);
+    } // rejecting illegal characters in db name
+    else{
+        list($targetdbname, $dbname) = mysql__get_names( $targetdbname );
+        
+        $dblist = mysql__select_list2($mysqli, 'show databases');
+        if (array_search(strtolower($targetdbname), array_map('strtolower', $dblist)) !== false ){
+            $sErrorMsg = "<div class='ui-state-error'>Warning: database '".$targetdbname
+                ."' already exists. Please choose a different name<br/></div>";
+            $_REQUEST['mode'] = 0;
+            $_REQUEST['targetdbname'] = null;
+            unset($_REQUEST['targetdbname']);
+        }else{
+            ob_start();
+        }
+    }
 }
 ?>
 <html>
@@ -137,22 +172,26 @@ if($isCloneTemplate){ //template db must be registered with id less than 21
                     ele = document.getElementById("submitBtn");
                     ele.disabled = 'disabled';
 
-                    ele = document.getElementById("loading");
-                    ele.style.display = "block";
-                    ele = document.getElementById("mainform");
-                    ele.style.display = "none";
-
-                    showProgress();
+                    onStartProgress();    
                     return true;
                     //document.forms[0].submit();
                 }
             }
+            
+            function onStartProgress(){
+                    ele = document.getElementById("loading");
+                    ele.style.display = "block";
+                    ele = document.getElementById("mainform");
+                    if(ele) ele.style.display = "none";
 
+                    showProgress();
+            }
+                
             function showProgress(){
 
                 var ele = document.getElementById("divProgress");
                 if(ele){
-                    ele.innerHTML = ele.innerHTML + ".";
+                    ele.innerHTML = ele.innerHTML + ". ";
                     setTimeout(showProgress, 500);
                 }
             }
@@ -161,14 +200,30 @@ if($isCloneTemplate){ //template db must be registered with id less than 21
 
 
         <div class="banner"><h2>Clone <?php print ($isCloneTemplate?'Template ':'')?>Database</h2></div>
-
         <div id="page-inner" style="overflow:auto">
-
-        
             <div id="loading" style="display:none">
                 <img alt="cloning ..." src="../../../common/images/mini-loading.gif" width="16" height="16" />
-                <strong><span id="divProgress">&nbsp; Cloning of database may take a few minutes for large databases </span></strong>
+                <div id="divProgress" style="font-weight:bold;width:100%;">&nbsp; Cloning of database may take a few minutes for large databases.</div>
             </div>
+      
+<?php    
+if(@$_REQUEST['mode']=='2'){
+    
+    $targetdbname = $_REQUEST['targetdbname'];
+    $nodata = (@$_REQUEST['nodata']==1);
+
+    //$res = false;
+    //sleep(15);
+    
+    $res = cloneDatabase($targetdbname, $nodata, $templateddb, $user_id);
+    if(!$res){
+        echo_flush ('<p style="padding-left:20px;"><h2 style="color:red">WARNING: Your database has not been cloned.</h2>'
+        .'Please run Verify &gt; Verify database integrity. If this does not find and fix errors, please send a bug report (Help &gt; Bug report) and we will investigate the problem.');
+    }
+
+    print "</div></body></html>";
+}else{
+?>
             <div id="mainform">
 
                 <?php if(!$isCloneTemplate) { ?>
@@ -181,42 +236,13 @@ if($isCloneTemplate){ //template db must be registered with id less than 21
                 </p>
 
                 <?php
-                
+                }
+                if($sErrorMsg){
+                    echo $sErrorMsg;
                 }
                 
-                //verify that name of database is unique
-                if(@$_REQUEST['mode']=='2'){
-                    
-                    $targetdbname = $_REQUEST['targetdbname'];
-
-                    // Avoid illegal chars in db name
-                    $hasInvalid = preg_match('[\W]', $targetdbname);
-                    if ($hasInvalid) {
-                        echo ("<p><hr><p>&nbsp;<p>Requested database copy name: <b>$targetdbname</b>".
-                            "<p>Sorry, only letters, numbers and underscores (_) are allowed in the database name");
-
-                            $_REQUEST['mode'] = 0;
-                            $_REQUEST['targetdbname'] = null;
-                            unset($_REQUEST['targetdbname']);
-                    } // rejecting illegal characters in db name
-                    else{
-                        list($targetdbname, $dbname) = mysql__get_names( $targetdbname );
-                        
-                        $dblist = mysql__select_list2($mysqli, 'show databases');
-                        if (array_search(strtolower($targetdbname), array_map('strtolower', $dblist)) !== false ){
-                            echo ("<div class='ui-state-error'>Warning: database '".$targetdbname
-                                ."' already exists. Please choose a different name<br/></div>");
-                            $_REQUEST['mode'] = 0;
-                            $_REQUEST['targetdbname'] = null;
-                            unset($_REQUEST['targetdbname']);
-                        }
-                    }
-                }
-                
-
                 // ---- SPECIFY THE TARGET DATABASE (first pass) -------------------------------------------------------------------
 
-if(@$_REQUEST['mode']!='2' || !@$_REQUEST['targetdbname']){
                     ?>
                     <div class="separator_row" style="margin:20px 0;"></div>
                     <form name='selectdb' action='cloneDB.php' method='get' onsubmit="{return onSubmit(event);}">
@@ -248,25 +274,6 @@ if(@$_REQUEST['mode']!='2' || !@$_REQUEST['targetdbname']){
     <?php
     exit;
 }
-
-// ---- PROCESS THE COPY FUNCTION (second pass) --------------------------------------------------------------------
-
-if(@$_REQUEST['mode']=='2'){
-
-    $targetdbname = $_REQUEST['targetdbname'];
-    $nodata = (@$_REQUEST['nodata']==1);
-    $res = cloneDatabase($targetdbname, $nodata, $templateddb, $user_id);
-    
-    if(!$res){
-        echo_flush ('<p style="padding-left:20px;"><h2 style="color:red">WARNING: Your database has not been cloned.</h2>'
-        .'Please run Verify &gt; Verify database integrity. If this does not find and fix errors, please send a bug report (Help &gt; Bug report) and we will investigate the problem.');
-    }
-        
-
-
-    print "</div></body></html>";
-}
-
 // ---- COPY FUNCTION -----------------------------------------------------------------
 
 //

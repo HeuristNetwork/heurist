@@ -963,8 +963,13 @@ var that = this;
             .css('vertical-align','-3px')
             .change(function(){that._onChange();})
             .appendTo( $inputdiv );
-
-            if(!(value==false || value=='0' || value=='n')){
+            
+            
+            if($.isArray(this.configMode)){
+                
+                $input.prop('checked', (this.configMode.indexOf(value)==0) );
+                
+            }else if(!(value==false || value=='0' || value=='n')){
                 $input.prop('checked','checked');
             }
 

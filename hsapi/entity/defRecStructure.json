@@ -171,8 +171,8 @@
                         "dty_Role":"virtual",
                         "rst_Class":"enum relmarker relationtype",
                         "rst_Display":"hidden",
-                        "rst_DisplayName":"Terms list preview and Default Value:",
-                        "rst_DisplayHelpText": "The list of terms available for selection as values for this field. Select default value"
+                        "rst_DisplayName":"Default Value:",
+                        "rst_DisplayHelpText": "Select default value from the list of terms available"
                     }
                 },
                 {  "dtID": "rst_FilteredJsonTermIDTree",
@@ -274,15 +274,29 @@
                         "rst_Class":"group_separator",
                         "rst_DisplayName":"Group/separator type:",
                         "rst_DefaultValue": "group",
+                        "rst_DisplayHelpText": "Collapsible Block header delimits a block of fields which can be opened/closed/moved together. Consecutive Tab headers create a row of tabs containing the fields which follow them. Simple Divider is an independant heading with no grouping function.",
                         "rst_FieldConfig": [
-                            {"key":"group", "title":"Block header"},
-                            {"key":"accordion", "title":"Collapsable block header"},
+                            {"key":"group", "title":"Simple Divider"},
+                            {"key":"accordion", "title":"Collapsible Block header"},
                             {"key":"tabs", "title":"Tab header"}]
+                    }
+                },
+                {
+                    "dtID": "rst_SeparatorRequirementType",
+                    "dtFields":{
+                        "dty_Type":"boolean",
+                        "dty_Role":"virtual",
+                        "rst_Class":"group_separator",
+                        "rst_DisplayName":"Hidden:",
+                        "rst_DisplayHelpText": "Not applicable for Collapsible block and Tab header", 
+                        "rst_DefaultValue":"optional",
+                        "rst_FieldConfig":["forbidden","optional"]
                     }
                 },
                 {
                     "groupHeader": "Additional",
                     "groupType": "accordion",
+                    "groupHeaderClass": "ui-heurist-bg-light",
                     "groupStyle": null,
                     "children":[
                 

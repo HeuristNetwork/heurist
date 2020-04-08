@@ -1257,7 +1257,7 @@ ul.fancytree-container ul{
 }
 
 /* intermediate level */
-.heurist-helper1{
+.heurist-helper1, .heurist-helper3{
     font-style:italic;
     font-size: 0.9em;
     vertical-align:top;

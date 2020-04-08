@@ -30,7 +30,8 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
     _stillNeedUpdateForRecID: 0,
     usrPreferences:{
         treepanel_closed: true,          
-        treepanel_width:400 
+        treepanel_width:400,
+        help_on: false
     },
     
     menues: {}, //popup menu for this widget
@@ -81,9 +82,9 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                 +'<div class="main-layout ent_wrapper">'
                         
                         +'<div class="ui-layout-west">'
-                                +'<div class="treeview_with_header">'
+                                +'<div class="treeview_with_header" style="background:white">'
                                     +'<div style="padding:10px 20px 4px 10px;border-bottom:1px solid lightgray">' //instruction and close button
-                                        +'<span style="font-style:italic;display:inline-block">Drag heading or field to reposition<br>Select field or click gearwheek to modify</span>&nbsp;&nbsp;&nbsp;'
+                                        +'<span style="font-style:italic;display:inline-block">Drag heading or field to reposition<br>Select field or click gearwheel to modify</span>&nbsp;&nbsp;&nbsp;'
                                         +'<button style="vertical-align:top;margin-top:4px;" class="closeRtsEditor"/>'
                                         +'<span style="position:absolute; right:4px;width:32px;top:26px;height:32px;font-size:32px;cursor:pointer" class="closeTreePanel ui-icon ui-icon-carat-2-w"/>'
                                     +'</div>'
@@ -330,13 +331,15 @@ dty_TermIDTreeNonSelectableIDs
                     
                         var isSep = (recset.fld(record, 'dty_Type')=='separator');
                         var title = recset.fld(record,'rst_DisplayName');
-                        if(!isSep )
+                        var req = recset.fld(record,'rst_RequirementType');
+                        if(!isSep ){
                             title = '<span style="padding-left:20px">' + title 
                                     +'</span><span style="font-size:smaller">  ('
                                     +window.hWin.HEURIST4.detailtypes.lookups[recset.fld(record,'dty_Type')]
                                     +')</span>';
-                                    
-                        var req = recset.fld(record,'rst_RequirementType');
+                        }else if(req=='forbidden'){
+                            title =  title + '<span style="font-size:smaller;text-transform:none;"> (hidden)</span>';
+                        }
                     
                     var node = {title: title, key: dty_ID, extraClasses:isSep?'separator2':req};
                     node['data'] = {header:isSep, type:'group'};
@@ -1354,13 +1357,30 @@ dty_TermIDTreeNonSelectableIDs
                     if(!this.editForm.parents('fieldset:first').is(':visible')){
                         this.editForm.parents('fieldset:first').show();
                     }
-                
+                    
+                    //expand accordion tab
+                    var ele = this.editForm.parents('.ui-accordion:first');
+                    if(ele.length>0){
+                        ele.accordion( 'option', 'active', 0);
+                    }else{
+                        ele = this.editForm.parents('.ui-tabs');
+                        if(ele.length>0){
+                            var tabIndex = this.editForm.parents('fieldset:first').attr('data-tabindex');
+                            ele.tabs( 'option', 'active', tabIndex);
+                        }
+                    }
                     
                     //adjust preview editor position
                     var ele_ed = this.previewEditor.find('.editFormDialog');
                     setTimeout(function(){
                         ele_ed.scrollTop(0);
                         var top = $(ed_cont).position().top - 60;
+                        
+                        var ele = that.editForm.parents('.ui-tabs');
+                        if(ele.length>0){
+                            top = top + $(ele).position().top;
+                        }
+                        
                         ele_ed.scrollTop(top);
                     },200); //without timeout preview form scrolls to kept position
                 }
@@ -1452,6 +1472,21 @@ dty_TermIDTreeNonSelectableIDs
             this._onDetailTypeChange();
         }
         
+        
+        //add show explanation checkbox
+        var ishelp_on = (this.usrPreferences['help_on']==true || this.usrPreferences['help_on']=='true');
+        var ele = $('<div><label style="float:right;padding-right:30px"><input type="checkbox" '
+                        +(ishelp_on?'checked':'')+'/>show explanations</label></div>').prependTo(this.editForm);
+        
+        this._on( ele.find('input'), {change: function( event){
+            var ishelp_on = $(event.target).is(':checked');
+            this.usrPreferences['help_on'] = ishelp_on;
+            window.hWin.HEURIST4.ui.switchHintState2(ishelp_on, this.editForm, '.heurist-helper3');
+        }});
+        this.editForm.find('.heurist-helper1').removeClass('heurist-helper1').addClass('heurist-helper3');
+        window.hWin.HEURIST4.ui.switchHintState2(ishelp_on, this.editForm, '.heurist-helper3');
+        
+        
         var bottom_div = $('<div style="width:100%;min-height:26px">').appendTo(this.editForm);
         
         var  dt_type = this._editing.getValue('dty_Type')[0];
@@ -1470,6 +1505,11 @@ dty_TermIDTreeNonSelectableIDs
                 }
             }
             this._editing.setFieldValueByName( 'rst_SeparatorType', sep_type, false );
+
+
+            sep_type = this._editing.getValue('rst_RequirementType')[0];
+            sep_type = (sep_type=='forbidden')?sep_type:'optional';
+            this._editing.setFieldValueByName( 'rst_SeparatorRequirementType', sep_type, false );
             
             this.editForm.find('.ui-accordion').hide();
         }else{
@@ -1862,15 +1902,18 @@ dty_TermIDTreeNonSelectableIDs
                             
                             var isSep = (fields['dty_Type']=='separator');
                             var title = fields['rst_DisplayName'];
+                            var req = fields['rst_RequirementType'];
                             if(!isSep){
                                 title =  '<span style="padding-left:20px">' + title 
                                         + '</span><span style="font-size:smaller">  ('
                                         +window.hWin.HEURIST4.detailtypes.lookups[fields['dty_Type']]
                                         +')</span>';
+                            }else if(req=='forbidden'){
+                                title =  title + '<span style="font-size:smaller;text-transform:none;"> (hidden)</span>';
                             }
                             
                             node.setTitle( title ); 
-                            node.extraClass = isSep?'separator2':fields['rst_RequirementType'];
+                            node.extraClass = isSep?'separator2':req;
                             node.data = {help:fields['rst_DisplayHelpText'], type:fields['rst_SeparatorType']};   
                         } 
                     }
@@ -1896,6 +1939,7 @@ dty_TermIDTreeNonSelectableIDs
                 fields['rst_DefaultValue'] = fields['rst_DefaultValue_resource'];
             }else if(dt_type=='separator'){
                 fields['rst_DefaultValue'] = fields['rst_SeparatorType'];
+                fields['rst_RequirementType'] = fields['rst_SeparatorRequirementType'];
             }else if(dt_type=='freetext' || dt_type=='integer' || dt_type=='float'){                
                 //fields['rst_DefaultValue'] = fields['rst_DefaultValue_inc'];
             }
@@ -1933,7 +1977,7 @@ dty_TermIDTreeNonSelectableIDs
     //
     closeDialog: function(is_force){
         
-        if($.isFunction(this.saveUiPreferences))this.saveUiPreferences();
+        if($.isFunction(this.saveUiPreferences)) this.saveUiPreferences();
 
 
         if(this.options.external_toolbar){
@@ -2017,15 +2061,18 @@ edit form is always inline
                     if(node) {
                         var isSep = recset.fld(record,'dty_Type')=='separator';
                         var title = recset.fld(record, 'rst_DisplayName');
+                        var req = recset.fld(record,'rst_RequirementType');
                         if(!isSep){
                             title =  '<span style="padding-left:20px">' + title 
                                         + '</span><span style="font-size:smaller;">  ('
                                     +window.hWin.HEURIST4.detailtypes.lookups[recset.fld(record,'dty_Type')]
                                     +')</span>';
+                        }else if(req=='forbidden'){
+                            title =  title + '<span style="font-size:smaller;text-transform:none;"> (hidden)</span>';
                         }
                         node.setTitle( title );   
                         if(this._isFlat || !node.folder){
-                            var req = recset.fld(record,'rst_RequirementType');
+                            
                             node.extraClasses = isSep?'separator2':req;
                             $(node.li).addClass( isSep?'separator2':req );
                         }
@@ -2416,7 +2463,8 @@ edit form is always inline
 
         var params = {
             treepanel_closed: isClosed,
-            treepanel_width: sz
+            treepanel_width: sz,
+            help_on: this.usrPreferences['help_on']
         }
         
         window.hWin.HAPI4.save_pref('prefs_'+this._entityName, params);

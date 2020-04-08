@@ -58,9 +58,13 @@ if(isset($message)){
 }
 
 function echo_flush($msg){
-    ob_start();
+    //ob_start();
     print $msg;
-    @ob_flush();
-    @flush();
+    //ob_end_flush();
+    //@ob_flush();
+    //@flush();
+}
+function echo_flush2($msg){
+    print $msg;
 }
 ?>

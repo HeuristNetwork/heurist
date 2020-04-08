@@ -1729,16 +1729,20 @@ window.hWin.HEURIST4.ui = {
     //
     //  used in manageRecords only
     //
-    switchHintState2: function(state, $container){
+    switchHintState2: function(state, $container, className){
+        
+            if(!className){
+                className = '.heurist-helper1';
+            }
         
             if(state){
                 //$help_button.addClass('ui-state-focus');    
-                $container.find('.heurist-helper1').css('display','block');
-                $container.find('div.div-table-cell.heurist-helper1').css('display','table-cell');
+                $container.find(className).css('display','block');
+                $container.find('div.div-table-cell'+className).css('display','table-cell');
             }else{
                 //$help_button.removeClass('ui-state-focus');
-                $container.find('.heurist-table-helper1').css('display','none');
-                $container.find('.heurist-helper1').css('display','none');
+                $container.find('div.div-table-cell'+className).css('display','none');
+                $container.find(className).css('display','none');
             }
     },
     
