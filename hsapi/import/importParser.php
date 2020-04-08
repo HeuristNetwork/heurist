@@ -176,7 +176,7 @@ public static function encodeAndGetPreview($upload_file_name, $params){
     }
     unset($line);
   
-    return self::parseAndValidate($encoded_file_name, $original_filename, 100, $params);
+    return self::parseAndValidate($encoded_file_name, $original_filename, 1000, $params);
 }
 
 ///--------------------------------------
@@ -244,7 +244,7 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
     
     if(!$keyfields) $keyfields = array();
     if(!$datefields) $datefields = array();
-    if(!$memofields) {$memofields = array(); }
+    if(!$memofields) { $memofields = array(); }
     
     $csv_dateformat = @$params["csv_dateformat"];
     
@@ -607,7 +607,7 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
     
 
     if($limit>0){
-        // returns encoded filename  and parsed values for give limit lines
+        // returns encoded filename  and parsed values for given limit lines
         return array( 
                 'encoded_filename'=>$encoded_filename,   //full path
                 'original_filename'=>$original_filename, //filename only

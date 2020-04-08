@@ -1610,7 +1610,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
     //
     // init field mapping table - main table to work with 
     //
-    function _initFieldMapppingTable(){
+    function _initFieldMapppingTable( ){
     
         $('#tblFieldMapping > tbody').empty();
                         
@@ -1625,7 +1625,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                                                     ?'Column to Field mapping (record match)'
                                                     :'Fields to update');
         var stype = (currentStep==3)?'mapping_keys':'mapping_flds'; //for matching and for import
-        var mapping_flds = imp_session['sequence'][currentSeqIndex][stype];  //field index=field type id
+        var mapping_flds = imp_session['sequence'][currentSeqIndex][stype];  //field index=>field type id
         if(!mapping_flds) mapping_flds = {};
         
         //all mapped fields - to place column in "processed" section
@@ -1802,7 +1802,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
     //
     // init field mapping selectors after change of rectype
     //
-    function _initFieldMapppingSelectors(){
+    function _initFieldMapppingSelectors( preset_mapping ){
         
         var sels = $("select[id^='sa_dt_']"); //all selectors
         
@@ -1819,9 +1819,13 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
            
             
             if(currentStep!=3){
-                mapping_flds = imp_session['sequence'][currentSeqIndex]['mapping_flds'];
+                if(preset_mapping){
+                    mapping_flds = preset_mapping;
+                }else{
+                    mapping_flds = imp_session['sequence'][currentSeqIndex]['mapping_flds'];
+                }
             }else{
-                _onMatchModeSet();
+                _onMatchModeSet();    
             }
             if(!mapping_flds || $.isEmptyObject(mapping_flds)){
                 mapping_flds = imp_session['sequence'][currentSeqIndex]['mapping_keys'];
@@ -1855,10 +1859,10 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             allowed.splice(allowed.indexOf("geo"),1);
         }
         
-        var topitems = [{key:'',title:'...'},{key:'url',title:'Record URL'},{key:'scratchpad',title:'Record Notes'}];
+        var topitems = [{key:'',title:(currentStep==3)?'matching...':'importing...'},{key:'url',title:'Record URL'},{key:'scratchpad',title:'Record Notes'}];
         
         var allowed2 = ['resource'];
-        var topitems2 = [{key:'',title:'...'}]; 
+        var topitems2 = [{key:'',title:(currentStep==3)?'matching...':'importing...'}]; 
 
         $.each(sels, function (idx, item){
             var $item = $(item);
@@ -2331,7 +2335,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                             encoded_file_name = response.data.encoded_filename;
                                       
                             $('<h2 style="margin:10px">'+window.hWin.HR('Parse results.')
-                                    +(response.data.values.length<100?'':' First 100 rows')
+                                    +(response.data.values.length<1000?'':' First 1000 rows')
                                     +'</h2>').appendTo(container);
 
                             tbl  = $('<table>').addClass('tbpreview').appendTo(container);
@@ -2798,6 +2802,44 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                                     _skipToNextRecordType();   
                                 }else{
                                     _showStep(4);
+                                    
+                                    //load mapping  preset/suggestions
+                                    var request = { action: 'get_matching_samples',
+                                        rty_ID: imp_session['sequence'][currentSeqIndex]['rectype'],
+                                        imp_ID: imp_ID,
+                                            id: window.hWin.HEURIST4.util.random()
+                                           };
+                                           
+                                        window.hWin.HAPI4.doImportAction(request, function( response ){
+                                            
+                                            if(response.status == window.hWin.ResponseStatus.OK && Object.keys(response.data).length>0 ){
+                                                //and render sequence
+                                                $('#presetMapping').show();
+                                                
+                                                var preset_mappings = response.data;
+                                                var sel = $('#sel_presetMapping')
+                                                sel.empty();
+                                                window.hWin.HEURIST4.ui.addoption(sel[0], null, window.hWin.HR('select...'));    
+                                                for(var sesionName in preset_mappings)
+                                                if(sesionName){
+                                                    window.hWin.HEURIST4.ui.addoption(sel[0], sesionName, sesionName)
+                                                }
+                                                
+                                                //sel = window.hWin.HEURIST4.ui.initHSelect(sel, false);
+                                                sel.change(function(event){
+                                                   var sessionName = $(event.target).val();
+                                                   if(sessionName && preset_mappings[sessionName]){
+                                                       _initFieldMapppingSelectors( preset_mappings[sessionName] );
+                                                   }
+                                                });
+
+
+                                            }else{
+                                                $('#presetMapping').hide();
+                                            }
+                                        });
+                                    
+                                    
                                     _initFieldMapppingTable();
                                     //$('#mr_cnt_disamb').parent().hide();
                                 }
@@ -3213,9 +3255,9 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             var j, i=0, fieldnames = Object.keys(mapping_flds);
             
             if(mode=="update"){
-                s = s + '<th width="30px">Record ID</th>';
+                s = s + '<th style="text-align:left">Record ID</th>';
             }else if(fieldnames.length==0) {
-                s = s + '<th width="30px">Line #</th>';
+                s = s + '<th style="text-align:left">Line #</th>';
             }else{
                 start_idx = 1;
             }
@@ -3224,7 +3266,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 for(;i<fieldnames.length;i++){
                     var colname = imp_session['columns'][fieldnames[i]];
                     if(fieldnames[i]!=index_field_idx){
-                        s = s + '<th>'+colname+'</th>';
+                        s = s + '<th style="text-align:left">'+colname+'</th>';
                     }
                 }
             }else{  //all
@@ -3232,7 +3274,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 fieldnames = imp_session['columns'];
                 for(;i<fieldnames.length;i++){
                     var colname = fieldnames[i];
-                    s = s + '<th>'+colname+'</th>';
+                    s = s + '<th style="text-align:left">'+colname+'</th>';
                 }
             }
 

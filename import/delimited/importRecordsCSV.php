@@ -406,18 +406,18 @@ If you have missing data for Required fields, you may find it convenient to set 
                                 <!-- display:none; todo restore this feature -->
                 </div>    
             </div>        
-            <div id="btnClearFile"  style="float: right;"
+            
+            <div id="btnClearFile"  style="float: right;margin-right:80px;"
                 title="Clear the data for this uploaded file from the server">
                 Clear uploaded file</div>
-                
-            <div id="helper1" class="heurist-helper1" style="float: right; padding:0.5em;">
-                Note: Data is retained between sessions until cleared
-            </div>    
 
-            <div id="btnDownloadFile" style="float: right;"
+            <div id="btnDownloadFile" style="float: right;margin-right:40px;"
                 title="Download the data as currently displayed (including matching/IDs) to a new delimited file for further desktop editing">
                 Download data to file</div>
 
+            <div id="helper1" class="heurist-helper1" style="float: right; padding:0.5em;">
+                Note: Data is retained between sessions until cleared
+            </div>    
     
         </div>
 
@@ -517,6 +517,7 @@ If you have missing data for Required fields, you may find it convenient to set 
             Create new records</label>
             <label><input type="checkbox" checked="checked" id="sa_update" class="text" onchange="{importRecordsCSV.onUpdateModeSet()}">&nbsp;
             Update existing records</label>
+            <span style="padding-left: 200px;display:none;" id="presetMapping">Use mapping from other sessions: <select id="sel_presetMapping"></select></span>
         </div>
         <div  id="divPrepareSetting" class="step4 step-ctrls" style="display:none;top:205px">
             <div class="heurist-helper1" id="divPrepareSettingHelp" style="display:block;">
