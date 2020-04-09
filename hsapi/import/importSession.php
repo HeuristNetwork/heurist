@@ -123,6 +123,40 @@ public static function setPrimaryRectype($imp_ID, $rty_ID, $sequence){
         return dbs_GetRectypeStructureTree(self::$system, $rty_ID, 6, 'resource');  //?? 6
      }
 }
+
+
+//
+// searches all sessions and find matchings for given rectype
+// it is used to quick restore field matching for chunks csv import (similar csv files)
+//
+public static function getMatchingSamples($imp_ID, $rty_ID){
+
+     self::initialize();
+     
+     $matching = array();
+     
+     if(!($imp_ID>0)) $imp_ID = 0;
+     
+     $sessions = mysql__select_assoc2(self::$mysqli, 'select sif_ID, sif_ProcessingInfo from sysImportFiles where sif_ID!='.$imp_ID);
+     
+     foreach($sessions as $id=>$imp_session){
+         
+        $imp_session = json_decode($imp_session, true);
+        if($imp_session!==false){
+            //if($imp_session['primary_rectype']==$rty_ID){
+            foreach($imp_session['sequence'] as $seq){
+                
+                if($seq['rectype']==$rty_ID && is_array($seq['mapping_flds']) && count($seq['mapping_flds'])>0){
+                    $matching[ $imp_session['import_name'] ] = $seq['mapping_flds'];
+                    break;
+                }
+            }
+        }
+     }
+    
+     return $matching;    
+}
+
                                         
 
 /**

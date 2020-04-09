@@ -41,14 +41,14 @@
                      (used to post pasted csv to server side)    
 
     2) step1
-        parse_step1  check encoding, save file in new encoding invoke parse_step2 with limit 100 to get parse preview
+        parse_step1  check encoding, save file in new encoding invoke parse_step2 with limit 1000 to get parse preview
     
     3) step2 
-        parse_step2 -  if limit>100 returns first 100 lines to preview parse (used after set of parse parameters)
+        parse_step2 -  if limit>1000 returns first 1000 lines to preview parse (used after set of parse parameters)
                        otherwise (used after set of field roles) 
                             remove spaces, convert dates, validate identifies, find memo and multivalues
                             if id and date fields are valid invokes parse_db_save
-                            otherwise returns error array and first 100 
+                            otherwise returns error array and first 1000
                             
         parse_db_save - save content of file into import table, create session object and saves it to sysImportFiles table, returns session
 
@@ -150,7 +150,11 @@ if(!$system->init(@$_REQUEST['db'])){
             
         }else if($action=='set_primary_rectype'){
             
-            $res = ImportSession::setPrimaryRectype(@$_REQUEST['imp_ID'], @$_REQUEST['rty_ID'], @$_REQUEST['sequence']);
+            $res = ImportSession::setPrimaryRectype( @$_REQUEST['imp_ID'], @$_REQUEST['rty_ID'], @$_REQUEST['sequence']);
+            
+        }else if($action=='get_matching_samples'){
+            
+            $res = ImportSession::getMatchingSamples( @$_REQUEST['imp_ID'], @$_REQUEST['rty_ID'] );
             
         }else if($action=='records'){  //load records from temp import table   
             
