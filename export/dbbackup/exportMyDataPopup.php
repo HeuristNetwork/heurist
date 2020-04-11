@@ -133,7 +133,7 @@ if($mode=='2' && file_exists($folder.".zip") ){
 
                 <div id="buttons" class="actionButtons" style="padding-top:10px;text-align:center">
                     <input type="button" value="Export" style="margin-right: 20px;padding-left:5px; padding-right:5px;"
-onClick="{ document.getElementById('buttons').style.visibility = 'hidden';  document.forms[0].submit(); }">
+onClick="{ $('<div>').addClass('coverall-div').css('zIndex',60000).appendTo('body'); document.getElementById('buttons').style.visibility = 'hidden';  document.forms[0].submit(); }">
 <?php if(@$_REQUEST['inframe']!=1) { ?>                    
                     <input type="button" value="Cancel"  style="padding-left:5px; padding-right:5px;" onClick="window.close();">
 <?php } ?>                    
