@@ -170,8 +170,13 @@ console.log(re);
                             that.option("selection",  null);
                         }else if(data.dataset_visibility){
                             
-                            that._setLayersVisibility( window.hWin.HAPI4.getSelection(data.selection, true) );
+                            var sel =  window.hWin.HAPI4.getSelection(data.selection, true);
+                            
+                            // selection is dataset id - show/hide visibility of dataset
+                            that._setLayersVisibility( sel );
                         }else{
+                            
+                            //highlight and zoom
                             
                             that._doVisualizeSelection( window.hWin.HAPI4.getSelection(data.selection, true) );
                         }
@@ -237,11 +242,16 @@ console.log(re);
                 
                 var url = window.hWin.HAPI4.baseURL + 'viewers/map/map'+
                     (this.options.leaflet?'_leaflet':'')+'.php?db='+window.hWin.HAPI4.database;
-                    
+
                 if(this.options.layout_params){
             
-                    for(var key in this.options.layout_params)
-                        url = url + '&'+key + '=' + this.options.layout_params[key];
+                    for(var key in this.options.layout_params){
+                        if(key=='style' && window.hWin.HEURIST4.util.isJSON(this.options.layout_params[key])){
+                            url = url + '&'+key + '=' +  encodeURIComponent(JSON.stringify( this.options.layout_params[key] ));
+                        }else{
+                            url = url + '&'+key + '=' + this.options.layout_params[key];    
+                        }
+                    }
                     
                     /*layout_params['nomap'] = __gp('nomap');
                     layout_params['notimeline'] = __gp('notimeline');
@@ -255,7 +265,7 @@ console.log(re);
                     */
                     if(this.options.published){
                     }
-                    
+
                 }else{
                     //init from default_layout
                     if(this.options.layout){
@@ -405,7 +415,9 @@ console.log(re);
         }
     }
     
-
+    //
+    // highlight and zoom
+    //
     , _doVisualizeSelection: function (selection) {
 
         if(window.hWin.HEURIST4.util.isnull(this.options.recordset)) return;
@@ -448,6 +460,14 @@ console.log(re);
 
             if(this.options.leaflet){ //leaflet
                 mapping.mapping('setLayersVisibility', selection);
+                
+                //if layer is visible - select and zoom to record in search results
+                var recID = selection[0];
+                var layer_rec = mapping.mapping('getLayerFromMapDocument', 0, recID);
+                if(layer_rec && (layer_rec['layer']).isVisible()){
+                    this._doVisualizeSelection( selection );
+                } 
+                
             }
             
         }        

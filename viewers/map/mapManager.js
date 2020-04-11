@@ -1132,6 +1132,9 @@ function hMapManager( _options )
             _refreshSearchContent();
         },
         
+        //zoomToLayer
+        
+        
         //
         // returns leaflet layer_id by database mapdoc and name 
         //
@@ -1145,6 +1148,13 @@ function hMapManager( _options )
             }
             return 0;
             
+        },
+        
+        //
+        //
+        //
+        getLayer: function( mapdoc_id, recid ){
+            return mapDocuments.getLayer(mapdoc_id, recid);
         },
                 
         //

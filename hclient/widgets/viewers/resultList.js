@@ -1312,6 +1312,7 @@ $.widget( "heurist.resultList", {
         + '<span class="ui-button-icon-primary ui-icon ui-icon-comment"/>'
         + '</div>'):'')
         
+        //toadd and toremove classes works with div.collected see h4styles
         + ((this.options.support_collection)
           ?('<div title="Click to collect/remove from collection" '
         + 'class="rec_collect action-button ui-button ui-widget ui-state-default ui-corner-all'+btn_icon_only+'" '
@@ -1604,7 +1605,7 @@ $.widget( "heurist.resultList", {
                         height: 800, title:'Record Info'});
                 return;
             }else
-            if($target.parents('.rec_expand_on_map').length>0){
+            if($target.hasClass('rec_expand_on_map') || $target.parents('.rec_expand_on_map').length>0){
                 if(this._currentRecordset){
                     
                     //var record = this._currentRecordset.getById(selected_rec_ID);
@@ -1617,7 +1618,9 @@ $.widget( "heurist.resultList", {
                 }            
                 return;            
             }else
-            if($target.parents('.rec_view_link_ext').length>0){
+            if($target.hasClass('rec_view_link_ext') || $target.parents('.rec_view_link_ext').length>0){
+                //View external link (opens in new window)
+                //OR Embed map document
                 if(this._currentRecordset){
                     var record = this._currentRecordset.getById(selected_rec_ID);
                     var rectypeID = this._currentRecordset.fld(record, 'rec_RecTypeID' );
@@ -1631,7 +1634,7 @@ $.widget( "heurist.resultList", {
                 }
                 return;
             }else 
-            if($target.parents('.rec_delete').length>0){
+            if($target.hasClass('rec_delete') || $target.parents('.rec_delete').length>0){
                 if(this._currentRecordset){
                     var record = this._currentRecordset.getById(selected_rec_ID)
                     var rectypeID = this._currentRecordset.fld(record, 'rec_RecTypeID' );
@@ -1654,7 +1657,7 @@ $.widget( "heurist.resultList", {
                 }
                 return;
             }else 
-            if($target.parents('.rec_collect').length>0){
+            if($target.hasClass('rec_collect') || $target.parents('.rec_collect').length>0){
 
                 if($rdiv.hasClass('collected')){
                     window.hWin.HEURIST4.collection.collectionDel(selected_rec_ID);        

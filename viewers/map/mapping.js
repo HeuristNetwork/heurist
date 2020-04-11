@@ -38,6 +38,7 @@ Thematic mapping
 * events:
 * onselect
 * oninit
+* style: default style for current query
 * 
 * 
 * init (former _load)
@@ -409,6 +410,10 @@ $.widget( "heurist.mapping", {
         return this.mapManager.getMapDocumentRecordset( mapdoc_id);
     },
     
+    getLayerFromMapDocument:function( mapdoc_id, recid ){
+        return this.mapManager.getLayer( mapdoc_id, recid );
+    },
+    
     //--------------------
     
     //
@@ -481,7 +486,7 @@ $.widget( "heurist.mapping", {
     // show/hide dataset
     //
     setLayersVisibility: function (_selection){
-        this.mapManager.setLayersVisibility( _selection );
+        this.mapManager.setLayersVisibility( _selection);
     },
     
     //
@@ -1455,8 +1460,15 @@ $.widget( "heurist.mapping", {
         //take map style from user preferences
         var def_style;
         if(suppress_prefs!==true){
-            //take default style from topmost map document
-            def_style = this.mapManager.getSymbology();
+            
+            if(this.options.default_style){
+                //take default style from widget parameters
+                def_style = this.options.default_style;
+            }else{
+                //take default style from topmost map document
+                def_style = this.mapManager.getSymbology();
+            }
+            
             if(!def_style){
                 //otherwise from user preferences
                 def_style = window.hWin.HAPI4.get_prefs('map_default_style');
@@ -1464,6 +1476,7 @@ $.widget( "heurist.mapping", {
             }
             def_style = this.setStyleDefaultValues(def_style, true);
         }else{
+            
             //'#00b0f0' - lighy blue
             def_style = {iconType:'rectype', color:'#ff0000', fillColor:'#ff0000', weight:3, opacity:1, 
                     fillOpacity:0.2, iconSize:18, stroke:true, fill:true};
@@ -1577,8 +1590,10 @@ $.widget( "heurist.mapping", {
     },
     
     //
+    // highlight and zoom (if external call)
+    //
     // triggers redraw for path and polygones (assigns styler function)  and creates highlight circles for markers
-    // is_external - true - public call (from app_timemap for example)
+    // is_external - true - public call (from app_timemap for example)  - perform zoom
     //    
     setFeatureSelection: function( _selection, is_external ){
         var that = this;
@@ -1925,7 +1940,10 @@ $.widget( "heurist.mapping", {
         this.options.isEditAllowed = !this.options.isPublished || __parseval(params['editstyle']);
         
         this.options.map_rollover = __parseval(params['map_rollover']);
+        this.options.default_style = window.hWin.HEURIST4.util.isJSON(params['style']);
 
+console.log(params);        
+        
         //special case - till thematic map is not developed - for custom style
         /* expremental 
         this.isHamburgIslamicImpire = (params['search_realm']=='hie_places');

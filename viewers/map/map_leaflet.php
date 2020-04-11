@@ -227,7 +227,8 @@ if(true || $_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0
         
         layout_params['published'] = __gp('published');
         layout_params['map_rollover'] = __gp('map_rollover');
-        
+        layout_params['style'] = window.hWin.HEURIST4.util.isJSON(__gp('style')); //default style
+
         mapping = $('#mapping').mapping({
             element_layout: '#mapping',
             element_map: '#map',
