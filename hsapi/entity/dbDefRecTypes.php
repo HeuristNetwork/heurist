@@ -267,8 +267,6 @@ class DbDefRecTypes extends DbEntityBase
         //add specific field values
         foreach($this->records as $idx=>$record){
 
-            $this->records[$idx]['rty_Modified'] = null; //reset
-
             //validate duplication
             $mysqli = $this->system->get_mysqli();
             $res = mysql__select_value($mysqli,
@@ -279,8 +277,16 @@ class DbDefRecTypes extends DbEntityBase
                 return false;
             }
 
-            $this->records[$idx]['is_new'] = (!(@$this->records[$idx]['rty_ID']>0));
             
+            if(@$this->records[$idx]['rty_LocallyModified']==null){
+                $this->records[$idx]['rty_LocallyModified'] = 0; //default value for new
+            }
+            if(@$this->records[$idx]['rty_IDInOriginatingDB']==''){
+                $this->records[$idx]['rty_IDInOriginatingDB'] = 0;
+            }
+            $this->records[$idx]['rty_Modified'] = date('Y-m-d H:i:s'); //reset
+            
+            $this->records[$idx]['is_new'] = (!(@$this->records[$idx]['rty_ID']>0));
         }
         
         return $ret;
@@ -329,7 +335,7 @@ class DbDefRecTypes extends DbEntityBase
                     $mask = @$record['rty_TitleMask'];
                     if($mask){
                             $parameters = array("");
-                            $val = TitleMask::execute($mask, $rtyID, 1, null, _ERR_REP_SILENT);//convert from human to coded
+                            $val = TitleMask::execute($mask, $rty_ID, 1, null, _ERR_REP_SILENT);//convert from human to coded
                             $parameters = addParam($parameters, "s", $val);
 
                             $query = "update defRecTypes set rty_TitleMask = ? where rty_ID = $rty_ID";
@@ -344,14 +350,14 @@ class DbDefRecTypes extends DbEntityBase
             
                     //4. treat thumbnail
                     $thumb_file_name = @$record['rty_Thumb'];
-                    //rename it to recID.png
+                    //rename it to recID.png and copy to entity/defRecTypes
                     if($thumb_file_name){
                         parent::renameEntityImage($thumb_file_name, $rty_ID, 'thumbnail');
                     }
                     
                     //treat icon
                     $icon_file_name = @$record['rty_Icon'];
-                    //rename it to recID.png
+                    //rename it to recID.png and copy to entity/defRecTypes
                     if($icon_file_name){
                         parent::renameEntityImage($icon_file_name, $rty_ID, 'icon');
                     }

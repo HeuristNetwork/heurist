@@ -440,8 +440,8 @@ print $targetPath.'<br>';
                             <option value="UsrSavedSearches">Filters</option>
                             <option value="SysIdentification">Database Property</option>
                             <option value="SysDatabases">Databases</option>
-                            <option value="DefRecTypes">Record Types</option>
-                            <option value="DefRecStructure" selected>Record Type Structure</option>
+                            <option value="DefRecTypes" selected>Record Types</option>
+                            <option value="DefRecStructure">Record Type Structure</option>
                             <option value="DefRecTypeGroups">Record Type Groups+</option>
                             <option value="DefDetailTypes">Field Types</option>
                             <option value="DefDetailTypeGroups">Field Type Groups +</option>

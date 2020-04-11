@@ -82,7 +82,7 @@
                     "dtFields":{
                         "dty_Type":"blocktext",
                         "dty_Size":5000,
-                        "rst_DisplayWidth":60,
+                        "rst_DisplayWidth":100,
                         "rst_RequirementType":"required",
                         "rst_DisplayName": "Description",
                         "rst_DisplayHelpText": "Detailed description of the record type, providing an explanation of its content. A good description here is important for future documentation of the database." 
@@ -106,21 +106,18 @@
                         "dty_Type":"freetext",
                         "dty_Size":250,
                         "rst_DisplayWidth":60,
-                        "rst_DisplayName": "Semantic/Reference URL",
-                        "rst_DisplayHelpText": "URL to a full description or ontological reference definition of the record type"
+                        "rst_DisplayName": "Semantic/Reference URI",
+                        "rst_DisplayHelpText": "URI to a full description or ontological reference definition of the record type"
                     }
                 },
                 {
                     "dtID": "rty_ShowURLOnEditForm",
                     "dtFields":{
-                        "dty_Type":"enum",
+                        "dty_Type":"boolean",
                         "rst_DisplayName": "Show record URL on edit form:",
                         "rst_DisplayHelpText": "Display URL at top of edit form for this record type. This is a special URL used to hyperlink search results. It is distinct from any URL fields in the record, which are not affected. Use only where a majority of records of this type have one, and only one, principle URL eg. for web sites/internet bookmarks.",
-                        "rst_DefaultValue": "y",
-                        "rst_FieldConfig":[
-                            {"key":"1","title":"Yes"},
-                            {"key":"0","title":"No"}
-                        ]
+                        "rst_DefaultValue": "1",
+                        "rst_FieldConfig":["1","0"]
                     }
                 },
                 {  "dtID": "rty_LocallyModified",
@@ -176,27 +173,21 @@
                 {
                     "dtID": "rty_ShowInLists",
                     "dtFields":{
-                        "dty_Type":"enum",
+                        "dty_Type":"boolean",
                         "rst_DisplayName": "Show in lists:",
                         "rst_DisplayHelpText": "Show this record type in pulldown lists etc. (always visible in record management screen)",
-                        "rst_DefaultValue": "y",
-                        "rst_FieldConfig":[
-                            {"key":"1","title":"Yes"},
-                            {"key":"0","title":"No"}
-                        ]
+                        "rst_DefaultValue": "1",
+                        "rst_FieldConfig":["1","0"]
                     }
                 },
                 {
                     "dtID": "rty_ShowDescriptionOnEditForm",
                     "dtFields":{
-                        "dty_Type":"enum",
+                        "dty_Type":"boolean",
                         "rst_DisplayName": "Show description on edit form:",
                         "rst_DisplayHelpText": "Display record type description at top of edit form for this record type. This is a useful way of providing some context for the content of the form",
-                        "rst_DefaultValue": "y",
-                        "rst_FieldConfig":[
-                            {"key":"1","title":"Yes"},
-                            {"key":"0","title":"No"}
-                        ]
+                        "rst_DefaultValue": "1",
+                        "rst_FieldConfig":["1","0"]
                     }
                 }
                     

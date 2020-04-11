@@ -116,7 +116,7 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
 
         var popele = that.element.find('#div_ui_config');
         
-        popele.find('#input_ui_group').val(this.options.ui_params['groups']);
+        popele.find('#input_ui_group').val(this.options.ui_params['groupsPresentation']);
         
         popele.find( ".toggles" ).controlgroup( {
             direction: "vertical"
@@ -143,7 +143,7 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
                     
                     //get new parameters
                     var params = { 
-                        groups: popele.find( '#input_ui_group' ).val(),
+                        groupsPresentation: popele.find( '#input_ui_group' ).val(),
                         fields: fields
                     };
                     
@@ -183,13 +183,13 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
         var sel_group = this.element.find('#sel_group');
         var tabheight = 0;
         
-        if(params['groups']=='tab'){
+        if(params['groupsPresentation']=='tab'){
             sel_group.show();
             tabheight = sel_group.height();
         }else{
             sel_group.hide();
         }
-        if(params['groups']=='select'){
+        if(params['groupsPresentation']=='select'){
             this.element.find('#div_search_group').show();            
         }else{
             //that.element.find('#div_search_group').hide();
@@ -231,7 +231,7 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
         this.searchList = null;
         if(this.options.searchFormList){
             this.options.searchFormList.empty();
-            this.searchList = $('<ol>').css({'list-style-type': 'none'}).appendTo(this.options.searchFormList)
+            this.searchList = $('<ol>').css({'list-style-type': 'none','padding':'0px'}).appendTo(this.options.searchFormList)
         }
         
         this.selectGroup = this.element.find('#sel_group');

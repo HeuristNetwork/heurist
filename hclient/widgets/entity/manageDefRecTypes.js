@@ -33,7 +33,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
     defaultPrefs:{
         width:(window.hWin?window.hWin.innerWidth:window.innerWidth)*0.95,
         height:(window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95,
-        groups:'tab', //'list','select'
+        groupsPresentation:'tab', //'list','select'
 //'id','ccode','addrec','filter','count','group','icon','edit','editstr','name',description','show','duplicate','fields','status'        
         fields:['editstr','name'] 
         },
@@ -425,7 +425,7 @@ console.log(response);
         
         var html_icon = '<div class="recordIcons" style="min-width:16px;">' //recid="'+recID+'" bkmk_id="'+bkm_ID+'">'
         +     '<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
-        +     '" style="background-image: url(&quot;'+rtIcon+'&quot;);">'       //opacity:'+recOpacity+'
+        +     '"  class="rt-icon" style="background-image: url(&quot;'+rtIcon+'&quot;);">'       //opacity:'+recOpacity+'
         + '</div>';
         
         
@@ -564,7 +564,7 @@ console.log(response);
             var params = this.getUiPreferences();
             
             params['fields'] = new_params['fields']; 
-            params['groups'] = new_params['groups']; 
+            params['groupsPresentation'] = new_params['groupsPresentation']; 
         
             window.hWin.HAPI4.save_pref('prefs_'+this._entityName, params);
         }
@@ -585,7 +585,7 @@ console.log(response);
         this.searchForm.css({'height':iheight});
         this.recordList.css({'top':iheight});     
 
-        if(params['groups']=='list'){
+        if(params['groupsPresentation']=='list'){
             this.recordList.css({'left':'171px'});
             this.searchFormList.css({'top':this.recordList.css('top')}).show();
         }else{
