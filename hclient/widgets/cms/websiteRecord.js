@@ -16,6 +16,16 @@ function onPageInit(success){
 workflow
 _init - #main-menu navigation wizard onselect -> __iniLoadPageById warn for changes -> _hideEditor -> __loadPageById
 */ 
+
+
+// 
+//  tinymce-body - textare container with data - it becomes visible when editor is ON
+//  .mce-edit-area > iframe - real editor
+//  btn_inline_editor3 button invokes direct editor
+//  btn_inline_editor button invokes wyswyg editor _editPageContent
+//
+//  last_save_content - page content before it was loaded into tinymce
+
     
 function hCmsEditing(_options) {
     var _className = "CmsEditing",
@@ -50,7 +60,6 @@ function hCmsEditing(_options) {
         //cfg_widgets is from layout_defaults=.js 
         LayoutMgr.init(cfg_widgets, null);
         
-
         inlineEditorConfig = {
             selector: '.tinymce-body',
             //fixed_toolbar_container: '#main-header',
@@ -94,8 +103,10 @@ function hCmsEditing(_options) {
                 });
                 */
                 editor.on('init', function(e) {
-                    if(!is_header_editor)
+                    if(!is_header_editor){
                         last_save_content = __getEditorContent();//keep value to restore
+                    }
+                    // adds widget-design-header and widget-options and event handlers for edit/remove links
                     __initWidgetEditLinks(null);
                     
                     //adjust height
@@ -198,6 +209,7 @@ function hCmsEditing(_options) {
                 .click( _editPageContent )
                 .show();
 
+        //switch to direct edit OR save direct edit                        
         $('<a href="#" id="btn_inline_editor3">source</a>')
                 .appendTo($('body')).addClass('ui-front cms-button')
                 .click(function( event ){
@@ -206,9 +218,11 @@ function hCmsEditing(_options) {
                         //save changes
                         __saveChanges( true );
                     }else{
+                        //switch to direct editor
+                        
                         $('#btn_inline_editor4').hide();
-                        $('#btn_inline_editor').text('wyswyg');
-                        $('#btn_inline_editor3').text('Save');
+                        $('#btn_inline_editor').text('wyswyg'); //change "Edit page content" to "wyswyg"
+                        $('#btn_inline_editor3').text('Save');  //change label from "source" to "Save"
                         $('#btn_inline_editor5').show();
                         
                         $('#main-content').parent().css('overflow-y','hidden');
@@ -232,6 +246,7 @@ function hCmsEditing(_options) {
             .addClass('ui-front cms-button')
             .click(function () {
                 __hideEditor();
+                //restore original
                 $('.tinymce-body').val($('#main-content').html());
             })
             .show();
@@ -319,9 +334,11 @@ function hCmsEditing(_options) {
     }        
     
     //
-    // returns text content from editor
+    // returns text content from tinymce editor    
+    // without .widget-design-header and .widget-options
     //
-    function __getEditorContent(){
+    function __getEditorContent()
+    {
         var newval = null;
         if(tinymce && tinymce.activeEditor){
             newval = tinymce.activeEditor.getContent();
@@ -332,6 +349,13 @@ function hCmsEditing(_options) {
                 //remove the only tag
                 newval = nodes[0].textContent;
             }
+           
+            //remove .widget-design-header and .widget-options
+            var ele = $('<div>').html(newval);
+            ele.find('div[data-heurist-app-id]').each(function(i,item){
+                $(item).text( $(item).find('.widget-options').text() );
+            });
+            newval = ele.html();
         }
         return newval;        
     }
@@ -345,13 +369,20 @@ function hCmsEditing(_options) {
     }
          
     //
-    // need_close close editor and reinit page preview
+    // need_close - close editor and reinit page preview
     //
     function __saveChanges( need_close, new_pageid ){
         
         window.hWin.HEURIST4.msg.bringCoverallToFront($('body').find('.ent_wrapper'));
 
-        var newval = (_isDirectEditMode()) ?$('.tinymce-body').val() :__getEditorContent();
+        var newval = '';
+        if(_isDirectEditMode()){
+           //save as is
+           newval = $('.tinymce-body').val();
+            
+        }else{
+           newval = __getEditorContent(); 
+        }
         
         //send data to server
         var request;
@@ -410,7 +441,7 @@ function hCmsEditing(_options) {
     //                    
     function __hideEditor( new_pageid ){
             
-            if(!_isDirectEditMode()){
+            if(!_isDirectEditMode()){ //detach
                 tinymce.remove('.tinymce-body');
             }
             $('#btn_inline_editor').show();
@@ -504,11 +535,37 @@ function hCmsEditing(_options) {
     }    
     
     //
-    // assign events for edit remove links on widget placeholder in timymce editor
+    // adds widget-design-header and widget-options
+    // assigns events for edit/remove links on widget placeholder in timymce editor
     //
     function __initWidgetEditLinks(widgetid){
 
-            var eles;               
+            var eles; 
+            
+            // adds widget-design-header and widget-options
+            if(widgetid==null){
+                eles = tinymce.activeEditor.dom.select('div[data-heurist-app-id]');
+            }else{
+                eles = tinymce.activeEditor.dom.get( widgetid );
+                eles = [eles];
+            }
+            
+            $(eles).each(function(idx, ele){
+                ele = $(ele);
+                if (ele.find('div.widget-design-header').length==0){
+                    
+                    var opts = ele.text(); 
+                    ele.empty().append(
+                '<div style="padding:10px;" class="widget-design-header"><img src="'
+                +window.hWin.HAPI4.baseURL+'hclient/assets/heurist_logo_35x35.png" height="22" style="vertical-align:middle">&nbsp;<b>'
+                + ele.attr('data-heurist-app-id').substring(8)
+                + '</b><a href="#" class="edit" style="padding:0 10px" title="Click to edit">edit</a>&nbsp;&nbsp;'
+                + '<a href="#" class="remove">remove</a></div>'
+                + '<span class="widget-options" style="font-style:italic;display:none">'+opts+'</span>');
+                    
+                }
+            });
+           
             if(widgetid==null){
                 //all
                 eles = tinymce.activeEditor.dom.select('.widget-design-header'); //div.
@@ -612,6 +669,7 @@ function hCmsEditing(_options) {
         //
         function __prepareWidgetDiv( widgetid, widget_old ){
             //var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
+            
             
             var sel = $dlg.find('#widgetName');
             var widget_name = sel.val();
@@ -778,7 +836,7 @@ function hCmsEditing(_options) {
                 }
             }
             
-            
+/*            
             var content = '<div id="'+widgetid+'" class="mceNonEditable'
                 + ((widget_name=='heurist_Groups')?' initTabs':'') +'" '
                 +' data-heurist-app-id="'+widget_name
@@ -791,9 +849,23 @@ function hCmsEditing(_options) {
                 + '<a href="#" class="remove">remove</a> '+sh+' </div>'//+widgetCss
                 + ' <span class="widget-options" style="font-style:italic;display:none">'+widget_options+'</span>'
                 + groupContent + '</div>';
+*/                
+
+            var content = '';
+            /*
+            if(window.hWin.HEURIST4.util.isempty(widget_old)){
+                content =  '<!-- =========================='+ widget_name +'======================= -->'; // + "\n";
+            }
+            */
+
+            var content = content + '<div data-heurist-app-id="'+widget_name+'" '
+                + ' id="'+widgetid+'" class="mceNonEditable"'
+                + ' style="'+ widgetCss+'" '
+                + '>' + widget_options +  '</div>';
+  
                 
             return content; 
-        }
+        }//__prepareWidgetDiv
         
         //
         // to UI
@@ -914,15 +986,17 @@ function hCmsEditing(_options) {
                         .appendTo(cont);
         }
         
+        
+        var is_addition = window.hWin.HEURIST4.util.isempty(widgetid_edit);        
                 
-        buttons[window.hWin.HR(window.hWin.HEURIST4.util.isempty(widgetid_edit)?'Add':'Save')]  = function() {
+        buttons[window.hWin.HR(is_addition ?'Add':'Save')]  = function() {
             
                     var widgetid = 'mywidget_'+window.hWin.HEURIST4.util.random();
                     var  content = __prepareWidgetDiv( widgetid, widgetid_edit );            
                     
                     if(content!==false){
                         
-                        if(!window.hWin.HEURIST4.util.isempty(widgetid_edit)){  //edit
+                        if(!is_addition){  //edit
                             /*  old way it does not activeate noneditable
                             var ele = $(content).appendTo($('body'));
                             tinymce.activeEditor.dom.replace( ele[0], tinymce.activeEditor.dom.get(widgetid_edit) );
@@ -931,7 +1005,7 @@ function hCmsEditing(_options) {
                             tinymce.activeEditor.selection.select( tinymce.activeEditor.dom.get(widgetid_edit) );
                             tinymce.activeEditor.insertContent(content);
                             
-                        }else{  //replace
+                        }else{  //add
                             tinymce.activeEditor.insertContent(content);
                         }
                         __initWidgetEditLinks(widgetid); //activate edit/remove links

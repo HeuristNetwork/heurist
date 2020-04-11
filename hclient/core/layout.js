@@ -180,17 +180,15 @@ function hLayout(args) {
             var ele = $(eles[i]);
             var app_id = ele.attr('data-heurist-app-id');
             if(_appGetWidgetById(app_id)!=null){
-                var opts = window.hWin.HEURIST4.util.isJSON(ele.attr('data-heurist-app-options')); //old way
-                if(!opts){ //find span with configuration
-                    var cfgele = ele.find('span.widget-options:first');
-                    if(cfgele.length==0) cfgele = ele.find('span'); //backward capability
-                    opts = window.hWin.HEURIST4.util.isJSON(cfgele.text());
-                    
-                    //extend options with suppimentary ones
-                    if(supp_options && supp_options[app_id]){
-                        opts = (opts!=false)? $.extend(opts, supp_options[app_id])
-                                        :supp_options[app_id];
-                    }
+
+                var cfgele = ele.find('span.widget-options:first');
+                if(cfgele.length==0) cfgele = ele;
+                opts = window.hWin.HEURIST4.util.isJSON(cfgele.text());
+                
+                //extend options with suppimentary ones
+                if(supp_options && supp_options[app_id]){
+                    opts = (opts!=false)? $.extend(opts, supp_options[app_id])
+                                    :supp_options[app_id];
                 }
                 
                 layout[ele.attr("id")] = {dropable:false, apps:[{appid:app_id, hasheader:false, 
