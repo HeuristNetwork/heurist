@@ -2102,7 +2102,7 @@ window.hWin.HEURIST4.ui = {
                         + (isEdit?'<span style="display:table-cell;vertical-align: bottom"><span class="ui-icon ui-icon-triangle-1-e"/></span>':'') //padding-top:3px;
                         
                         + '<span style="display:table-cell;vertical-align:top;">'  //;padding-top:2px;
-                        + '<img src="'+ph_gif+'" style="margin-right:10px;'
+                        + '<img src="'+ph_gif+'"  class="rt-icon" style="margin-right:10px;'
                         + ((info['rec_RecTypeID']>0)?
                             'background-image:url(\''    //vertical-align:top;margin-top:2px;
                             + top.HAPI4.iconBaseURL+info['rec_RecTypeID'] + '\');'   //rectype icon

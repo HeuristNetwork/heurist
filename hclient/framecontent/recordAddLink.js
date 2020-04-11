@@ -806,7 +806,7 @@ function hRecordAddLink() {
                 rec_titles.push('<b>'+window.hWin.HEURIST4.rectypes.names[recRecTypeID]+'</b>');
                 $('#'+party+'_title').text(rec_title);
                 $('#'+party+'_rectype').text(window.hWin.HEURIST4.rectypes.names[recRecTypeID]);
-                $('#'+party+'_rectype_img').css('background-image', 'url("'+top.HAPI4.iconBaseURL+recRecTypeID+'")');
+                $('#'+party+'_rectype_img').addClass('rt-icon').css('background-image', 'url("'+top.HAPI4.iconBaseURL+recRecTypeID+'")');
                 
                 //find fields
                 var oppositeRecTypeID = (party=='target')?source_RecTypeID:null; 

@@ -680,14 +680,20 @@ div .selected_last{
 }
 .icons div.recordDiv:hover{
     z-index:10;
+/*    
     -moz-box-shadow:0px 3px 8px #666;
     -webkit-box-shadow:0px 3px 8px #666;
-    box-shadow:0px 3px 8px #666;
+    box-shadow:0px 1px 8px #666;
     height:68px;
+*/    
+    -moz-box-shadow:0px 1px 2px #666;
+    -webkit-box-shadow:0px 1px 2px #666;
+    box-shadow:0px 1px 1px #666;
+    height:64px;
     /*
     height:42px;
     width:144px;   -2px */
-    margin:0px;
+    margin:4px;
 }
 
 .icons .recordDiv .recTypeThumb {
@@ -735,6 +741,10 @@ div .selected_last{
 }
 .icons .rt-icon{
     display: none;
+}
+.rt-icon{
+    background-repeat: no-repeat;
+    background-position: center;
 }
 
 /* LIST VIEW */

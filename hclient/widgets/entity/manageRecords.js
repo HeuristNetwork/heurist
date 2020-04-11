@@ -784,7 +784,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
 '<div style="margin:10px 4px;"><div style="padding-bottom:0.5em;display:inline-block;width: 100%;">'
 
 +'<h3 class="truncate rectypeHeader" style="float:left;max-width:400px;margin:0 8px 0 0;">'
-                + '<img src="'+ph_gif+'" style="vertical-align:top;margin-right: 10px;background-image:url(\''
+                + '<img src="'+ph_gif+'" class="rt-icon" style="vertical-align:top;margin-right: 10px;background-image:url(\''
                 + window.hWin.HAPI4.iconBaseURL+recRecTypeID+'\');"/>'
                 + window.hWin.HEURIST4.rectypes.names[recRecTypeID]+'</h3>'
 +'<select class="rectypeSelect ui-corner-all ui-widget-content" '
@@ -891,7 +891,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                                               that.onEditFormChange();
                                               
                                               selHd.html(
-                        '<img src="'+ph_gif+'" style="vertical-align:top;margin-right: 10px;background-image:url(\''
+                        '<img src="'+ph_gif+'"  class="rt-icon" style="vertical-align:top;margin-right: 10px;background-image:url(\''
                         + window.hWin.HAPI4.iconBaseURL+selRt.val()+'\');"/>'
                         + window.hWin.HEURIST4.rectypes.names[selRt.val()]                                      
                                               );
@@ -3002,8 +3002,8 @@ rectypes.names[rectypeID] + ' is defined as a child of <b>'+names
             var ph_gif = window.hWin.HAPI4.baseURL + 'hclient/assets/16x16.gif';
             var sheader = '<div class="ui-heurist-header2" style="text-align:left;min-height:25px">'
                     + '<img src="'+ph_gif
-                        + '" width=18 height=18 style="border-radius: 50%;padding:2px;background-color:white;'
-                        + 'background-position:center;background-repeat:no-repeat;background-size: 14px 14px;'
+                        + '" width=18 height=18 class="rt-icon" style="border-radius: 50%;padding:2px;background-color:white;'
+                        + 'background-size: 14px 14px;'
                         + 'vertical-align:middle;margin: 2px 10px 2px 4px; background-image:url(\''
                         + window.hWin.HAPI4.iconBaseURL+this._currentEditRecTypeID + '\');"/>' 
                         //+ 'm&color=rgb(255,255,255)\');"/>'
