@@ -10,7 +10,7 @@
 * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
 * or implied. See the License for the specific language governing permissions and limitations under
 * the License.
-*/
+*/                                                     7
 
 /**
 *  Corsstabs UI class
@@ -640,7 +640,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
             });
             */
         }else{
-            alert('There are no more terms available');
+            window.hWin.HEURIST4.msg.showMsgDlg('There are no more terms available');
         }
 
 
@@ -684,7 +684,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
         if(needServerRequest){
 
             if(inProgress){
-                alert('Preparation in progress');
+                window.hWin.HEURIST4.msg.showMsgDlg('Preparation in progress');
                 return;
             }
 
@@ -695,12 +695,13 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 return;
             }
             if(fields3.row.field<1){
-                alert('Row field is not defined');
+                window.hWin.HEURIST4.msg.showMsgDlg('Row field is not defined');
                 $('#cbRows').focus();
                 return;
             }
             if(fields3.row.intervals.length<1){
-                alert('No intervals for field "row" defined');
+                window.hWin.HEURIST4.msg.showMsgDlg('There are no values for the "'+fields3.row.fieldname+'" field. '
+                            +'Please check the set of records you are analysing ');
                 $('#cbRows').focus();
                 return;
             }
@@ -728,7 +729,8 @@ function CrosstabsAnalysis(_query, _query_domain) {
             if(fields3.page.field>0){
 
                 if(fields3.page.intervals.length<1){
-                    alert('No intervals for field "page" defined');
+                    window.hWin.HEURIST4.msg.showMsgDlg('There are no values for the "'+fields3.page.fieldname+'" field. '
+                            +'Please check the set of records you are analysing ');
                     $('#cbPages').focus();
                     _setMode(2);
                     return;
@@ -743,7 +745,8 @@ function CrosstabsAnalysis(_query, _query_domain) {
             if(fields3.column.field>0){
 
                 if(fields3.column.intervals.length<1){
-                    alert('No intervals for field "column" defined');
+                    window.hWin.HEURIST4.msg.showMsgDlg('There are no values for the "'+fields3.column.fieldname+'" field. '
+                            +'Please check the set of records you are analysing ');
                     $('#cbColumn').focus();
                     _setMode(2);
                     return;
@@ -1393,7 +1396,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
         doSave: function(){
             //_doRetrieve();
-            alert('Sorry. Not implemented yet');
+            window.hWin.HEURIST4.msg.showMsgDlg('Sorry. Not implemented yet');
         },
 
         doCancel: function(){
@@ -1405,7 +1408,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
         },
 
         doPrint: function(){
-            alert('Sorry. Not implemented yet');
+            window.hWin.HEURIST4.msg.showMsgDlg('Sorry. Not implemented yet');
         },
 
         assignRecordset: function(recordset){
