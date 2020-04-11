@@ -196,7 +196,7 @@ $.widget( "heurist.search_faceted", {
         }
 
         //"font-size":"0.7em",
-        this.div_toolbar = $( "<div>" ).css({'font-size': '0.9em',"float":"right","padding-top":"0.3em","padding-right":"0.6em"})
+        this.div_toolbar = $( "<div>" ).css({'font-size': '0.9em',"float":"right","padding-top":"0.3em","padding-right":"18px"})
                 .appendTo( this.div_header );
 
         this.btn_submit = $( "<button>", { text: window.hWin.HR("Submit") })
@@ -701,10 +701,10 @@ $.widget( "heurist.search_faceted", {
                             +'<span class="ui-button-icon ui-icon ui-icon-arrowreturnthick-1-w"></span>'
                             +'<span class="ui-button-text"> </span></button>'                    
                     +'</div>'    
-                    +'</div>').css({'border-bottom': '1px solid lightgray','margin-bottom':'25px'}).appendTo($fieldset);
+                    +'</div>').css({'border-bottom': '1px solid lightgray','margin-bottom':'25px', 'padding-bottom':'5px'}).appendTo($fieldset);
                     
            var btn_reset2 = $( "<button>", {title:window.hWin.HR("Clear all fields / Reset all the filters to their initial states") })
-           .css({float:'right','margin-top':'4px'})
+           .css({float:'right','margin-top':'10px','margin-right':'2px'})
            .appendTo( ele )
            .button({label: window.hWin.HR("Reset all"), icon: 'ui-icon-arrowreturnthick-1-w', iconPosition:'end' });
            this._on( btn_reset2, { click: "doResetAll" });
@@ -956,8 +956,10 @@ $.widget( "heurist.search_faceted", {
                     inpt.find('.input-cell > .input-div').css({'display':'inline-block'}); // !important
                     inpt.find('.input-cell').css('display','block');
                     
-                    inpt.find('input').removeClass('text').css({'width':'150px'});
-                    inpt.find('select').removeClass('text').css({'width':'150px'});
+                    //since it takes default width from field definitions
+                    //force width for direct input and selectors to 150px 
+                    inpt.find('input').removeClass('text').css({'width':'150px','min-width':'150px'});
+                    inpt.find('select').removeClass('text').css({'width':'150px','min-width':'150px'});
                     
                     var btn_add = $( "<button>",{title:'To clear previous search click the RESET button'})
                     .addClass("smallbutton")
