@@ -859,8 +859,8 @@ function hCmsEditing(_options) {
             */
 
             var content = content + '<div data-heurist-app-id="'+widget_name+'" '
-                + ' id="'+widgetid+'" class="mceNonEditable"'
                 + ' style="'+ widgetCss+'" '
+                + ' id="'+widgetid+'" class="mceNonEditable"'
                 + '>' + widget_options +  '</div>';
   
                 
