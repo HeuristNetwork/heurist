@@ -163,7 +163,7 @@ $is_csv = (@$_REQUEST['html']!=1);
         fclose($fd);
         
         header('Content-Type: text/csv');
-        header('Content-disposition: attachment; filename='.$filename);
+        header('Content-Disposition: attachment; filename='.$filename);
         header('Content-Length: ' . strlen($out));
         
         exit($out);

@@ -141,6 +141,7 @@ if($db){
                         }    
                     }
                     
+                    //see db_files
                     downloadFile($mimeType, $filepath, @$_REQUEST['embedplayer']==1?null:$originalFileName);
                 }else if($external_url){
 //DEBUG error_log('External '.$external_url);                

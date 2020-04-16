@@ -50,7 +50,7 @@
     //$json = json_encode($json);
     header('Content-Type: application/json');
     //header('Content-Type: application/vnd.geo+json');
-    //header('Content-disposition: attachment; filename=output.json');
+    //header('Content-Disposition: attachment; filename=output.json');
     header('Content-Length: ' . strlen($remote_data));
     exit($remote_data);
 ?>

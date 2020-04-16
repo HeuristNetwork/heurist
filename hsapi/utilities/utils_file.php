@@ -629,6 +629,25 @@
     
         
     //
+    // check file existance, readability and opens the file
+    // returns file handle, or -1 not exist, -2 not readable -3 can't open
+    //
+    function fileOpen($file)
+    {
+        if (!(file_exists($file) && is_file($file))) {
+            return -1;
+        }
+        if (!is_readable($file)) {
+            return -2;
+        }
+        $handle = fopen($file, 'rb');
+        if (!$handle) {
+            return -3;
+        }
+        return $handle;
+    }
+        
+    //
     //
     //
     function fileCopy($s1, $s2) {
@@ -888,7 +907,7 @@ function createZipArchive($source, $only_these_folders, $destination, $verbose=t
             // Determine real path
             $file = realpath($file);
 
-            //ignore files that are not in list of specifiede folders
+            //ignore files that are not in list of specified folders
             $is_filtered = true;
             if( is_array($only_these_folders) ){
 
@@ -912,7 +931,7 @@ function createZipArchive($source, $only_these_folders, $destination, $verbose=t
                 $zip->addEmptyDir( $newdir );
             }
             else if (is_file($file) === true) { // File
-                $newfile = str_replace($source.'/', '', $file2);
+                $newfile = str_replace($source.'/', '', $file2); //without folder name
                 $zip->addFile($file, $newfile);
                 //$zip->addFromString(str_replace($source . '/', '', $file), file_get_contents($file));
             }

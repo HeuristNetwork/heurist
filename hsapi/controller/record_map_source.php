@@ -5,7 +5,7 @@
     * 
     * params
     * recID
-    * format = geojson convets file to geojson 
+    * format = geojson converts file to geojson 
     * 
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
@@ -57,6 +57,7 @@
     }*/
     
     $record = array("rec_ID"=>$params['recID']);
+    //load record with details and 2 header fields
     $record = recordSearchByID($system, $params['recID'], true, "rec_ID, rec_RecTypeID");
     //array(DT_KML, DT_KML_FILE, DT_FILE_RESOURCE));
     if (@$record["details"] &&
@@ -92,6 +93,7 @@
                     if (file_exists($filepath)) {
                         
                         $ext = strtolower(substr($filepath,-4,4));
+                }else if($ext=='.csv'){
                         
                         if(strpos(strtolower($filepath),'.kmz')==strlen($filepath)-4){
                             //check if scratch folder exists
@@ -119,8 +121,7 @@
                 }
                 
                 if($input_format=='kml' || $ext=='.kmz' || $ext=='.kml'){
-                    $input_format = 'kml';
-                }else if($ext=='.csv'){
+                    $input_format = 'kml';                                                                                      
                     $input_format = 'csv';
                 }else if($ext=='.tsv'){
                     $input_format = 'csv';
@@ -257,7 +258,7 @@
                             $json = json_encode($json);
                             header('Content-Type: application/json');
                             //header('Content-Type: application/vnd.geo+json');
-                            //header('Content-disposition: attachment; filename=output.json');
+                            //header('Content-Disposition: attachment; filename=output.json');
                             header('Content-Length: ' . strlen($json));
                             exit($json);
                     }else{
@@ -266,17 +267,27 @@
                 }
 
                 
-            }else{
+            }
+            else
+            if(@$params['format']=='zip_with_metadata'){
+                
+                //archive file with record metadata
+                
+        
+            }
+            else
+            {
+                //downloadFile()
                 
                 if($input_format=='kml'){
                     header('Content-Type: application/vnd.google-earth.kml+xml');
-                    header('Content-disposition: attachment; filename=output.kml');
+                    header('Content-Disposition: attachment; filename=output.kml');
                 }else if($input_format=='csv'){
                     header('Content-Type: text/csv');
-                    header('Content-disposition: attachment; filename=output.csv');
+                    header('Content-Disposition: attachment; filename=output.csv');
                 }else if($input_format=='dbf'){
                     header('Content-Type: application/x-dbase');
-                    header('Content-disposition: attachment; filename=output.dbf');
+                    header('Content-Disposition: attachment; filename=output.dbf');
                 } 
                 header('Content-Length: ' . strlen($file_content));
                 exit($file_content);

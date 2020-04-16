@@ -517,7 +517,11 @@ function downloadFile($mimeType, $filename, $originalFileName=null){
         
         //force download  - important for embed element DO NOT include this atttibute!
         if($originalFileName!=null){
-          header('Content-Disposition: attachment; filename="'.$originalFileName.'"'); //basename($filename));
+            $contentDispositionField = 'Content-Disposition: attachment; '
+                . sprintf('filename="%s"; ', rawurlencode($originalFileName))
+                . sprintf("filename*=utf-8''%s", rawurlencode($originalFileName));            
+            
+            header($contentDispositionField);
         }
         header('Content-Transfer-Encoding: binary');
         header('Expires: 0');

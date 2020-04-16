@@ -117,8 +117,9 @@ if(@$_REQUEST['multifile']){ // output manifest + files ??
     $intofile = true; //flag one-record-per-file mode for HuNI  
 }else{
     $intofile = false;
-}
+}                                                 
 
+$output_file = null;
 $hunifile = null; //name of file-per-record for HuNI mode
 
 if(@$_REQUEST['filename']){ //write the output into single file
@@ -127,7 +128,7 @@ if(@$_REQUEST['filename']){ //write the output into single file
     if(!$output_file){
         die("Can't write ".$output_file." file. Please ask sysadmin to check permissions");
     }
-
+    $_REQUEST['mode'] = 1;
 }else{
     $output_file = null;     
 }
@@ -166,7 +167,7 @@ if(!$intofile){
                 $filename = 'Export_'.$_REQUEST['db'].'_'.date("YmdHis").'.xml';    
             }
 
-            header('Content-disposition: attachment; filename='.$filename);
+            header('Content-Disposition: attachment; filename='.$filename);
             //header('Content-Length: ' . strlen($content));
         }
 

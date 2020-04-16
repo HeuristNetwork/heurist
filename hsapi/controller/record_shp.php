@@ -203,7 +203,7 @@ use Shapefile\ShapefileReader;
                         $json = json_encode($json);
                         header('Content-Type: application/json');
                         //header('Content-Type: application/vnd.geo+json');
-                        //header('Content-disposition: attachment; filename=output.json');
+                        //header('Content-Disposition: attachment; filename=output.json');
                         header('Content-Length: ' . strlen($json));
                         exit($json);
                     
@@ -226,28 +226,12 @@ error_log($e->getCode().' ('.$e->getErrorType().'): '.$e->getMessage());
             .' does not have fields where stored reference to shp or zip file',
             HEURIST_NOT_FOUND); 
     }
-
-//
-// check file existance, readability and opens the file
-// returns file handle, or -1 not exist, -2 not readable -3 can't open
-//
-function fileOpen($file)
-{
-    if (!(file_exists($file) && is_file($file))) {
-        return -1;
-    }
-    if (!is_readable($file)) {
-        return -2;
-    }
-    $handle = fopen($file, 'rb');
-    if (!$handle) {
-        return -3;
-    }
-    return $handle;
-}
     
 //
 // $fileinfo as fileGetFullInfo
+//
+// 1) external file is saved in scratch
+// 2) zipped extracted into scratch
 //
 function fileRetrievePath($fileinfo, $need_ext=null, $isArchive=false){
     

@@ -394,7 +394,7 @@ require_once(dirname(__FILE__).'/../../hsapi/dbaccess/conceptCode.php');
             print json_encode($res);
         }else{
             header('Content-type: html/text');
-            header('Content-disposition: attachment; filename='.str_replace(".tpl",".gpl",$filename));                
+            header('Content-Disposition: attachment; filename='.str_replace(".tpl",".gpl",$filename));                
             print $res; //"<hr><br><br><xmp>".$template."</xmp>";
         }
     }
