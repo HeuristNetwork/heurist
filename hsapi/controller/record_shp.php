@@ -49,7 +49,7 @@ use Shapefile\ShapefileReader;
     }
     
     $params['simplify'] = true;
-    
+
     $fields = array();
     
     if($system->defineConstant('DT_ZIP_FILE')){
@@ -87,22 +87,73 @@ use Shapefile\ShapefileReader;
        (@$record["details"][DT_SHAPE_FILE] || @$record["details"][DT_ZIP_FILE] || @$record["details"][DT_FILE_RESOURCE]))
     {
         
-                $dbf_file = null;
-                $shx_file = null;
+            $dbf_file = null;
+            $shx_file = null;
 
-                if(DT_SHAPE_FILE>0 && @$record["details"][DT_SHAPE_FILE]){
-                    
-                    $shp_file = fileRetrievePath(array_shift($record["details"][DT_SHAPE_FILE]),'shp',false);
-                    $dbf_file = fileRetrievePath(array_shift($record["details"][DT_DBF_FILE]),'dbf',false);
-                    $shx_file = fileRetrievePath(array_shift($record["details"][DT_SHX_FILE]),'shx',false);
-                    
-                }else if(DT_ZIP_FILE>0 && @$record["details"][DT_ZIP_FILE]){
-                    $shp_file = fileRetrievePath(array_shift($record["details"][DT_ZIP_FILE]),'shp',true);
-                    $isZipArchive = true;
+            if(DT_SHAPE_FILE>0 && @$record["details"][DT_SHAPE_FILE]){
+                
+                $shp_file = fileRetrievePath(array_shift($record["details"][DT_SHAPE_FILE]),'shp',false);
+                $dbf_file = fileRetrievePath(array_shift($record["details"][DT_DBF_FILE]),'dbf',false);
+                $shx_file = fileRetrievePath(array_shift($record["details"][DT_SHX_FILE]),'shx',false);
+                
+            }else if(DT_ZIP_FILE>0 && @$record["details"][DT_ZIP_FILE]){
+                $shp_file = fileRetrievePath(array_shift($record["details"][DT_ZIP_FILE]),'shp',true);
+                $isZipArchive = true;
+            }else{
+                $shp_file = fileRetrievePath(array_shift($record["details"][DT_FILE_RESOURCE]),'shp',true);
+                $isZipArchive = true;
+            }
+            
+            if(@$params['format']=='rawfile'){
+                
+                $originalFileName = 'Dataset_'.$params['recID'];
+                $file_zip = $originalFileName.'.zip';
+                $file_zip_full = tempnam(HEURIST_SCRATCHSPACE_DIR, "arc");
+                $zip = new ZipArchive();
+                if (!$zip->open($file_zip_full, ZIPARCHIVE::CREATE)) {
+                    $system->error_exit_api("Cannot create zip $file_zip_full");
                 }else{
-                    $shp_file = fileRetrievePath(array_shift($record["details"][DT_FILE_RESOURCE]),'shp',true);
-                    $isZipArchive = true;
+                    if(!$dbf_file){
+                        $dbf_file = substr($shp_file,0,strlen($shp_file)-3).'dbf';
+                    }
+                    if(!$shx_file){                       +
+                        $shx_file = substr($shp_file,0,strlen($shp_file)-3).'dbf';
+                    }
+                    $zip->addFile($shp_file, basename($shp_file) );
+                    if(file_exists($dbf_file)){
+                        $zip->addFile($dbf_file, basename($dbf_file) );
+                    }
+                    if(file_exists($shx_file)){
+                        $zip->addFile($shx_file, basename($shx_file) );
+                    }
+                    
+                    if(@$params['metadata']){//save hml into scratch folder
+                        
+                        $file_metadata = $originalFileName.'.txt';
+                        $file_metadata_full = tempnam(HEURIST_SCRATCHSPACE_DIR, "meta");
+                        $url = HEURIST_BASE_URL.'export/xml/flathml.php?db='
+                                    .$params['db']
+                                    .'&q=ids:'.$params['metadata'].'&depth=0';
+                        file_put_contents($file_metadata_full ,$url);
+                        if(file_exists($file_metadata_full)){
+                            $zip->addFile($file_metadata_full, $file_metadata);    
+                        }
+                    }
+                    $zip->close();
+                    //donwload
+                    $contentDispositionField = 'Content-Disposition: attachment; '
+                        . sprintf('filename="%s"; ', rawurlencode($file_zip))
+                        . sprintf("filename*=utf-8''%s", rawurlencode($file_zip));            
+                    
+                    header('Content-Type: application/zip');
+                    header($contentDispositionField);
+                    header('Content-Length: ' . filesize($file_zip_full));
+                    readfile($file_zip_full);
+                    
+                    
                 }
+                
+            }else{
                 
                 try {
                 
@@ -220,6 +271,7 @@ error_log($e->getCode().' ('.$e->getErrorType().'): '.$e->getMessage());
                     $system->error_exit_api('Cannot init ShapeFile library: '.$e->getMessage(), HEURIST_ERROR);
                 }                
                 
+            }
     }else{
         $system->error_exit_api('Record '
             .$params['recID']

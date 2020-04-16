@@ -5,7 +5,9 @@
     * 
     * params
     * recID
-    * format = geojson converts file to geojson 
+    * format = geojson converts file to geojson, 
+    *          rawfile - download as original file
+    * metadata - include text file with link to flathml
     * 
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
@@ -64,10 +66,19 @@
        (@$record["details"][DT_KML] || @$record["details"][DT_KML_FILE] || @$record["details"][DT_FILE_RESOURCE]))
     {
             $input_format = ($record['rec_RecTypeID']==RT_KML_SOURCE)?'kml':'csv';
+            $file_content = null;
+            $tmp_destination = null;
+           
+            if(@$params['format']=='rawfile'){
+                $tmp_destination = tempnam(HEURIST_SCRATCHSPACE_DIR, "data");
+            }
     
             if(@$record["details"][DT_KML]){
-                //snippet
+                //snippet - format unknown
                 $file_content = array_shift($record["details"][DT_KML]);   
+                if($tmp_destination){
+                    file_put_contents($tmp_destination, $file_content);
+                }
             }
             else
             {
@@ -78,6 +89,7 @@
                 }
                 $kml_file = $kml_file['file'];
                 $url = @$kml_file['ulf_ExternalFileReference'];
+                $originalFileName = @$kml_file['ulf_OrigFileName'];
                 
                 if($url){
                     $file_content = loadRemoteURLContent($url, true);    
@@ -86,6 +98,10 @@
                     } 
                     
                     $ext = strtolower(substr($url,-4,4));
+
+                    if($tmp_destination){
+                        file_put_contents($tmp_destination, $file_content);
+                    }
                     
                 }else {
                     $filepath = resolveFilePath($kml_file['fullPath']);
@@ -93,9 +109,14 @@
                     if (file_exists($filepath)) {
                         
                         $ext = strtolower(substr($filepath,-4,4));
-                }else if($ext=='.csv'){
-                        
-                        if(strpos(strtolower($filepath),'.kmz')==strlen($filepath)-4){
+                    }else{
+                        error_log('Cannot load file '.$kml_file['fullPath']);                    
+                        exit(); //@todo error return
+                    }
+                    
+                    if($tmp_destination==null){
+                            
+                        if($ext=='.kmz'){
                             //check if scratch folder exists
                             $res = folderExistsVerbose(HEURIST_SCRATCH_DIR, true, 'scratch');
                             if($res!==true){
@@ -111,18 +132,21 @@
                                     unlink( $filename );
                                 }
                             }
-                                
                         }
+                        
                         $file_content = file_get_contents($filepath);
                     }else{
-                        error_log('Cannot load file '.$kml_file['fullPath']);                    
-                        exit(); //@todo error return
+                        if($ext=='.kmz'){
+                            $input_format = 'kmz';    
+                        }
+                        $tmp_destination = $filepath;
                     }
+                    
                 }
                 
                 if($input_format=='kml' || $ext=='.kmz' || $ext=='.kml'){
                     $input_format = 'kml';                                                                                      
-                    $input_format = 'csv';
+                    //$input_format = 'csv';
                 }else if($ext=='.tsv'){
                     $input_format = 'csv';
                     $parser_parms['csv_delimiter'] = 'tab';
@@ -195,11 +219,11 @@
                         
                 }
                     
-                if(!@$mapping[DT_NAME]){
-                    $mapping[DT_NAME] = 'name';  
-                } 
-                
                 if(count($mapping)>0){
+                    
+                    if(!@$mapping[DT_NAME]){
+                        $mapping[DT_NAME] = 'name';  
+                    } 
                     
                     //returns csv with header
                     $parsed = ImportParser::parseAndValidate($file_content, null, PHP_INT_MAX, $parser_parms);
@@ -269,28 +293,66 @@
                 
             }
             else
-            if(@$params['format']=='zip_with_metadata'){
-                
-                //archive file with record metadata
-                
-        
-            }
-            else
             {
                 //downloadFile()
+                if(true || !$originalFileName){
+                    $originalFileName = 'Dataset_'.$params['recID'].'.kml'; 
+                }
+                $originalFileName = substr($originalFileName,0,strlen($originalFileName)-3);
                 
-                if($input_format=='kml'){
-                    header('Content-Type: application/vnd.google-earth.kml+xml');
-                    header('Content-Disposition: attachment; filename=output.kml');
-                }else if($input_format=='csv'){
-                    header('Content-Type: text/csv');
-                    header('Content-Disposition: attachment; filename=output.csv');
-                }else if($input_format=='dbf'){
-                    header('Content-Type: application/x-dbase');
-                    header('Content-Disposition: attachment; filename=output.dbf');
-                } 
-                header('Content-Length: ' . strlen($file_content));
-                exit($file_content);
+                if(@$params['format']=='rawfile'){
+                    //return zipped original file with metadata
+                    $file_zip = $originalFileName.'zip';
+                    $file_zip_full = tempnam(HEURIST_SCRATCHSPACE_DIR, "arc");
+                    $zip = new ZipArchive();
+                    if (!$zip->open($file_zip_full, ZIPARCHIVE::CREATE)) {
+                        $system->error_exit_api("Cannot create zip $file_zip_full");
+                    }else{
+                        $zip->addFile($tmp_destination, $originalFileName.$input_format);
+                    }
+                
+                    if(@$params['metadata']){//save hml into scratch folder
+                        
+                        $file_metadata = $originalFileName.'txt';
+                        $file_metadata_full = tempnam(HEURIST_SCRATCHSPACE_DIR, "meta");
+                        $url = HEURIST_BASE_URL.'export/xml/flathml.php?db='
+                                    .$params['db']
+                                    .'&q=ids:'.$params['metadata'].'&depth=0';
+                        file_put_contents($file_metadata_full ,$url);
+                        if(file_exists($file_metadata_full)){
+                            $zip->addFile($file_metadata_full, $file_metadata);    
+                        }
+                    }
+                    $zip->close();
+                    //donwload
+                    $contentDispositionField = 'Content-Disposition: attachment; '
+                        . sprintf('filename="%s"; ', rawurlencode($file_zip))
+                        . sprintf("filename*=utf-8''%s", rawurlencode($file_zip));            
+                    
+                    header('Content-Type: application/zip');
+                    header($contentDispositionField);
+                    header('Content-Length: ' . filesize($file_zip_full));
+                    readfile($file_zip_full);
+
+                }else{
+
+                    if($input_format=='kml'){
+                        header('Content-Type: application/vnd.google-earth.kml+xml');
+                    }else if($input_format=='csv'){
+                        header('Content-Type: text/csv');
+                    }else if($input_format=='dbf'){
+                        header('Content-Type: application/x-dbase');
+                    } 
+                    $originalFileName = $originalFileName.$input_format;
+                    $contentDispositionField = 'Content-Disposition: attachment; '
+                            . sprintf('filename="%s"; ', rawurlencode($originalFileName))
+                            . sprintf("filename*=utf-8''%s", rawurlencode($originalFileName));            
+                        
+                    header($contentDispositionField);
+                    header('Content-Length: ' . strlen($file_content));
+                    exit($file_content);
+                }    
+                
             }
     }else{
         $system->error_exit_api('Database '.$params['db'].'. Record '.$params['recID'].' does not have data for KML/CSV snipppet or file');

@@ -558,11 +558,15 @@ XML;
             }
             
             // IT DOES NOT WORK - need to rewrite flathml
-            if(false && @$params['metadata']){//save hml into scratch folder
+            if(@$params['metadata']){//save hml into scratch folder
                 
-                $file_metadata = $params['filename'].($params['format']=='xml'?'.hml':'.xml');
+                $file_metadata = $params['filename'].'.txt';//($params['format']=='xml'?'.hml':'.xml');
                 $file_metadata_full = tempnam(HEURIST_SCRATCHSPACE_DIR, "meta");
-
+                $url = HEURIST_BASE_URL.'export/xml/flathml.php?db='
+                            .$params['db']  //self::$system->dbname()
+                            .'&q=ids:'.$params['metadata'].'&depth=0';
+                file_put_contents($file_metadata_full ,$url);
+                /*
                 $_REQUEST['db'] = self::$system->dbname();
                 $_REQUEST['w'] = 'all';
                 $_REQUEST['q'] = 'ids:'.$params['metadata'];
@@ -573,11 +577,10 @@ XML;
                 if (is_file($to_include)) {
                     include $to_include;
                 }
-            
+                */
                 if(file_exists($file_metadata_full)){
                     $zip->addFile($file_metadata_full, $file_metadata);    
                 }
-                    
             }
             $zip->close();
             //donwload

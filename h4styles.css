@@ -455,7 +455,7 @@ div.recordDiv .ui-button-text{
     padding: 0px 4px;
 }
 .icons div.recordDiv.public .action-button{ 
-    width: 58px;
+    width: 68px;
     padding: 2px;
     margin: 2px;
 }
@@ -475,7 +475,7 @@ div.recordDiv.public .action-button > .ui-button-icon-primary{
 
 .icons div.recordDiv.public .action-button-container {
     top:6px !important;
-    max-width:140px;
+    max-width:160px;
 }
 div.recordDiv.public .rec_edit_link_ext{
     display:none;
