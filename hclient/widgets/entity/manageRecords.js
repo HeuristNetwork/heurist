@@ -1551,6 +1551,50 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     //
     //
     //
+    editRecordTypeAttributes: function(){
+        
+        var that = this;
+        var rty_ID = this._currentEditRecTypeID;
+        
+        if(this._editing.isModified()){
+            
+                var sMsg = "Click YES to save changes and modify the record type attributes";
+                window.hWin.HEURIST4.msg.showMsgDlg(sMsg, function(){
+                    
+                        var fields = that._editing.getValues(false);
+                        fields['no_validation'] = 1; //do not validate required fields
+                        that._saveEditAndClose( fields, function(){ //save without validation
+                            that._editing.initEditForm(null, null); //clear edit form
+                            that._initEditForm_step3(that._currentEditID); //reload edit form                       
+                            that.editRecordTypeAttributes();
+                        })
+                }, {title:'Data have been modified', yes:window.hWin.HR('Yes') ,no:window.hWin.HR('Cancel')});   
+                return;                           
+        }
+
+        var sURL = window.hWin.HAPI4.baseURL 
+                    + "admin/structure/rectypes/editRectype.html?supress=1&db="
+                    + window.hWin.HAPI4.database +"&rectypeID="+rty_ID;
+            
+        window.hWin.HEURIST4.msg.showDialog(sURL, {    
+                "no-resize": true,
+                title: 'Edit Record Type Attributes',
+                height: 800,
+                width: 800,
+                callback: function(context) {
+                    if(!Hul.isnull(context) && context.result){
+                         //refresh the local heurist
+                        window.hWin.HEURIST4.rectypes = context.rectypes;
+                    }
+                    //refresh icon, title, mask
+                    that._initEditForm_step3(that._currentEditID);
+                }
+        });
+    },
+    
+    //
+    //
+    //
     editRecordType: function(is_inline){
 
         var that = this;
@@ -2839,6 +2883,11 @@ rectypes.names[rectypeID] + ' is defined as a child of <b>'+names
 
             $('<div style="display:table;min-width:575px;width:100%">'
              +'<div style="display:table-cell;text-align:left;padding:20px 0px 5px 35px;">'
+
+                +'<div style="padding-right:50px;display:inline-block">'
+                    +'<span class="btn-edit-rt2 btns-admin-only" style="font-size:larger"></span>'
+                    +'<span class="btn-edit-rt-back" style="font-size:larger;display:none">Close</span>' //Back to Whole Form
+                +'</div>'
              
                 +'<div style="display:inline-block;padding-left:20px">'
                     +'<label><input type="checkbox" class="chb_show_help" '
@@ -2848,9 +2897,7 @@ rectypes.names[rectypeID] + ' is defined as a child of <b>'+names
                 +'</div>'
              
                 +'<div style="padding-right:50px;float:right">'
-                    +'<span class="btn-edit-rt-back" style="font-size:larger;display:none">Back to Whole Form</span>'
-                    +'<span class="btn-edit-rt btns-admin-only" style="font-size:larger">Modify structure</span>'
-                    +'<span class="btn-edit-rt2 btns-admin-only" style="font-size:larger">NEW!</span>'
+                    +'<span class="btn-edit-rt btns-admin-only">Attributes</span>'
                     +'<span class="btn-edit-rt-titlemask btns-admin-only">Edit title mask</span>'
                     +'<span class="btn-edit-rt-template btns-admin-only">Template</span>'
                     +'<span class="btn-bugreport">Bug report</span>'
@@ -2892,10 +2939,14 @@ rectypes.names[rectypeID] + ' is defined as a child of <b>'+names
                 
                 this.element.find('.btns-admin-only').show();
 
-                this.element.find('.btn-edit-rt').button({icon:'ui-icon-gear'}).css(btn_css)
-                        .click(function(){that.editRecordType(false);});
-                this.element.find('.btn-edit-rt2').button().css(btn_css)
+                this.element.find('.btn-edit-rt').button().css(btn_css)
+                        .click(function(){that.editRecordTypeAttributes();}); //was editRecordType(false)
+                        
+                var btn = this.element.find('.btn-edit-rt2').button({icon:'ui-icon-gear',label:'Modify<br>structure'}).css(btn_css)
+                        .width(100)
                         .click(function(){that.editRecordType(true);});
+                btn.find('.ui-button-icon').css({'font-size':'25px','float':'left',width:'25px',height:'25px','margin-top':'0px'});
+                        
                 this.element.find('.btn-edit-rt-titlemask').button({icon:'ui-icon-pencil'})
                         .css(btn_css).click(function(){that.editRecordTypeTitle();});
                 
@@ -3099,12 +3150,17 @@ rectypes.names[rectypeID] + ' is defined as a child of <b>'+names
                 
                 var btn = this.element.find('.btn-edit-rt-back');
                 if(btn){
-                    btn.button().show()
+                    btn.button({icon:'ui-icon-gear-crossed'}).show()
                         .click(function(){ 
                             //that._toolbar.find('#btnClose_rts').click();  
                             that.options.rts_editor.manageDefRecStructure('closeDialog');
                         });                
                     if(btn_css) btn.css(btn_css);
+                   /*
+                    var ic = btn.find('.ui-button-icon').css({'font-size':'25px',width:'25px',height:'25px','margin-top':'0px'});
+                    $('<span class="ui-icon ui-icon-cancel" '
+            +'style="color:darkgray;display:inline;font-size:28px;vertical-align: 0px"></span>').prependTo(ic);
+                    */
                 }
                 
             }

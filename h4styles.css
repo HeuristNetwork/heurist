@@ -1626,6 +1626,13 @@ background: #8ea9b9
     margin-left: -0.3em;
 }
 
+.ui-icon-gear-crossed{ 
+    background-image: url(hclient/assets/gear_crossed.png) !important; 
+    width: 25;
+    height: 24;
+}
+
+
 .ui-icon-filter-form { background-image: url(hclient/assets/filter_form_icon_black.png) !important; }
 
 .ui-icon-aa { 
