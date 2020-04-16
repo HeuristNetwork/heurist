@@ -174,6 +174,12 @@ console.log(re);
                             
                             // selection is dataset id - show/hide visibility of dataset
                             that._setLayersVisibility( sel );
+                            
+                        }else if(data.dataset_download){
+
+                            var sel =  window.hWin.HAPI4.getSelection(data.selection, true);
+                            that._downloadLayerData( sel );
+                            
                         }else{
                             
                             //highlight and zoom
@@ -442,6 +448,33 @@ console.log(re);
             
         }
     }
+    
+    //
+    //
+    //
+    , _downloadLayerData: function (selection) {
+
+        if(window.hWin.HEURIST4.util.isnull(this.options.recordset)) return;
+
+        if(!this.element.is(':visible')
+            || window.hWin.HEURIST4.util.isnull(this.mapframe) || this.mapframe.length < 1){
+            return;
+        }
+
+        if (this.mapframe[0].contentWindow.mapping) {
+            var  mapping = this.mapframe[0].contentWindow.mapping;  
+
+            if(this.options.leaflet){ //leaflet
+                //if layer is visible - select and zoom to record in search results
+                var recID = selection[0];
+                var layer_rec = mapping.mapping('getLayerFromMapDocument', 0, recID);
+                (layer_rec['layer']).getMapData();
+                
+            }
+            
+        }        
+    }
+
 
     //
     // show (expand) layer/dataset or hide it on map

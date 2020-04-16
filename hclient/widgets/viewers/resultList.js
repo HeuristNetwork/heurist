@@ -1618,6 +1618,19 @@ $.widget( "heurist.resultList", {
                 }            
                 return;            
             }else
+            if($target.hasClass('rec_download') || $target.parents('.rec_download').length>0){
+                
+                if(this._currentRecordset){
+                    
+                    $(this.document).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT, 
+                    {selection:[selected_rec_ID], 
+                        dataset_download: true, 
+                        source:this.element.attr('id'), search_realm:this.options.search_realm} );
+                    
+                }
+                return;            
+                
+            }else
             if($target.hasClass('rec_view_link_ext') || $target.parents('.rec_view_link_ext').length>0){
                 //View external link (opens in new window)
                 //OR Embed map document

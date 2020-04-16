@@ -89,7 +89,7 @@ function hMapLayer2( _options ) {
             _addImage();
 
         }else if(rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_KML_SOURCE'] ||
-                 rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_FILE_SOURCE']){
+                 rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_FILE_SOURCE']){  //csv
 
             _addFileSource();
             
@@ -311,7 +311,7 @@ function hMapLayer2( _options ) {
                 origination_db = request.db;
             }
                 
-            //perform search        
+            //perform search see record_output.php       
             window.hWin.HAPI4.RecordMgr.search_new(server_request,
                 function(response){
 
@@ -428,7 +428,76 @@ function hMapLayer2( _options ) {
             }
             
         },
+        
+        //
+        // 
+        //
+        getMapData: function(){
+            
+            //detect datasource type 
+            var rectypeID = _recordset.fld(_record, 'rec_RecTypeID');
+            var request = {}, url = null;
+            var layerName = _recordset.fld(_record, 'rec_Title');
+            
+            var layer_ID = 0;
+            var dataset_ID = _recordset.fld(_record, 'rec_ID');
+            if(options.rec_layer){
+                layer_ID = _recordset.fld(options.rec_layer, 'rec_ID');
+            }
 
+            if(rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_LAYER'] 
+                || rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_TLCMAP_DATASET']
+                || rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_QUERY_SOURCE']){
+                   
+                var sQuery;
+                if(options.recordset){ 
+                    sQuery = '?q=ids:'+options.recordset.getIds()
+                        + '&db=' + window.hWin.HAPI4.database;
+                }else{
+                    var query = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_QUERY_STRING']);
+                    var params = window.hWin.HEURIST4.util.parseHeuristQuery(query);
+                    sQuery = window.hWin.HEURIST4.util.composeHeuristQuery2(params, true);
+                    sQuery = sQuery + '&db=' + (params.db?params.db:window.hWin.HAPI4.database);
+                }
+                sQuery = sQuery + '&format=geojson&filename='+layerName; //zip=1&
+                
+                //returns hml for these two records
+                sQuery = sQuery + '&metadata='+dataset_ID+(layer_ID>0?(','+layer_ID):'');
+                 
+                url = window.hWin.HAPI4.baseURL 
+                        + 'hsapi/controller/record_output.php'+ sQuery;
+                                                                  
+                window.open(url, '_blank');
+
+            }else if(rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_TILED_IMAGE_SOURCE']){
+
+                //_addTiledImage();
+
+            }else if(rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_GEOTIFF_SOURCE']){
+
+                //_addImage();
+
+            }else if(rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_KML_SOURCE'] ||
+                     rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_FILE_SOURCE']){  //csv
+
+                url = window.hWin.HAPI4.baseURL 
+                        + 'hsapi/controller/record_map_source.php?db='+ window.hWin.HAPI4.database
+                        + 'recID='+rec_ID;
+
+                //perform loading kml, csb, dbf
+                //window.hWin.HAPI4.RecordMgr.load_kml_as_geojson({recID:rec_ID});
+                
+                window.open(url, '_blank');
+                
+            }else if(rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_SHP_SOURCE']){
+                //_addSHP();
+            }
+            
+        },
+        
+        //
+        //
+        //
         zoomToLayer: function(){
             
             if(_nativelayer_id>0){

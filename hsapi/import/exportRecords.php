@@ -29,6 +29,9 @@ require_once (dirname(__FILE__).'/../../common/php/Temporal.php');
 
 /**
 * 
+*  setSession - work with different database
+*  output - main method
+* 
 */
 class ExportRecords {
     private function __construct() {}    
@@ -54,6 +57,9 @@ private static function initialize()
     self::$initialized = true;
 }
 
+//
+// set session different that current global one (to work with different database)
+//
 public static function setSession($system){
     self::$system  = $system;
     self::$mysqli = $system->get_mysqli();
@@ -69,15 +75,19 @@ public static function setSession($system){
 //    format - json|geojson|xml|gephi
 //    defs  0|1  include database definitions
 //    file  0|1
+//    filename - export into file with given name
 //    zip   0|1
 //    depth 0|1|2|...all  
+//
+//    tlcmap 0|1  convert tlcmap records to layer
+//    restapi 0|1  - json output in format {records:[]}
 //
 // prefs for geojson, json
 //    extended 0 as is (in heurist internal format), 1 - interpretable, 2 include concept code and labels
 //    leaflet - 0|1 returns strict geojson and timeline data as two separate arrays, without details, only header fields rec_ID, RecTypeID and rec_Title
 //    simplify  0|1 simplify  paths with more than 1000 vertices 
 //
-//    limit for leaflet and gephi obly
+//    limit for leaflet and gephi only
 //
 // @todo if output if file and zip - output datatabase,defintions and records as separate files
 //      split records by 1000 entries chunks
@@ -226,6 +236,18 @@ XML;
         $gephi_header = '<?xml version="1.0" encoding="UTF-8"?>'.$gephi_header;
 
         fwrite($fd, $gephi_header);     
+    }else if($params['format']=='hml'){
+        
+        //@TODO
+        
+        fwrite($fd, '<?xml version="1.0" encoding="UTF-8" xmlns="http://heuristnetwork.org" '
+        .'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" '
+        .'xsi:schemaLocation="http://heuristnetwork.org reference/scheme_record.xsd"?><hml><records>');     
+
+        $dbID = self::$system->get_system('sys_dbRegisteredID');
+        fwrite($fd, '<dbID>'.($dbID>0?$dbID:0).'</dbID>'."\n");
+        fwrite($fd, "<records>\n");
+        
     }else{
         fwrite($fd, '<?xml version="1.0" encoding="UTF-8"?><heurist><records>');     
     }
@@ -336,7 +358,7 @@ XML;
         
         }else if($params['format']=='json'){ 
             
-            if(@$params['extended']>0 && @$params['extended']<3){
+            if(@$params['extended']>0 && @$params['extended']<3){ //with concept codes and labels
                 $feature = self::_getJsonFeature($record, $params['extended']);
                 fwrite($fd, $comma.json_encode($feature));
             }else{
@@ -374,11 +396,16 @@ XML;
             }
             
              
+        }else if($params['format']=='hml'){
+            
+            //@TODO
+            
+            
         }else{
             $xml = new SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?><record/>');
-            array_to_xml($record, $xml);
+            self::_array_to_xml($record, $xml);
             //array_walk_recursive($record, array ($xml , 'addChild'));
-            fwrite($fd, substr($xml->asXML(),38));
+            fwrite($fd, substr($xml->asXML(),38)); //remove header
         }
         
         
@@ -455,9 +482,9 @@ XML;
                     fwrite($fd, ']}'); 
                 }else{
                     $xml = new SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?><definitions/>');
-                    array_to_xml($rectypes, $xml);
-                    array_to_xml($detailtypes, $xml);
-                    array_to_xml($terms, $xml);
+                    self::_array_to_xml($rectypes, $xml);
+                    self::_array_to_xml($detailtypes, $xml);
+                    self::_array_to_xml($terms, $xml);
                     fwrite($fd, substr($xml->asXML(),38));
                 }
             }
@@ -484,7 +511,7 @@ XML;
                 fwrite($fd, '}}');     
             }else{
                 $xml = new SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?><database/>');
-                array_to_xml($database_info, $xml);
+                self::_array_to_xml($database_info, $xml);
                 fwrite($fd, substr($xml->asXML(),38));
                 fwrite($fd, '</heurist>');     
             }
@@ -513,27 +540,83 @@ XML;
     }else{
         
         //$content = stream_get_contents($fd);
-        $content = file_get_contents($tmp_destination);
         fclose($fd);
         
-        if($params['format']=='json' || $params['format']=='geojson'){
-            header( 'Content-Type: application/json');    
+        if(@$params['filename']){
+            //save into specified file in scratch folder
+            $file_records  = $params['filename'].'.'.$params['format'];
+
+            //archive into zip    
+            $file_zip = $params['filename'].'.zip';
+            $file_zip_full = tempnam(HEURIST_SCRATCHSPACE_DIR, "arc");
+            $zip = new ZipArchive();
+            if (!$zip->open($file_zip_full, ZIPARCHIVE::CREATE)) {
+                self::$system->addError(HEURIST_SYSTEM_CONFIG, "Cannot create zip $file_zip_full");
+                return false;
+            }else{
+                $zip->addFile($tmp_destination, $file_records);
+            }
+            
+            // IT DOES NOT WORK - need to rewrite flathml
+            if(false && @$params['metadata']){//save hml into scratch folder
+                
+                $file_metadata = $params['filename'].($params['format']=='xml'?'.hml':'.xml');
+                $file_metadata_full = tempnam(HEURIST_SCRATCHSPACE_DIR, "meta");
+
+                $_REQUEST['db'] = self::$system->dbname();
+                $_REQUEST['w'] = 'all';
+                $_REQUEST['q'] = 'ids:'.$params['metadata'];
+                $_REQUEST['depth'] = '0'; //do not include links or relations
+                $_REQUEST['filename'] = $file_metadata_full;
+
+                $to_include = dirname(__FILE__).'/../../export/xml/flathml.php';
+                if (is_file($to_include)) {
+                    include $to_include;
+                }
+            
+                if(file_exists($file_metadata_full)){
+                    $zip->addFile($file_metadata_full, $file_metadata);    
+                }
+                    
+            }
+            $zip->close();
+            //donwload
+            $contentDispositionField = 'Content-Disposition: attachment; '
+                . sprintf('filename="%s"; ', rawurlencode($file_zip))
+                . sprintf("filename*=utf-8''%s", rawurlencode($file_zip));            
+            
+            header('Content-Type: application/zip');
+            header($contentDispositionField);
+            header('Content-Length: ' . filesize($file_zip_full));
+            readfile($file_zip_full);
+
+            // remove the zip archive and temp files
+            //unlink($file_zip_full); 
+            //unlink($file_metadata_full);
+            unlink($tmp_destination);   
+            return true;
         }else{
-            header( 'Content-Type: text/xml');
-        }
+            $content = file_get_contents($tmp_destination);
+
+            if($params['format']=='json' || $params['format']=='geojson'){
+                header( 'Content-Type: application/json');    
+            }else{
+                header( 'Content-Type: text/xml');
+            }
         
-        if(@$params['file']==1 || @$params['file']===true){
-            $filename = 'Export_'.$params['db'].'_'.date("YmdHis").'.'.$params['format'];
-            header('Content-disposition: attachment; filename='.$filename);
-            header('Content-Length: ' . strlen($content));
+            if(@$params['file']==1 || @$params['file']===true){
+                $filename = 'Export_'.$params['db'].'_'.date("YmdHis").'.'.$params['format'];
+                header('Content-Disposition: attachment; filename='.$filename);
+                header('Content-Length: ' . strlen($content));
+            }
+            
+            if(@$params['restapi']==1 && count($rt_counts)==0){
+                http_response_code(404);
+            }
+            unlink($tmp_destination);
+            
+            exit($content);
         }
-        
-        if(@$params['restapi']==1 && count($rt_counts)==0){
-            http_response_code(404);
-        }
-        unlink($tmp_destination);
-        
-        exit($content);
     }
     
 }
@@ -708,10 +791,10 @@ private static function _getGeoJsonFeature($record, $extended=false, $simplify=f
         $idx_name = $defRecTypes['typedefs']['dtFieldNamesToIndex']['rst_DisplayName'];
 
         if(self::$defTerms==null) {
-            $defTerms = dbs_GetTerms(self::$system);
-            $defTerms = new DbsTerms(self::$system, $defTerms);
+            self::$defTerms = dbs_GetTerms(self::$system);
+            self::$defTerms = new DbsTerms(self::$system, self::$defTerms);
         }
-    }
+    }    
     
     if(self::$defDetailtypes==null) self::$defDetailtypes = dbs_GetDetailTypes(self::$system, null, 2);
     $idx_dname = self::$defDetailtypes['typedefs']['fieldNamesToIndex']['dty_Name'];
@@ -936,8 +1019,8 @@ private static function _getJsonFeature($record, $mode){
             self::$defRecTypes = dbs_GetRectypeStructures(self::$system, null, 2);
         }    
         if(self::$defTerms==null) {
-            $defTerms = dbs_GetTerms(self::$system);
-            $defTerms = new DbsTerms(self::$system, $defTerms);
+            self::$defTerms = dbs_GetTerms(self::$system);
+            self::$defTerms = new DbsTerms(self::$system, self::$defTerms);
         }
         if(self::$defDetailtypes==null){
             self::$defDetailtypes = dbs_GetDetailTypes(self::$system, null, 2);   
@@ -994,6 +1077,26 @@ private static function _getJsonFeature($record, $mode){
 
     return $res;
 }
+
+
+
+//
+// json to xml
+//
+private static function _array_to_xml( $data, &$xml_data ) {
+    foreach( $data as $key => $value ) {
+        if( is_numeric($key) ){
+            $key = 'item'.$key; //dealing with <0/>..<n/> issues
+        }
+        if( is_array($value) ) {
+            $subnode = $xml_data->addChild($key);
+            self::_array_to_xml($value, $subnode);
+        } else {
+            $xml_data->addChild("$key",htmlspecialchars("$value"));
+        }
+     }
+}
+
 
 } //end class
 ?>
