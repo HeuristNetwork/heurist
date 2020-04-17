@@ -85,7 +85,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                                 +'<div class="treeview_with_header" style="background:white">'
                                     +'<div style="padding:10px 20px 4px 10px;border-bottom:1px solid lightgray">' //instruction and close button
                                         +'<span style="font-style:italic;display:inline-block">Drag heading or field to reposition<br>Select field or click gearwheel to modify</span>&nbsp;&nbsp;&nbsp;'
-                                        +'<button style="vertical-align:top;margin-top:4px;" class="closeRtsEditor"/>'
+                                        //+'<button style="vertical-align:top;margin-top:4px;" class="closeRtsEditor"/>'
                                         +'<span style="position:absolute; right:4px;width:32px;top:26px;height:32px;font-size:32px;cursor:pointer" class="closeTreePanel ui-icon ui-icon-carat-2-w"/>'
                                     +'</div>'
                                     +'<div class="treeView"/>' //treeview
@@ -224,8 +224,10 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         this._initMenu('rep');
         this._initMenu('req');
         
+        /*
         this.btnClose = this.element.find('.closeRtsEditor').button({label:window.hWin.HR('Close')});
         this._on(this.btnClose, {click:this.closeDialog});
+        */
 
         //this.btnCloseTree = this.element.find('.closeTreePanel').button({text:false,icon:'ui-icon-carat-2-w'});
         this._on(this.element.find('.closeTreePanel'), {click:function(){ this.mainLayout.layout().close("west"); }});

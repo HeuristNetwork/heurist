@@ -2877,7 +2877,6 @@ rectypes.names[rectypeID] + ' is defined as a child of <b>'+names
         
         var ishelp_on = (this.usrPreferences['help_on']==true || this.usrPreferences['help_on']=='true');
         var isfields_on = this.usrPreferences['optfields']==true || this.usrPreferences['optfields']=='true';
-
         if( this.element.find('.chb_opt_fields').length==0 )
         {  //not inited yet
 
@@ -2892,7 +2891,7 @@ rectypes.names[rectypeID] + ' is defined as a child of <b>'+names
                 +'<div style="display:inline-block;padding-left:20px">'
                     +'<label><input type="checkbox" class="chb_show_help" '
                         +(ishelp_on?'checked':'')+'/>Show help</label><span style="display:inline-block;width:40px"></span>'
-                    +'<label><input type="checkbox" class="chb_opt_fields" '
+                    +'<label class="lbl_opt_fields"><input type="checkbox" class="chb_opt_fields" '
                         +(isfields_on?'checked':'')+'/>Optional fields</label>'
                 +'</div>'
              
@@ -3035,6 +3034,7 @@ rectypes.names[rectypeID] + ' is defined as a child of <b>'+names
                         .change(function( event){
                             var isfields_on = $(event.target).is(':checked');
                             that.usrPreferences['optfields'] = isfields_on;
+                            //that.saveUiPreferences();
                             $(that.element).find('div.optional').parent('div[data-dtid]').css({'display': (isfields_on?'table':'none')} ); 
                             $(that.element).find('div.optional_hint').css({'display': (isfields_on?'none':'block')} ); 
                             
@@ -3042,7 +3042,10 @@ rectypes.names[rectypeID] + ' is defined as a child of <b>'+names
                         });
                         
         }
-        
+        else{
+            this.element.find('.chb_opt_fields').prop('checked', isfields_on);
+            this.element.find('.chb_show_help').prop('checked', ishelp_on);
+        }
         //add record title at the top ======================
         
         if(this.editHeader && this.editHeader.length>0){ 
@@ -3092,7 +3095,7 @@ rectypes.names[rectypeID] + ' is defined as a child of <b>'+names
         }
 
 
-        //show-hide optional fields     
+        //show-hide optional fields 
         $(this.element).find('div.optional').parent().css({'display': (isfields_on?'table':'none')} ); 
         $(this.element).find('div.optional_hint').css({'display': (isfields_on?'none':'block')} ); 
         
@@ -3162,6 +3165,9 @@ rectypes.names[rectypeID] + ' is defined as a child of <b>'+names
             +'style="color:darkgray;display:inline;font-size:28px;vertical-align: 0px"></span>').prependTo(ic);
                     */
                 }
+                //switch on optional fields and hide checckbox
+                this.element.find('.chb_opt_fields').prop('checked',true).hide().change();
+                this.element.find('.lbl_opt_fields').hide();
                 
             }
             
