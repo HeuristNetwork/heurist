@@ -205,8 +205,10 @@ function hEditing(_options) {
                     if(fields[idx].groupType != currGroupType){ //create new group container and init previous
                         //init previous one 
                         if(groupEle!=null){
-                            if(currGroupType == 'accordion'){
-                                groupEle.accordion({heightStyle: "content", active:false, collapsible: true});
+                            if(currGroupType == 'accordion' || currGroupType == 'expanded'){
+                                groupEle.accordion({heightStyle: "content", 
+                                                    active:(currGroupType == 'expanded')?0:false, 
+                                                    collapsible: true});
                                 if(currGroupHeaderClass){
                                     groupEle.find('.ui-accordion-header').addClass(currGroupHeaderClass);
                                 }
@@ -218,7 +220,7 @@ function hEditing(_options) {
                         currGroupHeaderClass= fields[idx].groupHeaderClass;
                         currGroupType = fields[idx].groupType;
                         //create new accordion or tabcontrol
-                        if(currGroupType == 'accordion'){
+                        if(currGroupType == 'accordion' || currGroupType == 'expanded'){
                             groupEle = $('<div>').appendTo(groupContainer);
                         }else if(currGroupType == 'tabs'){
                             //header(tabs)
@@ -242,7 +244,7 @@ function hEditing(_options) {
                     
                         newFieldContainer.attr('data-dtid', fields[idx]['dtID']);
 
-                        if(!(currGroupType == 'tabs' || currGroupType == 'accordion')){
+                        if(!(currGroupType == 'tabs' || currGroupType == 'accordion' || currGroupType == 'expanded')){
                             //div for gearwheel
                             $('<div>').css({'padding-left':'7px','height':'12px','display':'inline-block'})
                                 .attr('data-dtid', fields[idx]['dtID'])
@@ -254,7 +256,7 @@ function hEditing(_options) {
                     }
 
                     //add header and field container
-                    if(currGroupType == 'accordion'){
+                    if(currGroupType == 'accordion' || currGroupType == 'expanded'){
                         $('<h3>').html('<span class="separator2">'+headerText+'</span>').appendTo(groupEle);
                         newFieldContainer.appendTo($('<div>').appendTo(groupEle));
 
@@ -358,8 +360,10 @@ function hEditing(_options) {
             
             //init last one
             if(groupEle!=null){
-                if(currGroupType == 'accordion'){
-                    groupEle.accordion({heightStyle: "content", active:false, collapsible: true });
+                if(currGroupType == 'accordion' || currGroupType == 'expanded'){
+                    groupEle.accordion({heightStyle: "content", 
+                                        active:(currGroupType == 'expanded')?0:false,
+                                        collapsible: true });
                     if(currGroupHeaderClass){
                         groupEle.find('.ui-accordion-header').addClass(currGroupHeaderClass);
                     }

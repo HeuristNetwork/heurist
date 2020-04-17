@@ -277,7 +277,8 @@
                         "rst_DisplayHelpText": "Collapsible Block header delimits a block of fields which can be opened/closed/moved together. Consecutive Tab headers create a row of tabs containing the fields which follow them. Simple Divider is an independant heading with no grouping function.",
                         "rst_FieldConfig": [
                             {"key":"group", "title":"Simple Divider"},
-                            {"key":"accordion", "title":"Collapsible Block header"},
+                            {"key":"accordion", "title":"Collapsible Block header (initially collapsed)"},
+                            {"key":"expanded", "title":"Collapsible Block header (initially expanded)"},
                             {"key":"tabs", "title":"Tab header"}]
                     }
                 },

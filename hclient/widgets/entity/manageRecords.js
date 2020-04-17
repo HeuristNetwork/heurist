@@ -2356,13 +2356,17 @@ rectypes.names[rectypeID] + ' is defined as a child of <b>'+names
                         if(group_fields!=null){
                             fields[fields.length-1].children = group_fields;
                         }
+                        
                         var dtGroup = {
                             dtID: rfr['dt_ID'],
                             groupHeader: rfr[fi_name],
                             groupHelpText: rfr[fi_help],
                             groupHidden: false,
                             groupTitleVisible: (rfr[fi_reqtype]!=='forbidden'),
-                            groupType: (rfr[fi_defval]=='group'||rfr[fi_defval]=='tabs'||rfr[fi_defval]=='accordion')?rfr[fi_defval]:'group',
+                            groupType: (rfr[fi_defval]=='group'||
+                                        rfr[fi_defval]=='tabs'||
+                                        rfr[fi_defval]=='accordion'||
+                                        rfr[fi_defval]=='expanded')?rfr[fi_defval]:'group',
                             groupStyle: {},
                             children:[]
                         };
