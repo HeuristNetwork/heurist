@@ -172,7 +172,7 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
             $coding_sheet = array();
             $images = array();
             $documents = array();
-            $allowed_img_ext = array('jpg','jpeg','bmp','pict','tif','tiff','png','gif');
+            $allowed_img_ext = array('jpg','jpeg','jfif','bmp','pict','tif','tiff','png','gif');
             $allowed_doc_ext = array('pdf','doc','docx','rtf','txt');
 
             rrmdir($folder);

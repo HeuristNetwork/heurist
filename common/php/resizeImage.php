@@ -225,6 +225,7 @@ if (array_key_exists('ulf_ID', $_REQUEST))
         switch($mimeExt) {
             case 'image/jpeg':
             case 'jpeg':
+            case 'jfif':
             case 'jpg':
             case 'image/gif':
             case 'gif':
@@ -282,6 +283,7 @@ if (array_key_exists('ulf_ID', $_REQUEST))
             switch($mimeExt) {
                 case 'image/jpeg':
                 case 'jpeg':
+                case 'jfif':
                 case 'jpg':
                     $img = @imagecreatefromjpeg($filename);
                     break;

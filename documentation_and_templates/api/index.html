@@ -11436,7 +11436,7 @@ except ApiException as e:
   	module.exports = (function () {
   	    /**
   	     * @param {object} json The JSON object you want to render. It has to be an
-  	     * object or array. Do NOT pass raw JSON string.
+         * object or array. Do NOT pass raw JSON string.
   	     *
   	     * @param {number} [open=1] his number indicates up to how many levels the
   	     * rendered tree should expand. Set it to `0` to make the whole tree collapsed
@@ -12657,7 +12657,7 @@ except ApiException as e:
   
   },{"../node_modules/is-buffer/index.js":36,"./util/debug":16,"./util/plugins":17,"./util/promise":18,"./util/url":19,"ono":69}],6:[function(require,module,exports){
   (function (Buffer){
-  "use strict";var BINARY_REGEXP=/\.(jpeg|jpg|gif|png|bmp|ico)$/i;module.exports={order:400,allowEmpty:!0,canParse:function(r){return Buffer.isBuffer(r.data)&&BINARY_REGEXP.test(r.url)},parse:function(r){return Buffer.isBuffer(r.data)?r.data:new Buffer(r.data)}};
+  "use strict";var BINARY_REGEXP=/\.(jpeg|jfif|jpg|gif|png|bmp|ico)$/i;module.exports={order:400,allowEmpty:!0,canParse:function(r){return Buffer.isBuffer(r.data)&&BINARY_REGEXP.test(r.url)},parse:function(r){return Buffer.isBuffer(r.data)?r.data:new Buffer(r.data)}};
   
   }).call(this,require("buffer").Buffer)
   

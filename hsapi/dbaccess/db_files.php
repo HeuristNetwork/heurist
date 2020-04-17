@@ -260,6 +260,7 @@ function getImageFromFile($filename){
         
             switch($path_parts['extension']) {
                 case 'jpeg':
+                case 'jfif':
                 case 'jpg':
                     $image = @imagecreatefromjpeg($filename);
                     break;

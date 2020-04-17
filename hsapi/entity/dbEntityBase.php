@@ -573,11 +573,15 @@ class DbEntityBase
                     $filename = $path.'icon/'.$recID.'.png';    
                 }else{
                     $filename = null;
-                    $exts = $extension?array($extension):array('png','jpg','jpeg','gif');
+                    $exts = $extension?array($extension):array('png','jpg','jpeg','jfif','gif');
                     foreach ($exts as $ext){
                         $filename = $path.$recID.'.'.$ext;
                         if(file_exists($filename)){
-                            $content_type = 'image/'.$ext;
+                            if($ext=='jpg' || $ext=='jfif'){
+                                $content_type = 'image/jpeg';
+                            }else{
+                                $content_type = 'image/'.$ext;    
+                            }
                             break;
                         }
                     }

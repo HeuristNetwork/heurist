@@ -841,7 +841,7 @@ XML;
                 $flleinfo = pathinfo($filename);
                 $ext = strtolower($flleinfo['extension']);
 
-                if( $ext=="jpeg" || $ext=="jpg" || $ext=="tif" || $ext=="tiff" )
+                if( $ext=="jpeg" || $ext=="jfif" || $ext=="jpg" || $ext=="tif" || $ext=="tiff" )
                 {
 
                     $exif = exif_read_data($filename, 'IFD0');

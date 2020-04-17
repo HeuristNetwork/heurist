@@ -168,10 +168,14 @@ if($filename){ //download from scratch
             }
             
             
-            $exts = array('png','jpg','jpeg','gif');
+            $exts = array('png','jpg','jpeg','jfif','gif');
             foreach ($exts as $ext){
                 if(file_exists($filename.'.'.$ext)){
-                    $content_type = 'image/'.$ext;
+                    if($ext=='jpg' || $ext=='jfif'){
+                        $content_type = 'image/jpeg';
+                    }else{
+                        $content_type = 'image/'.$ext;    
+                    }
                     $filename = $filename.'.'.$ext;
                     break;
                 }
