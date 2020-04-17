@@ -974,7 +974,7 @@ var that = this;
             }
 
         }
-        else if(this.detailType=='rectype'){  //@todo it seems not used need refer via resource type and entity mgr
+        else if(this.detailType=='rectype'){  //@todo it seems NOT USED, need refer via resource type and entity mgr
 
             $input = $( "<select>" )
             .uniqueId()
@@ -1466,6 +1466,81 @@ var that = this;
             
         } 
         
+        else if(this.detailType=='resource' && this.configMode.entity=='DefRecTypes'){ //-----------
+        //@TODO remove as soon as defRecType entity manager is completed
+        
+            __show_select_dialog = function(event){
+        
+                if(that.is_disabled) return;
+                event.preventDefault();
+                
+                var sels = that.newvalues[$input.attr('id')];//$(event.target).attr('id')];
+                
+                var sURL =  window.hWin.HAPI4.baseURL + "admin/structure/rectypes/selectRectype.html?type=" 
+                        + that.detailType  + "&dtID=" + that.options.recID +"&ids=" 
+                        + sels
+                        + "&db="+ window.hWin.HAPI4.database;  
+
+                window.hWin.HEURIST4.msg.showDialog(sURL, {
+                    "close-on-blur": false,
+                    "no-resize": true,
+                    title: 'Select Record Type',
+                    height: 600,
+                    width: 640,
+                    callback: function(selection) {
+                        if(!window.hWin.HEURIST4.util.isempty(selection) && !$.isArray(selection)){
+                            selection = selection.split(','); 
+                        }  
+                        var newsel = window.hWin.HEURIST4.util.isArrayNotEmpty(selection)?selection:[];
+                        
+                        //config and data are loaded already, since dialog was opened
+                        that._findAndAssignTitle($input, newsel);
+                        that.newvalues[$input.attr('id')] = newsel.join(',');
+                        that._onChange();
+                    }
+                });
+            }
+            
+            //replace input with div
+            $input = $( "<div>").css({'display':'inline-block','vertical-align':'middle','min-wdith':'25ex'})
+                            .uniqueId().appendTo( $inputdiv );
+                            
+                            
+            //define explicit add relationship button
+            $( "<button>", {title: "Select"})
+                        .button({icon:"ui-icon-triangle-1-e",
+                               label:('&nbsp;&nbsp;&nbsp;select')})
+                        .addClass('sel_link2').hide()
+                        .appendTo( $inputdiv );
+            
+            var $input_img, $gicon;
+            var select_return_mode = 'ids';
+            
+            var icon_for_button = 'ui-icon-pencil'; //was -link
+            if(this.configMode.select_return_mode &&
+               this.configMode.select_return_mode!='ids'){
+                 select_return_mode = 'recordset'
+            }
+                
+            $gicon = $('<span class="ui-icon ui-icon-triangle-1-e sel_link" '
+            +'style="display:inline-block;vertical-align:top;margin-left:8px;margin-top:2px;cursor:hand"></span>')
+            .insertBefore( $input );
+            
+            $input.addClass('entity_selector').css({'margin-left': '-24px'});
+
+            $input.css({'min-wdith':'22ex'});
+
+            $input.hide();
+            that._findAndAssignTitle($input, value);
+
+            //no more buttons this._on( $btn_rec_search_dialog, { click: __show_select_dialog } );
+            this._on( $input, { keypress: __show_select_dialog, click: __show_select_dialog } );
+            this._on( $gicon, { click: __show_select_dialog } );
+            this._on( $inputdiv.find('.sel_link2'), { click: __show_select_dialog } );
+            
+            this.newvalues[$input.attr('id')] = value;  //for this type assign value at init  
+        
+        }
         else if(this.detailType=='resource') //----------------------------------------------------
         {
             
