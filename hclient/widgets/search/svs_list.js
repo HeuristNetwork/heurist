@@ -1147,7 +1147,9 @@ $.widget( "heurist.svs_list", {
                     that._avoidConflictForGroup(groupID, function(){
                         //data.otherNode - dragging node
                         //node - target node
+//console.log('target '+node.tree._id+'  source '+data.otherNode.tree._id);                        
                         if(node.tree._id != data.otherNode.tree._id){
+                            //group is changed
                         
                             var mod_node = data.otherNode;
                             
@@ -1158,18 +1160,29 @@ $.widget( "heurist.svs_list", {
 
 //console.log('move '+mod_node.key+'  '+mod_node.title+' from '+oldGroupID
 //+' to '+newGroupID_for_db+' ('+newGroupID+') '+node.key+' '+node.title);
+                            var affected = [];
+                            if(mod_node.folder){
+                                 mod_node.visit( function(node){
+                                    if(!node.folder) affected.push(node.key);    
+                                 });
+                            }else{
+                                 affected = [mod_node.key];
+                            }
 
-                            var request = { svs_ID: mod_node.key, 
+
+                            var request = { svs_ID: affected, 
                                             svs_UGrpID: newGroupID_for_db };
                             
                             window.hWin.HAPI4.SystemMgr.ssearch_save(request,
                                 function(response){
                                     if(response.status == window.hWin.ResponseStatus.OK){
 
-                                        window.hWin.HAPI4.currentUser.usr_SavedSearch[mod_node.key][_GRPID] = newGroupID;
-                                        data.otherNode.tree._id = node.tree._id;
+                                        for(var i=0; i<affected.length; i++){
+                                            window.hWin.HAPI4.currentUser.usr_SavedSearch[affected[i]][_GRPID] = newGroupID;    
+                                        }
+                                        //data.otherNode.tree._id = node.tree._id;
                                         data.otherNode.moveTo(node, data.hitMode);
-                            
+                                        
                                         that._saveTreeData( oldGroupID, null, function(){
                                             that._saveTreeData( groupID, null, function(){
                                                 
@@ -1182,6 +1195,7 @@ $.widget( "heurist.svs_list", {
                                 });
                             
                         }else{
+                            //the same group
                             data.otherNode.moveTo(node, data.hitMode);
                             that._saveTreeData( groupID );
                         }
@@ -1557,7 +1571,9 @@ $.widget( "heurist.svs_list", {
 
     },
 
-
+    //
+    //
+    //
     _saveSearch: function(request, node){
 
         var that = this;
@@ -1944,6 +1960,15 @@ $.widget( "heurist.svs_list", {
     , editSavedSearch: function(mode, groupID, svsID, squery, node, is_short){
 
         var that = this;
+        var currGroupId = 0;
+        var isPrivate = false;
+        if(window.hWin.HAPI4.currentUser.usr_SavedSearch[svsID]){
+            currGroupId = window.hWin.HAPI4.currentUser.usr_SavedSearch[svsID][_GRPID];
+            if(currGroupId == window.hWin.HAPI4.currentUser.ugr_ID){
+                 currGroupId = (that.treeviews['all']._id == node.tree._id)?'all':'bookmark';
+                 isPrivate = true;
+            }
+        }
 
         var callback = function(event, response) {
             if(response.isNewSavedFilter){     //new saved search
@@ -1966,10 +1991,42 @@ $.widget( "heurist.svs_list", {
                 $("#addlink"+groupID).css('display', 'none');
 
             }else if(node){ //edit is called from this widget only - otherwise we have to implement search node by svsID
-                //edit - changed only title in treeview
-                node.setTitle(response.svs_Name);
-                node.render(true);
-                that._saveTreeData( groupID );
+                //if group is changed move node to another tree
+                groupID = response.svs_UGrpID
+                if(groupID == window.hWin.HAPI4.currentUser.ugr_ID){
+                    groupID = response.domain; //all or bookmarks
+                }else{
+                    isPrivate = false;
+                }
+
+//console.log('!!!!! '+currGroupId+'  new '+groupID);
+                
+                if( currGroupId != groupID){
+                    //remove from old group
+                    node.remove();
+                    if(!isPrivate){
+                        that._saveTreeData( currGroupId );   
+                    }
+                    if(that.treeviews[currGroupId].count()<1){
+                        $("#addlink"+currGroupId).css('display', 'block');
+                    }
+                    
+                    //add to to new tree
+                    var tree = that.treeviews[groupID];
+                    node = tree.rootNode;
+                    node.addNode( { title:response.svs_Name, key: response.svs_ID}, 'child' );
+                    that._saveTreeData( groupID );
+                    $("#addlink"+groupID).hide();
+                    
+                }else{
+                    node.setTitle(response.svs_Name);
+                    node.render(true);
+                    //edit - changed only title in treeview
+                    that._saveTreeData( groupID );
+                }
+
+            
+            
             }
         };
 

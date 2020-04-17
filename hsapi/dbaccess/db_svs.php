@@ -171,22 +171,32 @@
     function svsSave($system, $record){
 
         if( !(@$record['svs_ID']>0) && !@$record['svs_Name']){
-            $system->addError(HEURIST_INVALID_REQUEST, "Name not defined");
+            $system->addError(HEURIST_INVALID_REQUEST, "Name not defined"); //for new 
         }else if(!(@$record['svs_ID']>0) && !@$record['svs_Query']){
-            $system->addError(HEURIST_INVALID_REQUEST, "Query not defined");
+            $system->addError(HEURIST_INVALID_REQUEST, "Query not defined"); //for new 
         }else{
 
             if (!$system->is_member(@$record['svs_UGrpID'])) { //was has_access
                 $system->addError(HEURIST_REQUEST_DENIED, 
                     'Cannot update filter criteria. Current user must be member for group');
             }else{
-
-                $res = mysql__insertupdate($system->get_mysqli(), "usrSavedSearches", "svs", $record);
-                if(is_numeric($res)>0){
-                    return $res; //returns affected record id
+                
+                if(is_array($record['svs_ID'])){
+                    $rec_IDs = $record['svs_ID'];
                 }else{
-                    $system->addError(HEURIST_DB_ERROR, 'Cannot update record in database', $res);
+                    $rec_IDs = array($record['svs_ID']);
                 }
+                
+                foreach($rec_IDs as $svs_ID){
+                    $record['svs_ID'] = $svs_ID;                             
+                    $res = mysql__insertupdate($system->get_mysqli(), "usrSavedSearches", "svs", $record);
+                    if(is_numeric($res)>0){
+                        return $res; //returns affected record id
+                    }else{
+                        $system->addError(HEURIST_DB_ERROR, 'Cannot update saved filrer #'.$svs_ID.' in database', $res);
+                    }
+                }
+
 
             }
         }
