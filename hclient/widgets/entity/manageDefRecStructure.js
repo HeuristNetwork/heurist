@@ -53,7 +53,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         if(!(this.options.rty_ID>0)) {
             this.options.rty_ID = 4; //57; //by default is required   
         }
-        this.options.previewEditor = null; // record editor for preview
+        this.previewEditor = null; // record editor for preview
         
         this.options.layout_mode = 'short';
         this.options.use_cache = true;
@@ -72,7 +72,22 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         if(this.options.edit_mode=='editonly'){
             this.options.select_mode = 'manager';
             this.options.layout_mode = 'editonly';
-        }else{
+            
+        }else if(this.options.external_preview){
+            
+            this.options.layout_mode = 
+                '<div class="treeview_with_header" style="background:white">'
+                    +'<div style="padding:10px 20px 4px 10px;border-bottom:1px solid lightgray">' //instruction and close button
+                        +'<span style="font-style:italic;display:inline-block">Drag heading or field to reposition<br>Select field or click gearwheel to modify</span>&nbsp;&nbsp;&nbsp;'
+                        //+'<button style="vertical-align:top;margin-top:4px;" class="closeRtsEditor"/>'
+                        +'<span style="position:absolute; right:4px;width:32px;top:26px;height:32px;font-size:32px;cursor:pointer" class="closeTreePanel ui-icon ui-icon-carat-2-w"/>'
+                    +'</div>'
+                    +'<div class="treeView"/>' //treeview
+                    +'<div class="editForm" style="top:0px;display:none">EDITOR</div>'
+                    +'<div class="recordList" style="display:none"/>'
+                +'</div>';
+            
+        }else {
             this.options.layout_mode =                 
                 '<div style="display:none">'
                     +'<div class="ent_header searchForm"/>'     
@@ -141,50 +156,58 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
 
         var that = this;
         
-        var layout_opts =  {
-            applyDefaultStyles: true,
-            togglerContent_open:    '<div class="ui-icon ui-icon-triangle-1-w"></div>',
-            togglerContent_closed:  '<div class="ui-icon ui-icon-carat-2-e"></div>',
-            //togglerContent_open:    '&nbsp;',
-            //togglerContent_closed:  '&nbsp;',
-            west:{
-                size: this.usrPreferences.treepanel_width,
-                maxWidth:800,
-                minWidth:340,
-                spacing_open:6,
-                spacing_closed:40,  
-                togglerAlign_open:'center',
-                togglerAlign_closed:'top',
-                togglerAlign_closed:16,   //top position   
-                togglerLength_closed:40,  //height of toggler button
-                initClosed: (this.usrPreferences.treepanel_closed==true || this.usrPreferences.treepanel_closed=='true'),
-                slidable:false,  //otherwise it will be over center and autoclose
-                contentSelector: '.treeview_with_header',   
-                onopen_start : function( ){ 
-                    var tog = that.element.find('.ui-layout-toggler-west');
-                    tog.removeClass('prominent-cardinal-toggler');
+        if(!this.options.external_preview){
+        
+            var layout_opts =  {
+                applyDefaultStyles: true,
+                togglerContent_open:    '<div class="ui-icon ui-icon-triangle-1-w"></div>',
+                togglerContent_closed:  '<div class="ui-icon ui-icon-carat-2-e"></div>',
+                //togglerContent_open:    '&nbsp;',
+                //togglerContent_closed:  '&nbsp;',
+                west:{
+                    size: this.usrPreferences.treepanel_width,
+                    maxWidth:800,
+                    minWidth:340,
+                    spacing_open:6,
+                    spacing_closed:40,  
+                    togglerAlign_open:'center',
+                    togglerAlign_closed:'top',
+                    togglerAlign_closed:16,   //top position   
+                    togglerLength_closed:40,  //height of toggler button
+                    initClosed: (this.usrPreferences.treepanel_closed==true || this.usrPreferences.treepanel_closed=='true'),
+                    slidable:false,  //otherwise it will be over center and autoclose
+                    contentSelector: '.treeview_with_header',   
+                    onopen_start : function( ){ 
+                        var tog = that.element.find('.ui-layout-toggler-west');
+                        tog.removeClass('prominent-cardinal-toggler');
+                    },
+                    onclose_end : function( ){ 
+                        var tog = that.element.find('.ui-layout-toggler-west');
+                        tog.addClass('prominent-cardinal-toggler');
+                    }
                 },
-                onclose_end : function( ){ 
-                    var tog = that.element.find('.ui-layout-toggler-west');
-                    tog.addClass('prominent-cardinal-toggler');
+                center:{
+                    minWidth:400,
+                    contentSelector: '.preview_and_edit_form'    
                 }
-            },
-            center:{
-                minWidth:400,
-                contentSelector: '.preview_and_edit_form'    
+            };
+
+            this.mainLayout = this.element.find('.main-layout');
+            this.mainLayout.layout(layout_opts); //.addClass('ui-heurist-bg-light')
+
+            if(this.usrPreferences.treepanel_closed==true || this.usrPreferences.treepanel_closed=='true'){
+                        var tog = that.mainLayout.find('.ui-layout-toggler-west');
+                        tog.addClass('prominent-cardinal-toggler');
             }
-        };
-
-        this.mainLayout = this.element.find('.main-layout');
-        this.mainLayout.layout(layout_opts); //.addClass('ui-heurist-bg-light')
-
-        if(this.usrPreferences.treepanel_closed==true || this.usrPreferences.treepanel_closed=='true'){
-                    var tog = that.mainLayout.find('.ui-layout-toggler-west');
-                    tog.addClass('prominent-cardinal-toggler');
+            
+            this.previewEditor = this.element.find('.previewEditor');
+            
+        }else{
+            this.previewEditor = this.options.external_preview;
         }
         
         
-        this.previewEditor = this.element.find('.previewEditor');
+        
         
         this.recordList.resultList('option', 'show_toolbar', false);
         this.recordList.resultList('option', 'pagesize', 9999);
@@ -201,7 +224,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             
                 //var treeData = this._cachedRecordset.getTreeViewData('trm_Label','trm_ParentTermID');
                 this._initTreeView();
-                this._showRecordEditorPreview();
+                this._showRecordEditorPreview( true );
                 
             }else{
                 //usual way from server - NOT USED  
@@ -216,6 +239,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         }    
         
         if(this.options.external_toolbar){
+            // IJ: need to edit record and rt in the same time
             this.toolbarOverRecordEditor(this.options.external_toolbar);    
         }
         
@@ -230,7 +254,13 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         */
 
         //this.btnCloseTree = this.element.find('.closeTreePanel').button({text:false,icon:'ui-icon-carat-2-w'});
-        this._on(this.element.find('.closeTreePanel'), {click:function(){ this.mainLayout.layout().close("west"); }});
+        this._on(this.element.find('.closeTreePanel'), {click:function(){ 
+            if(this.options.external_preview){
+                this.options.external_preview.manageRecords('closeWestPanel');
+            }else{
+                this.mainLayout.layout().close("west"); 
+            }
+        }});
         
         return true;
     },            
@@ -762,7 +792,7 @@ dty_TermIDTreeNonSelectableIDs
     
     
     //----------------------
-    //
+    // list view is not visbile - we show everything in treeview
     //
     //
     _recordListItemRenderer:function(recordset, record){
@@ -795,16 +825,6 @@ dty_TermIDTreeNonSelectableIDs
         //@todo we have _rendererActionButton and _defineActionButton - remove ?
         //current user is admin of database managers
         if(this.options.select_mode=='manager' && this.options.edit_mode=='popup' && window.hWin.HAPI4.is_admin()){
-             /*
-            html = html 
-                + '<div class="rec_view_link logged-in-only" style="width:60px">'
-                + '<div title="Click to edit field" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit"  style="height:16px">'
-                +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'
-                + '</div>'
-                +'<div title="Click to delete reminder" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="delete"  style="height:16px">'
-                +     '<span class="ui-button-icon-primary ui-icon ui-icon-circle-close"></span><span class="ui-button-text"></span>'
-                + '</div></div>';
-              */  
                 
             html = html + '<div class="rec_actions user-list" style="top:4px;width:60px;">'
                     + '<div title="Click to edit field" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit" style="height:16px">'
@@ -826,40 +846,7 @@ dty_TermIDTreeNonSelectableIDs
             + this._defineActionButton({key:'delete',label:'Remove', title:'', icon:'ui-icon-minus'}, null,'icon_text');
 
         }
-            
-        /* special case for show in list checkbox
-        html = html 
-            +  '<div title="Make type visible in user accessible lists" class="item inlist logged-in-only" '
-            + 'style="width:3em;padding-top:5px" role="button" aria-disabled="false" data-key="show-in-list">'
-            +     '<input type="checkbox" checked="'+(fld('dty_ShowInLists')==0?'':'checked')+'" />'
-            + '</div>';
-            
-            var group_selectoptions = this.searchForm.find('#sel_group').html();
-                        
-            html = html 
-                //  counter and link to rectype + this._rendererActionButton('duplicate')
-                //group selector
-            +  '<div title="Change group" class="item inlist logged-in-only"'
-            +  ' style="width:8em;padding-top:3px" data-key2="group-change">'
-            +     '<select style="max-width:7.5em;font-size:1em" data-grpid="'+fld('dty_DetailTypeGroupID')
-            + '">'+group_selectoptions+'</select>'
-            +  '</div>'
-                + this._rendererActionButton('delete');
-        */
-        
         html = html + '</div>'; //close recordDiv
-        
-        /* 
-            html = html 
-        +'<div title="Click to edit group" class="rec_edit_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit">'
-        +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'
-        + '</div>&nbsp;&nbsp;'
-        + '<div title="Click to delete group" class="rec_view_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="delete">'
-        +     '<span class="ui-button-icon-primary ui-icon ui-icon-circle-close"></span><span class="ui-button-text"></span>'
-        + '</div>'
-        + '</div>';*/
-
-
         return html;
         
     },
@@ -902,60 +889,32 @@ dty_TermIDTreeNonSelectableIDs
     onEditFormChange: function( changed_element ){
         //this._super(changed_element);
             
+        //show hide buttons in treeview
+        var isEditOpen = this.editForm.is(':visible');
+        
+        this.editForm.find('#btnCloseEditor_rts').css('display', 
+                (isEditOpen)?'block':'none');
+                
+        //show/hide action buttons in tree
+        this._treeview.find('.svs-contextmenu3').css('visibility', isEditOpen?'hidden':'visible' );
+        if(!isEditOpen){
+            //deactivate node - add action buttons
+            var tree = this._treeview.fancytree('getTree');
+            var node = tree.getActiveNode();
+            if(node && node.key!=this._currentEditID){
+                node.setActive(false);  
+            } 
+        }
+
+        
+        var isChanged = this.editForm.is(':visible') 
+                        && this._editing && this._editing.isModified();
+        this.editForm.find('#btnRecSaveAndClose_rts').css('display', 
+                (isChanged)?'block':'none');
+            
         if(this._toolbar){
-            
-            //show hide buttons in treeview
-            var isEditOpen = this.editForm.is(':visible');
-            
-            this.editForm.find('#btnCloseEditor_rts').css('display', 
-                    (isEditOpen)?'block':'none');
-                    
-            //show/hide action buttons in tree
-            this._treeview.find('.svs-contextmenu3').css('visibility', isEditOpen?'hidden':'visible' );
-            if(!isEditOpen){
-                //deactivate node - add action buttons
-                var tree = this._treeview.fancytree('getTree');
-                var node = tree.getActiveNode();
-                if(node && node.key!=this._currentEditID){
-                    node.setActive(false);  
-                } 
-            }
-
-            
-            var isChanged = this.editForm.is(':visible') 
-                            && this._editing && this._editing.isModified();
-            this.editForm.find('#btnRecSaveAndClose_rts').css('display', 
-                    (isChanged)?'block':'none');
-            
             this._toolbar.find('#btnRecPreview_rts').css('display', 
                     (isChanged)?'none':'block');
-                    
-                    
-            
-            /*           
-            var canDelete = isEditOpen
-                            && !(this._editing && this._editing.isModified());
-            
-            this._toolbar.find('#btnRecDelete_rts').css('display', 
-                    (canDelete)?'block':'none');
-            this._toolbar.find('#btnCloseEditor_rts').css('display', 
-                    (canDelete)?'block':'none');
-
-            var isChanged = this.editForm.is(':visible') 
-                            && this._editing && this._editing.isModified();
-
-            this._toolbar.find('#btnRecPreview_rts').css('display', 
-                    (isChanged)?'none':'block');
-            this._toolbar.find('#btnPreferences_rts').css('display', 
-                    (isChanged)?'none':'block');
-                    
-            this._toolbar.find('#btnRecSave_rts').css('display', 
-                    (isChanged)?'block':'none');
-            this._toolbar.find('#btnRecSaveAndClose_rts').css('display', 
-                    (isChanged)?'block':'none');
-            this._toolbar.find('#btnRecCancel_rts').css('display', 
-                    (isChanged)?'block':'none');
-            */
         }
             
     },  
@@ -968,6 +927,7 @@ dty_TermIDTreeNonSelectableIDs
         
         if(re_toolbar){ //replace
         
+            //hide native record toolbar
             re_toolbar.find('.ui-dialog-buttonset').hide();
             
             var btn_array = this._getEditDialogButtons();
@@ -1004,61 +964,6 @@ dty_TermIDTreeNonSelectableIDs
                       }},
             ];
             
-            
-
-            /* OLD version 
-            var btns = [                       
-                {text:window.hWin.HR('Preferences'),
-                      css:{'float':'left',display:'block'}, id:'btnPreferences_rts', icon:'ui-icon-gear',
-                      click: function() {  }},
-                      
-                {text:window.hWin.HR('Refresh Preview'),
-                      css:{'float':'left',display:'block'}, id:'btnRecPreview_rts',
-                      click: function() { that._showRecordEditorPreview(); }},
-                
-                {text:window.hWin.HR(this.options.external_toolbar?'Exit Structure editor':'Close Dialog'), 
-                      css:{'margin-left':'4em','float':'right'},
-                      click: function() { 
-                          that.closeDialog(); 
-                      }},
-
-                      
-                {text:window.hWin.HR('Close Field Editor'), id:'btnCloseEditor_rts', 
-                      css:{'margin-right':'8em','float':'right',display:'none'},
-                      click: function() { 
-
-                        if(that.previewEditor){
-                            if(false){ //was modified - ned reload preview @todo
-                                that._showRecordEditorPreview();    
-                            } else {
-                                that.editForm.hide();
-                                that.previewEditor.show();
-                                that.onEditFormChange();
-                            }
-                        }
-                          
-                      }},
-                      
-                {text:window.hWin.HR('Drop Changes'), id:'btnRecCancel_rts', 
-                      css:{'margin-left':'0.5em','float':'right',display:'none'},
-                      click: function() { that._initEditForm_step3(that._currentEditID) }},  //reload edit form
-                {text:window.hWin.HR('Save'), id:'btnRecSave_rts',
-                      accesskey:"S",
-                      css:{'font-weight':'bold','float':'right',display:'none'},
-                      click: function() { that._saveEditAndClose( null, 'none' ); }},
-                {text:window.hWin.HR('Save and Close'), id:'btnRecSaveAndClose_rts',  //save editor and show preview
-                      accesskey:"C",
-                      css:{'font-weight':'bold','float':'right',display:'none'},
-                      click: function() { that._saveEditAndClose( null, 'close' ); }},
-                {text:window.hWin.HR('Remove'), id:'btnRecDelete_rts', title:'Exclude field from structure',
-                      css:{'float':'right',display:'none'},
-                      click: function() { if(that._currentEditID>0) that._removeField(that._currentEditID); }}
-                      
-                      
-                      
-                      ];
-            */
-        
             return btns;
     },    
     
@@ -1243,24 +1148,26 @@ dty_TermIDTreeNonSelectableIDs
     // show record editor form - it reflects the last changes of rt structure
     // recID - dty_ID - field that was saved
     //
-    _showRecordEditorPreview: function() {
+    _showRecordEditorPreview: function( hard_reload ) {
         
         //hide editor - show and updated preview
         if(this.previewEditor){
             
             this._closeFormlet();
+
+            var that = this.previewEditor;
+            var that2 = this;
            
             if(!this.previewEditor.manageRecords('instance')){
-                
-                var that = this.previewEditor;
-                var that2 = this;
+                // record editor not defined - create new one
+                // this is old option when record editor is slave to rts editor
                 
                 var options = {
                         rts_editor: this.element,
                         select_mode: 'manager',
                         edit_mode: 'editonly',
                         in_popup_dialog: false,
-                        allowAdminToolbar: false,
+                        allowAdminToolbar: false, //if false it hides attribute and titlemask links
                         rec_ID: this.options.rec_ID_sample,
                         new_record_params: {RecTypeID: this.options.rty_ID},
                         layout_mode:'<div class="ent_wrapper editor">'
@@ -1290,7 +1197,23 @@ dty_TermIDTreeNonSelectableIDs
                 
                 this.previewEditor.manageRecords( options ).addClass('ui-widget');
             }else{
-                this.previewEditor.manageRecords('reloadEditForm');
+                if(this.options.external_preview){
+                    this.previewEditor.manageRecords('option','onInitEditForm',function(){
+                            if(that2._show_optional){
+                                that.manageRecords('showOptionalFieds', true);    
+                            }
+                            if(that2._open_formlet_for_recID>0){
+                                that2.editField( that2._open_formlet_for_recID );
+                            }
+                            that2._show_optional = false;
+                            that2._open_formlet_for_recID = -1;
+                        });
+
+                    this.previewEditor.manageRecords('reloadEditForm', hard_reload);    
+                }else{
+                    this.previewEditor.manageRecords('reloadEditForm');    
+                }
+                
             }
         }
     },
@@ -1583,8 +1506,12 @@ dty_TermIDTreeNonSelectableIDs
             if(this._edit_dialog) this._edit_dialog.dialog('destroy');
             this._edit_dialog = null;
         }
+        
         this.editForm.hide();
-        this.previewEditor.show();
+        if(!this.options.external_preview){
+            this.previewEditor.show();
+        }
+        
         this.onEditFormChange(); //after close
     },  
                       
@@ -1983,6 +1910,7 @@ dty_TermIDTreeNonSelectableIDs
 
 
         if(this.options.external_toolbar){
+            //rts editor is opened from record editor
 
             if(is_force || this.defaultBeforeClose()){
                 if($.isFunction(this.options.onClose)){
@@ -2459,17 +2387,19 @@ edit form is always inline
     //    
     saveUiPreferences:function(){
    
-        var myLayout = this.mainLayout.layout();                
-        sz = myLayout.state.west.size;
-        isClosed = myLayout.state.west.isClosed;
+        if(this.mainLayout){
+            var myLayout = this.mainLayout.layout();                
+            sz = myLayout.state.west.size;
+            isClosed = myLayout.state.west.isClosed;
 
-        var params = {
-            treepanel_closed: isClosed,
-            treepanel_width: sz,
-            help_on: this.usrPreferences['help_on']
+            var params = {
+                treepanel_closed: isClosed,
+                treepanel_width: sz,
+                help_on: this.usrPreferences['help_on']
+            }
+            
+            window.hWin.HAPI4.save_pref('prefs_'+this._entityName, params);
         }
-        
-        window.hWin.HAPI4.save_pref('prefs_'+this._entityName, params);
         return true;
     },
     

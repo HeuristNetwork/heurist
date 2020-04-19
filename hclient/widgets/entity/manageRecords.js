@@ -39,6 +39,10 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         height:(window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95,
         optfields:true, 
         help_on:true,
+        
+        structure_closed: true,          
+        structure_width:500,
+        
         summary_closed:true,          
         summary_width:400, 
         summary_tabs:['0','1']},
@@ -54,8 +58,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                                 +    '<div class="ent_content_full recordList"/>'
                             +'</div>'
 
-                            //for inline edit - todo remove and not use!    
                             + '<div class="editFormDialog ent_wrapper editor">'
+                                    + '<div class="ui-layout-west"><div class="editStructure">..</div></div>' //container for rts_editor
                                     + '<div class="ui-layout-center"><div class="editForm"/></div>'
                                     + '<div class="ui-layout-east"><div class="editFormSummary">....</div></div>'
                                     //+ '<div class="ui-layout-south><div class="editForm-toolbar"/></div>'
@@ -136,7 +140,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         ); 
         
         
-        if(this.options.rts_editor){
+        //create field actions for rts editor
+        if(true || this.options.rts_editor){
             this.rts_actions_menu = $('<div class="rts-editor-actions" style="width:133px;display:none;padding-top:2px;background:#95A7B7 !important;'
                     +'font-size:10px;font-weight:normal;cursor:pointer">'
                    +'<span data-action="edit" style="background:lightblue;padding:4px">'
@@ -642,10 +647,33 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 
                 var layout_opts =  {
                     applyDefaultStyles: true,
-                    togglerContent_open:    '<div class="ui-icon ui-icon-triangle-1-e"></div>',
-                    togglerContent_closed:  '<div class="ui-icon ui-icon-carat-2-w"></div>',
                     //togglerContent_open:    '&nbsp;',
                     //togglerContent_closed:  '&nbsp;',
+                    west:{
+                        size: this.usrPreferences.structure_width,
+                        maxWidth:800,
+                        minWidth:340,
+                        spacing_open:6,
+                        spacing_closed:40,  
+                        togglerAlign_open:'center',
+                        togglerAlign_closed:'top',
+                        togglerAlign_closed:16,   //top position   
+                        togglerLength_closed:40,  //height of toggler button
+                        initHidden: true,
+                        initClosed: false && (this.usrPreferences.structure_closed==true || this.usrPreferences.structure_closed=='true'),
+                        slidable:false,  //otherwise it will be over center and autoclose
+                        contentSelector: '.editStructure',   
+                        onopen_start : function( ){ 
+                            var tog = that.element.find('.ui-layout-toggler-west');
+                            tog.removeClass('prominent-cardinal-toggler');
+                        },
+                        onclose_end : function( ){ 
+                            var tog = that.element.find('.ui-layout-toggler-west');
+                            tog.addClass('prominent-cardinal-toggler');
+                        },
+                        togglerContent_open:    '<div class="ui-icon ui-icon-triangle-1-w"></div>',
+                        togglerContent_closed:  '<div class="ui-icon ui-icon-carat-2-e"></div>',
+                    },
                     east:{
                         size: this.usrPreferences.summary_width,
                         maxWidth:800,
@@ -665,7 +693,9 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         onclose_end : function(){ 
                             var tog = that.editFormPopup.find('.ui-layout-toggler-east');
                             tog.addClass('prominent-cardinal-toggler');
-                        }
+                        },
+                        togglerContent_open:    '<div class="ui-icon ui-icon-triangle-1-e"></div>',
+                        togglerContent_closed:  '<div class="ui-icon ui-icon-carat-2-w"></div>',
                     },
                     /*south:{
                         spacing_open:0,
@@ -1595,6 +1625,13 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     //
     //
     //
+    closeWestPanel: function(){
+        this.editFormPopup.layout().close("west");  
+    },
+    
+    //
+    //
+    //
     editRecordType: function(is_inline){
 
         var that = this;
@@ -1617,11 +1654,17 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 return;                           
         }
         
-        if(is_inline){
+        if( is_inline ){
+            
+            this._reloadRtsEditor();
+            //show and expand sleft hand panel 
+            this.editFormPopup.layout().show('west', true); 
+        }
+        else if(flase && is_inline){ //OLD OPTION: show as widget on full width/height with its own preview 
             //create new widget manageDefRecStructure
-            var $structure_editor = this.element.find('.structure_editor');
+            var $structure_editor = this.element.find('.editStructure');
             if($structure_editor.length==0){
-                $structure_editor = $('<div class="structure_editor" style="display:none"/>').appendTo(this.element);
+                $structure_editor = $('<div class="editStructure" style="display:none"/>').appendTo(this.element);
             }else{
                 $structure_editor.empty();
             }
@@ -1632,7 +1675,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 select_mode: 'manager',
                 rty_ID: that._currentEditRecTypeID,
                 rec_ID_sample: that._currentEditID,
-                external_toolbar: this._toolbar,
+                external_toolbar: this._toolbar,  //send toolbar to structure editor to replace buttons
                 onClose: function()
             {
                 //restore native toolbar
@@ -1652,7 +1695,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             $structure_editor.show();
             window.hWin.HEURIST4.ui.showEntityDialog('DefRecStructure', popup_options); 
             
-        }else{
+        }else{ //POPUP rts editor
             var url = window.hWin.HAPI4.baseURL + 'admin/structure/fields/editRecStructure.html?db='+window.hWin.HAPI4.database
                 +'&rty_ID='+that._currentEditRecTypeID;
 
@@ -2520,8 +2563,7 @@ rectypes.names[rectypeID] + ' is defined as a child of <b>'+names
         }else{
             window.hWin.HEURIST4.msg.showMsgErr(response);
         }
-    },        
-    
+    },                                                      
     
     
     //  -----------------------------------------------------
@@ -2881,6 +2923,8 @@ rectypes.names[rectypeID] + ' is defined as a child of <b>'+names
         
         var ishelp_on = (this.usrPreferences['help_on']==true || this.usrPreferences['help_on']=='true');
         var isfields_on = this.usrPreferences['optfields']==true || this.usrPreferences['optfields']=='true';
+        var btn_css = {'font-weight': 'bold', color:'#7D9AAA', background:'#ecf1fb' };
+        
         if( this.element.find('.chb_opt_fields').length==0 )
         {  //not inited yet
 
@@ -2910,33 +2954,7 @@ rectypes.names[rectypeID] + ' is defined as a child of <b>'+names
                 +'</div>'
                 
              +'</div></div>').insertBefore(this.editForm.first('fieldset'));
-/*            
-            $('<div style="display:table;min-width:575px;width:100%">'
-             +'<div style="display:table-cell;text-align:left;padding:20px 0px 5px 35px;">'
-                    +'<label><input type="checkbox" class="chb_show_help" '
-                        +(ishelp_on?'checked':'')+'/>Show help</label><span style="display:inline-block;width:40px"></span>'
-                    +'<label><input type="checkbox" class="chb_opt_fields" '
-                        +(isfields_on?'checked':'')+'/>Optional fields</label>'
-                +'<span class="btn-config4-container" style="border: 1px #7D9AAA solid;padding: 4px;margin-left: 50px;">'
-                    +'<span class="btn-edit-rt" style="font-weight: bold;cursor:pointer;color:#7D9AAA;padding:2px 0 20px 6px">Modify structure</span>'
-                    +'<span class="btn-edit-rt ui-icon ui-icon-gear smallicon" style="height:18px;margin-left:4px"></span></span>'
 
-                +'<span class="btn-config4-container" style="padding: 4px;margin-left: 10px;">'
-                    +'<span class="btn-edit-rt-titlemask" style="font-size: smaller;font-weight: bold;cursor:pointer;color:#7D9AAA;padding:2px 0 20px 6px">edit title mask</span>'
-                    +'<span class="btn-edit-rt-titlemask ui-icon ui-icon-pencil smallicon" style="height:18px;margin-left:4px"></span></span>'
-                +'<span class="btn-edit-rt-template" style="font-size: smaller;font-weight: bold;cursor:pointer;color:#7D9AAA;padding:2px 0 20px 6px">template</span>'
-                +'<span class="btn-edit-rt-template ui-icon ui-icon-arrowthickstop-1-s smallicon" style="height:18px;margin-left:4px"></span></span>'
-
-                    +'<hr style="margin: 10px 0 0 0;width:230px">'
-             +'</div>'
-             +'<div style="display:table-cell;text-align:right;padding: 10px 40px 0px 0px;font-weight: bold;">'
-
-                +'<span class="btn-bugreport" style="font-size: smaller;cursor:pointer;color:#7D9AAA;padding:2px 0 20px 10px">Bug report</span>'
-                +'<span class="btn-config7 ui-icon ui-icon-bug smallicon"></span>'
-             +'</div></div>').insertBefore(this.editForm.first('fieldset'));
-*/
-
-            var btn_css = {'font-weight': 'bold', color:'#7D9AAA', background:'#ecf1fb' };
             if(window.hWin.HAPI4.is_admin() && this.options.allowAdminToolbar!==false)
             {
                 
@@ -3126,54 +3144,38 @@ rectypes.names[rectypeID] + ' is defined as a child of <b>'+names
                     that._on(ele,{mouseover:function(event){
                         clearTimeout(that._menuTimeoutId);
                         var el = $(event.target);
+                       
                         that.rts_actions_menu
                                 .attr('data-did', el.parents('div[data-dtid]').attr('data-dtid'))
-                                .css({position:'absolute',left:'10px',top:el.position().top+25 })
+                                .css({position:'absolute'
+                                        ,left:that.editForm.parent().position().left + el.position().left
+                                        ,top:that.editForm.position().top + el.position().top + 26 })
                                 .show();
                         //position({ my:'top left', at:'top left', of: el})
                     }, mouseout: function(event){
                         that._menuTimeoutId = setTimeout(function() {that.rts_actions_menu.hide(); }, 800);
                     }});
-                    /*
-                    ele.find('span.ui-icon').on({click: function(event){
-                        var ele = $(event.target).parents('div[data-dtid]');
-                        
-                        if($(event.target).hasClass('ui-icon-plus')){
-                            that.options.rts_editor.manageDefRecStructure(
-                                'showBaseFieldEditor', -1, ele.attr('data-dtid')
-                            );
-                        }else{
-                            that.options.rts_editor.manageDefRecStructure(
-                                'editField', ele.attr('data-dtid')
-                            );
-                        }
-                        //console.log('click '+ele.attr('data-dtid') );
-                    }});
-                    */
                 }
             });
             //init back button - if there is opened rts editor
-            if(this.options.rts_editor && this.options.rts_editor.manageDefRecStructure('option','external_toolbar')){
-                
-                var btn = this.element.find('.btn-edit-rt-back');
-                if(btn){
-                    btn.button({icon:'ui-icon-gear-crossed'}).show()
-                        .click(function(){ 
-                            //that._toolbar.find('#btnClose_rts').click();  
-                            that.options.rts_editor.manageDefRecStructure('closeDialog');
-                        });                
-                    if(btn_css) btn.css(btn_css);
-                   /*
-                    var ic = btn.find('.ui-button-icon').css({'font-size':'25px',width:'25px',height:'25px','margin-top':'0px'});
-                    $('<span class="ui-icon ui-icon-cancel" '
-            +'style="color:darkgray;display:inline;font-size:28px;vertical-align: 0px"></span>').prependTo(ic);
-                    */
-                }
-                //switch on optional fields and hide checckbox
-                this.element.find('.chb_opt_fields').prop('checked',true).hide().change();
-                this.element.find('.lbl_opt_fields').hide();
-                
+            var btn = this.element.find('.btn-edit-rt-back');
+            if(btn){
+                btn.button({icon:'ui-icon-gear-crossed'}).show()
+                    .click(function(){ 
+                                    
+                        that.editFormPopup.layout().hide('west');
+                        that.options.rts_editor = null;
+                        that.reloadEditForm( true );
+                        
+                        //that.options.rts_editor.manageDefRecStructure('closeDialog');
+                    });                
+                if(btn_css) btn.css(btn_css);
             }
+            this.element.find('.btn-edit-rt2').hide();
+            
+            //switch on optional fields and hide checckbox
+            this.element.find('.chb_opt_fields').prop('checked',true).hide().change();
+            this.element.find('.lbl_opt_fields').hide();
             
             //hide message about forbidden fields
             $(this.element).find('.hidden_field_warning').hide();
@@ -3188,8 +3190,16 @@ rectypes.names[rectypeID] + ' is defined as a child of <b>'+names
             //reduce width of header
             $(this.element).find('.separator').css({width: '80%', display: 'inline-block'});
             
+            //if record type has been changed - reload rts_editor
+            this._reloadRtsEditor();
             
         }else{
+
+            this.element.find('.btn-edit-rt2').show();
+            this.element.find('.btn-edit-rt-back').hide();
+            this.element.find('.chb_opt_fields').show();
+            this.element.find('.lbl_opt_fields').show();
+            
             
             $(this.element).find('div.forbidden').parent().css({'display':'none'} ); 
 
@@ -3216,6 +3226,37 @@ rectypes.names[rectypeID] + ' is defined as a child of <b>'+names
         
     },//END _afterInitEditForm
     
+    //
+    //
+    //
+    _reloadRtsEditor: function(){            
+
+            if(this.options.rts_editor){
+                 if(this.options.rts_editor.manageDefRecStructure('option','rty_ID')==this._currentEditRecTypeID){
+                     return;
+                 }
+            } 
+
+            var $structure_editor = this.element.find('.editStructure');
+            $structure_editor.children().remove();
+            var rts_edit_container = $('<div>').appendTo($structure_editor);
+            //show left layout panel, hide summary panel
+            var popup_options = {
+                isdialog: false,
+                container: rts_edit_container,
+                select_mode: 'manager',
+                rty_ID: this._currentEditRecTypeID,
+                rec_ID_sample: this._currentEditID,
+                external_preview: this.element   //send this widget to use as preview
+            };
+            this.options.rts_editor = rts_edit_container;
+            
+            window.hWin.HEURIST4.ui.showEntityDialog('DefRecStructure', popup_options); 
+    },
+    
+    //
+    //
+    //
     showOptionalFieds: function(isShow){
         this.element.find('.chb_opt_fields').prop('checked', isShow).change();
     },
@@ -3302,9 +3343,7 @@ rectypes.names[rectypeID] + ' is defined as a child of <b>'+names
         
         var dwidth = this.defaultPrefs['width'],
             dheight = this.defaultPrefs['height'],
-            isClosed = false,
             activeTabs = [],
-            sz = 400,
             help_on = true,
             optfields = true;
             
@@ -3321,10 +3360,16 @@ rectypes.names[rectypeID] + ' is defined as a child of <b>'+names
                 });
 
                 var myLayout = that.editFormPopup.layout();                
-                sz = myLayout.state.east.size;
-                isClosed = myLayout.state.east.isClosed;
                 
+                params.summary_closed = myLayout.state.east.isClosed;;
+                params.summary_width = myLayout.state.east.size;
         }
+        if(that.options.rts_editor){
+                var myLayout = that.editFormPopup.layout();                
+                params.structure_width = myLayout.state.west.size;
+                params.structure_closed = myLayout.state.west.isClosed;
+        }
+        
         help_on = that.element.find('.chb_show_help').is(':checked');
         optfields = that.element.find('.chb_opt_fields').is(':checked');
             
@@ -3356,8 +3401,6 @@ rectypes.names[rectypeID] + ' is defined as a child of <b>'+names
         params.height = dheight;
         params.help_on = help_on;
         params.optfields = optfields;
-        params.summary_closed = isClosed;
-        params.summary_width = sz;
         params.summary_tabs = activeTabs;
 
         window.hWin.HAPI4.save_pref('prefs_'+this._entityName, params);

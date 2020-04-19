@@ -1485,15 +1485,21 @@ $.widget( "heurist.manageEntity", {
     //
     //
     //
-    reloadEditForm: function(){
+    reloadEditForm: function( hard_reload ){
         //this._initEditForm_step3(this._currentEditID);
             
         var keepPos = 0;            
         if(this._editing){
             keepPos = this._editing.getContainer().parents('.editFormDialog').scrollTop(); 
         }
+        
+        if(hard_reload===true){
+            this._initEditForm_step3(this._currentEditID);        
+        }else{
+            this._initEditForm_step4(null);
+        }
        
-        this._initEditForm_step4(null);
+        
         this._editing.getContainer().parents('.editFormDialog').scrollTop(keepPos);
     },
 
