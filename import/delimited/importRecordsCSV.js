@@ -1711,11 +1711,37 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             sProcessed = '<tr height="40" style="valign:bottom"><td class="subh" colspan="5"><br />'
             +'<b>Already used</b>'
              + ((currentStep==3)?'':'<span style="font-size:0.7em;font-style:italic"> You only need to map all required fields (in red) if you plan to create new records</span>')
-            +'</td></tr>'
+            +'<br><br><a href="#" class="lnk_SelectAll" style="font-size:smaller">Select all/none</a></td></tr>'
                 +sProcessed;
         }
         
         $('#tblFieldMapping > tbody').html(sID_field+sIndexes+sRemain+sProcessed);
+        
+        if(sProcessed!=''){
+            
+            var is_all_checked = true;
+            $("input[id^='cbsa_dt_']").each(function(i,item){
+               if(!$(item).is(':checked') && $(item).is(':visible')){
+                   is_all_checked = false;
+                   return false
+               }
+            });
+            
+            $('.lnk_SelectAll').attr('data-checked',is_all_checked?1:0)
+                .text( is_all_checked?'Select none':'Select all');
+        
+            $('.lnk_SelectAll').click(function(e){
+                var cb = $(e.target);
+                var was_checked = (cb.attr('data-checked')==1);
+                $("input[id^='cbsa_dt_']").each(function(i,item){
+                   if(!$(item).attr('disabled'))
+                        $(item).prop('checked',was_checked?0:1).change(); 
+                });
+                cb.attr('data-checked',(was_checked?0:1) );
+                cb.text(was_checked?'Select all':'Select none');
+            });
+        
+        }
         
         //init listeners
         $("input[id^='cbsa_dt_']").change(function(e){
