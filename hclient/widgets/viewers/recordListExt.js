@@ -128,6 +128,9 @@ that._dout('myOnShowEvent');
 
     }, //end _create
 
+    //
+    //
+    //
     loadURL: function( newurl ){
         
         var that = this;
@@ -147,9 +150,9 @@ this._dout('load '+this.options.is_frame_based+'  '+newurl);
     
     onLoadComplete: function(){
         this.loadanimation(false);
-        if(!this.options.reload_for_recordset){
-//this._dout('onLoadComplete');                
-//          this._refresh();
+        if(!this.options.reload_for_recordset && this.options.is_frame_based && !this.options.is_single_selection){
+this._dout('onLoadComplete refresh again');                
+              this._refresh();
         }
 //2020-03-08        this._trigger( 'loadcomplete', null, null );
     },
@@ -212,7 +215,7 @@ this._dout('update dataset '+request.q);
             $('a[href="#'+id+'"]').html(this.options.title);
         }
 
-this._dout('refresh '+this.element.is(':visible'));            
+this._dout('refresh vis='+this.element.is(':visible'));            
 
         //refesh if element is visible only - otherwise it costs much resources
         if(!this.element.is(':visible') || window.hWin.HEURIST4.util.isempty(this.options.url)){
