@@ -1942,7 +1942,7 @@ $.widget( "heurist.mapping", {
         this.options.map_rollover = __parseval(params['map_rollover']);
         this.options.default_style = window.hWin.HEURIST4.util.isJSON(params['style']);
 
-console.log(params);        
+//console.log(params);        
         
         //special case - till thematic map is not developed - for custom style
         /* expremental 

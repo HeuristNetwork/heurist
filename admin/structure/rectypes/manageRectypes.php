@@ -158,7 +158,7 @@ require_once(dirname(__FILE__)."/../../../hclient/framecontent/initPage.php");
         <div id="modelTabs" class="yui-navset yui-navset-top"></div>
     </div>
     <div class="ent_footer">
-        <div style="float:right"><label><input id="use_new_rts_editor" type="checkbox"/>NEW RTS EDITOR</label></div>
+        <div style="float:right;display:none"><label><input id="use_new_rts_editor" type="checkbox"/>NEW RTS EDITOR</label></div>
         <h4 style="line-height:3ex;padding:20px">Use this function to build and extend your database by adding and modifying record (entity) types. 
         <br/>Allows the re-use of existing fields for consistency across entity types, as well as the creation of entirely new fields. 
         <br/>New databases are pre-populated with a range of useful record types and term (category) vocabularies.</h4>

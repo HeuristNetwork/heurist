@@ -398,7 +398,7 @@ if(!($is_map_popup || $without_header)){
 }?>        
         </style>
     </head>
-    <body class="popup">
+    <body class="popup" style="overflow-x: hidden;">
 
         <script type="text/javascript" src="../../viewers/map/mapViewer.js"></script>
         <script>
