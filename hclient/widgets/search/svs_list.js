@@ -438,11 +438,11 @@ $.widget( "heurist.svs_list", {
                     try {
                         //1. remove nodes that refers to missed search
                         //it returns null if leaf is not found
-                        function __cleandata(data, level){
+                        function __cleandata(data, level, groupID){
 
                             if(level==0){ //this is top level  data['all'] && data['bookmark'] && data['entity']
                                 for(groupID in data){
-                                    data[groupID] = __cleandata(data[groupID], level+1);
+                                    data[groupID] = __cleandata(data[groupID], level+1, groupID);
                                     if(data[groupID].was_cleaned==true){
                                         data[groupID].was_cleaned = null;
                                         var treeData = {};
@@ -457,7 +457,7 @@ $.widget( "heurist.svs_list", {
                                 var newchildren = [];
                                 for (var idx in data.children){
                                     if(idx>=0){
-                                        var node = __cleandata(data.children[idx], level+1);
+                                        var node = __cleandata(data.children[idx], level+1, groupID);
                                         if(node!=null){
                                             newchildren.push(node);
                                             data.was_cleaned = data.was_cleaned || node.was_cleaned; 
@@ -470,7 +470,12 @@ $.widget( "heurist.svs_list", {
                                 data.children = newchildren;
                                 return data;
                             }else if(data.key>0){
-                                return window.hWin.HAPI4.currentUser.usr_SavedSearch[data.key]?data:null;
+                                if(window.hWin.HAPI4.currentUser.usr_SavedSearch[data.key]){
+                                    //check group
+                                    return (window.hWin.HAPI4.currentUser.usr_SavedSearch[data.key][_GRPID] == groupID)?data:null;
+                                }else{
+                                    return null;
+                                }
                             }else{
                                 return data;
                             }
@@ -478,7 +483,7 @@ $.widget( "heurist.svs_list", {
 
                         window.hWin.HAPI4.currentUser.ugr_SvsTreeData = $.parseJSON(response.data);
 
-                        window.hWin.HAPI4.currentUser.ugr_SvsTreeData = __cleandata(window.hWin.HAPI4.currentUser.ugr_SvsTreeData, 0);
+                        window.hWin.HAPI4.currentUser.ugr_SvsTreeData = __cleandata(window.hWin.HAPI4.currentUser.ugr_SvsTreeData, 0, 0);
 
                     }
                     catch (err) {
@@ -494,7 +499,7 @@ $.widget( "heurist.svs_list", {
                     that._validate_TreeData();
                 }
                 that._updateAccordeon();
-            } );
+            } );  //ssearch_gettree
 
             return;
         }
@@ -1611,7 +1616,9 @@ $.widget( "heurist.svs_list", {
 
     },
 
-    //add missed groups and saved searches to treeview
+    //
+    //add missed groups and saved searches to treeview (to the end of tree)
+    //
     _validate_TreeData: function(){
 
         var treeData = this._define_DefaultTreeData();
@@ -1668,6 +1675,9 @@ $.widget( "heurist.svs_list", {
         window.hWin.HAPI4.currentUser.ugr_SvsTreeData = treeDataF;
     },
 
+    //
+    //
+    //
     _define_DefaultTreeData: function(){
 
         var treeData;
