@@ -492,43 +492,43 @@ $.widget( "heurist.search_faceted", {
                }
                
                
-               function __checkEntry(qarr, key, val){
-                    var len0 = qarr.length, notfound = true, isarray;
-                    
-                    for (var i=0;i<len0;i++){
-                        if(! window.hWin.HEURIST4.util.isnull( qarr[i][key] ) ){ //such key already exsits
-                            
-                            if(window.hWin.HEURIST4.util.isArray(qarr[i][key])){ //next level
-                                return qarr[i][key];   
-                            }else if(qarr[0][key]==val){ //already exists
-                                return qarr;
-                            }
-                        }
-                    }
+                   function __checkEntry(qarr, key, val){
+                       var len0 = qarr.length, notfound = true, isarray;
 
-                    var predicat = {};
-                    predicat[key] = val;
-                    qarr.push(predicat);
-                    
-                    if(window.hWin.HEURIST4.util.isArray(val)){
-                         return val;
-                    }else{
-                         return qarr;
-                    }
-               }            
-               
+                       for (var i=0;i<len0;i++){
+                           if(! window.hWin.HEURIST4.util.isnull( qarr[i][key] ) ){ //such key already exsits
+
+                               if(window.hWin.HEURIST4.util.isArray(qarr[i][key])){ //next level
+                                   return qarr[i][key];   
+                               }else if(qarr[0][key]==val){ //already exists
+                                   return qarr;
+                               }
+                           }
+                       }
+
+                       var predicat = {};
+                       predicat[key] = val;
+                       qarr.push(predicat);
+
+                       if(window.hWin.HEURIST4.util.isArray(val)){
+                           return val;
+                       }else{
+                           return qarr;
+                       }
+                   }            
+                   
                     var curr_level = mainquery;     
                     var j = 0;    
                     while(j<code.length){
                         
                         var rtid = code[j];
                         var dtid = code[j+1];
-                        
+
+                        //first level can be multi rectype
                         //add recordtype
-                        if(rtid>0){
+                        if(rtid>0 ||  rtid.indexOf(',')>0){
                             curr_level = __checkEntry(curr_level,"t",rtid);
                         }
-                        
                         var linktype = dtid.substr(0,2);
                         var slink = null;
                         
@@ -551,10 +551,10 @@ $.widget( "heurist.search_faceted", {
                             key  = slink+rtid_linked+":"+dtid.substr(2); //rtid need to distinguish links/relations for various recordtypes
                             val = [];
                         }else{
-                            //multifield search 
+                            //multifield search for datetime
                             if(dtid==9 && that._use_multifield){
                                 dtid = '9,10,11';
-                            }else if(dtid==1  && that._use_multifield){
+                            }else if(dtid==1  && that._use_multifield){ //for name
                                 dtid = '1,18,231,304';
                             }
                             
@@ -881,11 +881,15 @@ $.widget( "heurist.search_faceted", {
                   
              }else{
                  //instead of list of links it is possible to allow enter search value directly into input field
+                 var rtid = field['rtid'];
+                 if(rtid.indexOf(',')>0){
+                        rtid = rtid.split(',')[0];
+                 }
                  
-                   var ed_options = {
+                 var ed_options = {
                                 varid: field['var'],  //content_id+"_"+
                                 recID: -1,
-                                rectypeID: field['rtid'],
+                                rectypeID: rtid,
                                 dtID: field['id'],
                                 rectypes: window.hWin.HEURIST4.rectypes,
                                 values: [''],
@@ -2365,42 +2369,47 @@ if(!detailtypes[dtID]){
     //
     _createInputField :function(field_index){
 
-               var field = this.options.params.facets[field_index];
-                 
-               var ed_options = {
-                            varid: field['var'],  //content_id+"_"+
-                            recID: -1,
-                            rectypeID: field['rtid'],
-                            dtID: field['id'],
-                            rectypes: window.hWin.HEURIST4.rectypes,
-                            values: [''],
-                            readonly: false,
-                            title:  "<span style='font-weight:bold'>" + field['title'] + "</span>",
-                            showclear_button: false,
-                            suppress_prompts: true,  //supress help, error and required features
-                            suppress_repeat: true,
-                            detailtype: field['type']  //overwrite detail type from db (for example freetext instead of memo)
-                    };
-                    
-               if(isNaN(Number(field['id']))){ //field id not defined
-                   ed_options['dtFields'] = {
-                       dty_Type: field['type'],
-                       rst_RequirementType: 'optional',
-                       rst_MaxValues: 1,
-                       rst_DisplayWidth: 0
-                   };
-               }
-   
-                //rst_DefaultValue
-                 
-                var inpt = $("<div>",{id: "fv_"+field['var'] }).editing_input(   //this is our widget for edit given fieldtype value
-                        ed_options
-                    );
+        var field = this.options.params.facets[field_index];
 
-                inpt.appendTo($fieldset);
-                that._input_fields['$X'+field['var']] = inpt;
-        
-        
+        var rtid = field['rtid'];
+        if(rtid.indexOf(',')>0){
+            rtid = rtid.split(',')[0];
+        }
+
+        var ed_options = {
+            varid: field['var'],  //content_id+"_"+
+            recID: -1,
+            rectypeID: rtid,
+            dtID: field['id'],
+            rectypes: window.hWin.HEURIST4.rectypes,
+            values: [''],
+            readonly: false,
+            title:  "<span style='font-weight:bold'>" + field['title'] + "</span>",
+            showclear_button: false,
+            suppress_prompts: true,  //supress help, error and required features
+            suppress_repeat: true,
+            detailtype: field['type']  //overwrite detail type from db (for example freetext instead of memo)
+        };
+
+        if(isNaN(Number(field['id']))){ //field id not defined
+            ed_options['dtFields'] = {
+                dty_Type: field['type'],
+                rst_RequirementType: 'optional',
+                rst_MaxValues: 1,
+                rst_DisplayWidth: 0
+            };
+        }
+
+        //rst_DefaultValue
+
+        var inpt = $("<div>",{id: "fv_"+field['var'] }).editing_input(   //this is our widget for edit given fieldtype value
+            ed_options
+        );
+
+        inpt.appendTo($fieldset);
+        that._input_fields['$X'+field['var']] = inpt;
+
+
     },
     
     //

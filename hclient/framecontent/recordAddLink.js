@@ -557,7 +557,7 @@ function hRecordAddLink() {
     } 
     
     //
-    // record selector (for target mainly)
+    // record selector (for target mainly)     (@todo move to utils_ui ???)
     //
     function _createInputElement_RecordSelector(party, rt_constraints){
         

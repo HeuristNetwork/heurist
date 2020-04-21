@@ -1003,6 +1003,7 @@ window.hWin.HEURIST4.ui = {
         return $(selObj);
     },
 
+    
     //
     // get selector for record types tree
     //

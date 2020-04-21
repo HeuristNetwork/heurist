@@ -3131,6 +3131,8 @@ console.log('onpaste');
         var repeatable = (Number(this.f('rst_MaxValues')) != 1);
         if(values.length>1 && !repeatable){
             this.showErrorMsg('Repeated value for a single value field - please correct');
+        }else{
+            this.showErrorMsg(null);
         }
         
         this._setAutoWidth();            

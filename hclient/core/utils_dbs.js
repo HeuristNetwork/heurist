@@ -414,7 +414,7 @@ window.hWin.HEURIST4.dbs = {
                         rectypes['typedefs'][$recTypeId]['dtFields'][DT_PARENT_ENTITY] = $ffr;
                     }
 
-                    $details = rectypes['typedefs'][$recTypeId]['dtFields'];
+                    var $details = rectypes['typedefs'][$recTypeId]['dtFields'];
 
                     
                     var $children_links = [];
@@ -494,6 +494,67 @@ window.hWin.HEURIST4.dbs = {
             }else if($mode==5 || $mode==6){
                 $res['title'] = 'Any record type';
                 $res['type'] = 'rectype';
+                
+                if($mode==5 && $recursion_depth==0 && $recTypeId && $recTypeId.indexOf(',')>0){ //for faceted search
+                    $res['key'] = $recTypeId;
+                    $res['type'] = 'rectype';
+                    
+                    var recTypes = $recTypeId.split(',');
+                    var names = [];
+                    //if there are several rectypes - find common fields only
+                    var  $details = window.hWin.HEURIST4.util.cloneJSON(rectypes['typedefs'][recTypes[0]]['dtFields']); 
+
+                    $.each(recTypes, function(i, rtid){ 
+                        names.push(rectypes.names[rtid]) 
+                        if(i>0){
+                            var fields = rectypes['typedefs'][rtid]['dtFields'];
+                            var dtIds = Object.keys($details);
+                            for (var k=0; k<dtIds.length; k++){
+                                if(!fields[dtIds[k]]){
+                                    //it does not exist 
+                                    $details[dtIds[k]] = null;
+                                    delete $details[dtIds[k]];
+                                }
+                            }
+                        }
+                    });
+                    $res['title'] = names.join(', ');
+                    
+                    var $children_links = [];
+                    var $new_pointer_fields = [];
+
+                    for (var $dtID in $details) {
+                        
+                        var $dtValue = $details[$dtID];
+                        
+                        if($dtValue[rectypes['typedefs']['dtFieldNamesToIndex']['rst_RequirementType']]=='forbidden') continue;
+
+                        $dt_type = $dtValue[rectypes['typedefs']['dtFieldNamesToIndex']['dty_Type']];
+                        if($dt_type=='resource' || $dt_type=='relmarker'){
+                                $new_pointer_fields.push( $dtID );
+                        }
+                        
+                        $res_dt = __getDetailSection(recTypes[0], $dtID, $recursion_depth, $mode, 
+                                                                $fieldtypes, null, $new_pointer_fields);
+                        if($res_dt){
+                            
+                            var codes = $res_dt['code'].split(':');
+                            codes[0] = $recTypeId;
+                            $res_dt['code'] = codes.join(':');
+                            
+                            if($res_dt['type']=='resource' || $res_dt['type']=='relmarker'){
+                                $children_links.push($res_dt);
+                            }else{
+                                $children.push($res_dt);
+                            }
+                        }
+                    }//for details
+                    
+                    //add resource and relation at the end of result array
+                    $children = $children.concat($children_links);                    
+                    
+                }
+                
             }
 
             
@@ -764,28 +825,45 @@ window.hWin.HEURIST4.dbs = {
         
         var rtypes = db_structure.rectypes['names'];
         var res = [];
-        
-        rectypeids = (!$.isArray(rectypeids)?rectypeids.split(','):rectypeids);    
-        //create hierarchy tree 
-        for (var k=0; k<rectypeids.length; k++) {
-            var rectypeID = rectypeids[k];
-            var def = __getRecordTypeTree(rectypeID, 0, $mode, fieldtypes, null);
+
+        if($mode==5){
             
-                if(def!==null) {
-                    if(parentcode!=null){
-                        if(def['code']){
-                            def['code'] = parentcode+':'+def['code'];
-                        }else{
-                            def['code'] = parentcode;
+            var def = __getRecordTypeTree(rectypeids, 0, $mode, fieldtypes, null);
+
+            if(def!==null) {
+                if($.isArray(def['children'])){
+                    def = __assignCodes(def);
+                    res.push( def );
+                }                    
+            }
+        
+        } else {
+        
+            rectypeids = (!$.isArray(rectypeids)?rectypeids.split(','):rectypeids);    
+            
+            
+            //create hierarchy tree 
+            for (var k=0; k<rectypeids.length; k++) {
+                var rectypeID = rectypeids[k];
+                var def = __getRecordTypeTree(rectypeID, 0, $mode, fieldtypes, null);
+                
+                    if(def!==null) {
+                        if(parentcode!=null){
+                            if(def['code']){
+                                def['code'] = parentcode+':'+def['code'];
+                            }else{
+                                def['code'] = parentcode;
+                            }
                         }
+                        //debug $def['title'] = @$def['code'].$def['title'];   
+                        //asign codes
+                        if($.isArray(def['children'])){
+                            def = __assignCodes(def);
+                            res.push( def );
+                        }                    
                     }
-                    //debug $def['title'] = @$def['code'].$def['title'];   
-                    //asign codes
-                    if($.isArray(def['children'])){
-                        def = __assignCodes(def);
-                        res.push( def );
-                    }                    
-                }
+            }
+            
         }
 
         return res;    
@@ -1105,7 +1183,7 @@ window.hWin.HEURIST4.dbs = {
         
         if(fieldName){
             if(dfi[fieldName]>=0){
-                return detailtypes.typedefs[rty_ID].commonFields[ dfi[fieldName] ];
+                return detailtypes.typedefs[dty_ID].commonFields[ dfi[fieldName] ];
             }else{
                 return null;
             }

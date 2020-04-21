@@ -285,6 +285,7 @@ $.widget( "heurist.search_faceted_wiz", {
                this.select_main_rectype.hSelect("destroy"); 
             }
             this.select_main_rectype.remove();   
+            this.select_main_rectype = null;
         }
         
         
@@ -401,7 +402,16 @@ $.widget( "heurist.search_faceted_wiz", {
             }
             else if(this.step==0 && newstep==1){ //select record types
 
-                if(!(this.select_main_rectype.val()>0)){
+                if(this.select_main_rectype && this.select_main_rectype.editing_input('instance')){
+                    
+                    var val = this.select_main_rectype.editing_input('getValues');
+                    if(!val || !val[0]){
+                        window.hWin.HEURIST4.msg.showMsgErr('Select record type(s)');
+                        this.select_main_rectype.editing_input('focus');
+                        return;
+                    }
+                    
+                }else if(!(this.select_main_rectype.val()>0)){
                     window.hWin.HEURIST4.msg.showMsgErr('Select record type');
                     if(this.select_main_rectype.hSelect("instance")!=undefined){
                         this.select_main_rectype.hSelect("focus"); 
@@ -441,11 +451,18 @@ $.widget( "heurist.search_faceted_wiz", {
 
             if(this.step==1 && newstep==2){ //select field types
 
-                var rectypeIds = [this.select_main_rectype.val()];
+                    
+                var rectypeIds = [];
+                if(this.select_main_rectype && this.select_main_rectype.editing_input('instance')){
+                    rectypeIds = (this.select_main_rectype.editing_input('getValues')[0]).split(','); 
+                }else{
+                    rectypeIds = [this.select_main_rectype.val()];
+                }
+                
                 
                 //mandatory
                 if(!window.hWin.HEURIST4.util.isArrayNotEmpty(rectypeIds)){
-                    window.hWin.HEURIST4.msg.showMsgDlg(window.hWin.HR("Select record type"));
+                    window.hWin.HEURIST4.msg.showMsgDlg(window.hWin.HR("Select record type(s)"));
 
                     this.step = 0;
                     return;
@@ -499,6 +516,46 @@ $.widget( "heurist.search_faceted_wiz", {
         window.hWin.HEURIST4.ui.applyCompetencyLevel(-1, $dlg); 
     }
 
+    //
+    // record type selector (@todo move to utils_ui ???)
+    //
+    ,_createInputElement_RecordTypeSelector: function(container_fieldset){
+        
+        var that = this;
+
+        var ed_options = {
+            recID: -1,
+            dtID: "dty_PtrTargetRectypeIDs",
+            dtFields:{
+                "dty_Type":"resource",
+                "rst_DisplayName":"Search for (entity types):",
+                "rst_DisplayHelpText": "This determines the record type which will be retrieved by the search."
+                +"The facets can, however, be based on attributes of other record types linked from this type", 
+                "rst_FieldConfig": {"entity":"DefRecTypes","csv":true}
+            },
+            change: function(){
+                    var $dlg = that.step0.find("#facets_options");
+                    var svs_name = $dlg.find('#svs_Name');
+                    var val = this.getValues()
+                    if(val.length>0 && val[0]){
+                        val = val[0].split(',');
+                        if(svs_name.val()==''){
+                            var names = [];
+                            $.each(val,function(i,item){ names.push(window.hWin.HEURIST4.rectypes.names[item]) });
+                            svs_name.val( names.join(', ') );
+                        }
+                        svs_name.focus();
+                        that.options.params.facets = [];
+                    }
+                    that.originalRectypeID=null; //reset flag - facet was changed - need to proceed all steps of wizard
+                    $("#btnSave").css('visibility','hidden');//$("#btnSave").hide();
+            }    
+        };
+
+        return $("<div>").editing_input(ed_options).prependTo(container_fieldset);
+    }
+    
+    
     , _showStep :function(newstep){
 
         if(this.step>=0) this.step_panels[this.step].css({'display':'none'});
@@ -573,6 +630,8 @@ $.widget( "heurist.search_faceted_wiz", {
 
             if(this.select_main_rectype==null){
                 
+                this.select_main_rectype = this._createInputElement_RecordTypeSelector( $dlg.find('.main_fieldset'));
+/*                
                 this.select_main_rectype = window.hWin.HEURIST4.ui.createRectypeSelectNew( $dlg.find("#opt_rectypes").get(0), {
                     topOptions: [{key:'',title:'select...'}],
                     useHtmlSelect: false,
@@ -593,19 +652,7 @@ $.widget( "heurist.search_faceted_wiz", {
                     that.originalRectypeID=null; //reset flag - facet was changed - need to proceed all steps of wizard
                     $("#btnSave").css('visibility','hidden');//$("#btnSave").hide();
                 }});
-                /*
-                $dlg.find("#opt_rectypes").change(function(){
-                    if($(opt_rectypes).val()>0){
-                        if(svs_name.val()=='') 
-                            svs_name.val(opt_rectypes.options[opt_rectypes.selectedIndex].text+'s');
-                        svs_name.focus();
-                    }
-                    if(parseInt(that.options.svsID)>0){ //edit
-                        that.originalRectypeID=null; 
-                        $("#btnSave").css('visibility','hidden');//$("#btnSave").hide();
-                    }
-                });
-                */
+*/
             }
 
 
@@ -644,10 +691,18 @@ $.widget( "heurist.search_faceted_wiz", {
                 svs_ugrid.attr('disabled','disabled');;
                 
                 if(this.options.params.rectypes) {
-                    this.select_main_rectype.val(this.options.params.rectypes[0]);
-                    if(this.select_main_rectype.hSelect("instance")!=undefined){
-                       this.select_main_rectype.hSelect("refresh"); 
+                    
+                    if(this.select_main_rectype.editing_input('instance')){
+                        var rtids = $.isArray(this.options.params.rectypes)?this.options.params.rectypes.join(',')
+                                                                           :this.options.params.rectypes;
+                        this.select_main_rectype.editing_input('setValue', rtids );    
+                    }else{
+                        this.select_main_rectype.val(this.options.params.rectypes[0]);
+                        if(this.select_main_rectype.hSelect("instance")!=undefined){
+                           this.select_main_rectype.hSelect("refresh"); 
+                        }
                     }
+                    
                     
                     //$(opt_rectypes).change(function(){});
                     
@@ -701,6 +756,12 @@ $.widget( "heurist.search_faceted_wiz", {
                 $dlg.find('#svs_PrelimFilterToggle').prop('checked', true);
                 $dlg.find('#svs_PrelimFilterToggleMode0').prop('checked', true);
                 $dlg.find('#svs_PrelimFilterToggleLabel').val(window.hWin.HR('Apply preliminary filter'));
+                
+                
+                if(this.select_main_rectype.editing_input('instance')){
+                    this.select_main_rectype.editing_input('setValue', '' );    
+                }
+                
             }
 
             this._on($dlg.find('#svs_PrelimFilterToggle'), {change:function( event ){
@@ -1175,6 +1236,10 @@ $.widget( "heurist.search_faceted_wiz", {
                 while(j<codes.length){
                     var rtid = codes[j];
                     var dtid = codes[j+1];
+                    
+                    if(rtid.indexOf(',')>0){
+                        rtid = rtid.split(',')[0];
+                    }
                     
                     if(!window.hWin.HEURIST4.rectypes.typedefs[ rtid ]){
                         //record type was removed - remove facet
