@@ -209,17 +209,26 @@ function fileGetThumbnailURL($system, $recID, $get_bgcolor){
 
     $thumb_url = null;
     $bg_color = null;
+    $fileid = null;
 
     $query = "select recUploadedFiles.ulf_ObfuscatedFileID".
     " from recDetails".
     " left join recUploadedFiles on ulf_ID = dtl_UploadedFileID".
     " left join defFileExtToMimetype on fxm_Extension = ulf_MimeExt".
-    " where dtl_RecID = $recID" .
-    " and (dtl_UploadedFileID is not null)".    // no dty_ID of zero so undefined are ignored
-    " and (fxm_MimeType like 'image%' or fxm_MimeType='video/youtube' or fxm_MimeType='video/vimeo')".
-    " limit 1";
-
-    $fileid = mysql__select_value($system->get_mysqli(), $query);
+    " where dtl_RecID = $recID ";
+    
+    if($system->defineConstant('DT_THUMBNAIL') & DT_THUMBNAIL>0){
+        $fileid = mysql__select_value($system->get_mysqli(), $query
+                .' and dtl_DetailTypeID='.DT_THUMBNAIL.' limit 1'); 
+    }
+    if($fileid == null){
+        $query = $query.  
+            " and (dtl_UploadedFileID is not null)".    // no dty_ID of zero so undefined are ignored
+            " and (fxm_MimeType like 'image%' or fxm_MimeType='video/youtube' or fxm_MimeType='video/vimeo')".
+            " limit 1";
+        $fileid = mysql__select_value($system->get_mysqli(), $query);
+    }
+    
     if($fileid){
 
         $thumbfile = 'ulf_'.$fileid.'.png';
