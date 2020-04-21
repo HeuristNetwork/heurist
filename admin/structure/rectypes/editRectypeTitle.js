@@ -142,7 +142,8 @@ function EditRectypeTitle() {
             var recs = recordset.getRecords();
             for(var rec_ID in recs) 
             if(rec_ID>0){
-                window.hWin.HEURIST4.ui.addoption(sel, rec_ID, recordset.fld(recs[rec_ID], 'rec_Title'));
+                window.hWin.HEURIST4.ui.addoption(sel, rec_ID, 
+                    window.hWin.HEURIST4.util.stripTags(recordset.fld(recs[rec_ID], 'rec_Title')));
             }
 
             sel.selectedIndex = 0;
