@@ -3144,27 +3144,36 @@ rectypes.names[rectypeID] + ' is defined as a child of <b>'+names
         if(this.options.rts_editor){
             //var that = this;
             $(this.element).find('div[data-dtid]').each(function(idx, item){
-                if(parseInt($(item).attr('data-dtid'))>0){
-                    var is_folder = false;
-                    var ele = $('<div><span class="ui-icon ui-icon-gear"></span></div>')
-                    .css({'display':'table-cell','vertical-align':'top',
-                          'min-width':'32px','cursor':'pointer','padding-top':'0.4em'})
-                    .prependTo($(item));    
+                var dtId = parseInt($(item).attr('data-dtid'));
+                if(dtId>0){
+                
+                    if(window.hWin.HEURIST4.rectypes.typedefs[that._currentEditRecTypeID].dtFields[dtId]){
                     
-                    that._on(ele,{mouseover:function(event){
-                        clearTimeout(that._menuTimeoutId);
-                        var el = $(event.target);
-                       
-                        that.rts_actions_menu
-                                .attr('data-did', el.parents('div[data-dtid]').attr('data-dtid'))
-                                .css({position:'absolute'
-                                        ,left:that.editForm.parent().position().left + el.position().left
-                                        ,top:that.editForm.position().top + el.position().top + 26 })
-                                .show();
-                        //position({ my:'top left', at:'top left', of: el})
-                    }, mouseout: function(event){
-                        that._menuTimeoutId = setTimeout(function() {that.rts_actions_menu.hide(); }, 800);
-                    }});
+                        var is_folder = false;
+                        var ele = $('<div><span class="ui-icon ui-icon-gear"></span></div>')
+                        .css({'display':'table-cell','vertical-align':'top',
+                              'min-width':'32px','cursor':'pointer','padding-top':'0.4em'})
+                        .prependTo($(item));    
+                        
+                        that._on(ele,{mouseover:function(event){
+                            clearTimeout(that._menuTimeoutId);
+                            var el = $(event.target);
+                           
+                            that.rts_actions_menu
+                                    .attr('data-did', el.parents('div[data-dtid]').attr('data-dtid'))
+                                    .css({position:'absolute'
+                                            ,left:that.editForm.parent().position().left + el.position().left
+                                            ,top:that.editForm.position().top + el.position().top + 26 })
+                                    .show();
+                            //position({ my:'top left', at:'top left', of: el})
+                        }, mouseout: function(event){
+                            that._menuTimeoutId = setTimeout(function() {that.rts_actions_menu.hide(); }, 800);
+                        }});
+                    }else{
+                        //placeholder
+                        var ele = $('<div>').css({'display':'table-cell','min-width':'32px'})
+                        .prependTo($(item));    
+                    }
                 }
             });
             //init back button - if there is opened rts editor
