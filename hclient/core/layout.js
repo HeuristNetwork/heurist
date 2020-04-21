@@ -272,10 +272,11 @@ function hLayout(args) {
             //togglerLength_open: 21, 
             west:{
               spacing_open:6,
-              spacing_closed:16,  
+              spacing_closed:40,  
               togglerAlign_open:'center',
-              togglerAlign_closed:20,
-              togglerLength_closed:32,  //to makes it square set to 16
+              togglerAlign_closed:'top',
+              //togglerAlign_closed:16,   //top position   
+              togglerLength_closed:40,
               onopen_start : function(){ 
                   var  w = window.hWin.HAPI4.LayoutMgr.cardinalPanel('getSize', ['center','outerWidth'] );
                   var mw = 250; //window.hWin.HAPI4.LayoutMgr.cardinalPanel('getSize', ['west','minWidth'] );
@@ -295,10 +296,11 @@ function hLayout(args) {
             },
             east:{
               spacing_open:6,
-              spacing_closed:16,  
+              spacing_closed:40,  
               togglerAlign_open:'center',
-              togglerAlign_closed:20, //'top',
-              togglerLength_closed:32,  //to makes it square set to 16
+              togglerAlign_closed:'top',
+              //togglerAlign_closed:16,   //top position   
+              togglerLength_closed:40,
               onopen_start: function(){ 
                   
                   var  w = window.hWin.HAPI4.LayoutMgr.cardinalPanel('getSize', ['center','outerWidth'] );

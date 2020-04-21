@@ -656,7 +656,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         spacing_open:6,
                         spacing_closed:40,  
                         togglerAlign_open:'center',
-                        togglerAlign_closed:'top',
+                        //togglerAlign_closed:'top',
                         togglerAlign_closed:16,   //top position   
                         togglerLength_closed:40,  //height of toggler button
                         initHidden: true,
