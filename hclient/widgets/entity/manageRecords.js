@@ -658,18 +658,20 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         togglerAlign_open:'center',
                         //togglerAlign_closed:'top',
                         togglerAlign_closed:16,   //top position   
-                        togglerLength_closed:40,  //height of toggler button
+                        togglerLength_closed:80,  //height of toggler button
                         initHidden: true,
-                        initClosed: false && (this.usrPreferences.structure_closed==true || this.usrPreferences.structure_closed=='true'),
+                        initClosed: (this.usrPreferences.structure_closed==true || this.usrPreferences.structure_closed=='true'),
                         slidable:false,  //otherwise it will be over center and autoclose
                         contentSelector: '.editStructure',   
                         onopen_start : function( ){ 
                             var tog = that.element.find('.ui-layout-toggler-west');
                             tog.removeClass('prominent-cardinal-toggler');
+                            tog.find('.heurist-helper2').remove();
                         },
                         onclose_end : function( ){ 
                             var tog = that.element.find('.ui-layout-toggler-west');
                             tog.addClass('prominent-cardinal-toggler');
+                            $('<span class="heurist-helper2" style="font-size:9px;">Move Delete</span>').appendTo(tog);
                         },
                         togglerContent_open:    '<div class="ui-icon ui-icon-triangle-1-w"></div>',
                         togglerContent_closed:  '<div class="ui-icon ui-icon-carat-2-e"></div>',
@@ -680,7 +682,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         spacing_open:6,
                         spacing_closed:40,  
                         togglerAlign_open:'center',
-                        togglerAlign_closed:'top',
+                        //togglerAlign_closed:'top',
                         togglerAlign_closed:16,   //top position   
                         togglerLength_closed:40,  //height of toggler button
                         initClosed:(this.usrPreferences.summary_closed==true || this.usrPreferences.summary_closed=='true'),
@@ -716,6 +718,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                             var tog = that.editFormPopup.find('.ui-layout-toggler-east');
                             tog.addClass('prominent-cardinal-toggler');
                 }
+                
                 
                 //this tabs are open by default
                 //if(!this.usrPreferences.summary_tabs) 
@@ -1657,8 +1660,15 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         if( is_inline ){
             
             this._reloadRtsEditor();
-            //show and expand sleft hand panel 
-            this.editFormPopup.layout().show('west', true); 
+            //show and expand left hand panel 
+            var isClosed = (this.usrPreferences.structure_closed==true || this.usrPreferences.structure_closed=='true');
+            this.editFormPopup.layout().show('west', !isClosed ); 
+            if(isClosed){
+                        var tog = that.editFormPopup.find('.ui-layout-toggler-west');
+                        tog.addClass('prominent-cardinal-toggler');
+                        $('<span class="heurist-helper2" style="font-size:9px;">Move Delete</span>').appendTo(tog);
+            }
+                
         }
         else if(flase && is_inline){ //OLD OPTION: show as widget on full width/height with its own preview 
             //create new widget manageDefRecStructure
