@@ -181,10 +181,12 @@
                     'Cannot update filter criteria. Current user must be member for group');
             }else{
                 
-                if(is_array($record['svs_ID'])){
+                if(is_array(@$record['svs_ID'])){
                     $rec_IDs = $record['svs_ID'];
-                }else{
+                }else if ($record['svs_ID']>0){
                     $rec_IDs = array($record['svs_ID']);
+                }else{
+                    $rec_IDs = array(-1); //new   
                 }
                 
                 foreach($rec_IDs as $svs_ID){
