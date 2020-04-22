@@ -535,11 +535,11 @@ function downloadFile($mimeType, $filename, $originalFileName=null){
         }
         header('Content-Transfer-Encoding: binary');
         header('Expires: 0');
-        header('Cache-Control: must-revalidate');
+        header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
         header('Pragma: public');
         header('Content-Length: ' . filesize($filename));
         @ob_clean();
-        flush();
+        ob_end_flush(); //flush();
         
         if($is_zip){
             ob_start(); 
@@ -549,10 +549,15 @@ function downloadFile($mimeType, $filename, $originalFileName=null){
             echo $output; 
             unset($output);         
         }else{
-            readfile($filename);
+            if(false && filesize($filename)<10*1024*1024){
+                readfile($filename);    
+            }else{
+                $handle = fopen($filename, "rb");
+                while (!feof($handle)) {
+                    echo fread($handle, 1000);
+                }            
+            }
         }
-        
-
     }
 }
 
