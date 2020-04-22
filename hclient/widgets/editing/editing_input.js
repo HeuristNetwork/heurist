@@ -2618,6 +2618,9 @@ console.log('onpaste');
                 click: function(e){
                                             
                     if(that.is_disabled) return;
+                    
+                    //if empty
+                    if(that.getValues()[0] == '') return;
 
                     var input_id = $(e.target).attr('data-input-id');  //parent(). need if button
                     
