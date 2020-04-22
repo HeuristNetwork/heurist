@@ -1503,7 +1503,7 @@ function EditTerms() {
                                 term.folder = false;
                                 term.conceptid = null;
                                 term.description = arTerm[fi.trm_Description];
-                                term.termcode = "";
+                                term.termcode = arTerm[fi.trm_Code];
                                 term.trm_SemanticReferenceURL = arTerm[fi.trm_SemanticReferenceURL];
                                 term.parent_id = arTerm[fi.trm_ParentTermID];
                                     //context.parent; //_currentNode.data.id;
