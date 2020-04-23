@@ -144,8 +144,16 @@ if($db){
                     //see db_files
                     downloadFile($mimeType, $filepath, @$_REQUEST['embedplayer']==1?null:$originalFileName);
                 }else if($external_url){
-//DEBUG error_log('External '.$external_url);                
-                    header('Location: '.$external_url);  //redirect to URL (external)
+//DEBUG error_log('External '.$external_url);        
+                    if(strpos($external_url,'http://')==0){
+                        //proxy http (unsecure) resources
+                        $heurist_path = tempnam(HEURIST_SCRATCH_DIR, "_proxyremote_");        
+                        downloadViaProxy($heurist_path, $mimeType, $external_url, false);
+                        unlink($heurist_path);
+                    }else{
+                        header('Location: '.$external_url);  //redirect to URL (external)    
+                    }
+                    
                     
                 }else{
 //DEBUG

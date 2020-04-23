@@ -1257,17 +1257,6 @@ if($cres==false){
                 $_SESSION[$this->dbname_full]['ugr_Name']     = $user['ugr_Name'];
                 $_SESSION[$this->dbname_full]['ugr_FullName'] = $user['ugr_FirstName'] . ' ' . $user['ugr_LastName'];
                 
-                
-                /* vsn 3 backward capability
-                $_SESSION[$h3session]['cookie_version'] = 1;
-                $_SESSION[$h3session]['user_id']       = $userID;
-                $_SESSION[$h3session]['user_name']     = $_SESSION[$this->dbname_full]['ugr_Name'];
-                $_SESSION[$h3session]['user_realname'] = $_SESSION[$this->dbname_full]['ugr_FullName'];
-                $_SESSION[$h3session]['user_access']   = $_SESSION[$this->dbname_full]['ugr_Groups'];
-                $_SESSION[$h3session]['keepalive']     = @$_SESSION[$this->dbname_full]['keepalive'];
-                */
-                
-                
                 //remove semaphore file
                 
             }//$reload_user_from_db from db

@@ -435,11 +435,13 @@ class ReportRecord {
                             $origvalues = array();
 
                             foreach ($dtValue as $key => $value){
+                                
                                 $external_url = @$value['file']['ulf_ExternalFileReference'];
-                                if($external_url){
+                                if($external_url && strpos($external_url,'http://')!==0){
                                     array_push($res, $external_url);  //external 
 
-                                }else if(@$value['file']['ulf_ObfuscatedFileID']){
+                                }else 
+                                if(@$value['file']['ulf_ObfuscatedFileID']){
                                     //local
                                     array_push($res, HEURIST_BASE_URL."?db=".HEURIST_DBNAME
                                             ."&file=".$value['file']['ulf_ObfuscatedFileID']);

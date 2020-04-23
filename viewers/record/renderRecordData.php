@@ -1190,7 +1190,9 @@ function print_public_details($bib) {
                 print '<div class="thumb_image"'.($isImageOrPdf?'':' style="cursor:default"').'>';
             }
 
-            $url = @$thumb['external_url']?$thumb['external_url']:(HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&file='.$thumb['nonce']);
+            $url = (@$thumb['external_url'] && strpos($thumb['external_url'],'http://')!==0) 
+                        ?$thumb['external_url']
+                        :(HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&file='.$thumb['nonce']);
 
             if($thumb['player'] && !$is_map_popup){
 
@@ -1212,11 +1214,13 @@ function print_public_details($bib) {
                 }
             }else{  //for usual image
                 print '<img src="'.htmlspecialchars($thumb['thumb']).'" '
-                    .(($is_map_popup || $without_header)?'':'onClick="zoomInOut(this,\''. htmlspecialchars($thumb['thumb']) .'\',\''. htmlspecialchars($url) .'\')"').'>';
+                    .(($is_map_popup || $without_header)?''
+                        :'onClick="zoomInOut(this,\''. htmlspecialchars($thumb['thumb']) .'\',\''. htmlspecialchars($url) .'\')"').'>';
             }
             print '<br/><div class="download_link">';
             if($thumb['player'] && !($is_map_popup || $without_header)){
-                print '<a id="lnk'.$thumb['id'].'" href="#" oncontextmenu="return false;" style="display:none;padding-right:20px" onclick="hidePlayer('.$thumb['id'].')">SHOW THUMBNAIL</a>';
+                print '<a id="lnk'.$thumb['id'].'" href="#" oncontextmenu="return false;" style="display:none;padding-right:20px" onclick="hidePlayer('
+                    .$thumb['id'].')">SHOW THUMBNAIL</a>';
             }
             
             print '<a href="' . htmlspecialchars($url) 
