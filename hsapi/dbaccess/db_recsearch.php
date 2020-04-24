@@ -1105,6 +1105,9 @@
             $params['detail'] = @$params['f']; //backward capability
         }
         
+        $system->defineConstant('RT_CMS_MENU');
+        $system->defineConstant('DT_EXTENDED_DESCRIPTION');
+        
 
         $fieldtypes_in_res = null;
         //search for geo and time fields and remove non timemap records - for rules we need all records
@@ -1805,8 +1808,9 @@ $loop_cnt=1;
                                   left join recUploadedFiles as f on f.ulf_ID = dtl_UploadedFileID
                                 where dtl_RecID in (' . join(',', $chunk_rec_ids) . ')';
 
-                            }
-
+                            } 
+                            //$detail_query = $detail_query . ' order by dtl_RecID, dtl_ID';
+                            $need_Concatenation = false;
 $loop_cnt++;                          
                             // @todo - we may use getAllRecordDetails
                             $res_det = $mysqli->query( $detail_query );
@@ -1822,6 +1826,7 @@ $loop_cnt++;
                                     $recID = array_shift($row);
                                     if( !array_key_exists('d', $records[$recID]) ){
                                         $records[$recID]['d'] = array();
+                                        $need_Concatenation = $need_Concatenation || ($records[$recID][4]==RT_CMS_MENU);
                                     }
                                     $dtyID = $row[0];
 
@@ -1897,6 +1902,19 @@ $loop_cnt++;
                                         }
                                    }
                                 }//$istimemap_request
+                                //it has RT_CMS_MENU - need concatenate all DT_EXTENDED_DESCRIPTION
+                                
+                                if($need_Concatenation){
+                                   
+                                    foreach ($chunk_rec_ids as $recID) {
+                                        $record = $records[$recID];
+                                        if($record[4]==RT_CMS_MENU 
+                                            && is_array(@$record['d'][DT_EXTENDED_DESCRIPTION]))
+                                        {
+                                            $records[$recID]['d'][DT_EXTENDED_DESCRIPTION] = array(implode('',$record['d'][DT_EXTENDED_DESCRIPTION]));
+                                        }
+                                    }
+                                }
                                 
                           
                                 if($res_count>5000){
@@ -2211,7 +2229,7 @@ $loop_cnt++;
     
     */
     function recordSearchDetails($system, &$record, $need_details) {
-
+        
         $recID = $record["rec_ID"];
         $squery =
         "select dtl_ID,
@@ -2248,68 +2266,78 @@ $loop_cnt++;
 
         $details = array();
         if($res){
-        while ($rd = $res->fetch_assoc()) {
-            // skip all invalid values
-            if (( !$rd["dty_Type"] === "file" && $rd["dtl_Value"] === null ) ||
-                (($rd["dty_Type"] === "enum" || $rd["dty_Type"] === "relationtype") && !$rd["dtl_Value"])) {
-                continue;
-            }
+            while ($rd = $res->fetch_assoc()) {
+                // skip all invalid values
+                if (( !$rd["dty_Type"] === "file" && $rd["dtl_Value"] === null ) ||
+                    (($rd["dty_Type"] === "enum" || $rd["dty_Type"] === "relationtype") && !$rd["dtl_Value"])) {
+                    continue;
+                }
 
-            if (! @$details[$rd["dtl_DetailTypeID"]]) $details[$rd["dtl_DetailTypeID"]] = array();
+                if (! @$details[$rd["dtl_DetailTypeID"]]) $details[$rd["dtl_DetailTypeID"]] = array();
 
-            $detailValue = null;
+                $detailValue = null;
 
-            switch ($rd["dty_Type"]) {
-                case "freetext": case "blocktext":
-                case "float":
-                case "date":
-                case "enum":
-                case "relationtype":
-                case "integer": case "boolean": case "year": case "urlinclude": // these shoudl no logner exist, retained for backward compatibility
-                    $detailValue = $rd["dtl_Value"];
-                    break;
+                switch ($rd["dty_Type"]) {
+                    case "blocktext":
+                    case "freetext": 
+                    case "float":
+                    case "date":
+                    case "enum":
+                    case "relationtype":
+                    case "integer": case "boolean": case "year": case "urlinclude": // these shoudl no logner exist, retained for backward compatibility
+                        $detailValue = $rd["dtl_Value"];
+                        break;
 
-                case "file":
+                    case "file":
 
-                    //$detailValue = get_uploaded_file_info($rd["dtl_UploadedFileID"], false);
-                    
-                    $fileinfo = fileGetFullInfo($system, $rd["dtl_UploadedFileID"]);
-                    if(is_array($fileinfo) && count($fileinfo)>0){
-                        $detailValue = array("file" => $fileinfo[0], "fileid"=>$fileinfo[0]["ulf_ObfuscatedFileID"]);
-                    }
+                        //$detailValue = get_uploaded_file_info($rd["dtl_UploadedFileID"], false);
+                        
+                        $fileinfo = fileGetFullInfo($system, $rd["dtl_UploadedFileID"]);
+                        if(is_array($fileinfo) && count($fileinfo)>0){
+                            $detailValue = array("file" => $fileinfo[0], "fileid"=>$fileinfo[0]["ulf_ObfuscatedFileID"]);
+                        }
 
-                    break;
+                        break;
 
-                case "resource":
-                    $detailValue = array(
-                        "id" => $rd["rec_ID"],
-                        "type"=>$rd["rec_RecTypeID"],
-                        "title" => $rd["rec_Title"],
-                        "hhash" => $rd["rec_Hash"]
-                    );
-                    break;
-
-                case "geo":
-                    if ($rd["dtl_Value"]  &&  $rd["dtl_Geo"]) {
+                    case "resource":
                         $detailValue = array(
-                            "geo" => array(
-                                "type" => $rd["dtl_Value"],
-                                "wkt" => $rd["dtl_Geo"]
-                            )
+                            "id" => $rd["rec_ID"],
+                            "type"=>$rd["rec_RecTypeID"],
+                            "title" => $rd["rec_Title"],
+                            "hhash" => $rd["rec_Hash"]
                         );
-                    }
-                    break;
+                        break;
 
-                case "separator":    // this should never happen since separators are not saved as details, skip if it does
-                case "relmarker":    // relmarkers are places holders for display of relationships constrained in some way
-                default:
-                    break;
-            }
+                    case "geo":
+                        if ($rd["dtl_Value"]  &&  $rd["dtl_Geo"]) {
+                            $detailValue = array(
+                                "geo" => array(
+                                    "type" => $rd["dtl_Value"],
+                                    "wkt" => $rd["dtl_Geo"]
+                                )
+                            );
+                        }
+                        break;
 
-            if ($detailValue) {
-                $details[$rd["dtl_DetailTypeID"]][$rd["dtl_ID"]] = $detailValue;
+                    case "separator":    // this should never happen since separators are not saved as details, skip if it does
+                    case "relmarker":    // relmarkers are places holders for display of relationships constrained in some way
+                    default:
+                        break;
+                }
+
+                if ($detailValue) {
+                    $details[$rd["dtl_DetailTypeID"]][$rd["dtl_ID"]] = $detailValue;
+                }
             }
-        }
+            
+            //special case for RT_CMS_MENU
+            $system->defineConstant('RT_CMS_MENU');
+            $system->defineConstant('DT_EXTENDED_DESCRIPTION');
+            if(RT_CMS_MENU==@$record['rec_RecTypeID'] 
+                            && is_array(@$details[DT_EXTENDED_DESCRIPTION]))
+            {
+                $details[DT_EXTENDED_DESCRIPTION] = array(implode('',$details[DT_EXTENDED_DESCRIPTION]));
+            }
 
             $res->close();
         }

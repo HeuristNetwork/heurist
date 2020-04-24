@@ -1406,7 +1406,8 @@
     //function doDetailInsertion($recID, $details, $rectype, $wg, &$nonces, &$retitleRecs, $modeImport)
     /**
     * 
-    *
+    * uses getHTMLPurifier, checkMaxLength
+    * 
     * @param mixed $mysqli
     * @param mixed $rectype
     * @param mixed $details
@@ -1426,8 +1427,7 @@
         * where t:id means detail type id  and bd:id means detail record id
         * new details are array values without a preceeding detail ID as in the last line of this example
         */
-
-
+        
         //1. load record structure
         //2. verify (value, termid, file id, resource id) and prepare details (geo field). verify required field presence
         //3. delete existing details
@@ -1472,6 +1472,9 @@
         //$query_size = 'select LENGTH(?)';
         //$stmt_size = $mysqli->prepare($query_size);
         
+        $system->defineConstant('RT_CMS_MENU');
+        $system->defineConstant('DT_EXTENDED_DESCRIPTION');
+        
         //list of field ids that will not html purified
         $not_purify = array();
         if($system->defineConstant('DT_CMS_SCRIPT')){ array_push($not_purify, DT_CMS_SCRIPT); }
@@ -1483,9 +1486,13 @@
         $purifier = getHTMLPurifier();
         
         //2. verify (value, termid, file id, resource id) and prepare details (geo field). verify required field presence
+        
         $insertValues = array();
         $errorValues = array();
         foreach ($details2 as $dtyID => $values) {
+            
+            $splitValues = array();
+            
             foreach ($values as $eltID => $dtl_Value) {
 
                 if(!is_array($dtl_Value) && strlen(trim($dtl_Value))==0){
@@ -1501,8 +1508,26 @@
                 
                 if(!(is_array($dtl_Value) || $det_types[$dtyID]=='geo' || $det_types[$dtyID]=='file')){
                     $rval = $mysqli->real_escape_string( $dtl_Value );
-                    $err_msg = checkMaxLength('#'.$dtyID, $rval);
-                    if($err_msg!=null) break;
+                    
+                    
+                    //special case: split huge web content 
+                    if($rectype==RT_CMS_MENU && $dtyID==DT_EXTENDED_DESCRIPTION){
+                       $lim = checkMaxLength2($rval);
+                       //TEST $lim = 100;
+                       if($lim>0){
+                            $dtl_Value = $purifier->purify($dtl_Value);
+                            $dtl_Value = htmlspecialchars_decode( $dtl_Value );
+                           
+                            $iStart = 0;
+                            while($iStart<mb_strlen($dtl_Value)){
+                                array_push($splitValues, mb_substr($dtl_Value, $iStart, $lim));
+                                $iStart = $iStart + $lim;
+                            }
+                       }
+                    }else{
+                        $err_msg = checkMaxLength('#'.$dtyID, $rval);
+                        if($err_msg!=null) break;
+                    }
                 }
 
                 switch ($det_types[$dtyID]) {
@@ -1725,11 +1750,17 @@
                     if(@$det_required[$dtyID]!=null){
                         unset($det_required[$dtyID]);
                     }
-
-                    $dval['dtl_Value'] = $dtl_Value;
-                    $dval['dtl_UploadedFileID'] = $dtl_UploadedFileID;
-                    $dval['dtl_Geo'] = $dtl_Geo;
-                    array_push($insertValues, $dval);
+                    
+                    if(count($splitValues)>0){
+                        foreach($splitValues as $val){
+                            array_push($insertValues, $val);
+                        }
+                    }else{
+                        $dval['dtl_Value'] = $dtl_Value;
+                        $dval['dtl_UploadedFileID'] = $dtl_UploadedFileID;
+                        $dval['dtl_Geo'] = $dtl_Geo;
+                        array_push($insertValues, $dval);
+                    }
                 }else{
                     $query = 'SELECT IF((rst_DisplayName=\'\' OR rst_DisplayName IS NULL), dty_Name, rst_DisplayName) as rst_DisplayName '
                         .'FROM defRecStructure, defDetailTypes WHERE rst_RecTypeID='.$rectype

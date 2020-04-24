@@ -564,12 +564,36 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
         $mysqli = $this->system->get_mysqli();
 
         $rval = $mysqli->real_escape_string($this->data['rVal']);
+
+        $this->initPutifier();
         
-        $err_msg = checkMaxLength($dtyName, $rval);
-        if($err_msg!=null){
-            $this->system->addError(HEURIST_INVALID_REQUEST, $err_msg);
-            return false;
+        //split value if exceeds 64K        
+        $splitValues = array();
+        $this->system->defineConstant('DT_EXTENDED_DESCRIPTION');
+        if(@$this->data['needSplit'] && $dtyID==DT_EXTENDED_DESCRIPTION){
+            
+               $lim = checkMaxLength2($rval);
+               //TEST $lim = 100;
+               if($lim>0){
+                    $dtl_Value = $this->data['rVal'];
+                    $dtl_Value =  $this->purifier->purify($dtl_Value);
+                    $dtl_Value = htmlspecialchars_decode( $dtl_Value );
+                        
+                    $iStart = 0;
+                    while($iStart<mb_strlen($dtl_Value)){
+                        
+                        array_push($splitValues, mb_substr($dtl_Value, $iStart, $lim));
+                        $iStart = $iStart + $lim;
+                    }
+               }
+        }else{
+            $err_msg = checkMaxLength($dtyName, $rval);
+            if($err_msg!=null){
+                $this->system->addError(HEURIST_INVALID_REQUEST, $err_msg);
+                return false;
+            }
         }
+        
         $basetype = mysql__select_value($mysqli, 'select dty_Type from defDetailTypes where dty_ID = '.$dtyID);
         
         $partialReplace = false;
@@ -577,7 +601,7 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
         if(!@$this->data['sVal']){    //value to be replaced
             //all except geo and file
             //$searchClause = '1=1';
-            $replace_all_occurences = true;  
+            $replace_all_occurences = true;   //search value not defined replace all
 
             $types = mysql__select_list2($mysqli, 'select dty_ID from defDetailTypes where dty_Type = "file" OR dty_Type = "geo"');
             $searchClause = 'dtl_DetailTypeID NOT IN ('.implode(',',$types).')';
@@ -618,8 +642,6 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
                      
         $baseTag = "~replace field $dtyName $now";
         
-        $this->initPutifier();
-        
         foreach ($this->recIDs as $recID) {
             //get matching detail value for record if there is one
             $query = "SELECT dtl_ID, dtl_Value FROM recDetails WHERE dtl_RecID = $recID and dtl_DetailTypeID = $dtyID and $searchClause";
@@ -638,35 +660,50 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
             
             foreach ($valuesToBeReplaced as $dtlID => $dtlVal) {
                 
-                if (!$replace_all_occurences && $partialReplace) {// need to replace sVal with rVal
-                    $newVal = preg_replace("/".$this->data['sVal']."/",$this->data['rVal'],$dtlVal);
-                }else{
-                    $newVal = $this->data['rVal'];
-                }
-         
-                $dtl['dtl_ID'] = $dtlID;  //detail type id
-                
-                if(($basetype=='freetext' || $basetype='blocktext')
-                    && !in_array($dtyID, $this->not_purify)){
-                    $s = $this->purifier->purify( $newVal );                                
-                    $dtl['dtl_Value'] = htmlspecialchars_decode( $s );
-                }else{
-                    $dtl['dtl_Value'] = $newVal;        
-                }
-                
-                
-                $ret = mysql__insertupdate($mysqli, 'recDetails', 'dtl', $dtl);
-            
-                if (!is_numeric($ret)) {
-                    $sqlErrors[$recID] = $ret;
-                    continue;
-                }
-                $recDetailWasUpdated = true;
+                if(count($splitValues)>0){
 
-                if($replace_all_occurences && count($valuesToBeReplaced)>1){
+                    foreach($splitValues as $val){
+                        $dtl['dtl_ID']  = -1;
+                        $dtl['dtl_RecID']  = $recID;
+                        $dtl['dtl_DetailTypeID']  = $dtyID;
+                        $dtl['dtl_Value'] = $val;
+                        $ret = mysql__insertupdate($mysqli, 'recDetails', 'dtl', $dtl);    
+                    }
+                    $recDetailWasUpdated = true;
                     $valuesToBeDeleted = array_keys($valuesToBeReplaced);
-                    array_shift($valuesToBeDeleted);
                     break;
+                    
+                }else{
+                    
+                    if (!$replace_all_occurences && $partialReplace) {// need to replace sVal with rVal
+                        $newVal = preg_replace("/".$this->data['sVal']."/",$this->data['rVal'],$dtlVal);
+                    }else{
+                        $newVal = $this->data['rVal'];
+                    }
+             
+                    $dtl['dtl_ID'] = $dtlID;  //detail type id
+                    
+                    if(($basetype=='freetext' || $basetype='blocktext')
+                        && !in_array($dtyID, $this->not_purify)){
+                        $s = $this->purifier->purify( $newVal );                                
+                        $dtl['dtl_Value'] = htmlspecialchars_decode( $s );
+                    }else{
+                        $dtl['dtl_Value'] = $newVal;        
+                    }
+                    
+                    $ret = mysql__insertupdate($mysqli, 'recDetails', 'dtl', $dtl);    
+            
+                    if (!is_numeric($ret)) {
+                        $sqlErrors[$recID] = $ret;
+                        continue;
+                    }
+                    $recDetailWasUpdated = true;
+
+                    if($replace_all_occurences && count($valuesToBeReplaced)>1){
+                        $valuesToBeDeleted = array_keys($valuesToBeReplaced);
+                        array_shift($valuesToBeDeleted); //except first one
+                        break;
+                    }
                 }
             }//for
             if ($recDetailWasUpdated) {
@@ -684,7 +721,7 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
             if(count($valuesToBeDeleted)>0){
                 //remove the rest for repalce all occurences
                 $sql = 'delete from recDetails where dtl_ID in ('.implode(',',$valuesToBeDeleted).')';
-                if ($mysqli->query($sql) === TRUE) {
+                if ($mysqli->query($sql) === false) {
                     $sqlErrors[$recID] = $mysqli->error;         
                 }
             }

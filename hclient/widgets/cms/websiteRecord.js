@@ -397,7 +397,8 @@ function hCmsEditing(_options) {
             request = {a: 'replace',
                     recIDs: current_pageid,
                     dtyID: window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION'],
-                    rVal: newval};
+                    rVal: newval,
+                    needSplit: true};
         }
                                         
         

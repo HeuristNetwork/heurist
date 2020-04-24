@@ -910,13 +910,13 @@ $query = 'CREATE TABLE sysDashboard ('
 
             $res = false;
 
-            if(isFunctionExists($mysqli, 'NEW_LEVENSHTEIN') && isFunctionExists($mysqli, 'NEW_LIPOSUCTION')
+/*            
+            isFunctionExists($mysqli, 'NEW_LEVENSHTEIN') && isFunctionExists($mysqli, 'NEW_LIPOSUCTION')
                 && isFunctionExists($mysqli, 'hhash') && isFunctionExists($mysqli, 'simple_hash')
                 //&& isFunctionExists('set_all_hhash')
-                && isFunctionExists($mysqli, 'getTemporalDateString')){
-
+*/                            
+            if(isFunctionExists($mysqli, 'getTemporalDateString')){
                 $res = true;
-
             }else{
 
                 include(dirname(__FILE__).'/../utilities/utils_db_load_script.php'); // used to load procedures/triggers
@@ -1069,17 +1069,29 @@ $query = 'CREATE TABLE sysDashboard ('
             return null;
         }
     }
+
+    //
+    //
+    //
+    function checkMaxLength2($dtl_Value){
+        $dtl_Value = trim($dtl_Value);
+        $len  = strlen($dtl_Value);  //number of bytes
+        $len2 = mb_strlen($dtl_Value); //number of characters
+        $lim = ($len-$len2<200)?64000:32000; //32768;
+        if($len>$lim){
+            return $lim;
+        }else{
+            return 0;
+        }
+    }
     
     //
     // check max length for TEXT field
     //
     function checkMaxLength($dty_Name, $dtl_Value){
         
-        $dtl_Value = trim($dtl_Value);
-        $len  = strlen($dtl_Value);  //number of bytes
-        $len2 = mb_strlen($dtl_Value); //number of characters
-        $lim = ($len-$len2<200)?64000:32768; //32528
-        $lim2 = ($len-$len2<200)?64:32;
+        $lim = checkMaxLength2($dtl_Value);
+        $lim2 = ($lim>32000)?64:32;
         /*
         if($len>10000){
             $stmt_size->bind_param('s', $dtl_Value);
@@ -1092,6 +1104,9 @@ $query = 'CREATE TABLE sysDashboard ('
             }
         }
         */
+        //number of bytes more than limit
+        //limit: if number of bytes and chars is slightly different it takes 64KB 
+        // otherwise it is assumed utf and limit is 32KB
         if($len>$lim){ //65535){  32768
             return 'The data in field ('.$dty_Name
             .') exceeds the maximum size for a field of '.$lim2.'Kbytes. '
