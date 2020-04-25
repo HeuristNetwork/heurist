@@ -136,7 +136,7 @@ function hMapManager( _options )
     maxHeight = 9999999,
     
     isExpanded = false,
-    keepWidth = 200,
+    keepWidth = 250,
     
     basemaplayer =null;  //current basemap layer
     
@@ -231,11 +231,13 @@ function hMapManager( _options )
         options.container.addClass('ui-widget-content')
             .css({'margin-right':'5px','font-size':'0.97em'});
             
+        /*  
         if($.isArray(options.visible_panels) && options.visible_panels.indexOf('off')<0){
             _onExpand(); //expand at once
         }else{
             that.updatePanelVisibility();  
         }
+        */
         //
     }
 
@@ -885,7 +887,7 @@ function hMapManager( _options )
         btn_expand.hide();
         btn_collapse.show();
         options.container.css({'width':keepWidth,'overflow-y':'auto',padding:'4px'}).resizable( "enable" );
-        that.updatePanelVisibility();
+        that.updatePanelVisibility(); //refresh
         that.setHeight();
     }
 
@@ -937,24 +939,62 @@ function hMapManager( _options )
         },
         
         //
-        // params = [basemaps,search,mapdocuments|onedoc]
+        // params
+        // {width:200,open:1|0,basemaps:0|1|-1,mapdocs: ,  } 
         //
         updatePanelVisibility: function(params)
         {
             if(params){
+                if($.isArray(params)){
+                    if(params.indexOf('all')>=0){ //default
+                        params = {basemaps:0,mapdocs:0,search:1};
+                    }else{
+                        var defWidth = 250;
+                        $.each(params,function(i,item){
+                           if(window.hWin.HEURIST4.util.isNumber(item) && item>0){
+                               defWidth = item;
+                               return false;
+                           } 
+                        });
+                        params = {basemaps:params.indexOf('-basemaps')<0?(params.indexOf('basemaps')<0?-1:1):0,
+                                  mapdocs:params.indexOf('-mapdocs')<0?(params.indexOf('mapdocs')<0?-1:1):0,
+                                  search:params.indexOf('-search')<0?(params.indexOf('search')<0?-1:1):0,
+                                  open:params.indexOf('off')<0?1:0,
+                                  width:defWidth};
+                    }
+                }
+                
+                keepWidth  = params.width>0?params.width:250;
+                isExpanded = window.hWin.HEURIST4.util.istrue(params.open, true);
+                
                 options.visible_panels = params; //array of visible panels
+                
+                if(isExpanded){
+                    _onExpand();
+                }else{
+                    _onCollapse();
+                    keepWidth  = params.width>0?params.width:250;
+                }
+                
+                return;
             }
-            if(!options.visible_panels) options.visible_panels = ['all'];
+            
+            if(!options.visible_panels) options.visible_panels = {basemaps:0,mapdocs:0,search:1};//['all'];
             
             function __set(val){
-                var is_visible = (options.visible_panels.indexOf('all')>=0 || options.visible_panels.indexOf(val)>=0);
+                var is_visible = true;//(options.visible_panels.indexOf('all')>=0 || options.visible_panels.indexOf(val)>=0);
                 var ele = options.container.find('.svs-acordeon[grpid="'+val+'"]');
                 if(val=='tempmap'){
                     is_visible = options.hasTempMap;
+                }else{
+                    val = options.visible_panels[val];
+                    is_collapsed = !window.hWin.HEURIST4.util.istrue(val, false);
+                    is_visible = (val!=-1);//window.hWin.HEURIST4.util.istrue(val, false);
                 }
                 
                 if(is_visible){
                     ele.show();
+                    ele.accordion("option", "active", is_collapsed?false:0);
                 }else{
                     ele.hide();
                 }

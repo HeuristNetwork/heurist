@@ -166,7 +166,8 @@ var cfg_layouts = [
                                 is_single_selection:true, 'data-logaction':'open_Record'}
                     },    // H3 record viewer
                     {appid:'heurist_Map', options:{'data-logaction':'open_MapTime'}}, // map viewer (map.php) inside widget (app_timemap.js)
-                    {appid:'heurist_Map2', options:{'data-logaction':'open_MapTime', leaflet:true}}, 
+                    {appid:'heurist_Map2', options:{'data-logaction':'open_MapTime', leaflet:true
+                        , layout_params:{legend:'search,-basemaps,-mapdocs,250,off'} }}, 
                     
                     {appid:'heurist_resultListExt', name: 'Custom Reports', options:{title:'Custom Reports', 
                                     url: 'viewers/smarty/showReps.html?db=[dbname]', 'data-logaction':'open_Reports'}

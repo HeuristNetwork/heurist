@@ -1907,16 +1907,21 @@ $.widget( "heurist.mapping", {
         }
         function __splitval(val){
             
-            var res = [];
-            if(!$.isArray(val)){
-                if(!val) val = 'all';
-                val = val.toLowerCase();
-                res = val.split(',');
-            }
-            if(!(res.length>0)) res = val.split(';');
-            if(!(res.length>0)) res = val.split('|');
+            var res = window.hWin.HEURIST4.util.isJSON(val);
+            if(res === false){
             
-            if(res.length==0) res.push['all'];
+                res = [];
+                if(!$.isArray(val)){
+                    if(!val) val = 'all';
+                    val = val.toLowerCase();
+                    res = val.split(',');
+                }
+                if(!(res.length>0)) res = val.split(';');
+                if(!(res.length>0)) res = val.split('|');
+                
+                if(res.length==0) res.push['all'];
+                
+            }
             
             return res;
         }
