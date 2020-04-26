@@ -213,7 +213,7 @@ function hEditing(_options) {
                                     groupEle.find('.ui-accordion-header').addClass(currGroupHeaderClass);
                                 }
                             }else if(currGroupType == 'tabs'){
-                                groupEle.tabs();
+                                groupEle.tabs().addClass('edit-form-tabs');
                             }
                         }
                 
@@ -263,7 +263,8 @@ function hEditing(_options) {
                         newFieldContainer.addClass(options.className);
 
                     }else if(currGroupType == 'tabs'){
-                        $('<li>').html('<a href="#'+newFieldContainer.attr('id')+'"><span class="separator2">'+headerText+'</span></a>')
+                        // class="separator2"
+                        $('<li>').html('<a href="#'+newFieldContainer.attr('id')+'"><span>'+headerText+'</span></a>')
                         .appendTo(groupTabHeader);
 
                         $(newFieldContainer).appendTo(groupEle);
@@ -368,7 +369,7 @@ function hEditing(_options) {
                         groupEle.find('.ui-accordion-header').addClass(currGroupHeaderClass);
                     }
                 }else if(currGroupType == 'tabs'){
-                    groupEle.tabs({active: 0});
+                    groupEle.tabs({active: 0}).addClass('edit-form-tabs');;
                 }
             }
             
