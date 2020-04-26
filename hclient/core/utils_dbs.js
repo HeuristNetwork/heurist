@@ -500,10 +500,15 @@ window.hWin.HEURIST4.dbs = {
                     $res['type'] = 'rectype';
                     
                     var recTypes = $recTypeId.split(',');
-                    var names = [];
-                    //if there are several rectypes - find common fields only
+                    
+                    $res['title'] = rectypes.names[recTypes[0]];
+                    
                     var  $details = window.hWin.HEURIST4.util.cloneJSON(rectypes['typedefs'][recTypes[0]]['dtFields']); 
 
+                    //if there are several rectypes - find common fields only
+                    //IJ wants show all fields of fist record type
+                    /*  2020-04-25
+                    var names = [];
                     $.each(recTypes, function(i, rtid){ 
                         names.push(rectypes.names[rtid]) 
                         if(i>0){
@@ -519,6 +524,7 @@ window.hWin.HEURIST4.dbs = {
                         }
                     });
                     $res['title'] = names.join(', ');
+                    */
                     
                     var $children_links = [];
                     var $new_pointer_fields = [];

@@ -1826,7 +1826,8 @@ $loop_cnt++;
                                     $recID = array_shift($row);
                                     if( !array_key_exists('d', $records[$recID]) ){
                                         $records[$recID]['d'] = array();
-                                        $need_Concatenation = $need_Concatenation || ($records[$recID][4]==RT_CMS_MENU);
+                                        $need_Concatenation = $need_Concatenation || 
+                                            (defined('RT_CMS_MENU') && $records[$recID][4]==RT_CMS_MENU);
                                     }
                                     $dtyID = $row[0];
 
@@ -2331,9 +2332,8 @@ $loop_cnt++;
             }
             
             //special case for RT_CMS_MENU
-            $system->defineConstant('RT_CMS_MENU');
             $system->defineConstant('DT_EXTENDED_DESCRIPTION');
-            if(RT_CMS_MENU==@$record['rec_RecTypeID'] 
+            if($system->defineConstant('RT_CMS_MENU') && RT_CMS_MENU==@$record['rec_RecTypeID'] 
                             && is_array(@$details[DT_EXTENDED_DESCRIPTION]))
             {
                 $details[DT_EXTENDED_DESCRIPTION] = array(implode('',$details[DT_EXTENDED_DESCRIPTION]));
