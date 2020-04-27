@@ -218,7 +218,8 @@ function hEditing(_options) {
                         }
                 
                         currGroupHeaderClass= fields[idx].groupHeaderClass;
-                        currGroupType = fields[idx].groupType;
+                        currGroupType = (fields[idx].groupType == 'tabs_new')
+                                                  ?'tabs':fields[idx].groupType;
                         //create new accordion or tabcontrol
                         if(currGroupType == 'accordion' || currGroupType == 'expanded'){
                             groupEle = $('<div>').appendTo(groupContainer);
@@ -264,7 +265,7 @@ function hEditing(_options) {
 
                     }else if(currGroupType == 'tabs'){
                         // class="separator2"
-                        $('<li>').html('<a href="#'+newFieldContainer.attr('id')+'"><span>'+headerText+'</span></a>')
+                        $('<li>').html('<a href="#'+newFieldContainer.attr('id')+'"><span style="font-weight:bold">'+headerText+'</span></a>')
                         .appendTo(groupTabHeader);
 
                         $(newFieldContainer).appendTo(groupEle);

@@ -1425,7 +1425,7 @@ dty_TermIDTreeNonSelectableIDs
                 edit_ele.hide();
             }else{
                 sep_type = this._editing.getValue('rst_DefaultValue')[0];
-                if(!(sep_type=='accordion' || sep_type=='tabs')){
+                if(!(sep_type=='accordion' || sep_type=='tabs' || sep_type=='tabs_new' || sep_type=='expanded')){
                     sep_type = 'group';
                 }
             }

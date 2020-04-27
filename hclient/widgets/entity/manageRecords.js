@@ -2418,6 +2418,7 @@ rectypes.names[rectypeID] + ' is defined as a child of <b>'+names
                             groupTitleVisible: (rfr[fi_reqtype]!=='forbidden'),
                             groupType: (rfr[fi_defval]=='group'||
                                         rfr[fi_defval]=='tabs'||
+                                        rfr[fi_defval]=='tabs_new'||
                                         rfr[fi_defval]=='accordion'||
                                         rfr[fi_defval]=='expanded')?rfr[fi_defval]:'group',
                             groupStyle: {},

@@ -279,7 +279,8 @@
                             {"key":"group", "title":"Simple Divider"},
                             {"key":"accordion", "title":"Collapsible Block header (initially collapsed)"},
                             {"key":"expanded", "title":"Collapsible Block header (initially expanded)"},
-                            {"key":"tabs", "title":"Tab header"}]
+                            {"key":"tabs", "title":"Tab header"},
+                            {"key":"tabs_new", "title":"Tab (start new group)"}]
                     }
                 },
                 {
