@@ -183,6 +183,7 @@ $.widget( "heurist.mapping", {
     isMarkerClusterEnabled: true,
     markerClusterGridSize: 50,
     markerClusterMaxZoom: 18,
+    markerClusterMaxSpider: 5,
     isEditAllowed: true,
     
     
@@ -1132,26 +1133,28 @@ $.widget( "heurist.mapping", {
                 // a.layer is actually a cluster
                 this.all_clusters[layer_id].on('clusterclick', function (a) {
                     //console.log(a);
-                    if(a.layer.getAllChildMarkers().length>5){
-                        var markers = a.layer.getAllChildMarkers();
-                        
-                        var latlng = a.layer.getLatLng();
-                        var selected_layers = {};
-                        var sText = '';
-                        
-                        //scan all markers in this cluster
-                        $.each(markers, function(i, top_layer){    
-                            if(top_layer.feature){
-                                selected_layers[top_layer._leaflet_id] = top_layer;
-                                sText = sText + '<option value="'+top_layer._leaflet_id+'">'
-                                                        + window.hWin.HEURIST4.util.htmlEscape( top_layer.feature.properties.rec_Title )+ '</option>';
-                            }
-                        });
-                        
-                        that._showMultiSelectionPopup(latlng, sText, selected_layers);
-                        
-                    }else{
-                       a.layer.spiderfy(); 
+                    if(that.nativemap.getZoom()>=that.markerClusterMaxZoom){
+                        if(a.layer.getAllChildMarkers().length>that.markerClusterMaxSpider){
+                            var markers = a.layer.getAllChildMarkers();
+                            
+                            var latlng = a.layer.getLatLng();
+                            var selected_layers = {};
+                            var sText = '';
+                            
+                            //scan all markers in this cluster
+                            $.each(markers, function(i, top_layer){    
+                                if(top_layer.feature){
+                                    selected_layers[top_layer._leaflet_id] = top_layer;
+                                    sText = sText + '<option value="'+top_layer._leaflet_id+'">'
+                                                            + window.hWin.HEURIST4.util.htmlEscape( top_layer.feature.properties.rec_Title )+ '</option>';
+                                }
+                            });
+                            
+                            that._showMultiSelectionPopup(latlng, sText, selected_layers);
+                            
+                        }else{
+                           a.layer.spiderfy(); 
+                        }
                     }
                 });
                 
@@ -1979,6 +1982,7 @@ $.widget( "heurist.mapping", {
             
             this.markerClusterGridSize = parseInt(window.hWin.HAPI4.get_prefs_def('mapcluster_grid', 50));
             this.markerClusterMaxZoom = parseInt(window.hWin.HAPI4.get_prefs_def('mapcluster_zoom', 18));
+            this.markerClusterMaxSpider = parseInt(window.hWin.HAPI4.get_prefs_def('mapcluster_spider', 5));
         }
 
         //maxClusterRadius
