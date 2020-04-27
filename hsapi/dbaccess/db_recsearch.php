@@ -1140,6 +1140,7 @@
             $system->defineConstant('DT_BG_COLOR'); //outdated
             $system->defineConstant('DT_OPACITY');  //outdated
             
+            //list of rectypes that are sources for geo location
             $rectypes_as_place = $system->get_system('sys_TreatAsPlaceRefForMapping');
             if($rectypes_as_place){
                 $rectypes_as_place = prepareIds($rectypes_as_place);

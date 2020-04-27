@@ -1111,7 +1111,9 @@ $.widget( "heurist.mapping", {
             if(is_new_markercluster){
                 var opts = {showCoverageOnHover:false, 
                                 maxClusterRadius:this.markerClusterGridSize,
-                                disableClusteringAtZoom:this.markerClusterMaxZoom};
+                                spiderfyOnMaxZoom: false
+                                //disableClusteringAtZoom:this.markerClusterMaxZoom
+                };
                                 
                 if(window.hWin.HAPI4.database=='digital_harlem'){
                     opts['iconCreateFunction'] = function(cluster) {
@@ -1125,6 +1127,34 @@ $.widget( "heurist.mapping", {
                 }
                 
                 this.all_clusters[layer_id] = L.markerClusterGroup(opts);
+                
+
+                // a.layer is actually a cluster
+                this.all_clusters[layer_id].on('clusterclick', function (a) {
+                    //console.log(a);
+                    if(a.layer.getAllChildMarkers().length>5){
+                        var markers = a.layer.getAllChildMarkers();
+                        
+                        var latlng = a.layer.getLatLng();
+                        var selected_layers = {};
+                        var sText = '';
+                        
+                        //scan all markers in this cluster
+                        $.each(markers, function(i, top_layer){    
+                            if(top_layer.feature){
+                                selected_layers[top_layer._leaflet_id] = top_layer;
+                                sText = sText + '<option value="'+top_layer._leaflet_id+'">'
+                                                        + window.hWin.HEURIST4.util.htmlEscape( top_layer.feature.properties.rec_Title )+ '</option>';
+                            }
+                        });
+                        
+                        that._showMultiSelectionPopup(latlng, sText, selected_layers);
+                        
+                    }else{
+                       a.layer.spiderfy(); 
+                    }
+                });
+                
             }else{
                 this.all_clusters[layer_id].clearLayers() 
             }
@@ -1320,30 +1350,7 @@ $.widget( "heurist.mapping", {
                         
                         if(found_cnt>1){
                             //show popup with selector
-                            this.main_popup.setLatLng(latlng)
-                                .setContent('<p style="margin:12px;font-style:italic">'
-                                        +found_cnt+' shapes found here. Select desired: </p>'
-                                        +'<select size="'+ ((found_cnt>10)?10:found_cnt)
-                                        +'" style="max-width:300px;overflow-y: auto;border: none;outline: none; cursor:pointer">'
-                                        +sText+'</select>') 
-                                .openOn(this.nativemap);
-                            
-                            var that = this;
-                                
-                            var ele = $(this.main_popup._container).find('select');
-                            ele.on({'change':function(evt){
-                                var leaflet_id = $(evt.target).val();
-                                that._onLayerSelect(selected_layers[leaflet_id], latlng);
-                            },'mousemove':function(evt){
-                                var leaflet_id = $(evt.target).attr('value');
-                                if(leaflet_id>0){
-                                    $(evt.target).siblings().removeClass('selected');
-                                    $(evt.target).addClass('selected');
-                                    var layer = selected_layers[leaflet_id];
-                                    that.setFeatureSelection([layer.feature.properties.rec_ID]); //highlight from popup
-                                }
-                            }});
-                            
+                            this._showMultiSelectionPopup(latlng, sText, selected_layers);
                             return;
                         }
                         
@@ -1356,6 +1363,41 @@ $.widget( "heurist.mapping", {
         }
     },
 
+    //
+    //
+    //    
+    _showMultiSelectionPopup: function(latlng, sText, selected_layers){
+        
+        var found_cnt = Object.keys(selected_layers).length;        
+        
+        this.main_popup.setLatLng(latlng)
+                        .setContent('<p style="margin:12px;font-style:italic">'
+                                +found_cnt+' map objects found here. Select desired: </p>'
+                                +'<select size="'+ ((found_cnt>10)?10:found_cnt)
+                                +'" style="max-width:300px;overflow-y: auto;border: none;outline: none; cursor:pointer">'
+                                +sText+'</select>') 
+                        .openOn(this.nativemap);
+                    
+                    var that = this;
+                        
+                    var ele = $(this.main_popup._container).find('select');
+                    ele.on({'change':function(evt){
+                        var leaflet_id = $(evt.target).val();
+                        that._onLayerSelect(selected_layers[leaflet_id], latlng);
+                    },'mousemove':function(evt){
+                        var leaflet_id = $(evt.target).attr('value');
+                        if(leaflet_id>0){
+                            $(evt.target).siblings().removeClass('selected');
+                            $(evt.target).addClass('selected');
+                            var layer = selected_layers[leaflet_id];
+                            that.setFeatureSelection([layer.feature.properties.rec_ID]); //highlight from popup
+                        }
+                    }});
+    },
+
+    //
+    //
+    //
     _onLayerSelect: function(layer, latlng){
 
             

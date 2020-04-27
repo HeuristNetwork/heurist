@@ -66,7 +66,6 @@
     $defRecTypes = null;
     $defDetailtypes = null;
     $defTerms = null;
-    $find_places_for_geo = ($system->user_GetPreference('deriveMapLocation', 1)==1);
 
     if(@$_REQUEST['postdata']){
         //in export csv all parameters send as json array in postdata 

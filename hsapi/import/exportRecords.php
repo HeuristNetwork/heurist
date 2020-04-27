@@ -93,7 +93,7 @@ public static function setSession($system){
 //      split records by 1000 entries chunks
 //
 public static function output($data, $params){
-    
+
     self::initialize();
 
     if (!($data && @$data['status']==HEURIST_OK)){
@@ -147,10 +147,14 @@ public static function output($data, $params){
             .' AND rst_DetailTypeID in ('.DT_MAP_BOOKMARK.','.DT_ZOOM_KM_POINT.')' );        
     }
     
+    $find_places_for_geo = false;
+    
     //
     // HEADER ------------------------------------------------------------
     //
     if($params['format']=='geojson'){
+        
+        $find_places_for_geo = (self::$system->user_GetPreference('deriveMapLocation', 1)==1);
 
         if(@$params['leaflet']){
             fwrite($fd, '{"geojson":');         
@@ -337,7 +341,8 @@ XML;
         
         if($params['format']=='geojson'){
             
-            $feature = self::_getGeoJsonFeature($record, (@$params['extended']==2), @$params['simplify'], @$params['leaflet']);
+            $feature = self::_getGeoJsonFeature($record, (@$params['extended']==2), 
+                        @$params['simplify'], @$params['leaflet'], $find_places_for_geo);
             if(@$params['leaflet']){ //include only geoenabled features, timeline data goes in separate timeline array
                    if(@$feature['when']){
                         $timeline_data[] = array('rec_ID'=>$recID, 'when'=>$feature['when']['timespans'], 
@@ -917,7 +922,7 @@ private static function _getGeoJsonFeature($record, $extended=false, $simplify=f
     
     if(count($geovalues)==0 && $find_places_for_geo){
         //this record does not have geo value - find it in related/linked places
-        $geodetails = recordSearchGeoDetails($system, $record['rec_ID']);    
+        $geodetails = recordSearchGeoDetails(self::$system, $record['rec_ID']);    
         foreach ($geodetails as $dty_ID=>$field_details) {
             foreach($field_details as $dtl_ID=>$value){ //for detail multivalues
                     $wkt = $value['geo']['wkt'];
