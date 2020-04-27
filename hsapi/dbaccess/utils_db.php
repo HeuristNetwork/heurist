@@ -1078,7 +1078,7 @@ $query = 'CREATE TABLE sysDashboard ('
         $len  = strlen($dtl_Value);  //number of bytes
         $len2 = mb_strlen($dtl_Value); //number of characters
         $lim = ($len-$len2<200)?64000:32000; //32768;
-        if($len>$lim){
+        if($len>$lim){   //size in bytes more than allowed limit
             return $lim;
         }else{
             return 0;
@@ -1091,7 +1091,6 @@ $query = 'CREATE TABLE sysDashboard ('
     function checkMaxLength($dty_Name, $dtl_Value){
         
         $lim = checkMaxLength2($dtl_Value);
-        $lim2 = ($lim>32000)?64:32;
         /*
         if($len>10000){
             $stmt_size->bind_param('s', $dtl_Value);
@@ -1107,7 +1106,8 @@ $query = 'CREATE TABLE sysDashboard ('
         //number of bytes more than limit
         //limit: if number of bytes and chars is slightly different it takes 64KB 
         // otherwise it is assumed utf and limit is 32KB
-        if($len>$lim){ //65535){  32768
+        if($lim>0){ //65535){  32768
+            $lim2 = ($lim>32000)?64:32;
             return 'The data in field ('.$dty_Name
             .') exceeds the maximum size for a field of '.$lim2.'Kbytes. '
             .'Note that this does not mean '.$lim2.'K characters, '
