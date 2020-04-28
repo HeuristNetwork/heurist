@@ -1112,7 +1112,8 @@ $.widget( "heurist.mapping", {
             if(is_new_markercluster){
                 var opts = {showCoverageOnHover:false, 
                                 maxClusterRadius:this.markerClusterGridSize,
-                                spiderfyOnMaxZoom: false
+                                spiderfyOnMaxZoom: false,
+                                zoomToBoundsOnClick: false
                                 //disableClusteringAtZoom:this.markerClusterMaxZoom
                 };
                                 
@@ -1133,7 +1134,10 @@ $.widget( "heurist.mapping", {
                 // a.layer is actually a cluster
                 this.all_clusters[layer_id].on('clusterclick', function (a) {
                     //console.log(a);
-                    if(that.nativemap.getZoom()>=that.markerClusterMaxZoom){
+                    //var clusterZoom = getBoundsZoom(a.layer.getBounds());
+                    
+                    if(that.nativemap.getZoom()>=that.markerClusterMaxZoom ||
+                        that.nativemap.getBoundsZoom(a.layer.getBounds())>=that.markerClusterMaxZoom ){
                         if(a.layer.getAllChildMarkers().length>that.markerClusterMaxSpider){
                             var markers = a.layer.getAllChildMarkers();
                             
@@ -1155,6 +1159,8 @@ $.widget( "heurist.mapping", {
                         }else{
                            a.layer.spiderfy(); 
                         }
+                    }else{
+                        a.layer.zoomToBounds({padding: [20, 20]});
                     }
                 });
                 
