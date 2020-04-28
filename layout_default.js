@@ -281,7 +281,7 @@ var cfg_layouts = [
         center:{minsize:300, dropable:false,
             tabs:[{dockable:false, dragable:false, resizable:false, adjust_positions:true,
                 apps:[
-                    {appid:'heurist_Map', options:{layout:['map','timeline'], mapdocument:61557, eventbased:false} } //mapping
+                    {appid:'heurist_Map', options:{layout:['map','timeline'], mapdocument:61557, eventbased:false, published:1} } //mapping
                     ,{appid:'heurist_resultList', hasheader:true, name: 'List', 
                         options:{empty_remark:null, title:'List', show_viewmode:false, eventbased:false} }
                     //,{appid:'heurist_Frame', hasheader:true, name: 'DH Blog', options:{url: 'http://digitalharlemblog.wordpress.com/'} }
@@ -319,7 +319,7 @@ var cfg_layouts = [
         center:{minsize:300, dropable:false,
             tabs:[{dockable:false, dragable:false, resizable:false, adjust_positions:true,
                 apps:[
-                    {appid:'heurist_Map', options:{layout:['map','timeline'], mapdocument:61557, eventbased:false} } //mapping
+                    {appid:'heurist_Map', options:{layout:['map','timeline'], mapdocument:61557, eventbased:false, published:1} } //mapping
                     ,{appid:'heurist_resultList', hasheader:true, name: 'List', 
                         options:{empty_remark:null, title:'List', show_viewmode:false, eventbased:false} }
                     //,{appid:'heurist_Frame', hasheader:true, name: 'DH Blog', options:{url: 'http://digitalharlemblog.wordpress.com/'} }

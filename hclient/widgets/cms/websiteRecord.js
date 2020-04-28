@@ -699,9 +699,22 @@ function hCmsEditing(_options) {
                     if(ctrls.indexOf('legend')>=0){
                         ctrls = [];
                         $dlg.find('input[name="legend"]:checked').each(
-                            function(idx,item){ctrls.push($(item).val());}
+                            function(idx,item){
+                                var is_exp = $dlg.find('input[name="legend_exp"][value="'+$(item).val()+'"]').is(':checked')?'':'-'
+                                ctrls.push(is_exp+$(item).val());
+                            }
                         );
-                        if(ctrls.length>0 && ctrls.length<3) layout_params['legend'] = ctrls.join(',');
+                        if(ctrls.length>0){
+                            layout_params['legend'] = ctrls.join(',');    
+                            if(!$dlg.find('input[name="legend_exp2"]').is(':checked')){
+                                layout_params['legend'] += ',off';    
+                            }
+                            var w = $dlg.find('input[name="legend_width"]').val();
+                            if(w>100 && w<600){
+                                layout_params['legend'] += (','+w);
+                            }
+                        } 
+                        
                     }
                     layout_params['published'] = 1;
                     layout_params['template'] = $dlg.find('select[name="map_template"]').val();
@@ -901,10 +914,25 @@ function hCmsEditing(_options) {
                             function(idx,item){$(item).prop('checked',ctrls.indexOf($(item).val())>=0);}
                         );
                         var legend = (opts.layout_params.legend)?opts.layout_params.legend.split(','):[];
-                        if(legend.length>0)
-                        $dlg.find('input[name="legend"]').each(
-                            function(idx,item){$(item).prop('checked',legend.indexOf($(item).val())>=0);}
-                        );
+                        if(legend.length>0){
+                            
+                            $dlg.find('input[name="legend_exp2"]').prop('checked',legend.indexOf('off')<0);
+                            
+                            $.each(legend, function(i, val){
+                                if(parseInt(val)>0){
+                                    $dlg.find('input[name="legend_width"]').val(val);        
+                                }else if(val!='off'){
+                                    var is_exp = (val[0]!='-')
+                                    if (!is_exp) legend[i] = val.substring(1);
+                                    $dlg.find('input[name="legend_exp"][value="'+val+'"]').prop('checked',is_exp);
+                                }
+                            });
+                            $dlg.find('input[name="legend"]').each(
+                                function(idx,item){
+                                    $(item).prop('checked',legend.indexOf($(item).val())>=0);
+                                }
+                            );
+                        }
                         if(opts.layout_params['template']){
                             $dlg.find('select[name="map_template"]').attr('data-template', opts.layout_params['template']);        
                         }

@@ -185,7 +185,8 @@ function hMapManager( _options )
                 .append( _defineHeader('Temp Map', 'tempmap'))
                 .append( _defineContent('tempmap') ).appendTo(options.container);        
                 
-        //init list of accordions
+        
+        //restore expand/collapse status
         var keep_status = window.hWin.HAPI4.get_prefs('map_control_status');
         if(keep_status){
             keep_status = window.hWin.HEURIST4.util.isJSON(keep_status);   
@@ -194,6 +195,7 @@ function hMapManager( _options )
             keep_status = { 'search':true };
         }
         
+        //init list of accordions
         var cdivs = options.container.find('.svs-acordeon');
         $.each(cdivs, function(i, cdiv){
 

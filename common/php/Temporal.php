@@ -480,6 +480,11 @@ function temporalToSimpleRange($value){
                     $res[3] = removeLeadingYearZeroes($tDate['PDE'], $is_greg_or_julian, true); 
                     $is_valid = $is_valid || ($res[3]!=null && $res[3]!='');
                 }
+                
+                if($res[0]=='' && $res[1]!='' && $res[1]!=null) $res[0]=$res[1];    
+                if($res[3]=='' && $res[2]!='' && $res[2]!=null) $res[3]=$res[2];    
+                
+                
                 break;
                 if(!$is_valid) $res = null;
     }

@@ -103,7 +103,7 @@ $.widget( "heurist.mapping", {
         element_timeline: 'timeline',
  
         //various layout and behaviour settings
-        // they are assigned in map.php onPageInit from url parameters
+        // they are assigned in map_leaflet.php onPageInit from url parameters
         // which in turn can be set in app_timemap.js
         layout_params:{}, 
         
@@ -319,7 +319,7 @@ $.widget( "heurist.mapping", {
         //content for legend
         this.mapManager = new hMapManager({container:this.map_legend._container, mapwidget:this.element});
         
-        this.updateLayout(this.options.layout_params);
+        this.updateLayout();
         
         this._adjustLegendHeight();
         
@@ -332,7 +332,7 @@ $.widget( "heurist.mapping", {
         this._superApply( arguments );
         
         if((arguments[0] && arguments[0]['layout_params']) || arguments['layout_params'] ){
-            this.updateLayout(this.options.layout_params);
+            this.updateLayout();
         }
     },
 
@@ -804,7 +804,7 @@ $.widget( "heurist.mapping", {
 
                     for(k=0; k<tdata.when.length; k++){
                         ts = tdata.when[k];
-
+                        
                         titem = {
                             id: layer_id+'-'+tdata.rec_ID+'-'+k, //unique id
                             group: layer_id,
@@ -950,6 +950,7 @@ $.widget( "heurist.mapping", {
 
     //
     // get or save map bounds in usr prefs/restore and set map
+    // (used to store extent in mapDraw intersession)
     //    
     getSetMapBounds: function(is_set){
         
@@ -1505,6 +1506,7 @@ $.widget( "heurist.mapping", {
     
     //
     // assigns default values for style (size,color and marker type)
+    // default values priority: widget options, topmost mapdocument, user preferences
     //
     setStyleDefaultValues: function(style, suppress_prefs){
         
@@ -1945,13 +1947,15 @@ $.widget( "heurist.mapping", {
     //   basemap: name of initial basemap
     //   extent: fixed extent    
     //
-    updateLayout: function( params ){
+    updateLayout: function(){
+        
+        var params = this.options.layout_params;
         
         function __parseval(val){
             if(val===false || val===true) return val;
             if(!window.hWin.HEURIST4.util.isempty(val)){
                 if(typeof val == 'string') val = val.toLowerCase();
-                return !(val==0 || val=='off' || val=='no' || val=='n');
+                return !(val==0 || val=='off' || val=='no' || val=='n' || val=='false');
             }else{
                 return false;
             }
@@ -1976,24 +1980,37 @@ $.widget( "heurist.mapping", {
             
             return res;
         }
+
+
+        this.options.isPublished = (params && __parseval(params['published'])) || !window.hWin.HAPI4.has_access();
         
-        if(window.hWin.HEURIST4.util.isempty(params) || params['published']==0){
+        //if parameters are not defined - takes default values from user preferences
+        if(window.hWin.HEURIST4.util.isempty(params) || !this.options.isPublished){
             //this is not publish take params from preferences
-            params = {};
-            params['map_rollover'] = (window.hWin.HAPI4.get_prefs_def('map_rollover', 0)==1);
-            params['template'] = window.hWin.HAPI4.get_prefs_def('map_template', null);
-            params['nocluster'] = (window.hWin.HAPI4.get_prefs_def('mapcluster_on', 0)!=1);
-            params['controls'] = window.hWin.HAPI4.get_prefs_def('mapcontrols', 'all');
+            if(window.hWin.HEURIST4.util.isempty(params)) params = {};
+            
+            if(window.hWin.HEURIST4.util.isempty(params['map_rollover']))
+                params['map_rollover'] = (window.hWin.HAPI4.get_prefs_def('map_rollover', 0)==1);
+            if(window.hWin.HEURIST4.util.isempty(params['template']))
+                params['template'] = window.hWin.HAPI4.get_prefs_def('map_template', null);
+            if(window.hWin.HEURIST4.util.isempty(params['nocluster']))
+                params['nocluster'] = (window.hWin.HAPI4.get_prefs_def('mapcluster_on', 0)!=1);
+            if(window.hWin.HEURIST4.util.isempty(params['controls']))
+                params['controls'] = window.hWin.HAPI4.get_prefs_def('mapcontrols', 'all');
+            if(window.hWin.HEURIST4.util.isempty(params['nocluster']))
+                params['nocluster'] = (window.hWin.HAPI4.get_prefs_def('mapcluster_on', 1)==0);
+            
             params['controls'] = params['controls']+',legend'; //is always visible for non-published maps
             
             this.markerClusterGridSize = parseInt(window.hWin.HAPI4.get_prefs_def('mapcluster_grid', 50));
             this.markerClusterMaxZoom = parseInt(window.hWin.HAPI4.get_prefs_def('mapcluster_zoom', 18));
             this.markerClusterMaxSpider = parseInt(window.hWin.HAPI4.get_prefs_def('mapcluster_spider', 5));
         }
-
+        
+        //@todo deriveMapLocation
+        
         //maxClusterRadius
         this.isMarkerClusterEnabled = !__parseval(params['nocluster']);
-        this.options.isPublished = __parseval(params['published']) || !window.hWin.HAPI4.has_access();
         this.options.isEditAllowed = !this.options.isPublished || __parseval(params['editstyle']);
         
         this.options.map_rollover = __parseval(params['map_rollover']);

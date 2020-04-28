@@ -1,6 +1,8 @@
 /**
 * app_timemap.js - load map + timeline into an iframe in the interface.
-* This widget acts as a wrapper for viewers/map/map.php
+* This widget acts as a wrapper for viewers/map/map.php or viewers/map/map_leaflet.php
+* 
+* app_timemap -> map_leadlet.php -> mapping.js
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -37,7 +39,7 @@ $.widget( "heurist.app_timemap", {
 
         init_at_once: false,  //load basemap at once (useful for publish to avoid empty space) 
         
-        layout_params:null, //params to be passed to map
+        layout_params:null, //params to be passed to mapping.js
         mapdocument:null,   // map document loaded on map init
         
         //this value reset to false on every search_finish, need to set it to true explicitely before each search
@@ -258,19 +260,6 @@ console.log(re);
                             url = url + '&'+key + '=' + this.options.layout_params[key];    
                         }
                     }
-                    
-                    /*layout_params['nomap'] = __gp('nomap');
-                    layout_params['notimeline'] = __gp('notimeline');
-                    layout_params['nocluster'] = __gp('nocluster');
-                    layout_params['editstyle'] = __gp('editstyle');
-                    layout_params['basemap'] = __gp('basemap');  //name of basemap
-                    layout_params['extent'] = __gp('extent'); //@todo
-                    
-                    layout_params['controls'] = __gp('controls'); //cs list of visible controls
-                    layout_params['legend'] = __gp('legend'); //cs list of visible panels
-                    */
-                    if(this.options.published){
-                    }
 
                 }else{
                     //init from default_layout
@@ -286,6 +275,11 @@ console.log(re);
                     
                     this.options.published = 0;
                 }
+                
+                //besides layout_params (controls and panels visibility) it passes
+                // mapdocument - id of startup mapdocument
+                // search_initial - initial query
+                // published  - 0|1
                 
                 if(!window.hWin.HEURIST4.util.isempty(this.options.published)){
                     url = url + '&published='+this.options.published; 
