@@ -139,6 +139,8 @@ $passwordForDatabaseDeletion=""; // if less than 15 characters no one can delete
 $passwordForReservedChanges=""; // if blank, no-one can modify reserved fields, otherwise challenge
 $passwordForServerFunctions=""; // if blank, no-one can run server analysis functions - risk of overload - otherwise challenge
 
+$allowThumbnailsWebAccessdefault = true;
+
 $defaultRootFileUploadPath ="";
 $defaultRootFileUploadURL = "";
 $sysAdminEmail = "";

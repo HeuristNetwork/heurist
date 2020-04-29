@@ -233,7 +233,7 @@ function fileGetThumbnailURL($system, $recID, $get_bgcolor){
 
         $thumbfile = 'ulf_'.$fileid.'.png';
 
-        if(file_exists(HEURIST_THUMB_DIR . $thumbfile)){
+        if(defined('HEURIST_THUMB_URL') && file_exists(HEURIST_THUMB_DIR . $thumbfile)){
             $thumb_url = HEURIST_THUMB_URL.$thumbfile;
         }else{
             //it will be redirected to hsapi/controller/file_download.php

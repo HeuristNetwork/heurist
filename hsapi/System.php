@@ -452,9 +452,11 @@ error_log(print_r($_REQUEST, true));
     */
     public function getArrayOfSystemFolders(){
         
+        global $allowThumbnailsWebAccessdefault;
+        
         //const name, description, allow webaccess, for backup
         $folders = array();
-        $folders['filethumbs']   = array('THUMB','used to store thumbnails for uploaded files', true, true);
+        $folders['filethumbs']   = array('THUMB','used to store thumbnails for uploaded files', $allowThumbnailsWebAccessdefault, true);
         $folders['file_uploads'] = array('FILES','used to store uploaded files by default');
         //besides we have HEURIST_SCRATCHSPACE_DIR == sys temp dir
         $folders['scratch']      = array('SCRATCH','used to store temporary files', false); 
