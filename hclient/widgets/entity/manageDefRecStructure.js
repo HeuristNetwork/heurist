@@ -1419,7 +1419,7 @@ dty_TermIDTreeNonSelectableIDs
         if(dt_type=='separator'){
             
             var sep_type;
-            if(window.hWin.HAPI4.database.indexOf('Casey')>=0){
+            if(false && window.hWin.HAPI4.database.indexOf('Casey')>=0){
                 sep_type = 'group';
                 edit_ele = this._editing.getFieldByName('rst_SeparatorType');
                 edit_ele.hide();
