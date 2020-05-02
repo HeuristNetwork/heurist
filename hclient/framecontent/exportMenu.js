@@ -203,25 +203,26 @@ function hexportMenu() {
             window.hWin.HEURIST4.ui.showRecordActionDialog('recordExportCSV');
             
         }else if(action == "menu-export-hml-resultset"){ // Current resultset, including rules-based expansion iof applied
-            _exportRecords({format:'hml', isAll:true, includeRelated:false, multifile:false, save_as_file:save_as_file});
+            _exportRecords({format:'hml', multifile:false, save_as_file:save_as_file});
             
+/*            
         }else if(action == "menu-export-hml-selected"){ // Currently selected records only
-            _exportRecords({format:'hml', isAll:false, includeRelated:false, multifile:false, save_as_file:save_as_file});
+            _exportRecords({format:'hml', isAll:false, multifile:false, save_as_file:save_as_file});
             
         }else if(action == "menu-export-hml-plusrelated"){ // Current resulteset plus any related records
             _exportRecords({format:'hml', isAll:true, includeRelated:true, multifile:false, save_as_file:save_as_file});
-
+*/
         }else if(action == "menu-export-hml-multifile"){ // selected + related
-            _exportRecords({format:'hml', isAll:true, includeRelated:false, multifile:true, save_as_file:save_as_file});
+            _exportRecords({format:'hml', save_as_file:save_as_file});
             
         }else if(action == "menu-export-json"){ 
-            _exportRecords({format:'json', isAll:true, includeRelated:false, multifile:false, save_as_file:save_as_file});
+            _exportRecords({format:'json', save_as_file:save_as_file});
             
         }else if(action == "menu-export-geojson"){ 
-            _exportRecords({format:'geojson', isAll:true, includeRelated:false, multifile:false, save_as_file:save_as_file});
+            _exportRecords({format:'geojson', save_as_file:save_as_file});
             
         }else if(action == "menu-export-gephi"){ 
-            _exportRecords({format:'gephi', isAll:true, includeRelated:false, multifile:false, save_as_file:save_as_file});
+            _exportRecords({format:'gephi', save_as_file:save_as_file});
 
         }else if(action == "menu-export-kml"){
             _exportKML(true, save_as_file);
@@ -245,6 +246,9 @@ function hexportMenu() {
         layoutString,rtFilter,relFilter,ptrFilter;
         
         var isEntireDb = false;
+        
+        opts.isAll = (opts.isAll!==false);
+        opts.multifile = (opts.multifile===true);
 
         if(opts.isAll){
 
@@ -278,25 +282,42 @@ function hexportMenu() {
             
             var script; 
             var params = '';
-            if($('#followPointers').is(':checked')){
+            if(true || $('#followPointers').is(':checked')){
 
                 if(isEntireDb){
                     params =  'depth=0';
                 }else {
-                    if(opts.ignoreFollowPointers!==true){
-                        window.hWin.HEURIST4.msg.showMsgDlg(
-    '<p>The records you are exporting may contain pointers to other records which are not in your current results set. These records may additionally point to other records.</p>'                
-    +'<p>Heurist follows the chain of related records, which will be included in the XML or JSON output. The total number of records exported will therefore exceed the results count indicated.</p>'
-    +'<p>To disable this feature and export current result only uncheck "Follow pointers"</p>'
-    +'<p>Continue?</p>',
-                        function(){ opts.ignoreFollowPointers=true; _exportRecords( opts ); });
+                    if(opts.questionResolved!==true){
+                        var $expdlg = window.hWin.HEURIST4.msg.showMsgDlg(
+'<p>The records you are exporting may contain pointers to other records which are not in your current results set. These records may additionally point to other records.</p>'                
+//+'<p>Heurist follows the chain of related records, which will be included in the XML or JSON output. The total number of records exported will therefore exceed the results count indicated.</p>'
+//+'<p>To disable this feature and export current result only uncheck "Follow pointers"</p>'
++'<br><label><input type="radio" name="links" value="direct" checked/>Follow pointers and relationship markers in records</label>'
++'<br><label><input type="radio" name="links" value="direct_links"/>Follow only pointers, ignore relationship markers <warning about losing relationships></label>'
++'<br><label><input type="radio" name="links" value="none"/>Don\'t follow pointers or relationship markers (you will lose any data which is referenced by pointer fields in the exported records)</label>'
++'<br><label><input type="radio" name="links" value="all"/>Follow ALL connections including reverse pointers" (warning: any commonly used connection, such as to Places, will result in a near-total dump of the database)</label><br>'
+                        , function(){ 
+                            
+                            var val = $expdlg.find('input[name="links"]:checked').val();
+console.log('>'+val);
+                            
+                            opts.linksMode = val;
+                            opts.questionResolved=true; 
+                            _exportRecords( opts ); 
+                        },
+                        {
+                            yes: 'Proceed',
+                            no: 'Cancel'
+                        });
                         
                         return;
                     }
                     params =  'depth=all';
                 }
                 
-            }else{
+            }
+            /*
+            else{
                 if ((opts.format === 'hml' || opts.format === 'json') && !opts.confirmNotFollowPointers) {
                     window.hWin.HEURIST4.msg.showMsgDlg(
                         '<p><span style="color:red">WARNING:</span> by allowing the export of records without following pointers, ' +
@@ -316,7 +337,9 @@ function hexportMenu() {
                 }
                 params =  'depth='+(opts.includeRelated?1:0);
             }
+            */
             
+            params =  params + (opts.linksMode?('&linkmode='+opts.linksMode):'');  
             
             if(opts.format=='hml'){
                 script = 'export/xml/flathml.php';                

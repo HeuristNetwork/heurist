@@ -137,13 +137,11 @@ require_once(dirname(__FILE__)."/initPage.php");
                 title="Generate HML (Heurist XML format) for current set of search results (current query) with one record per file, plus manifest">
                 HuNI harvestable XML files (file-per-record)</a>
         </div>
-        
-        <br>
-        <div style="padding-left:108px;font-size:smaller"><label><input type="checkbox" id="followPointers" checked/>Follow all pointers</label></div>
 
         <div class="heurist-prompt" style="padding:6px">
             Allow popup window in your browser preferences
         </div>
+        <br>
     </div>
 </body>
 </html>

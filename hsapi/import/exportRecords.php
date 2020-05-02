@@ -73,6 +73,7 @@ public static function setSession($system){
 //
 // $parmas 
 //    format - json|geojson|xml|gephi
+//    linkmode = direct, direct_links, none, all
 //    defs  0|1  include database definitions
 //    file  0|1
 //    filename - export into file with given name
@@ -269,16 +270,32 @@ XML;
     if(@$params['depth']){
         $max_depth = (@$params['depth']=='all') ?9999:intval(@$params['depth']);
     }
+    
+    $direction = 0;// both direct and reverse links
+    $no_relationships = false;
+        
+    if(@$params['linkmode']){//direct, direct_links, none, all
+
+        if($params['linkmode']=='none'){
+            $max_depth = 0;
+        }else if($params['linkmode']=='direct'){
+            $direction = 1; //direct only
+        }else if($params['linkmode']=='direct_links'){
+            $direction = 1; //direct only
+            $no_relationships = true;
+        }
+    }
+    
     if($max_depth>0){
-        //search direct and reverse links 
         if($params['format']=='gephi' && @$params['limit']>0){
            $limit = $params['limit'];  
         }else{
            $limit = 0; 
         }
         
+        //search direct and reverse links 
         //it adds ids to $records
-        recordSearchRelatedIds(self::$system, $records, 0, 0, $max_depth, $limit);
+        recordSearchRelatedIds(self::$system, $records, $direction, $no_relationships, 0, $max_depth, $limit);
     }
 
 

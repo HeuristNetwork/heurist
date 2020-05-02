@@ -9,6 +9,7 @@
     * parameters
     * db - heurist database
     * format = geojson|json|csv|kml|xml|hml|gephi
+    * linkmode = direct, direct_links, none, all
     * prefs:{ format specific parameters }, }
     * 
     * prefs for csv
