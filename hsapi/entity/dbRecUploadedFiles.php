@@ -351,9 +351,13 @@ class DbRecUploadedFiles extends DbEntityBase
             //change mimetype to extension
             $mimeType = strtolower($this->records[$idx]['ulf_MimeExt']);
             if($mimeType==''){
+                $mimeType = 'dat';
+                $this->records[$idx]['ulf_MimeExt'] = 'dat';
+                /*
                     $this->system->addError(HEURIST_ACTION_BLOCKED, $this->error_ext);
                     return false;
-            }else
+                */
+            }
             if(strpos($mimeType,'/')>0){ //this is mimetype - find extension
                 $fileExtension = mysql__select_value($this->system->get_mysqli(), 
                     'select fxm_Extension from defFileExtToMimetype where fxm_Mimetype="'.addslashes($mimeType).'"');
