@@ -48,8 +48,8 @@ use Shapefile\ShapefileReader;
         $system->error_exit_api('recID parameter is not defined or has wrong value'); //exit from script
     }
     
-    $params['simplify'] = true;
-
+    $need_simplify = (treu || @$params['simplify']=='yes' || @$params['simplify']==1);
+    
     $fields = array();
     
     if($system->defineConstant('DT_ZIP_FILE')){
@@ -198,26 +198,32 @@ use Shapefile\ShapefileReader;
                         $feature = json_decode($record->getGeoJSON(false, true), true);
                         unset($record);
                         
-                        if(@$params['simplify']){
-                            $geo = @$feature['geometry'];
-                            if(is_array(@$geo['coordinates']) && count(@$geo['coordinates'])>0){
+                        
+                        $geo = @$feature['geometry'];
+                        if(is_array(@$geo['coordinates']) && count(@$geo['coordinates'])>0){
+                            
+                            if($geo['type']=='LineString'){
                                 
-                                if($geo['type']=='LineString'){
+                                checkWGS($system, $geo['coordinates']);
+                                if($need_simplify) simplifyCoordinates($geo['coordinates']);
 
-                                    simplifyCoordinates($geo['coordinates']);
-
-                                } else if($geo['type']=='Polygon'){
-                                    for($idx=0; $idx<count($geo['coordinates']); $idx++){
-                                        simplifyCoordinates($geo['coordinates'][$idx]);
-                                    }
-                                } else if ( $geo['type']=='MultiPolygon' || $geo['type']=='MultiLineString')
-                                {
-                                    for($idx=0; $idx<count($geo['coordinates']); $idx++) //shapes
-                                        for($idx2=0; $idx2<count($geo['coordinates'][$idx]); $idx2++) //points
-                                            simplifyCoordinates($geo['coordinates'][$idx][$idx2]);
+                            } else if($geo['type']=='Polygon'){
+                                for($idx=0; $idx<count($geo['coordinates']); $idx++){
+                                    checkWGS($system, $geo['coordinates'][$idx]);
+                                    if($need_simplify) simplifyCoordinates($geo['coordinates'][$idx]);
                                 }
-                            }    
-                        } 
+                            } else if ( $geo['type']=='MultiPolygon' || $geo['type']=='MultiLineString')
+                            {
+                                for($idx=0; $idx<count($geo['coordinates']); $idx++) //shapes
+                                    for($idx2=0; $idx2<count($geo['coordinates'][$idx]); $idx2++) //points
+                                    {
+                                        checkWGS($system, $geo['coordinates'][$idx][$idx2]);
+                                        if($need_simplify) simplifyCoordinates($geo['coordinates'][$idx][$idx2]);
+                                    }
+                                        
+                            }
+                        }    
+                         
                         
                         //$json[] = $feature;
                         
@@ -278,6 +284,25 @@ error_log($e->getCode().' ('.$e->getErrorType().'): '.$e->getMessage());
             .' does not have fields where stored reference to shp or zip file',
             HEURIST_NOT_FOUND); 
     }
+    
+//
+//
+//
+function checkWGS($system, $orig_points){
+
+    foreach ($orig_points as $point) {
+        if (($northing!=round($point[1])) || ($easting!=round($point[0])) 
+                || (abs($point[0])<200) || (abs($point[1])<90)){
+//: id:xxxxxx title: xxxxxxxxxxxxxxxx                    
+                $system->error_exit_api(
+'Cannot process shp file. Heurist uses WGS84 (World Geographic System) '
+.'to support the plotting of maps worldwide. This shapefile is not in this format '
+.'and will not therefore display on maps. '
+.'Please use a GIS or other converter to convert to WGS84', HEURIST_ERROR);  
+        }                
+    }
+    return true;
+}
     
 //
 // $fileinfo as fileGetFullInfo
