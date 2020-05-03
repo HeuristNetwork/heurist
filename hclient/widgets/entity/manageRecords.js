@@ -3006,7 +3006,8 @@ rectypes.names[rectypeID] + ' is defined as a child of <b>'+names
                         
                         var btn = $('<div>')
                             .button({label:cfg.label?cfg.label:('Lookup '+cfg.service) })
-                            .attr('data-cfg', i).css('padding-right','4px')
+                            .attr('data-cfg', i).css({'font-size': 'larger', // 'padding-right':'4px',
+                                border: '1px solid', 'font-weight': 'bold'})
                             .appendTo(lookup_div);
                         
                         this._on(btn, {click:
