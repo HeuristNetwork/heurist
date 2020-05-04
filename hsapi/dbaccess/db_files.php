@@ -466,7 +466,7 @@ function resolveFilePath($path){
 * @param mixed $url
 * @param mixed $bypassProxy
 */
-function downloadViaProxy($filename, $mimeType, $url, $bypassProxy = true){
+function downloadViaProxy($filename, $mimeType, $url, $bypassProxy = true, $originalFileName=null){
 
     //if(!file_exists($filename)){ // || filemtime($filename)<time()-(86400*30))
 
@@ -491,7 +491,7 @@ function downloadViaProxy($filename, $mimeType, $url, $bypassProxy = true){
         //}
 
         if(file_exists($filename)){
-            downloadFile($mimeType, $filename);
+            downloadFile($mimeType, $filename, $originalFileName);
         }
     
     }

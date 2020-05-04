@@ -1013,11 +1013,10 @@ function print_public_details($bib) {
                         'linked' => ($bd['name']=='Linked media')
                     ));
               
-                    if($originalFileName && !$external_url){ 
-                        $bd['val'] = '<a target="_surf" class="external-link" href="'.htmlspecialchars($file_URL).'">'.htmlspecialchars($originalFileName).'</a> '.($fileSize>0?'[' .htmlspecialchars($fileSize) . 'kB]':'');
-                    }else{
-                        $bd['val'] = '<a target="_surf" class="external-link" href="'.htmlspecialchars($file_URL).'">'.htmlspecialchars($external_url).'</a>';
-                    }
+                    $bd['val'] = '<a target="_surf" class="external-link" href="'.htmlspecialchars($external_url?$external_url:$file_URL).'">'
+                            .htmlspecialchars(($originalFileName && $originalFileName!='_remote')?$originalFileName:($external_url?$external_url:$file_URL)).'</a> '
+                            .($fileSize>0?'[' .htmlspecialchars($fileSize) . 'kB]':'');
+
                     if($file_description!=null && $file_description!=''){
                         $bd['val'] = $bd['val'].'<br>'.htmlspecialchars($file_description);
                     }
@@ -1191,8 +1190,9 @@ function print_public_details($bib) {
             }
 
             $url = (@$thumb['external_url'] && strpos($thumb['external_url'],'http://')!==0) 
-                        ?$thumb['external_url']
+                        ?$thumb['external_url']            //direct for https
                         :(HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&file='.$thumb['nonce']);
+            $download_url = HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&download=1&file='.$thumb['nonce'];
 
             if($thumb['player'] && !$is_map_popup){
 
@@ -1223,9 +1223,16 @@ function print_public_details($bib) {
                     .$thumb['id'].')">SHOW THUMBNAIL</a>';
             }
             
-            print '<a href="' . htmlspecialchars($url) 
-                                . '" class="external-link" target=_surf class="image_tool">DOWNLOAD'
+            if($isImageOrPdf || !@$thumb['external_url']){
+                print '<a href="' . htmlspecialchars($download_url) 
+                                . '" class="external-link image_tool" target="_surf">DOWNLOAD'
                                 . (@$thumb['linked']?' (linked media)':'').'</a></div>';
+            }else{
+                print '<a href="' . htmlspecialchars($url) 
+                                . '" class="external-link" target=_blank>OPEN IN NEW TAB'
+                                . (@$thumb['linked']?' (linked media)':'').'</a></div>';
+            }
+            
             print '</div>';
             if($is_map_popup){
                 print '<br>';
