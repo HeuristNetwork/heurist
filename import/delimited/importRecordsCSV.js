@@ -1660,7 +1660,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             
             //checkbox that marks 'in use'
             var s = '<tr><td width="75px" align="center">&nbsp;<span style="display:none">'
-                    +'<input type="checkbox" id="cbsa_dt_'+i+'" value="'+i+'"/></span></td>';
+                    +'<input type="checkbox" id="cbsa_dt_'+i+'" value="'+i+'" data-type="'
+                    +(isIDfield?'id':(isIndex?'index':(isProcessed?'processed':'remain')))+'"/></span></td>';
 
             // count of unique values
             s = s + '<td  width="75px" align="center">'+imp_session['uniqcnt'][i]+'</td>';
@@ -1703,7 +1704,10 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             + ((currentStep==3) ?'Matching - not yet used'
                                 :'Not yet Imported')
             +'</b>'
-            + ((currentStep==3)?'':'<span style="font-size:0.7em;font-style:italic"> You only need to map all required fields (in red) if you plan to create new records</span>')
+            + ((currentStep==3)
+                ?''
+                :('<span style="font-size:0.7em;font-style:italic"> You only need to map all required fields (in red) if you plan to create new records</span>'
+                 +'<br><br><a href="#" class="lnk_SelectAll_remain" style="font-size:smaller">Select all/none</a>') )
             +'</td></tr>'
                 +sRemain;
         }
@@ -1711,37 +1715,11 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             sProcessed = '<tr height="40" style="valign:bottom"><td class="subh" colspan="5"><br />'
             +'<b>Already used</b>'
              + ((currentStep==3)?'':'<span style="font-size:0.7em;font-style:italic"> You only need to map all required fields (in red) if you plan to create new records</span>')
-            +'<br><br><a href="#" class="lnk_SelectAll" style="font-size:smaller">Select all/none</a></td></tr>'
+            +'<br><br><a href="#" class="lnk_SelectAll_processed" style="font-size:smaller">Select all/none</a></td></tr>'
                 +sProcessed;
         }
         
         $('#tblFieldMapping > tbody').html(sID_field+sIndexes+sRemain+sProcessed);
-        
-        if(sProcessed!=''){
-            
-            var is_all_checked = true;
-            $("input[id^='cbsa_dt_']").each(function(i,item){
-               if(!$(item).is(':checked') && $(item).is(':visible')){
-                   is_all_checked = false;
-                   return false
-               }
-            });
-            
-            $('.lnk_SelectAll').attr('data-checked',is_all_checked?1:0)
-                .text( is_all_checked?'Select none':'Select all');
-        
-            $('.lnk_SelectAll').click(function(e){
-                var cb = $(e.target);
-                var was_checked = (cb.attr('data-checked')==1);
-                $("input[id^='cbsa_dt_']").each(function(i,item){
-                   if(!$(item).attr('disabled'))
-                        $(item).prop('checked',was_checked?0:1).change(); 
-                });
-                cb.attr('data-checked',(was_checked?0:1) );
-                cb.text(was_checked?'Select all':'Select none');
-            });
-        
-        }
         
         //init listeners
         $("input[id^='cbsa_dt_']").change(function(e){
@@ -1763,6 +1741,57 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         //load data
         _getValuesFromImportTable();            
         //
+        
+        if(sProcessed!=''){
+            
+            var is_all_checked = true;
+            $("input[id^='cbsa_dt_']").each(function(i,item){
+               if(!$(item).is(':checked') && $(item).attr('data-type')=='processed'){
+                   is_all_checked = false;
+                   return false
+               }
+            });
+            
+            $('.lnk_SelectAll_processed').attr('data-checked',is_all_checked?1:0)
+                .text( is_all_checked?'Select none':'Select all');
+        
+            $('.lnk_SelectAll_processed').click(function(e){
+                var cb = $(e.target);
+                var was_checked = (cb.attr('data-checked')==1);
+                $("input[id^='cbsa_dt_']").each(function(i,item){
+                   if($(item).attr('data-type')=='processed')   //!$(item).attr('disabled'))
+                        $(item).prop('checked',was_checked?0:1).change(); 
+                });
+                cb.attr('data-checked',(was_checked?0:1) );
+                cb.text(was_checked?'Select all':'Select none');
+            });
+        
+        }
+        if(sRemain!=''){
+            
+            var is_all_checked = true;
+            $("input[id^='cbsa_dt_']").each(function(i,item){
+               if(!$(item).is(':checked') && $(item).attr('data-type')=='remain'){
+                   is_all_checked = false;
+                   return false
+               }
+            });
+            
+            $('.lnk_SelectAll_remain').attr('data-checked',is_all_checked?1:0)
+                .text( is_all_checked?'Select none':'Select all');
+        
+            $('.lnk_SelectAll_remain').click(function(e){
+                var cb = $(e.target);
+                var was_checked = (cb.attr('data-checked')==1);
+                $("input[id^='cbsa_dt_']").each(function(i,item){
+                   if($(item).attr('data-type')=='remain')   //!$(item).attr('disabled')
+                        $(item).prop('checked',was_checked?0:1).change(); 
+                });
+                cb.attr('data-checked',(was_checked?0:1) );
+                cb.text(was_checked?'Select all':'Select none');
+            });
+        
+        }
         
     }    
 
@@ -1923,8 +1952,11 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                }
                
                if(!window.hWin.HEURIST4.util.isnull(selected_value)){
-                        $("#cbsa_dt_"+field_idx).prop('checked', true);
-                        $(item).parent().show(); //show selector
+                        var cbox = $("#cbsa_dt_"+field_idx);
+                        if(cbox.attr('data-type')!='processed'){                   
+                            $("#cbsa_dt_"+field_idx).prop('checked', true);
+                            $(item).parent().show(); //show selector
+                        }
                         $(item).val(dt_id);
                         if(sel.hSelect("instance")!=undefined){
                            sel.hSelect("refresh"); 

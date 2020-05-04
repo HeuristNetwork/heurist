@@ -2010,3 +2010,24 @@ input[type="file"] {
 ::-webkit-scrollbar-thumb:window-inactive {
     background: rgba(142,169,185,0.4); 
 }
+/* tab control for edit form */
+.edit-form-tabs{
+    margin-bottom:4px;
+}
+.edit-form-tabs li{
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;    
+}
+.edit-form-tabs li.ui-tabs-active{
+    background: #ECF1FB !important;
+}
+.edit-form-tabs li > a{
+    width: 30ex;
+    max-width: 30ex;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.edit-form-tabs .ui-tabs-panel{
+    padding-bottom: 10px !important;    
+}

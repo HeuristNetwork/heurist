@@ -122,6 +122,8 @@ $.widget( "heurist.search_faceted_wiz", {
 
 
     select_main_rectype: null,
+    select_additional_rectypes: null,
+    svs_MultiRtSearch: null,
 
     step: 0, //current step
     step_panels:[],
@@ -286,6 +288,9 @@ $.widget( "heurist.search_faceted_wiz", {
             }
             this.select_main_rectype.remove();   
             this.select_main_rectype = null;
+            
+            this.select_additional_rectypes.remove();   
+            this.select_additional_rectypes = null;
         }
         
         
@@ -402,16 +407,8 @@ $.widget( "heurist.search_faceted_wiz", {
             }
             else if(this.step==0 && newstep==1){ //select record types
 
-                if(this.select_main_rectype && this.select_main_rectype.editing_input('instance')){
-                    
-                    var val = this.select_main_rectype.editing_input('getValues');
-                    if(!val || !val[0]){
-                        window.hWin.HEURIST4.msg.showMsgErr('Select record type(s)');
-                        this.select_main_rectype.editing_input('focus');
-                        return;
-                    }
-                    
-                }else if(!(this.select_main_rectype.val()>0)){
+                //MAIN RECORD TYPE
+                if(!(this.select_main_rectype.val()>0)){
                     window.hWin.HEURIST4.msg.showMsgErr('Select record type');
                     if(this.select_main_rectype.hSelect("instance")!=undefined){
                         this.select_main_rectype.hSelect("focus"); 
@@ -452,11 +449,26 @@ $.widget( "heurist.search_faceted_wiz", {
             if(this.step==1 && newstep==2){ //select field types
 
                     
-                var rectypeIds = [];
-                if(this.select_main_rectype && this.select_main_rectype.editing_input('instance')){
-                    rectypeIds = (this.select_main_rectype.editing_input('getValues')[0]).split(','); 
-                }else{
-                    rectypeIds = [this.select_main_rectype.val()];
+                var rectypeIds = [this.select_main_rectype.val()];
+                if(this.select_additional_rectypes && this.select_additional_rectypes.editing_input('instance')){
+                    
+                    var val = this.select_additional_rectypes.editing_input('getValues');
+                    if(val){
+                        val = val[0].split(',');
+                        var is_reduced = false, vals=[];
+                        for (var i=0; i<val.length; i++){
+                            if(val[i] && window.hWin.HEURIST4.util.findArrayIndex(val[i], rectypeIds)<0){
+                                rectypeIds.push(val[i]);
+                                vals.push(val[i]);
+                            }else{
+                                is_reduced = true;
+                            }
+                        }
+                        if(is_reduced){
+                            this.select_additional_rectypes.editing_input('setValue',vals.join(','));    
+                        }
+                        //rectypeIds = rectypeIds.concat(val);
+                    }
                 }
                 
                 
@@ -519,7 +531,7 @@ $.widget( "heurist.search_faceted_wiz", {
     //
     // record type selector (@todo move to utils_ui ???)
     //
-    ,_createInputElement_RecordTypeSelector: function(container_fieldset){
+    ,_createInputElement_RecordTypeSelector: function(){
         
         var that = this;
 
@@ -528,9 +540,9 @@ $.widget( "heurist.search_faceted_wiz", {
             dtID: "dty_PtrTargetRectypeIDs",
             dtFields:{
                 "dty_Type":"resource",
-                "rst_DisplayName":"Search for (entity types):",
-                "rst_DisplayHelpText": "This determines the record type which will be retrieved by the search."
-                +"The facets can, however, be based on attributes of other record types linked from this type", 
+                "rst_DisplayName":"Also search for:",
+                "rst_DisplayHelpText": "", 
+//This determines the record type which will be retrieved by the search. The facets can, however, be based on attributes of other record types linked from this type                
                 "rst_FieldConfig": {"entity":"DefRecTypes","csv":true}
             },
             change: function(){
@@ -545,14 +557,12 @@ $.widget( "heurist.search_faceted_wiz", {
                             svs_name.val( names.join(', ') );
                         }
                         svs_name.focus();
-                        that.options.params.facets = [];
                     }
-                    that.originalRectypeID=null; //reset flag - facet was changed - need to proceed all steps of wizard
-                    $("#btnSave").css('visibility','hidden');//$("#btnSave").hide();
+                    that._resetFacets();
             }    
         };
 
-        return $("<div>").editing_input(ed_options).prependTo(container_fieldset);
+        return $("<div>").editing_input(ed_options).insertAfter( this.step0.find('.main-rectype') );
     }
     
     
@@ -630,8 +640,6 @@ $.widget( "heurist.search_faceted_wiz", {
 
             if(this.select_main_rectype==null){
                 
-                this.select_main_rectype = this._createInputElement_RecordTypeSelector( $dlg.find('.main_fieldset'));
-/*                
                 this.select_main_rectype = window.hWin.HEURIST4.ui.createRectypeSelectNew( $dlg.find("#opt_rectypes").get(0), {
                     topOptions: [{key:'',title:'select...'}],
                     useHtmlSelect: false,
@@ -645,14 +653,30 @@ $.widget( "heurist.search_faceted_wiz", {
                             svs_name.val(opt.text().trim()+'s');
                         }
                         svs_name.focus();
-                        
-                        that.options.params.facets = [];
                     }
-                    
-                    that.originalRectypeID=null; //reset flag - facet was changed - need to proceed all steps of wizard
-                    $("#btnSave").css('visibility','hidden');//$("#btnSave").hide();
+                    that._resetFacets();
                 }});
-*/
+
+                //additional rectypes                
+                this.select_additional_rectypes = this._createInputElement_RecordTypeSelector();
+                this.select_additional_rectypes.hide();
+                
+                this.svs_MultiRtSearch = $dlg.find('#svs_MultiRtSearch');
+                
+                this._on(this.svs_MultiRtSearch, {change:function(event){
+                    if(this.select_additional_rectypes.editing_input('instance')){
+                        if(this.svs_MultiRtSearch.is(':checked')){
+                            this.select_additional_rectypes.show();
+                        }else{
+                            
+                            //reset flag - facet was changed - need to proceed all steps of wizard
+                            if(this.select_additional_rectypes.editing_input('getValues')[0]){
+                                this._resetFacets();
+                            }
+                            this.select_additional_rectypes.editing_input('setValue', '');
+                            this.select_additional_rectypes.hide();
+                        }
+                    }}});
             }
 
 
@@ -691,16 +715,27 @@ $.widget( "heurist.search_faceted_wiz", {
                 svs_ugrid.attr('disabled','disabled');;
                 
                 if(this.options.params.rectypes) {
-                    
-                    if(this.select_main_rectype.editing_input('instance')){
-                        var rtids = $.isArray(this.options.params.rectypes)?this.options.params.rectypes.join(',')
-                                                                           :this.options.params.rectypes;
-                        this.select_main_rectype.editing_input('setValue', rtids );    
+
+                    if($.isArray(this.options.params.rectypes)){
+                        rtids = this.options.params.rectypes;
                     }else{
-                        this.select_main_rectype.val(this.options.params.rectypes[0]);
-                        if(this.select_main_rectype.hSelect("instance")!=undefined){
-                           this.select_main_rectype.hSelect("refresh"); 
+                        rtids = this.options.params.rectypes.split(',')
+                    }
+                    
+                    this.select_main_rectype.val(rtids[0]);
+                    if(this.select_main_rectype.hSelect("instance")!=undefined){
+                       this.select_main_rectype.hSelect("refresh"); 
+                    }
+                    
+                    if(this.select_additional_rectypes.editing_input('instance')){
+                        var initval = '';
+                        if(rtids.length>1){
+                            rtids.shift();
+                            initval = rtids.join(',');
                         }
+                        this.select_additional_rectypes.editing_input('setValue', initval );    
+                        
+                        this.svs_MultiRtSearch.prop('checked',(initval!='')).change();
                     }
                     
                     
@@ -758,9 +793,11 @@ $.widget( "heurist.search_faceted_wiz", {
                 $dlg.find('#svs_PrelimFilterToggleLabel').val(window.hWin.HR('Apply preliminary filter'));
                 
                 
-                if(this.select_main_rectype.editing_input('instance')){
-                    this.select_main_rectype.editing_input('setValue', '' );    
+                this.select_main_rectype.val('');
+                if(this.select_main_rectype.hSelect('instance')){
+                    this.select_main_rectype.hSelect('refresh');    
                 }
+                this.svs_MultiRtSearch.prop('checked',false).change();
                 
             }
 
@@ -832,6 +869,15 @@ $.widget( "heurist.search_faceted_wiz", {
         
         }
     }
+    
+    //
+    // reset flag - facet was changed - need to proceed all steps of wizard
+    //
+    , _resetFacets: function(){
+        this.options.params.facets = [];
+        this.originalRectypeID = null; //
+        $("#btnSave").css('visibility','hidden');
+    }
 
     //
     //
@@ -859,7 +905,7 @@ $.widget( "heurist.search_faceted_wiz", {
     // 2d step - init fieldtreeview
     , _initStep2_FieldTreeView: function(rectypeIds){
 
-        if(window.hWin.HEURIST4.util.isArrayNotEmpty(rectypeIds) && this.current_tree_rectype_ids != rectypeIds){
+        if(window.hWin.HEURIST4.util.isArrayNotEmpty(rectypeIds) && this.current_tree_rectype_ids != rectypeIds.join(',') ){
             /*if(!this.options.params.rectypes ||
             !($(rectypeIds).not(this.options.params.rectypes).length == 0 &&
             $(this.options.params.rectypes).not(rectypeIds).length == 0))*/
@@ -871,7 +917,7 @@ $.widget( "heurist.search_faceted_wiz", {
                 var rectype;
 
                 if(this.options.params.rectypes){
-                    rectype = this.options.params.rectypes.join();
+                    rectype = this.options.params.rectypes.join(',');
                 }
                 
                 //window.hWin.HEURIST4.util.setDisabled($('#btnNext'),true);
@@ -1017,7 +1063,7 @@ $.widget( "heurist.search_faceted_wiz", {
                             //hide all folder triangles
                             //treediv.find('.fancytree-expander').hide();
 
-                            that.current_tree_rectype_ids = rectypeIds;
+                            that.current_tree_rectype_ids = rectypeIds.join(',');
 
                             $("#fsw_showreverse").change(function(event){
 

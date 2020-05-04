@@ -101,7 +101,14 @@ if(true || $_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0
 // line: 13594 catch exception of datetime convertation
 //
 -->
-<?php if (!(@$_REQUEST['noinit']!=1 && @$_REQUEST['notimeline'])) { ?>
+
+<?php 
+print '<!--';
+print @$_REQUEST['notimeline'];
+print '<br>';
+print !@$_REQUEST['notimeline'];
+print '-->';
+if (!(@$_REQUEST['notimeline']=='true' || @$_REQUEST['notimeline']=='1')) { ?>
 <script type="text/javascript" src="<?php echo PDIR;?>external/vis/dist/vis.js"></script>
 <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>external/vis/dist/vis.css" />
 <?php } ?>
@@ -222,7 +229,7 @@ if(true || $_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0
         layout_params['extent'] = __gp('extent'); //@todo
         
         layout_params['controls'] = __gp('controls'); //comma separated list of visible controls
-        layout_params['legend'] = __gp('legend'); //comma separated list of visible panels: basemap,search,mapdocs
+        layout_params['legend'] = __gp('legend'); //legend configuration: csv basemaps,mapdocs,search,off,width
         layout_params['template'] = __gp('template'); //smarty template for popup info
         
         layout_params['published'] = __gp('published');

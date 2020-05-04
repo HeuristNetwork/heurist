@@ -103,7 +103,7 @@ $.widget( "heurist.mapping", {
         element_timeline: 'timeline',
  
         //various layout and behaviour settings
-        // they are assigned in map.php onPageInit from url parameters
+        // they are assigned in map_leaflet.php onPageInit from url parameters
         // which in turn can be set in app_timemap.js
         layout_params:{}, 
         
@@ -183,6 +183,7 @@ $.widget( "heurist.mapping", {
     isMarkerClusterEnabled: true,
     markerClusterGridSize: 50,
     markerClusterMaxZoom: 18,
+    markerClusterMaxSpider: 5,
     isEditAllowed: true,
     
     
@@ -318,7 +319,7 @@ $.widget( "heurist.mapping", {
         //content for legend
         this.mapManager = new hMapManager({container:this.map_legend._container, mapwidget:this.element});
         
-        this.updateLayout(this.options.layout_params);
+        this.updateLayout();
         
         this._adjustLegendHeight();
         
@@ -331,7 +332,7 @@ $.widget( "heurist.mapping", {
         this._superApply( arguments );
         
         if((arguments[0] && arguments[0]['layout_params']) || arguments['layout_params'] ){
-            this.updateLayout(this.options.layout_params);
+            this.updateLayout();
         }
     },
 
@@ -803,7 +804,7 @@ $.widget( "heurist.mapping", {
 
                     for(k=0; k<tdata.when.length; k++){
                         ts = tdata.when[k];
-
+                        
                         titem = {
                             id: layer_id+'-'+tdata.rec_ID+'-'+k, //unique id
                             group: layer_id,
@@ -949,6 +950,7 @@ $.widget( "heurist.mapping", {
 
     //
     // get or save map bounds in usr prefs/restore and set map
+    // (used to store extent in mapDraw intersession)
     //    
     getSetMapBounds: function(is_set){
         
@@ -1111,7 +1113,10 @@ $.widget( "heurist.mapping", {
             if(is_new_markercluster){
                 var opts = {showCoverageOnHover:false, 
                                 maxClusterRadius:this.markerClusterGridSize,
-                                disableClusteringAtZoom:this.markerClusterMaxZoom};
+                                spiderfyOnMaxZoom: false,
+                                zoomToBoundsOnClick: false
+                                //disableClusteringAtZoom:this.markerClusterMaxZoom
+                };
                                 
                 if(window.hWin.HAPI4.database=='digital_harlem'){
                     opts['iconCreateFunction'] = function(cluster) {
@@ -1125,6 +1130,41 @@ $.widget( "heurist.mapping", {
                 }
                 
                 this.all_clusters[layer_id] = L.markerClusterGroup(opts);
+                
+
+                // a.layer is actually a cluster
+                this.all_clusters[layer_id].on('clusterclick', function (a) {
+                    //console.log(a);
+                    //var clusterZoom = getBoundsZoom(a.layer.getBounds());
+                    
+                    if(that.nativemap.getZoom()>=that.markerClusterMaxZoom ||
+                        that.nativemap.getBoundsZoom(a.layer.getBounds())>=that.markerClusterMaxZoom ){
+                        if(a.layer.getAllChildMarkers().length>that.markerClusterMaxSpider){
+                            var markers = a.layer.getAllChildMarkers();
+                            
+                            var latlng = a.layer.getLatLng();
+                            var selected_layers = {};
+                            var sText = '';
+                            
+                            //scan all markers in this cluster
+                            $.each(markers, function(i, top_layer){    
+                                if(top_layer.feature){
+                                    selected_layers[top_layer._leaflet_id] = top_layer;
+                                    sText = sText + '<option value="'+top_layer._leaflet_id+'">'
+                                                            + window.hWin.HEURIST4.util.htmlEscape( top_layer.feature.properties.rec_Title )+ '</option>';
+                                }
+                            });
+                            
+                            that._showMultiSelectionPopup(latlng, sText, selected_layers);
+                            
+                        }else{
+                           a.layer.spiderfy(); 
+                        }
+                    }else{
+                        a.layer.zoomToBounds({padding: [20, 20]});
+                    }
+                });
+                
             }else{
                 this.all_clusters[layer_id].clearLayers() 
             }
@@ -1320,30 +1360,7 @@ $.widget( "heurist.mapping", {
                         
                         if(found_cnt>1){
                             //show popup with selector
-                            this.main_popup.setLatLng(latlng)
-                                .setContent('<p style="margin:12px;font-style:italic">'
-                                        +found_cnt+' shapes found here. Select desired: </p>'
-                                        +'<select size="'+ ((found_cnt>10)?10:found_cnt)
-                                        +'" style="max-width:300px;overflow-y: auto;border: none;outline: none; cursor:pointer">'
-                                        +sText+'</select>') 
-                                .openOn(this.nativemap);
-                            
-                            var that = this;
-                                
-                            var ele = $(this.main_popup._container).find('select');
-                            ele.on({'change':function(evt){
-                                var leaflet_id = $(evt.target).val();
-                                that._onLayerSelect(selected_layers[leaflet_id], latlng);
-                            },'mousemove':function(evt){
-                                var leaflet_id = $(evt.target).attr('value');
-                                if(leaflet_id>0){
-                                    $(evt.target).siblings().removeClass('selected');
-                                    $(evt.target).addClass('selected');
-                                    var layer = selected_layers[leaflet_id];
-                                    that.setFeatureSelection([layer.feature.properties.rec_ID]); //highlight from popup
-                                }
-                            }});
-                            
+                            this._showMultiSelectionPopup(latlng, sText, selected_layers);
                             return;
                         }
                         
@@ -1356,6 +1373,41 @@ $.widget( "heurist.mapping", {
         }
     },
 
+    //
+    //
+    //    
+    _showMultiSelectionPopup: function(latlng, sText, selected_layers){
+        
+        var found_cnt = Object.keys(selected_layers).length;        
+        
+        this.main_popup.setLatLng(latlng)
+                        .setContent('<p style="margin:12px;font-style:italic">'
+                                +found_cnt+' map objects found here. Select desired: </p>'
+                                +'<select size="'+ ((found_cnt>10)?10:found_cnt)
+                                +'" style="max-width:300px;overflow-y: auto;border: none;outline: none; cursor:pointer">'
+                                +sText+'</select>') 
+                        .openOn(this.nativemap);
+                    
+                    var that = this;
+                        
+                    var ele = $(this.main_popup._container).find('select');
+                    ele.on({'change':function(evt){
+                        var leaflet_id = $(evt.target).val();
+                        that._onLayerSelect(selected_layers[leaflet_id], latlng);
+                    },'mousemove':function(evt){
+                        var leaflet_id = $(evt.target).attr('value');
+                        if(leaflet_id>0){
+                            $(evt.target).siblings().removeClass('selected');
+                            $(evt.target).addClass('selected');
+                            var layer = selected_layers[leaflet_id];
+                            that.setFeatureSelection([layer.feature.properties.rec_ID]); //highlight from popup
+                        }
+                    }});
+    },
+
+    //
+    //
+    //
     _onLayerSelect: function(layer, latlng){
 
             
@@ -1454,6 +1506,7 @@ $.widget( "heurist.mapping", {
     
     //
     // assigns default values for style (size,color and marker type)
+    // default values priority: widget options, topmost mapdocument, user preferences
     //
     setStyleDefaultValues: function(style, suppress_prefs){
         
@@ -1894,49 +1947,70 @@ $.widget( "heurist.mapping", {
     //   basemap: name of initial basemap
     //   extent: fixed extent    
     //
-    updateLayout: function( params ){
+    updateLayout: function(){
+        
+        var params = this.options.layout_params;
         
         function __parseval(val){
             if(val===false || val===true) return val;
             if(!window.hWin.HEURIST4.util.isempty(val)){
                 if(typeof val == 'string') val = val.toLowerCase();
-                return !(val==0 || val=='off' || val=='no' || val=='n');
+                return !(val==0 || val=='off' || val=='no' || val=='n' || val=='false');
             }else{
                 return false;
             }
         }
         function __splitval(val){
             
-            var res = [];
-            if(!$.isArray(val)){
-                if(!val) val = 'all';
-                val = val.toLowerCase();
-                res = val.split(',');
-            }
-            if(!(res.length>0)) res = val.split(';');
-            if(!(res.length>0)) res = val.split('|');
+            var res = window.hWin.HEURIST4.util.isJSON(val);
+            if(res === false){
             
-            if(res.length==0) res.push['all'];
+                res = [];
+                if(!$.isArray(val)){
+                    if(!val) val = 'all';
+                    val = val.toLowerCase();
+                    res = val.split(',');
+                }
+                if(!(res.length>0)) res = val.split(';');
+                if(!(res.length>0)) res = val.split('|');
+                
+                if(res.length==0) res.push['all'];
+                
+            }
             
             return res;
         }
+
+
+        this.options.isPublished = (params && __parseval(params['published'])) || !window.hWin.HAPI4.has_access();
         
-        if(window.hWin.HEURIST4.util.isempty(params) || params['published']==0){
+        //if parameters are not defined - takes default values from user preferences
+        if(window.hWin.HEURIST4.util.isempty(params) || !this.options.isPublished){
             //this is not publish take params from preferences
-            params = {};
-            params['map_rollover'] = (window.hWin.HAPI4.get_prefs_def('map_rollover', 0)==1);
-            params['template'] = window.hWin.HAPI4.get_prefs_def('map_template', null);
-            params['nocluster'] = (window.hWin.HAPI4.get_prefs_def('mapcluster_on', 0)!=1);
-            params['controls'] = window.hWin.HAPI4.get_prefs_def('mapcontrols', 'all');
+            if(window.hWin.HEURIST4.util.isempty(params)) params = {};
+            
+            if(window.hWin.HEURIST4.util.isempty(params['map_rollover']))
+                params['map_rollover'] = (window.hWin.HAPI4.get_prefs_def('map_rollover', 0)==1);
+            if(window.hWin.HEURIST4.util.isempty(params['template']))
+                params['template'] = window.hWin.HAPI4.get_prefs_def('map_template', null);
+            if(window.hWin.HEURIST4.util.isempty(params['nocluster']))
+                params['nocluster'] = (window.hWin.HAPI4.get_prefs_def('mapcluster_on', 0)!=1);
+            if(window.hWin.HEURIST4.util.isempty(params['controls']))
+                params['controls'] = window.hWin.HAPI4.get_prefs_def('mapcontrols', 'all');
+            if(window.hWin.HEURIST4.util.isempty(params['nocluster']))
+                params['nocluster'] = (window.hWin.HAPI4.get_prefs_def('mapcluster_on', 1)==0);
+            
             params['controls'] = params['controls']+',legend'; //is always visible for non-published maps
             
             this.markerClusterGridSize = parseInt(window.hWin.HAPI4.get_prefs_def('mapcluster_grid', 50));
             this.markerClusterMaxZoom = parseInt(window.hWin.HAPI4.get_prefs_def('mapcluster_zoom', 18));
+            this.markerClusterMaxSpider = parseInt(window.hWin.HAPI4.get_prefs_def('mapcluster_spider', 5));
         }
-
+        
+        //@todo deriveMapLocation
+        
         //maxClusterRadius
         this.isMarkerClusterEnabled = !__parseval(params['nocluster']);
-        this.options.isPublished = __parseval(params['published']) || !window.hWin.HAPI4.has_access();
         this.options.isEditAllowed = !this.options.isPublished || __parseval(params['editstyle']);
         
         this.options.map_rollover = __parseval(params['map_rollover']);

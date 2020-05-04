@@ -29,6 +29,7 @@ parameters
 $OUTPUT_STUBS, stub  - output only record header fields (see outputRecordStub)
 $REVERSE,  rev  - yes|no include reverse pointer fields
 $EXPAND_REV_PTR, revexpand   yes|no
+$NO_RELATIONSHIPS  yes|no
 
 $WOOT, woot default to not output text content
 $USEXINCLUDELEVEL, hinclude  default to not output xinclude format for related records until beyound 99 degrees of separation
@@ -318,8 +319,27 @@ $WGN = mysql__select_assoc2($mysqli, 'SELECT grp.ugr_ID, grp.ugr_Name FROM sysUG
 $UGN = mysql__select_assoc2($mysqli, 'SELECT grp.ugr_ID, grp.ugr_Name FROM sysUGrps grp WHERE ugr_Type = "user"');
 
 $GEO_TYPES = array('r' => 'bounds', 'c' => 'circle', 'pl' => 'polygon', 'l' => 'path', 'p' => 'point', 'm'=>'multi');
+$NO_RELATIONSHIPS = false;
 
 // set parameter defaults
+if(@$_REQUEST['linkmode']){//direct, direct_links, none, all
+
+    if($_REQUEST['linkmode']=='none'){
+        $_REQUEST['depth'] = '0';
+        $NO_RELATIONSHIPS = true;
+        
+    }else if($_REQUEST['linkmode']=='direct'){
+        $_REQUEST['revexpand'] = 'no';
+        
+    }else if($_REQUEST['linkmode']=='direct_links'){
+        $_REQUEST['revexpand'] = 'no';
+        $NO_RELATIONSHIPS = true;
+        
+    }else if($_REQUEST['linkmode']=='all'){
+        $_REQUEST['revexpand'] = 'yes';
+    }
+}
+
 $REVERSE = @$_REQUEST['rev'] === 'no' ? false : true; //default to including reverse pointers
 $EXPAND_REV_PTR = @$_REQUEST['revexpand'] === 'no' ? false : true;
 $WOOT = @$_REQUEST['woot'] ? intval($_REQUEST['woot']) : 0; //default to not output text content
@@ -848,12 +868,15 @@ function _getForwardPointers($rec_id, $depth){
 //
 function _getRelations($rec_id, $depth){
 
-    global $system, $mysqli, $ACCESSABLE_OWNER_IDS, $PUBONLY, $RECTYPE_FILTERS, $RELTYPE_FILTERS;
+    global $system, $mysqli, $ACCESSABLE_OWNER_IDS, $PUBONLY, $RECTYPE_FILTERS, $RELTYPE_FILTERS, $REVERSE;
 
     $rtfilter = (@$RECTYPE_FILTERS && array_key_exists($depth, $RECTYPE_FILTERS) ? $RECTYPE_FILTERS[$depth] : null);
     $relfilter = (@$RELTYPE_FILTERS && array_key_exists($depth, $RELTYPE_FILTERS) ? $RELTYPE_FILTERS[$depth] : null);
 
-    $query = 'SELECT rl_SourceID, rl_TargetID, rl_RelationID, rl_RelationTypeID FROM recLinks, Records trg '
+    //
+    // find direct relations
+    //
+    $query = 'SELECT rl_SourceID, rl_TargetID, rl_RelationID, rl_RelationTypeID FROM Records trg, recLinks '
     .' left join Records rel on rel.rec_ID=rl_RelationID'
     .' where rl_SourceID='.$rec_id.' and rl_RelationTypeID>0 '
     .'  and trg.rec_ID = rl_TargetID  and (trg.rec_FlagTemporary=0) and (rel.rec_FlagTemporary=0) '
@@ -874,7 +897,11 @@ function _getRelations($rec_id, $depth){
         $res->close();
     }
 
-    $query = 'SELECT rl_SourceID, rl_TargetID, rl_RelationID, rl_RelationTypeID FROM recLinks, Records src '
+    if($REVERSE){
+    //
+    // find reverse relations
+    //
+    $query = 'SELECT rl_SourceID, rl_TargetID, rl_RelationID, rl_RelationTypeID FROM Records src, recLinks '
     .' left join Records rel on rel.rec_ID=rl_RelationID'
     .' where rl_TargetID='.$rec_id.' and rl_RelationTypeID>0 '
     .'  and src.rec_ID = rl_SourceID  and (src.rec_FlagTemporary=0)  and (rel.rec_FlagTemporary=0) '
@@ -893,7 +920,8 @@ function _getRelations($rec_id, $depth){
         }
         $res->close();
     }
-
+    }
+    
     return $resout;    
 }
 
@@ -1074,7 +1102,7 @@ function outputRecord($recID, $depth, $outputStub = false, $parentID = null){
 
     global $system, $RTN, $DTN, $INV, $TL, $RQS, $WGN, $UGN, $MAX_DEPTH, $WOOT, $USEXINCLUDELEVEL, $already_out,
     $RECTYPE_FILTERS, $SUPRESS_LOOPBACKS, $relRT, $relTrgDT, $relTypDT, $relSrcDT, $selectedIDs, $intofile, $hunifile, $dbID,
-    $EXPAND_REV_PTR, $REVERSE, $rectype_templates;
+    $EXPAND_REV_PTR, $REVERSE, $NO_RELATIONSHIPS, $rectype_templates;
 
     $hunifile = null;
 
@@ -1084,6 +1112,7 @@ function outputRecord($recID, $depth, $outputStub = false, $parentID = null){
         $record = recordSearchByID($system, $recID);//see db_recsearch
     }
 
+//https://heuristplus.sydney.edu.au/h5-ao/export/xml/flathml.php?q=ids%3A44519%20&rules=%5B%7B%22query%22%3A%22t%3A31%20linkedfrom%3A10-83%20%22%7D%2C%7B%22query%22%3A%22t%3A28%20linkedfrom%3A10-87%20%22%7D%2C%7B%22query%22%3A%22t%3A29%20linkedfrom%3A10-88%20%22%2C%22levels%22%3A%5B%7B%22query%22%3A%22t%3A25%20linkedfrom%3A29-78%20%22%7D%5D%7D%2C%7B%22query%22%3A%22t%3A33%20linkedfrom%3A10-95%20%22%2C%22levels%22%3A%5B%7B%22query%22%3A%22t%3A25%20linkedfrom%3A33-78%20%22%7D%2C%7B%22query%22%3A%22t%3A25%20linkedfrom%3A33-96%20%22%7D%2C%7B%22query%22%3A%22t%3A25%20linkedfrom%3A33-141%20%22%7D%5D%7D%2C%7B%22query%22%3A%22t%3A27%20linkedfrom%3A10-102%20%22%2C%22levels%22%3A%5B%7B%22query%22%3A%22t%3A26%20linkedfrom%3A27-97%20%22%2C%22levels%22%3A%5B%7B%22query%22%3A%22t%3A25%20linkedfrom%3A26-78%20%22%7D%5D%7D%5D%7D%2C%7B%22query%22%3A%22t%3A24%20linkedfrom%3A10-103%20%22%2C%22levels%22%3A%5B%7B%22query%22%3A%22t%3A25%20linkedfrom%3A24-78%20%22%7D%5D%7D%2C%7B%22query%22%3A%22t%3A24%20linkedfrom%3A10-79%20%22%2C%22levels%22%3A%5B%7B%22query%22%3A%22t%3A25%20linkedfrom%3A24-78%20%22%7D%5D%7D%2C%7B%22query%22%3A%22t%3A26%20linkedfrom%3A10-146%20%22%7D%2C%7B%22query%22%3A%22relatedfrom%3A10%20%22%7D%5D&a=1&db=ExpertNation&depth=1&stub=1
 
     $filter = (array_key_exists($depth, $RECTYPE_FILTERS) ? $RECTYPE_FILTERS[$depth] : null);
 
@@ -1192,6 +1221,7 @@ function outputRecord($recID, $depth, $outputStub = false, $parentID = null){
 
     foreach ($record['details'] as $dt => $details) {
         foreach ($details as $value) {
+            if(!$outputStub)
             outputDetail($dt, $value, $record['rec_RecTypeID'], $depth, $outputStub);
             //parentID - not used anymore $record['rec_RecTypeID'] == $relRT ? $parentID : $record['rec_ID']);
         }
@@ -1238,29 +1268,32 @@ function outputRecord($recID, $depth, $outputStub = false, $parentID = null){
             $resout['related'] = array_merge($resout['related'], array_keys($relations));
         }
 
+        if(!$NO_RELATIONSHIPS){
+        
+            $relations = _getRelations($recID, $depth+1);
+            //$resout[$row['rl_RelationID']] = array('useInverse'=>true, 'termID'=> $row['rl_RelationTypeID'], 'relatedRecordID'=>$row['rl_SourceID']);
+            foreach ($relations as $relRec_id => $attrs) {
 
-        $relations = _getRelations($recID, $depth+1);
-        //$resout[$row['rl_RelationID']] = array('useInverse'=>true, 'termID'=> $row['rl_RelationTypeID'], 'relatedRecordID'=>$row['rl_SourceID']);
-        foreach ($relations as $relRec_id => $attrs) {
+                $trmID = $attrs['termID'];
 
-            $trmID = $attrs['termID'];
+                $attrs['term'] = $TL[$trmID]['trm_Label'];
+                $attrs['termConceptID'] = ConceptCode::getTermConceptID($trmID);
+                if ($TL[$trmID]['trm_Code']) {
+                    $attrs['code'] = $TL[$trmID]['trm_Code'];
+                };
+                if (array_key_exists($trmID, $INV) && $INV[$trmID]) {
+                    $attrs['inverse'] = $TL[$INV[$trmID]]['trm_Label'];
+                    $attrs['invTermID'] = $INV[$trmID];
+                    $attrs['invTermConceptID'] = ConceptCode::getTermConceptID($INV[$trmID]);
+                }
+                array_push($resout['related'], $attrs['relatedRecordID']);    
+                array_push($resout['relationRecs'], $relRec_id);
 
-            $attrs['term'] = $TL[$trmID]['trm_Label'];
-            $attrs['termConceptID'] = ConceptCode::getTermConceptID($trmID);
-            if ($TL[$trmID]['trm_Code']) {
-                $attrs['code'] = $TL[$trmID]['trm_Code'];
-            };
-            if (array_key_exists($trmID, $INV) && $INV[$trmID]) {
-                $attrs['inverse'] = $TL[$INV[$trmID]]['trm_Label'];
-                $attrs['invTermID'] = $INV[$trmID];
-                $attrs['invTermConceptID'] = ConceptCode::getTermConceptID($INV[$trmID]);
+                makeTag('relationship', $attrs, $relRec_id);
             }
-            array_push($resout['related'], $attrs['relatedRecordID']);    
-            array_push($resout['relationRecs'], $relRec_id);
 
-            makeTag('relationship', $attrs, $relRec_id);
         }
-
+        
     }
     closeTag('record');
 

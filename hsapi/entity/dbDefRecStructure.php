@@ -215,6 +215,9 @@ class DbDefRecStructure extends DbEntityBase
             }
 
             if(!@$this->records[$idx]['rst_Status']) $this->records[$idx]['rst_Status'] = 'open';
+
+            if(!(intval(@$this->records[$idx]['rst_MaxValues'])>=0)) $this->records[$idx]['rst_MaxValues'] = 1;
+
             
             $this->records[$idx]['rst_Modified'] = date('Y-m-d H:i:s'); //reset
 

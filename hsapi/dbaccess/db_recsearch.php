@@ -433,7 +433,7 @@
     * @param mixed $ids
     * @param mixed $direction  -  1 direct/ -1 reverse/ 0 both
     */
-    function recordSearchRelatedIds($system, &$ids, $direction=0, $depth=0, $max_depth=1, $limit=0, $new_level_ids=null, $temp_ids=null){
+    function recordSearchRelatedIds($system, &$ids, $direction=0, $no_relationships=false, $depth=0, $max_depth=1, $limit=0, $new_level_ids=null, $temp_ids=null){
         
         if($depth>=$max_depth) return;
         
@@ -447,7 +447,7 @@
         
         $res1 = null; $res2 = null;
 
-        if($temp_ids==null){
+        if($temp_ids==null && !$no_relationships){
             //find temp relationship records (rt#1)
             $relRT = ($system->defineConstant('RT_RELATION')?RT_RELATION:0);
             $query = 'SELECT rec_ID FROM Records '
@@ -461,6 +461,10 @@
             $query = 'SELECT rl_TargetID, rl_RelationID FROM recLinks, Records '
                   .' where rl_SourceID in ('.implode(',',$new_level_ids).') '
                   .' AND rl_TargetID=rec_ID AND rec_FlagTemporary=0';
+            if($no_relationships){
+                $query = $query . ' AND rl_RelationID IS NULL';     
+            }
+                  
             $res = $mysqli->query($query);
             if ($res){
                 $res1 = array();
@@ -469,7 +473,7 @@
                     
                     $id = intval($row[1]);     
                     if($id>0){
-                        if(in_array($id, $temp_ids)){ //is temporary
+                        if($temp_ids!=null && in_array($id, $temp_ids)){ //is temporary
                             continue;     //exclude temporary
                         }else if(!in_array($id, $ids)){
                             array_push($res1, $id); //add relationship record   
@@ -487,6 +491,10 @@
             $query = 'SELECT rl_SourceID, rl_RelationID FROM recLinks, Records where rl_TargetID in ('
                                                .implode(',',$new_level_ids).') '
                   .' AND rl_SourceID=rec_ID AND rec_FlagTemporary=0';
+            if($no_relationships){
+                $query = $query . ' AND rl_RelationID IS NULL';     
+            }
+            
             $res = $mysqli->query($query);
             if ($res){
                 $res2 = array();
@@ -495,7 +503,7 @@
                     
                     $id = intval($row[1]);     
                     if($id>0){
-                        if(in_array($id, $temp_ids)){ //is temporary
+                        if($temp_ids!=null && in_array($id, $temp_ids)){ //is temporary
                             continue;
                         }else if(!in_array($id, $ids)){
                             array_push($res2, $id);   
@@ -524,7 +532,7 @@
             if($limit>0 && count($ids)>=$limit){
                 $ids = array_slice($ids,0,$limit);
             }else{
-                recordSearchRelatedIds($system, $ids, $direction, $depth+1, $max_depth, $limit, $res, $temp_ids);    
+                recordSearchRelatedIds($system, $ids, $direction, $no_relationships, $depth+1, $max_depth, $limit, $res, $temp_ids);    
             }
             
         }
@@ -1140,6 +1148,7 @@
             $system->defineConstant('DT_BG_COLOR'); //outdated
             $system->defineConstant('DT_OPACITY');  //outdated
             
+            //list of rectypes that are sources for geo location
             $rectypes_as_place = $system->get_system('sys_TreatAsPlaceRefForMapping');
             if($rectypes_as_place){
                 $rectypes_as_place = prepareIds($rectypes_as_place);
@@ -1826,7 +1835,8 @@ $loop_cnt++;
                                     $recID = array_shift($row);
                                     if( !array_key_exists('d', $records[$recID]) ){
                                         $records[$recID]['d'] = array();
-                                        $need_Concatenation = $need_Concatenation || ($records[$recID][4]==RT_CMS_MENU);
+                                        $need_Concatenation = $need_Concatenation || 
+                                            (defined('RT_CMS_MENU') && $records[$recID][4]==RT_CMS_MENU);
                                     }
                                     $dtyID = $row[0];
 
@@ -2331,9 +2341,8 @@ $loop_cnt++;
             }
             
             //special case for RT_CMS_MENU
-            $system->defineConstant('RT_CMS_MENU');
             $system->defineConstant('DT_EXTENDED_DESCRIPTION');
-            if(RT_CMS_MENU==@$record['rec_RecTypeID'] 
+            if($system->defineConstant('RT_CMS_MENU') && RT_CMS_MENU==@$record['rec_RecTypeID'] 
                             && is_array(@$details[DT_EXTENDED_DESCRIPTION]))
             {
                 $details[DT_EXTENDED_DESCRIPTION] = array(implode('',$details[DT_EXTENDED_DESCRIPTION]));

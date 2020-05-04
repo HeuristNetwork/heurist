@@ -496,7 +496,7 @@ $.widget( "heurist.svs_list", {
                 if(!window.hWin.HAPI4.currentUser.ugr_SvsTreeData) //treeview was not saved - define tree data by default
                     window.hWin.HAPI4.currentUser.ugr_SvsTreeData = that._define_DefaultTreeData();
                 else{
-                    that._validate_TreeData();
+                    that._validate_TreeData();  //add missed filters to the end of treedata
                 }
                 that._updateAccordeon();
             } );  //ssearch_gettree
@@ -857,7 +857,9 @@ $.widget( "heurist.svs_list", {
 
     },
 
+    //
     //it adds context menu for evey group header 
+    //
     _getAddContextMenu: function(groupID){
         var arr_menu = [{title: "New", cmd: "addSearch", uiIcon: "ui-icon-plus" },
             {title: "New faceted", cmd: "addSearch2", uiIcon: "ui-icon-box" },
@@ -971,6 +973,9 @@ $.widget( "heurist.svs_list", {
 
     },
 
+    //
+    //
+    //
     _redefineContent: function(groupID){
         //find group div
         var grp_div = this.accordeon.find('.svs-acordeon[grpid="'+groupID+'"]');
@@ -990,8 +995,10 @@ $.widget( "heurist.svs_list", {
         var that = this;
         var CLIPBOARD = null;
 
-        var treeData = window.hWin.HAPI4.currentUser.ugr_SvsTreeData[groupID] && window.hWin.HAPI4.currentUser.ugr_SvsTreeData[groupID].children
-        ?window.hWin.HAPI4.currentUser.ugr_SvsTreeData[groupID].children :[];
+        var treeData = window.hWin.HAPI4.currentUser.ugr_SvsTreeData[groupID] 
+                        && window.hWin.HAPI4.currentUser.ugr_SvsTreeData[groupID].children
+        ?window.hWin.HAPI4.currentUser.ugr_SvsTreeData[groupID].children 
+        :[];
 
         var tree = $("<div>").addClass('hasmenu').css('padding-bottom','0em');
         
@@ -1617,7 +1624,7 @@ $.widget( "heurist.svs_list", {
     },
 
     //
-    //add missed groups and saved searches to treeview (to the end of tree)
+    // add missed groups and saved searches to treeview (to the end of tree)
     //
     _validate_TreeData: function(){
 
@@ -1683,8 +1690,10 @@ $.widget( "heurist.svs_list", {
         var treeData;
         if(window.hWin.HAPI4.has_access()){
             treeData = {
-                all: { title: window.hWin.HR('My Searches'), folder: true, expanded: true, children: this._define_SVSlist(window.hWin.HAPI4.currentUser.ugr_ID, 'all') },
-                bookmark:{ title: window.hWin.HR('My Bookmarks'), folder: true, expanded: true, children: this._define_SVSlist(window.hWin.HAPI4.currentUser.ugr_ID, 'bookmark') }
+                all: { title: window.hWin.HR('My Searches'), folder: true, expanded: true, 
+                        children: this._define_SVSlist(window.hWin.HAPI4.currentUser.ugr_ID, 'all') },
+                bookmark:{ title: window.hWin.HR('My Bookmarks'), folder: true, expanded: true, 
+                        children: this._define_SVSlist(window.hWin.HAPI4.currentUser.ugr_ID, 'bookmark') }
             };
             if(window.hWin.HAPI4.is_admin()){
                 treeData['guests'] = { title: window.hWin.HR('Searches for guests'), folder: true, expanded: false, children: this._define_SVSlist(0) };
@@ -1753,7 +1762,7 @@ $.widget( "heurist.svs_list", {
 
                 var prms = Hul.parseHeuristQuery(ssearches[svsID][_QUERY]);
 
-                if(!domain || domain==prms.domain){
+                if(!domain || domain==prms.w){
                     var sname = ssearches[svsID][_NAME];
                     res.push( { title:sname, folder:false, key:svsID } );
                 }

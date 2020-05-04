@@ -136,7 +136,8 @@ class Simplify {
 function simplifyCoordinates(&$orig_points){
     
     if(count($orig_points)>1000){
-
+        
+        //invert
         $points = array();    
         foreach ($orig_points as $point) {
             array_push($points, array('y'=>$point[1], 'x'=>$point[0]));

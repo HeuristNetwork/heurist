@@ -142,11 +142,11 @@ public static function getMatchingSamples($imp_ID, $rty_ID){
      foreach($sessions as $id=>$imp_session){
          
         $imp_session = json_decode($imp_session, true);
-        if($imp_session!==false){
+        if($imp_session!==false && is_array(@$imp_session['sequence'])){
             //if($imp_session['primary_rectype']==$rty_ID){
             foreach($imp_session['sequence'] as $seq){
                 
-                if($seq['rectype']==$rty_ID && is_array($seq['mapping_flds']) && count($seq['mapping_flds'])>0){
+                if($seq['rectype']==$rty_ID && is_array(@$seq['mapping_flds']) && count($seq['mapping_flds'])>0){
                     $matching[ $imp_session['import_name'] ] = $seq['mapping_flds'];
                     break;
                 }

@@ -208,21 +208,7 @@ error_log(print_r($_REQUEST, true));
     // get 3d party web service configuration and their mapping to heurist record types and fields
     //
     private function getWebServiceConfigs(){
-        /*
-        
-[{
-    "rty_ID": "3-1009",
-    "service": "tlcmap",
-    "fields":{ 
-      "properties.name": "2-1",  
-      "geometry": "2-28",
-      "properties.id": "2-26",
-      "state": "2-234",
-      "LGA": "2-2",
-      "description": "2-4"
-    }    
-}]        
-        */
+
         //read service_mapping.json from setting folder
         $config_res = null;
         
@@ -452,9 +438,11 @@ error_log(print_r($_REQUEST, true));
     */
     public function getArrayOfSystemFolders(){
         
+        global $allowThumbnailsWebAccessdefault;
+        
         //const name, description, allow webaccess, for backup
         $folders = array();
-        $folders['filethumbs']   = array('THUMB','used to store thumbnails for uploaded files', true, true);
+        $folders['filethumbs']   = array('THUMB','used to store thumbnails for uploaded files', $allowThumbnailsWebAccessdefault, true);
         $folders['file_uploads'] = array('FILES','used to store uploaded files by default');
         //besides we have HEURIST_SCRATCHSPACE_DIR == sys temp dir
         $folders['scratch']      = array('SCRATCH','used to store temporary files', false); 

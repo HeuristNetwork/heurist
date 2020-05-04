@@ -2418,6 +2418,7 @@ rectypes.names[rectypeID] + ' is defined as a child of <b>'+names
                             groupTitleVisible: (rfr[fi_reqtype]!=='forbidden'),
                             groupType: (rfr[fi_defval]=='group'||
                                         rfr[fi_defval]=='tabs'||
+                                        rfr[fi_defval]=='tabs_new'||
                                         rfr[fi_defval]=='accordion'||
                                         rfr[fi_defval]=='expanded')?rfr[fi_defval]:'group',
                             groupStyle: {},
@@ -3005,7 +3006,8 @@ rectypes.names[rectypeID] + ' is defined as a child of <b>'+names
                         
                         var btn = $('<div>')
                             .button({label:cfg.label?cfg.label:('Lookup '+cfg.service) })
-                            .attr('data-cfg', i).css('padding-right','4px')
+                            .attr('data-cfg', i).css({'font-size': 'larger', // 'padding-right':'4px',
+                                border: '1px solid', 'font-weight': 'bold'})
                             .appendTo(lookup_div);
                         
                         this._on(btn, {click:

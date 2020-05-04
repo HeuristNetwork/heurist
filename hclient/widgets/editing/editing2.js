@@ -213,12 +213,13 @@ function hEditing(_options) {
                                     groupEle.find('.ui-accordion-header').addClass(currGroupHeaderClass);
                                 }
                             }else if(currGroupType == 'tabs'){
-                                groupEle.tabs();
+                                groupEle.tabs().addClass('edit-form-tabs');
                             }
                         }
                 
                         currGroupHeaderClass= fields[idx].groupHeaderClass;
-                        currGroupType = fields[idx].groupType;
+                        currGroupType = (fields[idx].groupType == 'tabs_new')
+                                                  ?'tabs':fields[idx].groupType;
                         //create new accordion or tabcontrol
                         if(currGroupType == 'accordion' || currGroupType == 'expanded'){
                             groupEle = $('<div>').appendTo(groupContainer);
@@ -263,7 +264,8 @@ function hEditing(_options) {
                         newFieldContainer.addClass(options.className);
 
                     }else if(currGroupType == 'tabs'){
-                        $('<li>').html('<a href="#'+newFieldContainer.attr('id')+'"><span class="separator2">'+headerText+'</span></a>')
+                        // class="separator2"
+                        $('<li>').html('<a href="#'+newFieldContainer.attr('id')+'"><span style="font-weight:bold">'+headerText+'</span></a>')
                         .appendTo(groupTabHeader);
 
                         $(newFieldContainer).appendTo(groupEle);
@@ -368,7 +370,7 @@ function hEditing(_options) {
                         groupEle.find('.ui-accordion-header').addClass(currGroupHeaderClass);
                     }
                 }else if(currGroupType == 'tabs'){
-                    groupEle.tabs({active: 0});
+                    groupEle.tabs({active: 0}).addClass('edit-form-tabs');;
                 }
             }
             

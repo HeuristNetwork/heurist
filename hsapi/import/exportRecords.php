@@ -73,6 +73,7 @@ public static function setSession($system){
 //
 // $parmas 
 //    format - json|geojson|xml|gephi
+//    linkmode = direct, direct_links, none, all
 //    defs  0|1  include database definitions
 //    file  0|1
 //    filename - export into file with given name
@@ -93,7 +94,7 @@ public static function setSession($system){
 //      split records by 1000 entries chunks
 //
 public static function output($data, $params){
-    
+
     self::initialize();
 
     if (!($data && @$data['status']==HEURIST_OK)){
@@ -147,10 +148,14 @@ public static function output($data, $params){
             .' AND rst_DetailTypeID in ('.DT_MAP_BOOKMARK.','.DT_ZOOM_KM_POINT.')' );        
     }
     
+    $find_places_for_geo = false;
+    
     //
     // HEADER ------------------------------------------------------------
     //
     if($params['format']=='geojson'){
+        
+        $find_places_for_geo = (self::$system->user_GetPreference('deriveMapLocation', 1)==1);
 
         if(@$params['leaflet']){
             fwrite($fd, '{"geojson":');         
@@ -265,16 +270,32 @@ XML;
     if(@$params['depth']){
         $max_depth = (@$params['depth']=='all') ?9999:intval(@$params['depth']);
     }
+    
+    $direction = 0;// both direct and reverse links
+    $no_relationships = false;
+        
+    if(@$params['linkmode']){//direct, direct_links, none, all
+
+        if($params['linkmode']=='none'){
+            $max_depth = 0;
+        }else if($params['linkmode']=='direct'){
+            $direction = 1; //direct only
+        }else if($params['linkmode']=='direct_links'){
+            $direction = 1; //direct only
+            $no_relationships = true;
+        }
+    }
+    
     if($max_depth>0){
-        //search direct and reverse links 
         if($params['format']=='gephi' && @$params['limit']>0){
            $limit = $params['limit'];  
         }else{
            $limit = 0; 
         }
         
+        //search direct and reverse links 
         //it adds ids to $records
-        recordSearchRelatedIds(self::$system, $records, 0, 0, $max_depth, $limit);
+        recordSearchRelatedIds(self::$system, $records, $direction, $no_relationships, 0, $max_depth, $limit);
     }
 
 
@@ -337,7 +358,8 @@ XML;
         
         if($params['format']=='geojson'){
             
-            $feature = self::_getGeoJsonFeature($record, (@$params['extended']==2), @$params['simplify'], @$params['leaflet']);
+            $feature = self::_getGeoJsonFeature($record, (@$params['extended']==2), 
+                        @$params['simplify'], @$params['leaflet'], $find_places_for_geo);
             if(@$params['leaflet']){ //include only geoenabled features, timeline data goes in separate timeline array
                    if(@$feature['when']){
                         $timeline_data[] = array('rec_ID'=>$recID, 'when'=>$feature['when']['timespans'], 
@@ -917,7 +939,7 @@ private static function _getGeoJsonFeature($record, $extended=false, $simplify=f
     
     if(count($geovalues)==0 && $find_places_for_geo){
         //this record does not have geo value - find it in related/linked places
-        $geodetails = recordSearchGeoDetails($system, $record['rec_ID']);    
+        $geodetails = recordSearchGeoDetails(self::$system, $record['rec_ID']);    
         foreach ($geodetails as $dty_ID=>$field_details) {
             foreach($field_details as $dtl_ID=>$value){ //for detail multivalues
                     $wkt = $value['geo']['wkt'];

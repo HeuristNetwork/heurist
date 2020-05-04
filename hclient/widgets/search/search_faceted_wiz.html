@@ -21,16 +21,25 @@
 <fieldset class="main_fieldset">
 <input type="hidden" name="svs_ID" id="svs_ID" />
 
-<!--
-<div class="simple-mode">
+<div class="main-rectype">
     <div class="header"><label for="opt_rectypes">Search for (entity type)</label></div>
     <select name="sa_rectype" id="opt_rectypes" class="text ui-widget-content ui-corner-all" style="min-width:250px"></select>
+    
+    <div style="vertical-align:top;display:inline-block;font-size:smaller;padding: 7px">
+            <label>search for more than one record types
+                <input name="svs_MultiRtSearch" id="svs_MultiRtSearch" class="text ui-widget-content ui-corner-all" type="checkbox"
+                style="display:inline-block;margin:0"/>
+            </label>
+    </div>
+    
+    
     <div style="width: 420px; font-size: smaller; margin-top: 0px; margin-bottom: 5px;">
     This determines the record type which will be retrieved by the search.
     The facets can, however, be based on attributes of other record types linked from this type.
+    </div>
+    
 </div>
-</div>
--->
+
 <div>
     <div class="header"><label for="svs_Name">Faceted search name</label></div>
     <input type="text" name="svs_Name" id="svs_Name" class="text ui-widget-content ui-corner-all"
@@ -109,12 +118,12 @@
     </div>
     <div class="prefilter-settings">
         <label><input name="svs_PrelimFilterToggle" id="svs_PrelimFilterToggle" class="text ui-widget-content ui-corner-all" type="checkbox"
-                style="display:inline-block;margin:0"  checked="true"/>&nbsp;Allow user to toggle preliminary filter</label>
+                style="display:inline-block;margin:0"  checked="checked"/>&nbsp;Allow user to toggle preliminary filter</label>
     </div>
     <div style="padding:5px 0 0 20px;" id="svs_PrelimFilterToggleSettings">
         <label>
         <input name="svs_PrelimFilterToggleMode" id="svs_PrelimFilterToggleMode0" class="text ui-widget-content ui-corner-all" type="radio"
-                style="display:inline-block;margin:0" checked="true"/>&nbsp;Normal : Checked = filter ON</label>
+                style="display:inline-block;margin:0" checked="checked"/>&nbsp;Normal : Checked = filter ON</label>
         <label>&nbsp;&nbsp;&nbsp;
         <input name="svs_PrelimFilterToggleMode" id="svs_PrelimFilterToggleMode1" class="text ui-widget-content ui-corner-all" type="radio"
                 style="display:inline-block;margin:0"/>&nbsp;Reversed : Checked = filter OFF</label>

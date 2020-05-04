@@ -1511,7 +1511,7 @@
                     
                     
                     //special case: split huge web content 
-                    if($rectype==RT_CMS_MENU && $dtyID==DT_EXTENDED_DESCRIPTION){
+                    if(defined('RT_CMS_MENU') && $rectype==RT_CMS_MENU && $dtyID==DT_EXTENDED_DESCRIPTION){
                        $lim = checkMaxLength2($rval);
                        //TEST $lim = 100;
                        if($lim>0){
