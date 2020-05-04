@@ -837,6 +837,13 @@ window.hWin.HEURIST4.dbs = {
             var def = __getRecordTypeTree(rectypeids, 0, $mode, fieldtypes, null);
 
             if(def!==null) {
+                if(parentcode!=null){
+                    if(def['code']){
+                        def['code'] = parentcode+':'+def['code'];
+                    }else{
+                        def['code'] = parentcode;
+                    }
+                }
                 if($.isArray(def['children'])){
                     def = __assignCodes(def);
                     res.push( def );

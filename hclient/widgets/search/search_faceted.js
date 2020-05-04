@@ -526,7 +526,7 @@ $.widget( "heurist.search_faceted", {
 
                         //first level can be multi rectype
                         //add recordtype
-                        if(rtid>0 ||  rtid.indexOf(',')>0){
+                        if(rtid>0 ||  rtid.indexOf(',')>0){  //AA!!  ||  rtid.indexOf(',')>0
                             curr_level = __checkEntry(curr_level,"t",rtid);
                         }
                         var linktype = dtid.substr(0,2);
@@ -882,7 +882,7 @@ $.widget( "heurist.search_faceted", {
              }else{
                  //instead of list of links it is possible to allow enter search value directly into input field
                  var rtid = field['rtid'];
-                 if(rtid.indexOf(',')>0){
+                 if(rtid.indexOf(',')>0){  //if multirectype use only first one
                         rtid = rtid.split(',')[0];
                  }
                  
@@ -1476,8 +1476,13 @@ $.widget( "heurist.search_faceted", {
                 
 
                 window.HAPI4.RecordMgr.get_facets(request, function(response){ 
+                    
+                    //ignore results of passed sequence
                     if(response.request_id != that._request_id){
-                        //ignore results of passed sequence
+                        
+                        if(response.status != window.hWin.ResponseStatus.OK){
+                            console.log(response.message);
+                        }
                         return;
                     }
                     that._redrawFacets(response, true) 
