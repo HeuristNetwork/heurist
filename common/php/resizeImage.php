@@ -348,6 +348,10 @@ if (array_key_exists('ulf_ID', $_REQUEST))
             }
             */
             
+        }else if (@$_REQUEST['offer_download']){
+            // image placeholder
+            header('Location: ../images/16x16.gif');
+            return;
         }
     }
 

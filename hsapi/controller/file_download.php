@@ -61,6 +61,9 @@ if($db){
             if($force_recreate){
                 $thumb_url = $thumb_url.'&refresh=1';    
             }
+            if(@$_REQUEST['offer_download']){
+                $thumb_url = $thumb_url.'&offer_download=1';        
+            }
             
             header("Location: ".$thumb_url);
             exit();
