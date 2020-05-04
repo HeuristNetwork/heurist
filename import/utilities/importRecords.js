@@ -184,7 +184,7 @@ function hImportRecords(_max_upload_size) {
                                             return false;
                                         });
                                         $('#div_RectypeToBeImported').html('<table><tr>'
-                                                +'<td>Code</td><td>Rec count</td><td>Name</td><td>ID in this db</td></tr>'
+                                                +'<td>ID read from file</td><td>Rec count</td><td>Name</td><td>ID in this db</td></tr>'
                                                 +s+'</table>');
                                         
                                         $('#div_sourcedb').html('Source database:&nbsp;&nbsp;&nbsp;id: <b>'
