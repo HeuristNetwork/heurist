@@ -457,7 +457,8 @@ window.hWin.HEURIST4.util = {
                     
                     if(window.hWin.HEURIST4.util.isArray(r.rectypes)){
                         r.type = 3; //'faceted';
-                        r.domain = (r.domain=='b' || r.domain=='bookmark')?'bookmark':'all';
+                        r.w = (r.domain=='b' || r.domain=='bookmark')?'bookmark':'all';
+                        r.domain = r.w;
                         return r;
                     }
                     
@@ -486,7 +487,7 @@ window.hWin.HEURIST4.util = {
         
         domain = (domain=='b' || domain=='bookmark')?'bookmark':'all';
         
-        var res = {q:qsearch, w:domain, rules:rules, rulesonly:rulesonly, notes:notes, 
+        var res = {q:qsearch, w:domain, domain:domain, rules:rules, rulesonly:rulesonly, notes:notes, 
                         primary_rt:primary_rt, viewmode:viewmode, type:type};    
         
         if(!window.hWin.HEURIST4.util.isempty(db)){
