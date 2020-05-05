@@ -1490,7 +1490,7 @@ $.widget( "heurist.manageEntity", {
             
         var keepPos = 0;            
         if(this._editing){
-            keepPos = this._editing.getContainer().parents('.editFormDialog').scrollTop(); 
+            keepPos = this.editForm.scrollTop();
         }
         
         if(hard_reload===true){
@@ -1499,8 +1499,7 @@ $.widget( "heurist.manageEntity", {
             this._initEditForm_step4(null);
         }
        
-        
-        this._editing.getContainer().parents('.editFormDialog').scrollTop(keepPos);
+        this.editForm.scrollTop(keepPos);
     },
 
     //

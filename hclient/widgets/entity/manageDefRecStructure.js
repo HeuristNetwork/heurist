@@ -1296,7 +1296,7 @@ dty_TermIDTreeNonSelectableIDs
                     }
                     
                     //adjust preview editor position
-                    var ele_ed = this.previewEditor.find('.editFormDialog');
+                    var ele_ed = this.previewEditor.find('.editForm'); //editFormDialog
                     setTimeout(function(){
                         ele_ed.scrollTop(0);
                         var top = $(ed_cont).position().top - 60;
@@ -1305,7 +1305,6 @@ dty_TermIDTreeNonSelectableIDs
                         if(ele.length>0){
                             top = top + $(ele).position().top;
                         }
-                        
                         ele_ed.scrollTop(top);
                     },200); //without timeout preview form scrolls to kept position
                 }
@@ -1850,7 +1849,7 @@ dty_TermIDTreeNonSelectableIDs
                     recset.setRecord(recID, fields);
                 }
                 
-                // 3. get treeview.toDict and pur it in ExtDescription of field 2-57 ("Header 1") 
+                // 3. get treeview.toDict and put it in ExtDescription of field 2-57 ("Header 1") 
                 /*treeview.visit(function(node){
                         if(!node.folder){
                             node.data = {}; //remove garbage fancytree may put here
