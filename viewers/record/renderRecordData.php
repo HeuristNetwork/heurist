@@ -1223,13 +1223,13 @@ function print_public_details($bib) {
                     .$thumb['id'].')">SHOW THUMBNAIL</a>';
             }
             
-            if($isImageOrPdf || !@$thumb['external_url']){
-                print '<a href="' . htmlspecialchars($download_url) 
-                                . '" class="external-link image_tool" target="_surf">DOWNLOAD'
+            if(@$thumb['external_url']){
+                print '<a href="' . htmlspecialchars($thumb['external_url']) 
+                                . '" class="external-link" target=_blank>OPEN IN NEW TAB'
                                 . (@$thumb['linked']?' (linked media)':'').'</a></div>';
             }else{
-                print '<a href="' . htmlspecialchars($url) 
-                                . '" class="external-link" target=_blank>OPEN IN NEW TAB'
+                print '<a href="' . htmlspecialchars($download_url) 
+                                . '" class="external-link image_tool" target="_surf">DOWNLOAD'
                                 . (@$thumb['linked']?' (linked media)':'').'</a></div>';
             }
             
