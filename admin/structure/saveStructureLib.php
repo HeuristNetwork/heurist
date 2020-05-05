@@ -761,8 +761,8 @@ function updateRecStructure( $dtFieldNames , $rtyID, $rt) {
                     }
 
                     //special behaviour
-                    if($colName=='rst_MaxValues' && $val==0){
-                        $val = null;
+                    if($colName=='rst_MaxValues' && $val==null){
+                        $val = 0; //repeatbale
                     }else if($colName=='rst_PointerMode' && ($val=='' || $val==null)){
                         $val = 'addorbrowse';
                     }else if($colName=='rst_Modified'){

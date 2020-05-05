@@ -234,7 +234,7 @@ CREATE TABLE defRecStructure (
   rst_MayModify enum('locked','discouraged','open') NOT NULL default 'open' COMMENT 'Extent to which detail may be modified within this record structure',
   rst_OriginatingDBID mediumint(8) unsigned default NULL COMMENT 'Database where this record structure element originated, 0 = locally',
   rst_IDInOriginatingDB smallint(5) unsigned default NULL COMMENT 'ID used in database where this record structure element originated',
-  rst_MaxValues tinyint(3) unsigned default NULL COMMENT 'Maximum number of values per record for this detail, NULL = unlimited, 0 = not allowed',
+  rst_MaxValues tinyint(3) unsigned default NULL COMMENT 'Maximum number of values per record for this detail, 1 - single, >1 limited, NULL or 0 = no limit',
   rst_MinValues tinyint(3) unsigned NOT NULL default '0' COMMENT 'If required, minimum number of values per record for this detail',
   rst_InitialRepeats TINYINT(1) DEFAULT 1 COMMENT 'Number of repeat values to be displayed for this field when a new record is first displayed',
   rst_DisplayDetailTypeGroupID tinyint(3) unsigned default NULL COMMENT 'If set, places detail in specified group instead of according to dty_DetailTypeGroup',

@@ -552,7 +552,7 @@ function EditRecStructure() {
                         if(type!=='separator'){
                             var minval = oRecord.getData('rst_MinValues');
                             var maxval = oRecord.getData('rst_MaxValues');
-                            var res = 'repeatable';
+                            var res = 'repeatable';  //null or 0
                             if(Number(maxval)===1){
                                 res = 'single'; // value';
                             }else if(Number(maxval)>1){
@@ -3440,10 +3440,11 @@ function onReqtypeChange(evt){
         //Dom.setStyle(span_min, "visibility", "hidden");
     } else if(el.value === "forbidden" || el.value === "hidden"){
         el_min.value = 0;
+        /* 2020-05-05  do not change max value for hidden fields
         el_max.value = 0;
-
         var span_max = Dom.get(name+'_spanMaxValue');
         Dom.setStyle(span_max, "visibility", "hidden");
+        */
     }
 
     if (!(el.value == "forbidden" || el.value == "hidden" )){
