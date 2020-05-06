@@ -265,7 +265,7 @@ function hEditing(_options) {
 
                     }else if(currGroupType == 'tabs'){
                         // class="separator2"
-                        $('<li>').html('<a href="#'+newFieldContainer.attr('id')+'"><span style="font-weight:bold">'+headerText+'</span></a>')
+                        $('<li>').addClass('edit-form-tab').html('<a href="#'+newFieldContainer.attr('id')+'"><span style="font-weight:bold">'+headerText+'</span></a>')
                         .appendTo(groupTabHeader);
 
                         $(newFieldContainer).appendTo(groupEle);
@@ -387,6 +387,7 @@ function hEditing(_options) {
         
         __createGroup(recstructure, $container, null);
         
+       
         $container.fadeIn(250);
         
         _setFocus();

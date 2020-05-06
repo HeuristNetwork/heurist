@@ -121,6 +121,11 @@ if(defined('IS_INDEX_PAGE')){
 
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!--
+<meta http-equiv="Content-Security-Policy" content="default-src https: data: http: 'unsafe-eval' 'unsafe-inline'; img-src https: data: http:;">
+-->
+<!--
+ 'self' http://maps.nypl.org -->
 
 <link rel=icon href="<?php echo PDIR;?>favicon.ico" type="image/x-icon">
 <link rel="shortcut icon" href="<?php echo PDIR;?>favicon.ico" type="image/x-icon">

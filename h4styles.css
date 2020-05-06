@@ -2014,20 +2014,55 @@ input[type="file"] {
 .edit-form-tabs{
     margin-bottom:4px;
 }
-.edit-form-tabs li{
-    border-top-left-radius: 6px;
-    border-top-right-radius: 6px;    
+.edit-form-tabs .ui-tabs-panel{
+    padding-bottom: 10px !important;    
 }
 .edit-form-tabs li.ui-tabs-active{
     background: #ECF1FB !important;
 }
-.edit-form-tabs li > a{
+li.edit-form-tab {
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;    
+}
+li.edit-form-tab > a{
     width: 30ex;
     max-width: 30ex;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
-.edit-form-tabs .ui-tabs-panel{
-    padding-bottom: 10px !important;    
+
+/*   */
+.ui-tabs-paging-next { 
+    float: right !important;
+}
+.ui-tabs-paging-prev,
+.ui-tabs-paging-next {
+    background: transparent !important;
+    border: 0 !important;
+    margin-bottom: 1px !important;
+}
+.ui-tabs-paging-prev a,
+.ui-tabs-paging-next a {
+    display: block; 
+    position: relative; 
+    top: 1px; 
+    border: 0;
+    z-index: 2; 
+    padding: 0;
+    /* color: #444; */ 
+    text-decoration: none;
+    background: transparent !important; 
+    cursor: pointer;
+}
+.ui-tabs-paging-next a:hover,
+.ui-tabs-paging-next a:focus,
+.ui-tabs-paging-next a:active,
+.ui-tabs-paging-prev a:hover,
+.ui-tabs-paging-prev a:focus,
+.ui-tabs-paging-prev a:active { 
+    background: transparent; 
+}
+.ui-tabs-paging-disabled {
+    visibility: hidden;
 }

@@ -707,7 +707,20 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     },*/
                     center:{
                         minWidth:400,
-                        contentSelector: '.editForm'    
+                        contentSelector: '.editForm',
+                        //pane_name, pane_element, pane_state, pane_options, layout_name
+                        onresize_end : function(){
+                            var ele = that.editForm.find('.ui-tabs');
+                            if(ele.length>0){
+                                try{
+                                    ele.tabs('pagingResize');    
+                                    //ele.tabs('pagingDestroy');
+                                    //ele.tabs('paging');
+                                }catch(ex){
+                                }
+                            }
+                            
+                        }    
                     }
                 };
 
@@ -2570,6 +2583,8 @@ rectypes.names[rectypeID] + ' is defined as a child of <b>'+names
                 this.options.edit_obstacle = false;
             } 
             
+            
+            this.editForm.find('.ui-tabs').tabs('paging');
             
         }else{
             window.hWin.HEURIST4.msg.showMsgErr(response);
