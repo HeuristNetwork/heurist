@@ -113,29 +113,51 @@ the source database and can download files (eg. images) from it. Registration of
         </div>
         
         <div id="divStep1" style="display:none">
-           <p class="st1_A import-rem">The following entity (record) types in this file do not yet exist, or require updating
+           <p class="st1_A import-rem heurist-helper3">The following entity (record) types in this file do not yet exist, or require updating
             in the database into which you are importing data:</p>
-           <p id="st1_B" class="import-rem">All entity types are recognised. However it is not guaranteed that they are identical. 
+
+           <p class="st1_B import-rem heurist-helper3">All entity types are recognised. However it is not guaranteed that they are identical. 
            Press "Sync" button to make sure that all fields and terms are the same in source and destination databases. If you are sure that structure is valid you may skip sync step and proceed to record import.</p>
 
-           <p class="st1_C import-rem">The target database does not contain all the structural elements (record types) required to accommodate the incoming data. You still can import the data. However, data for missing definitions will be ignored.
-            <a href="#" class="tsv_download">List of elements  in source file</a> (will download a tab-separated file).</p>
-            
-           <p class="st1_D import-rem">All entity types are recognised. However it is not guaranteed that they are identical.  
-            We recommend downloading the list of elements to be imported and verify matches.
-            <a href="#" class="tsv_download">List of elements in source file</a> (will download a tab-separated file)</p>
-            
+           <p class="st1_notreg import-rem heurist-helper3">The source database is not registered. If you proceed with import we will assume 
+the same structure as the target database (eg. because the data is based on a downloaded XML template from the target or 
+the target is a clone of the source database).<br>
+Note that local internal IDs are used where no global concept IDs are defined. This could result in mis-allocation of data 
+if the source and target do not have the same structure </p>
+           
            <div id="div_tsv" style="display:none"></div>
            
            <!-- list of missing definitions -->
            <div id="div_RectypeToBeImported" style="max-height: 128px;overflow-y: auto;">
            </div>     
 
+           <!-- source broken: import blocked -->
+           <p class="st1_E import-rem" style="color:red">There are errors in <span class="cnt_missed_rt"></span> in your XML file. Please correct the file to allow import. Note that XML tags are case sensitive.</p>
+           
+           <!-- non-registered: all rt are recognized -->
+           <p class="st1_notreg import-rem heurist-helper3">
+               <span class="st1_D import-rem">All entity types are recognised. However it is not guaranteed that they are identical.</span>  
+
+               <!-- non-registered: some rt are NOT recognized -->
+               <span class="st1_G import-rem">The target database does not contain <span class="cnt_missed_rt"></span> 
+               required to accommodate the incoming data. You still can import the data. However, data for missing definitions will be ignored.</span>
+               
+               <!-- non-registered: compare offer -->                                                                                          
+               <br>We recommend downloading the list of elements to be imported and verify matches.
+                <a href="#" class="tsv_download">List of elements in source file</a> (will download a tab-separated file)
+           </p>
+           
+           <p class="st1_C import-rem heurist-helper3">
+                <span class="cnt_local_rt"></span> in the source file use local codes, which are not guaranteed to have the same meaning between the source file and the target database. We recommend downloading the list of elements to be imported and verifying that the source and target record types and fields match. <a href="#" class="tsv_download">List of elements in source file</a> (tab-separated file)
+           </p>
+           
+<!--
            <p class="st1_A import-rem">
 The source database MUST be registered with the Heurist Master Index BEFORE the data is exported. If it has not been registered, please close this dialogue, register the source database (only the owner or an administrator can do this), re-export the data and then run this function on the new file.
            </p>
-           <p class="st1_A import-rem">
-If the download of listed entity types fails to clear this message, please click on Help > Bug report and let us know. We will get back to you within 24 hours and help you import your data.
+-->
+           <p class="st1_A st1_B import-rem heurist-helper3">
+If the download/synch of listed entity types fails to clear this message, please click on Help > Bug report and let us know. We will get back to you within 24 hours and help you import your data.
            </p>
            
            <button id="btn_ImportRt" class="import-rem">Download listed entity types</button>
@@ -148,7 +170,6 @@ If the download of listed entity types fails to clear this message, please click
 <p>Note: no attempt is made to identify duplicate records - all items imported will create a new record. If you require duplicate record identification and replacement or merging, please <?php echo CONTACT_HEURIST_TEAM;?> for assistance (support at heuristnetwork dot org or use the bug report function)</p>
            <br><br>
            <button id="btn_ImportRecords">Import Records</button>
-           <span class="st1_C import-rem" style="color:red">Beware: some data will not be imported (see above)</span>
         </div>
        
         <!-- STEP 3 - result  -->

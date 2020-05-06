@@ -96,7 +96,7 @@ function hImportRecords(_max_upload_size) {
         //change: function(){},
         error: function (jqXHR, textStatus, errorThrown) {
             //!!! $('#upload_form_div').show();
-            _hideProgress(0, 0);
+            _hideProgress(0);
             pbar_div.hide();
             if(textStatus!='abort'){
                 window.hWin.HEURIST4.msg.showMsgErr(textStatus+' '+errorThrown);
@@ -104,15 +104,14 @@ function hImportRecords(_max_upload_size) {
         },
         done: function (e, response) {
 
-                //!!! $('#upload_form_div').show();                
-                //pbar_div.hide();       //hide progress bar
-                //_hideProgress(0, -1);
                 response = response.result;
                 if(response.status==window.hWin.ResponseStatus.OK){  //after upload
                     var data = response.data;
                     $.each(data.files, function (index, file) {
                         if(file.error){
+                            _hideProgress(0);                
                             window.hWin.HEURIST4.msg.showMsgErr(file.error);
+                            return false;
                         }else{
                             
                             upload_file_name = file.name;
@@ -125,7 +124,8 @@ function hImportRecords(_max_upload_size) {
                                    
                             //call importController.php                                          
                             window.hWin.HAPI4.doImportAction(request, function( response ){
-                                    
+                                
+                                    _hideProgress(0);
                                     if(response.status == window.hWin.ResponseStatus.OK){
                                         //render list of rectypes to be imported
                                         var isAllRecognized = true;
@@ -134,29 +134,57 @@ function hImportRecords(_max_upload_size) {
                                         var rectypes = response.data.rectypes;
                                         var s = '', tsv = 'type\tsource id\tccode\tname in source\ttarget id\tname in target\n';
                                         var recCount = 0;
+                                        
+                                        var sourceMissed = 0;
+                                        var targetMissed = 0;
+                                        var cnt_local_rt = 0;
+                                        
                                         for(var rtyID in rectypes){
+                                            
                                             var rectype = rectypes[rtyID];
+                                            
+                                            var rectype_source = rectype['code'];
+                                            if(!rectype_source){
+                                                rectype_source = '<span style="color:red">missed</span>';
+                                                sourceMissed++;
+                                            }else if(rectype_source.indexOf('-')<0 || rectype_source.indexOf('0000-')==0 ){
+                                                cnt_local_rt++;
+                                            }
+                                            
                                             s = s + '<tr><td>'
-                                                    +rectype['code']+'</td><td>'
+                                                    +rectype_source+'</td><td>'
                                                     +rectype['count']+'</td><td>'
                                                     //+rectype['target_RecTypeID']+'</td><td>'
-                                                    +rectype['name']+'</td><td>'
+                                                    +rectype['name']+'</td><td>';
                                                     +(rectype['target_RecTypeID']>0?rectype['target_RecTypeID']:'')+'</td></tr>';
                                             
-                                            recCount = recCount + rectype['count'];
                                             
                                             var target_id;
                                             if(rectype['target_RecTypeID']>0){
                                                 target_id = rectype['target_RecTypeID']+'\t'+
-                                                window.hWin.HEURIST4.rectypes.names[rectype['target_RecTypeID']]+'\n';
+                                                        window.hWin.HEURIST4.rectypes.names[rectype['target_RecTypeID']]+'\n';
+                                                
+                                                recCount = recCount + rectype['count'];
+                                                
+                                                s = s + rectype['target_RecTypeID']+'</td></tr>';
                                             }else{
-                                                target_id = '\t\n';
+                                                if(rectype['code'] && !(source_db>0)){
+                                                    target_id = '\tnot found\n';
+                                                    s = s + '<span style="color:red">not found</span></td></tr>';
+                                                }else{
+                                                    target_id = '\t\n';
+                                                    s = s + '</td></tr>';
+                                                }
+                                                
                                                 isAllRecognized = false;
+                                                targetMissed++;
                                             }
                                             
                                             tsv = tsv + 'rectype\t'+(rtyID.indexOf('-')?'':rtyID)+'\t'+rectype['code']+'\t'
                                                     +rectype['name']+'\t'+target_id;
                                         }
+                                        
+                                        // show missed fields
                                         var detailtypes = response.data.detailtypes;
                                         if(detailtypes)
                                         for(var dtyID in detailtypes){
@@ -196,28 +224,44 @@ function hImportRecords(_max_upload_size) {
                                                 
                                         _showStep(1);   
                                         
+                                        //hide all remakrs
                                         $('.import-rem').hide();
-                                        
-                                        if(!(source_db>0) || source_db==window.hWin.HAPI4.sysinfo.db_registeredid){
+
+                                        if(sourceMissed>0){
+                                                $('.cnt_missed_rt').text(sourceMissed+' record type'+(sourceMissed>1?'s':''));
+                                                $('.st1_E').show();
+                                            
+                                        }else if(!(source_db>0) || source_db==window.hWin.HAPI4.sysinfo.db_registeredid){
                                             //source database is not registered or the same database
                                             //thus we can't or not need import defintions
                                             //show the list of all definitions in source
-                                            if(isAllRecognized){
+                                            $('.st1_notreg').show();
+                                            
+                                            if(targetMissed>0){
+                                                $('.cnt_missed_rt').text(targetMissed+' record type'+(targetMissed>1?'s':''));
+                                                $('.st1_G').show();
+                                            }else if(isAllRecognized){
                                                 $('.st1_D').show();
-                                            }else{
-                                                $('.st1_C').show();
                                             }
                                             $("#divStep2").show();
                                             
-                                        }else if(isAllRecognized){
-                                            //show step2 and option to SYNC
-                                            $('#btn_ImportRt').show().button('option','label','Synch listed entity types');
-                                            $('#st1_B').show(); //All entity types are recognised. However it is not guaranteed
-                                            $("#divStep2").show();
-                                        }else{
-                                            //show option A - download - missing definitions
-                                            $('#btn_ImportRt').show().button('option','label','Download listed entity types');
-                                            $('.st1_A').show(); // rectypes in this file do not yet exist in target db
+                                        }else { //registered
+                                            
+                                            if(isAllRecognized){
+                                                //show step2 and option to SYNC
+                                                $('#btn_ImportRt').show().button('option','label','Synch listed entity types');
+                                                $('.st1_B').show(); //All entity types are recognised. However it is not guaranteed
+                                                $("#divStep2").show();
+                                            }else{
+                                                //show option A - download - missing definitions
+                                                $('#btn_ImportRt').show().button('option','label','Download listed entity types');
+                                                $('.st1_A').show(); // rectypes in this file do not yet exist in target db
+                                            }
+                                            if(cnt_local_rt>0){
+                                                $('.cnt_local_rt').text(cnt_local_rt+' record type'+(cnt_local_rt>1?'s':''));
+                                                $('.st1_C').show();
+                                            }
+                                        
                                         }
 
                                         $('#spanRecCount').text(recCount);
@@ -240,7 +284,7 @@ function hImportRecords(_max_upload_size) {
                         }
                     });
                 }else{
-                    //$('#divFieldRolesHeader').show();
+                    _hideProgress(0);
                     _showStep(0);
                     window.hWin.HEURIST4.msg.showMsgErr(response.message);
                 }
