@@ -594,8 +594,8 @@ dty_TermIDTreeNonSelectableIDs
                
                var actionspan = $('<div class="svs-contextmenu3" style="position:absolute;right:8px;display:none;padding:2px;margin-top:0px;background:#95A7B7 !important;'
                     +'font-size:9px;font-weight:normal;text-transform:none">'
-                   +'<span data-action="block" style="background:lightgreen;padding:4px;font-size:9px;font-weight:normal" title="Add a new group/separator">&nbsp;±&nbsp;&nbsp;Block</span>'               
-                   +'<span data-action="field" style="background:#ECF1FB;padding:4px"><span class="ui-icon ui-icon-plus" title="Add a new field to this record type" style="font-size:9px;font-weight:normal"/>Field</span>'
+                   //+'<span data-action="block" style="background:lightgreen;padding:4px;font-size:9px;font-weight:normal" title="Add a new group/separator">&nbsp;±&nbsp;&nbsp;Block</span>'               
+                   //+'<span data-action="field" style="background:#ECF1FB;padding:4px"><span class="ui-icon ui-icon-plus" title="Add a new field to this record type" style="font-size:9px;font-weight:normal"/>Field</span>'
                    +'<span data-action="delete" style="background:red;padding:4px"><span class="ui-icon ui-icon-close" title="'
                         +((is_folder)?'Delete header':'Exclude field from record type')+'" style="font-size:9px;font-weight:normal"/>Delete</span>'
                    +(true || is_folder?'':
