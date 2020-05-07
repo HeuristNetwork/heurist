@@ -274,7 +274,14 @@ private static function hmlToJson($filename){
 * 
 * It reads manifest files and tries to find all record types in current database by concept code. All record types from manifest file
 * Returns array of rectypes, false otherwise
-*     source_rectype_id => array(name,code,count,target_RecTypeID
+* $res = array(
+            'database'=> database id
+            'database_name'=> 
+            'rectypes'=> array(source_rectype_id => array(name,code,count,target_RecTypeID),...
+            'detailtypes'=>$imp_detailtypes  //need to show missed detail fields
+        );
+* 
+*     
 *
 * @param mixed $filename
 */
@@ -306,15 +313,16 @@ public static function getDefintions($filename){
             $imp_rectypes[$rtid]['target_RecTypeID'] = $local_id;
         }
         
-        $dbsource_is_same = defined('HEURIST_DBID') && ((!(@$data['heurist']['database']['id']>0)) || 
-                            @$data['heurist']['database']['id']==HEURIST_DBID);
-        
+        //for not registered and the same - found missed         
+        $dbsource_is_same = ( (!(@$data['heurist']['database']['id']>0)) || 
+                              (defined('HEURIST_DBID') && @$data['heurist']['database']['id']==HEURIST_DBID) );
         
         $imp_detailtypes = null;
         
-        if($dbsource_is_same){
-        
+        if(true || $dbsource_is_same){
+            
             $imp_detailtypes = @$data['heurist']['database']['detailtypes'];
+
             if($imp_detailtypes){
                 $database_defs = array('detailtypes'=>dbs_GetDetailTypes(self::$system, null, 2));
                 //find local ids

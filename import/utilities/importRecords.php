@@ -113,17 +113,25 @@ the source database and can download files (eg. images) from it. Registration of
         </div>
         
         <div id="divStep1" style="display:none">
-           <p class="st1_A import-rem heurist-helper3">The following entity (record) types in this file do not yet exist, or require updating
+           <p class="st1_OfferSync import-rem heurist-helper3">The following entity (record) types in this file do not yet exist, or require updating
             in the database into which you are importing data:</p>
+            
+           <p class="st1_AllRecognized_afterSync import-rem heurist-helper3">All entity types are recognised</p>
 
-           <p class="st1_B import-rem heurist-helper3">All entity types are recognised. However it is not guaranteed that they are identical. 
+           <p class="st1_AllRecognized_beforeSync import-rem heurist-helper3">All entity types are recognised. However it is not guaranteed that they are identical. 
            Press "Sync" button to make sure that all fields and terms are the same in source and destination databases. If you are sure that structure is valid you may skip sync step and proceed to record import.</p>
 
+           <p class="st1_NotRecognized_afterSync import-rem heurist-helper3">Download definitions from the source database is performed.
+                However <span class="cnt_missed_rt3"></span> still cannot be matched to the target database as shown below.
+           </p>
+
+           
            <p class="st1_notreg import-rem heurist-helper3">The source database is not registered. If you proceed with import we will assume 
 the same structure as the target database (eg. because the data is based on a downloaded XML template from the target or 
 the target is a clone of the source database).<br>
 Note that local internal IDs are used where no global concept IDs are defined. This could result in mis-allocation of data 
 if the source and target do not have the same structure </p>
+
            
            <div id="div_tsv" style="display:none"></div>
            
@@ -132,7 +140,11 @@ if the source and target do not have the same structure </p>
            </div>     
 
            <!-- source broken: import blocked -->
-           <p class="st1_E import-rem" style="color:red">There are errors in <span class="cnt_missed_rt"></span> in your XML file. Please correct the file to allow import. Note that XML tags are case sensitive.</p>
+           <p class="st1_E import-rem" style="color:red">
+                There are errors in the XML file : faulty XML tags (note: case sensitive), <span class="cnt_missed_rt"></span> 
+                cannot be matched to the target database as shown above. We recommend corrections to the XML file to eliminate such errors 
+                or remove data which cannot be matched, or manual downloading of definitions to match the incoming data.
+           </p>
            
            <!-- non-registered: all rt are recognized -->
            <p class="st1_notreg import-rem heurist-helper3">
@@ -155,12 +167,26 @@ if the source and target do not have the same structure </p>
            <p class="st1_A import-rem">
 The source database MUST be registered with the Heurist Master Index BEFORE the data is exported. If it has not been registered, please close this dialogue, register the source database (only the owner or an administrator can do this), re-export the data and then run this function on the new file.
            </p>
--->
            <p class="st1_A st1_B import-rem heurist-helper3">
 If the download/synch of listed entity types fails to clear this message, please click on Help > Bug report and let us know. We will get back to you within 24 hours and help you import your data.
            </p>
+-->           
+
            
-           <button id="btn_ImportRt" class="import-rem">Download listed entity types</button>
+            <p class="st1_ImportRtError import-rem heurist-helper3">
+We were unable to download definitions from the source database for <span class="cnt_missed_rt2"></span> (listed above) specified in the XML file. 
+This may indicate an unregistered source (if indicated above), deletion of these types from the source database, or errors in the XML file (typos in XML tags, record type or field code). 
+We recommend corrections to the XML file to eliminate such errors or remove data which cannot be matched, or manual downloading of definitions to match the incoming data.
+            </p>
+            <p class="st1_ImportRtError2 import-rem heurist-helper3">
+If you do proceed, data for which there is no appropriate target record type will be ignored. This will result in an incomplete database. Make sure this is what you want before proceeding.
+            </p>
+            <p class="st1_ImportRtError3 import-rem heurist-helper3">
+There are missing fields. Import is not allowed.
+            </p>
+           
+            <br>
+            <button id="btn_ImportRt" class="import-rem">Download listed entity types</button>
         </div>
         
         <!-- STEP 2  - start donwload -->
@@ -168,7 +194,7 @@ If the download/synch of listed entity types fails to clear this message, please
 <p id="st2_B" class="import-rem">All entity types are recognised and synched.</p>
 <p>Importing <span id="spanRecCount"></span> items as new records.</p>
 <p>Note: no attempt is made to identify duplicate records - all items imported will create a new record. If you require duplicate record identification and replacement or merging, please <?php echo CONTACT_HEURIST_TEAM;?> for assistance (support at heuristnetwork dot org or use the bug report function)</p>
-           <br><br>
+           <br>
            <button id="btn_ImportRecords">Import Records</button>
         </div>
        
