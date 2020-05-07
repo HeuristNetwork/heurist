@@ -1055,8 +1055,8 @@ INSERT INTO sysUGrps (ugr_ID,ugr_Name,ugr_LongName,ugr_Description,ugr_Type,ugr_
 
 -- An extra group of users to give people the idea
  INSERT INTO sysUGrps (ugr_ID,ugr_Name,ugr_LongName,ugr_Type,ugr_Password,ugr_eMail,ugr_Enabled,ugr_FirstName,ugr_LastName)
- VALUES (5,'Website filters',
- 'Group to work with saved filters for Web search layout',
+ VALUES (4,'Website filters',
+ 'Filters for building a website',
  'Workgroup','PASSWORD NOT REQUIRED','EMAIL NOT SET FOR ID=5','y','other','users');
 
 
@@ -1064,7 +1064,7 @@ INSERT INTO sysUGrps (ugr_ID,ugr_Name,ugr_LongName,ugr_Description,ugr_Type,ugr_
 -- Insert a row to define the link between group 1 (dbowners), group 3 (other users) and group 5 (website filters) and user 2 (the first admin)
 INSERT IGNORE INTO sysUsrGrpLinks (ugl_UserID,ugl_GroupID,ugl_Role) VALUES (2,1,'admin');
 INSERT IGNORE INTO sysUsrGrpLinks (ugl_UserID,ugl_GroupID,ugl_Role) VALUES (2,3,'admin');
-INSERT IGNORE INTO sysUsrGrpLinks (ugl_UserID,ugl_GroupID,ugl_Role) VALUES (2,5,'admin');
+INSERT IGNORE INTO sysUsrGrpLinks (ugl_UserID,ugl_GroupID,ugl_Role) VALUES (2,4,'admin');
 
 
 -- defRectypegroups and defDetailtypeGroups are now inserted by coreDefinitions.txt
