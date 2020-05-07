@@ -489,7 +489,6 @@ dty_TermIDTreeNonSelectableIDs
 */
             this._treeview = this.element.find('.treeView').addClass('tree-rts')
                                 .fancytree(fancytree_options); //was recordList
-            
             if(this._isFlat){         
                 this.__updateActionIcons(500);
             }else{
@@ -876,8 +875,16 @@ dty_TermIDTreeNonSelectableIDs
             this._super(); 
         }else{
             var that = this;
+            
+            var rst_ID = this._currentEditID;
+            if(rst_ID.indexOf('.')>0){
+                rst_ID = rst_ID.split('.')[1];
+            }
+            
             window.hWin.HEURIST4.msg.showMsgDlg(
-                'Are you sure you wish to delete this field? Proceed?', function(){ that._deleteAndClose(true) }, 
+                'Are you sure you wish to delete field "'
+                + window.hWin.HEURIST4.util.htmlEscape(this._cachedRecordset.fld(rst_ID, 'rst_DisplayName'))
+                +'"?', function(){ that._deleteAndClose(true) }, 
                 {title:'Warning',yes:'Proceed',no:'Cancel'});        
         }
         
