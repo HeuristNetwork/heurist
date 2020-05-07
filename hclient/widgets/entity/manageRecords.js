@@ -3166,11 +3166,13 @@ rectypes.names[rectypeID] + ' is defined as a child of <b>'+names
                 
                     if(window.hWin.HEURIST4.rectypes.typedefs[that._currentEditRecTypeID].dtFields[dtId]){
                     
-                        var is_folder = false;
-                        var ele = $('<div><span class="ui-icon ui-icon-gear"></span></div>')
+                        var is_folder = false;      
+                        var ele = $('<div><span  data-hh="bbbb" class="ui-icon ui-icon-gear"></span></div>')
                         .css({'display':'table-cell','vertical-align':'top',
                               'min-width':'32px','cursor':'pointer','padding-top':'0.4em'})
                         .prependTo($(item));    
+                        
+                        //ele = ele.find('.ui-icon-gear');
                         
                         that._on(ele,{mouseover:function(event){
                             clearTimeout(that._menuTimeoutId);
@@ -3178,11 +3180,14 @@ rectypes.names[rectypeID] + ' is defined as a child of <b>'+names
                            
                             that.rts_actions_menu
                                     .attr('data-did', el.parents('div[data-dtid]').attr('data-dtid'))
+                                    .show()
+                                    .position({ my:'left top', at:'left top', of: el});
+                                    /*
                                     .css({position:'absolute'
                                             ,left:that.editForm.parent().position().left + el.position().left
                                             ,top:that.editForm.position().top + el.position().top + 26 })
-                                    .show();
-                            //position({ my:'top left', at:'top left', of: el})
+                                    */
+                                    
                         }, mouseout: function(event){
                             that._menuTimeoutId = setTimeout(function() {that.rts_actions_menu.hide(); }, 800);
                         }});
