@@ -1075,7 +1075,7 @@ private static function _getJsonFeature($record, $mode){
             $val = array('dty_ID'=>$dty_ID,'value'=>$value);
 
             if($mode==2){ //extended - with concept codes and names/labels
-                $field_type = $defDetailtypes['typedefs'][$dty_ID]['commonFields'][$idx_dtype];
+                $field_type = self::$defDetailtypes['typedefs'][$dty_ID]['commonFields'][$idx_dtype];
                 //It needs to include the field name and term label and term standard code.
                 if($field_type=='enum' || $field_type=='relationtype'){
                     $val['termLabel'] = self::$defTerms->getTermLabel($value, true);
