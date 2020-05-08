@@ -2767,7 +2767,7 @@ rectypes.names[rectypeID] + ' is defined as a child of <b>'+names
             var isChanged = this._editing.isModified() || this._updated_tags_selection!=null;
             mode = isChanged?'visible':'hidden';
             
-            if(isChanged && changed_element){
+            if(isChanged && changed_element){  // && changed_element.options
                 
                 //special case for tiled image map source - if file is mbtiles - assign tiler url 
                 if(changed_element.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_FILE_RESOURCE'] && 

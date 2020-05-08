@@ -212,11 +212,12 @@ error_log(print_r($_REQUEST, true));
         //read service_mapping.json from setting folder
         $config_res = null;
         
-        $entity_file = HEURIST_SETTING_DIR.'service_mapping.json';
+        //$config_file = HEURIST_SETTING_DIR.'service_mapping.json';
+        $config_file = dirname(__FILE__).'/controller/record_lookup_config.json';
         
-        if(file_exists($entity_file)){
+        if(file_exists($config_file)){
             
-           $json = file_get_contents($entity_file);
+           $json = file_get_contents($config_file);
            
            $config = json_decode($json, true);
            if(is_array($config)){

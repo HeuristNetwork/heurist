@@ -531,7 +531,7 @@ function hEditing(_options) {
     
     function _onChange(){
         if($.isFunction(onChangeCallBack)){
-            onChangeCallBack.call(this);    
+            onChangeCallBack.call( this );    
         }
     }
     
@@ -674,7 +674,8 @@ function hEditing(_options) {
                 ele.editing_input('setValue', $.isArray(value)?value:[value], (is_changed===false));
                 if(is_changed!==false){
                     ele.editing_input('isChanged', true);    
-                    _onChange();
+                    ele.editing_input('onChange');
+                    //_onChange();
                 }
             }
         },

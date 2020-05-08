@@ -1,0 +1,13 @@
+[{
+    "rty_ID": "3-1009",
+    "service": "tlcmap",
+    "label": "Lookup in AGHP",
+    "fields":{ 
+      "properties.placename": "2-1",  
+      "geometry": "2-28",
+      "properties.anps id": "2-581",
+      "properties.state": "2-234",
+      "properties.LGA": "2-2",
+      "properties.description": "2-3"
+    }    
+}]

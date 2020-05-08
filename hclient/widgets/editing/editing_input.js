@@ -210,7 +210,7 @@ $.widget( "heurist.editing_input", {
                         
                         //reorganize
                         that.isChanged(true);
-                        that._onChange();
+                        that.onChange();
                         that.btn_cancel_reorder.show();
                         
                         if(isparententity){//restore parent entity flag
@@ -484,7 +484,7 @@ $.widget( "heurist.editing_input", {
                     }
                     //remove from array
                     that.inputs.splice(idx,1);
-                    that._onChange();                    
+                    that.onChange();                    
                     return;
                 }
 
@@ -535,7 +535,7 @@ var that = this;
     //
     //
     //
-    _onChange: function(event){
+    onChange: function(event){
     
         this.showErrorMsg(null);
         
@@ -583,8 +583,8 @@ var that = this;
                     e.target.select()
                 }    
             })
-            .keyup(function(){that._onChange();})
-            .change(function(){that._onChange();})
+            .keyup(function(){that.onChange();})
+            .change(function(){that.onChange();})
             .appendTo( $inputdiv );
 
             
@@ -644,7 +644,7 @@ var that = this;
                                            }
                                            
                                            //$input.val( ed.getContent() );
-                                           that._onChange();
+                                           that.onChange();
                                        });
                                      },
                                     plugins: [
@@ -790,7 +790,7 @@ var that = this;
                     }
                 
                 }
-                that._onChange();
+                that.onChange();
             }
             
             $input.change( __onTermChange );
@@ -861,7 +861,7 @@ var that = this;
                                             if(data && data.selection && data.selection.length>0){
                                                 $input.val(data.selection[0]);
                                                 if($input.hSelect('instance')!==undefined) $input.hSelect('refresh');
-                                                that._onChange();
+                                                that.onChange();
                                             }
                                         }
                                         });
@@ -961,7 +961,7 @@ var that = this;
             .uniqueId()
             .addClass('text ui-widget-content ui-corner-all')
             .css('vertical-align','-3px')
-            .change(function(){that._onChange();})
+            .change(function(){that.onChange();})
             .appendTo( $inputdiv );
             
             
@@ -987,7 +987,7 @@ var that = this;
             if(value){
                 $input.val(value);
             }
-            $input.change(function(){that._onChange();})
+            $input.change(function(){that.onChange();})
 
         }
         else if(this.detailType=="user"){ //special case - only groups of current user
@@ -997,7 +997,7 @@ var that = this;
             .addClass('text ui-widget-content ui-corner-all')
             .css('width','auto')
             .val(value)
-            .change(function(){that._onChange();})
+            .change(function(){that.onChange();})
             .appendTo( $inputdiv );
 
             window.hWin.HEURIST4.ui.createUserGroupsSelect($input.get(0),null,
@@ -1363,7 +1363,7 @@ var that = this;
                                              rec_IsChildRecord:isparententity
                                             }, __show_select_dialog);
                                         //ele.appendTo($inputdiv);
-                                        that._onChange();
+                                        that.onChange();
                                         
                 /* 2017-11-08 no more buttons
                                         if($inputdiv.find('.sel_link').length==0){
@@ -1496,7 +1496,7 @@ var that = this;
                         //config and data are loaded already, since dialog was opened
                         that._findAndAssignTitle($input, newsel);
                         that.newvalues[$input.attr('id')] = newsel.join(',');
-                        that._onChange();
+                        that.onChange();
                     }
                 });
             }
@@ -1601,7 +1601,7 @@ var that = this;
                             //config and data are loaded already, since dialog was opened
                             that._findAndAssignTitle($input, newsel);
                             that.newvalues[$input.attr('id')] = newsel.join(',');
-                            that._onChange();
+                            that.onChange();
                             
                         }else if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
                             //todo
@@ -1667,9 +1667,9 @@ var that = this;
             .attr('autocapitalize','none')
             .attr('spellcheck','false')
             .val(value)
-            .keyup(function(){that._onChange();})
+            .keyup(function(){that.onChange();})
             .change(function(){
-                    that._onChange();
+                    that.onChange();
             })
             .appendTo( $inputdiv );
             
@@ -1825,7 +1825,7 @@ var that = this;
                                 $input.removeClass('Temporal').addClass('text').removeAttr("readonly").css('width','20ex');
                             }
                             
-                            that._onChange();
+                            that.onChange();
                 }
                 
                 
@@ -2014,7 +2014,7 @@ var that = this;
                             if(window.hWin.HEURIST4.util.isempty($input.val())){
                                  $input_img.find('img').attr('src','');    
                             }
-                            that._onChange(); 
+                            that.onChange(); 
                         });
                         
                         var hideTimer = 0;
@@ -2155,7 +2155,7 @@ var that = this;
                                 var newsel = newsel.join(';');
                                 that.newvalues[$input.attr('id')] = newsel;
                                 $input.val(newsel);
-                                that._onChange();
+                                that.onChange();
                             }
                         }, 
                        selectedFolders: that.newvalues[$input.attr('id')], 
@@ -2217,7 +2217,7 @@ var that = this;
                                         if(res){
                                             $input_img.find('img').prop('src', res.url);
                                             that.newvalues[$input.attr('id')] = res.path; 
-                                            that._onChange(); 
+                                            that.onChange(); 
                                         }
                                     }, assets:that.configMode.use_assets, size:that.configMode.size});
                                 }).appendTo( ele );                            
@@ -2326,7 +2326,7 @@ var that = this;
                             }
                         }
                         $input.attr('title', file.name);
-                        that._onChange();//need call it manually since onchange event is redifined by fileupload widget
+                        that.onChange();//need call it manually since onchange event is redifined by fileupload widget
                     }
                 });
             }else{
@@ -2523,14 +2523,14 @@ console.log('onpaste');
                             .addClass('smallbutton btn_add_term')
                             .css({'line-height': '20px','vertical-align':'top',cursor:'pointer','text-decoration':'underline'})
                             .appendTo($inputdiv )
-                            .on( { click: function(){ $input.val('');that._onChange(); } });
+                            .on( { click: function(){ $input.val('');that.onChange(); } });
                             
                         function __openThemeDialog(){
                                 var current_val = window.hWin.HEURIST4.util.isJSON( $input.val() );
                                 if(!current_val) current_val = {};
                                 window.hWin.HEURIST4.ui.showEditThemeDialog(current_val, false, function(new_value){
                                     $input.val(JSON.stringify(new_value));
-                                    that._onChange();
+                                    that.onChange();
                                 });
                         }                
                         
@@ -2550,7 +2550,7 @@ console.log('onpaste');
                             if(!current_val) current_val = {};
                             window.hWin.HEURIST4.ui.showEditSymbologyDialog(current_val, false, function(new_value){
                                 $input.val(JSON.stringify(new_value));
-                                that._onChange();
+                                that.onChange();
                             });
                     }});
             
@@ -2631,7 +2631,7 @@ console.log('onpaste');
                         that._removeInput( input_id );
                     }
                     
-                    that._onChange(); 
+                    that.onChange(); 
                 }
             });
 
@@ -3096,7 +3096,7 @@ console.log('onpaste');
                 if(that.detailType=='date' || that.detailType=='file'){
                     $input.change();
                 }else{
-                    that._onChange();
+                    that.onChange();
                 }
                 return;
             }
@@ -3143,7 +3143,7 @@ console.log('onpaste');
         if(make_as_nochanged){
             this._setAutoWidth();            
         }else{
-            this._onChange();
+            this.onChange();
         }
         */
     },
