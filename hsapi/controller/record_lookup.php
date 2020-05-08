@@ -38,13 +38,13 @@
     }
 
     if(!(@$params['service'])){
-        $system->error_exit_api('service parameter is not defined or has wrong value'); //exit from script
+        $system->error_exit_api('Service parameter is not defined or has wrong value'); //exit from script
     }
 
     $url = $params['service'];
     $remote_data = loadRemoteURLContent($url, true);    
     if($remote_data===false){
-        $system->error_exit_api('Cannot load remote data '.$url, HEURIST_ERROR);    
+        $system->error_exit_api('Cannot connect/load data from the service: '.$url, HEURIST_ERROR);    
     }
 
     json_decode($remote_data);
@@ -54,20 +54,35 @@
         $array = array_map("str_getcsv", explode("\n", $csv));
         $json = json_encode($array);
 */
+        $hasGeo = false;
         $remote_data = str_getcsv($remote_data, "\n"); //parse the rows
-        $header = str_getcsv(array_shift($remote_data));
-        $id = 1;
-        foreach($remote_data as &$line){
-            $line = str_getcsv($line);  
-            foreach($header as $idx=>$key){
-                 $line[$key] = $line[$idx];
-                 unset($line[$idx]);
+        if(is_array($remote_data) && count($remote_data)>1){
+            
+            $header = str_getcsv(array_shift($remote_data));
+            $id = 1;
+            foreach($remote_data as &$line){
+                $line = str_getcsv($line);  
+                foreach($header as $idx=>$key){
+                     $line[$key] = $line[$idx];
+                     unset($line[$idx]);
+                }
+                if(@$line['Latitude'] && @$line['Longitude']){
+                    $line = array('type'=>'Feature','id'=>$id, 'properties'=>$line,
+                        'geometry'=>array('type'=>'Point','coordinates'=>array($line['Longitude'], $line['Latitude'])));
+                    $hasGeo = true;
+                }
+            } 
+            
+            if(!$hasGeo){
+                $system->error_exit_api('Service did not return data in an appropriate format');
             }
-            if(@$line['Latitude'] && @$line['Longitude']){
-                $line = array('type'=>'Feature','id'=>$id, 'properties'=>$line,
-                    'geometry'=>array('type'=>'Point','coordinates'=>array($line['Longitude'], $line['Latitude'])));
+        }else{
+            if(!$hasGeo){
+                $system->error_exit_api('Service did not return any data');
             }
-        } 
+        }
+        
+        
         $remote_data = json_encode($remote_data);
     }
 

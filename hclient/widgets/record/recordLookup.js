@@ -215,7 +215,6 @@ $.widget( "heurist.recordLookup", $.heurist.recordAction, {
                     //this._addNewRecord(this.options.rectype_for_new_record, sel);                     
                 }else{
                     //pass mapped values and close dialog
-console.log(sel);                    
                     this._context_on_close = sel;
                     this._as_dialog.dialog('close');
                 }
@@ -304,7 +303,9 @@ console.log(sel);
     //
     _onSearchResult: function(geojson_data){
         
-        this.recordList.show();
+       this.recordList.show();
+       
+       var is_wrong_data = true;
                         
        if (window.hWin.HEURIST4.util.isGeoJSON(geojson_data, true)){
             
@@ -340,8 +341,8 @@ console.log(sel);
                 var feature = geojson_data.features[i];
                 
                 var recID = i+1;
-                res_orders.push(recID);
                 
+                var hasGeo = false;
                 var values = [recID, this.options.mapping.rty_ID];
                 for(var k=0; k<map_flds.length; k++){
                     
@@ -372,13 +373,18 @@ console.log(sel);
                                     }
                                 }
                                 val = typeCode+' '+wkt;
+                                hasGeo = true;
                             }
                         }
                     }
                         
                     values.push(val);    
                 }
-                res_records[recID] = values;
+                if(hasGeo){
+                    res_orders.push(recID);
+                    res_records[recID] = values;    
+                }
+                
                 
 
                 /*
@@ -408,22 +414,28 @@ console.log(sel);
               'state': '2-234',
               'LGA': '2-2',
               'description': '2-4'
-*/            
-            
-            var res_recordset = new hRecordSet({
-                count: res_orders.length,
-                offset: 0,
-                fields: fields,
-                rectypes: [this.options.mapping.rty_ID],
-                records: res_records,
-                order: res_orders,
-                mapenabled: true //???
-            });              
-            
-            this.recordList.resultList('updateResultSet', res_recordset);            
-       }else{
+*/    
+            if(res_orders.length>0){        
+                var res_recordset = new hRecordSet({
+                    count: res_orders.length,
+                    offset: 0,
+                    fields: fields,
+                    rectypes: [this.options.mapping.rty_ID],
+                    records: res_records,
+                    order: res_orders,
+                    mapenabled: true //???
+                });              
+                
+                this.recordList.resultList('updateResultSet', res_recordset);            
+                is_wrong_data = false;
+            }
+       }
+       
+       if(is_wrong_data){
             //ele.text('ERROR '+geojson_data);                    
             this.recordList.resultList('updateResultSet', null);            
+            
+            window.hWin.HEURIST4.msg.showMsgErr('Service did not return data in an appropriate format');
        }
     },
 
