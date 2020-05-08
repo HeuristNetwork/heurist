@@ -382,7 +382,7 @@
                     .$mysqli->real_escape_string( $record['ugr_Name'])."' or ugr_eMail='"
                     .$mysqli->real_escape_string($record['ugr_eMail'])."'");
                 if($res!=$recID){
-                    $system->addError(HEURIST_INVALID_REQUEST, 'The provided name or email already exists');
+                    $system->addError(HEURIST_ACTION_BLOCKED, 'The provided name or email already exists');
                     return false;
                 }
 
