@@ -318,11 +318,17 @@ console.log('beforeunload MAPPEVIEW');
                     db: window.hWin.HAPI4.database,
                     ID:0, //new record
                     RecTypeID: RT_MAP_DOCUMENT,
+                    OwnerUGrpID: window.hWin.HAPI4.user_id(),
                     RecTitle: mapdoc_name,
                     details: details};
+                    
+                window.hWin.HEURIST4.msg.bringCoverallToFront($('body'));
+                    
 
                 window.hWin.HAPI4.RecordMgr.saveRecord(request, 
                     function(response){
+                        window.hWin.HEURIST4.msg.sendCoverallToBack();
+                        
                         var  success = (response.status == window.hWin.ResponseStatus.OK);
                         if(success){
                             
