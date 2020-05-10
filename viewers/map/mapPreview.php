@@ -147,12 +147,12 @@ console.log('beforeunload MAPPEVIEW');
         
             //mapping.mapping( 'drawLoadWKT', initial_wkt, true);
             var dfd = new $.Deferred();            
-            mapping.mapping( 'createVirtualMapDocument', initial_layers, dfd);
+            mapping.mapping('getMapManager').createVirtualMapDocument( initial_layers, dfd );
             
-            //create map snapshot
+            //create map snapshot as soon as map is loaded
             $.when( dfd.promise() ).done(
                 function(data){
-
+                    //remove redundant nodes to create snapshot
                     function filterNode(node) {
                         if (node instanceof Text) {
                             return true;
@@ -186,13 +186,18 @@ console.log('beforeunload MAPPEVIEW');
             );
         }
         
-        setTimeout(function(){
-            //load check login iframe
-            var ele = $('#checklogin');
-            ele.attr('src', null);
-            ele.attr('src', window.hWin.HAPI4.baseURL
-                +'hclient/framecontent/initPageLogin.php?db='+target_database);
-        },500);
+        //
+        //
+        //        
+        if(target_database!=window.hWin.HAPI4.database){
+            setTimeout(function(){
+                //load check login iframe
+                var ele = $('#checklogin');
+                ele.attr('src', null);
+                ele.attr('src', window.hWin.HAPI4.baseURL
+                    +'hclient/framecontent/initPageLogin.php?db='+target_database);
+            },500);
+        }
         
     }
             
@@ -206,23 +211,33 @@ console.log('beforeunload MAPPEVIEW');
                 return;
             }
             
-            var recordset = mapping.mapping( 'getMapDocumentRecordset', 'temp');
+            //get all layers and datasources of document
+            var recordset = mapping.mapping( 'getMapManager' ).getMapDocumentRecordset( 'temp' );
             if(recordset==null || recordset.length()==0){
                 window.hWin.HEURIST4.msg.showMsgFlash('Temp mapspace is empty');
                 return;    
             }
+
+            var RT_MAP_DOCUMENT    = window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_DOCUMENT'];
+            var RT_MAP_LAYER       = window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_LAYER'];
+            var RT_TLCMAP_DATASET  = window.hWin.HAPI4.sysinfo['dbconst']['RT_TLCMAP_DATASET'];
             
-            //check that all layers and datasource records are public
+            //1. check that all layers and datasource records are public
+            //2. calculate 
             var not_public = [], cnt_dt = 0, cnt_ds = 0;
             var idx, records = recordset.getRecords();
+            
+            var native_ids = [];  //leaflet ids
+            var heurist_ids = []; //heurist layer ids in mapdoc
+            
             for(idx in records){
                 if(idx)
                 {
                     var record = records[idx];
+                    var recType = recordset.fld(record, 'rec_RecTypeID');
                     if(recordset.fld(record, 'rec_NonOwnerVisibility')!='public'){
                         
                         var recName = recordset.fld(record, 'rec_Title');
-                        var recType = recordset.fld(record, 'rec_RecTypeID');
                         
                         if(recType==RT_MAP_LAYER || recType==RT_TLCMAP_DATASET){
                             recType = 'dataset';
@@ -231,7 +246,12 @@ console.log('beforeunload MAPPEVIEW');
                             recType = 'datasource';
                             cnt_ds++;
                         }
+                        
                         not_public.push(recName+' ('+recType+')');
+                        
+                    }else if((recType==RT_MAP_LAYER || recType==RT_TLCMAP_DATASET) && record['layer']){
+                        heurist_ids.push(recordset.fld(record, 'rec_ID'));    
+                        native_ids.push((record['layer']).getNativeId());    
                     }
                 }
             }
@@ -257,6 +277,72 @@ console.log('beforeunload MAPPEVIEW');
                 window.hWin.HEURIST4.msg.showMsgErr( sMsg );
                 return;
             }
+            
+            var mapdoc_name = $('#mapspace_name').val()
+            
+            //if target and source databases are the same - jusst create new mapdocument
+            if(target_database==window.hWin.HAPI4.database){
+
+                var layer_cnt = heurist_ids.length;
+                
+                var DT_NAME          = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'];
+                var DT_MAP_BOOKMARK  = window.hWin.HAPI4.sysinfo['dbconst']['DT_MAP_BOOKMARK'];
+                var DT_ZOOM_KM_POINT = window.hWin.HAPI4.sysinfo['dbconst']['DT_ZOOM_KM_POINT'];
+                var DT_GEO_OBJECT    = window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_OBJECT'];
+                var DT_MAP_LAYER     = window.hWin.HAPI4.sysinfo['dbconst']['DT_MAP_LAYER'];
+                
+                var bounds = mapping.mapping( 'getBounds', native_ids);
+
+                var mbookmark = 'Extent,'+bounds.getSouth()+','+bounds.getWest()
+                         +','+bounds.getNorth()+','+bounds.getEast()+',1800,2050';
+            
+                var mbox = [bounds.getWest()+' '+bounds.getSouth(),
+                            bounds.getWest()+' '+bounds.getNorth(),
+                            bounds.getEast()+' '+bounds.getNorth(),
+                            bounds.getEast()+' '+bounds.getSouth(),
+                            bounds.getWest()+' '+bounds.getSouth()];
+                mbox = 'pl POLYGON(('+mbox.join(',')+'))';
+                //{geo:{type:'pl',wkt:'POLYGON(('+mbox.join(',')+'))'}};
+                
+                var zoomKm = Math.round(bounds.getSouthWest().distanceTo(bounds.getNorthEast())/10000); //100000
+                
+                var details = {};
+                details['t:'+DT_NAME] = [ mapdoc_name ];
+                details['t:'+DT_MAP_BOOKMARK]  = [ mbookmark ];
+                details['t:'+DT_ZOOM_KM_POINT] = [ zoomKm ];
+                details['t:'+DT_GEO_OBJECT]    = [ mbox ];
+                details['t:'+DT_MAP_LAYER]     = heurist_ids;
+
+                
+                var request = {a: 'save', 
+                    db: window.hWin.HAPI4.database,
+                    ID:0, //new record
+                    RecTypeID: RT_MAP_DOCUMENT,
+                    RecTitle: mapdoc_name,
+                    details: details};
+
+                window.hWin.HAPI4.RecordMgr.saveRecord(request, 
+                    function(response){
+                        var  success = (response.status == window.hWin.ResponseStatus.OK);
+                        if(success){
+                            
+                            var sMsg = '<br><p>'
+    +' Created 1 map document with '+layer_cnt+' map layers.</p>'                       
+    +'<p>Please go to <b>My Maps</b> to edit the styling, to obtain the URL,'
+    +' or to obtain a snippet of html which will allow you to embed this map in an external website</p>';
+                            
+                            window.hWin.HEURIST4.msg.showMsgDlg(sMsg, null, 'Map saved');
+                            window.close();
+                                                        
+                        }else{
+                            window.hWin.HEURIST4.msg.showMsgErr(response);
+                        }
+                    }
+                );
+                
+                return;
+            }//same database
+            
 
             //$('#divStep2').hide();
             var session_id = Math.round((new Date()).getTime()/1000);  //for progress
@@ -265,7 +351,7 @@ console.log('beforeunload MAPPEVIEW');
                 source_db: window.hWin.HAPI4.database,
                 db: target_database,
                 ids: recordset.getIds(),  //layers and datasource
-                tlcmapspace: $('#mapspace_name').val(), //name of mapdocument
+                tlcmapspace: mapdoc_name, //name of mapdocument
                 tlcmapshot: tlcmap_snapshot, //base64 encoded image to be saved as mapdocument thumb
                 action: 'import_records',
                 session: session_id,
@@ -307,7 +393,7 @@ console.log('beforeunload MAPPEVIEW');
                                 
                     }
                 });
-    } 
+    } //_exportMapSpace
     
         </script>
         <style type="text/css">

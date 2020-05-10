@@ -750,7 +750,7 @@ private static function _calculateSummaryExtent($maplayer_extents, $is_return_re
             
             $gPoint = new GpointConverter();
             $gPoint->setLongLat($mbox['minx'], $mbox['miny']);
-            $zoomKm = round($gPoint->distanceFrom($mbox['maxx'], $mbox['miny'])/100000,0);
+            $zoomKm = round($gPoint->distanceFrom($mbox['maxx'], $mbox['minx'])/100000,0);
             
             
             $mbookmark = 'Extent,'.$mbox['miny'].','.$mbox['minx']
@@ -775,7 +775,7 @@ private static function _calculateSummaryExtent($maplayer_extents, $is_return_re
                 DT_NAME=>array('1'=>$params['tlcmap']),
                 DT_MAP_BOOKMARK=>array('2'=>($mbookmark!=null?$mbookmark:$mapdoc_defaults[DT_MAP_BOOKMARK])),
                 DT_ZOOM_KM_POINT=>array('3'=>($zoomKm>0?$zoomKm:$mapdoc_defaults[DT_ZOOM_KM_POINT])),
-                DT_GEO_OBJECT=>array('4'=>($mbookmark!=null?array('geo'=>array("type"=>"pl", "wkt"=>$mbox)):null)),
+                DT_GEO_OBJECT=>array('4'=>($mbox!=null?array('geo'=>array("type"=>"pl", "wkt"=>$mbox)):null)),
                 DT_MAP_LAYER=>$maplayer_records
             );
             

@@ -441,19 +441,20 @@ public static function importRecordsFromDatabase($params, $session_id){
         }
     }
     
-    //convert tlcmap dataset to map layer and creates parent mapspace
+    // convert tlcmap dataset to map layer and creates parent mapspace
     // see record_output.php
     if(@$params['tlcmapspace']!=null){
         $remote_path = $remote_path.'&tlcmap='.urlencode($params['tlcmapspace']);    
     }
 
+    // save file that produced with record_output.php from source to temp file  
     $heurist_path = tempnam(HEURIST_SCRATCH_DIR, "_temp_"); // . $file_id;
 
     $filesize = saveURLasFile($remote_path, $heurist_path);
 
 //2. import records
     if($filesize>0 && file_exists($heurist_path)){
-        //
+        //read temp file, import records
         $res = self::importRecords($heurist_path, $session_id, false, true, self::$system->get_user_id() );
     
         if(@$params['tlcmapshot'] && $res!==false){

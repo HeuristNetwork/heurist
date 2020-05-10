@@ -345,7 +345,7 @@ function hMapLayer2( _options ) {
                     
                     //check if there are layers and tlcmapdatasets among result set
                     if( _parent_mapdoc==0 ){ // && window.hWin.HEURIST4.util.isArrayNotEmpty(layers_ids)
-                        options.mapwidget.mapping('addLayerRecords', layers_ids);
+                        options.mapwidget.mapping('getMapManager').addLayerRecords( layers_ids );
                     } 
                     
 

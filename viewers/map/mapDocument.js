@@ -481,7 +481,7 @@ function hMapDocument( _options )
         },
         
         //
-        //
+        // create new virtual map document for given layer_ids
         //
         createVirtualMapDocument: function(layer_ids, deferred){
             that.closeMapDocument('temp'); //clear old one
@@ -501,31 +501,6 @@ function hMapDocument( _options )
             
             //if(map_documents==null) _loadMapDocuments(); //init list of mapdocs
         },
-        
-        //
-        //returns layer record or mapdocument record
-        //
-        getLayer: function(mapdoc_id, rec_id){
-            
-            if(map_documents_content[mapdoc_id]){
-                var _record = null;
-                if(rec_id>0){
-                    _record = (map_documents_content[mapdoc_id]).getById( rec_id );
-                }else if(map_documents) {
-                    _record = map_documents.getById( mapdoc_id );
-                }
-                if(_record) return _record; 
-            }
-            return null;
-        },
-
-        //
-        // returns all records for given mapspace
-        //
-        getMapDocumentRecordset: function(mapdoc_id){
-            return map_documents_content[mapdoc_id];
-        },
-        
         
         //
         // adds search results or query as a new layer to mapdoc (usuallly "Search Results")
@@ -768,7 +743,8 @@ function hMapDocument( _options )
         editSymbology: function( mapdoc_id, rec_id, callback ){
             _editSymbology( mapdoc_id, rec_id, callback );    
         },
-
+        
+        
         //
         //
         //
@@ -790,12 +766,49 @@ function hMapDocument( _options )
                 
             if(mapdoc_extent!=null){ 
 
+                    //extent is taken from mapdocument
                     options.mapwidget.mapping('zoomToBounds', mapdoc_extent);
                 
             }else{
                 //neither bbox nor bookmark are defined
                 //find all layer ids and zoom to summary extent
+                var ids = that.getNativeIdsForDocument( mapdoc_id );
                 
+                if(ids.length>0)
+                    options.mapwidget.mapping('zoomToLayer', ids);
+            }
+        },
+        
+             
+        //
+        // returns layer record OR mapdocument record (if rec_id is not defined)
+        //
+        getLayer: function(mapdoc_id, rec_id){
+            
+            if(map_documents_content[mapdoc_id]){
+                var _record = null;
+                if(rec_id>0){
+                    _record = (map_documents_content[mapdoc_id]).getById( rec_id );
+                }else if(map_documents) {
+                    _record = map_documents.getById( mapdoc_id );
+                }
+                if(_record) return _record; 
+            }
+            return null;
+        },
+
+        //
+        // returns all records for given mapspace (layers and datasources)
+        //
+        getMapDocumentRecordset: function(mapdoc_id){
+            return map_documents_content[mapdoc_id];
+        },
+        
+        
+        //
+        //
+        //
+        getNativeIdsForDocument: function(mapdoc_id){
                 var resdata = map_documents_content[mapdoc_id];
             
                 var ids = [];
@@ -812,9 +825,7 @@ function hMapDocument( _options )
                         }
                     }
                 }
-                if(ids.length>0)
-                    options.mapwidget.mapping('zoomToLayer', ids);
-            }
+                return ids;            
         },
         
         //

@@ -288,18 +288,26 @@ error_log($e->getCode().' ('.$e->getErrorType().'): '.$e->getMessage());
 //
 //
 //
-function checkWGS($system, $orig_points){
+function checkWGS($system, $orig_points, $check_number_or_all=3){
 
+    $cnt = 0;
     foreach ($orig_points as $point) {
-        if (($northing!=round($point[1])) || ($easting!=round($point[0])) 
-                || (abs($point[0])<200) || (abs($point[1])<90)){
+        //if not integer and less than 180/90 this is wgs
+        if (!(($northing!=round($point[1])) || ($easting!=round($point[0])) 
+                || (abs($point[0])<200) || (abs($point[1])<90))){
 //: id:xxxxxx title: xxxxxxxxxxxxxxxx                    
                 $system->error_exit_api(
 'Cannot process shp file. Heurist uses WGS84 (World Geographic System) '
 .'to support the plotting of maps worldwide. This shapefile is not in this format '
 .'and will not therefore display on maps. '
 .'Please use a GIS or other converter to convert to WGS84', HEURIST_ERROR);  
-        }                
+        }       
+                 
+        if( $check_number_or_all===true || $cnt < $check_number_or_all ){
+            $cnt++;
+        }else{
+            break;
+        }
     }
     return true;
 }
