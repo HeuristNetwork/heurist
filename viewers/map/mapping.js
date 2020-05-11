@@ -1342,7 +1342,7 @@ $.widget( "heurist.mapping", {
                         .setContent('<p style="margin:12px;font-style:italic">'
                                 +found_cnt+' map objects found here. Select desired: </p>'
                                 +'<select size="'+ ((found_cnt>10)?10:found_cnt)
-                                +'" style="max-width:300px;overflow-y: auto;border: none;outline: none; cursor:pointer">'
+                                +'" style="width:100%;overflow-y: auto;border: none;outline: none; cursor:pointer">'
                                 +sText+'</select>') 
                         .openOn(this.nativemap);
                     
