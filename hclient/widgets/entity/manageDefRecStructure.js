@@ -615,7 +615,7 @@ dty_TermIDTreeNonSelectableIDs
                         if(action=='field'){
                            
                            //add field   
-                           that.showBaseFieldEditor(-1);
+                           that.showBaseFieldEditor(-1, null);
                             
                         }else if(action=='block'){
                             
@@ -980,8 +980,17 @@ dty_TermIDTreeNonSelectableIDs
     // arg1 - not defined or not integer - use current 
     // arg2 - add new field after dty_ID 
     //
-    showBaseFieldEditor: function( arg1, arg2 ){
+    showBaseFieldEditor: function( arg1, arg2, allow_proceed ){
         
+        
+        if(allow_proceed!==true){
+            this._allowActionIfModified( function(){ 
+                this.showBaseFieldEditor( arg1, arg2, true );                            
+            } );
+            return;
+        }
+        
+        var dtyID;
         if(isNaN(parseInt(arg1))){ //event - use curent 
             dtyID = this._currentEditID;
             if(!(dtyID>0)) return;
@@ -1000,7 +1009,7 @@ dty_TermIDTreeNonSelectableIDs
         
         if(!(dtyID>0)){ //new field
         
-            if(arg2>0){
+            if(arg2>0){ //add after
                 this._lockDefaultEdit = true;
                 var tree = this._treeview.fancytree("getTree");
                 node = tree.getNodeByKey(arg2);
@@ -2039,7 +2048,14 @@ edit form is always inline
     //
     // add new separator/group
     //
-    addNewSeparator: function( after_dtid ){
+    addNewSeparator: function( after_dtid, allow_proceed ){
+        
+        if(allow_proceed!==true){
+            this._allowActionIfModified( function(){ 
+                this.addNewSeparator( after_dtid, true );                            
+            } );
+            return;
+        }
         
         if(this._isFlat){
             

@@ -162,18 +162,19 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         var action = ele.attr('data-action');
                         if(!action) action = ele.parent().attr('data-action');
                         
-                        if(action=='field'){
-                            that.options.rts_editor.manageDefRecStructure(
-                                'showBaseFieldEditor', -1, dt_id);
-                        }else if(action=='block'){
+                            if(action=='field'){
+                                that.options.rts_editor.manageDefRecStructure(
+                                    'showBaseFieldEditor', -1, dt_id);
+                            }else if(action=='block'){
+                                
+                                that.options.rts_editor.manageDefRecStructure(
+                                    'addNewSeparator', dt_id);
+                                
+                            }else if(action=='edit'){
+                                that.options.rts_editor.manageDefRecStructure(
+                                    'editField', dt_id);
+                            }
                             
-                            that.options.rts_editor.manageDefRecStructure(
-                                'addNewSeparator', dt_id);
-                            
-                        }else if(action=='edit'){
-                            that.options.rts_editor.manageDefRecStructure(
-                                'editField', dt_id);
-                        }
                     }
             });
                     
