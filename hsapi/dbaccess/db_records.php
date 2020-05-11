@@ -1515,8 +1515,12 @@
                        $lim = checkMaxLength2($rval);
                        //TEST $lim = 100;
                        if($lim>0){
-                            $dtl_Value = $purifier->purify($dtl_Value);
-                            $dtl_Value = htmlspecialchars_decode( $dtl_Value );
+                            //remove script tag
+                            $dtl_Value = trim($dtl_Value);
+                            $dtl_Value = preg_replace('#<script(.*?)>(.*?)</script>#is', '', $dtl_Value);
+                           
+                            //$dtl_Value = $purifier->purify($dtl_Value);
+                            //$dtl_Value = htmlspecialchars_decode( $dtl_Value );
                            
                             $iStart = 0;
                             while($iStart<mb_strlen($dtl_Value)){
@@ -1539,8 +1543,10 @@
                         if(!$isValid ){
                             $err_msg = 'Value is empty';  
                         }else if(!in_array($dtyID, $not_purify)){
-                            $dtl_Value = $purifier->purify($dtl_Value);
-                            $dtl_Value = htmlspecialchars_decode( $dtl_Value );
+                            $dtl_Value = trim($dtl_Value);
+                            $dtl_Value = preg_replace('#<script(.*?)>(.*?)</script>#is', '', $dtl_Value);
+                            //$dtl_Value = $purifier->purify($dtl_Value);
+                            //$dtl_Value = htmlspecialchars_decode( $dtl_Value );  //&gt; to >
                         }
                         break;
                     
