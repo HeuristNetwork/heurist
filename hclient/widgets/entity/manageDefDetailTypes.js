@@ -692,7 +692,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
     //
     //
     //
-    _activateEnumControls: function( ele ){
+    _activateEnumControls: function( ele, full_mode ){
         
             var ele = ele.find('.input-div');
             //remove old content
@@ -703,29 +703,46 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             
             this.enum_container = ele;
             
-            $('<div style="line-height:2ex;padding-top:4px">'
-                    +'<label style="text-align:left;line-height:19px;vertical-align:top">'
-                    +'<input type="radio" value="vocabulary" name="enumType" style="vertical-align: top;">&nbsp;Use a vocabulary</label> '
-                    +'<div id="enumVocabulary" style="display:inline-block;padding-left:4px;">'
-                        +'<select id="selVocab" class="sel_width"></select>'
-                        +'<span id="termsPreview1"></span>'
-                        +'<div style="font-size:smaller">'
-                            +'<a href="#" id="add_vocabulary">add a vocabulary</a>&nbsp;'
-                            +'<a href="#" id="add_terms" style="padding-left:10px">add terms to vocabulary</a>&nbsp;'
-                            +'<a href="#" id="show_terms_1" style="padding-left:10px">edit terms tree</a>'
+            if( !(this._currentEditID>0) && (full_mode!==true) ){ //insert
+            
+                $('<div style="line-height:2ex;padding-top:4px">'
+                        +'<div id="enumVocabulary" style="display:inline-block;padding-left:4px;">'
+                            +'<select id="selVocab" class="sel_width"></select>'
+                            +'<span id="termsPreview1"></span>'
+                            +'<div style="font-size:smaller">'
+                                +'<a href="#" id="add_advanced">advanced</a>&nbsp;'
+                                +'<a href="#" id="add_vocabulary" style="margin-left:90px;">add a vocabulary</a>&nbsp;'
+                            +'</div>'
                         +'</div>'
-                    +'</div>'
-            +'</div><div style="padding-top:4px">'
-                    +'<label style="text-align:left;line-height: 12px;">'
-                    +'<input type="radio" value="individual" name="enumType" style="margin-top:0px">&nbsp;Select terms individually</label> '
-                    +'<div  id="enumIndividual" style="display:none;padding-left:4px;">'
-                        +'<input type="button" value="Select terms" id="btnSelectTerms" style="margin-right:4px"/>'                    
-                        +'<span id="termsPreview2"></span>'
-                        +'<a href="#" id="show_terms_2">edit terms tree</a>'
-                    +'</div>'
-                    +'<div style="font-style:italic;padding: 4px 0px">'
-                        +'Warning: Advanced users only - list must be updated manually if relevant new terms added</div>'
-            +'</div>').appendTo(this.enum_container);
+                +'</div>').appendTo(this.enum_container);
+            
+            }else{
+            
+                $('<div style="line-height:2ex;padding-top:4px">'
+                        +'<label style="text-align:left;line-height:19px;vertical-align:top">'
+                        +'<input type="radio" value="vocabulary" name="enumType" style="vertical-align: top;">&nbsp;Use a vocabulary</label> '
+                        +'<div id="enumVocabulary" style="display:inline-block;padding-left:4px;">'
+                            +'<select id="selVocab" class="sel_width"></select>'
+                            +'<span id="termsPreview1"></span>'
+                            +'<div style="font-size:smaller">'
+                                +'<a href="#" id="add_vocabulary">add a vocabulary</a>&nbsp;'
+                                +'<a href="#" id="add_terms" style="padding-left:10px">add terms to vocabulary</a>&nbsp;'
+                                +'<a href="#" id="show_terms_1" style="padding-left:10px">edit terms tree</a>'
+                            +'</div>'
+                        +'</div>'
+                +'</div><div style="padding-top:4px">'
+                        +'<label style="text-align:left;line-height: 12px;">'
+                        +'<input type="radio" value="individual" name="enumType" style="margin-top:0px">&nbsp;Select terms individually</label> '
+                        +'<div  id="enumIndividual" style="display:none;padding-left:4px;">'
+                            +'<input type="button" value="Select terms" id="btnSelectTerms" style="margin-right:4px"/>'                    
+                            +'<span id="termsPreview2"></span>'
+                            +'<a href="#" id="show_terms_2">edit terms tree</a>'
+                        +'</div>'
+                        +'<div style="font-style:italic;padding: 4px 0px">'
+                            +'Warning: Advanced users only - list must be updated manually if relevant new terms added</div>'
+                +'</div>').appendTo(this.enum_container);
+                
+            }
                 
             //create event listeneres
             this._on(this.enum_container.find('input[name="enumType"]'),{change:
@@ -742,6 +759,10 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             this._on(this.enum_container.find('#add_terms'),{click: this._onAddVocabOrTerms});
             this._on(this.enum_container.find('#show_terms_1'),{click: this._showOtherTerms});
             this._on(this.enum_container.find('#show_terms_2'),{click: this._showOtherTerms});
+            this._on(this.enum_container.find('#add_advanced'),{click: function(){
+                
+                this._activateEnumControls(this._editing.getFieldByName('dty_Mode_enum'), true);
+            }});
             
             this.enum_container.find('#btnSelectTerms').button();
             this._on(this.enum_container.find('#btnSelectTerms'),{click: this._onSelectTerms});
