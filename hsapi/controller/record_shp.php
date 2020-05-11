@@ -293,9 +293,8 @@ function checkWGS($system, $orig_points, $check_number_or_all=3){
     $cnt = 0;
     foreach ($orig_points as $point) {
         //if not integer and less than 180/90 this is wgs
-        if (!(($northing!=round($point[1])) || ($easting!=round($point[0])) 
-                || (abs($point[0])<200) || (abs($point[1])<90))){
-//: id:xxxxxx title: xxxxxxxxxxxxxxxx                    
+        //!(($point[1]!=round($point[1])) || ($point[0]!=round($point[0])) 
+        if (!((abs($point[0])<200) && (abs($point[1])<90))){
                 $system->error_exit_api(
 'Cannot process shp file. Heurist uses WGS84 (World Geographic System) '
 .'to support the plotting of maps worldwide. This shapefile is not in this format '
@@ -309,6 +308,7 @@ function checkWGS($system, $orig_points, $check_number_or_all=3){
             break;
         }
     }
+    
     return true;
 }
     
