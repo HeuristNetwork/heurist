@@ -125,7 +125,7 @@ function uout($idx, $def){
     background-color: <?php uout('cd_bg', '#e0dfe0');?> !important;  
 }
 textarea.ui-widget-content, input.ui-widget-content, select.ui-widget-content{
-    background: <?php uout('cd_input', '#F4F2F4');?> !important; 
+    background: <?php uout('cd_input', '#F4F2F4');?>; /*0511 !important;*/
 }
 .ui-widget-content {
     border: 1px solid <?php uout('cd_bg', '#e0dfe0');?>; 
@@ -190,7 +190,7 @@ select.ui-heurist-header2, input.ui-heurist-header2{
     color: <?php uout('ce_color', '#6A7C99');?>;
 }
 .ent_wrapper.editor .text{
-    background: none repeat scroll 0 0 <?php uout('ce_input', '#ffffff');?>  !important;
+    background: none repeat scroll 0 0 <?php uout('ce_input', '#ffffff');?>; /* 0511 !important */
     border: 1px solid  <?php uout('cd_bg', '#e0dfe0' );?>;;
 }
 .separator2{

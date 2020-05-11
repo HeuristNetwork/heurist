@@ -83,7 +83,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                         +'<span style="position:absolute; right:4px;width:32px;top:26px;height:32px;font-size:32px;cursor:pointer" class="closeTreePanel ui-icon ui-icon-carat-2-w"/>'
                     +'</div>'
                     +'<div class="treeView"/>' //treeview
-                    +'<div class="editForm" style="top:0px;display:none">EDITOR</div>'
+                    +'<div class="editForm editFormRtStructure" style="top:0px;display:none">EDITOR</div>'
                     +'<div class="recordList" style="display:none"/>'
                 +'</div>';
             
@@ -1313,7 +1313,9 @@ dty_TermIDTreeNonSelectableIDs
                             top = top + $(ele).position().top;
                         }
                         ele_ed.scrollTop(top);
+                        
                     },200); //without timeout preview form scrolls to kept position
+                    
                 }
                 this.editForm.show();
                 this._editing.setFocus();
@@ -1494,9 +1496,14 @@ dty_TermIDTreeNonSelectableIDs
         this._on( btnSave, {click: function() { that._saveEditAndClose( null, 'close' ); }});
         
         
-        
-
         this._super();
+        
+        //change default styles
+        this.editForm.find('.text').css({background: '#ECF1FB'});
+        this.editForm.find('.entity_selector').css({background: '#ECF1FB'});
+        this.editForm.find('.ui-selectmenu-button').css({background: '#ECF1FB'});
+        this.editForm.find('.required > label').css({color: '#6A7C99'});
+
     },    
     
     
