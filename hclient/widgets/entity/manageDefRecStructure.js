@@ -369,7 +369,8 @@ dty_TermIDTreeNonSelectableIDs
                                     +'</span><span style="font-size:smaller">  ('
                                     +window.hWin.HEURIST4.detailtypes.lookups[recset.fld(record,'dty_Type')]
                                     +')</span>';
-                        }else if(req=='forbidden'){
+                        }
+                        if(req=='forbidden'){
                             title =  title + '<span style="font-size:smaller;text-transform:none;"> (hidden)</span>';
                         }
                     
@@ -1810,6 +1811,21 @@ dty_TermIDTreeNonSelectableIDs
         }
     },
     
+    _composeTreeItem: function(title, type, req){
+        
+        if(type!='separator'){
+            title =  '<span style="padding-left:20px;">' + title 
+                    + '</span><span style="font-size:smaller;">  ('
+                    +window.hWin.HEURIST4.detailtypes.lookups[type]
+                    +')</span>';
+        }
+        if(req=='forbidden'){
+            title =  title + '<span style="font-size:smaller;text-transform:none;"> (hidden)</span>';
+        }
+        
+        return title;
+    },
+    
     //-----------------------------------------------------
     //
     // special case for separator field
@@ -1859,7 +1875,8 @@ dty_TermIDTreeNonSelectableIDs
                                         + '</span><span style="font-size:smaller">  ('
                                         +window.hWin.HEURIST4.detailtypes.lookups[fields['dty_Type']]
                                         +')</span>';
-                            }else if(req=='forbidden'){
+                            }
+                            if(req=='forbidden'){
                                 title =  title + '<span style="font-size:smaller;text-transform:none;"> (hidden)</span>';
                             }
                             
@@ -2019,7 +2036,8 @@ edit form is always inline
                                         + '</span><span style="font-size:smaller;">  ('
                                     +window.hWin.HEURIST4.detailtypes.lookups[recset.fld(record,'dty_Type')]
                                     +')</span>';
-                        }else if(req=='forbidden'){
+                        }
+                        if(req=='forbidden'){
                             title =  title + '<span style="font-size:smaller;text-transform:none;"> (hidden)</span>';
                         }
                         node.setTitle( title );   

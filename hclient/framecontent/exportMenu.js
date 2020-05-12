@@ -292,14 +292,13 @@ function hexportMenu() {
 '<p>The records you are exporting may contain pointers to other records which are not in your current results set. These records may additionally point to other records.</p>'                
 //+'<p>Heurist follows the chain of related records, which will be included in the XML or JSON output. The total number of records exported will therefore exceed the results count indicated.</p>'
 //+'<p>To disable this feature and export current result only uncheck "Follow pointers"</p>'
-+'<br><label><input type="radio" name="links" value="direct" checked/>Follow pointers and relationship markers in records</label>'
-+'<br><label><input type="radio" name="links" value="direct_links"/>Follow only pointers, ignore relationship markers <warning about losing relationships></label>'
-+'<br><label><input type="radio" name="links" value="none"/>Don\'t follow pointers or relationship markers (you will lose any data which is referenced by pointer fields in the exported records)</label>'
-+'<br><label><input type="radio" name="links" value="all"/>Follow ALL connections including reverse pointers" (warning: any commonly used connection, such as to Places, will result in a near-total dump of the database)</label><br>'
++'<p style="padding:20px 0"><label><input type="radio" name="links" value="direct" style="float:left;margin-right:8px;" checked/>Follow pointers and relationship markers in records <b>(recommended)</b></label>'
++'<br><br><label><input type="radio" name="links" value="direct_links" style="float:left;margin-right:8px;"/>Follow only pointers, ignore relationship markers <warning about losing relationships></label>'
++'<br><br><label><input type="radio" name="links" value="none" style="float:left;margin-right:8px;"/>Don\'t follow pointers or relationship markers (you will lose any data which is referenced by pointer fields in the exported records)</label>'
++'<br><br><label><input type="radio" name="links" value="all" style="float:left;margin-right:8px;"/>Follow ALL connections including reverse pointers" (warning: any commonly used connection, such as to Places, will result in a near-total dump of the database)</label></p>'
                         , function(){ 
                             
                             var val = $expdlg.find('input[name="links"]:checked').val();
-console.log('>'+val);
                             
                             opts.linksMode = val;
                             opts.questionResolved=true; 

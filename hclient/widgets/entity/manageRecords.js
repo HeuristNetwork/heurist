@@ -3224,10 +3224,11 @@ rectypes.names[rectypeID] + ' is defined as a child of <b>'+names
             
             //show forbidden fields as disabled - except gearwheel
             var ele_fb = $(this.element).find('div.forbidden');
-            ele_fb.css({'opacity':'0.5'}); 
-            ele_fb.next().css({'opacity':'0.5'}); 
-            ele_fb.next().next().css({'opacity':'0.5'}); 
-            //ele_fb.find('.ui-icon-gear').parent().css({'opacity':'0 !important', color:'red'});
+            ele_fb.css({'opacity':'0.3'});   //header
+            ele_fb.next().css({'opacity':'0.3'}); //repeat btn 
+            var ele_id = ele_fb.next().next().css({'opacity':'0.3'}); //input-cell 
+            //ele_id.find('input').css('border','1px dotted red');
+            ele_id.find('input,textarea,button,.ui-selectmenu-button').css('border','1px dotted red');
             
             //reduce width of header
             $(this.element).find('.separator').css({width: '80%', display: 'inline-block'});

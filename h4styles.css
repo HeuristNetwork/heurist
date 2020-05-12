@@ -313,7 +313,7 @@ input.text, select.text {
 }
 
 .required, .required>label, .recommended {
-    font-weight: bold;
+    font-weight: 800;
 }
 
 /* for tabs, accordions, treeview */
@@ -1250,7 +1250,7 @@ span.fancytree-checkbox{
     color:#6A7C99 !important;
 }
 .tree-rts .forbidden, a.forbidden{
-    color:gray !important;
+    color:lightgray !important;
 }
 
 
