@@ -629,7 +629,12 @@ foreach ($this->imp_fieldtypes as $ftId){
         $trg_detailtypes['names'][abs($res)] = $def_field[$idx_name-1]; //new name
         
     }else{
-        $this->error_exit2("Can't add field type for id#".$ftId.". ".$res);
+        //$ftId
+        $this->error_exit2('Can\'t add base field "'.$def_field[$idx_name-1]
+            .'" (global code '.$def_field[$idx_ccode-1] 
+            .') defined in  template. This may be due to a name conflict caused by unrecognised accents on similar names. '
+            .'<br><br>Please '.CONTACT_HEURIST_TEAM.' for advice'
+            .'<br><br>MySQL message:'.$res);
         return false;
     }
 }

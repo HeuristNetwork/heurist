@@ -33,7 +33,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
     defaultPrefs:{
         width:(window.hWin?window.hWin.innerWidth:window.innerWidth)*0.95,
         height:(window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95,
-        groupsPresentation:'tab', //'list','select'
+        groupsPresentation:'tab', //'none','tab',list','select'
 //'id','ccode','addrec','filter','count','group','icon','edit','editstr','name',description','show','duplicate','fields','status'        
         fields:['editstr','name'] 
         },

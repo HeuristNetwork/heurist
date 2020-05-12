@@ -467,6 +467,7 @@ $.widget( "heurist.importStructure", {
                 isdialog: false,
                 container: '#panel_rty_list',
                 select_mode: 'select_single',
+                groupsPresentation: 'none',
 
                 simpleSearch: true,
 
