@@ -1667,6 +1667,20 @@
 
                             //TODO !!! mysql_num_rows(mysql_query("select ulf_ID from recUploadedFiles where ulf_ID=".dtl_UploadedFileID)) <=0 )
 
+                        }else if(is_string($dtl_Value)){  //this is base64 encoded image
+                        
+                            //save encoded image as file and register it
+                            $entity = new DbRecUploadedFiles($system, null);
+                            $dtl_UploadedFileID = $entity->registerImage($dtl_Value, 'map_snapshot_'.$recID); //it returns ulf_ID
+                            if( is_bool($dtl_UploadedFileID) && !$dtl_UploadedFileID ){
+                                $dtl_UploadedFileID = -1; //fail
+                                $err_msg = 'Can\'t register snapshot image';
+                            }
+                            if(is_array($dtl_UploadedFileID)){
+                                $dtl_UploadedFileID = $dtl_UploadedFileID[0];
+                            }
+                        
+                        
                         }else{  // new way - URL or JSON string with file data array (structure similar get_uploaded_file_info)
                             //TODO!!!!!
                             // $dtl_UploadedFileID = register_external($dtl_Value);

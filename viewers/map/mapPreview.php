@@ -152,36 +152,10 @@ console.log('beforeunload MAPPEVIEW');
             //create map snapshot as soon as map is loaded
             $.when( dfd.promise() ).done(
                 function(data){
-                    //remove redundant nodes to create snapshot
-                    function filterNode(node) {
-                        if (node instanceof Text) {
-                            return true;
-                        }
-                        return [
-                            "div",
-                            "span",
-                            "p",
-                            "i",
-                            "img",
-                            "svg",
-                            "g",
-                            "path"
-                        ].includes(node.tagName.toLowerCase()) || /^h[123456]$/i.test(node.tagName);
-                    }
-                    setTimeout(function(){  
-                        try{
-                            domtoimage
-                            .toPng(document.getElementById('map_container'),{
-                                filter: filterNode
-                            })
-                            .then(function (dataUrl) {
-                                //dataUrl - base64 upload to server and register 
-                                tlcmap_snapshot = dataUrl;
-                            });                                
-                        }catch(e){
-                        }
 
-                        }, 2000);                    
+                    setTimeout(function(){  
+                             // _createMapSnapShot();
+                    }, 2000);                    
                 }
             );
         }
@@ -200,7 +174,51 @@ console.log('beforeunload MAPPEVIEW');
         }
         
     }
+    
+    //
+    // assign tlcmap_snapshot
+    //
+    function _createMapSnapShot(){
+
+        //remove redundant nodes to create snapshot
+        function filterNode(node) {
+            if (node instanceof Text) {
+                return true;
+            }
+            return [
+                "div",
+                "span",
+                "p",
+                "i",
+                "img",
+                "svg",
+                "g",
+                "path"
+            ].includes(node.tagName.toLowerCase()) || /^h[123456]$/i.test(node.tagName);
+        }    
+
+
+        try{
+            domtoimage
+            .toPng(document.getElementById('map_container'),{
+                filter: filterNode
+            })
+            .then(function (dataUrl) {
+                //dataUrl - base64 upload to server and register 
+                tlcmap_snapshot = dataUrl;
+                if(tlcmap_snapshot==null){
+                    window.hWin.HEURIST4.msg.showMsgFlash('Cannot create mapdocument snapshot');
+                    $('#save-button').show();
+                }else{
+                    _exportMapSpace();    
+                }
+            });                                
             
+        }catch(e){
+            window.hWin.HEURIST4.msg.showMsgFlash('Cannot create mapdocument snapshot');
+            $('#save-button').show();
+        }        
+    }
             
     //
     // export layers and datasource to target database
@@ -210,13 +228,21 @@ console.log('beforeunload MAPPEVIEW');
             if(!window.hWin.HEURIST4.msg.checkLength($('#mapspace_name'),'','Define name of map',3,120)){
                 return;
             }
-            
+
             //get all layers and datasources of document
             var recordset = mapping.mapping( 'getMapManager' ).getMapDocumentRecordset( 'temp' );
             if(recordset==null || recordset.length()==0){
                 window.hWin.HEURIST4.msg.showMsgFlash('Temp mapspace is empty');
                 return;    
             }
+            
+            $('#save-button').hide();
+            
+            if(tlcmap_snapshot==null){
+                _createMapSnapShot();
+                return;    
+            }
+            
 
             var RT_MAP_DOCUMENT    = window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_DOCUMENT'];
             var RT_MAP_LAYER       = window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_LAYER'];
@@ -275,12 +301,13 @@ console.log('beforeunload MAPPEVIEW');
 +'<a href="mailto:'+window.hWin.HAPI4.sysinfo.dbowner_email+'">'+window.hWin.HAPI4.sysinfo.dbowner_email+'</a>)</p>';
                 
                 window.hWin.HEURIST4.msg.showMsgErr( sMsg );
+                $('#save-button').show();
                 return;
             }
             
             var mapdoc_name = $('#mapspace_name').val()
             
-            //if target and source databases are the same - jusst create new mapdocument
+            //if target and source databases are the same - just create new mapdocument
             if(target_database==window.hWin.HAPI4.database){
 
                 var layer_cnt = heurist_ids.length;
@@ -290,6 +317,8 @@ console.log('beforeunload MAPPEVIEW');
                 var DT_ZOOM_KM_POINT = window.hWin.HAPI4.sysinfo['dbconst']['DT_ZOOM_KM_POINT'];
                 var DT_GEO_OBJECT    = window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_OBJECT'];
                 var DT_MAP_LAYER     = window.hWin.HAPI4.sysinfo['dbconst']['DT_MAP_LAYER'];
+                var DT_THUMBNAIL     = window.hWin.HAPI4.sysinfo['dbconst']['DT_THUMBNAIL'];
+                
                 
                 var bounds = mapping.mapping( 'getBounds', native_ids);
 
@@ -312,6 +341,10 @@ console.log('beforeunload MAPPEVIEW');
                 details['t:'+DT_ZOOM_KM_POINT] = [ zoomKm ];
                 details['t:'+DT_GEO_OBJECT]    = [ mbox ];
                 details['t:'+DT_MAP_LAYER]     = heurist_ids;
+                
+                if(tlcmap_snapshot && DT_THUMBNAIL>0){
+                    details['t:'+DT_THUMBNAIL] = [tlcmap_snapshot];
+                }
 
                 
                 var request = {a: 'save', 
@@ -327,6 +360,7 @@ console.log('beforeunload MAPPEVIEW');
 
                 window.hWin.HAPI4.RecordMgr.saveRecord(request, 
                     function(response){
+                        $('#save-button').show();
                         window.hWin.HEURIST4.msg.sendCoverallToBack();
                         
                         var  success = (response.status == window.hWin.ResponseStatus.OK);
@@ -368,6 +402,7 @@ console.log('beforeunload MAPPEVIEW');
                    
             window.hWin.HAPI4.doImportAction(request, function( response ){
                 
+                    $('#save-button').show();
                     window.hWin.HEURIST4.msg.sendCoverallToBack();
                     
                     if(response.status == window.hWin.ResponseStatus.OK){

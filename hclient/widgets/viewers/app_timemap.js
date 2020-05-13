@@ -491,7 +491,7 @@ console.log(re);
                 
                 //if layer is visible - select and zoom to record in search results
                 var recID = selection[0];
-                var layer_rec = mapManager.getLayerFromMapDocument( 0, recID );
+                var layer_rec = mapManager.getLayer( 0, recID );
                 if(layer_rec && (layer_rec['layer']).isVisible()){
                     this._doVisualizeSelection( selection );
                 } 

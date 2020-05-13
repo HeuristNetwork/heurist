@@ -506,7 +506,7 @@ public static function saveMapDocumentSnapShot($rec_ID, $tlcmapshot){
             $ulf_ID = $ulf_ID[0];
         }
 
-        //3. add DT_THUMBNAIL detail to mapdocume record
+        //3. add DT_THUMBNAIL detail to mapdocument record
         $dbRecDetails = new DbRecDetails(self::$system, array('ulfID'=>$ulf_ID, dtyID=>DT_THUMBNAIL, 'recIDs'=>$rec_ID));
         $res = $dbRecDetails->detailsAdd();
 
