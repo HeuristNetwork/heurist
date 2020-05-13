@@ -579,14 +579,19 @@ XML;
                 $zip->addFile($tmp_destination, $file_records);
             }
             
-            // IT DOES NOT WORK - need to rewrite flathml
+            // SAVE hml inot file DOES NOT WORK - need to rewrite flathml
             if(@$params['metadata']){//save hml into scratch folder
                 
                 $file_metadata = $params['filename'].'.txt';//($params['format']=='xml'?'.hml':'.xml');
                 $file_metadata_full = tempnam(HEURIST_SCRATCHSPACE_DIR, "meta");
-                $url = HEURIST_BASE_URL.'export/xml/flathml.php?db='
-                            .$params['db']  //self::$system->dbname()
-                            .'&q=ids:'.$params['metadata'].'&depth=0';
+                
+                
+                //$url = $serverURL.'export/xml/flathml.php?db='.$params['db'].'&q=ids:'.$params['metadata'].'&depth=0';
+                
+                $serverURL = HEURIST_SERVER_URL . '/heurist/';
+                list($dataset_id, $layer_id) = explode(',',$params['metadata']);
+                $url = $serverURL.'?db='.$params['db'].'&recID='.$dataset_id;  //($layer_id>0?$layer_id:$dataset_id);
+                $url = $url."\n".($url.'&fmt=html');
                 file_put_contents($file_metadata_full ,$url);
                 /*
                 $_REQUEST['db'] = self::$system->dbname();

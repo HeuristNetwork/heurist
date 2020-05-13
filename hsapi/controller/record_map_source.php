@@ -238,7 +238,7 @@
                     
                     
                 }else{
-                    //etire kml is considered as unified map entry
+                    //entire kml is considered as unified map entry
                     try{
                         $geom = geoPHP::load($file_content, 'kml');
                     }catch(Exception $e){
@@ -315,9 +315,12 @@
                         
                         $file_metadata = $originalFileName.'txt';
                         $file_metadata_full = tempnam(HEURIST_SCRATCHSPACE_DIR, "meta");
-                        $url = HEURIST_BASE_URL.'export/xml/flathml.php?db='
-                                    .$params['db']
-                                    .'&q=ids:'.$params['metadata'].'&depth=0';
+                        
+                        $serverURL = HEURIST_SERVER_URL . '/heurist/';
+                        //list($dataset_id, $layer_id) = explode(',',$params['metadata']);
+                        $url = $serverURL.'?db='.$params['db'].'&recID='.$params['recID']; //($layer_id>0?$layer_id:$dataset_id);
+                        $url = $url."\n".($url.'&fmt=html');
+                        //$url = HEURIST_BASE_URL.'export/xml/flathml.php?db='.$params['db'].'&q=ids:'.$params['metadata'].'&depth=0';
                         file_put_contents($file_metadata_full ,$url);
                         if(file_exists($file_metadata_full)){
                             $zip->addFile($file_metadata_full, $file_metadata);    

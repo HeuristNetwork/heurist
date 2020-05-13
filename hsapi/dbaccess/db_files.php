@@ -562,6 +562,86 @@ function downloadFile($mimeType, $filename, $originalFileName=null){
 }
 
 //
+// $rec_ID -  metadata for record_id
+//
+function downloadFileWithMetadata($fileinfo, $rec_ID){
+  
+    $filepath = $fileinfo['fullPath'];  //concat(ulf_FilePath,ulf_FileName as fullPath
+    $external_url = $fileinfo['ulf_ExternalFileReference'];     //ulf_ExternalFileReference
+    $mimeType = $fileinfo['fxm_MimeType'];  //fxm_MimeType
+    $params = $fileinfo['ulf_Parameters'];  //ulf_Parameters - not used anymore (for backward capability only)
+    $originalFileName = $fileinfo['ulf_OrigFileName'];
+    $fileSize = $fileinfo['ulf_FileSizeKB'];
+    $fileExt = $fileinfo['ulf_MimeExt'];
+    
+    $filepath = resolveFilePath($filepath);
+    $is_local = file_exists($filepath);
+
+    //fix issue if original name does not have ext    
+    if($originalFileName=='' || $originalFileName==null || $originalFileName=='_remote'){
+        $originalFileName = 'Dataset_'.$rec_ID;    
+    }
+    
+    
+    $finfo = pathinfo($originalFileName);
+    $ext = @$finfo['extension'];
+    if($ext==null || $ext==''){
+        if($is_local){
+            $finfo = pathinfo($filepath);  //take from path
+        }else{
+            $finfo = array();
+        }
+        if(@$finfo['extension']){
+            $originalFileName = $originalFileName.'.'.@$finfo['extension'];   
+        }else if($fileExt){
+            $originalFileName = $originalFileName.'.'.$fileExt;   
+        }
+    }    
+    
+    if($is_local){
+        
+    }else if($external_url){
+        $filepath = tempnam(HEURIST_SCRATCH_DIR, '_remote_');
+        saveURLasFile($external_url, $filepath);
+    }
+    
+    $filename = substr($originalFileName,0,strlen($originalFileName)-3);
+    $file_zip = $filename.'zip';
+    $file_zip_full = tempnam(HEURIST_SCRATCHSPACE_DIR, "arc");
+
+    $zip = new ZipArchive();
+    if (!$zip->open($file_zip_full, ZIPARCHIVE::CREATE)) {
+        $system->error_exit_api("Cannot create zip $file_zip_full");
+    }else{
+        $zip->addFile($filepath, $originalFileName);
+    }
+    
+    $file_metadata = $filename.'txt';
+    $file_metadata_full = tempnam(HEURIST_SCRATCHSPACE_DIR, "meta");
+    
+    $serverURL = HEURIST_SERVER_URL . '/heurist/';
+    $url = $serverURL.'?db='.$params['db'].'&recID='.$rec_ID;
+    $url = $url."\n".($url.'&fmt=html');
+
+    file_put_contents($file_metadata_full ,$url);
+    if(file_exists($file_metadata_full)){
+        $zip->addFile($file_metadata_full, $file_metadata);    
+    }
+    $zip->close();
+    
+    //donwload
+    $contentDispositionField = 'Content-Disposition: attachment; '
+        . sprintf('filename="%s"; ', rawurlencode($file_zip))
+        . sprintf("filename*=utf-8''%s", rawurlencode($file_zip));            
+    
+    header('Content-Type: application/zip');
+    header($contentDispositionField);
+    header('Content-Length: ' . filesize($file_zip_full));
+    readfile($file_zip_full);
+    
+}
+
+//
 // output the appropriate html tag to view media content
 //
 //

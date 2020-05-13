@@ -127,6 +127,10 @@ if($db){
 
                     fileGetWidthHeight($filepath, $external_url, $mimeType);
 
+                }else if(@$_REQUEST['metadata']){//download zip file: registered file and file with links to html and xml
+                
+                    downloadFileWithMetadata($fileinfo, $_REQUEST['metadata']);
+                
                 }else
                 if(file_exists($filepath)){
                     
@@ -135,7 +139,7 @@ if($db){
                         $finfo = pathinfo($originalFileName);
                         $ext = @$finfo['extension'];
                         if($ext==null || $ext==''){
-                            $finfo = pathinfo($filepath); 
+                            $finfo = pathinfo($filepath);  //take from path
                             if(@$finfo['extension']){
                                 $originalFileName = $originalFileName.'.'.@$finfo['extension'];   
                             }else if($fileExt){
