@@ -186,14 +186,13 @@ if(@$_REQUEST['field']){
         $field_content = __getValue($rec, $_REQUEST['field']);
         
         if (trim($field_content)!='' && $_REQUEST['field']==DT_CMS_SCRIPT && !$system->is_js_acript_allowed()) {
-?>   
+/*
 window.hWin.HEURIST4.msg.showMsgDlg(
 '<p>This website contains javascript in the custom javascript field of the home page record.' 
 +'Execution of custom javascript is only permitted in specifically authorised databases.</p> '
 +'<p>Please ask the database owner either to edit the CMS HomePage and MenuPage records and clear the custom javascript fields, or to ask their ' 
 +'system administrator to add this database to js_in_database_authorised.txt</p>',null,'Warning');
-<?php      
-            //print 'alert("Execution of custom script not allowed for this database")';        
+*/
         }else{
             print $field_content;
         }
