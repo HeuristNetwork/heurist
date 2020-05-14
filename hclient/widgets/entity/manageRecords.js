@@ -28,6 +28,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     _updated_tags_selection: null,
     _keepYPos: 0,
     _menuTimeoutId: 0,
+    _resizeTimer: 0,
     
     //this.options.selectOnSave - special case when open edit record from select popup
     //this.options.allowAdminToolbar  - if false hide ModifyStructure, Edit title mask and others
@@ -711,16 +712,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         contentSelector: '.editForm',
                         //pane_name, pane_element, pane_state, pane_options, layout_name
                         onresize_end : function(){
-                            var ele = that.editForm.find('.ui-tabs');
-                            if(ele.length>0){
-                                try{
-                                    ele.tabs('pagingResize');    
-                                    //ele.tabs('pagingDestroy');
-                                    //ele.tabs('paging');
-                                }catch(ex){
-                                }
-                            }
-                            
+                            that.handleTabsResize();                            
                         }    
                     }
                 };
@@ -770,6 +762,35 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         }//!isOpenAready
             
         this._initEditForm_step3(recID); 
+    },
+    
+    
+    //    
+    //
+    //
+    handleTabsResize: function() {
+            if (this._resizeTimer) clearTimeout(this._resizeTimer);
+            
+            if (true)  //windowHeight != $(window).height() || windowWidth != $(window).width()) 
+            {
+                var that = this;
+                this._resizeTimer = setTimeout(
+                    function(){                
+                            var ele = that.editForm.find('.ui-tabs');
+                            if(ele.length>0){
+                                try{
+      
+                                    for(var i=0; i<ele.length; i++){  //
+                                        $(ele[i]).tabs('pagingResize');        
+                                        //$(ele[i]).tabs('pagingDestroy');
+                                        //$(ele[i]).tabs('paging');
+                                    }                              
+                                    
+                                }catch(ex){
+                                }
+                            }
+                    }, 200);
+            }
     },
     
     //
@@ -2585,7 +2606,19 @@ rectypes.names[rectypeID] + ' is defined as a child of <b>'+names
             } 
             
             
-            this.editForm.find('.ui-tabs').tabs('paging');
+            var eles = this.editForm.find('.ui-tabs');
+            /*
+                eles.tabs('paging',{
+                    nextButton: '<span style="font-size:1.2em;font-weight:900">&#187;</span>', // Text displayed for next button.
+                    prevButton: '<span style="font-size:1.2em;font-weight:900">&#171;</span>' // Text displayed for previous button.
+                });
+            */    
+            for (var i=0; i<eles.length; i++){
+                $(eles[i]).attr('data-id','idx'+i).tabs('paging',{
+                    nextButton: '<span style="font-size:1.2em;font-weight:900">&#187;</span>', // Text displayed for next button.
+                    prevButton: '<span style="font-size:1.2em;font-weight:900">&#171;</span>' // Text displayed for previous button.
+                });
+            }     
             
         }else{
             window.hWin.HEURIST4.msg.showMsgErr(response);
