@@ -836,7 +836,7 @@ private static function saveToDatabase($preproc){
         //array_push($mapping,0);
     }
 
-    $query = $query." PRIMARY KEY (`imp_ID`)) ENGINE=InnoDB  DEFAULT CHARSET=utf8;";
+    $query = $query." PRIMARY KEY (`imp_ID`)) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb3;";  //was utf8 this is alias utf8mb3
 
     $columns = substr($columns,0,-1);
     $counts = $counts." count(*) ";
@@ -861,7 +861,7 @@ private static function saveToDatabase($preproc){
     $mysqli->query('SET GLOBAL local_infile = true');
     //load file into table  LOCAL
     $query = "LOAD DATA LOCAL INFILE '".$filename."' INTO TABLE ".$import_table
-    ." CHARACTER SET UTF8"
+    ." CHARACTER SET utf8mb3"    //was UTF8 this is alias for utf8mb3
     ." FIELDS TERMINATED BY ',' "  //.$csv_delimiter."' "
     ." OPTIONALLY ENCLOSED BY  '\"' " //.$csv_enclosure."' "
     ." LINES TERMINATED BY '\n'"  //.$csv_linebreak."' " 
