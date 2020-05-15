@@ -99,9 +99,9 @@
                 return array(HEURIST_INVALID_REQUEST, "Could not open database ".htmlspecialchars($database_name, ENT_QUOTES, 'UTF-8'));
             }
 
-            $mysqli->query('set character set "utf8"'); //was utf8mb4
-            $mysqli->query('set names "utf8"');
-
+            $mysqli->query('set character set "utf8mb4"'); //utf8 is utf8mb3 by default
+            //$mysqli->query('set names "utf8"');
+            
         }
         return true;
     }

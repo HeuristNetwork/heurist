@@ -70,7 +70,7 @@ CREATE TABLE Records (
   KEY rec_OwnerUGrpID (rec_OwnerUGrpID),
   KEY rec_Hash (rec_Hash(40)),
   KEY rec_AddedByUGrpID (rec_AddedByUGrpID)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
