@@ -231,7 +231,8 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
     $empty_fields = array(); // array of fields with NULL/empty values
     $empty75_fields = array(); // array of fields with NULL/empty values in 75% of lines
     
-    $memos = array();  //multiline fields
+    //$memos = array();
+    $field_sizes = array();  //keeps max length for all fields (or memo for len>1000 or multiline fields)
     $multivals = array();
     $parsed_values = array();
     
@@ -343,60 +344,74 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
                 foreach($header as $field_name){
 
                     $field = @$properties[$field_name];
-                    
+
                     if($field==null) $field='';
-                        
+
                     //Identify repeating value fields and flag - will not be used as key fields
                     if($field_name=='geometry'){
                         $int_fields[$k] = null;
                         $num_fields[$k] = null;
                         $empty_fields[$k] = null;
-                        array_push($memos, $k);
+                        $field_sizes[$k] = 'memo';
                     }else{
-                            
+
                         if( !in_array($k, $multivals) && strpos($field, '|')!==false ){
-    //DEBUG error_log('Line '.$line_no.'  '.$field.'  '.strpos($field, '|').'  field '.$k.' is multivalue');
+                            //DEBUG error_log('Line '.$line_no.'  '.$field.'  '.strpos($field, '|').'  field '.$k.' is multivalue');
                             array_push($multivals, $k);
                         }
+
+                        $field = trim($field);
                         
-                        if( !in_array($k, $memos) && (in_array($k, $memofields) || strlen($field)>250 || strpos($field, '\\r')!==false) ){
-                            array_push($memos, $k);
+                        //get field size before import to temp table                        
+                        if($limit==0 && @$field_sizes[$k]!=='memo'){
+                            if(in_array($k, $memofields)){
+                                $field_sizes[$k] = 'memo';
+                            }else {
+                                $flen = strlen($field);    
+                                if ($flen>500 || strpos($field, '\\r')!==false) {
+                                    $field_sizes[$k] = 'memo';
+                                }else if(@$field_sizes[$k]>0){
+                                    $field_sizes[$k] = max($field_sizes[$k], $flen);
+                                }else{
+                                    $field_sizes[$k] = $flen;
+                                }
+                            }
                         }
 
                         //Remove any spaces at start/end of fields (including potential memos) & any redundant spaces in field that is not multi-line
-                        if(in_array($k, $memos)){
-                            $field = trim($field);
-                        }else{
+                        if(@$field_sizes[$k]!='memo'){
+
                             $field = trim(preg_replace('/([\s])\1+/', ' ', $field)); 
-                        }
 
-                        //Convert dates to standardised format.  //'field_'.
-                        if($check_datefield && @$datefields[$k]!=null && $field!=""){
-                            $field = self::prepareDateField($field, $csv_dateformat);
+                            //Convert dates to standardised format.  //'field_'.
+                            if($check_datefield && @$datefields[$k]!=null && $field!=""){
+                                $field = self::prepareDateField($field, $csv_dateformat);
+                            }
+
+                            $check_keyfield_K = ($check_keyfield && @$keyfields['field_'.$k]!=null);
+                            //check integer value
+                            if(@$int_fields[$k] || $check_keyfield_K){
+                                self::prepareIntegerField($field, $k, $check_keyfield_K, $err_keyfields, $int_fields);
+                            }                 
+                            if(@$num_fields[$k] && !is_numeric($field)){
+                                $num_fields[$k]=null;
+                            }
                         }
                         
-                        $check_keyfield_K =  ($check_keyfield && @$keyfields['field_'.$k]!=null);
-                        //check integer value
-                        if(@$int_fields[$k] || $check_keyfield_K){
-                            self::prepareIntegerField($field, $k, $check_keyfield_K, $err_keyfields, $int_fields);
-                        }
-                        if(@$num_fields[$k] && !is_numeric($field)){
-                            $num_fields[$k]=null;
-                        }
-                        if($field==null || trim($field)==''){ //not empty
-                             $empty75_fields[$k]++;
-                        }else if(@$empty_fields[$k]){
-                             $empty_fields[$k]=null; //field has value
+                        if($field==null || $field==''){ 
+                            $empty75_fields[$k]++;
+                        }else if(@$empty_fields[$k]){//not empty
+                            $empty_fields[$k]=null; 
                         }                    
-                        
-                        }//not geometry
 
-                        //Doubling up as an escape for quote marks
-                        $field = addslashes($field);
-                        array_push($line_values, $field);
-                        $field = '"'.$field.'"';
-                        array_push($newfields, $field);
-                        $k++;
+                    }//not geometry
+
+                    //Doubling up as an escape for quote marks
+                    $field = addslashes($field);
+                    array_push($line_values, $field);
+                    $field = '"'.$field.'"';
+                    array_push($newfields, $field);
+                    $k++;
                 }//foreach field value
                     
                     $line_no++;
@@ -530,34 +545,46 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
     //DEBUG error_log('Line '.$line_no.'  '.$field.'  '.strpos($field, '|').'  field '.$k.' is multivalue');
                             array_push($multivals, $k);
                         }
-                        if( !in_array($k, $memos) && (in_array($k, $memofields) || strlen($field)>250 || strpos($field, '\\r')!==false) ){
-                            array_push($memos, $k);
-                        }
-
-                        //Remove any spaces at start/end of fields (including potential memos) & any redundant spaces in field that is not multi-line
-                        if(in_array($k, $memos)){
-                            $field = trim($field);
-                        }else{
-                            $field = trim(preg_replace('/([\s])\1+/', ' ', $field)); 
-                        }
-
-                        //Convert dates to standardised format.  //'field_'.
-                        if($check_datefield && @$datefields[$k]!=null && $field!=""){
-                            $field = self::prepareDateField($field, $csv_dateformat);
+                        
+                        $field = trim($field);
+                        
+                        //get field size before import to temp table                        
+                        if($limit==0 && @$field_sizes[$k]!=='memo'){
+                            if(in_array($k, $memofields)){
+                                $field_sizes[$k] = 'memo';
+                            }else {
+                                $flen = strlen($field);    
+                                if ($flen>500 || strpos($field, '\\r')!==false) {
+                                    $field_sizes[$k] = 'memo';
+                                }else if(@$field_sizes[$k]>0){
+                                    $field_sizes[$k] = max($field_sizes[$k], $flen);
+                                }else{
+                                    $field_sizes[$k] = $flen;
+                                }
+                            }
                         }
                         
-                        $check_keyfield_K =  ($check_keyfield && @$keyfields['field_'.$k]!=null);
-                        //check integer value
-                        if(@$int_fields[$k] || $check_keyfield_K){
-                            self::prepareIntegerField($field, $k, $check_keyfield_K, $err_keyfields, $int_fields);
+                        if(@$field_sizes[$k] != 'memo'){
+
+                            //Convert dates to standardised format.  //'field_'.
+                            if($check_datefield && @$datefields[$k]!=null && $field!=""){
+                                $field = self::prepareDateField($field, $csv_dateformat);
+                            }
+                            
+                            $check_keyfield_K =  ($check_keyfield && @$keyfields['field_'.$k]!=null);
+                            //check integer value
+                            if(@$int_fields[$k] || $check_keyfield_K){
+                                self::prepareIntegerField($field, $k, $check_keyfield_K, $err_keyfields, $int_fields);
+                            }
+                            if(@$num_fields[$k] && !is_numeric($field)){
+                                $num_fields[$k]=null;
+                            }
                         }
-                        if(@$num_fields[$k] && !is_numeric($field)){
-                            $num_fields[$k]=null;
-                        }
-                        if($field==null || trim($field)==''){ //not empty
+                        
+                        if($field==null || $field==''){
                              $empty75_fields[$k]++;
-                        }else if(@$empty_fields[$k]){
-                             $empty_fields[$k]=null; //field has value
+                        }else if(@$empty_fields[$k]){//field has value
+                             $empty_fields[$k]=null; 
                         }                    
 
                         //Doubling up as an escape for quote marks
@@ -639,7 +666,7 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
                 'empty_fields'=>$empty_fields, 
                 'empty75_fields'=>$empty75, 
                 
-                'memos'=>$memos, 'multivals'=>$multivals, 'fields'=>$header );    
+                'field_sizes'=>$field_sizes, 'multivals'=>$multivals, 'fields'=>$header );    
         }else{
             //everything ok - proceed to save into db
             
@@ -648,7 +675,7 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
             $preproc['encoded_filename']  = $encoded_filename;
             $preproc['original_filename'] = $original_filename;  //filename only
             $preproc['fields'] = $header;
-            $preproc['memos']  = $memos;
+            $preproc['field_sizes']  = $field_sizes;
             $preproc['multivals'] = $multivals;
             $preproc['keyfields'] = $keyfields; //indexes => "field_3":"10",
             
@@ -656,9 +683,9 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
             $preproc['csv_mvsep'] = $csv_mvsep;            
            
             $res = self::saveToDatabase($preproc);
+            //delete prepare
+            unlink($prepared_filename);
             if($res!==false){
-                //delete prepare
-                unlink($prepared_filename);
                 //delete encoded
                 if(file_exists($encoded_filename)) unlink($encoded_filename);
                 //delete original
@@ -828,15 +855,64 @@ private static function saveToDatabase($preproc){
     $columns = "";
     $counts = "";
     $mapping = array();
+    
     $len = count($preproc['fields']);
+    do{
+        $max_size = 0;
+        $max_size_index = -1;
+        $row_size = 10;
+        for ($i = 0; $i < $len; $i++) {
+            $size = @$preproc['field_sizes'][$i];
+            if($size==='memo'){
+                   $row_size += 12;
+            }else if($size>0){
+                   $row_size += (2 + 4*$size);
+                   if($size>$max_size){
+                        $max_size = $size;
+                        $max_size_index = $i; 
+                   }
+            }else{
+                   $row_size += 6;
+            }
+        }
+        if($row_size>50000 && $max_size_index>=0){
+            $preproc['field_sizes'][$max_size_index] = 'memo';
+        }
+    }while($row_size>50000);
+        
+    $row_size = 10;
     for ($i = 0; $i < $len; $i++) {
-        $query = $query."`field_".$i."` ".(in_array($i, $preproc['memos'])?" mediumtext, ":" varchar(300), " ) ;
+        
+        $size = @$preproc['field_sizes'][$i];
+        if($size==='memo'){
+           $row_size += 12;
+           $fieldtype = 'mediumtext'; 
+        }else {
+            //$size = 300;
+            if($size>0){
+               $row_size += (2 + 4*$size);
+               $fieldtype = 'varchar('.$size.')'; 
+            }else{
+               $row_size += 6;
+               $fieldtype = 'varchar(1)'; 
+            }            
+        }
+        
+        $query = $query."`field_".$i."` ".$fieldtype.', ' ;
+        
         $columns = $columns."field_".$i.",";
         $counts = $counts."count(distinct field_".$i."),";
         //array_push($mapping,0);
     }
+    
+    if($row_size>50000){ 
+        self::$system->addError(HEURIST_UNKNOWN_ERROR, 
+            'Cannot create import table. Rows exceeding 64 KBytes. This limit is set by MySQL and cannot be changed. '
+            .'Remove unused columns. ('.$row_size.')');                
+        return false;
+    }
 
-    $query = $query." PRIMARY KEY (`imp_ID`)) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb3;";  //was utf8 this is alias utf8mb3
+    $query = $query." PRIMARY KEY (`imp_ID`)) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4;";  //was utf8 this is alias utf8mb3
 
     $columns = substr($columns,0,-1);
     $counts = $counts." count(*) ";
@@ -861,7 +937,7 @@ private static function saveToDatabase($preproc){
     $mysqli->query('SET GLOBAL local_infile = true');
     //load file into table  LOCAL
     $query = "LOAD DATA LOCAL INFILE '".$filename."' INTO TABLE ".$import_table
-    ." CHARACTER SET utf8mb3"    //was UTF8 this is alias for utf8mb3
+    ." CHARACTER SET utf8mb4"    //was UTF8 this is alias for utf8mb3
     ." FIELDS TERMINATED BY ',' "  //.$csv_delimiter."' "
     ." OPTIONALLY ENCLOSED BY  '\"' " //.$csv_enclosure."' "
     ." LINES TERMINATED BY '\n'"  //.$csv_linebreak."' " 
