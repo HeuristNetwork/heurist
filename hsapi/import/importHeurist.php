@@ -124,7 +124,7 @@ private static function readDataFile($filename, $type=null, $validate=true){
 
 //
 // @todo use XMLReader to allow stream read, 
-// simplexml_load_file -loads the entire file into memory
+// simplexml_load_file - loads the entire file into memory
 //
 private static function hmlToJson($filename){
 
@@ -274,7 +274,14 @@ private static function hmlToJson($filename){
 * 
 * It reads manifest files and tries to find all record types in current database by concept code. All record types from manifest file
 * Returns array of rectypes, false otherwise
-*     source_rectype_id => array(name,code,count,target_RecTypeID
+* $res = array(
+            'database'=> database id
+            'database_name'=> 
+            'rectypes'=> array(source_rectype_id => array(name,code,count,target_RecTypeID),...
+            'detailtypes'=>$imp_detailtypes  //need to show missed detail fields
+        );
+* 
+*     
 *
 * @param mixed $filename
 */
@@ -306,15 +313,16 @@ public static function getDefintions($filename){
             $imp_rectypes[$rtid]['target_RecTypeID'] = $local_id;
         }
         
-        $dbsource_is_same = defined('HEURIST_DBID') && ((!(@$data['heurist']['database']['id']>0)) || 
-                            @$data['heurist']['database']['id']==HEURIST_DBID);
-        
+        //for not registered and the same - found missed         
+        $dbsource_is_same = ( (!(@$data['heurist']['database']['id']>0)) || 
+                              (defined('HEURIST_DBID') && @$data['heurist']['database']['id']==HEURIST_DBID) );
         
         $imp_detailtypes = null;
         
-        if($dbsource_is_same){
-        
+        if(true || $dbsource_is_same){
+            
             $imp_detailtypes = @$data['heurist']['database']['detailtypes'];
+
             if($imp_detailtypes){
                 $database_defs = array('detailtypes'=>dbs_GetDetailTypes(self::$system, null, 2));
                 //find local ids
@@ -433,19 +441,20 @@ public static function importRecordsFromDatabase($params, $session_id){
         }
     }
     
-    //convert tlcmap dataset to map layer and creates parent mapspace
+    // convert tlcmap dataset to map layer and creates parent mapspace
     // see record_output.php
     if(@$params['tlcmapspace']!=null){
         $remote_path = $remote_path.'&tlcmap='.urlencode($params['tlcmapspace']);    
     }
 
+    // save file that produced with record_output.php from source to temp file  
     $heurist_path = tempnam(HEURIST_SCRATCH_DIR, "_temp_"); // . $file_id;
 
     $filesize = saveURLasFile($remote_path, $heurist_path);
 
 //2. import records
     if($filesize>0 && file_exists($heurist_path)){
-        //
+        //read temp file, import records
         $res = self::importRecords($heurist_path, $session_id, false, true, self::$system->get_user_id() );
     
         if(@$params['tlcmapshot'] && $res!==false){
@@ -497,7 +506,7 @@ public static function saveMapDocumentSnapShot($rec_ID, $tlcmapshot){
             $ulf_ID = $ulf_ID[0];
         }
 
-        //3. add DT_THUMBNAIL detail to mapdocume record
+        //3. add DT_THUMBNAIL detail to mapdocument record
         $dbRecDetails = new DbRecDetails(self::$system, array('ulfID'=>$ulf_ID, dtyID=>DT_THUMBNAIL, 'recIDs'=>$rec_ID));
         $res = $dbRecDetails->detailsAdd();
 

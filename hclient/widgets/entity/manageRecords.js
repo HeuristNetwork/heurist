@@ -28,6 +28,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     _updated_tags_selection: null,
     _keepYPos: 0,
     _menuTimeoutId: 0,
+    _resizeTimer: 0,
     
     //this.options.selectOnSave - special case when open edit record from select popup
     //this.options.allowAdminToolbar  - if false hide ModifyStructure, Edit title mask and others
@@ -162,18 +163,19 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         var action = ele.attr('data-action');
                         if(!action) action = ele.parent().attr('data-action');
                         
-                        if(action=='field'){
-                            that.options.rts_editor.manageDefRecStructure(
-                                'showBaseFieldEditor', -1, dt_id);
-                        }else if(action=='block'){
+                            if(action=='field'){
+                                that.options.rts_editor.manageDefRecStructure(
+                                    'showBaseFieldEditor', -1, dt_id);
+                            }else if(action=='block'){
+                                
+                                that.options.rts_editor.manageDefRecStructure(
+                                    'addNewSeparator', dt_id);
+                                
+                            }else if(action=='edit'){
+                                that.options.rts_editor.manageDefRecStructure(
+                                    'editField', dt_id);
+                            }
                             
-                            that.options.rts_editor.manageDefRecStructure(
-                                'addNewSeparator', dt_id);
-                            
-                        }else if(action=='edit'){
-                            that.options.rts_editor.manageDefRecStructure(
-                                'editField', dt_id);
-                        }
                     }
             });
                     
@@ -707,7 +709,11 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     },*/
                     center:{
                         minWidth:400,
-                        contentSelector: '.editForm'    
+                        contentSelector: '.editForm',
+                        //pane_name, pane_element, pane_state, pane_options, layout_name
+                        onresize_end : function(){
+                            that.handleTabsResize();                            
+                        }    
                     }
                 };
 
@@ -756,6 +762,35 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         }//!isOpenAready
             
         this._initEditForm_step3(recID); 
+    },
+    
+    
+    //    
+    //
+    //
+    handleTabsResize: function() {
+            if (this._resizeTimer) clearTimeout(this._resizeTimer);
+            
+            if (true)  //windowHeight != $(window).height() || windowWidth != $(window).width()) 
+            {
+                var that = this;
+                this._resizeTimer = setTimeout(
+                    function(){                
+                            var ele = that.editForm.find('.ui-tabs');
+                            if(ele.length>0){
+                                try{
+      
+                                    for(var i=0; i<ele.length; i++){  //
+                                        $(ele[i]).tabs('pagingResize');        
+                                        //$(ele[i]).tabs('pagingDestroy');
+                                        //$(ele[i]).tabs('paging');
+                                    }                              
+                                    
+                                }catch(ex){
+                                }
+                            }
+                    }, 200);
+            }
     },
     
     //
@@ -2571,6 +2606,20 @@ rectypes.names[rectypeID] + ' is defined as a child of <b>'+names
             } 
             
             
+            var eles = this.editForm.find('.ui-tabs');
+            /*
+                eles.tabs('paging',{
+                    nextButton: '<span style="font-size:1.2em;font-weight:900">&#187;</span>', // Text displayed for next button.
+                    prevButton: '<span style="font-size:1.2em;font-weight:900">&#171;</span>' // Text displayed for previous button.
+                });
+            */    
+            for (var i=0; i<eles.length; i++){
+                $(eles[i]).attr('data-id','idx'+i).tabs('paging',{
+                    nextButton: '<span style="font-size:1.2em;font-weight:900">&#187;</span>', // Text displayed for next button.
+                    prevButton: '<span style="font-size:1.2em;font-weight:900">&#171;</span>' // Text displayed for previous button.
+                });
+            }     
+            
         }else{
             window.hWin.HEURIST4.msg.showMsgErr(response);
         }
@@ -2752,7 +2801,7 @@ rectypes.names[rectypeID] + ' is defined as a child of <b>'+names
             var isChanged = this._editing.isModified() || this._updated_tags_selection!=null;
             mode = isChanged?'visible':'hidden';
             
-            if(isChanged && changed_element){
+            if(isChanged && changed_element){  // && changed_element.options
                 
                 //special case for tiled image map source - if file is mbtiles - assign tiler url 
                 if(changed_element.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_FILE_RESOURCE'] && 
@@ -3151,11 +3200,13 @@ rectypes.names[rectypeID] + ' is defined as a child of <b>'+names
                 
                     if(window.hWin.HEURIST4.rectypes.typedefs[that._currentEditRecTypeID].dtFields[dtId]){
                     
-                        var is_folder = false;
-                        var ele = $('<div><span class="ui-icon ui-icon-gear"></span></div>')
+                        var is_folder = false;      
+                        var ele = $('<div><span  data-hh="bbbb" class="ui-icon ui-icon-gear"></span></div>')
                         .css({'display':'table-cell','vertical-align':'top',
                               'min-width':'32px','cursor':'pointer','padding-top':'0.4em'})
                         .prependTo($(item));    
+                        
+                        //ele = ele.find('.ui-icon-gear');
                         
                         that._on(ele,{mouseover:function(event){
                             clearTimeout(that._menuTimeoutId);
@@ -3163,11 +3214,14 @@ rectypes.names[rectypeID] + ' is defined as a child of <b>'+names
                            
                             that.rts_actions_menu
                                     .attr('data-did', el.parents('div[data-dtid]').attr('data-dtid'))
+                                    .show()
+                                    .position({ my:'left top', at:'left top', of: el});
+                                    /*
                                     .css({position:'absolute'
                                             ,left:that.editForm.parent().position().left + el.position().left
                                             ,top:that.editForm.position().top + el.position().top + 26 })
-                                    .show();
-                            //position({ my:'top left', at:'top left', of: el})
+                                    */
+                                    
                         }, mouseout: function(event){
                             that._menuTimeoutId = setTimeout(function() {that.rts_actions_menu.hide(); }, 800);
                         }});
@@ -3203,10 +3257,11 @@ rectypes.names[rectypeID] + ' is defined as a child of <b>'+names
             
             //show forbidden fields as disabled - except gearwheel
             var ele_fb = $(this.element).find('div.forbidden');
-            ele_fb.css({'opacity':'0.5'}); 
-            ele_fb.next().css({'opacity':'0.5'}); 
-            ele_fb.next().next().css({'opacity':'0.5'}); 
-            //ele_fb.find('.ui-icon-gear').parent().css({'opacity':'0 !important', color:'red'});
+            ele_fb.css({'opacity':'0.3'});   //header
+            ele_fb.next().css({'opacity':'0.3'}); //repeat btn 
+            var ele_id = ele_fb.next().next().css({'opacity':'0.3'}); //input-cell 
+            //ele_id.find('input').css('border','1px dotted red');
+            ele_id.find('input,textarea,button,.ui-selectmenu-button').css('border','1px dotted red');
             
             //reduce width of header
             $(this.element).find('.separator').css({width: '80%', display: 'inline-block'});

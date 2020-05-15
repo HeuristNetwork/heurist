@@ -413,8 +413,12 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
             
             $this->initPutifier();
             if(!in_array($dtyID, $this->not_purify)){
-                $s = $this->purifier->purify( $this->data['val']);                                
-                $dtl['dtl_Value'] = htmlspecialchars_decode( $s );
+                
+                $s = trim($this->data['val']);
+                $this->data['val'] = preg_replace('#<script(.*?)>(.*?)</script>#is', '', $s);
+                
+                //$s = $this->purifier->purify( $this->data['val']);                                
+                //$dtl['dtl_Value'] = htmlspecialchars_decode( $s );
             }else{
                 $dtl['dtl_Value'] = $this->data['val'];    
             }
@@ -576,8 +580,12 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
                //TEST $lim = 100;
                if($lim>0){
                     $dtl_Value = $this->data['rVal'];
-                    $dtl_Value =  $this->purifier->purify($dtl_Value);
-                    $dtl_Value = htmlspecialchars_decode( $dtl_Value );
+                    
+                    $s = trim($dtl_Value);
+                    $dtl_Value = preg_replace('#<script(.*?)>(.*?)</script>#is', '', $s);
+                    
+                    //$dtl_Value =  $this->purifier->purify($dtl_Value);
+                    //$dtl_Value = htmlspecialchars_decode( $dtl_Value );
                         
                     $iStart = 0;
                     while($iStart<mb_strlen($dtl_Value)){
@@ -685,8 +693,12 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
                     
                     if(($basetype=='freetext' || $basetype='blocktext')
                         && !in_array($dtyID, $this->not_purify)){
-                        $s = $this->purifier->purify( $newVal );                                
-                        $dtl['dtl_Value'] = htmlspecialchars_decode( $s );
+                            
+                            $s = trim($newVal);
+                            $dtl['dtl_Value'] = preg_replace('#<script(.*?)>(.*?)</script>#is', '', $s);
+                            
+                        //$s = $this->purifier->purify( $newVal );                                
+                        //$dtl['dtl_Value'] = htmlspecialchars_decode( $s );
                     }else{
                         $dtl['dtl_Value'] = $newVal;        
                     }

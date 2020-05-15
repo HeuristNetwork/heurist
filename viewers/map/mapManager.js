@@ -1046,7 +1046,7 @@ function hMapManager( _options )
         },
 
         //
-        // creates virtual mapspace
+        // creates virtual mapspace from given layer_ids
         //
         createVirtualMapDocument: function(layer_ids, dfd_top){
             
@@ -1071,11 +1071,8 @@ function hMapManager( _options )
                 }
             );
             
-            
-            
-            
         },
-        
+
         // 
         // returns default style for mapdoc or layer
         //
@@ -1084,7 +1081,7 @@ function hMapManager( _options )
         },
         
         //
-        //
+        //  get all layers and datasources of document
         //
         getMapDocumentRecordset: function(mapdoc_id){
             return mapDocuments.getMapDocumentRecordset(mapdoc_id);
@@ -1094,7 +1091,7 @@ function hMapManager( _options )
         // returns list of mapdocuments ids
         // mode - all|loaded|visible
         // 
-        getMapDocuments: function( mode ) {
+        getMapDocumentsIds: function( mode ) {
             var res = [];
             var tree = mapdoc_treeview.fancytree("getTree");
             tree.visit(function(node){
@@ -1139,7 +1136,8 @@ function hMapManager( _options )
         },
         
         //
-        //  add entries into search result mapdocument and refresh legend
+        //  add entries into search result mapdocument (id=0) and refresh legend
+        // (see hMapLayer2._addQueryLayer)        
         //
         addLayerRecords: function( layers_ids ) {
             
@@ -1150,7 +1148,7 @@ function hMapManager( _options )
         },
 
         //
-        // 
+        // show/hide dataset
         //
         setLayersVisibility: function (_selection){
             
@@ -1193,7 +1191,7 @@ function hMapManager( _options )
         },
         
         //
-        //
+        // returns layer OR map document (if recid is not define)
         //
         getLayer: function( mapdoc_id, recid ){
             return mapDocuments.getLayer(mapdoc_id, recid);

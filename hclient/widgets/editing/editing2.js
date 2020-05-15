@@ -265,7 +265,7 @@ function hEditing(_options) {
 
                     }else if(currGroupType == 'tabs'){
                         // class="separator2"
-                        $('<li>').html('<a href="#'+newFieldContainer.attr('id')+'"><span style="font-weight:bold">'+headerText+'</span></a>')
+                        $('<li>').addClass('edit-form-tab').html('<a href="#'+newFieldContainer.attr('id')+'"><span style="font-weight:bold">'+headerText+'</span></a>')
                         .appendTo(groupTabHeader);
 
                         $(newFieldContainer).appendTo(groupEle);
@@ -387,6 +387,7 @@ function hEditing(_options) {
         
         __createGroup(recstructure, $container, null);
         
+       
         $container.fadeIn(250);
         
         _setFocus();
@@ -530,7 +531,7 @@ function hEditing(_options) {
     
     function _onChange(){
         if($.isFunction(onChangeCallBack)){
-            onChangeCallBack.call(this);    
+            onChangeCallBack.call( this );    
         }
     }
     
@@ -673,7 +674,8 @@ function hEditing(_options) {
                 ele.editing_input('setValue', $.isArray(value)?value:[value], (is_changed===false));
                 if(is_changed!==false){
                     ele.editing_input('isChanged', true);    
-                    _onChange();
+                    ele.editing_input('onChange');
+                    //_onChange();
                 }
             }
         },

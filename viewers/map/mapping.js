@@ -380,39 +380,12 @@ $.widget( "heurist.mapping", {
     
     
 
-    //----------------  @todo return mapManager and call these methods directly?
+    //---------------- 
     //
+    // returns mapManager object
     //
-    //
-    openMapDocument: function( mapdoc_id ) {
-        this.mapManager.openMapDocument( mapdoc_id );
-    },
-
-    //
-    // returns array of mapdocuments ids
-    // mode - all|loaded|visible
-    // 
-    getMapDocuments: function( mode ) 
-    {
-        return this.mapManager.getMapDocuments( mode );
-    },
-
-    createNewMapDocument: function( event ) 
-    {
-        this.mapManager.createNewMapDocument( event );
-    },
-
-    createVirtualMapDocument: function( layer_ids, dfd ) 
-    {
-        this.mapManager.createVirtualMapDocument( layer_ids, dfd );
-    },
-    
-    getMapDocumentRecordset: function( mapdoc_id ){
-        return this.mapManager.getMapDocumentRecordset( mapdoc_id);
-    },
-    
-    getLayerFromMapDocument:function( mapdoc_id, recid ){
-        return this.mapManager.getLayer( mapdoc_id, recid );
+    getMapManager: function(){
+        return this.mapManager;
     },
     
     //--------------------
@@ -470,24 +443,9 @@ $.widget( "heurist.mapping", {
     // it is used in DH and EN where recordset is generated and prepared in custom way on client side
     //
     addRecordSet: function(recset, dataset_name) {
-        //it is not piblish recordset since it is prepared localy 
+        //it is not publish recordset since it is prepared localy 
         this.current_query_layer = null;
         this.mapManager.addRecordSet( recset, dataset_name );
-    },
-    
-    //
-    // add layer records to search result - add all layer/dataset records
-    // (see hMapLayer2._addQueryLayer)
-    //
-    addLayerRecords: function(layers_ids){
-        this.mapManager.addLayerRecords( layers_ids );    
-    },
-    
-    //
-    // show/hide dataset
-    //
-    setLayersVisibility: function (_selection){
-        this.mapManager.setLayersVisibility( _selection);
     },
     
     //
@@ -1384,7 +1342,7 @@ $.widget( "heurist.mapping", {
                         .setContent('<p style="margin:12px;font-style:italic">'
                                 +found_cnt+' map objects found here. Select desired: </p>'
                                 +'<select size="'+ ((found_cnt>10)?10:found_cnt)
-                                +'" style="max-width:300px;overflow-y: auto;border: none;outline: none; cursor:pointer">'
+                                +'" style="width:100%;overflow-y: auto;border: none;outline: none; cursor:pointer">'
                                 +sText+'</select>') 
                         .openOn(this.nativemap);
                     

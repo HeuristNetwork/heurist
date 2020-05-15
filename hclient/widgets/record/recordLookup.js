@@ -40,6 +40,7 @@ $.widget( "heurist.recordLookup", $.heurist.recordAction, {
         htmlContent: 'recordLookup.html',
         helpContent: 'recordLookup.html', //in context_help folder
         
+        //service:'tlcmap',
         mapping:null, //maps external fields to heurist field details
         add_new_record: false  //if true it creates new record on selection
         //define onClose to get selected values
@@ -53,23 +54,20 @@ $.widget( "heurist.recordLookup", $.heurist.recordAction, {
     _initControls: function(){
 
         var that = this;
-        
-        //put this configuration to settings folder
-        if(!this.options.mapping)
-            this.options.mapping = {
-              rty_ID: 12,//'3-1009'
-              service: 'tlcmap',
-              label: 'Lookup in AGHP',
-              fields:{ 
-                  'properties.name': 1, //'2-1',  
-                  'geometry': 28, //'2-28',
-                  //'properties.id': 26, //'2-26', //original id
-                  'properties.id': 26,   // 2-581  //external id
-                  'state': 234, //'2-234',
-                  'LGA': 2, //'2-2',
-                  'description': 4 //'2-4'
-              }    
-            };
+            
+/*
+"placename":"Manly",
+"anps id":"43347",
+"state":"NSW",
+"LGA":"MANLY",
+"Latitude":"-33.79833333333333",
+"Longitude":"151.28444444444443",
+"Original Data Source":"State Records (TLCM)",
+"flag":"Uses GDA94 Coordinates instead of WGS84",
+"description":"A suburb about 4 km S by E of Brookvale and about 6 km N by E of Vaucluse.  Boundaries shown on map marked GNB 3641"
+
+[{"type":"Feature","id":"857","properties":{"rec_ID":"857"....},"geometry":{"type":"Point","coordinates":[48.671137,46.998197]}},
+*/    
         
         this.element.find('fieldset > div > .header').css({width:'80px','min-width':'80px'})
         
@@ -165,9 +163,9 @@ $.widget( "heurist.recordLookup", $.heurist.recordAction, {
         
         var recID = fld('rec_ID');
         var rectypeID = fld('rec_RecTypeID');
-        var recTitle = fld('properties.name',40); 
+        var recTitle = fld('properties.placename',40); 
         
-        recTitle = recTitle + fld('LGA',15)+fld('state',6)+fld('description',80); 
+        recTitle = recTitle + fld('properties.LGA',15)+fld('properties.state',6)+fld('properties.description',80); 
         
         var recIcon = window.hWin.HAPI4.iconBaseURL + rectypeID + '.png';
         
@@ -231,13 +229,24 @@ $.widget( "heurist.recordLookup", $.heurist.recordAction, {
     //
     _doSearch: function(){
         
+        var sURL;
+        if(this.options.mapping.service=='tlcmap'){
+            sURL = 'http://tlcmap.org/ghap/search?format=csv&paging=100';
+            
+        }else if(this.options.mapping.service=='tlcmap_old'){
+            sURL = 'http://tlcmap.australiasoutheast.cloudapp.azure.com/ws/ghap/search?format=json&paging=100';  
+        }else{
+            window.hWin.HEURIST4.msg.showMsgFlash('Name of service not defined...', 500);
+            return;
+        }
+
         if(this.element.find('#inpt_name').val()=='' && this.element.find('#inpt_anps_id').val()==''){
             window.hWin.HEURIST4.msg.showMsgFlash('Define name ot ANPS ID...', 500);
             return;
         }
+        
         window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent());
         
-        var sURL = 'http://tlcmap.australiasoutheast.cloudapp.azure.com/ws/ghap/search?format=json&paging=100';
         
         if(this.element.find('#inpt_name').val()!=''){
             sURL = sURL + '&' 
@@ -256,7 +265,7 @@ $.widget( "heurist.recordLookup", $.heurist.recordAction, {
 
         var that = this;
         var request = {service:sURL};             
-        //loading as geojson
+        //loading as geojson  - see controller record_lookup.php
         window.hWin.HAPI4.RecordMgr.lookup_external_service(request,
             function(response){
                 window.hWin.HEURIST4.msg.sendCoverallToBack();
@@ -289,9 +298,14 @@ $.widget( "heurist.recordLookup", $.heurist.recordAction, {
         */
     },
     
+    //
+    //
+    //
     _onSearchResult: function(geojson_data){
         
-        this.recordList.show();
+       this.recordList.show();
+       
+       var is_wrong_data = true;
                         
        if (window.hWin.HEURIST4.util.isGeoJSON(geojson_data, true)){
             
@@ -319,21 +333,23 @@ $.widget( "heurist.recordLookup", $.heurist.recordAction, {
                 map_flds[k] = map_flds[k].split('.'); 
             }
             
+            if(!geojson_data.features) geojson_data.features = geojson_data;
+            
             //parse json
             var i=0;
             for(;i<geojson_data.features.length;i++){
                 var feature = geojson_data.features[i];
                 
                 var recID = i+1;
-                res_orders.push(recID);
                 
+                var hasGeo = false;
                 var values = [recID, this.options.mapping.rty_ID];
                 for(var k=0; k<map_flds.length; k++){
                     
                     var val = feature[ map_flds[k][0] ];
                     
                     for(var m=1; m<map_flds[k].length; m++){
-                        if(val && val[ map_flds[k][m] ]){
+                        if(val && !window.hWin.HEURIST4.util.isnull( val[ map_flds[k][m] ])){
                             val = val[ map_flds[k][m] ];
                         }
                     }      
@@ -357,13 +373,18 @@ $.widget( "heurist.recordLookup", $.heurist.recordAction, {
                                     }
                                 }
                                 val = typeCode+' '+wkt;
+                                hasGeo = true;
                             }
                         }
                     }
                         
                     values.push(val);    
                 }
-                res_records[recID] = values;
+                if(hasGeo){
+                    res_orders.push(recID);
+                    res_records[recID] = values;    
+                }
+                
                 
 
                 /*
@@ -393,22 +414,28 @@ $.widget( "heurist.recordLookup", $.heurist.recordAction, {
               'state': '2-234',
               'LGA': '2-2',
               'description': '2-4'
-*/            
-            
-            var res_recordset = new hRecordSet({
-                count: res_orders.length,
-                offset: 0,
-                fields: fields,
-                rectypes: [this.options.mapping.rty_ID],
-                records: res_records,
-                order: res_orders,
-                mapenabled: true //???
-            });              
-            
-            this.recordList.resultList('updateResultSet', res_recordset);            
-       }else{
+*/    
+            if(res_orders.length>0){        
+                var res_recordset = new hRecordSet({
+                    count: res_orders.length,
+                    offset: 0,
+                    fields: fields,
+                    rectypes: [this.options.mapping.rty_ID],
+                    records: res_records,
+                    order: res_orders,
+                    mapenabled: true //???
+                });              
+                
+                this.recordList.resultList('updateResultSet', res_recordset);            
+                is_wrong_data = false;
+            }
+       }
+       
+       if(is_wrong_data){
             //ele.text('ERROR '+geojson_data);                    
             this.recordList.resultList('updateResultSet', null);            
+            
+            window.hWin.HEURIST4.msg.showMsgErr('Service did not return data in an appropriate format');
        }
     },
 

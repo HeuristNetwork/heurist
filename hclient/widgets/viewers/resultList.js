@@ -1651,9 +1651,25 @@ $.widget( "heurist.resultList", {
                 if(this._currentRecordset){
                     var record = this._currentRecordset.getById(selected_rec_ID)
                     var rectypeID = this._currentRecordset.fld(record, 'rec_RecTypeID' );
-                    //show embed dialog
+                    //show delete dialog
                     if(rectypeID==window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_DOCUMENT']){
 
+                        window.hWin.HAPI4.currentRecordsetSelection = [selected_rec_ID];
+                        if(Hul.isempty(window.hWin.HAPI4.currentRecordsetSelection)) return;
+                        
+                        window.hWin.HEURIST4.ui.showRecordActionDialog('recordDelete', {
+                            title: 'Delete map document. Associated map layers and data sources retain',
+                            onClose:
+                           function( context ){
+                               if(context){
+                                   // refresh search
+                                   window.hWin.HAPI4.SearchMgr.doSearch( that, that._query_request );
+                               }
+                           }
+                        });
+                        
+                        
+/* old version                        
                         window.hWin.HEURIST4.ui.showRecordActionDialog('recordDelete', {
                             map_document_id: selected_rec_ID,
                             title: 'Delete map document and associated map layers and data sources',
@@ -1665,10 +1681,11 @@ $.widget( "heurist.resultList", {
                                }
                            }
                         });
-                        
+*/                        
                     }
                 }
                 return;
+                
             }else 
             if($target.hasClass('rec_collect') || $target.parents('.rec_collect').length>0){
 

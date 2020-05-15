@@ -885,18 +885,35 @@ window.hWin.HEURIST4.dbs = {
 
 
     //
-    //  find by concept code in local definitions
+    // find by concept code in local definitions
     //
     // entities - rectypes, detailtypes, terms
+    //
+    // return local id or zero if not found
     //
     findByConceptCode: function(concept_code, entities, idx_ccode){
 
         var res = [];
         var sall = false;
+        
+        var findID = 0;
+        
+        if(typeof concept_code === 'String' && concept_code.indexOf('-')>0){
+            var codes = concept_code.split('-');
+            if(codes.length==2 && parseInt(codes[0])==0){
+                   findID = codes[1];
+            }
+        }else if(parseInt(concept_code)>0){
+            findID = concept_code;    
+        }
+        
+        if(findID>0 && entities[findID]){
+            return findID; 
+        }
 
-        for (var id in entities) 
-        if(id>0){
-            var def = entities[id];
+        for (var localID in entities) 
+        if(localID>0){
+            var def = entities[localID];
             var isOK = false;
             if(def['commonFields']){
                 isOK = def['commonFields'][idx_ccode] == concept_code;
@@ -906,9 +923,9 @@ window.hWin.HEURIST4.dbs = {
             
             if(isOK){
                 if(sall){
-                    res.push(id);
+                    res.push(localID);
                 }else{
-                    return id;
+                    return localID;
                 }
             }
         }

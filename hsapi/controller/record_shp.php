@@ -131,9 +131,12 @@ use Shapefile\ShapefileReader;
                         
                         $file_metadata = $originalFileName.'.txt';
                         $file_metadata_full = tempnam(HEURIST_SCRATCHSPACE_DIR, "meta");
-                        $url = HEURIST_BASE_URL.'export/xml/flathml.php?db='
-                                    .$params['db']
-                                    .'&q=ids:'.$params['metadata'].'&depth=0';
+                        
+                        $serverURL = HEURIST_SERVER_URL . '/heurist/';
+                        //list($dataset_id, $layer_id) = explode(',',$params['metadata']);
+                        $url = $serverURL.'?db='.$params['db'].'&recID='.$params['recID']; //($layer_id>0?$layer_id:$dataset_id);
+                        $url = $url."\n".($url.'&fmt=html');
+
                         file_put_contents($file_metadata_full ,$url);
                         if(file_exists($file_metadata_full)){
                             $zip->addFile($file_metadata_full, $file_metadata);    
@@ -288,19 +291,27 @@ error_log($e->getCode().' ('.$e->getErrorType().'): '.$e->getMessage());
 //
 //
 //
-function checkWGS($system, $orig_points){
+function checkWGS($system, $orig_points, $check_number_or_all=3){
 
+    $cnt = 0;
     foreach ($orig_points as $point) {
-        if (($northing!=round($point[1])) || ($easting!=round($point[0])) 
-                || (abs($point[0])<200) || (abs($point[1])<90)){
-//: id:xxxxxx title: xxxxxxxxxxxxxxxx                    
+        //if not integer and less than 180/90 this is wgs
+        //!(($point[1]!=round($point[1])) || ($point[0]!=round($point[0])) 
+        if (!((abs($point[0])<200) && (abs($point[1])<90))){
                 $system->error_exit_api(
 'Cannot process shp file. Heurist uses WGS84 (World Geographic System) '
 .'to support the plotting of maps worldwide. This shapefile is not in this format '
 .'and will not therefore display on maps. '
 .'Please use a GIS or other converter to convert to WGS84', HEURIST_ERROR);  
-        }                
+        }       
+                 
+        if( $check_number_or_all===true || $cnt < $check_number_or_all ){
+            $cnt++;
+        }else{
+            break;
+        }
     }
+    
     return true;
 }
     

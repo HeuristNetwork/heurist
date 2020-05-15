@@ -99,9 +99,9 @@
                 return array(HEURIST_INVALID_REQUEST, "Could not open database ".htmlspecialchars($database_name, ENT_QUOTES, 'UTF-8'));
             }
 
-            $mysqli->query('set character set "utf8"'); //was utf8mb4
-            $mysqli->query('set names "utf8"');
-
+            $mysqli->query('set character set "utf8mb4"'); //utf8 is utf8mb3 by default
+            //$mysqli->query('set names "utf8"');
+            
         }
         return true;
     }
@@ -915,14 +915,13 @@ $query = 'CREATE TABLE sysDashboard ('
                 && isFunctionExists($mysqli, 'hhash') && isFunctionExists($mysqli, 'simple_hash')
                 //&& isFunctionExists('set_all_hhash')
 */                            
-            if(isFunctionExists($mysqli, 'getTemporalDateString')){
-                $res = true;
-            }else{
-
+            if(!isFunctionExists($mysqli, 'getTemporalDateString') || isFunctionExists($mysqli, 'NEW_LIPOSUCTION')){ //need drop old functions
                 include(dirname(__FILE__).'/../utilities/utils_db_load_script.php'); // used to load procedures/triggers
                 if(db_script(HEURIST_DBNAME_FULL, dirname(__FILE__).'/../../admin/setup/dbcreate/addProceduresTriggers.sql', false)){
                     $res = true;
                 }
+            }else{
+                $res = true;
             }
 
             return $res;

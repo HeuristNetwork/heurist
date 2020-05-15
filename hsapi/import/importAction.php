@@ -293,7 +293,8 @@ private static function findRecordIds($imp_session, $params){
                             $is_insert = true;
                         }else if(array_key_exists($keyvalue, $tmp_idx_update)) {
                             
-                            $imp_session['validation']['recs_update'][$tmp_idx_update[$keyvalue]][0] .= (','.$imp_id);
+                            $imp_session['validation']['recs_update'][$tmp_idx_update[$keyvalue]][0] .= 
+                                        (','.is_array($imp_id)?implode(','.$imp_id):$imp_id);
                             //$imp_session['validation']['recs_update'][$tmp_idx_update[$keyvalue]][1] .= (",".$imp_id);
                             $is_update = true;
                         }

@@ -83,7 +83,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                         +'<span style="position:absolute; right:4px;width:32px;top:26px;height:32px;font-size:32px;cursor:pointer" class="closeTreePanel ui-icon ui-icon-carat-2-w"/>'
                     +'</div>'
                     +'<div class="treeView"/>' //treeview
-                    +'<div class="editForm" style="top:0px;display:none">EDITOR</div>'
+                    +'<div class="editForm editFormRtStructure" style="top:0px;display:none">EDITOR</div>'
                     +'<div class="recordList" style="display:none"/>'
                 +'</div>';
             
@@ -369,7 +369,8 @@ dty_TermIDTreeNonSelectableIDs
                                     +'</span><span style="font-size:smaller">  ('
                                     +window.hWin.HEURIST4.detailtypes.lookups[recset.fld(record,'dty_Type')]
                                     +')</span>';
-                        }else if(req=='forbidden'){
+                        }
+                        if(req=='forbidden'){
                             title =  title + '<span style="font-size:smaller;text-transform:none;"> (hidden)</span>';
                         }
                     
@@ -489,7 +490,6 @@ dty_TermIDTreeNonSelectableIDs
 */
             this._treeview = this.element.find('.treeView').addClass('tree-rts')
                                 .fancytree(fancytree_options); //was recordList
-            
             if(this._isFlat){         
                 this.__updateActionIcons(500);
             }else{
@@ -594,8 +594,8 @@ dty_TermIDTreeNonSelectableIDs
                
                var actionspan = $('<div class="svs-contextmenu3" style="position:absolute;right:8px;display:none;padding:2px;margin-top:0px;background:#95A7B7 !important;'
                     +'font-size:9px;font-weight:normal;text-transform:none">'
-                   +'<span data-action="block" style="background:lightgreen;padding:4px;font-size:9px;font-weight:normal" title="Add a new group/separator">&nbsp;±&nbsp;&nbsp;Block</span>'               
-                   +'<span data-action="field" style="background:#ECF1FB;padding:4px"><span class="ui-icon ui-icon-plus" title="Add a new field to this record type" style="font-size:9px;font-weight:normal"/>Field</span>'
+                   //+'<span data-action="block" style="background:lightgreen;padding:4px;font-size:9px;font-weight:normal" title="Add a new group/separator">&nbsp;±&nbsp;&nbsp;Block</span>'               
+                   //+'<span data-action="field" style="background:#ECF1FB;padding:4px"><span class="ui-icon ui-icon-plus" title="Add a new field to this record type" style="font-size:9px;font-weight:normal"/>Field</span>'
                    +'<span data-action="delete" style="background:red;padding:4px"><span class="ui-icon ui-icon-close" title="'
                         +((is_folder)?'Delete header':'Exclude field from record type')+'" style="font-size:9px;font-weight:normal"/>Delete</span>'
                    +(true || is_folder?'':
@@ -616,7 +616,7 @@ dty_TermIDTreeNonSelectableIDs
                         if(action=='field'){
                            
                            //add field   
-                           that.showBaseFieldEditor(-1);
+                           that.showBaseFieldEditor(-1, null);
                             
                         }else if(action=='block'){
                             
@@ -876,8 +876,16 @@ dty_TermIDTreeNonSelectableIDs
             this._super(); 
         }else{
             var that = this;
+            
+            var rst_ID = this._currentEditID;
+            if(rst_ID.indexOf('.')>0){
+                rst_ID = rst_ID.split('.')[1];
+            }
+            
             window.hWin.HEURIST4.msg.showMsgDlg(
-                'Are you sure you wish to delete this field? Proceed?', function(){ that._deleteAndClose(true) }, 
+                'Are you sure you wish to delete field "'
+                + window.hWin.HEURIST4.util.htmlEscape(this._cachedRecordset.fld(rst_ID, 'rst_DisplayName'))
+                +'"?', function(){ that._deleteAndClose(true) }, 
                 {title:'Warning',yes:'Proceed',no:'Cancel'});        
         }
         
@@ -973,8 +981,17 @@ dty_TermIDTreeNonSelectableIDs
     // arg1 - not defined or not integer - use current 
     // arg2 - add new field after dty_ID 
     //
-    showBaseFieldEditor: function( arg1, arg2 ){
+    showBaseFieldEditor: function( arg1, arg2, allow_proceed ){
         
+        
+        if(allow_proceed!==true){
+            this._allowActionIfModified( function(){ 
+                this.showBaseFieldEditor( arg1, arg2, true );                            
+            } );
+            return;
+        }
+        
+        var dtyID;
         if(isNaN(parseInt(arg1))){ //event - use curent 
             dtyID = this._currentEditID;
             if(!(dtyID>0)) return;
@@ -993,7 +1010,7 @@ dty_TermIDTreeNonSelectableIDs
         
         if(!(dtyID>0)){ //new field
         
-            if(arg2>0){
+            if(arg2>0){ //add after
                 this._lockDefaultEdit = true;
                 var tree = this._treeview.fancytree("getTree");
                 node = tree.getNodeByKey(arg2);
@@ -1296,7 +1313,7 @@ dty_TermIDTreeNonSelectableIDs
                     }
                     
                     //adjust preview editor position
-                    var ele_ed = this.previewEditor.find('.editFormDialog');
+                    var ele_ed = this.previewEditor.find('.editForm'); //editFormDialog
                     setTimeout(function(){
                         ele_ed.scrollTop(0);
                         var top = $(ed_cont).position().top - 60;
@@ -1305,9 +1322,10 @@ dty_TermIDTreeNonSelectableIDs
                         if(ele.length>0){
                             top = top + $(ele).position().top;
                         }
-                        
                         ele_ed.scrollTop(top);
+                        
                     },200); //without timeout preview form scrolls to kept position
+                    
                 }
                 this.editForm.show();
                 this._editing.setFocus();
@@ -1488,9 +1506,14 @@ dty_TermIDTreeNonSelectableIDs
         this._on( btnSave, {click: function() { that._saveEditAndClose( null, 'close' ); }});
         
         
-        
-
         this._super();
+        
+        //change default styles
+        this.editForm.find('.text').css({background: '#ECF1FB'});
+        this.editForm.find('.entity_selector').css({background: '#ECF1FB'});
+        this.editForm.find('.ui-selectmenu-button').css({background: '#ECF1FB'});
+        this.editForm.find('.required > label').css({color: '#6A7C99'});
+
     },    
     
     
@@ -1788,6 +1811,21 @@ dty_TermIDTreeNonSelectableIDs
         }
     },
     
+    _composeTreeItem: function(title, type, req){
+        
+        if(type!='separator'){
+            title =  '<span style="padding-left:20px;">' + title 
+                    + '</span><span style="font-size:smaller;">  ('
+                    +window.hWin.HEURIST4.detailtypes.lookups[type]
+                    +')</span>';
+        }
+        if(req=='forbidden'){
+            title =  title + '<span style="font-size:smaller;text-transform:none;"> (hidden)</span>';
+        }
+        
+        return title;
+    },
+    
     //-----------------------------------------------------
     //
     // special case for separator field
@@ -1837,7 +1875,8 @@ dty_TermIDTreeNonSelectableIDs
                                         + '</span><span style="font-size:smaller">  ('
                                         +window.hWin.HEURIST4.detailtypes.lookups[fields['dty_Type']]
                                         +')</span>';
-                            }else if(req=='forbidden'){
+                            }
+                            if(req=='forbidden'){
                                 title =  title + '<span style="font-size:smaller;text-transform:none;"> (hidden)</span>';
                             }
                             
@@ -1850,7 +1889,7 @@ dty_TermIDTreeNonSelectableIDs
                     recset.setRecord(recID, fields);
                 }
                 
-                // 3. get treeview.toDict and pur it in ExtDescription of field 2-57 ("Header 1") 
+                // 3. get treeview.toDict and put it in ExtDescription of field 2-57 ("Header 1") 
                 /*treeview.visit(function(node){
                         if(!node.folder){
                             node.data = {}; //remove garbage fancytree may put here
@@ -1997,7 +2036,8 @@ edit form is always inline
                                         + '</span><span style="font-size:smaller;">  ('
                                     +window.hWin.HEURIST4.detailtypes.lookups[recset.fld(record,'dty_Type')]
                                     +')</span>';
-                        }else if(req=='forbidden'){
+                        }
+                        if(req=='forbidden'){
                             title =  title + '<span style="font-size:smaller;text-transform:none;"> (hidden)</span>';
                         }
                         node.setTitle( title );   
@@ -2026,7 +2066,14 @@ edit form is always inline
     //
     // add new separator/group
     //
-    addNewSeparator: function( after_dtid ){
+    addNewSeparator: function( after_dtid, allow_proceed ){
+        
+        if(allow_proceed!==true){
+            this._allowActionIfModified( function(){ 
+                this.addNewSeparator( after_dtid, true );                            
+            } );
+            return;
+        }
         
         if(this._isFlat){
             

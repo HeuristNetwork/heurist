@@ -844,7 +844,7 @@ $.widget( "heurist.svs_list", {
         }
         else{
             
-            $('<span style="padding:10px">No searches defined</span>').appendTo(this.accordeon);
+            $('<span style="padding:10px">No filters defined</span>').appendTo(this.accordeon);
         }
         this.accordeon.show();
         
@@ -1533,11 +1533,11 @@ $.widget( "heurist.svs_list", {
              append_link.contextmenu(context_opts);
 
             //treedata is empty - add div - to show add links
-            var tree_links = $("<div>", {id:"addlink"+groupID})
+            var tree_links = $('<div>', {id:"addlink"+groupID})
             .css({'display': treeData && treeData.length>0?'none':'block', 'padding-left':'1em'} )
             .append( append_link );
 
-
+            
             if(window.hWin.HEURIST4.util.isnull(container)){
                 res = $('<div>').append(tree_links).append(tree);
             }else{
@@ -1551,11 +1551,15 @@ $.widget( "heurist.svs_list", {
             //not logged in
             tree.fancytree(fancytree_options);
 
+            //treedata is empty - add div - to show empty message
+            var tree_links = $('<div class="heurist-helper3">no filters defined</div>')
+            .css({'display': treeData && treeData.length>0?'none':'block', 'padding-left':'1em'} );
+            
             if(window.hWin.HEURIST4.util.isnull(container)){
-                res = $('<div>').append(tree);
+                res = $('<div>').append(tree_links).append(tree);
             }else{
                 container.empty();
-                container.append(tree);
+                container.append(tree_links).append(tree);
                 res = container;
             }
             

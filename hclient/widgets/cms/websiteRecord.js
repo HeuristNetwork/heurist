@@ -1110,7 +1110,7 @@ function hCmsEditing(_options) {
                        if(!ele.editing_input('instance')){
                            
                             var ed_options = {
-                                recID: -1,
+                                recID: -1,                                                                                       
                                 dtID: ele.attr('id'), //'group_selector',
                                 //show_header: false,
                                 values: [dele.find('input[name="menu_recIDs"]').val()],
@@ -1141,15 +1141,21 @@ function hCmsEditing(_options) {
                             
                             if(selval==0){
                                 //buttons
+                                dele.find('#allowed_UGrpID').css('display','table-row');
+                                dele.find('#allowed_svsIDs').css('display','table-row');
                                 dele.find('#allowed_UGrpID').editing_input('setDisabled', false);
                                 dele.find('#allowed_svsIDs').editing_input('setDisabled', false);
                             }else if(selval==1){
                                 //tree
+                                dele.find('#allowed_UGrpID').css('display','table-row');
+                                dele.find('#allowed_svsIDs').css('display','none');
                                 dele.find('#allowed_UGrpID').editing_input('setDisabled', false);
                                 dele.find('#allowed_svsIDs').editing_input('setDisabled', true);
                                 dele.find('input[name="allowed_svsIDs"]').val('');
                             }else{
                                 //full
+                                dele.find('#allowed_UGrpID').css('display','none');
+                                dele.find('#allowed_svsIDs').css('display','none');
                                 dele.find('#allowed_UGrpID').editing_input('setDisabled', true);
                                 dele.find('#allowed_svsIDs').editing_input('setDisabled', true);
                                 dele.find('input[name="allowed_UGrpID"]').val('');

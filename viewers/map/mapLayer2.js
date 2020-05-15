@@ -163,6 +163,7 @@ function hMapLayer2( _options ) {
     //
     function _addImage(){
 
+         //obfuscated file id
          var imageFile = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_FILE_RESOURCE']);
          
          var image_url = window.hWin.HAPI4.baseURL + '?db=' + window.hWin.HAPI4.database + '&file='+
@@ -345,7 +346,7 @@ function hMapLayer2( _options ) {
                     
                     //check if there are layers and tlcmapdatasets among result set
                     if( _parent_mapdoc==0 ){ // && window.hWin.HEURIST4.util.isArrayNotEmpty(layers_ids)
-                        options.mapwidget.mapping('addLayerRecords', layers_ids);
+                        options.mapwidget.mapping('getMapManager').addLayerRecords( layers_ids );
                     } 
                     
 
@@ -430,7 +431,7 @@ function hMapLayer2( _options ) {
         },
         
         //
-        // 
+        //  sends request for map data (json, kml or shp) and text file with links (to record view and hml) 
         //
         getMapData: function(){
             
@@ -459,7 +460,7 @@ function hMapLayer2( _options ) {
                     sQuery = window.hWin.HEURIST4.util.composeHeuristQuery2(params, true);
                     sQuery = sQuery + '&db=' + (params.db?params.db:window.hWin.HAPI4.database);
                 }
-                sQuery = sQuery + '&format=geojson&filename=Dataset_'+dataset_ID; //layerName; //zip=1&
+                sQuery = sQuery + '&format=geojson&filename=Dataset_'+dataset_ID; //(layer_ID>0?layer_ID:dataset_ID); //layerName; //zip=1&
                 
                 //returns hml for these two records
                 sQuery = sQuery + '&metadata='+dataset_ID+(layer_ID>0?(','+layer_ID):'');
@@ -470,12 +471,25 @@ function hMapLayer2( _options ) {
                 window.open(url, '_blank');
 
             }else if(rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_TILED_IMAGE_SOURCE']){
-
-                //_addTiledImage();
+                
+                var layer_url = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_SERVICE_URL']);
+                
+                var sMsg = '<p>This dataset is a tiled image running on a server. '
+                +'Tiled images should be accessed via their URL which delivers the appropriate tiles for the area being mapped</p>'
+                +layer_url
+                +'<p>Link to metadata :'
+                +window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database+'&recID='+dataset_ID+'</p>';
+                
+                window.hWin.HEURIST4.msg.showMsgDlg(sMsg);
 
             }else if(rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_GEOTIFF_SOURCE']){
 
-                //_addImage();
+                var imageFile = _recordset.fld(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_FILE_RESOURCE']);                
+                
+                url = window.hWin.HAPI4.baseURL+'?db='+ window.hWin.HAPI4.database 
+                        +'&metadata='+dataset_ID+'&file='+imageFile;
+                                                                  
+                window.open(url, '_blank');
 
             }else if(rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_KML_SOURCE'] ||
                      rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_FILE_SOURCE']){  //csv

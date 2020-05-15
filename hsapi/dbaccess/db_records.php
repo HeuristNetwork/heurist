@@ -1515,8 +1515,12 @@
                        $lim = checkMaxLength2($rval);
                        //TEST $lim = 100;
                        if($lim>0){
-                            $dtl_Value = $purifier->purify($dtl_Value);
-                            $dtl_Value = htmlspecialchars_decode( $dtl_Value );
+                            //remove script tag
+                            $dtl_Value = trim($dtl_Value);
+                            $dtl_Value = preg_replace('#<script(.*?)>(.*?)</script>#is', '', $dtl_Value);
+                           
+                            //$dtl_Value = $purifier->purify($dtl_Value);
+                            //$dtl_Value = htmlspecialchars_decode( $dtl_Value );
                            
                             $iStart = 0;
                             while($iStart<mb_strlen($dtl_Value)){
@@ -1539,8 +1543,10 @@
                         if(!$isValid ){
                             $err_msg = 'Value is empty';  
                         }else if(!in_array($dtyID, $not_purify)){
-                            $dtl_Value = $purifier->purify($dtl_Value);
-                            $dtl_Value = htmlspecialchars_decode( $dtl_Value );
+                            $dtl_Value = trim($dtl_Value);
+                            $dtl_Value = preg_replace('#<script(.*?)>(.*?)</script>#is', '', $dtl_Value);
+                            //$dtl_Value = $purifier->purify($dtl_Value);
+                            //$dtl_Value = htmlspecialchars_decode( $dtl_Value );  //&gt; to >
                         }
                         break;
                     
@@ -1661,6 +1667,20 @@
 
                             //TODO !!! mysql_num_rows(mysql_query("select ulf_ID from recUploadedFiles where ulf_ID=".dtl_UploadedFileID)) <=0 )
 
+                        }else if(is_string($dtl_Value)){  //this is base64 encoded image
+                        
+                            //save encoded image as file and register it
+                            $entity = new DbRecUploadedFiles($system, null);
+                            $dtl_UploadedFileID = $entity->registerImage($dtl_Value, 'map_snapshot_'.$recID); //it returns ulf_ID
+                            if( is_bool($dtl_UploadedFileID) && !$dtl_UploadedFileID ){
+                                $dtl_UploadedFileID = -1; //fail
+                                $err_msg = 'Can\'t register snapshot image';
+                            }
+                            if(is_array($dtl_UploadedFileID)){
+                                $dtl_UploadedFileID = $dtl_UploadedFileID[0];
+                            }
+                        
+                        
                         }else{  // new way - URL or JSON string with file data array (structure similar get_uploaded_file_info)
                             //TODO!!!!!
                             // $dtl_UploadedFileID = register_external($dtl_Value);

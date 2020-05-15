@@ -579,14 +579,19 @@ XML;
                 $zip->addFile($tmp_destination, $file_records);
             }
             
-            // IT DOES NOT WORK - need to rewrite flathml
+            // SAVE hml inot file DOES NOT WORK - need to rewrite flathml
             if(@$params['metadata']){//save hml into scratch folder
                 
                 $file_metadata = $params['filename'].'.txt';//($params['format']=='xml'?'.hml':'.xml');
                 $file_metadata_full = tempnam(HEURIST_SCRATCHSPACE_DIR, "meta");
-                $url = HEURIST_BASE_URL.'export/xml/flathml.php?db='
-                            .$params['db']  //self::$system->dbname()
-                            .'&q=ids:'.$params['metadata'].'&depth=0';
+                
+                
+                //$url = $serverURL.'export/xml/flathml.php?db='.$params['db'].'&q=ids:'.$params['metadata'].'&depth=0';
+                
+                $serverURL = HEURIST_SERVER_URL . '/heurist/';
+                list($dataset_id, $layer_id) = explode(',',$params['metadata']);
+                $url = $serverURL.'?db='.$params['db'].'&recID='.$dataset_id;  //($layer_id>0?$layer_id:$dataset_id);
+                $url = $url."\n".($url.'&fmt=html');
                 file_put_contents($file_metadata_full ,$url);
                 /*
                 $_REQUEST['db'] = self::$system->dbname();
@@ -750,7 +755,7 @@ private static function _calculateSummaryExtent($maplayer_extents, $is_return_re
             
             $gPoint = new GpointConverter();
             $gPoint->setLongLat($mbox['minx'], $mbox['miny']);
-            $zoomKm = round($gPoint->distanceFrom($mbox['maxx'], $mbox['miny'])/100000,0);
+            $zoomKm = round($gPoint->distanceFrom($mbox['maxx'], $mbox['minx'])/100000,0);
             
             
             $mbookmark = 'Extent,'.$mbox['miny'].','.$mbox['minx']
@@ -775,7 +780,7 @@ private static function _calculateSummaryExtent($maplayer_extents, $is_return_re
                 DT_NAME=>array('1'=>$params['tlcmap']),
                 DT_MAP_BOOKMARK=>array('2'=>($mbookmark!=null?$mbookmark:$mapdoc_defaults[DT_MAP_BOOKMARK])),
                 DT_ZOOM_KM_POINT=>array('3'=>($zoomKm>0?$zoomKm:$mapdoc_defaults[DT_ZOOM_KM_POINT])),
-                DT_GEO_OBJECT=>array('4'=>($mbookmark!=null?array('geo'=>array("type"=>"pl", "wkt"=>$mbox)):null)),
+                DT_GEO_OBJECT=>array('4'=>($mbox!=null?array('geo'=>array("type"=>"pl", "wkt"=>$mbox)):null)),
                 DT_MAP_LAYER=>$maplayer_records
             );
             
@@ -1075,7 +1080,7 @@ private static function _getJsonFeature($record, $mode){
             $val = array('dty_ID'=>$dty_ID,'value'=>$value);
 
             if($mode==2){ //extended - with concept codes and names/labels
-                $field_type = $defDetailtypes['typedefs'][$dty_ID]['commonFields'][$idx_dtype];
+                $field_type = self::$defDetailtypes['typedefs'][$dty_ID]['commonFields'][$idx_dtype];
                 //It needs to include the field name and term label and term standard code.
                 if($field_type=='enum' || $field_type=='relationtype'){
                     $val['termLabel'] = self::$defTerms->getTermLabel($value, true);

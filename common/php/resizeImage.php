@@ -348,6 +348,10 @@ if (array_key_exists('ulf_ID', $_REQUEST))
             }
             */
             
+        }else if (@$_REQUEST['offer_download']){
+            // image placeholder
+            header('Location: ../../hclient/assets/200x200-warn.gif');
+            return;
         }
     }
 

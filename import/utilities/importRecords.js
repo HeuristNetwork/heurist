@@ -35,7 +35,13 @@ function hImportRecords(_max_upload_size) {
     btnUploadData,
     upload_file_name,  //file on server with original uploaded data
     progressInterval,
-    session_id;
+    session_id,
+    rectypesInSource,
+    detailtypesInSource,
+    source_db;
+
+    var targetMissed = 0;
+    var targetDtMissed = 0;
     
     function _init( _max_upload_size){
     
@@ -96,7 +102,7 @@ function hImportRecords(_max_upload_size) {
         //change: function(){},
         error: function (jqXHR, textStatus, errorThrown) {
             //!!! $('#upload_form_div').show();
-            _hideProgress(0, 0);
+            _hideProgress(0);
             pbar_div.hide();
             if(textStatus!='abort'){
                 window.hWin.HEURIST4.msg.showMsgErr(textStatus+' '+errorThrown);
@@ -104,15 +110,14 @@ function hImportRecords(_max_upload_size) {
         },
         done: function (e, response) {
 
-                //!!! $('#upload_form_div').show();                
-                //pbar_div.hide();       //hide progress bar
-                //_hideProgress(0, -1);
                 response = response.result;
                 if(response.status==window.hWin.ResponseStatus.OK){  //after upload
                     var data = response.data;
                     $.each(data.files, function (index, file) {
                         if(file.error){
+                            _hideProgress(0);                
                             window.hWin.HEURIST4.msg.showMsgErr(file.error);
+                            return false;
                         }else{
                             
                             upload_file_name = file.name;
@@ -125,67 +130,12 @@ function hImportRecords(_max_upload_size) {
                                    
                             //call importController.php                                          
                             window.hWin.HAPI4.doImportAction(request, function( response ){
-                                    
+                                
+                                    _hideProgress(0);
                                     if(response.status == window.hWin.ResponseStatus.OK){
                                         //render list of rectypes to be imported
-                                        var isAllRecognized = true;
-                                        var source_db = response.data.database;
+                                        source_db = response.data.database;
                                         var source_db_name = response.data.database_name;
-                                        var rectypes = response.data.rectypes;
-                                        var s = '', tsv = 'type\tsource id\tccode\tname in source\ttarget id\tname in target\n';
-                                        var recCount = 0;
-                                        for(var rtyID in rectypes){
-                                            var rectype = rectypes[rtyID];
-                                            s = s + '<tr><td>'
-                                                    +rectype['code']+'</td><td>'
-                                                    +rectype['count']+'</td><td>'
-                                                    //+rectype['target_RecTypeID']+'</td><td>'
-                                                    +rectype['name']+'</td><td>'
-                                                    +(rectype['target_RecTypeID']>0?rectype['target_RecTypeID']:'')+'</td></tr>';
-                                            
-                                            recCount = recCount + rectype['count'];
-                                            
-                                            var target_id;
-                                            if(rectype['target_RecTypeID']>0){
-                                                target_id = rectype['target_RecTypeID']+'\t'+
-                                                window.hWin.HEURIST4.rectypes.names[rectype['target_RecTypeID']]+'\n';
-                                            }else{
-                                                target_id = '\t\n';
-                                                isAllRecognized = false;
-                                            }
-                                            
-                                            tsv = tsv + 'rectype\t'+(rtyID.indexOf('-')?'':rtyID)+'\t'+rectype['code']+'\t'
-                                                    +rectype['name']+'\t'+target_id;
-                                        }
-                                        var detailtypes = response.data.detailtypes;
-                                        if(detailtypes)
-                                        for(var dtyID in detailtypes){
-                                            var detailtype = detailtypes[dtyID];
-                                                                                        
-                                            var target_id;
-                                            if(detailtype['target_dtyID']>0){
-                                                target_id = detailtype['target_dtyID']+'\t'+
-                                                window.hWin.HEURIST4.detailtypes.names[detailtype['target_dtyID']]+'\n';
-                                            }else{
-                                                target_id = '\t\n';
-                                                isAllRecognized = false;
-                                            }
-                                            
-                                            tsv = tsv + 'detailtype\t'+(dtyID.indexOf('-')?'':dtyID)
-                                                    +'\t'+detailtype['code']+'\t'
-                                                    +detailtype['name']+'\t'+target_id;
-                                        }
-                                        
-                                        $('#div_tsv').text(tsv);
-                                        $('.tsv_download').click(function(event){
-                                            window.hWin.HEURIST4.util.stopEvent(event);
-                                            window.hWin.HEURIST4.util.downloadInnerHtml('elements_in_import.tsv',
-                                                $('#div_tsv'),'text/tab-separated-values');
-                                            return false;
-                                        });
-                                        $('#div_RectypeToBeImported').html('<table><tr>'
-                                                +'<td>Code</td><td>Rec count</td><td>Name</td><td>ID in this db</td></tr>'
-                                                +s+'</table>');
                                         
                                         $('#div_sourcedb').html('Source database:&nbsp;&nbsp;&nbsp;id: <b>'
                                         +(source_db>0?source_db:'0 <span style="color:red">(not registered)</span>')
@@ -194,42 +144,11 @@ function hImportRecords(_max_upload_size) {
                                             ?'<span style="color:red">(not specified)</span>': ('<b>'+source_db_name+'</b>') ))
                                         .show();        
                                                 
-                                        _showStep(1);   
+                                        //assign to global variables for re-use after sync
+                                        rectypesInSource = response.data.rectypes;
+                                        detailtypesInSource = response.data.detailtypes;
                                         
-                                        $('.import-rem').hide();
-                                        
-                                        if(!(source_db>0) || source_db==window.hWin.HAPI4.sysinfo.db_registeredid){
-                                            //source database is not registered or the same database
-                                            //thus we can't or not need import defintions
-                                            //show the list of all definitions in source
-                                            if(isAllRecognized){
-                                                $('.st1_D').show();
-                                            }else{
-                                                $('.st1_C').show();
-                                            }
-                                            $("#divStep2").show();
-                                            
-                                        }else if(isAllRecognized){
-                                            //show step2 and option to SYNC
-                                            $('#btn_ImportRt').show().button('option','label','Synch listed entity types');
-                                            $('#st1_B').show(); //All entity types are recognised. However it is not guaranteed
-                                            $("#divStep2").show();
-                                        }else{
-                                            //show option A - download - missing definitions
-                                            $('#btn_ImportRt').show().button('option','label','Download listed entity types');
-                                            $('.st1_A').show(); // rectypes in this file do not yet exist in target db
-                                        }
-
-                                        $('#spanRecCount').text(recCount);
-                                        
-                                        //no missing defintions
-                                        if(s!=''){
-                                        }else{
-                                            //all record types are already in target database
-                                            //goto import records step
-                                            _showStep(2);
-                                        }
-                                        
+                                        _showListOfEntityTypes(false);
                                     }else{
                                         _showStep(0);
                                         window.hWin.HEURIST4.msg.showMsgErr(response);
@@ -240,7 +159,7 @@ function hImportRecords(_max_upload_size) {
                         }
                     });
                 }else{
-                    //$('#divFieldRolesHeader').show();
+                    _hideProgress(0);
                     _showStep(0);
                     window.hWin.HEURIST4.msg.showMsgErr(response.message);
                 }
@@ -282,6 +201,237 @@ function hImportRecords(_max_upload_size) {
     }
 
     //
+    //
+    //
+    function _showListOfEntityTypes(afterSync){  
+
+        var rectypes = rectypesInSource;
+        var detailtypes = detailtypesInSource;
+
+        var s = '', tsv = 'type\tsource id\tccode\tname in source\ttarget id\tname in target\n';
+        var recCount = 0;
+
+        var isAllRecognized = true;
+        var sourceMissed = 0;
+        var sourceDtMissed = 0;
+        var cnt_local_rt = 0;
+        var cnt_local_dt = 0;
+        targetMissed = 0;
+        targetDtMissed = 0;
+        var idx_ccode_rt = window.hWin.HEURIST4.rectypes.typedefs.commonNamesToIndex.rty_ConceptID;
+        var idx_ccode_dt = window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex.dty_ConceptID;
+        
+        function __cntlbl(rt, dt){
+            
+            return (rt>0?(rt+' record type'+(rt>1?'s':'')):'')
+                    +((rt>0 && dt>0)?' and ':'')
+                    +(dt>0?(dt+' field type'+(dt>1?'s':'')):'')
+        }
+        
+
+        for(var rtyID in rectypes){
+
+            var rectype = rectypes[rtyID];
+
+            var rectype_source = rectype['code'];
+            if(!rectype_source){
+                rectype_source = '<span style="color:red">missed</span>';
+                sourceMissed++;
+            }else if(rectype_source.indexOf('-')<0 || rectype_source.indexOf('0000-')==0 ){
+                cnt_local_rt++;
+            }
+
+            s = s + '<tr><td>'
+                + rectype_source+ '</td><td>'
+                + rectype['count']+ '</td><td>'
+                //+rectype['target_RecTypeID']+'</td><td>'
+                +rectype['name']+ '</td><td>';
+            
+            if(afterSync && rectype['code'] &&!(rectype['target_RecTypeID']>0)){
+                //try to find again
+                rectype['target_RecTypeID'] = window.hWin.HEURIST4.dbs.findByConceptCode(rectype['code'], window.hWin.HEURIST4.rectypes, idx_ccode_rt);
+            }
+
+            var target_id;
+            if(rectype['target_RecTypeID']>0){
+                target_id = rectype['target_RecTypeID']+'\t'+
+                window.hWin.HEURIST4.rectypes.names[rectype['target_RecTypeID']]+'\n';
+
+                recCount = recCount + rectype['count'];
+
+                s = s + rectype['target_RecTypeID']+'</td></tr>';
+            }else{
+                if(rectype['code'] && (afterSync || !(source_db>0)) ){
+                    target_id = '\tnot found\n';
+                    s = s + '<span style="color:red">not found</span></td></tr>';
+                }else{
+                    target_id = '\t\n';
+                    s = s + '</td></tr>';
+                }
+
+                isAllRecognized = false;
+                targetMissed++;
+            }
+
+            tsv = tsv + 'rectype\t'+(rtyID.indexOf('-')?'':rtyID)+'\t'+rectype['code']+'\t'
+            +rectype['name']+'\t'+target_id;
+        }
+
+        // show missed fields
+        if(detailtypes)
+            for(var dtyID in detailtypes){
+                var detailtype = detailtypes[dtyID];
+
+                var dt_source = detailtype['code'];
+                if(!dt_source){
+                    dt_source = '<span style="color:red">missed</span>';
+                    sourceDtMissed++;
+                }else if(dt_source.indexOf('-')<0 || dt_source.indexOf('0000-')==0 ){
+                    cnt_local_dt++;
+                }
+                
+                if(afterSync && detailtype['code'] &&!(detailtype['target_dtyID']>0)){
+                    //try to find again
+                    detailtype['target_dtyID'] = window.hWin.HEURIST4.dbs.findByConceptCode(detailtype['code'], 
+                                    window.hWin.HEURIST4.detailtypes.typedefs, idx_ccode_dt);
+                }
+
+                var target_id;
+                if(detailtype['target_dtyID']>0){
+                    target_id = detailtype['target_dtyID']+'\t'+
+                    window.hWin.HEURIST4.detailtypes.names[detailtype['target_dtyID']]+'\n';
+                }else{
+                    
+                    var is_issue = (detailtype['code'] && (afterSync || !(source_db>0)));
+
+                    if(targetDtMissed==0){
+                        s = s + '<tr><td colspan="4"><b>field types '+(is_issue?'issues':'')+':</b></td></tr>';    
+                    }
+
+                    s = s + '<tr><td>'
+                    +dt_source+'</td><td></td><td>'
+                    +detailtype['name']+'</td><td>';
+
+                    if(is_issue){
+                        target_id = '\tnot found\n';
+                        s = s + '<span style="color:red">not found</span></td></tr>';
+                    }else{
+                        target_id = '\t\n';
+                        s = s + '</td></tr>';
+                    }
+
+                    
+                    isAllRecognized = false;
+                    targetDtMissed++;
+                }
+
+                tsv = tsv + 'detailtype\t'+(dtyID.indexOf('-')?'':dtyID)
+                +'\t'+detailtype['code']+'\t'
+                +detailtype['name']+'\t'+target_id;
+            }
+
+        $('#div_tsv').text(tsv);
+        $('.tsv_download').click(function(event){
+            window.hWin.HEURIST4.util.stopEvent(event);
+            window.hWin.HEURIST4.util.downloadInnerHtml('elements_in_import.tsv',
+                $('#div_tsv'),'text/tab-separated-values');
+            return false;
+        });
+        $('#div_RectypeToBeImported').html('<table><tr>'
+            +'<td>ID read from file</td><td>Rec count</td><td>Name</td><td>ID in this db</td></tr>'
+            +s+'</table>');
+
+        _showStep(1);   
+
+        //hide all remakrs
+        $('.import-rem').hide();
+
+        $('.cnt_missed_rt').text(__cntlbl(targetMissed, targetDtMissed));
+        $('.cnt_missed_rt3').text(__cntlbl(targetMissed, targetDtMissed));
+        $('.cnt_missed_rt2').text(__cntlbl(targetMissed, 0));
+        
+        if(sourceMissed>0 || sourceDtMissed>0){
+            $('.cnt_missed_rt').text(__cntlbl(sourceMissed, sourceDtMissed));
+            $('.st1_E').show();
+
+        }else if(!(source_db>0) || source_db==window.hWin.HAPI4.sysinfo.db_registeredid){
+            //source database is not registered or the same database
+            //thus we can't or not need import defintions
+            //show the list of all definitions in source
+            $('.st1_notreg').show();
+
+            if(targetMissed>0 || targetDtMissed>0){
+                $('.st1_G').show();
+            }else if(isAllRecognized){
+                $('.st1_D').show();
+            }
+            $("#divStep2").show();
+
+        }else { //registered
+
+            if(cnt_local_rt>0 || cnt_local_dt>0){
+                $('.cnt_local_rt').text(__cntlbl(cnt_local_rt, cnt_local_dt));
+                $('.st1_C').show();
+            }
+            
+            if(afterSync){
+                
+                if(isAllRecognized){
+
+                    $('#btn_ImportRt').hide();
+                    $('.st1_AllRecognized_afterSync').show(); //All entity types are recognised.
+                    $("#divStep2").show();
+
+                }else {
+
+                    $('.st1_NotRecognized_afterSync').show();
+
+                    if(targetDtMissed==0){
+                        //it is possible import if rt are missed, lock if fields are missed
+
+                        if(targetMissed>0){
+                            $('.st1_ImportRtError2').show();
+                        }
+
+                        _showStep(1);
+                        $("#divStep2").show();
+
+                    }else if(targetDtMissed>0) {
+                        //import impossible
+                        $('.st1_ImportRtError3').show();
+                        _showStep(1);    
+
+                    }
+                }
+            
+            }else{
+                if(isAllRecognized){
+                    //show step2 and option to SYNC
+                    $('#btn_ImportRt').show().button('option','label','Synch listed entity types');
+                    $('.st1_AllRecognized_beforeSync').show(); //All entity types are recognised. However it is not guaranteed
+                    $("#divStep2").show();
+                }else{
+                    //show option A - download - missing definitions
+                    $('#btn_ImportRt').show().button('option','label','Download listed entity types');
+                    $('.st1_OfferSync').show(); // rectypes in this file do not yet exist in target db
+                }
+            }
+            
+        }
+
+        $('#spanRecCount').text(recCount);
+
+        //no missing defintions
+        if(s!=''){
+        }else{
+            //all record types are already in target database
+            //goto import records step
+            _showStep(2);
+        }
+    }                                        
+
+
+    //
     // import database definitions before import records
     //
     function _importDefinitions(){
@@ -299,15 +449,16 @@ function hImportRecords(_max_upload_size) {
             
 //var _time_debug = new Date().getTime() / 1000;            
                    
-            window.hWin.HAPI4.doImportAction(request, function( response ){
+                function _afterImportDefinitions( response ){
                     
 //console.log('inport defs '+(new Date().getTime() / 1000 - _time_debug));
 //_time_debug = new Date().getTime() / 1000;
-
+                    _hideProgress();
+                    $('body > div:not(.loading)').show();
+                    
                     if(response.status == window.hWin.ResponseStatus.OK){
                         //hide progress and go to step2 - import records
-                        _hideProgress(2);
-                        //update local definitions
+                        /*update local definitions
                         if(response.data.data){
                             //update definitions on client side
                             if(response.data.data.rectypes) window.hWin.HEURIST4.rectypes = response.data.data.rectypes;
@@ -318,15 +469,45 @@ function hImportRecords(_max_upload_size) {
                                 window.hWin.HEURIST4.msg.showMsgDlg('<div style="font:small"><table>'
                                     +response.data.report.rectypes+'</table></div>',null,'Result of import definitions');
                             }
-                        }
+                        }*/
                         //refresh database definitions
-                        window.hWin.HAPI4.SystemMgr.get_defs_all( false, window.hWin.document);
+                        window.hWin.HAPI4.SystemMgr.get_defs_all( false, window.hWin.document, 
+                        function(){
+                            //verify for missed record types again    
+                            _showListOfEntityTypes( true );
+                        });
                     }else{
                         //hide progress and stay on step 1
-                        _hideProgress(1);
+                        $('.st1_ImportRtError').show();
+                        
                         window.hWin.HEURIST4.msg.showMsgErr(response);
+                        
+                        //it is possible import if rt are missed, lock if fields are missed
+                        if(targetDtMissed>0) {
+                            //import impossible
+                            $('.st1_ImportRtError3').show();
+                            _showStep(1);    
+                            
+                        }else if(targetDtMissed==0){
+                            //import possible
+                            if(targetMissed>0){
+                                $('.st1_ImportRtError2').show();
+                            }
+                            
+                            _showStep(1);
+                            $("#divStep2").show();
+                            
+                        }
+
+                        
                     }
-                });
+                    
+                    
+                };
+                
+                window.hWin.HAPI4.doImportAction(request, _afterImportDefinitions);
+                //debug _afterImportDefinitions( {status:1, message:'Bla Error!!!!'} );
+                //_afterImportDefinitions( {status:window.hWin.ResponseStatus.OK } );
         
     }        
 

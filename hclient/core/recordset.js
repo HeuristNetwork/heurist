@@ -1011,13 +1011,19 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
     
     /**
     * public method "values"
+    * record - recId or record object
     */
     function _getFieldValues(record, fldname){
         if(window.hWin.HEURIST4.util.isempty(fldname)) return null;
+
+        if( (!$.isPlainObject(record)) && !isnull(record) && records[record]){
+            record = records[record];
+        }
         
         if(isnull(record)){
             return null
         }else{  //@todo calcfields
+        
             var idx = $.inArray(fldname, fields);
             if(idx>-1){
                 return record[idx];
@@ -1070,6 +1076,11 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
     */
     function _getFieldValue(record, fldname){
 
+        
+        if( (!$.isPlainObject(record)) && !isnull(record) && records[record]){
+            record = records[record];
+        }
+        
         if(isnull(record) || window.hWin.HEURIST4.util.isempty(fldname)){
             return null;
         }

@@ -130,7 +130,7 @@ function hPublishDialog( _options )
             }
         
             if($(popupelement).find("#m_mapdocs").is(':checked')){
-                var mapdocs = options.mapwidget.getMapDocuments('visible');
+                var mapdocs = options.mapwidget.getMapManager().getMapDocumentsIds('visible');
                 if(mapdocs.length>0){
                     layout_params['mapdocument'] = mapdocs.join(',');
                 }
@@ -281,7 +281,13 @@ function hPublishDialog( _options )
             });
         */
             
-        }
+        },
+        
+        closePublishDialog: function(){
+            if(popupdialog && popupdialog.dialog('instance')){
+                popupdialog.dialog('close')
+            }
+        }    
 
     }
 

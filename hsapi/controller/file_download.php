@@ -61,6 +61,9 @@ if($db){
             if($force_recreate){
                 $thumb_url = $thumb_url.'&refresh=1';    
             }
+            if(@$_REQUEST['offer_download']){
+                $thumb_url = $thumb_url.'&offer_download=1';        
+            }
             
             header("Location: ".$thumb_url);
             exit();
@@ -124,6 +127,10 @@ if($db){
 
                     fileGetWidthHeight($filepath, $external_url, $mimeType);
 
+                }else if(@$_REQUEST['metadata']){//download zip file: registered file and file with links to html and xml
+                
+                    downloadFileWithMetadata($fileinfo, $_REQUEST['metadata']);
+                
                 }else
                 if(file_exists($filepath)){
                     
@@ -132,7 +139,7 @@ if($db){
                         $finfo = pathinfo($originalFileName);
                         $ext = @$finfo['extension'];
                         if($ext==null || $ext==''){
-                            $finfo = pathinfo($filepath); 
+                            $finfo = pathinfo($filepath);  //take from path
                             if(@$finfo['extension']){
                                 $originalFileName = $originalFileName.'.'.@$finfo['extension'];   
                             }else if($fileExt){
@@ -145,10 +152,18 @@ if($db){
                     downloadFile($mimeType, $filepath, @$_REQUEST['embedplayer']==1?null:$originalFileName);
                 }else if($external_url){
 //DEBUG error_log('External '.$external_url);        
-                    if(strpos($external_url,'http://')==0){
+                    if(strpos($external_url,'http://')==0 || $_REQUEST['download']){
+                        
+                        if($fileExt){
+                            $finfo = pathinfo($originalFileName);
+                            $ext = @$finfo['extension'];
+                            if($ext==null || $ext==''){
+                                $originalFileName = $originalFileName.'.'.$fileExt;   
+                            }
+                        }
                         //proxy http (unsecure) resources
                         $heurist_path = tempnam(HEURIST_SCRATCH_DIR, "_proxyremote_");        
-                        downloadViaProxy($heurist_path, $mimeType, $external_url, false);
+                        downloadViaProxy($heurist_path, $mimeType, $external_url, false, $originalFileName);
                         unlink($heurist_path);
                     }else{
                         header('Location: '.$external_url);  //redirect to URL (external)    

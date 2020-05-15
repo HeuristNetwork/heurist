@@ -174,7 +174,7 @@ function _upload_icon(mode) {
             "close-on-blur": false,
             "no-resize": false,
             height: 600, //(mode==0?200:250),
-            width: 850,
+            width: 1100,
             title:' Select thumbnail and icon',
             callback:function(context){
                 icon_refresh(context);

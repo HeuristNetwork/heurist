@@ -444,7 +444,7 @@ console.log(re);
     }
     
     //
-    //
+    //  sends request for map data (json, kml or shp) and text file with links (to record view and hml) 
     //
     , _downloadLayerData: function (selection) {
 
@@ -461,7 +461,7 @@ console.log(re);
             if(this.options.leaflet){ //leaflet
                 //if layer is visible - select and zoom to record in search results
                 var recID = selection[0];
-                var layer_rec = mapping.mapping('getLayerFromMapDocument', 0, recID);
+                var layer_rec = mapping.mapping('getMapManager').getLayer( 0, recID );
                 (layer_rec['layer']).getMapData();
                 
             }
@@ -486,11 +486,12 @@ console.log(re);
             var  mapping = this.mapframe[0].contentWindow.mapping;  
 
             if(this.options.leaflet){ //leaflet
-                mapping.mapping('setLayersVisibility', selection);
+                var mapManager = mapping.mapping( 'getMapManager' );
+                mapManager.setLayersVisibility(selection);
                 
                 //if layer is visible - select and zoom to record in search results
                 var recID = selection[0];
-                var layer_rec = mapping.mapping('getLayerFromMapDocument', 0, recID);
+                var layer_rec = mapManager.getLayer( 0, recID );
                 if(layer_rec && (layer_rec['layer']).isVisible()){
                     this._doVisualizeSelection( selection );
                 } 

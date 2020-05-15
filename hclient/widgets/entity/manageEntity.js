@@ -1317,7 +1317,43 @@ $.widget( "heurist.manageEntity", {
                 ele.find('#btnRecRemove').css('visibility', 'visible');    
             }*/
         }
+    },
+    
+    //
+    //
+    //
+    _allowActionIfModified: function( callback ){
         
+            if(this._editing && this._currentEditID!=null && this._editing.isModified()){
+                
+                var that = this;
+                
+                var $mdlg = window.hWin.HEURIST4.msg.showMsgDlg(
+                    'New '+this.options.entity.entityTitle+' requested with unsaved modifications in current '+this.options.entity.entityTitle+'.',
+                    //'You are about opening new edit form without saving data in current one. Save changes and start new edit?',
+                    //'Data were modified in edit form. Ignore modifications and start edit the new data',
+                        {
+                         'Save changes':function(){ 
+                            //save changes and go to next step
+                            that._saveEditAndClose( null, callback );
+                            $mdlg.dialog('close');
+                         },
+                         'Drop changes':function(){ 
+                            //drop changes load another record
+                            callback.call(that);
+                            //that._initEditForm_step2(recID);
+                            $mdlg.dialog('close');
+                         },   
+                         'Cancel':function(){
+                            $mdlg.dialog('close');
+                         }   
+                        }
+                        ,{title:'Confirm'}); //,yes:'Save changes', no:'Cancel'
+            }else{
+                callback.call(this);
+                //this._initEditForm_step2(recID);            
+            }
+            
     },
     
     /*
@@ -1348,31 +1384,7 @@ $.widget( "heurist.manageEntity", {
             this._initEditForm_step2(recID);
             
         }else{
-            
-            if(this._currentEditID!=null && this._editing.isModified()){
-                var $mdlg = window.hWin.HEURIST4.msg.showMsgDlg(
-                    'New '+this.options.entity.entityTitle+' requested with unsaved modifications in current '+this.options.entity.entityTitle+'.',
-                    //'You are about opening new edit form without saving data in current one. Save changes and start new edit?',
-                    //'Data were modified in edit form. Ignore modifications and start edit the new data',
-                        {
-                         'Save changes':function(){ 
-                            //save changes and go to next step
-                            that._saveEditAndClose( null, function(){ that._initEditForm_step2(recID); } );
-                            $mdlg.dialog('close');
-                         },
-                         'Drop changes':function(){ 
-                            //drop changes load another recrd
-                            that._initEditForm_step2(recID);
-                            $mdlg.dialog('close');
-                         },   
-                         'Cancel':function(){
-                            $mdlg.dialog('close');
-                         }   
-                        }
-                        ,{title:'Confirm'}); //,yes:'Save changes', no:'Cancel'
-            }else{
-                this._initEditForm_step2(recID);            
-            }
+            this._allowActionIfModified( function(){ that._initEditForm_step2(recID); } );
         }
     },
     
@@ -1490,7 +1502,7 @@ $.widget( "heurist.manageEntity", {
             
         var keepPos = 0;            
         if(this._editing){
-            keepPos = this._editing.getContainer().parents('.editFormDialog').scrollTop(); 
+            keepPos = this.editForm.scrollTop();
         }
         
         if(hard_reload===true){
@@ -1499,8 +1511,7 @@ $.widget( "heurist.manageEntity", {
             this._initEditForm_step4(null);
         }
        
-        
-        this._editing.getContainer().parents('.editFormDialog').scrollTop(keepPos);
+        this.editForm.scrollTop(keepPos);
     },
 
     //
