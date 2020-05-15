@@ -1914,10 +1914,10 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             allowed.splice(allowed.indexOf("geo"),1);
         }
         
-        var topitems = [{key:'',title:(currentStep==3)?'matching...':'importing...'},{key:'url',title:'Record URL'},{key:'scratchpad',title:'Record Notes'}];
+        var topitems = [{key:'',title:(currentStep==3)?'Matching - select field ...':'select field ...'},{key:'url',title:'Record URL'},{key:'scratchpad',title:'Record Notes'}];
         
         var allowed2 = ['resource'];
-        var topitems2 = [{key:'',title:(currentStep==3)?'matching...':'importing...'}]; 
+        var topitems2 = [{key:'',title:(currentStep==3)?'Matching - select field ...':'select field ...'}]; 
 
         $.each(sels, function (idx, item){
             var $item = $(item);
@@ -2335,7 +2335,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                         if(window.hWin.HEURIST4.util.isArrayNotEmpty(response.data['err_encoding'])){
 
                             var msg = 'Your file can\'t be converted to UTF-8. '
-                            +'Please open it in an advanced text editor and save with UTF-8 text encoding.<br>'
+                            +'Please open it in a text editor such as Notepad++ and save with UTF-8 text encoding.<br>'
                             +response.data['err_encoding_count']+' lines have such issue';
                                 
                             $( window.hWin.HEURIST4.msg.createAlertDiv(msg)).appendTo(container3);
