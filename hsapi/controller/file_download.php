@@ -181,17 +181,24 @@ if($db){
         }
 
     }
-    else if (@$_REQUEST['rurl'] && $db=='ExpertNation'){ //
+    else if (@$_REQUEST['rurl']){ //
         //load remote content from uni adelaide 
-        $remote_path = 'http://global.adelaide.edu.au/v/style-guide2/includes/common/'.$_REQUEST['rurl'];
-        //if(strpos($remote_path,'global.adelaide.edu.au/v/style-guide2/includes/common/')>0){
-            
-            $system->initPathConstants($db);
-            
+        if($db=='ExpertNation'){
+            $remote_path = 'http://global.adelaide.edu.au/v/style-guide2/includes/common/'.$_REQUEST['rurl'];
+            $mimetype = "text/html";
+        }else{
+            $remote_path = $_REQUEST['rurl'];
+            $mimetype = @$_REQUEST['mimetype'];    
+        }
+        
+        $system->initPathConstants($db);
+        
+        if(defined('HEURIST_SCRATCH_DIR')){
             $heurist_path = tempnam(HEURIST_SCRATCH_DIR, "_proxyremote_");        
-            downloadViaProxy($heurist_path, "text/html", $remote_path, false);
-            unlink($heurist_path);
-        //}
+            downloadViaProxy($heurist_path, $mimetype, $remote_path, false);
+            if(file_exists($heurist_path))unlink($heurist_path);
+        }
+        
     }
 }
 ?>
