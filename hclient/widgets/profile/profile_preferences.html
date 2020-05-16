@@ -149,7 +149,7 @@
         <div class="header"><label for="mapcluster_on">Map marker clustering</label></div>
         <input type="checkbox" name="mapcluster_on" id="mapcluster_on" class="text ui-widget-content ui-corner-all"/>
         
-        <label for="mapcluster_grid">grid pixels: </label>
+        <label for="mapcluster_grid">grid pixels </label>
         <input id="mapcluster_grid" name="mapcluster_grid" style="max-width: 45px;" type="number" min="1" step="1" value="20"
             title="The grid size of a cluster in pixels"/>&nbsp;
 <!--            
@@ -159,8 +159,8 @@
 -->         
     </div>
     <div>
-        <div class="header"><label for="mapcluster_zoom">Stop clustering closer than: </label></div>
-        <select id="mapcluster_zoom" name="mapcluster_zoom" style="width:450px;"
+        <div class="header"><label for="mapcluster_zoom">Stop clustering closer than (rollover for explanation) </label></div>
+        <select id="mapcluster_zoom" name="mapcluster_zoom" style="width:150px;"
             title="The maximum zoom level that a marker can be part of a cluster. Level 1 = ~10,000km (15 deg.) to ~65,000 km (equator). 
      Level 18 = ~50m (15 deg.) to ~250m (equator)"> 
             <option value="1">Level 1 (Worldwide)</option>
@@ -188,16 +188,15 @@
         -->    
     </div>
     <div>
-        <div class="header"><label for="deriveMapLocation">Derive map location of non-geolocalised entities from connected Places</label></div>
+        <div class="header"><label for="deriveMapLocation">Derive location of entities w/out coordinates from connected Places</label></div>
         <input type="checkbox" name="deriveMapLocation " id="deriveMapLocation" checked class="text ui-widget-content ui-corner-all"/>
-        <label style="padding-left:100px">Popup on rollover<input type="checkbox" id="map_rollover"></label>
     </div>
     <div>
         <!--
         <div class="header"><label for="mapSelectTools">Map select tools (by click, in rect, in shape)</label></div>
         <input type="checkbox" name="mapSelectTools " id="mapSelectTools" checked class="text ui-widget-content ui-corner-all"/>
         -->
-        <div class="header"><label>Controls:</label></div>
+        <div class="header"><label>Controls</label></div>
             <label><input type="checkbox" id="mctrl_bookmark" value="bookmark">bookmark</label>&nbsp;
             <label><input type="checkbox" id="mctrl_geocoder" value="geocoder">geocoder</label>&nbsp;
             <label title="Map select tools (by click, in rect, in shape)">
@@ -207,14 +206,15 @@
     </div>
     
     <div>
-        <div class="header"><label>Map popup template:</label></div>
+        <div class="header"><label>Map popup template</label></div>
         <select id="map_template" name="map_template" class="text ui-widget-content ui-corner-all" 
-            title="" style="width:300px;min-width:300px;max-width:300px">
+            title="" style="width:250px;min-width:300px;max-width:300px">
         </select>
+        <label style="padding-left:20px">Show on rollover<input type="checkbox" id="map_rollover"></label>
     </div>
 
     <div id="map_default_style_div">
-        <div class="header"><label>Map symbology for Current Query:</label></div>
+        <div class="header"><label>Symbology for results (aka Current Query) on map </label></div>
         <input id="map_default_style" name="map_default_style" class="text ui-widget-content ui-corner-all"/>
     </div>
     
@@ -235,15 +235,15 @@
     <div>
         <div class="header">
             <label for="search_result_pagesize">
-                Page size for display of search results list
+                Page size for display of search results list<br/><i style="font-size:smaller">Searches with many results will display slowly with larger page sizes</i>
             </label>
         </div>
         <select name="search_result_pagesize" id="search_result_pagesize" class="text ui-widget-content ui-corner-all" style="min-width:50px"
             title="This limit does not apply to filter. This is just for pagination of result list">
-            <option value="50">50</option>
+            <option value="50">50 (optimum)</option>
             <option value="100">100</option>
-            <option value="500">500</option>
-            <option value="1000">1,000</option>
+            <option value="500">500  (not recommended)</option>
+            <option value="1000">1,000 (not recommended)</option>
             <option value="5000">5,000 (not recommended)</option>
         </select>
     </div>
@@ -257,7 +257,7 @@
         </div>
         <select name="smarty-output-limit" id="smarty-output-limit" class="text ui-widget-content ui-corner-all" style="min-width:50px"
             title="This limit does not apply to external calls or periodic report generation to file">
-            <option value="50">50</option>
+            <option value="50">50 (optimum)</option>
             <option value="200">200</option>
             <option value="500">500 (not recommended)</option>
             <option value="1000">1,000 (not recommended)</option>
@@ -267,7 +267,7 @@
 
     <div>
         <div class="header"><label for="search_detail_limit">
-                Limit objects on interactive map/timeline<br/><i style="font-size:smaller">Heurist interface, not external calls. Beware overloading websites with too many objects.</i>
+                Limit objects on interactive map/timeline<br/><i style="font-size:smaller">Heurist interface, not external calls.<br/>Beware overloading websites with too many objects.</i>
             </label></div>
         <select name="search_detail_limit" id="search_detail_limit" class="text ui-widget-content ui-corner-all" style="min-width:50px"
             title="This limit does not apply to external calls - make sure you do not overload websites with maps or timelines with too many objects">
@@ -283,13 +283,16 @@
     </div>
 
     <div>
-        <div class="header"><label for="bookmarks_on">Show My Bookmarks in navigation panel<br/><i style="font-size:smaller">Turn on only if using bookmarks in shared db</i></label></div>
+        <div class="header">
+        <label for="bookmarks_on">Show My Bookmarks in navigation panel<br/><i style="font-size:smaller">Turn on only if using bookmarks in shared db</i></label></div>
         <input type="checkbox" name="bookmarks_on" id="bookmarks_on" class="text ui-widget-content ui-corner-all"/>
-
-        <label for="entity_btn_on">Entity quick filter buttons: </label>
-        <input type="checkbox" name="entity_btn_on" id="entity_btn_on" class="text ui-widget-content ui-corner-all"/>
     </div>
 
+    <div>
+        <div class="header">
+        <label for="entity_btn_on">Entity quick filter buttons </label>
+        <input type="checkbox" name="entity_btn_on" id="entity_btn_on" class="text ui-widget-content ui-corner-all"/>
+    </div>
     
     <!-- ================================================= -->
     <br/><hr />
@@ -323,7 +326,7 @@
 
     
     
-    <!--
+    <!-- Pre 2018: ptions which are no longer used or need rethinking or need proper maintenance
     <br />
     <hr />
     <br />
