@@ -2684,6 +2684,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
     // Find records in Heurist database and assign record id to identifier field in import table
     //
     // matchMode - 0 - match by mapped fields, 1- match by id column, 2 - skip matching
+    // disamb_resolv -  [{recid: heurist record id,key: import_id},....]
     //
     function _doMatching( matchMode, disamb_resolv ){
         
@@ -2795,7 +2796,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 request['idfield']=imp_session['columns'][key_idx]; //key_idx;            
             }
             if(disamb_resolv!=null){
-                request['disamb_resolv']=disamb_resolv;          
+                request['disamb_resolv'] = JSON.stringify( disamb_resolv );          
             }
             
             

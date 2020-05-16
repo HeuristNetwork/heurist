@@ -83,6 +83,7 @@ private static function findDisambResolution($keyvalue, $disamb_resolv){
 */
 private static function findRecordIds($imp_session, $params){
     
+    //result array
     $imp_session['validation'] = array( 
         "count_update"=>0, 
         "count_insert"=>0,
@@ -96,6 +97,7 @@ private static function findRecordIds($imp_session, $params){
 
     $import_table = $imp_session['import_table'];
     $multivalue_field_name = @$params['multifield']; //name of multivalue field - among mapped fields ONLY ONE can be multivalued
+
     if( $multivalue_field_name!=null && $multivalue_field_name>=0 ) $multivalue_field_name = 'field_'.$multivalue_field_name;
 
     $cnt_update_rows = 0;
@@ -103,6 +105,9 @@ private static function findRecordIds($imp_session, $params){
 
     //disambiguation resolution 
     $disamb_resolv = @$params['disamb_resolv'];   //record id => $keyvalue
+    if($disamb_resolv!=null && !is_array($disamb_resolv)){
+        $disamb_resolv = json_decode($disamb_resolv, true);
+    }
     if(!$disamb_resolv){ //old way
         $disamb_ids = @$params['disamb_id'];   //record ids
         $disamb_keys = @$params['disamb_key'];  //key values
@@ -129,6 +134,7 @@ private static function findRecordIds($imp_session, $params){
     $sel_fields = array();
     $mapping_fieldname_to_index = array(); //field_x => x for quick access
 
+    //get arrays of  field_XXX => field type, field_XXX=>index in mapping
     if(is_array($mapping))
     foreach ($mapping as $index => $field_type) {
         if($field_type=="url" || $field_type=="id" || @$detDefs[$field_type]){
@@ -159,6 +165,7 @@ private static function findRecordIds($imp_session, $params){
 
     $mysqli = self::$mysqli;
     
+    //--------------------------------------------------------------------------
     //loop all records in import table and detect what is for insert and what for update
     $select_query = "SELECT imp_id, ".implode(",", $sel_fields)." FROM ".$import_table;
 
@@ -171,7 +178,7 @@ private static function findRecordIds($imp_session, $params){
                 
                 $values_tobind = array();
                 $values_tobind[] = ''; //first element for bind_param must be a string with field types
-                $keys_values = array();
+                $keys_values = array(); //field index => keyvalue from csv
 
                 //BEGIN statement constructor
                 $select_query_match_from = array("Records");
@@ -241,8 +248,7 @@ private static function findRecordIds($imp_session, $params){
                 $ids = array();
                 $values = array('');
                 //split multivalue field
-                if($multivalue_field_name!=null && $multivalue_field_value!=null){
-                    
+                if($multivalue_field_name!=null && $multivalue_field_value!=null && $multivalue_field_name!=='' && $multivalue_field_value!==''){
                     $values = self::getMultiValues($multivalue_field_value, $imp_session['csv_enclosure'], $imp_session['csv_mvsep']);
                     if(!is_array($values) || count($values)==0){
                         $values = array(''); //at least one value
@@ -251,7 +257,7 @@ private static function findRecordIds($imp_session, $params){
 
                 
                 //keyvalue = values from other field + value from multivalue
-                foreach($values as $idx=>$value){ //from multivalue matching vield
+                foreach($values as $idx=>$value){ //from multivalue matching field
                     
                     $a_tobind = $values_tobind; //values for prepared query
                     $a_from = $select_query_match_from;
@@ -287,16 +293,21 @@ private static function findRecordIds($imp_session, $params){
                     
                     
                     if(@$pairs[$keyvalue]){  //we already found record for this combination
+//disambiguation
                     
                         if(array_key_exists($keyvalue, $tmp_idx_insert)){
                             $imp_session['validation']['recs_insert'][$tmp_idx_insert[$keyvalue]][0] .= (','.$imp_id);
                             $is_insert = true;
                         }else if(array_key_exists($keyvalue, $tmp_idx_update)) {
-                            
-                            $imp_session['validation']['recs_update'][$tmp_idx_update[$keyvalue]][0] .= 
-                                        (','.is_array($imp_id)?implode(','.$imp_id):$imp_id);
-                            //$imp_session['validation']['recs_update'][$tmp_idx_update[$keyvalue]][1] .= (",".$imp_id);
+
+//error_log($keyvalue);                            
+//error_log('REC_ID='.$tmp_idx_update[$keyvalue]);
+//error_log( $imp_session['validation']['recs_update'][$tmp_idx_update[$keyvalue]][0] );
+                            // make first field (id)  - csv 
+                            $imp_session['validation']['recs_update'][$tmp_idx_update[$keyvalue]][0] .= (','.$imp_id);
+                                        
                             $is_update = true;
+//return 'termination';                            
                         }
                         array_push($ids, $pairs[$keyvalue]);
                     
@@ -359,7 +370,7 @@ private static function findRecordIds($imp_session, $params){
                             if(@$imp_session['validation']['recs_update'][$rec_ID]){
                                 $imp_session['validation']['recs_update'][$rec_ID][0] .= (','.$imp_id);
                             }else{
-                                $imp_session['validation']['recs_update'][$rec_ID][0] = $rec;
+                                $imp_session['validation']['recs_update'][$rec_ID] = $rec;
                             }
                             
                             $is_update = true;
