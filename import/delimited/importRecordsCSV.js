@@ -3474,14 +3474,26 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             
             s = '<div>The following rows match with multiple records. This may be due to the existence of duplicate '
             + 'records in your database, but you may not have chosen all the fields required to correctly disambiguate '
-            + 'the incoming rows against existing data records.</div><br/><br/>'
-            + '<button style="float:right" onclick="{$(\'.sel_disamb\').val(-1);}">Set all to Create New</button>'
+            + 'the incoming rows against existing data records.</div><br/><br/>Set all to: '
+            + '<button style="float:right" onclick="{$(\'.sel_disamb\').val(-1);}">Create New</button>'
+            + '<button style="float:right;margin-right:10px" '
+            + 'onclick="{$(\'.sel_disamb\').each(function(i,item){ '
+                    +'var opts = $(item).find(\'option\');'
+                    +'$(item).val( $(opts[opts.length-2]).attr(\'value\') ); }); }">Last choice</button>'
+            + '<button style="float:right;margin-right:10px" '
+            + 'onclick="{$(\'.sel_disamb\').each(function(i,item){$(item).val( $(item).find(\'option:first\').attr(\'value\') ) });}">First choice</button>'
             + '<br/><br/>'
             + '<table class="tbmain" width="100%"><thead><tr><th>Key values</th><th>&nbsp;</th><th>Rows affected</th><th>Records in Heurist</th></tr>';
 
             
             var buttons = {};
-            buttons[window.hWin.HR('Confirm and continue to assign IDs')]  = function() {
+            
+            buttons[window.hWin.HR('Save ambiguities list to file')]  = function() {
+                
+                 window.hWin.HEURIST4.util.downloadInnerHtml('ambiguities.csv', $('#csv_disambig'), 'text/csv');
+            };
+            
+            buttons[window.hWin.HR('Apply choices above')]  = function() {
                     
                     var keyvalues = Object.keys(res['disambiguation']);
 
@@ -3507,10 +3519,24 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             
             var j, i=0, keyvalues = Object.keys(res['disambiguation']);
             
+            var csv_output = '';
+            
+            var fieldnames = Object.keys(res['mapped_fields']);
+            for(i=0;i<fieldnames.length;i++){
+                
+                var colname = imp_session['columns'][fieldnames[i].substr(6)];
+                csv_output += colname+',';
+            }
+            
+            csv_output += 'Record ID,Record Title\n';
+            
             for(i=0;i<keyvalues.length;i++){
 
                 var keyvalue = keyvalues[i].split(imp_session['csv_mvsep']);
                 //WHY???!!! keyvalue.shift(); //remove first element 
+                csv_output +=('"'+keyvalue.join('","')+'"');
+                var keys_prefix = ','.repeat(keyvalue.length);
+                
                 keyvalue = keyvalue.join(';&nbsp;&nbsp;');
                 
                 //list of heurist records
@@ -3529,6 +3555,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
 
                 for(j=0;j<recIds.length;j++){
                     s = s +  '<option value="'+recIds[j]+'">[rec# '+recIds[j]+'] '+disamb[recIds[j]]+'</option>';
+                    
+                    csv_output += (keys_prefix + '"'+recIds[j]+'","'+disamb[recIds[j]]+'"\n');
                 }
                 s = s + '<option value="-1">[create new record] None of these</option>';
                 s = s + '</select>&nbsp;'
@@ -3536,10 +3564,10 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 + '&q=ids:' + recIds.join(',') + '\', \'_blank\');}">view records <span class="ui-icon ui-icon-extlink"></a></td></tr>';
             }
             
-            s = s + '</table><br><br>'
+            s = s + '</table><br><br><div id="csv_disambig" style="display:none">'+csv_output+'</div>'
             +'<div>Please select from the possible matches in the dropdowns. You may not be able to determine the correct records'
             +' if you have used an incomplete set of fields for matching.</div>';
-        
+
         }
         else if(mode=='error' || mode=='warning'){    //------------------------------------------------------------------------------------------- 
 
