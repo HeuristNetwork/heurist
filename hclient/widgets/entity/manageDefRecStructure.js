@@ -447,10 +447,21 @@ dty_TermIDTreeNonSelectableIDs
                 
             },
             activate: function(event, data) {
+                //main entry point to start edit rts field
                 if(data.node.key>0){
                     that.selectedRecords([data.node.key]);
-                    if(!that._lockDefaultEdit)
-                        that._onActionListener(event, {action:'edit'}); //default action of selection        
+                    if(!that._lockDefaultEdit){
+                    
+                        if(that.options.external_preview){
+                            that.options.external_preview.manageRecords('saveQuickWithoutValidation',
+                                function(){
+                                    that._onActionListener(event, {action:'edit'}); //default action of selection            
+                                });
+                        }else{
+                            that._onActionListener(event, {action:'edit'}); //default action of selection            
+                        }
+                        
+                    }
                 }
             }
         };
@@ -471,9 +482,16 @@ dty_TermIDTreeNonSelectableIDs
                     data.otherNode.moveTo(node, data.hitMode);    
                     //save treeview in database
                     that._dragIsAllowed = false;
-                    setTimeout(function(){
-                        that._saveRtStructureTree();
-                    },500);
+                    
+                    if(that.options.external_preview){
+                        that.options.external_preview.manageRecords('saveQuickWithoutValidation',
+                               function(){ that._saveRtStructureTree() });
+                    }else{
+                        setTimeout(function(){
+                            that._saveRtStructureTree();
+                        },500);
+                    }
+                    
                 }
             };
 /*            
@@ -1175,7 +1193,7 @@ dty_TermIDTreeNonSelectableIDs
             var that = this.previewEditor;
             var that2 = this;
            
-            if(!this.previewEditor.manageRecords('instance')){
+            if(!this.previewEditor.manageRecords('instance')){ //OLD VERSION
                 // record editor not defined - create new one
                 // this is old option when record editor is slave to rts editor
                 
@@ -1226,7 +1244,7 @@ dty_TermIDTreeNonSelectableIDs
                             that2._open_formlet_for_recID = -1;
                         });
 
-                    this.previewEditor.manageRecords('reloadEditForm', hard_reload);    
+                    this.previewEditor.manageRecords('reloadEditForm', true);//hard_reload);    
                 }else{
                     this.previewEditor.manageRecords('reloadEditForm');    
                 }
@@ -1239,6 +1257,7 @@ dty_TermIDTreeNonSelectableIDs
     //-----
     // for formlet
     // assign event listener for rst_Repeatability and dty_Type fields
+    // show formlet
     //
     _afterInitEditForm: function(){
 

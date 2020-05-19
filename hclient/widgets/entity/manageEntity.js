@@ -1357,6 +1357,7 @@ $.widget( "heurist.manageEntity", {
     },
     
     /*
+    addEditRecord
     _initEditForm_step1  - it creates hEditing object and warns about save previous data
     _initEditForm_step2  - init buttons for toolbar for inline or open edit form in popup 
     _initEditForm_step3 -  search for full record data (if required)
@@ -1506,6 +1507,7 @@ $.widget( "heurist.manageEntity", {
         }
         
         if(hard_reload===true){
+            this._editing.initEditForm(null, null); //clear edit form
             this._initEditForm_step3(this._currentEditID);        
         }else{
             this._initEditForm_step4(null);
