@@ -3474,7 +3474,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             
             s = '<div>The following rows match with multiple records. This may be due to the existence of duplicate '
             + 'records in your database, but you may not have chosen all the fields required to correctly disambiguate '
-            + 'the incoming rows against existing data records.</div><br/><br/>Set all to: '
+            + 'the incoming rows against existing data records.</div><br/><br/>'
             + '<button style="float:right" onclick="{$(\'.sel_disamb\').val(-1);}">Create New</button>'
             + '<button style="float:right;margin-right:10px" '
             + 'onclick="{$(\'.sel_disamb\').each(function(i,item){ '
@@ -3482,9 +3482,9 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                     +'$(item).val( $(opts[opts.length-2]).attr(\'value\') ); }); }">Last choice</button>'
             + '<button style="float:right;margin-right:10px" '
             + 'onclick="{$(\'.sel_disamb\').each(function(i,item){$(item).val( $(item).find(\'option:first\').attr(\'value\') ) });}">First choice</button>'
+            + '<span style="float:right; padding: 3px;">Set all to: </span>'
             + '<br/><br/>'
-            + '<table class="tbmain" width="100%"><thead><tr><th>Key values</th><th>&nbsp;</th><th>Rows affected</th><th>Records in Heurist</th></tr>';
-
+            + '<table class="tbmain" width="100%">';
             
             var buttons = {};
             
@@ -3520,13 +3520,19 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             var j, i=0, keyvalues = Object.keys(res['disambiguation']);
             
             var csv_output = '';
+
+            s += '<thead><tr>';
+
             
             var fieldnames = Object.keys(res['mapped_fields']);
             for(i=0;i<fieldnames.length;i++){
                 
                 var colname = imp_session['columns'][fieldnames[i].substr(6)];
                 csv_output += colname+',';
+                s += ('<th align="left">'+colname+'</th>');
             }
+            
+            s += '<th align="center">Row</th><th align="center">Count</th><th>Records in Heurist</th></tr>';
             
             csv_output += 'Record ID,Record Title\n';
             
@@ -3537,7 +3543,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 csv_output +=('"'+keyvalue.join('","')+'"');
                 var keys_prefix = ','.repeat(keyvalue.length);
                 
-                keyvalue = keyvalue.join(';&nbsp;&nbsp;');
+                keyvalue = keyvalue.join('</td><td>'); //';&nbsp;&nbsp;');
                 
                 //list of heurist records
                 var disamb = res['disambiguation'][keyvalues[i]];
@@ -3545,12 +3551,12 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
 
                 var recIds = Object.keys(disamb);
                         
-                s = s + '<tr><td>'+keyvalue+'</td><td>'
+                s = s + '<tr><td>'+ keyvalue +'</td><td align="center">'
                 + '<a href="#" '
                 + 'style="text-decoration:underline;color:blue" '
                 + ' onclick="{window.hWin.HEURIST4.util.findObjInFrame(\'importRecordsCSV\').showImportLineInPopup(\''+disambig_imp_id+'\');}">'
-                + 'view <span class="ui-icon ui-icon-popup"></a>'
-                + '</td><td>'+recIds.length+'</td><td>'+
+                + 'view</a>'  // <span class="ui-icon ui-icon-popup">
+                + '</td><td align="center">'+recIds.length+'</td><td>'+
                         '<select class="sel_disamb" data-key="'+i+'">';                
 
                 for(j=0;j<recIds.length;j++){
