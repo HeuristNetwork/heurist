@@ -1709,7 +1709,7 @@ private static function getMultiValues($values, $csv_enclosure, $csv_mvsep){
 
 //=================
 //
-// assign real record ID into import (source) table
+// assign real record ID into import (source) table  NOT USED
 //
 private static function updateRecIds($import_table, $imp_id, $id_field, $newids, $csv_mvsep){
 
@@ -2529,7 +2529,8 @@ public static function performImport($params, $mode_output){
 
                 // || $recordId==null 
                 //add - update record for 2 cases: idfield not defined, idfield is multivalue
-                if(  ($id_field_not_defined || $recordId==null) && count($details)>0 ){ //id field not defined - insert for each line
+                                            //$recordId==null
+                if(  ($id_field_not_defined || $ismulti_id) && count($details)>0 ){ //id field not defined - insert for each line
 
                     if(!$ignore_insert){
                         
@@ -2539,8 +2540,6 @@ public static function performImport($params, $mode_output){
 
                         $details = array();
                     }
-                    
-
                 }
 
                 self::$rep_processed++;
@@ -2564,7 +2563,8 @@ public static function performImport($params, $mode_output){
         }//main  all recs in import table
         $res->close();
 
-        if($id_field && count($details)>0 && $recordId!=null){ //action for last record
+                                        //&& $recordId!=null
+        if($id_field && count($details)>0){ //action for last record
             //$details = retainExisiting($details, $details2, $params, $recordTypeStructure, $idx_reqtype);
             $allow_operation = ! (($recordId>0) ?$ignore_update:$ignore_insert);
             if($allow_operation){
