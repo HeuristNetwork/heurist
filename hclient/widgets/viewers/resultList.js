@@ -134,6 +134,7 @@ $.widget( "heurist.resultList", {
         {
             this._events = window.hWin.HAPI4.Event.ON_CREDENTIALS 
                 + ' ' + window.hWin.HAPI4.Event.ON_LAYOUT_RESIZE
+                + ' ' + window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE
                 + ' ' + window.hWin.HAPI4.Event.ON_REC_SEARCHSTART
                 + ' ' + window.hWin.HAPI4.Event.ON_REC_SELECT
                 + ' ' + window.hWin.HAPI4.Event.ON_REC_COLLECT
@@ -277,7 +278,8 @@ $.widget( "heurist.resultList", {
                     that._renderSearchInfoMsg(recset);
                     
 
-                }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SELECT){
+                }
+                else if(e.type == window.hWin.HAPI4.Event.ON_REC_SELECT){
 
                     //this selection is triggered by some other app - we have to redraw selection
                     if(data && data.source!=that.element.attr('id') && that._isSameRealm(data)) {
@@ -290,6 +292,10 @@ $.widget( "heurist.resultList", {
                         
                         
                     }
+                }else 
+                if(e.type == window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE)
+                {
+                    that.options.pagesize = window.hWin.HAPI4.get_prefs('search_result_pagesize');
                 }
                 //that._refresh();
             });

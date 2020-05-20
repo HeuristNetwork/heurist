@@ -1254,6 +1254,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                                         + 'hclient/framecontent/initPageTheme.php?db='
                                         + window.hWin.HAPI4.database);
                                 }
+                                
                             }
 
                         }else{
