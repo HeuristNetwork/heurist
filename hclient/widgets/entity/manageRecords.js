@@ -2637,8 +2637,8 @@ rectypes.names[rectypeID] + ' is defined as a child of <b>'+names
             */    
             for (var i=0; i<eles.length; i++){
                 $(eles[i]).attr('data-id','idx'+i).tabs('paging',{
-                    nextButton: '<span style="font-size:1.2em;font-weight:900">&#187;</span>', // Text displayed for next button.
-                    prevButton: '<span style="font-size:1.2em;font-weight:900">&#171;</span>' // Text displayed for previous button.
+                    nextButton: '<span style="font-size:2em;font-weight:900;line-height:5px">&#187;</span>', // Text displayed for next button.
+                    prevButton: '<span style="font-size:2em;font-weight:900;line-height:5px">&#171;</span>' // Text displayed for previous button.
                 });
             }     
             
