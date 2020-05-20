@@ -578,7 +578,7 @@ window.hWin.HEURIST4.ui = {
 
             //sort by name
             arrterm.sort(function (a,b){
-                return a[1]<b[1]?-1:1;
+                return a[1].toUpperCase()<b[1].toUpperCase()?-1:1;
             });
 
 
