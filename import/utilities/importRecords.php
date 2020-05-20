@@ -32,6 +32,8 @@ require_once(dirname(__FILE__).'/../../hsapi/utilities/utils_file.php');
 
 $post_max_size = get_php_bytes('post_max_size');
 $file_max_size = get_php_bytes('upload_max_filesize');
+$max_size = min($file_max_size,$post_max_size);
+$s_max_size = round($max_size/1024/1024).' MBytes';
 ?>
 <html>
     <head>
@@ -72,8 +74,7 @@ $file_max_size = get_php_bytes('upload_max_filesize');
             var importRecords;
             // Callback function after initialization
             $(document).ready(function() {
-                    var max_size = Math.min(<?php echo $file_max_size;?>, <?php echo $post_max_size;?>);
-                    importRecords = new hImportRecords(max_size);
+                    importRecords = new hImportRecords(<?php echo $max_size; ?>);
             });
         
         
@@ -105,7 +106,7 @@ the source database and can download files (eg. images) from it. Registration of
 -->        
             <input type="file" id="uploadFile" style="display:none">
             <button id="btn_UploadData">Select file to import</button>
-        
+            <span>Maximum size <?php echo $s_max_size?> - contact Heurist team if you need to upload a larger file</span>
         </div>
 
         <!-- STEP 1 - list of missing record types - offer to sync definitions -->

@@ -145,6 +145,17 @@ function hMapLayer2( _options ) {
                     layer_url = layer_url + '/{z}/{x}/{y}'
                                 + (mimeType && mimeType[idx_ccode] == '2-540'? ".png" : ".gif");
                 }
+                
+                if(layer_url.indexOf('http://')===0){
+                    
+                    var mimetype = 'image/'+(mimeType && mimeType[idx_ccode] == '2-540'? "png" : "gif");
+                    
+                    //load via proxy
+                    layer_url = window.hWin.HAPI4.baseURL 
+                            + '?db=' + window.hWin.HAPI4.database 
+                            + '&mimetype=' + mimetype
+                            + '&rurl=' + layer_url; //encodeURIComponent(layer_url);
+                }
 
             }
             

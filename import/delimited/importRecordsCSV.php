@@ -27,6 +27,18 @@ require_once(dirname(__FILE__).'/../../hsapi/utilities/utils_file.php');
 
 $post_max_size = get_php_bytes('post_max_size');
 $file_max_size = get_php_bytes('upload_max_filesize');
+
+$max_size = min($file_max_size,$post_max_size);
+$s_max_size = round($max_size/1024/1024).' MBytes';
+/*
+$max_size = 5000000;
+if($max_size<100*1024*1024){
+    //ini_set('post_max_size', '100M' );
+    //ini_set( 'upload_max_filesize', '100M' );
+    $max_size = 100*1024*1024;
+}
+*/
+
 $format = @$_REQUEST['format'];
 if(!$format) $format='csv';
 ?>
@@ -38,10 +50,9 @@ if(!$format) $format='csv';
             // Callback function after initialization
             function onPageInit(success){
                 if(success){
-                    var max_size = Math.min(<?php echo $file_max_size;?>, <?php echo $post_max_size;?>);
                     importRecordsCSV = new hImportRecordsCSV(
                                 window.hWin.HEURIST4.util.getUrlParameter('imp_ID', window.location.search), 
-                                max_size, "<?php echo $format;?>");
+                                <?php echo $max_size; ?>, "<?php echo $format;?>");
                 }
             }
         
@@ -152,7 +163,8 @@ If you have missing data for Required fields, you may find it convenient to set 
             <input type="file" id="uploadFile" style="display:none">
             <div id="btnUploadFile" title="Browse for CSV/TSV file that contains your data to be imported into Heurist database">
                 Upload File</div>
-            <span class="format-csv">The first line must have field names with correct number of fields</span>  
+            <span class="format-csv">The first line must have field names with correct number of fields.</span>
+            <span>Maximum size <?php echo $s_max_size?> - contact Heurist team if you need to upload a larger file</span>
 
         <h2 style="padding:10 0 10 120">OR</h2>
         

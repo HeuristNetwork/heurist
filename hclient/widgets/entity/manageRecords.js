@@ -163,27 +163,51 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         var action = ele.attr('data-action');
                         if(!action) action = ele.parent().attr('data-action');
                         
-                            if(action=='field'){
-                                that.options.rts_editor.manageDefRecStructure(
-                                    'showBaseFieldEditor', -1, dt_id);
-                            }else if(action=='block'){
+                        if(action=='field' || action=='block' || action=='edit'){
+                            
+                            function __modifyStructureAction(){
                                 
-                                that.options.rts_editor.manageDefRecStructure(
-                                    'addNewSeparator', dt_id);
-                                
-                            }else if(action=='edit'){
-                                that.options.rts_editor.manageDefRecStructure(
-                                    'editField', dt_id);
+                                if(action=='field'){    
+                                    that.options.rts_editor.manageDefRecStructure(
+                                        'showBaseFieldEditor', -1, dt_id);
+                                }else if(action=='block'){
+                                    
+                                    that.options.rts_editor.manageDefRecStructure(
+                                        'addNewSeparator', dt_id);
+                                    
+                                }else if(action=='edit'){
+                                    that.options.rts_editor.manageDefRecStructure(
+                                        'editField', dt_id);
+                                }
                             }
+                            
+                            //save record silently
+                            that.saveQuickWithoutValidation( __modifyStructureAction );
+                            
+                        }
                             
                     }
             });
                     
         }
-
-               
+    },
+    
+    //
+    //
+    //
+    saveQuickWithoutValidation: function( _callback ){
+      
+        if(this._editing.isModified()){
+            var fields = this._editing.getValues(false);
+            fields['no_validation'] = 1; //do not validate required fields
+            this._saveEditAndClose( fields, _callback);           
+        }else{
+            _callback();
+        }
         
     },
+    
+    
     //  
     // invoked from _init after load entity config    
     //
@@ -662,7 +686,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         togglerAlign_closed:16,   //top position   
                         togglerLength_closed:80,  //height of toggler button
                         initHidden: true,
-                        initClosed: (this.usrPreferences.structure_closed==true || this.usrPreferences.structure_closed=='true'),
+                        initClosed: (this.usrPreferences.structure_closed!==false || this.usrPreferences.structure_closed!=='false'),
                         slidable:false,  //otherwise it will be over center and autoclose
                         contentSelector: '.editStructure',   
                         onopen_start : function( ){ 
@@ -1629,13 +1653,12 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 var sMsg = "Click YES to save changes and modify the record type attributes";
                 window.hWin.HEURIST4.msg.showMsgDlg(sMsg, function(){
                     
-                        var fields = that._editing.getValues(false);
-                        fields['no_validation'] = 1; //do not validate required fields
-                        that._saveEditAndClose( fields, function(){ //save without validation
+                        that.saveQuickWithoutValidation( function(){ //save without validation
                             that._editing.initEditForm(null, null); //clear edit form
                             that._initEditForm_step3(that._currentEditID); //reload edit form                       
                             that.editRecordTypeAttributes();
-                        })
+                        } );
+
                 }, {title:'Data have been modified', yes:window.hWin.HR('Yes') ,no:window.hWin.HR('Cancel')});   
                 return;                           
         }
@@ -1681,13 +1704,12 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                             +"structure modification in main menu Structure > Modify / Extend";
                 window.hWin.HEURIST4.msg.showMsgDlg(sMsg, function(){
                     
-                        var fields = that._editing.getValues(false);
-                        fields['no_validation'] = 1; //do not validate required fields
-                        that._saveEditAndClose( fields, function(){ //save without validation
+                        that.saveQuickWithoutValidation( function(){ //save without validation
                             that._editing.initEditForm(null, null); //clear edit form
                             that._initEditForm_step3(that._currentEditID); //reload edit form                       
                             that.editRecordType(is_inline);
-                        })
+                        } );
+                    
                 }, {title:'Data have been modified', yes:window.hWin.HR('Yes') ,no:window.hWin.HR('Cancel')});   
                 return;                           
         }
@@ -1696,7 +1718,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             
             this._reloadRtsEditor();
             //show and expand left hand panel 
-            var isClosed = (this.usrPreferences.structure_closed==true || this.usrPreferences.structure_closed=='true');
+            var isClosed = (this.usrPreferences.structure_closed!==false || this.usrPreferences.structure_closed!=='false');
             this.editFormPopup.layout().show('west', !isClosed ); 
             if(isClosed){
                         var tog = that.editFormPopup.find('.ui-layout-toggler-west');

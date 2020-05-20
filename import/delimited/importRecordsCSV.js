@@ -2684,6 +2684,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
     // Find records in Heurist database and assign record id to identifier field in import table
     //
     // matchMode - 0 - match by mapped fields, 1- match by id column, 2 - skip matching
+    // disamb_resolv -  [{recid: heurist record id,key: import_id},....]
     //
     function _doMatching( matchMode, disamb_resolv ){
         
@@ -2795,7 +2796,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 request['idfield']=imp_session['columns'][key_idx]; //key_idx;            
             }
             if(disamb_resolv!=null){
-                request['disamb_resolv']=disamb_resolv;          
+                request['disamb_resolv'] = JSON.stringify( disamb_resolv );          
             }
             
             
@@ -3474,13 +3475,25 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             s = '<div>The following rows match with multiple records. This may be due to the existence of duplicate '
             + 'records in your database, but you may not have chosen all the fields required to correctly disambiguate '
             + 'the incoming rows against existing data records.</div><br/><br/>'
-            + '<button style="float:right" onclick="{$(\'.sel_disamb\').val(-1);}">Set all to Create New</button>'
+            + '<button style="float:right" onclick="{$(\'.sel_disamb\').val(-1);}">Create New</button>'
+            + '<button style="float:right;margin-right:10px" '
+            + 'onclick="{$(\'.sel_disamb\').each(function(i,item){ '
+                    +'var opts = $(item).find(\'option\');'
+                    +'$(item).val( $(opts[opts.length-2]).attr(\'value\') ); }); }">Last choice</button>'
+            + '<button style="float:right;margin-right:10px" '
+            + 'onclick="{$(\'.sel_disamb\').each(function(i,item){$(item).val( $(item).find(\'option:first\').attr(\'value\') ) });}">First choice</button>'
+            + '<span style="float:right; padding: 3px;">Set all to: </span>'
             + '<br/><br/>'
-            + '<table class="tbmain" width="100%"><thead><tr><th>Key values</th><th>&nbsp;</th><th>Rows affected</th><th>Records in Heurist</th></tr>';
-
+            + '<table class="tbmain" width="100%">';
             
             var buttons = {};
-            buttons[window.hWin.HR('Confirm and continue to assign IDs')]  = function() {
+            
+            buttons[window.hWin.HR('Save ambiguities list to file')]  = function() {
+                
+                 window.hWin.HEURIST4.util.downloadInnerHtml('ambiguities.csv', $('#csv_disambig'), 'text/csv');
+            };
+            
+            buttons[window.hWin.HR('Apply choices above')]  = function() {
                     
                     var keyvalues = Object.keys(res['disambiguation']);
 
@@ -3506,11 +3519,31 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             
             var j, i=0, keyvalues = Object.keys(res['disambiguation']);
             
+            var csv_output = '';
+
+            s += '<thead><tr>';
+
+            
+            var fieldnames = Object.keys(res['mapped_fields']);
+            for(i=0;i<fieldnames.length;i++){
+                
+                var colname = imp_session['columns'][fieldnames[i].substr(6)];
+                csv_output += colname+',';
+                s += ('<th align="left">'+colname+'</th>');
+            }
+            
+            s += '<th align="center">Row</th><th align="center">Count</th><th>Records in Heurist</th></tr>';
+            
+            csv_output += 'Record ID,Record Title\n';
+            
             for(i=0;i<keyvalues.length;i++){
 
-                var keyvalue = keyvalues[i].split(imp_session['csv_mvsep']);
+                var keyvalue = keyvalues[i].split('▫');//imp_session['csv_mvsep']);
                 //WHY???!!! keyvalue.shift(); //remove first element 
-                keyvalue = keyvalue.join(';&nbsp;&nbsp;');
+                csv_output +=('"'+keyvalue.join('","')+'"');
+                var keys_prefix = ','.repeat(keyvalue.length);
+                
+                keyvalue = keyvalue.join('</div></td><td><div class="truncate" style="max-width:100px">'); //';&nbsp;&nbsp;');
                 
                 //list of heurist records
                 var disamb = res['disambiguation'][keyvalues[i]];
@@ -3518,16 +3551,18 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
 
                 var recIds = Object.keys(disamb);
                         
-                s = s + '<tr><td>'+keyvalue+'</td><td>'
+                s = s + '<tr><td><div class="truncate" style="max-width:100px">'+ keyvalue +'</div></td><td align="center">'
                 + '<a href="#" '
                 + 'style="text-decoration:underline;color:blue" '
                 + ' onclick="{window.hWin.HEURIST4.util.findObjInFrame(\'importRecordsCSV\').showImportLineInPopup(\''+disambig_imp_id+'\');}">'
-                + 'view <span class="ui-icon ui-icon-popup"></a>'
-                + '</td><td>'+recIds.length+'</td><td>'+
-                        '<select class="sel_disamb" data-key="'+i+'">';                
+                + 'view</a>'  // <span class="ui-icon ui-icon-popup">
+                + '</td><td align="center">'+recIds.length+'</td><td>'+
+                        '<select class="sel_disamb" style="max-width:300px" data-key="'+i+'">';                
 
                 for(j=0;j<recIds.length;j++){
                     s = s +  '<option value="'+recIds[j]+'">[rec# '+recIds[j]+'] '+disamb[recIds[j]]+'</option>';
+                    
+                    csv_output += (keys_prefix + '"'+recIds[j]+'","'+disamb[recIds[j]]+'"\n');
                 }
                 s = s + '<option value="-1">[create new record] None of these</option>';
                 s = s + '</select>&nbsp;'
@@ -3535,10 +3570,10 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 + '&q=ids:' + recIds.join(',') + '\', \'_blank\');}">view records <span class="ui-icon ui-icon-extlink"></a></td></tr>';
             }
             
-            s = s + '</table><br><br>'
+            s = s + '</table><br><br><div id="csv_disambig" style="display:none">'+csv_output+'</div>'
             +'<div>Please select from the possible matches in the dropdowns. You may not be able to determine the correct records'
             +' if you have used an incomplete set of fields for matching.</div>';
-        
+
         }
         else if(mode=='error' || mode=='warning'){    //------------------------------------------------------------------------------------------- 
 
