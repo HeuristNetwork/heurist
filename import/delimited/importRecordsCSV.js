@@ -1395,12 +1395,13 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 var itop = selitem.offset().top + selitem.height() + 7;
 
                 if(currentStep>3){
-                    ileft = $('#btnBackToMatching').offset().left+$('#btnBackToMatching').width()+5;
+                    ileft = $('#btnBackToMatching').offset().left+$('#btnBackToMatching').width()+25;
                 }
 
                 $('#img_arrow4').css({left: ileft, top: iline_top+1 });  //down to arrow
-                $('#img_arrow3').css({left: ileft, top: iline_top+12 });  //arrow
+                $('#img_arrow3').css({left: ileft, top: iline_top+16 });  //arrow
                 $('#img_arrow2').css({left: iright, top: itop, height: iline_top-itop+2 }); //line down
+                
                 if(ileft<iright){                
                     $('#img_arrow1').css({left: ileft, top: iline_top, width:(iright-ileft+2)});  //line horizontal
                 }else{
