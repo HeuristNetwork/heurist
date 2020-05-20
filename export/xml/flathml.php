@@ -1970,6 +1970,21 @@ if($intofile){ // flags HuNI manifest + separate files per record
             in order: local ID, concept code, label or standard code.   
             If no match is found, the value will be added as a new term 
             \n
+            Relationship markers: these are indicated by SEE NOTES AT START in 
+            the value. Relationship markers are special fields as they contain no data; 
+            they are simply a marker in the data structure indicating the display 
+            of relationship records which satisfy particular criteria (relationship type 
+            and target entity type). They also trigger the creation of relationships 
+            with particular parameters during data entry.
+            \n
+            Relationships should therefore be imported by importing as records of 
+            type RELATIONSHIP. They will appear in the marker fields when the data is 
+            viewed. Leave at least one copy of each relationship marker field in the 
+            file as this will trigger download of the field definition if it is not in 
+            the target database. Only one copy of each relationship marker is needed to 
+            trigger the download of the definition, duplicates can be deleted if there 
+            is a need to limit file size.
+            \n
             The XML file may (optionally) specify a Heurist database ID 
             with <database id=??>. If a database ID is specified, synchronisation 
             of definitions from that database will be performed before the data 
