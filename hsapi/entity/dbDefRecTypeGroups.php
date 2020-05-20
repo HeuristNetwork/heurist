@@ -182,7 +182,7 @@ class DbDefRecTypeGroups extends DbEntityBase
                 return false;
             }
 
-            $this->records[$idx]['rtg_Modified'] = null; //reset
+            $this->records[$idx]['rtg_Modified'] = date('Y-m-d H:i:s'); //reset
             
             if(!(@$this->records[$idx]['rtg_Order']>0)){
                 $this->records[$idx]['rtg_Order'] = 2;

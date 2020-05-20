@@ -188,7 +188,7 @@ class DbRecThreadedComments extends DbEntityBase
                     $this->records[$idx]['cmt_OwnerUgrpID'] = $this->system->get_user_id();
                 }
             }
-            $this->records[$idx]['cmt_Modified'] = null; //reset
+            $this->records[$idx]['cmt_Modified'] = date('Y-m-d H:i:s'); //reset
         }
 
         return $ret;

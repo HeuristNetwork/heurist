@@ -209,7 +209,7 @@ class DbUsrTags extends DbEntityBase
             if($isinsert && !($this->records[$idx]['tag_UGrpID']>0)){
                 $this->records[$idx]['tag_UGrpID'] = $this->system->get_user_id();
             }
-            $this->records[$idx]['tag_Modified'] = null; //reset
+            $this->records[$idx]['tag_Modified'] = date('Y-m-d H:i:s'); //reset
         }
 
         return $ret;

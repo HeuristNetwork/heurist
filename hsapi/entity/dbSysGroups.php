@@ -215,7 +215,7 @@ class DbSysGroups extends DbEntityBase
         //add specific field values
         foreach($this->records as $idx=>$record){
             $this->records[$idx]['ugr_Type'] = 'workgroup';
-            $this->records[$idx]['ugr_Modified'] = null; //reset
+            $this->records[$idx]['ugr_Modified'] = date('Y-m-d H:i:s'); //reset
             $this->records[$idx]['ugr_Password'] = 'PASSWORD NOT REQUIRED';
             $this->records[$idx]['ugr_eMail'] = 'EMAIL NOT SET FOR '.$this->records[$idx]['ugr_Name'];
             

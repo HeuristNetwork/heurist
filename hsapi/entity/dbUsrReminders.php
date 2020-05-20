@@ -210,7 +210,7 @@ class DbUsrReminders extends DbEntityBase
                 $this->records[$idx]['rem_Nonce'] = dechex(rand());
                 $this->fields['rem_Nonce'] = array(); //to pass data to save 
             }
-            $this->records[$idx]['rem_Modified'] = null; //reset
+            $this->records[$idx]['rem_Modified'] = date('Y-m-d H:i:s'); //reset
         }
 
         return $ret;
