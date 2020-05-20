@@ -126,7 +126,7 @@ $.widget( "heurist.editing_input", {
             this.header = $( "<div>")
             .addClass('header '+required)
             //.css('width','150px')
-            .css({'vertical-align':'top', 'line-height':'initial'}) 
+            .css({'vertical-align':'top'})  //, 'line-height':'initial'
             .html('<label>' + lblTitle + '</label>')
             .appendTo( this.element );
             

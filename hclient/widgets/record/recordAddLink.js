@@ -44,6 +44,7 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
     target_RecTypeID:null,
     sSourceName:'',
     sTargetName:'',
+    _openRelationRecordEditor: false,
     
     //  
     // invoked from _init after loading of html content
@@ -51,7 +52,9 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
     _initControls: function(){
         
         
-        if(window.hWin.HEURIST4.util.isempty(this.options.source_ID)){        
+        if(window.hWin.HEURIST4.util.isempty(this.options.source_ID)){    
+            //source reccord not defined - show scope selector
+            
             this.element.find('#div_source1').hide();
             this.element.find('#div_source2').css('display','inline-block');
         }else{
@@ -86,7 +89,23 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
     //
     _getActionButtons: function(){
         var res = this._super();
-        res[1].text = window.hWin.HR((this.options.relmarker_dty_ID>0)?'Create link':'Create links');
+
+        res[1].text = window.hWin.HR((this.options.source_ID>0)?'Create link':'Create links');
+        
+        if(this.options.source_ID>0){ //this.options.relmarker_dty_ID>0){
+            var that = this;
+            //enable for relationships only
+            res.splice(1, 0, 
+                 {text:window.hWin.HR('Create link and edit'),
+                    id:'btnDoAction2',
+                    disabled:'disabled',
+                    css:{'float':'right', 'font-size':'0.82em', 'margin-top':'0.6em', 'padding':'6.1px'},
+                    click: function() { 
+                            that._openRelationRecordEditor = true;
+                            that.doAction(); 
+                    }});
+        }
+        
         return res;
     },
     
@@ -216,6 +235,8 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
         var fi_name = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex['rst_DisplayName'], 
             fi_constraints = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex['rst_PtrFilteredIDs'], 
             fi_type = window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex['dty_Type'],
+            
+            fi_req_type =  window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex['rst_RequirementType'],
             fi_term =  window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex['rst_FilteredJsonTermIDTree'],
             fi_term_dis =  window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex['rst_TermIDTreeNonSelectableIDs'],
             hasSomeLinks = false;
@@ -229,10 +250,12 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
         for (dty in window.hWin.HEURIST4.rectypes.typedefs[recRecTypeID].dtFields) {
             
             var field_type = window.hWin.HEURIST4.detailtypes.typedefs[dty].commonFields[fi_type];
+            var req_type  = window.hWin.HEURIST4.rectypes.typedefs[recRecTypeID].dtFields[dty][fi_req_type];
             
-            if(!(field_type=='resource' || field_type=='relmarker')){
+            if ((!(field_type=='resource' || field_type=='relmarker')) || req_type=='forbidden') {
                  continue;
             }
+            
             if(this.options.relmarker_dty_ID>0){  //detail id is defined in options
             
                 if( this.options.relmarker_dty_ID==dty && (party=='source') ){  //&& (source_ID>0 || target_ID>0)
@@ -343,6 +366,7 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
         
         var isEnabled = ((this.options.target_ID>0 || this.getFieldValue('target_record')>0) && 
                             sel_field.val()>0);
+        var isEnabled2 = false;
                             
         if(isEnabled && sel_field.attr('data-type')=='relmarker'){
             //in case relmarker check if reltype selected
@@ -350,9 +374,11 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
             var dtyID = sel_field.val()
             var termID = this.getFieldValue('rt_'+(isReverce?'target':'source')+'_sel_'+dtyID);        
             isEnabled = (termID>0);
+            isEnabled2 = isEnabled;
         }                
                         
         window.hWin.HEURIST4.util.setDisabled( this.element.parents('.ui-dialog').find('#btnDoAction'), !isEnabled );
+        window.hWin.HEURIST4.util.setDisabled( this.element.parents('.ui-dialog').find('#btnDoAction2'), !isEnabled );
         
     }, 
     
@@ -804,6 +830,10 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
                 res.count = requests.length;
                 window.hWin.HEURIST4.msg.showMsgFlash('Link created...', 500);
                 this._context_on_close = res;
+                
+                if(this._openRelationRecordEditor && res.count==1 && res.relation_recID>0){
+                     window.hWin.HEURIST4.ui.openRecordEdit(res.relation_recID, null, {});   
+                }
                 this._as_dialog.dialog('close');
                 //)window.close(res);//'Link'+(requests.length>1?'s':'')+' created...');
             }
