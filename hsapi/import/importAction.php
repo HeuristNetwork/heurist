@@ -178,7 +178,8 @@ private static function findRecordIds($imp_session, $params){
                 
                 $values_tobind = array();
                 $values_tobind[] = ''; //first element for bind_param must be a string with field types
-                $keys_values = array(); //field index => keyvalue from csv
+                $keys_values = array(); //field index => keyvalue from csv   
+                $keys_values_all = array(); //all field values including empty
 
                 //BEGIN statement constructor
                 $select_query_match_from = array("Records");
@@ -191,13 +192,18 @@ private static function findRecordIds($imp_session, $params){
                 $index = 0;
                 foreach ($mapped_fields as $fieldname => $field_type) {
 
+                    
                     if($row[$fieldname]==null || trim($row[$fieldname])=='') {
+                        $keys_values_all[] = '';
                         continue; //ignore empty values   
                     }
+                    $fieldvalue = trim($row[$fieldname]);
+                    
                     
                         if($field_type=="url" || $field_type=="id"){  // || $field_type=="scratchpad"){
                             array_push($select_query_match_where, "rec_".$field_type."=?");
-                            $values_tobind[] = trim($row[$fieldname]);
+                            $values_tobind[] = $fieldvalue;
+                            $keys_values_all[] = $fieldvalue;
                         }else if(is_numeric($field_type)){
 
                             $from = '';
@@ -217,19 +223,21 @@ private static function findRecordIds($imp_session, $params){
                             $where = 'rec_ID=d'.$index.'.dtl_RecID and '.$where;
                             $from = $from.'recDetails d'.$index;
                             
-                            //we may work with the only multivalue field for matching - otherwise it is not possible to detect proper combination
+                            // we may work with the only multivalue field for matching
+                            // otherwise it is not possible to detect proper combination
                             if($multivalue_field_name==$fieldname){
                                 $multivalue_selquery_from = $from;
                                 $multivalue_selquery_where = $where;
-                                $multivalue_field_value = trim($row[$fieldname]);
+                                $multivalue_field_value = $fieldvalue;
                             }else{  
                                 array_push($select_query_match_where, $where);
                                 array_push($select_query_match_from, $from);
-                                $values_tobind[] = trim($row[$fieldname]);
+                                $values_tobind[] = $fieldvalue;
+                                $keys_values_all[] = $fieldvalue;
                                 $values_tobind[0] = $values_tobind[0].'s';
                                 
                                 if(@$mapping_fieldname_to_index[$fieldname]>=0)
-                                    $keys_values[$mapping_fieldname_to_index[$fieldname]] = trim($row[$fieldname]);
+                                    $keys_values[$mapping_fieldname_to_index[$fieldname]] = $fieldvalue;
                             }
                             
                         }
@@ -254,7 +262,6 @@ private static function findRecordIds($imp_session, $params){
                         $values = array(''); //at least one value
                     }
                 }
-
                 
                 //keyvalue = values from other field + value from multivalue
                 foreach($values as $idx=>$value){ //from multivalue matching field
@@ -262,6 +269,8 @@ private static function findRecordIds($imp_session, $params){
                     $a_tobind = $values_tobind; //values for prepared query
                     $a_from = $select_query_match_from;
                     $a_where = $select_query_match_where;
+                    
+                    $a_keys = $keys_values_all;
                     
                     if($multivalue_field_name!=null){
                         
@@ -274,20 +283,25 @@ private static function findRecordIds($imp_session, $params){
                     if(trim($value)!=''){ //if multivalue field has values use $values_tobind
                             $a_tobind[0] = $a_tobind[0].'s';
                             $a_tobind[] = $value;
+                            $a_keys[] = $value;
                  
                             $a_from[] = $multivalue_selquery_from;
                             $a_where[] = $multivalue_selquery_where;
                     }
+
+                    //merge all values - to create unuque key for combination of values
+                    //$keyvalue = implode('▫',$keys_values2);
+                    $keyvalue = implode('▫', $a_keys); 
                     
+                    /*
                     $fc = $a_tobind;
                     array_shift($fc); //remove ssssss
-                    
-                    //merge all values - to create unuque key for combination of values
                     if($imp_session['csv_mvsep']=='none'){
-                        $keyvalue = implode('', $fc); //$fc;
+                        $keyvalue = implode('', $fc); 
                     }else{
                         $keyvalue = implode($imp_session['csv_mvsep'], $fc);  //csv_mvsep - separator
                     }
+                    */
                     
                     if($keyvalue=='') continue;
                     

@@ -3538,12 +3538,12 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             
             for(i=0;i<keyvalues.length;i++){
 
-                var keyvalue = keyvalues[i].split(imp_session['csv_mvsep']);
+                var keyvalue = keyvalues[i].split('▫');//imp_session['csv_mvsep']);
                 //WHY???!!! keyvalue.shift(); //remove first element 
                 csv_output +=('"'+keyvalue.join('","')+'"');
                 var keys_prefix = ','.repeat(keyvalue.length);
                 
-                keyvalue = keyvalue.join('</td><td>'); //';&nbsp;&nbsp;');
+                keyvalue = keyvalue.join('</div></td><td><div class="truncate" style="max-width:100px">'); //';&nbsp;&nbsp;');
                 
                 //list of heurist records
                 var disamb = res['disambiguation'][keyvalues[i]];
@@ -3551,13 +3551,13 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
 
                 var recIds = Object.keys(disamb);
                         
-                s = s + '<tr><td>'+ keyvalue +'</td><td align="center">'
+                s = s + '<tr><td><div class="truncate" style="max-width:100px">'+ keyvalue +'</div></td><td align="center">'
                 + '<a href="#" '
                 + 'style="text-decoration:underline;color:blue" '
                 + ' onclick="{window.hWin.HEURIST4.util.findObjInFrame(\'importRecordsCSV\').showImportLineInPopup(\''+disambig_imp_id+'\');}">'
                 + 'view</a>'  // <span class="ui-icon ui-icon-popup">
                 + '</td><td align="center">'+recIds.length+'</td><td>'+
-                        '<select class="sel_disamb" data-key="'+i+'">';                
+                        '<select class="sel_disamb" style="max-width:300px" data-key="'+i+'">';                
 
                 for(j=0;j<recIds.length;j++){
                     s = s +  '<option value="'+recIds[j]+'">[rec# '+recIds[j]+'] '+disamb[recIds[j]]+'</option>';
