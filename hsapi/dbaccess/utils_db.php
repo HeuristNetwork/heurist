@@ -1204,6 +1204,9 @@ $query = 'CREATE TABLE sysDashboard ('
         return $res;
     }    
     
+    //
+    //  returns value of session file
+    //
     function mysql__update_progress($mysqli, $session_id, $is_init, $value){
         
         if($session_id==null) return null;
@@ -1213,18 +1216,19 @@ $query = 'CREATE TABLE sysDashboard ('
         $res = null;
         
         $session_file = HEURIST_SCRATCH_DIR.'session'.$session_id;
-        $is_ex = file_exists($session_file);
+        $is_exist = file_exists($session_file);
         
         if($value=='REMOVE'){
-            if($is_ex) unlink($session_file);
+            if($is_exist) unlink($session_file);
         }else{
             //get    
-            if($is_ex) $res = file_get_contents($session_file);
+            if($is_exist) $res = file_get_contents($session_file);
             
             if($value!=null && $res!='terminate'){
                 file_put_contents($session_file, $value);
                 $res = $value;
             }
+                        
             /*            
                 list($execution_counter, $tot)  = explode(',',$value);
                 if ($execution_counter>0 && intdiv($execution_counter,500) == $execution_counter/500){

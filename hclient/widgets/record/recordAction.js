@@ -51,6 +51,8 @@ $.widget( "heurist.recordAction", {
     
     _context_on_close:false, //variable to be passed to options.onClose event listener
     
+    _progressInterval:null,
+    
     //controls
     selectRecordScope:null,
     
@@ -363,6 +365,113 @@ $.widget( "heurist.recordAction", {
         
         return isdisabled;
     },
+    
+    
+    //
+    // is_autohide = true stops progress check if it returns null/empty value
+    // if false it shows rotating(loading) image for null values and progress bar for n,count values
+    // in latter case _hideProgress should be called explicitely
+    //
+    _showProgress: function ( session_id, is_autohide, t_interval ){
+
+        if(!(session_id>0)) {
+             this._hideProgress();
+             return;
+        }
+        var that = this;
+       
+        var progressCounter = 0;        
+        var progress_url = window.hWin.HAPI4.baseURL + "viewers/smarty/reportProgress.php";
+
+        this.element.find('#div_fieldset').hide();
+        var progress_div = this.element.find('.progressbar_div').show();
+        $('body').css('cursor','progress');
+        var btn_stop = progress_div.find('.progress_stop').button();
+        
+        this._on(btn_stop,{click: function() {
+            
+                var request = {terminate:1, t:(new Date()).getMilliseconds(), session:session_id};
+                window.hWin.HEURIST4.util.sendRequest(progress_url, request, null, function(response){
+                    that._hideProgress();
+                    if(response && response.status==window.hWin.ResponseStatus.UNKNOWN_ERROR){
+                        //console.log(response);                   
+                    }
+                });
+            }});
+        
+        var div_loading = progress_div.find('.loading').show();
+        var pbar = progress_div.find('#progressbar');
+        var progressLabel = pbar.find('.progress-label').text('');
+        pbar.progressbar({value:0});
+        //pbar.progressbar('value', 0);
+        /*{
+              value: false,
+              change: function() {
+                progressLabel.text( progressbar.progressbar( "value" ) + "%" );
+              },
+              complete: function() {
+                progressLabel.text( "Complete!" );
+              }
+        });*/
+        
+        this._progressInterval = setInterval(function(){ 
+            
+            var request = {t:(new Date()).getMilliseconds(), session:session_id};            
+            
+            window.hWin.HEURIST4.util.sendRequest(progress_url, request, null, function(response){
+               
+//console.log(response);               
+                
+                if(response && response.status==window.hWin.ResponseStatus.UNKNOWN_ERROR){
+                    that._hideProgress();
+                    //console.log(response+'  '+session_id);                   
+                }else{
+                    //it may return terminate,done,
+                    var resp = response?response.split(','):[];
+                    if(response=='terminate' || resp.length!=2){
+                        if(response=='terminate' || is_autohide){
+                            that._hideProgress();
+                        }else{
+                            div_loading.show();    
+                            //pbar.progressbar( "value", 0 );
+                            //progressLabel.text('wait...');
+                        }
+                    }else{
+                        div_loading.hide();
+                        if(resp[0]>0 && resp[1]>0){
+                            var val = resp[0]*100/resp[1];
+                            pbar.progressbar( "value", val );
+                            progressLabel.text(resp[0]+' of '+resp[1]);
+                        }else{
+                            progressLabel.text('preparing...');
+                            pbar.progressbar( "value", 0 );
+                        }
+                    }
+                    
+                    progressCounter++;
+                    
+                }
+            },'text');
+          
+        
+        }, t_interval);                
+        
+    },
+    
+    _hideProgress: function (){
+        
+        $('body').css('cursor','auto');
+        
+        if(this._progressInterval!=null){
+            
+            clearInterval(this._progressInterval);
+            this._progressInterval = null;
+        }
+        this.element.find('.progressbar_div').hide();
+        this.element.find('#div_fieldset').show();
+        
+    },
+    
   
 });
 

@@ -1664,6 +1664,7 @@ $.widget( "heurist.resultList", {
                         if(Hul.isempty(window.hWin.HAPI4.currentRecordsetSelection)) return;
                         
                         window.hWin.HEURIST4.ui.showRecordActionDialog('recordDelete', {
+                            hide_scope: true,
                             title: 'Delete map document. Associated map layers and data sources retain',
                             onClose:
                            function( context ){

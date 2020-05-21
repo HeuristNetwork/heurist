@@ -638,10 +638,15 @@
     * @param mixed $need_transaction - false when record are removed for user/group/rectype deletion
     * @param mixed $check_source_links - prevents action if there are target records that points to given record
     */
-    function recordDelete($system, $recids, $need_transaction=true, $check_source_links=false){
+    function recordDelete($system, $recids, $need_transaction=true, $check_source_links=false, $filterByRectype=0, $progress_session_id=null){
 
         $recids = prepareIds($recids);
         if(count($recids)>0){
+            
+            if(count($recids)>100){
+                ini_set('max_execution_time', 0);
+            }
+            
             
             /*narrow by record type
             $rec_RecTypeID = @$params['rec_RecTypeID'];
@@ -663,10 +668,13 @@
             foreach ($recids as $recID) {
                 $ownerid = null;
                 $access = null;
-                if(!recordCanChangeOwnerwhipAndAccess($system, $recID, $ownerid, $access, $rectypes)){
-                    $noaccess_count++;
-                }else{
-                    array_push($allowed_recids, $recID);
+                $is_allowed = recordCanChangeOwnerwhipAndAccess($system, $recID, $ownerid, $access, $rectypes);
+                if( (!($filterByRectype>0)) || ($rectypes[$recID]==$filterByRectype)) {
+                    if($is_allowed){
+                        array_push($allowed_recids, $recID);    
+                    }else{
+                        $noaccess_count++;
+                    } 
                 }
             }
             if(count($recids)==1 && $noaccess_count==1){
@@ -697,6 +705,7 @@
             $rels_count = 0;
             $deleted = array();
             $msg_error = '';
+            $msg_termination = null;
             
             $system->defineConstant('RT_RELATION');
                         
@@ -705,8 +714,17 @@
                 $mysqli->query('set @logged_in_user_id = '.$system->get_user_id());
             }
             $mysqli->query('set @suppress_update_trigger=NULL');
+            
+            
+            $tot_count = count($allowed_recids);
+            
+            if($progress_session_id){
+                //init progress session
+                mysql__update_progress(null, $progress_session_id, true, '0,'.$tot_count);
+            }
                         
             foreach ($allowed_recids as $recID) {
+                //$stat = array('deleted'=>array($recID), 'rels_count'=>0, 'bkmk_count'=>0);
                 $stat = deleteOneRecord($system, $recID, $rectypes[$recID]);
                 
                 if( array_key_exists('error', $stat) ){
@@ -718,9 +736,24 @@
                     $bkmk_count += $stat['bkmk_count'];
                 }
                 
+                if($progress_session_id && (count($deleted) % 10 == 0)){
+                    $session_val = count($deleted).','.$tot_count;
+                    $current_val = mysql__update_progress(null, $progress_session_id, false, $session_val);
+                    if($current_val && $current_val=='terminate'){
+                        $msg_termination = 'Deletion is terminated by user';
+                        break;
+                    }
+                }
             }//foreach
             
-            if($msg_error){
+            if($progress_session_id){
+                //remove session file
+                mysql__update_progress(null, $progress_session_id, false, 'REMOVE');    
+            }
+            
+            if($msg_termination){
+                $res = $system->addError(HEURIST_ERROR, $msg_termination);
+            }else if($msg_error){
                 $res = $system->addError(HEURIST_DB_ERROR, 'Cannot delete record. '.$msg_error);
             }else{
                 $res = array('status'=>HEURIST_OK, 
@@ -730,7 +763,7 @@
             }
             
             if($need_transaction){
-                if($msg_error){
+                if($msg_termination || $msg_error){
                     $mysqli->rollback();
                 }else{
                     $mysqli->commit();    
@@ -906,14 +939,18 @@
         
     }    
     
-    //
-    //
-    //
+    /*
+    returns
+    
+            $res = array("error" => $msg_error.'  '.$mysqli->error);
+        OR
+            $res = array("deleted"=>$deleted, "bkmk_count"=>$bkmk_count, "rels_count"=>$rels_count);
+    */
     function deleteOneRecord($system, $id, $rectype){
         
         $bkmk_count = 0;
         $rels_count = 0;
-        $deleted = array();
+        $deleted = array();  //ids of deleted records
         $msg_error = '';
         $mysqli = $system->get_mysqli();
         

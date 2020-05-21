@@ -19,6 +19,9 @@
                 }
             }
         }
+        $mysqli = null;
+        
+        //keep progress value in HEURIST_SCRATCH_DIR
         if(@$_REQUEST['terminate']==1){
             $res = 'terminate';
             mysql__update_progress($mysqli, $_REQUEST['session'], false, $res);
@@ -26,6 +29,7 @@
             //retrieve current status
             $res = mysql__update_progress($mysqli, $_REQUEST['session'], false, null);
         }
+        if($res==null) $res = '';
         
 
 /*        
@@ -47,6 +51,6 @@ error_log('repror '.$_REQUEST['session'].'   '.$res);
 */        
         print $res;
     }else{
-        print 'done';
+        print 'terminate';
     }
 ?>

@@ -133,7 +133,7 @@ $.widget( "heurist.recordTag", $.heurist.recordAction, {
     doAction: function(mode){
         
             var scope_val = this.selectRecordScope.val();
-            if(scope_val=='')    return;
+            if(scope_val=='') return;
             
             if(mode!='assign') mode = 'remove';
 

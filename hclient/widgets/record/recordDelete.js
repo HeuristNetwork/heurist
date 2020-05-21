@@ -60,11 +60,14 @@ $.widget( "heurist.recordDelete", $.heurist.recordAction, {
                              +'&bib_ids=' + this._currentRecordsetSelIds.join(','));
             }
         } else {
-            this.element.find('#div_3').show();
+            this.element.find('#div_3').show(); //show 
         }
         
         //hide scope selector
-        this.element.find('#div_fieldset').hide();
+        if(this.options.hide_scope || this.options.map_document_id>0){
+            this.element.find('#div_fieldset').hide();    
+        }
+        
         
         this.recordList = this.element.find('.recordList');
         
@@ -235,13 +238,13 @@ $.widget( "heurist.recordDelete", $.heurist.recordAction, {
     //
     doAction: function( isconfirm, check_source ){
 
-        var scope_val = 'current';
-        //var scope_val = this.selectRecordScope.val();
-        //if (scope_val=='')  return;
+        //var scope_val = 'current';
+        var scope_val = this.selectRecordScope.val();
+        if (scope_val=='') return;
         
         var that = this;       
             
-        if(isconfirm!==true){
+        if(scope_val=='selected' && isconfirm!==true){
             
             var recset = this.recordList.resultList('getRecordSet');           
             var r1 = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME'];
@@ -280,27 +283,30 @@ $.widget( "heurist.recordDelete", $.heurist.recordAction, {
             var scope = [], 
             rec_RecTypeID = 0;
             
-            /*
+            
             if(scope_val == 'selected'){
-                scope = this._currentRecordsetSelIds;
-            }else { //(scope_val == 'current'
+                scope = this._currentRecordsetSelIds; //this.recordList.resultList('getRecordSet').getIds();
+            }else {
                 scope = this._currentRecordset.getIds();
-                if(scope_val  >0 ){
+                if(scope_val  >0 ){ //filter by record type
                     rec_RecTypeID = scope_val;
                 }   
             }
-            */
-            var scope = this.recordList.resultList('getRecordSet').getIds();           
 
+            var session_id = Math.round((new Date()).getTime()/1000);
         
             var request = {
                 'request_id' : window.hWin.HEURIST4.util.random(),
-                'ids'  : scope.join(',')
-                };
+                'ids'  : scope.join(','),
+                'session': session_id
+            };
                 
             if(rec_RecTypeID>0){
                 request['rec_RecTypeID'] = rec_RecTypeID;
             }
+            
+//console.log(request);            
+            this._showProgress( session_id, false, 1000 );
             
             //check source links   
             if(check_source!==true){                            
@@ -310,6 +316,8 @@ $.widget( "heurist.recordDelete", $.heurist.recordAction, {
             
             window.hWin.HAPI4.RecordMgr.remove(request, 
                     function(response){
+                        that._hideProgress();
+                        
                         if(response.status == window.hWin.ResponseStatus.OK){
                             
                             if(response.data.source_links_count>0 && response.data.source_links){

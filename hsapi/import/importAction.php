@@ -575,7 +575,7 @@ public static function assignRecordIds($params){
             'disambiguation'=>array()
         );
     }
-    else if(count($records)>0)
+    else if(is_array($records) && count($records)>0)
     {   
         //reset index field to '' (means no matching - record will be ignored on update/insert)
         $updquery = "update $import_table set $id_field='' where imp_id>0";
