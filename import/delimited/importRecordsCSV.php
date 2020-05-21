@@ -457,8 +457,8 @@ If you have missing data for Required fields, you may find it convenient to set 
         <img id="img_arrow4" src="../../hclient/assets/blackdot.png" width="2" style="position:absolute;left:0px;height:18px;display:none;z-index:2">        
         
         <div style="padding:1em 0 1em 1em;position: absolute;top:130; width:97%; border:2px red solid;background: rgba(255, 0, 0, 0.18);" id="divheader">
-            
-            <div  id="divActionsMatching" class="action_buttons step3" style="padding-left: 35px">
+            <div style="float:left;font-weight:bold;text-align:center">WORKFLOW<br>instruction below</div>
+            <div  id="divActionsMatching" class="action_buttons step3" style="padding-left: 120px">
                 
                 <h2 style="display:inline-block">step 1: MATCHING</h2>
                 

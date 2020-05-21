@@ -1396,6 +1396,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
 
                 if(currentStep>3){
                     ileft = $('#btnBackToMatching').offset().left+$('#btnBackToMatching').width()+25;
+                }else{
+                    ileft = $('#divheader').offset().left+112;
                 }
 
                 $('#img_arrow4').css({left: ileft, top: iline_top+1 });  //down to arrow
