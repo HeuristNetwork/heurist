@@ -2171,6 +2171,9 @@ $loop_cnt++;
                 
             }else if($dty_Type=='resource'){
                 $details[$dty_ID] = array($idx=>array('id'=>'RECORD_REFERENCE', 'type'=>0, 'title'=>''));    
+                
+            }else if($dty_Type=='relmarker'){
+                $details[$dty_ID] = array($idx=>'SEE NOTES AT START');    
 
             }else if($dty_Type=='geo'){
                 $details[$dty_ID] = array($idx=>array('geo'=>array('wkt'=>'WKT_VALUE')) ); //'type'=>'TEXT',     
