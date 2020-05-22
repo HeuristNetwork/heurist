@@ -62,8 +62,8 @@
     //load record with details and 2 header fields
     $record = recordSearchByID($system, $params['recID'], true, "rec_ID, rec_RecTypeID");
     //array(DT_KML, DT_KML_FILE, DT_FILE_RESOURCE));
-    if (@$record["details"] &&
-       (@$record["details"][DT_KML] || @$record["details"][DT_KML_FILE] || @$record["details"][DT_FILE_RESOURCE]))
+    if (@$record['details'] &&
+       (@$record['details'][DT_KML] || @$record['details'][DT_KML_FILE] || @$record['details'][DT_FILE_RESOURCE]))
     {
             $input_format = ($record['rec_RecTypeID']==RT_KML_SOURCE)?'kml':'csv';
             $file_content = null;
@@ -73,19 +73,19 @@
                 $tmp_destination = tempnam(HEURIST_SCRATCHSPACE_DIR, "data");
             }
     
-            if(@$record["details"][DT_KML]){
+            if(@$record['details'][DT_KML]){
                 //snippet - format unknown
-                $file_content = array_shift($record["details"][DT_KML]);   
+                $file_content = array_shift($record['details'][DT_KML]);   
                 if($tmp_destination){
                     file_put_contents($tmp_destination, $file_content);
                 }
             }
             else
             {
-                if(@$record["details"][DT_KML_FILE]){
-                    $kml_file = array_shift($record["details"][DT_KML_FILE]);
+                if(@$record['details'][DT_KML_FILE]){
+                    $kml_file = array_shift($record['details'][DT_KML_FILE]);
                 }else{
-                    $kml_file = array_shift($record["details"][DT_FILE_RESOURCE]);
+                    $kml_file = array_shift($record['details'][DT_FILE_RESOURCE]);
                 }
                 $kml_file = $kml_file['file'];
                 $url = @$kml_file['ulf_ExternalFileReference'];
@@ -185,18 +185,18 @@
                 $fm_t2 = ConceptCode::getDetailTypeLocalID('2-933');
                 
                 
-                if($fm_name!=null && is_array(@$record["details"][$fm_name])){
-                    $mapping[DT_NAME] = array_shift($record["details"][$fm_name]);
+                if($fm_name!=null && is_array(@$record['details'][$fm_name])){
+                    $mapping[DT_NAME] = array_shift($record['details'][$fm_name]);
                 }
-                if($fm_desc!=null && is_array(@$record["details"][$fm_desc])){
-                    $mapping[DT_EXTENDED_DESCRIPTION] = array_shift($record["details"][$fm_desc]);
+                if($fm_desc!=null && is_array(@$record['details'][$fm_desc])){
+                    $mapping[DT_EXTENDED_DESCRIPTION] = array_shift($record['details'][$fm_desc]);
                 }
                     
-                if($fm_t1!=null && is_array(@$record["details"][$fm_t1])){
-                    $mapping[DT_START_DATE] = array_shift($record["details"][$fm_t1]);
+                if($fm_t1!=null && is_array(@$record['details'][$fm_t1])){
+                    $mapping[DT_START_DATE] = array_shift($record['details'][$fm_t1]);
                 }
-                if($fm_t2!=null && is_array(@$record["details"][$fm_t2])){
-                    $mapping[DT_END_DATE] = array_shift($record["details"][$fm_t2]);
+                if($fm_t2!=null && is_array(@$record['details'][$fm_t2])){
+                    $mapping[DT_END_DATE] = array_shift($record['details'][$fm_t2]);
                 }
 
 
@@ -210,11 +210,11 @@
                 }else{
                     $parser_parms['csvdata'] = true; 
                     
-                    if($fm_X!=null && @$record["details"][$fm_X]){
-                        $mapping['longitude'] = array_shift($record["details"][$fm_X]);
+                    if($fm_X!=null && @$record['details'][$fm_X]){
+                        $mapping['longitude'] = array_shift($record['details'][$fm_X]);
                     }
-                    if($fm_Y!=null && @$record["details"][$fm_Y]){
-                        $mapping['latitude'] = array_shift($record["details"][$fm_Y]);
+                    if($fm_Y!=null && @$record['details'][$fm_Y]){
+                        $mapping['latitude'] = array_shift($record['details'][$fm_Y]);
                     }
                         
                 }
@@ -295,36 +295,28 @@
             else
             {
                 //downloadFile()
-                if(true || !$originalFileName){
-                    $originalFileName = 'Dataset_'.$params['recID'].'.kml'; 
+                $originalFileName = null;
+                if(is_array($record['details'][DT_NAME])){
+                    $originalFileName = fileNameSanitize(array_values($record['details'][DT_NAME])[0]);
                 }
-                $originalFileName = substr($originalFileName,0,strlen($originalFileName)-3);
+                if(!$originalFileName) $originalFileName = 'Dataset_'.$record['rec_ID'];
+                
                 
                 if(@$params['format']=='rawfile'){
                     //return zipped original file with metadata
-                    $file_zip = $originalFileName.'zip';
+                    $file_zip = $originalFileName.'.zip';
                     $file_zip_full = tempnam(HEURIST_SCRATCHSPACE_DIR, "arc");
                     $zip = new ZipArchive();
                     if (!$zip->open($file_zip_full, ZIPARCHIVE::CREATE)) {
                         $system->error_exit_api("Cannot create zip $file_zip_full");
                     }else{
-                        $zip->addFile($tmp_destination, $originalFileName.$input_format);
+                        $zip->addFile($tmp_destination, $originalFileName.'.'.$input_format);
                     }
                 
                     if(@$params['metadata']){//save hml into scratch folder
                         
-                        $file_metadata = $originalFileName.'txt';
-                        $file_metadata_full = tempnam(HEURIST_SCRATCHSPACE_DIR, "meta");
-                        
-                        $serverURL = HEURIST_SERVER_URL . '/heurist/';
-                        //list($dataset_id, $layer_id) = explode(',',$params['metadata']);
-                        $url = $serverURL.'?db='.$params['db'].'&recID='.$params['recID']; //($layer_id>0?$layer_id:$dataset_id);
-                        $url = $url."\n".($url.'&fmt=html');
-                        //$url = HEURIST_BASE_URL.'export/xml/flathml.php?db='.$params['db'].'&q=ids:'.$params['metadata'].'&depth=0';
-                        file_put_contents($file_metadata_full ,$url);
-                        if(file_exists($file_metadata_full)){
-                            $zip->addFile($file_metadata_full, $file_metadata);    
-                        }
+                        $zip->addFromString($originalFileName.'.txt', 
+                                       recordLinksFileContent($system, $record));    
                     }
                     $zip->close();
                     //donwload

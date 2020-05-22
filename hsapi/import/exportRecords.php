@@ -564,12 +564,45 @@ XML;
         //$content = stream_get_contents($fd);
         fclose($fd);
         
-        if(@$params['filename']){
+        if(@$params['filename'] || @$params['metadata']){
+            
+            $record = null;
+            $originalFileName = null;
+            if(@$params['metadata']){
+                list($db_meta,$rec_ID) = explode('-',$params['metadata']);
+                if(!$db_meta && $rec_ID) $db_meta = self::$system->dbname(); 
+                
+                $record = array("rec_ID"=>$rec_ID);
+                if($db_meta!=self::$system->dbname()){
+                    self::$system->init($db_meta, true, false);
+                    //mysql__usedatabase(self::$mysqli, $db_meta);
+                }
+                
+                if(self::$system->defineConstant('DT_NAME', true)){
+                    
+                    //$val = mysql__select_value(self::$mysqli,'select dtl_Value from recDetails where rec_ID='
+                    //    .$params['metadata'].' and dtl_DetailTypeID='.DT_NAME);
+                    //if($val){
+                        //$originalFileName = fileNameSanitize($val);
+                    //}
+                    
+                    recordSearchDetails(self::$system, $record, array(DT_NAME));
+                    if(is_array($record['details'][DT_NAME])){
+                        $originalFileName = fileNameSanitize(array_values($record['details'][DT_NAME])[0]);
+                    }
+                }
+                if(!$originalFileName) $originalFileName = 'Dataset_'.$record['rec_ID'];
+                
+            }else{
+                $originalFileName = $params['filename'];
+            }
+            
+            
             //save into specified file in scratch folder
-            $file_records  = $params['filename'].'.'.$params['format'];
+            $file_records  = $originalFileName.'.'.$params['format'];
 
             //archive into zip    
-            $file_zip = $params['filename'].'.zip';
+            $file_zip = $originalFileName.'.zip';
             $file_zip_full = tempnam(HEURIST_SCRATCHSPACE_DIR, "arc");
             $zip = new ZipArchive();
             if (!$zip->open($file_zip_full, ZIPARCHIVE::CREATE)) {
@@ -581,33 +614,9 @@ XML;
             
             // SAVE hml inot file DOES NOT WORK - need to rewrite flathml
             if(@$params['metadata']){//save hml into scratch folder
-                
-                $file_metadata = $params['filename'].'.txt';//($params['format']=='xml'?'.hml':'.xml');
-                $file_metadata_full = tempnam(HEURIST_SCRATCHSPACE_DIR, "meta");
-                
-                
-                //$url = $serverURL.'export/xml/flathml.php?db='.$params['db'].'&q=ids:'.$params['metadata'].'&depth=0';
-                
-                $serverURL = HEURIST_SERVER_URL . '/heurist/';
-                list($dataset_id, $layer_id) = explode(',',$params['metadata']);
-                $url = $serverURL.'?db='.$params['db'].'&recID='.$dataset_id;  //($layer_id>0?$layer_id:$dataset_id);
-                $url = $url."\n".($url.'&fmt=html');
-                file_put_contents($file_metadata_full ,$url);
-                /*
-                $_REQUEST['db'] = self::$system->dbname();
-                $_REQUEST['w'] = 'all';
-                $_REQUEST['q'] = 'ids:'.$params['metadata'];
-                $_REQUEST['depth'] = '0'; //do not include links or relations
-                $_REQUEST['filename'] = $file_metadata_full;
+                    $zip->addFromString($originalFileName.'.txt', 
+                                    recordLinksFileContent(self::$system, $record));    
 
-                $to_include = dirname(__FILE__).'/../../export/xml/flathml.php';
-                if (is_file($to_include)) {
-                    include $to_include;
-                }
-                */
-                if(file_exists($file_metadata_full)){
-                    $zip->addFile($file_metadata_full, $file_metadata);    
-                }
             }
             $zip->close();
             //donwload

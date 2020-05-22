@@ -564,7 +564,7 @@ function downloadFile($mimeType, $filename, $originalFileName=null){
 //
 // $rec_ID -  metadata for record_id
 //
-function downloadFileWithMetadata($fileinfo, $rec_ID){
+function downloadFileWithMetadata($system, $fileinfo, $rec_ID){
   
     $filepath = $fileinfo['fullPath'];  //concat(ulf_FilePath,ulf_FileName as fullPath
     $external_url = $fileinfo['ulf_ExternalFileReference'];     //ulf_ExternalFileReference
@@ -577,10 +577,16 @@ function downloadFileWithMetadata($fileinfo, $rec_ID){
     $filepath = resolveFilePath($filepath);
     $is_local = file_exists($filepath);
 
-    //fix issue if original name does not have ext    
-    if($originalFileName=='' || $originalFileName==null || $originalFileName=='_remote'){
-        $originalFileName = 'Dataset_'.$rec_ID;    
+    //name for zip archive 
+    $downloadFileName = null;
+    $record = array("rec_ID"=>$rec_ID);
+    if($system->defineConstant('DT_NAME')){
+        recordSearchDetails($system, $record, array(DT_NAME));
+        if(is_array($record['details'][DT_NAME])){
+                $downloadFileName = fileNameSanitize(array_values($record['details'][DT_NAME])[0]);
+        }
     }
+    if(!$downloadFileName) $downloadFileName = 'Dataset_'.$rec_ID;
     
     
     $finfo = pathinfo($originalFileName);
@@ -605,8 +611,7 @@ function downloadFileWithMetadata($fileinfo, $rec_ID){
         saveURLasFile($external_url, $filepath);
     }
     
-    $filename = substr($originalFileName,0,strlen($originalFileName)-3);
-    $file_zip = $filename.'zip';
+    $file_zip = $downloadFileName.'.zip';
     $file_zip_full = tempnam(HEURIST_SCRATCHSPACE_DIR, "arc");
 
     $zip = new ZipArchive();
@@ -615,18 +620,10 @@ function downloadFileWithMetadata($fileinfo, $rec_ID){
     }else{
         $zip->addFile($filepath, $originalFileName);
     }
-    
-    $file_metadata = $filename.'txt';
-    $file_metadata_full = tempnam(HEURIST_SCRATCHSPACE_DIR, "meta");
-    
-    $serverURL = HEURIST_SERVER_URL . '/heurist/';
-    $url = $serverURL.'?db='.$params['db'].'&recID='.$rec_ID;
-    $url = $url."\n".($url.'&fmt=html');
 
-    file_put_contents($file_metadata_full ,$url);
-    if(file_exists($file_metadata_full)){
-        $zip->addFile($file_metadata_full, $file_metadata);    
-    }
+    $zip->addFromString($downloadFileName.'.txt', 
+                    recordLinksFileContent($system, $record));    
+    
     $zip->close();
     
     //donwload

@@ -471,10 +471,10 @@ function hMapLayer2( _options ) {
                     sQuery = window.hWin.HEURIST4.util.composeHeuristQuery2(params, true);
                     sQuery = sQuery + '&db=' + (params.db?params.db:window.hWin.HAPI4.database);
                 }
-                sQuery = sQuery + '&format=geojson&filename=Dataset_'+dataset_ID; //(layer_ID>0?layer_ID:dataset_ID); //layerName; //zip=1&
+                sQuery = sQuery + '&format=geojson'; //(layer_ID>0?layer_ID:dataset_ID); //layerName; //zip=1&
                 
-                //returns hml for these two records
-                sQuery = sQuery + '&metadata='+dataset_ID+(layer_ID>0?(','+layer_ID):'');
+                //@todo: attach hml for dataset record
+                sQuery = sQuery + '&metadata='+window.hWin.HAPI4.database+'-'+dataset_ID; 
                  
                 url = window.hWin.HAPI4.baseURL 
                         + 'hsapi/controller/record_output.php'+ sQuery;

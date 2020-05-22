@@ -2357,6 +2357,27 @@ $loop_cnt++;
     }
     
     //
+    // returns string with short description and links to record view and hml
+    // $record - rec id or record array
+    //
+    function recordLinksFileContent($system, $record){
+        
+        if(is_numeric($record)){
+            $record = array("rec_ID"=>$record);
+            recordSearchDetails($system, $record, array(DT_NAME));
+        }
+        
+        $url = HEURIST_SERVER_URL . '/heurist/?db='.$system->dbname().'&recID='.$record['rec_ID'];
+                        
+        return 'Downloaded from: '.$system->get_system('sys_dbName', true)."\n"
+                .'Dataset ID: '.$record['rec_ID']."\n"
+                .(is_array(@$record['details'][DT_NAME])?'Dataset: '.array_values($record["details"][DT_NAME])[0]."\n":'')
+                .'Full metadata (XML): '.$url."\n"
+                .'Human readable (html): '.($url.'&fmt=html')."\n";
+        
+    }
+    
+    //
     // find geo in linked places 
     //
     function recordSearchGeoDetails($system, $recID) {

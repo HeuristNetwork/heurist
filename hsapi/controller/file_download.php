@@ -129,7 +129,7 @@ if($db){
 
                 }else if(@$_REQUEST['metadata']){//download zip file: registered file and file with links to html and xml
                 
-                    downloadFileWithMetadata($fileinfo, $_REQUEST['metadata']);
+                    downloadFileWithMetadata($system, $fileinfo, $_REQUEST['metadata']);
                 
                 }else
                 if(file_exists($filepath)){

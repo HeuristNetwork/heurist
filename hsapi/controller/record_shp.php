@@ -71,6 +71,9 @@ use Shapefile\ShapefileReader;
     }else{
         define('DT_FILE_RESOURCE',0);
     }
+    if($system->defineConstant('DT_NAME')){
+        $fields[] = DT_NAME;
+    }    
     
     
     if( count($fields) == 0 ){
@@ -83,30 +86,35 @@ use Shapefile\ShapefileReader;
     $record = array("rec_ID"=>$params['recID']);
     recordSearchDetails($system, $record, $fields);
     
-    if (@$record["details"] &&
-       (@$record["details"][DT_SHAPE_FILE] || @$record["details"][DT_ZIP_FILE] || @$record["details"][DT_FILE_RESOURCE]))
+    if (@$record['details'] &&
+       (@$record['details'][DT_SHAPE_FILE] || @$record['details'][DT_ZIP_FILE] || @$record['details'][DT_FILE_RESOURCE]))
     {
         
             $dbf_file = null;
             $shx_file = null;
 
-            if(DT_SHAPE_FILE>0 && @$record["details"][DT_SHAPE_FILE]){
+            if(DT_SHAPE_FILE>0 && @$record['details'][DT_SHAPE_FILE]){
                 
-                $shp_file = fileRetrievePath(array_shift($record["details"][DT_SHAPE_FILE]),'shp',false);
-                $dbf_file = fileRetrievePath(array_shift($record["details"][DT_DBF_FILE]),'dbf',false);
-                $shx_file = fileRetrievePath(array_shift($record["details"][DT_SHX_FILE]),'shx',false);
+                $shp_file = fileRetrievePath(array_shift($record['details'][DT_SHAPE_FILE]),'shp',false);
+                $dbf_file = fileRetrievePath(array_shift($record['details'][DT_DBF_FILE]),'dbf',false);
+                $shx_file = fileRetrievePath(array_shift($record['details'][DT_SHX_FILE]),'shx',false);
                 
-            }else if(DT_ZIP_FILE>0 && @$record["details"][DT_ZIP_FILE]){
-                $shp_file = fileRetrievePath(array_shift($record["details"][DT_ZIP_FILE]),'shp',true);
+            }else if(DT_ZIP_FILE>0 && @$record['details'][DT_ZIP_FILE]){
+                $shp_file = fileRetrievePath(array_shift($record['details'][DT_ZIP_FILE]),'shp',true);
                 $isZipArchive = true;
             }else{
-                $shp_file = fileRetrievePath(array_shift($record["details"][DT_FILE_RESOURCE]),'shp',true);
+                $shp_file = fileRetrievePath(array_shift($record['details'][DT_FILE_RESOURCE]),'shp',true);
                 $isZipArchive = true;
             }
             
             if(@$params['format']=='rawfile'){
                 
-                $originalFileName = 'Dataset_'.$params['recID'];
+                $originalFileName = null;
+                if(is_array($record['details'][DT_NAME])){
+                    $originalFileName = fileNameSanitize(array_values($record['details'][DT_NAME])[0]);
+                }
+                if(!$originalFileName) $originalFileName = 'Dataset_'.$record['rec_ID'];
+                
                 $file_zip = $originalFileName.'.zip';
                 $file_zip_full = tempnam(HEURIST_SCRATCHSPACE_DIR, "arc");
                 $zip = new ZipArchive();
@@ -116,7 +124,7 @@ use Shapefile\ShapefileReader;
                     if(!$dbf_file){
                         $dbf_file = substr($shp_file,0,strlen($shp_file)-3).'dbf';
                     }
-                    if(!$shx_file){                       +
+                    if(!$shx_file){                       
                         $shx_file = substr($shp_file,0,strlen($shp_file)-3).'dbf';
                     }
                     $zip->addFile($shp_file, basename($shp_file) );
@@ -129,18 +137,8 @@ use Shapefile\ShapefileReader;
                     
                     if(@$params['metadata']){//save hml into scratch folder
                         
-                        $file_metadata = $originalFileName.'.txt';
-                        $file_metadata_full = tempnam(HEURIST_SCRATCHSPACE_DIR, "meta");
-                        
-                        $serverURL = HEURIST_SERVER_URL . '/heurist/';
-                        //list($dataset_id, $layer_id) = explode(',',$params['metadata']);
-                        $url = $serverURL.'?db='.$params['db'].'&recID='.$params['recID']; //($layer_id>0?$layer_id:$dataset_id);
-                        $url = $url."\n".($url.'&fmt=html');
-
-                        file_put_contents($file_metadata_full ,$url);
-                        if(file_exists($file_metadata_full)){
-                            $zip->addFile($file_metadata_full, $file_metadata);    
-                        }
+                        $zip->addFromString($originalFileName.'.txt', 
+                                       recordLinksFileContent($system, $record));    
                     }
                     $zip->close();
                     //donwload
