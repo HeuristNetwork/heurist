@@ -167,7 +167,6 @@ console.log(re);
 
                     //accept events from the same realm only
                     if(that._isSameRealm(data) && data.source!=that.element.attr('id')) { //selection happened somewhere else
-                        //console.log("_doVisualizeSelection");
                         if(data.reset){
                             that.option("selection",  null);
                         }else if(data.dataset_visibility){
@@ -350,8 +349,7 @@ console.log(re);
                                     ?that.options.recordset :that.options.recordset.getIds();
                             if(_selection.length==0) _selection = 'hide_all';
                         }
-                            
-                        mapping.mapping('setVisibilityAndZoom', {mapdoc_id:0, dataset_name:'Current query'}, _selection);                            
+                        mapping.mapping('setVisibilityAndZoom', {mapdoc_id:0, dataset_name:'Current query'}, _selection, true);                            
 
                         
                     }else{
@@ -371,6 +369,16 @@ console.log(re);
                             $(that.document).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT,
                                     { selection:selected, source:that.element.attr('id'), search_realm:that.options.search_realm } );
                         });
+                        
+                    mapping.mapping('option','onlayerstatus',function( dataset_id, status ) {
+
+                            if(dataset_id>0)
+                            $(that.document).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT,
+                                    { selection:[dataset_id], map_visibility:status,
+                                     source:that.element.attr('id'), search_realm:that.options.search_realm } );
+
+                    });
+                        
                 }
                 
                 this.map_inited = true;
@@ -488,7 +496,7 @@ console.log(re);
             if(this.options.leaflet){ //leaflet
                 var mapManager = mapping.mapping( 'getMapManager' );
                 mapManager.setLayersVisibility(selection);
-                
+//console.log('BBBBBBBBB');                
                 //if layer is visible - select and zoom to record in search results
                 var recID = selection[0];
                 var layer_rec = mapManager.getLayer( 0, recID );

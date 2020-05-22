@@ -35,8 +35,9 @@ Thematic mapping
 * nomap - timeline only
 * map_rollover
 * 
-* events:
+* callback events:
 * onselect
+* onlayerstatus - arguments datasetid and status (visible,hidden )see mapManager treeview select event
 * oninit
 * style: default style for current query
 * 
@@ -70,8 +71,7 @@ Thematic mapping
     _stylerFunction - returns style for every path and polygone, either individual feature style of parent layer style.
     _getMarkersByRecordID - returns markers by heurist ids (for filter and highlight)
     
-* Events: see options.onselect and oninit
-* onSelection - 
+* Events: 
 * onInitComplete - triggers options.oninit event handler
 * 
 * 
@@ -109,6 +109,7 @@ $.widget( "heurist.mapping", {
         
         // callbacks
         onselect: null,
+        onlayerstatus:null,
         oninit: null,
         ondraw_addstart:null,
         ondraw_editstart:null,
@@ -1772,12 +1773,12 @@ $.widget( "heurist.mapping", {
                                 check_function( layer.feature.properties.rec_ID )
                             ) 
                           {
-                                layer.addTo( that.nativemap );    
+                                layer.addTo( that.nativemap );   //to show  
                                 
                                 bounds.push( that.getLayerBounds(layer) );
                                 
                           }else{
-                                layer.remove();    
+                                layer.remove(); //to hide    
                           }
                     });
                 }

@@ -173,6 +173,8 @@ console.log('beforeunload MAPPEVIEW');
             },500);
         }
         
+        mapping.mapping('getMapManager').setHeight($('#map_digitizer').height()-50);
+        
     }
     
     //

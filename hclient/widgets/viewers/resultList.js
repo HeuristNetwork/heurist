@@ -107,6 +107,8 @@ $.widget( "heurist.resultList", {
     _init_completed:false,
     
     _grp_keep_status:{}, //expanded groups
+    
+    _app_timemap:null, //direct reference to mapping widget to support complex interaction
 
     // the constructor
     _create: function() {
@@ -284,10 +286,25 @@ $.widget( "heurist.resultList", {
                     //this selection is triggered by some other app - we have to redraw selection
                     if(data && data.source!=that.element.attr('id') && that._isSameRealm(data)) {
                         
-                        if(data.reset){
+                        if(data.reset){ //clear selection
                             that.setSelected(null);
                         }else{
-                            that.setSelected(data.selection);    
+                            if(data.map_visibility){
+                                
+                                if(data.selection && data.selection.length==1){
+                                
+                                    var rdiv = that.div_content.find('.recordDiv[recid="'+data.selection[0]+'"]');
+                                    if(rdiv.length>0){
+                                        rdiv.find('.rec_expand_on_map').attr('data-loaded', data.map_visibility);
+                                        rdiv.find('.rec_expand_on_map > .ui-button-text').text(
+                                            data.map_visibility=='visible'?'Hide data':'Show data');
+                                    }
+                                    
+                                }
+                                
+                            }else{
+                                that.setSelected(data.selection);        
+                            }
                         }
                         
                         
@@ -1614,12 +1631,24 @@ $.widget( "heurist.resultList", {
             if($target.hasClass('rec_expand_on_map') || $target.parents('.rec_expand_on_map').length>0){
                 if(this._currentRecordset){
                     
-                    //var record = this._currentRecordset.getById(selected_rec_ID);
-            
-                    $(this.document).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT, 
-                    {selection:[selected_rec_ID], 
-                        dataset_visibility: true, 
-                        source:this.element.attr('id'), search_realm:this.options.search_realm} );
+                    
+                    var btn = $target.hasClass('rec_expand_on_map')?$target:$target.parents('.rec_expand_on_map');
+                    
+                    if(btn.attr('data-loaded')!='visible'){
+                         btn.attr('data-loaded','visible');
+                         btn.find('.ui-button-text').text('Hide data');
+                    }else{
+                         btn.attr('data-loaded','hidden');
+                         btn.find('.ui-button-text').text('Show data');
+                    }
+                    //+ '<span class="ui-button-icon-primary ui-icon ui-icon-globe"/>'
+                         
+                        //var record = this._currentRecordset.getById(selected_rec_ID);
+                        $(this.document).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT, 
+                        {selection:[selected_rec_ID], 
+                            dataset_visibility: true, 
+                            source:this.element.attr('id'), search_realm:this.options.search_realm} );
+                    
                     
                 }            
                 return;            

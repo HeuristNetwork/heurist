@@ -503,7 +503,7 @@ function hMapManager( _options )
                                             //}) 
                                         }, 500);                                           
                                     },
-                                    select: function(e, data) {  //show/hide
+                                    select: function(e, data) {  //show/hide   checkbox event listener
                                         
                                         var node = data.node;
                                         if(node.data.type=='mapdocument'){
@@ -521,8 +521,19 @@ function hMapManager( _options )
                                             
                                             var mapdoc_id = node.data.mapdoc_id;
                                             if(mapdoc_id>=0){
+                                                //node.key - heurist layer record id
                                                 var layer_rec = mapDocuments.getLayer(mapdoc_id, node.key);
-                                                if(layer_rec) (layer_rec['layer']).setVisibility( node.isSelected() );
+                                                if(layer_rec){
+                                                    (layer_rec['layer']).setVisibility( node.isSelected() );  
+                                                    //trigger 
+                                                    var onlayerstatus = options.mapwidget.mapping('option','onlayerstatus');
+                                                    if($.isFunction(onlayerstatus)){
+                                                        onlayerstatus.call(options.mapwidget, 
+                                                                node.key,
+                                                                    //node.isSelected()
+                                                                    layer_rec['layer'].isVisible()?'visible':'hidden');
+                                                    }
+                                                } 
                                             } 
                                         }
                                         
