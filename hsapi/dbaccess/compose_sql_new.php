@@ -114,6 +114,7 @@ $mysqli = null;
 $wg_ids = null; //groups current user is member
 $publicOnly = false;
 $currUserID = 0;
+//$use_user_wss = false;
 
 //keep params for debug only!
 $params_global;
@@ -143,7 +144,7 @@ $top_query;
 //
 function get_sql_query_clauses_NEW($db, $params, $currentUser=null){
 
-    global $mysqli, $wg_ids, $currUserID, $publicOnly, $params_global, $top_query;
+    global $mysqli, $wg_ids, $currUserID, $publicOnly, $params_global, $top_query;//, $use_user_wss;
     
     $params_global = $params;
 
@@ -191,7 +192,7 @@ function get_sql_query_clauses_NEW($db, $params, $currentUser=null){
     if($currUserID==2 && $search_domain != BOOKMARK){
         $wg_ids = array();    
     }
-    
+    //$use_user_wss = (@$params['use_user_wss']===true);
     
     $query = new HQuery( "0", $query_json, $search_domain, $currUserID );
     $top_query = $query;
@@ -200,7 +201,17 @@ function get_sql_query_clauses_NEW($db, $params, $currentUser=null){
     //1. create tree of predicates
     //2. make where
 
-
+    // 4c. SPECIAL CASE for USER WORKSET
+    if(@$params['use_user_wss']===true && $currUserID>0){
+        
+        $q2 = 'select wss_RecID from usrWorkingSubsets where wss_OwnerUGrpID='.$currUserID.' LIMIT 1';
+        if(mysql__select_value($mysqli, $q2)>0){
+            $query->where_clause = '(exists (select wss_RecID from usrWorkingSubsets where wss_RecID=r0.rec_ID and wss_OwnerUGrpID='.$currUserID.'))'
+                . ($query->where_clause && trim($query->where_clause)!=''? ' and '.$query->where_clause :'');
+        }
+    }
+    
+    
     // 6. DEFINE LIMIT AND OFFSET ---------------------------------------------------------------------------------------
 
     $limit = get_limit($params);
@@ -265,7 +276,7 @@ class HQuery {
 
     function makeSQL(){
 
-        global $publicOnly, $wg_ids, $params_global;
+        global $publicOnly, $wg_ids, $params_global; //, $mysqli, $use_user_wss;
 
         $res = $this->top_limb->makeSQL(); //it creates where_clause and fill tables array
 
@@ -286,7 +297,15 @@ class HQuery {
         //add usrRecPermission join
         if($this->level=='0' && !$publicOnly && $this->currUserID>0 && $this->currUserID!=2){
                 $this->from_clause = $this->from_clause.' LEFT JOIN usrRecPermissions ON rcp_RecID=r0.rec_ID ';
-        }            
+        } 
+        /*           
+        if($this->level=='0' && $this->currUserID>0 && $use_user_wss===true)
+        {
+            $q2 = 'select wss_RecID from usrWorkingSubsets where wss_OwnerUGrpID='.$this->currUserID.' LIMIT 1';
+            if(mysql__select_value($mysqli, $q2)>0){
+                $this->from_clause = $this->from_clause.' LEFT JOIN usrWorkingSubsets ON wss_RecID=r0.rec_ID and wss_OwnerUGrpID='.$this->currUserID.' ';
+            }
+        }*/
             
         // add tables from other    
         foreach($this->top_limb->tables as $table){

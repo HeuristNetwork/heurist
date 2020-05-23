@@ -974,8 +974,23 @@ CREATE TABLE woots (
   PRIMARY KEY  (woot_ID),
   UNIQUE KEY woot_title_key (woot_Title(200))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Woot records (entries, pages) are linked to a set of XHTML c';
-
+                                                               
 -- ------------------------------------------------------------------------------------------------
+
+--
+-- Table structure for table 'record subsets'
+--
+
+CREATE TABLE usrWorkingSubsets (
+  wss_ID mediumint(8) unsigned NOT NULL auto_increment COMMENT 'Unique ID for the working subsets table',
+  wss_RecID int(10) unsigned NOT NULL COMMENT 'ID of a Record to be included in the working subset for a specific user',
+  wss_OwnerUGrpID smallint(5) unsigned NOT NULL COMMENT 'Person to whose working subset this Record ID is assigned',
+  PRIMARY KEY  (wss_ID),
+  KEY wss_RecID (wss_RecID),
+  KEY wss_OwnerUGrpID (wss_OwnerUGrpID),
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Lists a set of Records to be included in a working subset for a user. Working susbset is an initial filter on all filter actions.';
+
+
 -- ------------------------------------------------------------------------------------------------
 -- ------------------------------------------------------------------------------------------------
 -- ------------------------------------------------------------------------------------------------

@@ -48,7 +48,7 @@ use Shapefile\ShapefileReader;
         $system->error_exit_api('recID parameter is not defined or has wrong value'); //exit from script
     }
     
-    $need_simplify = (treu || @$params['simplify']=='yes' || @$params['simplify']==1);
+    $need_simplify = (true || @$params['simplify']=='yes' || @$params['simplify']==1);
     
     $fields = array();
     

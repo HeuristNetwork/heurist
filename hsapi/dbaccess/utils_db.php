@@ -658,6 +658,8 @@
     //
     function updateDatabseToLatest2($system){
 
+        $report = array();
+
         $ret = false;        
         $mysqli = $system->get_mysqli();
     
@@ -697,6 +699,29 @@
             }
             $report[] = 'defRecStructure: rst_PointerMode and rst_PointerBrowseFilter added';
         }
+    
+    
+        //create new tables
+        $value = mysql__select_value($mysqli, "SHOW TABLES LIKE 'usrWorkingSubsets'");
+        if($value==null || $value==""){        
+            
+$query = 'CREATE TABLE usrWorkingSubsets ( '
+  ."wss_ID mediumint(8) unsigned NOT NULL auto_increment COMMENT 'Unique ID for the working subsets table',"
+  ."wss_RecID int(10) unsigned NOT NULL COMMENT 'ID of a Record to be included in the working subset for a specific user',"
+  ."wss_OwnerUGrpID smallint(5) unsigned NOT NULL COMMENT 'Person to whose working subset this Record ID is assigned',"
+  ."PRIMARY KEY  (wss_ID),"
+  .'KEY wss_RecID (wss_RecID),'
+  .'KEY wss_OwnerUGrpID (wss_OwnerUGrpID)'
+.") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Lists a set of Records to be included in a working subset for a user. Working susbset is an initial filter on all filter actions.'";
+            
+            $res = $mysqli->query($query);
+            if(!$res){
+                $system->addError(HEURIST_DB_ERROR, 'Cannot create usrWorkingSubsets', $mysqli->error);
+                return false;
+            }
+            $report[] = 'usrWorkingSubsets created';
+        }
+    
     
         
         $query = "SHOW COLUMNS FROM `defTerms` LIKE 'trm_SemanticReferenceURL'";

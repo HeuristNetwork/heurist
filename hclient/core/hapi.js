@@ -251,6 +251,12 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
     *   get_url_content_type - resolve mimetype for given url
     * 
     *   versionCheck - checks client software version and database version
+    * 
+    *   user_get
+    *   usr_names
+    *   user_log
+    *   user_save
+    *   user_wss - working subset
     *
     * @returns {Object}
     */
@@ -412,6 +418,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                         if(response.status == window.hWin.ResponseStatus.OK){
                             window.hWin.HAPI4.sysinfo['db_total_records'] = response.data[0];
                             window.hWin.HAPI4.sysinfo['db_has_active_dashboard'] = response.data[1];
+                            window.hWin.HAPI4.sysinfo['db_workset_count'] = response.data[2];
                             if(callback) callback();
                         }else{
                             window.hWin.HEURIST4.msg.showMsgErr(response.message); 
@@ -448,6 +455,15 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             }
 
             /**
+            * set/clear work subset
+            */
+            ,user_wss: function(request, callback){
+                if(request) request.a = 'user_wss';
+                _callserver('usr_info', request, callback);
+            }
+
+
+            /**
             * Save user profile info in db
             * @param request
             * @param callback
@@ -456,7 +472,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 if(request) request.a = 'usr_save';
                 _callserver('usr_info', request, callback);
             }
-
+            
             /**
             * Get user profile info form db - used in Admin part only?
             * @param request

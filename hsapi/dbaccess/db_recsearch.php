@@ -1531,7 +1531,12 @@
 
             return $fin_result;
         }//END RULES ------------------------------------------
-
+        else if( $currUserID>0 ) {
+            //find user work susbset
+            $params['use_user_wss'] = true;
+        }
+        
+        
         $search_detail_limit = PHP_INT_MAX;
 
         if(@$params['sql']){

@@ -815,6 +815,7 @@ error_log(print_r($_REQUEST, true));
         
         $db_total_records = 0;
         $db_has_active_dashboard = 0;
+        $db_workset_count = 0;
         
         if( $this->mysqli ){
              $db_total_records = mysql__select_value($this->mysqli, 'select count(*) from Records');
@@ -827,9 +828,15 @@ error_log(print_r($_REQUEST, true));
                  }
                  $db_has_active_dashboard = mysql__select_value($this->mysqli, $query);
                  $db_has_active_dashboard = ($db_has_active_dashboard>0)?$db_has_active_dashboard:0;
+                 
+                 $curr_user_id = $this->get_user_id();
+                 if($curr_user_id>0){
+                    $query = 'select count(*) from usrWorkingSubsets where wss_OwnerUGrpID='.$curr_user_id;
+                    $db_workset_count = mysql__select_value($this->mysqli, $query);
+                 }
              }
         }
-        return array($db_total_records, $db_has_active_dashboard);
+        return array($db_total_records, $db_has_active_dashboard, $db_workset_count);
     }
 
     /**
@@ -925,6 +932,7 @@ error_log(print_r($_REQUEST, true));
                 $res2 = $this->getTotalRecordsAndDashboard();                    
                 $res['sysinfo']['db_total_records'] = $res2[0];
                 $res['sysinfo']['db_has_active_dashboard'] = $res2[1];
+                $res['sysinfo']['db_workset_count'] = $res2[2];
             }
 
         }else{

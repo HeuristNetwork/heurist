@@ -2777,10 +2777,27 @@ $.widget( "heurist.resultList", {
     setHeaderText: function(newtext, headercss){
         var stext = '<h3 style="margin:0">'+(this.options.title ?this.options.title :newtext)+'</h3>';
         if(this.options.title && newtext) stext = stext +  '<h4 style="margin:0;font-size:0.9em">'+newtext+'</h4>';
+    
         this.div_header.find('div.result-list-header').html( stext );
         if(headercss){
             this.div_header.css(headercss);    
             this._adjustHeadersPos();
+        }
+        
+        this.refreshSubsetSign();    
+    },
+    
+    refreshSubsetSign: function(){
+        if(this.div_header){
+            var container = this.div_header.find('div.result-list-header');
+            if(window.hWin.HAPI4.sysinfo.db_workset_count>0){
+                $('<span style="position:absolute;right:10px;top:10px;padding:2px 4px;background:white;color:red"'
+                +' title="'+window.hWin.HAPI4.sysinfo.db_workset_count+' records"'
+                +'>SUBSET ACTIVE</span>')
+                    .appendTo(container);
+            }else{
+                container.find('span').remove();
+            }
         }
     },
     

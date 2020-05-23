@@ -78,9 +78,10 @@ function onHapiInit(success){
     
 <?php
      //returns total records in db and counts of active entries in dashboard  
-     list($db_total_records, $db_has_active_dashboard) = $system->getTotalRecordsAndDashboard(); 
+     list($db_total_records, $db_has_active_dashboard, $db_workset_count) = $system->getTotalRecordsAndDashboard(); 
      echo 'window.hWin.HAPI4.sysinfo.db_total_records = '.$db_total_records.';';
      echo 'window.hWin.HAPI4.sysinfo.db_has_active_dashboard = '.$db_has_active_dashboard.';';
+     echo 'window.hWin.HAPI4.sysinfo.db_workset_count = '.$db_workset_count.';';
 ?>
     
     verify_credentials( false );

@@ -334,6 +334,82 @@
 
         return $ret;
     }
+    
+    //
+    //
+    //
+    function user_WorkSet( $system, $params ){
+
+        $res = false;        
+        $curr_user_id = $system->get_user_id();
+        if($curr_user_id>0){
+            
+            $mysqli = $system->get_mysqli();
+            
+            $mysqli->query('DELETE FROM usrWorkingSubsets where wss_OwnerUGrpID='.$curr_user_id);
+            if ($mysqli->error) {
+                    $system->addError(HEURIST_DB_ERROR, 'Can not reset user workset. SQL error: '.$mysqli->error);
+            }else{
+                    $res = 0;
+            }
+                
+            if(@$params['clear']!=1){
+                
+                $recids = @$params['ids'];
+                $recids = prepareIds($recids);
+                if(is_array($recids) && count($recids)>0){
+                    
+                    $filename = tempnam(HEURIST_SCRATCHSPACE_DIR, "data");
+                    
+                    if (!$handle_wr = fopen($filename, 'w')) {
+                        $system->addError(HEURIST_ERROR, 'Cannot open file to save workset data: '.$filename);                
+                        return false;
+                    }
+                    
+                    foreach($recids as $recid){
+                        $line = implode(',', $newfields)."\n";
+                        if (fwrite($handle_wr, $recid.','.$curr_user_id."\n") === FALSE) {
+                            $system->addError(HEURIST_ERROR, 'Cannot write workset data to file '.$filename);
+                            fclose($handle_wr);
+                            if(file_exists($filename)) unlink($filename);
+                            return false;
+                        }
+                    }
+                    fclose($handle_wr);
+                    
+                    if(strpos($filename,"\\")>0){
+                        $filename = str_replace("\\","\\\\",$filename);
+                    }
+                    
+                    $mysqli->query('SET GLOBAL local_infile = true');
+                    //load file into table  LOCAL
+                    $query = "LOAD DATA LOCAL INFILE '".$filename."' INTO TABLE usrWorkingSubsets "
+                    //." CHARACTER SET utf8mb4"    
+                    ." FIELDS TERMINATED BY ',' "  
+                    ." OPTIONALLY ENCLOSED BY  '\"' " 
+                    ." LINES TERMINATED BY '\n'"  
+                    //." IGNORE 1 LINES
+                    ." (wss_RecID ,wss_OwnerUGrpID)";
+                    
+                    if (!$mysqli->query($query)) {
+                        $system->addError(HEURIST_DB_ERROR, 'Unable to import workset data. SQL error: '.$mysqli->error);
+                    }else{
+                        $res = count($recids);
+                    }
+                    
+                    if(file_exists($filename)) unlink($filename);
+                
+                }else{
+                    $system->addError(HEURIST_INVALID_REQUEST, 'Set of records to be added to user workset is not defined');
+                }
+            }
+            
+        }else{
+            $system->addError(HEURIST_REQUEST_DENIED);
+        }
+        
+        return $res; 
+    }
 
     //CRUD methods
     function user_Delete($system, $recID){

@@ -188,7 +188,17 @@ function get_sql_query_clauses($db, $params, $currentUser=null) {
         $where_clause = '(not exists (select rl_ID from recLinks where rl_SourceID=TOPBIBLIO.rec_ID  or rl_TargetID=TOPBIBLIO.rec_ID )) '
             . ($where_clause? ' and '.$where_clause :'');
     }
+    
+    // 4c. SPECIAL CASE for USER WORKSET
+    if(@$params['use_user_wss']===true && $currUserID>0){
 
+        $q2 = 'select wss_RecID from usrWorkingSubsets where wss_OwnerUGrpID='.$currUserID.' LIMIT 1';
+        if(mysql__select_value($mysqli, $q2)>0){
+            $where_clause = '(exists (select wss_RecID from usrWorkingSubsets where wss_RecID=TOPBIBLIO.rec_ID and wss_OwnerUGrpID='.$currUserID.'))'
+                . ($where_clause? ' and '.$where_clause :'');
+        }
+    }
+    
     // 5. DEFINE USERGROUP RESTRICTIONS ---------------------------------------------------------------------------------
 
     if ($search_domain != EVERYTHING) {

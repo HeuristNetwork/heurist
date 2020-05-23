@@ -491,7 +491,53 @@ console.log(menu.find('.ui-menu-item').css('padding'));
         }else if(action == "menu-collected-save"){
 
             window.hWin.HEURIST4.collection.collectionSave();
+        
+        }else if(action == "menu-subset-set"){
+            
+            if(!window.hWin.HAPI4.currentRecordset ||
+                    window.hWin.HAPI4.currentRecordset.length()==0)
+            {
+                        
+                window.hWin.HEURIST4.msg.showMsgDlg(
+                '<p>The working subset is created from your current query results. You have no query results, so no subset was created.</p>' 
+                +'<p>Please run a query which returns the set of records you wish to treat as the working subset and select this function again.</p>');
+                    
+            }else if(window.hWin.HAPI4.currentRecordset.length()>window.hWin.HAPI4.sysinfo.db_total_records*0.8){
+                
+                window.hWin.HEURIST4.msg.showMsgDlg(
+                '<p>You are trying to make a subset of everything or nearly everything (>=99%) of records  in the database. This does not make much sense.</p>'  
++'<p>Please apply a filter which returns the subset you wish to work with and select this function again.</p>');
+                
+            }else {
+            
+                var scope = window.hWin.HAPI4.currentRecordset.getIds();
+                
+                window.hWin.HAPI4.SystemMgr.user_wss({ids:scope.join(',')},
+                    function(response){
+                        if(response.status == window.hWin.ResponseStatus.OK){
+                            window.hWin.HAPI4.sysinfo.db_workset_count = response.data;
+                            that.options.resultList.resultList('refreshSubsetSign');
+                            window.hWin.HEURIST4.msg.showMsgFlash(response.data+' records has been added to work subset');
+                        }else{
+                            window.hWin.HEURIST4.msg.showMsgErr(response, true);
+                        }
+                    });
+                    
+            }
+            
 
+        }else if(action == "menu-subset-clear"){
+
+            window.hWin.HAPI4.SystemMgr.user_wss({clear:1},
+                function(response){
+                    if(response.status == window.hWin.ResponseStatus.OK){
+                        window.hWin.HAPI4.sysinfo.db_workset_count = 0;
+                        that.options.resultList.resultList('refreshSubsetSign');
+                    }else{
+                        window.hWin.HEURIST4.msg.showMsgErr(response, true);
+                    }
+                });
+                
         }
 
 

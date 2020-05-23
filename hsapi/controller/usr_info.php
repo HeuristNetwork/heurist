@@ -93,7 +93,7 @@
         
     }else if( !$system->init( @$_REQUEST['db'] ) ){ 
         
-//        error_log('FAILD INIT SYSTEM');        
+//        error_log('FAILED INIT SYSTEM');        
         
     }else{
         
@@ -258,6 +258,10 @@
             } else if ($action=="members" && @$_REQUEST['UGrpID']) {
 
                 $res = user_getWorkgroupMemebers($system->get_mysqli(), @$_REQUEST['UGrpID']);
+
+            } else if ($action=="user_wss") {
+                
+                $res = user_WorkSet($system, $_REQUEST);
 
             } else if ($action=="svs_save"){
 
