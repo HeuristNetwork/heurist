@@ -51,7 +51,7 @@ $.widget( "heurist.resultListCollection", {
         .disableSelection();
         
         //padding:4px 2px 4px 14px
-        this.labelCollectionInfo = $('<div style="display:inline-block;vertical-align:bottom;min-height:21px;font-weight:bold;padding-right:30px">')
+        this.labelCollectionInfo = $('<div style="display:inline-block;vertical-align:bottom;min-height:21px;font-weight:bold;padding-right:30px;font-size:13px">')
                 .appendTo(this.element);
         
         //create set of buttons
@@ -64,13 +64,13 @@ $.widget( "heurist.resultListCollection", {
         this._initBtn('Clear');
         //this._initBtn('List');
         
-        if(this.options.action_mode=='map'){
+        if(false && this.options.action_mode=='map'){
 
             var btn = $('<button>',{
                 text: window.hWin.HR(this.options.action_Label), 
             }).button()
-            .css({'font-weight':'bold', 'font-style':'italic', padding:'10px', 'margin-right':'10px',
-                'background':'lightgray', 'font-size':'1.2em'})
+            .css({'font-weight':'bold', 'font-style':'italic', 'margin-right':'10px',
+                'background':'lightgray'}) //padding:'10px', 'font-size':'1.2em'
             .appendTo( this.element );
             
             this['btn_'+name] = btn;
@@ -80,6 +80,7 @@ $.widget( "heurist.resultListCollection", {
                 });
         }else{
             this._initBtn('Action');    
+            if(this.options.action_mode=='map') this['btn_Action'].find('a').css({'font-weight':'bold'});
         }
         
         this.divMainMenuItems.menu();
@@ -130,7 +131,7 @@ $.widget( "heurist.resultListCollection", {
                            var recTitle = recordset.fld(record, 'rec_Title'); 
                            var recTitle_strip2 = window.hWin.HEURIST4.util.stripTags(recTitle);
                            
-                           return '<div class="recordDiv" style="height:18px;padding:0px 2px;"><div class="recordIcons">'
+                           return '<div class="recordDiv collected_perm" style="height:18px;padding:0px 2px;"><div class="recordIcons">'
         +     '<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
         +     '" class="rt-icon" style="background-image: url(&quot;'+recIcon+'&quot;);"/></div>'
         + '<div class="recordTitle" style="left:22px;top:4px">' + recTitle_strip2 + '</div>'
@@ -315,7 +316,7 @@ $.widget( "heurist.resultListCollection", {
         
         this._collection = _collection;
 
-        this.labelCollectionInfo.html( window.hWin.HR('Collection: ') + 
+        this.labelCollectionInfo.html( window.hWin.HR('Collected: ') + 
                 (_collection && _collection.length>0?_collection.length:'0') + ' datasets');
                 
         if(_collection && _collection.length>0){
