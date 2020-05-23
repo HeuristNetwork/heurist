@@ -289,15 +289,35 @@ $.widget( "heurist.resultList", {
                         if(data.reset){ //clear selection
                             that.setSelected(null);
                         }else{
-                            if(data.map_visibility){
+                            if(data.map_layer_status){  //visible hidden loading error
                                 
                                 if(data.selection && data.selection.length==1){
-                                
+                                    
                                     var rdiv = that.div_content.find('.recordDiv[recid="'+data.selection[0]+'"]');
-                                    if(rdiv.length>0){
-                                        rdiv.find('.rec_expand_on_map').attr('data-loaded', data.map_visibility);
-                                        rdiv.find('.rec_expand_on_map > .ui-button-text').text(
-                                            data.map_visibility=='visible'?'Hide data':'Show data');
+                                    if(rdiv.length>0)
+                                    {
+                                        rdiv.find('.rec_expand_on_map > .ui-icon').removeClass('rotate');
+                                        if(data.map_layer_status=='visible'){
+                                            s = 'Hide data';
+                                            
+                                            //zoom to loaded data
+                                            $(that.document).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT, 
+                                            {selection:data.selection, 
+                                                map_layer_action: 'zoom',
+                                                source:that.element.attr('id'), search_realm:that.options.search_realm} );
+                                            
+                                        }else if(data.map_layer_status=='loading'){
+                                            s = 'loading';
+                                            rdiv.find('.rec_expand_on_map > .ui-icon').addClass('rotate');
+                                        }else if(data.map_layer_status=='error'){
+                                            s = 'Error';
+                                            rdiv.find('.rec_expand_on_map > .ui-icon').removeClass('ui-icon-globe').addClass('ui-icon-alert');
+                                        }else{
+                                            s = 'Show data';
+                                        }
+                                        
+                                        rdiv.find('.rec_expand_on_map').attr('data-loaded', data.map_layer_status);
+                                        rdiv.find('.rec_expand_on_map > .ui-button-text').text( s );
                                     }
                                     
                                 }
@@ -1631,9 +1651,10 @@ $.widget( "heurist.resultList", {
             if($target.hasClass('rec_expand_on_map') || $target.parents('.rec_expand_on_map').length>0){
                 if(this._currentRecordset){
                     
-                    
                     var btn = $target.hasClass('rec_expand_on_map')?$target:$target.parents('.rec_expand_on_map');
+                    if(btn.attr('data-loaded')=='loading') return; 
                     
+                    /*
                     if(btn.attr('data-loaded')!='visible'){
                          btn.attr('data-loaded','visible');
                          btn.find('.ui-button-text').text('Hide data');
@@ -1642,11 +1663,11 @@ $.widget( "heurist.resultList", {
                          btn.find('.ui-button-text').text('Show data');
                     }
                     //+ '<span class="ui-button-icon-primary ui-icon ui-icon-globe"/>'
-                         
+                    */     
                         //var record = this._currentRecordset.getById(selected_rec_ID);
                         $(this.document).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT, 
                         {selection:[selected_rec_ID], 
-                            dataset_visibility: true, 
+                            map_layer_action: 'trigger_visibility',  //dataset_visibility: true, 
                             source:this.element.attr('id'), search_realm:this.options.search_realm} );
                     
                     
@@ -1659,7 +1680,7 @@ $.widget( "heurist.resultList", {
                     
                     $(this.document).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT, 
                     {selection:[selected_rec_ID], 
-                        dataset_download: true, 
+                        map_layer_action: 'download', //dataset_download: true, 
                         source:this.element.attr('id'), search_realm:this.options.search_realm} );
                     
                 }

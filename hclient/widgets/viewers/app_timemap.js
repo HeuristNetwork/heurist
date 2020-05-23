@@ -169,22 +169,25 @@ console.log(re);
                     if(that._isSameRealm(data) && data.source!=that.element.attr('id')) { //selection happened somewhere else
                         if(data.reset){
                             that.option("selection",  null);
-                        }else if(data.dataset_visibility){
+                        }else if(data.map_layer_action == 'trigger_visibility'){
                             
                             var sel =  window.hWin.HAPI4.getSelection(data.selection, true);
                             
                             // selection is dataset id - show/hide visibility of dataset
                             that._setLayersVisibility( sel );
                             
-                        }else if(data.dataset_download){
+                        }else if(data.map_layer_action == 'download'){
 
                             var sel =  window.hWin.HAPI4.getSelection(data.selection, true);
                             that._downloadLayerData( sel );
                             
+                        }else if(data.map_layer_action == 'zoom'){
+
+                            var sel =  window.hWin.HAPI4.getSelection(data.selection, true);
+                            that._zoomToLayer(sel);
+                            
                         }else{
-                            
                             //highlight and zoom
-                            
                             that._doVisualizeSelection( window.hWin.HAPI4.getSelection(data.selection, true) );
                         }
                     }
@@ -370,11 +373,11 @@ console.log(re);
                                     { selection:selected, source:that.element.attr('id'), search_realm:that.options.search_realm } );
                         });
                         
-                    mapping.mapping('option','onlayerstatus',function( dataset_id, status ) {
+                    mapping.mapping('option','onlayerstatus',function( layer_id, status ) {
 
-                            if(dataset_id>0)
+                            if(layer_id>0)
                             $(that.document).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT,
-                                    { selection:[dataset_id], map_visibility:status,
+                                    { selection:[layer_id], map_layer_status:status,
                                      source:that.element.attr('id'), search_realm:that.options.search_realm } );
 
                     });
@@ -477,6 +480,23 @@ console.log(re);
         }        
     }
 
+    //
+    //
+    //
+    , _zoomToLayer: function (selection) {
+        
+        if (this.mapframe[0].contentWindow.mapping && selection && selection.length>0) {
+            var  mapping = this.mapframe[0].contentWindow.mapping;  
+
+            if(this.options.leaflet){ //leaflet
+                //if layer is visible - select and zoom to record in search results
+                var recID = selection[0];
+                var layer_rec = mapping.mapping('getMapManager').getLayer( 0, recID );
+                (layer_rec['layer']).zoomToLayer();
+                
+            }
+        }        
+    }
 
     //
     // show (expand) layer/dataset or hide it on map
@@ -494,13 +514,14 @@ console.log(re);
             var  mapping = this.mapframe[0].contentWindow.mapping;  
 
             if(this.options.leaflet){ //leaflet
+
                 var mapManager = mapping.mapping( 'getMapManager' );
                 mapManager.setLayersVisibility(selection);
-//console.log('BBBBBBBBB');                
                 //if layer is visible - select and zoom to record in search results
                 var recID = selection[0];
                 var layer_rec = mapManager.getLayer( 0, recID );
                 if(layer_rec && (layer_rec['layer']).isVisible()){
+
                     this._doVisualizeSelection( selection );
                 } 
                 

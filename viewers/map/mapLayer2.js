@@ -83,11 +83,15 @@ function hMapLayer2( _options ) {
         }else if(rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_TILED_IMAGE_SOURCE']){
 
             _addTiledImage();
+            
+            setTimeout(function(){ _triggerLayerStatus( 'visible' ); },200);
 
         }else if(rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_GEOTIFF_SOURCE']){
 
             _addImage();
 
+            setTimeout(function(){ _triggerLayerStatus( 'visible' ); },200);
+            
         }else if(rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_KML_SOURCE'] ||
                  rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_FILE_SOURCE']){  //csv
 
@@ -210,6 +214,8 @@ function hMapLayer2( _options ) {
                     var dataset_name = _recordset.fld(options.rec_layer || _record, 'rec_Title');
                     
                     if(response.status && response.status != window.hWin.ResponseStatus.OK){
+                        _triggerLayerStatus( 'error' );
+                        
                         if(!window.hWin.HEURIST4.util.isempty(response.message)){
                             response.message = 'Layer : '+dataset_name+'<br><br>'+response.message;
                         }
@@ -223,6 +229,7 @@ function hMapLayer2( _options ) {
                                 dataset_name:dataset_name,
                                 preserveViewport:options.preserveViewport });
                                 
+                        _triggerLayerStatus( 'visible' );
                     }
                     
                 }
@@ -252,6 +259,9 @@ function hMapLayer2( _options ) {
                     var dataset_name = _recordset.fld(options.rec_layer || _record, 'rec_Title');
                     
                     if(response.status && response.status != window.hWin.ResponseStatus.OK){
+                        _triggerLayerStatus( 'error' );
+                        
+                        
                         if(!window.hWin.HEURIST4.util.isempty(response.message)){
                             response.message = 'Layer : '+dataset_name+'<br><br>'+response.message;
                         }
@@ -284,6 +294,7 @@ function hMapLayer2( _options ) {
                             window.hWin.HEURIST4.msg.showMsgErr(response);
                         }
                         
+                        _triggerLayerStatus( 'visible' );
                     }
                 }
             }
@@ -351,7 +362,9 @@ function hMapLayer2( _options ) {
                                     dataset_name:_recordset.fld(options.rec_layer || _record, 'rec_Title'),  //name for timeline
                                     preserveViewport:options.preserveViewport });
                                                          
-                    }else {
+                        _triggerLayerStatus( 'visible' );
+                   }else {
+                        _triggerLayerStatus( 'error' );
                         window.hWin.HEURIST4.msg.showMsgErr(response);
                     }
                     
@@ -395,22 +408,45 @@ function hMapLayer2( _options ) {
                         dataset_name:_recordset.fld(options.rec_layer || _record, 'rec_Title'),  //name for timeline
                         preserveViewport:options.preserveViewport });
                                              
+            _triggerLayerStatus( 'visible' );
         }else {
+            _triggerLayerStatus( 'error' );
             window.hWin.HEURIST4.msg.showMsgErr(response);
         }
+        
     }
     
     //
     // return extent in leaflet format (for tiler and image layers)
     //
     function _getBoundingBox(){
-        
+
         return window.hWin.HEURIST4.geo.getWktBoundingBox(
-                _recordset.getFieldGeoValue(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_OBJECT'])
-                );
-        
+            _recordset.getFieldGeoValue(_record, window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_OBJECT'])
+        );
+
     }
 
+
+    //
+    // trigger callback
+    //
+    function _triggerLayerStatus( status ){
+
+        if(status!=null){
+            var layer_ID = 0;
+            if(options.rec_layer){
+                layer_ID = _recordset.fld(options.rec_layer, 'rec_ID');
+            }
+            if(layer_ID>0){
+
+                var onlayerstatus = options.mapwidget.mapping('option','onlayerstatus');
+                if($.isFunction(onlayerstatus)){
+                    onlayerstatus.call(options.mapwidget, layer_ID, status);
+                }
+            }
+        }
+    }
     
     //public members
     var that = {
@@ -430,14 +466,22 @@ function hMapLayer2( _options ) {
         setVisibility:function(isvisible){
             
             is_visible = isvisible;
-              
+            
+            var status = null;
+           
             if(is_inited){
                 if(_nativelayer_id>0){
+                    status =  isvisible?'visible':'hidden'
+                    
                     options.mapwidget.mapping('setLayerVisibility', _nativelayer_id, isvisible);
                 }
             }else if(isvisible) {
+                status = 'loading'
                 _addLayerToMap();    
             }
+            
+            //trigger callback
+            _triggerLayerStatus( status );
             
         },
         

@@ -525,14 +525,6 @@ function hMapManager( _options )
                                                 var layer_rec = mapDocuments.getLayer(mapdoc_id, node.key);
                                                 if(layer_rec){
                                                     (layer_rec['layer']).setVisibility( node.isSelected() );  
-                                                    //trigger 
-                                                    var onlayerstatus = options.mapwidget.mapping('option','onlayerstatus');
-                                                    if($.isFunction(onlayerstatus)){
-                                                        onlayerstatus.call(options.mapwidget, 
-                                                                node.key,
-                                                                    //node.isSelected()
-                                                                    layer_rec['layer'].isVisible()?'visible':'hidden');
-                                                    }
                                                 } 
                                             } 
                                         }
@@ -1182,10 +1174,7 @@ function hMapManager( _options )
             }
             _refreshSearchContent();
         },
-        
-        //zoomToLayer
-        
-        
+
         //
         // returns leaflet layer_id by database mapdoc and name 
         //
