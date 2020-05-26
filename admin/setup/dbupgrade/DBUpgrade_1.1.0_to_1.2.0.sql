@@ -48,7 +48,7 @@
     ALTER TABLE `recDetails` ADD `dtl_Certainty` DECIMAL( 3, 2 ) NOT NULL DEFAULT '1.0' 
     COMMENT 'A certainty value for this observation in the range 0 to 1, where 1 indicates complete certainty';
 
-    ALTER TABLE `recDetails` ADD `dtl_Annotation` VARCHAR( 250 ) CHARACTER SET utf8 COLLATE utf8_general_ci NULL
+    ALTER TABLE `recDetails` ADD `dtl_Annotation` VARCHAR( 250 ) NULL
     COMMENT'A short note / annotation about this specific data value - may enlarge for example on the reasons for the certainty value';
 
 -- ---------------------------------------------------------------------------------------------------------------------------------    
@@ -95,17 +95,17 @@
 -- ---------------------------------------------------------------------------------------------------------------------------------    
 -- Provision for an image or PDF or external URL to define or illustrate the term
     ALTER TABLE  `defTerms`
-        ADD  `trm_SemanticReferenceURL` VARCHAR( 250 ) CHARACTER SET utf8 COLLATE utf8_general_ci NULL
+        ADD  `trm_SemanticReferenceURL` VARCHAR( 250 ) NULL
         COMMENT 'The URL to a semantic definition or web page describing the term';
 
     ALTER TABLE  `defTerms`
-        ADD  `trm_IllustrationURL` VARCHAR( 250 ) CHARACTER SET utf8 COLLATE utf8_general_ci NULL
+        ADD  `trm_IllustrationURL` VARCHAR( 250 ) NULL
         COMMENT 'The URL to a picture or other resource illustrating the term. If blank, look for trm_ID.jpg/gif/png in term_images directory';
 
 -- ---------------------------------------------------------------------------------------------------------------------------------    
     -- Provision for an external semantic URL to define the base field type
     ALTER TABLE  `defDetailTypes`
-        ADD  `dty_SemanticReferenceURL` VARCHAR( 250 ) CHARACTER SET utf8 COLLATE utf8_general_ci NULL
+        ADD  `dty_SemanticReferenceURL` VARCHAR( 250 ) NULL
         COMMENT 'The URL to a semantic definition or web page describing the base field type';
 
 -- ---------------------------------------------------------------------------------------------------------------------------------    

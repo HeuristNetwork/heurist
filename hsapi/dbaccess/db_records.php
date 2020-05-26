@@ -469,10 +469,6 @@
 
         if ($stmt) {
 
-            //$mysqli->query('set character_set_server = utf8mb4');
-            //$mysqli->query('set collation_server = utf8mb4_general_ci');
-
-            
             // $stmt->bind_param('isis', $dtyID, $dtl_Value, $dtl_UploadedFileID, $dtl_Geo);
             foreach ($detailValues as $values) {
 

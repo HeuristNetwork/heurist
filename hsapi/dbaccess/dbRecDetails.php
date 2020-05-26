@@ -1123,7 +1123,7 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
                             /*
                             $query = 'INSERT INTO recDetails (dtl_RecID,dtl_DetailTypeID,dtl_Value) VALUES ('
                             .$dtl['dtl_RecID'].', '.$dtl['dtl_DetailTypeID'].', '
-                            .'CONVERT( CAST(? AS BINARY) USING utf8))';
+                            .'CONVERT( CAST(? AS BINARY) USING utf8mb4))';
                             
                             $ret = mysql__exec_param_query($mysqli, $query, array($dtl['dtl_Value']));
                             */

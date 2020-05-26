@@ -66,7 +66,7 @@ CREATE TABLE defCalcFunctions (
   cfn_FunctionSpecification text NOT NULL COMMENT 'A function or chain of functions, or some PHP plugin code',
   cfn_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record, used to get last updated date for table',
   PRIMARY KEY  (cfn_ID)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Specifications for generating calculated fields, plugins and';
+) ENGINE=InnoDB COMMENT='Specifications for generating calculated fields, plugins and';
 
 -- --------------------------------------------------------
 
@@ -83,7 +83,7 @@ CREATE TABLE defCrosswalk (
   crw_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'The date when this mapping added or modified',
   PRIMARY KEY  (crw_ID),
   UNIQUE KEY crw_composite (crw_SourcedbID,crw_DefType,crw_LocalCode)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Map the codes used in this Heurist DB to codes used in other';
+) ENGINE=InnoDB  COMMENT='Map the codes used in this Heurist DB to codes used in other';
 
 -- --------------------------------------------------------
 
@@ -98,7 +98,7 @@ CREATE TABLE defDetailTypeGroups (
   dtg_Description varchar(255) NOT NULL COMMENT 'General description fo this group of detail (field) types',
   dtg_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record, used to get last updated date for table',
   PRIMARY KEY  (dtg_ID)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Groups detail types for display in separate sections of edit';
+) ENGINE=InnoDB   COMMENT='Groups detail types for display in separate sections of edit';
 
 -- --------------------------------------------------------
 
@@ -128,12 +128,12 @@ CREATE TABLE defDetailTypes (
   dty_NonOwnerVisibility enum('hidden','viewable','public','pending') NOT NULL default 'viewable' COMMENT 'Allows restriction of visibility of a particular field in ALL record types (overrides rst_VisibleOutsideGroup)',
   dty_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record, used to get last updated date for table',
   dty_LocallyModified tinyint(1) unsigned NOT NULL default '0' COMMENT 'Flags a definition element which has been modified relative to the original source',
-  dty_SemanticReferenceURL VARCHAR( 250 ) CHARACTER SET utf8 COLLATE utf8_general_ci NULL COMMENT 'The URL to a semantic definition or web page describing the base field type',  
+  dty_SemanticReferenceURL VARCHAR( 250 ) NULL COMMENT 'The URL to a semantic definition or web page describing the base field type',  
   PRIMARY KEY  (dty_ID),
   UNIQUE KEY dty_Name (dty_Name),
   KEY dty_Type (dty_Type),
   KEY dty_DetailTypeGroupID (dty_DetailTypeGroupID)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='The detail types (fields) which can be attached to records';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='The detail types (fields) which can be attached to records';
 
 -- --------------------------------------------------------
 
@@ -150,7 +150,7 @@ CREATE TABLE defFileExtToMimetype (
   fxm_ImagePlaceholder varchar(63) default NULL COMMENT 'Thumbnail size representation for display, generate from fxm_FiletypeName',
   fxm_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record, used to get last updated date for table',
   PRIMARY KEY  (fxm_Extension)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Converts extensions to mimetypes and provides icons and mime';
+) ENGINE=InnoDB  COMMENT='Converts extensions to mimetypes and provides icons and mime';
 
 -- --------------------------------------------------------
 
@@ -165,7 +165,7 @@ CREATE TABLE defLanguages (
   lng_Notes varchar(1000) default NULL COMMENT 'URL reference to, or notes on the definition of the language',
   lng_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record, used to get last updated date for table',
   PRIMARY KEY  (lng_NISOZ3953)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Language list including optional standard language codes';
+) ENGINE=InnoDB  COMMENT='Language list including optional standard language codes';
 
 -- --------------------------------------------------------
 
@@ -188,7 +188,7 @@ CREATE TABLE defOntologies (
   ont_locallyModified tinyint(1) unsigned NOT NULL default '0' COMMENT 'Flags a definition element which has been modified relative to the original source',
   PRIMARY KEY  (ont_ID),
   UNIQUE KEY ont_ShortName (ont_ShortName)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='A table of references to different ontologies used by Heuris';
+) ENGINE=InnoDB   COMMENT='A table of references to different ontologies used by Heuris';
 
 -- --------------------------------------------------------
 
@@ -236,7 +236,7 @@ CREATE TABLE defRecStructure (
   PRIMARY KEY  (rst_ID),
   UNIQUE KEY rst_composite (rst_RecTypeID,rst_DetailTypeID),
   KEY rst_DetailTypeID (rst_DetailTypeID)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='The record details (fields) required for each record type';
+) ENGINE=InnoDB   COMMENT='The record details (fields) required for each record type';
 
 -- --------------------------------------------------------
 
@@ -253,7 +253,7 @@ CREATE TABLE defRecTypeGroups (
   rtg_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record, used to get last updated date for table',
   PRIMARY KEY  (rtg_ID),
   UNIQUE KEY rtg_Name (rtg_Name)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Grouping mechanism for record types in pulldowns';
+) ENGINE=InnoDB   COMMENT='Grouping mechanism for record types in pulldowns';
 
 -- --------------------------------------------------------
 
@@ -288,7 +288,7 @@ CREATE TABLE defRecTypes (
   PRIMARY KEY  (rty_ID),
   UNIQUE KEY rty_Name (rty_Name),
   KEY rty_RecTypeGroupID (rty_RecTypeGroupID)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Defines record types, which corresponds with a set of detail';
+) ENGINE=InnoDB   COMMENT='Defines record types, which corresponds with a set of detail';
 
 -- --------------------------------------------------------
 
@@ -314,7 +314,7 @@ CREATE TABLE defRelationshipConstraints (
   KEY rcs_TermID (rcs_TermID),
   KEY rcs_TargetRectypeID (rcs_TargetRectypeID),
   KEY rcs_SourceRecTypeID (rcs_SourceRectypeID)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Constrain target-rectype/vocabularies/values for a pointer d';
+) ENGINE=InnoDB  COMMENT='Constrain target-rectype/vocabularies/values for a pointer d';
 
 -- --------------------------------------------------------
 
@@ -341,12 +341,12 @@ CREATE TABLE defTerms (
   trm_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record, used to get last updated date for table',
   trm_LocallyModified tinyint(1) unsigned NOT NULL default '0' COMMENT 'Flags a definition element which has been modified relative to the original source',
   trm_Code varchar(100) default NULL COMMENT 'Optional code eg. alphanumeric code which may be required for import or export',
-  trm_SemanticReferenceURL VARCHAR( 250 ) CHARACTER SET utf8 COLLATE utf8_general_ci NULL COMMENT 'The URL to a semantic definition or web page describing the term',
-  trm_IllustrationURL VARCHAR( 250 ) CHARACTER SET utf8 COLLATE utf8_general_ci NULL COMMENT 'The URL to a picture or other resource illustrating the term. If blank, look for trm_ID.jpg/gif/png in term_images directory',  
+  trm_SemanticReferenceURL VARCHAR( 250 ) NULL COMMENT 'The URL to a semantic definition or web page describing the term',
+  trm_IllustrationURL VARCHAR( 250 ) NULL COMMENT 'The URL to a picture or other resource illustrating the term. If blank, look for trm_ID.jpg/gif/png in term_images directory',  
   PRIMARY KEY  (trm_ID),
   KEY trm_ParentTermIDKey (trm_ParentTermID),
   KEY trm_InverseTermIDKey (trm_InverseTermId)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Terms by detail type and the vocabulary they belong to';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Terms by detail type and the vocabulary they belong to';
 
 -- --------------------------------------------------------
 
@@ -364,7 +364,7 @@ CREATE TABLE defTranslations (
   PRIMARY KEY  (trn_ID),
   UNIQUE KEY trn_composite (trn_Source,trn_Code,trn_LanguageCode3),
   KEY trn_LanguageCode3 (trn_LanguageCode3)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Translation table into multiple languages for all translatab';
+) ENGINE=InnoDB  COMMENT='Translation table into multiple languages for all translatab';
 
 -- --------------------------------------------------------
 
@@ -378,7 +378,7 @@ CREATE TABLE defURLPrefixes (
   urp_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record, used to get last updated date for table',
   PRIMARY KEY  (urp_ID),
   UNIQUE KEY urp_Prefix (urp_Prefix)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Common URL prefixes allowing single-point change of URL for ';
+) ENGINE=InnoDB  COMMENT='Common URL prefixes allowing single-point change of URL for ';
 
 -- --------------------------------------------------------
 
@@ -396,6 +396,6 @@ CREATE TABLE usrSavedSearches (
   svs_ExclusiveXSL varchar(250) default '' COMMENT 'Name of XSL to which to lock this publish format, blank = any XSL OK',
   PRIMARY KEY  (svs_ID),
   KEY svs_UGrpID (svs_UGrpID)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Saved searches for personal/usergroup use and for publishing';
+) ENGINE=InnoDB  COMMENT='Saved searches for personal/usergroup use and for publishing';
 
 

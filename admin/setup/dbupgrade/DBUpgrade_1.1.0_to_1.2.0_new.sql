@@ -87,7 +87,7 @@ BEGIN
     CALL sp_AlterTable(db_name,"recDetails","dtl_Certainty",
         "DECIMAL( 3, 2 ) NOT NULL DEFAULT '1.0' COMMENT 'A certainty value for this observation in the range 0 to 1, where 1 indicates complete certainty'");
     CALL sp_AlterTable(db_name,"recDetails","dtl_Annotation",
-        "VARCHAR( 250 ) CHARACTER SET utf8 COLLATE utf8_general_ci NULL COMMENT'A short note / annotation about this specific data value - may enlarge for example on the reasons for the certainty value'");
+        "VARCHAR( 250 ) NULL COMMENT'A short note / annotation about this specific data value - may enlarge for example on the reasons for the certainty value'");
     
     CALL sp_AlterTable(db_name,"defRecStructure","rst_ShowDetailCertainty",
         "TinyInt(1) NOT NULL  default 0 COMMENT 'When editing the field, allow editng of the dtl_Certainty value (off by default)' after `rst_TermIDTreeNonSelectableIDs`");
@@ -111,11 +111,11 @@ BEGIN
         "TINYINT(1) DEFAULT 1 COMMENT 'Number of repeat values to be displayed for this field when a new record is first displayed' AFTER `rst_MinValues`");
 
     CALL sp_AlterTable(db_name,"defTerms","trm_SemanticReferenceURL",
-        "VARCHAR( 250 ) CHARACTER SET utf8 COLLATE utf8_general_ci NULL COMMENT 'The URL to a semantic definition or web page describing the term'");
+        "VARCHAR( 250 ) NULL COMMENT 'The URL to a semantic definition or web page describing the term'");
     CALL sp_AlterTable(db_name,"defTerms","trm_IllustrationURL",
-        "VARCHAR( 250 ) CHARACTER SET utf8 COLLATE utf8_general_ci NULL COMMENT 'The URL to a picture or other resource illustrating the term. If blank, look for trm_ID.jpg/gif/png in term_images directory'");
+        "VARCHAR( 250 ) NULL COMMENT 'The URL to a picture or other resource illustrating the term. If blank, look for trm_ID.jpg/gif/png in term_images directory'");
     CALL sp_AlterTable(db_name,"defDetailTypes","dty_SemanticReferenceURL",
-        "VARCHAR( 250 ) CHARACTER SET utf8 COLLATE utf8_general_ci NULL COMMENT 'The URL to a semantic definition or web page describing the base field type'");
+        "VARCHAR( 250 ) NULL COMMENT 'The URL to a semantic definition or web page describing the base field type'");
     CALL sp_AlterTable(db_name,"usrBookmarks","bkm_Notes",
         "TEXT COMMENT 'Personal notes'");
     CALL sp_AlterTable(db_name,"sysUGrps","ugr_NavigationTree",
