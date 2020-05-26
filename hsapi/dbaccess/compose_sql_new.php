@@ -1660,7 +1660,7 @@ class HPredicate {
             }
             
             if ($cs_ids && strpos($cs_ids, ',')>0) {  
-            //if (preg_match('/^\d+(?:,\d*)+$/', $this->value)) { - it does not work for >500 entries
+            //if (preg_match('/^\d+(?:,\d*)+$/', $this->value)) { - regex does not work for >500 entries
                                 
                 // comma-separated list of defRecTypes ids
                 $in = ($this->negate)? 'not in' : 'in';

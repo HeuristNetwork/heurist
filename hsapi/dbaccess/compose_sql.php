@@ -2113,7 +2113,7 @@ class BibIDPredicate extends Predicate {
                     $cs_ids = implode(',',$rsvd);
                 }
                 
-            //if (preg_match('/^\d+(?:,\d*)+$/', $this->value)) { - it does not work for >500 entries
+            //if (preg_match('/^\d+(?:,\d*)+$/', $this->value)) { - regex does not work for >500 entries
                 // comma-separated list of ids
                 $not = ($this->parent->negate)? ' not' : '';
                 $match_pred = $not.' in ('.$cs_ids.')';

@@ -627,20 +627,6 @@ public static function assignRecordIds($params){
         $select_query = "SELECT count(*) FROM ".$import_table." WHERE ".$id_field." IS NULL"; 
         $cnt2 = mysql__select_value($mysqli, $select_query);
         $cnt_insert = $cnt + (($cnt2>0)?intval($cnt2):0);
-        /*
-        if( $cnt>0 ){
-                $imp_session['validation']['count_insert'] = $cnt;
-                $imp_session['validation']['count_insert_rows'] = $cnt;
-
-                
-                //find first 100 records to display
-                //$select_query = "SELECT imp_id FROM ".$import_table
-                //        .' WHERE '.$id_field.'<0 or '.$id_field.' IS NULL LIMIT 5000';
-                //$imp_session['validation']['recs_insert'] = mysql__select_all($mysqli, $select_query);
-                
-                $imp_session['validation']['recs_insert'] = array(); //do not send all records to client side
-        }
-        */
 
         // find records to be ignored
         $select_query = "SELECT count(*) FROM ".$import_table." WHERE ".$id_field."=''";
@@ -700,7 +686,7 @@ public static function assignRecordIds($params){
 /**
 * 1) Performs mapping validation (required fields, enum, pointers, numeric/date)
 * 2) Counts matched (update) and new records
-*
+* 
 * imp_ID 
 * sa_rectype - record type
 * seq_index - sequence
@@ -814,7 +800,7 @@ public static function validateImport($params) {
         if(!$ignore_insert){
             $imp_session['validation']["count_insert"] = $imp_session['reccount'];
             $imp_session['validation']["count_insert_rows"] = $imp_session['reccount'];  //all rows will be imported as new records
-            $select_query = "SELECT imp_id, ".implode(",",$sel_query)." FROM ".$import_table." LIMIT 5000";
+            $select_query = "SELECT imp_id, ".implode(",",$sel_query)." FROM ".$import_table." LIMIT 5000"; //for peview only
             $imp_session['validation']['recs_insert'] = mysql__select_all($mysqli, $select_query);
         }
 
@@ -867,13 +853,13 @@ public static function validateImport($params) {
                 
                     $imp_session['validation']['count_update'] = $cnt;
                     $imp_session['validation']['count_update_rows'] = $cnt;
-                    //find first 100 records to display
+                    //find first 10000 records to display
                     $select_query = "SELECT ".$id_field.", imp_id, ".implode(",",$sel_query)
                     ." FROM ".$import_table
                     ." left join Records on rec_ID=".$id_field
                     ." WHERE rec_ID is not null and ".$id_field.">0"
-                    ." ORDER BY ".$id_field." LIMIT 5000";
-                    $imp_session['validation']['recs_update'] = mysql__select_all($mysqli, $select_query);
+                    ." ORDER BY ".$id_field." LIMIT 5000"; //for preview only
+                    $imp_session['validation']['recs_update'] = mysql__select_all($mysqli, $select_query); //for preview only
 
             }else if($cnt==null){
                 self::$system->addError(HEURIST_DB_ERROR,
@@ -897,9 +883,9 @@ public static function validateImport($params) {
                     $imp_session['validation']['count_insert'] = $cnt;
                     $imp_session['validation']['count_insert_rows'] = $cnt;
 
-                    //find first 100 records to display
+                    //find first 5000 records to preview display
                     $select_query = "SELECT imp_id, ".implode(",",$sel_query)." FROM ".$import_table
-                            .' WHERE '.$id_field.'<0 or '.$id_field.' IS NULL LIMIT 5000';
+                            .' WHERE '.$id_field.'<0 or '.$id_field.' IS NULL LIMIT 5000'; //for preview only
                     $imp_session['validation']['recs_insert'] = mysql__select_all($mysqli, $select_query);
             }
         }
@@ -913,7 +899,7 @@ public static function validateImport($params) {
             $select_query = "SELECT imp_id, ".implode(",",$sel_query)
             ." FROM ".$import_table
             ." LEFT JOIN Records on rec_ID=".$id_field
-            ." WHERE ".$id_field.">0 and rec_ID is null LIMIT 5000";
+            ." WHERE ".$id_field.">0 and rec_ID is null LIMIT 5000"; //for preview only
             $res = mysql__select_all($mysqli, $select_query);
             if($res && count($res)>0){
                 if(@$imp_session['validation']['recs_insert']){
@@ -1345,7 +1331,7 @@ private static function getWrongRecords($query, $imp_session, $message, $short_m
 
     $mysqli = self::$mysqli;
 
-    $res = $mysqli->query($query." LIMIT 5000");
+    $res = $mysqli->query($query." LIMIT 5000"); //for preview only
     if($res){
         $wrong_records = array();
         $wrong_records_ids = array();
@@ -1403,7 +1389,7 @@ private static function validateEnumerations($query, $imp_session, $fields_check
 
     $dt_type = $dt_def[$idx_fieldtype]; //for domain
     
-    $res = $mysqli->query($query." LIMIT 5000");
+    $res = $mysqli->query( $query );
 
     if($res){
         
@@ -1495,7 +1481,7 @@ private static function validateResourcePointers($mysqli, $query, $imp_session,
     $dt_def = $recStruc[$recordType]['dtFields'][$dt_id];
     $idx_pointer_types = $recStruc['dtFieldNamesToIndex']['rst_PtrFilteredIDs'];
 
-    $res = $mysqli->query($query." LIMIT 5000");
+    $res = $mysqli->query($query);
 
     if($res){
         $wrong_records = array();
@@ -1557,7 +1543,7 @@ private static function validateResourcePointers($mysqli, $query, $imp_session,
 */
 private static function validateNumericField($mysqli, $query, $imp_session, $fields_checked, $field_idx, $type){
 
-    $res = $mysqli->query($query." LIMIT 5000");
+    $res = $mysqli->query($query);
 
     if($res){
         $wrong_records = array();
@@ -1616,7 +1602,7 @@ private static function validateNumericField($mysqli, $query, $imp_session, $fie
 */
 private static function validateDateField($query, $imp_session, $fields_checked, $field_idx, $type){
 
-    $res = self::$mysqli->query($query." LIMIT 5000");
+    $res = self::$mysqli->query($query);
 
     if($res){
         $wrong_records = array();

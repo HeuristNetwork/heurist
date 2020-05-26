@@ -990,7 +990,7 @@ private static function saveToDatabase($preproc){
         "import_table"=>$import_table,
         "import_name"=>((substr($preproc['original_filename'],-4)=='.tmp'?'csv':$preproc['original_filename']).' '.date('Y-m-d H:i:s')),
         "columns"=>$preproc['fields'],   //names of columns in file header
-        "memos"=>$preproc['memos'],
+        //"memos"=>$preproc['memos'],
         "multivals"=>$preproc['multivals'],  //columns that have multivalue separator
         "csv_enclosure"=>$preproc['csv_enclosure'],
         "csv_mvsep"=>$preproc['csv_mvsep'],
