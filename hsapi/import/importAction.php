@@ -2462,7 +2462,7 @@ public static function performImport($params, $mode_output){
 //       0   Retain existing if no new data supplied for record
 //       1   Delete existing even if no new data supplied for record   
 
-                            if($value) {//value from cvs
+                            if($value!=null && $value!='') {//value from cvs
                                 
                                 $need_add = false;
                                 
