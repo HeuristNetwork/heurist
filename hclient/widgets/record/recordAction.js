@@ -34,11 +34,13 @@ $.widget( "heurist.recordAction", {
         //parameters
         scope_types: null, // [all, selected, current, rectype ids, none]
         init_scope: '',  // inital selection
+        currentRecordset: null,
         
         //listeners
         onInitFinished:null,  //event listener when dialog is fully inited - use to perform initial search with specific parameters
         beforeClose:null,     //to show warning before close
-        onClose:null       
+        onClose:null 
+        
     },
     
     _currentRecordset:null,
