@@ -1755,7 +1755,7 @@ class FieldPredicate extends Predicate {
     function get_field_type_clause(){
         global $mysqli;
 
-        if(trim($this->value)==''){
+        if(trim($this->value)===''){
             
             $rd_type_clause = "!=''";
             
@@ -1779,7 +1779,7 @@ class FieldPredicate extends Predicate {
     function get_field_value(){
         global $mysqli;
 
-        if(trim($this->value)=='' || $this->value==false){   //if value is not defined find any non empty value
+        if(trim($this->value)==='' || $this->value===false){   //if value is not defined find any non empty value
             
             $match_pred = " !='' ";
         
