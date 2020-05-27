@@ -595,8 +595,6 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                         }
                     }
                 }
-                
-console.log(response);               
 
                 $('#div_result').html(sResult);
                 $('#div_result').css({padding:'10px'}).show();
