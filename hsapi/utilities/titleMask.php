@@ -506,7 +506,7 @@ private static function __get_field_value( $rdt_id, $rt, $mode, $rec_id, $enum_p
                 }else{
                     $value = $detail[1];
                 }
-                if($value){
+                if($value!=null && $value!=''){
                     array_push($res, $value);
                 }
             }else if($found){
