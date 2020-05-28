@@ -100,9 +100,12 @@ console.log(terms);
                 if(response.status == window.hWin.ResponseStatus.OK){
                     
                     var recordset = new hRecordSet(response.data);
+                    var cnt = 0;
                     
                     recordset.each(function(recID, record){
                         console.log(recID+'  '+this.fld(record,'rec_RecTypeID')+'  '+this.fld(record,'rec_Title'));
+                        if(cnt>10) return false;
+                        cnt++;
                     });
                     
                     

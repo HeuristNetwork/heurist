@@ -392,7 +392,15 @@ private static function __get_rec_detail_types($rt) {
 */
 private static function __get_record_value($rec_id, $reset=false) {
 
+/*    
+    $memory_limit = get_php_bytes('memory_limit');
+    $mem_used = memory_get_usage();
+    if($mem_used>$memory_limit-104857600){ //100M
+    
+    }
+*/    
     //if not reset it leads to memory exhaustion
+    //$reset = true;
     if ($reset || !is_array(self::$records) || count(self::$records)>1000) {
         self::$records = array();
     }
@@ -411,6 +419,7 @@ private static function __get_record_value($rec_id, $reset=false) {
                 $ret = $row;
                 $ret['rec_Details'] = array();
 
+                //trim(substr(dtl_Value,0,300)) as 
                 $query = 'SELECT dtl_DetailTypeID, dtl_Value, rst_RequirementType '
                 .'FROM recDetails LEFT JOIN defRecStructure '
                 .'ON rst_RecTypeID='.$ret['rec_RecTypeID']

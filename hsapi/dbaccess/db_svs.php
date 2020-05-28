@@ -183,7 +183,7 @@
                 
                 if(is_array(@$record['svs_ID'])){
                     $rec_IDs = $record['svs_ID'];
-                }else if ($record['svs_ID']>0){
+                }else if (@$record['svs_ID']>0){
                     $rec_IDs = array($record['svs_ID']);
                 }else{
                     $rec_IDs = array(-1); //new   

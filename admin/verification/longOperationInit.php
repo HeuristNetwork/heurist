@@ -27,9 +27,9 @@
             
  if(@$_REQUEST['type']=='titles'){
     if(@$_REQUEST['recTypeIDs']){
-        $srcURL = 'recalcTitlesSpecifiedRectypes.php?recTypeIDs='.$_REQUEST['recTypeIDs'].'&db='.$_REQUEST['db'];    
+        $srcURL = 'rebuildRecordTitles.php?recTypeIDs='.$_REQUEST['recTypeIDs'].'&db='.$_REQUEST['db'];    
     }else{
-        $srcURL = 'recalcTitlesAllRecords.php?db='.$_REQUEST['db'];    
+        $srcURL = 'rebuildRecordTitles.php?db='.$_REQUEST['db'];    
     }
     $sTitle = 'Recalculation of composite record titles';
  }else
