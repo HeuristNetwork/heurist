@@ -401,8 +401,7 @@
                 $keep_autocommit = mysql__begin_transaction($mysqli);
             }
 
-                
-            $mysqli->query('set @suppress_update_trigger=1');
+            if(!$modeImport) $mysqli->query('set @suppress_update_trigger=1');
             
             $query = "UPDATE Records set rec_Modified=?, rec_RecTypeID=?, rec_OwnerUGrpID=?, rec_NonOwnerVisibility=?,"
             ."rec_URL=?, rec_ScratchPad=?, rec_FlagTemporary=? "
@@ -433,12 +432,13 @@
             array_shift($owner_grps); //remove first
             updateUsrRecPermissions($mysqli, $recID, $access_grps, $owner_grps);
 
-            if($system->get_user_id()>0){
-                //set current user for stored procedures (log purposes)
-                $mysqli->query('set @logged_in_user_id = '.$system->get_user_id());
+            if(!$modeImport){
+                if($system->get_user_id()>0){
+                    //set current user for stored procedures (log purposes)
+                    $mysqli->query('set @logged_in_user_id = '.$system->get_user_id());
+                }
+                $mysqli->query('set @suppress_update_trigger=NULL');
             }
-            $mysqli->query('set @suppress_update_trigger=NULL');
-            
             
             //delete ALL existing details
             $query = "DELETE FROM recDetails where dtl_RecID=".$recID;
@@ -564,7 +564,7 @@
         $newTitle = recordUpdateTitle($system, $recID, $rectype, @$record['Title']);
     
         
-        if(!$is_insert){
+        if(!$is_insert && !$modeImport){
             $mysqli->query('set @suppress_update_trigger=1');
 
             removeReverseChildToParentPointer($system, $recID, $rectype);    
@@ -1516,7 +1516,7 @@
         if($system->defineConstant('DT_KML')){ array_push($not_purify, DT_KML); }
         if($system->defineConstant('DT_QUERY_STRING')){ array_push($not_purify, DT_QUERY_STRING); }
         if($system->defineConstant('DT_SERVICE_URL')){ array_push($not_purify, DT_SERVICE_URL); }
-        $purifier = getHTMLPurifier();
+        // $purifier = getHTMLPurifier();
         
         //2. verify (value, termid, file id, resource id) and prepare details (geo field). verify required field presence
         
@@ -2105,7 +2105,7 @@
     //
     //
     function sanitizeURL($url){
-        if($url){
+        if($url!=null && trim($url)!=''){
             $url = filter_var($url, FILTER_SANITIZE_URL);
             if(filter_var($url, FILTER_VALIDATE_URL)){
                 return $url;

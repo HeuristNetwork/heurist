@@ -78,99 +78,6 @@ if(!$init_client || @$_REQUEST['session']>0){ //2a. init operation on client sid
         <script type="text/javascript">
     
         
-    var _progressInterval;
-                        
-    function _showProgress( $progress_div, session_id, t_interval ){
-        
-        var progressCounter = 0;        
-        var progress_url = window.hWin.HAPI4.baseURL + "viewers/smarty/reportProgress.php";
-        if(!(session_id>0)) session_id = Math.round((new Date()).getTime()/1000);
-        
-        $progress_div.show(); 
-        document.body.style.cursor = 'progress';
-        
-        //add progress bar content 
-        $progress_div.html('<div class="loading" style="display:none;height:100%"></div>'
-        +'<div style="width:80%;height:40px;padding:5px;text-align:center;margin:auto;margin-top:20%;">'
-            +'<div id="progressbar"><div class="progress-label">Processing data...</div></div>'
-            +'<div class="progress_stop" style="text-align:center;margin-top:4px">Abort</div>'
-        +'</div>');
-        
-        var btn_stop = $progress_div.find('.progress_stop').button();
-        
-        //this._on(,{click: function() {
-        
-        btn_stop.click(function(){
-                var request = {terminate:1, t:(new Date()).getMilliseconds(), session:session_id};
-                window.hWin.HEURIST4.util.sendRequest(progress_url, request, null, function(response){
-                    _hideProgress(); //window.hWin.HEURIST4.ui
-                    if(response && response.status==window.hWin.ResponseStatus.UNKNOWN_ERROR){
-                        //console.log(response);                   
-                    }
-                });
-            });
-    
-        
-        var div_loading = $progress_div.find('.loading').show();
-        var pbar = $progress_div.find('#progressbar');
-        var progressLabel = pbar.find('.progress-label').text('');
-        pbar.progressbar({value:0});
-        
-        _progressInterval = setInterval(function(){ 
-            
-            var request = {t:(new Date()).getMilliseconds(), session:session_id};            
-            
-            window.hWin.HEURIST4.util.sendRequest(progress_url, request, null, function(response){
-
-                if(response && response.status==window.hWin.ResponseStatus.UNKNOWN_ERROR){
-                    _hideProgress();
-                    //console.log(response+'  '+session_id);                   
-                }else{
-                    //it may return terminate,done,
-                    var resp = response?response.split(','):[];
-                    if(response=='terminate' || resp.length!=2){
-                        if(response=='terminate'){
-                            _hideProgress();
-                        }else{
-                            div_loading.show();    
-                            //pbar.progressbar( "value", 0 );
-                            //progressLabel.text('wait...');
-                        }
-                    }else{
-                        div_loading.hide();
-                        if(resp[0]>0 && resp[1]>0){
-                            var val = resp[0]*100/resp[1];
-                            pbar.progressbar( "value", val );
-                            progressLabel.text(resp[0]+' of '+resp[1]);
-                        }else{
-                            progressLabel.text('preparing...');
-                            pbar.progressbar( "value", 0 );
-                        }
-                    }
-                    
-                    progressCounter++;
-                    
-                }
-            },'text');
-          
-        
-        }, t_interval);                
-        
-        return session_id;
-    }
-    
-    function _hideProgress(){
-        
-        $('body').css('cursor','auto');
-        
-        if(_progressInterval!=null){
-            
-            clearInterval(_progressInterval);
-            _progressInterval = null;
-        }
-        $('.progress_div').hide();
-    }
-    
     //
     //
     //
@@ -184,7 +91,7 @@ if(!$init_client || @$_REQUEST['session']>0){ //2a. init operation on client sid
             
         var action_url = window.hWin.HAPI4.baseURL + "admin/verification/rebuildRecordTitles.php";
         
-        var session_id = _showProgress($('.progress_div'),  0, 500 );
+        var session_id = window.hWin.HEURIST4.msg.showProgress( $('.progress_div'),  0, 500 );
         
         var request = {
             'session': session_id
@@ -194,14 +101,12 @@ if(!$init_client || @$_REQUEST['session']>0){ //2a. init operation on client sid
             print "request['recTypeIDs'] = '".$_REQUEST['recTypeIDs']."';";
         }
 ?>        
-console.log( '!!!!!' );
+
         var sURL = window.hWin.HAPI4.baseURL
                         +'?w=all&db='+window.hWin.HAPI4.database+'&q=';
-                        
-console.log( sURL );                        
         
         window.hWin.HEURIST4.util.sendRequest(action_url, request, null, function(response){
-            _hideProgress();
+            window.hWin.HEURIST4.msg.hideProgress();
                         
             if(response.status == window.hWin.ResponseStatus.OK){
                 $('#changed_count').text(response.data['changed_count']);
@@ -268,9 +173,9 @@ if($init_client){
                 <div><span id=same_count></span> are unchanged</div>
                 <div><span id=blank_count></span> are left as-is (missing fields etc)</div>
 
-                <br/><a target=_blank id="q_updates" href="<?php echo $res['q_updates'];?>">Click to view updated records</a><br/>&nbsp;<br/>
+                <br/><a target=_blank id="q_updates" href="#">Click to view updated records</a><br/>&nbsp;<br/>
                 
-                <a target=_blank id="q_blanks" href="<?php echo $res['q_blanks'];?>">Click to view records for which the data would create a blank title</a>
+                <a target=_blank id="q_blanks" href="#">Click to view records for which the data would create a blank title</a>
                 <span id="q_blanks_info">
                     <br/>This is generally due to a faulty title mask (verify with Check Title Masks)
                     <br/>or faulty data in individual records. These titles have not been changed.

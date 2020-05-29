@@ -2784,7 +2784,11 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
 
        function __doMatchingStart(){    
          
+           
+            var session_id = window.hWin.HEURIST4.msg.showProgress( $('#progressbar_div'),  0, 1000, false );
+           
             var request = {
+                session   : session_id,
                 imp_ID    : imp_ID,
                 action    : 'step3',
                 sa_rectype: imp_session['sequence'][currentSeqIndex]['rectype'],
@@ -2807,6 +2811,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         
             window.hWin.HAPI4.doImportAction(request, 
                     function(response){
+                        window.hWin.HEURIST4.msg.hideProgress();
                         
                         if(response.status == window.hWin.ResponseStatus.OK){
                             
@@ -3001,8 +3006,11 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         
         function __doPrepareStart(){
 
+            var session_id = window.hWin.HEURIST4.msg.showProgress( $('#progressbar_div'),  0, 1000, false );
+            
             var request = {
                 db        : window.hWin.HAPI4.database,
+                session   : session_id,
                 imp_ID    : imp_ID,
                 action    : 'step4',
                 sa_rectype: rtyID,
@@ -3019,6 +3027,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
     
         window.hWin.HAPI4.doImportAction(request,  
                 function(response){
+                    
+                    window.hWin.HEURIST4.msg.hideProgress();
                     
                     if(response.status == window.hWin.ResponseStatus.OK){
                         
@@ -3155,8 +3165,11 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             return;
         }
         
+        var session_id = window.hWin.HEURIST4.msg.showProgress( $('#progressbar_div'),  0, 1000, false );
+        
         var request = {
             db        : window.hWin.HAPI4.database,
+            session   : session_id,
             imp_ID    : imp_ID,
             action    : 'step5',
             sa_rectype: rtyID,
@@ -3179,6 +3192,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
     
         window.hWin.HAPI4.doImportAction(request, 
                 function(response){
+                    
+                    window.hWin.HEURIST4.msg.hideProgress();
                     
                     if(response.status == window.hWin.ResponseStatus.OK){
                         
