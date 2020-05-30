@@ -125,7 +125,7 @@ $.widget( "heurist.app_timemap", {
                     if(!((data && data.search_realm=='mapping_recordset') || 
                         that._isSameRealm(data))) return;
                  
-/* DEBUG
+/* DEBUG HIE
 if( data.search_realm=='mapping_recordset'){
 //console.log('listner '+data.search_realm);                    
 if(data.recordset=='show_all'){
@@ -174,7 +174,7 @@ console.log(re);
                             var sel =  window.hWin.HAPI4.getSelection(data.selection, true);
                             
                             // selection is dataset id - show/hide visibility of dataset
-                            that._setLayersVisibility( sel );
+                            that._setLayersVisibility( sel, data.mapdoc_id, data.new_visiblity );
                             
                         }else if(data.map_layer_action == 'download'){
 
@@ -378,7 +378,7 @@ console.log(re);
                             if(layer_id>0)
                             $(that.document).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT,
                                     { selection:[layer_id], map_layer_status:status,
-                                     source:that.element.attr('id'), search_realm:that.options.search_realm } );
+                                      source:that.element.attr('id'), search_realm:that.options.search_realm } );
 
                     });
                         
@@ -501,9 +501,9 @@ console.log(re);
     //
     // show (expand) layer/dataset or hide it on map
     //
-    , _setLayersVisibility: function (selection) {
+    , _setLayersVisibility: function (selection, mapdoc_ID, new_visiblity) {
 
-        if(window.hWin.HEURIST4.util.isnull(this.options.recordset)) return;
+        //if(window.hWin.HEURIST4.util.isnull(this.options.recordset)) return;
 
         if(!this.element.is(':visible')
             || window.hWin.HEURIST4.util.isnull(this.mapframe) || this.mapframe.length < 1){
@@ -514,16 +514,18 @@ console.log(re);
             var  mapping = this.mapframe[0].contentWindow.mapping;  
 
             if(this.options.leaflet){ //leaflet
-
+            
+                if(!(mapdoc_ID>=0)) mapdoc_ID = 0;
                 var mapManager = mapping.mapping( 'getMapManager' );
-                mapManager.setLayersVisibility(selection);
+                mapManager.setLayersVisibility(mapdoc_ID, selection, new_visiblity);
+                /*
                 //if layer is visible - select and zoom to record in search results
                 var recID = selection[0];
-                var layer_rec = mapManager.getLayer( 0, recID );
+                var layer_rec = mapManager.getLayer( mapdoc_ID, recID );
                 if(layer_rec && (layer_rec['layer']).isVisible()){
-
                     this._doVisualizeSelection( selection );
-                } 
+                }
+                */ 
                 
             }
             

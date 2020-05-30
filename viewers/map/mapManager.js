@@ -945,7 +945,8 @@ function hMapManager( _options )
         
         //
         // params
-        // {width:200,open:1|0,basemaps:0|1|-1,mapdocs: ,  } 
+        // either json: {width:200,open:1|0,basemaps:0|1|-1,mapdocs: ,  }   -1 hidden,0-close,1-open
+        // or   off,width(numeric),-basemaps,mapdocs,search  
         //
         updatePanelVisibility: function(params)
         {
@@ -1153,14 +1154,18 @@ function hMapManager( _options )
         //
         // show/hide dataset
         //
-        setLayersVisibility: function (_selection){
+        setLayersVisibility: function (mapdoc_ID, _selection, visibility){
+            
+            if(!(mapdoc_ID>=0)) mapdoc_ID = 0;
             
             function __setVis(recID, record){
-                  
-                    var layer_rec = mapDocuments.getLayer(0, recID);
+                
+                    var layer_rec = mapDocuments.getLayer(mapdoc_ID, recID);
                     if(layer_rec){
-                        var is_visible = (layer_rec['layer']).isVisible();
-                        (layer_rec['layer']).setVisibility( !is_visible );  
+                        var curr_visible = (layer_rec['layer']).isVisible();
+                        if(visibility!=curr_visible){
+                            (layer_rec['layer']).setVisibility(!curr_visible );  
+                        }
                     } 
                     
             }
@@ -1170,7 +1175,7 @@ function hMapManager( _options )
                      __setVis(_selection[i]);
                 }
             }else{
-                _selection.each(_selection);
+                _selection.each(__setVis);
             }
             _refreshSearchContent();
         },
