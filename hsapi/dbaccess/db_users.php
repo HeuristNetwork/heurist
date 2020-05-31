@@ -367,7 +367,6 @@
                     }
                     
                     foreach($recids as $recid){
-                        $line = implode(',', $newfields)."\n";
                         if (fwrite($handle_wr, $recid.','.$curr_user_id."\n") === FALSE) {
                             $system->addError(HEURIST_ERROR, 'Cannot write workset data to file '.$filename);
                             fclose($handle_wr);

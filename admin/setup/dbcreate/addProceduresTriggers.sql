@@ -377,10 +377,11 @@ DELIMITER $$
 --			where rty_OriginatingDBID = 3 and rty_IDInOriginatingDB = 52 order by rty_ID desc limit 1;
 -- need to change this to check the rectype's type = relationship
 -- 1 = record relationship
-	insert into usrRecentRecords (rre_UGrpID, rre_RecID, rre_Time)
-								values (@logged_in_user_id, NEW.rec_ID, now());
-	set @rec_id := last_insert_id(NEW.rec_ID);
---		if NEW.rec_RecTypeID = relRT then
+    if @suppress_update_trigger is null then
+	    insert into usrRecentRecords (rre_UGrpID, rre_RecID, rre_Time)
+								    values (@logged_in_user_id, NEW.rec_ID, now());
+	    set @rec_id := last_insert_id(NEW.rec_ID);
+    --		if NEW.rec_RecTypeID = relRT then
 		if NEW.rec_RecTypeID = 1 then
         begin
 --  need to also save relationship records RecTypeID
@@ -390,6 +391,7 @@ DELIMITER $$
             values (NEW.rec_ID, NEW.rec_ID, NEW.rec_ID);
         end;    
 		end if;
+    end if;
 	end$$
 
 DELIMITER ;

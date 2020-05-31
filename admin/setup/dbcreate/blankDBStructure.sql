@@ -39,6 +39,8 @@
 --
 
 -- --------------------------------------------------------
+SET NAMES utf8mb4;
+--  COLLATE utf8mb4_0900_ai_ci
 
 --
 -- Table structure for table 'Records'
@@ -70,7 +72,7 @@ CREATE TABLE Records (
   KEY rec_OwnerUGrpID (rec_OwnerUGrpID),
   KEY rec_Hash (rec_Hash(40)),
   KEY rec_AddedByUGrpID (rec_AddedByUGrpID)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
 
@@ -84,7 +86,7 @@ CREATE TABLE defCalcFunctions (
   cfn_FunctionSpecification text COMMENT 'A function or chain of functions, or some PHP plugin code',
   cfn_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record, used to get last updated date for table',
   PRIMARY KEY  (cfn_ID)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Specifications for generating calculated fields, plugins and';
+) ENGINE=InnoDB COMMENT='Specifications for generating calculated fields, plugins and';
 
 -- --------------------------------------------------------
 
@@ -101,7 +103,7 @@ CREATE TABLE defCrosswalk (
   crw_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'The date when this mapping added or modified',
   PRIMARY KEY  (crw_ID),
   UNIQUE KEY crw_composite (crw_SourcedbID,crw_DefType,crw_LocalCode)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Map the codes used in this Heurist DB to codes used in other';
+) ENGINE=InnoDB COMMENT='Map the codes used in this Heurist DB to codes used in other';
 
 -- --------------------------------------------------------
 
@@ -116,7 +118,7 @@ CREATE TABLE defDetailTypeGroups (
   dtg_Description varchar(255) NOT NULL COMMENT 'General description fo this group of detail (field) types',
   dtg_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record, used to get last updated date for table',
   PRIMARY KEY  (dtg_ID)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Groups detail types for display in separate sections of edit';
+) ENGINE=InnoDB COMMENT='Groups detail types for display in separate sections of edit';
 
 -- --------------------------------------------------------
 
@@ -146,12 +148,12 @@ CREATE TABLE defDetailTypes (
   dty_NonOwnerVisibility enum('hidden','viewable','public','pending') NOT NULL default 'viewable' COMMENT 'Allows restriction of visibility of a particular field in ALL record types (overrides rst_VisibleOutsideGroup)',
   dty_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record, used to get last updated date for table',
   dty_LocallyModified tinyint(1) unsigned NOT NULL default '0' COMMENT 'Flags a definition element which has been modified relative to the original source',
-  dty_SemanticReferenceURL VARCHAR( 250 ) CHARACTER SET utf8 COLLATE utf8_general_ci NULL COMMENT 'The URI to a semantic definition or web page describing the base field type',  
+  dty_SemanticReferenceURL VARCHAR( 250 ) NULL COMMENT 'The URI to a semantic definition or web page describing the base field type',  
   PRIMARY KEY  (dty_ID),
   UNIQUE KEY dty_Name (dty_Name),
   KEY dty_Type (dty_Type),
   KEY dty_DetailTypeGroupID (dty_DetailTypeGroupID)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='The detail types (fields) which can be attached to records';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='The detail types (fields) which can be attached to records';
 
 -- --------------------------------------------------------
 
@@ -168,7 +170,7 @@ CREATE TABLE defFileExtToMimetype (
   fxm_ImagePlaceholder varchar(63) default NULL COMMENT 'Thumbnail size representation for display, generate from fxm_FiletypeName',
   fxm_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record, used to get last updated date for table',
   PRIMARY KEY  (fxm_Extension)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Converts extensions to mimetypes and provides icons and mime';
+) ENGINE=InnoDB COMMENT='Converts extensions to mimetypes and provides icons and mime';
 
 -- --------------------------------------------------------
 
@@ -183,7 +185,7 @@ CREATE TABLE defLanguages (
   lng_Notes varchar(1000) default NULL COMMENT 'Semantic URI reference or URL for notes on the definition of the language',
   lng_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record, used to get last updated date for table',
   PRIMARY KEY  (lng_NISOZ3953)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Language list including optional standard language codes';
+) ENGINE=InnoDB COMMENT='Language list including optional standard language codes';
 
 -- --------------------------------------------------------
 
@@ -206,7 +208,7 @@ CREATE TABLE defOntologies (
   ont_locallyModified tinyint(1) unsigned NOT NULL default '0' COMMENT 'Flags a definition element which has been modified relative to the original source',
   PRIMARY KEY  (ont_ID),
   UNIQUE KEY ont_ShortName (ont_ShortName)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='A table of references to different ontologies used by Heuris';
+) ENGINE=InnoDB COMMENT='A table of references to different ontologies used by Heuris';
 
 -- --------------------------------------------------------
 
@@ -254,7 +256,7 @@ CREATE TABLE defRecStructure (
   PRIMARY KEY  (rst_ID),
   UNIQUE KEY rst_composite (rst_RecTypeID,rst_DetailTypeID),
   KEY rst_DetailTypeID (rst_DetailTypeID)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='The record details (fields) required for each record type';
+) ENGINE=InnoDB COMMENT='The record details (fields) required for each record type';
 
 -- --------------------------------------------------------
 
@@ -271,7 +273,7 @@ CREATE TABLE defRecTypeGroups (
   rtg_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record, used to get last updated date for table',
   PRIMARY KEY  (rtg_ID),
   UNIQUE KEY rtg_Name (rtg_Name)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Grouping mechanism for record types in pulldowns';
+) ENGINE=InnoDB COMMENT='Grouping mechanism for record types in pulldowns';
 
 -- --------------------------------------------------------
 
@@ -306,7 +308,7 @@ CREATE TABLE defRecTypes (
   PRIMARY KEY  (rty_ID),
   UNIQUE KEY rty_Name (rty_Name),
   KEY rty_RecTypeGroupID (rty_RecTypeGroupID)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Defines record types, which corresponds with a set of detail';
+) ENGINE=InnoDB COMMENT='Defines record types, which corresponds with a set of detail';
 
 -- --------------------------------------------------------
 
@@ -332,7 +334,7 @@ CREATE TABLE defRelationshipConstraints (
   KEY rcs_TermID (rcs_TermID),
   KEY rcs_TargetRectypeID (rcs_TargetRectypeID),
   KEY rcs_SourceRecTypeID (rcs_SourceRectypeID)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Constrain target-rectype/vocabularies/values for a pointer d';
+) ENGINE=InnoDB COMMENT='Constrain target-rectype/vocabularies/values for a pointer d';
 
 -- --------------------------------------------------------
 
@@ -359,12 +361,12 @@ CREATE TABLE defTerms (
   trm_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record, used to get last updated date for table',
   trm_LocallyModified tinyint(1) unsigned NOT NULL default '0' COMMENT 'Flags a definition element which has been modified relative to the original source',
   trm_Code varchar(100) default NULL COMMENT 'Optional code eg. alphanumeric code which may be required for import or export',
-  trm_SemanticReferenceURL VARCHAR( 250 ) CHARACTER SET utf8 COLLATE utf8_general_ci NULL COMMENT 'The URI to a semantic definition or web page describing the term',
-  trm_IllustrationURL VARCHAR( 250 ) CHARACTER SET utf8 COLLATE utf8_general_ci NULL COMMENT 'The URL to a picture or other resource illustrating the term. If blank, look for trm_ID.jpg/gif/png in term_images directory',  
+  trm_SemanticReferenceURL VARCHAR( 250 ) NULL COMMENT 'The URI to a semantic definition or web page describing the term',
+  trm_IllustrationURL VARCHAR( 250 ) NULL COMMENT 'The URL to a picture or other resource illustrating the term. If blank, look for trm_ID.jpg/gif/png in term_images directory',  
   PRIMARY KEY  (trm_ID),
   KEY trm_ParentTermIDKey (trm_ParentTermID),
   KEY trm_InverseTermIDKey (trm_InverseTermId)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Terms by detail type and the vocabulary they belong to';
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Terms by detail type and the vocabulary they belong to';
 
 -- --------------------------------------------------------
 
@@ -382,7 +384,7 @@ CREATE TABLE defTranslations (
   PRIMARY KEY  (trn_ID),
   UNIQUE KEY trn_composite (trn_Source,trn_Code,trn_LanguageCode3),
   KEY trn_LanguageCode3 (trn_LanguageCode3)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Translation table into multiple languages for all translatab';
+) ENGINE=InnoDB COMMENT='Translation table into multiple languages for all translatab';
 
 -- --------------------------------------------------------
 
@@ -396,7 +398,7 @@ CREATE TABLE defURLPrefixes (
   urp_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record, used to get last updated date for table',
   PRIMARY KEY  (urp_ID),
   UNIQUE KEY urp_Prefix (urp_Prefix)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Common URL prefixes allowing single-point change of URL for ';
+) ENGINE=InnoDB COMMENT='Common URL prefixes allowing single-point change of URL for ';
 
 -- --------------------------------------------------------
 
@@ -422,8 +424,7 @@ CREATE TABLE recDetails (
   KEY dtl_ValShortenedKey (dtl_ValShortened),
   KEY dtl_ValueKey (dtl_Value(63)),
   KEY dtl_UploadedFileIDKey (dtl_UploadedFileID)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='The detail (field) values for each record - public data';
--- CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='The detail (field) values for each record - public data';
 -- --------------------------------------------------------
 
 --
@@ -435,7 +436,7 @@ CREATE TABLE recForwarding (
   rfw_NewRecID int(10) unsigned NOT NULL COMMENT 'The new record to which this ID will be forwarded',
   PRIMARY KEY  (rfw_OldRecID),
   KEY rfw_NewRecID (rfw_NewRecID)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Allows referer routine to redirect certain calls to a replac';
+) ENGINE=InnoDB COMMENT='Allows referer routine to redirect certain calls to a replac';
 
 -- --------------------------------------------------------
 
@@ -450,7 +451,7 @@ CREATE TABLE recRelationshipsCache (
   PRIMARY KEY  (rrc_RecID),
   KEY rrc_sourcePtrKey (rrc_SourceRecID),
   KEY rrc_TargetPtrKey (rrc_TargetRecID)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='A cache for record relationship pointers to speed access';
+) ENGINE=InnoDB COMMENT='A cache for record relationship pointers to speed access';
 
 -- --------------------------------------------------------
 
@@ -471,7 +472,7 @@ CREATE TABLE recLinks (
   KEY rl_TargetPtrKey (rl_TargetID),
   KEY rl_RelationKey (rl_RelationID),
   KEY rl_DetailKey (rl_DetailID)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='A cache for records links (pointers and relationships) to speed access';
+) ENGINE=InnoDB COMMENT='A cache for records links (pointers and relationships) to speed access';
 
 -- --------------------------------------------------------
 
@@ -482,7 +483,7 @@ CREATE TABLE recLinks (
 CREATE TABLE recSimilarButNotDupes (
   snd_SimRecsList varchar(16000) NOT NULL COMMENT 'A comma separated list of record IDs which are similar but not identical',
   KEY snd_SimRecsList (snd_SimRecsList(13))
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Used in dedupe. Sets of IDs which are not dupes. Index is of';
+) ENGINE=InnoDB COMMENT='Used in dedupe. Sets of IDs which are not dupes. Index is of';
 
 -- --------------------------------------------------------
 
@@ -503,7 +504,7 @@ CREATE TABLE recThreadedComments (
   KEY cmt_OwnerUgrpID (cmt_OwnerUgrpID),
   KEY cmt_ParentCmtID (cmt_ParentCmtID),
   KEY cmt_RecID (cmt_RecID)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Threaded comments for each record';
+) ENGINE=InnoDB COMMENT='Threaded comments for each record';
 
 -- --------------------------------------------------------
 
@@ -533,7 +534,7 @@ CREATE TABLE recUploadedFiles (
   KEY ulf_Description (ulf_Description(100)),
   KEY ulf_UploaderUGrpID (ulf_UploaderUGrpID),
   KEY ulf_MimeExt (ulf_MimeExt)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Index to uploaded files linked from records';
+) ENGINE=InnoDB COMMENT='Index to uploaded files linked from records';
 
 -- --------------------------------------------------------
 
@@ -553,7 +554,7 @@ CREATE TABLE sysArchive (
   arc_ContentType enum('del','raw','zraw','diff','zdiff') NOT NULL default 'raw' COMMENT 'Format of the data stored, del=deleted, raw=text dump, Diff=delta, Z=zipped indicates ',
   PRIMARY KEY  (arc_ID),
   KEY arc_Table (arc_Table,arc_ChangedByUGrpID,arc_OwnerUGrpID,arc_RecID,arc_TimeOfChange)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='An archive of all (or most) changes in the database to allow';
+) ENGINE=InnoDB COMMENT='An archive of all (or most) changes in the database to allow';
 
 
 -- --------------------------------------------------------
@@ -572,7 +573,7 @@ CREATE TABLE sysDashboard (
   dsh_CommandToRun varchar(64) COMMENT 'Name of commonly used functions',
   dsh_Parameters varchar(250) COMMENT 'Parameters to pass to the command eg the record type to create',
   PRIMARY KEY  (dsh_ID)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Defines an editable list of shortcuts to functions to be displayed on a popup dashboard at startup unless turned off';
+) ENGINE=InnoDB COMMENT='Defines an editable list of shortcuts to functions to be displayed on a popup dashboard at startup unless turned off';
 
 -- --------------------------------------------------------
 
@@ -586,7 +587,7 @@ CREATE TABLE sysDBNameCache (
   dnc_TimeStamp timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date when name of database last read from Heurist index or the database',
   dnc_URL varchar(128) default NULL COMMENT 'Root path to this installation and database',
   PRIMARY KEY  (dnc_ID)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Local db name cache for display of origin and source DBs in ';
+) ENGINE=InnoDB COMMENT='Local db name cache for display of origin and source DBs in ';
 
 -- --------------------------------------------------------
 
@@ -598,7 +599,7 @@ CREATE TABLE sysDocumentation (
   doc_id tinyint(3) unsigned NOT NULL auto_increment,
   doc_text text COMMENT 'Relevant documentation as text',
   PRIMARY KEY  (doc_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Descriptive infORmation about this database and its function';
+) ENGINE=InnoDB COMMENT='Descriptive infORmation about this database and its function';
 
 -- --------------------------------------------------------
 
@@ -641,7 +642,7 @@ CREATE TABLE sysIdentification (
   sys_MediaExtensions varchar(1024) default 'jpg,jpeg,jfif,png,gif,tif,tiff,wmv,doc,docx,xls,xlsx,txt,rtf,xml,xsl,xslt,mpg,mpeg,mov,mp3,mp4,qt,wmd,avi,kml,sid,ecw,mp3,mid,midi,evo,csv,tab,wav,cda,wmz,wms,aif,aiff' COMMENT 'The file extensions to be harvested from the MediaFolders directories',
   sys_TreatAsPlaceRefForMapping VARCHAR(1000) DEFAULT '' COMMENT 'Comma delimited list of additional rectypes (local codes) to be considered as Places',
   PRIMARY KEY  (sys_ID)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Identification/version for this Heurist database (single rec)';
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Identification/version for this Heurist database (single rec)';
 
 -- --------------------------------------------------------
 
@@ -654,7 +655,7 @@ CREATE TABLE sysLocks (
   lck_UGrpID smallint(5) unsigned NOT NULL COMMENT 'Set to user ID to lock specified function',
   lck_Modified timestamp NOT NULL default CURRENT_TIMESTAMP COMMENT 'Date and time when the action was commenced, use to drop old locks',
   PRIMARY KEY  (lck_Action)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Provides token system for selected administrative actions';
+) ENGINE=InnoDB COMMENT='Provides token system for selected administrative actions';
 
 -- --------------------------------------------------------
 
@@ -667,7 +668,7 @@ CREATE TABLE sysTableLastUpdated (
   tlu_DateStamp datetime NOT NULL default '1000-01-01 00:00:00' COMMENT 'Date and time of last update of table',
   tlu_CommonObj tinyint(1) unsigned NOT NULL default '1' COMMENT 'Indicates tables which contain data defs required in common-obj',
   PRIMARY KEY  (tlu_TableName)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Datestamp, determines if updates since definitions loaded in';
+) ENGINE=InnoDB COMMENT='Datestamp, determines if updates since definitions loaded in';
 
 -- --------------------------------------------------------
 
@@ -706,7 +707,7 @@ CREATE TABLE sysUGrps (
   PRIMARY KEY  (ugr_ID),
   UNIQUE KEY ugr_Name (ugr_Name),
   UNIQUE KEY ugr_eMail (ugr_eMail)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Users/Groups diff. by ugr_Type. May defer to similar table i';
+) ENGINE=InnoDB  COMMENT='Users/Groups diff. by ugr_Type. May defer to similar table i';
 
 -- --------------------------------------------------------
 
@@ -722,7 +723,7 @@ CREATE TABLE sysUsrGrpLinks (
   PRIMARY KEY  (ugl_ID),
   UNIQUE KEY ugl_CompositeKey (ugl_UserID,ugl_GroupID),
   KEY ugl_GroupID (ugl_GroupID)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Identifies groups to which a user belongs and their role in ';
+) ENGINE=InnoDB COMMENT='Identifies groups to which a user belongs and their role in ';
 
 -- --------------------------------------------------------
 
@@ -745,7 +746,7 @@ CREATE TABLE usrBookmarks (
   UNIQUE KEY bkm_RecID (bkm_RecID,bkm_UGrpID),
   KEY bkm_UGrpID (bkm_UGrpID),
   KEY bkm_Modified (bkm_Modified)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Bookmark = personal data relating to a record, one for each ';
+) ENGINE=InnoDB COMMENT='Bookmark = personal data relating to a record, one for each ';
 
 -- --------------------------------------------------------
 
@@ -758,7 +759,7 @@ CREATE TABLE usrHyperlinkFilters (
   hyf_UGrpID smallint(5) unsigned NOT NULL COMMENT 'User for which this string is to be ignored',
   UNIQUE KEY hyf_CompositeKey (hyf_String,hyf_UGrpID),
   KEY hyf_UGrpID (hyf_UGrpID)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Configure hyperlink import to ignore common link strings';
+) ENGINE=InnoDB COMMENT='Configure hyperlink import to ignore common link strings';
 
 -- --------------------------------------------------------
 
@@ -775,7 +776,7 @@ CREATE TABLE usrRecTagLinks (
   PRIMARY KEY  (rtl_ID),
   UNIQUE KEY rtl_composite_key (rtl_RecID,rtl_TagID),
   KEY rtl_TagIDKey (rtl_TagID)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Link table connecting tags to records';
+) ENGINE=InnoDB COMMENT='Link table connecting tags to records';
 
 -- --------------------------------------------------------
 
@@ -790,7 +791,7 @@ CREATE TABLE IF NOT EXISTS usrRecPermissions (
     rcp_RecID int(10) unsigned NOT NULL COMMENT 'The record to which permission is linked',
     rcp_Level enum('view','edit') NOT NULL default 'view' COMMENT 'Level of permission',
     PRIMARY KEY  (rcp_ID)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Permissions for groups to records';
+) ENGINE=InnoDB COMMENT='Permissions for groups to records';
             
 -- --------------------------------------------------------
 
@@ -804,7 +805,7 @@ CREATE TABLE usrRecentRecords (
   rre_Time timestamp NOT NULL default CURRENT_TIMESTAMP COMMENT 'Timestamp of use of records, notably those searched for with pointer field',
   UNIQUE KEY rre_composite (rre_UGrpID,rre_RecID),
   KEY rre_RecID (rre_RecID)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='A cache of recently used record IDs, identified to user, for speeding access and showing recently-used lists to a user';
+) ENGINE=InnoDB COMMENT='A cache of recently used record IDs, identified to user, for speeding access and showing recently-used lists to a user';
 
 -- --------------------------------------------------------
 
@@ -829,7 +830,7 @@ CREATE TABLE usrReminders (
   KEY rem_OwnerUGrpID (rem_OwnerUGrpID),
   KEY rem_ToWorkgroupID (rem_ToWorkgroupID),
   KEY rem_ToUserID (rem_ToUserID)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Reminders attached to records and recipients, with start dat';
+) ENGINE=InnoDB COMMENT='Reminders attached to records and recipients, with start dat';
 
 -- --------------------------------------------------------
 
@@ -842,7 +843,7 @@ CREATE TABLE usrRemindersBlockList (
   rbl_UGrpID smallint(5) unsigned NOT NULL COMMENT 'User who does not wish to receive this reminder',
   UNIQUE KEY rbl_composite_key (rbl_RemID,rbl_UGrpID),
   KEY rbl_UGrpID (rbl_UGrpID)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Allows user to block resending of specific reminders to them';
+) ENGINE=InnoDB COMMENT='Allows user to block resending of specific reminders to them';
 
 -- --------------------------------------------------------
 
@@ -852,19 +853,19 @@ CREATE TABLE usrRemindersBlockList (
 
 CREATE TABLE usrReportSchedule (
   rps_ID smallint(5) unsigned NOT NULL auto_increment COMMENT 'Primary ID of a report output update specification',
-  rps_Type enum('smarty') collate utf8_unicode_ci NOT NULL default 'smarty' COMMENT 'The type of report being generated',
-  rps_Title varchar(64) collate utf8_unicode_ci NOT NULL COMMENT 'A title for this specification for use in selection menus',
-  rps_FilePath varchar(128) collate utf8_unicode_ci default NULL COMMENT 'The full file path to whic hthe report is to be generated, filestore/dbname/generated-reports if blank',
-  rps_URL varchar(128) collate utf8_unicode_ci default NULL COMMENT 'The corresponding URL for web access to the directory in which this report is published, to , filestore/dbname/generated-reports if blank',
-  rps_FileName varchar(64) collate utf8_unicode_ci NOT NULL COMMENT 'The base name of the report being published - wil lbe compelted with file types',
-  rps_HQuery text collate utf8_unicode_ci NOT NULL COMMENT 'The Heurist query to be used in generating this report',
-  rps_Template varchar(64) collate utf8_unicode_ci NOT NULL COMMENT 'The name of the template file to be used in generating this report',
+  rps_Type enum('smarty') NOT NULL default 'smarty' COMMENT 'The type of report being generated',
+  rps_Title varchar(64) NOT NULL COMMENT 'A title for this specification for use in selection menus',
+  rps_FilePath varchar(128) default NULL COMMENT 'The full file path to whic hthe report is to be generated, filestore/dbname/generated-reports if blank',
+  rps_URL varchar(128) default NULL COMMENT 'The corresponding URL for web access to the directory in which this report is published, to , filestore/dbname/generated-reports if blank',
+  rps_FileName varchar(64) NOT NULL COMMENT 'The base name of the report being published - wil lbe compelted with file types',
+  rps_HQuery text NOT NULL COMMENT 'The Heurist query to be used in generating this report',
+  rps_Template varchar(64) NOT NULL COMMENT 'The name of the template file to be used in generating this report',
   rps_IntervalMinutes int(11) default NULL COMMENT 'The interval in minutes between regenerations of the report output, null = never',
   rps_Added timestamp NULL default NULL COMMENT 'The date when this specification was added',
   rps_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'The date this specification was last updated',
   PRIMARY KEY  (rps_ID),
   UNIQUE KEY rps_path_filename (rps_FilePath,rps_FileName)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci COMMENT='Specs for writing out static files from a query plus templat';
+) ENGINE=InnoDB COMMENT='Specs for writing out static files from a query plus templat';
 
 -- --------------------------------------------------------
 
@@ -882,7 +883,7 @@ CREATE TABLE usrSavedSearches (
   svs_ExclusiveXSL varchar(250) default '' COMMENT 'Name of XSL to which to lock this publish format, blank = any XSL OK',
   PRIMARY KEY  (svs_ID),
   KEY svs_UGrpID (svs_UGrpID)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Saved searches for personal/usergroup use and for publishing';
+) ENGINE=InnoDB COMMENT='Saved searches for personal/usergroup use and for publishing';
 
 -- --------------------------------------------------------
 
@@ -901,7 +902,7 @@ CREATE TABLE usrTags (
   UNIQUE KEY tag_composite_key (tag_Text,tag_UGrpID),
   KEY tag_UGrpID (tag_UGrpID),
   KEY tag_Text (tag_Text)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Personal and Workgroup tags (formerly keywords)';
+) ENGINE=InnoDB COMMENT='Personal and Workgroup tags (formerly keywords)';
 
 -- --------------------------------------------------------
 
@@ -917,7 +918,7 @@ CREATE TABLE woot_ChunkPermissions (
   wprm_CreatorID smallint(6) NOT NULL COMMENT 'Creator of the permission (= user ID ???? <check>)',
   wprm_Created datetime NOT NULL COMMENT 'Date and time of creation of the permission',
   UNIQUE KEY wprm_chunk_composite_key (wprm_ChunkID,wprm_UGrpID,wprm_GroupID)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Permissions value for individual woot chunks';
+) ENGINE=InnoDB COMMENT='Permissions value for individual woot chunks';
 
 -- --------------------------------------------------------
 
@@ -940,7 +941,7 @@ CREATE TABLE woot_Chunks (
   PRIMARY KEY  (chunk_ID),
   UNIQUE KEY chunk_composite_key (chunk_WootID,chunk_InsertOrder,chunk_Version),
   KEY chunk_is_latest_key (chunk_IsLatest)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB;
 
 -- --------------------------------------------------------
 
@@ -956,7 +957,7 @@ CREATE TABLE woot_RecPermissions (
   wrprm_CreatorID int(11) NOT NULL COMMENT 'Creator of the permission',
   wrprm_Created datetime NOT NULL COMMENT 'Date and time of creation of the permission',
   UNIQUE KEY wrprm_composite_key (wrprm_WootID,wrprm_UGrpID,wrprm_GroupID)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Overall permissions for the woot record (entry/page)';
+) ENGINE=InnoDB COMMENT='Overall permissions for the woot record (entry/page)';
 
 -- --------------------------------------------------------
 
@@ -973,7 +974,7 @@ CREATE TABLE woots (
   woot_CreatorID int(11) default NULL COMMENT 'Creator (user id) of the woot',
   PRIMARY KEY  (woot_ID),
   UNIQUE KEY woot_title_key (woot_Title(200))
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Woot records (entries, pages) are linked to a set of XHTML c';
+) ENGINE=InnoDB COMMENT='Woot records (entries, pages) are linked to a set of XHTML c';
                                                                
 -- ------------------------------------------------------------------------------------------------
 
@@ -987,8 +988,8 @@ CREATE TABLE usrWorkingSubsets (
   wss_OwnerUGrpID smallint(5) unsigned NOT NULL COMMENT 'Person to whose working subset this Record ID is assigned',
   PRIMARY KEY  (wss_ID),
   KEY wss_RecID (wss_RecID),
-  KEY wss_OwnerUGrpID (wss_OwnerUGrpID),
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Lists a set of Records to be included in a working subset for a user. Working susbset is an initial filter on all filter actions.';
+  KEY wss_OwnerUGrpID (wss_OwnerUGrpID)
+) ENGINE=InnoDB COMMENT='Lists a set of Records to be included in a working subset for a user. Working susbset is an initial filter on all filter actions.';
 
 
 -- ------------------------------------------------------------------------------------------------

@@ -964,5 +964,109 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         //$dlg.parent().find('.ui-dialog-buttonpane').css({'background':'red none repeat scroll 0 0 !important','background-color':'transparent !important'});
         //'#8ea9b9 none repeat scroll 0 0 !important'     none !important','background-color':'none !important
     },  
+    
+    _progressInterval: 0,
+    _progressDiv: null,
+                        
+    showProgress: function( $progress_div, session_id, t_interval, need_content ){
+        
+        var progressCounter = 0;        
+        var progress_url = window.hWin.HAPI4.baseURL + "viewers/smarty/reportProgress.php";
+        if(!(session_id>0)) session_id = Math.round((new Date()).getTime()/1000);
+        
+        window.hWin.HEURIST4.msg._progressDiv = $progress_div;
+        $progress_div.show(); 
+        document.body.style.cursor = 'progress';
+        
+        //add progress bar content
+        if(need_content!=false){
+            $progress_div.html('<div class="loading" style="display:none;height:80%"></div>'
+            +'<div style="width:80%;height:40px;padding:5px;text-align:center;margin:auto;margin-top:20%;">'
+                +'<div id="progressbar"><div class="progress-label">Processing data...</div></div>'
+                +'<div class="progress_stop" style="text-align:center;margin-top:4px">Abort</div>'
+            +'</div>');
+        }
+        
+        
+        var btn_stop = $progress_div.find('.progress_stop').button();
+        
+        //this._on(,{click: function() {
+        
+        btn_stop.click(function(){
+                var request = {terminate:1, t:(new Date()).getMilliseconds(), session:session_id};
+                window.hWin.HEURIST4.util.sendRequest(progress_url, request, null, function(response){
+                    _hideProgress(); //window.hWin.HEURIST4.ui
+                    if(response && response.status==window.hWin.ResponseStatus.UNKNOWN_ERROR){
+                        //console.log(response);                   
+                    }
+                });
+            });
+    
+        var div_loading = $progress_div.find('.loading').show();
+        var pbar = $progress_div.find('#progressbar');
+        var progressLabel = pbar.find('.progress-label').text('');
+        pbar.progressbar({value:0});
+        
+        window.hWin.HEURIST4.msg._progressInterval = setInterval(function(){ 
+            
+            var request = {t:(new Date()).getMilliseconds(), session:session_id};            
+            
+            window.hWin.HEURIST4.util.sendRequest(progress_url, request, null, function(response){
+
+//console.log(response);                
+                if(response && response.status==window.hWin.ResponseStatus.UNKNOWN_ERROR){
+                    _hideProgress();
+                    //console.log(response+'  '+session_id);                   
+                }else{
+                    //it may return terminate,done,
+                    var resp = response?response.split(','):[];
+                    if(response=='terminate' || !(resp.length>=2)){
+                        if(response=='terminate'){
+                            _hideProgress();
+                        }else{
+                            div_loading.show();    
+                            //pbar.progressbar( "value", 0 );
+                            //progressLabel.text('wait...');
+                        }
+                    }else{
+                        div_loading.hide();
+                        if(resp[0]>0 && resp[1]>0){
+                            var val = resp[0]*100/resp[1];
+                            pbar.progressbar( "value", val );
+                            progressLabel.text(resp[0]+' of '+resp[1]+'  '+(resp.length==3?resp[2]:''));
+                        }else{
+                            progressLabel.text('preparing...');
+                            pbar.progressbar( "value", 0 );
+                        }
+                    }
+                    
+                    progressCounter++;
+                    
+                }
+            },'text');
+          
+        
+        }, t_interval);                
+        
+        return session_id;
+    },
+    
+    hideProgress: function(){
+        
+        $('body').css('cursor','auto');
+        
+        if(window.hWin.HEURIST4.msg._progressInterval!=null){
+            
+            clearInterval(window.hWin.HEURIST4.msg._progressInterval);
+            window.hWin.HEURIST4.msg._progressInterval = null;
+        }
+        if(window.hWin.HEURIST4.msg._progressDiv){
+            window.hWin.HEURIST4.msg._progressDiv.hide();    
+            window.hWin.HEURIST4.msg._progressDiv = null;
+        }
+        
+    },
+    
+    
   
 };

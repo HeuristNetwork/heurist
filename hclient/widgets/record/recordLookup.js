@@ -40,8 +40,8 @@ $.widget( "heurist.recordLookup", $.heurist.recordAction, {
         htmlContent: 'recordLookup.html',
         helpContent: 'recordLookup.html', //in context_help folder
         
-        //service:'tlcmap',
-        mapping:null, //maps external fields to heurist field details
+        mapping:null, //configuration from record_lookup_configuration.json
+               
         add_new_record: false  //if true it creates new record on selection
         //define onClose to get selected values
     },
@@ -83,7 +83,6 @@ $.widget( "heurist.recordLookup", $.heurist.recordAction, {
                
                view_mode: 'list',
                show_viewmode:false,
-               
                
                entityName: this._entityName,
                //view_mode: this.options.view_mode?this.options.view_mode:null,

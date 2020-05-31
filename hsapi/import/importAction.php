@@ -30,7 +30,8 @@ require_once('UTMtoLL.php');
 require_once('GpointConverter.php');
 
 /**
-* two public methods
+* 3 public methods
+* assignRecordIds  (matching)
 * validateImport
 * performImport
 * 
@@ -82,6 +83,8 @@ private static function findDisambResolution($keyvalue, $disamb_resolv){
 * @param mixed $params
 */
 private static function findRecordIds($imp_session, $params){
+    
+    $progress_session_id = @$params['session'];
     
     //result array
     $imp_session['validation'] = array( 
@@ -167,10 +170,19 @@ private static function findRecordIds($imp_session, $params){
     
     //--------------------------------------------------------------------------
     //loop all records in import table and detect what is for insert and what for update
+    
+    $tot_count = $imp_session['reccount'];
+    $cnt = 0;
+    $step = ceil($tot_count/100);
+    if($step>100) $step = 100;
+    else if($step<10) $step=10;
+    
     $select_query = "SELECT imp_id, ".implode(",", $sel_fields)." FROM ".$import_table;
 
     $res = $mysqli->query($select_query);
     if($res){
+        mysql__update_progress(null, $progress_session_id, true, '0,'.$tot_count);    
+    
         $ind = -1;
         while ($row = $res->fetch_assoc()){
             
@@ -243,6 +255,11 @@ private static function findRecordIds($imp_session, $params){
                         }
                         $index++;
                 }//for all fields in match array
+                
+                $cnt++;
+                if($cnt % $step == 0){
+                    mysql__update_progress(null, $progress_session_id, true, $cnt.','.$tot_count);    
+                }
                 
                 if($index==0){//all matching fields in import table are empty - skip it
                     $imp_session['validation']['count_ignore_rows']++;
@@ -414,6 +431,7 @@ private static function findRecordIds($imp_session, $params){
             if($is_insert) $cnt_insert_rows++;
 
         }//while import table
+
     }
     else{
         return $mysqli->error;
@@ -474,6 +492,10 @@ public static function assignRecordIds($params){
     $pairs = null;
     $disambiguation = array();
     
+    $progress_session_id = @$params['session'];
+    mysql__update_progress(null, $progress_session_id, true, '0,0');    
+
+    
     if($match_mode == 0){  //find records by mapping
             
         $imp_session = self::findRecordIds($imp_session, $params);
@@ -483,6 +505,7 @@ public static function assignRecordIds($params){
             $pairs = $imp_session['validation']['pairs'];     //keyvalues => record id - count number of unique values
             $disambiguation = $imp_session['validation']['disambiguation'];
         }else{
+            mysql__update_progress(null, $progress_session_id, false, 'REMOVE');    
             self::$system->addError(HEURIST_ERROR, $imp_session);
             return false; //error
         }
@@ -493,6 +516,7 @@ public static function assignRecordIds($params){
         }
 
         if(count($disambiguation)>0){
+            mysql__update_progress(null, $progress_session_id, false, 'REMOVE');    
             return $imp_session; //"It is not possible to proceed because of disambiguation";
         }
         
@@ -534,6 +558,7 @@ public static function assignRecordIds($params){
         
             $altquery = "alter table ".$import_table." add column ".$id_field." varchar(255) ";
             if (!$mysqli->query($altquery)) {
+                mysql__update_progress(null, $progress_session_id, false, 'REMOVE');    
                 self::$system->addError(HEURIST_DB_ERROR, 'Cannot alter import session table; cannot add new index field', $mysqli->error);
                 return false;
             }
@@ -583,6 +608,11 @@ public static function assignRecordIds($params){
         
         //$records - is result of findRecordsIds
         //update ID values in import table - replace id to found
+        $tot = count($records);
+        $cnt = 0;
+        $keep_autocommit = mysql__begin_transaction(self::$mysqli);
+        $is_error = null;
+        
         foreach($records as $imp_id => $ids){
 
             if($ids){
@@ -590,11 +620,32 @@ public static function assignRecordIds($params){
                 $updquery = "update ".$import_table." set ".$id_field."='".$ids
                 ."' where imp_id = ".$imp_id;
                 if(!$mysqli->query($updquery)){
-                    self::$system->addError(HEURIST_DB_ERROR, 'Cannot update import table: set ID field', $mysqli->error.' QUERY:'.$updquery);
-                    return false;
+                    $is_error = $updquery;
+                    break;
+                }
+                $cnt++;
+                if($cnt%100==0){
+                    mysql__update_progress(null, $progress_session_id, false, $cnt.','.$tot);        
+                }
+                if($cnt % 2000 == 0){
+                    self::$mysqli->commit();
+                    self::$mysqli->begin_transaction(MYSQLI_TRANS_START_READ_WRITE);
                 }
             }
         }
+        
+        if($is_error){
+            mysql__update_progress(null, $progress_session_id, false, 'REMOVE');    
+            self::$system->addError(HEURIST_DB_ERROR, 'Cannot update import table: set ID field', $mysqli->error.' QUERY:'.$is_error);
+            self::$mysqli->rollback();
+            if($keep_autocommit===true) self::$mysqli->autocommit(TRUE);
+            return;
+        }else{
+            self::$mysqli->commit();
+            if($keep_autocommit===true) self::$mysqli->autocommit(TRUE);
+        }
+        
+        
         
         // find records to be ignored
         /* they already found in findRecordsIds
@@ -627,20 +678,6 @@ public static function assignRecordIds($params){
         $select_query = "SELECT count(*) FROM ".$import_table." WHERE ".$id_field." IS NULL"; 
         $cnt2 = mysql__select_value($mysqli, $select_query);
         $cnt_insert = $cnt + (($cnt2>0)?intval($cnt2):0);
-        /*
-        if( $cnt>0 ){
-                $imp_session['validation']['count_insert'] = $cnt;
-                $imp_session['validation']['count_insert_rows'] = $cnt;
-
-                
-                //find first 100 records to display
-                //$select_query = "SELECT imp_id FROM ".$import_table
-                //        .' WHERE '.$id_field.'<0 or '.$id_field.' IS NULL LIMIT 5000';
-                //$imp_session['validation']['recs_insert'] = mysql__select_all($mysqli, $select_query);
-                
-                $imp_session['validation']['recs_insert'] = array(); //do not send all records to client side
-        }
-        */
 
         // find records to be ignored
         $select_query = "SELECT count(*) FROM ".$import_table." WHERE ".$id_field."=''";
@@ -658,6 +695,9 @@ public static function assignRecordIds($params){
         
         //$imp_session['validation']['count_insert'] = $imp_session['reccount'];
     }
+    
+    
+    mysql__update_progress(null, $progress_session_id, false, 'REMOVE');    
     
     //define field as index in session
     @$imp_session['indexes'][$id_field] = $rty_ID;
@@ -700,7 +740,7 @@ public static function assignRecordIds($params){
 /**
 * 1) Performs mapping validation (required fields, enum, pointers, numeric/date)
 * 2) Counts matched (update) and new records
-*
+* 
 * imp_ID 
 * sa_rectype - record type
 * seq_index - sequence
@@ -715,6 +755,8 @@ public static function validateImport($params) {
      
     self::initialize();    
     
+    $progress_session_id = @$params['session'];
+        
     $imp_session = ImportSession::load(@$params['imp_ID']);
     if($imp_session==false){
         return false;
@@ -808,13 +850,15 @@ public static function validateImport($params) {
     }
     
 
+    mysql__update_progress(null, $progress_session_id, true, '1,7,index fields validation');    
+    
     // calculate the number of records to insert, update and insert with existing ids
     // @todo - it has been implemented for non-multivalue indexes only
     if(!$id_field){ //ID field not defined - all records will be inserted
         if(!$ignore_insert){
             $imp_session['validation']["count_insert"] = $imp_session['reccount'];
             $imp_session['validation']["count_insert_rows"] = $imp_session['reccount'];  //all rows will be imported as new records
-            $select_query = "SELECT imp_id, ".implode(",",$sel_query)." FROM ".$import_table." LIMIT 5000";
+            $select_query = "SELECT imp_id, ".implode(",",$sel_query)." FROM ".$import_table." LIMIT 5000"; //for peview only
             $imp_session['validation']['recs_insert'] = mysql__select_all($mysqli, $select_query);
         }
 
@@ -867,13 +911,13 @@ public static function validateImport($params) {
                 
                     $imp_session['validation']['count_update'] = $cnt;
                     $imp_session['validation']['count_update_rows'] = $cnt;
-                    //find first 100 records to display
+                    //find first 5000 records to display
                     $select_query = "SELECT ".$id_field.", imp_id, ".implode(",",$sel_query)
                     ." FROM ".$import_table
                     ." left join Records on rec_ID=".$id_field
                     ." WHERE rec_ID is not null and ".$id_field.">0"
-                    ." ORDER BY ".$id_field." LIMIT 5000";
-                    $imp_session['validation']['recs_update'] = mysql__select_all($mysqli, $select_query);
+                    ." ORDER BY ".$id_field." LIMIT 5000"; //for preview only
+                    $imp_session['validation']['recs_update'] = mysql__select_all($mysqli, $select_query); //for preview only
 
             }else if($cnt==null){
                 self::$system->addError(HEURIST_DB_ERROR,
@@ -897,9 +941,9 @@ public static function validateImport($params) {
                     $imp_session['validation']['count_insert'] = $cnt;
                     $imp_session['validation']['count_insert_rows'] = $cnt;
 
-                    //find first 100 records to display
+                    //find first 5000 records to preview display
                     $select_query = "SELECT imp_id, ".implode(",",$sel_query)." FROM ".$import_table
-                            .' WHERE '.$id_field.'<0 or '.$id_field.' IS NULL LIMIT 5000';
+                            .' WHERE '.$id_field.'<0 or '.$id_field.' IS NULL LIMIT 5000'; //for preview only
                     $imp_session['validation']['recs_insert'] = mysql__select_all($mysqli, $select_query);
             }
         }
@@ -913,7 +957,7 @@ public static function validateImport($params) {
             $select_query = "SELECT imp_id, ".implode(",",$sel_query)
             ." FROM ".$import_table
             ." LEFT JOIN Records on rec_ID=".$id_field
-            ." WHERE ".$id_field.">0 and rec_ID is null LIMIT 5000";
+            ." WHERE ".$id_field.">0 and rec_ID is null LIMIT 5000"; //for preview only
             $res = mysql__select_all($mysqli, $select_query);
             if($res && count($res)>0){
                 if(@$imp_session['validation']['recs_insert']){
@@ -1110,6 +1154,8 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
     }
 
     //2. In DB: Verify that all required fields have values =============================================
+    mysql__update_progress(null, $progress_session_id, false, '2,7,checking that required fields have values');
+    
     $k=0;
     foreach ($query_reqs as $field){
         $query = "select imp_id, ".implode(",",$sel_query)
@@ -1122,7 +1168,6 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
             ."You can find and correct these values using Verify > Verify integrity",
             "Missing Values", $field, 'warning');
         if(is_array($wrong_records)) {
-            
             
             $cnt = count(@$imp_session['validation']['warning']);//was
             //@$imp_session['validation']['count_warning']
@@ -1156,6 +1201,8 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
        }
     }
     //3. In DB: Verify that enumeration fields have correct values =====================================
+    mysql__update_progress(null, $progress_session_id, false, '3,7,validation of enumeration fields');
+    
     if(!@$imp_session['csv_enclosure']){
         $imp_session['csv_enclosure'] = @$params['csv_enclosure']?$params['csv_enclosure']:'"';
     }
@@ -1177,7 +1224,7 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
             
             $wrong_records = self::validateEnumerations($query, $imp_session, $field, $dt_mapping[$field], 
                 $idx, $recStruc, $recordType,
-                "Term list values read must match existing terms defined for the field. Periods are taken as indicators of hierarchy", "new terms");
+                "Term list values read must match existing terms defined for the field. Periods are taken as indicators of hierarchy", "new terms", $progress_session_id);
 
         }else{
 
@@ -1201,6 +1248,8 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
         }
     }
     //4. In DB: Verify resource fields ==================================================
+    mysql__update_progress(null, $progress_session_id, false, '4,7,validation of resource fields');
+    
     $k=0;
     foreach ($query_res as $field){
 
@@ -1212,7 +1261,7 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
             $idx = array_search($field, $sel_query)+1;
 
             $wrong_records = self::validateResourcePointers($mysqli, $query, $imp_session, 
-                                        $field, $dt_mapping[$field], $idx, $recStruc, $recordType);
+                                        $field, $dt_mapping[$field], $idx, $recStruc, $recordType, $progress_session_id);
 
         }else{
             $query = "select imp_id, ".implode(",",$sel_query)
@@ -1235,6 +1284,8 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
     }
 
     //5. Verify numeric fields
+    mysql__update_progress(null, $progress_session_id, false, '5,7,validation of numeric fields');
+    
     $k=0;
     foreach ($query_num as $field){
 
@@ -1245,7 +1296,7 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
 
             $idx = array_search($field, $sel_query)+1;
 
-            $wrong_records = self::validateNumericField($query, $imp_session, $field, $idx, 'warning');
+            $wrong_records = self::validateNumericField($query, $imp_session, $field, $idx, 'warning', $progress_session_id);
 
         }else{
             $query = "select imp_id, ".implode(",",$sel_query)
@@ -1269,6 +1320,8 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
     }
     
     //6. Verify datetime fields
+    mysql__update_progress(null, $progress_session_id, false, '6,7,validation of datetime fields');
+    
     $k=0;
     foreach ($query_date as $field){
 
@@ -1324,6 +1377,8 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
         }
     }
     
+    mysql__update_progress(null, $progress_session_id, false, 'REMOVE');
+    
     return $imp_session;
         
     }
@@ -1345,7 +1400,7 @@ private static function getWrongRecords($query, $imp_session, $message, $short_m
 
     $mysqli = self::$mysqli;
 
-    $res = $mysqli->query($query." LIMIT 5000");
+    $res = $mysqli->query($query.((true || $type='error')?'':' LIMIT 5000')); //check all if its critical
     if($res){
         $wrong_records = array();
         $wrong_records_ids = array();
@@ -1391,7 +1446,7 @@ private static function getWrongRecords($query, $imp_session, $message, $short_m
 * @param mixed $short_message
 */
 private static function validateEnumerations($query, $imp_session, $fields_checked, $dt_id, $field_idx, $recStruc, $recordType, 
-            $message, $short_message){
+            $message, $short_message, $progress_session_id){
 
     $mysqli = self::$mysqli; 
                 
@@ -1403,9 +1458,15 @@ private static function validateEnumerations($query, $imp_session, $fields_check
 
     $dt_type = $dt_def[$idx_fieldtype]; //for domain
     
-    $res = $mysqli->query($query." LIMIT 5000");
+    $res = $mysqli->query( $query );
 
     if($res){
+        
+        $cnt = 0;        
+        $tot_count = $imp_session['reccount']>0?$imp_session['reccount']:1000;
+        if($tot_count>4000){
+            mysql__update_progress(null, $progress_session_id, false, '0,'.$tot_count.',validation of numeric fields');
+        }
         
         $wrong_records = array();
         $wrong_values = array();
@@ -1453,6 +1514,11 @@ private static function validateEnumerations($query, $imp_session, $fields_check
                 $row[$field_idx] = implode($imp_session['csv_mvsep'], $newvalue);
                 array_push($wrong_records, $row);
             }
+            
+            $cnt++;
+            if($tot_count>4000 && $cnt%2000==0){
+                mysql__update_progress(null, $progress_session_id, false, $cnt.','.$tot_count.',validation of resource fields');    
+            }
         }
         $res->close();
         $cnt_error = count($wrong_records);
@@ -1490,14 +1556,21 @@ private static function validateEnumerations($query, $imp_session, $fields_check
 * @param mixed $recStruc - record type structure
 */
 private static function validateResourcePointers($mysqli, $query, $imp_session, 
-                                        $fields_checked, $dt_id, $field_idx, $recStruc, $recordType){
+                                        $fields_checked, $dt_id, $field_idx, $recStruc, $recordType, $progress_session_id){
 
     $dt_def = $recStruc[$recordType]['dtFields'][$dt_id];
     $idx_pointer_types = $recStruc['dtFieldNamesToIndex']['rst_PtrFilteredIDs'];
 
-    $res = $mysqli->query($query." LIMIT 5000");
+    $res = $mysqli->query($query);
 
     if($res){
+
+        $cnt = 0;        
+        $tot_count = $imp_session['reccount']>0?$imp_session['reccount']:1000;
+        if($tot_count>4000){
+            mysql__update_progress(null, $progress_session_id, false, '0,'.$tot_count.',validation of resource fields');
+        }
+        
         $wrong_records = array();
         while ($row = $res->fetch_row()){
 
@@ -1521,6 +1594,11 @@ private static function validateResourcePointers($mysqli, $query, $imp_session,
             if($is_error){
                 $row[$field_idx] = implode($imp_session['csv_mvsep'], $newvalue);
                 array_push($wrong_records, $row);
+            }
+            
+            $cnt++;
+            if($tot_count>4000 && $cnt%2000==0){
+                mysql__update_progress(null, $progress_session_id, false, $cnt.','.$tot_count.',validation of resource fields');    
             }
         }
         $res->close();
@@ -1555,11 +1633,18 @@ private static function validateResourcePointers($mysqli, $query, $imp_session,
 * @param mixed $fields_checked - name of field to be verified
 * @param mixed $field_idx - index of validation field in query result (to get value)
 */
-private static function validateNumericField($mysqli, $query, $imp_session, $fields_checked, $field_idx, $type){
+private static function validateNumericField($mysqli, $query, $imp_session, $fields_checked, $field_idx, $type, $progress_session_id){
 
-    $res = $mysqli->query($query." LIMIT 5000");
+    $res = $mysqli->query($query);
 
     if($res){
+
+        $cnt = 0;        
+        $tot_count = $imp_session['reccount']>0?$imp_session['reccount']:1000;
+        if($tot_count>4000){
+            mysql__update_progress(null, $progress_session_id, false, '0,'.$tot_count.',validation of numeric fields');
+        }
+        
         $wrong_records = array();
         while ($row = $res->fetch_row()){
 
@@ -1581,6 +1666,11 @@ private static function validateNumericField($mysqli, $query, $imp_session, $fie
             if($is_error){
                 $row[$field_idx] = implode($imp_session['csv_mvsep'], $newvalue);
                 array_push($wrong_records, $row);
+            }
+            
+            $cnt++;
+            if($tot_count>4000 && $cnt%2000==0){
+                mysql__update_progress(null, $progress_session_id, false, $cnt.','.$tot_count.',validation of numeric fields');    
             }
         }
         $res->close();
@@ -1616,7 +1706,7 @@ private static function validateNumericField($mysqli, $query, $imp_session, $fie
 */
 private static function validateDateField($query, $imp_session, $fields_checked, $field_idx, $type){
 
-    $res = self::$mysqli->query($query." LIMIT 5000");
+    $res = self::$mysqli->query($query);
 
     if($res){
         $wrong_records = array();
@@ -1807,8 +1897,9 @@ private static function doInsertUpdateRecord($recordId, $import_table, $recordTy
     $record['ScratchPad'] = @$details['ScratchPad'];
     $record['details'] = $details;
     
-    $out = recordSave(self::$system, $record);  //see db_records.php
-    
+    //DEBUG 
+    $out = recordSave(self::$system, $record, false);  //see db_records.php
+    //$out = array('status'=>HEURIST_OK, 'data'=>$recordId);
     //$out = array('status'=>HEURIST_ERROR, 'message'=>'Fake error message');
     
     //array("status"=>HEURIST_OK, "data"=> $recID, 'rec_Title'=>$newTitle);
@@ -1843,8 +1934,8 @@ private static function doInsertUpdateRecord($recordId, $import_table, $recordTy
             }
         }else{
             if(self::$rep_skipped<100){        
-                error_log( 'IMPORT CSV: '.($recordId>0?('rec#'.$recordId):'new record')
-                    .$out["message"].'  '.print_r(@$out["sysmsg"], true) );
+//error_log( 'IMPORT CSV: '.($recordId>0?('rec#'.$recordId):'new record').$out["message"].'  '.print_r(@$out["sysmsg"], true) );
+
                 self::$rep_skipped_details[] = ($recordId>0?('record#'.$recordId):'new record')
                         .': '.$out["message"];
             }
@@ -1873,13 +1964,16 @@ private static function doInsertUpdateRecord($recordId, $import_table, $recordTy
         
             if($old_id_in_idfield==null){
                 
-                $updquery = "UPDATE ".$import_table
-                ." SET ".$id_field."=".$new_recordID
-                ." WHERE imp_id in (". implode(",",$details['imp_id']) .")";
+                if($new_recordID>0){
+                
+                    $updquery = "UPDATE ".$import_table
+                    ." SET ".$id_field."=".$new_recordID
+                    ." WHERE imp_id in (". implode(",",$details['imp_id']) .")";
 
-                if(!self::$mysqli->query($updquery) && $mode_output!='json'){
-                    print "<div style='color:red'>Cannot update import table (set record id ".$new_recordID.") for lines:".
-                    implode(",",$details['imp_id'])."</div>";
+                    if(!self::$mysqli->query($updquery) && $mode_output!='json'){
+                        print "<div style='color:red'>Cannot update import table (set record id ".$new_recordID.") for lines:".
+                        implode(",",$details['imp_id'])."</div>";
+                    }
                 }
 
             }else{
@@ -1943,6 +2037,8 @@ private static function getImportValue($rec_id, $import_table){
 */
 public static function performImport($params, $mode_output){
     
+    $_time_debug = time();
+    
     self::initialize();    
     
     self::$rep_processed = 0;
@@ -1952,6 +2048,8 @@ public static function performImport($params, $mode_output){
     self::$rep_skipped_details = array();
     self::$rep_permission  = 0;
     self::$rep_unique_ids = array();
+    
+    $progress_session_id = @$params['session'];
     
     $imp_session = ImportSession::load(@$params['imp_ID']);
     if($imp_session==false){
@@ -2102,14 +2200,14 @@ public static function performImport($params, $mode_output){
         return "import table is empty";
 
     }else{
-
-        
         
         $tot_count = $imp_session['reccount'];
         $first_time = true;
-        $step = ceil($tot_count/10);
-        if($step>10) $step = 10;
-        else if($step<1) $step=1;
+        $step = ceil($tot_count/100);
+        if($step>100) $step = 100;
+        else if($step<10) $step=10;
+        
+        mysql__update_progress( null, $progress_session_id, true, '0,'.$tot_count );    
         
         $csv_mvsep = @$params['csv_mvsep']?$params['csv_mvsep']:$imp_session['csv_mvsep'];
         $csv_enclosure = @$params['csv_enclosure']?$params['csv_enclosure']:$imp_session['csv_enclosure'];
@@ -2129,6 +2227,17 @@ public static function performImport($params, $mode_output){
 
         $pairs = array(); // for multivalue rec_id => new_rec_id  (keep new id if such id already used)
         $pairs_id_value = array(); //for multivalue rec_id     new_rec_id => value of mapped field
+        
+
+        self::$mysqli->query('set @suppress_update_trigger=1');
+
+        // start transaction
+        $use_transaction = true;
+        $keep_autocommit = false;
+        if($use_transaction){
+            $keep_autocommit = mysql__begin_transaction(self::$mysqli);    
+        }
+        
 
         while ($row = $res->fetch_row()){
 
@@ -2476,7 +2585,7 @@ public static function performImport($params, $mode_output){
 //       0   Retain existing if no new data supplied for record
 //       1   Delete existing even if no new data supplied for record   
 
-                            if($value) {//value from cvs
+                            if($value!=null && $value!='') {//value from cvs
                                 
                                 $need_add = false;
                                 
@@ -2557,8 +2666,8 @@ public static function performImport($params, $mode_output){
                 }
 
                 self::$rep_processed++;
-
-                if ($mode_output=='html' && self::$rep_processed % $step == 0) {
+/*
+                if (false && $mode_output=='html' && self::$rep_processed % $step == 0) {
                     ob_start();
                     if($first_time){
                         print '<script type="text/javascript">$("#div-progress").hide();</script>';
@@ -2571,8 +2680,22 @@ public static function performImport($params, $mode_output){
                     ob_flush();
                     flush();
                 }
+*/                
+                if($use_transaction && self::$rep_processed % 1000 == 0){
+                    self::$mysqli->commit();
+                    self::$mysqli->begin_transaction(MYSQLI_TRANS_START_READ_WRITE);
+                }
+                if(self::$rep_processed % $step == 0){
+                    mysql__update_progress(null, $progress_session_id, false, self::$rep_processed.','.$tot_count);                    
+                }
             }//foreach multivalue index
 
+            /*
+            if(self::$rep_processed>2000){ //DEBUG
+                break;
+            }
+            */
+            
             
         }//main  all recs in import table
         $res->close();
@@ -2589,6 +2712,22 @@ public static function performImport($params, $mode_output){
             
             }
         }
+        
+        if($use_transaction){
+            self::$mysqli->commit();
+            if($keep_autocommit===true) self::$mysqli->autocommit(TRUE);
+        }
+        mysql__update_progress(null, $progress_session_id, false, 'REMOVE');                    
+        self::$mysqli->query('set @suppress_update_trigger=NULL');
+
+        /*
+                if($use_transaction){
+                    self::$mysqli->rollback();
+                    if($keep_autocommit===true) self::$mysqli->autocommit(TRUE);
+                }
+        */
+        
+        
         if(!$id_field){
             array_push($imp_session['uniqcnt'], self::$rep_added);
         }
@@ -2604,6 +2743,9 @@ public static function performImport($params, $mode_output){
             }
             $imp_session['sequence'][$currentSeqIndex]['mapping_keys_values'] = $new_keys_values;
         }
+        
+//DEBUG        
+//error_log( self::$rep_processed.'   '.(time() - $_time_debug) );
         
         
         $import_report = array(                
@@ -2639,7 +2781,7 @@ public static function performImport($params, $mode_output){
         }
         
                                                                          
-        if($mode_output!='json'){
+        if(false && $mode_output!='json'){
 
             print '<script type="text/javascript">update_counts('
                 .self::$rep_processed.','.self::$rep_added.','

@@ -49,7 +49,7 @@
 -- it is probably better to use Elastic search indexes to determine whether there is duplication. tbd. 
 
     ALTER TABLE Records
-    Add rec_KeyfieldsComposite VARCHAR(64) CHARACTER SET utf8 COLLATE utf8_general_ci NULL
+    Add rec_KeyfieldsComposite VARCHAR(64) NULL
     COMMENT 'Contains a composite field constructed from record details flagged for indexing by rst_UseInUniqueIndex';
 
     // see notes above  ALTER TABLE Records
@@ -99,5 +99,5 @@
     COMMENT 'Date and time analysis last modified',
       PRIMARY KEY  (uan_ID),
       KEY uan_UGrpID (uan_UGrpID)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8 
+    ) ENGINE=InnoDBs
     COMMENT='Generic table for storing field derivation rules and analysis functions';

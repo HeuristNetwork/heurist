@@ -108,8 +108,6 @@ $.widget( "heurist.resultList", {
     
     _grp_keep_status:{}, //expanded groups
     
-    _app_timemap:null, //direct reference to mapping widget to support complex interaction
-
     // the constructor
     _create: function() {
 

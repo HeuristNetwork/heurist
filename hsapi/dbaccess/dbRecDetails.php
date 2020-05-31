@@ -93,7 +93,7 @@ class DbRecDetails
             if($this->system->defineConstant('DT_SERVICE_URL')){ array_push($not_purify, DT_SERVICE_URL); }
             
             $this->not_purify = $not_purify;
-            $this->purifier = getHTMLPurifier();
+            //$this->purifier = getHTMLPurifier();
         }
     }
 
@@ -144,7 +144,7 @@ class DbRecDetails
         }
 
         if (!( @$this->data['recIDs'])){ //record ids to be updated
-            $this->system->addError(HEURIST_INVALID_REQUEST, 'Insufficent data passed: records');
+            $this->system->addError(HEURIST_INVALID_REQUEST, 'Insufficent data passed: records not defined');
             return false;
         }
         
@@ -380,8 +380,8 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
             $this->data['val'] = $this->data['rVal'];
         }
         
-        if (!(@$this->data['val'] || @$this->data['geo'] || @$this->data['ulfID'])){
-            $this->system->addError(HEURIST_INVALID_REQUEST, "Insufficent data passed");
+        if (!(@$this->data['val']!=null || @$this->data['geo']!=null || @$this->data['ulfID']!=null)){
+            $this->system->addError(HEURIST_INVALID_REQUEST, "Insufficent data passed. New field value not defined");
             return false;
         }
         
@@ -409,25 +409,25 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
                      
         $baseTag = "~add field $dtyName $now"; //name of tag assigned to modified records
         
-        if(@$this->data['val']){
+        if(@$this->data['val']!=null){
             
             $this->initPutifier();
             if(!in_array($dtyID, $this->not_purify)){
                 
                 $s = trim($this->data['val']);
-                $this->data['val'] = preg_replace('#<script(.*?)>(.*?)</script>#is', '', $s);
-                
+                $dtl['dtl_Value'] = preg_replace('#<script(.*?)>(.*?)</script>#is', '', $s);
+                                                      
                 //$s = $this->purifier->purify( $this->data['val']);                                
-                //$dtl['dtl_Value'] = htmlspecialchars_decode( $s );
+                //$dtl['dtl_Value'] = htmlspecialchars_decode( $this->data['val'] );
             }else{
                 $dtl['dtl_Value'] = $this->data['val'];    
             }
             
         }
-        if(@$this->data['geo']){
+        if(@$this->data['geo']!=null){
             $dtl['dtl_Geo'] = array("ST_GeomFromText(\"" . $this->data['geo'] . "\")");  
         }
-        if(@$this->data['ulfID']){
+        if(@$this->data['ulfID']>0){
             $dtl['dtl_UploadedFileID'] = $this->data['ulfID'];
         }
         
@@ -551,8 +551,8 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
     */
     public function detailsReplace()
     {
-        if (!@$this->data['rVal']){
-            $this->system->addError(HEURIST_INVALID_REQUEST, "Insufficent data passed");
+        if (@$this->data['rVal']==null){
+            $this->system->addError(HEURIST_INVALID_REQUEST, "Insufficent data passed. New value not defined");
             return false;
         }
         
@@ -606,11 +606,12 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
         
         $partialReplace = false;
         
-        if(!@$this->data['sVal']){    //value to be replaced
+        if(@$this->data['sVal']==null){    //value to be replaced
             //all except geo and file
             //$searchClause = '1=1';
             $replace_all_occurences = true;   //search value not defined replace all
 
+            //??? why we need it if $dtyID is defined
             $types = mysql__select_list2($mysqli, 'select dty_ID from defDetailTypes where dty_Type = "file" OR dty_Type = "geo"');
             $searchClause = 'dtl_DetailTypeID NOT IN ('.implode(',',$types).')';
             
@@ -697,8 +698,8 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
                             $s = trim($newVal);
                             $dtl['dtl_Value'] = preg_replace('#<script(.*?)>(.*?)</script>#is', '', $s);
                             
-                        //$s = $this->purifier->purify( $newVal );                                
-                        //$dtl['dtl_Value'] = htmlspecialchars_decode( $s );
+                            //$s = $this->purifier->purify( $newVal );                                
+                            //$dtl['dtl_Value'] = htmlspecialchars_decode( $dtl['dtl_Value'] );
                     }else{
                         $dtl['dtl_Value'] = $newVal;        
                     }
@@ -1123,7 +1124,7 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
                             /*
                             $query = 'INSERT INTO recDetails (dtl_RecID,dtl_DetailTypeID,dtl_Value) VALUES ('
                             .$dtl['dtl_RecID'].', '.$dtl['dtl_DetailTypeID'].', '
-                            .'CONVERT( CAST(? AS BINARY) USING utf8))';
+                            .'CONVERT( CAST(? AS BINARY) USING utf8mb4))';
                             
                             $ret = mysql__exec_param_query($mysqli, $query, array($dtl['dtl_Value']));
                             */

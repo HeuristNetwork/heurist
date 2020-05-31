@@ -42,7 +42,7 @@ class DbUsrRecPermissions extends DbEntityBase
               ."`rcp_Level` enum('view','edit') NOT NULL default 'view' COMMENT 'Level of permission',"
               ."PRIMARY KEY  (rcp_ID)"
               //."UNIQUE KEY rcp_composite_key (rcp_RecID,rcp_UGrpID)"
-            .") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Permissions for groups to records'";
+            .") ENGINE=InnoDB COMMENT='Permissions for groups to records'";
         
             if (!$mysqli->query($query)) {
                 error_log($mysqli->error);

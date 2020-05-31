@@ -403,7 +403,7 @@ window.hWin.HEURIST4.ui = {
     },
 
     //
-    // check taht given selectedTermID is among allowed termIDTree (except headerTermIDsList)
+    // check that given selectedTermID is among allowed termIDTree (except headerTermIDsList)
     //
     isTermInList: function(datatype, termIDTree, headerTermIDsList, selectedTermID) {
         
@@ -1907,7 +1907,7 @@ window.hWin.HEURIST4.ui = {
                         + '</div>'
                         //+ '<div class="ent_footer editForm-toolbar"/>'
                     +'</div>',
-                    onInitFinished:function( ){
+                    onInitFinished:function( last_attempt ){
                         
                         if(query_request){
                             if(!$.isPlainObject(query_request)){ //just string
@@ -1943,6 +1943,11 @@ window.hWin.HEURIST4.ui = {
                                                         
                                     }
                                     else {
+                                        if(last_attempt!==true && query_request && rec_ID>0){
+                                            query_request = null;
+                                            onInitFinished( true );
+                                            return;
+                                        }
                                         
                                         var sMsg = ' does not exist in database or has status "hidden" for non owners';
                                         if(rec_ID>0){

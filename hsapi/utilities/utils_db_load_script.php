@@ -97,7 +97,7 @@ $db_password = ADMIN_DBUSERPSWD;
 // See http://dev.mysql.com/doc/refman/5.0/en/charset-charsets.html for the full list
 // Change this if you have problems with non-latin letters
 
-$db_connection_charset = 'utf8';
+$db_connection_charset = 'utf8mb4';
 
 // OPTIONAL SETTINGS
 
@@ -208,8 +208,10 @@ if (!$error && !TESTMODE)
         }
     }
 
-    if (!$error && $db_connection_charset!=='')
+    if (!$error && $db_connection_charset!==''){
         $mysqli->query("SET NAMES $db_connection_charset");
+    }
+        
 
     if (!$error && isset ($pre_query) && sizeof ($pre_query)>0)
     { reset($pre_query);

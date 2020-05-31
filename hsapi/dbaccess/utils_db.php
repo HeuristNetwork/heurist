@@ -99,9 +99,9 @@
                 return array(HEURIST_INVALID_REQUEST, "Could not open database ".htmlspecialchars($database_name, ENT_QUOTES, 'UTF-8'));
             }
 
-            $mysqli->query('set character set "utf8mb4"'); //utf8 is utf8mb3 by default
-            //$mysqli->query('set names "utf8"');
-            
+            //$mysqli->query('SET CHARACTER SET utf8mb4'); //utf8 is utf8mb3 by default
+            //$mysqli->query('SET NAMES utf8mb4 COLLATE utf8mb4_0900_ai_ci');
+            $mysqli->query('SET NAMES utf8mb4');
         }
         return true;
     }
@@ -119,7 +119,11 @@
                 'Only letters, numbers and underscores (_) are allowed in the database name');
         }else{
             // Create database
-            $sql = "CREATE DATABASE `".$db_name."`";
+            $sql = 'CREATE DATABASE `'.$db_name.'` '
+                     .' DEFAULT CHARACTER SET = utf8 DEFAULT COLLATE = utf8_general_ci';
+                    //.' DEFAULT CHARACTER SET = utf8mb4 DEFAULT COLLATE = utf8mb4_0900_ai_ci';
+                    //
+                    
             if ($mysqli->query($sql)) {
                 $res = true;
             } else {
@@ -712,7 +716,7 @@ $query = 'CREATE TABLE usrWorkingSubsets ( '
   ."PRIMARY KEY  (wss_ID),"
   .'KEY wss_RecID (wss_RecID),'
   .'KEY wss_OwnerUGrpID (wss_OwnerUGrpID)'
-.") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Lists a set of Records to be included in a working subset for a user. Working susbset is an initial filter on all filter actions.'";
+.") ENGINE=InnoDB COMMENT='Lists a set of Records to be included in a working subset for a user. Working susbset is an initial filter on all filter actions.'";
             
             $res = $mysqli->query($query);
             if(!$res){
@@ -729,7 +733,7 @@ $query = 'CREATE TABLE usrWorkingSubsets ( '
         $row_cnt = $res->num_rows;
         if(!$row_cnt){ //column not defined
             $query = 'ALTER TABLE `defTerms` ADD '
-                    .' `trm_SemanticReferenceURL` VARCHAR( 250 ) CHARACTER SET utf8 COLLATE utf8_general_ci NULL'
+                    .' `trm_SemanticReferenceURL` VARCHAR( 250 ) NULL'
                     ." COMMENT 'The URI to a semantic definition or web page describing the term'"
                     .' AFTER `trm_Code`';
             $res = $mysqli->query($query);
@@ -766,7 +770,7 @@ $query = 'CREATE TABLE usrWorkingSubsets ( '
                   ."`rcp_RecID` int(10) unsigned NOT NULL COMMENT 'The record to which permission is linked',"
                   ."`rcp_Level` enum('view','edit') NOT NULL default 'view' COMMENT 'Level of permission',"
                   ."PRIMARY KEY  (rcp_ID)"
-                .") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Permissions for groups to records'";
+                .") ENGINE=InnoDB COMMENT='Permissions for groups to records'";
             
             $res = $mysqli->query($query);
             if(!$res){
@@ -793,7 +797,7 @@ $query = 'CREATE TABLE sysDashboard ('
   ."dsh_CommandToRun varchar(64) COMMENT 'Name of commonly used functions',"
   ."dsh_Parameters varchar(250) COMMENT 'Parameters to pass to the command eg the record type to create',"
   ."PRIMARY KEY  (dsh_ID)"
-.") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Defines an editable list of shortcuts to functions to be displayed on a popup dashboard at startup unless turned off'";
+.") ENGINE=InnoDB COMMENT='Defines an editable list of shortcuts to functions to be displayed on a popup dashboard at startup unless turned off'";
             
             $res = $mysqli->query($query);
             if(!$res){

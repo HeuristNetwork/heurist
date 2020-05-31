@@ -1755,7 +1755,7 @@ class FieldPredicate extends Predicate {
     function get_field_type_clause(){
         global $mysqli;
 
-        if(trim($this->value)==''){
+        if(trim($this->value)===''){
             
             $rd_type_clause = "!=''";
             
@@ -1779,7 +1779,7 @@ class FieldPredicate extends Predicate {
     function get_field_value(){
         global $mysqli;
 
-        if(trim($this->value)=='' || $this->value==false){   //if value is not defined find any non empty value
+        if(trim($this->value)==='' || $this->value===false){   //if value is not defined find any non empty value
             
             $match_pred = " !='' ";
         
@@ -2113,7 +2113,7 @@ class BibIDPredicate extends Predicate {
                     $cs_ids = implode(',',$rsvd);
                 }
                 
-            //if (preg_match('/^\d+(?:,\d*)+$/', $this->value)) { - it does not work for >500 entries
+            //if (preg_match('/^\d+(?:,\d*)+$/', $this->value)) { - regex does not work for >500 entries
                 // comma-separated list of ids
                 $not = ($this->parent->negate)? ' not' : '';
                 $match_pred = $not.' in ('.$cs_ids.')';

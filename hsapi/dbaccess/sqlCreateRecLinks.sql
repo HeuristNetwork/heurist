@@ -16,7 +16,7 @@ CREATE TABLE recLinks (
   KEY rl_TargetPtrKey (rl_TargetID),
   KEY rl_RelationKey (rl_RelationID),
   KEY rl_DetailKey (rl_DetailID)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='A cache for records links (pointers and relationships) to speed access';
+) ENGINE=InnoDB COMMENT='A cache for records links (pointers and relationships) to speed access';
 
 -- add relationships
 insert into recLinks (rl_SourceID, rl_TargetID, rl_RelationID, rl_RelationTypeID)

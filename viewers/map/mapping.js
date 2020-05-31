@@ -2192,7 +2192,7 @@ $.widget( "heurist.mapping", {
         __controls('help');
         
             
-        //   legend: [basemaps,search,mapdocs|onedoc]
+        //   legend: [basemaps,search,mapdocs|onedoc,off,width]
         this.mapManager.updatePanelVisibility(__splitval(params['legend']));
         
         //$('#map-settingup-message').text('EXPERIMENTAL');

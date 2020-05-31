@@ -3072,6 +3072,9 @@ rectypes.names[rectypeID] + ' is defined as a child of <b>'+names
                 
                 for(var i=0;i<service_config.length; i++){
                     var cfg = service_config[i];    
+                    
+                    if(cfg.database && cfg.database!=window.hWin.HAPI4.database) contiue;
+                    
                     if(cfg.rty_ID == this._currentEditRecTypeID){   //@todo many services
                         notfound = false;            
                         
@@ -3088,23 +3091,48 @@ rectypes.names[rectypeID] + ' is defined as a child of <b>'+names
                                 
                                 var cfg = window.hWin.HAPI4.sysinfo['service_config'][idx];
                                 
-                            window.hWin.HEURIST4.ui.showRecordActionDialog('recordLookup',
-                                {mapping: cfg, onClose:function(recset){
+                            window.hWin.HEURIST4.ui.showRecordActionDialog(cfg.dialog, //'recordLookup'
+                                { mapping: cfg, 
+                                  edit_fields: this._editing.getValues(true),
+                                  edit_record: this._currentEditRecordset,
+                                  onClose:function(recset){
                                     if(recset){
-                                        var rec = recset.getFirstRecord();
-                                        // loop all fields in selected values
-                                        // find field in edit form
-                                        // assign value
-                                        var fields = recset.getFields();
-                                        for(var k=2; k<fields.length; k++){
-                                            var dt_id = cfg.fields[fields[k]];
-                                            if(dt_id>0)
-                                            {
-                                                var newval = recset.fld(rec, fields[k]);
-                                                newval = window.hWin.HEURIST4.util.isnull(newval)?'':newval;
-                                                that._editing.setFieldValueByName( dt_id, newval );
-                                                //var ele_input = that._editing.getFieldByName(dt_id );
+                                        
+                                        if((typeof recset.isA == "function") && recset.isA('hRecordSet')){
+                                        
+                                            var rec = recset.getFirstRecord();
+                                            // loop all fields in selected values
+                                            // find field in edit form
+                                            // assign value
+                                            var fields = recset.getFields();
+                                            for(var k=2; k<fields.length; k++){
+                                                var dt_id = cfg.fields[fields[k]];
+                                                if(dt_id>0)
+                                                {
+                                                    var newval = recset.fld(rec, fields[k]);
+                                                    newval = window.hWin.HEURIST4.util.isnull(newval)?'':newval;
+                                                    that._editing.setFieldValueByName( dt_id, newval );
+                                                    //var ele_input = that._editing.getFieldByName(dt_id );
+                                                }
                                             }
+                                        }else{
+                                            var dtyIds = Object.keys(recset);
+
+                                            for(var k=0; k<dtyIds.length; k++){
+                                                var dt_id = dtyIds[k];
+                                                if(dt_id>0)
+                                                {
+                                                    var newval = recset[dt_id];
+                                                    if(!$.isArray(newval)){
+                                                        newval = window.hWin.HEURIST4.util.isnull(newval)?'':newval;
+                                                        newval = [newval];  
+                                                    } 
+                                                    that._editing.setFieldValueByName( dt_id, newval );
+                                                    //var ele_input = that._editing.getFieldByName(dt_id );
+                                                }
+                                            }
+
+                                            
                                         }
                                     }
                                 }});
