@@ -62,10 +62,11 @@ of the codebase and rename it to index.html
 
 // *** DO NOT CHANGE VERSION NUMBER, THIS IS SET BY THE HEURIST DEVELOPMENT TEAM ***
 
-$version = "5.2.6"; // sets current program version number, determined by Heurist development lead
+$version = "5.2.7"; // sets current program version number, determined by Heurist development lead
 
 // dates below are the date of release of the given version, and list changes since last release
 
+// h5.2.7 31 May 2020 Handling of 4 byte UTF encoding, working subset function, improvements to CSV import including large files, clarify remote lookup from edit record, template import, structure editor,
 // h5.2.6 4 May 2020 Tabbed interface fixes, multi-type facet search, improve map clustering and widget parameters, remove following reverse pointers on XML export, warn on projected shapefiles 
 // h5.2.5 24 april 2020 Further fixes new structure editor, collapsible and tab headers, web page contet >64K, chunking large archive files for download removing size limit
 // h5.2.4 4 April 2020 Fixes to new structure editor and workflow in record editing
