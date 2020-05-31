@@ -198,7 +198,7 @@ window.hWin.HEURIST4.msg.showMsgDlg(
         }
     }else{
         //default value - content of page
-        print '<h2>'.__getValue($rec, DT_NAME).'</h2>'
+        print '<h2 class="webpageheading">'.__getValue($rec, DT_NAME).'</h2>'
                             .__getValue($rec, DT_EXTENDED_DESCRIPTION);
     }
     exit();

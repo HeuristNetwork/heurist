@@ -33,7 +33,9 @@ $.widget( "heurist.recordListExt", {
         
         reload_for_recordset: false, //refresh every time recordset is changed - for smarty report from CMS
         search_realm: null,
-        search_initial: null  //NOT USED query string or svs_ID for initial search
+        search_initial: null,  //NOT USED query string or svs_ID for initial search
+        
+        onLoadComplete: null  //callback
     },
 
     _current_url: null,
@@ -67,7 +69,7 @@ $.widget( "heurist.recordListExt", {
             {
                 if(!window.hWin.HAPI4.has_access()){ //logout
                     that.options.recordset = null;
-that._dout('credentiasl');                    
+that._dout('credentials');                    
                     that._refresh();
                 }
             }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH){ 
@@ -154,7 +156,11 @@ this._dout('load '+this.options.is_frame_based+'  '+newurl);
 this._dout('onLoadComplete refresh again');                
               this._refresh();
         }
-//2020-03-08        this._trigger( 'loadcomplete', null, null );
+        if($.isFunction(this.options.onLoadComplete)){
+            this.options.onLoadComplete.call(this);
+        }
+//2020-03-08        
+        //this._trigger( 'loadcomplete2', null, null );
     },
     
     //
@@ -181,7 +187,7 @@ this._dout('update dataset '+request.q);
 
     _setOptions: function() {
         // _super and _superApply handle keeping the right this-context
-        //this._superApply( arguments );
+        this._superApply( arguments );
         //this._refresh();
     },
     

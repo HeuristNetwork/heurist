@@ -112,10 +112,11 @@ $.widget( "heurist.navigation", {
             DT_SHORT_SUMMARY = window.hWin.HAPI4.sysinfo['dbconst']['DT_SHORT_SUMMARY'],
             DT_CMS_TOP_MENU = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_TOP_MENU'],
             DT_CMS_MENU = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_MENU'],
-            DT_CMS_PAGE = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_PAGE'],  //pointer to page 
+            //DT_CMS_PAGE = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_PAGE'],  //pointer to page 
             DT_CMS_CSS = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_CSS'],
             DT_CMS_SCRIPT = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_SCRIPT'],
             DT_CMS_TARGET = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_TARGET'];//target element on page or popup
+            DT_CMS_PAGETITLE = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_PAGETITLE'];//show page title above content
             
         var that = this;
         var ids_was_added = [], ids_recurred = [];
@@ -153,6 +154,8 @@ $.widget( "heurist.navigation", {
                     //target and position
                     var pageTarget = resdata.fld(record, DT_CMS_TARGET);
                     var pageStyle = resdata.fld(record, DT_CMS_CSS);
+                    var showTitle = (resdata.fld(record, DT_CMS_PAGETITLE)=='5949');
+
                     if(pageStyle){
                         that.pageStyles[page_id] = window.hWin.HEURIST4.util.cssToJson(pageStyle);    
                     }
@@ -160,6 +163,7 @@ $.widget( "heurist.navigation", {
                     res = res + '<li><a href="#" style="padding:2px 1em" data-pageid="'
                                     + page_id + '"'
                                     + (pageTarget?' data-target="' + pageTarget +'"':'')
+                                    + (showTitle?' data-showtitle="1"':'')
                                     + ' title="'+window.hWin.HEURIST4.util.htmlEscape(menuTitle)+'">'
                                     +window.hWin.HEURIST4.util.htmlEscape(menuName)+'</a>';
                     
@@ -255,7 +259,8 @@ $.widget( "heurist.navigation", {
             var pageid = $(event.target).attr('data-pageid');
             var page_target = $(event.target).attr('data-target');
             if(!page_target) page_target = '#main-content';
-            
+            var page_showtitle = ($(event.target).attr('data-showtitle')==1);
+         
             $(event.target).parents('.ui-menu[data-level!=0]').hide();
             /*var mele = $(event.target).parents('.ui-menu[data-level!=0]');
             if(mele.attr('data-level')!=0) mele.hide();*/
@@ -282,6 +287,7 @@ $.widget( "heurist.navigation", {
                     
                 }else{
                 
+                    //redirected to websiteRecord.php     
                     var page_url = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database
                                     +'&field=1&recid='+pageid;
                                     
@@ -298,9 +304,12 @@ $.widget( "heurist.navigation", {
                                 open: function(){
 
 
-                                    var pagetitle = $($dlg.find('.ui-dialog-content').children()[0]);
-                                    if(pagetitle.is('h2')){
-                                        pagetitle.addClass("webpageheading");//.css({position:'absolute',left:0,width:'auto'});
+                                    var pagetitle = $dlg.find('h2.webpageheading');
+                                    if(pagetitle.length>0){ //find title - this is first children
+                                        //pagetitle.addClass("webpageheading");//.css({position:'absolute',left:0,width:'auto'});
+                                        if(!page_showtitle){
+                                            pagetitle.hide();
+                                        }
                                     }
 
                                     window.hWin.HAPI4.LayoutMgr.appInitFromContainer2( $dlg );
