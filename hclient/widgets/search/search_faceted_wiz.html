@@ -33,7 +33,7 @@
     </div>
     
     
-    <div style="width: 420px; font-size: smaller; margin-top: 0px; margin-bottom: 5px;">
+    <div style="width: 420px; margin-top: 0px; margin-bottom: 5px;" class="heurist-helper2">
     This determines the record type which will be retrieved by the search.
     The facets can, however, be based on attributes of other record types linked from this type.
     </div>
@@ -44,7 +44,7 @@
     <div class="header"><label for="svs_Name">Faceted search name</label></div>
     <input type="text" name="svs_Name" id="svs_Name" class="text ui-widget-content ui-corner-all"
         maxlength="64" size="64" />
-    <div style="width: 290px; font-size: smaller; margin-top: 0px; margin-bottom: 5px;">
+    <div style="width: 290px; margin-top: 0px; margin-bottom: 5px;" class="heurist-helper2">
         Used in navigation tree (maximum 64 characters).
 
     </div>
@@ -52,10 +52,23 @@
 <div>
     <div class="header"  style="margin-bottom: 10px; "><label for="svs_UGrpID">Save in work group</label></div>
     <select name="svs_UGrpID" id="svs_UGrpID" class="text ui-widget-content ui-corner-all"></select>
-    <div style="width: 420px; font-size: smaller; margin-top: 0px; margin-bottom: 5px;">
+    <div style="width: 420px; margin-top: 0px; margin-bottom: 10px;" class="heurist-helper2">
         Use a shared workgroup if you want other people to be able to use your search.
     </div>
 </div>
+
+<div>
+    <div class="header"><label for="svs_SearchOnReset"></label></div>
+    <input name="svs_SearchOnReset" id="svs_SearchOnReset" class="text ui-widget-content ui-corner-all" type="checkbox"
+            style="display:inline-block;margin:0" title="Perform search on init"/>
+    <div style="width: 420px; padding-left:10px; font-size: smaller; display:inline-block">
+        Display full set of records prior to facet selection
+    </div>
+    <div style="width: 420px; margin: 4px 0px 5px 22px;" class="heurist-helper2">
+        Recommended on public websites unless too slow due to large number of records
+    </div>
+</div>
+
 </fieldset>
 
 <div class="optional_fields"><h4>Advanced</h4>
@@ -113,7 +126,7 @@
             <div id="svs_getCurrentFilter"  style="margin-top:0.4em"></div>
         </div>
     </div>    
-    <div style="width: 420px; font-size: smaller; margin-top: 5px; margin-bottom: 5px;">
+    <div style="width: 420px; margin-top: 5px; margin-bottom: 5px;" class="heurist-helper2">
                 A Heurist filter string which extracts a subset of the database, to which the faceted search is then applied.
     </div>
     <div class="prefilter-settings">
@@ -162,7 +175,7 @@
         </div>
     </div>
     
-    <div style="width: 420px; font-size: smaller; margin-top: 5px;  margin-bottom: 5px;">
+    <div style="width: 420px; margin-top: 5px;  margin-bottom: 5px;" class="heurist-helper2">
     Rules are applied to the result set after each selection. They expand the results
     to include connected records (entities). This expansion may be restricted
     to specific entity types, connection types or filters.
@@ -196,21 +209,10 @@
 <fieldset style="padding-top:10px">
 
 <div>
-    <div class="header">
-        <label for="svs_SearchOnReset"></label>
-    </div>
-    <input name="svs_SearchOnReset" id="svs_SearchOnReset" class="text ui-widget-content ui-corner-all" type="checkbox"
-            style="display:inline-block;margin:0" title="Perform search on init"/>
-    <div style="width: 420px; padding-left:10px; font-size: smaller; display:inline-block">
-        Display full set of records prior to facet selection
-    </div>
-</div>
-
-<div>
     <div class="header"><label for="svs_Title">Title in user interface</label></div>
     <input type="text" name="svs_Title" id="svs_Title" class="text ui-widget-content ui-corner-all"
         maxlength="64" size="64" />
-    <div style="font-size: smaller; margin-top: 0px; margin-bottom: 5px;">
+    <div style="margin-top: 0px; margin-bottom: 5px;" class="heurist-helper2">
         Used in user search interface (maximum 64 characters).
     </div>
 </div>
