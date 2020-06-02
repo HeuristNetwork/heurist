@@ -706,10 +706,10 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             if( !(this._currentEditID>0) && (full_mode!==true) ){ //insert
             
                 $('<div style="line-height:2ex;padding-top:4px">'
-                        +'<div id="enumVocabulary" style="display:inline-block;padding-left:4px;">'
+                        +'<div id="enumVocabulary" style="display:inline-block;">' //padding-left:4px;
                             +'<select id="selVocab" class="sel_width"></select>'
                             +'<span id="termsPreview1"></span>'
-                            +'<div style="font-size:smaller">'
+                            +'<div style="padding:5px 3px">'
                                 +'<a href="#" id="add_advanced">advanced</a>&nbsp;'
                                 +'<a href="#" id="add_vocabulary" style="margin-left:90px;">add a vocabulary</a>&nbsp;'
                             +'</div>'

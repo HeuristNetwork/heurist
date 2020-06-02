@@ -19,6 +19,13 @@
 
 $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
 
+    
+//specific options
+//   rty_ID: 
+//   rec_ID_sample: 
+//   external_preview: send this widget to use as preview
+    
+    
     _entityName:'defRecStructure',
     
     _fakeSepIdsCounter:0,
@@ -446,8 +453,8 @@ dty_TermIDTreeNonSelectableIDs
                     //window.hWin.HEURIST4.util.stopEvent(event)
                 
             },
-            activate: function(event, data) {
-                //main entry point to start edit rts field
+            activate: function(event, data) { 
+                //main entry point to start edit rts field - open formlet
                 if(data.node.key>0){
                     that.selectedRecords([data.node.key]);
                     if(!that._lockDefaultEdit){
@@ -455,9 +462,11 @@ dty_TermIDTreeNonSelectableIDs
                         if(that.options.external_preview){
                             that.options.external_preview.manageRecords('saveQuickWithoutValidation',
                                 function(){
+                                    that.previewEditor.manageRecords('setDisabledEditForm', true)
                                     that._onActionListener(event, {action:'edit'}); //default action of selection            
                                 });
                         }else{
+                            that.previewEditor.manageRecords('setDisabledEditForm', true)
                             that._onActionListener(event, {action:'edit'}); //default action of selection            
                         }
                         
@@ -1511,7 +1520,10 @@ dty_TermIDTreeNonSelectableIDs
                         if(that._editing && that._editing.isModified() && that._currentEditID!=null){
                             var $dlg, buttons = {};
                             buttons['Save'] = function(){ that._saveEditAndClose(null, 'close'); $dlg.dialog('close'); }; 
-                            buttons['Ignore and close'] = function(){ that._closeFormlet(); $dlg.dialog('close'); };
+                            buttons['Ignore and close'] = function(){ 
+                                    that._closeFormlet(); 
+                                    $dlg.dialog('close'); 
+                            };
 
                             $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
                                 'You have made changes to the data. Click "Save" otherwise all changes will be lost.',
@@ -1554,6 +1566,7 @@ dty_TermIDTreeNonSelectableIDs
             this.previewEditor.show();
         }
         
+        this.previewEditor.manageRecords('setDisabledEditForm', false);
         this.onEditFormChange(); //after close
     },  
                       

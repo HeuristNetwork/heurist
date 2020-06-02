@@ -1727,7 +1727,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             }
                 
         }
-        else if(flase && is_inline){ //OLD OPTION: show as widget on full width/height with its own preview 
+        else if(false && is_inline){ //OLD OPTION: show as widget on full width/height with its own preview 
             //create new widget manageDefRecStructure
             var $structure_editor = this.element.find('.editStructure');
             if($structure_editor.length==0){

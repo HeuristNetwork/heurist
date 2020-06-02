@@ -1498,6 +1498,13 @@ $.widget( "heurist.manageEntity", {
     //
     //
     //
+    setDisabledEditForm: function( mode ){
+        this._editing.setDisabled(mode);  
+    },
+
+    //
+    //
+    //
     reloadEditForm: function( hard_reload ){
         //this._initEditForm_step3(this._currentEditID);
             
