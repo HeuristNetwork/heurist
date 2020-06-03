@@ -1,20 +1,22 @@
 
 <fieldset id="div_layout">
     <div id="div_header" style="padding: 0.2em; width: 100%; display:block;font-size:larger">
-        <p>This function allows one to design a layout displaying a connected set of Heurist widgets (search, saved filters, results lists, custom reports, maps, timelines, network diagrams etc.) which can be embedded in a third-party website.</p>
-        <p>Create a new layout or select an existing one from the dropdown (existing layouts can be edited).</p>
+        <p>This function allows one to design and edit a web page which can include Heurist widgets (search, saved filters, results lists, custom reports, maps, timelines, network diagrams etc.) which can be embedded in a third-party website.</p>
+        <p>Create a new web page or select an existing one from the dropdown (existing pages can be edited).</p>
     </div>
     <div style="padding: 0.2em; width: 100%;" class="input">
+        
         <div class="header" style="padding: 0 16px 0 16px;min-width:40px;width:40px">
-            <label for="layout_name">Name:</label>
+            <label for="sel_layout">Select existing layout:</label>
+        </div>
+        <select id="sel_layout" class="text ui-widget-content ui-corner-all" style="max-width:30em"></select>
+        
+        <div class="header" style="padding: 0 16px 0 16px;min-width:40px;width:40px">
+            <label for="layout_name">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;OR &nbsp;&nbsp;&nbsp;Name for new page:</label>
         </div>
         <input id="layout_name" class="text ui-widget-content ui-corner-all" style="max-width:30em">
         <button id="btnCreateLayout" style="margin-left:4px">Create new</button> 
         
-        <div class="header" style="padding: 0 16px 0 16px;min-width:40px;width:40px">
-            <label for="sel_layout">OR</label>
-        </div>
-        <select id="sel_layout" class="text ui-widget-content ui-corner-all" style="max-width:30em"></select>
     </div>
     <div style="padding: 0.2em; width: 100%;" class="input">
     </div>
