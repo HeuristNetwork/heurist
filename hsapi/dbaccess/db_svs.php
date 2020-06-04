@@ -176,6 +176,9 @@
             $system->addError(HEURIST_INVALID_REQUEST, "Query not defined"); //for new 
         }else{
 
+            //refresh groups
+            $system->get_user_group_ids(null, true);
+            
             if (!$system->is_member(@$record['svs_UGrpID'])) { //was has_access
                 $system->addError(HEURIST_REQUEST_DENIED, 
                     'Cannot update filter criteria. Current user must be member for group');

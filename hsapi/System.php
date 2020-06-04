@@ -1194,8 +1194,6 @@ if($cres==false){
             $userID = $user['ugr_ID'];
         }else{
             
-            $userID = @$_SESSION[$this->dbname_full]['ugr_ID'];
-        
             $reload_user_from_db = ($user==true);  //reload user unconditionally
             
             $userID = @$_SESSION[$this->dbname_full]['ugr_ID'];
@@ -1241,21 +1239,10 @@ if($cres==false){
 
             if($reload_user_from_db){ //from database
                 
-                if(!is_array($user)){
-                    $user = user_getById($this->mysqli, $userID);
-                }
-                //user can be removed - check presence 
-                if($user==null){
+                if(!$this->updateSessionForUser( $userID )){
                     return false; //not logged in
                 }
-                
-                $_SESSION[$this->dbname_full]['ugr_ID'] = $userID;
-                $_SESSION[$this->dbname_full]['ugr_Groups']   = user_getWorkgroups( $this->mysqli, $userID );
-                $_SESSION[$this->dbname_full]['ugr_Name']     = $user['ugr_Name'];
-                $_SESSION[$this->dbname_full]['ugr_FullName'] = $user['ugr_FirstName'] . ' ' . $user['ugr_LastName'];
-                
-                //remove semaphore file
-                
+
             }//$reload_user_from_db from db
             
             $this->current_User = array('ugr_ID'=>intval($userID),
@@ -1286,6 +1273,27 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
         }
         return $islogged;
     }
+    
+    //
+    //
+    //
+    public function updateSessionForUser( $userID ){
+        
+        $user = user_getById($this->mysqli, $userID);
+        
+        //user can be removed - check presence 
+        if($user==null){
+            return false; //not logged in
+        }
+        
+        $_SESSION[$this->dbname_full]['ugr_ID'] = $userID;
+        $_SESSION[$this->dbname_full]['ugr_Groups']   = user_getWorkgroups( $this->mysqli, $userID );
+        $_SESSION[$this->dbname_full]['ugr_Name']     = $user['ugr_Name'];
+        $_SESSION[$this->dbname_full]['ugr_FullName'] = $user['ugr_FirstName'] . ' ' . $user['ugr_LastName'];
+        
+        return true;
+    }
+    
     
     /**
     * some databases may share credentials

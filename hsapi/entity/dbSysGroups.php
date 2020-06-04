@@ -349,6 +349,8 @@ class DbSysGroups extends DbEntityBase
                     }
             }
             
+            //update user groups for current user
+            //$this->system->updateSessionForUser( $this->system->get_user_id() );
             //@todo   $groups = reloadUserGroups(get_user_id());
             //@todo   updateSessionForUser(get_user_id(), 'user_access', $groups);
         }else{

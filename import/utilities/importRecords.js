@@ -533,7 +533,8 @@ function hImportRecords(_max_upload_size) {
             },4000);
             return;
             */
-                   
+            
+            //see importController       
             window.hWin.HAPI4.doImportAction(request, function( response ){
                     
                     if(response.status == window.hWin.ResponseStatus.OK){
@@ -564,7 +565,7 @@ function hImportRecords(_max_upload_size) {
     }        
     
     //
-    // Move to UI
+    // @todo use msg.showProgress
     //
     function _showProgress( session_id, currentStep ){
 

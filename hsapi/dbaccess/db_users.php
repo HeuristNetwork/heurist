@@ -276,6 +276,8 @@
         'defaultSearch' => 'sortby:-m'
         );
     }
+    
+    //@$_SESSION[$system->dbname_full()]['ugr_Groups'] = user_getWorkgroups( $this->mysqli, $userID );
 
     /**
     * Get set of properties from SESSION and to database
