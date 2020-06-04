@@ -168,16 +168,19 @@ console.log(re);
                     //accept events from the same realm only
                     if(that._isSameRealm(data) && data.source!=that.element.attr('id')) { //selection happened somewhere else
                         if(data.reset){
+                            //clear selection
                             that.option("selection",  null);
+                            
                         }else if(data.map_layer_action == 'trigger_visibility'){
                             
                             var sel =  window.hWin.HAPI4.getSelection(data.selection, true);
                             
-                            // selection is dataset id - show/hide visibility of dataset
+                            // data.selection is dataset id - show/hide visibility of dataset
+                            // new_visiblity - true, false to show/hide entire layer or array of ids to filter out on map
                             that._setLayersVisibility( sel, data.mapdoc_id, data.new_visiblity );
                             
                         }else if(data.map_layer_action == 'download'){
-
+                            //download layer data
                             var sel =  window.hWin.HAPI4.getSelection(data.selection, true);
                             that._downloadLayerData( sel );
                             
@@ -531,7 +534,6 @@ console.log(re);
             
         }        
     }
-
 
     // events bound via _on are removed automatically
     // revert other modifications here

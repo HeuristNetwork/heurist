@@ -62,7 +62,8 @@ Thematic mapping
     setFeatureSelection - triggers redraw for path and polygones (assigns styler function)  and creates highlight circles for markers
     setFeatureVisibility - applies visibility for given set of heurist recIds (filter from timeline)
     zoomToSelection
-    setVisibilityAndZoom - show only items in given recordset and zoom 
+    setLayerVisibility - show hide entire layer
+    setVisibilityAndZoom - show susbset n given recordset and zoom 
     
     _onLayerClick - map layer (shape) on click event handler - highlight selection on timeline and map, opens popup
     _clearHighlightedMarkers - removes special "highlight" selection circle markers from map
@@ -984,26 +985,27 @@ $.widget( "heurist.mapping", {
     },
 
     //
+    // switch layer entire visibility on off
     //
-    //
-    setLayerVisibility: function(layer_id, is_visible)
+    setLayerVisibility: function(nativelayer_id, visiblity_set)
     {
-        var affected_layer = this.all_layers[layer_id];
+        var affected_layer = this.all_layers[nativelayer_id];
         if(affected_layer){
             this._clearHighlightedMarkers();
             
-            if(is_visible===false){
+            if(visiblity_set===false){
+                //hide all
                 affected_layer.remove();
-                if(this.all_clusters[layer_id]) this.all_clusters[layer_id].remove();
+                if(this.all_clusters[nativelayer_id]) this.all_clusters[nativelayer_id].remove();
             }else{
                 affected_layer.addTo(this.nativemap);
-                if(this.all_clusters[layer_id]) this.all_clusters[layer_id].addTo(this.nativemap);
+                if(this.all_clusters[nativelayer_id]) this.all_clusters[nativelayer_id].addTo(this.nativemap);
             }
         }
     },
     
-    isLayerVisibile: function(layer_id){
-        var affected_layer = this.all_layers[layer_id];
+    isLayerVisibile: function(laynativelayer_ider_id){
+        var affected_layer = this.all_layers[nativelayer_id];
         if(affected_layer){
             return this.nativemap.hasLayer(affected_layer);
         }else{
@@ -1737,7 +1739,7 @@ $.widget( "heurist.mapping", {
     },
     
     //
-    // dataset_id -  {mapdoc_id, dataset_name, dataset_id}
+    // dataset_id -  {mapdoc_id:, dataset_name:, dataset_id:  or native_id}
     //
     setVisibilityAndZoom: function( dataset_id, _selection, need_zoom ){
         

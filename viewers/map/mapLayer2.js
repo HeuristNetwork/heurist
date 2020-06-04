@@ -463,19 +463,28 @@ function hMapLayer2( _options ) {
             */                 
         },
         
-        setVisibility:function(isvisible){
+        //
+        // visiblity_set true,false or array of ids
+        //
+        setVisibility:function(visiblity_set){
             
-            is_visible = isvisible;
+            var was_invisible = !is_visible;
+            is_visible = (window.hWin.HEURIST4.util.isArrayNotEmpty(visiblity_set) || visiblity_set === true);
             
             var status = null;
            
             if(is_inited){
                 if(_nativelayer_id>0){
-                    status =  isvisible?'visible':'hidden'
+                    status =  (is_visible)?'visible':'hidden';
                     
-                    options.mapwidget.mapping('setLayerVisibility', _nativelayer_id, isvisible);
+                    if(window.hWin.HEURIST4.util.isArrayNotEmpty(visiblity_set)){                            
+                        if(was_invisible) options.mapwidget.mapping('setLayerVisibility', _nativelayer_id, true);
+                        options.mapwidget.mapping('setVisibilityAndZoom', {native_id:_nativelayer_id}, visiblity_set, true);
+                    }else{        
+                        options.mapwidget.mapping('setLayerVisibility', _nativelayer_id, is_visible);
+                    }
                 }
-            }else if(isvisible) {
+            }else if(is_visible) {
                 status = 'loading'
                 _addLayerToMap();    
             }

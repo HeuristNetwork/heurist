@@ -63,7 +63,7 @@ $.widget( "heurist.resultList", {
         
         recordDivClass: '', //additional class that modifies recordDiv appearance (see for example "public" in h4styles.css)
         // smarty template or url (or todo function) to draw inline record details when recordview_onselect='inline'. (LINE view mode only)
-        rendererExpandDetails: null, 
+        rendererExpandDetails: null,  //name of smarty template or function to draw expanded details
 
         searchfull: null,  // custom function to search full data
         
@@ -73,7 +73,7 @@ $.widget( "heurist.resultList", {
         //event
         onselect: null,  //on select event for non event based
 
-        onPageRender: null, //on complete of page render
+        onPageRender: null, //event listner on complete of page render
 
         navigator:'auto',  //none, buttons, menu, auto
 
@@ -2688,7 +2688,7 @@ $.widget( "heurist.resultList", {
 
         this._trigger( "onpagerender", null, this );
         
-        //@todo replace it to event listener in manageRecUploadedFiles
+        //@todo replace it to event listener in manageRecUploadedFiles as in manageSysGroups
         if($.isFunction(this.options.onPageRender)){
             this.options.onPageRender.call(this);
         }
