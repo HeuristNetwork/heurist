@@ -529,7 +529,10 @@ console.log(re);
                     this._doVisualizeSelection( selection );
                 }
                 */ 
-                
+
+                //zoom to visible elements only
+//console.log( new_visiblity );                
+                this.zoomToSelection( new_visiblity );
             }
             
         }        

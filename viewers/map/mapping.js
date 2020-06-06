@@ -848,7 +848,7 @@ $.widget( "heurist.mapping", {
 
                 if( bounds[i].isValid() ){
                     if(res==null){
-                        res = bounds[i];
+                        res = L.latLngBounds(bounds[i].getSouthWest(), bounds[i].getNorthEast() );
                     }else{
                         res.extend(bounds[i]);
                         //bounds[i].getNorthWest());
@@ -899,6 +899,7 @@ $.widget( "heurist.mapping", {
     
     //
     // zoom to TOP layers
+    // layer_ids - native ids
     //
     zoomToLayer: function(layer_ids){
         
@@ -1650,8 +1651,6 @@ $.widget( "heurist.mapping", {
             this.vistimeline.timeline('setSelection', this.selected_rec_ids);
         }
         
-//center (and zoom) on map
-//console.log('selected '+this.selected_rec_ids.length+' markers '+this.highlightedMarkers.length);
         if (is_external===true){
             this.zoomToSelection();        
         }
@@ -1758,9 +1757,9 @@ $.widget( "heurist.mapping", {
                 return (window.hWin.HEURIST4.util.findArrayIndex(rec_ID, _selection)>=0);
             }
         }
-        
+
         if(check_function!=null){
-            
+    
             this._clearHighlightedMarkers();
             
             var _leaflet_id = this.mapManager.getLayerNativeId(dataset_id); //get _leaflet_id by mapdoc and dataset name
@@ -1775,13 +1774,15 @@ $.widget( "heurist.mapping", {
                                 check_function( layer.feature.properties.rec_ID )
                             ) 
                           {
-                                layer.addTo( that.nativemap );   //to show  
-                                
+                                if(!layer._map){
+                                    layer.addTo( that.nativemap );   //to show  
+                                }
                                 bounds.push( that.getLayerBounds(layer) );
                                 
                           }else{
                                 layer.remove(); //to hide    
                           }
+                          
                     });
                 }
             });
@@ -1977,8 +1978,6 @@ $.widget( "heurist.mapping", {
         this.options.map_rollover = __parseval(params['map_rollover']);
         this.options.default_style = window.hWin.HEURIST4.util.isJSON(params['style']);
 
-//console.log(params);        
-        
         //special case - till thematic map is not developed - for custom style
         /* expremental 
         this.isHamburgIslamicImpire = (params['search_realm']=='hie_places');

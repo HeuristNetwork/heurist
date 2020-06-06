@@ -1150,7 +1150,7 @@ function hMapManager( _options )
             } );
             
         },
-
+        
         //
         // show/hide datasets
         // visibility - true or false to show/hide entire layer or array of record ids 
@@ -1169,7 +1169,6 @@ function hMapManager( _options )
                         }
                         
                     } 
-                    
             }
             
             if($.isArray(_selection)){

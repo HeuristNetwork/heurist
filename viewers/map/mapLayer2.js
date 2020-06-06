@@ -476,10 +476,9 @@ function hMapLayer2( _options ) {
             if(is_inited){
                 if(_nativelayer_id>0){
                     status =  (is_visible)?'visible':'hidden';
-                    
                     if(window.hWin.HEURIST4.util.isArrayNotEmpty(visiblity_set)){                            
                         if(was_invisible) options.mapwidget.mapping('setLayerVisibility', _nativelayer_id, true);
-                        options.mapwidget.mapping('setVisibilityAndZoom', {native_id:_nativelayer_id}, visiblity_set, true);
+                        options.mapwidget.mapping('setVisibilityAndZoom', {native_id:_nativelayer_id}, visiblity_set, false);
                     }else{        
                         options.mapwidget.mapping('setLayerVisibility', _nativelayer_id, is_visible);
                     }
