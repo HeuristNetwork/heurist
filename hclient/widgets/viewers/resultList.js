@@ -2788,14 +2788,34 @@ $.widget( "heurist.resultList", {
     refreshSubsetSign: function(){
         if(this.div_header){
             var container = this.div_header.find('div.result-list-header');
+            container.find('span').remove();
+            var s = '<span style="position:absolute;right:10px;top:10px;font-size:0.6em;">';    
             if(window.hWin.HAPI4.sysinfo.db_workset_count>0){
-                $('<span style="position:absolute;right:10px;top:10px;padding:2px 4px;background:white;color:red"'
+                if(this.options.show_menu){
+                  s = s+'<span class="set_subset" '
+                      +'title="Make the current filter the active subset to which all subsequent actions are applied">Set</span>'
+                      +'&nbsp;&nbsp;'
+                      +'<span class="ui-icon ui-icon-arrowrefresh-1-w clear_subset" style="font-size:1em;" title="Click to revert to whole database"></span>&nbsp;';
+                }    
+                
+                $(s
+                +'<span style="padding:.4em 1em 0.3em;background:white;color:red;vertical-align:sub;"'
                 +' title="'+window.hWin.HAPI4.sysinfo.db_workset_count+' records"'
-                +'>SUBSET ACTIVE</span>')
+                +'>SUBSET ACTIVE n='+window.hWin.HAPI4.sysinfo.db_workset_count+'</span></span>')
                     .appendTo(container);
-            }else{
-                container.find('span').remove();
+            }else if(this.options.show_menu) {
+                $(s+'<span class="set_subset" '
+                +'title="Make the current filter the active subset to which all subsequent actions are applied">Set subset</span></span>')
+                .appendTo(container);
             }
+            if(this.options.show_menu){
+                this._on(container.find('span.set_subset').button(),
+                    {click: function(){this.callResultListMenu('menu-subset-set');}} );
+                this._on(container.find('span.clear_subset').css('cursor','pointer'),
+                    {click: function(){this.callResultListMenu('menu-subset-clear');}} );
+            }
+            
+            
         }
     },
     
