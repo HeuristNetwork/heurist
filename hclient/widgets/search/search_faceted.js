@@ -1023,6 +1023,11 @@ $.widget( "heurist.search_faceted", {
             this.doSearch();
         }else{
             this._recalculateFacets(-1);     
+            
+            //trigget empty fake event to update messge in result list
+            $(this.document).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH, 
+                [ {empty_remark:'<div style="padding:10px;"><h3><span class="ui-icon ui-icon-arrowthick-1-w"></span>'
+                +'Please select from facets on left</h3></div>', search_realm:this.options.search_realm} ]);
         }
        
     }

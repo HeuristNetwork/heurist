@@ -49,7 +49,8 @@ $.widget( "heurist.resultList", {
         title: null,  //see show_inner_header
         //searchsource: null,
 
-        empty_remark:'No entries match the filter criteria',
+        emptyMessageURL: null, //url of page to be loaded on empty result set 
+        empty_remark:'No entries match the filter criteria', //html content for empty message
         pagesize: -1,
         
         groupByMode: null, //[null|'none','tab','accordion'],
@@ -239,16 +240,21 @@ $.widget( "heurist.resultList", {
                     var recset = data.recordset;
 
                     if(recset==null){
+                        
+                        if(data.empty_remark){
+                            that.div_content.html( data.empty_remark );
+                        }else{
 
-                        var recID_withStartupInfo = window.hWin.HEURIST4.util.getUrlParameter('Startinfo');
-                        if(recID_withStartupInfo>0){
-                            that._renderStartupMessageComposedFromRecord();
-                        }else                       
-                            if(that.options.emptyMessageURL){
-                                that.div_content.load( that.options.emptyMessageURL );
+                            var recID_withStartupInfo = window.hWin.HEURIST4.util.getUrlParameter('Startinfo');
+                            if(recID_withStartupInfo>0){
+                                that._renderStartupMessageComposedFromRecord();
+                                
+                            }else if(that.options.emptyMessageURL){
+                                    that.div_content.load( that.options.emptyMessageURL );
                             }else{
-                                that._renderEmptyMessage(0);
+                                    that._renderEmptyMessage(0);
                             }
+                        }
 
                         if(that.btn_search_save){
                             that.btn_search_save.hide();
@@ -1023,7 +1029,7 @@ $.widget( "heurist.resultList", {
 
         return $emptyres;
     },
-
+    
     //
     // mode 
     // 0 - no startup filter
@@ -1032,6 +1038,7 @@ $.widget( "heurist.resultList", {
     _renderEmptyMessage: function(mode){
 
         if( !window.hWin.HEURIST4.util.isempty(this.options['empty_remark']) ){
+            
             $('<div>').css('padding','10px').html(this.options['empty_remark']).appendTo(this.div_content);
 
         }else
