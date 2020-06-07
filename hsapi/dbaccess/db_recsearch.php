@@ -971,7 +971,7 @@
                     }
                     
                     if($isWebPage){
-                        return recordSearch($system, array('q'=>array('ids'=>$root_rec_id), 'detail'=>'detail'));
+                        return recordSearch($system, array('q'=>array('ids'=>$root_rec_id), 'detail'=>'detail', 'w'=>'e'));
                     }else{
                         //find parent home record
                         $res = recordSearchFindParent($system, 
@@ -1026,7 +1026,7 @@
         
         if($isRoot){
             //return recordset
-            return recordSearch($system, array('q'=>array('ids'=>$result), 'detail'=>'detail'));
+            return recordSearch($system, array('q'=>array('ids'=>$result), 'detail'=>'detail', 'w'=>'e'));
         }
         
     }
@@ -1548,8 +1548,8 @@
             return $fin_result;
         }//END RULES ------------------------------------------
         else if( $currUserID>0 ) {
-            //find user work susbset
-            $params['use_user_wss'] = true;
+            //find user work susbset (except EVERYTHING search)
+            $params['use_user_wss'] = ($params['w']!='e'); 
         }
         
         
