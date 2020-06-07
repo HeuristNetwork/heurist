@@ -303,6 +303,8 @@ $.widget( "heurist.search_faceted_wiz", {
     }
 
     ,show: function(){
+        this.current_tree_rectype_ids = null;
+        
         this.element.dialog("open");
         this.step1.hide();
         this.step2.hide();
