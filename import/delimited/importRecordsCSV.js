@@ -38,6 +38,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
     upload_file_name,  //file on server with original uploaded data
     encoded_file_name, //file on server with UTF8 encoded data
     
+    exp_level = window.hWin.HAPI4.get_prefs_def('userCompetencyLevel', 2), //beginner default
+    
     session_selector;
     
     function _init(_imp_ID, _max_upload_size, format){
@@ -2458,7 +2460,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                                 +'<td style="min-width:50px;text-align:center">'
                                     +(is_id_field?'<input type="checkbox" id="id_field_'+i+'" value="'+i
                                             +'" checked disabled/>':'-')+'</td>'
-                                +'<td style="min-width:50px;text-align:center">'
+                                +'<td style="min-width:50px;text-align:center" class="date-column">'
                                     //date field
                                     +(is_id_field?'':'<input type="checkbox" id="d_field_'+i+'" value="'+i+'"/>')+'</td>' 
                                 +'<td style="width:200px">'
@@ -2466,6 +2468,10 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                                     +'" class="text ui-widget-content ui-corner-all"></select>'):'')
                                 +'</td></tr>').appendTo(tbl);
                             }         
+                            
+                            if(exp_level>0){
+                                container2.find('.tbfields .date-column').hide();                                    
+                            }
                             
                             
                             function __isAllRectypesSelectedForIdFields(){
@@ -2526,7 +2532,6 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                                 $('#id_field_'+id_suggestions[i]).change();
                             }
                             
-
                         }else if(response.data.import_id>0){
                             
                             imp_ID = response.data.import_id;      

@@ -378,7 +378,7 @@ If you have missing data for Required fields, you may find it convenient to set 
                                 <td style="width:150px">Column</td>
                                 <td style="width:50px">&nbsp;</td>
                                 <td style="width:50px;text-align:center">Heurist<br>Identifier</td>
-                                <td style="width:50px;text-align:center">Date</td>
+                                <td style="width:50px;text-align:center" class="date-column">Date</td>
                                 <td style="width:200px"><span id="lbl_ID_select" style="display:none">IDs for which record type?<span></td></tr></thead><tbody></tbody></table>
                     
                     
