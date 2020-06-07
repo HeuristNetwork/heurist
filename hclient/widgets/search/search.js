@@ -1391,7 +1391,7 @@ $.widget( "heurist.search", {
                 modal: false,
                 resizable: false,
                 borderless: true,
-                onCloseCalback: function(){
+                close: function(){
                     that.search_assistant.hide();
                 },
                 open: function(){
