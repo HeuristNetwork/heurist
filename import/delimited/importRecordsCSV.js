@@ -3172,6 +3172,16 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         
         var session_id = window.hWin.HEURIST4.msg.showProgress( $('#progressbar_div'),  0, 1000, false );
         
+        var update_mode = $("input[name='sa_upd']:checked"). val();
+        var retain_existing = 0
+        if(update_mode>=20){
+            retain_existing = update_mode==20?0:1;
+            update_mode = 2;
+        }else{
+            //pre 2020-06-08
+            retain_existing = $("input[name='sa_upd2']:checked"). val();
+        }
+        
         var request = {
             db        : window.hWin.HAPI4.database,
             session   : session_id,
@@ -3187,8 +3197,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             //0 - Retain existing values and append distinct new data as repeat values
             //1 - Add new data only if field is empty
             //2 - Replace all existing value(s) 
-            sa_upd: $("input[name='sa_upd']:checked"). val(), 
-            sa_upd2: $("input[name='sa_upd2']:checked"). val()  //if no data: retain existing (0) or remove existing (1)
+            sa_upd: update_mode, 
+            sa_upd2: retain_existing  //if no data: retain existing (0) or remove existing (1)
         };
         
 //        request['DBGSESSID']='425288446588500001;d=1,p=0,c=0';
@@ -4182,10 +4192,19 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         
             $('#divFieldMapping2').show();
         
-            if ($("#sa_upd2").is(":checked")) {
+            /* 2020-06-08
+            if ($("#sa_upd2").is(":checked")) { 
                 $("#divImport2").css('display','block');
             }else{
                 $("#divImport2").css('display','none');
+            }
+            */
+            if ($("#sa_upd1").is(":checked") || $("#sa_upd20").is(":checked")) { 
+                $("#divImport3").css('display','block');
+                $('#divImport3_marker').removeClass('ui-icon-triangle-1-e').addClass('ui-icon-triangle-1-s');
+            }else{
+                $("#divImport3").css('display','none');
+                $('#divImport3_marker').removeClass('ui-icon-triangle-1-s').addClass('ui-icon-triangle-1-e');
             }
                 
             if(currentStep==4){ //prepare

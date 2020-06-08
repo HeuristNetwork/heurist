@@ -535,11 +535,34 @@ If you have missing data for Required fields, you may find it convenient to set 
             <div class="heurist-helper1" id="divPrepareSettingHelp" style="display:block;">
             </div>
         </div>
-        <div  id="divImportSetting" class="step5 step-ctrls" style="display:none;top:205px">
+        <div  id="divImportSetting" class="step5 step-ctrls" style="display:none;top:205px;font-size:0.9em;">
             <div class="heurist-helper1" id="divImportSettingHelp" style="display:block;padding-bottom:1em">
-                You are now ready to update the database. This step applies the changes you have prepared and is not (easily) reversible.            
+                You are now ready to update the database. This step applies the changes you have prepared and is not (easily) reversible.
             </div>
 
+            <input type="radio" checked name="sa_upd" id="sa_upd21" value="21" class="text">&nbsp;
+            <label for="sa_upd21">Load new values, replacing all existing values for these records/fields</label><br>
+            
+            <input type="radio" name="sa_upd" id="sa_upd0" value="0" class="text">&nbsp;
+            <label for="sa_upd0">Add new values without deletion of existing values (duplicates are ignored)</label><br>
+            
+            <a href="#" style="margin: 0.3em;line-height: 17px;text-decoration:none"
+            onclick="{$('#divImport3').show();$('#divImport3_marker').removeClass('ui-icon-triangle-1-e').addClass('ui-icon-triangle-1-s');}">
+                <span class="ui-icon ui-icon-triangle-1-e" id="divImport3_marker"></span>&nbsp;&nbsp;Other options
+            </a>           
+            
+            <div style="padding-left: 60px; vertical-align: top; display: none;" id="divImport3">
+            
+                <input type="radio" name="sa_upd" id="sa_upd1" value="1" class="text">&nbsp;
+                <label for="sa_upd1">Add new values only if field is empty (new values ignored for non-empty fields)</label><br>
+
+                <input type="radio" name="sa_upd" id="sa_upd20" value="20" class="text">&nbsp;
+                <label for="sa_upd20"> Replace existing values with new values, retain existing value if no new value supplied</label>
+            
+            </div>
+            
+            
+<!--  VERSION pre 2020-06-08           
             <input type="radio" checked="" name="sa_upd" id="sa_upd0" value="0" class="text" onchange="{importRecordsCSV.onUpdateModeSet()}">&nbsp;
             <label for="sa_upd0">Retain existing values and append distinct new data as repeat values
                 (existing values are not duplicated)</label><br>
@@ -557,6 +580,7 @@ If you have missing data for Required fields, you may find it convenient to set 
                         <input type="radio" name="sa_upd2" id="sa_upd21" value="1" class="text">&nbsp;
                         <label for="sa_upd21" style="font-size:0.9em;">Delete existing even if no new data supplied for record</label>
                     </div>            
+-->                    
         </div>
 <!-- end radiogroup setting divs -->     
 
