@@ -72,7 +72,7 @@ CREATE TABLE Records (
   KEY rec_OwnerUGrpID (rec_OwnerUGrpID),
   KEY rec_Hash (rec_Hash(40)),
   KEY rec_AddedByUGrpID (rec_AddedByUGrpID)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -366,7 +366,7 @@ CREATE TABLE defTerms (
   PRIMARY KEY  (trm_ID),
   KEY trm_ParentTermIDKey (trm_ParentTermID),
   KEY trm_InverseTermIDKey (trm_InverseTermId)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='Terms by detail type and the vocabulary they belong to';
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COMMENT='Terms by detail type and the vocabulary they belong to';
 
 -- --------------------------------------------------------
 
@@ -424,7 +424,7 @@ CREATE TABLE recDetails (
   KEY dtl_ValShortenedKey (dtl_ValShortened),
   KEY dtl_ValueKey (dtl_Value(63)),
   KEY dtl_UploadedFileIDKey (dtl_UploadedFileID)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='The detail (field) values for each record - public data';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='The detail (field) values for each record - public data';
 -- --------------------------------------------------------
 
 --
