@@ -209,12 +209,12 @@ class DbDefRecStructure extends DbEntityBase
             if($isInsert){
                 $this->records[$idx]['rst_ID'] = -1;
                 $this->records[$idx]['rst_LocallyModified'] = 0;
+                if(!@$this->records[$idx]['rst_Status']) $this->records[$idx]['rst_Status'] = 'open';
             }else{
                 $this->records[$idx]['rst_ID'] = $row['rst_ID'];
                 $this->records[$idx]['rst_LocallyModified'] = ($row['rst_OriginatingDBID']>0)?1:0;
             }
 
-            if(!@$this->records[$idx]['rst_Status']) $this->records[$idx]['rst_Status'] = 'open';
 
             if(@$this->records[$idx]['rst_MaxValues']==null ||
                 !(intval(@$this->records[$idx]['rst_MaxValues'])>=0)) $this->records[$idx]['rst_MaxValues'] = 1;

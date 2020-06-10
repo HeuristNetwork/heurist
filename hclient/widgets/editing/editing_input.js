@@ -348,7 +348,15 @@ $.widget( "heurist.editing_input", {
     
     _setOptions: function( ) {
         this._superApply( arguments );
-        this._refresh();
+        
+        if(this.options.recreate===true){
+            this.options.recreate = null;
+            this.element.empty();
+            this._destroy();
+            this._create();
+        }else{
+            this._refresh();    
+        }
     },
 
     // events bound via _on are removed automatically
