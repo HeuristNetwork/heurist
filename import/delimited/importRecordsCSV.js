@@ -4192,7 +4192,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         
             $('#divFieldMapping2').show();
         
-            /* 2020-06-08
+            /* pre 2020-06-08
             if ($("#sa_upd2").is(":checked")) { 
                 $("#divImport2").css('display','block');
             }else{
@@ -4220,6 +4220,10 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
 
                 window.hWin.HEURIST4.util.setDisabled($('#sa_insert'), !both_insert_and_update);
                 window.hWin.HEURIST4.util.setDisabled($('#sa_update'), !both_insert_and_update);
+                if(!both_insert_and_update){
+                    $('#sa_insert').css('opacity',1);
+                    $('#sa_update').css('opacity',1);
+                }
                 if(!both_insert_and_update || 
                    (!$('#sa_insert').prop('checked') && !$('#sa_update').prop('checked'))
                 ){
@@ -4256,6 +4260,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             
                 window.hWin.HEURIST4.util.setDisabled($('#sa_insert'), true);
                 window.hWin.HEURIST4.util.setDisabled($('#sa_update'), true);
+                $('#sa_insert').css('opacity',1);
+                $('#sa_update').css('opacity',1);
             
                 $('h2.step5').css('display','inline-block');
                 window.hWin.HEURIST4.util.setDisabled($('#btnPrepareStart'), true);
