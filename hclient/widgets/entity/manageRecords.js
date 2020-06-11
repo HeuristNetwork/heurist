@@ -326,7 +326,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     that.rts_actions_menu.width(43);
                     that.rts_actions_menu.find('.edit_rts_sel').hide();
                 }else{
-                    that.rts_actions_menu.width(272);
+                    that.rts_actions_menu.width(280); //272
                     that.rts_actions_menu.find('.edit_rts_sel').show();
                     that.rts_actions_menu.find('.s_reqtype').val(rst_fields[fi['rst_RequirementType']])
                     var v = rst_fields[fi['rst_MaxValues']];

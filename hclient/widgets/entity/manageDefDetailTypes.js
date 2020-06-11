@@ -516,6 +516,16 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                 
         }
         
+        //add special checkbox
+        if(!(this._currentEditID>0)){ //insert       
+            var s = window.hWin.HAPI4.get_prefs_def('edit_rts_open_formlet_after_add',0)==1?'checked':'';
+            var ele = $('<label style="float:right;padding-right:30px"><input type="checkbox" '+s+' style="margin-top:10px"/>'
+                +'Open immediately on save to set width and defaults</label>').appendTo(this.editForm);
+            this._on(ele.find('input'),{change:function(e){
+                window.hWin.HAPI4.save_pref('edit_rts_open_formlet_after_add', $(e.target).is(':checked')?1:0);
+            }});
+        }
+        
 
     },    
     

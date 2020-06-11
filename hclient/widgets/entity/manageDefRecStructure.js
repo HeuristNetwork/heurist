@@ -1007,6 +1007,7 @@ dty_TermIDTreeNonSelectableIDs
     // arg1 - dty_ID (if -1 - add/select new field)
     // arg1 - not defined or not integer - use current 
     // arg2 - add new field after dty_ID 
+    // allow_proceed - flag to ask user first
     //
     showBaseFieldEditor: function( arg1, arg2, allow_proceed ){
         
@@ -1247,7 +1248,9 @@ dty_TermIDTreeNonSelectableIDs
                                 that.manageRecords('showOptionalFieds', true);    
                             }
                             if(that2._open_formlet_for_recID>0){
-                                that2.editField( that2._open_formlet_for_recID );
+                                if(window.hWin.HAPI4.get_prefs_def('edit_rts_open_formlet_after_add',0)==1){
+                                    that2.editField( that2._open_formlet_for_recID );    
+                                }
                             }
                             that2._show_optional = false;
                             that2._open_formlet_for_recID = -1;
