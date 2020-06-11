@@ -3,7 +3,7 @@
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2019 University of Sydney
+* @copyright   (C) 2005-2020 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
@@ -69,7 +69,7 @@ $.widget( "heurist.mainMenu", {
                     +window.hWin.HAPI4.sysinfo.version_new+") is available from <a target=_blank href='https://github.com/HeuristNetwork/heurist'>GitHub</a> or "
                     +"<a target=_blank href='http://HeuristNetwork.org'>HeuristNetwork.org</a>. We recommend updating your copy of the software if the sub-version has changed "
                     +"(or better still with any change of version).<br/><br/>"
-                    +"Heurist is copyright (C) 2007 - 2017 The University of Sydney and available as Open Source software under the GNU-GPL licence. "
+                    +"Heurist is copyright (C) 2005-2020 The University of Sydney and available as Open Source software under the GNU-GPL licence. "
                     +"Beta versions of the software with new features may also be available at the GitHub repository or linked from the HeuristNetwork home page.");
                 }else{
                     document.location.reload();    

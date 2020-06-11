@@ -8,7 +8,7 @@
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2019 University of Sydney
+* @copyright   (C) 2005-2020 University of Sydney
 * @author      Tom Murtagh
 * @author      Kim Jackson
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
