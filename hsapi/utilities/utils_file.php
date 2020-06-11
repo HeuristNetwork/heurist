@@ -415,6 +415,8 @@
         $order = array();
         $fields = array('file_id', 'file_name', 'file_dir', 'file_url');
         $idx = 1;
+        if(!is_array($dirs)) $dirs = array($dirs);
+        if(!is_array($exts)) $exts = array($exts);
 
         foreach ($dirs as $dir) {
             
@@ -422,6 +424,11 @@
                 //$folder = constant($dir);     @todo need better algorithm
                 $folder = str_replace('HEURIST_ICON_DIR/', HEURIST_ICON_DIR, $dir);
                 $url = str_replace('HEURIST_ICON_DIR/', HEURIST_ICON_URL, $dir);
+            }else if (strpos($dir, HEURIST_FILESTORE_DIR)!==false) {    
+                
+                $folder =  $dir;
+                $url = null;
+                
             }else{
                 $folder =  HEURIST_DIR.$dir;
                 $url = HEURIST_BASE_URL.$dir;

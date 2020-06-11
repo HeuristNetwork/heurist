@@ -131,7 +131,83 @@ class DbEntityBase
         return $this->config;
     }
     
+    //
+    // working with config/setting 
+    //
+    public function files( $action ){
+        
+        if(!($this->system->get_user_id()>0)){
+            $this->system->addError(HEURIST_REQUEST_DENIED, 'Insufficient rights for this operation');
+            return false;
+        }
+        
+        $res = false;
+        
+        $ext = $action['ext'];
+        $operation = $action['operation'];
+        $content = @$action['content'];
+        $filename = @$action['file'];
+        $entity_name = $this->config['entityName'];
+        $rec_ID = @$action['rec_ID'];
+        
+        $path = HEURIST_FILESTORE_DIR.'entity/'.$entity_name.'/'.$ext.'/'.($rec_ID>0?$rec_ID.'/':''); 
+        
+        if($operation=='list'){
+            
+            if($ext==null){
+                $system->addError(HEURIST_INVALID_REQUEST, 'Can not get list of setting files. Extension parameter is not defined');
+                $res = false;
+            }else{
+                $res = folderContent($path, $ext);    
+            }
+            
+        }else if($operation=='get'){
+            
+            $sMsg = 'Can not get content of setting file. ';
+            
+            if($filename==null){
+                $system->addError(HEURIST_INVALID_REQUEST, $sMsg.'Filename parameter is not defined');
+                $res = false;
+            }else if (!file_exists($path.$filename)){
+                $system->addError(HEURIST_ERROR, $sMsg.'File does not exist');
+                $res = false;
+            }else{
+                $res = file_get_contents($path.$filename);    
+            }
+            
+        }else if($operation=='put'){
+            
+            $filename = fileNameSanitize($filename);
+            
+            $sMsg = 'Can not save content of setting file. ';
+            
+            if($filename==null){
+                $system->addError(HEURIST_INVALID_REQUEST, $sMsg.'Filename parameter is not defined');
+                $res = false;
+            }else if ($content==null){
+                $system->addError(HEURIST_INVALID_REQUEST, $sMsg.'Content parameter is not defined');
+                $res = false;
+            }else{
+                $swarn = folderCreate2($path, '', false);
+                if($swarn!=''){
+                    $system->addError(HEURIST_ERROR, $sMsg.$swarn);
+                    $res = false;
+                }else{
+                    $res = file_put_contents($path.$filename, $content);    
+                    if($res!==false){
+                        $res = $filename;
+                    }
+                }
+            }
+        }
+        
+        return $res;
+    }
     
+    
+    //
+    //
+    //
     public function records(){
         return $this->records;
     }
@@ -154,8 +230,15 @@ class DbEntityBase
                 $res = $this->save();
             }else if(@$this->data['a'] == 'delete'){
                 $res = $this->delete();
-            }else if(@$this->data['a'] == 'config'){ //return configuration
+            }else if(@$this->data['a'] == 'config'){ // return configuration
                 $res = $this->config();
+            }else if(@$this->data['a'] == 'files'){ // working with settings/config files
+            
+                // get list of files by extension
+                // put data into file
+                // load date from file 
+                $res = $this->files( $this->data ); 
+                
             }else if(@$this->data['a'] == 'counts'){  //various counts(aggregations) request - implementation depends on entity
                 $res = $this->counts();
             }else if(@$this->data['a'] == 'action' || @$this->data['a'] == 'batch'){ 
