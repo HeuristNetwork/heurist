@@ -2588,8 +2588,9 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 
                  shelp = 'Please select one or more columns on which to match <b>'
                  + window.hWin.HEURIST4.rectypes.names[rtyID]
-                 + '</b> in the incoming data against records already in the database.'
-                 + '<br>Note: do not use columns containing multiple values for matching, as this will generate multiple records per input line.<br><br>';
+    + '</b> in the incoming data against records already in the database.'
+    + '<br>Note: do not use columns containing multiple values for matching, as this will generate multiple records per input line.'
+    + '<br>To force creation of all new records, select columns and map to a field which will never match<br><br>';
                  
                 if(key_idx>=0){
                     shelp = shelp + 'The existing identification field "'+imp_session['columns'][key_idx]+'" will be overwritten.' 
