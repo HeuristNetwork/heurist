@@ -147,6 +147,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             this.rts_actions_menu = $('<div class="rts-editor-actions" '
                     +'style="width:272px;background:none !important;display:none;padding-top:2px;'
                     +'font-size:10px;font-weight:normal;cursor:pointer">'
+                   +'<div style="line-height:18px">&nbsp;</div>' 
                    +'<span data-action="edit" style="background:lightblue;padding:3px;display:inline-block;width:42px;">'
                         +'<span class="ui-icon ui-icon-pencil" title="Edit" style="font-size:9px;font-weight:normal"/>Edit</span>'           
                         
@@ -233,7 +234,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 mouseleave : function(){ this._rts_selector_flag = false; },
                 change: function(event){
                         this._rts_changed_flag = true;
-                        this.edit_rts_apply.show();
+                        this.edit_rts_apply[0].click();
+                        //this.edit_rts_apply.show();
                 }                
             });
                     
@@ -336,8 +338,19 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     }else{
                         that.rts_actions_menu.find('.s_width').hide()    
                     }
-                    v = rst_fields[fi['rst_DisplayWidth']];
-                    v = (v!=null && v>0)?(v==5?v :(Math.floor(v/10)*10)):100;
+                    v = Number(rst_fields[fi['rst_DisplayWidth']]);
+                    if(isNaN(v) || window.hWin.HEURIST4.util.isempty(v)) v=100;
+                    //v = (v!=null && v>0)?(v==5?v :(Math.floor(v/10)*10)):100;
+                    var prev_v = 5;
+                    that.rts_actions_menu.find('.s_width > option').each(function(i,item){
+                        if(Number($(item).val())>v){
+                            v = prev_v;
+                            return false;
+                        }
+                        prev_v = Number($(item).val());
+                    });
+                    if(prev_v<v) v = prev_v;
+                    
                     that.rts_actions_menu.find('.s_width').val(v);
                     //console.log(rst_fields[fi['rst_DisplayWidth']]+'  '+rst_fields[fi['rst_MaxValues']]);                                
                 }
@@ -347,7 +360,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 that.rts_actions_menu
                 .attr('data-did', el.parents('div[data-dtid]').attr('data-dtid'))
                 .show()
-                .position({ my:'left top', at:'left bottom', of: el});
+                .position({ my:'left top', at:'left top', of: el});
                 /*
                 .css({position:'absolute'
                 ,left:that.editForm.parent().position().left + el.position().left
