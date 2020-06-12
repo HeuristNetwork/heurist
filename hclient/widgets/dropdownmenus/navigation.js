@@ -112,7 +112,6 @@ $.widget( "heurist.navigation", {
             DT_SHORT_SUMMARY = window.hWin.HAPI4.sysinfo['dbconst']['DT_SHORT_SUMMARY'],
             DT_CMS_TOP_MENU = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_TOP_MENU'],
             DT_CMS_MENU = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_MENU'],
-            //DT_CMS_PAGE = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_PAGE'],  //pointer to page 
             DT_CMS_CSS = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_CSS'],
             DT_CMS_SCRIPT = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_SCRIPT'],
             DT_CMS_TARGET = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_TARGET'];//target element on page or popup
@@ -213,7 +212,7 @@ $.widget( "heurist.navigation", {
         
         var opts = {};
         if(this.options.orientation=='horizontal'){
-            opts = {position:{ my: "left top", at: "left+20 bottom" }};
+            opts = {position:{ my: "left top", at: "left bottom" }}; ///+20
         }
         
         var myTimeoutId = 0;
@@ -241,10 +240,22 @@ $.widget( "heurist.navigation", {
         
         var all_menues = this.divMainMenuItems.find('ul.ui-menu');
         this._on( all_menues, {
-            mouseenter : function(){_show()},
-            mouseleave : function(){_hide(all_menues)}
+            mouseenter : function(){ _show(); },
+            mouseleave : function(){ 
+                _hide(all_menues) 
+            }
         });
-        
+
+        //prevents default jquery delay         
+        this.divMainMenuItems.children('li.ui-menu-item').hover(function(event) {
+                event.preventDefault();
+                $(this).find('.ui-menu').show();
+            },
+            function(event) {
+                event.preventDefault();
+                $(this).find('.ui-menu').hide();
+            }
+        );        
         
         if(this.options.toplevel_css!==null){
             this.divMainMenuItems.children('li.ui-menu-item').children('a').css(this.options.toplevel_css);
