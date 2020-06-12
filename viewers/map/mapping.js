@@ -1035,7 +1035,6 @@ $.widget( "heurist.mapping", {
     isSomethingOnMap: function(){
         
             var len = Object.keys(this.all_layers).length;
-console.log('!!!!! '+len);            
             //all_layers
             for (var layer_id in this.all_layers){
                 var layer = this.all_layers[layer_id]
@@ -1045,7 +1044,6 @@ console.log('!!!!! '+len);
                     return true;   
                 }else if ( layer instanceof L.LayerGroup ) {
                     var layers = layer.getLayers();
-console.log( layers.length );            
                     if(layers.length>0) return true;
                 }
             }
@@ -2288,8 +2286,6 @@ console.log( layers.length );
         
         var no_map_data = !this.isSomethingOnMap(), 
             no_time_data = (this.timeline_groups.length==0);
-        
-console.log('_updatePanels '+no_map_data);        
         
         if(this.is_timeline_disabled!==(this.notimeline || no_time_data) ||
            this.is_map_disabled!==(this.nomap || no_map_data))
