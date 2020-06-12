@@ -239,9 +239,10 @@ class DbUsrTags extends DbEntityBase
             if($cnt>0){
                 $this->system->addError(HEURIST_ACTION_BLOCKED, 
                 (($cnt==1 && count($this->records)==1)
-                    ? 'Tag is'
-                    : $cnt.' tags are')
-                    .' in use. Detach records first');
+                ? 'There is a tag'
+                : 'There are '.$cnt.' tags')
+                .' attached to record(s). You must delete the records'.
+                ' or the tag values in order to be able to delete the tags.');
                 return false;
             }
         }
