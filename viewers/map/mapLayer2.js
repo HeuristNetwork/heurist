@@ -439,11 +439,7 @@ function hMapLayer2( _options ) {
                 layer_ID = _recordset.fld(options.rec_layer, 'rec_ID');
             }
             if(layer_ID>0){
-
-                var onlayerstatus = options.mapwidget.mapping('option','onlayerstatus');
-                if($.isFunction(onlayerstatus)){
-                    onlayerstatus.call(options.mapwidget, layer_ID, status);
-                }
+                options.mapwidget.mapping('option','onLayerStatus', layer_ID, status);
             }
         }
     }

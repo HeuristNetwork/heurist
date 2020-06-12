@@ -196,7 +196,7 @@ if($db){
         if(defined('HEURIST_SCRATCH_DIR')){
             $heurist_path = tempnam(HEURIST_SCRATCH_DIR, "_proxyremote_");        
             downloadViaProxy($heurist_path, $mimetype, $remote_path, false);
-            if(file_exists($heurist_path))unlink($heurist_path);
+            if(file_exists($heurist_path)) unlink($heurist_path);
         }
         
     }

@@ -168,15 +168,19 @@ $.widget( "heurist.mapping", {
     
 
     //storages
-    all_layers: [],    // array of all loaded TOP layers by leaflet id   
+    all_layers: {},    // array of all loaded TOP layers by leaflet id   
     all_clusters: {},  // markerclusters
     all_markers: {},
     
     timeline_items: {},
     timeline_groups: [], 
+    
+    nomap: false,
     notimeline: false,
+    //current status
     is_timeline_disabled:0,
-
+    is_map_disabled:0, 
+    
     selected_rec_ids:[],
 
     myIconRectypes:{},  //storage for rectype icons by color and rectype id
@@ -533,6 +537,8 @@ $.widget( "heurist.mapping", {
         
         this.all_layers[new_layer._leaflet_id] = new_layer;
         
+        this._updatePanels();
+        
         return new_layer._leaflet_id;
         
     },
@@ -545,6 +551,8 @@ $.widget( "heurist.mapping", {
         var new_layer = L.imageOverlay(image_url, image_extent).addTo(this.nativemap);
       
         this.all_layers[new_layer._leaflet_id] = new_layer;
+        
+        this._updatePanels();
         
         return new_layer._leaflet_id;
     },
@@ -652,13 +660,16 @@ $.widget( "heurist.mapping", {
                 });
             } 
             */   
+            
+            this.all_layers[new_layer._leaflet_id] = new_layer;
+            
                 
             if(!this.notimeline){
                 this.updateTimelineData(new_layer._leaflet_id, timeline_data, dataset_name);
-            }         
-
-            this.all_layers[new_layer._leaflet_id] = new_layer;
+            }
             
+            this._updatePanels();
+
             //apply layer ot default style and fill markercluster
             this.applyStyle( new_layer._leaflet_id, layer_style ?layer_style: this.setStyleDefaultValues() ); //{color: "#00b0f0"}
 
@@ -797,7 +808,7 @@ $.widget( "heurist.mapping", {
                 
             this.vistimeline.timeline('timelineRefresh', this.timeline_items, this.timeline_groups);          
             
-            this._updatePanels()
+            //this._updatePanels();
     },
     
     //
@@ -976,12 +987,13 @@ $.widget( "heurist.mapping", {
             
             affected_layer.remove();
             this.all_layers[layer_id] = null;
+            delete this.all_layers[layer_id];
             
             if(this.removeTimelineGroup(layer_id) && !this.notimeline){
                 //update timeline
                 this.vistimeline.timeline('timelineRefresh', this.timeline_items, this.timeline_groups);
-                this._updatePanels()
             }
+            this._updatePanels()
         }
     },
 
@@ -1005,13 +1017,56 @@ $.widget( "heurist.mapping", {
         }
     },
     
-    isLayerVisibile: function(laynativelayer_ider_id){
+    //
+    //
+    //
+    isLayerVisibile: function(nativelayer_id){
         var affected_layer = this.all_layers[nativelayer_id];
         if(affected_layer){
             return this.nativemap.hasLayer(affected_layer);
         }else{
             return false;
         }
+    },
+    
+    //
+    //
+    //
+    isSomethingOnMap: function(){
+        
+            var len = Object.keys(this.all_layers).length;
+console.log('!!!!! '+len);            
+            //all_layers
+            for (var layer_id in this.all_layers){
+                var layer = this.all_layers[layer_id]
+                if(window.hWin.HEURIST4.util.isArrayNotEmpty( this.all_markers[layer_id] ) || this.all_clusters[layer_id]){
+                    return true;   
+                }else if(layer instanceof L.ImageOverlay || layer instanceof L.TileLayer){
+                    return true;   
+                }else if ( layer instanceof L.LayerGroup ) {
+                    var layers = layer.getLayers();
+console.log( layers.length );            
+                    if(layers.length>0) return true;
+                }
+            }
+            
+            return false;
+            
+            /*
+            is_found = false;
+            this.nativemap.eachLayer(function(layer){
+                if(layer instanceof L.ImageOverlay || layer instanceof L.TileLayer){
+                    is_found = true;
+                    return false;
+                }else if (layer instanceof L.Polygon || layer instanceof L.Circle || layer instanceof L.Rectangle){
+                    is_found = true;
+                    return false;
+                }
+            });
+            return is_found;
+            */
+            
+        
     },
 
     addImage2: function( imageurl, image_extent ){
@@ -1136,7 +1191,8 @@ $.widget( "heurist.mapping", {
         }
             
         if(is_new_markercluster){
-            
+
+            //all markers per top layer            
             this.all_markers[layer_id] = [];
             
             var  that = this;
@@ -1174,8 +1230,7 @@ $.widget( "heurist.mapping", {
                             layer.feature.style = that.hie_places_wo_events_style;
                         }
                     }*/
-
-                    that.all_markers[layer_id].push( layer );
+                    that.all_markers[layer_id].push( layer );    
                 }
 
                 layer.on('click', function(e){that._onLayerClick(e)} );
@@ -1992,7 +2047,7 @@ $.widget( "heurist.mapping", {
 
         
         //show/hide map or timeline
-        var nomap = __parseval(params['nomap']);
+        this.nomap = __parseval(params['nomap']);
         this.notimeline = __parseval(params['notimeline']);
         
         var layout_opts = {};
@@ -2023,7 +2078,7 @@ $.widget( "heurist.mapping", {
                 var th = Math.floor($(this.options.element_layout).height()*0.2);
                 layout_opts.south__size = th>200?200:th;
                 
-                if(nomap){
+                if(this.nomap){
                     layout_opts.center__minHeight = 0;
                     layout_opts.south__spacing_open = 0;
                     layout_opts.south__spacing_closed = 0;
@@ -2215,40 +2270,79 @@ $.widget( "heurist.mapping", {
     },
     
     
+    //
+    //
+    //
+                
+    onLayerStatus: function( layer_ID, status ){
+        if($.isFunction(this.options.onlayerstatus)){
+            this.options.onlayerstatus.call(this, layer_ID, status);
+        }
+        //this._updatePanels();
+    },    
+    
     /**
     * show/hide panels map and timeline
     */
     _updatePanels: function(){
         
-        var ismap = true, no_time_data = (this.timeline_groups.length==0);
+        var no_map_data = !this.isSomethingOnMap(), 
+            no_time_data = (this.timeline_groups.length==0);
         
-        if(this.is_timeline_disabled!==(this.notimeline || no_time_data)){
+console.log('_updatePanels '+no_map_data);        
+        
+        if(this.is_timeline_disabled!==(this.notimeline || no_time_data) ||
+           this.is_map_disabled!==(this.nomap || no_map_data))
+        {
 
-            this.is_timeline_disabled=(this.notimeline || no_time_data);
+            this.is_timeline_disabled = (this.notimeline || no_time_data);
+            this.is_map_disabled = (this.nomap || no_map_data);
             
             if(this.options.element_layout){
             
                 var layout_opts = {};
-                var th;
-                if(this.notimeline || no_time_data){
+                var tha, th;
+                if(this.is_timeline_disabled){
+                    //hide resize control
                     layout_opts.south__size = 0;
                     layout_opts.south__spacing_open = 0;
                     layout_opts.south__spacing_closed = 0;
                 }else {
-                    th = Math.floor($(this.options.element_layout).height()*0.2);
-                    layout_opts.south__size = th>200?200:th;
-                    layout_opts.south__spacing_open = 7;
-                    layout_opts.south__spacing_closed = 12;
-                    layout_opts.center__minHeight = 30;
-                    layout_opts.center__minWidth = 200;
+                    //default height of timeline is 20%
+                    tha = $(this.options.element_layout).height();
+                    th = Math.floor(tha*0.2);
+                    
+                    if(this.is_map_disabled){
+                        layout_opts.south__size = tha-30;
+                        
+                        layout_opts.center__minHeight = 0;
+                        layout_opts.south__spacing_open = 0;
+                        layout_opts.south__spacing_closed = 0;
+                    }else{
+                        layout_opts.south__size = th>200?200:th;
+                        
+                        //show resize control when both map and timeline are visible
+                        layout_opts.south__spacing_open = 7;
+                        layout_opts.south__spacing_closed = 12;
+                        layout_opts.center__minHeight = 30;
+                        layout_opts.center__minWidth = 200;
+                    }                    
                 }
                 var mylayout = $(this.options.element_layout).layout(layout_opts);
                 
-                if(this.notimeline || no_time_data){
+                if(this.is_timeline_disabled){
                     mylayout.hide('south');
                 }else{
                     mylayout.show('south');
-                    mylayout.sizePane('south', th)    
+                    mylayout.sizePane('south', layout_opts.south__size);    
+                }
+
+                if(this.is_map_disabled){
+                   $('#map').hide();
+                   $('#map_empty_message').show();
+                }else{
+                   $('#map_empty_message').hide();
+                   $('#map').show();
                 }
                 
             }
