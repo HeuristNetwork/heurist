@@ -519,9 +519,10 @@ class DbRecUploadedFiles extends DbEntityBase
         if($cnt>0){
             $this->system->addError(HEURIST_ACTION_BLOCKED, 
             (($cnt==1 && count($this->records)==1)
-                ? 'File is'
-                : $cnt.' files are')
-                .' in use. Detach records first');
+                ? 'There is a reference'
+                : 'There are '.$cnt.' references')
+                .' from record(s) to this File. You must delete the records'.
+                ' or the File field values in order to be able to delete the file.');
             return false;
         }
         
