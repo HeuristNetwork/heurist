@@ -9,7 +9,7 @@
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2019 University of Sydney
+* @copyright   (C) 2005-2020 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
@@ -303,6 +303,8 @@ $.widget( "heurist.search_faceted_wiz", {
     }
 
     ,show: function(){
+        this.current_tree_rectype_ids = null;
+        
         this.element.dialog("open");
         this.step1.hide();
         this.step2.hide();
@@ -763,7 +765,9 @@ $.widget( "heurist.search_faceted_wiz", {
                         +(this.options.params.ui_prelim_filter_toggle_mode==1)?'1':'0')
                         .prop('checked', true);
                 $dlg.find('#svs_PrelimFilterToggleLabel').val(this.options.params.ui_prelim_filter_toggle_label);
-                
+
+                $dlg.find('#svs_ExitButton').prop('checked', this.options.params.ui_exit_button!==false);
+                $dlg.find('#svs_ExitButtonLabel').val(this.options.params.ui_exit_button_label);
                 
             }else{ //add new saved search
                 this.originalRectypeID == null;
@@ -792,6 +796,8 @@ $.widget( "heurist.search_faceted_wiz", {
                 $dlg.find('#svs_PrelimFilterToggleMode0').prop('checked', true);
                 $dlg.find('#svs_PrelimFilterToggleLabel').val(window.hWin.HR('Apply preliminary filter'));
                 
+                $dlg.find('#svs_ExitButton').prop('checked', true);
+                $dlg.find('#svs_ExitButtonLabel').val('');
                 
                 this.select_main_rectype.val('');
                 if(this.select_main_rectype.hSelect('instance')){
@@ -828,6 +834,15 @@ $.widget( "heurist.search_faceted_wiz", {
                 }
             }});
             $dlg.find('#svs_SpatialFilter').change();
+
+            this._on($dlg.find('#svs_ExitButton'), {change:function( event ){
+                if($(event.target).is(':checked')){
+                    $dlg.find('.svs_ExitButton').show();
+                }else{
+                    $dlg.find('.svs_ExitButton').hide();
+                }
+            }});
+            $dlg.find('#svs_ExitButton').change();
             
             
             this._on( [$dlg.find('#svs_SpatialFilterSet')[0],$dlg.find('#svs_SpatialFilterInitial')[0]],
@@ -1755,6 +1770,9 @@ $.widget( "heurist.search_faceted_wiz", {
         
         this.options.params.ui_additional_filter = $dlg.find('#svs_AdditionalFilter').is(':checked');
         this.options.params.ui_additional_filter_label =$dlg.find('#svs_AdditionalFilterLabel').val();
+        
+        this.options.params.ui_exit_button = $dlg.find('#svs_ExitButton').is(':checked');
+        this.options.params.ui_exit_button_label = $dlg.find('#svs_ExitButtonLabel').val();
 
         var svs_ugrid = svs_ugrid.val();
         if(parseInt(svs_ugrid)>0){

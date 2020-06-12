@@ -6,7 +6,7 @@
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2019 University of Sydney
+* @copyright   (C) 2005-2020 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @note        Completely revised for Heurist version 4
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -1391,7 +1391,7 @@ $.widget( "heurist.search", {
                 modal: false,
                 resizable: false,
                 borderless: true,
-                onCloseCalback: function(){
+                close: function(){
                     that.search_assistant.hide();
                 },
                 open: function(){

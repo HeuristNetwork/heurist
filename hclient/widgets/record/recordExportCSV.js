@@ -3,7 +3,7 @@
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2019 University of Sydney
+* @copyright   (C) 2005-2020 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
@@ -22,7 +22,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
     // default options
     options: {
     
-        height: 520,
+        height: 580,
         width:  800,
         modal:  true,
         title:  'Export records to comma or tab separated text files',
@@ -34,6 +34,139 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
         helpContent: 'recordExportCSV.html' //in context_help folder
     },
 
+    selectedFields:null,
+    
+    _initControls: function() {
+      
+      this._super();    
+
+      //save settings
+      $('#btnSaveSettings').button();
+      this._on($('#btnSaveSettings'), {click: function(){
+          
+                var fileName = $('#inpt_save_setting_name').val();
+                
+                if(fileName.trim()==''){
+                    window.hWin.HEURIST4.msg.showMsgFlash('Name not defined');
+                    return;
+                }
+                
+                var settings = this._getSettings(false);            
+                if(!settings) return;
+
+                var request = {
+                    'a'          : 'files',
+                    'entity'     : 'defRecTypes',
+                    'operation'  : 'put',
+                    'ext'        : 'csf',    
+                    'rec_ID'     : this._selectedRtyID,
+                    'file'       : fileName+'.csf',    
+                    'content'    : JSON.stringify(settings)    
+                };
+
+                var that = this;                                                
+                window.hWin.HAPI4.EntityMgr.doRequest(request, 
+                    function(response){
+                        if(response.status == window.hWin.ResponseStatus.OK){
+                            
+                            $('#inpt_save_setting_name').val('');
+                            var ele = $('#sel_saved_settings');
+                            var filename = response.data;
+                            window.hWin.HEURIST4.ui.addoption(ele[0], filename, filename.substring(0,filename.indexOf('.csf')) );
+                            $('#divLoadSettings').show();    
+                            window.hWin.HEURIST4.msg.showMsgFlash('Settings are saved');
+                            
+                        }else{
+                            window.hWin.HEURIST4.msg.showMsgErr(response);
+                        }
+                });      
+          
+      }});
+      
+      //load settings
+      this._on($('#sel_saved_settings'), {change: function(){
+          
+                this.selectedFields = [];
+
+                var fileName = $('#sel_saved_settings').val();
+          
+                if(fileName.trim()==''){
+                    return;
+                }
+
+                var request = {
+                    'a'          : 'files',
+                    'entity'     : 'defRecTypes',
+                    'operation'  : 'get',
+                    'ext'        : 'csf',    
+                    'rec_ID'     : this._selectedRtyID,
+                    'file'       : fileName
+                };
+
+                var that = this;                                                
+                window.hWin.HAPI4.EntityMgr.doRequest(request, 
+                    function(response){
+                        if(response.status == window.hWin.ResponseStatus.OK){
+                            
+                            var settings = window.hWin.HEURIST4.util.isJSON(response.data);
+                            if(settings==false){
+                                    window.hWin.HEURIST4.msg.showMsgFlash('Settings are invalid');
+                                    return;  
+                            } 
+                            
+                            //restore selection
+                            that.selectedFields = settings.fields; 
+                            
+                            var tree = that.element.find('.rtt-tree').fancytree("getTree");           
+                            tree.visit(function(node){
+                                node.setExpanded(true);
+                            });            
+                            
+                            setTimeout(function(){
+                                that._assignSelectedFields();
+                            },1000);
+                            
+                            that.element.find('#delimiterSelect').val(settings.csv_delimiter);
+                            that.element.find('#quoteSelect').val(settings.csv_enclosure);
+                            that.element.find('#cbNamesAsFirstRow').prop('checked',(settings.csv_header==1));
+                            that.element.find('#cbIncludeTermIDs').prop('checked',(settings.include_term_ids==1));
+                            that.element.find('#cbIncludeTermCodes').prop('checked',(settings.include_term_codes==1));
+                            that.element.find('#cbIncludeTermHierarchy').prop('checked',(settings.include_term_hierarchy==1));
+                            that.element.find('#cbIncludeResourceTitles').prop('checked',(settings.include_resource_titles==1));
+                            
+                            
+                        }else{
+                            window.hWin.HEURIST4.msg.showMsgErr(response);
+                        }
+                });      
+          
+      }});
+    },
+    
+    //
+    // assign selected fields in tree
+    //
+    _assignSelectedFields: function(){
+
+        if(this.selectedFields && this.selectedFields.length>0){
+        
+            var tree = this.element.find('.rtt-tree').fancytree("getTree");
+            var that = this;
+
+            tree.visit(function(node){
+                    if(!window.hWin.HEURIST4.util.isArrayNotEmpty(node.children)){ //this is leaf
+                        //find it among facets
+                        for(var i=0; i<that.selectedFields.length; i++){
+                            if(that.selectedFields[i]==node.data.code){
+                                node.setSelected(true);
+                                break;
+                            }
+                        }
+                    }
+                });
+        }
+    },
+    
     //    
     //
     //
@@ -134,93 +267,21 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                 }   
             }
             
-            
-            var header_fields = {id:'rec_ID',title:'rec_Title',url:'rec_URL',modified:'rec_Modified',tags:'rec_Tags'};
-            function __removeLinkType(dtid){
-                if(header_fields[dtid]){
-                    dtid = header_fields[dtid];
-                }else{
-                    var linktype = dtid.substr(0,2); //remove link type lt ot rt  10:lt34
-                    if(isNaN(Number(linktype))){
-                        dtid = dtid.substr(2);
-                    }
-                }
-                return dtid;
-            }
-            function __addSelectedField(ids, lvl, constr_rt_id){
-                
-                if(ids.length < lvl) return;
-                
-                //take last two - these are rt:dt
-                var rtid = ids[ids.length-lvl-1];
-                var dtid = __removeLinkType(ids[ids.length-lvl]);
-                
-                if(!selectedFields[rtid]){
-                    selectedFields[rtid] = [];    
-                }
-                if(constr_rt_id>0){
-                    dtid = dtid+':'+constr_rt_id;
-                }
-                
-                //window.hWin.HEURIST4.util.findArrayIndex( dtid, selectedFields[rtid] )<0
-                if( selectedFields[rtid].indexOf( dtid )<0 ) {
-                    
-                    selectedFields[rtid].push(dtid);    
-                    
-                    //add resource field for parent recordtype
-                    __addSelectedField(ids, lvl+2, rtid);
-                }
-            }
-            
-            //get selected fields from treeview
-            var selectedFields = {};
-            var tree = this.element.find('.rtt-tree').fancytree("getTree");
-            var fieldIds = tree.getSelectedNodes(false);
-            var k, len = fieldIds.length;
-            
             if(scope.length<1){
                 window.hWin.HEURIST4.msg.showMsgFlash('No results found. '
                 +'Please modify search/filter to return at least one result record.', 2000);
                 return;
             }
-            if(len<1){
-                window.hWin.HEURIST4.msg.showMsgFlash('No fields selected. '
-            +'Please select at least one field in tree', 2000);
-                return;
-            }
             
-            
-            for (k=0;k<len;k++){
-                var node =  fieldIds[k];
-                
-                if(window.hWin.HEURIST4.util.isempty(node.data.code)) continue;
-                
-                var ids = node.data.code.split(":");
-                
-                __addSelectedField(ids, 1, 0);
-                
-                //DEBUG console.log( node.data.code );
-            }
-            //DEBUG console.log( selectedFields );
-            
-            
+            var settings = this._getSettings(true);            
+            if(!settings) return;
+           
             var request = {
                 'request_id' : window.hWin.HEURIST4.util.random(),
                 'db': window.hWin.HAPI4.database,
                 'ids'  : scope,
                 'format': 'csv',
-                'prefs':{
-                'fields': selectedFields,
-                'csv_delimiter':  this.element.find('#delimiterSelect').val(),
-                'csv_enclosure':  this.element.find('#quoteSelect').val(),
-                'csv_mvsep':'|',
-                'csv_linebreak':'nix', //not used at tne moment
-                'csv_header': this.element.find('#cbNamesAsFirstRow').is(':checked'),
-                'include_term_ids': this.element.find('#cbIncludeTermIDs').is(':checked')?1:0,
-                'include_term_codes': this.element.find('#cbIncludeTermCodes').is(':checked')?1:0,
-                'include_term_hierarchy': this.element.find('#cbIncludeTermHierarchy').is(':checked')?1:0,
-                'include_resource_titles': this.element.find('#cbIncludeResourceTitles').is(':checked')?1:0
-                }};
+                'prefs': settings};
                 
             if(rec_RecTypeID>0){
                 request['rec_RecTypeID'] = rec_RecTypeID;
@@ -265,11 +326,99 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                     });
       */  
     },
+    
+    //
+    // mode_action true - returns fields for csv export, false - returns codes of selected nodes
+    //
+    _getSettings: function( mode_action ){
+
+            var header_fields = {id:'rec_ID',title:'rec_Title',url:'rec_URL',modified:'rec_Modified',tags:'rec_Tags'};
+            function __removeLinkType(dtid){
+                if(header_fields[dtid]){
+                    dtid = header_fields[dtid];
+                }else{
+                    var linktype = dtid.substr(0,2); //remove link type lt ot rt  10:lt34
+                    if(isNaN(Number(linktype))){
+                        dtid = dtid.substr(2);
+                    }
+                }
+                return dtid;
+            }
+            function __addSelectedField(ids, lvl, constr_rt_id){
+                
+                if(ids.length < lvl) return;
+                
+                //take last two - these are rt:dt
+                var rtid = ids[ids.length-lvl-1];
+                var dtid = __removeLinkType(ids[ids.length-lvl]);
+                
+                if(!selectedFields[rtid]){
+                    selectedFields[rtid] = [];    
+                }
+                if(constr_rt_id>0){
+                    dtid = dtid+':'+constr_rt_id;
+                }
+                
+                //window.hWin.HEURIST4.util.findArrayIndex( dtid, selectedFields[rtid] )<0
+                if( selectedFields[rtid].indexOf( dtid )<0 ) {
+                    
+                    selectedFields[rtid].push(dtid);    
+                    
+                    //add resource field for parent recordtype
+                    __addSelectedField(ids, lvl+2, rtid);
+                }
+            }
+            
+            //get selected fields from treeview
+            var selectedFields = mode_action?{}:[];
+            var tree = this.element.find('.rtt-tree').fancytree("getTree");
+            var fieldIds = tree.getSelectedNodes(false);
+            var k, len = fieldIds.length;
+            
+            if(len<1){
+                window.hWin.HEURIST4.msg.showMsgFlash('No fields selected. '
+                    +'Please select at least one field in tree', 2000);
+                return false;
+            }
+            
+            
+            for (k=0;k<len;k++){
+                var node =  fieldIds[k];
+                
+                if(window.hWin.HEURIST4.util.isempty(node.data.code)) continue;
+                
+                if(mode_action){
+                    var ids = node.data.code.split(":");
+                    __addSelectedField(ids, 1, 0);
+                }else{
+                    selectedFields.push(node.data.code);
+                }
+                
+                //DEBUG console.log( node.data.code );
+            }
+            //DEBUG 
+console.log( selectedFields );
+
+        
+        return {
+                'fields': selectedFields,
+                'csv_delimiter':  this.element.find('#delimiterSelect').val(),
+                'csv_enclosure':  this.element.find('#quoteSelect').val(),
+                'csv_mvsep':'|',
+                'csv_linebreak':'nix', //not used at tne moment
+                'csv_header': this.element.find('#cbNamesAsFirstRow').is(':checked'),
+                'include_term_ids': this.element.find('#cbIncludeTermIDs').is(':checked')?1:0,
+                'include_term_codes': this.element.find('#cbIncludeTermCodes').is(':checked')?1:0,
+                'include_term_hierarchy': this.element.find('#cbIncludeTermHierarchy').is(':checked')?1:0,
+                'include_resource_titles': this.element.find('#cbIncludeResourceTitles').is(':checked')?1:0
+                };
+        
+    },
 
     //
     // overwritten
     //
-    _onRecordScopeChange: function () 
+    _onRecordScopeChange: function() 
     {
         var isdisabled = this._super();
         
@@ -279,10 +428,51 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
         //reload treeview
         this._loadRecordTypesTreeView( rtyID );
         
+        $('#divSaveSettings').hide();
+        $('#divLoadSettings').hide();
+        
         if(rtyID==''){
             $('.rtt-tree').parent().hide();
         }else{
             $('.rtt-tree').parent().show();
+            if(rtyID>0){
+                
+                this.selectedFields = [];
+                
+                //get list of settings
+                var request = {
+                    'a'          : 'files',
+                    'entity'     : 'defRecTypes',
+                    'operation'  : 'list',
+                    'rec_ID'     : rtyID,
+                    'ext'        : 'csf'    
+                };
+
+                var that = this;                                                
+                window.hWin.HAPI4.EntityMgr.doRequest(request, 
+                    function(response){
+                        if(response.status == window.hWin.ResponseStatus.OK){
+                            var ele = $('#sel_saved_settings').empty();
+                            window.hWin.HEURIST4.ui.addoption(ele[0], '', '');
+                            
+                            var recset = new hRecordSet(response.data);
+                            if(recset.length()>0){
+                                
+                                recset.each(function(recID, rec){
+                                    var filename = recset.fld(rec, 'file_name');
+                                    window.hWin.HEURIST4.ui.addoption(ele[0], filename, filename.substring(0,filename.indexOf('.csf')));
+                                });
+                                $('#divLoadSettings').show();    
+                            }
+                            
+                        }else{
+                            window.hWin.HEURIST4.msg.showMsgErr(response);
+                        }
+                });      
+                
+                $('#divSaveSettings').show();
+                
+            }
         }
         
         return isdisabled;
@@ -345,6 +535,11 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                     }
                     
                     return data;                                                   
+                },
+                loadChildren: function(e, data){
+                    setTimeout(function(){
+                        //that._assignSelectedFields();
+                    },500);
                 },
                 select: function(e, data) {
                 },

@@ -3,7 +3,7 @@
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2019 University of Sydney
+* @copyright   (C) 2005-2020 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -463,19 +463,27 @@ function hMapLayer2( _options ) {
             */                 
         },
         
-        setVisibility:function(isvisible){
+        //
+        // visiblity_set true,false or array of ids
+        //
+        setVisibility:function(visiblity_set){
             
-            is_visible = isvisible;
+            var was_invisible = !is_visible;
+            is_visible = (window.hWin.HEURIST4.util.isArrayNotEmpty(visiblity_set) || visiblity_set === true);
             
             var status = null;
            
             if(is_inited){
                 if(_nativelayer_id>0){
-                    status =  isvisible?'visible':'hidden'
-                    
-                    options.mapwidget.mapping('setLayerVisibility', _nativelayer_id, isvisible);
+                    status =  (is_visible)?'visible':'hidden';
+                    if(window.hWin.HEURIST4.util.isArrayNotEmpty(visiblity_set)){                            
+                        if(was_invisible) options.mapwidget.mapping('setLayerVisibility', _nativelayer_id, true);
+                        options.mapwidget.mapping('setVisibilityAndZoom', {native_id:_nativelayer_id}, visiblity_set, false);
+                    }else{        
+                        options.mapwidget.mapping('setLayerVisibility', _nativelayer_id, is_visible);
+                    }
                 }
-            }else if(isvisible) {
+            }else if(is_visible) {
                 status = 'loading'
                 _addLayerToMap();    
             }

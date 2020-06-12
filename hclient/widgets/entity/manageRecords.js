@@ -3,7 +3,7 @@
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2019 University of Sydney
+* @copyright   (C) 2005-2020 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
@@ -28,6 +28,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     _updated_tags_selection: null,
     _keepYPos: 0,
     _menuTimeoutId: 0,
+    _rts_selector_flag: false, //mouse over rts selectors
+    _rts_changed_flag: false,
     _resizeTimer: 0,
     
     //this.options.selectOnSave - special case when open edit record from select popup
@@ -140,22 +142,109 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             }
         ); 
         
-        
         //create field actions for rts editor
-        if(true || this.options.rts_editor){
-            this.rts_actions_menu = $('<div class="rts-editor-actions" style="width:133px;display:none;padding-top:2px;background:#95A7B7 !important;'
+        if(true || this.options.rts_editor){ //height:17px;background:#95A7B7 !important;
+            this.rts_actions_menu = $('<div class="rts-editor-actions" '
+                    +'style="width:272px;background:none !important;display:none;padding-top:2px;'
                     +'font-size:10px;font-weight:normal;cursor:pointer">'
-                   +'<span data-action="edit" style="background:lightblue;padding:4px">'
-                        +'<span class="ui-icon ui-icon-pencil" title="Edit" style="font-size:9px;font-weight:normal"/>Edit</span>'              
-                   +'<span data-action="field" style="background:lightcyan;padding:4px">'
+                   +'<span data-action="edit" style="background:lightblue;padding:3px;display:inline-block;width:42px;">'
+                        +'<span class="ui-icon ui-icon-pencil" title="Edit" style="font-size:9px;font-weight:normal"/>Edit</span>'           
+                        
+                   +'<span class="edit_rts_sel" style="background:lightblue;padding:4px" title="Requirement type">'
+                        +'<select class="edit_rts s_reqtype"><option>required</option><option>recommended</option><option>optional</option>'
+                        +'<option value="forbidden">hidden</option></select></span>'           
+                   +'<span class="edit_rts_sel" style="background:lightblue;padding:4px" title="Repeatability">'
+                        +'<select class="edit_rts s_repeat"><option value="1">single</option><option value="0">repeatable</option>'
+                        +'<option value="2">limited 2</option><option value="3">limited 3</option>'
+                        +'<option value="5">limited 5</option><option value="10">limited 10</option></select></span>'           
+                   +'<span class="edit_rts_sel" style="background:lightblue;padding:4px" title="Width of field">'
+                        +'<select class="edit_rts s_width"><option>5</option><option>10</option><option>20</option><option>30</option>'
+                        +'<option>40</option><option>50</option><option>60</option><option>80</option><option>100</option>'
+                        +'<option>120</option></select></span>'
+
+                   +'<span class="edit_rts_btn" style="top:24px;left:80px;position:absolute;background:lightblue;display:none" '
+                   +' data-apply="1" title="Save changes for field properties">Apply</span>'
+                   +'<span class="edit_rts_btn" style="top:24px;left:130px;position:absolute;background:lightblue;display:none">'
+                   +'Cancel</span>'
+                           
+                   +'<br><span data-action="field" style="background:lightcyan;padding:4px;display:inline-block;width: 40px;">'
                         +'<span class="ui-icon ui-icon-plus" title="Add a new field to this record type" style="font-size:9px;font-weight:normal"/>Field</span>'
-                   +'<span data-action="block" title="Add a new group/separator" style="background:lightgreen;padding:4px;font-size:9px;font-weight:normal"><span style="font-size:11px">&nbsp;±&nbsp;&nbsp;</span>Block</span>'               
+                   +'<br><span data-action="block" title="Add a new group/separator" style="background:lightgreen;padding:4px;display:inline-block;width: 40px;"><span style="font-size:11px">&nbsp;+&nbsp;&nbsp;</span>Block</span>'               
                     +'</div>').appendTo(this.element);
+                    
+            
+            //save/cancel rts buttons
+            this.edit_rts_apply = this.rts_actions_menu.find('.edit_rts_btn').button();
+            this._on( this.edit_rts_apply, {
+                click: function(e){
+                    if($(e.target).attr('data-apply')){
+
+                            var dtId = this.rts_actions_menu.attr('data-did');
+                        
+                            var fields = {
+                                rst_RecTypeID: this._currentEditRecTypeID,
+                                rst_DetailTypeID: dtId,
+                                rst_MaxValues: this.rts_actions_menu.find('.s_repeat').val(), 
+                                rst_DisplayWidth: this.rts_actions_menu.find('.s_width').val(), 
+                                rst_RequirementType: this.rts_actions_menu.find('.s_reqtype').val()};
+                        
+                            var request = {
+                                'a'          : 'save',
+                                'entity'     : 'defRecStructure',
+                                'request_id' : window.hWin.HEURIST4.util.random(),
+                                'fields'     : fields                     
+                                };
+                                
+                            var dlged = that._getEditDialog();
+                            if(dlged) window.hWin.HEURIST4.msg.bringCoverallToFront(dlged);
+                            
+                            window.hWin.HAPI4.EntityMgr.doRequest(request, 
+                                function(response){
+                                    
+                                    window.hWin.HEURIST4.msg.sendCoverallToBack();
+                                    
+                                    if(response.status == window.hWin.ResponseStatus.OK){
+
+                                        var fi = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex;
+                                        var rst_fields = window.hWin.HEURIST4.rectypes.typedefs[that._currentEditRecTypeID].dtFields[dtId];
+                                        rst_fields[fi['rst_MaxValues']] = fields['rst_MaxValues'];
+                                        rst_fields[fi['rst_DisplayWidth']] = fields['rst_DisplayWidth'];
+                                        rst_fields[fi['rst_RequirementType']] = fields['rst_RequirementType'];
+                                        
+                                        //recreate edit field
+                                        var dtFields = that._prepareFieldForEditor( rst_fields );
+                                        var inpt = that._editing.getFieldByName(dtId);
+                                        inpt.editing_input('option', {dtFields:dtFields, recreate:true} );
+                                        that._createRtsEditButton(dtId, $(that.element).find('div[data-dtid="'+dtId+'"]') );
+                                        
+                                    }else{
+                                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                                    }
+                                });
+                        
+                    }
+                    this.rts_actions_menu.hide(); 
+                }
+            });
+
+            //prevent exit on select events                    
+            this._on( this.rts_actions_menu.find('.edit_rts'), {
+                mouseover : function(){ this._rts_selector_flag = true; clearTimeout(this._menuTimeoutId); },
+                mouseleave : function(){ this._rts_selector_flag = false; },
+                change: function(event){
+                        this._rts_changed_flag = true;
+                        this.edit_rts_apply.show();
+                }                
+            });
                     
             this._on( this.rts_actions_menu, {
                 mouseover : function(){ clearTimeout(this._menuTimeoutId); },
-                mouseleave : function(){ this.rts_actions_menu.hide(); },
+                mouseleave : function(){ 
+                    if(this._rts_selector_flag || this._rts_changed_flag) return;
+                    this.rts_actions_menu.hide(); 
+                },
                 click: function(event){
+                        if(this._rts_selector_flag || this._rts_changed_flag) return;
                         var dt_id = this.rts_actions_menu.attr('data-did');
                         this.rts_actions_menu.hide();
                         
@@ -205,6 +294,74 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             _callback();
         }
         
+    },
+    
+    
+    //
+    // adds gear button befor edit field - it opens rts_actions_menu on mouse over
+    //
+    _createRtsEditButton : function(dtId, div_ele){  
+        
+        var that = this;
+                      
+        var rst_fields = window.hWin.HEURIST4.rectypes.typedefs[that._currentEditRecTypeID].dtFields[dtId];
+        if(rst_fields){
+
+            var is_folder = false;      
+            var ele = $('<div><span  data-hh="bbbb" class="ui-icon ui-icon-gear"></span></div>')
+            .css({'display':'table-cell','vertical-align':'top',
+                'min-width':'32px','cursor':'pointer','padding-top':'0.4em'})
+            .prependTo($(div_ele));    
+
+            //ele = ele.find('.ui-icon-gear');
+            that._on(ele,{mouseover:function(event){
+                clearTimeout(that._menuTimeoutId);
+                var el = $(event.target);
+
+                var dtId = el.parents('div[data-dtid]').attr('data-dtid');
+                var fi = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex;
+                var rst_fields = window.hWin.HEURIST4.rectypes.typedefs[that._currentEditRecTypeID].dtFields[dtId];
+                var dt_type = rst_fields[fi['dty_Type']];
+                if(dt_type=='separator'){
+                    that.rts_actions_menu.width(43);
+                    that.rts_actions_menu.find('.edit_rts_sel').hide();
+                }else{
+                    that.rts_actions_menu.width(280); //272
+                    that.rts_actions_menu.find('.edit_rts_sel').show();
+                    that.rts_actions_menu.find('.s_reqtype').val(rst_fields[fi['rst_RequirementType']])
+                    var v = rst_fields[fi['rst_MaxValues']];
+                    that.rts_actions_menu.find('.s_repeat').val(v!=null && v>=0?v:0);
+                    if(dt_type=='freetext' || dt_type=='blocktext' || dt_type=='float'){
+                        that.rts_actions_menu.find('.s_width').show();
+                    }else{
+                        that.rts_actions_menu.find('.s_width').hide()    
+                    }
+                    v = rst_fields[fi['rst_DisplayWidth']];
+                    v = (v!=null && v>0)?(v==5?v :(Math.floor(v/10)*10)):100;
+                    that.rts_actions_menu.find('.s_width').val(v);
+                    //console.log(rst_fields[fi['rst_DisplayWidth']]+'  '+rst_fields[fi['rst_MaxValues']]);                                
+                }
+
+                that.rts_actions_menu.find('.edit_rts_btn').hide();
+                that._rts_changed_flag = false;
+                that.rts_actions_menu
+                .attr('data-did', el.parents('div[data-dtid]').attr('data-dtid'))
+                .show()
+                .position({ my:'left top', at:'left bottom', of: el});
+                /*
+                .css({position:'absolute'
+                ,left:that.editForm.parent().position().left + el.position().left
+                ,top:that.editForm.position().top + el.position().top + 26 })
+                */
+
+                }, mouseout: function(event){
+                    that._menuTimeoutId = setTimeout(function() {that.rts_actions_menu.hide(); }, 800);
+            }});
+        }else{
+            //placeholder
+            var ele = $('<div>').css({'display':'table-cell','min-width':'32px'})
+            .prependTo($(div_ele));    
+        }
     },
     
     
@@ -3247,39 +3404,7 @@ rectypes.names[rectypeID] + ' is defined as a child of <b>'+names
             $(this.element).find('div[data-dtid]').each(function(idx, item){
                 var dtId = parseInt($(item).attr('data-dtid'));
                 if(dtId>0){
-                
-                    if(window.hWin.HEURIST4.rectypes.typedefs[that._currentEditRecTypeID].dtFields[dtId]){
-                    
-                        var is_folder = false;      
-                        var ele = $('<div><span  data-hh="bbbb" class="ui-icon ui-icon-gear"></span></div>')
-                        .css({'display':'table-cell','vertical-align':'top',
-                              'min-width':'32px','cursor':'pointer','padding-top':'0.4em'})
-                        .prependTo($(item));    
-                        
-                        //ele = ele.find('.ui-icon-gear');
-                        
-                        that._on(ele,{mouseover:function(event){
-                            clearTimeout(that._menuTimeoutId);
-                            var el = $(event.target);
-                           
-                            that.rts_actions_menu
-                                    .attr('data-did', el.parents('div[data-dtid]').attr('data-dtid'))
-                                    .show()
-                                    .position({ my:'left top', at:'left top', of: el});
-                                    /*
-                                    .css({position:'absolute'
-                                            ,left:that.editForm.parent().position().left + el.position().left
-                                            ,top:that.editForm.position().top + el.position().top + 26 })
-                                    */
-                                    
-                        }, mouseout: function(event){
-                            that._menuTimeoutId = setTimeout(function() {that.rts_actions_menu.hide(); }, 800);
-                        }});
-                    }else{
-                        //placeholder
-                        var ele = $('<div>').css({'display':'table-cell','min-width':'32px'})
-                        .prependTo($(item));    
-                    }
+                    that._createRtsEditButton(dtId, item);
                 }
             });
             //init back button - if there is opened rts editor

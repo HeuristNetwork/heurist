@@ -5,7 +5,7 @@
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2019 University of Sydney
+* @copyright   (C) 2005-2020 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
@@ -49,7 +49,8 @@ $.widget( "heurist.resultList", {
         title: null,  //see show_inner_header
         //searchsource: null,
 
-        empty_remark:'No entries match the filter criteria',
+        emptyMessageURL: null, //url of page to be loaded on empty result set 
+        empty_remark:'No entries match the filter criteria', //html content for empty message
         pagesize: -1,
         
         groupByMode: null, //[null|'none','tab','accordion'],
@@ -63,7 +64,7 @@ $.widget( "heurist.resultList", {
         
         recordDivClass: '', //additional class that modifies recordDiv appearance (see for example "public" in h4styles.css)
         // smarty template or url (or todo function) to draw inline record details when recordview_onselect='inline'. (LINE view mode only)
-        rendererExpandDetails: null, 
+        rendererExpandDetails: null,  //name of smarty template or function to draw expanded details
 
         searchfull: null,  // custom function to search full data
         
@@ -73,7 +74,7 @@ $.widget( "heurist.resultList", {
         //event
         onselect: null,  //on select event for non event based
 
-        onPageRender: null, //on complete of page render
+        onPageRender: null, //event listner on complete of page render
 
         navigator:'auto',  //none, buttons, menu, auto
 
@@ -239,16 +240,21 @@ $.widget( "heurist.resultList", {
                     var recset = data.recordset;
 
                     if(recset==null){
+                        
+                        if(data.empty_remark){
+                            that.div_content.html( data.empty_remark );
+                        }else{
 
-                        var recID_withStartupInfo = window.hWin.HEURIST4.util.getUrlParameter('Startinfo');
-                        if(recID_withStartupInfo>0){
-                            that._renderStartupMessageComposedFromRecord();
-                        }else                       
-                            if(that.options.emptyMessageURL){
-                                that.div_content.load( that.options.emptyMessageURL );
+                            var recID_withStartupInfo = window.hWin.HEURIST4.util.getUrlParameter('Startinfo');
+                            if(recID_withStartupInfo>0){
+                                that._renderStartupMessageComposedFromRecord();
+                                
+                            }else if(that.options.emptyMessageURL){
+                                    that.div_content.load( that.options.emptyMessageURL );
                             }else{
-                                that._renderEmptyMessage(0);
+                                    that._renderEmptyMessage(0);
                             }
+                        }
 
                         if(that.btn_search_save){
                             that.btn_search_save.hide();
@@ -1023,7 +1029,7 @@ $.widget( "heurist.resultList", {
 
         return $emptyres;
     },
-
+    
     //
     // mode 
     // 0 - no startup filter
@@ -1032,6 +1038,7 @@ $.widget( "heurist.resultList", {
     _renderEmptyMessage: function(mode){
 
         if( !window.hWin.HEURIST4.util.isempty(this.options['empty_remark']) ){
+            
             $('<div>').css('padding','10px').html(this.options['empty_remark']).appendTo(this.div_content);
 
         }else
@@ -2688,7 +2695,7 @@ $.widget( "heurist.resultList", {
 
         this._trigger( "onpagerender", null, this );
         
-        //@todo replace it to event listener in manageRecUploadedFiles
+        //@todo replace it to event listener in manageRecUploadedFiles as in manageSysGroups
         if($.isFunction(this.options.onPageRender)){
             this.options.onPageRender.call(this);
         }
@@ -2788,14 +2795,34 @@ $.widget( "heurist.resultList", {
     refreshSubsetSign: function(){
         if(this.div_header){
             var container = this.div_header.find('div.result-list-header');
+            container.find('span').remove();
+            var s = '<span style="position:absolute;right:10px;top:10px;font-size:0.6em;">';    
             if(window.hWin.HAPI4.sysinfo.db_workset_count>0){
-                $('<span style="position:absolute;right:10px;top:10px;padding:2px 4px;background:white;color:red"'
+                if(this.options.show_menu){
+                  s = s+'<span class="set_subset" '
+                      +'title="Make the current filter the active subset to which all subsequent actions are applied">Set</span>'
+                      +'&nbsp;&nbsp;'
+                      +'<span class="ui-icon ui-icon-arrowrefresh-1-w clear_subset" style="font-size:1em;" title="Click to revert to whole database"></span>&nbsp;';
+                }    
+                
+                $(s
+                +'<span style="padding:.4em 1em 0.3em;background:white;color:red;vertical-align:sub;"'
                 +' title="'+window.hWin.HAPI4.sysinfo.db_workset_count+' records"'
-                +'>SUBSET ACTIVE</span>')
+                +'>SUBSET ACTIVE n='+window.hWin.HAPI4.sysinfo.db_workset_count+'</span></span>')
                     .appendTo(container);
-            }else{
-                container.find('span').remove();
+            }else if(this.options.show_menu) {
+                $(s+'<span class="set_subset" '
+                +'title="Make the current filter the active subset to which all subsequent actions are applied">Set subset</span></span>')
+                .appendTo(container);
             }
+            if(this.options.show_menu){
+                this._on(container.find('span.set_subset').button(),
+                    {click: function(){this.callResultListMenu('menu-subset-set');}} );
+                this._on(container.find('span.clear_subset').css('cursor','pointer'),
+                    {click: function(){this.callResultListMenu('menu-subset-clear');}} );
+            }
+            
+            
         }
     },
     

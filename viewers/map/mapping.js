@@ -62,7 +62,8 @@ Thematic mapping
     setFeatureSelection - triggers redraw for path and polygones (assigns styler function)  and creates highlight circles for markers
     setFeatureVisibility - applies visibility for given set of heurist recIds (filter from timeline)
     zoomToSelection
-    setVisibilityAndZoom - show only items in given recordset and zoom 
+    setLayerVisibility - show hide entire layer
+    setVisibilityAndZoom - show susbset n given recordset and zoom 
     
     _onLayerClick - map layer (shape) on click event handler - highlight selection on timeline and map, opens popup
     _clearHighlightedMarkers - removes special "highlight" selection circle markers from map
@@ -78,7 +79,7 @@ Thematic mapping
 * 
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2019 University of Sydney
+* @copyright   (C) 2005-2020 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
@@ -847,7 +848,7 @@ $.widget( "heurist.mapping", {
 
                 if( bounds[i].isValid() ){
                     if(res==null){
-                        res = bounds[i];
+                        res = L.latLngBounds(bounds[i].getSouthWest(), bounds[i].getNorthEast() );
                     }else{
                         res.extend(bounds[i]);
                         //bounds[i].getNorthWest());
@@ -898,6 +899,7 @@ $.widget( "heurist.mapping", {
     
     //
     // zoom to TOP layers
+    // layer_ids - native ids
     //
     zoomToLayer: function(layer_ids){
         
@@ -984,26 +986,27 @@ $.widget( "heurist.mapping", {
     },
 
     //
+    // switch layer entire visibility on off
     //
-    //
-    setLayerVisibility: function(layer_id, is_visible)
+    setLayerVisibility: function(nativelayer_id, visiblity_set)
     {
-        var affected_layer = this.all_layers[layer_id];
+        var affected_layer = this.all_layers[nativelayer_id];
         if(affected_layer){
             this._clearHighlightedMarkers();
             
-            if(is_visible===false){
+            if(visiblity_set===false){
+                //hide all
                 affected_layer.remove();
-                if(this.all_clusters[layer_id]) this.all_clusters[layer_id].remove();
+                if(this.all_clusters[nativelayer_id]) this.all_clusters[nativelayer_id].remove();
             }else{
                 affected_layer.addTo(this.nativemap);
-                if(this.all_clusters[layer_id]) this.all_clusters[layer_id].addTo(this.nativemap);
+                if(this.all_clusters[nativelayer_id]) this.all_clusters[nativelayer_id].addTo(this.nativemap);
             }
         }
     },
     
-    isLayerVisibile: function(layer_id){
-        var affected_layer = this.all_layers[layer_id];
+    isLayerVisibile: function(laynativelayer_ider_id){
+        var affected_layer = this.all_layers[nativelayer_id];
         if(affected_layer){
             return this.nativemap.hasLayer(affected_layer);
         }else{
@@ -1648,8 +1651,6 @@ $.widget( "heurist.mapping", {
             this.vistimeline.timeline('setSelection', this.selected_rec_ids);
         }
         
-//center (and zoom) on map
-//console.log('selected '+this.selected_rec_ids.length+' markers '+this.highlightedMarkers.length);
         if (is_external===true){
             this.zoomToSelection();        
         }
@@ -1737,7 +1738,7 @@ $.widget( "heurist.mapping", {
     },
     
     //
-    // dataset_id -  {mapdoc_id, dataset_name, dataset_id}
+    // dataset_id -  {mapdoc_id:, dataset_name:, dataset_id:  or native_id}
     //
     setVisibilityAndZoom: function( dataset_id, _selection, need_zoom ){
         
@@ -1756,9 +1757,9 @@ $.widget( "heurist.mapping", {
                 return (window.hWin.HEURIST4.util.findArrayIndex(rec_ID, _selection)>=0);
             }
         }
-        
+
         if(check_function!=null){
-            
+    
             this._clearHighlightedMarkers();
             
             var _leaflet_id = this.mapManager.getLayerNativeId(dataset_id); //get _leaflet_id by mapdoc and dataset name
@@ -1773,13 +1774,15 @@ $.widget( "heurist.mapping", {
                                 check_function( layer.feature.properties.rec_ID )
                             ) 
                           {
-                                layer.addTo( that.nativemap );   //to show  
-                                
+                                if(!layer._map){
+                                    layer.addTo( that.nativemap );   //to show  
+                                }
                                 bounds.push( that.getLayerBounds(layer) );
                                 
                           }else{
                                 layer.remove(); //to hide    
                           }
+                          
                     });
                 }
             });
@@ -1975,8 +1978,6 @@ $.widget( "heurist.mapping", {
         this.options.map_rollover = __parseval(params['map_rollover']);
         this.options.default_style = window.hWin.HEURIST4.util.isJSON(params['style']);
 
-//console.log(params);        
-        
         //special case - till thematic map is not developed - for custom style
         /* expremental 
         this.isHamburgIslamicImpire = (params['search_realm']=='hie_places');

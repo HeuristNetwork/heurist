@@ -5,7 +5,7 @@
     *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
-    * @copyright   (C) 2005-2019 University of Sydney
+    * @copyright   (C) 2005-2020 University of Sydney
     * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
     * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
     * @version     4.0
@@ -378,7 +378,7 @@ If you have missing data for Required fields, you may find it convenient to set 
                                 <td style="width:150px">Column</td>
                                 <td style="width:50px">&nbsp;</td>
                                 <td style="width:50px;text-align:center">Heurist<br>Identifier</td>
-                                <td style="width:50px;text-align:center">Date</td>
+                                <td style="width:50px;text-align:center" class="date-column">Date</td>
                                 <td style="width:200px"><span id="lbl_ID_select" style="display:none">IDs for which record type?<span></td></tr></thead><tbody></tbody></table>
                     
                     
@@ -453,10 +453,10 @@ If you have missing data for Required fields, you may find it convenient to set 
         
         <img id="img_arrow1" src="../../hclient/assets/blackdot.png" height="2" style="position:absolute;left:0px;width:100px;display:none" >
         <img id="img_arrow2" src="../../hclient/assets/blackdot.png" width="2"  style="position:absolute;left:0px;height:16px;display:none">
-        <img id="img_arrow3" src="../../hclient/assets/arrow.png" style="position:absolute;left:0px;display:none">        
+        <img id="img_arrow3" src="../../hclient/assets/arrow.png" style="position:absolute;left:0px;display:none;z-index:2">        
         <img id="img_arrow4" src="../../hclient/assets/blackdot.png" width="2" style="position:absolute;left:0px;height:18px;display:none;z-index:2">        
         
-        <div style="padding:1em 0 1em 1em;position: absolute;top:130; width:97%; border:2px red solid;background: rgba(255, 0, 0, 0.18);" id="divheader">
+        <div style="padding:1em 0 1em 1em;position: absolute;top:130; width:97%; border:none;background:rgba(151, 244, 128, 0.83);" id="divheader">
             <div style="float:left;font-weight:bold;text-align:center">WORKFLOW<br>instruction below</div>
             <div  id="divActionsMatching" class="action_buttons step3" style="padding-left: 120px">
                 
@@ -535,11 +535,34 @@ If you have missing data for Required fields, you may find it convenient to set 
             <div class="heurist-helper1" id="divPrepareSettingHelp" style="display:block;">
             </div>
         </div>
-        <div  id="divImportSetting" class="step5 step-ctrls" style="display:none;top:205px">
+        <div  id="divImportSetting" class="step5 step-ctrls" style="display:none;top:205px;font-size:0.9em;">
             <div class="heurist-helper1" id="divImportSettingHelp" style="display:block;padding-bottom:1em">
-                You are now ready to update the database. This step applies the changes you have prepared and is not (easily) reversible.            
+                You are now ready to update the database. This step applies the changes you have prepared and is not (easily) reversible.
             </div>
 
+            <input type="radio" checked name="sa_upd" id="sa_upd21" value="21" class="text">&nbsp;
+            <label for="sa_upd21">Load new values, replacing all existing values for these records/fields</label><br>
+            
+            <input type="radio" name="sa_upd" id="sa_upd0" value="0" class="text">&nbsp;
+            <label for="sa_upd0">Add new values without deletion of existing values (duplicates are ignored)</label><br>
+            
+            <a href="#" style="margin: 0.3em;line-height: 17px;text-decoration:none"
+            onclick="{$('#divImport3').show();$('#divImport3_marker').removeClass('ui-icon-triangle-1-e').addClass('ui-icon-triangle-1-s');}">
+                <span class="ui-icon ui-icon-triangle-1-e" id="divImport3_marker"></span>&nbsp;&nbsp;Other options
+            </a>           
+            
+            <div style="padding-left: 60px; vertical-align: top; display: none;" id="divImport3">
+            
+                <input type="radio" name="sa_upd" id="sa_upd1" value="1" class="text">&nbsp;
+                <label for="sa_upd1">Add new values only if field is empty (new values ignored for non-empty fields)</label><br>
+
+                <input type="radio" name="sa_upd" id="sa_upd20" value="20" class="text">&nbsp;
+                <label for="sa_upd20"> Replace existing values with new values, retain existing value if no new value supplied</label>
+            
+            </div>
+            
+            
+<!--  VERSION pre 2020-06-08           
             <input type="radio" checked="" name="sa_upd" id="sa_upd0" value="0" class="text" onchange="{importRecordsCSV.onUpdateModeSet()}">&nbsp;
             <label for="sa_upd0">Retain existing values and append distinct new data as repeat values
                 (existing values are not duplicated)</label><br>
@@ -557,6 +580,7 @@ If you have missing data for Required fields, you may find it convenient to set 
                         <input type="radio" name="sa_upd2" id="sa_upd21" value="1" class="text">&nbsp;
                         <label for="sa_upd21" style="font-size:0.9em;">Delete existing even if no new data supplied for record</label>
                     </div>            
+-->                    
         </div>
 <!-- end radiogroup setting divs -->     
 

@@ -6,7 +6,7 @@
 * 
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2019 University of Sydney
+* @copyright   (C) 2005-2020 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
@@ -37,6 +37,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
     currentId,  //currect record id in import tabel to PREVIEW data
     upload_file_name,  //file on server with original uploaded data
     encoded_file_name, //file on server with UTF8 encoded data
+    
+    exp_level = window.hWin.HAPI4.get_prefs_def('userCompetencyLevel', 2), //beginner default
     
     session_selector;
     
@@ -2458,7 +2460,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                                 +'<td style="min-width:50px;text-align:center">'
                                     +(is_id_field?'<input type="checkbox" id="id_field_'+i+'" value="'+i
                                             +'" checked disabled/>':'-')+'</td>'
-                                +'<td style="min-width:50px;text-align:center">'
+                                +'<td style="min-width:50px;text-align:center" class="date-column">'
                                     //date field
                                     +(is_id_field?'':'<input type="checkbox" id="d_field_'+i+'" value="'+i+'"/>')+'</td>' 
                                 +'<td style="width:200px">'
@@ -2466,6 +2468,10 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                                     +'" class="text ui-widget-content ui-corner-all"></select>'):'')
                                 +'</td></tr>').appendTo(tbl);
                             }         
+                            
+                            if(exp_level>0){
+                                container2.find('.tbfields .date-column').hide();                                    
+                            }
                             
                             
                             function __isAllRectypesSelectedForIdFields(){
@@ -2526,7 +2532,6 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                                 $('#id_field_'+id_suggestions[i]).change();
                             }
                             
-
                         }else if(response.data.import_id>0){
                             
                             imp_ID = response.data.import_id;      
@@ -2583,8 +2588,9 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 
                  shelp = 'Please select one or more columns on which to match <b>'
                  + window.hWin.HEURIST4.rectypes.names[rtyID]
-                 + '</b> in the incoming data against records already in the database.'
-                 + '<br>Note: do not use columns containing multiple values for matching, as this will generate multiple records per input line.<br><br>';
+    + '</b> in the incoming data against records already in the database.'
+    + '<br>Note: do not use columns containing multiple values for matching, as this will generate multiple records per input line.'
+    + '<br>To force creation of all new records, select columns and map to a field which will never match<br><br>';
                  
                 if(key_idx>=0){
                     shelp = shelp + 'The existing identification field "'+imp_session['columns'][key_idx]+'" will be overwritten.' 
@@ -3167,6 +3173,16 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         
         var session_id = window.hWin.HEURIST4.msg.showProgress( $('#progressbar_div'),  0, 1000, false );
         
+        var update_mode = $("input[name='sa_upd']:checked"). val();
+        var retain_existing = 0
+        if(update_mode>=20){
+            retain_existing = update_mode==20?0:1;
+            update_mode = 2;
+        }else{
+            //pre 2020-06-08
+            retain_existing = $("input[name='sa_upd2']:checked"). val();
+        }
+        
         var request = {
             db        : window.hWin.HAPI4.database,
             session   : session_id,
@@ -3182,8 +3198,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             //0 - Retain existing values and append distinct new data as repeat values
             //1 - Add new data only if field is empty
             //2 - Replace all existing value(s) 
-            sa_upd: $("input[name='sa_upd']:checked"). val(), 
-            sa_upd2: $("input[name='sa_upd2']:checked"). val()  //if no data: retain existing (0) or remove existing (1)
+            sa_upd: update_mode, 
+            sa_upd2: retain_existing  //if no data: retain existing (0) or remove existing (1)
         };
         
 //        request['DBGSESSID']='425288446588500001;d=1,p=0,c=0';
@@ -4177,10 +4193,19 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         
             $('#divFieldMapping2').show();
         
-            if ($("#sa_upd2").is(":checked")) {
+            /* pre 2020-06-08
+            if ($("#sa_upd2").is(":checked")) { 
                 $("#divImport2").css('display','block');
             }else{
                 $("#divImport2").css('display','none');
+            }
+            */
+            if ($("#sa_upd1").is(":checked") || $("#sa_upd20").is(":checked")) { 
+                $("#divImport3").css('display','block');
+                $('#divImport3_marker').removeClass('ui-icon-triangle-1-e').addClass('ui-icon-triangle-1-s');
+            }else{
+                $("#divImport3").css('display','none');
+                $('#divImport3_marker').removeClass('ui-icon-triangle-1-s').addClass('ui-icon-triangle-1-e');
             }
                 
             if(currentStep==4){ //prepare
@@ -4196,6 +4221,10 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
 
                 window.hWin.HEURIST4.util.setDisabled($('#sa_insert'), !both_insert_and_update);
                 window.hWin.HEURIST4.util.setDisabled($('#sa_update'), !both_insert_and_update);
+                if(!both_insert_and_update){
+                    $('#sa_insert').css('opacity',1);
+                    $('#sa_update').css('opacity',1);
+                }
                 if(!both_insert_and_update || 
                    (!$('#sa_insert').prop('checked') && !$('#sa_update').prop('checked'))
                 ){
@@ -4232,6 +4261,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             
                 window.hWin.HEURIST4.util.setDisabled($('#sa_insert'), true);
                 window.hWin.HEURIST4.util.setDisabled($('#sa_update'), true);
+                $('#sa_insert').css('opacity',1);
+                $('#sa_update').css('opacity',1);
             
                 $('h2.step5').css('display','inline-block');
                 window.hWin.HEURIST4.util.setDisabled($('#btnPrepareStart'), true);

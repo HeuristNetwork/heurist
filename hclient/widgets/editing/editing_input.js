@@ -3,7 +3,7 @@
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2019 University of Sydney
+* @copyright   (C) 2005-2020 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
@@ -348,7 +348,15 @@ $.widget( "heurist.editing_input", {
     
     _setOptions: function( ) {
         this._superApply( arguments );
-        this._refresh();
+        
+        if(this.options.recreate===true){
+            this.options.recreate = null;
+            this.element.empty();
+            this._destroy();
+            this._create();
+        }else{
+            this._refresh();    
+        }
     },
 
     // events bound via _on are removed automatically

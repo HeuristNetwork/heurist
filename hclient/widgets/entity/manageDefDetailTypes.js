@@ -3,7 +3,7 @@
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2019 University of Sydney
+* @copyright   (C) 2005-2020 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
@@ -514,6 +514,16 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                $(depended_fields[idx]).show();
            }
                 
+        }
+        
+        //add special checkbox
+        if(!(this._currentEditID>0)){ //insert       
+            var s = window.hWin.HAPI4.get_prefs_def('edit_rts_open_formlet_after_add',0)==1?'checked':'';
+            var ele = $('<label style="float:right;padding-right:30px"><input type="checkbox" '+s+' style="margin-top:10px"/>'
+                +'Open immediately on save to set width and defaults</label>').appendTo(this.editForm);
+            this._on(ele.find('input'),{change:function(e){
+                window.hWin.HAPI4.save_pref('edit_rts_open_formlet_after_add', $(e.target).is(':checked')?1:0);
+            }});
         }
         
 

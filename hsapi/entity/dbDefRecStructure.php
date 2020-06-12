@@ -6,7 +6,7 @@
     *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
-    * @copyright   (C) 2005-2019 University of Sydney
+    * @copyright   (C) 2005-2020 University of Sydney
     * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
     * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
     * @version     4.0
@@ -209,12 +209,12 @@ class DbDefRecStructure extends DbEntityBase
             if($isInsert){
                 $this->records[$idx]['rst_ID'] = -1;
                 $this->records[$idx]['rst_LocallyModified'] = 0;
+                if(!@$this->records[$idx]['rst_Status']) $this->records[$idx]['rst_Status'] = 'open';
             }else{
                 $this->records[$idx]['rst_ID'] = $row['rst_ID'];
                 $this->records[$idx]['rst_LocallyModified'] = ($row['rst_OriginatingDBID']>0)?1:0;
             }
 
-            if(!@$this->records[$idx]['rst_Status']) $this->records[$idx]['rst_Status'] = 'open';
 
             if(@$this->records[$idx]['rst_MaxValues']==null ||
                 !(intval(@$this->records[$idx]['rst_MaxValues'])>=0)) $this->records[$idx]['rst_MaxValues'] = 1;

@@ -6,7 +6,7 @@
     *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
-    * @copyright   (C) 2005-2019 University of Sydney
+    * @copyright   (C) 2005-2020 University of Sydney
     * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
     * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
     * @version     4.0
@@ -349,6 +349,8 @@ class DbSysGroups extends DbEntityBase
                     }
             }
             
+            //update user groups for current user
+            //$this->system->updateSessionForUser( $this->system->get_user_id() );
             //@todo   $groups = reloadUserGroups(get_user_id());
             //@todo   updateSessionForUser(get_user_id(), 'user_access', $groups);
         }else{

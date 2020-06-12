@@ -4,7 +4,7 @@
 * 
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2019 University of Sydney
+* @copyright   (C) 2005-2020 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
@@ -211,13 +211,20 @@ $.widget( "heurist.search_faceted", {
         .appendTo( this.div_toolbar )
         .button().hide(); //@todo
 
+        
+        var lbl = this.options.params.ui_exit_button_label
+                        ?this.options.params.ui_exit_button_label
+                        :window.hWin.HR('Show all available searches');
+        
         this.btn_close = $( "<button>", { 
                     title:window.hWin.HR("Close this facet search and return to the list of saved searches") })
         .appendTo( this.div_toolbar )
-        .button({icon: "ui-icon-close", iconPosition:'end', 
-            label:window.hWin.HR("Show all available searches")}); //was Close
+        .button({icon: "ui-icon-close", iconPosition:'end', label:lbl}); //was Close
 
         this.btn_close.find('.ui-icon-close').css({right: 0}); //'font-size': '1.3em', 
+        
+        if(this.options.params.ui_exit_button===false) this.options.showclosebutton = false;
+        
         
         this._on( this.btn_submit, { click: "doSearch" });
         this._on( this.btn_reset, { click: "doResetAll" });
@@ -1016,6 +1023,11 @@ $.widget( "heurist.search_faceted", {
             this.doSearch();
         }else{
             this._recalculateFacets(-1);     
+            
+            //trigget empty fake event to update messge in result list
+            $(this.document).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH, 
+                [ {empty_remark:'<div style="padding:10px;"><h3><span class="ui-icon ui-icon-arrowthick-1-w"></span>'
+                +'Please select from facets on left</h3></div>', search_realm:this.options.search_realm} ]);
         }
        
     }

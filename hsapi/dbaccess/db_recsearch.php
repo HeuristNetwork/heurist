@@ -28,7 +28,7 @@
     *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
-    * @copyright   (C) 2005-2019 University of Sydney
+    * @copyright   (C) 2005-2020 University of Sydney
     * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
     * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
     * @version     4.0
@@ -63,14 +63,25 @@
         if(@$params['rt'] && @$params['dt']){
 
             $mysqli = $system->get_mysqli();
-            $currentUser = $system->getCurrentUser();
+            //$currentUser = $system->getCurrentUser();
 
-            $query = "select min(cast(dtl_Value as decimal)) as min, max(cast(dtl_Value as decimal)) as max from Records, recDetails where rec_ID=dtl_RecID and rec_RecTypeID="
-            .$params['rt']." and dtl_DetailTypeID=".$params['dt']." and dtl_Value is not null and dtl_Value!=''";
-
+            $query = 'SELECT MIN(CAST(dtl_Value as decimal)) as MIN, MAX(CAST(dtl_Value as decimal)) AS MAX FROM Records, recDetails';
+            $where_clause  = ' WHERE rec_ID=dtl_RecID AND rec_RecTypeID='
+            .$params['rt'].' AND dtl_DetailTypeID='.$params['dt']." AND dtl_Value is not null AND dtl_Value!=''";
+            
+            $currUserID = $system->get_user_id();
+            if( $currUserID > 0 ) {
+                $q2 = 'select wss_RecID from usrWorkingSubsets where wss_OwnerUGrpID='.$currUserID.' LIMIT 1';
+                if(mysql__select_value($mysqli, $q2)>0){
+                    $query = $query.', usrWorkingSubsets ';
+                    $where_clause = $where_clause.' AND wss_RecID=rec_ID AND wss_OwnerUGrpID='
+                        .$currUserID.'))';
+                }
+                
+            }
             //@todo - current user constraints
-
-            $res = $mysqli->query($query);
+            
+            $res = $mysqli->query($query.$where_clause);
             if (!$res){
                 $response = $system->addError(HEURIST_DB_ERROR, "Search query error on min/max. Query ".$query, $mysqli->error);
             }else{
@@ -161,6 +172,11 @@
             if(!@$params['q']){
                 return $system->addError(HEURIST_INVALID_REQUEST, $savedSearchName."Facet query search request. Missing query parameter");
             }
+            
+            if( $system->get_user_id() > 0 ) {
+                //find user work susbset
+                $params['use_user_wss'] = true;
+            }            
 
             //get SQL clauses for current query
             $qclauses = get_sql_query_clauses_NEW($mysqli, $params, $currentUser);
@@ -955,7 +971,7 @@
                     }
                     
                     if($isWebPage){
-                        return recordSearch($system, array('q'=>array('ids'=>$root_rec_id), 'detail'=>'detail'));
+                        return recordSearch($system, array('q'=>array('ids'=>$root_rec_id), 'detail'=>'detail', 'w'=>'e'));
                     }else{
                         //find parent home record
                         $res = recordSearchFindParent($system, 
@@ -1010,7 +1026,7 @@
         
         if($isRoot){
             //return recordset
-            return recordSearch($system, array('q'=>array('ids'=>$result), 'detail'=>'detail'));
+            return recordSearch($system, array('q'=>array('ids'=>$result), 'detail'=>'detail', 'w'=>'e'));
         }
         
     }
@@ -1532,8 +1548,8 @@
             return $fin_result;
         }//END RULES ------------------------------------------
         else if( $currUserID>0 ) {
-            //find user work susbset
-            $params['use_user_wss'] = true;
+            //find user work susbset (except EVERYTHING search)
+            $params['use_user_wss'] = ($params['w']!='e'); 
         }
         
         

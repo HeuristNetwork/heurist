@@ -6,7 +6,7 @@
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
-* @copyright   (C) 2005-2019 University of Sydney
+* @copyright   (C) 2005-2020 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
@@ -1150,11 +1150,12 @@ function hMapManager( _options )
             } );
             
         },
-
+        
         //
-        // show/hide dataset
+        // show/hide datasets
+        // visibility - true or false to show/hide entire layer or array of record ids 
         //
-        setLayersVisibility: function (mapdoc_ID, _selection, visibility){
+        setLayersVisibility: function (mapdoc_ID, _selection, visibility_set){
             
             if(!(mapdoc_ID>=0)) mapdoc_ID = 0;
             
@@ -1163,11 +1164,11 @@ function hMapManager( _options )
                     var layer_rec = mapDocuments.getLayer(mapdoc_ID, recID);
                     if(layer_rec){
                         var curr_visible = (layer_rec['layer']).isVisible();
-                        if(visibility!=curr_visible){
-                            (layer_rec['layer']).setVisibility(!curr_visible );  
+                        if(visibility_set!==curr_visible){
+                            (layer_rec['layer']).setVisibility( visibility_set );  
                         }
+                        
                     } 
-                    
             }
             
             if($.isArray(_selection)){
@@ -1181,14 +1182,21 @@ function hMapManager( _options )
         },
 
         //
+        //
         // returns leaflet layer_id by database mapdoc and name 
+        // dataset = {mapdoc_id:, dataset_name:, dataset_id: }
         //
         getLayerNativeId: function( dataset ){
-            
-            if(dataset && dataset.mapdoc_id>=0){
-                var layer = mapDocuments.getLayerByName(dataset.mapdoc_id, dataset.dataset_name, dataset.dataset_id);
-                if(layer){
-                    return layer.getNativeId();
+
+            if(dataset){
+                if(dataset.native_id>=0){
+                    return dataset.native_id;
+                
+                }else if(dataset.mapdoc_id>=0){
+                    var layer = mapDocuments.getLayerByName(dataset.mapdoc_id, dataset.dataset_name, dataset.dataset_id);
+                    if(layer){
+                        return layer.getNativeId();
+                    }
                 }
             }
             return 0;
