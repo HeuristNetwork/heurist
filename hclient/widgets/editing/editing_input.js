@@ -382,7 +382,7 @@ $.widget( "heurist.editing_input", {
                         $(eid).remove(); //remove editor element
                         
                     }else if(that.detailType=='file'){
-                        $(input).fileupload('destroy');
+                        if($(input).fileupload('instance')!==undefined) $(input).fileupload('destroy');
                     }else{
                         if($(input).hSelect('instance')!==undefined) $(input).hSelect('destroy');
                     }
