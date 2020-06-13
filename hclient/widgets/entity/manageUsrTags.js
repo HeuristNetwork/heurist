@@ -806,7 +806,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
                         }
                     }
                                            
-                    that.list_div.position({my:'left top', at:'left bottom', of:input_tag})
+                    that.list_div.addClass('ui-widget-content').position({my:'left top', at:'left bottom', of:input_tag})
                     //.css({'max-width':(maxw+'px')});
                     .css({'max-width':input_tag.width()+60});
                     if(is_added){
@@ -817,7 +817,10 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
                     
                 }else if(input_tag.val().length>2){
                     that.list_div.empty();
-                    $('<div style="min-width:160px;font-size:0.8em"><span class="ui-icon ui-icon-check" style="display:inline-block;vertical-align:bottom"/>Confirm&nbsp;and&nbsp;assign&nbsp;new&nbsp;Tag</div>')
+                    $('<div style="min-width:160px;font-size:0.8em" class="ui-widget-content">'
+                    +'<span class="ui-icon ui-icon-check" '
+                    +'style="display:inline-block;vertical-align:bottom;"/>'
+                    +'Confirm&nbsp;and&nbsp;assign&nbsp;new&nbsp;Tag</div>')
                         .appendTo(that.list_div)
                             .click( function(event){
                                     btn_add.click();

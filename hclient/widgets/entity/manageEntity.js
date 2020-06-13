@@ -1225,7 +1225,7 @@ $.widget( "heurist.manageEntity", {
     _afterDeleteEvenHandler: function( recID ){
         
             this._currentEditID = null;
-            window.hWin.HEURIST4.msg.showMsgFlash(this.options.entity.entityTitle+' '+window.hWin.HR('has been deleted'));
+            window.hWin.HEURIST4.msg.showMsgFlash(this.options.entity.entityTitle+' '+window.hWin.HR('has been deleted'), 2000);
             if(this.options.edit_mode=='popup'){
                 //hide popup edit form 
                 if(this._edit_dialog){

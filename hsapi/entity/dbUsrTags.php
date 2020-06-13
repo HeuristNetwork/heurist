@@ -231,18 +231,20 @@ class DbUsrTags extends DbEntityBase
             
             $mysqli = $this->system->get_mysqli();
             
-            $recIDs_inuse = mysql__select_list($mysqli, 'usrRecTagLinks', 'rtl_TagID', 
-                        'rtl_TagID in ('.implode(',', $this->recordIDs).')');
-            
+            $recIDs_inuse = mysql__select_list2($mysqli, 'SELECT DISTINCT rtl_RecID '
+                        .'FROM usrRecTagLinks WHERE rtl_TagID in ('.implode(',', $this->recordIDs).')');
             $cnt = count($recIDs_inuse);       
                         
             if($cnt>0){
                 $this->system->addError(HEURIST_ACTION_BLOCKED, 
                 (($cnt==1 && count($this->records)==1)
-                ? 'There is a tag'
-                : 'There are '.$cnt.' tags')
-                .' attached to record(s). You must delete the records'.
-                ' or the tag values in order to be able to delete the tags.');
+                ? 'There is a record'
+                : 'There are '.$cnt.' records')
+                .' with this tag.<br>You must delete the record(s)'
+                .' or remove the tag in order to be able to delete the tag.<br><br>'
+                .'<a href="#" onclick="window.open(\''
+                . HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&q=ids:'.implode(',', $recIDs_inuse)
+                .'\',\'_blank\')">Open records in search</a> to allow deletion or removal of this tag');
                 return false;
             }
         }

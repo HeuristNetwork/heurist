@@ -8,8 +8,8 @@
         
         "searchFormContent": "searchRecUploadedFiles.html",
         
-        "entityTitle": "Uploaded or Referenced File",
-        "entityTitlePlural": "Uploaded or Referenced Files",
+        "entityTitle": "File/reference",
+        "entityTitlePlural": "Files/references",
         "empty_remark": "Please use the search field above to locate relevant file (partial string match on title)",
 
         "sel_actions": [{"key":"edit", "title":"Edit File"},

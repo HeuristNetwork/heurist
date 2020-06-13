@@ -511,18 +511,24 @@ class DbRecUploadedFiles extends DbEntityBase
             
         $mysqli = $this->system->get_mysqli();
         
-        $recIDs_inuse = mysql__select_list($mysqli, 'recDetails', 'dtl_UploadedFileID', 
-                    'dtl_UploadedFileID in ('.implode(',', $this->recordIDs).')');
         
+        $cnt = mysql__select_value($mysqli, 'SELECT count(dtl_ID) '
+            .'FROM recDetails WHERE dtl_UploadedFileID in ('.implode(',', $this->recordIDs).')');
+                    
+        /*            
+        $recIDs_inuse = mysql__select_list2($mysqli, 'SELECT DISTINCT dtl_RecID '
+                    .'FROM recDetails WHERE dtl_UploadedFileID in ('.implode(',', $this->recordIDs).')');
         $cnt = count($recIDs_inuse);       
+        */
                     
         if($cnt>0){
             $this->system->addError(HEURIST_ACTION_BLOCKED, 
             (($cnt==1 && count($this->records)==1)
                 ? 'There is a reference'
                 : 'There are '.$cnt.' references')
-                .' from record(s) to this File. You must delete the records'.
-                ' or the File field values in order to be able to delete the file.');
+                .' from record(s) to this File.<br>You must delete the records'
+                .' or the File field values in order to be able to delete the file.'
+                .' <br><br>Click the edit icon to see the records which reference this image');
             return false;
         }
         
