@@ -82,18 +82,19 @@ function copy_IconAndThumb_FromLibrary($rt_id, $filename) {
     $lib_dir1 = dirname(__FILE__).'/../../admin/setup/iconLibrary/16px/';
     $lib_dir2 = dirname(__FILE__).'/../../admin/setup/iconLibrary/64px/';
     
-    if(strpos($filename,'icons8-')==0){
+    if(strpos($filename,'icons8-')===0){
         $filename64 = substr($filename,0,strlen($filename)-6).'64.png';
     }else{
         $filename64 = $filename;
     }
+    
+    // actually save the file
+    $res1 = copy($lib_dir1.$filename, HEURIST_ICON_DIR . $rt_id . '.png');
+    $res2 = copy($lib_dir2.$filename64, HEURIST_ICON_DIR . 'thumb/th_' .$rt_id.'.png');
 
-    if (copy($lib_dir1.$filename, HEURIST_ICON_DIR . $rt_id . '.png') &&
-    copy($lib_dir2.$filename64, HEURIST_ICON_DIR . 'thumb/th_' .$rt_id.'.png')) { // actually save the file
-
-        return false;
-    }
-    return true;
+    return $res1 && $res2;
+    
+    //return false;
 }
 
 

@@ -77,13 +77,24 @@ $mysqli = $system->get_mysqli();
 
     if(@$_REQUEST['libicon']){
         //take from  library
-        if(copy_IconAndThumb_FromLibrary($rt_id, $_REQUEST['libicon'])){
+        $res = copy_IconAndThumb_FromLibrary($rt_id, $_REQUEST['libicon']);
+        
+        if($res==false){
             //error
-            list($success_msg, $failure_msg) = array('', "Library file: $filename couldn't be saved to upload path defined for db = "
-            .HEURIST_DBNAME." (".HEURIST_ICON_DIR."). Please ask your system administrator to correct the path and/or permissions for this directory");
+            $filename = $_REQUEST['libicon'];
+            
+            $filename64 = '';
+            if(strpos($filename,'icons8-')===0){
+                $filename64 = ', '.substr($filename,0,strlen($filename)-6).'64.png';    
+            }
+            
+            list($success_msg, $failure_msg) = array('', 
+                "Library files: $filename $filename64 couldn't be saved to upload path defined for db = "
+                .HEURIST_DBNAME." (".HEURIST_ICON_DIR."). Please ask your system administrator to correct the path and/or permissions for this directory");
         }else{
             list($success_msg, $failure_msg) = array('Icon and thumbnail have been set successfully', '');
         }
+        
 
     }else{
         //upload new one
