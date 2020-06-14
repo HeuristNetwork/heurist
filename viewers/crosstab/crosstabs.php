@@ -58,6 +58,12 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPage.php');
                             <div style="font-size: 0.9em;">Note: choice of record type determines the list of fields avaiable but does not filter the results - the analysis is based on all records in the result set</div>
                         </div>
                     </div>
+                    <div style="padding: 0.2em; width: 100%; display:none;" class="input" id="divLoadSettings">
+                        <div class="header" style="padding: 0 16px 0 16px;">
+                            <label for="sel_saved_settings">Saved settings:</label>
+                        </div>
+                        <select id="sel_saved_settings" class="text ui-widget-content ui-corner-all" style="max-width:30em"></select>
+                    </div>
                 </fieldset>
 
                 <div style="height:2em">&nbsp;</div>
@@ -97,7 +103,7 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPage.php');
                 <fieldset id="shows" style="border-color: gray; border-style: solid; border-width: thin;display:none;">
 
                     <div>
-                        <div class="fldheader"><label for="aggregationMode">Values</label></div>
+                        <div class="fldheader" style="padding-top: 19px;"><label for="aggregationMode">Values</label></div>
                         <div class="input-cell" style="padding-top: 4px;">
 
                             <div class="crosstab-aggregation" style="margin-left: 0;"><input type="radio" checked value="count" id="aggregationModeCount" name="aggregationMode" onchange="crosstabsAnalysis.changeAggregationMode()">&nbsp;Counts</div>
@@ -105,7 +111,7 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPage.php');
                             <div id="aggSum" class="crosstab-aggregation"><input type="radio" value="sum" name="aggregationMode" onchange="crosstabsAnalysis.changeAggregationMode()">&nbsp;Sum</div>
                             <div id="aggAvg" class="crosstab-aggregation"><input type="radio" value="avg" name="aggregationMode" onchange="crosstabsAnalysis.changeAggregationMode()">&nbsp;Average</div>
 
-                            <div id="divAggField" class="crosstab-aggregation">of&nbsp;<select id="cbAggField" disabled="disabled" name="column" onchange="crosstabsAnalysis.changeAggregationMode()" class="text ui-widget-content ui-corner-all"></select></div>
+                            <div id="divAggField" class="crosstab-aggregation" style="margin-top:10px">of&nbsp;<select id="cbAggField" disabled="disabled" name="column" onchange="crosstabsAnalysis.changeAggregationMode()" class="text ui-widget-content ui-corner-all"></select></div>
                         </div>
                     </div>
 
@@ -130,13 +136,24 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPage.php');
                                 onchange="crosstabsAnalysis.doRender()"  id="rbShowBlanks">show blank rows/columns
                         </div>
                     </div>
+                    
+                    <div style="width: 100%;" class="input" id="divSaveSettings">
+                        <div class="header" style="padding: 0 16px 0 16px;">
+                            <label>Save settings for future use</label>
+                        </div>
+                        &nbsp;&nbsp;<b>Name</b>&nbsp;
+                        <input id="inpt_save_setting_name" class="text ui-widget-content ui-corner-all" style="max-width:30em"/>
+                        &nbsp;&nbsp;<button id="btnSaveSettings">Save</button>
+                    </div>
 
                 </fieldset>
                 <div style="text-align:right;padding-top:1em; padding-bottom:1em; display:none;" id="btnPanels">
                     <button id="btnUpdate" onclick="crosstabsAnalysis.doRetrieve()">Update results</button>
+                    <!--
                     <button onclick="crosstabsAnalysis.doSave()">Save specification</button>
                     <button id="btnCancel" onclick="crosstabsAnalysis.doCancel()">Cancel</button>
                     <button id="btnPrint" onclick="crosstabsAnalysis.doPrint()">Print results</button>
+                    -->
                 </div>
             </div>
 

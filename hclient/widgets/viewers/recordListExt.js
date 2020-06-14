@@ -321,7 +321,7 @@ this._dout('refresh vis='+this.element.is(':visible'));
                 }else if (this.dosframe[0].contentWindow.crosstabsAnalysis) {
                     
                     if (this.options.recordset!=null){
-                        this._checkRecordsetLengthAndRunCrosstabsAnalysis(6000);
+                        this._checkRecordsetLengthAndRunCrosstabsAnalysis(6000, query_string_main);
                     }
                     
                 }else{
@@ -397,7 +397,7 @@ this._dout('refresh vis='+this.element.is(':visible'));
         showReps.processTemplate();
     },
     
-    _checkRecordsetLengthAndRunCrosstabsAnalysis: function(limit){
+    _checkRecordsetLengthAndRunCrosstabsAnalysis: function(limit, query_string_main){
 /* @todo */
         if(!this.options.is_frame_based) return;
         
@@ -419,8 +419,9 @@ this._dout('refresh vis='+this.element.is(':visible'));
                 rectype_first = this.options.recordset.fld(rec, 'rec_RecTypeID');
             }
 
-            recordset = {"resultCount":tot_cnt, "recordCount":recIDs_list.length, 
-                                                "recIDs":recIDs_list.join(','), 'first_rt':rectype_first};
+            recordset = {"resultCount":tot_cnt, "recordCount":recIDs_list.length,
+                          query_main:  query_string_main,
+                          "recIDs":recIDs_list.join(','), 'first_rt':rectype_first};
 
         }else{
             window.hWin.HEURIST4.totalQueryResultRecordCount = 0;

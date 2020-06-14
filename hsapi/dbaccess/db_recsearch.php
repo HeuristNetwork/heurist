@@ -75,7 +75,7 @@
                 if(mysql__select_value($mysqli, $q2)>0){
                     $query = $query.', usrWorkingSubsets ';
                     $where_clause = $where_clause.' AND wss_RecID=rec_ID AND wss_OwnerUGrpID='
-                        .$currUserID.'))';
+                        .$currUserID;
                 }
                 
             }

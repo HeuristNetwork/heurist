@@ -58,9 +58,9 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                     'a'          : 'files',
                     'entity'     : 'defRecTypes',
                     'operation'  : 'put',
-                    'ext'        : 'csf',    
+                    'folder'     : 'csvexport',    
                     'rec_ID'     : this._selectedRtyID,
-                    'file'       : fileName+'.csf',    
+                    'file'       : fileName+'.cfg',    
                     'content'    : JSON.stringify(settings)    
                 };
 
@@ -72,7 +72,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                             $('#inpt_save_setting_name').val('');
                             var ele = $('#sel_saved_settings');
                             var filename = response.data;
-                            window.hWin.HEURIST4.ui.addoption(ele[0], filename, filename.substring(0,filename.indexOf('.csf')) );
+                            window.hWin.HEURIST4.ui.addoption(ele[0], filename, filename.substring(0,filename.indexOf('.cfg')) );
                             $('#divLoadSettings').show();    
                             window.hWin.HEURIST4.msg.showMsgFlash('Settings are saved');
                             
@@ -98,7 +98,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                     'a'          : 'files',
                     'entity'     : 'defRecTypes',
                     'operation'  : 'get',
-                    'ext'        : 'csf',    
+                    'folder'     : 'csvexport',    
                     'rec_ID'     : this._selectedRtyID,
                     'file'       : fileName
                 };
@@ -397,8 +397,6 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                 //DEBUG console.log( node.data.code );
             }
             //DEBUG 
-console.log( selectedFields );
-
         
         return {
                 'fields': selectedFields,
@@ -406,7 +404,7 @@ console.log( selectedFields );
                 'csv_enclosure':  this.element.find('#quoteSelect').val(),
                 'csv_mvsep':'|',
                 'csv_linebreak':'nix', //not used at tne moment
-                'csv_header': this.element.find('#cbNamesAsFirstRow').is(':checked'),
+                'csv_header': this.element.find('#cbNamesAsFirstRow').is(':checked')?1:0,
                 'include_term_ids': this.element.find('#cbIncludeTermIDs').is(':checked')?1:0,
                 'include_term_codes': this.element.find('#cbIncludeTermCodes').is(':checked')?1:0,
                 'include_term_hierarchy': this.element.find('#cbIncludeTermHierarchy').is(':checked')?1:0,
@@ -445,7 +443,7 @@ console.log( selectedFields );
                     'entity'     : 'defRecTypes',
                     'operation'  : 'list',
                     'rec_ID'     : rtyID,
-                    'ext'        : 'csf'    
+                    'folder'     : 'csvexport'    
                 };
 
                 var that = this;                                                
@@ -460,7 +458,7 @@ console.log( selectedFields );
                                 
                                 recset.each(function(recID, rec){
                                     var filename = recset.fld(rec, 'file_name');
-                                    window.hWin.HEURIST4.ui.addoption(ele[0], filename, filename.substring(0,filename.indexOf('.csf')));
+                                    window.hWin.HEURIST4.ui.addoption(ele[0], filename, filename.substring(0,filename.indexOf('.cfg')));
                                 });
                                 $('#divLoadSettings').show();    
                             }

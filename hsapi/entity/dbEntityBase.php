@@ -143,22 +143,22 @@ class DbEntityBase
         
         $res = false;
         
-        $ext = $action['ext'];
+        $folder = $action['folder']; //folder
         $operation = $action['operation'];
         $content = @$action['content'];
         $filename = @$action['file'];
         $entity_name = $this->config['entityName'];
         $rec_ID = @$action['rec_ID'];
         
-        $path = HEURIST_FILESTORE_DIR.'entity/'.$entity_name.'/'.$ext.'/'.($rec_ID>0?$rec_ID.'/':''); 
+        $path = HEURIST_FILESTORE_DIR.'entity/'.$entity_name.'/'.$folder.'/'.($rec_ID>0?$rec_ID.'/':''); 
         
         if($operation=='list'){
             
-            if($ext==null){
-                $system->addError(HEURIST_INVALID_REQUEST, 'Can not get list of setting files. Extension parameter is not defined');
+            if($folder==null){
+                $system->addError(HEURIST_INVALID_REQUEST, 'Can not get list of setting files. Folder parameter is not defined');
                 $res = false;
             }else{
-                $res = folderContent($path, $ext);    
+                $res = folderContent($path, 'cfg');    
             }
             
         }else if($operation=='get'){
