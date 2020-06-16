@@ -1242,7 +1242,7 @@ $.widget( "heurist.search_faceted", {
                             source:this.element.attr('id'), 
                             qname: this.options.query_name,
                             rules: this.options.params.rules,
-                            rulesonly: (this.options.params.rulesonly==1 || this.options.params.rulesonly)?1:0,
+                            rulesonly: this.options.params.rulesonly,
                             viewmode: this.options.params.ui_viewmode,
                             //to keep info what is primary record type in final recordset
                             primary_rt: this.options.params.rectypes[0],

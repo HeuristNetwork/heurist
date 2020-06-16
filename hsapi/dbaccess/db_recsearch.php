@@ -1040,6 +1040,7 @@
     *
     *       FOR RULES
     *       rules - rules queries - to search related records on server side
+    *       rulesonly - return rules only (without original query)
     *       getrelrecs (=1) - search relationship records (along with related) on server side
     *       topids - list of records ids, it is used to compose 'parentquery' parameter to use in rules (@todo - replace with new rules algorithm)
     *
@@ -1074,7 +1075,6 @@
     */
     function recordSearch($system, $params)
     {
-        
         //if $params['q'] has svsID it means search by saved filter - all parameters will be taken from saved filter
         // {"svs":5}
         if(@$params['q']){
@@ -1359,7 +1359,8 @@
             
             $resSearch = recordSearch($system, $params); //search for main set
 
-            $keepMainSet = (@$params['rulesonly']!=1);
+            $keepMainSet = (@$params['rulesonly']!=1 && @$params['rulesonly']!=2);
+            $keepLastSetOnly = (@$params['rulesonly']==2);
             
             if(is_array($resSearch) && $resSearch['status']!=HEURIST_OK){  //error
                 return $resSearch;
@@ -1378,7 +1379,7 @@
                 
                 //empty main result set
                 $fin_result = $resSearch;
-                $fin_result['data']['records'] = array();
+                $fin_result['data']['records'] = array(); //empty
                 $fin_result['data']['reccount'] = 0;
                 $fin_result['data']['count'] = 0;
             }
@@ -1413,41 +1414,41 @@
 
                     if($response['status'] == HEURIST_OK){
                             
-                            if(!$rule['ignore']){
-                            //merge with final results
-                            if($is_ids_only){
+                            if(!$rule['ignore'] && (!$keepLastSetOnly || $is_last)){
+                                //merge with final results
+                                if($is_ids_only){
 
-                                $fin_result['data']['records'] = array_merge_unique($fin_result['data']['records'], 
-                                                                             $response['data']['records']);
-
-                            }else{
-                                $fin_result['data']['records'] = mergeRecordSets($fin_result['data']['records'], 
+                                    $fin_result['data']['records'] = array_merge_unique($fin_result['data']['records'], 
                                                                                  $response['data']['records']);
 
-                                $fin_result['data']['fields_detail'] = array_merge_unique($fin_result['data']['fields_detail'], 
-                                                                             $response['data']['fields_detail']);
-                                                                                 
-                                $fin_result['data']['rectypes'] = array_merge_unique($fin_result['data']['rectypes'], 
-                                                                             $response['data']['rectypes']);
-                                                                                 
-                                $fin_result['data']['order'] = array_merge($fin_result['data']['order'], 
-                                                                        array_keys($response['data']['records']));
-                                                                        /*
-                                foreach( array_keys($response['data']['records']) as $rt){
-                                    $rectype_id = @$rt['4'];
-                                    if($rectype_id){
-                                        //if(@$fin_result['data']['rectypes'][$rectype_id]){
-                                        //    $fin_result['data']['rectypes'][$rectype_id]++;
-                                        //}else{
-                                        //    $fin_result['data']['rectypes'][$rectype_id]=1;
-                                        //}
-                                        if(!array_key_exists($rectype_id, $fin_result['data']['rectypes'])){
-                                            $fin_result['data']['rectypes'][$rectype_id] = 1;
+                                }else{
+                                    $fin_result['data']['records'] = mergeRecordSets($fin_result['data']['records'], 
+                                                                                     $response['data']['records']);
+
+                                    $fin_result['data']['fields_detail'] = array_merge_unique($fin_result['data']['fields_detail'], 
+                                                                                 $response['data']['fields_detail']);
+                                                                                     
+                                    $fin_result['data']['rectypes'] = array_merge_unique($fin_result['data']['rectypes'], 
+                                                                                 $response['data']['rectypes']);
+                                                                                     
+                                    $fin_result['data']['order'] = array_merge($fin_result['data']['order'], 
+                                                                            array_keys($response['data']['records']));
+                                                                            /*
+                                    foreach( array_keys($response['data']['records']) as $rt){
+                                        $rectype_id = @$rt['4'];
+                                        if($rectype_id){
+                                            //if(@$fin_result['data']['rectypes'][$rectype_id]){
+                                            //    $fin_result['data']['rectypes'][$rectype_id]++;
+                                            //}else{
+                                            //    $fin_result['data']['rectypes'][$rectype_id]=1;
+                                            //}
+                                            if(!array_key_exists($rectype_id, $fin_result['data']['rectypes'])){
+                                                $fin_result['data']['rectypes'][$rectype_id] = 1;
+                                            }
                                         }
                                     }
+                                    */
                                 }
-                                */
-                            }
                             }
 
                             if(!$is_last){ //add top ids for next level
@@ -1549,7 +1550,7 @@
         }//END RULES ------------------------------------------
         else if( $currUserID>0 ) {
             //find user work susbset (except EVERYTHING search)
-            $params['use_user_wss'] = ($params['w']!='e'); 
+            $params['use_user_wss'] = (@$params['w']!='e'); //(strcasecmp(@$params['w'],'E') == 0); 
         }
         
         
@@ -1605,7 +1606,9 @@
         }
   
 //
-//if($is_ids_only && $system->dbname()=='ExpertNation') error_log($query);
+//if($is_ids_only && $system->dbname()=='ExpertNation') 
+//error_log($params['use_user_wss']);
+//error_log($query);
 
         $res = $mysqli->query($query);
         if (!$res){
@@ -2102,6 +2105,9 @@ $loop_cnt++;
         return $res;
     }
 
+    //
+    //
+    //
     function _createFlatRule(&$flat_rules, $r_tree, $parent_index){
 
             if($r_tree){

@@ -96,7 +96,13 @@ function hSvsEdit(args) {
                 var crules = window.hWin.HEURIST4.util.cleanRules( request.rules );                                                        
                 svs_rules.val( crules==null?'':JSON.stringify(crules) );
                 svs_rules_full.val( crules==null?'':request.rules );
-                svs_rules_only.prop('checked', (request.rulesonly==1 || request.rulesonly==true));
+                
+                var is_rules_only = (request.rulesonly>0 || request.rulesonly==true);
+                svs_rules_only.prop('checked', is_rules_only);
+                
+                $dlg.find('#svs_RulesOnly1').prop('checked', (request.rulesonly!=2));
+                $dlg.find('#svs_RulesOnly2').prop('checked', (request.rulesonly==2));
+                
                 svs_notes.val( request.notes );
                 svs_viewmode.val( request.viewmode );
 
@@ -110,6 +116,7 @@ function hSvsEdit(args) {
                 svs_rules.val('');
                 svs_rules_full.val('');
                 svs_rules_only.prop('checked', false);
+                $dlg.find('#divRulesOnly').hide();
                 svs_notes.val('');
                 svs_viewmode.val('');
                 svs_ugrid.parent().show();
@@ -150,6 +157,12 @@ function hSvsEdit(args) {
                 svs_ugrid.attr('disabled', !(allowChangeGroupID || window.hWin.HEURIST4.util.isempty(groupID)) );
             }
 
+            svs_rules_only.on('change',function(e){
+                $dlg.find('#divRulesOnly').css('display',$(e.target).is(':checked')?'block':'none');    
+            });
+            svs_rules_only.change();
+                
+            
             var isRules = window.hWin.HEURIST4.util.isempty(svs_query.val()) && !window.hWin.HEURIST4.util.isempty(svs_rules.val());
 
             if(isRules){ //ruleset only
@@ -381,10 +394,10 @@ function hSvsEdit(args) {
                     var svs_ugrid = $dlg.find('#svs_UGrpID');
                     var svs_rules = $dlg.find('#svs_Rules'); 
                     var svs_rules_full = $dlg.find('#svs_Rules2'); //hidden rules in full format
-                    var svs_rules_only = $dlg.find('#svs_RulesOnly');
                     var svs_notes = $dlg.find('#svs_Notes');
                     var svs_viewmode = $dlg.find('#svs_ViewMode');
-
+                    var svs_rules_only = $dlg.find('#svs_RulesOnly');
+                    
                     allFields.removeClass( "ui-state-error" );
                     
                     svs_ugrid = svs_ugrid.val();
@@ -443,13 +456,19 @@ function hSvsEdit(args) {
                         }else{
                             rules = null;
                         }
+                        
+                        var rules_only = 0;
+                        if(svs_rules_only.is(':checked')){
+                            rules_only = $dlg.find('#svs_RulesOnly1').is(':checked')?1:2;
+                        }
 
+                        
                         var request = {  //svs_ID: svsID, //?svs_ID:null,
                             svs_Name: svs_name.val(),
                             svs_Query: window.hWin.HEURIST4.util.composeHeuristQuery2({q:svs_query.val(), 
                                     w:domain, 
                                     rules:rules, 
-                                    rulesonly:svs_rules_only.is(':checked')?1:0, 
+                                    rulesonly:rules_only, 
                                     notes:svs_notes.val(),
                                     viewmode:svs_viewmode.val()  }, false),
                                     
