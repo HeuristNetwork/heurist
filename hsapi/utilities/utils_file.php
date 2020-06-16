@@ -433,7 +433,8 @@
                 $folder =  HEURIST_DIR.$dir;
                 $url = HEURIST_BASE_URL.$dir;
             }
-                    
+            
+            if (!(file_exists($folder) && is_dir($folder))) continue;
             
             $files = scandir($folder);
             foreach ($files as $filename) {
