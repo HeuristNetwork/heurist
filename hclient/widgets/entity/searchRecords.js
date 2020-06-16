@@ -83,6 +83,7 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
                 
                 var rectypeID = rt_list[idx];
                 var name = window.hWin.HEURIST4.rectypes.names[rectypeID];
+                if(!name) continue;
                 
                 $('<button>')
                     .button({label: (is_browse?'':window.hWin.HR('Add'))+' '+ name.trim(), 
