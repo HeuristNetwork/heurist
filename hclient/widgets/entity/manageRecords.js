@@ -43,8 +43,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         optfields:true, 
         help_on:true,
         
-        structure_closed: true,          
-        structure_width:500,
+        structure_closed: 1,          
+        structure_width:280,
         
         summary_closed:true,          
         summary_width:400, 
@@ -840,7 +840,6 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             }else
             //summary tab - specific for records only    
             if(this.editFormSummary && this.editFormSummary.length>0){    
-                
                 var layout_opts =  {
                     applyDefaultStyles: true,
                     //togglerContent_open:    '&nbsp;',
@@ -856,7 +855,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         togglerAlign_closed:16,   //top position   
                         togglerLength_closed:80,  //height of toggler button
                         initHidden: true,
-                        initClosed: (this.usrPreferences.structure_closed!==false || this.usrPreferences.structure_closed!=='false'),
+                        initClosed: (this.usrPreferences.structure_closed!=0),
                         slidable:false,  //otherwise it will be over center and autoclose
                         contentSelector: '.editStructure',   
                         onopen_start : function( ){ 
@@ -1888,7 +1887,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             
             this._reloadRtsEditor();
             //show and expand left hand panel 
-            var isClosed = (this.usrPreferences.structure_closed!==false || this.usrPreferences.structure_closed!=='false');
+            var isClosed = (this.usrPreferences.structure_closed!=0);
             this.editFormPopup.layout().show('west', !isClosed ); 
             if(isClosed){
                         var tog = that.editFormPopup.find('.ui-layout-toggler-west');
@@ -3631,7 +3630,7 @@ rectypes.names[rectypeID] + ' is defined as a child of <b>'+names
         if(that.options.rts_editor){
                 var myLayout = that.editFormPopup.layout();                
                 params.structure_width = myLayout.state.west.size;
-                params.structure_closed = myLayout.state.west.isClosed;
+                params.structure_closed = myLayout.state.west.isClosed?1:0;
         }
         
         help_on = that.element.find('.chb_show_help').is(':checked');
