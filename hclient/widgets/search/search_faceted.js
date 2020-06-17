@@ -186,7 +186,8 @@ $.widget( "heurist.search_faceted", {
         // Sets up element to apply the ui-state-focus class on focus.
         //this._focusable($element);   
 
-        this.div_header = $( "<div>" ).appendTo( this.element );
+        this.div_header = $( "<div>" ).css({height: 'auto',
+            position: 'absolute', left: 0, right: 0}).appendTo( this.element );
         
         if(!this.options.ispreview){                       //padding-top:1.4em;
             this.div_title = $('<div>')
@@ -194,11 +195,14 @@ $.widget( "heurist.search_faceted", {
 //style='text-align:left;margin:4px 0 0 0!important;padding-left:1em;width:auto, max-width:90%'></h3")
                     .addClass('truncate svs-header').appendTo( this.div_header );
         }
-
+        
+        this.refreshSubsetSign();
+        
         //"font-size":"0.7em",
-        this.div_toolbar = $( "<div>" ).css({'font-size': '0.9em',"float":"right","padding-top":"0.3em","padding-right":"18px"})
+        this.div_toolbar = $( "<div>" ).css({'font-size': '0.9em',"float":"right","padding-top":"10px","padding-right":"18px"})
                 .appendTo( this.div_header );
 
+                
         this.btn_submit = $( "<button>", { text: window.hWin.HR("Submit") })
         .appendTo( this.div_toolbar )
         .button();
@@ -231,7 +235,7 @@ $.widget( "heurist.search_faceted", {
         this._on( this.btn_save, { click: "doSaveSearch" });
         this._on( this.btn_close, { click: "doClose" });
 
-
+        
         this.facets_list_container = $( "<div>" )
         .css({"top":((this.div_title)?'6em':'2em'),"bottom":0,"left":'1em',"right":'0.5em',"position":"absolute"}) //was top 3.6
         .appendTo( this.element );
@@ -283,10 +287,17 @@ $.widget( "heurist.search_faceted", {
                           that._currentRecordset = recset;
                           that._isInited = false;
                           that._recalculateFacets(-1);       
+                          that.refreshSubsetSign();
                     }         
-                }else if(e.type == window.hWin.HAPI4.Event.ON_CUSTOM_EVENT && data && data.closeFacetedSearch){
+                }else if(e.type == window.hWin.HAPI4.Event.ON_CUSTOM_EVENT && data){
                     
-                    that._trigger( "onclose");
+                    if(data.userWorkSetUpdated){
+                        that.refreshSubsetSign();
+                    }
+                    if(data.closeFacetedSearch){
+                        that._trigger( "onclose");    
+                    }
+                    
                 }
             }
         });
@@ -297,11 +308,21 @@ $.widget( "heurist.search_faceted", {
                //__setUiSpatialFilter( that.options.params.ui_spatial_filter_initial, null);
         }
         
-
+        this._adjustAccordionTop();
+        
         //this._refresh();
         this.doReset();
     }, //end _create
 
+    //
+    //
+    //
+    _adjustAccordionTop: function(){
+        if(this.facets_list_container && this.div_header){
+            this.facets_list_container.css({top: this.div_header.height()+4});
+        }
+    },
+    
     // Any time the widget is called with no arguments or with only an option hash, 
     // the widget is initialized; this includes when the widget is created.
     _init: function() {
@@ -2479,7 +2500,38 @@ if(!detailtypes[dtID]){
        }
         
        return null; 
-    }
+    },
+    
+    //
+    //
+    //
+    refreshSubsetSign: function(){
+        
+        if(this.div_header){
+
+            var container = this.div_header.find('div.subset-active-div');
+            
+            if(container.length==0){
+                var ele = $('<div>').addClass('subset-active-div').css({'padding-left':'1em'}) //css({'padding':'0.1em 0em 0.5em 1em'})
+                      .appendTo(this.div_header);
+            }
+            container.find('span').remove();
+            //var s = '<span style="position:absolute;right:10px;top:10px;font-size:0.6em;">';    
+         
+            if(window.hWin.HAPI4.sysinfo.db_workset_count>0){
+                
+                $('<span style="padding:.4em 1em 0.3em;background:white;color:red;vertical-align:sub;font-size: 11px;font-weight: bold;"'
+                  +' title="'+window.hWin.HAPI4.sysinfo.db_workset_count+' records"'
+                  +'>SUBSET ACTIVE n='+window.hWin.HAPI4.sysinfo.db_workset_count+'</span>')
+                    .appendTo(container);
+            }
+            this._adjustAccordionTop();
+        }
+        
+    },
+    
+    
+    
 
     
 });
