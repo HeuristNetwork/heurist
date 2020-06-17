@@ -66,9 +66,9 @@
                      $line[$key] = $line[$idx];
                      unset($line[$idx]);
                 }
-                if(@$line['Latitude'] && @$line['Longitude']){
+                if(@$line['latitude'] && @$line['longitude']){
                     $line = array('type'=>'Feature','id'=>$id, 'properties'=>$line,
-                        'geometry'=>array('type'=>'Point','coordinates'=>array($line['Longitude'], $line['Latitude'])));
+                        'geometry'=>array('type'=>'Point','coordinates'=>array($line['longitude'], $line['latitude'])));
                     $hasGeo = true;
                 }
             } 
