@@ -1503,12 +1503,12 @@ function CrosstabsAnalysis(_query, _query_domain) {
         if ( aggMode == "count" ) {
 
             $('#cbAggField').attr('disabled','disabled');
-            $('#divAggField').css('visibility','hidden');
-            //$('#divAggField').hide();
+            //$('#divAggField').css('visibility','hidden');
+            $('#divAggField').hide();
         }else{
             $('#cbAggField').removeAttr('disabled');
-            $('#divAggField').css('visibility','visible');
-            //$('#divAggField').css('display','inline-block');
+            //$('#divAggField').css('visibility','visible');
+            $('#divAggField').css('display','inline-block');
         }
 
         if ( aggMode == "avg" ) {

@@ -111,7 +111,7 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPage.php');
                             <div id="aggSum" class="crosstab-aggregation"><input type="radio" value="sum" name="aggregationMode" onchange="crosstabsAnalysis.changeAggregationMode()">&nbsp;Sum</div>
                             <div id="aggAvg" class="crosstab-aggregation"><input type="radio" value="avg" name="aggregationMode" onchange="crosstabsAnalysis.changeAggregationMode()">&nbsp;Average</div>
 
-                            <div id="divAggField" class="crosstab-aggregation" style="margin-top:10px">of&nbsp;<select id="cbAggField" disabled="disabled" name="column" onchange="crosstabsAnalysis.changeAggregationMode()" class="text ui-widget-content ui-corner-all"></select></div>
+                            <div id="divAggField" class="crosstab-aggregation" style="margin-top:10px">of&nbsp;<select id="cbAggField" name="column" onchange="crosstabsAnalysis.changeAggregationMode()" class="text ui-widget-content ui-corner-all"></select></div>
                         </div>
                     </div>
 
@@ -147,8 +147,8 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPage.php');
                     </div>
 
                 </fieldset>
-                <div style="text-align:right;padding-top:1em; padding-bottom:1em; display:none;" id="btnPanels">
-                    <button id="btnUpdate" onclick="crosstabsAnalysis.doRetrieve()">Update results</button>
+                <div style="text-align:center;padding-top:1em; padding-bottom:1em; display:none;" id="btnPanels">
+                    <button id="btnUpdate" onclick="crosstabsAnalysis.doRetrieve()" style="font-size:bigger;font-weight:larger">Update results</button>
                     <!--
                     <button onclick="crosstabsAnalysis.doSave()">Save specification</button>
                     <button id="btnCancel" onclick="crosstabsAnalysis.doCancel()">Cancel</button>
