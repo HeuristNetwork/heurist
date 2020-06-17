@@ -37,6 +37,21 @@ define('HEURIST_DBID', $system->get_system('sys_dbRegisteredID'));
 
 $mysqli = $system->get_mysqli();
 
+$rty_ID = @$_REQUEST["rty"];
+$dty_ID = @$_REQUEST["dty"];
+$trm_ID = @$_REQUEST["trm"];
+if($rty_ID){
+    $rty_ID = ConceptCode::getRecTypeLocalID($rty_ID);    
+}
+if($dty_ID){
+    $dty_ID = ConceptCode::getDetailTypeLocalID($dty_ID);    
+}
+if($trm_ID){
+    $trm_ID = ConceptCode::getTermLocalID($trm_ID);    
+}
+$is_subset = ($rty_ID>0 || $dty_ID>0 || $trm_ID>0);
+
+
 // * IMPORTANT *
 // UPDATE THE FOLLOWING WHEN DATABASE FORMAT IS CHANGED:
 // Version info in common/config/initialise.php
@@ -69,6 +84,7 @@ print "\n<HeuristDBVersion>".$db_version."</HeuristDBVersion>";
 // TODO: Also need to output general properties of the database set in Structure > Properties / dvanced Properties
 
 
+if(!$is_subset){
 // Output each of the definition tables in turn
 
 // ------------------------------------------------------------------------------------------
@@ -113,12 +129,14 @@ $res->close();
 
 print "</Ontologies>";
 
+}
 // ------------------------------------------------------------------------------------------
 // Detail Type TERMS
+if($trm_ID>0){
 
 print "\n\n<Terms>";
 include HEURIST_DIR.'admin/structure/crosswalk/defTermsFields.inc'; // sets value of $flds
-$query = "select $flds from defTerms";
+$query = "select $flds from defTerms".($trm_ID>0?' WHERE trm_ID='.$trm_ID:'');
 $res = $mysqli->query($query);
 $fmt = 'defTerms';  // update format if fields added
 print "\n\n<!-- $flds -->";
@@ -127,13 +145,14 @@ $res->close();
 
 print "</Terms>";
 
-
+}
 // ------------------------------------------------------------------------------------------
 // RECORD TYPES (this will be repeated for each of the tables)
+if($rty_ID>0){
 
 print "\n\n<RecordTypes>";
 include HEURIST_DIR.'admin/structure/crosswalk/defRecTypesFields.inc'; // sets value of $flds
-$query = "select $flds from defRecTypes";
+$query = "select $flds from defRecTypes".($rty_ID>0?' WHERE rty_ID='.$rty_ID:'');
 $res = $mysqli->query($query);
 $fmt = 'defRecTypes'; // update format if fields added
 print "\n\n<!-- $flds -->";
@@ -142,13 +161,14 @@ $res->close();
 
 print "</RecordTypes>";
 
-
+}
 // ------------------------------------------------------------------------------------------
 // DETAIL TYPES
+if($dty_ID>0){
 
 print "\n\n<DetailTypes>";
 include HEURIST_DIR.'admin/structure/crosswalk/defDetailTypesFields.inc'; // sets value of $flds
-$query = "select $flds from defDetailTypes";
+$query = "select $flds from defDetailTypes".($dty_ID>0?' WHERE dty_ID='.$dty_ID:'');
 $res = $mysqli->query($query);
 $fmt = 'defDetailTypes';  // update format if fields added
 print "\n\n<!-- $flds -->";
@@ -157,13 +177,14 @@ $res->close();
 
 print "</DetailTypes>";
 
-
+}
 // ------------------------------------------------------------------------------------------
 // RECORD STRUCTURE
+if($rty_ID>0){
 
 print "\n\n<RecordStructures>";
 include HEURIST_DIR.'admin/structure/crosswalk/defRecStructureFields.inc'; // sets value of $flds
-$query = "select $flds from defRecStructure";
+$query = "select $flds from defRecStructure".($rty_ID>0?' WHERE rst_RecTypeID='.$rty_ID:'');
 $res = $mysqli->query($query);
 $fmt = 'defRecStructure'; // update format if fields added
 print "\n\n<!-- $flds -->";
@@ -171,6 +192,10 @@ while ($row = $res->fetch_assoc()) { @print_row($row, $fmt, $flds); }
 $res->close();
 
 print "</RecordStructures>";
+
+}
+
+if(!$is_subset){
 
 // ------------------------------------------------------------------------------------------
 // RELATIONSHIP CONSTRAINTS
@@ -357,9 +382,9 @@ $res->close();
 
 print "</UserTags>";
 
+}
 
-
-print '\n</hml_structure>'; // end of file
+print "\n</hml_structure>"; // end of file
 
 
 // --------------------------------------------------------------------------------------
