@@ -1299,7 +1299,7 @@ prof =Profile
             ON_CREDENTIALS: 'ON_CREDENTIALS', //login, logout, change user role, sysinfo (change sysIdentification) 
             ON_REC_SEARCHSTART: "ON_REC_SEARCHSTART",
             ON_REC_SEARCH_FINISH: "ON_REC_SEARCH_FINISH",
-            ON_REC_PAGESET: "ON_REC_PAGESET",
+            ON_CUSTOM_EVENT: "ON_CUSTOM_EVENT", //special event for custom link various widgets
             ON_REC_UPDATE: "ON_REC_UPDATE",
             ON_REC_SELECT: "ON_REC_SELECT",
             ON_REC_COLLECT: "ON_REC_COLLECT",

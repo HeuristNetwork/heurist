@@ -244,7 +244,7 @@ $.widget( "heurist.search_faceted", {
         
         //was this.document
         $(window.hWin.document).on(window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH+' '+window.hWin.HAPI4.Event.ON_REC_SEARCHSTART
-            +' '+window.hWin.HAPI4.Event.ON_LAYOUT_RESIZE, 
+            +' '+window.hWin.HAPI4.Event.ON_LAYOUT_RESIZE+' '+window.hWin.HAPI4.Event.ON_CUSTOM_EVENT, 
         
         function(e, data) {
             
@@ -259,32 +259,35 @@ $.widget( "heurist.search_faceted", {
                   
             }else {
 
-            if(data && that.options.search_realm && that.options.search_realm!=data.search_realm) return;
-            if(data.reset) return; //ignore
+                if(data && that.options.search_realm && that.options.search_realm!=data.search_realm) return;
+                if(data.reset) return; //ignore
 
 
-            if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCHSTART){
-            
-                    if(data){
-                        if(data.source==that.element.attr('id') ){   //search from this widget
-                              current_query_request_id = data.id;
-                        }else{
-                            //search from outside - close this widget
-                            that._trigger( "onclose");
-                            //that.doClose();
+                if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCHSTART){
+                
+                        if(data){
+                            if(data.source==that.element.attr('id') ){   //search from this widget
+                                  current_query_request_id = data.id;
+                            }else{
+                                //search from outside - close this widget
+                                that._trigger( "onclose");
+                                //that.doClose();
+                            }
                         }
-                    }
-                
-            }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH){
-                
-                var recset = data.recordset;
-                if(recset && recset.queryid()==current_query_request_id) {
-                      //search from this widget
-                      that._currentRecordset = recset;
-                      that._isInited = false;
-                      that._recalculateFacets(-1);       
-                }         
-            }
+                    
+                }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH){
+                    
+                    var recset = data.recordset;
+                    if(recset && recset.queryid()==current_query_request_id) {
+                          //search from this widget
+                          that._currentRecordset = recset;
+                          that._isInited = false;
+                          that._recalculateFacets(-1);       
+                    }         
+                }else if(e.type == window.hWin.HAPI4.Event.ON_CUSTOM_EVENT && data && data.closeFacetedSearch){
+                    
+                    that._trigger( "onclose");
+                }
             }
         });
         
@@ -408,7 +411,8 @@ $.widget( "heurist.search_faceted", {
         
         $(this.document).off( window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH
             +' '+window.hWin.HAPI4.Event.ON_REC_SEARCHSTART
-            +' '+window.hWin.HAPI4.Event.ON_LAYOUT_RESIZE );
+            +' '+window.hWin.HAPI4.Event.ON_LAYOUT_RESIZE
+            +' '+window.hWin.HAPI4.Event.ON_CUSTOM_EVENT );
         
         // remove generated elements
         if(this.div_title) this.div_title.remove();

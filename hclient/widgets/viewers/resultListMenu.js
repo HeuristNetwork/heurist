@@ -518,6 +518,10 @@ console.log(menu.find('.ui-menu-item').css('padding'));
                             window.hWin.HAPI4.sysinfo.db_workset_count = response.data;
                             that.options.resultList.resultList('refreshSubsetSign');
                             window.hWin.HEURIST4.msg.showMsgFlash(response.data+' records has been added to work subset');
+                            
+                            $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_CUSTOM_EVENT, 
+                                {closeFacetedSearch:true, source:that.element.attr('id'), search_realm:that.options.search_realm} );
+                            
                         }else{
                             window.hWin.HEURIST4.msg.showMsgErr(response, true);
                         }
