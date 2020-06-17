@@ -1034,7 +1034,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
         //Type of value displayed (count, average, sum)
 
 
-        if(plen<1){
+        if(plen<1){ //less than 1 page
             doRenderPage('', records_resp);
         }else{
 
@@ -1123,6 +1123,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
         var clen = columns.length;
         var rlen = rows.length;
 
+        var hasValues = false;
         var grantotal = 0;
         var colspan = 1;
 
@@ -1335,8 +1336,9 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
         for (i=0; i<rlen; i++){
 
-
             if(supressBlankRow && rows[i].isempty) continue;
+            
+            hasValues = true;
 
             $row = $('<tr>').appendTo($table);
             $row.append('<td class="crosstab-header" style="{text-align:left;}">'+rows[i].name+'</td>');
@@ -1438,7 +1440,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
         }
 
 
-        if(grantotal!=0){
+        if(hasValues){ //grantotal!=0){
             $divres.append('<h2 class="crosstab-page">'+pageName+'</h2>');
             $table.appendTo($divres);
 
