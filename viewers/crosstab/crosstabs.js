@@ -975,8 +975,9 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
     }
 
+    //round to two digits
     function rnd(original){
-        return Math.round(original*10)/10;
+        return Math.round(original*100)/100;
     }
 
     /**
@@ -1137,8 +1138,8 @@ function CrosstabsAnalysis(_query, _query_domain) {
             columns.push({});
         }
 
-        //reset output array for rows
-        for (i=0; i<rlen; i++){
+        //reset output array for rows  set all cells to 0
+        for (i=0; i<rlen; i++){  //by rows
 
             rows[i].output = [];
             rows[i].avgcount = [];
@@ -1151,7 +1152,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
             rows[i].isempty = true;
 
 
-            for (j=0; j<clen; j++){
+            for (j=0; j<clen; j++){  //by cols
                 rows[i].output.push(0);
                 rows[i].percent_col.push(0);
                 rows[i].percent_row.push(0);
@@ -1226,26 +1227,46 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 rows[i].total = 0;
             }
 
+            var cols_with_values_for_row = [];
+            for (i=0; i<rlen; i++){
+                cols_with_values_for_row.push(0);
+            }
+            
+            
             for (j=0; j<clen; j++){  //cols
                 columns[j].total = 0;
+                
+                var rows_with_values = 0;
+                
                 for (i=0; i<rlen; i++){  //rows
                     if(rows[i].avgcount[j]>1){
                         rows[i].output[j] = rnd(rows[i].output[j]/rows[i].avgcount[j]);
                     }
 
+                    if(rows[i].output[j]>0){
+                        cols_with_values_for_row[i]++;  
+                        rows_with_values++;  
+                    } 
+                    
                     rows[i].total = rows[i].total + rows[i].output[j];
                     columns[j].total = columns[j].total + rows[i].output[j];
                 }
 
-                columns[j].total = rnd(columns[j].total/rlen);
+                if(rows_with_values>0) {
+                    columns[j].total = rnd(columns[j].total/rows_with_values); //was rlen
+                }
             }
 
             grantotal = 0;
+            var cnt_avg = 0;
             for (i=0; i<rlen; i++){
-                rows[i].total = rnd(rows[i].total/clen);
+                if(cols_with_values_for_row[i]>0){
+                    rows[i].total = rnd(rows[i].total/cols_with_values_for_row[i]); //clen);
+                }
                 grantotal = grantotal + rows[i].total;
+                if(rows[i].total>0) cnt_avg++;
             }
-            grantotal = rnd(grantotal/rlen);
+            grantotal = rnd(grantotal/cnt_avg);
 
 
         }else{
