@@ -191,7 +191,7 @@ $.widget( "heurist.search_faceted", {
         
         if(!this.options.ispreview){                       //padding-top:1.4em;
             this.div_title = $('<div>')
-            .css({padding:'0.5em 0em 0.5em 1em','font-size':'1.4em','font-weight':'bold','max-width':'90%'})
+            .css({padding:'1em','font-size':'1.4em','font-weight':'bold','max-width':'90%'})
 //style='text-align:left;margin:4px 0 0 0!important;padding-left:1em;width:auto, max-width:90%'></h3")
                     .addClass('truncate svs-header').appendTo( this.div_header );
         }
@@ -308,7 +308,7 @@ $.widget( "heurist.search_faceted", {
                //__setUiSpatialFilter( that.options.params.ui_spatial_filter_initial, null);
         }
         
-        this._adjustAccordionTop();
+        setTimeout(function(){that._adjustSearchDivTop();},500);
         
         //this._refresh();
         this.doReset();
@@ -317,7 +317,7 @@ $.widget( "heurist.search_faceted", {
     //
     //
     //
-    _adjustAccordionTop: function(){
+    _adjustSearchDivTop: function(){
         if(this.facets_list_container && this.div_header){
             this.facets_list_container.css({top: this.div_header.height()+4});
         }
@@ -2512,7 +2512,7 @@ if(!detailtypes[dtID]){
             var container = this.div_header.find('div.subset-active-div');
             
             if(container.length==0){
-                var ele = $('<div>').addClass('subset-active-div').css({'padding-left':'1em'}) //css({'padding':'0.1em 0em 0.5em 1em'})
+                var ele = $('<div>').addClass('subset-active-div').css({'padding-left':'1.3em'}) //css({'padding':'0.1em 0em 0.5em 1em'})
                       .appendTo(this.div_header);
             }
             container.find('span').remove();
@@ -2520,12 +2520,12 @@ if(!detailtypes[dtID]){
          
             if(window.hWin.HAPI4.sysinfo.db_workset_count>0){
                 
-                $('<span style="padding:.4em 1em 0.3em;background:white;color:red;vertical-align:sub;font-size: 11px;font-weight: bold;"'
+                $('<span style="padding:0.3em 1em;background:white;color:red;vertical-align:sub;font-size: 11px;font-weight: bold;"'
                   +' title="'+window.hWin.HAPI4.sysinfo.db_workset_count+' records"'
                   +'>SUBSET ACTIVE n='+window.hWin.HAPI4.sysinfo.db_workset_count+'</span>')
                     .appendTo(container);
             }
-            this._adjustAccordionTop();
+            this._adjustSearchDivTop();
         }
         
     },
