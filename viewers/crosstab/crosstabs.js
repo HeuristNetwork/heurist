@@ -52,6 +52,8 @@ function CrosstabsAnalysis(_query, _query_domain) {
     var _currentRecordset = null;
     var _selectedRtyID = null;
 
+    var configEntityWidget = null;
+    
     var _isPopupMode = false;
 
     function _init(_query, _query_domain)
@@ -89,88 +91,20 @@ function CrosstabsAnalysis(_query, _query_domain) {
         //window.hWin.HAPI4.LayoutMgr.cardinalPanel('close', 'west');
         //window.hWin.HAPI4.LayoutMgr.cardinalPanel('sizePane', ['east', (top?top.innerWidth:window.innerWidth)-300 ]);  //maximize width
         
+      configEntityWidget = $('#divLoadSettings').configEntity({
+        entityName: 'defRecTypes',
+        configName: 'crosstabs',
         
-      //save settings
-      $('#btnSaveSettings').button();
-      $('#btnSaveSettings').on({click: function(){
-          
-                var fileName = $('#inpt_save_setting_name').val();
-                
-                if(fileName.trim()==''){
-                    window.hWin.HEURIST4.msg.showMsgFlash('Name not defined');
-                    return;
-                }
-                
-                var settings = _getSettings();            
-                if(!settings) return;
-
-                var request = {
-                    'a'          : 'files',
-                    'entity'     : 'defRecTypes',
-                    'operation'  : 'put',
-                    'folder'     : 'crosstabs',    
-                    'rec_ID'     : _selectedRtyID,
-                    'file'       : fileName+'.cfg',    
-                    'content'    : JSON.stringify(settings)    
-                };
-
-                var that = this;                                                
-                window.hWin.HAPI4.EntityMgr.doRequest(request, 
-                    function(response){
-                        if(response.status == window.hWin.ResponseStatus.OK){
-                            
-                            $('#inpt_save_setting_name').val('');
-                            var ele = $('#sel_saved_settings');
-                            var filename = response.data;
-                            window.hWin.HEURIST4.ui.addoption(ele[0], filename, filename.substring(0,filename.indexOf('.cfg')) );
-                            $('#divLoadSettings').show();    
-                            window.hWin.HEURIST4.msg.showMsgFlash('Settings are saved');
-                            
-                        }else{
-                            window.hWin.HEURIST4.msg.showMsgErr(response);
-                        }
-                });      
-          
-      }});
+        getSettings: function(){ return _getSettings(); }, //callback function to retieve configuration
+        setSettings: function( settings ){ _applySettings(settings); }, //callback function to apply configuration
+        
+        //divLoadSettingsName: this.element
+        divSaveSettings: $('#divSaveSettings'),  //element
+        allowRenameDelete: true,
+        useHTMLselect: true          
+      });
       
-      //load settings
-      $('#sel_saved_settings').on({change: function(){
-          
-                var fileName = $('#sel_saved_settings').val();
-          
-                if(fileName.trim()==''){
-                    return;
-                }
-
-                var request = {
-                    'a'          : 'files',
-                    'entity'     : 'defRecTypes',
-                    'operation'  : 'get',
-                    'folder'     : 'crosstabs',    
-                    'rec_ID'     : _selectedRtyID,
-                    'file'       : fileName
-                };
-
-                var that = this;                                                
-                window.hWin.HAPI4.EntityMgr.doRequest(request, 
-                    function(response){
-                        if(response.status == window.hWin.ResponseStatus.OK){
-                            
-                            var settings = window.hWin.HEURIST4.util.isJSON(response.data);
-                            if(settings==false){
-                                    window.hWin.HEURIST4.msg.showMsgFlash('Settings are invalid');
-                                    return;  
-                            }
-                            _applySettings(settings);
-                            
-                        }else{
-                            window.hWin.HEURIST4.msg.showMsgErr(response);
-                        }
-                });      
-          
-      }});
-        
-        
+      configEntityWidget.configEntity( 'updateList', $recTypeSelector.val() );    
     }
 
     /**
@@ -221,38 +155,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
         
         
         //get list of settings
-        var request = {
-            'a'          : 'files',
-            'entity'     : 'defRecTypes',
-            'operation'  : 'list',
-            'rec_ID'     : _selectedRtyID,
-            'folder'     : 'crosstabs'    
-        };
-
-        var that = this;                                                
-        window.hWin.HAPI4.EntityMgr.doRequest(request, 
-            function(response){
-                if(response.status == window.hWin.ResponseStatus.OK){
-                    var ele = $('#sel_saved_settings').empty();
-                    window.hWin.HEURIST4.ui.addoption(ele[0], '', '');
-                    
-                    var recset = new hRecordSet(response.data);
-                    if(recset.length()>0){
-                        
-                        recset.each(function(recID, rec){
-                            var filename = recset.fld(rec, 'file_name');
-                            window.hWin.HEURIST4.ui.addoption(ele[0], filename, filename.substring(0,filename.indexOf('.cfg')));
-                        });
-                        $('#divLoadSettings').show();    
-                    }
-                    
-                }else{
-                    window.hWin.HEURIST4.msg.showMsgErr(response);
-                }
-        });      
-        
-        $('#divSaveSettings').show();
-
+        configEntityWidget.configEntity( 'updateList', _selectedRtyID );    
     }
 
 
@@ -1105,7 +1008,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
         var showPercentageColumn = $('#rbShowPercentColumn').is(':checked');
         var supressBlankRow = !$('#rbShowBlanks').is(':checked');
         var supressBlankColumn = supressBlankRow;
-        var supressBlankPage = supressBlankRow;
+        var supressBlankPage = false;
 
         var aggregationMode = $("input:radio[name=aggregationMode]:checked").val();
         var isAVG = (aggregationMode === "avg");
@@ -1460,7 +1363,6 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
         }
 
-
         if(hasValues){ //grantotal!=0){
             $divres.append('<h2 class="crosstab-page">'+pageName+'</h2>');
             $table.appendTo($divres);
@@ -1600,7 +1502,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
         clearIntervals('row');
         clearIntervals('page');
         
-        $("input:radio[name=aggregationMode]:checked").val(settings.aggregationMode);
+        $('input:radio[value="'+settings.aggregationMode+'"]').prop('checked', true);
         $('#cbAggField').val(settings.agg_field);
         _changeAggregationMode();
 

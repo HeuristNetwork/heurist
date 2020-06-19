@@ -37,111 +37,73 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
     selectedFields:null,
     
     _initControls: function() {
-      
-      this._super();    
 
-      //save settings
-      $('#btnSaveSettings').button();
-      this._on($('#btnSaveSettings'), {click: function(){
-          
-                var fileName = $('#inpt_save_setting_name').val();
-                
-                if(fileName.trim()==''){
-                    window.hWin.HEURIST4.msg.showMsgFlash('Name not defined');
-                    return;
-                }
-                
-                var settings = this._getSettings(false);            
-                if(!settings) return;
 
-                var request = {
-                    'a'          : 'files',
-                    'entity'     : 'defRecTypes',
-                    'operation'  : 'put',
-                    'folder'     : 'csvexport',    
-                    'rec_ID'     : this._selectedRtyID,
-                    'file'       : fileName+'.cfg',    
-                    'content'    : JSON.stringify(settings)    
-                };
+        var that = this;
+        if(!$.isFunction($('body')['configEntity'])){ //OK! widget script js has been loaded
 
-                var that = this;                                                
-                window.hWin.HAPI4.EntityMgr.doRequest(request, 
-                    function(response){
-                        if(response.status == window.hWin.ResponseStatus.OK){
-                            
-                            $('#inpt_save_setting_name').val('');
-                            var ele = $('#sel_saved_settings');
-                            var filename = response.data;
-                            window.hWin.HEURIST4.ui.addoption(ele[0], filename, filename.substring(0,filename.indexOf('.cfg')) );
-                            $('#divLoadSettings').show();    
-                            window.hWin.HEURIST4.msg.showMsgFlash('Settings are saved');
-                            
-                        }else{
-                            window.hWin.HEURIST4.msg.showMsgErr(response);
-                        }
-                });      
-          
-      }});
-      
-      //load settings
-      this._on($('#sel_saved_settings'), {change: function(){
-          
-                this.selectedFields = [];
+            $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/entity/configEntity.js', 
+                function(){ 
+                    that._initControls();            
 
-                var fileName = $('#sel_saved_settings').val();
-          
-                if(fileName.trim()==''){
-                    return;
-                }
+            } );
+            return;            
+        }
 
-                var request = {
-                    'a'          : 'files',
-                    'entity'     : 'defRecTypes',
-                    'operation'  : 'get',
-                    'folder'     : 'csvexport',    
-                    'rec_ID'     : this._selectedRtyID,
-                    'file'       : fileName
-                };
+        this._super();    
 
-                var that = this;                                                
-                window.hWin.HAPI4.EntityMgr.doRequest(request, 
-                    function(response){
-                        if(response.status == window.hWin.ResponseStatus.OK){
-                            
-                            var settings = window.hWin.HEURIST4.util.isJSON(response.data);
-                            if(settings==false){
-                                    window.hWin.HEURIST4.msg.showMsgFlash('Settings are invalid');
-                                    return;  
-                            } 
-                            
-                            //restore selection
-                            that.selectedFields = settings.fields; 
-                            
-                            var tree = that.element.find('.rtt-tree').fancytree("getTree");           
-                            tree.visit(function(node){
-                                node.setExpanded(true);
-                            });            
-                            
-                            setTimeout(function(){
-                                that._assignSelectedFields();
-                            },1000);
-                            
-                            that.element.find('#delimiterSelect').val(settings.csv_delimiter);
-                            that.element.find('#quoteSelect').val(settings.csv_enclosure);
-                            that.element.find('#cbNamesAsFirstRow').prop('checked',(settings.csv_header==1));
-                            that.element.find('#cbIncludeTermIDs').prop('checked',(settings.include_term_ids==1));
-                            that.element.find('#cbIncludeTermCodes').prop('checked',(settings.include_term_codes==1));
-                            that.element.find('#cbIncludeTermHierarchy').prop('checked',(settings.include_term_hierarchy==1));
-                            that.element.find('#cbIncludeResourceTitles').prop('checked',(settings.include_resource_titles==1));
-                            
-                            
-                        }else{
-                            window.hWin.HEURIST4.msg.showMsgErr(response);
-                        }
-                });      
-          
-      }});
+
+        this.element.find('#divLoadSettings').configEntity({
+            entityName: 'defRecTypes',
+            configName: 'csvexport',
+
+            getSettings: function(){ return that.getSettings(false); }, //callback function to retieve configuration
+            setSettings: function( settings ){ that.setSettings( settings ); }, //callback function to apply configuration
+
+            //divLoadSettingsName: this.element
+            divSaveSettings: this.element.find('#divSaveSettings'),  //element
+            allowRenameDelete: true
+
+        });
+
+        this.element.find('#divLoadSettings').configEntity( 'updateList', this.selectRecordScope.val() );    
+
     },
+
+    //
+    //
+    //
+    setSettings: function(settings){
+        
+        this.selectedFields = [];
+        
+        if(settings){
+        
+            var that = this;
+            //restore selection
+            that.selectedFields = settings.fields; 
+            
+            var tree = that.element.find('.rtt-tree').fancytree("getTree");           
+            tree.visit(function(node){
+                node.setSelected(false);
+                node.setExpanded(true);
+            });            
+            
+            setTimeout(function(){
+                that._assignSelectedFields();
+            },1000);
+            
+            that.element.find('#delimiterSelect').val(settings.csv_delimiter);
+            that.element.find('#quoteSelect').val(settings.csv_enclosure);
+            that.element.find('#cbNamesAsFirstRow').prop('checked',(settings.csv_header==1));
+            that.element.find('#cbIncludeTermIDs').prop('checked',(settings.include_term_ids==1));
+            that.element.find('#cbIncludeTermCodes').prop('checked',(settings.include_term_codes==1));
+            that.element.find('#cbIncludeTermHierarchy').prop('checked',(settings.include_term_hierarchy==1));
+            that.element.find('#cbIncludeResourceTitles').prop('checked',(settings.include_resource_titles==1));
+            
+        }
+    },
+
     
     //
     // assign selected fields in tree
@@ -273,7 +235,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                 return;
             }
             
-            var settings = this._getSettings(true);            
+            var settings = this.getSettings(true);            
             if(!settings) return;
            
             var request = {
@@ -330,7 +292,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
     //
     // mode_action true - returns fields for csv export, false - returns codes of selected nodes
     //
-    _getSettings: function( mode_action ){
+    getSettings: function( mode_action ){
 
             var header_fields = {id:'rec_ID',title:'rec_Title',url:'rec_URL',modified:'rec_Modified',tags:'rec_Tags'};
             function __removeLinkType(dtid){
@@ -434,43 +396,12 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
         }else{
             $('.rtt-tree').parent().show();
             if(rtyID>0){
-                
                 this.selectedFields = [];
-                
-                //get list of settings
-                var request = {
-                    'a'          : 'files',
-                    'entity'     : 'defRecTypes',
-                    'operation'  : 'list',
-                    'rec_ID'     : rtyID,
-                    'folder'     : 'csvexport'    
-                };
-
-                var that = this;                                                
-                window.hWin.HAPI4.EntityMgr.doRequest(request, 
-                    function(response){
-                        if(response.status == window.hWin.ResponseStatus.OK){
-                            var ele = $('#sel_saved_settings').empty();
-                            window.hWin.HEURIST4.ui.addoption(ele[0], '', '');
-                            
-                            var recset = new hRecordSet(response.data);
-                            if(recset.length()>0){
-                                
-                                recset.each(function(recID, rec){
-                                    var filename = recset.fld(rec, 'file_name');
-                                    window.hWin.HEURIST4.ui.addoption(ele[0], filename, filename.substring(0,filename.indexOf('.cfg')));
-                                });
-                                $('#divLoadSettings').show();    
-                            }
-                            
-                        }else{
-                            window.hWin.HEURIST4.msg.showMsgErr(response);
-                        }
-                });      
-                
-                $('#divSaveSettings').show();
-                
             }
+        }
+        
+        if(this.element.find('#divLoadSettings').configEntity('instance')){
+            this.element.find('#divLoadSettings').configEntity( 'updateList', rtyID );    
         }
         
         return isdisabled;

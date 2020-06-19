@@ -163,7 +163,7 @@ class DbEntityBase
             
         }else if($operation=='get'){
             
-            $sMsg = 'Can not get content of setting file. ';
+            $sMsg = 'Can not get content of settings file. ';
             
             if($filename==null){
                 $this->system->addError(HEURIST_INVALID_REQUEST, $sMsg.'Filename parameter is not defined');
@@ -179,7 +179,7 @@ class DbEntityBase
             
             $filename = fileNameSanitize($filename);
             
-            $sMsg = 'Can not save content of setting file. ';
+            $sMsg = 'Can not save content the settings file. ';
             
             if($filename==null){
                 $this->system->addError(HEURIST_INVALID_REQUEST, $sMsg.'Filename parameter is not defined');
@@ -199,6 +199,47 @@ class DbEntityBase
                     }
                 }
             }
+            
+        }else if($operation=='rename'){
+            
+            $sMsg = 'Can not rename the settings file. ';
+            
+            $fileOld = @$action['fileOld'];
+            if(file_exists($path.$fileOld)){
+                
+                $filename = fileNameSanitize($filename);
+                if($filename==null){
+                    $this->system->addError(HEURIST_INVALID_REQUEST, $sMsg.'New filename parameter is not defined');
+                    $res = false;
+                }else if(!copy($path.$fileOld, $path.$filename)){
+                    $this->system->addError(HEURIST_INVALID_REQUEST, $sMsg);
+                    $res = false;
+                }else{
+                    unlink($path.$fileOld);
+                    $res = $filename;
+                }
+                
+            }else{
+                $this->system->addError(HEURIST_INVALID_REQUEST, $sMsg.'Settings file does not exist');
+                $res = false;
+            }
+            
+            
+            
+        }else if($operation=='delete'){
+         
+            $sMsg = 'Can not remove the settings file. ';
+            
+            if($filename==null){
+                $this->system->addError(HEURIST_INVALID_REQUEST, $sMsg.'Filename parameter is not defined');
+                $res = false;
+            }else if (!file_exists($path.$filename)){
+                $this->system->addError(HEURIST_ERROR, $sMsg.'File does not exist');
+                $res = false;
+            }else{
+                $res = unlink($path.$filename);    
+            }
+
         }
         
         return $res;

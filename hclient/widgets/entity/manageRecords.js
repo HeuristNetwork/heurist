@@ -218,6 +218,14 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                                         inpt.editing_input('option', {dtFields:dtFields, recreate:true} );
                                         that._createRtsEditButton(dtId, $(that.element).find('div[data-dtid="'+dtId+'"]') );
                                         
+                                        if(fields['rst_RequirementType']=='forbidden'){
+                                            inpt.find('.header').css({'opacity':'0.3'});   //header
+                                            inpt.find('.header').next().css({'opacity':'0.3'}); //repeat btn 
+                                            //var ele_id = ele_fb.next().next().css({'opacity':'0.3'}); //input-cell 
+                                            inpt.find('input,textarea,button,.ui-selectmenu-button').css('border','1px dotted red');
+                                        }
+                                        
+                                        
                                     }else{
                                         window.hWin.HEURIST4.msg.showMsgErr(response);
                                     }
