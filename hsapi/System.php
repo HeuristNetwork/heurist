@@ -494,7 +494,7 @@ error_log(print_r($_REQUEST, true));
 
         global $defaultRootFileUploadPath, $defaultRootFileUploadURL;
 
-        if(!$dbname) $dbname = HEURIST_DBNAME;
+        list($database_name_full, $dbname) = mysql__get_names($dbname);
         
         $upload_root = $this->getFileStoreRootFolder();
 

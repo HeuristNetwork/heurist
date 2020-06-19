@@ -37,12 +37,6 @@
 // TODO: write /redirects/resolver.php as an XML feed with parameterisation for a human-readable view
 // TODO: the following is a temporary redirect to viewRecord.php which renders a human-readable form
 
-$recid = null;         
-if(@$_REQUEST['recID']){
-    $recid = $_REQUEST['recID'];    
-}elseif(@$_REQUEST['recid']){
-    $recid = $_REQUEST['recid'];        
-}
 if(@$_REQUEST['fmt']){
     $format = $_REQUEST['fmt'];    
 }elseif(@$_REQUEST['format']){
@@ -50,14 +44,38 @@ if(@$_REQUEST['fmt']){
 }else{
     $format = 'xml';
 }
+$entity = null;
+$recid = null;         
+$database_id = 0;
+
+if(@$_REQUEST['recID']){
+    $recid = $_REQUEST['recID'];    
+}else if(@$_REQUEST['recid']){
+    $recid = $_REQUEST['recid'];        
+}else if (@$_REQUEST['rty'] || @$_REQUEST['dty'] || @$_REQUEST['trm']){
+    
+    if(@$_REQUEST['rty']) $entity = 'rty';
+    else if(@$_REQUEST['dty']) $entity = 'dty';
+    else if(@$_REQUEST['trm']) $entity = 'trm';
+    
+    $recid = $_REQUEST[$entity];
+    $format = 'xml';
+
+    if(strpos($recid, '-')>0){    
+        $vals = explode('-', $recid);
+        if(count($vals)==3){
+            $database_id = $vals[0];
+            $recid = $vals[1].'-'.$vals[2];
+        }
+    }
+    
+}
 
 //form accepting recID=123-3456 which redirects to record 3456 on database 123
-if(strpos($recid, '-')>0){
+if(!entity && strpos($recid, '-')>0){
     list($database_id, $recid) = explode('-', $recid, 2);
 }else if (is_int(@$_REQUEST['db'])){
     $database_id = $_REQUEST['db'];
-}else{
-    $database_id = 0;
 }
 
 $database_url = null;    
@@ -77,7 +95,15 @@ if ($database_id>0) {
 }
 
 if($database_url!=null){ //redirect to resolver for another database
-    $redirect = $database_url.'&recID='.$recid.'&fmt'.$format;
+    if($entity!=null){
+        $redirect = $database_url.'&'.$entity.'='.$recid;        
+    }else{
+        $redirect = $database_url.'&recID='.$recid.'&fmt'.$format;    
+    }
+}else if($entity!=null){
+    
+    $redirect = '../admin/describe/getDBStructureAsXML.php?db='.$_REQUEST['db'].'&'.$entity.'='.$recid;
+    
 }else if($format=='html'){
     $redirect = '../viewers/record/viewRecord.php?db='.$_REQUEST['db'].'&recID='.$recid;
     

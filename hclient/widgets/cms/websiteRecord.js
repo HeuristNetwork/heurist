@@ -980,6 +980,8 @@ function hCmsEditing(_options) {
                         }
                     }
                     
+                    
+                    
                 }
                 
             }
@@ -1106,14 +1108,20 @@ function hCmsEditing(_options) {
                    
                    if(val=='heurist_Navigation'){
                        
+                       var rval = dele.find('input[name="menu_recIDs"]').val();
+                       rval =  rval?rval.split(','):[];
+                       
                        var ele = dele.find('#menu_recIDs');
+                       
                        if(!ele.editing_input('instance')){
+                           
+                           
                            
                             var ed_options = {
                                 recID: -1,                                                                                       
                                 dtID: ele.attr('id'), //'group_selector',
                                 //show_header: false,
-                                values: [dele.find('input[name="menu_recIDs"]').val()],
+                                values: rval,
                                 readonly: false,
                                 showclear_button: true,
                                 dtFields:{
@@ -1128,8 +1136,30 @@ function hCmsEditing(_options) {
                             ele.editing_input(ed_options);
                             ele.parent().css('display','block');
                             ele.find('.header').css({'width':'150px','text-align':'right'});
-                           
                        }
+                       //ele.editing_input('setValue', rval);
+                       
+                       dele.find('select[name="orientation"]')
+                       .change(function(e){
+                           
+                           var is_horiz = ($(e.target).val()=='horizontal');
+
+                           var vals = $dlg.find('#widgetCss').val().split(';');
+                           for (var i=0; i<vals.length; i++){
+                               var vs = vals[i].split(':');
+                               if(vs && vs.length==2){
+                                   vs[0] = vs[0].trim();
+                                   if(vs[0]=='width'){
+                                       vals[i] = ('\nwidth: '+(is_horiz?'100%':'200px'));
+                                   }else if(vs[0]=='height'){
+                                       vals[i] = ('\nheight: '+(is_horiz?'50px':'300px'));
+                                   }
+                               }
+                           }
+
+                           $dlg.find('#widgetCss').val( vals.join(';'));
+                       });
+                       
                        
                    }else
                    if(val=='heurist_SearchTree'){

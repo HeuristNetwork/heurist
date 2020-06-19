@@ -10,7 +10,7 @@
 * is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
 * or implied. See the License for the specific language governing permissions and limitations under
 * the License.
-*/                                                     7
+*/                                                     
 
 /**
 *  Corsstabs UI class
@@ -26,7 +26,7 @@
 var crosstabsAnalysis;
 
 /**
-*  CrosstabsAnalysis - class for crosstab analysis                                           b
+*  CrosstabsAnalysis - class for crosstab analysis                                           
 *
 * @author Artem Osmakov <osmakov@gmail.com>
 * @version 2013.0530
@@ -37,12 +37,12 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
     var MAX_FOR_AUTO_RETRIEVE = 6000;
     
-    var recordtype;
     var fields3 = {column:{field:0, type:'', values:[], intervals:[]}, row:{}, page:{}};
     //     intervals:{name: , description:, values:[  ] }
     var records_resp;
     var keepCount = 10;
     var needServerRequest = true;
+    var suppressRetrieve = false;
     var inProgress = false;
     var query_main;
     var query_domain;
@@ -50,6 +50,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
     var $recTypeSelector;
     
     var _currentRecordset = null;
+    var _selectedRtyID = null;
 
     var _isPopupMode = false;
 
@@ -67,6 +68,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
         query_main = _query?_query:'';
         query_domain =_query_domain?_query_domain:'all';
 
+        //record type dropdown    
         $recTypeSelector = window.hWin.HEURIST4.ui.createRectypeSelect( $('#cbRectypes').get(0), null, 
                     window.hWin.HR('select record type'), false );
         $recTypeSelector.hSelect({ change: _onRectypeChange });
@@ -88,37 +90,119 @@ function CrosstabsAnalysis(_query, _query_domain) {
         //window.hWin.HAPI4.LayoutMgr.cardinalPanel('sizePane', ['east', (top?top.innerWidth:window.innerWidth)-300 ]);  //maximize width
         
         
+      //save settings
+      $('#btnSaveSettings').button();
+      $('#btnSaveSettings').on({click: function(){
+          
+                var fileName = $('#inpt_save_setting_name').val();
+                
+                if(fileName.trim()==''){
+                    window.hWin.HEURIST4.msg.showMsgFlash('Name not defined');
+                    return;
+                }
+                
+                var settings = _getSettings();            
+                if(!settings) return;
+
+                var request = {
+                    'a'          : 'files',
+                    'entity'     : 'defRecTypes',
+                    'operation'  : 'put',
+                    'folder'     : 'crosstabs',    
+                    'rec_ID'     : _selectedRtyID,
+                    'file'       : fileName+'.cfg',    
+                    'content'    : JSON.stringify(settings)    
+                };
+
+                var that = this;                                                
+                window.hWin.HAPI4.EntityMgr.doRequest(request, 
+                    function(response){
+                        if(response.status == window.hWin.ResponseStatus.OK){
+                            
+                            $('#inpt_save_setting_name').val('');
+                            var ele = $('#sel_saved_settings');
+                            var filename = response.data;
+                            window.hWin.HEURIST4.ui.addoption(ele[0], filename, filename.substring(0,filename.indexOf('.cfg')) );
+                            $('#divLoadSettings').show();    
+                            window.hWin.HEURIST4.msg.showMsgFlash('Settings are saved');
+                            
+                        }else{
+                            window.hWin.HEURIST4.msg.showMsgErr(response);
+                        }
+                });      
+          
+      }});
+      
+      //load settings
+      $('#sel_saved_settings').on({change: function(){
+          
+                var fileName = $('#sel_saved_settings').val();
+          
+                if(fileName.trim()==''){
+                    return;
+                }
+
+                var request = {
+                    'a'          : 'files',
+                    'entity'     : 'defRecTypes',
+                    'operation'  : 'get',
+                    'folder'     : 'crosstabs',    
+                    'rec_ID'     : _selectedRtyID,
+                    'file'       : fileName
+                };
+
+                var that = this;                                                
+                window.hWin.HAPI4.EntityMgr.doRequest(request, 
+                    function(response){
+                        if(response.status == window.hWin.ResponseStatus.OK){
+                            
+                            var settings = window.hWin.HEURIST4.util.isJSON(response.data);
+                            if(settings==false){
+                                    window.hWin.HEURIST4.msg.showMsgFlash('Settings are invalid');
+                                    return;  
+                            }
+                            _applySettings(settings);
+                            
+                        }else{
+                            window.hWin.HEURIST4.msg.showMsgErr(response);
+                        }
+                });      
+          
+      }});
+        
+        
     }
 
     /**
-    * update list of fields
+    * update list of fields for selected record type
+    * 1. columns 2.rows 3. pages 4, aggreagation
     */
     function _onRectypeChange(event, data){
 
         needServerRequest = true;
 
         if(data){
-            recordtype = Number(data.item.value);
+            _selectedRtyID = Number(data.item.value);
         }else{
-            recordtype = Number($recTypeSelector.val());
+            _selectedRtyID = Number($recTypeSelector.val());
             $recTypeSelector.hSelect("refresh"); 
         }
 
         var allowedlist = ["enum", "integer", "float", "resource", "relationtype"];//, "date", "freetext"]; //"resource",
 
-        //var selObj = createRectypeDetailSelect($('#cbColumns').get(0), recordtype, allowedlist, ' ');
-        //createRectypeDetailSelect($('#cbRows').get(0), recordtype, allowedlist, ' ');
-        //createRectypeDetailSelect($('#cbPages').get(0), recordtype, allowedlist, ' ');
+        //var selObj = createRectypeDetailSelect($('#cbColumns').get(0), _selectedRtyID, allowedlist, ' ');
+        //createRectypeDetailSelect($('#cbRows').get(0), _selectedRtyID, allowedlist, ' ');
+        //createRectypeDetailSelect($('#cbPages').get(0), _selectedRtyID, allowedlist, ' ');
         
-        var selObj = window.hWin.HEURIST4.ui.createRectypeDetailSelect($('#cbColumns').get(0), recordtype, allowedlist, ' ', null );
-        window.hWin.HEURIST4.ui.createRectypeDetailSelect($('#cbRows').get(0), recordtype, allowedlist, ' ', null );
-        window.hWin.HEURIST4.ui.createRectypeDetailSelect($('#cbPages').get(0), recordtype, allowedlist, ' ', null );
+        var selObj = window.hWin.HEURIST4.ui.createRectypeDetailSelect($('#cbColumns').get(0), _selectedRtyID, allowedlist, ' ', null );
+        window.hWin.HEURIST4.ui.createRectypeDetailSelect($('#cbRows').get(0), _selectedRtyID, allowedlist, ' ', null );
+        window.hWin.HEURIST4.ui.createRectypeDetailSelect($('#cbPages').get(0), _selectedRtyID, allowedlist, ' ', null );
 
         if(selObj.find('option').length<2){
             $("#vars").hide();
             $("#shows").hide();
             $("#btnPanels").hide();
-            $("#nofields").html(recordtype>0?'No suitable fields: numeric, pointer or enumeration types.':'Select record type.');
+            $("#nofields").html(_selectedRtyID>0?'No suitable fields: numeric, pointer or enumeration types.':'Select record type.');
             $("#nofields").show();
         }else{
             $("#vars").show();
@@ -127,13 +211,47 @@ function CrosstabsAnalysis(_query, _query_domain) {
             $("#btnPanels").show();
         }
 
-        //createRectypeDetailSelect($('#cbAggField').get(0), recordtype, ["integer", "float"], false);
-        window.hWin.HEURIST4.ui.createRectypeDetailSelect($('#cbAggField').get(0), recordtype, ["integer", "float"], false);
+        //createRectypeDetailSelect($('#cbAggField').get(0), _selectedRtyID, ["integer", "float"], false);
+        window.hWin.HEURIST4.ui.createRectypeDetailSelect($('#cbAggField').get(0), _selectedRtyID, ["integer", "float"], false);
         _changeAggregationMode();
 
         clearIntervals('column');
         clearIntervals('row');
         clearIntervals('page');
+        
+        
+        //get list of settings
+        var request = {
+            'a'          : 'files',
+            'entity'     : 'defRecTypes',
+            'operation'  : 'list',
+            'rec_ID'     : _selectedRtyID,
+            'folder'     : 'crosstabs'    
+        };
+
+        var that = this;                                                
+        window.hWin.HAPI4.EntityMgr.doRequest(request, 
+            function(response){
+                if(response.status == window.hWin.ResponseStatus.OK){
+                    var ele = $('#sel_saved_settings').empty();
+                    window.hWin.HEURIST4.ui.addoption(ele[0], '', '');
+                    
+                    var recset = new hRecordSet(response.data);
+                    if(recset.length()>0){
+                        
+                        recset.each(function(recID, rec){
+                            var filename = recset.fld(rec, 'file_name');
+                            window.hWin.HEURIST4.ui.addoption(ele[0], filename, filename.substring(0,filename.indexOf('.cfg')));
+                        });
+                        $('#divLoadSettings').show();    
+                    }
+                    
+                }else{
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                }
+        });      
+        
+        $('#divSaveSettings').show();
 
     }
 
@@ -169,32 +287,67 @@ function CrosstabsAnalysis(_query, _query_domain) {
         return $container;
     }
 
+    //
+    //
+    //
+    function _resetAllIntervals(fields, name){
+        
+        suppressRetrieve = true;
+        
+        if(!name) name = 'column';
+        
+        var detailid = fields[name];
+        $('#cb'+name[0].toUpperCase()+name.slice(1)+'s').val(detailid);
+        
+        _resetIntervals_continue(name, detailid, function(){
+            if(name == 'column') 
+                name = 'row'
+            else if(name == 'row') 
+                name = 'page'
+            else {
+                suppressRetrieve = false;
+                _autoRetrieve();
+                return;
+            }
+            _resetAllIntervals(fields, name);
+        });
+    }
+    
     /**
     * create set of intervals specific for particular detail type
+    * get min and max values
     */
     function _resetIntervals(event){
-
         needServerRequest = true;
-
         var detailid = event.target.value;
-        var detailname = (event.target.selectedIndex>=0)?event.target.options[event.target.selectedIndex].text:''; //options[event.target.selectedIndex];
         var name = $(event.target).attr('name');  //type
-
+        
+        _resetIntervals_continue(name, detailid);
+    }    
+       
+    //
+    //
+    //    
+    function _resetIntervals_continue(name, detailid, callback){
+        
         var $container = $('#'+name+'Intervals');
         $container.empty();
         fields3[name] = {field:0, fieldname:'', type:'', values:[], intervals:[], allownulls:false};
 
-        if (!(window.hWin.HEURIST4.rectypes.typedefs[recordtype] &&
-            window.hWin.HEURIST4.rectypes.typedefs[recordtype].dtFields[detailid]))
+        if (!(window.hWin.HEURIST4.rectypes.typedefs[_selectedRtyID] &&
+            window.hWin.HEURIST4.rectypes.typedefs[_selectedRtyID].dtFields[detailid]))
         {
             $container.hide();
+            if($.isFunction(callback)) callback.call();
             return;
         }
 
         //get detail type
         var fi = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex;
-        var details = window.hWin.HEURIST4.rectypes.typedefs[recordtype].dtFields[detailid];
+        var details = window.hWin.HEURIST4.rectypes.typedefs[_selectedRtyID].dtFields[detailid];
         var detailtype = details[fi['dty_Type']];
+        var detailname = details[fi['rst_DisplayName']];
+
 
         fields3[name] = {field:detailid, fieldname:detailname, type:detailtype, values:[], intervals:[]}
 
@@ -207,22 +360,25 @@ function CrosstabsAnalysis(_query, _query_domain) {
             //get min and max for this detail in database
 
             var baseurl = window.hWin.HAPI4.baseURL + "viewers/crosstab/crosstabs_srv.php";
-            var request = { a:'minmax', rt:recordtype , dt:detailid, session: Math.round((new Date()).getTime()/1000) };
+            var request = { a:'minmax', rt:_selectedRtyID , dt:detailid, session: Math.round((new Date()).getTime()/1000) };
 
             window.hWin.HEURIST4.util.sendRequest(baseurl, request, null,
                 function( response ){
                     if(response.status == window.hWin.ResponseStatus.OK){
 
-                        var val0 = parseFloat(response.data.min);
-                        var valmax = parseFloat(response.data.max);
+                        var val0 = parseFloat(response.data.MIN);
+                        var valmax = parseFloat(response.data.MAX);
 
                         if(isNaN(val0) || isNaN(valmax)){
                             $container = clearIntervals(name);
                             $container.html('There are no min max values for this field.');
+                            $container.show();
                         }else{
                             fields3[name].values = [val0, valmax];
                             calculateIntervals(name);
                         }
+                        
+                        if($.isFunction(callback)) callback.call();
 
                     }else{
                         window.hWin.HEURIST4.msg.showMsgErr(response);
@@ -234,7 +390,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
         }else if(detailtype=="resource"){
 
             //get list of possible values for pointer detail type
-            var request = { a:'pointers', rt:recordtype , dt:detailid };
+            var request = { a:'pointers', rt:_selectedRtyID , dt:detailid };
             var baseurl = window.hWin.HAPI4.baseURL + "viewers/crosstab/crosstabs_srv.php";
             
             if(_currentRecordset!=null){
@@ -252,10 +408,13 @@ function CrosstabsAnalysis(_query, _query_domain) {
                             fields3[name].values = [];
                             $container = clearIntervals(name);
                             $container.html('There are no pointer values for this field.');
+                            $container.show();
                         }else{
                             fields3[name].values = response.data;
                             calculateIntervals(name);
                         }
+            
+                        if($.isFunction(callback)) callback.call();
 
                     }else{
                         window.hWin.HEURIST4.msg.showMsgErr(response);
@@ -272,6 +431,8 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
         }
 
+            
+        if($.isFunction(callback)) callback.call();
         renderIntervals(name);
     }
 
@@ -329,7 +490,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
         }else if(fields3[name].type=="enum" || fields3[name].type=="relationtype"){
 
             var fi = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex;
-            var details = window.hWin.HEURIST4.rectypes.typedefs[recordtype].dtFields[fields3[name].field];
+            var details = window.hWin.HEURIST4.rectypes.typedefs[_selectedRtyID].dtFields[fields3[name].field];
             var detailtype = fields3[name].type; //details[fi['dty_Type']];
 
             var allTerms = details[fi['rst_FilteredJsonTermIDTree']];
@@ -349,6 +510,9 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
         }
         renderIntervals(name);
+        
+        if(suppressRetrieve) return;
+        
         _autoRetrieve();
     }
 
@@ -361,7 +525,8 @@ function CrosstabsAnalysis(_query, _query_domain) {
         $container.empty();
 
         if(fields3[name].intervals.length<1){
-            $container.html('no values defined');
+            $container.html('There are no values for these fields in the current results set');
+            $container.show();
             return;
         }
 
@@ -647,6 +812,9 @@ function CrosstabsAnalysis(_query, _query_domain) {
     }
 
     
+    //
+    //
+    //
     function _autoRetrieve(){
 
         if(!_isPopupMode){
@@ -655,13 +823,15 @@ function CrosstabsAnalysis(_query, _query_domain) {
             }else if( _currentRecordset.resultCount < MAX_FOR_AUTO_RETRIEVE){
                 _setMode(2);
                 
-                if(!recordtype || isNaN(recordtype) || fields3.row.intervals.length<1 || Number(fields3.row.field)<1){
+                if(!_selectedRtyID || isNaN(_selectedRtyID) || fields3.row.intervals.length<1 || Number(fields3.row.field)<1){
                     //critical settings are not defined
                     return;
                 }else{
                     needServerRequest = true;
                     _doRetrieve();
                 }
+            }else {
+                console.log( _currentRecordset.resultCount + ' click update to retrieve values ' );
             }
         }
     }
@@ -688,7 +858,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 return;
             }
 
-            if(!recordtype || recordtype<1){
+            if(!_selectedRtyID || _selectedRtyID<1){
                 window.hWin.HEURIST4.msg.showMsgFlash('Record type is not defined',500);
                 $recTypeSelector.focus();
                 
@@ -712,7 +882,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
         var session_id = Math.round((new Date()).getTime()/1000);    
         
         var request = { a:'crosstab',
-                rt:recordtype ,
+                rt:_selectedRtyID ,
                 dt_row:fields3.row.field, 
                 dt_rowtype:fields3.row.type,
                 session:session_id}
@@ -769,7 +939,6 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 params = params + '&agg_field='+request.agg_field;
             }
 
-
             inProgress = true;
             var to = setTimeout(function(){
                 to = 0;
@@ -806,8 +975,9 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
     }
 
+    //round to two digits
     function rnd(original){
-        return Math.round(original*10)/10;
+        return Math.round(original*100)/100;
     }
 
     /**
@@ -830,13 +1000,22 @@ function CrosstabsAnalysis(_query, _query_domain) {
         }else{
             $('#btnPrint').show();
         }
+        
 
-        $divres.append('<div>Database name: '+window.hWin.HAPI4.database+'</div>');
+        $divres.append('<div>Database name: <b>'+window.hWin.HAPI4.database+'</b></div>');
         $divres.append('<div>Date and time: '+ (new Date()) +'</div>');
         $divres.append('<div>Type of analysis: Crosstab</div>');
         //$divres.append('<div>Title (name) of saved analysis: '+ +'</div>');
         //????? $divres.append('<div>Record type analysed: '++'</div>');
-        $divres.append('<div>Query string: q='+query_main+'&w='+query_domain +'</div>');
+        if(_currentRecordset!=null){
+            $divres.append('<div>Record count: '+ _currentRecordset['recordCount'] +'</div>');
+            $divres.append('<div>Query string: '+_currentRecordset['query_main'] +'</div>');
+            
+        }else{
+            $divres.append('<div>Query string: q='+query_main+'&w='+query_domain +'</div>');
+        }
+        
+            
         //$divres.append('<div>Total number of records: '+ +'</div>');
         //$divres.append('<div>Number of records for each record type</div>');
 
@@ -850,13 +1029,13 @@ function CrosstabsAnalysis(_query, _query_domain) {
             aggregationMode = "Counts";
         }
 
-        $divres.append('<div>Type of value displayed: '+aggregationMode+'</div>');
+        $divres.append('<div>Type of value displayed: <b>'+aggregationMode+'</b></div>');
 
         $divres.append('<div>---------------------------------</div>');
         //Type of value displayed (count, average, sum)
 
 
-        if(plen<1){
+        if(plen<1){ //less than 1 page
             doRenderPage('', records_resp);
         }else{
 
@@ -918,13 +1097,13 @@ function CrosstabsAnalysis(_query, _query_domain) {
         //     intervals:{name: , description:, values:[  ] }
 
         //parameters
-        var supressZero = $('#rbSupressZero').get(0).checked;
-        var showValue = $('#rbShowValue').get(0).checked;
-        var showTotalsRow = $('#rbShowTotals').get(0).checked;//$('#rbShowTotalsRow').get(0).checked;
-        var showTotalsColumn = $('#rbShowTotals').get(0).checked; //$('#rbShowTotalsColumn').get(0).checked;
-        var showPercentageRow = $('#rbShowPercentRow').get(0).checked;
-        var showPercentageColumn = $('#rbShowPercentColumn').get(0).checked;
-        var supressBlankRow = !$('#rbShowBlanks').get(0).checked;
+        var supressZero = $('#rbSupressZero').is(':checked');
+        var showValue = $('#rbShowValue').is(':checked');
+        var showTotalsRow = $('#rbShowTotals').is(':checked');//$('#rbShowTotalsRow').is(':checked');
+        var showTotalsColumn = $('#rbShowTotals').is(':checked'); //$('#rbShowTotalsColumn').is(':checked');
+        var showPercentageRow = $('#rbShowPercentRow').is(':checked');
+        var showPercentageColumn = $('#rbShowPercentColumn').is(':checked');
+        var supressBlankRow = !$('#rbShowBlanks').is(':checked');
         var supressBlankColumn = supressBlankRow;
         var supressBlankPage = supressBlankRow;
 
@@ -945,6 +1124,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
         var clen = columns.length;
         var rlen = rows.length;
 
+        var hasValues = false;
         var grantotal = 0;
         var colspan = 1;
 
@@ -958,8 +1138,8 @@ function CrosstabsAnalysis(_query, _query_domain) {
             columns.push({});
         }
 
-        //reset output array for rows
-        for (i=0; i<rlen; i++){
+        //reset output array for rows  set all cells to 0
+        for (i=0; i<rlen; i++){  //by rows
 
             rows[i].output = [];
             rows[i].avgcount = [];
@@ -972,7 +1152,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
             rows[i].isempty = true;
 
 
-            for (j=0; j<clen; j++){
+            for (j=0; j<clen; j++){  //by cols
                 rows[i].output.push(0);
                 rows[i].percent_col.push(0);
                 rows[i].percent_row.push(0);
@@ -1047,26 +1227,46 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 rows[i].total = 0;
             }
 
+            var cols_with_values_for_row = [];
+            for (i=0; i<rlen; i++){
+                cols_with_values_for_row.push(0);
+            }
+            
+            
             for (j=0; j<clen; j++){  //cols
                 columns[j].total = 0;
+                
+                var rows_with_values = 0;
+                
                 for (i=0; i<rlen; i++){  //rows
                     if(rows[i].avgcount[j]>1){
                         rows[i].output[j] = rnd(rows[i].output[j]/rows[i].avgcount[j]);
                     }
 
+                    if(rows[i].output[j]>0){
+                        cols_with_values_for_row[i]++;  
+                        rows_with_values++;  
+                    } 
+                    
                     rows[i].total = rows[i].total + rows[i].output[j];
                     columns[j].total = columns[j].total + rows[i].output[j];
                 }
 
-                columns[j].total = rnd(columns[j].total/rlen);
+                if(rows_with_values>0) {
+                    columns[j].total = rnd(columns[j].total/rows_with_values); //was rlen
+                }
             }
 
             grantotal = 0;
+            var cnt_avg = 0;
             for (i=0; i<rlen; i++){
-                rows[i].total = rnd(rows[i].total/clen);
+                if(cols_with_values_for_row[i]>0){
+                    rows[i].total = rnd(rows[i].total/cols_with_values_for_row[i]); //clen);
+                }
                 grantotal = grantotal + rows[i].total;
+                if(rows[i].total>0) cnt_avg++;
             }
-            grantotal = rnd(grantotal/rlen);
+            grantotal = rnd(grantotal/cnt_avg);
 
 
         }else{
@@ -1157,8 +1357,9 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
         for (i=0; i<rlen; i++){
 
-
             if(supressBlankRow && rows[i].isempty) continue;
+            
+            hasValues = true;
 
             $row = $('<tr>').appendTo($table);
             $row.append('<td class="crosstab-header" style="{text-align:left;}">'+rows[i].name+'</td>');
@@ -1260,7 +1461,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
         }
 
 
-        if(grantotal!=0){
+        if(hasValues){ //grantotal!=0){
             $divres.append('<h2 class="crosstab-page">'+pageName+'</h2>');
             $table.appendTo($divres);
 
@@ -1313,7 +1514,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
             $('#aggAvg').hide();
             $('#divAggField').hide();
 
-            $('#aggregationModeCount').get(0).checked = true; //val("count");
+            $('#aggregationModeCount').prop('checked',true); //val("count");
         }else{
             $('#aggSum').css('display','inline-block');
             $('#aggAvg').css('display','inline-block');
@@ -1323,19 +1524,21 @@ function CrosstabsAnalysis(_query, _query_domain) {
         if ( aggMode == "count" ) {
 
             $('#cbAggField').attr('disabled','disabled');
-            //$('#divAggField').hide();
+            //$('#divAggField').css('visibility','hidden');
+            $('#divAggField').hide();
         }else{
             $('#cbAggField').removeAttr('disabled');
-            //$('#divAggField').css('display','inline-block');
+            //$('#divAggField').css('visibility','visible');
+            $('#divAggField').css('display','inline-block');
         }
 
         if ( aggMode == "avg" ) {
             $("#rbShowPercentColumn").attr('disabled','disabled');
             $("#rbShowPercentRow").attr('disabled','disabled');
             $("#rbShowValue").attr('disabled','disabled');
-            $("#rbShowPercentColumn").get(0).checked = false;
-            $("#rbShowPercentRow").get(0).checked = false;
-            $("#rbShowValue").get(0).checked = true;
+            $("#rbShowPercentColumn").prop('checked',false);
+            $("#rbShowPercentRow").prop('checked',false);
+            $("#rbShowValue").prop('checked',true);
         }else{
             $("#rbShowValue").removeAttr('disabled');
             $("#rbShowPercentColumn").removeAttr('disabled');
@@ -1367,7 +1570,51 @@ function CrosstabsAnalysis(_query, _query_domain) {
         }
     }
     
+    //
+    //
+    //
+    function _getSettings(){
+        
+        var settings = {
+            aggregationMode: $("input:radio[name=aggregationMode]:checked").val(),
+            agg_field: $('#cbAggField').val(),
+            supressZero: $('#rbSupressZero').is(':checked')?1:0,
+            showValue: $('#rbShowValue').is(':checked')?1:0,
+            showTotals: $('#rbShowTotals').is(':checked')?1:0,
+            
+            showPercentageRow: $('#rbShowPercentRow').is(':checked')?1:0,
+            showPercentageColumn: $('#rbShowPercentColumn').is(':checked')?1:0,
+            supressBlanks: !$('#rbShowBlanks').is(':checked')?1:0,
+            fields: {column:fields3.column.field,row:fields3.row.field,page:fields3.page.field}
+        };
 
+        return settings;
+    }
+
+    //
+    //
+    //
+    function _applySettings( settings ){
+        
+        clearIntervals('column');
+        clearIntervals('row');
+        clearIntervals('page');
+        
+        $("input:radio[name=aggregationMode]:checked").val(settings.aggregationMode);
+        $('#cbAggField').val(settings.agg_field);
+        _changeAggregationMode();
+
+        $('#rbSupressZero').prop('checked',settings.supressZero==1);
+        $('#rbShowValue').prop('checked',settings.showValue==1);
+        $('#rbShowTotals').prop('checked',settings.showTotals==1);
+        
+        $('#rbShowPercentRow').prop('checked',settings.showPercentageRow==1);
+        $('#rbShowPercentColumn').prop('checked',settings.showPercentageColumn==1);
+        $('#rbShowBlanks').prop('checked',settings.supressBlanks==0);
+        
+        _resetAllIntervals(settings.fields);
+    }
+    
     //
     //public members
     //

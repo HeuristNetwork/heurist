@@ -157,10 +157,14 @@
 
 <div>
         <div class="header" ><label for="svs_RulesOnly">Show expansion only</label></div>
-        <input type="checkbox" name="svs_RulesOnly" id="svs_RulesOnly" class="text ui-widget-content ui-corner-all" style="margin:0"/>
+        <input type="checkbox" id="svs_RulesOnly" class="text ui-widget-content ui-corner-all" style="margin:0 4px 4px 0"/>
         <label style="font-size: smaller; margin-top: 2px;" for="svs_RulesOnly">
             Exclude results from the initial filter, only show results from expansion rules
         </label>
+        <div id="divRulesOnly" style="display:none;padding-left: 25px;">
+        <label style="font-size: smaller"><input type="radio" name="svs_RulesOnly" id="svs_RulesOnly1" checked value="1" style="margin:0 0 20px 0"/>&nbsp;return all expansion results</label>
+        <label style="font-size: smaller;padding-left: 10px;"><input type="radio" name="svs_RulesOnly" id="svs_RulesOnly2" value="2" style="margin:0 0 20px 0"/>&nbsp;only return last level of expansion</label>
+        </div>        
 </div>
 <div>
     <div class="header" style="vertical-align:top">

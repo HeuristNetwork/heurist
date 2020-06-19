@@ -701,9 +701,13 @@ $.widget( "heurist.search_faceted_wiz", {
                 svs_id.val(svsID);
                 svs_name.val(svs[0]);
                 svs_rules.val( this.options.params.rules?this.options.params.rules:'' );
-                svs_rules_only.prop('checked', (this.options.params.rulesonly==1 || this.options.params.rulesonly==true));
                 svs_filter.val( this.options.params.sup_filter?this.options.params.sup_filter:'' ).trigger('keyup');
-                
+
+                var is_rules_only = (this.options.params.rulesonly>0 || this.options.params.rulesonly==true);
+                svs_rules_only.prop('checked', is_rules_only);
+                $dlg.find('#svs_RulesOnly1').prop('checked', (this.options.params.rulesonly!=2));
+                $dlg.find('#svs_RulesOnly2').prop('checked', (this.options.params.rulesonly==2));
+
                 this.options.params = window.hWin.HEURIST4.util.isJSON(svs[1]);
                 if(!this.options.params){
                     window.hWin.HEURIST4.msg.showMsgDlg(window.hWin.HR('Cannot initialise edit for faceted search due to corrupted parameters. Please remove and re-create this search.'), null, "Error");
@@ -748,7 +752,6 @@ $.widget( "heurist.search_faceted_wiz", {
                     }
                 }
                 
-                
                 $dlg.find('#svs_Title').val(this.options.params.ui_title);
                 $dlg.find('#svs_ViewMode').val(this.options.params.ui_viewmode);
                 $dlg.find('#svs_SearchOnReset').prop('checked', this.options.params.search_on_reset);
@@ -775,8 +778,9 @@ $.widget( "heurist.search_faceted_wiz", {
                 svs_id.val('');
                 svs_name.val('');
                 svs_rules.val('');
-                svs_rules_only.prop('checked', false);
                 svs_filter.val('').trigger('keyup');
+                svs_rules_only.prop('checked', false);
+                $dlg.find('#divRulesOnly').hide();
 
 
                 svs_ugrid.val(this.options.domain);
@@ -806,7 +810,12 @@ $.widget( "heurist.search_faceted_wiz", {
                 this.svs_MultiRtSearch.prop('checked',false).change();
                 
             }
-
+            
+            this._on(svs_rules_only,{change:function(e){
+                $dlg.find('#divRulesOnly').css('display',$(e.target).is(':checked')?'block':'none');    
+            }});
+            svs_rules_only.change();
+            
             this._on($dlg.find('#svs_PrelimFilterToggle'), {change:function( event ){
                 if($(event.target).is(':checked') && svs_filter.val()!=''){
                     $dlg.find('#svs_PrelimFilterToggleSettings').show();
@@ -1746,7 +1755,13 @@ $.widget( "heurist.search_faceted_wiz", {
 
         if(true || !Hul.isempty(svs_rules.val())){
             this.options.params.rules = svs_rules.val();
-            this.options.params.rulesonly = svs_rules_only.is(':checked')?1:0;
+            
+            var rules_only = 0;
+            if(svs_rules_only.is(':checked')){
+                rules_only = $dlg.find('#svs_RulesOnly1').is(':checked')?1:2;
+            }
+            this.options.params.rulesonly = rules_only;
+            
         }else{
             this.options.params.rules = null;
             this.options.params.rulesonly = null;

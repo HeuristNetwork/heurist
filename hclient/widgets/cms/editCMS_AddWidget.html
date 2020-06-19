@@ -244,6 +244,7 @@
         <select name="orientation" class="text ui-widget-content ui-corner-all" title="" style="width:400px">
             <option value="horizontal">horizontal</option>
             <option value="vertical">vertical</option>
+            <option value="treeview">treeview</option>
         </select>
     </div>
     <div class="heurist_Navigation">
@@ -253,6 +254,14 @@
     <div  class="heurist_Navigation">
         <div class="header"><label>If root has the only, item use next level</label></div>
         <input name="use_next_level" type="checkbox"/>
+    </div>
+    <div class="heurist_Navigation">
+        <div class="header"><label>Open:</label></div>
+        <select name="target" class="text ui-widget-content ui-corner-all" title="" style="width:400px">
+            <option value="inline">inline (uses field "Target element")</option>
+            <option value="inline_page_content">inline (into div id="page-content")</option>
+            <option value="popup">in popup</option>
+        </select>
     </div>
     
 </fieldset>    

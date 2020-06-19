@@ -29,7 +29,6 @@ function editCMS( options ){
      RT_CMS_MENU = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'],
      DT_CMS_TOP_MENU = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_TOP_MENU'],
      DT_CMS_MENU  = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_MENU'],
-     DT_CMS_PAGE  = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_PAGE'],
 //     DT_CMS_THEME = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_THEME'],
      DT_NAME       = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'];
      DT_CMS_HEADER = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_HEADER'];
@@ -497,7 +496,6 @@ function editCMS( options ){
                                                         $res['key'] = menuitems[m];
                                                         $res['title'] = resdata.fld(menu_rec, DT_NAME);
                                                         $res['parent_id'] = parent_id; //reference to parent menu(or home)
-                                                        $res['page_id'] = resdata.fld(menu_rec, DT_CMS_PAGE);
                                                         $res['expanded'] = true;
                                                         
                                                         var menuitems2 = resdata.values(menu_rec, DT_CMS_MENU);
@@ -547,7 +545,7 @@ function editCMS( options ){
                             function __defineActionIcons(item){
                                 var item_li = $(item.li), 
                                 menu_id = item.key, 
-                                page_id = item.data.page_id,
+
                                 is_top = (item.data.parent_id==home_page_record_id);
                                 
                                 if($(item).find('.svs-contextmenu3').length==0){
@@ -556,8 +554,7 @@ function editCMS( options ){
 
                                     //add,edit menu,edit page,remove
                                     var actionspan = $('<div class="svs-contextmenu3" style="padding-right: 20px;" data-parentid="'
-                                          +item.data.parent_id+'" data-menuid="'+menu_id+'" data-pageid="'+page_id+'" >'
-                                          //+menu_id
+                                          +item.data.parent_id+'" data-menuid="'+menu_id+'">'
                                         +'<span class="ui-icon ui-icon-plus" title="Add new page/menu item"></span>'
                                         +'<span class="ui-icon ui-icon-pencil" title="Edit menu record"></span>'
                                         //+'<span class="ui-icon ui-icon-document" title="Edit page record"></span>'
@@ -580,7 +577,6 @@ function editCMS( options ){
                                         setTimeout(function(){                         
                                             var ele2 = ele.parents('.svs-contextmenu3');
                                             var menuid = ele2.attr('data-menuid');
-                                            var pageid = ele2.attr('data-pageid');
                                             var parent_id = ele2.attr('data-parentid');
 
                                             if(ele.hasClass('ui-icon-plus')){ //add new menu to 
@@ -607,22 +603,8 @@ function editCMS( options ){
                                                 }});
                                                 
 
-                                            }else if(ele.hasClass('ui-icon-document')){  //edit page record
-                                                 __in_progress();
-                                                //edit page
-                                                window.hWin.HEURIST4.ui.openRecordEdit(pageid, null,
-                                                {selectOnSave:true,
-                                                 onClose: function(){ 
-                                                     parent_span.find('.svs-contextmenu4').hide();
-                                                 },
-                                                 onselect:function(event, data){
-                                                    if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
-                                                        was_something_edited = true;
-                                                       _initWebSiteEditor();
-                                                    }
-                                                }});
-                                                
-                                            }else if(ele.hasClass('ui-icon-trash')){    //remove menu entry
+                                            }else 
+                                            if(ele.hasClass('ui-icon-trash')){    //remove menu entry
 
 
                                                 function __doRemove(){

@@ -237,18 +237,22 @@ $.widget( "heurist.svs_list", {
             that.helper_btm = null;
             that._refresh();
         });
+        $(window.hWin.document).on(window.hWin.HAPI4.Event.ON_CUSTOM_EVENT, function(e, data) {
+            if(data && data.userWorkSetUpdated){
+                that.refreshSubsetSign();
+                that._adjustAccordionTop();
+            }
+        });
         $(this.document).on(window.hWin.HAPI4.Event.ON_REC_SEARCHSTART, function(e, data){
             if(data && !data.increment && !data.reset){
                 that.currentSearch = Hul.cloneJSON(data);
             }
         });
-
-        if(this.btn_search_save){
-            $(this.document).on(window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH, function(e, data){
+        $(this.document).on(window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH, function(e, data){
                 //show if there is resulst
+                that.refreshSubsetSign();
                 that._adjustAccordionTop();
             });
-        }
 
 
         this._refresh();
@@ -504,6 +508,8 @@ $.widget( "heurist.svs_list", {
             return;
         }
 
+        this.refreshSubsetSign();
+        
         //all required scripts and data have been loaded - start update
         var ispublished = (this.options.searchTreeMode>=0);
 
@@ -684,6 +690,32 @@ $.widget( "heurist.svs_list", {
 
     },
 
+    //
+    //
+    //
+    refreshSubsetSign: function(){
+        
+        if(this.div_header){
+
+            var container = this.div_header.find('div.subset-active-div');
+            
+            if(container.length==0){
+                var ele = $('<div>').addClass('subset-active-div').css({'padding':'0 30px 10px 40px'})
+                      .insertBefore($(this.div_header.children()[0]));
+            }
+            container.find('span').remove();
+            //var s = '<span style="position:absolute;right:10px;top:10px;font-size:0.6em;">';    
+         
+            if(window.hWin.HAPI4.sysinfo.db_workset_count>0){
+                
+                $('<span style="padding:.4em 1em 0.3em;background:white;color:red;vertical-align:sub;font-size: 11px;font-weight: bold;"'
+                  +' title="'+window.hWin.HAPI4.sysinfo.db_workset_count+' records"'
+                  +'>SUBSET ACTIVE n='+window.hWin.HAPI4.sysinfo.db_workset_count+'</span>')
+                    .appendTo(container);
+            }
+        }
+    },
+    
 
     //
     //

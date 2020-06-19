@@ -247,8 +247,12 @@ window.hWin.HEURIST4.util = {
                     }
                     //@todo simplify rules array - rempove redundant info
                     query_string = query_string + '&rules=' + 
-                        (encode?encodeURIComponent(rules):rules) + 
-                        ((query_request.rulesonly==1 || query_request.rulesonly==true)?'&rulesonly=1':'');
+                        (encode?encodeURIComponent(rules):rules);
+                        
+                    if(query_request.rulesonly==true) query_request.rulesonly=1;    
+                    if(query_request.rulesonly>0){
+                        query_string = query_string + '&rulesonly=' + query_request.rulesonly;
+                    }
                 }
                 
                         
@@ -300,8 +304,10 @@ window.hWin.HEURIST4.util = {
                     rules = params.rules;
                 }
                 query_to_save.push('rules='+ (encode?encodeURIComponent(rules):rules));
-                if(params.rulesonly==1 || params.rulesonly==true){
-                    query_to_save.push('rulesonly=1');
+                
+                if(params.rulesonly==true) params.rulesonly=1;    
+                if(params.rulesonly>0){
+                    query_to_save.push('&rulesonly=' + params.rulesonly);
                 }
             }
 
@@ -554,6 +560,8 @@ window.hWin.HEURIST4.util = {
         
         if(request.rulesonly==1 || request.rulesonly==true){
                 res['rulesonly'] = 1;
+        }else if(request.rulesonly==2){
+                res['rulesonly'] = 2;
         }
 
         if(request.database){

@@ -61,6 +61,16 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
     header('Location: redirects/resolver.php?db='.@$_REQUEST['db'].'&recID='.$recid.'&fmt='.$format);
     return;
     
+}else 
+if (@$_REQUEST['rty'] || @$_REQUEST['dty'] || @$_REQUEST['trm']){
+    
+    if(@$_REQUEST['rty']) $s = 'rty='.$_REQUEST['rty'];
+    else if(@$_REQUEST['dty']) $s = 'dty='.$_REQUEST['dty'];
+    else if(@$_REQUEST['trm']) $s = 'trm='.$_REQUEST['trm'];
+
+    header('Location: redirects/resolver.php?db='.@$_REQUEST['db'].'&'.$s);
+    return;
+    
 }else if (@$_REQUEST['file'] || @$_REQUEST['thumb'] || @$_REQUEST['rurl']){
     header( 'Location: hsapi/controller/file_download.php?'.$_SERVER['QUERY_STRING'] );
     return;

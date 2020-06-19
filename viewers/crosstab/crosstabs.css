@@ -33,7 +33,7 @@ fieldset > div > .fldheader{
 fieldset > div > .input-cell{
     display:table-cell;
     min-width:120px;
-    width:380px;
+    Xwidth:380px;
     padding-bottom:2px;
     vertical-align: bottom;
 }

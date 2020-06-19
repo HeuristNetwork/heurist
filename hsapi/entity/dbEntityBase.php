@@ -143,22 +143,22 @@ class DbEntityBase
         
         $res = false;
         
-        $ext = $action['ext'];
+        $folder = $action['folder']; //folder
         $operation = $action['operation'];
         $content = @$action['content'];
         $filename = @$action['file'];
         $entity_name = $this->config['entityName'];
         $rec_ID = @$action['rec_ID'];
         
-        $path = HEURIST_FILESTORE_DIR.'entity/'.$entity_name.'/'.$ext.'/'.($rec_ID>0?$rec_ID.'/':''); 
+        $path = HEURIST_FILESTORE_DIR.'entity/'.$entity_name.'/'.$folder.'/'.($rec_ID>0?$rec_ID.'/':''); 
         
         if($operation=='list'){
             
-            if($ext==null){
-                $system->addError(HEURIST_INVALID_REQUEST, 'Can not get list of setting files. Extension parameter is not defined');
+            if($folder==null){
+                $this->system->addError(HEURIST_INVALID_REQUEST, 'Can not get list of setting files. Folder parameter is not defined');
                 $res = false;
             }else{
-                $res = folderContent($path, $ext);    
+                $res = folderContent($path, 'cfg');    
             }
             
         }else if($operation=='get'){
@@ -166,10 +166,10 @@ class DbEntityBase
             $sMsg = 'Can not get content of setting file. ';
             
             if($filename==null){
-                $system->addError(HEURIST_INVALID_REQUEST, $sMsg.'Filename parameter is not defined');
+                $this->system->addError(HEURIST_INVALID_REQUEST, $sMsg.'Filename parameter is not defined');
                 $res = false;
             }else if (!file_exists($path.$filename)){
-                $system->addError(HEURIST_ERROR, $sMsg.'File does not exist');
+                $this->system->addError(HEURIST_ERROR, $sMsg.'File does not exist');
                 $res = false;
             }else{
                 $res = file_get_contents($path.$filename);    
@@ -182,15 +182,15 @@ class DbEntityBase
             $sMsg = 'Can not save content of setting file. ';
             
             if($filename==null){
-                $system->addError(HEURIST_INVALID_REQUEST, $sMsg.'Filename parameter is not defined');
+                $this->system->addError(HEURIST_INVALID_REQUEST, $sMsg.'Filename parameter is not defined');
                 $res = false;
             }else if ($content==null){
-                $system->addError(HEURIST_INVALID_REQUEST, $sMsg.'Content parameter is not defined');
+                $this->system->addError(HEURIST_INVALID_REQUEST, $sMsg.'Content parameter is not defined');
                 $res = false;
             }else{
                 $swarn = folderCreate2($path, '', false);
                 if($swarn!=''){
-                    $system->addError(HEURIST_ERROR, $sMsg.$swarn);
+                    $this->system->addError(HEURIST_ERROR, $sMsg.$swarn);
                     $res = false;
                 }else{
                     $res = file_put_contents($path.$filename, $content);    
@@ -245,7 +245,7 @@ class DbEntityBase
                 //batch action. see details of operaion for method of particular class
                 $res = $this->batch_action();
             }else {
-                $system->addError(HEURIST_INVALID_REQUEST, "Type of request not defined or not allowed");
+                $this->system->addError(HEURIST_INVALID_REQUEST, "Type of request not defined or not allowed");
             }
         }
         
