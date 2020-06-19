@@ -247,7 +247,7 @@ $.widget( "heurist.navigation", {
             }
             window.hWin.HEURIST4.msg.showMsgDlg('Some menu items are recurred.<p>'
             +(s.join('<br>'))
-            +'</p>Ask webstite author to fix this issue');
+            +'</p>Ask website author to fix this issue');
         }
         
         //
