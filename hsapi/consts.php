@@ -365,7 +365,6 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     
     'DT_CMS_TOP_MENU' => array(99, 742),  
     'DT_CMS_MENU' => array(99, 761),  
-    'DT_CMS_PAGE' => array(99, 945),
     'DT_CMS_KEYWORDS' => array(99, 948),
     'DT_CMS_TARGET' => array(99, 949),
     'DT_CMS_HEADER' => array(2, 929),
@@ -374,7 +373,8 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_CMS_PAGETITLE' => array(99, 952),   //show page title above content
     'DT_CMS_ALTLOGO' => array(2, 926),  
     'DT_CMS_SCRIPT' => array(2, 927),
-    'DT_CMS_PAGETYPE' => array(2, 928) //menu (2-6253) or standalone (2-6254)
+    'DT_CMS_PAGETYPE' => array(2, 928), //menu (2-6253) or standalone (2-6254)
+    'DT_CMS_EXTFILES' => array(2, 939)
 
 ); //TODO: add email magic numbers
 
