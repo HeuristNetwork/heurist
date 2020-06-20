@@ -263,8 +263,12 @@
                 
                 $res = user_WorkSet($system, $_REQUEST);
 
-            } else if ($action=="svs_save"){
+            } else if ($action=="svs_copy"){
+                
+                $res = svsCopy($system, $_REQUEST);
 
+            } else if ($action=="svs_save"){
+                
                 stripScriptTagInRequest($_REQUEST);
                 $res = svsSave($system, $_REQUEST);
 
