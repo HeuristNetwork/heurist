@@ -1954,9 +1954,11 @@ $.widget( "heurist.svs_list", {
                         this.currentSearch.rules = Hul.cloneJSON(request.rules);
                     }
                     
+                    if(request.rulesonly===true) request.rulesonly = 1;
+                    
                     //target is required
                     if(! window.hWin.HAPI4.SearchMgr.doApplyRules( this, request.rules, 
-                                        (request.rulesonly==1 || request.rulesonly)?1:0, this.options.search_realm ) ){
+                                        (request.rulesonly>0)?request.rulesonly:0, this.options.search_realm ) ){
                         window.hWin.HEURIST4.msg.showMsgFlash(window.hWin.HR('RuleSets require an initial search result as a starting point.'),
                             3000, window.hWin.HR('Warning'), ele);
                     }else{
