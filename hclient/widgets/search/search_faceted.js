@@ -168,6 +168,8 @@ $.widget( "heurist.search_faceted", {
     _use_multifield: false, //HIE - search for several fields per facet
     
     ui_spatial_filter_image:null,
+    
+    _terminateFacetCalculation: false, //stop flag
 
     // the widget's constructor
     _create: function() {
@@ -229,11 +231,15 @@ $.widget( "heurist.search_faceted", {
         
         if(this.options.params.ui_exit_button===false) this.options.showclosebutton = false;
         
+        this.btn_terminate = $( "<button>").appendTo( this.div_toolbar )
+        .button({icon: "ui-icon-cancel", iconPosition:'end', label:'Terminate'}).hide();
+        
         
         this._on( this.btn_submit, { click: "doSearch" });
         this._on( this.btn_reset, { click: "doResetAll" });
         this._on( this.btn_save, { click: "doSaveSearch" });
         this._on( this.btn_close, { click: "doClose" });
+        this._on( this.btn_terminate, { click: function(){ this._terminateFacetCalculation = true; }});
 
         
         this.facets_list_container = $( "<div>" )
@@ -388,21 +394,31 @@ $.widget( "heurist.search_faceted", {
     */
     _refresh: function(){
         
-         var facets = this.options.params.facets;
-         var hasHistory = false, facet_index, len = facets?facets.length:0;
-         for (facet_index=0;facet_index<len;facet_index++){
-              if( !window.hWin.HEURIST4.util.isempty(facets[facet_index].history) ){
-                  hasHistory = true;
-                  break;
-              }
-         }
-        
         this._refreshTitle();
+        this._refreshButtons();
                             
+        
+        this.doRender();
+        //ART2907 this.doSearch();
+    },
+    
+    _refreshButtons: function(){
+        
         if(this.options.ispreview){
             this.btn_save.hide(); 
             this.btn_close.hide(); 
         }else{
+            
+             var facets = this.options.params.facets;
+             var hasHistory = false, facet_index, len = facets?facets.length:0;
+             for (facet_index=0;facet_index<len;facet_index++){
+                  if( !window.hWin.HEURIST4.util.isempty(facets[facet_index].history) ){
+                      hasHistory = true;
+                      break;
+                  }
+             }
+            
+            
             if(hasHistory && !this.options.params.ui_spatial_filter) {
                 //if(this.div_title) this.div_title.css('width','45%');
                 if(this.options.showresetbutton && this.btn_reset){
@@ -422,10 +438,9 @@ $.widget( "heurist.search_faceted", {
                 this.btn_close.hide(); 
             }
         }
-
-        this.doRender();
-        //ART2907 this.doSearch();
+        
     },
+    
     // 
     // custom, widget-specific, cleanup.
     _destroy: function() {
@@ -1305,10 +1320,18 @@ $.widget( "heurist.search_faceted", {
                 
                 this._request_id =  Math.round(new Date().getTime() + (Math.random() * 100));
             
+                this._terminateFacetCalculation = false;
+                this.btn_terminate.show();
+                if(this.btn_reset) this.btn_reset.hide()    
+                this.btn_close.hide();
+
                 var div_facets = this.facets_list.find(".facets");
                 if(div_facets.length>0)
                     div_facets.empty()
                     .css('background','url('+window.hWin.HAPI4.baseURL+'hclient/assets/loading-animation-white20.gif) no-repeat center center');
+        }
+        if(this._terminateFacetCalculation){
+            field_index  = this.options.params.facets.length;
         }
         
         var that = this;
@@ -1323,7 +1346,7 @@ $.widget( "heurist.search_faceted", {
                 if(field['type']=='enum' && field['groupby']=='firstlevel' && 
                                 !window.hWin.HEURIST4.util.isnull(field['selectedvalue'])){
                         this._redrawFacets({status:window.hWin.ResponseStatus.OK,  facet_index:i}, false );
-                        return;
+                        break;
                 }
                 
                 var subs_value = null;
@@ -1507,7 +1530,7 @@ $.widget( "heurist.search_faceted", {
                         this.cached_counts[k].count_query == hashQuery) // && this.cached_counts[k].dt == request.dt)
                     {
                         that._redrawFacets(this.cached_counts[k], false);
-                        return;
+                        break; //return;
                     }
                 }
                 
@@ -1527,8 +1550,14 @@ $.widget( "heurist.search_faceted", {
                                 
                 break;
             }
+
         }
         
+        
+        if(i  >= this.options.params.facets.length){
+            this.btn_terminate.hide();
+            this._refreshButtons();
+        }
     }
     
  
