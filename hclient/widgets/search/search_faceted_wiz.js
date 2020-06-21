@@ -249,12 +249,14 @@ $.widget( "heurist.search_faceted_wiz", {
 
         this._on($(this.step3).find('#selViewportLimit'),{change:this._refresh_FacetsPreview});
         
-        if(window.hWin.HAPI4.sysinfo['db_total_records']>10000){
+        if(window.hWin.HAPI4.sysinfo['db_workset_count']<10000 || window.hWin.HAPI4.sysinfo['db_total_records']<10000)
+        {
+            $(this.step3).find('#btnUpdatePreview').hide();
+        }else{
+        
             this._on($(this.step3).find('#btnUpdatePreview').button({icon:'ui-icon-carat-2-e', iconPosition:'end'})
                     .css({'opacity':0.5, background:'#f38989'}).show()
                 , {click:this._refresh_FacetsPreviewReal});
-        }else{
-            $(this.step3).find('#btnUpdatePreview').hide();
         }
         
         //preview
@@ -1701,10 +1703,11 @@ $.widget( "heurist.search_faceted_wiz", {
         this._assignFacetParams();
         this._defineDomain();
         
-        if(window.hWin.HAPI4.sysinfo['db_total_records']>10000){
-            $(this.step3).find('#btnUpdatePreview').css('opacity',1);
-        }else{
+        if(window.hWin.HAPI4.sysinfo['db_workset_count']<10000 || window.hWin.HAPI4.sysinfo['db_total_records']<10000)
+        {
             this._refresh_FacetsPreviewReal();
+        }else{
+            $(this.step3).find('#btnUpdatePreview').css('opacity',1);
         }
     }
     
