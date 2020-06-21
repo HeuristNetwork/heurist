@@ -452,6 +452,12 @@ window.hWin.HEURIST4.dbs = {
                         }
                     }//for details
                     
+                    //sort bt rst_DisplayOrder
+                    $children.sort(function(a,b){
+                        return (a['display_order']<b['display_order'])?-1:1;
+                    });
+                    
+                    
                     //add resource and relation at the end of result array
                     $children = $children.concat($children_links);
                     
@@ -556,6 +562,11 @@ window.hWin.HEURIST4.dbs = {
                         }
                     }//for details
                     
+                    //sort bt rst_DisplayOrder
+                    $children.sort(function(a,b){
+                        return (a['display_order']<b['display_order'])?-1:1;
+                    });
+                    
                     //add resource and relation at the end of result array
                     $children = $children.concat($children_links);                    
                     
@@ -643,7 +654,8 @@ window.hWin.HEURIST4.dbs = {
         var $dt_label   = $dtValue[$rst_fi['rst_DisplayName']];
         var $dt_title   = $dtValue[$rst_fi['rst_DisplayName']];
         var $dt_tooltip = $dtValue[$rst_fi['rst_DisplayHelpText']]; //help text
-        var $dt_conceptcode = $dtValue[$rst_fi['dty_ConceptID']];
+        var $dt_conceptcode   = $dtValue[$rst_fi['dty_ConceptID']];
+        var $dt_display_order = $dtValue[$rst_fi['rst_DisplayOrder']];
 
         var $pref = "";
         //$dt_maxvalues = $dtValue[$rst_fi['rst_MaxValues']]; //repeatable
@@ -784,6 +796,8 @@ window.hWin.HEURIST4.dbs = {
             }
             $res['type'] = $detailType;
             $res['name'] = $dt_label;
+            
+            $res['display_order'] = $dt_display_order;
             
             
             var idx_ccode = window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex.dty_ConceptID;
