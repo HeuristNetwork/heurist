@@ -1312,7 +1312,6 @@ $.widget( "heurist.search_faceted", {
 //@todo need to check that the sequence is not called more than once - otherwise we get multiple controls on facets
         
         //return;
-        
         // this._currentquery
         // this._resultset
         if(isNaN(field_index) || field_index<0){
@@ -1530,7 +1529,7 @@ $.widget( "heurist.search_faceted", {
                         this.cached_counts[k].count_query == hashQuery) // && this.cached_counts[k].dt == request.dt)
                     {
                         that._redrawFacets(this.cached_counts[k], false);
-                        break; //return;
+                        return;
                     }
                 }
                 
@@ -1582,7 +1581,7 @@ $.widget( "heurist.search_faceted", {
                     var detailtypes = window.hWin.HEURIST4.detailtypes.typedefs;
                     
                     var facet_index = parseInt(response.facet_index); 
-                    
+
                     var field = this.options.params.facets[facet_index];
                     
                     var j,i;
