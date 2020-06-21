@@ -22,7 +22,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
     // default options
     options: {
     
-        height: 580,
+        height: 780,
         width:  800,
         modal:  true,
         title:  'Export records to comma or tab separated text files',
