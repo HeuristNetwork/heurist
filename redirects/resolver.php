@@ -72,7 +72,7 @@ if(@$_REQUEST['recID']){
 }
 
 //form accepting recID=123-3456 which redirects to record 3456 on database 123
-if(!entity && strpos($recid, '-')>0){
+if(!$entity && strpos($recid, '-')>0){
     list($database_id, $recid) = explode('-', $recid, 2);
 }else if (is_int(@$_REQUEST['db'])){
     $database_id = $_REQUEST['db'];
