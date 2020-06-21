@@ -242,6 +242,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
     *   mygroups     - description of current user Workgroups
     *   ssearch_get  - get saved searches for current user and all usergroups where user is memeber, or by list of ids
     *   ssearch_save - save saved search in database
+    *   ssearch_copy - duplicate
     *   ssearch_delete - delete saved searches by IDs
     *   ssearch_savetree - save saved search treeview data
     *   ssearch_gettree - get saved search treeview data
@@ -664,6 +665,15 @@ prof =Profile
                 if(request) request.a = 'svs_save';
                 _callserver('usr_info', request, callback);
             }
+            
+            /**
+            * Duplicte saved search
+            */
+            ,ssearch_copy: function(request, callback){
+                if(request) request.a = 'svs_copy';
+                _callserver('usr_info', request, callback);
+            }
+            
 
             /**
             * Delete saved searches by IDs

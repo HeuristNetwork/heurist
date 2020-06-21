@@ -291,16 +291,6 @@ function editCMS( options ){
                     request['ids'] = 0; //find first home record
                 }
                 
-                /*
-                request = {q:(home_page_record_id>0 ?{"ids":home_page_record_id}:{'t:':RT_CMS_HOME}),
-                    limit: 1,
-                    rules: [{"query":'t:'+RT_CMS_MENU+' linkedfrom:'+RT_CMS_HOME+'-'+DT_CMS_TOP_MENU, //top menu
-                        "levels":[{"query":'t:'+RT_CMS_MENU+' linkedfrom:'+RT_CMS_MENU+'-'+DT_CMS_MENU,  //other menu
-                            "levels":[{"query":'t:'+RT_CMS_MENU+' linkedfrom:'+RT_CMS_MENU+'-'+DT_CMS_MENU, 
-                                "levels":[{"query":'t:'+RT_CMS_MENU+' linkedfrom:'+RT_CMS_MENU+'-'+DT_CMS_MENU}]  }]}]}]};  
-                            
-                            //{"query":'t:'+RT_CMS_PAGE+' linkedfrom:'+RT_CMS_MENU+'-'+DT_CMS_PAGE} pages no need
-                */
             }else{
                 request['detail'] = 'detail';    
             }

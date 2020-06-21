@@ -407,6 +407,9 @@
                         $third_element = $row[0].'%';      // first character
                     }else if($step_level>0 || $dt_type!='freetext'){
                         $third_element = $row[0];
+                        if($dt_type=='freetext'){
+                            $third_element = ('='.$third_element);   
+                        }
                     }
                     
                     //value, count, second value(max for range) or search value for firstchar

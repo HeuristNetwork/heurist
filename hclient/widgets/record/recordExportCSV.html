@@ -1,31 +1,25 @@
-<fieldset>
-
+<fieldset class="ent_header" style="height:5em">
 <div style="padding: 0.2em; width: 100%;" class="input">
     <div class="header" style="padding: 0 16px 0 16px;">
         <label for="sel_record_scope">Records scope:</label>
     </div>
     <select id="sel_record_scope" class="text ui-widget-content ui-corner-all" style="max-width:30em"></select>
 </div>
-<div style="padding: 0.2em; width: 100%; display:none;" class="input" id="divLoadSettings">
-    <div class="header" style="padding: 0 16px 0 16px;">
-        <label for="sel_saved_settings">Saved settings:</label>
-    </div>
-    <select id="sel_saved_settings" class="text ui-widget-content ui-corner-all" style="max-width:30em"></select>
-</div>
+<div style="padding: 0.2em; width: 100%; display:none;" class="input" id="divLoadSettings"></div>
 <hr style="margin:5px"/>
 </fieldset>
 
 
-<div style="padding: 0.2em; min-width: 600px;max-height:250px;overflow:hidden" class="input">
+<div style="top:5.2em; bottom:11em; padding: 1.2em; min-width: 600px;overflow:hidden" class="input ent_content">
     <div class="header" style="padding: 0 16px 0 16px;display: inline-block;vertical-align:top"><label>Select fields to export:</label></div>
     
-    <div class="detailRow rtt-tree" style="display: inline-block;overflow-y:auto;padding-bottom:1em;height:200px;outline: none;" 
+    <div class="detailRow rtt-tree" style="display: inline-block;overflow-y:auto;outline: none;position: absolute;bottom: 0px;top: 8px;" 
                 id="rectype_tree">
     </div>
 </div>
 
-
-<div style="padding:10px 0.2em 0 0.2em; min-width: 640px;" class="input">
+<div class="ent_footer" style="height:10.6em">
+<div style="padding:0px 0.2em; min-width: 640px;" class="input">
     <hr style="margin:5px"/>
     
     <div class="header" style="padding: 0 16px 0 16px;display: inline-block;"><label>Field delimeter:</label></div>
@@ -66,17 +60,13 @@
     </div>
 </div>
 
-<fieldset style="padding: 15px 5px;display:none;" id="divSaveSettings">
+<fieldset style="padding: 15px 5px;">
 
-<div style="width: 100%;" class="input">
-    <div class="header" style="padding: 0 16px 0 16px;">
-        <label>Save settings for future use</label>
-    </div>
-    &nbsp;&nbsp;<b>Name</b>&nbsp;<input id="inpt_save_setting_name" class="text ui-widget-content ui-corner-all" style="max-width:30em"/>
-    &nbsp;&nbsp;<button id="btnSaveSettings">Save</button>
-</div>
+<div style="width: 100%;display:none;" class="input" id="divSaveSettings"></div>
 
 </fieldset>
+
+</div>
 <!-- hidden form -->
 <form method="post" target="_blank" id="postform">
 <input type="hidden" id="postdata" name="postdata"/>

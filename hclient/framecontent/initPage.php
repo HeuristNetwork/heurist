@@ -202,7 +202,7 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
     }
     
     //
-    // overwrite datepciker method
+    // overwrite datepicker method
     //
     
     $.datepicker._gotoToday = function(event){

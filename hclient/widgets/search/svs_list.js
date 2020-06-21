@@ -804,7 +804,7 @@ $.widget( "heurist.svs_list", {
                 if(params.type==3){
                     iconBtn = 'ui-icon-box';
                 }else {
-                    if(params.type==1){ //withrules
+                    if(params.type==1){ //with rules
                         iconBtn = 'ui-icon-plus ui-icon-shuffle';
                     }else if(params.type==2){ //rules only
                         iconBtn = 'ui-icon-shuffle';
@@ -1314,6 +1314,13 @@ $.widget( "heurist.svs_list", {
                                  */   
                             }
                             break;
+                        case "copy":   //duplicate saved search
+                        
+                            if(!node.folder && node.key>0){
+                                that.duplicateSavedSearch(groupID, node.key, node);
+                            }
+                            break;
+                            
                         case "rename":   //EDIT
 
                             if(!node.folder && node.key>0){
@@ -1477,6 +1484,7 @@ $.widget( "heurist.svs_list", {
                     {title: "New", cmd: "addSearch", uiIcon: "ui-icon-plus" }, //<kbd>[Ctrl+N]</kbd>
                     {title: "New Faceted", cmd: "addSearch2", uiIcon: "ui-icon-box" },
                     {title: "New RuleSet", cmd: "addSearch3", uiIcon: "ui-icon-shuffle" },
+                    {title: "Duplicate", cmd: "copy", uiIcon: "ui-icon-copy" }, 
                     {title: "Edit", cmd: "rename", uiIcon: "ui-icon-pencil" }, // <kbd>[F2]</kbd>
                     {title: "----"},
                     //{title: "Copy to clipboard", cmd: "copycb", uiIcon: "ui-icon-copy" }, 
@@ -1645,7 +1653,7 @@ $.widget( "heurist.svs_list", {
                     node.addNode( { title:request.svs_Name, key: request.new_svs_ID }
                         , node.folder?"child":"after" );
 
-                    that._saveTreeData( request.svs_UGrpID );
+                        that._saveTreeData( request.svs_UGrpID );
                     $("#addlink"+request.svs_UGrpID).css('display', 'none');
 
                     //callback_method.call(that, null, request);
@@ -1946,9 +1954,11 @@ $.widget( "heurist.svs_list", {
                         this.currentSearch.rules = Hul.cloneJSON(request.rules);
                     }
                     
+                    if(request.rulesonly===true) request.rulesonly = 1;
+                    
                     //target is required
                     if(! window.hWin.HAPI4.SearchMgr.doApplyRules( this, request.rules, 
-                                        (request.rulesonly==1 || request.rulesonly)?1:0, this.options.search_realm ) ){
+                                        (request.rulesonly>0)?request.rulesonly:0, this.options.search_realm ) ){
                         window.hWin.HEURIST4.msg.showMsgFlash(window.hWin.HR('RuleSets require an initial search result as a starting point.'),
                             3000, window.hWin.HR('Warning'), ele);
                     }else{
@@ -2006,6 +2016,37 @@ $.widget( "heurist.svs_list", {
 
     }
 
+    //
+    //
+    //
+    , duplicateSavedSearch: function(groupID, svsID, node){
+        
+        var svs = window.hWin.HAPI4.currentUser.usr_SavedSearch[svsID];
+        if(!svs) return;
+        var that = this;
+
+        window.hWin.HAPI4.SystemMgr.ssearch_copy({svs_ID:svsID},
+            function(response){
+                if(response.status == window.hWin.ResponseStatus.OK){
+                    
+                    response = response.data;
+
+                    window.hWin.HAPI4.currentUser.usr_SavedSearch[response.svs_ID] = 
+                        [response.svs_Name, response.svs_Query, response.svs_UGrpID];
+
+                    node.addNode( { title:response.svs_Name, key: response.svs_ID}
+                        , 'after' );
+                        
+                    that._saveTreeData( groupID );
+
+                }else{
+                    window.hWin.HEURIST4.msg.showMsgErr(response, true);
+                }
+            }
+
+        );
+        
+    }
     
     // open edit dialog
     // mode: saved, rules, faceted

@@ -307,7 +307,7 @@ window.hWin.HEURIST4.util = {
                 
                 if(params.rulesonly==true) params.rulesonly=1;    
                 if(params.rulesonly>0){
-                    query_to_save.push('&rulesonly=' + params.rulesonly);
+                    query_to_save.push('rulesonly=' + params.rulesonly);
                 }
             }
 

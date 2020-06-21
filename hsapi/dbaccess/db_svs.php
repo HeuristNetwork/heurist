@@ -161,6 +161,56 @@
             }
         }
     }
+    
+    /**
+    * Duplicate given saved search
+    * 
+    * @param mixed $system
+    * @param mixed $record
+    */
+    function svsCopy($system, $record){
+        
+        if (!(@$record['svs_ID']>0)){
+            $system->addError(HEURIST_INVALID_REQUEST, 'ID for saved search to be duplicated is not defined'); //for new 
+        }else{
+            
+            //refresh groups
+            $system->get_user_group_ids(null, true);
+            $mysqli = $system->get_mysqli();
+            
+            $row = mysql__select_row_assoc($mysqli, 
+                    'select svs_UGrpID, svs_Name, svs_Query FROM usrSavedSearches WHERE svs_ID='.$record['svs_ID']);
+                
+            if (!$row) { 
+                $system->addError(HEURIST_NOT_FOUND, 
+                    'Cannot duplicate filter criteria. Original filter not found');
+            }else if (!$system->is_member($row['svs_UGrpID'])) { //was has_access
+                $system->addError(HEURIST_REQUEST_DENIED, 
+                    'Cannot duplicate filter criteria. Current user must be member for group');
+            }else{
+                    //get new name
+                    $new_name = $row['svs_Name'].' (copy)';
+            
+                    $query = 'INSERT INTO `usrSavedSearches` '
+                    .'(`svs_Name`,`svs_Added`,`svs_Modified`,`svs_Query`,`svs_UGrpID`,`svs_ExclusiveXSL`)'
+                    .' SELECT "'.$new_name.'",`svs_Added`,`svs_Modified`,`svs_Query`,`svs_UGrpID`,`svs_ExclusiveXSL` '
+                    .' FROM usrSavedSearches WHERE svs_ID = '.$record['svs_ID'];                    
+
+                    $res = $mysqli->query($query);
+                    
+                    if(!$res){
+                        $system->addError(HEURIST_DB_ERROR, 'Cannot copy saved filter #'
+                             .$record['svs_ID'].' in database', $mysqli->error);
+                    }else{
+                        return array('svs_ID'=>$mysqli->insert_id,
+                            'svs_Name'=>$new_name,'svs_Query'=>$row['svs_Query'],'svs_UGrpID'=>$row['svs_UGrpID']);
+                    }
+            }
+            
+        }
+        return false;
+        
+    }
 
     /**
     * Insert/update saved search
@@ -175,7 +225,7 @@
         }else if(!(@$record['svs_ID']>0) && !@$record['svs_Query']){
             $system->addError(HEURIST_INVALID_REQUEST, "Query not defined"); //for new 
         }else{
-
+            
             //refresh groups
             $system->get_user_group_ids(null, true);
             

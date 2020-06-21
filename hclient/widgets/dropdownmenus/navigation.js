@@ -103,7 +103,6 @@ $.widget( "heurist.navigation", {
         /*var request = { q: 'ids:'+ids,
             detail: //'detail'
                [window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'], 
-                window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_PAGE'], 
                 window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_MENU'], 
                 window.hWin.HAPI4.sysinfo['dbconst']['DT_SHORT_SUMMARY'],
                 window.hWin.HAPI4.sysinfo['dbconst']['DT_TARGET_ELEMENT']],

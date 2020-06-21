@@ -22,7 +22,6 @@ define('LOGIN_REQUIRED',1);
 */
 require_once(dirname(__FILE__)."/initPage.php");
 ?>
-
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/framecontent/exportMenu.js"></script>
 
 <script type="text/javascript">

@@ -27,6 +27,7 @@
 define('PDIR','../../');  //need for proper path to js and css    
 require_once(dirname(__FILE__).'/../../hclient/framecontent/initPage.php');
 ?>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/configEntity.js"></script>
 <script type="text/javascript">
 
     var mapping, menu_datasets, btn_datasets;
@@ -59,11 +60,13 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPage.php');
                         </div>
                     </div>
                     <div style="padding: 0.2em; width: 100%; display:none;" class="input" id="divLoadSettings">
+<!--                    
                         <div class="header" style="padding: 0 16px 0 16px;">
                             <label for="sel_saved_settings">Saved settings:</label>
                         </div>
                         <select id="sel_saved_settings" class="text ui-widget-content ui-corner-all" style="max-width:30em"></select>
                     </div>
+-->                    
                 </fieldset>
 
                 <div style="height:2em">&nbsp;</div>
@@ -137,13 +140,15 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPage.php');
                         </div>
                     </div>
                     
-                    <div style="width: 100%;" class="input" id="divSaveSettings">
+                    <div style="width: 100%;display:none;" class="input" id="divSaveSettings">
+<!--                    
                         <div class="header" style="padding: 0 16px 0 16px;">
                             <label>Save settings for future use</label>
                         </div>
                         &nbsp;&nbsp;<b>Name</b>&nbsp;
                         <input id="inpt_save_setting_name" class="text ui-widget-content ui-corner-all" style="max-width:30em"/>
                         &nbsp;&nbsp;<button id="btnSaveSettings">Save</button>
+-->                        
                     </div>
 
                 </fieldset>

@@ -234,6 +234,7 @@ $.widget( "heurist.search_faceted_wiz", {
             +'&nbsp;<select id="selViewportLimit"><option value=0>All</option><option value=5>5</option><option value=10>10</option>'
             +'<option value=20>20</option><option value=50>50</option></select>'
             
+            +'<span style="float:right; margin-left:10px;" id="btnUpdatePreview">Update Preview</span>'
             +'<div style="float:right"><label><input type="checkbox" id="cbShowAdvanced" style="vertical-align: middle;">'
             +window.hWin.HR("Show advanced ")+'</label></div>'
             );
@@ -246,6 +247,17 @@ $.widget( "heurist.search_faceted_wiz", {
         .appendTo(this.step3);
         this.step_panels.push(this.step3);
 
+        this._on($(this.step3).find('#selViewportLimit'),{change:this._refresh_FacetsPreview});
+        
+        if(window.hWin.HAPI4.sysinfo['db_workset_count']<10000 || window.hWin.HAPI4.sysinfo['db_total_records']<10000)
+        {
+            $(this.step3).find('#btnUpdatePreview').hide();
+        }else{
+        
+            this._on($(this.step3).find('#btnUpdatePreview').button({icon:'ui-icon-carat-2-e', iconPosition:'end'})
+                    .css({'opacity':0.5, background:'#f38989'}).show()
+                , {click:this._refresh_FacetsPreviewReal});
+        }
         
         //preview
         this.step4 = $("<div>")
@@ -573,15 +585,17 @@ $.widget( "heurist.search_faceted_wiz", {
         if(this.step>=0) this.step_panels[this.step].css({'display':'none'});
         this.step_panels[newstep].css({'display':'block','overflow':'hidden'});
 
+        /*
+        preview is combined with step3 from now
         if(this.step==3 && newstep==4){ //preview
             this._assignFacetParams();
             this._initStep4_FacetsPreview();
             $("#btnNext").button('option', 'label', window.hWin.HR('Save'));
         }
+        */
         if(this.step==2 && newstep==3){
-            this._assignFacetParams();
             this._refresh_FacetsPreview();
-            //$("#btnNext").button('option', 'label', window.hWin.HR('Save'));
+            this._refresh_FacetsPreviewReal();
             $("#btnNext").button({icon:'ui-icon-check', label:window.hWin.HR('Save')});
         }
 
@@ -1681,10 +1695,27 @@ $.widget( "heurist.search_faceted_wiz", {
         return null;
     }
     
+    //
+    // old version it updates parms only (from UI to options.params)
+    //
     ,_refresh_FacetsPreview: function(){
         
         this._assignFacetParams();
         this._defineDomain();
+        
+        if(window.hWin.HAPI4.sysinfo['db_workset_count']<10000 || window.hWin.HAPI4.sysinfo['db_total_records']<10000)
+        {
+            this._refresh_FacetsPreviewReal();
+        }else{
+            $(this.step3).find('#btnUpdatePreview').css('opacity',1);
+        }
+    }
+    
+    //
+    // update preview
+    //
+    ,_refresh_FacetsPreviewReal: function(){
+
         var listdiv = $(this.step3).find("#facets_preview2");
 
         var noptions= { query_name:"test", params: JSON.parse(JSON.stringify(this.options.params)), ispreview: true}
@@ -1694,6 +1725,7 @@ $.widget( "heurist.search_faceted_wiz", {
         }else{
             listdiv.search_faceted('option', noptions ); //assign new parameters
         }
+        $(this.step3).find('#btnUpdatePreview').css('opacity',0.5);
     }
 
     //4. show facet search preview
