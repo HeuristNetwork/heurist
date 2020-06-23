@@ -25,7 +25,7 @@ $.widget( "heurist.navigation", {
        orientation: 'horizontal', //vertical or treeview
        target: 'inline', // or popup 
        use_next_level: false,  //if top level consists of the single entry use next level of menues
-       onmenuselect: null,
+       onmenuselect: null,   //for cms edit mode it performs special behavior
        aftermenuselect: null,
        toplevel_css:null  //css for top level items
     },
@@ -133,6 +133,7 @@ $.widget( "heurist.navigation", {
         var RT_CMS_MENU = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'],
             DT_NAME = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'],
             DT_SHORT_SUMMARY = window.hWin.HAPI4.sysinfo['dbconst']['DT_SHORT_SUMMARY'],
+            DT_EXTENDED_DESCRIPTION = window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION'],
             DT_CMS_TOP_MENU = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_TOP_MENU'],
             DT_CMS_MENU = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_MENU'],
             DT_CMS_CSS = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_CSS'],
@@ -166,6 +167,7 @@ $.widget( "heurist.navigation", {
                     var pageTarget = resdata.fld(record, DT_CMS_TARGET);
                     var pageStyle = resdata.fld(record, DT_CMS_CSS);
                     var showTitle = (resdata.fld(record, DT_CMS_PAGETITLE)=='5949');
+                    var hasContent = !window.hWin.HEURIST4.util.isempty(resdata.fld(record, DT_EXTENDED_DESCRIPTION))
 
                     if(pageStyle){
                         that.pageStyles[page_id] = window.hWin.HEURIST4.util.cssToJson(pageStyle);    
@@ -188,10 +190,12 @@ $.widget( "heurist.navigation", {
 
                     }else{
                     
-                        res = res + '<li><a href="#" style="padding:2px 1em" data-pageid="'
-                                        + page_id + '"'
+                        res = res + '<li><a href="#" style="padding:2px 1em;'
+                                        +(hasContent?'':'cursor:default;')
+                                        +'" data-pageid="'+ page_id + '"'
                                         + (pageTarget?' data-target="' + pageTarget +'"':'')
                                         + (showTitle?' data-showtitle="1"':'')
+                                        + (hasContent?' data-hascontent="1"':'')
                                         + ' title="'+window.hWin.HEURIST4.util.htmlEscape(menuTitle)+'">'
                                         +window.hWin.HEURIST4.util.htmlEscape(menuName)+'</a>';
                     }
@@ -332,15 +336,19 @@ $.widget( "heurist.navigation", {
         var data = {
             page_id: $(event.target).attr('data-pageid'), 
             page_target: $(event.target).attr('data-target'),
-            page_showtitle: ($(event.target).attr('data-showtitle')==1)
+            page_showtitle: ($(event.target).attr('data-showtitle')==1),
+            hasContent: ($(event.target).attr('data-hascontent')==1)
         };
 
         //hide submenu
         $(event.target).parents('.ui-menu[data-level!=0]').hide();
         /*var mele = $(event.target).parents('.ui-menu[data-level!=0]');
         if(mele.attr('data-level')!=0) mele.hide();*/
-
-        if(data.page_id>0){
+        
+        if(!data.hasContent && !$.isFunction(this.options.onmenuselect)){
+            //no action if content is not defined
+            
+        }else if(data.page_id>0){
 
             //highlight top most menu
             var ele = $(event.target).parents('.ui-menu-item');
@@ -376,7 +384,8 @@ $.widget( "heurist.navigation", {
 
         }else{
 
-            //redirected to websiteRecord.php     
+            // redirected to websiteRecord.php 
+            // with field=1 it loads DT_EXTENDED_DESCRIPTION
             var page_url = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database
             +'&field=1&recid='+data.page_id;
 
@@ -441,7 +450,7 @@ $.widget( "heurist.navigation", {
                 
                 if(this.options.target=='inline_page_content'){
                     page_target = '#page-content';
-                }else if(!data.page_target) {
+                }else if(data.page_target) {
                     page_target = data.page_target;
                 }
 

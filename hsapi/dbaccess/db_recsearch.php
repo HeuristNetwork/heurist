@@ -937,6 +937,8 @@
     //
     function recordSearchMenuItems($system, $menuitems, &$result){
         
+        $system->defineConstants();
+        
         $menuitems = prepareIds($menuitems, true);
         $isRoot = (count($result)==0); //find any first CMS_HOME
         if($isRoot){
@@ -946,6 +948,7 @@
                 
                 return $system->addError(HEURIST_ERROR, 'Required field type "Menu" not defined in this database');         
             }
+            
             //if root record is menu - we have to find parent cms home
             if(count($menuitems)==1){
                 if($menuitems[0]==0){
@@ -974,7 +977,9 @@
                     }
                     
                     if($isWebPage){
-                        return recordSearch($system, array('q'=>array('ids'=>$root_rec_id), 'detail'=>'detail', 'w'=>'e'));
+                        return recordSearch($system, array('q'=>array('ids'=>$root_rec_id), 
+                            'detail'=>array(DT_NAME,DT_SHORT_SUMMARY,DT_CMS_TARGET,DT_CMS_CSS,DT_CMS_PAGETITLE,DT_EXTENDED_DESCRIPTION,DT_CMS_TOP_MENU,DT_CMS_MENU), //'detail' 
+                            'w'=>'e', 'cms_cut_description'=>1));
                     }else{
                         //find parent home record
                         $res = recordSearchFindParent($system, 
@@ -1029,7 +1034,9 @@
         
         if($isRoot){
             //return recordset
-            return recordSearch($system, array('q'=>array('ids'=>$result), 'detail'=>'detail', 'w'=>'e'));
+            return recordSearch($system, array('q'=>array('ids'=>$result), 
+                            'detail'=>array(DT_NAME,DT_SHORT_SUMMARY,DT_CMS_TARGET,DT_CMS_CSS,DT_CMS_PAGETITLE,DT_EXTENDED_DESCRIPTION,DT_CMS_TOP_MENU,DT_CMS_MENU), //'detail' 
+                            'w'=>'e', 'cms_cut_description'=>1));
         }
         
     }
@@ -1949,6 +1956,10 @@ $loop_cnt++;
                                             && is_array(@$record['d'][DT_EXTENDED_DESCRIPTION]))
                                         {
                                             $records[$recID]['d'][DT_EXTENDED_DESCRIPTION] = array(implode('',$record['d'][DT_EXTENDED_DESCRIPTION]));
+                                            
+                                            if(@$params['cms_cut_description']==1 && @$records[$recID]['d'][DT_EXTENDED_DESCRIPTION][0]){
+                                                $records[$recID]['d'][DT_EXTENDED_DESCRIPTION][0] = 'X';    
+                                            }
                                         }
                                     }
                                 }

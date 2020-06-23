@@ -198,8 +198,12 @@ window.hWin.HEURIST4.msg.showMsgDlg(
         }
     }else{
         //default value - content of page
-        print '<h2 class="webpageheading">'.__getValue($rec, DT_NAME).'</h2>'
-                            .__getValue($rec, DT_EXTENDED_DESCRIPTION);
+        $content = __getValue($rec, DT_EXTENDED_DESCRIPTION);
+        
+        $empty_mark = (trim($content)=='')?' date-empty="1"':'';
+        
+        print '<h2 class="webpageheading" '.$empty_mark.'>'.__getValue($rec, DT_NAME).'</h2>'
+                            .$content;
     }
     exit();
 }
