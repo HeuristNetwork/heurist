@@ -305,6 +305,7 @@ function hCmsEditing(_options) {
             $('#main-content').empty().load(window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database
                 +'&field=1&recid='+pageid, function()
                 {
+                        //first child is webpage title
                         var pagetitle = $($('#main-content').children()[0]);
                         if(pageid==home_pageid){
                             pagetitle.empty();
@@ -312,8 +313,18 @@ function hCmsEditing(_options) {
                         if(is_show_pagetitle){
                             $('#main-pagetitle').empty().show();
                         }
+                        //move title to header
                         pagetitle.addClass("webpageheading");
                         pagetitle.appendTo($('#main-pagetitle'));
+                        
+                        if(pagetitle.attr('date-empty')==1){
+                            pagetitle.attr('date-empty',0);
+                            window.hWin.HEURIST4.msg.showMsgDlg(
+                                'This menu item does not have associated page content.'
+                                +'<br>It will not be selectable in the website. '
+                                +'<br>We recommend this for parent menus.',null,null,
+                                {my:'left top', at:'left+200 top+100', of:$('#main-content-container')});    
+                        }
                         
                         //assign content to editor
                         $('.tinymce-body').val($('#main-content').html());
@@ -394,11 +405,18 @@ function hCmsEditing(_options) {
                     dtyID: window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_HEADER'],
                     rVal: newval};
         }else{
-            request = {a: 'replace',
-                    recIDs: current_pageid,
-                    dtyID: window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION'],
-                    rVal: newval,
-                    needSplit: true};
+            if(window.hWin.HEURIST4.util.isempty(newval)){
+                request = {a: 'delete',
+                        recIDs: current_pageid,
+                        dtyID: window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION']};
+            }else{
+                request = {a: 'replace',
+                        recIDs: current_pageid,
+                        dtyID: window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION'],
+                        rVal: newval,
+                        needSplit: true};
+            }
+            
         }
                                         
         
@@ -483,7 +501,7 @@ function hCmsEditing(_options) {
                 __loadPageById( new_pageid );   
             }else{
                 //assign last saved content
-                if( last_save_content ){ 
+                if( last_save_content != null ){ 
                     $('.tinymce-body').val(last_save_content); 
                     
                     if(was_modified){
