@@ -860,7 +860,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
             window.hWin.HEURIST4.util.sendRequest(baseurl, request, null,
                 function( response ){
                     __hideProgress();
-                    
+//console.log(response.data);                    
                     if(response.status == window.hWin.ResponseStatus.OK){
                         
                         needServerRequest = false;
@@ -1540,6 +1540,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
         },
 
         doRetrieve: function(){
+            needServerRequest = true;
             _doRetrieve();
         },
 

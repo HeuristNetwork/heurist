@@ -153,7 +153,7 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPage.php');
 
                 </fieldset>
                 <div style="text-align:center;padding-top:1em; padding-bottom:1em; display:none;" id="btnPanels">
-                    <button id="btnUpdate" onclick="crosstabsAnalysis.doRetrieve()" style="font-size:bigger;font-weight:larger">Update results</button>
+                    <button id="btnUpdate" onclick="crosstabsAnalysis.doRetrieve()" style="font-size:larger;font-weight:bold">Update results</button>
                     <!--
                     <button onclick="crosstabsAnalysis.doSave()">Save specification</button>
                     <button id="btnCancel" onclick="crosstabsAnalysis.doCancel()">Cancel</button>
