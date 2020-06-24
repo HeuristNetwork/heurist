@@ -1894,6 +1894,7 @@ dty_TermIDTreeNonSelectableIDs
             //save structure (tree) in DT_ENTITY_STRUCTURE field
             if( !this._isFlat &&  (dt_type=='separator' || recID==this.DT_ENTITY_STRUCTURE) )
             {
+                //NOT USED ANYMORE - since we always use flat structure
                 var recset = this.getRecordSet();
                 
                 if(recID!=this.DT_ENTITY_STRUCTURE){
@@ -1998,8 +1999,9 @@ dty_TermIDTreeNonSelectableIDs
     },
     
     //--------------------------------------------------------------------------
-    //
-    // update 1)recordset, 2) defintions 3)treeview 
+    //  
+    // update 1) defintions 2)treeview 
+    // (recordset is already updated in _saveEditAndClose)
     //
     _afterSaveEventHandler: function( recID, fieldvalues ){
 
@@ -2013,31 +2015,29 @@ dty_TermIDTreeNonSelectableIDs
         }
             
 
+        //recordset was updated in manageEntity._saveEditAndClose so we pass null
+        this.refreshRecset_Definition_TreeNodeItem(recID, null);    
+        
+//console.log('_afterSaveEventHandler: refresh tree and recordList');           
 
         
-/* 
-edit form closes on save - nothing reload        
-        if(recID!=this.DT_ENTITY_STRUCTURE){
-            this._currentEditID = recID;
-            this._initEditForm_step3(this._currentEditID); //reload
-        }
-edit form is always inline        
-        //if separator editor in popup - need to close it                
-        if(this._edit_dialog && this._edit_dialog.dialog('instance')){
-            this._currentEditID = null;
-            this._edit_dialog.dialog('close');
-        }
-*/        
-        //recordset was updated in manageEntity._saveEditAndClose
-        var recset = this.getRecordSet()
-        var record = recset.getById(recID);
-        //recset.setRecord(recID, fieldvalues);
+        this._dragIsAllowed = true;
+    },
+    
+    //
+    //
+    //
+    refreshRecset_Definition_TreeNodeItem: function( recID, fieldvalues ){
+      
+            //1. update recordset if fieldvalues are set
+            var recset = this.getRecordSet()
+            if(fieldvalues!=null){
+                recset.setRecord(recID, fieldvalues);  
+            }
 
-
-//console.log('_afterSaveEventHandler: refresh tree and recordList');           
-            // 1) list
-            //this.recordList.resultList('refreshPage');  
-            // 2) update HEURIST4.rectype (for preview)
+            var record = recset.getById(recID);
+      
+            //2. update db definitions HEURIST4.rectype
             var isNewField = false;
             var rectypes = window.hWin.HEURIST4.rectypes;
             if(this.options.rty_ID>0 && rectypes.typedefs[this.options.rty_ID]){
@@ -2045,19 +2045,22 @@ edit form is always inline
                 var fields = rectypes.typedefs[this.options.rty_ID].dtFields[recID];
                 
                 if(!fields){
+                    //new entry in rectypes structure
                     fields = [];
                     var len = Object.keys(fi).length;
+                    //fill with empty placeholders
                     for(var i=0; i<len; i++) fields.push('');
                     rectypes.typedefs[this.options.rty_ID].dtFields[recID] = fields;
                     isNewField = true;
                 }
+                //assign values from recordset
                 for(var fname in fi)
                 if(fname){
                     fields[fi[fname]] = (recset.fld(record, fname));
                 }
             }
             
-            // 3) refresh treeview
+            //3. refresh treeview
             if(this._isFlat || recID!==this.DT_ENTITY_STRUCTURE){
                 var tree = this._treeview.fancytree("getTree");
                 if(tree){
@@ -2086,14 +2089,8 @@ edit form is always inline
                         
                     }
                 }
-                /*4. update action buttons
-                if(is_usual_way){
-                    this.__updateActionIcons(200);
-                }*/
-                    
-            }
+            }        
         
-        this._dragIsAllowed = true;
     },
 
     

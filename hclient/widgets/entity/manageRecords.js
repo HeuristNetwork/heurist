@@ -205,12 +205,18 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                                     window.hWin.HEURIST4.msg.sendCoverallToBack();
                                     
                                     if(response.status == window.hWin.ResponseStatus.OK){
-
-                                        var fi = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex;
+                                        
+                                        //update db definitions and tree    
+                                        that.options.rts_editor.manageDefRecStructure(
+                                            'refreshRecset_Definition_TreeNodeItem', dtId, fields);
+                                        
                                         var rst_fields = window.hWin.HEURIST4.rectypes.typedefs[that._currentEditRecTypeID].dtFields[dtId];
+                                        /*
+                                        var fi = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex;
                                         rst_fields[fi['rst_MaxValues']] = fields['rst_MaxValues'];
                                         rst_fields[fi['rst_DisplayWidth']] = fields['rst_DisplayWidth'];
                                         rst_fields[fi['rst_RequirementType']] = fields['rst_RequirementType'];
+                                        */
                                         
                                         //recreate edit field
                                         var dtFields = that._prepareFieldForEditor( rst_fields );
