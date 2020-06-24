@@ -532,7 +532,7 @@ function hCmsEditing(_options) {
             $('#btn_inline_editor3').hide();
             $('#btn_inline_editor4').hide();
         }else{
-            var tp = $('#main-header').height()-15;
+            var tp = $('#main-header').height()-(is_show_pagetitle?15:-10);
             var lp = $('#main-header').width();
             $('#btn_inline_editor').css({position:'absolute',
                         top:tp,left:lp-190}).show();
