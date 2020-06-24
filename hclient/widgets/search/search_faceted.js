@@ -23,8 +23,8 @@ main methods
     _initFacetQueries - creates facet searches (counts and values for particular facets) and main query
     _fillQueryWithValues - fille queries with values
     doSearch - performs main search
-    _recalculateFacets - search for facet values
-    _redrawFacets 
+    _recalculateFacets - search for facet values as soon as main search finished
+    _redrawFacets - called from _recalculateFacets then call _recalculateFacets for next facet
 
 */
 
