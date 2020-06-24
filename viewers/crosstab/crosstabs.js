@@ -722,7 +722,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
         if(!_isPopupMode){
             if (_currentRecordset==null || _currentRecordset.resultCount<1){
-                _setMode(3);
+                _setMode(3); //no results
             }else if( _currentRecordset.resultCount < MAX_FOR_AUTO_RETRIEVE){
                 _setMode(2);
                 
@@ -780,7 +780,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
             }
 
             $("#pmessage").html('Requesting...');
-            _setMode(1);
+            _setMode(1); //progress
             
         var session_id = Math.round((new Date()).getTime()/1000);    
         
@@ -805,7 +805,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                     window.hWin.HEURIST4.msg.showMsgDlg('There are no values for the "'+fields3.page.fieldname+'" field. '
                             +'Please check the set of records you are analysing ');
                     $('#cbPages').focus();
-                    _setMode(2);
+                    _setMode(2); //results
                     return;
                 }
 
@@ -821,7 +821,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                     window.hWin.HEURIST4.msg.showMsgDlg('There are no values for the "'+fields3.column.fieldname+'" field. '
                             +'Please check the set of records you are analysing ');
                     $('#cbColumn').focus();
-                    _setMode(2);
+                    _setMode(2); //results
                     return;
                 }
 
@@ -845,9 +845,9 @@ function CrosstabsAnalysis(_query, _query_domain) {
             inProgress = true;
             var to = setTimeout(function(){
                 to = 0;
-                _setMode(0);
+                _setMode(0); //results
                 inProgress = false;
-                },20000);
+                },120000);
 
            function __hideProgress(){
                 clearTimeout(to);
@@ -860,6 +860,8 @@ function CrosstabsAnalysis(_query, _query_domain) {
             window.hWin.HEURIST4.util.sendRequest(baseurl, request, null,
                 function( response ){
                     __hideProgress();
+//
+//console.log('finised');
 //console.log(response.data);                    
                     if(response.status == window.hWin.ResponseStatus.OK){
                         
@@ -889,7 +891,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
     function _doRender(){
 
         $("#pmessage").html('Rendering...');
-        _setMode(1);
+        _setMode(1);//progress
 
         var pages = fields3.page.intervals;
         var plen = pages.length;
@@ -988,7 +990,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
         }
 
         $divres.find('td').css( {'padding':'4px', 'border':'1px dotted gray'} );//{'border':'1px dotted gray'}); //1px solid gray'});
-        _setMode(2);
+        _setMode(2);//results
     }//_doRender
 
     /**
@@ -1449,19 +1451,25 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
     }
 
+    //
+    // 0,2 - show results
+    // 1 - progress
+    // 3 - empty set
+    //
     function _setMode(mode){
 
         $("#inporgress").hide();
-        if(mode==3){
+        if(mode==3){  //no results
             $("#divres").hide();
             $("#qform").hide();
             $("#div_empty").show();
-        }else{
+        }else{  
+            //show results
             $("#divres").show();
             $("#qform").show();
             $("#div_empty").hide();
         }
-        if(mode==1){
+        if(mode==1){ //progress
             $("#inporgress").show();
             $("#divres").empty();
             $('#btnPrint').hide();
