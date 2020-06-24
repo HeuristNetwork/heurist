@@ -785,16 +785,16 @@ class HPredicate {
                 $res = "r".$this->qlevel.".rec_RecTypeID ".$res;
                 return array("where"=>$res);
 
+            case 'geo':
+                
+                return $this->predicateSpatial();
+
             case 'count':
             case 'cnt':
             
                 if(!$this->field_id) return null;
                 $this->pred_type = strtolower($this->pred_type);
                 
-            case 'geo':
-                
-                return $this->predicateSpatial();
-
             case 'field':
             case 'f':
 
