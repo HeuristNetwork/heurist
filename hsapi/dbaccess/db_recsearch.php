@@ -2384,7 +2384,7 @@ $loop_cnt++;
                 }
             }
             
-            //special case for RT_CMS_MENU
+            //special case for RT_CMS_MENU - JOIN all descriptions
             $system->defineConstant('DT_EXTENDED_DESCRIPTION');
             if($system->defineConstant('RT_CMS_MENU') && RT_CMS_MENU==@$record['rec_RecTypeID'] 
                             && is_array(@$details[DT_EXTENDED_DESCRIPTION]))

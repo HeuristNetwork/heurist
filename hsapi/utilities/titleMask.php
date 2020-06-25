@@ -62,6 +62,7 @@ class TitleMask {
      * This is by purpose, because we want a static class.
      */
     private function __construct() {}    
+    private static $system = null;
     private static $mysqli = null;
     private static $db_regid = 0;
     private static $initialized = false;
@@ -81,6 +82,7 @@ class TitleMask {
             return;
 
         global $system;
+        self::$system = $system;
         self::$mysqli = $system->get_mysqli();
         self::$db_regid = $system->get_system('sys_dbRegisteredID');
         self::$initialized = true;
@@ -420,14 +422,14 @@ private static function __get_record_value($rec_id, $reset=false) {
                 $ret['rec_Details'] = array();
 
                 //trim(substr(dtl_Value,0,300)) as 
-                $query = 'SELECT dtl_DetailTypeID, dtl_Value, rst_RequirementType '
+                $query = 'SELECT dtl_DetailTypeID, dtl_Value, dtl_UploadedFileID, rst_RequirementType '
                 .'FROM recDetails LEFT JOIN defRecStructure '
                 .'ON rst_RecTypeID='.$ret['rec_RecTypeID']
                    .' AND rst_DetailTypeID=dtl_DetailTypeID ' 
                    .' WHERE dtl_RecID='.$rec_id." order by dtl_DetailTypeID";
                 $res2 = self::$mysqli->query($query);
-                while ($row = $res2->fetch_array()){
-                    if($row[2]!='forbidden'){
+                while ($row = $res2->fetch_assoc()){
+                    if($row['rst_RequirementType']!='forbidden'){
                         array_push($ret['rec_Details'], $row);
                     }
                 }
@@ -467,6 +469,21 @@ private static function __get_enum_value($enum_id, $enum_param_name)
     return $ret;
 }
 
+//
+//
+//
+private static function __get_file_name($ulf_ID){
+
+    if($ulf_ID>0){
+        $fileinfo = fileGetFullInfo(self::$system, $ulf_ID);
+        if(is_array($fileinfo) && count($fileinfo)>0){
+            return $fileinfo[0]['ulf_OrigFileName'];
+            //  array("file" => $fileinfo[0], "fileid"=>$fileinfo[0]["ulf_ObfuscatedFileID"]);
+        }        
+    }
+    return '';
+}
+
 
 /*
 * Returns value for given detail type
@@ -503,17 +520,20 @@ private static function __get_field_value( $rdt_id, $rt, $mode, $rec_id, $enum_p
 
         $details = $rec_values['rec_Details'];
 
+        //dtl_DetailTypeID, dtl_Value, dtl_UploadedFileID, rst_RequirementType
         $res = array();
         $found = false;
         foreach($details as $detail){
-            if($detail[0]==$rdt_id){
+            if($detail['dtl_DetailTypeID']==$rdt_id){
                 $found = true;
                 if($dt_type=="enum" || $dt_type=="relationtype"){
-                    $value = self::__get_enum_value($detail[1], $enum_param_name);
+                    $value = self::__get_enum_value($detail['dtl_Value'], $enum_param_name);
                 }else if($dt_type=="date"){
-                    $value = temporalToHumanReadableString(trim($detail[1]));
+                    $value = temporalToHumanReadableString(trim($detail['dtl_Value']));
+                }else if($dt_type=="file"){
+                    $value = self::__get_file_name($detail['dtl_UploadedFileID']);
                 }else{
-                    $value = $detail[1];
+                    $value = $detail['dtl_Value'];
                 }
                 if($value!=null && $value!=''){
                     array_push($res, $value);
@@ -525,8 +545,8 @@ private static function __get_field_value( $rdt_id, $rt, $mode, $rec_id, $enum_p
 
         if(count($res)==0){
             return "";
-        }else if ($dt_type == 'file'){
-            return count($res)." file".(count($res)>1?"s":"");
+        /*}else if ($dt_type == 'file'){
+            return count($res)." file".(count($res)>1?"s":"");*/
         }else if ($dt_type == 'geo') {
             return count($res)." geographic object".(count($res)>1?"s":"");
         }else{
