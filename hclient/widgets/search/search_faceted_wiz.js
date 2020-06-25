@@ -81,8 +81,7 @@ NOTE - to make search fo facet value faster we may try to omit current search in
 /*
 step1 - selection of rectype, sup filter, rules
 step2 - select fields in treeview
-step3 - define label, help prompt and filter type (by first letter, by full name, directly)
-step4 - preview
+step3 - define label, help prompt and filter type (by first letter, by full name, directly) + preview
 */
 $.widget( "heurist.search_faceted_wiz", {
 
@@ -129,6 +128,8 @@ $.widget( "heurist.search_faceted_wiz", {
     step_panels:[],
     current_tree_rectype_ids:null,
     originalRectypeID:null, //flag that allows to save on first page for edit mode
+    
+    facetPreview_reccount:0, 
 
     // the widget's constructor
     _create: function() {
@@ -254,15 +255,6 @@ $.widget( "heurist.search_faceted_wiz", {
                 , {click:this._refresh_FacetsPreviewReal});
         
         
-        //preview
-        this.step4 = $("<div>")
-        .css({width:'100% !important', 'display':'none'})
-        .appendTo(this.element);
-        $("<div>").append($("<h4>").html(window.hWin.HR("Preview"))).appendTo(this.step4);
-        $("<div>",{id:'facets_preview'}).css({'top':'3.2em'}).appendTo(this.step4);
-        this.step_panels.push(this.step4);
-        
-
         this._refresh();
 
     }, //end _create
@@ -306,7 +298,6 @@ $.widget( "heurist.search_faceted_wiz", {
         this.step1.remove();
         this.step2.remove();
         this.step3.remove();
-        this.step4.remove();
     }
 
     ,show: function(){
@@ -316,7 +307,6 @@ $.widget( "heurist.search_faceted_wiz", {
         this.step1.hide();
         this.step2.hide();
         this.step3.hide();
-        this.step4.hide();
         this.navigateWizard(NaN); //init for 0 step
     }
 
@@ -580,15 +570,11 @@ $.widget( "heurist.search_faceted_wiz", {
         if(this.step>=0) this.step_panels[this.step].css({'display':'none'});
         this.step_panels[newstep].css({'display':'block','overflow':'hidden'});
 
-        /*
-        preview is combined with step3 from now
-        if(this.step==3 && newstep==4){ //preview
-            this._assignFacetParams();
-            this._initStep4_FacetsPreview();
-            $("#btnNext").button('option', 'label', window.hWin.HR('Save'));
-        }
-        */
         if(this.step==2 && newstep==3){
+            
+            this._doSaveSearch( true );//from ui to options.params
+
+            this.facetPreview_reccount = 0; //first time it always refresh preview
             this._refresh_FacetsPreview();
             //this._refresh_FacetsPreviewReal();
             $("#btnNext").button({icon:'ui-icon-check', label:window.hWin.HR('Save')});
@@ -1698,10 +1684,11 @@ $.widget( "heurist.search_faceted_wiz", {
         
         this._assignFacetParams();
         this._defineDomain();
+
+        //if( (window.hWin.HAPI4.sysinfo['db_workset_count']>0 && window.hWin.HAPI4.sysinfo['db_workset_count']<10000) 
+        //    || window.hWin.HAPI4.sysinfo['db_total_records']<10000 )
         
-        if( (window.hWin.HAPI4.sysinfo['db_workset_count']>0 && window.hWin.HAPI4.sysinfo['db_workset_count']<10000) 
-            || window.hWin.HAPI4.sysinfo['db_total_records']<10000 )
-        {
+        if( this.facetPreview_reccount < 10000 ){
             this._refresh_FacetsPreviewReal();
             $(this.step3).find('#btnUpdatePreview').hide();
         }else{
@@ -1716,8 +1703,23 @@ $.widget( "heurist.search_faceted_wiz", {
 
         var listdiv = $(this.step3).find("#facets_preview2");
 
-        var noptions= { query_name:"test", params: JSON.parse(JSON.stringify(this.options.params)), ispreview: true}
+        var noptions = { query_name:"test", params: JSON.parse(JSON.stringify(this.options.params)), ispreview: true}
+        
+        //force search for entire recordset to get total count of records
+        if( this.facetPreview_reccount == 0 ){
+            noptions.params.search_on_reset = true; 
+            var that = this;
+            noptions.params.callback_on_search_finish = function(total_count){
 
+                that.facetPreview_reccount = total_count;
+                if(total_count<10000){
+                    $(that.step3).find('#btnUpdatePreview').hide();
+                }else{
+                    $(that.step3).find('#btnUpdatePreview').show();
+                }
+            }
+        }
+            
         if(listdiv.html()==''){ //not created yet
             listdiv.search_faceted( noptions );
         }else{
@@ -1726,22 +1728,9 @@ $.widget( "heurist.search_faceted_wiz", {
         $(this.step3).find('#btnUpdatePreview').css('opacity',0.5);
     }
 
-    //4. show facet search preview
-    ,_initStep4_FacetsPreview: function(){
-
-        this._defineDomain();
-        var listdiv = $(this.step4).find("#facets_preview");
-
-        var noptions= { query_name:"test", params: JSON.parse(JSON.stringify(this.options.params)), ispreview: true}
-
-        if(listdiv.html()==''){ //not created yet
-            listdiv.search_faceted( noptions );
-        }else{
-            listdiv.search_faceted('option', noptions ); //assign new parameters
-        }
-
-    }
-
+    //
+    //
+    //
     ,_defineDomain: function(){
 
         var svs_ugrid = this.step0.find('#svs_UGrpID');
@@ -1755,8 +1744,9 @@ $.widget( "heurist.search_faceted_wiz", {
 
     //
     // save into database
+    //  prevent_real_save - if true just fill this.options.params
     //
-    ,_doSaveSearch:function(){
+    ,_doSaveSearch:function(prevent_real_save){
 
         var $dlg = this.step0;
 
@@ -1826,6 +1816,8 @@ $.widget( "heurist.search_faceted_wiz", {
             this.options.params.domain = svs_ugrid;
             svs_ugrid = window.hWin.HAPI4.currentUser.ugr_ID;
         }
+        
+        if(prevent_real_save===true) return;
 
         var request = {svs_Name: svs_name.val(),
             svs_Query: JSON.stringify(this.options.params),   //$.toJSON

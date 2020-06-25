@@ -134,6 +134,7 @@
     //      q - JSON query array
     //      field - field id to search
     //      type - field type (todo - search it dynamically with getDetailType)
+    //      needcount
     // @return
     //
     function recordSearchFacets($system, $params){
@@ -180,7 +181,6 @@
 
             //get SQL clauses for current query
             $qclauses = get_sql_query_clauses_NEW($mysqli, $params, $currentUser);
-
 
             $select_field  = "";
             $detail_link   = "";

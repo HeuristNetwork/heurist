@@ -294,6 +294,10 @@ $.widget( "heurist.search_faceted", {
                           that._isInited = false;
                           that._recalculateFacets(-1);       
                           that.refreshSubsetSign();
+                          
+                          if($.isFunction(that.options.params.callback_on_search_finish) && recset){
+                              that.options.params.callback_on_search_finish.call(this, recset.count_total());
+                          }
                     }         
                 }else if(e.type == window.hWin.HAPI4.Event.ON_CUSTOM_EVENT && data){
                     
@@ -1502,7 +1506,7 @@ $.widget( "heurist.search_faceted", {
                 }else if(fieldid==1  && that._use_multifield){
                     fieldid = '1,18,231,304';
                 }
-
+ 
                 var request = {q: query, count_query:count_query, w: 'a', a:'getfacets',
                                      facet_index: i, 
                                      field:  fieldid,
@@ -1540,6 +1544,7 @@ $.widget( "heurist.search_faceted", {
                     if(response.request_id != that._request_id){
                         
                         if(response.status != window.hWin.ResponseStatus.OK){
+                            console.log('ERROR in get_facets');
                             console.log(response.message);
                         }
                         return;
@@ -2531,7 +2536,7 @@ if(!detailtypes[dtID]){
     },
     
     //
-    //
+    // info message in the header to indicate that user work set is active
     //
     refreshSubsetSign: function(){
         
