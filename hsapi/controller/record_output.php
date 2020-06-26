@@ -93,6 +93,9 @@
         $search_params['needall'] = 1;  //search without limit of returned record count
     }
     
+    //
+    // search for single record by "recID", by set of "ids" or heurist query "q"
+    //
     if(@$params['recID']>0){
         $search_params['q'] = array('ids'=>$params['recID']);
     }else if(@$params['ids']){

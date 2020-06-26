@@ -85,6 +85,7 @@ public static function setSession($system){
 //
 // prefs for geojson, json
 //    extended 0 as is (in heurist internal format), 1 - interpretable, 2 include concept code and labels
+//    datatable 0|1 returns flattened json suitable for datatable ui component
 //    leaflet - 0|1 returns strict geojson and timeline data as two separate arrays, without details, only header fields rec_ID, RecTypeID and rec_Title
 //    simplify  0|1 simplify  paths with more than 1000 vertices 
 //
@@ -111,6 +112,7 @@ public static function output($data, $params){
         $records = $data['records'];
     }
     
+    $records_original_count = count($records); //mainset of ids (result of search without linked/related)
     $records_out = array(); //ids already out
     $rt_counts = array(); //counts of records by record type
     
@@ -173,7 +175,13 @@ public static function output($data, $params){
         }
         
     }else if($params['format']=='json'){
-        fwrite($fd, '{"heurist":{"records":[');     
+        
+        if(@$params['datatable']=='1'){
+            
+            fwrite($fd, '{"data": [');     
+        }else{
+            fwrite($fd, '{"heurist":{"records":[');         
+        }
             
     }else if($params['format']=='gephi'){
 
@@ -302,16 +310,17 @@ XML;
     //for gephi we don't need details
     $need_record_details = ($params['format']!='gephi');
     //for leaflet get only limited set of fields 
-    if(@$params['leaflet']){ 
-        $retrieve_fields = "rec_ID,rec_RecTypeID,rec_Title";
+    if(@$params['leaflet'] || @$params['datatable']){ 
+        $retrieve_fields = 'rec_ID,rec_RecTypeID,rec_Title';
     }else{
         $retrieve_fields = null;
     }
     
     //MAIN LOOP  ----------------------------------------
+    $records_count = (@$params['datatable']==1)?$records_original_count:count($records);
     
     $idx = 0;
-    while ($idx<count($records)){   //loop by record ids
+    while ($idx<$records_count){   //loop by record ids
     
         $recID = $records[$idx];
         if(is_array($recID)){
@@ -380,7 +389,12 @@ XML;
         
         }else if($params['format']=='json'){ 
             
-            if(@$params['extended']>0 && @$params['extended']<3){ //with concept codes and labels
+            if(@$params['datatable']==1){
+                
+                $feature = self::_getJsonFlat( $record );
+                fwrite($fd, $comma.json_encode($feature));
+                
+            }else if(@$params['extended']>0 && @$params['extended']<3){ //with concept codes and labels
                 $feature = self::_getJsonFeature($record, $params['extended']);
                 fwrite($fd, $comma.json_encode($feature));
             }else{
@@ -467,8 +481,11 @@ XML;
         
         fclose($fd_links);
     
-    }else{
-            //json or xml 
+    }else if($params['format']=='json' && @$params['datatable']==1){
+        
+        fwrite($fd, ']}');     
+        
+    }else{  //json or xml 
     
             if($params['format']=='json'){
                 fwrite($fd, ']');     
@@ -529,8 +546,8 @@ XML;
             $database_info['rectypes'] = $rt_counts;
             
             if($params['format']=='json'){
-                fwrite($fd, ',"database":'.json_encode($database_info));
-                fwrite($fd, '}}');     
+                    fwrite($fd, ',"database":'.json_encode($database_info));
+                    fwrite($fd, '}}');     
             }else{
                 $xml = new SimpleXMLElement('<?xml version="1.0" encoding="UTF-8"?><database/>');
                 self::_array_to_xml($database_info, $xml);
@@ -1034,6 +1051,62 @@ private static function _getJsonFromWkt($wkt, $simplify=true)
         return null;
 }
 
+//
+//
+//
+private static function _getJsonFlat( $record, $level=0 ){
+
+    $res = array('rec_ID'=>$record['rec_ID'], 'rec_RecTypeID'=>$record['rec_RecTypeID'], 
+                 'rec_Title'=>$record['rec_Title']); //, 'rec_URL'=>$record['rec_URL']
+
+
+    if(self::$defDetailtypes==null){
+        self::$defDetailtypes = dbs_GetDetailTypes(self::$system, null, 2);   
+    }
+    $idx_dtype = self::$defDetailtypes['typedefs']['fieldNamesToIndex']['dty_Type'];
+    
+    //convert details to proper JSON format, extract geo fields and convert WKT to geojson geometry
+    foreach ($record['details'] as $dty_ID=>$field_details) {
+        
+        $res[('f'.$dty_ID)] = array();
+        $field_type = self::$defDetailtypes['typedefs'][$dty_ID]['commonFields'][$idx_dtype];
+        
+        foreach($field_details as $dtl_ID=>$field_value){ //for detail multivalues
+        
+            if($field_type=='resource'){
+                
+                if($level>0){
+                    $field_value = array('rec_ID'=>$field_value['id'], 
+                                         'rec_RecTypeID'=>$field_value['type'], 
+                                         'rec_Title'=>$field_value['title']);
+                }else{
+                    $record = recordSearchByID(self::$system, $field_value['id'], true, 'rec_ID,rec_RecTypeID,rec_Title' );
+                    $field_value = self::_getJsonFlat( $record, $level+1 );
+                }
+                
+            }else if ($field_type=='file'){
+                
+                $field_value = $field_value['file']['ulf_ObfuscatedFileID'];
+                
+            }else if ($field_type=='geo'){
+
+                $field_value = @$field_value['geo']['wkt'];
+                
+            //}else if ($field_type=='enum' || $field_type=='relationtype'){
+            }
+            
+            array_push($res['f'.$dty_ID], $field_value);
+        } //for detail multivalues
+        
+        if(count($res['f'.$dty_ID])==1){
+            $res[('f'.$dty_ID)] = $res[('f'.$dty_ID)][0];  
+        } 
+    } //for all details of record
+
+    return $res;
+    
+    
+}
 
 //
 // convert heurist record to more interpretable format
