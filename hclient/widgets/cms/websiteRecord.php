@@ -274,7 +274,7 @@ function __getValue(&$menu_rec, $id){
 ?>
 <html>
 <head>
-	<title><?php print $website_title;?></title>
+	<title><?php print htmlspecialchars($website_title);?></title>
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
     <meta name="keywords" content="Heurist, Digital Humanities, Humanities Data, Research Data, Database Management, Academic data, Open Source, Free software, FOSS, University of Sydney,<?=$meta_keywords?>">
     <meta name="description" content="<?=$meta_description?>">
@@ -620,7 +620,7 @@ $website_title -> #main-title>h2
   <?php if($website_title){ ?>
   if($('#main-title').length>0){
       $('#main-title').empty();
-      $('<h2 style="font-size:1.7em;"><?php print $website_title;?></h2>').appendTo($('#main-title'));
+      $('<h2 style="font-size:1.7em;"><?php print htmlspecialchars($website_title, ENT_QUOTES);?></h2>').appendTo($('#main-title'));
   }
   <?php } ?>
 
