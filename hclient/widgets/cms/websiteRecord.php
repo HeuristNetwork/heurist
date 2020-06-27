@@ -88,7 +88,7 @@ otherwise page html structure and cotent of #main-header is generated in website
 On client side
 1. HAPI initialization, DB defintions load -> onHapiInit -> onPageInit
 2. onPageInit: init LayoutMgr, init main menu in #main-menu element
-3. loadHomePageContent(pageid): Loads content of page into #main-content and 
+3. loadPageContent(pageid): Loads content of page into #main-content and 
    calls widget initialization width LayoutMgr.appInitFromContainer
 4. If database configuration permits only:
    After widgets initialization it loads javascript (field 2-927) and incapsulate 
@@ -119,6 +119,9 @@ $system->defineConstants();
 $mysqli = $system->get_mysqli();
 
 $open_page_on_init = @$_REQUEST['initid'];
+if(!($open_page_on_init>0)) $open_page_on_init = @$_REQUEST['pageid'];
+if(!($open_page_on_init>0)) $open_page_on_init = 0;
+
 $rec_id = @$_REQUEST['recID'];
 if(!($rec_id>0)) $rec_id = @$_REQUEST['recid'];
 if(!($rec_id>0)) $rec_id = @$_REQUEST['id'];
@@ -313,7 +316,9 @@ if (($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1')
 <script>
     var _time_debug = new Date().getTime() / 1000;
 //    console.log('webpage start');
-    
+    var home_page_record_id=<?php echo $rec_id; ?>;
+    var init_page_record_id=<?php echo $open_page_on_init; ?>;
+    var is_embed =<?php echo array_key_exists('embed', $_REQUEST)?'true':'false'; ?>;
 </script>
     
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>
@@ -399,9 +404,11 @@ if($edit_Available){
     <script src="websiteRecord.js"></script>
     <?php
 }else{
+  /*print '<script>';
+  print 'var home_page_record_id='.$rec_id.';';
+  print 'var init_page_record_id='.$open_page_on_init.';';*/
 ?>    
-  <script>
-  
+<script>
 //
 // init page for publication version  
 // for cms version see websiteRecord.js
@@ -421,7 +428,7 @@ _time_debug = new Date().getTime() / 1000;
     
     //reload home page content by click on logo
     $("#main-logo").click(function(event){
-              loadHomePageContent(<?php print $rec_id?>);
+              loadPageContent( home_page_record_id );
     });
     
     setTimeout(function(){
@@ -431,17 +438,18 @@ _time_debug = new Date().getTime() / 1000;
 
         var topmenu = $('#main-menu');
         topmenu.attr('data-heurist-app-id','heurist_Navigation');
-                
+               
         window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, "#main-header",
-            {heurist_Navigation:{menu_recIDs:"<?php print $rec_id;?>", use_next_level:true, 
+            {heurist_Navigation:{menu_recIDs:home_page_record_id, use_next_level:true, 
             orientation:'horizontal',
             toplevel_css:{background:bg_color}, //'rgba(112,146,190,0.7)'
             aftermenuselect: afterPageLoad
             }} );
             
         $('#main-menu').show();
-        //inital load HOME page content $( "#main-logo").click(); 
-        loadHomePageContent(<?php print $rec_id?>);
+        
+        //load given page or home page content
+        loadPageContent(init_page_record_id>0 ?init_page_record_id :home_page_record_id);
         
         $(document).trigger(window.hWin.HAPI4.Event.ON_SYSTEM_INITED, []);
         
@@ -456,7 +464,7 @@ _time_debug = new Date().getTime() / 1000;
 //
 //
 //
-function loadHomePageContent(pageid){
+function loadPageContent(pageid){
         if(pageid>0){
               //window.hWin.HEURIST4.msg.bringCoverallToFront($('body').find('#main-content'));
               $('#main-content').empty().load(window.hWin.HAPI4.baseURL+'?db='
@@ -473,6 +481,7 @@ function loadHomePageContent(pageid){
                       
                       afterPageLoad( document, pageid );
               });
+              
         }
 }
 </script>
@@ -536,6 +545,40 @@ function afterPageLoad(document, pageid){
         }
         
     }
+
+    if(!is_embed){    
+        var s = location.pathname;
+        while (s.substring(0, 2) === '//') s = s.substring(1);
+
+        window.history.pushState("object or string", "Title", s+'?db='
+        +window.hWin.HAPI4.database+'&website&id='+home_page_record_id+(pageid!=home_page_record_id?'&pageid='+pageid:''));
+    }
+    
+    
+    //find all link elements
+    $('a').each(function(i,link){
+        
+        var href = $(link).attr('href');
+        if(href && href!='#'){
+            if(href.indexOf(window.hWin.HAPI4.baseURL)===0
+                && window.hWin.HEURIST4.util.getUrlParameter('db',href) == window.hWin.HAPI4.database
+                && window.hWin.HEURIST4.util.getUrlParameter('id',href) == home_page_record_id)
+            {
+                var pageid = window.hWin.HEURIST4.util.getUrlParameter('pageid',href);
+                if(pageid>0){
+                    $(link).attr('data-pageid', pageid);
+                    $(link).on({click:function(e){
+                        var pageid = $(e.target).attr('data-pageid');
+                        loadPageContent(pageid);            
+                        window.hWin.HEURIST4.util.stopEvent(e);
+                    }});
+                    
+                }
+            }
+        }
+        
+    });
+    
 }
 
 //
@@ -623,16 +666,6 @@ $website_title -> #main-title>h2
       $('<h2 style="font-size:1.7em;"><?php print htmlspecialchars($website_title, ENT_QUOTES);?></h2>').appendTo($('#main-title'));
   }
   <?php } ?>
-
-  /*main menu element not found - add default one
-  if($('#main-menu').length==0 && $('#main-header').length>0){
-      
-        $('<div id="main-menu" class="mceNonEditable" style="float:left;width:100%;min-height:40px;padding-top:16px;color:black;font-size:1.1em;" data-heurist-app-id="heurist_Navigation" data-generated="1">'
-            +'<div class="widget-design-header" style="padding: 10px;"><img style="vertical-align: middle;" src="../../assets/h4_icon_35x35.png" height="22" /> <strong>navigation</strong><a class="edit" style="padding: 0 10px;" title="Click to edit" href="#">edit</a>  <a class="remove" href="#">remove</a> height:50px width:100%</div>'
-            +'<span class="widget-options" style="font-style: italic; display: none;">{"menu_recIDs":"<?php print $rec_id;?>","use_next_level":true,"orientation":"horizontal","init_at_once":true}</span>'
-        +'</div>').appendTo($('#main-header'));
-                    
-  }*/
 
 } //initHeaderElements
 

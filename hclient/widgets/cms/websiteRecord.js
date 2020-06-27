@@ -335,6 +335,32 @@ function hCmsEditing(_options) {
                         
                         __alignButtons();
                         
+                        //find all link elements
+                        $('#main-content').find('a').each(function(i,link){
+                            
+                            var href = $(link).attr('href');
+                            if(href && href!='#'){
+                                if(href.indexOf(window.hWin.HAPI4.baseURL)===0
+                                    && window.hWin.HEURIST4.util.getUrlParameter('db',href) == window.hWin.HAPI4.database
+                                    && window.hWin.HEURIST4.util.getUrlParameter('id',href) == home_page_record_id)
+                                {
+                                    var pageid = window.hWin.HEURIST4.util.getUrlParameter('pageid',href);
+                                    if(pageid>0){
+                                        $(link).attr('data-pageid', pageid);
+                                        $(link).on({click:function(e){
+                                            var pageid = $(e.target).attr('data-pageid');
+                                            __iniLoadPageById(pageid);
+                                            window.hWin.HEURIST4.util.stopEvent(e);
+                                        }});
+                                        
+                                    }
+                                }
+                            }
+                            
+                        });
+                        
+                        
+                        
                         //@todo does not properly work here svs_list('instance') returns undefined
                         //afterPageLoad( document,  pageid );
                 });

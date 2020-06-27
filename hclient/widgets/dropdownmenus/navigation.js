@@ -96,7 +96,11 @@ $.widget( "heurist.navigation", {
             ids = '';    
         } else {
             if($.isArray(ids)) {ids = ids.join(',');}
-            else {this.options.menu_recIDs = this.options.menu_recIDs.split(',');}
+            else if(window.hWin.HEURIST4.util.isNumber(ids)){
+                this.options.menu_recIDs = [ids];
+            }else{
+                this.options.menu_recIDs = ids.split(',')  
+            } 
         }
 
         //retrieve menu content from server side
