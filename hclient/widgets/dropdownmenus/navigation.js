@@ -454,7 +454,7 @@ $.widget( "heurist.navigation", {
                 
                 if(this.options.target=='inline_page_content'){
                     page_target = '#page-content';
-                }else if(data.page_target) {
+                }else if(!window.hWin.HEURIST4.util.isempty(data.page_target)) {
                     page_target = data.page_target;
                 }
 
