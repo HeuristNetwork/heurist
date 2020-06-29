@@ -152,7 +152,7 @@ function simplifyCoordinates(&$orig_points){
             $crn++;
         }//while simplify
 
-        if(count($points2)<=1000){
+        if(count($points2)<=1000){ //result
             $orig_points = array();
             foreach ($points2 as $point) {
                 array_push($orig_points, array($point['x'], $point['y']) );

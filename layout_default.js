@@ -172,7 +172,7 @@ var cfg_layouts = [
                     {appid:'heurist_resultListExt', name: 'Custom Reports', options:{title:'Custom Reports', 
                                     url: 'viewers/smarty/showReps.html?db=[dbname]', 'data-logaction':'open_Reports'}
                     },
-                    {appid:'heurist_resultListExt', name: 'Data Table', options:{ dataTableParams:{}} },
+                    {appid:'heurist_resultListExt', name: 'Data Table', options:{ dataTableParams:{} } },
                     {appid:'heurist_Frame', name: 'Export',
                         options:{url: 'hclient/framecontent/exportMenu.php?db=[dbname]',
                                          isframe:true, 'data-logaction':'open_Export'}

@@ -560,7 +560,7 @@ function afterPageLoad(document, pageid){
         
         var href = $(link).attr('href');
         if(href && href!='#'){
-            if(href.indexOf(window.hWin.HAPI4.baseURL)===0
+            if(  (href.indexOf(window.hWin.HAPI4.baseURL)===0 || href[0] == '?')
                 && window.hWin.HEURIST4.util.getUrlParameter('db',href) == window.hWin.HAPI4.database
                 && window.hWin.HEURIST4.util.getUrlParameter('id',href) == home_page_record_id)
             {

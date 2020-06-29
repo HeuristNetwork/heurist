@@ -1012,7 +1012,8 @@ private static function _getGeoJsonFeature($record, $extended=false, $simplify=f
 }
 
 //
-// Convert WKT to geojson and simplifies coordinates 
+// Convert WKT to geojson and simplifies coordinates  
+// @TODO use utils_geo
 //
 private static function _getJsonFromWkt($wkt, $simplify=true)
 {

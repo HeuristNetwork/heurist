@@ -25,6 +25,9 @@
 */
 require_once(dirname(__FILE__)."/../../admin/verification/verifyValue.php");
 require_once(dirname(__FILE__)."/../../hsapi/dbaccess/db_records.php");
+require_once(dirname(__FILE__)."/../../hsapi/utilities/utils_geo.php");
+
+require_once (dirname(__FILE__).'/../../vendor/autoload.php'); //for geoPHP
 
 require_once('UTMtoLL.php');
 require_once('GpointConverter.php');
@@ -1060,7 +1063,11 @@ public static function validateImport($params) {
                 $geo_fields = array($field_name1,$field_name2);                
             }
 
+        }else 
+        if($ft_vals[$idx_fieldtype] == "geo"){
 
+            $geo_fields = array($field_name); //WKT field
+            
         }else
         if($ft_vals[$idx_reqtype] == "required"){
             if(!$field_name){
@@ -1354,22 +1361,40 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
         }
     }
 
-    //7. TODO Verify geo fields
+    //7. TODO Verify geo fields for UTM
     if(true && is_array($geo_fields) && count($geo_fields)>0){
+        
         // northing, easting
         $query = "select ".implode(',',$geo_fields)." from $import_table LIMIT 5";
         $res = $mysqli->query($query);
         $allInteger = true;
         $allOutWGS = true;
         if($res){
-            while ($row = $res->fetch_row()){
-                $northing = $row[0];
-                $easting = $row[1];
-                
-                $allInteger = $allInteger && ($northing==round($northing)) && ($easting==round($easting));
-                $allOutWGS = $allOutWGS && (abs($easting)>180) && (abs($northing)>90);
-                if (!($allOutWGS && $allInteger)) break;                
+            
+            if(count($geo_fields)==1){ //WKT field
+                while ($row = $res->fetch_row()){
+                    $wkt = $row[0];
+                    $geom = geoPHP::load($wkt, 'wkt');
+                    if(!$geom->isEmpty()){
+                        $bbox = $geom->getBBox();
+                        $allOutWGS = $allOutWGS 
+                            && (abs($bbox['minx'])>180) && (abs($bbox['miny'])>90)
+                            && (abs($bbox['maxx'])>180) && (abs($bbox['maxy'])>90);
+                        if (!$allOutWGS) break;
+                    }
+                    $allInteger = $allOutWGS;
+                }
+            }else{ //lat long fields
+                while ($row = $res->fetch_row()){
+                    $northing = $row[0];
+                    $easting = $row[1];
+                    
+                    $allInteger = $allInteger && ($northing==round($northing)) && ($easting==round($easting));
+                    $allOutWGS = $allOutWGS && (abs($easting)>180) && (abs($northing)>90);
+                    if (!($allOutWGS && $allInteger)) break;                
+                }
             }
+            
             if($allInteger || $allOutWGS){
                 $imp_session['validation']['utm_warning'] = 1;
             }
@@ -2062,7 +2087,10 @@ public static function performImport($params, $mode_output){
     
     $utm_zone = @$params['utm_zone'];
     $hemisphere = 'N';
-    $gPoint;
+    $gPoint = null;
+    $geojson_adapter = null;
+    $wkt_adapter = null;
+    
     if($utm_zone!=0 && $utm_zone!=null){
         $utm_zone = strtoupper($utm_zone);
         if(strpos($utm_zone, 'S')==false){ $hemisphere='N'; }
@@ -2071,7 +2099,11 @@ public static function performImport($params, $mode_output){
         if($utm_zone<1 || $utm_zone>60) {
             $utm_zone = 0;
         }else{
+            $geometry = geoPHP::load('MULTILINESTRING((10 10,20 20,10 40))','wkt');
+            $wkt_adapter = new wkt();
+            $geojson_adapter = new GeoJSON(); 
             $gPoint = new GpointConverter();
+            $gPoint->setUTMZone($utm_zone.$hemisphere);
         }
     }   
     
@@ -2429,6 +2461,18 @@ public static function performImport($params, $mode_output){
                                 }
 
                                 if($geoType){
+                                    
+                                    //convert UTM to WGS
+                                    if($utm_zone>0){
+                                        
+                                        $geom = geoPHP::load($r_value, 'wkt');
+                                        if(!$geom->isEmpty()){
+                                            $json = $geojson_adapter->write($geom, true);
+                                            $json = geo_SimplifyAndConvert_JSON($json, false, $gPoint);
+                                            $r_value = $wkt_adapter->write($geojson_adapter->read(json_encode($json), true));
+                                        }
+                                    }
+                                    
                                     if(strpos($r_value, $geoType)===0){
                                         //already exists                                        
                                         $value = $r_value;
@@ -2438,7 +2482,7 @@ public static function performImport($params, $mode_output){
                                 }else{
                                     $value = null;
                                 }
-
+                                
                             }
                             else if($fieldtype_type == "lat") {
                                 $lat = $r_value;

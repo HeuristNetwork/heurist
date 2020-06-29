@@ -97,8 +97,6 @@ require_once (dirname(__FILE__).'/../import/importSession.php'); //work work wit
 require_once (dirname(__FILE__).'/../import/importAction.php'); //work with import table: matching, assign id, performs validation and import
 require_once (dirname(__FILE__).'/../import/importHeurist.php'); //work with Heurist exchange format
 
-require_once (dirname(__FILE__).'/../../vendor/autoload.php'); //for geoPHP
-
 set_time_limit(0);
     
 $response = null;

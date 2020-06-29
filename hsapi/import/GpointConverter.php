@@ -182,8 +182,13 @@ class GpointConverter
     {
         $this->utmNorthing = $northing;
         $this->utmEasting = $easting;
+        if($zone!=null && $zone!='') $this->utmZone = $zone;
+    }
+    
+    public function setUTMZone($zone){
         $this->utmZone = $zone;
     }
+    
     
     /**
      * Get utm northing
