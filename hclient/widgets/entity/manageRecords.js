@@ -3256,7 +3256,7 @@ rectypes.names[rectypeID] + ' is defined as a child of <b>'+names
                 for(var i=0;i<service_config.length; i++){
                     var cfg = service_config[i];    
                     
-                    if(cfg.database && cfg.database!=window.hWin.HAPI4.database) contiue;
+                    if(cfg.database && cfg.database!=window.hWin.HAPI4.database) continue;
                     
                     if(cfg.rty_ID == this._currentEditRecTypeID){   //@todo many services
                         notfound = false;            
