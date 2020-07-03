@@ -52,14 +52,15 @@
 
             $res = $dbRecDetails->detailsAdd();
 
-        }else if(@$_REQUEST['a'] == 'replace'){ //returns
+        }else if(@$_REQUEST['a'] == 'replace'){ 
         
             $res = $dbRecDetails->detailsReplace();
 
-        }else if(@$_REQUEST['a'] == 'addreplace'){ //returns
+        }else if(@$_REQUEST['a'] == 'addreplace'){ 
         
                 $res = $dbRecDetails->detailsReplace();
-                if($res['passed']==1 && $res['undefined']==1){
+                if(is_array($res) && @$res['passed']==1 && @$res['undefined']==1){
+                    //detail not found - add new one
                     $res = $dbRecDetails->detailsAdd();
                 }
             
