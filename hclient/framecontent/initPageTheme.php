@@ -170,13 +170,17 @@ select.ui-heurist-header2, input.ui-heurist-header2{
 
 .ui-heurist-header2, .ui-heurist-btn-header1 {
     background:<?php uout('ca_bg', '#364050');?> !important;    
-    color:<?php uout('ca_color', '#ffffff');?> !important;
+    color:<?php uout('ca_color', '#ffffff');?> !important; 
 }
 .ui-heurist-btn-header1 {
     border: none !important;
 }
 .ui-heurist-header2 a{
     color:<?php uout('ca_color', '#ffffff');?> !important;
+}
+/* color for submenus */
+.ui-heurist-header2 .ui-menu .ui-menu a {
+    color: <?php uout('cd_color', '#333333');?> !important;
 }
 
 /* EDITOR CONTENT */

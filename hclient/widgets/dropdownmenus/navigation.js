@@ -30,7 +30,6 @@ $.widget( "heurist.navigation", {
        toplevel_css:null  //css for top level items
     },
 
-    menues:{},
     pageStyles:{},  //menu_id=>styles
     pageStyles_original:{}, //keep to restore  element_id=>css
 
