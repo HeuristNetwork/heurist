@@ -22,7 +22,7 @@
     require_once (dirname(__FILE__).'/../System.php');
     require_once (dirname(__FILE__).'/../dbaccess/db_recsearch.php');
     require_once (dirname(__FILE__).'/../dbaccess/utils_db.php');
-    require_once (dirname(__FILE__).'/../../viewers/map/Simplify.php');
+    require_once (dirname(__FILE__).'/../utilities/mapSimplify.php');
     //require_once (dirname(__FILE__).'/../../vendor/autoload.php'); //for ShapeFile
     
 // Register autoloader

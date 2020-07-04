@@ -29,8 +29,8 @@ require_once(dirname(__FILE__)."/../../hsapi/utilities/utils_geo.php");
 
 require_once (dirname(__FILE__).'/../../vendor/autoload.php'); //for geoPHP
 
-require_once('UTMtoLL.php');
-require_once('GpointConverter.php');
+//require_once('UTMtoLL.php');
+require_once ('/../../hsapi/utilities/mapCoordConverter.php');
 
 /**
 * 3 public methods

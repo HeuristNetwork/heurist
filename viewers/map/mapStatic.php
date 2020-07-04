@@ -37,8 +37,8 @@
     
     require_once (dirname(__FILE__).'/../../vendor/autoload.php'); //for geoPHP
 
-    require_once(dirname(__FILE__)."/encodePolyline.php");
-    require_once(dirname(__FILE__)."/Simplify.php");
+    require_once(dirname(__FILE__)."/../../hsapi/utilities/mapEncodePolyline.php");
+    require_once(dirname(__FILE__)."/../../hsapi/utilities/mapSimplify.php");
 
 	$mapobjects = array();
     

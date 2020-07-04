@@ -1,5 +1,7 @@
 <?php
 
+// NOT USED
+
 function ToLL($north, $east, $utmZone, $hemisphere)
 { 
   // This is the lambda knot value in the reference

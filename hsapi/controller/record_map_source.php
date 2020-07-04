@@ -30,9 +30,9 @@
     require_once (dirname(__FILE__).'/../dbaccess/utils_db.php');
     
     require_once (dirname(__FILE__).'/../../vendor/autoload.php'); //for geoPHP
-    require_once(dirname(__FILE__).'/../../viewers/map/Simplify.php');
     require_once (dirname(__FILE__).'/../import/importParser.php'); //parse CSV, KML and save into import table
-    require_once (dirname(__FILE__).'/../import/exportRecords.php');
+    require_once(dirname(__FILE__).'/../utilities/mapSimplify.php');
+    require_once (dirname(__FILE__).'/../dbaccess/exportRecords.php');
     
     $response = array();
 

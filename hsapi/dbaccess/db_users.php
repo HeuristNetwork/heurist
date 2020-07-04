@@ -301,6 +301,10 @@
                     'ugr_Preferences'=>json_encode($_SESSION[$dbname]["ugr_Preferences"]) ));
     }
 
+    //
+    // restore preferences from database and put it into SESSION (see login_verify)
+    // to get individual property use $system->user_GetPreference
+    //
     function user_getPreferences( $system ){
 
         $mysqli = $system->get_mysqli();

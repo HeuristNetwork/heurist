@@ -1,8 +1,8 @@
 <?php
 
 require_once (dirname(__FILE__).'/../../vendor/autoload.php'); //for geoPHP
-require_once (dirname(__FILE__).'/../../viewers/map/Simplify.php');
-require_once(dirname(__FILE__).'/GpointConverter.php');
+require_once (dirname(__FILE__).'/../utilities/mapSimplify.php');
+require_once (dirname(__FILE__).'/../utilities/mapCoordConverter.php');
 require_once (dirname(__FILE__).'/../../common/php/Temporal.php');
 
 /**
@@ -85,7 +85,12 @@ public static function setSession($system){
 //
 // prefs for geojson, json
 //    extended 0 as is (in heurist internal format), 1 - interpretable, 2 include concept code and labels
-//    datatable 0|1 returns flattened json suitable for datatable ui component
+//
+//    datatable -   datatable session id  - returns json suitable for datatable ui component
+//              >1 and "q" is defined - save query request in session to result set returned, 
+//              >1 and "q" not defined and "draw" is defined - takes query from session
+//              1 - use "q" parameter
+//
 //    leaflet - 0|1 returns strict geojson and timeline data as two separate arrays, without details, only header fields rec_ID, RecTypeID and rec_Title
 //    simplify  0|1 simplify  paths with more than 1000 vertices 
 //
@@ -176,7 +181,14 @@ public static function output($data, $params){
         
     }else if($params['format']=='json'){
         
-        if(@$params['datatable']=='1'){
+        if(@$params['datatable']>1){
+            
+            //"recordsTotal": 57,"recordsFiltered":'.count($records).',
+            
+            fwrite($fd, '{"draw": '.$params['draw'].',"recordsTotal":'
+                    .$params['recordsTotal'].',"recordsFiltered":'.$params['recordsTotal'].',"data":[');     
+            
+        }else if(@$params['datatable']==1){
             
             fwrite($fd, '{"data": [');     
         }else{
@@ -310,14 +322,14 @@ XML;
     //for gephi we don't need details
     $need_record_details = ($params['format']!='gephi');
     //for leaflet get only limited set of fields 
-    if(@$params['leaflet'] || @$params['datatable']){ 
+    if(@$params['leaflet'] || @$params['datatable']>0){ 
         $retrieve_fields = 'rec_ID,rec_RecTypeID,rec_Title';
     }else{
         $retrieve_fields = null;
     }
     
     //MAIN LOOP  ----------------------------------------
-    $records_count = (@$params['datatable']==1)?$records_original_count:count($records);
+    $records_count = (@$params['datatable']>0)?$records_original_count:count($records);
     
     $idx = 0;
     while ($idx<$records_count){   //loop by record ids
@@ -389,7 +401,7 @@ XML;
         
         }else if($params['format']=='json'){ 
             
-            if(@$params['datatable']==1){
+            if(@$params['datatable']>0){
                 
                 $feature = self::_getJsonFlat( $record );
                 fwrite($fd, $comma.json_encode($feature));
@@ -481,7 +493,7 @@ XML;
         
         fclose($fd_links);
     
-    }else if($params['format']=='json' && @$params['datatable']==1){
+    }else if($params['format']=='json' && @$params['datatable']>0){
         
         fwrite($fd, ']}');     
         

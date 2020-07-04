@@ -59,10 +59,9 @@
     require_once (dirname(__FILE__).'/../../admin/verification/verifyValue.php');
 
     require_once (dirname(__FILE__).'/../../vendor/autoload.php'); //for geoPHP
-    require_once (dirname(__FILE__).'/../../viewers/map/Simplify.php');
-    
-    require_once(dirname(__FILE__).'/../import/GpointConverter.php');
-    require_once (dirname(__FILE__).'/../import/exportRecords.php');
+    require_once (dirname(__FILE__).'/../utilities/mapSimplify.php');
+    require_once (dirname(__FILE__).'/../utilities/mapCoordConverter.php');
+    require_once (dirname(__FILE__).'/../dbaccess/exportRecords.php');
     
     $response = array();
 

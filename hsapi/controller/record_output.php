@@ -32,6 +32,11 @@
     *   leaflet - true|false returns strict geojson and timeline data as two separate arrays, without details, only header fields rec_ID, RecTypeID and rec_Title
     *   simplify  true|false simplify  paths with more than 1000 vertices 
     * 
+    * datatable -   datatable session id
+    *               >1 and "q" is defined - save query request in session to result set returned, 
+    *               >1 and "q" not defined and "draw" is defined - takes query from session
+    *                1 - use "q" parameter
+    * 
     *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
@@ -57,7 +62,7 @@
     require_once (dirname(__FILE__).'/../../common/php/Temporal.php');
     require_once (dirname(__FILE__).'/../../admin/verification/verifyValue.php');
 
-    require_once (dirname(__FILE__).'/../import/exportRecords.php');
+    require_once (dirname(__FILE__).'/../dbaccess/exportRecords.php');
     
     $response = array();
 
@@ -118,21 +123,6 @@
 
     $is_csv = (@$params['format'] == 'csv');
     if(@$params['format']){
-        /*forcefully sort by record type    
-        if(is_array(@$params['q'])){
-            $query_json = $params['q'];
-        }else{
-            $query_json = json_decode(@$params['q'], true);
-        }
-
-        if(is_array($query_json) && count($query_json)>0){
-            $params['q'] = $query_json;
-            if($is_csv) $params['q']['sortby']='rt';
-        }else if($is_csv) {
-             $params['q'] = @$params['q'].' sortby:rt';
-        }
-        */
-        
         //search only ids - all 
         $search_params['detail'] = 'ids';
     }
@@ -149,6 +139,55 @@
         //$search_params['limit'] = 1;
         //$search_params['needall'] = 0;
     }else{
+        
+//    datatable -   datatable session id  - returns json suitable for datatable ui component
+//              >1 and "q" is defined - save query request in session to result set returned, 
+//              >1 and "q" not defined and "draw" is defined - takes ids/query from session
+//              1 - use "q" parameter
+        if(@$params['format']=='json' && @$params['datatable']>1){
+            
+            $dt_key = 'datatable'.$params['datatable'];
+            
+            if(@$params['q']==null){
+                //restore ids from session
+                $search_params['q'] = $system->user_GetPreference($dt_key);
+                
+                if($search_params['q']==null){
+                    //query was removed 
+                    header( 'Content-Type: application/json');    
+                    echo json_encode(array('error'=>'Datatable session expired. Please refresh search'));
+                    exit();
+                }
+                
+                if(@$params['start']>0){
+                    $search_params['offset'] = $params['start'];
+                }
+                if($params['length']>0){
+                    $search_params['limit'] = $params['length'];
+                    $search_params['needall'] = 0;
+                }
+                
+            }else if(@$params['q']!=null){
+                //remove all other datatable keys from session
+                $dbname = $system->dbname_full();
+                $keys = array_keys(@$_SESSION[$dbname]["ugr_Preferences"]);
+                if(is_array($keys))
+                foreach ($keys as $key) {
+                    if(strpos($key,'datatable')===0){
+                        $_SESSION[$dbname]["ugr_Preferences"][$key] = null;    
+                        unset($_SESSION[$dbname]["ugr_Preferences"][$key]);
+                    }
+                }
+                //save int session and exit
+                user_setPreferences($system, array($dt_key=>$params['q']));
+                //returns OK
+                header( 'Content-Type: application/json');    
+                echo json_encode(array('status'=>HEURIST_OK));
+                exit();
+            }
+        }
+        
+        
         $response = recordSearch($system, $search_params);
     }
         
