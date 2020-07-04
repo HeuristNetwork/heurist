@@ -167,6 +167,7 @@ function hLayout(args) {
     *  Creates "free" layout from html elements attributes heurist-app-id and heurist-app-options
     *  supp_options - additional options that can not be set via configuration in html - such as event listeners
     * 
+    *  
     */
     function _getLayoutParams($container, supp_options){
         
@@ -179,10 +180,11 @@ function hLayout(args) {
         for(var i=0; i<eles.length; i++){
             var ele = $(eles[i]);
             var app_id = ele.attr('data-heurist-app-id');
-            if(_appGetWidgetById(app_id)!=null){
+            if(_appGetWidgetById(app_id)!=null){ //is defined in layout_default.cfg_widgets
 
-                var cfgele = ele.find('span.widget-options:first');
+                var cfgele = ele.find('span.widget-options:first'); //old version
                 if(cfgele.length==0) cfgele = ele;
+                // in new version config is in body
                 opts = window.hWin.HEURIST4.util.isJSON(cfgele.text());
                 
                 //extend options with suppimentary ones
@@ -628,14 +630,23 @@ function hLayout(args) {
                     
                 }else if (lpane.apps && lpane.apps[0].appid == 'heurist_Cardinals') {
 
+                    //outdated - config now in body of widget div
                     $pane.find('div.widget-design-header:first').remove(); //remove configuration div with header
                     $pane.find('span.widget-options:first').remove(); //remove configuration span with header
+                    
                     var layout_opts = lpane.apps[0].options.tabs;
+console.log('>>>>>');                                        
+console.log(layout_opts);                    
+                    var $cardinal_container = $('#'+lpane.apps[0].options.container);
+                  
+                    // container:'', tabs:{north:{id:"xxx"},center:{id:"xxx",size:300, minsize:150}...}
+                    //
+                    //  
                     var keys = Object.keys(layout_opts);
                     
                     for(var i=0; i<keys.length; i++){
                         var ele_id = layout_opts[keys[i]].id;
-                        $pane.children('#'+ele_id).addClass('ui-layout-'+keys[i]);    
+                        $cardinal_container.children('#'+ele_id).addClass('ui-layout-'+keys[i]);    
                     }
                     
                     layout_opts['applyDefaultStyles'] = true;
@@ -650,24 +661,22 @@ function hLayout(args) {
                     };
 
 
-                    if(!$pane.is(':visible')){
+                    if(!$cardinal_container.is(':visible')){
                         
                         $pane.on("myOnShowEvent222", function(event){
                             
-                            $pane.off("myOnShowEvent222");
-                            $pane.layout(layout_opts);
-                            __toogleIcons($pane, 'west', 'e', 'w');
-                            __toogleIcons($pane, 'east', 'w', 'e');
+                            $cardinal_container.off("myOnShowEvent222");
+                            $cardinal_container.layout(layout_opts);
+                            __toogleIcons($cardinal_container, 'west', 'e', 'w');
+                            __toogleIcons($cardinal_container, 'east', 'w', 'e');
                         });
                         
                     }else{
-                        $pane.layout(layout_opts);    
-                        __toogleIcons($pane, 'west', 'e', 'w');
-                        __toogleIcons($pane, 'east', 'w', 'e');
+                        $cardinal_container.layout(layout_opts);    
+                        __toogleIcons($cardinal_container, 'west', 'e', 'w');
+                        __toogleIcons($cardinal_container, 'east', 'w', 'e');
                     }
-                    
-                    
-                    
+                    $pane.hide();  //or remove?
                     
                     return;
                     
@@ -1429,7 +1438,7 @@ function hLayout(args) {
             }
             var layout = _getLayoutParams($container, supp_options); 
             
-            //init groups
+            //init groups/cardinal layouts
             
             
             
