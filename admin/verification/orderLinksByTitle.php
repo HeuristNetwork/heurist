@@ -54,12 +54,14 @@ $mysqli = $system->get_mysqli();
 $query = 'SELECT dtl_ID, r1.rec_ID, dtl_Value, r2.rec_Title FROM recDetails, Records r1, Records r2 '
 .' where r1.rec_ID=dtl_RecID and r1.rec_RecTypeID='.$_REQUEST['rty_ID'].' and dtl_DetailTypeID='.$_REQUEST['dty_ID']
 .' and dtl_Value=r2.rec_ID order by r1.rec_ID, r2.rec_Title ';
-    
+// and r1.rec_ID=494461    
 $res = $mysqli->query($query);
 
 $rec_ID = 0;
 
 $vals = array();
+$titles = array();
+$ids = array();
 
 $cnt = 0;
 
@@ -67,34 +69,39 @@ if($res){
     while ($row = $res->fetch_row()) {
         
         if($rec_ID!=$row[1]){
-            $cnt = $cnt + updateDtlValues($mysqli, $vals);    
+            $cnt = $cnt + updateDtlValues($mysqli, $ids, $vals, $titles);    
             $rec_ID=$row[1];
             $vals = array();
+            $ids = array();
+            $titles = array();
         }
-        $vals[$row[0]] = $row[2];
+        $ids[]  = $row[0];
+        $vals[] = $row[2];
+        //$titles[] = $row[0].'  '.$row[2].'  '.$row[3];
     }
-    $cnt = $cnt + updateDtlValues($mysqli, $vals);    
+    $cnt = $cnt + updateDtlValues($mysqli, $ids, $vals, $titles);    
 }
 
 print $cnt.' records updated';
 
-function updateDtlValues($mysqli, $vals){
-    
+function updateDtlValues($mysqli, $ids, $vals, $titles){
+
     if(count($vals)>1){
         
-        $dtl_IDs = array_keys($vals);
-        $idx = count($dtl_IDs)-1;
-    
-        foreach ($dtl_IDs as $dt) {
-                $query = "update recDetails set dtl_Value=".$vals[$dtl_IDs[$idx]].' where dtl_ID='.$dt;
-//print $query.'<br>';                
-                $res = $mysqli->query($query);
-                if ($mysqli->error) {
+        sort($ids);
+        $k = 0;
+        foreach ($ids as $dt) { //sorted dtl_ID
+//print $ids[$k].'  dtl_Value='.$vals[$k].'  title='.$titles[$k].'<br>';
+            $query = "update recDetails set dtl_Value=".$vals[$k].' where dtl_ID='.$ids[$k];
+            //print $query.'<br>';                
+            $res = $mysqli->query($query);
+            if ($mysqli->error) {
                     print 'Error for query '.$query.' '.$mysqli->error;
-                    exit();
-                }
-                $idx=$idx-1;    
-        } 
+            	    exit();
+            }
+
+	    $k++;
+        }
         return 1;  
     }else{
         return 0;
