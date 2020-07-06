@@ -1,0 +1,36 @@
+<fieldset class="ent_header" style="height:5em">
+<div style="padding: 0.2em; width: 100%;" class="input">
+    <div class="header" style="padding: 0 16px 0 16px;">
+        <label for="sel_record_scope">Records scope:</label>
+    </div>
+    <select id="sel_record_scope" class="text ui-widget-content ui-corner-all" style="max-width:30em"></select>
+</div>
+<div style="padding: 0.2em; width: 100%; display:none;" class="input" id="divLoadSettings"></div>
+<hr style="margin:5px"/>
+</fieldset>
+
+<!-- TREE for field selection -->
+<div style="top:5.2em; bottom:5em; padding: 1.2em; min-width: 600px;overflow:hidden" class="input ent_content">
+    <div class="header" style="float:left;width:40%;padding: 0 16px 0 16px;"><label>Select fields</label></div>
+    <div class="header" style="float:right;width:40%;padding: 0 16px 0 16px;"><label>Order columns</label></div>
+    <br>
+    
+    <div class="rtt-tree" style="overflow-y:auto;outline: none;position: absolute;bottom: 0px;top:32px;left:0;width:50%" 
+                id="rectype_tree">
+    </div>
+
+    <div class="rtt-list" style="overflow-y:auto;outline: none;position: absolute;bottom: 0px;top:32px;right:0;width:50%" id="rectype_list">
+    </div>
+    
+</div>
+
+<!-- CSV preferences -->
+<div class="ent_footer" style="height:4em">
+
+<fieldset style="padding:5px;">
+
+<div style="width: 100%;display:none;" class="input" id="divSaveSettings"></div>
+
+</fieldset>
+
+</div>

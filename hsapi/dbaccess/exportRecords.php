@@ -186,7 +186,8 @@ public static function output($data, $params){
             //"recordsTotal": 57,"recordsFiltered":'.count($records).',
             
             fwrite($fd, '{"draw": '.$params['draw'].',"recordsTotal":'
-                    .$params['recordsTotal'].',"recordsFiltered":'.$params['recordsTotal'].',"data":[');     
+                    .$params['recordsTotal'].',"recordsFiltered":'
+                    .(@$params['recordsFiltered']!=null?$params['recordsFiltered']:$params['recordsTotal']).',"data":[');     
             
         }else if(@$params['datatable']==1){
             
@@ -321,9 +322,67 @@ XML;
 
     //for gephi we don't need details
     $need_record_details = ($params['format']!='gephi');
-    //for leaflet get only limited set of fields 
-    if(@$params['leaflet'] || @$params['datatable']>0){ 
+    $columns = array('0'=>array()); //for datatable
+    $row_placeholder = array();
+    
+    if(@$params['leaflet']){
+        //for leaflet get only limited set of fields 
         $retrieve_fields = 'rec_ID,rec_RecTypeID,rec_Title';
+    }else if(@$params['datatable']>0){ 
+
+        //for datatable convert  $params['columns'] to array
+        
+        /*
+0: ["rec_ID","rec_Title"],
+3: ["rec_ID", "rec_RecTypeID", "1", "949", "9", "61"]
+5: ["1", "38"]
+        */
+        $need_tags = false;
+        $need_record_details = array();
+        $retrieve_fields = array(); //header fields
+        
+        if(is_array($params['columns'])){
+            foreach($params['columns'] as $idx=>$column){
+                $col_name = $column['data'];
+
+                if(strpos($col_name,'.')>0){
+                    list($rt_id,$col_name) = explode('.',$col_name);
+                    
+                    if(!@$row_placeholder[$rt_id]) $row_placeholder[$rt_id] = array();
+                    $row_placeholder[$rt_id][$col_name] = '';
+                }else{
+                    $rt_id = 0;
+                    $row_placeholder[$col_name] = '';
+                }
+
+                if($col_name=='rec_Tags'){
+                    $need_tags = true;           
+                }else if($rt_id==0){
+                     if(strpos($col_name,'rec_')===0){
+                         array_push($retrieve_fields, $col_name);    
+                     }else{
+                         array_push($need_record_details, $col_name);
+                     }
+                }
+                
+                
+                if(!array_key_exists($rt_id, $columns)) {
+                      $columns[$rt_id] = array();
+                }
+                array_push($columns[$rt_id], $col_name);    
+            }
+        }
+        
+        if(count($need_record_details)==0){
+            $need_record_details = false;
+        }
+        if(count($retrieve_fields)==0){ //always include id fields 
+            $retrieve_fields = array('rec_ID','rec_RecTypeID');
+            array_push($columns['0'],'rec_ID');
+            array_push($columns['0'],'rec_RecTypeID');
+        }
+        $retrieve_fields = implode(',', $retrieve_fields);
+        
     }else{
         $retrieve_fields = null;
     }
@@ -403,7 +462,7 @@ XML;
             
             if(@$params['datatable']>0){
                 
-                $feature = self::_getJsonFlat( $record );
+                $feature = self::_getJsonFlat( $record, $columns, $row_placeholder );
                 fwrite($fd, $comma.json_encode($feature));
                 
             }else if(@$params['extended']>0 && @$params['extended']<3){ //with concept codes and labels
@@ -1064,38 +1123,84 @@ private static function _getJsonFromWkt($wkt, $simplify=true)
         return null;
 }
 
-//
-//
-//
-private static function _getJsonFlat( $record, $level=0 ){
+/*
+Produces json for DataTable widget
 
-    $res = array('rec_ID'=>$record['rec_ID'], 'rec_RecTypeID'=>$record['rec_RecTypeID'], 
-                 'rec_Title'=>$record['rec_Title']); //, 'rec_URL'=>$record['rec_URL']
+$columns: 
+0: ["rec_ID","rec_Title"],
+3: ["rec_ID", "rec_RecTypeID", "1", "949", "9", "61"]
+5: ["1", "38"]
+*/
+private static function _getJsonFlat( $record, $columns, $row_placeholder, $level=0 ){
+    
+    
+    $res = ($level==0)?$row_placeholder:array();
+    
+    if($level==0){
+        $rt_id = 0;
+    }else{
+        $rt_id = $record['rec_RecTypeID'];
+    }
 
+    if(!array_key_exists($rt_id, $columns)) return null;
+    
+    foreach($columns[$rt_id] as $column){
 
+        $col_name = $column; //($rt_id>0 ?$rt_id.'.':'').   
+        
+        if ($column=='rec_Tags'){
+            $value = recordSearchPersonalTags($system, $recID);
+            $res[$col_name] = ($value==null)?'':implode('|', $value);
+        }else if(strpos($column,'rec_')===0){
+            $res[$col_name] = $record[$column];       
+        }else{
+            $res[$col_name] = ''; //placeholder
+        }
+    }
+    
+    
     if(self::$defDetailtypes==null){
         self::$defDetailtypes = dbs_GetDetailTypes(self::$system, null, 2);   
     }
     $idx_dtype = self::$defDetailtypes['typedefs']['fieldNamesToIndex']['dty_Type'];
     
-    //convert details to proper JSON format, extract geo fields and convert WKT to geojson geometry
+    //convert details to proper JSON format
     foreach ($record['details'] as $dty_ID=>$field_details) {
         
-        $res[('f'.$dty_ID)] = array();
+        if(!in_array($dty_ID, $columns[$rt_id])) continue;
+        
+        $col_name = $dty_ID; //($rt_id>0 ?$rt_id.'.':'').$dty_ID;
+        
+        $res[$col_name] = array();
         $field_type = self::$defDetailtypes['typedefs'][$dty_ID]['commonFields'][$idx_dtype];
         
         foreach($field_details as $dtl_ID=>$field_value){ //for detail multivalues
         
             if($field_type=='resource'){
                 
-                if($level>0){
-                    $field_value = array('rec_ID'=>$field_value['id'], 
-                                         'rec_RecTypeID'=>$field_value['type'], 
-                                         'rec_Title'=>$field_value['title']);
-                }else{
-                    $record = recordSearchByID(self::$system, $field_value['id'], true, 'rec_ID,rec_RecTypeID,rec_Title' );
-                    $field_value = self::_getJsonFlat( $record, $level+1 );
+                //if multi constraints - search all details
+                
+                $record = recordSearchByID(self::$system, $field_value['id'], true, null );
+                $field_value = self::_getJsonFlat( $record, $columns, null, $level+1 );
+                
+                if($field_value!=null){
+                    $rt_id_link = $record['rec_RecTypeID'];
+                    if(@$res[$rt_id_link]){
+                        foreach($field_value as $col=>$field){
+                            if(@$res[$rt_id_link][$col]==null || $res[$rt_id_link][$col]==''){
+                                $res[$rt_id_link][$col] = $field;
+                            }else{
+                                if(!is_array($res[$rt_id_link][$col])){
+                                    $res[$rt_id_link][$col] = array($res[$rt_id_link][$col]);
+                                }
+                                array_push($res[$rt_id_link][$col], $field);
+                            }    
+                        }
+                    }else{
+                        $res[$rt_id_link] = $field_value;    
+                    }
                 }
+                $field_value = $field_value['id'];
                 
             }else if ($field_type=='file'){
                 
@@ -1108,11 +1213,13 @@ private static function _getJsonFlat( $record, $level=0 ){
             //}else if ($field_type=='enum' || $field_type=='relationtype'){
             }
             
-            array_push($res['f'.$dty_ID], $field_value);
+            if($field_value!=null){
+                array_push($res[$col_name], $field_value);
+            }
         } //for detail multivalues
         
-        if(count($res['f'.$dty_ID])==1){
-            $res[('f'.$dty_ID)] = $res[('f'.$dty_ID)][0];  
+        if(count($res[$col_name])==1){
+            $res[$col_name] = $res[$col_name][0];  
         } 
     } //for all details of record
 

@@ -47,6 +47,7 @@ var cfg_widgets = [
 
     {id:'heurist_mainMenu', name:'Main Menu', widgetname:'mainMenu', script:'hclient/widgets/dropdownmenus/mainMenu.js'},
     {id:'heurist_resultList', name:'Search Result', widgetname:'resultList', script:'hclient/widgets/viewers/resultList.js'},
+    {id:'heurist_resultListView', name:'List View', widgetname:'resultListDataTable', script:'hclient/widgets/viewers/resultListDataTable.js'},
     {id:'heurist_resultListExt', name:'&nbsp;&nbsp;&nbsp;', widgetname:'recordListExt', script:'hclient/widgets/viewers/recordListExt.js'},
     {id:'heurist_resultListCollection', name:'Records Collection', widgetname:'resultListCollection', script:'hclient/widgets/viewers/resultListCollection.js'},
 
@@ -165,6 +166,7 @@ var cfg_layouts = [
                                 options:{url: 'viewers/record/renderRecordData.php?recID=[recID]&db=[dbname]', 
                                 is_single_selection:true, 'data-logaction':'open_Record'}
                     },    // H3 record viewer
+                    {appid:'heurist_resultListView', name: 'List View', options:{ dataTableParams:{} } },
                     {appid:'heurist_Map', options:{'data-logaction':'open_MapTime'}}, // map viewer (map.php) inside widget (app_timemap.js)
                     {appid:'heurist_Map2', options:{'data-logaction':'open_MapTime', leaflet:true
                         , layout_params:{legend:'search,-basemaps,-mapdocs,250,off'} }}, 
@@ -172,7 +174,6 @@ var cfg_layouts = [
                     {appid:'heurist_resultListExt', name: 'Custom Reports', options:{title:'Custom Reports', 
                                     url: 'viewers/smarty/showReps.html?db=[dbname]', 'data-logaction':'open_Reports'}
                     },
-                    {appid:'heurist_resultListExt', name: 'Data Table', options:{ dataTableParams:{} } },
                     {appid:'heurist_Frame', name: 'Export',
                         options:{url: 'hclient/framecontent/exportMenu.php?db=[dbname]',
                                          isframe:true, 'data-logaction':'open_Export'}

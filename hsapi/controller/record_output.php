@@ -159,6 +159,30 @@
                     exit();
                 }
                 
+                $search_by_type = '';
+                $search_by_field = '';
+                //search by record type
+                if(is_array($params['columns'])){
+                    foreach($params['columns'] as $idx=>$column){
+                        if($column['data']=='rec_RecTypeID' && @$column['search']['value']!=''){
+                            $search_by_type = '{"t":"'.$column['search']['value'].'"},';
+                            break;                            
+                        }
+                    }
+                }
+                if(@$params['search']['value']!=''){
+                      $search_by_field = '{"f":"'.addslashes($params['search']['value']).'"},';
+                }
+                if($search_by_type!='' || $search_by_field!=''){
+                    $search_params['q'] = '['.$search_by_type.$search_by_field.$search_params['q'].']';    
+                    
+                    $search_params['detail'] = 'count';
+                    $response = recordSearch($system, $search_params);
+                    $search_params['detail'] = 'ids';
+                    
+                    $params['recordsFiltered'] = $response['data']['count'];
+                }
+                
                 if(@$params['start']>0){
                     $search_params['offset'] = $params['start'];
                 }
@@ -167,7 +191,7 @@
                     $search_params['needall'] = 0;
                 }
                 
-            }else if(@$params['q']!=null){
+            }else if(@$params['q']!=null){  //first request - save base filter
                 //remove all other datatable keys from session
                 $dbname = $system->dbname_full();
                 $keys = array_keys(@$_SESSION[$dbname]["ugr_Preferences"]);

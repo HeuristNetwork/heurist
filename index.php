@@ -140,6 +140,7 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
         <script type="text/javascript" src="hclient/widgets/viewers/resultList.js"></script>
         <script type="text/javascript" src="hclient/widgets/viewers/resultListMenu.js"></script>
         <script type="text/javascript" src="hclient/widgets/viewers/resultListCollection.js"></script>
+        <script type="text/javascript" src="hclient/widgets/viewers/resultListDataTable.js"></script>
 
         <script type="text/javascript" src="hclient/widgets/viewers/staticPage.js"></script>
         <script type="text/javascript" src="hclient/widgets/dropdownmenus/navigation.js"></script>

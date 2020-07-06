@@ -35,9 +35,8 @@ $.widget( "heurist.recordListExt", {
         search_realm: null,
         search_initial: null,  //NOT USED query string or svs_ID for initial search
         
-        onLoadComplete: null,  //callback
+        onLoadComplete: null  //callback
         
-        dataTableParams: null
     },
 
     _current_url: null,
@@ -52,21 +51,6 @@ $.widget( "heurist.recordListExt", {
 
         this.div_content = $('<div>').css({width:'100%', height:'100%'}).appendTo( this.element );
         
-        if(this.options.dataTableParams){
-            
-            var classes = this.options.dataTableParams['classes']
-                                ?this.options.dataTableParams['classes']
-                                :'display compact';
-
-            //this.div_content.css({'padding-top':'5px'}); //,'overflow-y': 'auto'
-            this.div_datatable = $('<table>').css({'width':'98%'})
-                .addClass(classes).appendTo(this.div_content);
-            
-            this.options.is_single_selection = false;
-            this.options.reload_for_recordset =false;
-            this.options.is_frame_based = false;
-            
-        }
         
         if(this.options.is_frame_based){
             this.dosframe = $( "<iframe>" ).css({overflow: 'none !important', width:'100% !important'})
@@ -239,60 +223,6 @@ this._dout('update dataset '+request.q);
         }
 
 this._dout('refresh vis='+this.element.is(':visible'));            
-
-        if(this.options.dataTableParams!=null){
-
-            if(this.options.recordset && this.element.is(':visible')){
-                
-                this.loadanimation(false);
-                
-                var recIds_list = this.options.recordset.getIds();
-
-                var recIds = this.options.recordset.getIds().join(',');
-                    
-                if(recIds!=this._current_url){                    
-                    
-                    this._current_url = recIds;
-
-                    if(this._dataTable!=null){
-                        this._dataTable.destroy();
-                        this._dataTable = null;
-                        this.div_datatable.empty();
-                    }
-                    
-                    if(recIds_list.length>0){
-                    
-                        //this.options.dataTableParams['processing'] = true;
-                        this.options.dataTableParams['ajax'] = window.hWin.HAPI4.baseURL
-                        +'hsapi/controller/record_output.php?format=json&datatable=1'
-                        +'&db=' + window.hWin.HAPI4.database
-                        +'&q=ids:'+recIds;
-
-                        this.options.dataTableParams['scrollCollapse'] = true;
-                        this.options.dataTableParams['scrollY'] = this.div_content.height()-100;
-                        
-                        if(!this.options.dataTableParams['columns']){
-                            this.options.dataTableParams['columns'] = [
-                                { data: 'rec_ID', title:'ID' },
-                                { data: 'rec_Title', title:'Title' },
-                                { data: 'rec_RecTypeID', title:'Type' }
-                            ];
-                        }
-this._dout('reload datatable '+recIds);                  
-                        this._dataTable = this.div_datatable.DataTable( this.options.dataTableParams );    
-                        
-                        this.div_content.find('.dataTables_length').css('padding','5 0 0 10');
-                        this.div_content.find('.dataTables_filter').css('padding','5 10 0 0');
-                        this.div_content.find('.dataTables_info').css('padding-left','10px');
-                        
-                        
-                    }
-                }
-                
-            }
-            //that.options.recordset
-            return;
-        }
 
         //refesh if element is visible only - otherwise it costs much resources
         if(!this.element.is(':visible') || window.hWin.HEURIST4.util.isempty(this.options.url)){

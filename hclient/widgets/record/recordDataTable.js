@@ -1,5 +1,5 @@
 /**
-* recordExportCSV.js - select fields to be exported to CSV for current recordset
+* recordDataTable.js - select fields to be visible in DataTable for particular record type
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -17,7 +17,7 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-$.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
+$.widget( "heurist.recordDataTable", $.heurist.recordAction, {
 
     // default options
     options: {
@@ -25,10 +25,10 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
         height: 780,
         width:  800,
         modal:  true,
-        title:  'Export records to comma or tab separated text files',
+        title:  'Configure DataTable columns',
         
-        htmlContent: 'recordExportCSV.html',
-        helpContent: 'recordExportCSV.html' //in context_help folder
+        htmlContent: 'recordDataTable.html',
+        helpContent: 'recordDataTable.html' //in context_help folder
     },
 
     selectedFields:null,
@@ -52,9 +52,9 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
 
         this.element.find('#divLoadSettings').configEntity({
             entityName: 'defRecTypes',
-            configName: 'csvexport',
+            configName: 'datatable',
 
-            getSettings: function(){ return that.getSettings(false); }, //callback function to retieve configuration
+            getSettings: function(){ return that.getSettings(false); }, //callback function to retrieve configuration
             setSettings: function( settings ){ that.setSettings( settings ); }, //callback function to apply configuration
 
             //divLoadSettingsName: this.element
@@ -68,7 +68,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
     },
 
     //
-    //
+    // TO UI
     //
     setSettings: function(settings){
         
@@ -80,9 +80,12 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
             //restore selection
             that.selectedFields = settings.fields; 
             
+//
+console.log(settings.fields);            
+            
             var tree = that.element.find('.rtt-tree').fancytree("getTree");           
             tree.visit(function(node){
-                node.setSelected(false);
+                node.setSelected(false); //reset
                 node.setExpanded(true);
             });            
             
@@ -90,6 +93,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                 that._assignSelectedFields();
             },1000);
             
+            /*
             that.element.find('#delimiterSelect').val(settings.csv_delimiter);
             that.element.find('#quoteSelect').val(settings.csv_enclosure);
             that.element.find('#cbNamesAsFirstRow').prop('checked',(settings.csv_header==1));
@@ -97,10 +101,9 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
             that.element.find('#cbIncludeTermCodes').prop('checked',(settings.include_term_codes==1));
             that.element.find('#cbIncludeTermHierarchy').prop('checked',(settings.include_term_hierarchy==1));
             that.element.find('#cbIncludeResourceTitles').prop('checked',(settings.include_resource_titles==1));
-            
+            */
         }
     },
-
     
     //
     // assign selected fields in tree
@@ -109,7 +112,8 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
 
         if(this.selectedFields && this.selectedFields.length>0){
         
-            var tree = this.element.find('.rtt-tree').fancytree("getTree");
+            var list = this.element.find('div.rtt-list');
+            var tree = this.element.find('div.rtt-tree').fancytree("getTree");
             var that = this;
 
             tree.visit(function(node){
@@ -117,6 +121,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                         //find it among facets
                         for(var i=0; i<that.selectedFields.length; i++){
                             if(that.selectedFields[i]==node.data.code){
+                                //that._addSelectedColumn(node.data.code, node.data.title);
                                 node.setSelected(true);
                                 break;
                             }
@@ -125,14 +130,40 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                 });
         }
     },
-    
+
+    //
+    //
+    //    
+    _addSelectedColumn: function(code, title){
+        
+            var ids = code.split(':');
+            var rtid = ids[ids.length-2];
+            var dtid = ids[ids.length-1];
+
+            var header_fields = {id:'rec_ID',title:'rec_Title',url:'rec_URL',modified:'rec_Modified',tags:'rec_Tags'};
+            if(header_fields[dtid]){
+                dtid = header_fields[dtid];
+            }
+            if(rtid!=this._selectedRtyID){
+                dtid = rtid+'.'+dtid;
+            }
+            
+            var container = this.element.find('div.rtt-list');
+        
+            $('<div data-code="'+code+'" data-key="'+dtid+'">'
+                +'<input type="checkbox" title="Visibility in DataTable" checked>&nbsp;<span>'
+                +title+'</span></div>').appendTo(container);
+                
+            container.sortable();
+    },
+  
     //    
     //
     //
     _getActionButtons: function(){
         var res = this._super();
         var that = this;
-        res[1].text = window.hWin.HR('Download');
+        res[1].text = window.hWin.HR('Apply');
         res[0].text = window.hWin.HR('Close');
         /*
         res.push({text:window.hWin.HR('Export'),
@@ -164,47 +195,27 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
             
             var opt = window.hWin.HEURIST4.ui.addoption(selScope,'','select record type …');
             $(opt).attr('disabled','disabled').attr('visiblity','hidden').css({display:'none'});
-        
-            for (var rty in rectype_Ids){
+        }
+        for (var rty in rectype_Ids){
                 if(rty>=0 && window.hWin.HEURIST4.rectypes.pluralNames[rectype_Ids[rty]]){
                     rty = rectype_Ids[rty];
                     window.hWin.HEURIST4.ui.addoption(selScope,rty,
-                            'only: '+window.hWin.HEURIST4.rectypes.pluralNames[rty]);
+                            window.hWin.HEURIST4.rectypes.pluralNames[rty]); //'only: '+
                 }
-            }
         }
-
         
-        if (this._currentRecordset &&  this._currentRecordset.length() > 0) {
+        if (this._currentRecordset &&  this._currentRecordset.length() > 0 && rectype_Ids.length>1) {
             
-                var msg = (rectype_Ids.length>1)?'Basic record fields only':'Current result set';
-                    
-                window.hWin.HEURIST4.ui.addoption(selScope,
-                    (rectype_Ids.length>1)?'current':rectype_Ids[0],
-                    msg); //+' (count=' + this._currentRecordset.length()+')'
+                var msg = 'Any recordtype: Basic record fields only';
+                window.hWin.HEURIST4.ui.addoption(selScope, '', msg);
         }
-        
-        if (this._currentRecordsetSelIds &&  this._currentRecordsetSelIds.length > 0) {
-                    
-                window.hWin.HEURIST4.ui.addoption(selScope,'selected',
-                    'Selected records only (count=' + this._currentRecordsetSelIds.length+')');
-        }
-        
-        
         
         this._on( this.selectRecordScope, {
                 change: this._onRecordScopeChange} );        
-        //this.selectRecordScope.val(this.options.init_scope);    
-        //if(selScope.selectedIndex<0) selScope.selectedIndex=0;
+
         this._onRecordScopeChange();
         
         window.hWin.HEURIST4.ui.initHSelect(selScope);
-        
-        var wmenu = $(selScope).hSelect( "menuWidget" );  //was menu
-        //wmenu.find('li.ui-state-disabled').css({'display':'none !important'});
-        //$(selScope).hSelect('widget').text('select...');
-        //this.element.find('li.ui-state-disabled').css({'display':'none !important'});
-        
     },
             
     //
@@ -217,14 +228,10 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
             var scope = [], 
             rec_RecTypeID = 0;
             
-            if(scope_val == 'selected'){
-                scope = this._currentRecordsetSelIds;
-            }else { //(scope_val == 'current'
-                scope = this._currentRecordset.getIds();
-                if(scope_val  >0 ){
-                    rec_RecTypeID = scope_val;
-                }   
-            }
+            var scope = this._currentRecordset.getIds();
+            if(scope_val  >0 ){
+                rec_RecTypeID = scope_val;
+            }   
             
             if(scope.length<1){
                 window.hWin.HEURIST4.msg.showMsgFlash('No results found. '
@@ -234,63 +241,18 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
             
             var settings = this.getSettings(true);            
             if(!settings) return;
-           
-            var request = {
-                'request_id' : window.hWin.HEURIST4.util.random(),
-                'db': window.hWin.HAPI4.database,
-                'ids'  : scope,
-                'format': 'csv',
-                'prefs': settings};
-                
-            if(rec_RecTypeID>0){
-                request['rec_RecTypeID'] = rec_RecTypeID;
-            }
-            
-            var url = window.hWin.HAPI4.baseURL + 'hsapi/controller/record_output.php'
-            
-            this.element.find('#postdata').val( JSON.stringify(request) );
-            this.element.find('#postform').attr('action', url);
-            this.element.find('#postform').submit();
-                
-            if(mode==1){ //open in new window
-                
-            }else{ //download
-                
-            }     
-            /*
-                var that = this;                                                
-                
-                window.hWin.HAPI4.RecordMgr.access(request, 
-                    function(response){
-                        if(response.status == window.hWin.ResponseStatus.OK){
 
-                            that._context_on_close = (response.data.updated>0);
-                            
-                            that.closeDialog();
-                            
-                            var msg = 'Processed : '+response.data.processed + ' record'
-                                + (response.data.processed>1?'s':'') +'. Updated: '
-                                + response.data.updated  + ' record'
-                                + (response.data.updated>1?'s':'');
-                           if(response.data.noaccess>0){
-                               msg += ('<br><br>Not enough rights for '+response.data.noaccess+
-                                        ' record' + (response.data.noaccess>1?'s':''));
-                           }     
-                            
-                            window.hWin.HEURIST4.msg.showMsgFlash(msg, 2000);
-                            
-                        }else{
-                            window.hWin.HEURIST4.msg.showMsgErr(response);
-                        }
-                    });
-      */  
+            //close dialog  
+            this._context_on_close = settings;
+            this._as_dialog.dialog('close');
+                     
     },
     
     //
-    // mode_action true - returns fields for csv export, false - returns codes of selected nodes
+    // mode_action true - returns columns for DataTable, false - returns codes of selected nodes
     //
     getSettings: function( mode_action ){
-
+            /*
             var header_fields = {id:'rec_ID',title:'rec_Title',url:'rec_URL',modified:'rec_Modified',tags:'rec_Tags'};
             function __removeLinkType(dtid){
                 if(header_fields[dtid]){
@@ -327,9 +289,9 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                     __addSelectedField(ids, lvl+2, rtid);
                 }
             }
-            
+            */
             //get selected fields from treeview
-            var selectedFields = mode_action?{}:[];
+            var selectedFields = false&&mode_action?{}:[];
             var tree = this.element.find('.rtt-tree').fancytree("getTree");
             var fieldIds = tree.getSelectedNodes(false);
             var k, len = fieldIds.length;
@@ -346,7 +308,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                 
                 if(window.hWin.HEURIST4.util.isempty(node.data.code)) continue;
                 
-                if(mode_action){
+                if(false && mode_action){
                     var ids = node.data.code.split(":");
                     __addSelectedField(ids, 1, 0);
                 }else{
@@ -355,20 +317,33 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                 
                 //DEBUG console.log( node.data.code );
             }
+            
+            var selectedCols = [];
+            var need_id = true, need_type = true;
+            
+            this.element.find('div.rtt-list > div').each(function(idx,item){
+                var $item = $(item);
+                selectedCols.push({
+                    data: $item.attr('data-key'),                 
+                    title: $item.find('span').text(), 
+                    visible:  $item.find('input').is(':checked') 
+                });
+                if(need_id && $item.attr('data-key')=='rec_ID') need_id = false;
+                if(need_type && $item.attr('data-key')=='rec_RecTypeID') need_type = false;
+            });
+            if(need_id){
+                selectedCols.push({data:'rec_RecTypeID',title:'Record type',visible:false});    
+            }
+            if(need_type){
+                selectedCols.push({data:'rec_ID',title:'ID',visible:false});    
+            }
+            if(selectedCols.length==2){
+                selectedCols = null;//.push({data:'rec_Title',title:'Title',visible:true});    
+            }
+            
             //DEBUG 
-        
-        return {
-                'fields': selectedFields,
-                'csv_delimiter':  this.element.find('#delimiterSelect').val(),
-                'csv_enclosure':  this.element.find('#quoteSelect').val(),
-                'csv_mvsep':'|',
-                'csv_linebreak':'nix', //not used at tne moment
-                'csv_header': this.element.find('#cbNamesAsFirstRow').is(':checked')?1:0,
-                'include_term_ids': this.element.find('#cbIncludeTermIDs').is(':checked')?1:0,
-                'include_term_codes': this.element.find('#cbIncludeTermCodes').is(':checked')?1:0,
-                'include_term_hierarchy': this.element.find('#cbIncludeTermHierarchy').is(':checked')?1:0,
-                'include_resource_titles': this.element.find('#cbIncludeResourceTitles').is(':checked')?1:0
-                };
+        //console.log( selectedFields )
+        return { 'fields': selectedFields, 'columns': selectedCols };
         
     },
 
@@ -415,6 +390,8 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
             
             this._selectedRtyID = rtyID;
             
+            this.element.find('div.rtt-list').empty();
+            
             //generate treedata from rectype structure
             var treedata = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 6, rtyID, ['header_ext','all','parent_link'] );
             
@@ -451,16 +428,22 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                     var node = data.node;
                     var parentcode = node.data.code; 
                     var rectypes = node.data.rt_ids;
+
+                    if(parentcode.split(":").length<4){
                     
-                    var res = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 6, 
-                                                        rectypes, ['header_ext','all'], parentcode );
-                    if(res.length>1){
-                        data.result = res;
+                        var res = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 6, 
+                                                            rectypes, ['header_ext','all'], parentcode );
+                        if(res.length>1){
+                            data.result = res;
+                        }else{
+                            data.result = res[0].children;
+                        }
                     }else{
-                        data.result = res[0].children;
-                    }
+                        data.result = {};
+                    }                            
+                        
+                    return data;                       
                     
-                    return data;                                                   
                 },
                 loadChildren: function(e, data){
                     setTimeout(function(){
@@ -468,6 +451,12 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                     },500);
                 },
                 select: function(e, data) {
+                        
+                        if(data.node.isSelected()){
+                            that._addSelectedColumn(data.node.data.code, data.node.data.name);
+                        }else{
+                            that.element.find('div.rtt-list').find('div[data-code="'+data.node.data.code+'"]').remove();    
+                        }
                 },
                 click: function(e, data){
                    if($(e.originalEvent.target).is('span') && data.node.children && data.node.children.length>0){
@@ -491,6 +480,5 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
         }   
     },
     
-  
 });
 
