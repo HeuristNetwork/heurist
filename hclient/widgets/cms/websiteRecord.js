@@ -212,27 +212,7 @@ function hCmsEditing(_options) {
         //switch to direct edit OR save direct edit                        
         $('<a href="#" id="btn_inline_editor3">source</a>')
                 .appendTo($('body')).addClass('ui-front cms-button')
-                .click(function( event ){
-                    
-                    if(_isDirectEditMode()){
-                        //save changes
-                        __saveChanges( true );
-                    }else{
-                        //switch to direct editor
-                        
-                        $('#btn_inline_editor4').hide();
-                        $('#btn_inline_editor').text('wyswyg'); //change "Edit page content" to "wyswyg"
-                        $('#btn_inline_editor3').text('Save');  //change label from "source" to "Save"
-                        $('#btn_inline_editor5').show();
-                        
-                        $('#main-content').parent().css('overflow-y','hidden');
-                        $('#main-content').hide();
-                        $('#edit_mode').val(1).click();//to disable left panel
-                        $('.tinymce-body').show();
-                    }
-                    
-
-                })
+                .click( _editPageSource )
                 .show();
             
             
@@ -558,24 +538,45 @@ function hCmsEditing(_options) {
             $('#btn_inline_editor3').hide();
             $('#btn_inline_editor4').hide();
         }else{
-            var tp = $('#main-header').height()-(is_show_pagetitle?15:-10);
-            var lp = $('#main-header').width();
-            $('#btn_inline_editor').css({position:'absolute',
-                        top:tp,left:lp-190}).show();
-            $('#btn_inline_editor3').css({position:'absolute',
-                        top:tp,left:lp-40}).show();
-            $('#btn_inline_editor5').css({position:'absolute',
-                top:tp,left:lp-340}).hide();
             
-            //$('#btn_inline_editor').position({my:'right top',at:'right-90 top-15',of:$('#main-content')}).show();
-            //$('#btn_inline_editor3').position({my:'right top',at:'right-40 top-15',of:$('#main-content')}).show();
+            var ele_header = $('#main-header');
             
+            if(ele_header.length==0){
+                
+                var tp = 5;
+                var lp = $('#main-content').width();
+                $('#btn_inline_editor').css({position:'absolute',
+                            top:tp, left:lp-190}).show();
+                $('#btn_inline_editor3').css({position:'absolute',
+                            top:tp,left:lp-40}).show();
+                $('#btn_inline_editor5').css({position:'absolute',
+                    top:tp,left:lp-340}).hide();
+                    
+                $('textarea.tinymce-body').css('top',30);
             
-            var ele = $('#main-pagetitle > h2');
-            if(ele.length>0){
-                var pos = {my:'left top', at:'right+20 top+2', of:$('#main-pagetitle > h2')};   
-                $('#btn_inline_editor4').position(pos).show();
+            }else{
+                
+                var tp = $('#main-header').height()-(is_show_pagetitle?15:-10);
+                var lp = $('#main-header').width();
+                $('#btn_inline_editor').css({position:'absolute',
+                            top:tp,left:lp-190}).show();
+                $('#btn_inline_editor3').css({position:'absolute',
+                            top:tp,left:lp-40}).show();
+                $('#btn_inline_editor5').css({position:'absolute',
+                    top:tp,left:lp-340}).hide();
+                
+                //$('#btn_inline_editor').position({my:'right top',at:'right-90 top-15',of:$('#main-content')}).show();
+                //$('#btn_inline_editor3').position({my:'right top',at:'right-40 top-15',of:$('#main-content')}).show();
+                
+                var ele = $('#main-pagetitle > h2');
+                if(ele.length>0){
+                    var pos = {my:'left top', at:'right+20 top+2', of:$('#main-pagetitle > h2')};   
+                    $('#btn_inline_editor4').position(pos).show();
+                }
+                
+                
             }
+            
         }
     }    
     
@@ -1577,6 +1578,31 @@ function hCmsEditing(_options) {
                     },500);*/
     }        
     
+    //
+    // direct edit 
+    //
+    function _editPageSource( event ){
+        
+        if(_isDirectEditMode()){
+            //save changes
+            __saveChanges( true );
+        }else{
+            //switch to direct editor
+            
+            $('#btn_inline_editor4').hide();
+            $('#btn_inline_editor').text('wyswyg'); //change "Edit page content" to "wyswyg"
+            $('#btn_inline_editor3').text('Save');  //change label from "source" to "Save"
+            $('#btn_inline_editor5').show();
+            
+            $('#main-content').parent().css('overflow-y','hidden');
+            $('#main-content').hide();
+            $('#edit_mode').val(1).click();//to disable left panel
+            $('.tinymce-body').show();
+        }
+                    
+
+    }    
+    
     var allow_close_dialog = false;
     //
     //
@@ -1638,6 +1664,10 @@ function hCmsEditing(_options) {
             _editPageContent();
         },
 
+        editPageSource: function(){
+            _editPageSource();
+        },
+        
         editHeaderContent: function(){
             _editHeaderContent();
         },

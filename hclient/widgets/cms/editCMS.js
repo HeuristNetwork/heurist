@@ -390,6 +390,10 @@ function editCMS( options ){
                                                 //preview_frame[0].contentWindow.editPageContent();
                                                 preview_frame[0].contentWindow.cmsEditing.editPageContent();
                                             });
+                                            edit_dialog.find('#btn_edit_page_source').button({icon:'ui-icon-pencil'}).click(function(){
+                                                var preview_frame = edit_dialog.find('#web_preview');
+                                                preview_frame[0].contentWindow.cmsEditing.editPageSource();
+                                            });
                                             edit_dialog.find('#btn_edit_page_record').button().click(function(){
                                                 var preview_frame = edit_dialog.find('#web_preview');
                                                 //preview_frame[0].contentWindow.editPageRecord();
@@ -842,8 +846,11 @@ function editCMS( options ){
             if(!no_access){
                 edit_dialog.find('#btn_edit_page_content2').button({icon:'ui-icon-pencil'}).click(function(){
                     var preview_frame = edit_dialog.find('#web_preview');
-                    //preview_frame[0].contentWindow.editPageContent();
                     preview_frame[0].contentWindow.cmsEditing.editPageContent();
+                });
+                edit_dialog.find('#btn_edit_page_source2').button({icon:'ui-icon-pencil'}).click(function(){
+                    var preview_frame = edit_dialog.find('#web_preview');
+                    preview_frame[0].contentWindow.cmsEditing.editPageSource();
                 });
                 edit_dialog.find('#btn_edit_page_record').button().click(function(){
                     var preview_frame = edit_dialog.find('#web_preview');
