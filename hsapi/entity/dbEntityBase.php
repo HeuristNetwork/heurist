@@ -157,6 +157,19 @@ class DbEntityBase
             if($folder==null){
                 $this->system->addError(HEURIST_INVALID_REQUEST, 'Can not get list of setting files. Folder parameter is not defined');
                 $res = false;
+            }else if($rec_ID=='all'){
+                
+                $dirs = array();
+                $dir = new DirectoryIterator($path);
+                foreach ($dir as $node) {
+                    if ($node->isDir() && !$node->isDot()) {
+                        $folder_name = $node->getFilename();
+                        if(is_numeric($folder_name)){
+                            array_push($dirs, $path.$folder_name.'/');
+                        }
+                    }
+                }
+                $res = folderContent($dirs, 'cfg');    
             }else{
                 $res = folderContent($path, 'cfg');    
             }

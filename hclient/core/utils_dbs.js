@@ -41,6 +41,7 @@ getLinkedRecordTypes
 getLinkedRecordTypesReverse
 
 hasFields - returns true if rectype has a field in its structure
+rstField - Returns rectype header or details field values
 
 findByConceptCode
 */

@@ -30,6 +30,13 @@ $.widget( "heurist.resultListDataTable", {
         search_realm: null,
         serverSide: false,
         
+        show_rt_filter:false,
+        show_column_config:true,
+        show_search:false,
+        show_counter:true,
+        
+        search_initial:null,
+        
         dataTableParams: null
     },
 
@@ -37,6 +44,8 @@ $.widget( "heurist.resultListDataTable", {
     _current_url: null,
     _events: null,
     _dataTable: null,    
+    
+    selConfigs: null,
 
     // the constructor
     _create: function() {
@@ -44,6 +53,8 @@ $.widget( "heurist.resultListDataTable", {
         var that = this;
 
         this.div_content = $('<div>').css({width:'100%', height:'100%'}).appendTo( this.element );
+        
+        if(!this.options.dataTableParams) this.options.dataTableParams = {};
         
         var classes = this.options.dataTableParams['classes']
                             ?this.options.dataTableParams['classes']
@@ -83,8 +94,10 @@ $.widget( "heurist.resultListDataTable", {
                 if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH){ 
 
     that._dout('search finised');                
+    
                     that._current_query = data.query;
                     that.options.recordset = data.recordset; //hRecordSet
+
                     that._refresh();
                     that.loadanimation(false);
 
@@ -118,6 +131,14 @@ that._dout('myOnShowEvent');
         });
 
 
+        if(this.options.search_initial)
+        {
+            var request = { q:this.options.search_initial, w: 'a', detail: 'ids', 
+                        source:'init', search_realm: this.options.search_realm };
+            window.hWin.HAPI4.SearchMgr.doSearch(this.document, request);
+        }
+        
+        
     }, //end _create
 
     //
@@ -173,7 +194,7 @@ that._dout('myOnShowEvent');
                     var queryStr = '';
                     var rec_total_count = recIds_list.length;
                     
-                    this.options.serverSide = (rec_total_count>1); 
+                    this.options.serverSide = (rec_total_count>0); 
                     if(rec_total_count>5000){
                         queryStr = this._current_query;
                     }else{
@@ -182,10 +203,25 @@ that._dout('myOnShowEvent');
                     
                     this.options.dataTableParams['scrollCollapse'] = true;
                     this.options.dataTableParams['scrollY'] = this.div_content.height()-100;
+                    this.options.dataTableParams['scrollX'] = true;
                     
                     this.options.dataTableParams['initComplete'] = function(){that._onDataTableInitComplete()};
                     
-                    this.options.dataTableParams['dom'] = 'l<"selectors">frtip';
+                    var dom = '';
+                    if(this.options.show_rt_filter || this.options.show_column_config){
+                        dom = dom + '<"selectors">';
+                    }
+                    if(this.options.show_search){
+                          dom = dom + 'f';
+                    }
+                    dom = dom + 'rt';
+                    if(this.options.show_counter){
+                        dom = dom + 'i';
+                    }                   
+                    dom = dom + 'p'; 
+                    
+                    this.options.dataTableParams['dom'] = dom;//'<"selectors">frtip'; //l - for page length
+                    this.options.dataTableParams['pageLength'] = window.hWin.HAPI4.get_prefs('search_result_pagesize');
                     
                     // need download code: https://datatables.net/download/
                     //this.options.dataTableParams['dom'] = 'lfrtipB';
@@ -193,11 +229,18 @@ that._dout('myOnShowEvent');
 
                     if(!this.options.dataTableParams['columns']){
                         
-                        this.options.dataTableParams['columns'] = [
-                            { data: 'rec_ID', title:'ID' },
-                            { data: 'rec_Title', title:'Title' },
-                            { data: 'rec_RecTypeID', title:'Type', visible:false }
-                        ];
+                        var settings = window.hWin.HAPI4.get_prefs('columns_datatable');
+console.log(settings);                        
+                        if(settings){
+                            this.options.initial_cfg = settings;
+                            this.options.dataTableParams['columns'] = settings.columns;
+                        }else{
+                            this.options.dataTableParams['columns'] = [
+                                { data: 'rec_ID', title:'ID' },
+                                { data: 'rec_Title', title:'Title' },
+                                { data: 'rec_RecTypeID', title:'Type', visible:false }
+                            ];
+                        }
                         
                     }
 
@@ -252,16 +295,24 @@ this._dout('reload datatable '+this.options.serverSide);
                     this.div_content.find('.dataTables_length').css('padding','5 0 0 10');
                     var lele = this.div_content.find('.dataTables_filter').css('padding','5 10 0 0');
                     this.div_content.find('.dataTables_info').css('padding-left','10px');
-                    this.div_content.find('.dataTables_scrollBody').css('width','99%');
+                    this.div_content.find('.dataTables_scrollBody').css('width','100%');
+                    this.div_content.find('.dataTables_wrapper').css('padding','0 8px');
                     this.div_content.find('.dataTable').css('font-size','inherit');
+                    this.selConfigs = null;
                     
-                    var sel_container = this.div_content.find('div.selectors').css({float:'left',padding:'5px 10px','min-width':'250px'});
+                    
+          if(this.options.show_rt_filter || this.options.show_column_config){
+
+                var sel_container = this.div_content.find('div.selectors').css({float:'left',padding:'5px 10px','min-width':'200px'});
+          
+                if(this.options.show_rt_filter){
                     
                     //add record type selector - filter by record types
                     var rectype_Ids = this.options.recordset.getRectypes();
-//console.log(rectype_Ids);                    
+
                     if(rectype_Ids.length>1){
-                        var selScope = $('<select>').appendTo(sel_container);
+                        $('<label>Filter by:&nbsp;</label>').appendTo(sel_container)
+                        var selScope = $('<select>').appendTo(sel_container).css({'min-width':'12em'});
                         
                         var opt = window.hWin.HEURIST4.ui.addoption(selScope[0],'','select record type …');
                         $(opt).attr('disabled','disabled').attr('visiblity','hidden').css({display:'none'});
@@ -277,17 +328,48 @@ this._dout('reload datatable '+this.options.serverSide);
                         
                         this._on( selScope, {
                             change: this._onRecordTypeFilter} );        
-                        
+
                         
                         window.hWin.HEURIST4.ui.initHSelect(selScope);
                     }
+                }
+                
+                if(this.options.show_column_config){
+
+                    //$('<label>:&nbsp;&nbsp;Choose fields:&nbsp;</label>').appendTo(sel_container)
+                    //var selConfigs = $('<select>').appendTo(sel_container).css({'min-width':'15em'});
+                    
+                    if($.isFunction($('body')['configEntity'])){ //OK! widget script js has been loaded
+                        this.selConfigs = $('<fieldset>').css({display:'inline-block'}).appendTo(sel_container);
+                        
+                        var that = this;
+                        
+                        this.selConfigs.configEntity({
+                            entityName: 'defRecTypes',
+                            configName: 'datatable',
+                            loadSettingLabel: 'Columns:',
+
+                            getSettings: null,
+                            setSettings: function( settings ){ //callback function to apply configuration
+                                    that._onApplyColumnDefinition( settings ); 
+                            }, 
+
+                            divSaveSettings: null,
+                            allowRenameDelete: false
+                        });
+                        
+                        this.selConfigs.find('div.header').css({'display':'inline-block'});
+                        this.selConfigs.configEntity('updateList', 'all' );
+                    }                    
                     
                     //add button to configure columns
-                    var btn_cfg = $('<button>').button({icon: "ui-icon-gear"})
+                    var btn_cfg = $('<button>').button({icon: "ui-icon-pencil", label:'Configure columns', text:false})
                             .css({height:'20px'}).appendTo(sel_container);
                     
                     this._on( btn_cfg, {
                             click: this._openColumnDefinition} );        
+                }                            
+          }
         
     },
     
@@ -304,6 +386,9 @@ this._dout('reload datatable '+this.options.serverSide);
                 that._dataTable.column(idx).search((rty_ID>0?rty_ID:'')).draw();        
             }
         });
+        
+        if(this.selConfigs)
+            this.selConfigs.configEntity('updateList', rty_ID>0?rty_ID:'all');
         
         
     },
@@ -331,8 +416,18 @@ this._dout('reload datatable '+this.options.serverSide);
         }
     },
     
+    _onApplyColumnDefinition: function(config){
+        
+       window.hWin.HAPI4.save_pref('columns_datatable', config);        
+        
+       this.options.initial_cfg = config;
+       this.options.dataTableParams['columns'] = config.columns;
+       this._current_url = null; //to force reset datatable
+       this._refresh();
+    },
+    
     //
-    //
+    // open column configuration dialog
     //
     _openColumnDefinition: function(){
         
@@ -340,13 +435,10 @@ this._dout('reload datatable '+this.options.serverSide);
     
         var opts = {
             currentRecordset: this.options.recordset,
+            initial_cfg: that.options.initial_cfg,
             onClose: function(context){
                 if(context){
-console.log('selected');                    
-console.log(context);      
-                   that.options.dataTableParams['columns'] = context.columns;
-                   that._current_url = null; //to force reset datatable
-                   that._refresh();
+                    that._onApplyColumnDefinition(context);
                 }
             }
         };

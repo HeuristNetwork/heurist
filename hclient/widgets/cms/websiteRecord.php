@@ -325,6 +325,7 @@ if (($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1')
   
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/hapi.js"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils.js"></script>
+    <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_dbs.js"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_ui.js"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_msg.js"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_collection.js"></script>
@@ -372,7 +373,8 @@ if(!array_key_exists('embed', $_REQUEST)){
     <link href="<?php echo PDIR;?>external/js/evol.colorpicker.css" rel="stylesheet" type="text/css">
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageEntity.js"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchEntity.js"></script>
-
+    <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/configEntity.js"></script>
+    
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageRecords.js"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchRecords.js"></script>
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageRecUploadedFiles.js"></script>

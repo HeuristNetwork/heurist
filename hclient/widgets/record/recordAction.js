@@ -55,7 +55,7 @@ $.widget( "heurist.recordAction", {
     
     _progressInterval:null,
     
-    //controls
+    //selector control
     selectRecordScope:null,
     
     // the widget's constructor

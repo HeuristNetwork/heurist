@@ -28,10 +28,13 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
         title:  'Configure DataTable columns',
         
         htmlContent: 'recordDataTable.html',
-        helpContent: 'recordDataTable.html' //in context_help folder
+        helpContent: 'recordDataTable.html', //in context_help folder
+        
+        initial_cfg: null
     },
 
     selectedFields:null,
+    selectedColumns:null,
     
     _initControls: function() {
 
@@ -65,6 +68,10 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
 
         this.element.find('#divLoadSettings').configEntity( 'updateList', this.selectRecordScope.val() );    
 
+        if(this.options.initial_cfg){
+            this.setSettings(this.options.initial_cfg);
+        }
+        
     },
 
     //
@@ -78,10 +85,8 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
         
             var that = this;
             //restore selection
+            that.selectedColumns = settings.columns; 
             that.selectedFields = settings.fields; 
-            
-//
-console.log(settings.fields);            
             
             var tree = that.element.find('.rtt-tree').fancytree("getTree");           
             tree.visit(function(node){
@@ -128,17 +133,49 @@ console.log(settings.fields);
                         }
                     }
                 });
+
+            var cont = this.element.find('div.rtt-list');
+            //set visibility and order   
+            for(var i=0; i<that.selectedColumns.length; i++){
+                var dtid = that.selectedColumns[i].data; 
+                var ele =  cont.find('div[data-key="'+dtid+'"]');
+                if(ele.length>0){
+                    ele.attr('data-order',i);
+                    ele.find('input').prop('checked', that.selectedColumns[i].visible);
+                }
+            }
+            cont.find('div').sort(function(a,b){
+                return $(a).attr('data-order')<$(b).attr('data-order')?-1:1;
+            }).appendTo(cont);
         }
     },
 
     //
-    //
+    // add selected field to right hand column list
+    // code: 3:lt134:12:id
     //    
     _addSelectedColumn: function(code, title){
         
             var ids = code.split(':');
             var rtid = ids[ids.length-2];
             var dtid = ids[ids.length-1];
+            var parentcode = '';
+            
+            if(ids.length==4){
+                //include parent resource field
+                var parent_rtid = ids[0];
+                var parent_dtid = ids[1];
+                var linktype = parent_dtid.substr(0,2); //remove link type lt ot rt  10:lt34
+                if(isNaN(Number(linktype))){
+                    parent_dtid = parent_dtid.substr(2);
+                }
+                parentcode = parent_rtid+':'+parent_dtid;
+                var fieldtitle = window.hWin.HEURIST4.dbs.rstField(parent_rtid, parent_dtid, 'rst_DisplayName');
+                
+                this._addSelectedColumn(parentcode, fieldtitle);    
+                
+                title = window.hWin.HEURIST4.rectypes.names[rtid] +'.'+ title;        
+            }
 
             var header_fields = {id:'rec_ID',title:'rec_Title',url:'rec_URL',modified:'rec_Modified',tags:'rec_Tags'};
             if(header_fields[dtid]){
@@ -149,12 +186,13 @@ console.log(settings.fields);
             }
             
             var container = this.element.find('div.rtt-list');
-        
-            $('<div data-code="'+code+'" data-key="'+dtid+'">'
-                +'<input type="checkbox" title="Visibility in DataTable" checked>&nbsp;<span>'
-                +title+'</span></div>').appendTo(container);
-                
-            container.sortable();
+            
+            if(container.find('div[data-key="'+dtid+'"]').length==0){ //avoid duplication
+                $('<div data-code="'+code+'" data-key="'+dtid+'"'+(parentcode?(' data-parent="'+parentcode+'"'):'')+'>'
+                    +'<input type="checkbox" title="Visibility in DataTable" checked>&nbsp;<span style="cursor:ns-resize">'
+                    +title+'</span></div>').appendTo(container);
+                container.sortable();
+            }
     },
   
     //    
@@ -178,7 +216,7 @@ console.log(settings.fields);
     },    
         
     //
-    // overwrite parent's method
+    // overwrite parent's method (called fron super._initControls)
     //
     _fillSelectRecordScope: function (){
 
@@ -191,28 +229,45 @@ console.log(settings.fields);
         
         var rectype_Ids = this._currentRecordset.getRectypes();
         
-        if(rectype_Ids.length>1){
-            
-            var opt = window.hWin.HEURIST4.ui.addoption(selScope,'','select record type …');
-            $(opt).attr('disabled','disabled').attr('visiblity','hidden').css({display:'none'});
+        if(rectype_Ids.length>0 && 
+           this.options.initial_cfg && 
+           window.hWin.HEURIST4.util.findArrayIndex(this.options.initial_cfg.rty_ID,rectype_Ids)<0)
+        {
+             rectype_Ids.push(this.options.initial_cfg.rty_ID);
         }
-        for (var rty in rectype_Ids){
-                if(rty>=0 && window.hWin.HEURIST4.rectypes.pluralNames[rectype_Ids[rty]]){
-                    rty = rectype_Ids[rty];
-                    window.hWin.HEURIST4.ui.addoption(selScope,rty,
-                            window.hWin.HEURIST4.rectypes.pluralNames[rty]); //'only: '+
-                }
-        }
+
+//console.log('_fillSelectRecordScope');
+//console.log(rectype_Ids);
         
+        if(rectype_Ids.length==0){
+            window.hWin.HEURIST4.ui.createRectypeSelect(selScope,null,'select record type …',true);
+        }else{
+            if(rectype_Ids.length>1){
+                var opt = window.hWin.HEURIST4.ui.addoption(selScope,'','select record type …');
+                $(opt).attr('disabled','disabled').attr('visiblity','hidden').css({display:'none'});
+            }
+            for (var rty in rectype_Ids){
+                    if(rty>=0 && window.hWin.HEURIST4.rectypes.pluralNames[rectype_Ids[rty]]){
+                        rty = rectype_Ids[rty];
+                        window.hWin.HEURIST4.ui.addoption(selScope,rty,
+                                window.hWin.HEURIST4.rectypes.pluralNames[rty]); //'only: '+
+                    }
+            }
+        }
+
+/*        
         if (this._currentRecordset &&  this._currentRecordset.length() > 0 && rectype_Ids.length>1) {
-            
                 var msg = 'Any recordtype: Basic record fields only';
                 window.hWin.HEURIST4.ui.addoption(selScope, '', msg);
         }
-        
+*/        
         this._on( this.selectRecordScope, {
                 change: this._onRecordScopeChange} );        
 
+        if(this.options.initial_cfg){
+            this.selectRecordScope.val(this.options.initial_cfg.rty_ID);
+        }
+                
         this._onRecordScopeChange();
         
         window.hWin.HEURIST4.ui.initHSelect(selScope);
@@ -223,22 +278,6 @@ console.log(settings.fields);
     //
     doAction: function(mode){
 
-            var scope_val = this.selectRecordScope.val();
-            
-            var scope = [], 
-            rec_RecTypeID = 0;
-            
-            var scope = this._currentRecordset.getIds();
-            if(scope_val  >0 ){
-                rec_RecTypeID = scope_val;
-            }   
-            
-            if(scope.length<1){
-                window.hWin.HEURIST4.msg.showMsgFlash('No results found. '
-                +'Please modify search/filter to return at least one result record.', 2000);
-                return;
-            }
-            
             var settings = this.getSettings(true);            
             if(!settings) return;
 
@@ -248,7 +287,7 @@ console.log(settings.fields);
                      
     },
     
-    //
+    // FROM UI
     // mode_action true - returns columns for DataTable, false - returns codes of selected nodes
     //
     getSettings: function( mode_action ){
@@ -343,7 +382,8 @@ console.log(settings.fields);
             
             //DEBUG 
         //console.log( selectedFields )
-        return { 'fields': selectedFields, 'columns': selectedCols };
+        //fields for treeview, columns for datatable
+        return { rty_ID:this.selectRecordScope.val(), fields: selectedFields, columns: selectedCols };
         
     },
 
@@ -352,6 +392,7 @@ console.log(settings.fields);
     //
     _onRecordScopeChange: function() 
     {
+console.log('_onRecordScopeChange');        
         var isdisabled = this._super();
         
         //window.hWin.HEURIST4.util.setDisabled( this.element.parents('.ui-dialog').find('#btnDoAction2'), isdisabled );
@@ -360,13 +401,13 @@ console.log(settings.fields);
         //reload treeview
         this._loadRecordTypesTreeView( rtyID );
         
-        $('#divSaveSettings').hide();
-        $('#divLoadSettings').hide();
+        this.element.find('#divSaveSettings').hide();
+        this.element.find('#divLoadSettings').hide();
         
         if(rtyID==''){
-            $('.rtt-tree').parent().hide();
+            this.element.find('.rtt-tree').parent().hide();
         }else{
-            $('.rtt-tree').parent().show();
+            this.element.find('.rtt-tree').parent().show();
             if(rtyID>0){
                 this.selectedFields = [];
             }
@@ -455,7 +496,17 @@ console.log(settings.fields);
                         if(data.node.isSelected()){
                             that._addSelectedColumn(data.node.data.code, data.node.data.name);
                         }else{
-                            that.element.find('div.rtt-list').find('div[data-code="'+data.node.data.code+'"]').remove();    
+                            var cont = that.element.find('div.rtt-list');
+                            var ele= cont.find('div[data-code="'+data.node.data.code+'"]');
+                            
+                            //remove parent link field
+                            var parent_code = ele.attr('data-parent');
+                            if(parent_code){
+                                var parent_ele = cont.find('div[data-code="'+parent_code+'"]');
+                                var same_level_ele = cont.find('div[data-parent="'+parent_code+'"]');
+                                if(same_level_ele.length==1) parent_ele.remove();
+                            }
+                            ele.remove();    
                         }
                 },
                 click: function(e, data){

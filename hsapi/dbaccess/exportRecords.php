@@ -1149,7 +1149,7 @@ private static function _getJsonFlat( $record, $columns, $row_placeholder, $leve
         $col_name = $column; //($rt_id>0 ?$rt_id.'.':'').   
         
         if ($column=='rec_Tags'){
-            $value = recordSearchPersonalTags($system, $recID);
+            $value = recordSearchPersonalTags(self::$system, $recID);
             $res[$col_name] = ($value==null)?'':implode('|', $value);
         }else if(strpos($column,'rec_')===0){
             $res[$col_name] = $record[$column];       
@@ -1179,8 +1179,8 @@ private static function _getJsonFlat( $record, $columns, $row_placeholder, $leve
             if($field_type=='resource'){
                 
                 //if multi constraints - search all details
-                
-                $record = recordSearchByID(self::$system, $field_value['id'], true, null );
+                $link_rec_ID =  $field_value['id'];
+                $record = recordSearchByID(self::$system, $link_rec_ID, true, null );
                 $field_value = self::_getJsonFlat( $record, $columns, null, $level+1 );
                 
                 if($field_value!=null){
@@ -1200,7 +1200,7 @@ private static function _getJsonFlat( $record, $columns, $row_placeholder, $leve
                         $res[$rt_id_link] = $field_value;    
                     }
                 }
-                $field_value = $field_value['id'];
+                $field_value = $link_rec_ID;
                 
             }else if ($field_type=='file'){
                 

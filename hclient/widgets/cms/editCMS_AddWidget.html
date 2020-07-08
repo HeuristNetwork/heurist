@@ -16,6 +16,7 @@
             <option value="heurist_Search" data-name="search">Search field (with standard query builder)</option>
             <option value="heurist_SearchTree" data-name="saved searches">Saved searches (simple &amp; facet searches)</option>
             <option value="heurist_resultList" data-name="results list">Search results (list or thumbnails)</option>
+            <option value="heurist_resultListDataTable" data-name="datatable">Search results (Table view)</option>
             <option value="heurist_resultListCollection" data-name="collection">Collect records for listing, mapping or other output</option>
             <option value="heurist_Map" data-name="map/timeline">Map and timeline</option>
             <option value="heurist_Graph" data-name="network diagram">Network graph</option>
@@ -137,6 +138,20 @@
     </div>
     
     <div class="heurist_resultList">
+        <div class="header">
+            <label>Filter to be applied initially:</label>
+        </div>
+        <input name="search_initial"/>
+    </div>
+    
+    <div  class="heurist_resultListDataTable">
+        <div class="header"><label>Show</label></div>
+        <label>rectype filter&nbsp;<input type="checkbox" name="show_rt_filter"/></label>&nbsp;
+        <label>column config&nbsp;<input type="checkbox" name="show_column_config"/></label>
+        <label>search&nbsp;<input type="checkbox" name="show_search"/></label>
+        <label>counter&nbsp;<input type="checkbox" name="show_counter" checked/></label>&nbsp;
+    </div>
+    <div class="heurist_resultListDataTable">
         <div class="header">
             <label>Filter to be applied initially:</label>
         </div>

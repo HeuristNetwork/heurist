@@ -634,6 +634,8 @@ function hLayout(args) {
                     $pane.find('div.widget-design-header:first').remove(); //remove configuration div with header
                     $pane.find('span.widget-options:first').remove(); //remove configuration span with header
                     
+                    if(!lpane.apps[0].options){ return; }
+                    
                     var layout_opts = lpane.apps[0].options.tabs;
 console.log('>>>>>');                                        
 console.log(layout_opts);                    
