@@ -146,7 +146,7 @@
     
     <div  class="heurist_resultListDataTable">
         <div class="header"><label>Show</label></div>
-        <label>rectype filter&nbsp;<input type="checkbox" name="show_rt_filter"/></label>&nbsp;
+        <!-- <label>rectype filter&nbsp;<input type="checkbox" name="show_rt_filter"/></label>&nbsp; -->
         <label>column config&nbsp;<input type="checkbox" name="show_column_config"/></label>
         <label>search&nbsp;<input type="checkbox" name="show_search"/></label>
         <label>counter&nbsp;<input type="checkbox" name="show_counter" checked/></label>&nbsp;
@@ -157,7 +157,12 @@
         </div>
         <input name="search_initial"/>
     </div>
-    
+    <div class="heurist_resultListDataTable">
+        <div class="header" style="vertical-align:top">
+            <label>Data table parameters (advanced):</label>
+        </div>
+        <textarea id="dataTableParams" rows="10" style="width:500px"/>
+    </div>
     
     <div  class="heurist_resultListCollection">
         <div class="header"><label>Instructions</label></div>

@@ -236,6 +236,13 @@ $meta_keywords = htmlspecialchars(__getValue($rec, DT_CMS_KEYWORDS));
 $meta_description = htmlspecialchars(__getValue($rec, DT_SHORT_SUMMARY));
 $show_pagetitle = (ConceptCode::getTermConceptID(__getValue($rec, DT_CMS_PAGETITLE))!=='99-5447');
 
+
+$external_files = @$rec['details'][DT_CMS_EXTFILES];
+if($external_files!=null){
+    if(!is_array($external_files)){
+        $external_files = array($external_files);
+    }
+}
 //custom styles - mainly to override positions/visibility for #main-xxx elements
 $site_css = __getValue($rec, DT_CMS_CSS);
 
@@ -346,8 +353,16 @@ if (($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1')
     <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/viewers/resultListCollection.js"></script>
 
     <script type="text/javascript" src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.min.css"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.min.css"/>
 <?php 
+
+if(is_array($external_files) && count($external_files)>0){
+    foreach ($external_files as $ext_file){
+        if(strpos($ext_file,'<link')===0 || strpos($ext_file,'<script')===0){
+            print $ext_file."\n";
+        }
+    }
+}
 
 if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
         print '<script type="text/javascript" src="'.PDIR.'external/jquery.fancytree/jquery.fancytree-all.min.js"></script>';
@@ -498,7 +513,7 @@ var is_show_pagetitle = false;
         is_show_pagetitle = true;
 <?php } ?>        
     
-
+var datatable_custom_render = null;
 //
 // Executes custom javascript defined in field DT_CMS_SCRIPT
 // it wraps this script into function afterPageLoad[RecID] and adds this script into head

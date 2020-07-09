@@ -858,6 +858,9 @@ function hCmsEditing(_options) {
                     if(window.hWin.HEURIST4.util.isempty(opts['recordview_onselect'])){
                         opts['recordview_onselect']  = 'inline'; //default value    
                     } 
+                }else if(widget_name=='heurist_resultListDataTable'){
+                    
+                    opts['dataTableParams'] = $dlg.find('#dataTableParams').val();
                 }
                 
                 var selval = opts.searchTreeMode;
@@ -873,6 +876,8 @@ function hCmsEditing(_options) {
                 }
                 
             }
+          
+//console.log(opts);          
             
             opts['init_at_once'] = true;
             opts['search_realm'] = 'sr1';
@@ -1023,6 +1028,8 @@ function hCmsEditing(_options) {
                         if(opts['rendererExpandDetails']){
                             $dlg.find('select[name="rendererExpandDetails"]').attr('data-template', opts['rendererExpandDetails']);        
                         }
+                    }else if(widget_name=='heurist_resultListDataTable'){
+                        $dlg.find('#dataTableParams').val(opts['dataTableParams']);
                     }
                     
                     

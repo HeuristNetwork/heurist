@@ -55,8 +55,13 @@ $.widget( "heurist.resultListDataTable", {
 
         this.div_content = $('<div>').css({width:'100%', height:'100%'}).appendTo( this.element );
         
+//console.log(this.options);        
+        
+        this.options.dataTableParams = window.hWin.HEURIST4.util.isJSON(this.options.dataTableParams);
+        
         if(!this.options.dataTableParams) this.options.dataTableParams = {};
         
+        //table table-striped table-bordered - for bootstrap.css
         var classes = window.hWin.HEURIST4.util.isempty(this.options.dataTableParams['classes'])
                             ?'display compact nowrap'
                             :this.options.dataTableParams['classes'];
@@ -251,6 +256,22 @@ that._dout('myOnShowEvent');
                         }
                         
                     }
+                    
+console.log('function!');
+                    var cols = this.options.dataTableParams['columns'];
+                    for(var i=0;i<cols.length;i++){
+                        if(typeof cols[i]['render']==='string'){
+                            var fooName = cols[i]['render']
+                            if(typeof(eval(fooName))=='function'){ 
+                                
+console.log('found ' + fooName);                            
+                                cols[i]['render'] = eval(fooName);//function(data,type){ [fooName](data,type); }
+                            }else{
+                                cols[i]['render'] = null;
+                            }
+                        }
+                    }
+                    
 
 this._dout('reload datatable '+this.options.serverSide);                  
                     
