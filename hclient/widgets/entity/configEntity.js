@@ -353,7 +353,6 @@ $.widget( "heurist.configEntity", {
                                                     entity_id, 
                                                     filename.substring(0,filename.indexOf('.cfg')));
                             if(initial_value==entity_id){
-console.log( initial_value );                                
                                 $(opt).attr('selected',true);
                             }
                         });

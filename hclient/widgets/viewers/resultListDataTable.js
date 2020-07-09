@@ -58,7 +58,7 @@ $.widget( "heurist.resultListDataTable", {
         if(!this.options.dataTableParams) this.options.dataTableParams = {};
         
         var classes = window.hWin.HEURIST4.util.isempty(this.options.dataTableParams['classes'])
-                            ?'display compact'
+                            ?'display compact nowrap'
                             :this.options.dataTableParams['classes'];
 
         //this.div_content.css({'padding-top':'5px'}); //,'overflow-y': 'auto'
@@ -195,15 +195,15 @@ that._dout('myOnShowEvent');
                     var queryStr = '';
                     var rec_total_count = recIds_list.length;
                     
-                    this.options.serverSide = (rec_total_count>0); 
-                    if(rec_total_count>5000){
+                    this.options.serverSide = true; //(rec_total_count>0); 
+                    if(rec_total_count>0){ //5000
                         queryStr = this._current_query;
                     }else{
                         queryStr = '{"ids":"'+this.options.recordset.getIds().join(',')+'"}';
                     }
                     
                     this.options.dataTableParams['scrollCollapse'] = true;
-                    this.options.dataTableParams['scrollY'] = this.div_content.height()-100;
+                    this.options.dataTableParams['scrollY'] = this.div_content.height()-120;
                     this.options.dataTableParams['scrollX'] = true;
                     
                     this.options.dataTableParams['initComplete'] = function(){that._onDataTableInitComplete()};
