@@ -1149,8 +1149,8 @@ private static function _getJsonFlat( $record, $columns, $row_placeholder, $leve
         $col_name = $column; //($rt_id>0 ?$rt_id.'.':'').   
         
         if ($column=='rec_Tags'){
-            $value = recordSearchPersonalTags(self::$system, $recID);
-            $res[$col_name] = ($value==null)?'':implode('|', $value);
+            $value = recordSearchPersonalTags(self::$system, $record['rec_ID']);
+            $res[$col_name] = ($value==null)?'':implode(' | ', $value);
         }else if(strpos($column,'rec_')===0){
             $res[$col_name] = $record[$column];       
         }else{

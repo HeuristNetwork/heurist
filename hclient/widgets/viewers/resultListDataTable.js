@@ -34,6 +34,7 @@ $.widget( "heurist.resultListDataTable", {
         show_column_config:true,
         show_search:false,
         show_counter:true,
+        show_export_buttons:false,
         
         search_initial:null,
         
@@ -56,9 +57,9 @@ $.widget( "heurist.resultListDataTable", {
         
         if(!this.options.dataTableParams) this.options.dataTableParams = {};
         
-        var classes = this.options.dataTableParams['classes']
-                            ?this.options.dataTableParams['classes']
-                            :'display compact';
+        var classes = window.hWin.HEURIST4.util.isempty(this.options.dataTableParams['classes'])
+                            ?'display compact'
+                            :this.options.dataTableParams['classes'];
 
         //this.div_content.css({'padding-top':'5px'}); //,'overflow-y': 'auto'
         this.div_datatable = $('<table>').css({'width':'98%'})
@@ -207,30 +208,37 @@ that._dout('myOnShowEvent');
                     
                     this.options.dataTableParams['initComplete'] = function(){that._onDataTableInitComplete()};
                     
-                    var dom = '';
-                    if(this.options.show_rt_filter || this.options.show_column_config){
-                        dom = dom + '<"selectors">';
-                    }
-                    if(this.options.show_search){
-                          dom = dom + 'f';
-                    }
-                    dom = dom + 'rt';
-                    if(this.options.show_counter){
-                        dom = dom + 'i';
-                    }                   
-                    dom = dom + 'p'; 
-                    
-                    this.options.dataTableParams['dom'] = dom;//'<"selectors">frtip'; //l - for page length
-                    this.options.dataTableParams['pageLength'] = window.hWin.HAPI4.get_prefs('search_result_pagesize');
-                    
-                    // need download code: https://datatables.net/download/
-                    //this.options.dataTableParams['dom'] = 'lfrtipB';
-                    //this.options.dataTableParams['buttons'] = ['copy', 'excel', 'pdf'];
+                    if(window.hWin.HEURIST4.util.isempty(this.options.dataTableParams['dom'])){
+                        var dom = '';
+                        if(this.options.show_rt_filter || this.options.show_column_config){
+                            dom = dom + '<"selectors">';
+                        }
+                        if(this.options.show_search){
+                              dom = dom + 'f';
+                        }
+                        dom = dom + 'rt';
+                        if(this.options.show_counter){
+                            dom = dom + 'i';
+                        }                   
+                        dom = dom + 'p'; 
+                        
+                        if(this.options.show_export_buttons){
+                            dom = dom + 'B'; 
+                            this.options.dataTableParams['buttons'] = ['copy', 'excel', 'pdf'];    
+                        }
 
-                    if(!this.options.dataTableParams['columns']){
+                        this.options.dataTableParams['dom'] = dom;//'<"selectors">frtip'; //l - for page length
+                    }
+                    if(window.hWin.HEURIST4.util.isempty(this.options.dataTableParams['pageLength'])){
+                        this.options.dataTableParams['pageLength'] = window.hWin.HAPI4.get_prefs('search_result_pagesize');
+                    }
+                    
+                    this.options.dataTableParams['ordering'] = false;
+                    
+                    if(window.hWin.HEURIST4.util.isempty(this.options.dataTableParams['columns'])){
                         
                         var settings = window.hWin.HAPI4.get_prefs('columns_datatable');
-console.log(settings);                        
+
                         if(settings){
                             this.options.initial_cfg = settings;
                             this.options.dataTableParams['columns'] = settings.columns;
@@ -294,7 +302,7 @@ this._dout('reload datatable '+this.options.serverSide);
                     //adjust position for datatable controls    
                     this.div_content.find('.dataTables_length').css('padding','5 0 0 10');
                     var lele = this.div_content.find('.dataTables_filter').css('padding','5 10 0 0');
-                    this.div_content.find('.dataTables_info').css('padding-left','10px');
+                    this.div_content.find('.dataTables_info').css({'padding-left':'10px','padding-right':'10px'});
                     this.div_content.find('.dataTables_scrollBody').css('width','100%');
                     this.div_content.find('.dataTables_wrapper').css('padding','0 8px');
                     this.div_content.find('.dataTable').css('font-size','inherit');
@@ -347,7 +355,7 @@ this._dout('reload datatable '+this.options.serverSide);
                         this.selConfigs.configEntity({
                             entityName: 'defRecTypes',
                             configName: 'datatable',
-                            loadSettingLabel: 'Columns:',
+                            loadSettingLabel: 'Choose fields:',
 
                             getSettings: null,
                             setSettings: function( settings ){ //callback function to apply configuration
@@ -359,7 +367,8 @@ this._dout('reload datatable '+this.options.serverSide);
                         });
                         
                         this.selConfigs.find('div.header').css({'display':'inline-block'});
-                        this.selConfigs.configEntity('updateList', 'all' );
+                        this.selConfigs.configEntity('updateList', 'all', 
+                                that.options.initial_cfg?that.options.initial_cfg.cfg_name:null);
                     }                    
                     
                     //add button to configure columns

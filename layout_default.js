@@ -166,7 +166,7 @@ var cfg_layouts = [
                                 options:{url: 'viewers/record/renderRecordData.php?recID=[recID]&db=[dbname]', 
                                 is_single_selection:true, 'data-logaction':'open_Record'}
                     },    // H3 record viewer
-                    {appid:'heurist_resultListDataTable', name: 'List View', options:{ dataTableParams:{} } },
+                    {appid:'heurist_resultListDataTable', name: 'List View', options:{ dataTableParams:{}, show_export_buttons:true } },
                     {appid:'heurist_Map', options:{'data-logaction':'open_MapTime'}}, // map viewer (map.php) inside widget (app_timemap.js)
                     {appid:'heurist_Map2', options:{'data-logaction':'open_MapTime', leaflet:true
                         , layout_params:{legend:'search,-basemaps,-mapdocs,250,off'} }}, 
