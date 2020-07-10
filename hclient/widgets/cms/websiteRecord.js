@@ -44,6 +44,7 @@ function hCmsEditing(_options) {
     var is_header_editor = false;
     var header_content_raw = null;
     var header_content_generated = true;
+    var original_editor_content = '';
     var LayoutMgr = new hLayout(); //to avoid interferene with  window.hWin.HAPI4.LayoutMgr  
 
     
@@ -226,8 +227,9 @@ function hCmsEditing(_options) {
             .addClass('ui-front cms-button')
             .click(function () {
                 __hideEditor();
+console.log(original_editor_content);
                 //restore original
-                $('.tinymce-body').val($('#main-content').html());
+                $('.tinymce-body').val(original_editor_content);
             })
             .show();
 
@@ -1605,6 +1607,7 @@ function hCmsEditing(_options) {
             $('#main-content').hide();
             $('#edit_mode').val(1).click();//to disable left panel
             $('.tinymce-body').show();
+            original_editor_content = $('.tinymce-body').val();
         }
                     
 

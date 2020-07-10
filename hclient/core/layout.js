@@ -634,8 +634,11 @@ function hLayout(args) {
                     $pane.find('div.widget-design-header:first').remove(); //remove configuration div with header
                     $pane.find('span.widget-options:first').remove(); //remove configuration span with header
                     
-                    if(!lpane.apps[0].options){ return; }
-                    
+                    //{"container":"cont","tabs":{"west":{"id":"west"},"center":{"id":"center"},"east":{"id":"east"}}}
+                    if(!lpane.apps[0].options || !lpane.apps[0].options.tabs){
+console.log('Cardinal layout widget does not have proper options');
+                        return;                        
+                    }
                     var layout_opts = lpane.apps[0].options.tabs;
 console.log('>>>>>');                                        
 console.log(layout_opts);                    
@@ -665,9 +668,9 @@ console.log(layout_opts);
 
                     if(!$cardinal_container.is(':visible')){
                         
-                        $pane.on("myOnShowEvent222", function(event){
+                        $cardinal_container.on("myOnShowEvent", function(event){
                             
-                            $cardinal_container.off("myOnShowEvent222");
+                            $cardinal_container.off("myOnShowEvent");
                             $cardinal_container.layout(layout_opts);
                             __toogleIcons($cardinal_container, 'west', 'e', 'w');
                             __toogleIcons($cardinal_container, 'east', 'w', 'e');
