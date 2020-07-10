@@ -7,7 +7,7 @@ $requestParams = $_REQUEST;
 if(@$_REQUEST['method']){
     $method = $_REQUEST['method'];
 }else{
-    //get method
+    //get method  - GET POST PUT DELETE
     $method = $_SERVER['REQUEST_METHOD'];
     if ($method == 'POST' && array_key_exists('HTTP_X_HTTP_METHOD', $_SERVER)) {  //add
         if ($_SERVER['HTTP_X_HTTP_METHOD'] == 'DELETE') {

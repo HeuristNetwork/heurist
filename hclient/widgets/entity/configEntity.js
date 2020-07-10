@@ -180,8 +180,8 @@ $.widget( "heurist.configEntity", {
         // save settings
         //
         if(this.options.divSaveSettings){
-            $('<div class="header" style="padding: 0 16px 0 16px;"><label>Save settings for future use</label></div>'
-                +'&nbsp;&nbsp;<b>Name</b>&nbsp;<input class="inpt_save_setting_name text ui-widget-content ui-corner-all" style="max-width:30em"/>'
+            $('<div class="header" style="padding: 0 16px 0 16px;width:180px;"><label>Name settings to save for future use</label></div>'
+                +'<input class="inpt_save_setting_name text ui-widget-content ui-corner-all" style="max-width:30em"/>'
                 +'&nbsp;&nbsp;<button class="btnSaveSettings">Save</button>')
             .appendTo(this.options.divSaveSettings);
             this.inpt_save_setting_name = this.options.divSaveSettings.find('.inpt_save_setting_name');        

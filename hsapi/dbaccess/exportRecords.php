@@ -1165,7 +1165,8 @@ private static function _getJsonFlat( $record, $columns, $row_placeholder, $leve
     $idx_dtype = self::$defDetailtypes['typedefs']['fieldNamesToIndex']['dty_Type'];
     
     //convert details to proper JSON format
-    foreach ($record['details'] as $dty_ID=>$field_details) {
+    if(@$record['details'] && is_array($record['details'])){
+        foreach ($record['details'] as $dty_ID=>$field_details) {
         
         if(!in_array($dty_ID, $columns[$rt_id])) continue;
         
@@ -1222,6 +1223,7 @@ private static function _getJsonFlat( $record, $columns, $row_placeholder, $leve
             $res[$col_name] = $res[$col_name][0];  
         } 
     } //for all details of record
+    }
 
     return $res;
     

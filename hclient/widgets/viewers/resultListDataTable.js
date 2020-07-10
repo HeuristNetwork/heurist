@@ -257,14 +257,11 @@ that._dout('myOnShowEvent');
                         
                     }
                     
-console.log('function!');
                     var cols = this.options.dataTableParams['columns'];
                     for(var i=0;i<cols.length;i++){
                         if(typeof cols[i]['render']==='string'){
                             var fooName = cols[i]['render']
                             if(typeof(eval(fooName))=='function'){ 
-                                
-console.log('found ' + fooName);                            
                                 cols[i]['render'] = eval(fooName);//function(data,type){ [fooName](data,type); }
                             }else{
                                 cols[i]['render'] = null;

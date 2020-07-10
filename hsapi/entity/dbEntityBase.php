@@ -159,17 +159,22 @@ class DbEntityBase
                 $res = false;
             }else if($rec_ID=='all'){
                 
-                $dirs = array();
-                $dir = new DirectoryIterator($path);
-                foreach ($dir as $node) {
-                    if ($node->isDir() && !$node->isDot()) {
-                        $folder_name = $node->getFilename();
-                        if(is_numeric($folder_name)){
-                            array_push($dirs, $path.$folder_name.'/');
+                if(file_exists($path)){
+                
+                    $dirs = array();
+                    $dir = new DirectoryIterator($path);
+                    foreach ($dir as $node) {
+                        if ($node->isDir() && !$node->isDot()) {
+                            $folder_name = $node->getFilename();
+                            if(is_numeric($folder_name)){
+                                array_push($dirs, $path.$folder_name.'/');
+                            }
                         }
                     }
+                    $res = folderContent($dirs, 'cfg');    
+                }else{
+                    $res = array('count'=>0,'reccount'=>0,'order'=>array());
                 }
-                $res = folderContent($dirs, 'cfg');    
             }else{
                 $res = folderContent($path, 'cfg');    
             }
