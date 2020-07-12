@@ -828,8 +828,14 @@ console.log(original_editor_content);
                     cont.find('input[name="init_svsID"]').val( 
                             cont.find('#init_svsID').editing_input('getValues') );
                 }else if(widget_name=='heurist_Navigation'){
-                    cont.find('input[name="menu_recIDs"]').val( 
-                            cont.find('#menu_recIDs').editing_input('getValues') );
+                    var menu_recIDs = cont.find('#menu_recIDs').editing_input('getValues');
+                    if(window.hWin.HEURIST4.util.isempty(menu_recIDs) || 
+                      ($.isArray(menu_recIDs)&& (menu_recIDs.length==0||window.hWin.HEURIST4.util.isempty(menu_recIDs[0]))))
+                    {
+                        window.hWin.HEURIST4.msg.showMsgErr('Please set at least one top menu item');                     
+                        return false;   
+                    }
+                    cont.find('input[name="menu_recIDs"]').val( menu_recIDs );
                 }
             
                 //find input elements and fill opts with values
