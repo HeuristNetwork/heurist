@@ -105,7 +105,8 @@ function hCmsEditing(_options) {
                 */
                 editor.on('init', function(e) {
                     if(!is_header_editor){
-                        last_save_content = __getEditorContent();//keep value to restore
+//                        last_save_content = __getEditorContent();//keep value to restore
+//console.log('keep on setip '+last_save_content);                        
                     }
                     // adds widget-design-header and widget-options and event handlers for edit/remove links
                     __initWidgetEditLinks(null);
@@ -227,7 +228,7 @@ function hCmsEditing(_options) {
             .addClass('ui-front cms-button')
             .click(function () {
                 __hideEditor();
-console.log(original_editor_content);
+//console.log(original_editor_content);
                 //restore original
                 $('.tinymce-body').val(original_editor_content);
             })
@@ -444,6 +445,7 @@ console.log(original_editor_content);
                         
                         if(!is_header_editor){
                             last_save_content = newval;
+//console.log('was saved '+last_save_content);                        
                             was_modified = true;     
                         }else{
                             header_content_raw = newval;
@@ -500,6 +502,7 @@ console.log(original_editor_content);
                     //, toplevel_css:{background:bg_color}
                 }} );                 
                 //restore 
+//console.log('restore 1 '+last_save_content);                        
                 $('.tinymce-body').val(last_save_content); 
                 last_save_content = null;
             }
@@ -508,8 +511,13 @@ console.log(original_editor_content);
             if(new_pageid>0){
                 __loadPageById( new_pageid );   
             }else{
+                
+                if(original_editor_content!=null){
+                    //$('.tinymce-body').val(original_editor_content);
+                }
                 //assign last saved content
                 if( last_save_content != null ){ 
+//console.log('resore 2 ' + last_save_content);                    
                     $('.tinymce-body').val(last_save_content); 
                     
                     if(was_modified){
@@ -1580,9 +1588,11 @@ console.log(original_editor_content);
                     $('#main-content').parent().css('overflow-y','hidden');
                     $('#main-content').hide();
                     $('#edit_mode').val(1).click();//to disable left panel
+                    //original_editor_content 
+                    last_save_content = $('.tinymce-body').val();
+//console.log('_editPageContent '+last_save_content);                
+                    
                     $('.tinymce-body').show();
-                    //last_save_content = $('.tinymce-body').val();  //keep value to restore
-                    //inlineEditorConfig.height = $('.tinymce-body').height();
                     tinymce.init(inlineEditorConfig);
                     
                     /*setTimeout(function(){
