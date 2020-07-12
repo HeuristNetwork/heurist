@@ -271,7 +271,20 @@ $.widget( "heurist.navigation", {
 
             var opts = {};
             if(this.options.orientation=='horizontal'){
-                opts = {position:{ my: "left top", at: "left bottom" }}; ///+20
+                //opts = {position:{ my: "left top", at: "left bottom" }}; //+20
+                
+                opts = {position:{ my: "left top", at: "left bottom" },
+                        focus: function( event, ui ){
+                            
+                   if(!$(ui.item).parent().hasClass('horizontalmenu')){
+                        //indent for submenu
+                        var ele = $(ui.item).children('ul.ui-menu');
+                        if(ele.length>0){
+                            setTimeout(function() { ele.css({top:0,  left:'200px'}); }, 500);      
+                        }
+                   } 
+                }};
+                
             }
 
             var myTimeoutId = 0;
@@ -296,7 +309,7 @@ $.widget( "heurist.navigation", {
             //init jquery menu widget
             this.divMainMenuItems.menu( opts );
 
-
+/*            
             var all_menues = this.divMainMenuItems.find('ul.ui-menu');
             this._on( all_menues, {
                 mouseenter : function(){ _show(); },
@@ -304,11 +317,12 @@ $.widget( "heurist.navigation", {
                     _hide(all_menues) 
                 }
             });
-
+*/
             //prevents default jquery delay         
+            
             this.divMainMenuItems.children('li.ui-menu-item').hover(function(event) {
-                event.preventDefault();
-                $(this).find('.ui-menu').show();
+                    event.preventDefault();
+                    $(this).children('.ui-menu').show();  
                 },
                 function(event) {
                     event.preventDefault();
