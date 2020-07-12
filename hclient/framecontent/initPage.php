@@ -373,7 +373,7 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
         }
 
         //add version to title
-        window.document.title = window.document.title+' V'+window.hWin.HAPI4.sysinfo.version;
+        //window.document.title = window.document.title+' V'+window.hWin.HAPI4.sysinfo.version;
 
     }
 
