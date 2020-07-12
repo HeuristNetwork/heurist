@@ -55,8 +55,6 @@ $.widget( "heurist.resultListDataTable", {
 
         this.div_content = $('<div>').css({width:'100%', height:'100%'}).appendTo( this.element );
         
-//console.log(this.options);        
-        
         this.options.dataTableParams = window.hWin.HEURIST4.util.isJSON(this.options.dataTableParams);
         
         if(!this.options.dataTableParams) this.options.dataTableParams = {};
@@ -381,7 +379,10 @@ this._dout('reload datatable '+this.options.serverSide);
                             }, 
 
                             divSaveSettings: null,
-                            allowRenameDelete: false
+                            allowRenameDelete: true,
+                            renameAction: function(){ //overwrite default behaviour - open popup
+                                    that._openColumnDefinition();
+                            }
                         });
                         
                         this.selConfigs.find('div.header').css({'display':'inline-block'});
@@ -390,11 +391,13 @@ this._dout('reload datatable '+this.options.serverSide);
                     }                    
                     
                     //add button to configure columns
+                    /*
                     var btn_cfg = $('<button>').button({icon: "ui-icon-pencil", label:'Configure columns', text:false})
                             .css({height:'20px'}).appendTo(sel_container);
                     
                     this._on( btn_cfg, {
                             click: this._openColumnDefinition} );        
+                    */
                 }                            
           }
         

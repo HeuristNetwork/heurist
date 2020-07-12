@@ -35,12 +35,18 @@ $.widget( "heurist.configEntity", {
         //divLoadSettingsName: this.element
         divSaveSettings: null,  //element
         allowRenameDelete: false,
+        renameAction: null, //
+
+        saveOnExit: false,  //auto save on exit
+        
         useHTMLselect: false
     },
     
     sel_saved_settings: null,
     inpt_save_setting_name: null,
     btnSaveSettings: null,
+    
+    original_settings: null,
 
     // the widget's constructor
     _create: function() {
@@ -74,6 +80,13 @@ $.widget( "heurist.configEntity", {
         //         
         if(this.options.allowRenameDelete){
             this._on(this.element.find('span.ui-icon-pencil'), {click:function(){
+       
+                if($.isFunction(this.options.renameAction)){
+                    
+                    this.options.renameAction.call();
+                    
+                }else{
+                
                 var fileName = this.sel_saved_settings.val();
                 if(fileName!=''){
 
@@ -120,6 +133,7 @@ $.widget( "heurist.configEntity", {
 
 
                         }, 'Rename settings');                
+                }
                 }
             }});        
 
@@ -182,73 +196,19 @@ $.widget( "heurist.configEntity", {
         if(this.options.divSaveSettings){
             $('<div class="header" style="padding: 0 16px 0 16px;width:180px;"><label>Name settings to save for future use</label></div>'
                 +'<input class="inpt_save_setting_name text ui-widget-content ui-corner-all" style="max-width:30em"/>'
-                +'&nbsp;&nbsp;<button class="btnSaveSettings">Save</button>')
+                + (this.options.saveOnExit?'':'&nbsp;&nbsp;<button class="btnSaveSettings">Save</button>'))
             .appendTo(this.options.divSaveSettings);
             this.inpt_save_setting_name = this.options.divSaveSettings.find('.inpt_save_setting_name');        
-            this.btnSaveSettings = this.options.divSaveSettings.find('.btnSaveSettings');        
+            
+            if(!this.options.saveOnExit){
+            
+                this.btnSaveSettings = this.options.divSaveSettings.find('.btnSaveSettings');        
 
-            //
-            // save settings
-            //        
-            this._on(this.btnSaveSettings, {click: function(){
-
-                var fileName = this.inpt_save_setting_name.val();
-
-                if(fileName.trim()==''){
-                    window.hWin.HEURIST4.msg.showMsgFlash('Name not defined');
-                    return;
-                }
-
-                var entity_ID = this.options.entityID; 
-                if(fileName.indexOf('/')>0){
-                    fileName = fileName.split('/');
-                    entity_ID = fileName[0];
-                    fileName = fileName[1];
-                }
-                
-                var settings = this.options.getSettings();            
-                if(!settings) return;
-
-                var request = {
-                    'a'          : 'files',
-                    'operation'  : 'put',
-                    'entity'     : this.options.entityName,
-                    'folder'     : this.options.configName,    
-                    'rec_ID'     : entity_ID,
-                    'file'       : fileName+'.cfg',    
-                    'content'    : JSON.stringify(settings)    
-                };
-
-                window.hWin.HAPI4.EntityMgr.doRequest(request, 
-                    function(response){
-                        if(response.status == window.hWin.ResponseStatus.OK){
-
-                            that.inpt_save_setting_name.val('');
-                            var filename = response.data;
-                            var ele = that.sel_saved_settings.find('option[value="'+filename+'"]');
-                            if(ele.length>0){
-                                
-                            }else{
-                                window.hWin.HEURIST4.ui.addoption(that.sel_saved_settings[0], 
-                                    entity_ID+'/'+filename, 
-                                    filename.substring(0,filename.indexOf('.cfg')) );    
-                                if(that.sel_saved_settings.hSelect("instance")!=undefined){
-                                        that.sel_saved_settings.hSelect('refresh'); 
-                                }
-                            }
-                            
-                            that.element.show();    
-                            window.hWin.HEURIST4.msg.showMsgFlash('Settings are saved');
-
-                        }else{
-                            that.element.hide();
-                            window.hWin.HEURIST4.msg.showMsgErr(response);
-                        }
-                });      
-
-
-            }});
-
+                //
+                // save settings
+                //        
+                this._on(this.btnSaveSettings, {click: this.saveSettings});
+            }
         }
 
         //
@@ -287,6 +247,9 @@ $.widget( "heurist.configEntity", {
                         if(settings==false){
                             settings = null;
                             window.hWin.HEURIST4.msg.showMsgFlash('Settings are invalid');
+                        }else if(that.options.saveOnExit && that.sel_saved_settings){
+                            that.original_settings = response.data;
+                            that.inpt_save_setting_name.val(that.sel_saved_settings.find('option:selected').text());
                         } 
 
                     }else{
@@ -308,6 +271,103 @@ $.widget( "heurist.configEntity", {
     
     //
     //
+    //
+    isSomethingChanged: function(){
+
+        var new_settings = this.options.getSettings();            
+        if(!new_settings) return '';
+        
+        if((this.original_settings != JSON.stringify(new_settings))){
+            return true;
+        }else{
+            return this.sel_saved_settings.val();
+        }
+    },
+    
+    //
+    //
+    //
+    getFileName: function(){
+        return 
+    },
+    
+    //
+    //
+    //
+    saveSettings: function(callback){
+
+        var fileName = this.inpt_save_setting_name.val();
+        
+        var entity_ID = this.options.entityID; 
+
+        if(fileName.trim()==''){
+            if(this.options.saveOnExit){
+                fileName = window.hWin.HEURIST4.rectypes.names[entity_ID] + ' temporary';
+            }else{
+                window.hWin.HEURIST4.msg.showMsgFlash('Name not defined');
+                return;
+            }
+        }
+
+        /*if(fileName.indexOf('/')>0){
+            fileName = fileName.split('/');
+            entity_ID = fileName[0];
+            fileName = fileName[1];
+        }*/
+        
+        var settings = this.options.getSettings();            
+        if(!settings) return;
+        
+        this.original_settings = JSON.stringify(settings);
+
+        var request = {
+            'a'          : 'files',
+            'operation'  : 'put',
+            'entity'     : this.options.entityName,
+            'folder'     : this.options.configName,    
+            'rec_ID'     : entity_ID,
+            'file'       : fileName+'.cfg',    
+            'content'    : JSON.stringify(settings)    
+        };
+
+        var that = this;
+        
+        window.hWin.HAPI4.EntityMgr.doRequest(request, 
+            function(response){
+                if(response.status == window.hWin.ResponseStatus.OK){
+
+                    that.inpt_save_setting_name.val('');
+                    var filename = response.data;
+                    var ele = that.sel_saved_settings.find('option[value="'+filename+'"]');
+                    if(ele.length>0){
+                        
+                    }else{
+                        window.hWin.HEURIST4.ui.addoption(that.sel_saved_settings[0], 
+                            entity_ID+'/'+filename, 
+                            filename.substring(0,filename.indexOf('.cfg')) );    
+                        if(that.sel_saved_settings.hSelect("instance")!=undefined){
+                                that.sel_saved_settings.hSelect('refresh'); 
+                        }
+                    }
+                    
+                    that.element.show();    
+                    window.hWin.HEURIST4.msg.showMsgFlash('Settings are saved');
+                    
+                    if($.isFunction(callback)){
+                        callback.call( this, entity_ID+'/'+filename );
+                    } 
+
+                }else{
+                    that.element.hide();
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                }
+        });      
+
+
+    },    
+    
+    //
+    // initial_value - selected config file
     //
     updateList: function( rtyID, initial_value ){
         
@@ -336,7 +396,8 @@ $.widget( "heurist.configEntity", {
             function(response){
                 if(response.status == window.hWin.ResponseStatus.OK){
                     var ele = that.sel_saved_settings.empty();
-                    window.hWin.HEURIST4.ui.addoption(ele[0], '', '');
+                    window.hWin.HEURIST4.ui.addoption(ele[0], '', 'select...');
+                    ele[0].selectedIndex = 0;
                     
                     var recset = new hRecordSet(response.data);
                     if(recset.length()>0){
@@ -348,20 +409,24 @@ $.widget( "heurist.configEntity", {
                             entity_id = entity_id.split('/')
                             entity_id = entity_id[entity_id.length-2];
                             entity_id  = entity_id+'/'+filename;
+                            filename = filename.substring(0,filename.indexOf('.cfg'))
 
                             var opt = window.hWin.HEURIST4.ui.addoption(ele[0], 
                                                     entity_id, 
-                                                    filename.substring(0,filename.indexOf('.cfg')));
+                                                    filename);
                             if(initial_value==entity_id){
                                 $(opt).attr('selected',true);
+                                if(that.inpt_save_setting_name){
+                                    that.inpt_save_setting_name.val(filename);
+                                }
                             }
                         });
                         //ele[0].selectedIndex = sel_idx;
                         
-                        if(that.sel_saved_settings.hSelect("instance")!=undefined){
-                            that.sel_saved_settings.hSelect('refresh'); 
-                        }
                         that.element.show();    
+                    }
+                    if(that.sel_saved_settings.hSelect("instance")!=undefined){
+                        that.sel_saved_settings.hSelect('refresh'); 
                     }
                     
                 }else{

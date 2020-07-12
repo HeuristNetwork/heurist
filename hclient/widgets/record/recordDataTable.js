@@ -62,11 +62,13 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
 
             //divLoadSettingsName: this.element
             divSaveSettings: this.element.find('#divSaveSettings'),  //element
-            allowRenameDelete: true
+            allowRenameDelete: true,
+            saveOnExit: true  //auto save on exit
 
         });
 
-        this.element.find('#divLoadSettings').configEntity( 'updateList', this.selectRecordScope.val() );    
+        this.element.find('#divLoadSettings').configEntity( 'updateList', this.selectRecordScope.val(), 
+            this.options.initial_cfg?this.options.initial_cfg.cfg_name:null );    
 
         if(this.options.initial_cfg){
             this.setSettings(this.options.initial_cfg);
@@ -88,12 +90,24 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
             that.selectedColumns = settings.columns; 
             that.selectedFields = settings.fields; 
             
+            var id = this._selectedRtyID;
+            this._selectedRtyID = null;
+            this._loadRecordTypesTreeView( id );
+            
             var tree = that.element.find('.rtt-tree').fancytree("getTree");           
+            //tree.render(true);
             tree.visit(function(node){
                 node.setSelected(false); //reset
                 node.setExpanded(true);
             });            
             
+            /*
+            var timerId = setInterval(function(){
+                if(tree.isLoading()){
+                    clearInterval(timerId);
+                    that._assignSelectedFields();
+                }
+            } ,200); */
             setTimeout(function(){
                 that._assignSelectedFields();
             },1000);
@@ -236,9 +250,6 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
              rectype_Ids.push(this.options.initial_cfg.rty_ID);
         }
 
-//console.log('_fillSelectRecordScope');
-//console.log(rectype_Ids);
-        
         if(rectype_Ids.length==0){
             window.hWin.HEURIST4.ui.createRectypeSelect(selScope,null,'select record type …',true);
         }else{
@@ -280,11 +291,26 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
 
             var settings = this.getSettings(true);            
             if(!settings) return;
-
-            //close dialog  
-            this._context_on_close = settings;
-            this._as_dialog.dialog('close');
-                     
+            
+            
+            //compare if something changed autosave
+            var ele = this.element.find('#divLoadSettings');
+            var cfg_name = (ele.configEntity('instance'))?ele.configEntity( 'isSomethingChanged'):'';
+            if(cfg_name===true)
+            {
+                var that = this;
+                ele.configEntity( 'saveSettings', function(cfg_name){
+                        //close dialog 
+                        settings.cfg_name = cfg_name; 
+                        that._context_on_close = settings;
+                        that._as_dialog.dialog('close');
+                    });    
+                
+            }else{
+                settings.cfg_name = cfg_name; 
+                this._context_on_close = settings;
+                this._as_dialog.dialog('close');
+            }
     },
     
     // FROM UI
@@ -392,7 +418,6 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
     //
     _onRecordScopeChange: function() 
     {
-console.log('_onRecordScopeChange');        
         var isdisabled = this._super();
         
         //window.hWin.HEURIST4.util.setDisabled( this.element.parents('.ui-dialog').find('#btnDoAction2'), isdisabled );

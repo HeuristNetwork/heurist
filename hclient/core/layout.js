@@ -668,10 +668,10 @@ console.log(layout_opts);
 
                     if(!$cardinal_container.is(':visible')){
                         
+                        $cardinal_container.layout(layout_opts);
                         $cardinal_container.on("myOnShowEvent", function(event){
                             
                             $cardinal_container.off("myOnShowEvent");
-                            $cardinal_container.layout(layout_opts);
                             __toogleIcons($cardinal_container, 'west', 'e', 'w');
                             __toogleIcons($cardinal_container, 'east', 'w', 'e');
                         });
