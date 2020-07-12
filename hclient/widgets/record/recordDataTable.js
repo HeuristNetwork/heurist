@@ -155,7 +155,8 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
                 var ele =  cont.find('div[data-key="'+dtid+'"]');
                 if(ele.length>0){
                     ele.attr('data-order',i);
-                    ele.find('input').prop('checked', that.selectedColumns[i].visible);
+                    ele.find('input.columnVisibility').prop('checked', that.selectedColumns[i].visible);
+                    ele.find('select.columnWidth').val(that.selectedColumns[i].width);
                 }
             }
             cont.find('div').sort(function(a,b){
@@ -203,8 +204,12 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
             
             if(container.find('div[data-key="'+dtid+'"]').length==0){ //avoid duplication
                 $('<div data-code="'+code+'" data-key="'+dtid+'"'+(parentcode?(' data-parent="'+parentcode+'"'):'')+'>'
-                    +'<input type="checkbox" title="Visibility in DataTable" checked>&nbsp;<span style="cursor:ns-resize">'
-                    +title+'</span></div>').appendTo(container);
+                    +'<input type="checkbox" class="columnVisibility" title="Visibility in DataTable" checked>&nbsp;<span style="cursor:ns-resize">'
+                    +title+'</span>'
+                    +'<select class="columnWidth" title="Column width" style="float:right;width:50px;margin-right:10px;">'
+                    +'<option></option><option>20</option><option>50</option><option>100</option><option>200</option>'
+                    +'<option>300</option><option>400</option><option>500</option></select>'
+                    +'</div>').appendTo(container);
                 container.sortable();
             }
     },
@@ -388,11 +393,18 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
             
             this.element.find('div.rtt-list > div').each(function(idx,item){
                 var $item = $(item);
-                selectedCols.push({
+                var isVisible = $item.find('input.columnVisibility').is(':checked');
+                var colopts = {
                     data: $item.attr('data-key'),                 
                     title: $item.find('span').text(), 
-                    visible:  $item.find('input').is(':checked') 
-                });
+                    visible:  isVisible
+                };
+                if(isVisible && $item.find('select.columnWidth').val()>0){
+                    colopts['width'] = $item.find('select.columnWidth').val();
+                    colopts['className'] = 'truncate width'+colopts['width'];
+                }
+                
+                selectedCols.push(colopts);
                 if(need_id && $item.attr('data-key')=='rec_ID') need_id = false;
                 if(need_type && $item.attr('data-key')=='rec_RecTypeID') need_type = false;
             });

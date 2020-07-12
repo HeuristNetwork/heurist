@@ -208,6 +208,7 @@ that._dout('myOnShowEvent');
                     this.options.dataTableParams['scrollCollapse'] = true;
                     this.options.dataTableParams['scrollY'] = this.div_content.height()-120;
                     this.options.dataTableParams['scrollX'] = true;
+                    this.options.dataTableParams['autoWidth'] = false;
                     
                     this.options.dataTableParams['initComplete'] = function(){that._onDataTableInitComplete()};
                     
@@ -315,6 +316,7 @@ this._dout('reload datatable '+this.options.serverSide);
     //
     _onDataTableInitComplete:function(){
         
+        
                     //adjust position for datatable controls    
                     this.div_content.find('.dataTables_length').css('padding','5 0 0 10');
                     var lele = this.div_content.find('.dataTables_filter').css('padding','5 10 0 0');
@@ -323,6 +325,34 @@ this._dout('reload datatable '+this.options.serverSide);
                     this.div_content.find('.dataTables_wrapper').css('padding','0 8px');
                     this.div_content.find('.dataTable').css('font-size','inherit');
                     this.selConfigs = null;
+                    
+        //adjust column widths
+        /*
+        var that = this;
+        this._dataTable.columns().every( function () {
+            
+            var column = this;
+            if(column.visible()){
+                var title = column.header();
+                var dataIdx = column.index( 'fromVisible', column.index() );
+ 
+                var width  = that.options.dataTableParams['columns'][dataIdx]['width'];
+console.log(title);
+console.log(dataIdx+'  '+width+'  '+that.options.dataTableParams['columns'][dataIdx]['visible']);
+                if(!window.hWin.HEURIST4.util.isempty(width) && that.options.dataTableParams['columns'][dataIdx]['visible']){
+                    $(title).css({'max-width':width,width:width});   
+                }
+            }
+        } );                    
+        this.div_content.find('.dataTables_scrollBody th').each(function(idx,item){
+            //var column = that._dataTable.columns(idx);
+            //var dataIdx = column.index( 'fromVisible', idx );
+            var width  = that.options.dataTableParams['columns'][idx]['width'];
+console.log(idx+'  '+width+'  '+that.options.dataTableParams['columns'][idx]['visible']);
+            if(!window.hWin.HEURIST4.util.isempty(width) && that.options.dataTableParams['columns'][idx]['visible']){
+                $(item).css({'max-width':width,width:width});   
+            }
+        });*/
                     
                     
           if(this.options.show_rt_filter || this.options.show_column_config){
