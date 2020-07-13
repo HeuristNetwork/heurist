@@ -156,7 +156,7 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
                 if(ele.length>0){
                     ele.attr('data-order',i);
                     ele.find('input.columnVisibility').prop('checked', that.selectedColumns[i].visible);
-                    ele.find('select.columnWidth').val(that.selectedColumns[i].width);
+                    ele.find('select.columnWidth').val(that.selectedColumns[i].width>0?that.selectedColumns[i].width:20);
                 }
             }
             cont.find('div').sort(function(a,b){
@@ -206,9 +206,9 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
                 $('<div data-code="'+code+'" data-key="'+dtid+'"'+(parentcode?(' data-parent="'+parentcode+'"'):'')+'>'
                     +'<input type="checkbox" class="columnVisibility" title="Visibility in DataTable" checked>&nbsp;<span style="cursor:ns-resize">'
                     +title+'</span>'
-                    +'<select class="columnWidth" title="Column width" style="float:right;width:50px;margin-right:10px;">'
-                    +'<option></option><option>20</option><option>50</option><option>100</option><option>200</option>'
-                    +'<option>300</option><option>400</option><option>500</option></select>'
+                    +'<select class="columnWidth" title="Column width" style="width:50px;margin-left:10px;font-size:smaller;">'
+                    +'<option></option><option>10</option><option selected>20</option><option>50</option><option>100</option>'
+                    +'<option>200</option><option>300</option><option>400</option><option>500</option></select>'
                     +'</div>').appendTo(container);
                 container.sortable();
             }
