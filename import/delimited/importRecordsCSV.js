@@ -2890,7 +2890,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                                                 $('#presetMapping').show();
                                                 
                                                 var preset_mappings = response.data;
-                                                var sel = $('#sel_presetMapping')
+                                                var sel = $('#sel_presetMapping').css({'max-width':'200px'});
                                                 sel.empty();
                                                 window.hWin.HEURIST4.ui.addoption(sel[0], null, window.hWin.HR('select...'));    
                                                 for(var sesionName in preset_mappings)
