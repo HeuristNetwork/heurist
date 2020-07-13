@@ -2457,7 +2457,9 @@ $.widget( "heurist.resultList", {
         }
         
         //special div for horizontal
-        html = '<div>'+html+'</div>';
+        if(this.options.view_mode == 'horizontal'){
+            html = '<div>'+html+'</div>';
+        }
         
         this.div_content[0].innerHTML += html;
         
