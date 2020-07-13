@@ -1504,7 +1504,7 @@ window.hWin.HEURIST4.ui = {
  //console.log(parent_ele);
             var menu = selObj.hSelect(       
               { style: 'dropdown',
-                position:{collision: "flip"},
+                position:(navigator.userAgent.indexOf('Firefox')<0)?{collision: "flip"}:{},
                 appendTo: parent_ele,
                 /*positionOptions: {
                     collision: 'none',
@@ -1526,17 +1526,19 @@ window.hWin.HEURIST4.ui = {
                     var pos = wmenu_div.position().top;
                     
 //console.log( '>>> ' + wmenu.parents('body').height() );
+                    var parent_body = wmenu.parents('body');
+                    var bodyheight = parent_body.height()>0?parent_body.height():parent_body[0].clientHeight;
                     
-                    if(wmenu.parents('body').height()>0 && pos+wmenu.height()>wmenu.parents('body').height()){
-                        var newtop = wmenu.parents('body').height()-wmenu.height()-5;
+                    if(bodyheight>0 && pos+wmenu.height()>bodyheight){
+                        var newtop = bodyheight-wmenu.height()-5;
                         if(newtop<0){
                             newtop = 2;
-                            wmenu_div.height(wmenu.parents('body').height()-2);
+                            wmenu_div.height(bodyheight-2);
                         }
                         wmenu_div.css('top', newtop);
                     }
                     //calculate position
-                    //console.log(pos.top+','+wmenu.height()+','+wmenu.parents('body').height());
+//console.log(pos+'+'+wmenu.height()+'>'+bodyheight);
                 }
               });
                 
