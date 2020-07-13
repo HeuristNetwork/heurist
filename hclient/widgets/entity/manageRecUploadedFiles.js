@@ -452,12 +452,14 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
         var rectype = fld('ulf_ExternalFileReference')?'external':'local';
         //var isEnabled = (fld('ugr_Enabled')=='y');
         
-        var recTitle = fld2((rectype=='external')?'ulf_ExternalFileReference':'ulf_OrigFileName','auto');//,'20em'
+        var recTitle;
         var recTitleHint;
         if(rectype=='external'){
+            recTitle = fld2('ulf_ExternalFileReference','auto');//,'20em'
             recTitleHint = recID+' : '+fld('ulf_ExternalFileReference');
         }else{
             recTitleHint = recID+' : '+fld('ulf_OrigFileName') + ' @ ' + fld('ulf_FilePath');
+            recTitle = '<div class="item" style="width:auto">'+fld('ulf_OrigFileName')+' &nbsp;&nbsp;[ '+fld('ulf_FilePath')+' ]</div>';
         }
         
         var recIcon = '';//@todo take default icon from extnstions table and or for default image/audio/video
