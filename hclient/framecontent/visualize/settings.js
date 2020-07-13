@@ -24,6 +24,7 @@
 
 /** SETTING NAMES */
 var setting_linetype      = "setting_linetype";
+var setting_line_empty_link = "setting_line_empty_link";
 var setting_linelength    = "setting_linelength";
 var setting_linewidth     = "setting_linewidth";
 var setting_linecolor     = "setting_linecolor";
@@ -85,6 +86,7 @@ function putSetting(key, value) {
  */
 function checkStoredSettings() {
     getSetting(   setting_linetype,      settings.linetype    );
+    getSetting(   setting_line_empty_link, settings.setting_line_empty_link );
     getSetting(   setting_linelength,    settings.linelength  );
     getSetting(   setting_linewidth,     settings.linewidth   );
     getSetting(   setting_linecolor,     settings.linecolor   );
@@ -218,6 +220,12 @@ function handleSettingsInUI() {
         .click( function(){ setLinkMode('curved');} );
     $('#linksMode2').button({icon: 'ui-icon-link-stepped', showLabel:false})
         .click( function(){ setLinkMode('stepped');} );
+        
+    $('#linksEmpty').change( function(e){
+            putSetting(setting_line_empty_link, $(e.target).is(':checked')?1:0);
+            visualizeData();
+            _syncUI();
+    });
         
     $( "#setLinksMode" ).controlgroup();    
     
@@ -450,6 +458,10 @@ function _syncUI(){
     
     var linetype = getSetting(setting_linetype,'straight');
     $('#toolbar').find('button[name="linksMode"][value="'+linetype+'"]').addClass('ui-heurist-btn-header1');
+    
+    
+    var is_show_empty = (getSetting(setting_line_empty_link, 1)==1);
+    $('#toolbar').find('#linksEmpty').prop('checked', is_show_empty);
 }
 
 function changeViewMode(mode){

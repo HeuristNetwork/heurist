@@ -122,6 +122,7 @@ var svg;        // The SVG where the visualisation will be executed on
             // UI default settings
             advanced: false,
             linetype: "straight",
+            line_show_empty: true,
             linelength: 100,
             linewidth: 3,
             linecolor: "#22a",
@@ -777,6 +778,7 @@ function addLines(name, color, thickness) {
     var lines;
     
     var linetype = getSetting(setting_linetype, 'straight');
+    var hide_empty = (getSetting(setting_line_empty_link, 1)==0);
     
     if(true){ //getSetting(setting_linetype) != "straight"){//} == "curved") {
         // Add curved lines
@@ -804,7 +806,9 @@ function addLines(name, color, thickness) {
             return name + " link s"+d.source.id+"r"+d.relation.id+"t"+d.target.id;
          })
          .attr("stroke", function (d) {
-             if(d.targetcount == 0 && name === 'bottom-lines') {
+             if(hide_empty && d.targetcount == 0){
+                 return 'rgba(255, 255, 255, 0.0)'; //hidden
+             }else if(d.targetcount == 0 && name === 'bottom-lines') {
                  return '#d9d8d6';
              } else {
                  return color;
@@ -822,22 +826,26 @@ function addLines(name, color, thickness) {
          
     if(name=='bottom-lines' && linetype != "stepped"){
          lines.attr("marker-mid", function(d) {
-            return "url(#marker-s"+d.source.id+"r"+d.relation.id+"t"+d.target.id+")"; //reference to marker id
+             if(!(hide_empty && d.targetcount == 0)){
+                return "url(#marker-s"+d.source.id+"r"+d.relation.id+"t"+d.target.id+")"; //reference to marker id
+             }
          });
     }
     
     if(name=='top-lines'){
-         lines.on("mouseover", function(d) {
-//console.log(d.relation.id);  //field type id           
-             var selector = "s"+d.source.id+"r"+d.relation.id+"t"+d.target.id;
-             createOverlay(d3.event.offsetX, d3.event.offsetY, "relation", selector, getRelationOverlayData(d));  
-         })
-         .on("mouseout", function(d) {
-             var selector = "s"+d.source.id+"r"+d.relation.id+"t"+d.target.id;
-             removeOverlay(selector, 0);
-         });
+        lines.on("mouseover", function(d) {
+            //console.log(d.relation.id);  //field type id           
+            if(!(hide_empty && d.targetcount == 0)){
+                var selector = "s"+d.source.id+"r"+d.relation.id+"t"+d.target.id;
+                createOverlay(d3.event.offsetX, d3.event.offsetY, "relation", selector, getRelationOverlayData(d));  
+            }
+        })
+        .on("mouseout", function(d) {
+            var selector = "s"+d.source.id+"r"+d.relation.id+"t"+d.target.id;
+            removeOverlay(selector, 0);
+        });
     }
-         
+
     return lines;
 }
 
