@@ -344,8 +344,8 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
         $("head").append(cssLink);
         $("head").append($('<link rel="stylesheet" type="text/css" href="h4styles.css?t='+(new Date().getTime())+'">'));
         */
-
         var layoutid = '<?=@$_REQUEST['ll']?>';
+
         if(window.hWin.HEURIST4.util.isempty(layoutid)){
             layoutid = "H5Default";
             /*layoutid = window.hWin.HAPI4.get_prefs('layout_id');

@@ -46,6 +46,7 @@ var cfg_widgets = [
 
 
     {id:'heurist_mainMenu', name:'Main Menu', widgetname:'mainMenu', script:'hclient/widgets/dropdownmenus/mainMenu.js'},
+    {id:'heurist_mainMenu6', name:'Main Side Menu', widgetname:'mainMenu6', script:'hclient/widgets/dropdownmenus/mainMenu6.js'},
     {id:'heurist_resultList', name:'Search Result', widgetname:'resultList', script:'hclient/widgets/viewers/resultList.js'},
     {id:'heurist_resultListDataTable', name:'List View', widgetname:'resultListDataTable', script:'hclient/widgets/viewers/resultListDataTable.js'},
     {id:'heurist_resultListExt', name:'&nbsp;&nbsp;&nbsp;', widgetname:'recordListExt', script:'hclient/widgets/viewers/recordListExt.js'},
@@ -109,6 +110,18 @@ var cfg_layouts = [
                         layout_id:'FAP',dragable:false,
                         options:{ref: 'SearchAnalyze'}
                         ,css:{position:'absolute', top:'0',left:0,bottom:'0.1em',right:0}}]
+        }    
+    },
+
+    {id:'H6Default', name:'Heurist Def v6', theme:'heurist', type:'free',
+        north_pane:{ dropable:false, dragable:false, 
+                css:{position:'absolute', top:0,left:0,height:'6em',right:0, 
+                     'min-width':'75em'}, 
+            apps:[{appid:'heurist_mainMenu', hasheader:false, css:{height:'100%', border:'solid'}}] 
+        },
+        center_pane:{ dockable:false, dropable:false, dragable:false, 
+                css:{position:'absolute', top:'6.4em',left:0,bottom:'0.1em',right:0},
+            apps:[{appid:'heurist_mainMenu6', hasheader:false}]
         }    
     },
     
@@ -189,6 +202,7 @@ var cfg_layouts = [
             ]}]
         }
     },
+
     
     // Position of widgets are specified in CSS, all widgets can be dragged around and repositioned
     /* This layout needs to be defiend spcifically to be useful

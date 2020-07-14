@@ -1,0 +1,81 @@
+<!--
+/**
+* mainMenu6_design.html: design menu
+*
+* @package     Heurist academic knowledge management system
+* @link        http://HeuristNetwork.org
+* @copyright   (C) 2005-2020 University of Sydney
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @author      Ian Johnson     <ian.johnson@sydney.edu.au>
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     4
+*/
+
+/*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+* with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+* Unless required by applicable law or agreed to in writing, software distributed under the License is
+* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+* See the License for the specific language governing permissions and limitations under the License.
+*/
+-->
+
+<div class="ui-heurist-header" style="top:0px;">Admin</div>
+<div style="top:37px;position:absolute;width:100%;">
+
+    <ul style="list-style-type:none;margin:0;padding:12px">
+
+        <li style="padding:0px 6px 8px;" class="ui-heurist-title">Database</li>
+        
+        <li data-user-admin-status="-1" title="Open and login to another Heurist database - current database remains open" style="font-size:smaller;padding:6px">
+            <span class="ui-icon ui-icon-database"/><span class="menu-text">Open</span>
+        </li>
+        <li data-user-admin-status="0" title="Create a new database on the current server - essential structure elements are populated automatically" style="font-size:smaller;padding:6px">
+            <span class="ui-icon ui-icon-plus"/><span class="menu-text">New</span>
+        </li>
+        <li data-user-admin-status="1" title="Clones an identical database from the currrent database with all data, users, attached files, templates etc." style="font-size:smaller;padding:6px">
+            <span class="ui-icon ui-icon-databases"/><span class="menu-text">Clone</span>
+        </li>
+
+        <li data-user-admin-status="1" title="Edit the internal metadata describing the database and set some global behaviours. Recommended to provide a self-documenting database" style="font-size:smaller;padding:6px">
+            <span class="ui-icon ui-icon-databases"/><span class="menu-text">Properties</span>
+        </li>
+        <li data-user-admin-status="1" title="Register this database with the Heurist Master Index - this makes the structure (but not data) available for import by other databases" style="font-size:smaller;padding:6px">
+            <span class="ui-icon ui-icon-databases"/><span class="menu-text">Register</span>
+        </li>
+        <li data-user-admin-status="1" title="" style="font-size:smaller;padding:6px">
+            <span class="ui-icon ui-icon-databases"/><span class="menu-text">Create Archive Package</span>
+        </li>
+
+    </ul>
+        
+    <ul style="list-style-type:none;margin:0;padding:12px;border-top:1px gray solid;">
+    
+        <li style="padding:0px 8px 6px;" class="ui-heurist-title">Utilities</li>
+
+        <li data-user-admin-status="0" title="Specify hover....." style="font-size:smaller;padding:6px">
+            <span class="ui-icon ui-icon-list"/><span class="menu-text">Vocabularies Editor</span>
+        </li>
+    </ul>
+
+    <ul style="list-style-type:none;margin:0;padding:12px;border-top:1px gray solid;">
+        <li style="padding:0px 8px 6px;" class="ui-heurist-title">Verify</li>
+
+        <li data-user-admin-status="0" title="Specify hover....." style="font-size:smaller;padding:6px">
+            <span class="ui-icon ui-icon-list"/><span class="menu-text">Base Fields Editor</span>
+        </li>
+    </ul>
+        
+    <ul style="list-style-type:none;margin:0;padding:12px;border-top:1px gray solid;">
+        <li style="padding:0px 8px 6px;" class="ui-heurist-title">Manage Users</li>
+
+        <li data-user-admin-status="0" title="Specify hover....." 
+            style="font-size:smaller;padding:6px">
+            <span class="ui-icon ui-icon-database"/><span class="menu-text">Refresh Memory</span>
+        </li>
+    </ul>
+
+</div>
+
+
+ 

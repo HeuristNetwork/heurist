@@ -222,6 +222,21 @@ function hLayout(args) {
         
     }
     
+    /**
+    * Finds layout by id
+    *
+    * @param id
+    */
+    function _layoutGetById(id){
+        var i;
+        for(i=0; i<layouts.length; i++){
+            if(layouts[i].id==id){
+                return layouts[i];
+            }
+        }
+        return null;
+    }
+
     
     /**
     * Main funtion that inits all stuff
@@ -241,21 +256,6 @@ function hLayout(args) {
     var grid_step_size = 100;
     var app_counter = 0; //to maintain unique id for panels and tabs
     //var layout, $container;
-
-    /**
-    * Finds layout by id
-    *
-    * @param id
-    */
-    function layoutGetById(id){
-        var i;
-        for(i=0; i<layouts.length; i++){
-            if(layouts[i].id==id){
-                return layouts[i];
-            }
-        }
-        return null;
-    }
 
     //
     // north-west-east-south layout
@@ -917,7 +917,7 @@ console.log(layout_opts);
         }else if(app.widgetname=='include_layout'){
             //nested layouts
 
-            var layout = layoutGetById(options.ref);
+            var layout = _layoutGetById(options.ref);
             if(layout){
 
                 if(app_css){
@@ -1257,13 +1257,12 @@ console.log(layout_opts);
             layout = layoutid;
             layoutid = layout['id'];
         }else{
-            layout = layoutGetById(layoutid);
+            layout = _layoutGetById(layoutid);
         }
     
-
         if(layout==null){
             window.hWin.HEURIST4.msg.redirectToError('Layout ID:'+layoutid+' is not found. Verify your layout_default.js');
-            if(layoutid!='H5Default') layout = layoutGetById('H5Default');
+            if(layoutid!='H5Default') layout = _layoutGetById('H5Default');
             if(layout==null){
                 return;
             }
@@ -1418,7 +1417,6 @@ console.log(layout_opts);
                 $(app.widget)[widgetname](method, command);
         },
     
-        
         //
         //
         //
