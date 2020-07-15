@@ -530,21 +530,34 @@ if ($bkm_ID>0 || $rec_id>0) {
 // this functions outputs common info.
 function print_details($bib) {
     global $is_map_popup, $without_header, $ACCESSABLE_OWNER_IDS, $system;
-        
+
     print_header_line($bib);
-    
-    
+
     $rec_visibility = $bib['rec_NonOwnerVisibility'];
     $rec_owner  = $bib['rec_OwnerUGrpID']; 
     $hasAccess = ($rec_visibility=='public') || 
                                     ($system->has_access() && $rec_visibility!='hidden') || 
                                     in_array($rec_owner, $ACCESSABLE_OWNER_IDS);
     if($hasAccess){
+
     
         print_public_details($bib);
         
+        
+//$_time_debug = new DateTime();
+        
         $link_cnt = print_relation_details($bib);
+/*        
+$_time_debug2 = new DateTime('now');
+print 'print_relation_details  '.($_time_debug2->getTimestamp() - $_time_debug->getTimestamp()).'<br>';
+$_time_debug = $_time_debug2;
+*/
         $link_cnt = print_linked_details($bib, $link_cnt); //links from
+/*
+$_time_debug2 = new DateTime('now');
+print 'print_linked_details  '.($_time_debug2->getTimestamp() - $_time_debug->getTimestamp()).'<br>';
+$_time_debug = $_time_debug2;
+*/
         if($is_map_popup){ // && $link_cnt>3 //linkRow
         ?>
         <div class="map_popup"><div class="detailRow moreRow"><div class=detailType>
@@ -1432,9 +1445,11 @@ function print_relation_details($bib) {
 //
 // print reverse link
 //
-function print_linked_details($bib, $link_cnt) {
+function print_linked_details($bib, $link_cnt) 
+{
     global $system, $relRT,$ACCESSABLE_OWNER_IDS, $is_map_popup, $is_production, $rectypesStructure;
     
+    /* old version without recLinks
     $query = 'select * '.
     'from recDetails '.
     'left join defDetailTypes on dty_ID = dtl_DetailTypeID '.
@@ -1446,6 +1461,14 @@ function print_linked_details($bib, $link_cnt) {
     'and (rec_OwnerUGrpID in ('.join(',', $ACCESSABLE_OWNER_IDS).') OR '.
     ($system->has_access()?'NOT rec_NonOwnerVisibility = "hidden")':'rec_NonOwnerVisibility = "public")').
     ' ORDER BY rec_RecTypeID, rec_Title';
+    */
+    
+    $query = 'SELECT rec_ID, rec_RecTypeID, rec_Title FROM recLinks, Records '
+                .'where rl_TargetID = '.$bib['rec_ID']
+                .' AND (rl_RelationID IS NULL) AND rl_SourceID=rec_ID '
+    .' and (rec_OwnerUGrpID in ('.join(',', $ACCESSABLE_OWNER_IDS).') OR '
+    .($system->has_access()?'NOT rec_NonOwnerVisibility = "hidden")':'rec_NonOwnerVisibility = "public")')
+                .' ORDER BY rec_RecTypeID, rec_Title';    
     
     $mysqli = $system->get_mysqli();
     
@@ -1470,7 +1493,7 @@ function print_linked_details($bib, $link_cnt) {
     <?php
        }
     }
-        
+    
         while ($row = $res->fetch_assoc()) {
 
             print '<div class="detailRow fieldRow"'.($is_map_popup?' style="display:none"':'').'>'; // && $link_cnt>2 linkRow
