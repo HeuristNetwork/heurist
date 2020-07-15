@@ -83,7 +83,9 @@ $.widget( "heurist.resultList", {
         recordDiv_class:null,  //additional class for even entries recordDiv
         
         search_realm:  null,  //accepts search/selection events from elements of the same realm only
-        search_initial: null  //NOT USED query string or svs_ID for initial search
+        search_initial: null,  //NOT USED query string or svs_ID for initial search
+        
+        supress_load_fullrecord: false, //do not load full record data
     },
 
     _is_publication:false, //this is CMS publication - take css from parent
@@ -1591,16 +1593,23 @@ $.widget( "heurist.resultList", {
 
             }else if (action=='edit'){
 
+                /* OUTDATED
                 var query = null;
-                
-                if(false && this._currentRecordset && this._currentRecordset.length()<1000){
+                if(this._currentRecordset && this._currentRecordset.length()<1000){
                     //it breaks order in edit form - previos/next becomes wrong
                     query = 'ids:'+this._currentRecordset.getIds().join(',');
                 }else{
                     query = this._query_request;
+                }*/
+                
+                var ordered_recordset = null;
+                if(this._currentRecordset){
+                    ordered_recordset = this._currentRecordset;
+                }else{
+                    ordered_recordset = this._query_request;
                 }
 
-                window.hWin.HEURIST4.ui.openRecordInPopup(selected_rec_ID, query, true, null);
+                window.hWin.HEURIST4.ui.openRecordInPopup(selected_rec_ID, ordered_recordset, true, null);
                 //@todo callback to change rectitle
 
             }else if (action=='edit_ext'){
@@ -2417,7 +2426,7 @@ $.widget( "heurist.resultList", {
                 }else{
                     //record is not loaded yet
                     html  += this._renderRecord_html_stub( recID );    
-                    rec_toload.push(recID);
+                    if(this.options.supress_load_fullrecord===false) rec_toload.push(recID);
                 }
 
                 this._count_of_divs++;
@@ -2691,7 +2700,6 @@ $.widget( "heurist.resultList", {
 
 
         }
-
         
         this.setCollected( null );
 

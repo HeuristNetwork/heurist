@@ -1861,10 +1861,10 @@ window.hWin.HEURIST4.ui = {
     // important manageRecords.js and selectRecords.js must be loaded
     // 
     // rec_ID - record to edit
-    // query_request - returns set of records that can be edit in bunch (next/prev buttons)
+    // query_or_recordset - recordset or query returns set of records that can be edit in bunch (next/prev buttons)
     // popup_options['onselect'] - define function that accepts added/edited record as recordset
     // 
-    openRecordEdit:function(rec_ID, query_request, popup_options){
+    openRecordEdit:function(rec_ID, query_or_recordset, popup_options){
         
         /*
                 var usrPreferences = window.hWin.HAPI4.get_prefs_def('edit_record_dialog', 
@@ -1873,7 +1873,7 @@ window.hWin.HEURIST4.ui = {
         */
         if(!window.hWin.HEURIST4.ui.checkAndLogin(function(is_logged){
                     if(is_logged!==false){
-                        window.hWin.HEURIST4.ui.openRecordEdit(rec_ID, query_request, popup_options);
+                        window.hWin.HEURIST4.ui.openRecordEdit(rec_ID, query_or_recordset, popup_options);
                     }
                 })){
             return;
@@ -1886,7 +1886,7 @@ window.hWin.HEURIST4.ui = {
                 if(popup_options && 
                     $.isPlainObject(popup_options.new_record_params) && popup_options.new_record_params['rt']>0){
                     //rec_ID = -1;
-                    query_request = null;
+                    query_or_recordset = null;
                 }
                 
                 popup_options = $.extend(popup_options, {
@@ -1911,9 +1911,21 @@ window.hWin.HEURIST4.ui = {
                     +'</div>',
                     onInitFinished:function( last_attempt ){
                         
-                        if(query_request){
-                            if(!$.isPlainObject(query_request)){ //just string
-                                query_request = {q:query_request, w:'all'};
+                        if( query_or_recordset && 
+                            (typeof query_or_recordset.isA == "function") && 
+                             query_or_recordset.isA("hRecordSet") )
+                        {
+                            //array of record ids 
+                            this.updateRecordList(null, {recordset:query_or_recordset});
+                            this.addEditRecord( (rec_ID>0)?rec_ID:query_or_recordset.getOrder()[0] );
+                            return;
+                        }
+                        
+                        var query_request = null;
+                        
+                        if(query_or_recordset){
+                            if(!$.isPlainObject(query_or_recordset)){ //just string
+                                query_request = {q:query_or_recordset, w:'all'};
                             }
                         }else if(rec_ID>0){
                             query_request = {q:'ids:'+rec_ID, w:'e'}; //including temporary
@@ -1982,7 +1994,8 @@ window.hWin.HEURIST4.ui = {
     },
     
     //
-    //  Opens record edit or viewer
+    //  Opens record edit or viewer\
+    //  query_request - recordset or query string 
     //
     openRecordInPopup:function(rec_ID, query_request, isEdit, popup_options){
     
@@ -2489,6 +2502,7 @@ window.hWin.HEURIST4.ui = {
         if(!options) options = {};
         if(options.isdialog!==false) options.isdialog = true; //by default popup      
 
+        
         if($.isFunction($('body')[widgetName])){ //OK! widget script js has been loaded
         
             var manage_dlg;
@@ -2499,6 +2513,7 @@ window.hWin.HEURIST4.ui = {
                     .appendTo( $('body') )
                     [widgetName]( options );
             }else{
+                $(options.container).empty();
                 manage_dlg = $(options.container)[widgetName]( options );
             }
             

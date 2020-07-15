@@ -64,6 +64,7 @@ $.widget( "heurist.manageEntity", {
         width:  760,
         modal:  true,
         title:  '',
+        innerTitle: false, //show title as top panel 
         
         //LIST section 
         pagesize: 200,      // page size in resultList 
@@ -142,6 +143,8 @@ $.widget( "heurist.manageEntity", {
     _toolbar:null,
     
     _resultOnSelection: {}, //object that will be sent in _selectAndClose, additiontal parameter "selection" will be added
+    
+    _innerTitle: null,
     
     // the widget's constructor
     _create: function() {
@@ -229,6 +232,13 @@ $.widget( "heurist.manageEntity", {
         
         //this.element.css({'font-size':'1em'});
         
+        if(this.options.innerTitle){
+            var fele = this.element.find('.ent_wrapper:first');
+            this._innerTitle = $('<div>').addClass('ui-heurist-header')
+                .text(this.options['title'])
+                .insertBefore(fele);
+            fele.css('top','38px');
+        }
         
         //find 3 elements searchForm, recordList+recordList_toolbar, editForm+editForm_toolbar
         this.recordList = this.element.find('.recordList');
@@ -296,6 +306,20 @@ $.widget( "heurist.manageEntity", {
             }
         }
     },
+
+    //
+    //
+    //    
+    setTitle: function(title){
+        
+        this.options['title'] = title;
+        
+        if(this._innerTitle){
+            this._innerTitle.text( title );    
+        }else if(this._as_dialog && this._as_dialog.dialog('instance')) {
+            this._as_dialog.dialog('option', 'title', title);
+        }
+    },
       
     //  
     // invoked from _init after loading of entity configuration    
@@ -307,6 +331,15 @@ $.widget( "heurist.manageEntity", {
         if(!this._entityName || $.isEmptyObject(this.options.entity)){
             return false;
         }
+        
+        //construct entity from config
+        if(window.hWin.HEURIST4.util.isempty(this.options.title)){
+                this.options.title = window.hWin.HR(this.options['select_mode']=='manager'?'Manage':'Select') + ' ' +
+                    ((this.options['select_mode']!='select_single'
+                                ?this.options.entity.entityTitlePlural
+                                :this.options.entity.entityTitle));
+        }
+        this.setTitle(this.options.title);
         
         var that = this;
         
@@ -323,6 +356,7 @@ $.widget( "heurist.manageEntity", {
                        
                        entityName: this._entityName,
                        //view_mode: this.options.view_mode?this.options.view_mode:null,
+                       supress_load_fullrecord: (this.options.edit_mode == 'editonly'),
                        
                        pagesize:(this.options.pagesize>0) ?this.options.pagesize: 9999999999999,
                        empty_remark: 
@@ -880,17 +914,8 @@ $.widget( "heurist.manageEntity", {
             //was this.element.dialog("open");
             
             //init hint and help buttons on dialog titlebar
+            this.setTitle(this.options.title);                                     
              
-            //construct entity from config
-            if(window.hWin.HEURIST4.util.isempty(this.options.title)){
-                    var title = window.hWin.HR(this.options['select_mode']=='manager'?'Manage':'Select') + ' ' +
-                        ((this.options['select_mode']!='select_single'
-                                    ?this.options.entity.entityTitlePlural
-                                    :this.options.entity.entityTitle));
-                    
-                    this._as_dialog.dialog('option', 'title', title);                                     
-            }
-            
             this._as_dialog.dialog("open");
             
             if(this.options.entity.entityName=='records'){ //special case for help
