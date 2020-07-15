@@ -131,9 +131,9 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
         
         //load all menu commands
         var menu_entries = [];
-        var app = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('mainMenu');
-        if(app && app.widget){
-            menu_entries = $(app.widget).mainMenu('menuGetAllActions');
+        var widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('mainMenu');
+        if(widget){
+            menu_entries = widget.mainMenu('menuGetAllActions');
             if($.isArray(menu_entries)){
                 menu_entries.unshift( {key:'action-CreateFilter', title: 'Trigger quick query dropdown'} );
                 menu_entries.unshift( {key:'action-SearchById', title: 'Run a  saved filter' } );

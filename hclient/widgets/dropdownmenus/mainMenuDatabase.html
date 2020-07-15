@@ -21,19 +21,19 @@
 -->
 
 <li><a href="#" id="menu-database-browse"
-        data-user-admin-status="-1" data-logaction="db_Browse"
+        data-user-admin-status="-1" data-logaction="db_Browse" data-icon="ui-icon-database"
         title="Open and login to another Heurist database - current database remains open">
         Open</a>
 </li>
 
 <li><a href="admin/setup/dbcreate/createNewDB.php" id="menu-database-create"
-        data-user-admin-status="0" data-logaction="db_New"
+        data-user-admin-status="0" data-logaction="db_New" data-icon="ui-icon-plus"
         title="Create a new database on the current server - essential structure elements are populated automatically">
         New</a>
 </li>
 
 <li><a href="admin/setup/dboperations/cloneDB.php" id="menu-database-clone"
-        data-user-admin-status="1"
+        data-user-admin-status="1"  data-icon="ui-icon-databases"
         title="Clones an identical database from the currrent database with all data, users, attached files, templates etc.">
         Clone</a>
 </li>
@@ -41,7 +41,7 @@
 <li data-user-admin-status="1">-</li>
 
 <li><a href="#" id="menu-database-properties"
-        data-user-admin-status="1" data-logaction="db_Properties"
+        data-user-admin-status="1" data-logaction="db_Properties"  data-icon="ui-icon-wrench"
         title="Edit the internal metadata describing the database and set some global behaviours. Recommended to provide a self-documenting database">
         Properties</a>
 </li>
@@ -50,7 +50,7 @@
 <li>
     <a href="admin/setup/dbproperties/registerDB.php"        
         id="menu-database-register"
-        data-user-admin-status="1" data-logaction="db_Register" data-pwd-nonowner="ServerFunctions"
+        data-user-admin-status="1" data-logaction="db_Register" data-pwd-nonowner="ServerFunctions"  data-icon="ui-icon-star"
         title="Register this database with the Heurist Master Index - this makes the structure (but not data) available for import by other databases">
         Register</a>
 </li>
@@ -59,13 +59,13 @@
 <li data-user-admin-status="0" data-user-experience-level="1">-</li>
 
 <li><a href="admin/setup/dboperations/deleteCurrentDB.php"
-        data-user-admin-status="0" data-user-experience-level="1" data-pwd-nonowner="DatabaseDeletion"
+        data-user-admin-status="0" data-user-experience-level="1" data-pwd-nonowner="DatabaseDeletion"  data-icon="ui-icon-delet"
         title="Delete the current database completely - cannot be undone, although data is copied to a backup which could be reloaded by a system administrator">
         Delete</a>
 </li>
 
 <li><a href="admin/setup/dboperations/clearCurrentDB.php"
-        data-user-admin-status="0"  data-user-experience-level="1" data-pwd-nonowner="DatabaseDeletion"
+        data-user-admin-status="0"  data-user-experience-level="1" data-pwd-nonowner="DatabaseDeletion"  data-icon="ui-icon-erase"
         title="Clear all data (records, values, attached files) from the current database. Database structure - record types, fields, terms, constraints - is unaffected">
         Delete content</a>
 </li>
@@ -74,7 +74,7 @@
 
 <li> <!-- admin/rollback/rollbackRecords.php -->
     <a href="#" id="menu-database-rollback"       
-        data-user-admin-status="1"  data-user-experience-level="1"
+        data-user-admin-status="1"  data-user-experience-level="1"  data-icon="ui-icon-undo"
         title="Selectively roll back the data in the database to a specific date and time">
         Rollback</a>
 </li>

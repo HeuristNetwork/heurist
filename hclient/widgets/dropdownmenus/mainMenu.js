@@ -17,6 +17,12 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+/*
+    menuGetAllActions - returns array of {key:id,title:topmenu>name}
+    menuActionById - finds and executes menu entry by id
+    menuActionHandler - main event handker
+    menuGetActionLink - returns link 
+*/
 
 $.widget( "heurist.mainMenu", {
 
@@ -586,7 +592,23 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         });
 
     },
+    
+    //
+    //
+    //
+    menuGetActionLink: function(menu_entry_id){
 
+        for (var key in this.menues){
+            var menu = this.menues[key];
+            var link = $(menu).find('a[id="'+menu_entry_id+'"]');
+            if(link.length>0){
+                link.attr('data-parent',key);
+                return link;
+            }
+        }
+        return null;
+    },
+    
     //
     // returns all menu entries as array - used in dropdown command selector in dashboard editor
     //
@@ -611,21 +633,25 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
     //
     // finds and executes menu entry by link id
     // 
-    menuActionById: function(menu_entry_id){
+    menuActionById: function(menu_entry_id, target_container){
         
-        for (var key in this.menues){
-            var menu = this.menues[key];
-            var ele = $(menu).find('#'+menu_entry_id);
-            if(ele.length>0 && ele.is('a')){
-                this.menuActionHandler(null, ele);            
-                break;
+        if( !window.hWin.HEURIST4.util.isempty(menu_entry_id) ){
+        
+            for (var key in this.menues){
+                var menu = this.menues[key];
+                var ele = $(menu).find('#'+menu_entry_id);
+                if(ele.length>0 && ele.is('a')){
+                    this.menuActionHandler(null, ele, target_container);            
+                    break;
+                }
             }
+            
         }
     },
     //
     //
     //
-    menuActionHandler: function(event, item){
+    menuActionHandler: function(event, item, target_container){
         
         var that = this;
         
@@ -641,6 +667,13 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         if(!action_passworded && !window.hWin.HAPI4.has_access(2)) action_passworded = item.attr('data-pwd-nonowner');
         var href = item.attr('data-link');
         var target = item.attr('target');
+        var entity_dialog_options = {};
+        
+        if(target_container){
+            entity_dialog_options = {isdialog: false, 
+                                     innerTitle: true,
+                                     container: target_container};
+        }
         
         //  -1 no verification
         //  0 logged (DEFAULT)
@@ -658,10 +691,8 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         
         if(action == "menu-database-browse"){
 
-                window.hWin.HEURIST4.ui.showEntityDialog('sysDatabases', {
+                var options = $.extend(entity_dialog_options, {
                     select_mode:'select_single',
-                    isdialog: true,
-                    //container: $('#frame_container_div'),
                     onselect:function(event, data){
 
                         if(data && data.selection && data.selection.length==1){
@@ -669,9 +700,10 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                             if(db.indexOf('hdb_')===0) db = db.substr(4);
                             window.open( window.hWin.HAPI4.baseURL + '?db=' + db, '_blank');
                         }
-
                     }
                 });
+
+                window.hWin.HEURIST4.ui.showEntityDialog('sysDatabases', options);
 
         }else if(action == "menu-cms-create"){
 
@@ -762,12 +794,14 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
             
         }else if(action == "menu-database-properties"){
 
-                            window.hWin.HEURIST4.ui.showEntityDialog('sysIdentification');
+            window.hWin.HEURIST4.ui.showEntityDialog('sysIdentification', entity_dialog_options);
+            
         }else if(action == "menu-database-rollback"){
 
-                                window.hWin.HEURIST4.msg.showMsgDlg('Although rollback data has been recorded, '
+            window.hWin.HEURIST4.msg.showMsgDlg('Although rollback data has been recorded, '
                                     + 'there is currently no end-user interface way of rolling '
                                     + 'back the database. <br><br>'+window.hWin.HR('New_Function_Contact_Team'));
+                                    
         }else if(action == "menu-structure-import" || action == "menu-structure-import-express"){
 
             var opts = {isdialog: true};
@@ -884,20 +918,20 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
             window.hWin.HEURIST4.ui.showEntityDialog('recUploadedFiles',{width:950});
         }else 
         if(action == "menu-profile-groups"){
-            window.hWin.HEURIST4.ui.showEntityDialog('sysGroups');
+            window.hWin.HEURIST4.ui.showEntityDialog('sysGroups', entity_dialog_options);
         }else 
         if(action == "menu-profile-info"){
             window.hWin.HEURIST4.ui.showEntityDialog('sysUsers', 
                 {edit_mode:'editonly', rec_ID: window.hWin.HAPI4.currentUser['ugr_ID']});
         }else 
         if(action == "menu-profile-users"){ //for admin only
-            window.hWin.HEURIST4.ui.showEntityDialog('sysUsers');
+            window.hWin.HEURIST4.ui.showEntityDialog('sysUsers', entity_dialog_options);
         }else 
         if(action == "menu-profile-preferences"){
             that._editPreferences();
         }else
         if(action == "menu-profile-import"){  //for admin only
-            that._importUsers();
+            that._importUsers( entity_dialog_options );
         }else
         if(action == "menu-profile-logout"){ 
             that.logout();
@@ -994,8 +1028,8 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                     }
                 }
                 
-                window.hWin.HEURIST4.msg.showDialog( href, options);    
-            }
+                window.hWin.HEURIST4.msg.showDialog( href, options );    
+            } 
             
         }
         
@@ -1286,10 +1320,12 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
     } //end _editPreferences
 
     
-    , _importUsers: function (){
-
-        var options = {
-            title: 'Select database with users to be imported',
+    , _importUsers: function ( entity_dialog_options ){
+        
+        if(!entity_dialog_options) entity_dialog_options = {};
+        
+        var options = $.extend(entity_dialog_options, {
+            title: 'Step 1. Select database with users to be imported',
             select_mode: 'select_single',
             pagesize: 300,
             edit_mode: 'none',
@@ -1299,8 +1335,8 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                 if(data && data.selection && data.selection.length>0){
                         var selected_database = data.selection[0].substr(4);
                         
-                        var options2 = {
-                            title: 'Select users in '+selected_database+' to be imported',
+                        var options2 = $.extend(entity_dialog_options, {
+                            title: 'Step 2. Select users in '+selected_database+' to be imported',
                             database: selected_database,
                             select_mode: 'select_multi',
                             edit_mode: 'none',
@@ -1308,8 +1344,8 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                                 if(data && data.selection &&  data.selection.length>0){
                                     var selected_users = data.selection;
 
-                                    var options3 = {
-                                        title: 'Allocate imported users to work groups',
+                                    var options3 = $.extend(entity_dialog_options, {
+                                        title: 'Step 3. Allocate imported users to work groups',
                                         select_mode: 'select_roles',
                                         selectbutton_label: 'Allocate roles',
                                         sort_type_int: 'recent',
@@ -1348,18 +1384,18 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                                                         
                                             }
                                         }
-                                    };              
+                                    });              
                                     
                                     window.hWin.HEURIST4.ui.showEntityDialog('sysGroups', options3);
                                 }
                             }
-                        };
+                        });
                         
                         
                         window.hWin.HEURIST4.ui.showEntityDialog('sysUsers', options2);
                 }
             }
-        };    
+        });    
     
         window.hWin.HEURIST4.ui.showEntityDialog('sysDatabases', options);
     

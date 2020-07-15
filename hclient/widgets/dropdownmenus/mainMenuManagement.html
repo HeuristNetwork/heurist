@@ -31,9 +31,9 @@
 <li>
     <!-- export/dbbackup/exportMyDataPopup.php?inframe=1 -->
     <a href="export/dbbackup/exportMyDataPopup.php" data-user-admin-status="1" id="menu-manage-archive"
-        data-logaction="db_Archive"
-        title="Writes all the data in the database as SQL and XML files, plus all attached files, schema and documentation, to a ZIP file which you can download from a hyperlink">
-        Create data archive package</a>
+        data-logaction="db_Archive" data-icon="ui-icon-file-zip"
+                title="Writes all the data in the database as SQL and XML files, plus all attached files, schema and documentation, to a ZIP file which you can download from a hyperlink">
+        Create archive package</a>
 </li>
 
 <li data-user-admin-status="1">-</li>
@@ -55,13 +55,14 @@
 </li>
 <li>
     <a href="#"
-        id="menu-profile-files" data-logaction="prof_Files"
+        id="menu-profile-files" data-logaction="prof_Files" data-icon="ui-icon-files"
         title="Manage uploaded files and registered remote media resources">Manage files</a>
 </li>
 
 <li>
     <a href="admin/verification/longOperationInit.php?type=titles" id="menu-manage-rectitles"
         data-user-admin-status="1" data-logaction="st_RebuildTitles" data-header="Management &gt; Rebuild record titles"
+        data-icon="ui-icon-tags"
         title="Rebuilds the constructed record titles listed in search results, for all records">
         Rebuild record titles</a>
 </li>                    

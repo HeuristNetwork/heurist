@@ -27,25 +27,13 @@
 
         <li style="padding:0px 6px 8px;" class="ui-heurist-title">Database</li>
         
-        <li data-user-admin-status="-1" title="Open and login to another Heurist database - current database remains open" style="font-size:smaller;padding:6px">
-            <span class="ui-icon ui-icon-database"/><span class="menu-text">Open</span>
-        </li>
-        <li data-user-admin-status="0" title="Create a new database on the current server - essential structure elements are populated automatically" style="font-size:smaller;padding:6px">
-            <span class="ui-icon ui-icon-plus"/><span class="menu-text">New</span>
-        </li>
-        <li data-user-admin-status="1" title="Clones an identical database from the currrent database with all data, users, attached files, templates etc." style="font-size:smaller;padding:6px">
-            <span class="ui-icon ui-icon-databases"/><span class="menu-text">Clone</span>
-        </li>
+        <li data-action="menu-database-browse"/>
+        <li data-action="menu-database-create"/>
+        <li data-action="menu-database-clone" />
 
-        <li data-user-admin-status="1" title="Edit the internal metadata describing the database and set some global behaviours. Recommended to provide a self-documenting database" style="font-size:smaller;padding:6px">
-            <span class="ui-icon ui-icon-databases"/><span class="menu-text">Properties</span>
-        </li>
-        <li data-user-admin-status="1" title="Register this database with the Heurist Master Index - this makes the structure (but not data) available for import by other databases" style="font-size:smaller;padding:6px">
-            <span class="ui-icon ui-icon-databases"/><span class="menu-text">Register</span>
-        </li>
-        <li data-user-admin-status="1" title="" style="font-size:smaller;padding:6px">
-            <span class="ui-icon ui-icon-databases"/><span class="menu-text">Create Archive Package</span>
-        </li>
+        <li data-action="menu-database-properties"/>
+        <li data-action="menu-database-register"/>
+        <li data-action="menu-manage-archive"/>
 
     </ul>
         
@@ -53,26 +41,26 @@
     
         <li style="padding:0px 8px 6px;" class="ui-heurist-title">Utilities</li>
 
-        <li data-user-admin-status="0" title="Specify hover....." style="font-size:smaller;padding:6px">
-            <span class="ui-icon ui-icon-list"/><span class="menu-text">Vocabularies Editor</span>
-        </li>
+        <li data-action="menu-structure-refresh"/>
+        <li data-action="menu-profile-files"/>
+        <li data-action="menu-manage-rectitles"/>
+        
     </ul>
 
     <ul style="list-style-type:none;margin:0;padding:12px;border-top:1px gray solid;">
-        <li style="padding:0px 8px 6px;" class="ui-heurist-title">Verify</li>
+        <li data-action="" style="padding:0px 8px 6px;" class="ui-heurist-title">Verify</li>
 
-        <li data-user-admin-status="0" title="Specify hover....." style="font-size:smaller;padding:6px">
-            <span class="ui-icon ui-icon-list"/><span class="menu-text">Base Fields Editor</span>
-        </li>
+        <li data-action="menu-structure-verify"/>
+        <li data-action="menu-structure-duplicates"/>
     </ul>
         
     <ul style="list-style-type:none;margin:0;padding:12px;border-top:1px gray solid;">
         <li style="padding:0px 8px 6px;" class="ui-heurist-title">Manage Users</li>
 
-        <li data-user-admin-status="0" title="Specify hover....." 
-            style="font-size:smaller;padding:6px">
-            <span class="ui-icon ui-icon-database"/><span class="menu-text">Refresh Memory</span>
-        </li>
+        <li data-action="menu-profile-groups"/>
+        <li data-action="menu-profile-users"/>
+        <li data-action="menu-profile-import"/>
+        
     </ul>
 
 </div>

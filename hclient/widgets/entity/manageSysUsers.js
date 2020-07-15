@@ -67,53 +67,51 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
         }
         
         //update dialog title
-        if(this.options.isdialog){ // &&  !this.options.title
-            var title = null;
-            var usr_ID = 0;
-            
-            
-            if(this.options.title){
-                title = this.options.title;
-            }else
-            if(this.options.select_mode=='select_single'){
-               title = 'Select User'; 
-            }else
-            if(this.options.select_mode=='select_multi'){
-               title = 'Select Users'; 
-              
-              if(this.options.ugl_GroupID<0){ 
-                    usr_ID = Math.abs(this.options.ugl_GroupID);
-                    title += ' to add to Workgroup #'+usr_ID+': ';
-              }
-               
-            }else
-            if(this.options.ugl_GroupID>0){
-                usr_ID = this.options.ugl_GroupID;
-                title = 'Manage Users of Workgroup #'+this.options.ugl_GroupID+': ';
-            }else /*if(this.options.ugl_GroupID<0){
+        var title = null;
+        var usr_ID = 0;
+        
+        
+        if(this.options.title){
+            title = this.options.title;
+        }else
+        if(this.options.select_mode=='select_single'){
+           title = 'Select User'; 
+        }else
+        if(this.options.select_mode=='select_multi'){
+           title = 'Select Users'; 
+          
+          if(this.options.ugl_GroupID<0){ 
                 usr_ID = Math.abs(this.options.ugl_GroupID);
-                title = 'Select Users to add to Workgroup #'+usr_ID+': ';
-            }else*/
-            {
-                if(window.hWin.HAPI4.is_admin()){
-                    title = 'Manage All Users as Database Administrator';    
-                }else{                    
-                    //usr_ID = window.hWin.HAPI4.currentUser['ugr_ID'];
-                    title = 'Manage Users';    
+                title += ' to add to Workgroup #'+usr_ID+': ';
+          }
+           
+        }else
+        if(this.options.ugl_GroupID>0){
+            usr_ID = this.options.ugl_GroupID;
+            title = 'Manage Users of Workgroup #'+this.options.ugl_GroupID+': ';
+        }else /*if(this.options.ugl_GroupID<0){
+            usr_ID = Math.abs(this.options.ugl_GroupID);
+            title = 'Select Users to add to Workgroup #'+usr_ID+': ';
+        }else*/
+        {
+            if(window.hWin.HAPI4.is_admin()){
+                title = 'Manage All Users as Database Administrator';    
+            }else{                    
+                //usr_ID = window.hWin.HAPI4.currentUser['ugr_ID'];
+                title = 'Manage Users';    
+            }
+        }
+        
+        if(usr_ID>0 && title){
+            var that = this;
+            function __set_dlg_title(res){
+                if(res && res.status==window.hWin.ResponseStatus.OK){
+                    that.setTitle( title+res.data[usr_ID] );    
                 }
-            }
-            
-            if(usr_ID>0 && title){
-                var that = this;
-                function __set_dlg_title(res){
-                    if(res && res.status==window.hWin.ResponseStatus.OK){
-                        that._as_dialog.dialog('option','title', title+res.data[usr_ID]);    
-                    }
-                } 
-                window.hWin.HAPI4.SystemMgr.usr_names({UGrpID: usr_ID}, __set_dlg_title);
-            }else{
-                this._as_dialog.dialog('option','title', title);    
-            }
+            } 
+            window.hWin.HAPI4.SystemMgr.usr_names({UGrpID: usr_ID}, __set_dlg_title);
+        }else{
+            this.setTitle( title );    
         }
         
         // init search header

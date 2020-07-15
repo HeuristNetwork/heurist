@@ -57,45 +57,43 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
         }
 
         //update dialog title
-        if(this.options.isdialog){ //&& !this.options.title){
-            var title = null;
-            var usr_ID = 0;
-            
-            if(this.options.title){
-                title = this.options.title;
-            }else
-            if(this.options.select_mode=='select_single'){
-               title = 'Select Workgroup'; 
-            }else
-            if(this.options.select_mode=='select_multi'){
-               title = 'Select Workgroups'; 
-            }else
-            if(this.options.ugl_UserID>0){
-                usr_ID = this.options.ugl_UserID;
-                title = 'Manage Workgroups for User #'+this.options.ugl_UserID+': '
-                /*}else if(this.options.ugl_UserID<0){
-                usr_ID = Math.abs(this.options.ugl_UserID);
-                title = 'Define Roles for User #'+usr_ID+': '; */
-            }else{
-                if(window.hWin.HAPI4.is_admin()){
-                    title = 'Manage Workgroups as Database Administrator';    
-                }else{                    
-                    usr_ID = window.hWin.HAPI4.currentUser['ugr_ID'];
-                    title = 'Manage Workgroups for user #'+window.hWin.HAPI4.currentUser['ugr_ID']+': ';    
-                }
+        var title = null;
+        var usr_ID = 0;
+        
+        if(this.options.title){
+            title = this.options.title;
+        }else
+        if(this.options.select_mode=='select_single'){
+           title = 'Select Workgroup'; 
+        }else
+        if(this.options.select_mode=='select_multi'){
+           title = 'Select Workgroups'; 
+        }else
+        if(this.options.ugl_UserID>0){
+            usr_ID = this.options.ugl_UserID;
+            title = 'Manage Workgroups for User #'+this.options.ugl_UserID+': '
+            /*}else if(this.options.ugl_UserID<0){
+            usr_ID = Math.abs(this.options.ugl_UserID);
+            title = 'Define Roles for User #'+usr_ID+': '; */
+        }else{
+            if(window.hWin.HAPI4.is_admin()){
+                title = 'Manage Workgroups as Database Administrator';    
+            }else{                    
+                usr_ID = window.hWin.HAPI4.currentUser['ugr_ID'];
+                title = 'Manage Workgroups for user #'+window.hWin.HAPI4.currentUser['ugr_ID']+': ';    
             }
+        }
 
-            if(usr_ID>0 && title){
-                var that = this;
-                function __set_dlg_title(res){
-                    if(res && res.status==window.hWin.ResponseStatus.OK){
-                        that._as_dialog.dialog('option', 'title', title+res.data[usr_ID]);    
-                    }
-                } 
-                window.hWin.HAPI4.SystemMgr.usr_names({UGrpID: usr_ID}, __set_dlg_title);
-            }else{
-                this._as_dialog.dialog('option','title', title);    
-            }
+        if(usr_ID>0 && title){
+            var that = this;
+            function __set_dlg_title(res){
+                if(res && res.status==window.hWin.ResponseStatus.OK){
+                    that.setTitle( title+res.data[usr_ID] );    
+                }
+            } 
+            window.hWin.HAPI4.SystemMgr.usr_names({UGrpID: usr_ID}, __set_dlg_title);
+        }else{
+            this.setTitle( title );    
         }
 
 

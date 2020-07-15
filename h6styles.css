@@ -57,18 +57,27 @@ body {
     box-shadow: 3px 1px 3px #00000080;
 }
     
-.ui-menu6 .ui-menu6-section{
+.ui-menu6 .ui-menu6-section, .ui-menu6 .ui-menu6-container{
     background: #FFFFFF 0% 0% no-repeat padding-box;
     box-shadow: 2px 3px 10px #00000080;
     border: 0.25px solid #707070;
     border-radius: 3px;
-    
     position:absolute;
-    left:96px;
+    display:none;    
     top:2px;
     bottom:4px;
-    display:none;    
 }
+.ui-menu6 .ui-menu6-section{
+    left:96px;
+    width:200px;
+    overflow-y:auto;
+}
+.ui-menu6 .ui-menu6-container{
+    left:302px;
+    right: 4px;
+}
+
+
 .menu-text{
     margin-left:0.3em;
     cursor: pointer;

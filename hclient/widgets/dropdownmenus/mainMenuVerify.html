@@ -21,7 +21,7 @@
 -->
 
 <li>
-    <a href="#" id="menu-structure-refresh"
+    <a href="#" id="menu-structure-refresh" data-icon="ui-icon-refresh"
         data-user-admin-status="0" data-logaction="refresh_st"
         title="Clear and reload Heurist's internal working memory in your browser. Use this to correct dropdowns etc. if recent additions and changes do not show.">
         Refresh memory</a>
@@ -29,8 +29,8 @@
 
 <li>
     <a href="admin/verification/longOperationInit.php" id="menu-structure-verify"
-        data-user-admin-status="1" data-logaction="verify_st" data-size="medium"
-        data-header="Verify &gt; Errors in database structure"
+        data-user-admin-status="1" data-logaction="verify_st" data-size="medium" 
+        data-header="Verify &gt; Errors in database structure" data-icon="ui-icon-check"
         title="Find errors in database structure (invalid record type, field and term codes) and records with incorrect structure or inconsistent values (invalid pointer, missing data etc)">
         Verify integrity</a>
 </li>
@@ -39,7 +39,8 @@
 
 <li>
     <a href="admin/verification/listDuplicateRecords.php?fuzziness=10"
-       data-user-admin-status="1" data-size="medium"
+       id="menu-structure-duplicates"
+       data-user-admin-status="1" data-size="medium" data-icon="ui-icon-grip-solid-vertical"
        data-header="Verify &gt; Potential duplicate records"
        title="Fuzzy search to identify records which might contain duplicate data">
        Potential duplicate records

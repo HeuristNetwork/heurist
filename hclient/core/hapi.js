@@ -1038,7 +1038,7 @@ prof =Profile
                 //if(window.hWin.HEURIST4.util.isnull(request.limit)){
                 //    request.limit = window.hWin.HAPI4.get_prefs('search_detail_limit'); //if needall is set it is ignored on server side
                 //}
-
+                
                 // start search
                 _callserver('record_search', request, callback);    //standard search
 

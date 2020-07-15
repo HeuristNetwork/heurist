@@ -35,31 +35,38 @@
             data-logaction="imp_Delimed" data-size="large"
             data-header="Import &gt; Records from CSV/TSV"
             data-help="importRecordsCSV"
+            data-icon="ui-icon-file-table"
             title="Import data from delimited text file. Supports matching, record creation, record update.">
             Delimited text / CSV</a>
     </li>
     <li>
         <a href="import/biblio/syncZotero.php"
+            id="menu-import-zotero"
             data-logaction="sync_Zotero" data-size="portrait"
             data-header="Import &gt; Synchronise with a Zotero web library"
+            data-icon="ui-icon-book-b"
             title="Synchronise with a Zotero web library - new records are added to Heurist, existing records updated">
             Zotero bibliography</a>
     </li>
     <li>
         <a href="import/delimited/importRecordsCSV.php?format=kml"
+            id="menu-import-kml"
             data-logaction="imp_KML" data-size="large"
             data-header="Import &gt; Records from KML"
             data-help="importRecordsCSV"
+            data-icon="ui-icon-globe-b"
             title="Import KML files (geographic data in WKT can be imported from CSV &amp; tab delimited files)">
             KML</a>
     </li>
 
     <li>
         <a href="import/utilities/importRecords.php"
+            id="menu-import-xml"
             data-logaction="imp_Records"
             data-header="Import &gt; XML or JSON file"
             data-help="importRecords"
             data-dialog-width="760" data-dialog-height="570"
+            data-icon="ui-icon-script"
             title="Import records from another database">
             Heurist XML/JSon (experimental)</a>
     </li>
@@ -77,22 +84,26 @@
     
     <li>
         <a href="import/utilities/manageFilesUpload.php"
+           id="menu-files-upload"
            data-user-admin-status="1" data-size="medium" class="upload_files"
            data-header="Import &gt; Upload media files"
+           data-icon="ui-icon-upload"
            title="Upload multiple files and/or large files to scratch space or image directories, delete and rename uploaded files">
            Upload media files</a>
     </li>
     <li>
         <a href="import/fieldhelper/synchroniseWithFieldHelper.php"
-           id="menu-index-files"
+           id="menu-files-index"
            data-user-admin-status="1" data-size="medium" 
            data-header="Import &gt; Index media files"
+           data-icon="ui-icon-list"
            title="Index files on the server and create multimedia records for them (reads and creates FieldHelper manifests)">
            Index media files</a>
     </li>
 
     <li>
         <a href="#" id="menu-extract-pdf" data-user-experience-level="0"
+           data-icon="ui-icon-file-pdf"
            title="Extract text from PDF files">
            Extract text from PDF (experimental)</a>
     </li>

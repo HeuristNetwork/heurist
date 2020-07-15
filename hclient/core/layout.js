@@ -228,10 +228,13 @@ function hLayout(args) {
     * @param id
     */
     function _layoutGetById(id){
-        var i;
-        for(i=0; i<layouts.length; i++){
-            if(layouts[i].id==id){
-                return layouts[i];
+        if(id){
+            id = id.toLowerCase();
+            var i;
+            for(i=0; i<layouts.length; i++){
+                if(layouts[i].id.toLowerCase()==id){
+                    return layouts[i];
+                }
             }
         }
         return null;
@@ -1409,6 +1412,15 @@ console.log(layout_opts);
         //returns widget options from cfg_widgets
         appGetWidgetByName: function( widgetname ){
             return _appGetWidgetByName( widgetname );
+        },
+
+        getWidgetByName: function( widgetname ){
+            var app = _appGetWidgetByName( widgetname );
+            if(app && app.widget){
+                return $(app.widget);
+            }else{
+                return null;
+            }
         },
         
         executeCommand: function( widgetname, method, command ){
