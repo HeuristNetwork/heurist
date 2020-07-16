@@ -25,10 +25,13 @@ $.widget( "heurist.mainMenu6", {
         
     },
     
+    sections: ['design','import','explore','publish','admin'],
+    
     menues:{}, //section menu - div with menu actions
     containers:{}, //operation containers (next to section menu)
     
     _myTimeoutId: 0,
+    _myTimeoutId2: 0,
     _active_section: null,
     
     divMainMenu: null,  //main div
@@ -52,14 +55,25 @@ $.widget( "heurist.mainMenu6", {
                 that.divMainMenu.find('.menu-text').hide();
                 
                 that._on(that.divMainMenu.find('.ui-heurist-explore'),{
-                    mouseenter: that._expandPanel,
-                    mouseleave: that._collapsePanel,
+                    mouseenter: that._expandMainMenuPanel, //mouseenter mouseover
+                    mouseleave: that._collapseMainMenuPanel,
+                });
+                that._on(that.divMainMenu.not('.ui-heurist-explore'), {
+                    mouseover: that._mousein_SectionMenu,  
+                    mouseleave: that._mouseout_SectionMenu,
                 });
                 
+          
                 that._on(that.divMainMenu.find('.ui-heurist-header'),{
                     click: that._openSectionMenu
                 });
-                
+
+                //init all menues
+                $.each(that.sections, function(i, section){
+                    that._loadSectionMenu(section);
+                });
+                //open explore by default  
+                that._switchSection( 'explore' );
                 
           });
 
@@ -73,9 +87,10 @@ $.widget( "heurist.mainMenu6", {
     },
 
     //
-    //
+    // collapse main menu panel on explore mouseout
     //    
-    _collapsePanel: function(ele) {
+    _collapseMainMenuPanel: function(ele) {
+//console.log(' _collapseMainMenuPanel ' );
         var that = this;
         this._myTimeoutId = setTimeout(function() {
             /*
@@ -87,20 +102,22 @@ $.widget( "heurist.mainMenu6", {
             });
             */
             that.divMainMenu.find('.menu-text').hide();
-            that.divMainMenu.find('.ui-heurist-header2').css({'text-align':'center'});
             that.divMainMenu.effect('size',  { to: { width: 90 } }, 300, function(){
+                that.divMainMenu.find('.ui-heurist-header2').css({'text-align':'center'});
                 that.divMainMenu.find('.menu-text').hide();
             });
         }, 800);
     },
     
     //
+    // expand main menu panel on explore maouse in
     //
-    //
-    _expandPanel: function(ele, parent) {
+    _expandMainMenuPanel: function(e) {
+//console.log(' _expandMainMenuPanel ' );
         clearTimeout(this._myTimeoutId);
         this._myTimeoutId = 0;
         var that = this;
+        this._mouseout_SectionMenu(e);
         this.divMainMenu.effect('size',  { to: { width: 200 } }, 500,
                 function(){
                     that.divMainMenu.find('.ui-heurist-header2').css({'text-align':'left'});
@@ -109,87 +126,138 @@ $.widget( "heurist.mainMenu6", {
     },
     
     //
-    //
-    //
-    _openSectionMenu: function(e){
+    // leave only active section
+    //    
+    _mouseout_SectionMenu: function(e) {
         
-        var m_class = null;
         var that = this;
+        this._myTimeoutId2 = setTimeout(function() {
         
-        var sections = ['design','import','explore','publish','admin'];
-        
-        $.each(sections, function(i, section){
-            that.element.removeClass('ui-heurist-'+section+'-fade');    
-        });
-        
-        $.each(sections, function(i, section){
-            
-            if($(e.target).hasClass('ui-heurist-'+section)){
-                
-                if(!that.menues[section]){
-                    
-                    that.menues[section] = $('<div>')
-                        .addClass('ui-menu6-section ui-heurist-'+section)
-                        .css({width:'200px'})
-                        .appendTo( that.element );
-                        
-                    that.containers[section] = $('<div>')
-                        .addClass('ui-menu6-container ui-heurist-'+section)
-                        .appendTo( that.element );
-                        
-                    if(section=='explore')
-                    {
-                        that.containers[section]
-                            .css({left:'96px'})
-                            .show();
-
-                        window.hWin.HAPI4.LayoutMgr.appInitAll('SearchAnalyze2', that.containers[section] );
-                        
-                    }else{
-                        that.menues[section].load(
-                            window.hWin.HAPI4.baseURL+'hclient/widgets/dropdownmenus/mainMenu6_'+section+'.html',
-                            function(){ 
-                                that._initSectionMenu(section);
-                            });
-
-                        
+            var section_name = that._getSectionName(e);
+    //console.log(' out '+section_name );        
+            if(that._active_section!=section_name )
+            {
+                $.each(that.sections, function(i, section){
+                    if(that._active_section!=section){
+                        that.menues[section].css('z-index',0).hide(); 
                     }
-                }
-
-                if(that._active_section && that._active_section!=section 
-                    && that.menues[that._active_section])
-                {
-                    that.containers[that._active_section].hide();
-                    that.menues[that._active_section].hide();
-                }
-
-                if(that.menues[section].is(':visible')){ //close on repeat click
-                    if(section!=='explore'){
-                        that.menues[section].hide();        
-                    }
-                    m_class = 'ui-heurist-explore-fade'; //by default
-                    that._active_section = 'explore';
-                }else{
-                    that.menues[section].show();
-                    m_class = 'ui-heurist-'+section+'-fade';
-                    that._active_section = section;
-                }
-                
-                return false; //exit loop
+                });
             }
-        });
-        //change main background
-        if(m_class){
-            this.element.addClass(m_class);    
-            if(that._active_section=='explore' && that.menues['explore'])
-                that.menues['explore'].show();
-        }
+        },300);
     },
     
     //
-    // find menu actions and assign icon and title
+    // show section menu on mouse over
     //
-    _initSectionMenu: function(section){
+    _mousein_SectionMenu: function(e) {
+
+        clearTimeout(this._myTimeoutId2);
+        this._myTimeoutId2 = 0;
+        
+        var section_name = this._getSectionName(e);
+//console.log(' in '+section_name );        
+        if(this._active_section!=section_name ){
+            //hide all except active
+            var that = this;
+            $.each(this.sections, function(i, section){
+                if(section_name==section){
+                    if(section!=='explore')
+                        that.menues[section].css('z-index',2).show(); 
+                }else if(that._active_section!=section){
+                    that.menues[section].css('z-index',0).hide(); 
+                }
+            });
+            
+        }
+        
+    },
+    
+    //
+    //
+    //
+    _getSectionName: function(e){
+        var that = this;
+        var section_name = null;
+        if(e){
+            var ele;
+            if($(e.target).hasClass('ui-heurist-header') || $(e.target).hasClass('ui-heurist-header2')){
+                ele = $(e.target);
+            }else{
+                ele = $(e.target).parents('.ui-heurist-header2');
+                if(ele.length==0){
+                    ele = $(e.target).parents('.ui-heurist-header');
+                }
+            }
+            if(ele.length>0){
+            $.each(this.sections, function(i, section){
+                if(ele.hasClass('ui-heurist-'+section)){
+                    section_name = section;
+                    return false; //exit loop
+                }
+            });
+            }
+        }
+        
+        return section_name;
+    },
+    
+    
+    //
+    // opens section menu permanently and switches container 
+    //
+    _openSectionMenu: function(e){
+        
+        var section = this._getSectionName(e);
+        this._switchSection2( section );
+    },
+    
+    //
+    // loads content of section from mainMenu6_section.html
+    //
+    _loadSectionMenu: function( section ){
+        
+        this.menues[section] = $('<div>')
+            .addClass('ui-menu6-section ui-heurist-'+section)
+            .css({width:'200px'})
+            .appendTo( this.element );
+            
+        this.containers[section] = $('<div>')
+            .addClass('ui-menu6-container ui-heurist-'+section)
+            .appendTo( this.element );
+            
+            
+        this._on(this.menues[section],{
+            mouseover: function(){
+                clearTimeout(this._myTimeoutId2);
+                this._myTimeoutId2 = 0;
+            },
+            mouseleave: this._mouseout_SectionMenu
+        });
+                    
+        if(section=='explore'){
+            //@todo move to init of this widget
+            this.containers[section]
+                .css({left:'96px'})
+                .show();
+
+            window.hWin.HAPI4.LayoutMgr.appInitAll('SearchAnalyze2', this.containers[section] );
+        }else{
+            var that = this;
+            this.menues[section].load(
+                window.hWin.HAPI4.baseURL+'hclient/widgets/dropdownmenus/mainMenu6_'+section+'.html',
+                function(){ 
+                    that._initSectionMenu(section);
+                });
+        }
+        
+    },
+    
+    //
+    // finds menu actions and assigns icon and title 
+    // source of all actions in mainMenu widget 
+    // see mainMenuXXX.html snippets for descriptions of actions
+    //
+    _initSectionMenu: function( section ){
         
         var widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('mainMenu');
         if(!widget) return;
@@ -218,11 +286,85 @@ $.widget( "heurist.mainMenu6", {
         this._on(this.menues[section].find('li[data-action]'),{click:function(e){
             var li = $(e.target);
             if(!li.is('li')) li = li.parents('li');
-            this.containers[section].show();
+            this._switchSection2(section, true);
             widget.mainMenu('menuActionById', li.attr('data-action'), this.containers[section]); 
         }});
         
-    }
+    },
+    
+    //
+    // switch section on section menu click
+    //
+    _switchSection2: function( section, force_show ){
 
+        var that = this;
+        if(that._active_section!=section ){
+            
+            if(that._active_section && that.menues[that._active_section])
+            {
+                that.containers[that._active_section].css('z-index',0).hide();
+                that.menues[that._active_section].hide();
+                that.element.removeClass('ui-heurist-'+that._active_section+'-fade');
+            }
+            
+            that._active_section = section;
+
+            //show menu and section 
+            if(section != 'explore') {
+                that.menues[section].css('z-index',1).show();
+            }
+            if(force_show || !that.containers[section].is(':empty')){
+                that.containers[section].show();    
+            }
+            
+            //change main background
+            this.element.addClass('ui-heurist-'+section+'-fade');    
+        }
+    },
+
+    //
+    // switch section on main menu click
+    //
+    _switchSection: function( section ){
+
+        var that = this;
+        var m_class = 'ui-heurist-explore-fade'; //by default;
+        var wasChanged = (that._active_section!=section );
+
+        //hide previous section
+        if(wasChanged && that._active_section && that.menues[that._active_section])
+        {
+            that.containers[that._active_section].hide();
+            that.menues[that._active_section].hide();
+        }
+
+        that._active_section = section;
+        
+        if(section!=='explore') {
+            if(that.menues[section].is(':visible')){ //close on repeat click
+                that.menues[section].hide();        
+                that.containers[section].hide();
+                
+                that._active_section = 'explore';
+                wasChanged = true;
+            }else{
+                that.menues[section].show();
+                if(!that.containers[section].is(':empty')) that.containers[section].show();
+                
+                m_class = 'ui-heurist-'+section+'-fade';
+            }        
+        }
+        
+        //change main background
+        if(wasChanged){
+            $.each(this.sections, function(i, sect){
+                that.element.removeClass('ui-heurist-'+sect+'-fade');    
+            });
+            this.element.addClass(m_class);    
+            if(that._active_section=='explore')
+                    that.containers['explore'].show();
+        }
+        
+    }
     
 });
