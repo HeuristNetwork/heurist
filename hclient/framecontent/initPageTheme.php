@@ -236,7 +236,7 @@ select.ui-heurist-header2, input.ui-heurist-header2{
     background:<?php uout('explore_bg', '#523365');?> 0% 0% no-repeat padding-box;
 }
 .ui-heurist-explore-fade{background:<?php uout('explore_fade_bg', '#DAD0E4');?> 0% 0% no-repeat padding-box;}
-.ui-heurist-explore .ui-heurist-title{color:<?php uout('explore_title_color', '#4477B9');?>}
+.ui-heurist-explore .ui-heurist-title{color:<?php uout('explore_title_color', '7B4C98');?>}
 
 /* SECTION SCHEME: PUBLISH */
 .ui-heurist-publish.ui-heurist-header, .ui-heurist-publish .ui-heurist-header{

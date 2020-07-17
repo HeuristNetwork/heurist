@@ -73,13 +73,13 @@ body {
     overflow-y:auto;
 }
 .ui-menu6 .ui-menu6-container{
-    left:302px;
+    left:304px;
     right: 4px;
 }
 
 
 .menu-text{
-    margin-left:0.3em;
+    margin-left:0.5em;
     cursor: pointer;
 }
 .ui-heurist-header{

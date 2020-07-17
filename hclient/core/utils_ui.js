@@ -826,7 +826,7 @@ window.hWin.HEURIST4.ui = {
         var rectypeList = options.rectypeList;
         var topOptions = options.topOptions;
         var useHtmlSelect = (options.useHtmlSelect===true);
-        var useIcons = !useHtmlSelect && (options.useIcons===true);
+        var useIcons = (options.useIcons===true); //!useHtmlSelect && 
         var useCounts = (options.useCounts===true 
                             && !window.hWin.HEURIST4.util.isnull(window.hWin.HEURIST4.rectypes.counts));
         var useGroups = (options.useGroups!==false);
