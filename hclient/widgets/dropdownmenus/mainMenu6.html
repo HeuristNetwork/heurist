@@ -26,37 +26,40 @@
 <div class="ui-heurist-explore ui-heurist-header2" style="top:111px;bottom:75px;left:0;right:0;position:absolute;text-align:center">
     <!-- position:absolute;bottom:74px;top:112px  left:0;right:0; -->
     <ul style="border-bottom:1px gray solid;list-style-type:none;margin:0;padding:12px">
-        <li data-user-admin-status="0" title="Specify hover....." style="padding:6px 0px">
-            <span class="ui-icon ui-icon-file-plus"/><span class="menu-text">Add Record</span>
+        <li class="menu-explore" data-action="recordAdd" style="font-size:smaller;padding:6px">
+            <span class="ui-icon ui-icon-file-plus"/><span class="menu-text truncate" style="max-width:115px;display:inline-block;">Add record</span>
+            <span class="ui-icon ui-icon-gear menu-text" style="float:right;margin-top:0px"/>
         </li>
+        <!--
         <li data-user-admin-status="0" title="Specify hover....." style="font-size:smaller;padding:6px">
             <span class="ui-icon ui-icon-file-plus" style="height:12px;wdith:12px"/><span class="menu-text">Select type</span>
         </li>
         <li data-user-admin-status="0" title="Specify hover....." style="font-size:smaller;padding:6px">
             <span class="ui-icon ui-icon-file-plus" style="height:12px;wdith:12px"/><span class="menu-text">Set parameters</span>
         </li>
+        -->
     </ul>
 
     <ul style="border-bottom:1px gray solid;list-style-type:none;margin:0;padding:12px">
 
         <li style="padding:6px">Filters</li>
 
-        <li class="menu-explore" data-action="search_entity" title="" style="font-size:smaller;padding:6px">
+        <li class="menu-explore" data-action="search_entity" style="font-size:smaller;padding:6px">
             <span class="ui-icon ui-icon-entity"/><span class="menu-text">Entities</span>
         </li>
-        <li data-user-admin-status="0" title="Specify hover....." style="font-size:smaller;padding:6px">
+        <li class="menu-explore" data-action="search_quick" style="font-size:smaller;padding:6px">
             <span class="ui-icon ui-icon-magnify-search"/><span class="menu-text">Quick search</span>
         </li>
         <li data-user-admin-status="0" title="Specify hover....." style="font-size:smaller;padding:6px">
             <span class="ui-icon ui-icon-database-search"/><span class="menu-text">Advanced search</span>
         </li>
         <li data-user-admin-status="0" title="Specify hover....." style="font-size:smaller;padding:6px">
-            <span class="ui-icon ui-icon-filter-plus"/><span class="menu-text">Save Filter</span>
+            <span class="ui-icon ui-icon-filter-plus"/><span class="menu-text">Save filter</span>
         </li>
     </ul>
 
     <div style="padding:10px 5px">
-        <div style="padding-bottom:10px">Saved Filters</div>
+        <div style="padding:6px">Saved filters</div>
         <div>    
         </div> 
     </div>

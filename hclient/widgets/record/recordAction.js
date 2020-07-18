@@ -24,8 +24,11 @@ $.widget( "heurist.recordAction", {
     
         //DIALOG section       
         isdialog: false,     // show as dialog @see  _initDialog(), popupDialog(), closeDialog
+        supress_diaog_title: false,
+        
         height: 400,
         width:  760,
+        position: null,
         modal:  true,
         title:  '',
         htmlContent: 'recordAction.html',
@@ -93,8 +96,13 @@ $.widget( "heurist.recordAction", {
         
         //load html from file
         if(this._need_load_content && this.options.htmlContent){        
-            this.element.load(window.hWin.HAPI4.baseURL+'hclient/widgets/record/'+this.options.htmlContent
-                            +'?t='+window.hWin.HEURIST4.util.random(), 
+            
+            var url = this.options.htmlContent.indexOf(window.hWin.HAPI4.baseURL)===0
+                    ?this.options.htmlContent
+                    :window.hWin.HAPI4.baseURL+'hclient/widgets/record/'+this.options.htmlContent
+                            +'?t='+window.hWin.HEURIST4.util.random();
+            
+            this.element.load(url, 
             function(response, status, xhr){
                 that._need_load_content = false;
                 if ( status == "error" ) {
@@ -133,9 +141,7 @@ $.widget( "heurist.recordAction", {
             this._fillSelectRecordScope();
         }
         
-        if(this.options.isdialog){
-            this.popupDialog();
-        }
+        this.popupDialog();
         
         //show hide hints and helps according to current level
         window.hWin.HEURIST4.ui.applyCompetencyLevel(-1, this.element); 
@@ -196,8 +202,7 @@ $.widget( "heurist.recordAction", {
         
             var options = this.options,
                 btn_array = this._getActionButtons(), 
-                position = null,
-                    that = this;
+                that = this;
         
             if(!options.beforeClose){
                     options.beforeClose = function(){
@@ -215,7 +220,8 @@ $.widget( "heurist.recordAction", {
                     };
             }
             
-            if(position==null) position = { my: "center", at: "center", of: window };
+            if(options.position==null) options.position = { my: "center", at: "center", of: window };
+            
             var maxw = (window.hWin?window.hWin.innerWidth:window.innerWidth);
             if(options['width']>maxw) options['width'] = maxw*0.95;
             var maxh = (window.hWin?window.hWin.innerHeight:window.innerHeight);
@@ -230,7 +236,7 @@ $.widget( "heurist.recordAction", {
                 width:  options['width'],
                 modal:  (options['modal']!==false),
                 title: window.hWin.HEURIST4.util.isempty(options['title'])?'':options['title'], //title will be set in  initControls as soon as entity config is loaded
-                position: position,
+                position: options['position'],
                 beforeClose: options.beforeClose,
                 resizeStop: function( event, ui ) {//fix bug
                     that.element.css({overflow: 'none !important','width':that.element.parent().width()-24 });
@@ -255,7 +261,9 @@ $.widget( "heurist.recordAction", {
     popupDialog: function(){
         if(this.options.isdialog){
 
-            this._as_dialog.dialog("open");
+            var $dlg = this._as_dialog.dialog("open");
+            
+            if(this.options.supress_diaog_title) $dlg.parent().find('.ui-dialog-titlebar').hide();
             
             var helpURL = (this.options.helpContent)
                 ?(window.hWin.HAPI4.baseURL+'context_help/'+this.options.helpContent+' #content'):null;
@@ -275,6 +283,17 @@ $.widget( "heurist.recordAction", {
             }
             
             this._as_dialog.dialog("close");
+        }else{
+            
+            var canClose = true;
+            if($.isFunction(this.options.beforeClose)){
+                canClose = this.options.beforeClose();
+            }
+            if(canClose){
+                if($.isFunction(this.options.onClose)){
+                    this.options.onClose( this._context_on_close );
+                }
+            }
         }
     },
 

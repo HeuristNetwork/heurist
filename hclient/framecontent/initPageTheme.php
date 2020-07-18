@@ -217,6 +217,12 @@ select.ui-heurist-header2, input.ui-heurist-header2{
     color: <?php uout('ce_readonly', '#999999');?>;
 }
 
+/* H6 SPECIFIC */
+.ui-button-action{
+    background:<?php uout('button_action_bg', '#3D9946');?> 0% 0% no-repeat padding-box !important;
+    color:<?php uout('button_action_bg', '#FFFFFF');?> !important;
+}
+
 /* SECTION SCHEME: DESIGN */
 .ui-heurist-design.ui-heurist-header, .ui-heurist-design .ui-heurist-header{
     background:<?php uout('design_bg', '#305586');?> 0% 0% no-repeat padding-box;

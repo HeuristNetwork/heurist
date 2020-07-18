@@ -51,6 +51,12 @@ body {
     height: 18;
     background-size: contain;
 }
+
+.ui-button-action{
+    font-weight:bold  !important;
+    text-transform: uppercase;
+}
+
 /*   MAIN SIDE MENU */
 .ui-menu6{
     height:100%;

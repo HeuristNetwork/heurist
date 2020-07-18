@@ -1859,6 +1859,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     if(!Hul.isnull(context) && context.result){
                          //refresh the local heurist
                         window.hWin.HEURIST4.rectypes = context.rectypes;
+                        window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE); 
                     }
                     //refresh icon, title, mask
                     that._initEditForm_step3(that._currentEditID);

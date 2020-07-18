@@ -548,7 +548,6 @@ var updateResult = function(response) {
                 //editRecStructure();
                 response.isOpenEditStructure = true;
             }
-
             _this_window.close(response); //send back new HEURIST strcuture
         }
     }else{

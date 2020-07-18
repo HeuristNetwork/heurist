@@ -21,14 +21,19 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
 
     // default options
     options: {
+        is_h6style: false,
         width: 800,
         height: 800,
-        title:  'Add new Record',
+        title:  'Add new record',
+        
+        currentRecordset: {},  //stub
         currentRecType: 0,
         currentRecTags: null,
         scope_types: 'none',
         get_params_only: false
     },
+    
+    rectype_list:null,
 
     _initControls:function(){
         
@@ -57,22 +62,46 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
             this.options.currentAccessGroups = add_rec_prefs[4];           
         }
         
+        var $dlg = this.element.children('fieldset');
+        
+        if(this.options.is_h6style){
+            //add title 
+            $dlg.css({top:'36px',position:'absolute',width:'auto', margin: '0px','font-size':'0.9em'}).hide();
+
+            //titlebar            
+            var ele = $('<div class="ui-heurist-header" style="top:0px;">'+this.options.title
+                +'<span class="ui-icon ui-icon-gear" style="cursor:pointer;float:right;margin:0px 6px">Define parameters</span></div>')
+                .insertBefore($dlg); // menu-text
+                
+            //list of rectypes
+            this.rectype_list = $('<ul class="heurist-selectmenu" '
+                +' style="position:absolute;top:36px;width:190px;bottom:1px;padding-left:6px;'
+                +'font-size:smaller;overflow-y:auto;list-style-type:none"></ul>')
+                .insertBefore($dlg);
+                
+            this._on(ele.find('.ui-icon-gear'), {click: function(e){ 
+                
+                this.doExpand( this.rectype_list.is(':visible') );
+                
+            }});
+                
+        }
         
        //add and init record type selector
-       var ele = this.element.find('fieldset');  
        $('<div id="div_sel_rectype" style="padding: 0.2em; min-width: 600px;" class="input">'
             +'<div class="header" style="padding: 0 16px 0 16px;"><label for="sel_recordtype">Type of record to add:</label></div>'
             +'<select id="sel_recordtype" style="width:40ex;max-width:30em"></select>'
             
             +'<div id="btnAddRecord" style="font-size:0.9em;display:none;margin:0 30px"></div>'
             +'<div id="btnAddRecordInNewWin" style="font-size:0.9em;display:none;"></div>'
-        +'</div><hr style="margin:5px"/>').prependTo( ele );
+        +'</div><hr style="margin:5px"/>').prependTo( $dlg );
       
         this._fillSelectRecordTypes( this.options.currentRecType );
       
         if(this.options.get_params_only==false){
             
             this._on(this.element.find('#btnAddRecord').button({label: window.hWin.HR('Add Record').toUpperCase() })
+                .addClass('ui-button-action')
                 .show(), {click:this.doAction});
             this._on(this.element.find('#btnAddRecordInNewWin').button({icon:'ui-icon-extlink', 
                     label:window.hWin.HR('Add Record in New Window'), showLabel:false })
@@ -104,7 +133,46 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
         });
         
         
+        var that = this;
+        $(window.hWin.document).on(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, 
+            function(e, data) { 
+                that._fillSelectRecordTypes(that.options.currentRecType);
+            });
+        
+        
         return this._super();
+    },
+    
+    
+    //
+    // events bound via _on are removed automatically
+    // revert other modifications here
+    _destroy: function() {
+        $(window.hWin.document).off(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE);
+        return this._super();
+    },
+    
+    //
+    //
+    //    
+    doExpand: function(is_expand){
+        
+        var $dlg = this.element.children('fieldset');
+        var $icon = this.element.find('.ui-heurist-header > span.ui-icon');
+        
+        if(is_expand){
+            this.rectype_list.hide();
+            $dlg.show();
+            this.element.parent().width(700);
+            $icon.css('float','left').removeClass('ui-icon-gear').addClass('ui-icon-carat-2-w');
+        }else{
+            this.rectype_list.show();
+            $dlg.hide();
+            this.element.parent().width(200);
+            $icon.css('float','right').removeClass('ui-icon-carat-2-w').addClass('ui-icon-gear');
+        }    
+                
+        
     },
 
     //    
@@ -189,6 +257,80 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
         }});
         
         $(ele).val(value).hSelect("refresh"); 
+        
+        if(this.rectype_list){
+            
+            this.rectype_list.empty();
+            
+            $.each(rtSelect.find('option'),function(i,item){
+                if(i>0){
+                    var sdis = $(item).attr('value')>0
+                        ?' data-id="'+$(item).attr('value')+'" '
+                        :' class="ui-heurist-title truncate" style="font-size:1.1em;padding:6px;"';  // ui-state-disabled
+                        
+                    $('<li'+sdis
+                        +'>'+$(item).text()+'</li>')
+                        .appendTo(that.rectype_list);
+                    
+                }
+            });
+            
+            this.rectype_list.find('li[data-id]').css({padding: '4px 0 2px 20px', 
+                cursor: 'pointer', border: 'none'        
+            }).addClass('truncate');
+    
+            /*
+            $.each(ele.hSelect('menuWidget').find('li'),function(i,item){
+                if(i>0){
+                    item = $(item).clone();
+                    if(!item.hasClass('ui-state-disabled')){
+                        item.css({cursor:'pointer'});  
+                        //item.find('div').css({'border':'none !important'});  
+                    } 
+                    item.appendTo(that.rectype_list);
+                }
+            });
+            */
+            
+//.not('.ui-state-disabled')
+            this._on(this.rectype_list.find('li[data-id]'), {
+              mouseover: function(e){ $(e.target).addClass('ui-state-active'); },
+              mouseout: function(e){ $(e.target).removeClass('ui-state-active'); },
+              click: function(e){ 
+                  var rty_ID = $(e.target).attr('data-id'); 
+                  
+                  //$(e.target).text(); //send to parent
+
+                  var prefs = window.hWin.HAPI4.get_prefs('record-add-defaults');
+                  if(!$.isArray(prefs) || prefs.length<4){
+                        prefs = [rty_ID, 0, 'viewable', '']; //default to everyone
+                  }else{
+                        prefs[0] = rty_ID; 
+                  }
+                  window.hWin.HAPI4.save_pref('record-add-defaults', prefs);
+
+                  window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE, {origin:'recordAdd'});
+                  
+                  window.hWin.HEURIST4.ui.openRecordEdit(-1, null, 
+                                    {new_record_params:{RecTypeID:rty_ID}});
+                  this.closeDialog();
+              }
+            } );            
+
+            //this.rectype_list.html(ele.hSelect('menuWidget').clone());
+        }
+        /*
+        $.each(rtSelect.find('option'),function(i, item){
+            item = $(item);
+            $('<li data-id="'+item.attr('entity-id')+'" style="font-size:smaller;padding:6px">'
+                +'<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
+                    + '" class="rt-icon" style="vertical-align:middle;background-image: url(&quot;'+item.attr('icon-url')+ '&quot;);"/>'
+                //+'<img src="'+item.attr('icon-url')+'"/>'
+                +'<span class="menu-text">'+item.text()+'</span>'
+                +'<span style="float:right;">'+item.attr('rt-count')+'</span>'
+               +'</li>').appendTo(cont);    
+        });
+        */
         
         return ele;
     },

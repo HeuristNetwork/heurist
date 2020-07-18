@@ -1516,7 +1516,7 @@ $.widget( "heurist.search", {
         this.input_search_prompt2.css({width:(this.input_search.width()-30),
                                 height:(this.input_search.height()-10)}).show();
 
-        e = window.hWin.HEURIST4.util.stopEvent(e);
+        //e = window.hWin.HEURIST4.util.stopEvent(e);
     }
 
     // events bound via _on are removed automatically
