@@ -434,7 +434,7 @@ $.widget( "heurist.svs_list", {
             //    $.getScript(window.hWin.HAPI4.baseURL+'external/jquery.fancytree/src/jquery.fancytree.dnd.js', function(){ that._updateAccordeon(); } );
             alert('drag-n-drop extension for tree not loaded')
             return;
-        }else if(!window.hWin.HAPI4.currentUser.ugr_SvsTreeData){ //not loaded - load from sysUgrGrps.ugr_NavigationTree
+        }else if(!window.hWin.HAPI4.currentUser.ugr_SvsTreeData){ //not loaded yet - load from sysUgrGrps.ugr_NavigationTree
 
             window.hWin.HAPI4.SystemMgr.ssearch_gettree( {}, function(response){
 
@@ -1680,7 +1680,7 @@ $.widget( "heurist.svs_list", {
 
 
         for (var groupID in treeData){
-            if(!treeDataF[groupID]){
+            if(!treeDataF[groupID]){ //in saved tree we have missed group
                 //direct copy
                 treeDataF[groupID] = treeData[groupID];
             }else{
@@ -1767,6 +1767,7 @@ $.widget( "heurist.svs_list", {
 
     //
     /**
+    * for default tree data
     * create list of saved searches for given user/group
     * domain - all or bookmark or entity
     */

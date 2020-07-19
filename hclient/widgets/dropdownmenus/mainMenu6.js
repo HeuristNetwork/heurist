@@ -86,7 +86,9 @@ $.widget( "heurist.mainMenu6", {
                 });
                 
                 that._updateDefaultAddRectype();
-
+                that._createListOfGroups();
+                
+                that.divMainMenu.find('.menu-text').hide();
         });
 
         $(window.hWin.document).on(window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE
@@ -153,6 +155,7 @@ $.widget( "heurist.mainMenu6", {
             that.divMainMenu.stop().effect('size',  { to: { width: 91 } }, is_instant===true?10:300, function(){
                 that.divMainMenu.find('.ui-heurist-header2').css({'text-align':'center'});
                 that.divMainMenu.find('.menu-text').hide();
+                that.divMainMenu.css({bottom:'4px',height:'auto'});
 //console.log(' _collapsed');                
                 //that.divMainMenu.css({'box-shadow':null});
             });
@@ -172,7 +175,7 @@ $.widget( "heurist.mainMenu6", {
                 function(){
                     that.divMainMenu.find('.ui-heurist-header2').css({'text-align':'left'});
                     that.divMainMenu.find('.menu-text').show('fade',300);
-                    
+                    that.divMainMenu.css({bottom:'4px',height:'auto'});
                     //that.divMainMenu.css({'box-shadow':'rgba(0, 0, 0, 0.5) 5px 0px 0px'});
                 });
     },
@@ -313,6 +316,11 @@ $.widget( "heurist.mainMenu6", {
                 explore_top = $(e.target).position().top;
                 explore_height = 268+36;
                 explore_left = 201;
+                if(explore_top+explore_height>this.element.innerHeight()){
+                    explore_top = this.element.innerHeight() - explore_height;
+                }
+                
+                
                 this.menues['explore'].css({width:'400px',overflow:'hidden'});
                             
             }else if(action_name=='recordAdd'){
@@ -551,53 +559,40 @@ console.log('prvent colapse');
         }
     },
 
+    //-----------------------------------------------------------------
     //
-    // switch section on main menu click - NOT USED
+    // SAVED FILTERS
     //
-    /*
-    _switchSection: function( section ){
-
-        var that = this;
-        var m_class = 'ui-heurist-explore-fade'; //by default;
-        var wasChanged = (that._active_section!=section );
-
-        //hide previous section
-        if(wasChanged && that._active_section && that.menues[that._active_section])
+    _createListOfGroups: function(){
+        
+        var s = '<li class="menu-explore" data-action="search_filters" data_id="all">'
+            +'<span class="ui-icon ui-icon-user"/><span class="menu-text">'+window.hWin.HR('My Searches')
+            +'</span></li>'
+            +'<li class="menu-explore" data-action="search_filters" data_id="bookmark">'
+            +'<span class="ui-icon ui-icon-user"/><span class="menu-text">'+window.hWin.HR('My Bookmarks')
+            +'</span></li>';
+        
+        var groups = window.hWin.HAPI4.currentUser.ugr_Groups;
+        for (var groupID in groups)
         {
-            that.containers[that._active_section].hide();
-            that.menues[that._active_section].hide();
-        }
-
-        that._active_section = section;
-        
-        if(section!=='explore') {
-            if(that.menues[section].is(':visible')){ //close on repeat click
-                that.menues[section].hide();        
-                that.containers[section].hide();
+            if(groupID>0){
+                var name = window.hWin.HAPI4.sysinfo.db_usergroups[groupID];
+                var sicon = 'users';
+                if(groupID==1){
+                    sicon = 'database';
+                }else if(groupID==5){
+                    sicon = 'globe';
+                }
                 
-                that._active_section = 'explore';
-                wasChanged = true;
-            }else{
-                that.menues[section].show();
-                if(!that.containers[section].is(':empty')) that.containers[section].show();
-                
-                m_class = 'ui-heurist-'+section+'-fade';
-            }        
+                s = s + '<li class="menu-explore" data-action="search_filters" data_id="'+groupID+'">'
+                    +'<span class="ui-icon ui-icon-'+sicon+'"/><span class="menu-text">'+name
+                    +'</span></li>';
+            }
         }
         
-        //change main background
-        if(wasChanged){
-            $.each(this.sections, function(i, sect){
-                that.element.removeClass('ui-heurist-'+sect+'-fade');    
-                that.menues_explore_gap.removeClass('ui-heurist-'+sect+'-fade');    
-            });
-            this.element.addClass(m_class);    
-            this.menues_explore_gap.addClass(m_class);
-            if(that._active_section=='explore')
-                    that.containers['explore'].show();
-        }
-        
-    }
-    */
+        var cont = this.divMainMenu.find('#filter_by_groups');
+        cont.children().not(':first').remove();
+        $(s).appendTo(cont);
+    },
     
 });

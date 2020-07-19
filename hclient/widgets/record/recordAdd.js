@@ -67,7 +67,7 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
         
         if(this.options.is_h6style){
             //add title 
-            $dlg.css({top:'36px',position:'absolute',width:'auto', margin: '0px','font-size':'0.9em'}).hide();
+            $dlg.css({top:'36px',bottom:'2px','overflow-y':'auto',position:'absolute',width:'auto', margin: '0px','font-size':'0.9em'}).hide();
 
             //titlebar            
             var ele = $('<div class="ui-heurist-header" style="top:0px;">'+this.options.title

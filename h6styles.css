@@ -88,6 +88,10 @@ body {
     margin-left:0.5em;
     cursor: pointer;
 }
+.menu-explore{
+    font-size:smaller;
+    padding:6px;
+}
 .ui-heurist-header{
     /*font: Bold 20px/26px Roboto;*/
     font-weight:bold;
