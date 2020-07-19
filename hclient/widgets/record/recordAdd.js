@@ -30,7 +30,8 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
         currentRecType: 0,
         currentRecTags: null,
         scope_types: 'none',
-        get_params_only: false
+        get_params_only: false,
+        isExpanded: false,
     },
     
     rectype_list:null,
@@ -75,7 +76,7 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
                 
             //list of rectypes
             this.rectype_list = $('<ul class="heurist-selectmenu" '
-                +' style="position:absolute;top:36px;width:190px;bottom:1px;padding-left:6px;'
+                +' style="position:absolute;top:36px;left:0;right:0;bottom:1px;padding:0px;'
                 +'font-size:smaller;overflow-y:auto;list-style-type:none"></ul>')
                 .insertBefore($dlg);
                 
@@ -84,6 +85,8 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
                 this.doExpand( this.rectype_list.is(':visible') );
                 
             }});
+            
+            this.doExpand( this.options.isExpanded );
                 
         }
         
@@ -156,7 +159,7 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
     //
     //    
     doExpand: function(is_expand){
-        
+
         var $dlg = this.element.children('fieldset');
         var $icon = this.element.find('.ui-heurist-header > span.ui-icon');
         
@@ -266,7 +269,8 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
                 if(i>0){
                     var sdis = $(item).attr('value')>0
                         ?' data-id="'+$(item).attr('value')+'" '
-                        :' class="ui-heurist-title truncate" style="font-size:1.1em;padding:6px;"';  // ui-state-disabled
+                        :(' class="ui-heurist-title truncate" style="font-size:1.0em;padding:6px;font-weight:bold"'); 
+                            //+(i>1?'border-top:1px solid gray;margin-top:6px;':'')+'"');  // ui-state-disabled
                         
                     $('<li'+sdis
                         +'>'+$(item).text()+'</li>')
@@ -275,7 +279,7 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
                 }
             });
             
-            this.rectype_list.find('li[data-id]').css({padding: '4px 0 2px 20px', 
+            this.rectype_list.find('li[data-id]').css({padding: '4px 4px 2px 20px', 
                 cursor: 'pointer', border: 'none'        
             }).addClass('truncate');
     

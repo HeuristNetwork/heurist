@@ -30,8 +30,9 @@ $.widget( "heurist.mainMenu6", {
     menues:{}, //section menu - div with menu actions
     containers:{}, //operation containers (next to section menu)
     
-    _myTimeoutId: 0,
-    _myTimeoutId2: 0,
+    _myTimeoutId: 0, //delay on collapse main menu
+    _myTimeoutId2: 0, //delay on close section menu
+    _myTimeoutId3: 0, //delay on show explore section menu
     _explorer_menu_locked: false,
     _active_section: null,
     
@@ -46,9 +47,10 @@ $.widget( "heurist.mainMenu6", {
         .addClass('selectmenu-parent')
         .disableSelection();// prevent double click to select text
 
-        //90 200    
+        //91 200    
         this.divMainMenu = $('<div>')
-        .css({position:'absolute',width:'91px',top:'2px',left:'0px',bottom:'4px',cursor:'pointer','z-index':100})
+        .css({position:'absolute',width:'91px',top:'2px',left:'0px',bottom:'4px',
+                cursor:'pointer','z-index':104})
         .appendTo( this.element )
         .load(
             window.hWin.HAPI4.baseURL+'hclient/widgets/dropdownmenus/mainMenu6.html',
@@ -56,7 +58,7 @@ $.widget( "heurist.mainMenu6", {
 
                 that.divMainMenu.find('.menu-text').hide();
 
-                that._on(that.divMainMenu.find('.ui-heurist-explore'),{
+                that._on(that.divMainMenu.children('.ui-heurist-explore'),{
                     mouseenter: that._expandMainMenuPanel, //mouseenter mouseover
                     mouseleave: that._collapseMainMenuPanel,
                 });
@@ -75,7 +77,7 @@ $.widget( "heurist.mainMenu6", {
                     that._loadSectionMenu(section);
                 });
                 //open explore by default  
-                that._switchSection( 'explore' );
+                that._switchContainer( 'explore' );
 
                 //init explore menu items 
                 that._on(that.divMainMenu.find('.menu-explore'),{
@@ -97,7 +99,7 @@ $.widget( "heurist.mainMenu6", {
     }, //end _create
     
     //
-    //
+    //  
     //
     _updateDefaultAddRectype: function(){
       
@@ -107,7 +109,7 @@ $.widget( "heurist.mainMenu6", {
             var ele = this.divMainMenu.find('.menu-explore[data-action="recordAdd"]');
 
             if(rty_ID>0 && window.hWin.HEURIST4.rectypes.names[rty_ID]){
-                ele.find('.menu-text').text('Add '+window.hWin.HEURIST4.rectypes.names[rty_ID]);
+                ele.find('.menu-text.truncate').text('Add '+window.hWin.HEURIST4.rectypes.names[rty_ID]);
                 ele.attr('data-id', rty_ID);
                 this._on(ele, {click: function(e){
                     var ele = $(e.target).is('li')?$(e.target):$(e.target).parent('li');
@@ -136,26 +138,25 @@ $.widget( "heurist.mainMenu6", {
     //
     // collapse main menu panel on explore mouseout
     //    
-    _collapseMainMenuPanel: function(ele) {
-//console.log(' _collapseMainMenuPanel ' );
+    _collapseMainMenuPanel: function(is_instant) {
+//console.log(' _collapseMainMenuPanel '+is_instant+ '  '+this._myTimeoutId  );
         if(this._explorer_menu_locked || this.element.find('.ui-selectmenu-open').length>0) return;
+        
+        if(is_instant && this._myTimeoutId>0){
+            clearTimeout(this._myTimeoutId);
+        }
 
         var that = this;
         this._myTimeoutId = setTimeout(function() {
-            /*
-            that.divMainMenu.find('.menu-text').fadeOut(300, function(){;
-                if(that._myTimeoutId>0){
-                    that.divMainMenu.find('.ui-heurist-header2').css({'text-align':'center'});
-                    that.divMainMenu.effect('size',  { to: { width: 90 } }, 300);
-                }
-            });
-            */
+            that._myTimeoutId = 0;
             that.divMainMenu.find('.menu-text').hide();
-            that.divMainMenu.effect('size',  { to: { width: 91 } }, 300, function(){
+            that.divMainMenu.stop().effect('size',  { to: { width: 91 } }, is_instant===true?10:300, function(){
                 that.divMainMenu.find('.ui-heurist-header2').css({'text-align':'center'});
                 that.divMainMenu.find('.menu-text').hide();
+//console.log(' _collapsed');                
+                //that.divMainMenu.css({'box-shadow':null});
             });
-        }, 800);
+        }, is_instant===true?10:800);
     },
     
     //
@@ -167,10 +168,12 @@ $.widget( "heurist.mainMenu6", {
         this._myTimeoutId = 0;
         var that = this;
         this._mouseout_SectionMenu();
-        this.divMainMenu.effect('size',  { to: { width: 200 } }, 500,
+        this.divMainMenu.stop().effect('size',  { to: { width: 200 } }, 500,
                 function(){
                     that.divMainMenu.find('.ui-heurist-header2').css({'text-align':'left'});
                     that.divMainMenu.find('.menu-text').show('fade',300);
+                    
+                    //that.divMainMenu.css({'box-shadow':'rgba(0, 0, 0, 0.5) 5px 0px 0px'});
                 });
     },
     
@@ -184,6 +187,8 @@ $.widget( "heurist.mainMenu6", {
         var that = this;
         
 //console.log('_mouseout_SectionMenu');        
+        clearTimeout(this._myTimeoutId3); this._myTimeoutId3 = 0;
+        that.divMainMenu.find('li.menu-explore > .menu-text').css('text-decoration', 'none');
         
         function __closeAllsectionMenu() {
         
@@ -193,7 +198,7 @@ $.widget( "heurist.mainMenu6", {
             {
                 $.each(that.sections, function(i, section){
                     if(that._active_section!=section || that._active_section=='explore'){
-                        that._closeSection(section); 
+                        that._closeSectionMenu(section); 
                     }
                 });
             }
@@ -213,23 +218,25 @@ $.widget( "heurist.mainMenu6", {
 
         if(this._explorer_menu_locked || this.element.find('.ui-selectmenu-open').length>0) return;
         
-        clearTimeout(this._myTimeoutId2);
-        this._myTimeoutId2 = 0;
+        clearTimeout(this._myTimeoutId2); this._myTimeoutId2 = 0;
+        clearTimeout(this._myTimeoutId3); this._myTimeoutId3 = 0;
         
         var section_name = this._getSectionName(e);
         
 //console.log(' in '+section_name );        
 
-        if(this._active_section!=section_name ){
+        if(true || this._active_section!=section_name ){
             //hide all except active
             var that = this;
             $.each(this.sections, function(i, section){
                 if(section_name==section){
                     if(section!='explore'){
-                        that.menues[section].css('z-index',102).show(); 
+                        that.menues[section].css('z-index',102).show(); //show over current section menu
+//console.log('instant '+section);                        
+                        that._collapseMainMenuPanel(true); 
                     }
-                }else if(that._active_section!=section){
-                    that._closeSection(section);
+                }else if(that._active_section!=section || that._active_section=='explore'){
+                    that._closeSectionMenu(section);
                 }
             });
             
@@ -240,7 +247,7 @@ $.widget( "heurist.mainMenu6", {
     //
     // prevent close section and main menu
     //
-    _resetCoseTimers: function(){
+    _resetCloseTimers: function(){
         clearTimeout(this._myTimeoutId2); this._myTimeoutId2 = 0;
         clearTimeout(this._myTimeoutId); this._myTimeoutId = 0;
     },
@@ -253,13 +260,24 @@ $.widget( "heurist.mainMenu6", {
         if(this._explorer_menu_locked || this.element.find('.ui-selectmenu-open').length>0) return;
         this._explorer_menu_locked = false;
 
+        clearTimeout(this._myTimeoutId3); this._myTimeoutId3 = 0;
+        this._resetCloseTimers();
+        
         if($(e.target).attr('data-action')){
             var action_name = $(e.target).attr('data-action');
             
-            this._resetCoseTimers();
+            $(e.target).find('.menu-text').css('text-decoration','underline');
            
-            var that = this;
+            var that = this,
+                expandRecordAddSetting = false,
+                delay = 500;
+            
+            if(action_name=='recordAddSettings'){
+                action_name = 'recordAdd';
+                expandRecordAddSetting = true;
+            }
 
+            this.menues['explore'].hide();
             this.menues['explore'].find('.explore-widgets').hide();
             var cont = this.menues['explore'].find('#'+action_name);
 //console.log('_mousein_ExploreMenu '+action_name+'  '+cont.length);            
@@ -268,49 +286,70 @@ $.widget( "heurist.mainMenu6", {
             }
             cont.show();
             //var cont = this.menues['explore'];
+            var explore_top = '2px',
+                explore_height = 'auto',
+                explore_left = 204;
             
             if(action_name=='search_entity'){
                 
                 if(!cont.search_entity('instance'))
-                cont.search_entity({use_combined_select:true, mouseover:function(){that._resetCoseTimers()}});    
+                cont.search_entity({use_combined_select:true, 
+                                    mouseover:function(){that._resetCloseTimers()}, //NOT USED
+                                    onClose: function() { that._closeSectionMenu('explore'); that._switchContainer('explore'); }
+                                    });    
                 
-                this.menues['explore'].css({top:'2px',bottom:'4px',width:'200px',height:'auto',overflow:'auto'});
+                this.menues['explore'].css({left:'204px', bottom:'4px',width:'200px',overflow:'auto'});
                 
             }else if(action_name=='search_quick'){
                 
                 if(!cont.search_quick('instance'))
                 cont.search_quick({
-                        onClose: function() { that._closeSection('explore');},
-                        mouseover: function() { that._resetCoseTimers()},
+                        onClose: function() { that._closeSectionMenu('explore'); that._switchContainer('explore'); },
+                        mouseover: function() { that._resetCloseTimers()},
                         menu_locked: function(is_locked){ 
                             that._explorer_menu_locked = is_locked; 
                         }  });    
                 
-                this.menues['explore'].css({top:$(e.target).position().top, 
-                            height:268+36, width:'400px',overflow:'hidden'});
+                explore_top = $(e.target).position().top;
+                explore_height = 268+36;
+                explore_left = 201;
+                this.menues['explore'].css({width:'400px',overflow:'hidden'});
                             
             }else if(action_name=='recordAdd'){
                 
+                this.menues['explore'].css({bottom:'4px',width:'200px',overflow:'auto'});
+
                 if(!cont.recordAdd('instance')){
                     cont.recordAdd({
                             is_h6style: true,
-                            onClose: function() { that._closeSection('explore');},
-                            mouseover: function() { that._resetCoseTimers()},
+                            onClose: function() { that._closeSectionMenu('explore');},
+                            isExpanded: expandRecordAddSetting,
+                            mouseover: function() { that._resetCloseTimers()},
                             menu_locked: function(is_locked){ 
                                 that._explorer_menu_locked = is_locked; 
                             }  });  
                 }else{
-                    cont.recordAdd('doExpand',false);
-                }  
+                    cont.recordAdd('doExpand', expandRecordAddSetting);                        
+                }
                 
-                this.menues['explore'].css({top:'2px',bottom:'4px',width:'200px',height:'auto',overflow:'auto'});
+                if(!expandRecordAddSetting && $(e.target).attr('data-id')>0){
+                        delay = 2000;
+                }
                 
             }
+            that.menues['explore'].css({left:explore_left, top:explore_top, height:explore_height});
             
-            this.menues['explore'].css({'z-index':102,left:'204px'}).show(); 
+            this._myTimeoutId3 = setTimeout(function(){
+                that.menues['explore'].css({'z-index':103}).show(); 
+                if(explore_left>201){
+                    that.menues_explore_gap.css({top:explore_top, height:that.menues['explore'].height()}).show();
+                }else{
+                    that.menues_explore_gap.hide();
+                }
+            }, delay);
             
             if(action_name=='search_quick'){
-                window.hWin.HEURIST4.ui.initHSelect(this.menues['explore'].find(".sa_rectype"), false); 
+                //????? window.hWin.HEURIST4.ui.initHSelect(this.menues['explore'].find(".sa_rectype"), false); 
             }
             
         }
@@ -319,9 +358,10 @@ $.widget( "heurist.mainMenu6", {
     //
     //
     //
-    _closeSection: function( section ){
+    _closeSectionMenu: function( section ){
         this.menues[section].css({'z-index':0}).hide(); 
-        //this.menues[section].css({'z-index':2,left:'204px'}).show(); 
+        this.menues_explore_gap.hide();
+        //this.menues[section].css({'z-index':2,left:'200px'}).show(); 
     },
     
     //
@@ -360,7 +400,7 @@ $.widget( "heurist.mainMenu6", {
     _openSectionMenu: function(e){
         
         var section = this._getSectionName(e);
-        this._switchSection2( section );
+        this._switchContainer( section );
     },
     
     //
@@ -370,7 +410,7 @@ $.widget( "heurist.mainMenu6", {
         
         this.menues[section] = $('<div>')
             .addClass('ui-menu6-section ui-heurist-'+section)
-            .css({width:'200px'})
+            .css({width:'200px'})   //,'border-left':'4px solid darkgray'})
             .appendTo( this.element );
             
         this.containers[section] = $('<div>')
@@ -395,7 +435,7 @@ $.widget( "heurist.mainMenu6", {
                 var is_explore = ($(e.target).hasClass('ui-heurist-explore') 
                     || $(e.target).parents('.ui-heurist-explore').length>0);
                 if( is_explore ){
-                    this._collapseMainMenuPanel(); //force collapse
+                    //AAA this._collapseMainMenuPanel(); //force collapse
                 }
             }
         });
@@ -413,9 +453,15 @@ console.log('prvent colapse');
                     
                     
         if(section=='explore'){
-            //@todo move to init of this widget
+            
+            this.menues_explore_gap = $('<div>')
+                    .css({'width':'4px', position:'absolute', opacity: '0.8', 'z-index':103, left:'200px'})
+                    //.addClass('ui-heurist-explore-fade')
+                    .hide()
+                    .appendTo( this.element );
+            
             this.containers[section]
-                .css({left:'97px'})
+                .css({left:'96px'})
                 .show();
 
             window.hWin.HAPI4.LayoutMgr.appInitAll('SearchAnalyze2', this.containers[section] );
@@ -464,7 +510,7 @@ console.log('prvent colapse');
         this._on(this.menues[section].find('li[data-action]'),{click:function(e){
             var li = $(e.target);
             if(!li.is('li')) li = li.parents('li');
-            this._switchSection2(section, true);
+            this._switchContainer(section, true);
             widget.mainMenu('menuActionById', li.attr('data-action'), this.containers[section]); 
         }});
         
@@ -473,7 +519,7 @@ console.log('prvent colapse');
     //
     // switch section on section menu click
     //
-    _switchSection2: function( section, force_show ){
+    _switchContainer: function( section, force_show ){
 
         var that = this;
         if(that._active_section!=section ){
@@ -483,6 +529,7 @@ console.log('prvent colapse');
                 that.containers[that._active_section].hide();
                 that.menues[that._active_section].hide();
                 that.element.removeClass('ui-heurist-'+that._active_section+'-fade');
+                that.menues_explore_gap.removeClass('ui-heurist-'+that._active_section+'-fade');
             }
             
             that._active_section = section;
@@ -497,6 +544,7 @@ console.log('prvent colapse');
             
             //change main background
             this.element.addClass('ui-heurist-'+section+'-fade');    
+            this.menues_explore_gap.addClass('ui-heurist-'+section+'-fade');
             
         }else if(force_show){
             that.containers[section].show();    
@@ -504,8 +552,9 @@ console.log('prvent colapse');
     },
 
     //
-    // switch section on main menu click
+    // switch section on main menu click - NOT USED
     //
+    /*
     _switchSection: function( section ){
 
         var that = this;
@@ -540,12 +589,15 @@ console.log('prvent colapse');
         if(wasChanged){
             $.each(this.sections, function(i, sect){
                 that.element.removeClass('ui-heurist-'+sect+'-fade');    
+                that.menues_explore_gap.removeClass('ui-heurist-'+sect+'-fade');    
             });
             this.element.addClass(m_class);    
+            this.menues_explore_gap.addClass(m_class);
             if(that._active_section=='explore')
                     that.containers['explore'].show();
         }
         
     }
+    */
     
 });

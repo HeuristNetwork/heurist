@@ -30,7 +30,7 @@ $.widget( "heurist.search_entity", {
         by_favorites: true,  // show buttons: filter by entity (show selected (favorires) entities)
         by_usage: true, // show dropdown entity filter (by usage)
         
-        mouseover: null, //callback to prevent close h6 menu                
+        mouseover: null, //callback to prevent close h6 menu NOT USED
         search_realm: null
     },
 
@@ -64,7 +64,7 @@ $.widget( "heurist.search_entity", {
         if(this.options.use_combined_select){
             
             this.combined_select = $('<div class="ui-heurist-header" style="top:0px;">Filter by entity</div>'
-                +'<div style="top:37px;position:absolute;width:100%;">'
+                +'<div style="top:37px;position:absolute;">'  //width:100%;
                     +'<div class="ui-heurist-title" style="padding:12px 0px 0px 6px;">By Usage</div>'
                     +'<ul class="by-usage" style="list-style-type:none;margin:0;padding:6px"/>'
                     +'<div class="ui-heurist-title favorites" style="border-top:1px gray solid; padding:12px 0px 0px 6px;">Favorites</div>'
@@ -534,6 +534,10 @@ $.widget( "heurist.search_entity", {
             request.search_realm = this.options.search_realm;
             
             window.hWin.HAPI4.SearchMgr.doSearch( this, request );
+            
+            if($.isFunction(this.options.onClose)){
+                this.options.onClose();
+            }
     }
 
     // events bound via _on are removed automatically
