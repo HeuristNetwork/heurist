@@ -37,6 +37,7 @@ $.widget( "heurist.mainMenu6", {
     _active_section: null,
     
     divMainMenu: null,  //main div
+    search_faceted: null,
 
     // the widget's constructor
     _create: function() {
@@ -58,6 +59,11 @@ $.widget( "heurist.mainMenu6", {
 
                 that.divMainMenu.find('.menu-text').hide();
 
+                //init all menues
+                $.each(that.sections, function(i, section){
+                    that._loadSectionMenu(section);
+                });
+                
                 that._on(that.divMainMenu.children('.ui-heurist-explore'),{
                     mouseenter: that._expandMainMenuPanel, //mouseenter mouseover
                     mouseleave: that._collapseMainMenuPanel,
@@ -66,29 +72,31 @@ $.widget( "heurist.mainMenu6", {
                     mouseover: that._mousein_SectionMenu,  
                     mouseleave: that._mouseout_SectionMenu,
                 });
+                that._on(that.element.find('.ui-menu6-section.ui-heurist-explore'), {
+                    mouseleave: that._collapseMainMenuPanel
+                });
 
 
                 that._on(that.divMainMenu.find('.ui-heurist-header'),{
                     click: that._openSectionMenu
                 });
 
-                //init all menues
-                $.each(that.sections, function(i, section){
-                    that._loadSectionMenu(section);
-                });
                 //open explore by default  
                 that._switchContainer( 'explore' );
 
-                //init explore menu items 
-                that._on(that.divMainMenu.find('.menu-explore'),{
-                    mouseenter: that._mousein_ExploreMenu,
-                    mouseleave: that._mouseout_SectionMenu//mouseout
-                });
-                
                 that._updateDefaultAddRectype();
                 that._createListOfGroups();
                 
                 that.divMainMenu.find('.menu-text').hide();
+                
+                //init explore menu items 
+                that._on(that.divMainMenu.find('.menu-explore'),{
+                    mouseenter: that._mousein_ExploreMenu,
+                    mouseleave: function(e){
+                        // that._mouseout_SectionMenu(e);//mouseout   
+                        // that._collapseMainMenuPanel(e);
+                    }
+                });
         });
 
         $(window.hWin.document).on(window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE
@@ -208,7 +216,7 @@ $.widget( "heurist.mainMenu6", {
         }        
         
         if(e){
-            this._myTimeoutId2 = setTimeout(__closeAllsectionMenu,300);
+            this._myTimeoutId2 = setTimeout(__closeAllsectionMenu,500);
         }else{
             __closeAllsectionMenu();
         }
@@ -301,7 +309,7 @@ $.widget( "heurist.mainMenu6", {
                                     onClose: function() { that._closeSectionMenu('explore'); that._switchContainer('explore'); }
                                     });    
                 
-                this.menues['explore'].css({left:'204px', bottom:'4px',width:'200px',overflow:'auto'});
+                this.menues['explore'].css({bottom:'4px',width:'200px',overflow:'auto'});
                 
             }else if(action_name=='search_quick'){
                 
@@ -310,6 +318,7 @@ $.widget( "heurist.mainMenu6", {
                         onClose: function() { that._closeSectionMenu('explore'); that._switchContainer('explore'); },
                         mouseover: function() { that._resetCloseTimers()},
                         menu_locked: function(is_locked){ 
+                            that._resetCloseTimers();
                             that._explorer_menu_locked = is_locked; 
                         }  });    
                 
@@ -322,6 +331,52 @@ $.widget( "heurist.mainMenu6", {
                 
                 
                 this.menues['explore'].css({width:'400px',overflow:'hidden'});
+
+
+            }else if(action_name=='svs_list'){
+
+                this.menues['explore'].css({bottom:'4px',width:'200px',overflow:'auto'});
+                
+                var group_ID = $(e.target).attr('data-id');
+                
+                if(!cont.svs_list('instance')){
+                    cont.svs_list({
+                            is_h6style: true,
+                            onClose: function(noptions) { 
+                                    that._closeSectionMenu('explore'); 
+                                    that._switchContainer('explore'); 
+                                    
+                                    if(noptions==null){
+                                        //close faceted search
+                                        that._onCloseSearchFaceted();
+                                    }else{
+                                        noptions.onclose = function(){ that._onCloseSearchFaceted(); };
+                                        noptions.is_h6style = true;
+                                        
+                                        //open faceted search
+                                        that.search_faceted.show();
+                                        that.containers['explore'].css({left:'332px'});
+                                        
+                                        if(that.search_faceted.search_faceted('instance')){ 
+                                            that.search_faceted.search_faceted('option', noptions ); //assign new parameters
+                                        }else{
+                                            //not created yet
+                                            that.search_faceted.search_faceted( noptions );
+                                        }
+                                        
+                                    } 
+                            },
+                            allowed_UGrpID:[group_ID],
+                            menu_locked: function(is_locked){ 
+                                that._resetCloseTimers();
+                                that._explorer_menu_locked = is_locked; 
+                            }                            
+                            //mouseover: function() { that._resetCloseTimers()},
+                            });  
+                }else{
+                    cont.svs_list('option', 'allowed_UGrpID', [group_ID]);                        
+                }
+
                             
             }else if(action_name=='recordAdd'){
                 
@@ -334,6 +389,7 @@ $.widget( "heurist.mainMenu6", {
                             isExpanded: expandRecordAddSetting,
                             mouseover: function() { that._resetCloseTimers()},
                             menu_locked: function(is_locked){ 
+                                that._resetCloseTimers();
                                 that._explorer_menu_locked = is_locked; 
                             }  });  
                 }else{
@@ -360,6 +416,18 @@ $.widget( "heurist.mainMenu6", {
                 //????? window.hWin.HEURIST4.ui.initHSelect(this.menues['explore'].find(".sa_rectype"), false); 
             }
             
+        }
+    },
+    
+    //
+    //
+    //
+    _onCloseSearchFaceted: function(){
+        if(this.search_faceted.is(':visible')){
+            $(this.document).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCHSTART, [ 
+                {reset:true, search_realm:this.options.search_realm} ]);  //global app event to clear views
+            this.search_faceted.hide();
+            this.containers['explore'].css({left:'96px'});
         }
     },
     
@@ -467,6 +535,13 @@ console.log('prvent colapse');
                     //.addClass('ui-heurist-explore-fade')
                     .hide()
                     .appendTo( this.element );
+
+                    
+            this.search_faceted = $('<div>')
+                    .addClass('ui-menu6-container ui-heurist-'+section)
+                    .css({left:'96px', width:'230px'})
+                    .hide()
+                    .appendTo( this.element );
             
             this.containers[section]
                 .css({left:'96px'})
@@ -565,10 +640,10 @@ console.log('prvent colapse');
     //
     _createListOfGroups: function(){
         
-        var s = '<li class="menu-explore" data-action="search_filters" data_id="all">'
+        var s = '<li class="menu-explore" data-action="svs_list" data-id="all">'
             +'<span class="ui-icon ui-icon-user"/><span class="menu-text">'+window.hWin.HR('My Searches')
             +'</span></li>'
-            +'<li class="menu-explore" data-action="search_filters" data_id="bookmark">'
+            +'<li class="menu-explore" data-action="svs_list" data-id="bookmark">'
             +'<span class="ui-icon ui-icon-user"/><span class="menu-text">'+window.hWin.HR('My Bookmarks')
             +'</span></li>';
         
@@ -584,7 +659,7 @@ console.log('prvent colapse');
                     sicon = 'globe';
                 }
                 
-                s = s + '<li class="menu-explore" data-action="search_filters" data_id="'+groupID+'">'
+                s = s + '<li class="menu-explore" data-action="svs_list" data-id="'+groupID+'">'
                     +'<span class="ui-icon ui-icon-'+sicon+'"/><span class="menu-text">'+name
                     +'</span></li>';
             }
@@ -593,6 +668,21 @@ console.log('prvent colapse');
         var cont = this.divMainMenu.find('#filter_by_groups');
         cont.children().not(':first').remove();
         $(s).appendTo(cont);
+
+        /*        
+        window.hWin.HEURIST4.filters.getFiltersTree( function(data){
+            window.hWin.HAPI4.currentUser.ugr_SvsTreeData = data; 
+        });
+        */
+        
     },
+
+    //
+    //
+    //
+    _showSavedSearchesForGroups: function(group_id){
+
+        
+    }
     
 });

@@ -1,5 +1,5 @@
 /**
-*  Utility functions  for database structure
+*  Utility functions for database structure
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -34,7 +34,7 @@ isTermInList
 getChildrenTerms - returns entire terms tree or only part of it for selected termID
 
 
-REECTYPES
+RECTYPES
 
 createRectypeStructureTree
 getLinkedRecordTypes
@@ -44,6 +44,7 @@ hasFields - returns true if rectype has a field in its structure
 rstField - Returns rectype header or details field values
 
 findByConceptCode
+
 */
 
 if (!window.hWin.HEURIST4){

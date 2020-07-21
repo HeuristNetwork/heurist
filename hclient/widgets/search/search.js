@@ -1047,6 +1047,7 @@ $.widget( "heurist.search", {
             return;
         }
 
+        this.search_assistant.addClass('ui-heurist-header1 selectmenu-parent');        
 
         $('.ui-menu').not('.horizontalmenu').not('.heurist-selectmenu').hide(); //hide other
         $('.menu-or-popup').hide(); //hide other
@@ -1101,10 +1102,16 @@ $.widget( "heurist.search", {
             //hide popupo in case click outside
             function _hidethispopup(event) {
                 var popup = that.search_assistant_popup;
+//console.log($(event.target).closest(popup).length+'   '+$(event.target).attr('id')+'  is selectmenu '+ $(event.target).parents('.ui-selectmenu-menu').length );                
                 if($(event.target).closest(popup).length==0 && $(event.target).attr('id')!='menu-search-quick-link'){
                     //TEMP!!!!! popup.hide( "blind", {}, 500 );
-                    if(that.search_assistant_popup && that.search_assistant_popup.dialog('instance'))
-                        that.search_assistant_popup.dialog('close');
+                    if($(event.target).parents('.ui-selectmenu-menu').length>0) return;
+                    
+                    if(that.search_assistant_popup && that.search_assistant_popup.dialog('instance')){
+//console.log('COSE');                        
+                         that.search_assistant_popup.dialog('close');
+                    }
+                        
                 }else{
                     //TEMP!!!!! 
                     $( document ).one( "click", _hidethispopup);

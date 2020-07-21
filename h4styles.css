@@ -1931,7 +1931,7 @@ input[type="file"] {
     padding: 0.1em;
 }
 .ui-menu{
-    z-index: 99 !important;
+    z-index: 199 !important;
 }
 
 .ui-button .ui-button-text {

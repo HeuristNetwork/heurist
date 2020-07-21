@@ -384,8 +384,8 @@ window.hWin.HEURIST4.util = {
             var notJson = true;
             try{
                 //query1 = JSON.parse(query1);
-                var query1a = $.parseJSON(query1);
-                if(window.hWin.HEURIST4.util.isJSON(query1a)){
+                var query1a = window.hWin.HEURIST4.util.isJSON(query1);
+                if( query1a ){
                     query1 = query1a;
                     notJson = false;
                 }
@@ -404,8 +404,8 @@ window.hWin.HEURIST4.util = {
             var notJson = true;
             try{
                 //query2 = JSON.parse(query2);
-                var query2a = $.parseJSON(query2);
-                if(window.hWin.HEURIST4.util.isJSON(query2a)){
+                var query2a = window.hWin.HEURIST4.util.isJSON(query2);
+                if( query2a ){
                     query2 = query2a;
                     notJson = false;
                 }

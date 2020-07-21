@@ -72,7 +72,7 @@ $.widget( "heurist.search_quick", $.heurist.recordAccess, {
             $('<div class="ui-heurist-header" style="top:0px;">Quick search</div>')
                 .insertBefore($dlg);
         }else{
-             $dlg.addCass('ui-heurist-header1');
+             $dlg.addClass('ui-heurist-header1');
         }
         
         

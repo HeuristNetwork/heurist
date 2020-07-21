@@ -32,9 +32,9 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
 
     showMsgErrJson: function(response){
         if(typeof response === "string"){
-            showMsgErr(null);
+            window.hWin.HEURIST4.msg.showMsgErr(null);
         }else{
-            showMsgErr('Cannot parse server response: '+response.substr(0,255)+'...');
+            window.hWin.HEURIST4.msg.showMsgErr('Cannot parse server response: '+response.substr(0,255)+'...');
         }
     },
 
