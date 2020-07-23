@@ -142,15 +142,15 @@ $.widget( "heurist.search_faceted", {
     
     // default options
     options: {
-        // callbacks
+        is_h6style: true,
         params: {},
         ispreview: false,
         showclosebutton: true,
         showresetbutton: true,
-        onclose: null,
         search_realm: null,
         preliminary_filter:null,
-        svs_ID: null
+        svs_ID: null,
+        onclose: null// callback
     },
 
     cached_counts:[], //stored results of get_facets by stringified query index
@@ -191,11 +191,20 @@ $.widget( "heurist.search_faceted", {
         this.div_header = $( "<div>" ).css({height: 'auto',
             position: 'absolute', left: 0, right: 0}).appendTo( this.element );
         
-        if(!this.options.ispreview){                       //padding-top:1.4em;
-            this.div_title = $('<div>')
-            .css({padding:'1em','font-size':'1.4em','font-weight':'bold','max-width':'90%'})
-//style='text-align:left;margin:4px 0 0 0!important;padding-left:1em;width:auto, max-width:90%'></h3")
-                    .addClass('truncate svs-header').appendTo( this.div_header );
+        if(!this.options.ispreview){     
+        
+            if(this.options.is_h6style){
+                
+                this.div_title = $('<div class="ui-heurist-header truncate" style="position:relative;width:211px;padding:10px">')
+                    .appendTo( this.div_header );
+                
+            }else{
+                              //padding-top:1.4em;
+                this.div_title = $('<div>')
+                .css({padding:'1em','font-size':'1.4em','font-weight':'bold','max-width':'90%'})
+    //style='text-align:left;margin:4px 0 0 0!important;padding-left:1em;width:auto, max-width:90%'></h3")
+                        .addClass('truncate svs-header').appendTo( this.div_header );
+            }
         }
         
         this.refreshSubsetSign();
@@ -220,7 +229,7 @@ $.widget( "heurist.search_faceted", {
         
         var lbl = this.options.params.ui_exit_button_label
                         ?this.options.params.ui_exit_button_label
-                        :window.hWin.HR('Show all available searches');
+                        :window.hWin.HR(this.options.is_h6style?'Close':'Show all available searches');
         
         this.btn_close = $( "<button>", { 
                     title:window.hWin.HR("Close this facet search and return to the list of saved searches") })
@@ -243,8 +252,14 @@ $.widget( "heurist.search_faceted", {
 
         
         this.facets_list_container = $( "<div>" )
-        .css({"top":((this.div_title)?'6em':'2em'),"bottom":0,"left":'1em',"right":'0.5em',"position":"absolute"}) //was top 3.6
+        .css({"top":((this.div_title)?'6em':'2em'),"bottom":0,"position":"absolute"}) //was top 3.6
         .appendTo( this.element );
+        
+        if(this.options.is_h6style){
+            this.facets_list_container.css({left:0,right:0,'font-size':'0.9em'});    
+        }else{
+            this.facets_list_container.css({left:'1em',right:'0.5em'});    
+        }
 
         this.facets_list = $( "<div>" )
         .css({"overflow-y":"auto","overflow-x":"hidden","height":"100%"}) //"font-size":"0.9em",
@@ -305,7 +320,7 @@ $.widget( "heurist.search_faceted", {
                         that.refreshSubsetSign();
                     }
                     if(data.closeFacetedSearch){
-                        that._trigger( "onclose");    
+                        that._trigger( "onclose" );    
                     }
                     
                 }

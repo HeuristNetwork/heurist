@@ -52,7 +52,7 @@ if($layout_theme==null || $layout_theme=='' || $layout_theme=="heurist" || $layo
 <link rel="stylesheet" type="text/css" href="<?php echo $cssLink;?>">
 <!-- Heurist CSS -->
 <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h4styles.css" />
-<?php if(@$_REQUEST['ll']=='H6Default' || @$_REQUEST['ll']=='H6'){?>
+<?php if(true || @$_REQUEST['ll']=='H6Default' || @$_REQUEST['ll']=='H6'){?>
 <link rel="stylesheet" type="text/css" href="<?php echo PDIR;?>h6styles.css" />
 <?php } ?>
 <!-- Heurist Color Themes -->

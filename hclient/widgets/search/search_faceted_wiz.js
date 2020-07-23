@@ -149,11 +149,19 @@ $.widget( "heurist.search_faceted_wiz", {
         var ht = $(window).height();
         if(ht>700) ht = 700;
 
+        var is_h6style = (window.hWin.HAPI4.sysinfo['layout']=='H6Default');
+        
+        
         this.element.dialog({
             autoOpen: false,
             height: 580,
             width: 1000,
             modal: true,
+
+            resizable: true, //!is_h6style,
+            draggable: !is_h6style,
+            position: this.options.position,
+            
             title: window.hWin.HR("Define Faceted Search"),
             resizeStop: function( event, ui ) {
                 that.element.css({overflow: 'hidden !important','width':'100%'});
@@ -172,10 +180,12 @@ $.widget( "heurist.search_faceted_wiz", {
                         that.navigateWizard(-1);
                 }},
                 {text:window.hWin.HR('Next'), id:'btnNext',
+                    class:'ui-button-action', 
                     click: function() {
                         that.navigateWizard(1);
                 }},
                 {text:window.hWin.HR('Save'), id:'btnSave',
+                    class:'ui-button-action', 
                     click: function() {
                         that._doSaveSearch()
                         //that.navigateWizard(1);
@@ -299,15 +309,39 @@ $.widget( "heurist.search_faceted_wiz", {
         this.step2.remove();
         this.step3.remove();
     }
+    
+    , adjustDimension: function(){
+        var is_h6style = (window.hWin.HAPI4.sysinfo['layout']=='H6Default');
+        
+        if(is_h6style){
+            var dialog_height = window.innerHeight - this.element.parent().position().top - 5;
+            this.element.dialog( 'option', 'height', dialog_height);
+        }else{
+            var ht = window.innerHeight; //$(window).height();
+            if(ht>700) ht = 700;
+            this.element.dialog( 'option', 'height',  ht );
+        }
+    }
 
     ,show: function(){
         this.current_tree_rectype_ids = null;
+        
+        if(this.options.position!=null){
+            this.element.dialog( 'option', 'position', this.options.position );   
+        }
         
         this.element.dialog("open");
         this.step1.hide();
         this.step2.hide();
         this.step3.hide();
         this.navigateWizard(NaN); //init for 0 step
+        
+        var is_h6style = (window.hWin.HAPI4.sysinfo['layout']=='H6Default');
+        if(is_h6style){
+            this.element.parent().addClass('ui-heurist-explore');
+            this.adjustDimension();
+        }
+        
     }
 
     , navigateWizard: function(nav){
@@ -594,9 +628,7 @@ $.widget( "heurist.search_faceted_wiz", {
             $("#btnBack").hide();
             
         }else{
-            var ht = $(window).height();
-            if(ht>700) ht = 700;
-            this.element.dialog( "option", "height",  ht );
+            this.adjustDimension()
 
             $("#btnBack").show();
         }

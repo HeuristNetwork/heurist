@@ -197,7 +197,7 @@ function hSvsEdit(args) {
     //
     //
     //
-    function _editRules(ele_rules, ele_rules_full, squery, groupID) {
+    function _editRules(ele_rules, ele_rules_full, squery, groupID, dlg_options) {
 
        var that = this;
 
@@ -205,9 +205,13 @@ function hSvsEdit(args) {
         if(!window.hWin.HEURIST4.util.isnull(ele_rules_full)){
             url = url + '&rules=' + encodeURIComponent(ele_rules_full.val());
         }
-
-        window.hWin.HEURIST4.msg.showDialog(url, { width:1200, height:600, title:'Ruleset Editor', callback:
-            function(res){
+        
+        if(!dlg_options) dlg_options = {};
+        dlg_options['width'] = 1200;
+        dlg_options['height'] = 600;
+        if(!dlg_options['title']) dlg_options['title'] = 'Edit Rules';
+        dlg_options['callback'] = function(res)
+        {
                 if(!window.hWin.HEURIST4.util.isempty(res)) {
 
                     if(res.mode == 'save') {
@@ -231,8 +235,9 @@ function hSvsEdit(args) {
                         }
                     }
                 }
-        }});
+        };
 
+        window.hWin.HEURIST4.msg.showDialog(url, dlg_options);
 
     }
 
@@ -255,9 +260,11 @@ function hSvsEdit(args) {
     * @param is_short - works only for addition (from save fixed order)
     * @param callback
     */
-    function _showDialog( mode, groupID, svsID, squery, is_short, callback ){
+    function _showDialog( mode, groupID, svsID, squery, is_short, position, callback ){
         
         is_short = (!(svsID>0) && is_short===true);
+        
+        var is_h6style = (window.hWin.HAPI4.sysinfo['layout']=='H6Default');
 
         if(parseInt(svsID)>0){
             var svs = window.hWin.HAPI4.currentUser.usr_SavedSearch[svsID];
@@ -330,7 +337,7 @@ function hSvsEdit(args) {
                 }
             }
 
-            _showSearchFacetedWizard( {svsID:svsID, domain:groupID, params:facet_params, onsave: callback_method });
+            _showSearchFacetedWizard( {svsID:svsID, domain:groupID, params:facet_params, position: position, onsave: callback_method });
             //function(event, request){   that._updateAfterSave(request, 'faceted');
 
         }else if (mode == 'rules' && window.hWin.HEURIST4.util.isnull(svsID)){ //it happens for new rules only
@@ -338,7 +345,13 @@ function hSvsEdit(args) {
 
             if(window.hWin.HEURIST4.util.isnull(squery)) squery = {};
              squery.q = ''; // from rule builder we always save pure query only
-             _editRules(null, null, squery, groupID);
+             
+             var dlg_options = null;
+             if(is_h6style){
+                 dlg_options = {is_h6style:true, position:position, maximize:true};
+             }
+             
+             _editRules(null, null, squery, groupID, dlg_options);
 
         }else if(null == edit_dialog){
             //create new dialog
@@ -361,7 +374,10 @@ function hSvsEdit(args) {
                 .css({'height':'16px', 'width':'16px'})
                 .click(function( event ) {
                     //that.
-                    _editRules( $dlg.find('#svs_Rules'), $dlg.find('#svs_Rules2'), '', groupID );
+                    
+                    var dlg_options = is_h6style?{is_h6style:true}:null;
+                    
+                    _editRules( $dlg.find('#svs_Rules'), $dlg.find('#svs_Rules2'), '', groupID, dlg_options);
                 });
 
                 $dlg.find("#svs_Rules_clear")
@@ -580,19 +596,23 @@ function hSvsEdit(args) {
                         __doSave(true);
                     }
                 });
-
-
+                
                 $dlg.dialog({
                     autoOpen: false,
                     height: is_short?360:600,
                     width: 650,                                                                                               
                     modal: true,
                     resizable: false,
+                    draggable: !is_h6style,
                     title: window.hWin.HR(isRules?'Edit RuleSet':'Save filter criteria'),
+                    position: position,
                     buttons: [
                         {text:window.hWin.HR('Get filter + rules as string'), 
                             click: __getFilterString, css:{'margin-right':'60px'} },
-                        {text:window.hWin.HR('Save'), click: __doSave, css:{'margin-right':'10px'}},
+                        {text:window.hWin.HR('Save'), 
+                            id:'btnSave',
+                            class:'ui-button-action', 
+                            click: __doSave, css:{'margin-right':'10px'}},
                         {text:window.hWin.HR('Cancel'), click: function() {
                             $( this ).dialog( "close" );
                         }}
@@ -607,9 +627,12 @@ function hSvsEdit(args) {
                 }else{
                     edit_dialog.find('.hide-if-short').show();    
                 }
-
+                
                 $dlg.dialog("open");
                 $dlg.parent().addClass('ui-dialog-heurist');
+                if(is_h6style){
+                    $dlg.parent().addClass('ui-heurist-explore');
+                }
 
             });
         }else{
@@ -622,6 +645,10 @@ function hSvsEdit(args) {
                 edit_dialog.find('.hide-if-short').hide();
             }else{
                 edit_dialog.find('.hide-if-short').show();    
+            }
+            
+            if(position!=null){
+                edit_dialog.dialog( 'option', 'position', position );   
             }
             
             edit_dialog.dialog("open");
@@ -643,8 +670,8 @@ function hSvsEdit(args) {
             edit_dialog = null;
         },
 
-        showSavedFilterEditDialog: function( mode, groupID, svsID, squery, is_short, callback ) {
-            _showDialog( mode, groupID, svsID, squery, is_short, callback );
+        showSavedFilterEditDialog: function( mode, groupID, svsID, squery, is_short, position, callback ) {
+            _showDialog( mode, groupID, svsID, squery, is_short, position, callback );
         }
 
     }

@@ -477,6 +477,10 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
     * 
     * options
     *   dialogid - unique id to reuse dialog  (in this case dialog will not be removed on close)
+    * 
+    *   is_h6style - apply heurist6 style
+    *   position - adjust dialog position
+    *   maximize - set maximum allowed widht and height  
     */
     showDialog: function(url, options){
 
@@ -515,6 +519,20 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                     };       
                     
                     $dlg.dialog('open');  
+                    
+                    if(options.is_h6style){
+                            $dlg.parent().addClass('ui-heurist-explore');
+                            if(options.position){
+                                $dlg.dialog( 'option', 'position', options.position );   
+                                if(options.maximize){
+                                    var dialog_height = window.innerHeight - $dlg.parent().position().top - 5;
+                                    $dlg.dialog( 'option', 'height', dialog_height);
+                                    var dialog_width = window.innerWidth - $dlg.parent().position().left - 5;
+                                    $dlg.dialog( 'option', 'width', dialog_width);
+                                }
+                            }
+                    }
+                    
                    
                     if(options['params'] && $.isFunction(content.assignParameters)) {
                         content.assignParameters(options['params']);
@@ -702,6 +720,20 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                         };
                         $dlg.dialog(opts);
                         
+                        if(options.is_h6style){
+                                $dlg.parent().addClass('ui-heurist-explore');
+                                if(options.position){
+                                    $dlg.dialog( 'option', 'position', options.position );   
+                                    if(options.maximize){
+                                        var dialog_height = window.innerHeight - $dlg.parent().position().top - 5;
+                                        $dlg.dialog( 'option', 'height', dialog_height);
+                                        var dialog_width = window.innerWidth - $dlg.parent().position().left - 5;
+                                        $dlg.dialog( 'option', 'width', dialog_width);
+                                    }
+                                }
+                        }
+                        
+                        
                         if(options.noClose){
                             $dlg.parent().find('.ui-dialog-titlebar').find('.ui-icon-closethick').parent().hide();
                         }
@@ -754,7 +786,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                     //draggable: false,
                     title: options["title"],
                     buttons: options["buttons"],
-                    open: options.open,
+                    open: options.open,  //callback
                     beforeClose: options.beforeClose,
                     close: function(event, ui){
                         
@@ -770,7 +802,6 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                     }
             };
             if(options["position"]) opts["position"] = options["position"];
-            
             
             $dlg.dialog(opts);
 

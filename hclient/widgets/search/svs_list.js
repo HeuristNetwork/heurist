@@ -401,6 +401,9 @@ $.widget( "heurist.svs_list", {
         window.hWin.HAPI4.SystemMgr.ssearch_savetree( request, function(response){
 
             if(response.status == window.hWin.ResponseStatus.OK){
+                
+                window.hWin.HAPI4.currentUser.ugr_SvsTreeData[groupToSave] = treeData[groupToSave];
+                
                 window.hWin.HAPI4.currentUser.ugr_SvsTreeData[groupToSave].modified = response.data;
                 
                 if($.isFunction(callback)) callback.call(this);
@@ -668,11 +671,24 @@ $.widget( "heurist.svs_list", {
         
         this.div_header.text( name );
         
+        this._off(this.search_tree,'click');
+        this.search_tree.empty();
+        
         //create treeview
         this._defineContent( groupID, this.search_tree );        
         
         this.search_tree.find('.ui-fancytree').css('padding',0);
+/*        
+        var context_opts = this._getAddContextMenu(groupID);
+        this.search_tree.addClass('hasmenu2');
+        this.search_tree.contextmenu(context_opts);
         
+        this._on(this.search_tree,{click: function(event){ 
+                this.search_tree.contextmenu("open", $(event.target) ); 
+                window.hWin.HEURIST4.util.stopEvent(event); 
+                return false;
+        }});
+*/        
     },
 
     //
@@ -888,6 +904,16 @@ $.widget( "heurist.svs_list", {
         var context_opts = {
             delegate: ".hasmenu2",
             menu: arr_menu,
+            open: function(){
+                if($.isFunction(that.options.menu_locked)){
+                    that.options.menu_locked.call( this, true );
+                }
+            },
+            close: function(){
+                if($.isFunction(that.options.menu_locked)){
+                    that.options.menu_locked.call( this, false );
+                }
+            },
             select: function(event, ui) {
 
                 that._avoidConflictForGroup(groupID, function(){
@@ -1484,14 +1510,11 @@ $.widget( "heurist.svs_list", {
                     */
                 ],
                 open: function(){
-console.log('comtext opened');                    
                     if($.isFunction(that.options.menu_locked)){
-console.log('YES');                                            
                         that.options.menu_locked.call( this, true );
                     }
                 },
                 close: function(){
-console.log('comtext CLOSED');                    
                     if($.isFunction(that.options.menu_locked)){
                         that.options.menu_locked.call( this, false );
                     }
@@ -1985,7 +2008,7 @@ console.log('comtext CLOSED');
                     that._saveTreeData( groupID );
                 }
 
-            
+                that._saveTreeData( groupID );
             
             }
         };
@@ -2001,7 +2024,8 @@ console.log('comtext CLOSED');
                 this.edit_dialog = new hSvsEdit();
             }
             //this.edit_dialog.callback_method  = callback;
-            this.edit_dialog.showSavedFilterEditDialog( mode, groupID, svsID, squery, is_short, callback );
+            this.edit_dialog.showSavedFilterEditDialog( mode, groupID, svsID, squery, is_short, 
+                this.options.is_h6style?{ my: "left top", at: "right+4 top", of: this.element}:null, callback );
 
         }else{
             $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/search/svs_edit.js',
@@ -2405,7 +2429,7 @@ console.log(err)
 
         return res;
 
-    },
+    }
         
 
 });

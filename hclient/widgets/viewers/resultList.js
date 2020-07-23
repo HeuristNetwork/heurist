@@ -615,7 +615,13 @@ $.widget( "heurist.resultList", {
                     var  app = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('svs_list');
                     if(app && app.widget){
                         $(app.widget).svs_list('editSavedSearch', 'saved'); //call public method
-                    }
+                    }else{
+                        app = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('mainMenu6');
+                        if(app && app.widget){
+                            $(app.widget).mainMenu6('addSavedSearch', 'saved'); //call public method
+                        }
+                        
+                    } 
                 });
             } });    
             

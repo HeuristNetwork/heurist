@@ -30,7 +30,7 @@ function onPageInit(success) //callback function of hAPI initialization
         //init toolbar buttons
         $('#btn_add_level1').attr('title', 'explanatory rollover' ).button().on('click', null, addLevel );
 
-        $('#btn_save').attr('title', 'explanatory rollover' ).button().on('click', 3, saveRules);
+        $('#btn_save').addClass('ui-button-action').attr('title', 'explanatory rollover' ).button().on('click', 3, saveRules);
 
         //$('#btn_apply').button().on('click', 3, applyRules);
         

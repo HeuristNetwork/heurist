@@ -38,6 +38,9 @@ $.widget( "heurist.mainMenu6", {
     
     divMainMenu: null,  //main div
     search_faceted: null,
+    edit_svs_dialog: null,
+    
+    currentSearch: null,
 
     // the widget's constructor
     _create: function() {
@@ -97,6 +100,12 @@ $.widget( "heurist.mainMenu6", {
                         // that._collapseMainMenuPanel(e);
                     }
                 });
+                
+                that._on(that.divMainMenu.find('.menu-explore[data-action-onclick="svsAdd"]'), 
+                {click: function(e){
+                    that.addSavedSearch();
+                }});
+                
         });
 
         $(window.hWin.document).on(window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE
@@ -105,6 +114,13 @@ $.widget( "heurist.mainMenu6", {
                 //if(e.type == window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE){}
                 that._updateDefaultAddRectype();
         });
+        
+        $(window.hWin.document).on(window.hWin.HAPI4.Event.ON_REC_SEARCHSTART, function(e, data){
+            if(data && !data.increment && !data.reset){
+                that.currentSearch = window.hWin.HEURIST4.util.cloneJSON(data);
+            }
+        });
+        
         
     }, //end _create
     
@@ -134,15 +150,20 @@ $.widget( "heurist.mainMenu6", {
       }
       
     },
-
+    
     _refresh: function(){
     },
     
     _destroy: function() {
+        
         this.divMainMenu.remove();
         
-        $(this.document).off(window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE
-                +' '+window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE);
+        if(this.edit_svs_dialog) this.edit_svs_dialog.remove();
+        if(this.search_faceted) this.search_faceted.remove();
+        
+        $(window.hWin.document).off(window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE
+                +' '+window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE
+                +' '+window.hWin.HAPI4.Event.ON_REC_SEARCHSTART);
     },
 
     //
@@ -155,10 +176,13 @@ $.widget( "heurist.mainMenu6", {
         if(is_instant && this._myTimeoutId>0){
             clearTimeout(this._myTimeoutId);
         }
+        clearTimeout(this._myTimeoutId3); this._myTimeoutId3 = 0;
 
         var that = this;
         this._myTimeoutId = setTimeout(function() {
             that._myTimeoutId = 0;
+            
+            that.menues_explore_gap.hide();
             that.divMainMenu.find('.menu-text').hide();
             that.divMainMenu.stop().effect('size',  { to: { width: 91 } }, is_instant===true?10:300, function(){
                 that.divMainMenu.find('.ui-heurist-header2').css({'text-align':'center'});
@@ -273,151 +297,174 @@ $.widget( "heurist.mainMenu6", {
 
         clearTimeout(this._myTimeoutId3); this._myTimeoutId3 = 0;
         this._resetCloseTimers();
+        this.divMainMenu.find('li.menu-explore > .menu-text').css('text-decoration', 'none');
+        $(e.target).find('.menu-text').css('text-decoration','underline');
         
-        if($(e.target).attr('data-action')){
-            var action_name = $(e.target).attr('data-action');
+        if(!$(e.target).attr('data-action')){
+            var that = this;
+            this._myTimeoutId3 = setTimeout(function(){
+                    that.menues['explore'].hide();
+                    that.menues_explore_gap.hide();
+            },500);
             
-            $(e.target).find('.menu-text').css('text-decoration','underline');
-           
-            var that = this,
-                expandRecordAddSetting = false,
-                delay = 500;
-            
-            if(action_name=='recordAddSettings'){
-                action_name = 'recordAdd';
-                expandRecordAddSetting = true;
-            }
+        } else {
+            this._show_ExploreMenu(e);    
+        }
+    
+        
+    },
+        
+    //
+    //
+    //        
+    _show_ExploreMenu: function(e) {
+        
+        var action_name = $(e.target).attr('data-action');
+       
+        //AAAA this.menues['explore'].hide();
+        //this.menues['explore'].find('.explore-widgets').hide();
+        
+        var that = this,
+            expandRecordAddSetting = false,
+            delay = 500;
+        
+        if(action_name=='recordAddSettings'){
+            action_name = 'recordAdd';
+            expandRecordAddSetting = true;
+        }      
+        
+        var cont = this.menues['explore'].find('#'+action_name);
+        //console.log('_mousein_ExploreMenu '+action_name+'  '+cont.length);            
+        if(cont.length==0){
+            cont = $('<div id="'+action_name+'" class="explore-widgets">').appendTo(this.menues['explore']);
+        }
+        //cont.show();
+        //var cont = this.menues['explore'];
+        var explore_top = '2px',
+        explore_height = 'auto',
+        explore_left = 204;
 
-            this.menues['explore'].hide();
-            this.menues['explore'].find('.explore-widgets').hide();
-            var cont = this.menues['explore'].find('#'+action_name);
-//console.log('_mousein_ExploreMenu '+action_name+'  '+cont.length);            
-            if(cont.length==0){
-                cont = $('<div id="'+action_name+'" class="explore-widgets">').appendTo(this.menues['explore']);
-            }
-            cont.show();
-            //var cont = this.menues['explore'];
-            var explore_top = '2px',
-                explore_height = 'auto',
-                explore_left = 204;
-            
+        //deay before open explore section menu
+        this._myTimeoutId3 = setTimeout(function(){
+
+            that.menues['explore'].find('.explore-widgets').hide(); //hide others
+        
             if(action_name=='search_entity'){
-                
+
                 if(!cont.search_entity('instance'))
-                cont.search_entity({use_combined_select:true, 
-                                    mouseover:function(){that._resetCloseTimers()}, //NOT USED
-                                    onClose: function() { that._closeSectionMenu('explore'); that._switchContainer('explore'); }
-                                    });    
-                
-                this.menues['explore'].css({bottom:'4px',width:'200px',overflow:'auto'});
-                
-            }else if(action_name=='search_quick'){
-                
+                    cont.search_entity({use_combined_select:true, 
+                        mouseover: function(){that._resetCloseTimers()}, //NOT USED
+                        onClose: function() { that._closeSectionMenu('explore'); that._switchContainer('explore'); }
+                    });    
+
+                that.menues['explore'].css({bottom:'4px',width:'200px',overflow:'auto'});
+
+            }
+            else if(action_name=='search_quick'){
+
                 if(!cont.search_quick('instance'))
-                cont.search_quick({
+                    cont.search_quick({
                         onClose: function() { that._closeSectionMenu('explore'); that._switchContainer('explore'); },
                         mouseover: function() { that._resetCloseTimers()},
                         menu_locked: function(is_locked){ 
                             that._resetCloseTimers();
                             that._explorer_menu_locked = is_locked; 
-                        }  });    
-                
+                    }  });    
+
                 explore_top = $(e.target).position().top;
                 explore_height = 268+36;
                 explore_left = 201;
-                if(explore_top+explore_height>this.element.innerHeight()){
-                    explore_top = this.element.innerHeight() - explore_height;
+                if(explore_top+explore_height>that.element.innerHeight()){
+                    explore_top = that.element.innerHeight() - explore_height;
                 }
-                
-                
-                this.menues['explore'].css({width:'400px',overflow:'hidden'});
 
 
-            }else if(action_name=='svs_list'){
+                that.menues['explore'].css({width:'400px',overflow:'hidden'});
 
-                this.menues['explore'].css({bottom:'4px',width:'200px',overflow:'auto'});
-                
-                var group_ID = $(e.target).attr('data-id');
-                
+
+            }
+            else if(action_name=='svs_list'){
+
+                that.menues['explore'].css({bottom:'4px',width:'200px',overflow:'auto'});
+
+                var group_ID = (e)?[$(e.target).attr('data-id')]:null;
+
                 if(!cont.svs_list('instance')){
                     cont.svs_list({
-                            is_h6style: true,
-                            onClose: function(noptions) { 
-                                    that._closeSectionMenu('explore'); 
-                                    that._switchContainer('explore'); 
-                                    
-                                    if(noptions==null){
-                                        //close faceted search
-                                        that._onCloseSearchFaceted();
-                                    }else{
-                                        noptions.onclose = function(){ that._onCloseSearchFaceted(); };
-                                        noptions.is_h6style = true;
-                                        
-                                        //open faceted search
-                                        that.search_faceted.show();
-                                        that.containers['explore'].css({left:'332px'});
-                                        
-                                        if(that.search_faceted.search_faceted('instance')){ 
-                                            that.search_faceted.search_faceted('option', noptions ); //assign new parameters
-                                        }else{
-                                            //not created yet
-                                            that.search_faceted.search_faceted( noptions );
-                                        }
-                                        
-                                    } 
-                            },
-                            allowed_UGrpID:[group_ID],
-                            menu_locked: function(is_locked){ 
-                                that._resetCloseTimers();
-                                that._explorer_menu_locked = is_locked; 
-                            }                            
-                            //mouseover: function() { that._resetCloseTimers()},
-                            });  
+                        is_h6style: true,
+                        onClose: function(noptions) { 
+                            that._closeSectionMenu('explore'); 
+                            that._switchContainer('explore'); 
+
+                            if(noptions==null){
+                                //close faceted search
+                                that._onCloseSearchFaceted();
+                            }else{
+                                noptions.onclose = function(){ that._onCloseSearchFaceted(); };
+                                noptions.is_h6style = true;
+
+                                //open faceted search
+                                that.search_faceted.show();
+                                that.containers['explore'].css({left:'332px'});
+
+                                if(that.search_faceted.search_faceted('instance')){ 
+                                    that.search_faceted.search_faceted('option', noptions ); //assign new parameters
+                                }else{
+                                    //not created yet
+                                    that.search_faceted.search_faceted( noptions );
+                                }
+
+                            } 
+                        },
+                        allowed_UGrpID:group_ID,
+                        menu_locked: function(is_locked){ 
+                            that._resetCloseTimers();
+                            that._explorer_menu_locked = is_locked; 
+                        }                            
+                        //mouseover: function() { that._resetCloseTimers()},
+                    });  
                 }else{
-                    cont.svs_list('option', 'allowed_UGrpID', [group_ID]);                        
+                    cont.svs_list('option', 'allowed_UGrpID', group_ID);                        
                 }
 
-                            
-            }else if(action_name=='recordAdd'){
-                
-                this.menues['explore'].css({bottom:'4px',width:'200px',overflow:'auto'});
+
+            }
+            else if(action_name=='recordAdd'){
+
+                that.menues['explore'].css({bottom:'4px',width:'200px',overflow:'auto'});
 
                 if(!cont.recordAdd('instance')){
                     cont.recordAdd({
-                            is_h6style: true,
-                            onClose: function() { that._closeSectionMenu('explore');},
-                            isExpanded: expandRecordAddSetting,
-                            mouseover: function() { that._resetCloseTimers()},
-                            menu_locked: function(is_locked){ 
-                                that._resetCloseTimers();
-                                that._explorer_menu_locked = is_locked; 
-                            }  });  
+                        is_h6style: true,
+                        onClose: function() { that._closeSectionMenu('explore');},
+                        isExpanded: expandRecordAddSetting,
+                        mouseover: function() { that._resetCloseTimers()},
+                        menu_locked: function(is_locked){ 
+                            that._resetCloseTimers();
+                            that._explorer_menu_locked = is_locked; 
+                    }  });  
                 }else{
                     cont.recordAdd('doExpand', expandRecordAddSetting);                        
                 }
-                
+
                 if(!expandRecordAddSetting && $(e.target).attr('data-id')>0){
-                        delay = 2000;
+                    delay = 2000;
                 }
-                
+
             }
+            
             that.menues['explore'].css({left:explore_left, top:explore_top, height:explore_height});
+            cont.show(); //show current
             
-            this._myTimeoutId3 = setTimeout(function(){
-                that.menues['explore'].css({'z-index':103}).show(); 
-                if(explore_left>201){
-                    that.menues_explore_gap.css({top:explore_top, height:that.menues['explore'].height()}).show();
-                }else{
-                    that.menues_explore_gap.hide();
-                }
-            }, delay);
-            
-            if(action_name=='search_quick'){
-                //????? window.hWin.HEURIST4.ui.initHSelect(this.menues['explore'].find(".sa_rectype"), false); 
+            that.menues['explore'].css({'z-index':103}).show(); 
+            if(explore_left>201){
+                that.menues_explore_gap.css({top:explore_top, height:that.menues['explore'].height()}).show();
+            }else{
+                that.menues_explore_gap.hide();
             }
-            
-        }
-    },
+        }, delay);
+        
+    },    
     
     //
     //
@@ -678,11 +725,21 @@ console.log('prvent colapse');
     },
 
     //
+    // define new saved filter/search
     //
-    //
-    _showSavedSearchesForGroups: function(group_id){
+    addSavedSearch: function(){
 
-        
+        if(this.edit_svs_dialog==null){
+            this.edit_svs_dialog = new hSvsEdit();    
+        }
+
+        this.edit_svs_dialog.showSavedFilterEditDialog( 'saved', null, null, this.currentSearch , false, 
+                { my: "left top", at: "right+4 top", of:this.divMainMenu}, 
+            function(){
+                window.hWin.HAPI4.currentUser.usr_SavedSearch = null;
+                window.hWin.HAPI4.currentUser.ugr_SvsTreeData = null;
+            }    
+        );
     }
     
 });
