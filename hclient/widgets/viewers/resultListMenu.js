@@ -23,6 +23,7 @@ $.widget( "heurist.resultListMenu", {
 
     // default options
     options: {
+        is_h6style: false,
         // callbacks
         show_searchmenu:false,
         menu_class:null,
@@ -39,11 +40,13 @@ $.widget( "heurist.resultListMenu", {
         var that = this;
 
         this.element
-        .css('font-size', '1.3em')
+        .css('font-size', this.options.is_h6style?'1em':'1.3em')
         // prevent double click to select text
         .disableSelection();
         
-        this.divMainMenuItems = $('<ul>').addClass('horizontalmenu').appendTo(this.element);
+        this.divMainMenuItems = $('<ul>').addClass('horizontalmenu')
+            //.css({'dispaly':'table-row'})
+            .appendTo(this.element);
 
         if(this.options.show_searchmenu) this._initMenu('Search');
         this._initMenu('Selected');
@@ -59,13 +62,17 @@ $.widget( "heurist.resultListMenu", {
         this.divMainMenuItems.menu();
 
         this.divMainMenuItems.find('li').css({'padding':'0 3px'}); //reduce gap
-
+        
         if(this.options.menu_class!=null){
              this.element.addClass( this.options.menu_class );   
         }else{
             this.divMainMenuItems.find('.ui-menu-item > a').addClass('ui-widget-content');    
         }
 
+        //this.divMainMenuItems.children('li').children('a').css({'padding-right': '22px !important'});
+        this.divMainMenuItems.children('li').children('a').children('.ui-icon').css({right: '2px', left:'unset'});
+        //this.divMainMenuItems.children('li>a>.ui-icon').css({right: '2px', left:'unset'});
+        
         //-----------------------     listener of global events
         var sevents = window.hWin.HAPI4.Event.ON_CREDENTIALS+' '
                  +window.hWin.HAPI4.Event.ON_REC_SEARCHSTART+' '
@@ -210,9 +217,20 @@ console.log(menu.find('.ui-menu-item').css('padding'));
             return false;
         };
 
-        var link = $('<a>',{
-            text: window.hWin.HR(name), href:'#'
-        });//IJ 2015-06-26 .css('font-weight','bold');
+        var link = $('<a href="#"'
+                +(this.options.is_h6style?' style="padding-right:22px !important"':'')
+                +'>'+window.hWin.HR(name)+'</a>')
+        //,{});
+        
+        if(this.options.is_h6style){
+            //link.css({'padding-right': '22px !important'});
+            if(name=='Reorder'){
+                $('<span class="ui-icon ui-icon-bars">').appendTo(link);  //caret-1-s
+            }else{
+                $('<span class="ui-icon ui-icon-carat-d">').appendTo(link);  //caret-1-s
+            }
+        }
+        
 
         if(name=='Collected'){
             this.menu_Collected_link = link;

@@ -385,6 +385,16 @@ span.fancytree-node:hover{
 }
 .ui-heurist-explore-fade{background:<?php uout('explore_fade_bg', '#DAD0E4');?> !important;}
 .ui-heurist-explore .ui-heurist-title{color:<?php uout('explore_title_color', '#7B4C98');?>} /* '#7B4C98 */
+.ui-heurist-explore .ui-widget-content{background:<?php uout('explore_title_color', '#DAD0E4');?>}
+.ui-heurist-explore .ui-heurist-btn-header1{    
+    background:none !important;
+    border:1px solid <?php uout('explore_bg', '#7B4C98')?> !important;
+    color:<?php uout('explore_bg', '#7B4C98')?> !important;
+}
+.ui-heurist-explore .ui-button-icon-only{
+    background:none !important;
+    color:<?php uout('explore_bg', '#7B4C98')?> !important;
+}
 
 .ui-heurist-explore .ui-state-active, 
 .ui-heurist-explore .fancytree-active,

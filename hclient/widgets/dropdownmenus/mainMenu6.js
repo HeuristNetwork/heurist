@@ -327,11 +327,16 @@ $.widget( "heurist.mainMenu6", {
         var that = this,
             expandRecordAddSetting = false,
             delay = 500;
-        
-        if(action_name=='recordAddSettings'){
+            
+        if(action_name == 'recordAdd'){
+            if($(e.target).attr('data-id')>0){
+                delay = 2000;
+            }
+        }else if(action_name=='recordAddSettings'){
             action_name = 'recordAdd';
             expandRecordAddSetting = true;
         }      
+
         
         var cont = this.menues['explore'].find('#'+action_name);
         //console.log('_mousein_ExploreMenu '+action_name+'  '+cont.length);            
@@ -445,10 +450,6 @@ $.widget( "heurist.mainMenu6", {
                     }  });  
                 }else{
                     cont.recordAdd('doExpand', expandRecordAddSetting);                        
-                }
-
-                if(!expandRecordAddSetting && $(e.target).attr('data-id')>0){
-                    delay = 2000;
                 }
 
             }
@@ -594,7 +595,7 @@ console.log('prvent colapse');
                 .css({left:'96px'})
                 .show();
 
-            window.hWin.HAPI4.LayoutMgr.appInitAll('SearchAnalyze2', this.containers[section] );
+            window.hWin.HAPI4.LayoutMgr.appInitAll('SearchAnalyze3', this.containers[section] );
         }else{
             var that = this;
             this.menues[section].load(

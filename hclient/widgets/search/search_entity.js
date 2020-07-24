@@ -529,6 +529,7 @@ $.widget( "heurist.search_entity", {
             var request = {};
             request.q = '{"t":"'+rty_ID+'"}';
             request.w  = 'a';
+            request.qname = window.hWin.HEURIST4.rectypes.pluralNames[rty_ID];
             request.detail = 'ids';
             request.source = this.element.attr('id');
             request.search_realm = this.options.search_realm;

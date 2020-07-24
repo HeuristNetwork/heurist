@@ -203,6 +203,38 @@ var cfg_layouts = [
         }
     },
 
+
+    {id:'SearchAnalyze3', name:'Search Analyze Publish2', theme:'heurist', type:'cardinal',
+        center:{Xminsize:300, dropable:false, apps:[{appid:'heurist_resultList', hasheader:false,
+                     dockable:false, dragable:false, css:{'background-color':'white','font-size':'0.9em'}, //AO 2020-01-30 ,'font-size':'12px'
+                     options:{empty_remark:null, show_menu:true, support_collection:true,  is_h6style:true,
+                     show_savefilter:true, show_inner_header:true, XXheader_class:'ui-heurist-header2',show_url_as_link:true} }]},
+        east:{size:'50%', Xminsize:300, dropable:false,
+            tabs:[{dockable:true, dragable:false, resizable:false, adjust_positions:true, //css:{'font-size':'0.95em'},
+                apps:[
+                    {appid:'heurist_resultListExt', name: 'Record View', 
+                                options:{url: 'viewers/record/renderRecordData.php?recID=[recID]&db=[dbname]', 
+                                is_single_selection:true, 'data-logaction':'open_Record'}
+                    },    // H3 record viewer
+                    {appid:'heurist_resultListDataTable', name: 'List View', options:{ dataTableParams:{}, show_export_buttons:true } },
+                    {appid:'heurist_Map', options:{'data-logaction':'open_MapTime'}}, // map viewer (map.php) inside widget (app_timemap.js)
+                    {appid:'heurist_Map2', options:{'data-logaction':'open_MapTime', leaflet:true
+                        , layout_params:{legend:'search,-basemaps,-mapdocs,250,off'} }}, 
+                    
+                    {appid:'heurist_resultListExt', name: 'Custom Reports', options:{title:'Custom Reports', 
+                                    url: 'viewers/smarty/showReps.html?db=[dbname]', 'data-logaction':'open_Reports'}
+                    },
+                    {appid:'heurist_Graph',   options:{title:'Network Diagram',
+                                     url: 'hclient/framecontent/visualize/springDiagram.php?db=[dbname]',
+                                     'data-logaction':'open_Network'}},
+ 
+                    {appid:'heurist_resultListExt', name: 'Crosstabs', options:{title:'Crosstabs', 
+                                url: 'viewers/crosstab/crosstabs.php?db=[dbname]','data-logaction':'open_Crosstabs'}}
+                    
+            ]}]
+        }
+    },
+
     
     // Position of widgets are specified in CSS, all widgets can be dragged around and repositioned
     /* This layout needs to be defiend spcifically to be useful

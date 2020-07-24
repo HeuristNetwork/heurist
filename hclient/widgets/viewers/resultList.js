@@ -24,6 +24,7 @@ $.widget( "heurist.resultList", {
 
     // default options
     options: {
+        is_h6style: false,
         view_mode: null, // list|icons|thumbs|preview(thumbs3)|horizontal
 
         select_mode:null,//none, manager, select_single, select_multi
@@ -399,14 +400,20 @@ $.widget( "heurist.resultList", {
 
         //------------------------------------------       
 
-        //if(this.options.innerHeader || this.options.select_mode=='select_multi'){  .addClass('ui-widget-content')
-        this.div_header =  $( "<div>" ).css('height','41px').appendTo( this.element );
-
-        $('<div class="result-list-header">')
-        .css({'padding':'0.7em 0 0 20px', 'font-size': '1.17em'})   //padding left to align to search input field
-        .appendTo(this.div_header);
+        this.div_header =  $( "<div>" ).css('height','auto').appendTo( this.element ); //41px
         
-        this.setHeaderText(window.hWin.HR('Filtered Result'));
+        if(this.options.is_h6style){
+
+            $('<div class="result-list-header ui-heurist-header" style="font-size:1em;text-align:left;position:relative"/>')
+                .appendTo( this.div_header );
+        }else{
+        
+            //padding left to align to search input field
+            $('<div class="result-list-header">')
+                .css({'padding':'0.7em 0 0 20px', 'font-size': '1.17em'})   
+                .appendTo(this.div_header);
+        }
+        
         
         //add label to display number of selected, button and selected onlu checkbox
         if(this.options.select_mode=='select_multi'){
@@ -438,7 +445,7 @@ $.widget( "heurist.resultList", {
 
         this.div_toolbar = $( "<div>" )
         .addClass('div-result-list-toolbar ent_header')
-        .css({'width':'100%','top':'4px'})
+        .css({'width':'100%','top':'0px'})
         .appendTo( this.element );
 
         this.div_content = $( "<div>" )
@@ -455,7 +462,7 @@ $.widget( "heurist.resultList", {
             this.element.parent().css({'background':'none','border':'none'});
             this.element.parent().parent().css({'background':'none','border':'none'});
 
-            this.div_toolbar.addClass('ui-heurist-bg-light');
+            //this.div_toolbar.addClass('ui-heurist-bg-light');
             this.div_content.addClass('ui-heurist-bg-light');
         }
 
@@ -465,10 +472,11 @@ $.widget( "heurist.resultList", {
             'z-index':'99999999', 'background':'url('+window.hWin.HAPI4.baseURL+'hclient/assets/loading-animation-white.gif) no-repeat center center' })
         .appendTo( this.element ).hide();
 
-        this.action_buttons_div = $( "<span>" ).hide().appendTo( this.div_toolbar );
-
         if(window.hWin.HEURIST4.util.isArrayNotEmpty(this.options.action_buttons)){
 
+            this.action_buttons_div.css({'display':'inline-block', 'padding':'0 0 4px 1em'})
+                .hide().appendTo( this.div_toolbar );    
+            
             var idx = 0;
             for(idx in this.options.action_buttons){
 
@@ -490,7 +498,6 @@ $.widget( "heurist.resultList", {
                 });
             }
 
-            this.action_buttons_div.css({'display':'inline-block', 'padding':'0 0 4px 1em'});
         }
         if(window.hWin.HEURIST4.util.isArrayNotEmpty(this.options.action_select)){
 
@@ -546,7 +553,6 @@ $.widget( "heurist.resultList", {
         this.view_mode_selector.find('button[value="thumbs"]').button({icon: "ui-icon-view-icons", showLabel:false, label:window.hWin.HR('thumbs')}).css('font-size','1em');
         this.view_mode_selector.find('button[value="thumbs3"]').button({icon: "ui-icon-stop", showLabel:false, label:window.hWin.HR('thumbs3')}).css('font-size','1em');
         this.view_mode_selector.controlgroup();
-
         
         this._on( this.view_mode_selector.find('button'), {
             click: function(event) {
@@ -571,13 +577,22 @@ $.widget( "heurist.resultList", {
 
         if(this.options.show_menu){
             if($.isFunction($('body').resultListMenu)){
-                this.div_actions = $('<div>')
-                .css({display:'inline-block','padding-bottom':'4px','padding-left':'6px'})
-                //.css({'position':'absolute','top':3,'left':2})
-                .resultListMenu({
+
+                this.div_actions = $('<div>').resultListMenu({
+                        is_h6style: this.options.is_h6style,
                         menu_class: this.options.header_class,
-                        resultList: this.element})
-                .appendTo(this.div_toolbar);
+                        resultList: this.element});
+                
+                if(this.options.is_h6style){
+                    
+                    this.div_actions.css({display:'inline-block','padding':'4px','min-height':'30px'})
+                    .appendTo(this.div_header);
+                    
+                }else{
+                    this.div_actions.css({display:'inline-block','padding-bottom':'4px','padding-left':'6px'})
+                    //.css({'position':'absolute','top':3,'left':2})
+                    .appendTo(this.div_toolbar);
+                }
             }
         }else{
             
@@ -588,17 +603,19 @@ $.widget( "heurist.resultList", {
         if(this.options.show_savefilter){
             //special feature to save current filter
             //.css({position:'absolute',bottom:0,left:0,top:'2.8em'})
-            var btndiv = $('<div>').css({display:'block','vertical-align':'top',
-                padding: '5px', 'margin-top': '4px', height:'2.4em'})
-                .addClass('ui-widget-content')
+            var btndiv = $('<div>').css({display:'block',height:'2.4em','padding-left':'5px'}) //,'vertical-align':'top',padding: '5px', 'margin-top': '4px', 
+                //
                 .appendTo(this.div_toolbar);
+            if(!this.options.is_h6style){
+                btndiv.addClass('ui-widget-content')
+            }
                 
             this.btn_search_save = $( "<button>", {
                 text: window.hWin.HR('Save Filter'),
                 title: window.hWin.HR('Save the current filter and rules as a link in the navigation tree')
             })
             .css({'min-width': '80px','font-size':'0.8em', 'height': '21px', background: 'none'})
-            .addClass('ui-state-focus svs-header')
+            .addClass(this.options.is_h6style?'ui-heurist-btn-header1':'ui-state-focus svs-header')
             .appendTo( btndiv )
             .button({icons: {
                 primary: 'ui-icon-arrowthick-1-w'
@@ -649,10 +666,12 @@ $.widget( "heurist.resultList", {
             this.view_mode_selector.find('button').addClass(this.options.header_class).css({'border':'none'});
             this.span_pagination.find('button').addClass(this.options.header_class).css({'border':'none'});
         }
+
         
         this._showHideOnWidth();
 
         //-----------------------
+        this.setHeaderText(window.hWin.HR('Filtered Result'));
 
     },
     
@@ -716,7 +735,25 @@ $.widget( "heurist.resultList", {
 
     //adjust top,height according to visibility settings -----------
     _adjustHeadersPos: function(){
-        
+
+        var top = 0;    
+        if(this.options.show_inner_header){
+            this.div_header.show();
+            top = this.div_header.height();
+        }else{
+            this.div_header.hide();
+        }
+//console.log('1. '+top)
+        if(this.options.show_toolbar){
+            this.div_toolbar.css({'top':top+'px', height:'auto'});
+            this.div_toolbar.show();
+            top = top + this.div_toolbar.height();
+        }else{
+            this.div_toolbar.hide();
+        }
+//console.log('2. '+top)
+
+/*        
         var top = 4;
         if(this.options.show_inner_header){
             this.div_header.show();
@@ -731,7 +768,7 @@ $.widget( "heurist.resultList", {
         }else{
             this.div_toolbar.hide();
         }
-
+*/
         var has_content_header = this.div_content_header && this.div_content_header.is(':visible');
         //!window.hWin.HEURIST4.util.isempty(this.div_content_header.html());
         
@@ -920,12 +957,15 @@ $.widget( "heurist.resultList", {
         //this.element.find('input[type=radio][value="'+newmode+'"]').prop('checked', true);
 
         if(this.view_mode_selector){
-            this.view_mode_selector.find('button').removeClass('ui-heurist-btn-header1').css({'border':'none'});
+            
+            this.view_mode_selector.find('button')
+                //.removeClass(this.options.is_h6style?'':'ui-heurist-btn-header1')
+                .removeClass('ui-heurist-btn-header1')
+                .css({'border':'none'});
             var btn =   this.view_mode_selector.find('button[value="'+newmode+'"]');
             
             if(this.options.header_class==null) btn.addClass('ui-heurist-btn-header1')                
-            btn.css({'border':'solid 1px'});
-            //this.view_mode_selector.controlgroup('refresh');
+            btn.css({'border':'1px solid'});
         }
         
         $('.password-reminder-popup').dialog('close');
@@ -2349,9 +2389,19 @@ $.widget( "heurist.resultList", {
                 
                 if(this.options.header_class){
                     this.span_pagination.find('button').addClass(this.options.header_class).css({'border':'none'});
+                }else if(this.options.is_h6style){
+                    this.span_pagination.find('button').removeClass('ui-heurist-btn-header1')
+                        .css({'background':'none'});//.css({'border':'none !important'});
                 }
-                if(!ismenu)
-                    span_pages.find('#page'+currentPage).css({'border':'1px solid white'});
+                
+                if(!ismenu){
+                    if(this.options.is_h6style){
+                        span_pages.find('#page'+currentPage).addClass('ui-heurist-btn-header1')
+                    }else{
+                        span_pages.find('#page'+currentPage).css({'border':'1px solid white'});
+                    }
+                }
+                    
 
             }
         }
@@ -2796,18 +2846,28 @@ $.widget( "heurist.resultList", {
     },
     
     setHeaderText: function(newtext, headercss){
-        var stext = '<h3 style="margin:0">'+(this.options.title ?this.options.title :newtext)+'</h3>';
-        if(this.options.title && newtext) stext = stext +  '<h4 style="margin:0;font-size:0.9em">'+newtext+'</h4>';
+        
+        var stext
+        if(this.options.is_h6style){
+            stext = window.hWin.HEURIST4.util.isempty(newtext) ?this.options.title:newtext;
+            if(window.hWin.HEURIST4.util.isempty(stext)) stext = window.hWin.HR('Filtered Result');
+        }else{
+            stext = '<h3 style="margin:0">'+(this.options.title ?this.options.title :newtext)+'</h3>';
+            if(this.options.title && newtext) stext = stext +  '<h4 style="margin:0;font-size:0.9em">'+newtext+'</h4>';
+        }
     
         this.div_header.find('div.result-list-header').html( stext );
         if(headercss){
             this.div_header.css(headercss);    
-            this._adjustHeadersPos();
         }
+        this._adjustHeadersPos();
         
         this.refreshSubsetSign();    
     },
     
+    //
+    //
+    //
     refreshSubsetSign: function(){
         if(this.div_header){
             var container = this.div_header.find('div.result-list-header');
