@@ -189,7 +189,19 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
             function onPageInit(success){
                 if(success){
                 
-                    //FORCE LOGIN    
+                    //FORCE LOGIN  
+                    if(!window.hWin.HEURIST4.ui.checkAndLogin(true, function(){ onPageInit(true); }))
+                    {
+                        /*
+                        $(document).on(window.hWin.HAPI4.Event.ON_CREDENTIALS, function(){
+                                console.log('logged in');
+                                onPageInit(true);
+                        });
+                        */
+                        return;
+                    }
+                        
+/*                      
                     if(!window.hWin.HAPI4.has_access()){
                         
                         $(document).on(window.hWin.HAPI4.Event.ON_CREDENTIALS, function(){
@@ -197,15 +209,15 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
                                 onPageInit(true);
                         });
                         
-                        if(typeof doLogin !== "undefined" && $.isFunction(doLogin)){  // already loaded 
-                            doLogin(true);
+                        if(typeof showLoginDialog !== "undefined" && $.isFunction(showLoginDialog)){  // already loaded 
+                            showLoginDialog(true);
                         }else{
                             //var that = this;
                             $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/profile/profile_login.js', function(){onPageInit(true);} );
                         }                                
                         return;
                     }
-                    
+*/                    
                     $container = $('<div>').appendTo($("body"));
                     
                     var isPopup = (window.hWin.HEURIST4.util.getUrlParameter('popup', window.location.search)==1);

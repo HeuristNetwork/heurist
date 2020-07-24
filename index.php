@@ -392,7 +392,7 @@ _time_debug = new Date().getTime() / 1000;
                     }, 3000);
                 }
                 else if(!(lt=='DigitalHarlem' || lt=='DigitalHarlem1935' || lt=='WebSearch')){
-                    
+                    /* see mainMenu.js
                     if (!window.hWin.HEURIST4.util.getUrlParameter('cms')){
                         var init_search = window.hWin.HAPI4.get_prefs('defaultSearch');
 
@@ -408,6 +408,7 @@ _time_debug = new Date().getTime() / 1000;
                             $(document).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH, {recordset:null} );   
                         }
                     }
+                    */
                 }
                 //if database is empty show welcome screen
                 //if(!(window.hWin.HAPI4.sysinfo.db_total_records>0)){

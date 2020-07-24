@@ -18,7 +18,7 @@
 */
 
 //isforsed - if true - it is not possible to get out from login other than switch database
-function doLogin(isforsed, callback, parentwin, dialog_id){
+function showLoginDialog(isforsed, callback, parentwin, dialog_id){
 
     var is_secondary_parent = false;
     if(!parentwin){

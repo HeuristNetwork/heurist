@@ -1526,10 +1526,6 @@ prof =Profile
             _listeners.push( {obj:object, event_type:event_type, callback:callback} );
         },
         
-        is_ui_normal: function(){
-            return (window.hWin.HAPI4.get_prefs('layout_style')=='normal');
-        },
-
 
         user_id: function(){
                 return that.currentUser['ugr_ID'];  

@@ -643,8 +643,8 @@ console.log('Cardinal layout widget does not have proper options');
                         return;                        
                     }
                     var layout_opts = lpane.apps[0].options.tabs;
-console.log('>>>>>');                                        
-console.log(layout_opts);                    
+//console.log('>>>>>');                                        
+//console.log(layout_opts);                    
                     var $cardinal_container = $('#'+lpane.apps[0].options.container);
                   
                     // container:'', tabs:{north:{id:"xxx"},center:{id:"xxx",size:300, minsize:150}...}

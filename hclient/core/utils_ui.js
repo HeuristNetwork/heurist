@@ -1838,16 +1838,16 @@ window.hWin.HEURIST4.ui = {
     //
     //
     //
-    checkAndLogin: function(callback){
+    checkAndLogin: function(isforsed, callback){
 
         if(!window.hWin.HAPI4.has_access()){
             // {status:window.hWin.ResponseStatus.REQUEST_DENIED} 
-            if(typeof doLogin !== "undefined" && $.isFunction(doLogin)){  // already loaded in index.php
+            if(typeof showLoginDialog !== "undefined" && $.isFunction(showLoginDialog)){  // already loaded in index.php
                 //window.hWin.HEURIST4.msg.showMsgErr(top.HR('Session expired2'));
-                doLogin(false, callback);
+                showLoginDialog(isforsed, callback);
             }else{
                 $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/profile/profile_login.js', function(){
-                    window.hWin.HEURIST4.ui.checkAndLogin(callback);
+                    window.hWin.HEURIST4.ui.checkAndLogin(isforsed, callback);
                 }); 
             }
             return false;
@@ -1871,7 +1871,7 @@ window.hWin.HEURIST4.ui = {
                         {width: (window.hWin?window.hWin.innerWidth:window.innerWidth)*0.95,
                         height: (window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95 });
         */
-        if(!window.hWin.HEURIST4.ui.checkAndLogin(function(is_logged){
+        if(!window.hWin.HEURIST4.ui.checkAndLogin(false, function(is_logged){
                     if(is_logged!==false){
                         window.hWin.HEURIST4.ui.openRecordEdit(rec_ID, query_or_recordset, popup_options);
                     }

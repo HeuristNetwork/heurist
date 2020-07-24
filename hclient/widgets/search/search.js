@@ -29,8 +29,7 @@ $.widget( "heurist.search", {
         search_domain: 'a', //current search domain all|bookmark|recently added|recently selected  or a|b|r|s
         search_domain_set: null, // comma separated list of allowed domains  a,b,c,r,s
 
-        isloginforced:true,
-
+        btn_visible_login:false, 
         btn_visible_newrecord: true, // show add record button
         btn_visible_save: false,     // save search popup button
         btn_entity_filter: true,     // show buttons: filter by entity
@@ -84,7 +83,7 @@ $.widget( "heurist.search", {
         sz_search_padding = '0';
 
 
-        var div_left_visible = (!this.options.isloginforced || this.options.btn_visible_dbstructure);
+        var div_left_visible = (this.options.btn_visible_login || this.options.btn_visible_dbstructure);
 
         if(false) //div_left_visible)
         {
@@ -94,7 +93,7 @@ $.widget( "heurist.search", {
             .css({'height':'2em','width':0, 'padding':'1.8em','float':'left'})
             .appendTo( this.element );
 
-            if(!this.options.isloginforced){
+            if(this.options.btn_visible_login){
                 // Login button if not already logged in
                 this.btn_login = $( "<button>" ) // login button
                 .css('width',(window.hWin.HAPI4.sysinfo.registration_allowed==1)?'80px':'160px')
@@ -709,10 +708,6 @@ $.widget( "heurist.search", {
             //$(this.element).find('.logged-in-only').css('visibility','hidden');
             //$(this.element).find('.logged-out-only').css('visibility','visible');
             $(this.element).find('.logged-out-only').show();
-
-            if(this.options.isloginforced){
-                this._doLogin();
-            }
         }
 
 //ART        $(this.element).find('.div-table-cell').height( $(this.element).height() );
@@ -1562,75 +1557,5 @@ $.widget( "heurist.search", {
     }
 
 
-    , _doLogin: function(){
-
-        if(typeof doLogin !== "undefined" && $.isFunction(doLogin)){  // already loaded in index.php
-            doLogin(false, function(is_logged){
-                
-                if(is_logged){
-                    
-                    //@todo move to some widget in ON_CREDENTIALS listener
-                    var lt = window.hWin.HAPI4.sysinfo['layout']; 
-                    if(!(lt=='DigitalHarlem' || lt=='DigitalHarlem1935' || lt=='WebSearch')){
-                    
-                        var init_search = window.hWin.HAPI4.get_prefs('defaultSearch');
-                        if(!window.hWin.HEURIST4.util.isempty(init_search)){
-                            var request = {q: init_search, w: 'a', f: 'map', source:'init' };
-                            setTimeout(function(){
-                                window.hWin.HAPI4.SearchMgr.doSearch(window.hWin.document, request);//initial search
-                            }, 3000);
-                        }
-                        if(window.hWin.HAPI4.sysinfo.db_has_active_dashboard>0) {
-                           //show dashboard
-                           var prefs = window.hWin.HAPI4.get_prefs_def('prefs_sysDashboard', {showonstartup:1});
-                           if(prefs.showonstartup==1)
-                                    window.hWin.HEURIST4.ui.showEntityDialog('sysDashboard');
-                        }
-                        
-                    }
-                    
-                }else{
-                    window.hWin.location  = window.HAPI4.baseURL;
-                }
-                
-            });
-        }else{
-            //var that = this;
-            $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/profile/profile_login.js', this._doLogin );
-        }
-
-
-    }
-
-    , _doRegister: function(){
-
-        if(false && !$.isFunction(doLogin)){  // already loaded in index.php
-            //var that = this;
-            $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/profile/profile_login.js', this._doRegister );
-        }else{
-            doRegister();
-        }
-
-        /*
-        if($.isFunction($('body').profile_edit)){
-
-        if(!this.div_profile_edit || this.div_profile_edit.is(':empty') ){
-        this.div_profile_edit = $('<div>').appendTo( this.element );
-        }
-        this.div_profile_edit.profile_edit({'ugr_ID': window.hWin.HAPI4.currentUser.ugr_ID});
-
-        }else{
-        var that = this;
-        $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/profile/profile_edit.js', function() {
-        if($.isFunction($('body').profile_edit)){
-        that._doRegister();
-        }else{
-        window.hWin.HEURIST4.msg.showMsgErr('Widget profile edit not loaded!');
-        }
-        });
-        }
-        */
-
-    }
 
 });

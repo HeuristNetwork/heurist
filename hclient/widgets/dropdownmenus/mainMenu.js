@@ -28,7 +28,8 @@ $.widget( "heurist.mainMenu", {
 
     // default options
     options: {
-        host_logo:null
+        host_logo:null,
+        login_inforced: true
     },
     
     menues:{},
@@ -37,6 +38,8 @@ $.widget( "heurist.mainMenu", {
     sMsgCmsPrivate:'',
 
     _current_query_string:'',
+    
+    _initial_search_already_executed: false,
 
     // the widget's constructor
     _create: function() {
@@ -92,22 +95,21 @@ $.widget( "heurist.mainMenu", {
 
         //dashboard button                
         this.btn_dashboard = $('<div>').button({label:'Open dashboard'})
-            .css({'float':'right', margin:'1.1em', 'font-size':'0.9em'})
-            .addClass('ui-heurist-header2')
-            .appendTo( this.element )
-            .click(
-                function(){
-                    that.btn_dashboard.hide();
-                    
-                   var params = {viewmode: 'thumbs', showonstartup: 1 };
-                    window.hWin.HAPI4.save_pref('prefs_sysDashboard', params);     
-                    
-                    
-                    window.hWin.HEURIST4.ui.showEntityDialog('sysDashboard',
-                        {onClose:function(){
-                            $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE);
-                        }  });}
-            ); 
+        .css({'float':'right', margin:'1.1em', 'font-size':'0.9em'})
+        .addClass('ui-heurist-header2')
+        .appendTo( this.element )
+        .click(
+            function(){
+                that.btn_dashboard.hide();
+
+                var params = {viewmode: 'thumbs', showonstartup: 1 };
+                window.hWin.HAPI4.save_pref('prefs_sysDashboard', params);     
+
+                window.hWin.HEURIST4.ui.showEntityDialog('sysDashboard',
+                    {onClose:function(){
+                        $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE);
+                }  });}
+        ); 
 
         
         this.div_dbname = $( "<div>")
@@ -431,22 +433,21 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         
         $(this.element).find('.usrFullName').text(window.hWin.HAPI4.currentUser.ugr_FullName);
         
-        //need to update position of carat icon according width of user name
-        /*var ele = $('#carat1');
-        if(ele.length>0){
-            ele.css({'left': (ele.parent().width())+'px'});// (link.width()-16+'px !important')});
-        }
-        */
-        
-        
-        var cms_record_id = window.hWin.HEURIST4.util.getUrlParameter('cms', window.hWin.location.search);
+        /* var cms_record_id = window.hWin.HEURIST4.util.getUrlParameter('cms', window.hWin.location.search);
         if(cms_record_id>0){
             window.hWin.HEURIST4.ui.showEditCMSDialog( cms_record_id );    
-        }else
+        }else*/
+        
         if(window.hWin.HAPI4.sysinfo.db_has_active_dashboard>0){
             this.btn_dashboard.show();  
         }else{
             this.btn_dashboard.hide();  
+        }
+        
+        if(this.options.login_inforced && !window.hWin.HAPI4.has_access()){
+            this.doLogin();
+        }else {
+            this._performInitialSearch();
         }
     },
 
@@ -574,7 +575,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                 }
             });
             
-            that._refresh();
+//            that._refresh();
             
          
         })
@@ -1400,27 +1401,8 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         window.hWin.HEURIST4.ui.showEntityDialog('sysDatabases', options);
     
     
-    }    
-
-    // the same in profile.js
-    // TODO: use an include instead of repeating logout function in this file and profile.js
-    , logout: function(){
-
-        var that = this;
-
-        window.hWin.HAPI4.SystemMgr.logout(
-            function(response){
-                if(response.status == window.hWin.ResponseStatus.OK){
-                    window.hWin.HAPI4.setCurrentUser(null);
-                    $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_CREDENTIALS);
-                    that._refresh();
-                }else{
-                    window.hWin.HEURIST4.msg.showMsgErr(response);
-                }
-            }
-        );
-
     },
+
     
     //
     // show popup with list of web home records - on select either view or edit
@@ -1539,7 +1521,104 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                                                     
         window.open(url, '_blank');
         
-    }           
+    },
+    
+    //------------------------ LOGIN / LOGOUT --------------------
+
+    //
+    //
+    //
+    logout: function(){
+
+        var that = this;
+
+        window.hWin.HAPI4.SystemMgr.logout(
+            function(response){
+                if(response.status == window.hWin.ResponseStatus.OK){
+                    that._initial_search_already_executed = false;
+                    window.hWin.HAPI4.setCurrentUser(null);
+                    $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_CREDENTIALS);
+                    //that._refresh();
+                }else{
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                }
+            }
+        );
+
+    },
+    
+    //
+    //
+    //
+    doLogin: function(){
+        
+        var isforced = this.options.login_inforced;
+        var that = this;
+        window.hWin.HEURIST4.ui.checkAndLogin( isforced, function(is_logged)
+            { 
+                if(is_logged) {
+                    that._performInitialSearch();
+                } else if(that.options.login_inforced){
+                    window.hWin.location  = window.HAPI4.baseURL
+                }
+                    
+            }); 
+
+    },
+    
+    //
+    //
+    //
+    _performInitialSearch: function(){
+        
+        if(this._initial_search_already_executed) return;
+        
+        this._initial_search_already_executed = true;
+        
+        var lt = window.hWin.HAPI4.sysinfo['layout']; 
+        //if(window.hWin.HEURIST4.util.getUrlParameter('cms')){
+            
+        var cms_record_id = window.hWin.HEURIST4.util.getUrlParameter('cms', window.hWin.location.search);
+        if(cms_record_id>0){
+            
+            window.hWin.HEURIST4.ui.showEditCMSDialog( cms_record_id );    
+            
+        }else if(!(lt=='DigitalHarlem' || lt=='DigitalHarlem1935' || lt=='WebSearch')){
+        
+            var init_search = window.hWin.HAPI4.get_prefs('defaultSearch');
+            if(!window.hWin.HEURIST4.util.isempty(init_search)){
+                var request = {q: init_search, w: 'a', f: 'map', source:'init' };
+                setTimeout(function(){
+                    window.hWin.HAPI4.SearchMgr.doSearch(window.hWin.document, request);//initial search
+                }, 3000);
+            }else{
+                //trigger search finish to init some widgets
+                window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH, {recordset:null});
+            }
+            
+            if(window.hWin.HAPI4.sysinfo.db_has_active_dashboard>0) {
+               //show dashboard
+               var prefs = window.hWin.HAPI4.get_prefs_def('prefs_sysDashboard', {showonstartup:1});
+               if(prefs.showonstartup==1)
+                        window.hWin.HEURIST4.ui.showEntityDialog('sysDashboard');
+            }
+            
+        }
+    },
+
+    //
+    //
+    //
+    _doRegister: function(){
+
+        if(false && !$.isFunction(doRegister)){  // already loaded in index.php
+            //var that = this;
+            $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/profile/profile_login.js', this._doRegister );
+        }else{
+            doRegister();
+        }
+    }
+    
             
 
 });
