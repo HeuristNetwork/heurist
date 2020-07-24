@@ -72,7 +72,7 @@ $.widget( "heurist.navigation", {
             };
 
             this.element.fancytree(fancytree_options).addClass('tree-cms');
-
+            
         }else{
 
             this.divMainMenu = $("<div>").appendTo(this.element);
@@ -187,7 +187,7 @@ $.widget( "heurist.navigation", {
                         $res['page_id'] = page_id;
                         $res['page_showtitle'] = showTitle?1:0;
                         $res['page_target'] = (that.options.target=='popup')?'popup':pageTarget;
-                        $res['expanded'] = true;
+                        $res['expanded'] = false;
 
                         resitems.push($res);
 
@@ -263,6 +263,8 @@ $.widget( "heurist.navigation", {
             
             var tree = this.element.fancytree('getTree');
             tree.reload( menu_content );
+            //tree.expandAll(false);
+
             this.element.find('.ui-fancytree').show();
             
         }else{
@@ -311,6 +313,8 @@ $.widget( "heurist.navigation", {
                 return false;
             };
 
+            opts['icons'] = {submenu: "ui-icon-carat-1-e" }; //ui-icon-circle-triangle-e
+            
             //init jquery menu widget
             this.divMainMenuItems.menu( opts );
 
@@ -338,7 +342,10 @@ $.widget( "heurist.navigation", {
             if(this.options.toplevel_css!==null){
                 this.divMainMenuItems.children('li.ui-menu-item').children('a').css(this.options.toplevel_css);
             }
-
+            if(this.options.orientation=='horizontal'){
+                this.divMainMenuItems.children('li.ui-menu-item').children('a').find('span.ui-menu-icon').hide();
+            }
+                
             //
             // if onmenuselect function define it is used for action
             // otherwise it loads content to page_target (#main-content by default)
