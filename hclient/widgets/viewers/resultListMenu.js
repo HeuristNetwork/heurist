@@ -40,7 +40,7 @@ $.widget( "heurist.resultListMenu", {
         var that = this;
 
         this.element
-        .css('font-size', this.options.is_h6style?'1em':'1.3em')
+        .css('font-size', this.options.is_h6style?'1.2em':'1.3em')
         // prevent double click to select text
         .disableSelection();
         

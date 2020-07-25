@@ -2693,7 +2693,12 @@ rectypes.names[rectypeID] + ' is defined as a child of <b>'+names
             if(this._keepYPos>0){
                 this.editForm.scrollTop(this._keepYPos);
                 this._keepYPos = 0;
+            }else{
+                this.editForm.scrollTop(0);
             }
+            this.editForm.scrollLeft(0);
+                
+            
             
             //show rec_URL 
             var fi_url = rectypes.typedefs.commonNamesToIndex['rty_ShowURLOnEditForm'];

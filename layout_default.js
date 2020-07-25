@@ -207,8 +207,10 @@ var cfg_layouts = [
     {id:'SearchAnalyze3', name:'Search Analyze Publish2', theme:'heurist', type:'cardinal',
         center:{Xminsize:300, dropable:false, apps:[{appid:'heurist_resultList', hasheader:false,
                      dockable:false, dragable:false, css:{'background-color':'white','font-size':'0.9em'}, //AO 2020-01-30 ,'font-size':'12px'
-                     options:{empty_remark:null, show_menu:true, support_collection:true,  is_h6style:true,
-                     show_savefilter:true, show_inner_header:true, XXheader_class:'ui-heurist-header2',show_url_as_link:true} }]},
+                     options:{empty_remark:null, show_menu:true, support_collection:true, is_h6style:true,
+                     recordDivEvenClass: 'ui-widget-content',
+                     show_savefilter:true, show_search_form:true, show_inner_header:true, 
+                     XXheader_class:'ui-heurist-header2',show_url_as_link:true} }]},
         east:{size:'50%', Xminsize:300, dropable:false,
             tabs:[{dockable:true, dragable:false, resizable:false, adjust_positions:true, //css:{'font-size':'0.95em'},
                 apps:[

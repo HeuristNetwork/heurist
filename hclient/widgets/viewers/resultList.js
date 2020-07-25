@@ -38,6 +38,7 @@ $.widget( "heurist.resultList", {
         eventbased:true, //if false it does not listen global events
 
         show_toolbar: true,   //toolbar contains menu,savefilter,counter,viewmode and paginathorizontalion
+        show_search_form: false,
         show_menu: false,       //@todo ? - replace to action_select and action_buttons
         support_collection: false,
         show_savefilter: false,
@@ -64,6 +65,8 @@ $.widget( "heurist.resultList", {
         rendererGroupHeader: null,   // renderer function for group header (see groupByField)
         
         recordDivClass: '', //additional class that modifies recordDiv appearance (see for example "public" in h4styles.css)
+        recordDivEvenClass:null,  //additional class for even entries recordDiv
+        
         // smarty template or url (or todo function) to draw inline record details when recordview_onselect='inline'. (LINE view mode only)
         rendererExpandDetails: null,  //name of smarty template or function to draw expanded details
 
@@ -80,8 +83,6 @@ $.widget( "heurist.resultList", {
         navigator:'auto',  //none, buttons, menu, auto
 
         entityName:'records',   //records by default
-        
-        recordDiv_class:null,  //additional class for even entries recordDiv
         
         search_realm:  null,  //accepts search/selection events from elements of the same realm only
         search_initial: null,  //NOT USED query string or svs_ID for initial search
@@ -575,6 +576,19 @@ $.widget( "heurist.resultList", {
         //.css({'float':'right','padding':'0.6em 0.5em 0 0','font-style':'italic'})
         .appendTo( this.div_toolbar );
 
+        
+        if(this.options.is_h6style && this.options.show_search_form){
+
+                this.div_search_form = $('<div>').search({
+                        is_h6style: this.options.is_h6style,
+                        btn_visible_newrecord: false,
+                        search_button_label: 'Filter',
+                        btn_entity_filter: false})
+                    .css({display:'inline-block','max-height':'50px',padding:'4px'})
+                    .appendTo(this.div_header);
+        
+        }
+        
         if(this.options.show_menu){
             if($.isFunction($('body').resultListMenu)){
 
@@ -603,11 +617,12 @@ $.widget( "heurist.resultList", {
         if(this.options.show_savefilter){
             //special feature to save current filter
             //.css({position:'absolute',bottom:0,left:0,top:'2.8em'})
-            var btndiv = $('<div>').css({display:'block',height:'2.4em','padding-left':'5px'}) //,'vertical-align':'top',padding: '5px', 'margin-top': '4px', 
-                //
+            var btndiv = $('<div>').css({display:'block',height:'2.4em','padding-left':'5px'})
                 .appendTo(this.div_toolbar);
             if(!this.options.is_h6style){
                 btndiv.addClass('ui-widget-content')
+            }else{
+                btndiv.css({'padding-left':'9px'})
             }
                 
             this.btn_search_save = $( "<button>", {
@@ -843,6 +858,7 @@ $.widget( "heurist.resultList", {
             }
         } 
         if(this.div_actions) this.div_actions.remove();
+        if(this.div_search_form) this.div_search_form.remove();
         this.div_toolbar.remove();
         this.div_content.remove();
         this.div_coverall.remove();
@@ -2604,15 +2620,6 @@ $.widget( "heurist.resultList", {
 
         $allrecs = this.div_content.find('.recordDiv');
         
-        if(this.options.recordDiv_class){
-            //$allrecs.addClass(this.options.recordDiv_class);    
-            var that = this;
-            $allrecs.each(function(idx, item){
-                if(idx % 2 ==0){
-                    $(item).addClass(that.options.recordDiv_class);    
-                }
-            });
-        }
         if(this.options.view_mode == 'horizontal'){
             var h = this.div_content.height();
                 h = (((h<60) ?60 :((h>200)?230:h))-30) + 'px';
@@ -2758,7 +2765,7 @@ $.widget( "heurist.resultList", {
         }
         
         this.setCollected( null );
-
+        
         this._trigger( "onpagerender", null, this );
         
         //@todo replace it to event listener in manageRecUploadedFiles as in manageSysGroups
@@ -2766,6 +2773,17 @@ $.widget( "heurist.resultList", {
             this.options.onPageRender.call(this);
         }
 
+        if(this.options.recordDivEvenClass){
+            //$allrecs.addClass(this.options.recordDivEvenClass);    
+            var that = this;
+            $allrecs.each(function(idx, item){
+                if(idx % 2 == 0)
+                {
+                    $(item).addClass(that.options.recordDivEvenClass);    
+                }
+            });
+        }
+        
         if(this.div_content_header){
             this._adjustHeadersPos();
         }
@@ -2913,7 +2931,7 @@ $.widget( "heurist.resultList", {
             //init result list
             this.sortResultList = $('<div>').appendTo(this.sortResultListDlg)
                 .resultList({
-                   recordDiv_class: 'recordDiv_blue',
+                   recordDivEvenClass: 'recordDiv_blue',
                    eventbased: false, 
                    multiselect: false,
                    view_mode: 'list',

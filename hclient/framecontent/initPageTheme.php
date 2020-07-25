@@ -385,7 +385,10 @@ span.fancytree-node:hover{
 }
 .ui-heurist-explore-fade{background:<?php uout('explore_fade_bg', '#DAD0E4');?> !important;}
 .ui-heurist-explore .ui-heurist-title{color:<?php uout('explore_title_color', '#7B4C98');?>} /* '#7B4C98 */
-.ui-heurist-explore .ui-widget-content{background:<?php uout('explore_title_color', '#DAD0E4');?>}
+.ui-heurist-explore .ui-widget-content,
+.ui-heurist-explore .ui-selectmenu-button{
+    background:<?php uout('explore_title_color', '#DAD0E4');?>
+}
 .ui-heurist-explore .ui-heurist-btn-header1{    
     background:none !important;
     border:1px solid <?php uout('explore_bg', '#7B4C98')?> !important;

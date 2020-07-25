@@ -498,20 +498,20 @@ div.recordDiv > .rec_action_link{
 }
 
 div .selected, div.selected:hover{
-    background: -moz-linear-gradient(center top , #E6F8FD, #BEE4F8) repeat scroll 0 0 transparent;
-    background: -webkit-gradient(linear, left top, left bottom, from(#E6F8FD), to(#BEE4F8));
+    background: -moz-linear-gradient(center top , #E6F8FD, #BEE4F8) repeat scroll 0 0 transparent !important;
+    background: -webkit-gradient(linear, left top, left bottom, from(#E6F8FD), to(#BEE4F8)) !important;
     border-color: #62A7F8;
 }
 
 div.collected, div.collected_perm, div.collected:hover, div.collected_perm:hover {
-    background: -moz-linear-gradient(center top , #e6fdeb, #bef8cd) repeat scroll 0 0 transparent;
-    background: -webkit-gradient(linear, left top, left bottom, from(#e6fdeb), to(#bef8cd));
+    background: -moz-linear-gradient(center top , #e6fdeb, #bef8cd) repeat scroll 0 0 transparent !important;
+    background: -webkit-gradient(linear, left top, left bottom, from(#e6fdeb), to(#bef8cd)) !important;
     /* > .recordTitle
     text-shadow: 0px 0px 9px #00ff00 !important;*/
 }
 div.collected.selected {
-    background: -moz-linear-gradient(center top , #c1e8e3, #80e8da) repeat scroll 0 0 transparent;
-    background: -webkit-gradient(linear, left top, left bottom, from(#c1e8e3), to(#80e8da));
+    background: -moz-linear-gradient(center top , #c1e8e3, #80e8da) repeat scroll 0 0 transparent !important;
+    background: -webkit-gradient(linear, left top, left bottom, from(#c1e8e3), to(#80e8da)) !important;
 }
 
 div.collected  span.toadd {

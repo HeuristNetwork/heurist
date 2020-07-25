@@ -50,7 +50,7 @@ $.widget( "heurist.recordArchive", $.heurist.recordAction, {
         
         this.options.resultList = $.extend(this.options.resultList, 
         {
-               recordDiv_class: 'recordDiv_blue',
+               recordDivEvenClass: 'recordDiv_blue',
                eventbased: false,  //do not listent global events
 
                multiselect: false, //(this.options.select_mode!='select_single'), 

@@ -214,7 +214,7 @@ $.widget( "heurist.importStructure", {
             view_mode: 'list',
             show_viewmode: false,
 
-            recordDiv_class: 'recordDiv_blue',
+            recordDivEvenClass: 'recordDiv_blue',
 
             pagesize: (this.options.pagesize>0) ?this.options.pagesize: 9999999999999,
             empty_remark: '<div style="padding:1em 0 1em 0">No registered databases found</div>',

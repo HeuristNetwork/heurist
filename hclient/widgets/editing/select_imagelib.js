@@ -68,7 +68,7 @@ $.widget( "heurist.select_imagelib", {
         this.recordList = this.element.find('.recordList');
         this.recordList
                     .resultList({
-                       recordDiv_class: 'recordDiv_blue',
+                       recordDivEvenClass: 'recordDiv_blue',
                        eventbased: false, //do not listent global events
                        multiselect: false,
 
