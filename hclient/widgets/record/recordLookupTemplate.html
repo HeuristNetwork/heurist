@@ -1,0 +1,36 @@
+<!--
+* recordLookupTemplate.html : used by recordLookupTemplate.js
+*
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @copyright   (C) 2005-2020 University of Sydney
+* @link        http://HeuristNetwork.org
+* @version     5
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @package     Heurist academic knowledge management system
+-->
+
+<div id="ent_header" style="height:6em; padding: 0.2em; width: 100%;">
+<fieldset style="display:inline-block">
+    <div style="padding: 0.2em; width: 100%;" class="input">
+        <div class="header" style="padding: 0 16px 0 16px;">
+            <label for="inpt_name">Keyword:</label>
+        </div>
+        <input id="inpt_name" class="text ui-widget-content ui-corner-all" style="max-width:30em" value="new rec name"/>
+        &nbsp;&nbsp;<button id="btnAddNewRecord">Add New Record</button>
+        &nbsp;&nbsp;<button id="btnAddNewRecord2">Add New Record Editor</button>
+    </div>
+
+    <div style="padding: 0.2em; width: 100%;" class="input">
+        <div class="header" style="padding: 0 16px 0 16px;">
+            <label for="select_keywords">Parisian keywords:</label>
+        </div>
+        <select id="select_keywords" class="text ui-widget-content ui-corner-all" style="max-width:20em"></select>
+    </div>
+    
+    <button id="btnLookup">Lookup External Reference</button>
+
+</fieldset>
+</div>
+<div id="div_result" class="ent_content_full" style="display: none;top:6em">
+</div>
+
