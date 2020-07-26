@@ -87,6 +87,7 @@ $.widget( "heurist.search_faceted_wiz", {
 
     // default options
     options: {
+        is_h6style: false,
         svsID: null,
         domain: null, // bookmark|all or usergroup ID
         params: {
@@ -149,7 +150,7 @@ $.widget( "heurist.search_faceted_wiz", {
         var ht = $(window).height();
         if(ht>700) ht = 700;
 
-        var is_h6style = (window.hWin.HAPI4.sysinfo['layout']=='H6Default');
+        this.options.is_h6style = (window.hWin.HAPI4.sysinfo['layout']=='H6Default');
         
         
         this.element.dialog({
@@ -159,7 +160,7 @@ $.widget( "heurist.search_faceted_wiz", {
             modal: true,
 
             resizable: true, //!is_h6style,
-            draggable: !is_h6style,
+            draggable: !this.options.is_h6style,
             position: this.options.position,
             
             title: window.hWin.HR("Define Faceted Search"),
@@ -311,9 +312,8 @@ $.widget( "heurist.search_faceted_wiz", {
     }
     
     , adjustDimension: function(){
-        var is_h6style = (window.hWin.HAPI4.sysinfo['layout']=='H6Default');
         
-        if(is_h6style){
+        if(this.options.is_h6style){
             var dialog_height = window.innerHeight - this.element.parent().position().top - 5;
             this.element.dialog( 'option', 'height', dialog_height);
         }else{
@@ -336,8 +336,7 @@ $.widget( "heurist.search_faceted_wiz", {
         this.step3.hide();
         this.navigateWizard(NaN); //init for 0 step
         
-        var is_h6style = (window.hWin.HAPI4.sysinfo['layout']=='H6Default');
-        if(is_h6style){
+        if(this.options.is_h6style){
             this.element.parent().addClass('ui-heurist-explore');
             this.adjustDimension();
         }
@@ -937,12 +936,13 @@ $.widget( "heurist.search_faceted_wiz", {
 
         var that = this;
 
-        var url = window.hWin.HAPI4.baseURL+ "hclient/framecontent/ruleBuilderDialog.php?db=" + window.hWin.HAPI4.database;
+        var url = window.hWin.HAPI4.baseURL+ "hclient/widgets/search/ruleBuilderDialog.php?db=" + window.hWin.HAPI4.database;
         if(!Hul.isnull(ele_rules)){
             url = url + '&rules=' + encodeURIComponent(ele_rules.val());
         }
 
-        window.hWin.HEURIST4.msg.showDialog(url, { width:1200, height:600, title:'Ruleset Editor', callback:
+        window.hWin.HEURIST4.msg.showDialog(url, { is_h6style:this.options.is_h6style, 
+                    closeOnEscape:true, width:1200, height:600, title:'Ruleset Editor', callback:
             function(res){
                 if(!Hul.isempty(res)) {
                     ele_rules.val( JSON.stringify(res.rules) ); //assign new rules

@@ -40,7 +40,7 @@ function onPageInit(success) //callback function of hAPI initialization
         //@todo - use common helper/competency level functionality
         $('#btn_help').button({icons: { primary: "ui-icon-help" }, text:false}).on('click', 3, showHelp);
         $( "#helper" ).dialog({
-            autoOpen: ishelp_on, width:800,
+            autoOpen: false, width:800,
             position: { my: "right bottom", at: "right top", of: $('#btn_help') },
             show: {
                 effect: "slide",

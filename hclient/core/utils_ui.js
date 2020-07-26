@@ -1627,18 +1627,18 @@ window.hWin.HEURIST4.ui = {
     //
     //  usrPrefKey - prefs_entityName - context 
     //
-    initDialogHintButtons: function($dialog, button_container_id, helpcontent_url, hideHelpButton){
+    initDialogHintButtons: function($dialog, button_container_id, helpcontent_url, hideExpLevelButton){
         
         //IJ 2018-12-04 hide it! 
-        var hasContextHelp =  false && !window.hWin.HEURIST4.util.isempty(helpcontent_url);
-        var hideHelpButton = true;
+        var hasContextHelp =  !window.hWin.HEURIST4.util.isempty(helpcontent_url);
+        hideExpLevelButton = true; //always hide
         
         var titlebar = $dialog.parent().find('.ui-dialog-titlebar');
         if(titlebar.length==0){
             titlebar = $dialog.find(button_container_id);
         } 
         
-        if(!hideHelpButton){
+        if(!hideExpLevelButton){
             var $help_menu = $('<ul><li data-user-admin-status="2"><a><span class="ui-icon"/>Beginner</a></li>'
                 +'<li data-user-admin-status="1"><a><span class="ui-icon"/>Intermediate</a></li>'
                 +'<li data-user-admin-status="0"><a><span class="ui-icon"/>Expert</a></li><ul>')
@@ -1758,8 +1758,8 @@ window.hWin.HEURIST4.ui = {
 
         var $help_button = $(help_button);
 
-        if(nobutton!==true){ //do not init button
-            $help_button.button({icons: { primary: "ui-icon-circle-b-info" }, label:'Show context help', text:false});
+        if(nobutton!==true){ //do not init button    ui-icon-circle-b-info
+            $help_button.button({icons: { primary: "ui-icon-circle-help" }, label:'Show context help', text:false});
         }
         
         $help_button.on('click', function(){
@@ -1774,12 +1774,12 @@ window.hWin.HEURIST4.ui = {
                                         show: {
                                             effect: "slide",
                                             direction : 'right',
-                                            duration: 1000
+                                            duration: 500
                                         },
                                         hide: {
                                             effect: "slide",
                                             direction : 'right',
-                                            duration: 1000
+                                            duration: 500
                                         }
                                      });                 
                         }

@@ -634,7 +634,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
     //
     // finds and executes menu entry by link id
     // 
-    menuActionById: function(menu_entry_id, target_container){
+    menuActionById: function(menu_entry_id, dialog_options){
         
         if( !window.hWin.HEURIST4.util.isempty(menu_entry_id) ){
         
@@ -642,17 +642,18 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                 var menu = this.menues[key];
                 var ele = $(menu).find('#'+menu_entry_id);
                 if(ele.length>0 && ele.is('a')){
-                    this.menuActionHandler(null, ele, target_container);            
+                    this.menuActionHandler(null, ele, dialog_options);            
                     break;
                 }
             }
             
         }
     },
+    
     //
     //
     //
-    menuActionHandler: function(event, item, target_container){
+    menuActionHandler: function(event, item, dialog_options){
         
         var that = this;
         
@@ -668,12 +669,24 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         if(!action_passworded && !window.hWin.HAPI4.has_access(2)) action_passworded = item.attr('data-pwd-nonowner');
         var href = item.attr('data-link');
         var target = item.attr('target');
-        var entity_dialog_options = {};
+        var entity_dialog_options = {},
+            popup_dialog_options = {}; 
         
-        if(target_container){
+        if(dialog_options){
+            // for entity show dialog inline in target container
             entity_dialog_options = {isdialog: false, 
                                      innerTitle: true,
-                                     container: target_container};
+                                     container: dialog_options['container']};
+                                     
+            // for popup dialog show on postion over container
+            popup_dialog_options = {
+                is_h6style: true,
+                resizable: false,
+                draggable: false,
+                container: dialog_options['container'],
+                position: dialog_options['position'],
+                maximize: true
+            }                                     
         }
         
         //  -1 no verification
@@ -689,7 +702,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
             if(action_log){
                 window.hWin.HAPI4.SystemMgr.user_log(action_log);
             }
-        
+            
         if(action == "menu-database-browse"){
 
                 var options = $.extend(entity_dialog_options, {
@@ -1004,7 +1017,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                     options['context_help'] = window.hWin.HAPI4.baseURL+'context_help/'+dlg_help+'.html #content';
                 }
                 
-                var position = { my: "center", at: "center", of: window.hWin };
+                //var position = { my: "center", at: "center", of: window.hWin };
                 var maxw = (window.hWin?window.hWin.innerWidth:window.innerWidth);
                 if(options['width']>maxw) options['width'] = maxw*0.95;
                 var maxh = (window.hWin?window.hWin.innerHeight:window.innerHeight);
@@ -1028,6 +1041,8 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                             }
                     }
                 }
+                
+                options = $.extend(popup_dialog_options, options);
                 
                 window.hWin.HEURIST4.msg.showDialog( href, options );    
             } 

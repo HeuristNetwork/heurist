@@ -497,6 +497,7 @@ div.recordDiv > .rec_action_link{
     right: 0px;
 }
 
+/* @todo to avoid !important put these classes at the very end of styles */
 div .selected, div.selected:hover{
     background: -moz-linear-gradient(center top , #E6F8FD, #BEE4F8) repeat scroll 0 0 transparent !important;
     background: -webkit-gradient(linear, left top, left bottom, from(#E6F8FD), to(#BEE4F8)) !important;
@@ -1492,11 +1493,11 @@ background: #8ea9b9
 }
 .dialog-title-button{
     position:absolute;
-    top:50%;
-    margin:-10px 0 0 0;
-    padding:1px;
-    height:18px;
-    width:18px;
+    top: 50%;
+    margin: -10px 0 0 0;
+    padding: 1px;
+    height: 20px;
+    width: 20px;
 }
 
 .semitransparent{

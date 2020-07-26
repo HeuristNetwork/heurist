@@ -213,7 +213,10 @@ $.widget( "heurist.search", {
             this.div_search.css({'float':'left'});
         }else{
             this.div_search.css({'display':'table-row'});
-            //this.div_search_input.css({'width':'100%'});
+            if(this.options.is_h6style){
+                this.div_search_input.css({'width':'80%'});  
+                this.input_search.css({'width':'100%'});  
+            }
         }
             
         
@@ -271,7 +274,7 @@ $.widget( "heurist.search", {
 
         this.btn_search_as_guest = $( "<button>")
         .appendTo( this.div_search_as_guest )
-        .css({'min-height':'30px'})
+        .css({'min-height':'30px','min-width':'80px'})
         .addClass(this.options.button_class)
         .button({label: window.hWin.HR(this.options.search_button_label), iconPosition: 'end', icon:"ui-icon-search"});
 
@@ -283,7 +286,7 @@ $.widget( "heurist.search", {
             label: window.hWin.HR(this.options.search_button_label), 
             title: "Apply the filter/search in the search field and display results in the central panel below"
         })
-        .css({'min-height':'30px'})
+        .css({'min-height':'30px','min-width':'80px'})
         .appendTo( this.div_search_as_user )
         .addClass(this.options.button_class+' ui-button-action')
         .button({showLabel:true, icon:this._is_publication?'ui-icon-search':'ui-icon-filter'});

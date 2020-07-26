@@ -485,6 +485,12 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
     showDialog: function(url, options){
 
             if(!options) options = {};
+            
+            if(options.container){
+                window.hWin.HEURIST4.msg.showDialogInDiv(url, options);
+                return;
+            }
+            
 
             if(!options.title) options.title = ''; // removed 'Information'  which is not a particualrly useful title
 
@@ -609,8 +615,10 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                         
                         if(!options["title"]){
                             $dlg.dialog( "option", "title", content.document.title );
-                        }      
-                        if(options["context_help"] && window.hWin.HEURIST4.ui){
+                        }  
+                        
+                        //init help button     
+                        if(false && options["context_help"] && window.hWin.HEURIST4.ui){
                             window.hWin.HEURIST4.ui.initDialogHintButtons($dlg, null, options["context_help"], true);
                         }
                         
@@ -672,7 +680,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                         if($.isFunction(content.onFirstInit)) {  //see mapPreview
                             content.onFirstInit();
                         }
-                        
+                        //pass parameters to frame 
                         if(options['params'] && $.isFunction(content.assignParameters)) {
                             content.assignParameters(options['params']);
                         }
@@ -702,11 +710,12 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                                 height: options.height,
                                 modal: (options['modal']!==false),
                                 resizable: (options.resizable!==false),
-                                //draggable: false,
+                                draggable: (options.draggable!==false),
                                 title: options["title"],
                                 resizeStop: function( event, ui ) {
                                     $dosframe.css('width','100%');
                                 },
+                                closeOnEscape: options.closeOnEscape,
                                 beforeClose: options.beforeClose,
                                 close: function(event, ui){
                                     var closeCallback = options['afterclose'];
@@ -721,14 +730,38 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                         $dlg.dialog(opts);
                         
                         if(options.is_h6style){
+                                $dlg.addClass('ui-heurist-bg-light');
                                 $dlg.parent().addClass('ui-heurist-explore');
+                                if(options.container){
+
+                                    $dlg.dialog( 'option', 'position', 
+                                        { my: "left top", at: "left top", of:options.container});
+                                        
+                                    function __adjustOneResize(e){
+                                            var ele = e ?$(e.target) :options.container;
+                                            
+                                            var dialog_height = ele.height(); //window.innerHeight - $dlg.parent().position().top - 5;
+                                            $dlg.dialog( 'option', 'height', dialog_height);
+                                            var dialog_width = ele.width(); //window.innerWidth - $dlg.parent().position().left - 5;
+                                            $dlg.dialog( 'option', 'width', dialog_width);
+                                    }
+                                    //$(window).resize(__adjustOneResize)
+                                    options.container.off('resize');
+                                    options.container.on('resize', __adjustOneResize);
+                                    __adjustOneResize();
+                                    
+                                }else
                                 if(options.position){
                                     $dlg.dialog( 'option', 'position', options.position );   
                                     if(options.maximize){
-                                        var dialog_height = window.innerHeight - $dlg.parent().position().top - 5;
-                                        $dlg.dialog( 'option', 'height', dialog_height);
-                                        var dialog_width = window.innerWidth - $dlg.parent().position().left - 5;
-                                        $dlg.dialog( 'option', 'width', dialog_width);
+                                        function __maximizeOneResize(){
+                                            var dialog_height = window.innerHeight - $dlg.parent().position().top - 5;
+                                            $dlg.dialog( 'option', 'height', dialog_height);
+                                            var dialog_width = window.innerWidth - $dlg.parent().position().left - 5;
+                                            $dlg.dialog( 'option', 'width', dialog_width);
+                                        }
+                                        //$(window).resize(__maximizeOneResize)
+                                        __maximizeOneResize();
                                     }
                                 }
                         }
@@ -749,6 +782,149 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                         
            }
 
+    },
+
+    //
+    //
+    //
+    showDialogInDiv: function(url, options){
+
+            if(!options) options = {};
+
+            if(!options.title) options.title = '&nbsp;';
+            
+            $container = options['container'];
+            
+            var $dosframe = $container.find('iframe');
+            var _innerTitle = $container.children('.ui-heurist-header');
+            var frame_container = $container.children('.ent_content_full');
+               
+            if($dosframe.length==0)
+            {
+                _innerTitle = $('<div>').addClass('ui-heurist-header')
+                        .appendTo($container);
+
+                frame_container = $('<div>').addClass('ent_content_full')
+                        .css({'top':'38px'})
+                        .appendTo($container);
+
+                
+                $dosframe = $( "<iframe>")
+                            .css({height:'100%', width:'100%'})
+                            .appendTo( frame_container );
+            }else{
+                if($dosframe.attr('src')==url){
+                    $container.show();
+                    return;        
+                }
+            }
+
+            if(options.title){
+                _innerTitle.text(options['title']).show();
+                frame_container.css('top','38px');
+            }else{
+                _innerTitle.text('').hide();
+                frame_container.css('top','0px');
+            }
+            
+            function __onDialogClose() {
+                
+                var canClose = true;
+                if($.isFunction(options['beforeClose'])){
+                    canClose = options['beforeClose'].call( $dosframe[0], arguments );
+                }
+                if(canClose===false){
+                    return false;
+                }else{
+                    $container.hide();
+                    if($.isFunction(options['afterClose'])){
+                        canClose = options['afterClose'].call( $dosframe[0], arguments );
+                    }
+                    return true;
+                }
+            };
+            
+            //init close button     
+            $('<button>').button({icon:'ui-icon-closethick',showLabel:false, label:'Close'}) 
+                                    //classes:'ui-corner-all ui-dialog-titlebar-close'})
+                     .css({'position':'absolute', 'right':'4px', 'top':'6px', height:24, width:24})
+                     .appendTo(_innerTitle)
+                     .on({click:function(){
+                         __onDialogClose();
+                     }});
+                     
+            //init help button     
+            if(options["context_help"] && window.hWin.HEURIST4.ui){
+                    
+                    var $info_button = $('<button>').button({icon:'ui-icon-circle-help',showLabel:false, label:'Help'})
+                            //.addClass('dialog-title-button')
+                            .css({'position':'absolute', 'right':'34px', 'top':'6px', height:24, width:24})
+                            .appendTo(_innerTitle);
+                    
+                    window.hWin.HEURIST4.ui.initHelper($info_button, null, options["context_help"]);
+                    //window.hWin.HEURIST4.ui.initDialogHintButtons(_innerTitle, null, options["context_help"], true);
+            }
+                
+
+            
+            $dosframe.hide();
+            frame_container.addClass('loading');
+            
+            //callback function to resize dialog from internal iframe functions
+            //$dosframe[0].doDialogResize = function(width, height) {};
+
+            $dosframe.off('load');
+            //on load content event listener
+            $dosframe.on('load', function(){
+                         
+                if(window.hWin.HEURIST4.util.isempty($dosframe.attr('src'))){
+                    return;
+                }
+                    
+                var content = $dosframe[0].contentWindow;
+                
+                //replace native alert 
+                try{
+                    content.alert = function(txt){
+                        $dlg_alert = window.hWin.HEURIST4.msg.showMsgDlg(txt, null, ""); // Title was an unhelpful and inelegant "Info"
+                        $dlg_alert.dialog('open');
+                        return true;
+                }
+                }catch(e){
+                    console.log(e);
+                }
+                
+                frame_container.removeClass('loading');
+                $dosframe.show();    
+                
+                //close dialog from inside of frame
+                content.close = __onDialogClose;
+                
+               
+                if($.isFunction(options['doDialogResize'])){
+                    content.doDialogResize = options['doDialogResize'];
+                } 
+                if($.isFunction(options['onContentLoad'])){
+                    options['onContentLoad'].call(this, $dosframe[0]);
+                } 
+                       
+                //pass params into iframe
+                if(options['params'] && $.isFunction(content.assignParameters)) {
+                    content.assignParameters(options['params']);
+                }
+
+            }); //onload
+
+                        
+            if(!window.hWin.HEURIST4.util.isempty(options['padding'])){
+                //by default 2em
+                $content.css('padding', options.padding);
+            } 
+                    
+            //start content loading
+            $dosframe.attr('src', url);
+                        
+            //return $dosframe;
     },
     
     //

@@ -642,7 +642,9 @@ console.log('prvent colapse');
             var li = $(e.target);
             if(!li.is('li')) li = li.parents('li');
             this._switchContainer(section, true);
-            widget.mainMenu('menuActionById', li.attr('data-action'), this.containers[section]); 
+            widget.mainMenu('menuActionById', li.attr('data-action'), 
+                {container:this.containers[section]}
+            ); 
         }});
         
     },

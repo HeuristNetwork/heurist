@@ -15,7 +15,7 @@
 */
 
 /**
-* brief description of file
+* Advanced query builder - TO BE REPLACED
 *
 * @author      Tom Murtagh
 * @author      Kim Jackson

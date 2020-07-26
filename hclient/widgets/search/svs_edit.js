@@ -201,15 +201,16 @@ function hSvsEdit(args) {
 
        var that = this;
 
-        var url = window.hWin.HAPI4.baseURL+ "hclient/framecontent/ruleBuilderDialog.php?db=" + window.hWin.HAPI4.database;
+        var url = window.hWin.HAPI4.baseURL+ "hclient/widgets/search/ruleBuilderDialog.php?db=" + window.hWin.HAPI4.database;
         if(!window.hWin.HEURIST4.util.isnull(ele_rules_full)){
             url = url + '&rules=' + encodeURIComponent(ele_rules_full.val());
         }
         
         if(!dlg_options) dlg_options = {};
+        dlg_options['closeOnEscape'] = true;
         dlg_options['width'] = 1200;
         dlg_options['height'] = 600;
-        if(!dlg_options['title']) dlg_options['title'] = 'Edit Rules';
+        if(!dlg_options['title']) dlg_options['title'] = 'Ruleset Editor';
         dlg_options['callback'] = function(res)
         {
                 if(!window.hWin.HEURIST4.util.isempty(res)) {
