@@ -854,7 +854,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                      }});
                      
             //init help button     
-            if(options["context_help"] && window.hWin.HEURIST4.ui){
+            if( options["context_help"] && window.hWin.HEURIST4.ui){
                     
                     var $info_button = $('<button>').button({icon:'ui-icon-circle-help',showLabel:false, label:'Help'})
                             //.addClass('dialog-title-button')

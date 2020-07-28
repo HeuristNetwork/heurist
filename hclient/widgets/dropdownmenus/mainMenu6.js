@@ -390,7 +390,7 @@ $.widget( "heurist.mainMenu6", {
             }
             else if(action_name=='svs_list'){
 
-                that.menues['explore'].css({bottom:'4px',width:'200px',overflow:'auto'});
+                that.menues['explore'].css({bottom:'4px',width:'300px',overflow:'auto'});
 
                 var group_ID = (e)?[$(e.target).attr('data-id')]:null;
 
@@ -407,10 +407,12 @@ $.widget( "heurist.mainMenu6", {
                             }else{
                                 noptions.onclose = function(){ that._onCloseSearchFaceted(); };
                                 noptions.is_h6style = true;
+                                noptions.maximize = true;
 
                                 //open faceted search
                                 that.search_faceted.show();
-                                that.containers['explore'].css({left:'332px'});
+                                that.containers['explore'].css({left:'332px'}); //move to the right
+                                that.containers['explore'].layout().resizeAll();  //update layout
 
                                 if(that.search_faceted.search_faceted('instance')){ 
                                     that.search_faceted.search_faceted('option', noptions ); //assign new parameters
@@ -476,6 +478,7 @@ $.widget( "heurist.mainMenu6", {
                 {reset:true, search_realm:this.options.search_realm} ]);  //global app event to clear views
             this.search_faceted.hide();
             this.containers['explore'].css({left:'96px'});
+            this.containers['explore'].layout().resizeAll();
         }
     },
     

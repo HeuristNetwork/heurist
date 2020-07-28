@@ -1337,7 +1337,7 @@ ul > li > .svs-contextmenu {
 ul > li > .fancytree-node > .svs-contextmenu2 {
     display: none;
     cursor: pointer;
-    /*float:right;*/
+    padding-top: 6px;
     position:absolute;
     right:10;
 }

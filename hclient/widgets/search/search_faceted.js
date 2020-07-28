@@ -241,7 +241,7 @@ $.widget( "heurist.search_faceted", {
         if(this.options.params.ui_exit_button===false) this.options.showclosebutton = false;
         
         this.btn_terminate = $( "<button>").appendTo( this.div_toolbar )
-        .button({icon: "ui-icon-cancel", iconPosition:'end', label:'Terminate'}).hide();
+        .button({icon: "ui-icon-cancel", iconPosition:'end', label:'Interrupt'}).hide();
         
         
         this._on( this.btn_submit, { click: "doSearch" });
@@ -651,7 +651,7 @@ $.widget( "heurist.search_faceted", {
     //
     ,doReset: function(){
 
-        $(this.document).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCHSTART, [ {reset:true, search_realm:this.options.search_realm} ]);  //global app event to clear views
+        $(this.document).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCHSTART, [ {reset:true, search_realm:this.options.search_realm, primary_rt:9999} ]);  //global app event to clear views
         
         var facets = this.options.params.facets;
 
@@ -2560,7 +2560,7 @@ if(!detailtypes[dtID]){
             var container = this.div_header.find('div.subset-active-div');
             
             if(container.length==0){
-                var ele = $('<div>').addClass('subset-active-div').css({'padding-left':'1.3em'}) //css({'padding':'0.1em 0em 0.5em 1em'})
+                var ele = $('<div>').addClass('subset-active-div').css({'padding-left':'1.3em','padding-top':'4px'}) //css({'padding':'0.1em 0em 0.5em 1em'})
                       .appendTo(this.div_header);
             }
             container.find('span').remove();

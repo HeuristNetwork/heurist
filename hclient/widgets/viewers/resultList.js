@@ -183,6 +183,16 @@ $.widget( "heurist.resultList", {
                     that.setSelected(null);
                     $(that.document).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT, 
                         {selection:null, source:that.element.attr('id'), search_realm:that.options.search_realm} );
+                        
+                    if(that.options.show_search_form){
+                        if(data.primary_rt){
+                            //this is faceted search - hide input search form
+                            that.div_search_form.hide();
+                        }else{
+                            that.div_search_form.show();
+                        }
+                        that._adjustHeadersPos();
+                    }
 
                     if(data.reset){
                         
@@ -584,7 +594,7 @@ $.widget( "heurist.resultList", {
                         btn_visible_newrecord: false,
                         search_button_label: 'Filter',
                         btn_entity_filter: false})
-                    .css({display:'inline-block','max-height':'50px',padding:'4px'})
+                    .css({display:'block','max-height':'50px',padding:'10px 4px',width:'100%'})
                     .appendTo(this.div_header);
         
         }
@@ -760,7 +770,7 @@ $.widget( "heurist.resultList", {
         }
 //console.log('1. '+top)
         if(this.options.show_toolbar){
-            this.div_toolbar.css({'top':top+'px', height:'auto'});
+            this.div_toolbar.css({'top':(top-1)+'px', height:'auto'});
             this.div_toolbar.show();
             top = top + this.div_toolbar.height();
         }else{

@@ -922,11 +922,12 @@ $.widget( "heurist.manageEntity", {
                 this._as_dialog.addClass('manageRecords');
             }
             
-            var helpURL = window.hWin.HAPI4.baseURL+'context_help/'+this.options.entity.helpContent+' #content';
-            window.hWin.HEURIST4.ui.initDialogHintButtons(this._as_dialog,
-                null, //'prefs_'+this._entityName,
-                helpURL, false);
-            
+            if(false){
+                var helpURL = window.hWin.HAPI4.baseURL+'context_help/'+this.options.entity.helpContent+' #content';
+                window.hWin.HEURIST4.ui.initDialogHintButtons(this._as_dialog,
+                    null, //'prefs_'+this._entityName,
+                    helpURL, false);
+            }
         }
     },
 

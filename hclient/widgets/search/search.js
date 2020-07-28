@@ -212,10 +212,12 @@ $.widget( "heurist.search", {
             this.input_search.css({'width':'400px','height':'1.4em','max-width':'650px'});
             this.div_search.css({'float':'left'});
         }else{
-            this.div_search.css({'display':'table-row'});
+            
             if(this.options.is_h6style){
-                this.div_search_input.css({'width':'80%'});  
+                this.div_search_input.css({'width':'70%','max-width':'470px'});  
                 this.input_search.css({'width':'100%'});  
+            }else{
+                this.div_search.css({'display':'table-row'});
             }
         }
             
@@ -414,12 +416,14 @@ $.widget( "heurist.search", {
         .css({'width':'40px','vertical-align': '-4px'})  //'padding':'0 1.0em',
         .appendTo(this.div_buttons);*/
 
-        var linkGear = $('<a>',{href:'#', 
-            title:window.hWin.HR('Build a filter expression using a form-driven approach (simple and advanced options)')})
-            .css({'padding-right':'1.5em','display':'inline-block','margin-left':'-27px','opacity':'0.5','margin-top': '0.6em', width:'20px'})
-            .addClass('ui-icon ui-icon-filter-form') //was ui-icon-gear
-            .appendTo(this.div_buttons);
-        this._on( linkGear, {  click: this.showSearchAssistant });
+        if(!this.options.is_h6style){
+            var linkGear = $('<a>',{href:'#', 
+                title:window.hWin.HR('Build a filter expression using a form-driven approach (simple and advanced options)')})
+                .css({'padding-right':'1.5em','display':'inline-block','margin-left':'-27px','opacity':'0.5','margin-top': '0.6em', width:'20px'})
+                .addClass('ui-icon ui-icon-filter-form') //was ui-icon-gear
+                .appendTo(this.div_buttons);
+            this._on( linkGear, {  click: this.showSearchAssistant });
+        }
         
         /* rotate icon with given interval
         setInterval( function(){ linkGear.addClass('rotate'); 
@@ -706,6 +710,11 @@ $.widget( "heurist.search", {
         if(window.hWin.HAPI4.has_access()){
             $(this.element).find('.logged-in-only').show();
             $(this.element).find('.div-table-cell.logged-in-only').css({'display':'table-cell'});
+            
+            if(this.options.is_h6style){
+                $(this.element).find('.div-table-cell:visible').css({'display':'inline-block'});    
+            }
+            
             //$(this.element).find('.logged-in-only').css('visibility','visible');
             //$(this.element).find('.logged-out-only').css('visibility','hidden');
             $(this.element).find('.logged-out-only').hide();

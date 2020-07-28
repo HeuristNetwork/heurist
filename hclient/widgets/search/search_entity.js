@@ -60,19 +60,23 @@ $.widget( "heurist.search_entity", {
             this.element.addClass('ui-widget-content');
         }
         
+        this.config_select_orig = $('<select>').appendTo(this.element).hide();
+        this.config_select_orig = this.config_select_orig[0];
+        
         //configuration - select favorites
         if(this.options.use_combined_select){
             
             this.combined_select = $('<div class="ui-heurist-header" style="top:0px;">Filter by entity</div>'
-                +'<div style="top:37px;position:absolute;">'  //width:100%;
-                    +'<div class="ui-heurist-title" style="padding:12px 0px 0px 6px;">By Usage</div>'
+                +'<div style="top:37px;position:absolute;width:100%">'  //width:100%;
+                    +'<div class="ui-heurist-title favorites" style="width: 100%;padding:12px 0px 0px 6px;">Favorites</div>'
+                    +'<ul class="by-selected" style="list-style-type:none;margin:0;padding:6px"/>'
+                    +'<div class="ui-heurist-title" style="width: 100%;border-top:1px gray solid; padding:12px 0px 0px 6px;">By Usage</div>'
                     +'<ul class="by-usage" style="list-style-type:none;margin:0;padding:6px"/>'
-                    +'<div class="ui-heurist-title favorites" style="border-top:1px gray solid; padding:12px 0px 0px 6px;">Favorites</div>'
-                    +'<ul class="by-selected" style="list-style-type:none;margin:0;padding:6px"/>')
+                    )
                 .appendTo(this.element);
 
             this.config_btn = $('<span>').addClass('ui-icon ui-icon-gear')
-                .css({float:'right','margin-right':'18px'})   //'font-size':'0.8em',
+                .css({'margin-left':'10px'})   //'font-size':'0.8em',
                 .appendTo(this.combined_select.find('div.favorites'));        
                 
         }else{
@@ -256,9 +260,9 @@ $.widget( "heurist.search_entity", {
                         +'<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
                             + '" class="rt-icon" style="vertical-align:bottom;background-image: url(&quot;'+item.attr('icon-url')+ '&quot;);"/>'
                         //+'<img src="'+item.attr('icon-url')+'"/>'
-                        +'<div class="menu-text truncate" style="max-width:147px;display:inline-block;">'
+                        +'<div class="menu-text truncate" style="max-width:130px;display:inline-block;">'
                         +item.text()+'</div>'
-                        +'<span style="float:right;">'+item.attr('rt-count')+'</span>'
+                        +'<span style="float:right;min-width:20px">'+item.attr('rt-count')+'</span>'
                        +'</li>').appendTo(cont);    
                 });
             }
@@ -391,8 +395,9 @@ $.widget( "heurist.search_entity", {
             
             opts.useHtmlSelect = (select_rectype=='usage_select' && that.options.use_combined_select);
             
-            this[select_rectype] = window.hWin.HEURIST4.ui.createRectypeSelectNew(null, opts);
-                        
+            this[select_rectype] = window.hWin.HEURIST4.ui.createRectypeSelectNew(
+                    (select_rectype=='config_select')?this.config_select_orig:null, opts);
+            
             if(this[select_rectype].hSelect("instance")!=undefined){
                 var menu = this[select_rectype].hSelect( "menuWidget" );
                 menu.css({'max-height':'450px'});                        

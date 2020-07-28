@@ -112,6 +112,11 @@ $.widget( "heurist.svs_list", {
             //add title 
             this.div_header =  $('<div class="ui-heurist-header" style="top:0px;">Saved filter</div>')
                 .appendTo(this.element);
+                
+            this.div_header_sub = $('<div style="top:46px;font-style:italic;font-size:9px;position: absolute;left: 20px;">'
+                    +'These filters are only visible to you</div>')
+                .hide()
+                .appendTo(this.element);
         
             this.search_tree.css({top:'36px',bottom:'0px', width:'100%', 'padding-top':'6px', position:'absolute','font-size':'0.9em'});
         }else{
@@ -500,6 +505,8 @@ $.widget( "heurist.svs_list", {
         
         this.accordeon.css('top',this.div_header.height());
         
+        var container_width = this.accordeon.width();
+        
         if(islogged || this.isPublished){
 
             this.helper_btm.before(
@@ -515,14 +522,14 @@ $.widget( "heurist.svs_list", {
                     .addClass('heurist-bookmark-search')  //need find in preferences
                     .css('display', (window.hWin.HAPI4.get_prefs('bookmarks_on')=='1')?'block':'none')
                     .append( this._defineHeader(window.hWin.HR('My Bookmarks'), 'bookmark'))
-                    .append( this._defineContent('bookmark') ) );
+                    .append( this._defineContent('bookmark',container_width) ) );
 
                 this.helper_btm.before(
                     $('<div>')
                     .attr('grpid',  'all').addClass('svs-acordeon')
                     //.css('border','none')
                     .append( this._defineHeader(window.hWin.HR('My Searches'), 'all'))
-                    .append( this._defineContent('all') ));
+                    .append( this._defineContent('all',container_width) ));
                 
             }
                 
@@ -543,7 +550,7 @@ $.widget( "heurist.svs_list", {
                             $('<div>')
                             .attr('grpid',  groupID).addClass('svs-acordeon')
                             .append( this._defineHeader(name, groupID))
-                            .append( this._defineContent(groupID) ));
+                            .append( this._defineContent(groupID,container_width) ));
                         
                         //get description for user    
                         window.hWin.HAPI4.SystemMgr.user_get( { UGrpID: groupID},
@@ -564,7 +571,7 @@ $.widget( "heurist.svs_list", {
             ($('<div>')
                 .attr('grpid',  'all').addClass('svs-acordeon')
                 .append( this._defineHeader(window.hWin.HR('Predefined Searches'), 'all'))
-                .append( this._defineContent('all') )).appendTo( this.accordeon );
+                .append( this._defineContent('all',container_width) )).appendTo( this.accordeon );
 
 
         }
@@ -661,13 +668,21 @@ $.widget( "heurist.svs_list", {
         if(!treeData) return;
         
         var name = treeData.title;
+        var itop = 36;
         if(groupID>0){
             name = window.hWin.HAPI4.sysinfo.db_usergroups[groupID];        
+            this.div_header_sub.hide();
         }else if (groupID=='all'){
             name = window.hWin.HR('My Searches');
-        }else if (groupID=='bookmarks'){
+            this.div_header_sub.show();
+            itop = 56;
+        }else if (groupID=='bookmark'){
             name = window.hWin.HR('My Bookmarks')
+            this.div_header_sub.show();
+            itop = 56;
         }
+ console.log(groupID);      
+        this.search_tree.css({top:itop});
         
         this.div_header.text( name );
         
@@ -675,7 +690,7 @@ $.widget( "heurist.svs_list", {
         this.search_tree.empty();
         
         //create treeview
-        this._defineContent( groupID, this.search_tree );        
+        this._defineContent( groupID, this.element.parent().width(), this.search_tree );        
         
         this.search_tree.find('.ui-fancytree').css('padding',0);
 /*        
@@ -1023,7 +1038,7 @@ $.widget( "heurist.svs_list", {
         //find group div
         var grp_div = this.accordeon.find('.svs-acordeon[grpid="'+groupID+'"]');
         //define new
-        this._defineContent(groupID, grp_div.find('.ui-accordion-content'));
+        this._defineContent(groupID, this.accordeon.width(), grp_div.find('.ui-accordion-content'));
     },
 
 
@@ -1032,7 +1047,7 @@ $.widget( "heurist.svs_list", {
     // redraw treeview with the list of saved searches for given groupID and domain
     // add tree as a accordeon content
     //
-    _defineContent: function(groupID, container){
+    _defineContent: function(groupID, container_width, container){
         //
         var res;
         var that = this;
@@ -1542,12 +1557,42 @@ $.widget( "heurist.svs_list", {
                 }
             });
 
+
+            var context_opts = this._getAddContextMenu(groupID);
+
+            var append_link = $("<a>",{href:'#'})
+                .html('<span class="ui-icon ui-icon-plus hasmenu2" '
+                    +' style="display:inline-block; vertical-align: bottom"></span>'
+                    +'<span class="hasmenu2">add</span>')
+                .click(function(event){
+                    append_link.contextmenu('open', append_link.find('span.ui-icon') );
+                    //$(this).parent('a').contextmenu('open', $(event.target) );//$(this).parent('a'));
+             });
+             append_link.contextmenu(context_opts);
+
+            //treedata is empty - add div - to show add links
+            var tree_links = $('<div>', {id:"addlink"+groupID})
+            .css({'display': treeData && treeData.length>0?'none':'block', 'padding-left':'1em'} )
+            .append( append_link );
+
+            
+            if(window.hWin.HEURIST4.util.isnull(container)){
+                res = $('<div>').append(tree_links).append(tree);
+            }else{
+                container.empty();
+                container.append(tree_links).append(tree);
+                res = container;
+            }
+
             $.each( tree.find('span.fancytree-node'), function( idx, item ){
 
                 var ele = $(item); //.find('span.fancytree-node');
                 ele.css({display: 'block', width:'99%'});         
 
-                ele.find('.fancytree-title').css({display: 'inline-block', width:'80%'}).addClass('truncate');
+                ele.find('.fancytree-title')
+                    .css({display: 'inline-block', width:container_width>0?(container_width-30):'80%'})
+                    .addClass('truncate');
+                //'80%'
 
                 $('<div class="svs-contextmenu2 ui-icon ui-icon-menu"></div>')
                 .click(function(event){ tree.contextmenu("open", $(event.target) ); window.hWin.HEURIST4.util.stopEvent(event); return false;})
@@ -1577,34 +1622,7 @@ $.widget( "heurist.svs_list", {
                     });*/
                 }
             });
-
-
-            var context_opts = this._getAddContextMenu(groupID);
-
-            var append_link = $("<a>",{href:'#'})
-                .html('<span class="ui-icon ui-icon-plus hasmenu2" '
-                    +' style="display:inline-block; vertical-align: bottom"></span>'
-                    +'<span class="hasmenu2">add</span>')
-                .click(function(event){
-                    append_link.contextmenu('open', append_link.find('span.ui-icon') );
-                    //$(this).parent('a').contextmenu('open', $(event.target) );//$(this).parent('a'));
-             });
-             append_link.contextmenu(context_opts);
-
-            //treedata is empty - add div - to show add links
-            var tree_links = $('<div>', {id:"addlink"+groupID})
-            .css({'display': treeData && treeData.length>0?'none':'block', 'padding-left':'1em'} )
-            .append( append_link );
-
             
-            if(window.hWin.HEURIST4.util.isnull(container)){
-                res = $('<div>').append(tree_links).append(tree);
-            }else{
-                container.empty();
-                container.append(tree_links).append(tree);
-                res = container;
-            }
-
 
         }else{
             //not logged in
