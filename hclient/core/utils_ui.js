@@ -1926,8 +1926,11 @@ window.hWin.HEURIST4.ui = {
                         if(query_or_recordset){
                             if(!$.isPlainObject(query_or_recordset)){ //just string
                                 query_request = {q:query_or_recordset, w:'all'};
+                            }else if(query_or_recordset['q']){
+                                //query_request = query_or_recordset;
                             }
-                        }else if(rec_ID>0){
+                        }
+                        if(query_request==null && rec_ID>0){
                             query_request = {q:'ids:'+rec_ID, w:'e'}; //including temporary
                         }
                         
@@ -2627,7 +2630,6 @@ window.hWin.HEURIST4.ui = {
     //
     showRecordActionDialog: function(actionName, options){
 
-        
         if(!options) options = {};
         if(options.isdialog!==false) options.isdialog = true; //by default popup      
 

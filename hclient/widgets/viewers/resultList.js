@@ -1568,7 +1568,6 @@ $.widget( "heurist.resultList", {
     //
     //
     _recordDivOnClick: function(event){
-
         //var $allrecs = this.div_content.find('.recordDiv');
 
         var $target = $(event.target),
@@ -2582,7 +2581,7 @@ $.widget( "heurist.resultList", {
             /* enable but specify entityName to edit in options */
             dblclick: function(event){ //start edit on dblclick
                 if(!$.isFunction(this.options.renderer)){
-                    
+
                     if(window.hWin.HAPI4.has_access()){
                         
                         var $rdiv = $(event.target);
@@ -2592,15 +2591,24 @@ $.widget( "heurist.resultList", {
                         var selected_rec_ID = $rdiv.attr('recid');
 
                         event.preventDefault();
-                        
+                        /* old way
                         var query = null;
                         if(this._currentRecordset && this._currentRecordset.length()<1000){
                             query = 'ids:'+this._currentRecordset.getIds().join(',');
                         }else{
                             query = this._query_request;
                         }
-
                         window.hWin.HEURIST4.ui.openRecordInPopup(selected_rec_ID, query, true, null);
+                        */
+                        var ordered_recordset = null;
+                        if(this._currentRecordset){
+                            ordered_recordset = this._currentRecordset;
+                        }else{
+                            ordered_recordset = this._query_request;
+                        }
+                        window.hWin.HEURIST4.ui.openRecordInPopup(selected_rec_ID, ordered_recordset, true, null);
+                        
+                        
                         //@todo callback to change rectitle    
                     }else{
                         this._recordDivOnClick(event);
