@@ -19,6 +19,11 @@
 
 
 $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
+    
+    options: {
+        is_iconlist_mode: false,  //show in compact mode
+        isViewMode: true
+    },
 
     _entityName:'sysDashboard',
     defaultPrefs: {viewmode:'thumbs3', showonstartup:1},
@@ -52,7 +57,7 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
         }
         */
         
-        this.options.isViewMode = true;
+        //this.options.isViewMode = true;
         
         this.options.no_bottom_button_bar = true;
     
@@ -114,7 +119,7 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
         this._on(this.show_on_startup,{change:this.saveUiPreferences});
         //this._on(this.show_on_startup2,{change:this.saveUiPreferences});
         
-        this._setMode(true)
+        this._setMode(this.options.isViewMode);
         
         this.searchForm.find('#edit_dashboard').click(function(){
             that._setMode(false);
@@ -178,7 +183,6 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
             if(k==2) break;
         }
         
-        
         return true;
     },
 
@@ -201,7 +205,9 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
             }
         }
         
-        this._as_dialog.dialog('option', 'height', h);                                    
+        if(this.isdialog){
+            this._as_dialog.dialog('option', 'height', h);                                        
+        }
         
     },
     
@@ -246,14 +252,39 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
              //this.searchForm.hide();
              //this.recordList.css({'top': 0});
             this.searchForm.css({'height': '7.4em'});
-            this.recordList.css({'top': '5.4em'});
             
             this.searchForm.find('#view_mode').show();
             this.searchForm.find('#edit_mode').hide();
             //this._as_dialog.parent().find('.ui-dialog-titlebar').hide();
             
             this.recordList.resultList('option', 'sortable', false);
-            this.recordList.resultList('option','view_mode','thumbs');
+            
+            if(this.options.is_iconlist_mode){
+                this.recordList.resultList('applyViewMode','icons_list', true);
+                //hide header
+                this.recordList.css({top:0,right:34});
+                if(!this.div_openconfig){
+                    this.div_openconfig = $('<span title="Customize">')
+                        .css({color:'black',background:'white',position:'absolute',right:6,width:33,top:6,height:33,cursor:'pointer'})
+                        .addClass('ui-icon ui-icon-gear')
+                        .appendTo(this.element);
+
+                    this._on(this.div_openconfig, {
+                        click:function(){
+                            var that = this;
+                            window.hWin.HEURIST4.ui.showEntityDialog('sysDashboard',
+                                {isViewMode:false, onClose:function(){
+                                    $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE);
+                                    that.searchForm.searchSysDashboard('startSearch');
+                            }  });}
+                        }
+                    );                        
+                        
+                }
+            }else{
+                this.recordList.resultList('option','view_mode','thumbs');    
+                this.recordList.css({'top': '5.4em'});
+            }
             
             this.recordList.find('.div-result-list-content').css({'overflow-y':'auto'});
             

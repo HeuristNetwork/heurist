@@ -681,7 +681,6 @@ $.widget( "heurist.svs_list", {
             this.div_header_sub.show();
             itop = 56;
         }
- console.log(groupID);      
         this.search_tree.css({top:itop});
         
         this.div_header.text( name );

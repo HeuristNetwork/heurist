@@ -22,7 +22,6 @@ $.widget( "heurist.mainMenu6", {
 
     // default options
     options: {
-        
     },
     
     sections: ['design','import','explore','publish','admin'],
@@ -46,7 +45,7 @@ $.widget( "heurist.mainMenu6", {
     _create: function() {
 
         var that = this;
-
+        
         this.element.addClass('ui-menu6')
         .addClass('selectmenu-parent')
         .disableSelection();// prevent double click to select text
@@ -188,7 +187,8 @@ $.widget( "heurist.mainMenu6", {
                 that.divMainMenu.find('.ui-heurist-header2').css({'text-align':'center'});
                 that.divMainMenu.find('.menu-text').hide();
                 that.divMainMenu.css({bottom:'4px',height:'auto'});
-//console.log(' _collapsed');                
+                that._closeSectionMenu('explore');
+                //console.log(' _collapsed');                
                 //that.divMainMenu.css({'box-shadow':null});
             });
         }, is_instant===true?10:800);
@@ -199,8 +199,9 @@ $.widget( "heurist.mainMenu6", {
     //
     _expandMainMenuPanel: function(e) {
 //console.log(' _expandMainMenuPanel ' );
-        clearTimeout(this._myTimeoutId);
+        clearTimeout(this._myTimeoutId); //terminate collapse
         this._myTimeoutId = 0;
+        if(this.divMainMenu.width()==200) return; //already expanded
         var that = this;
         this._mouseout_SectionMenu();
         this.divMainMenu.stop().effect('size',  { to: { width: 200 } }, 500,
@@ -213,7 +214,7 @@ $.widget( "heurist.mainMenu6", {
     },
     
     //
-    // leave only active section
+    // leave active section
     //    
     _mouseout_SectionMenu: function(e) {
         

@@ -44,7 +44,7 @@ outline: 0;
 }
 
 .logo {
-    background-image: url("hclient/assets/h4logo_small.png") !important;
+    background-image: url("hclient/assets/h4logo_small.png");
     background-repeat: no-repeat !important;
     background-size: contain;
     width: 190px;
@@ -661,6 +661,45 @@ div .selected_last{
     display:none;
 }
 
+/* special mode for dahsboard */
+div.div-result-list-content.icons_list{
+    text-align: center;    
+}
+.icons_list .recordDiv, .icons_list .recordDiv:hover {
+    -moz-user-select: none;
+    border: none;
+    box-shadow: none;
+    display: inline-block;
+    font-size: 0.9em !important;
+    margin: 6px 2px;
+
+    min-width: 150px;
+    width : 150px;
+    height: 24px;
+    padding: 0;
+    position: relative;
+    background: none;
+}
+.icons_list .recordDiv .recTypeThumb{
+    top:2px;
+    width: 16px;
+    height: 16px;
+}
+.icons_list .recordDiv .recordTitle {
+    top: 6px;
+    left: 22px;    
+}
+.icons_list .recordDiv .recordTitle > .item {
+    max-width:130px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.icons_list .recordDiv .recordDescription,
+.icons_list .recordDiv .recordIcons
+{
+    display: none;
+}
 
 
 /* ICONS VIEW */
@@ -802,8 +841,6 @@ div .selected_last{
     white-space: nowrap;
     text-overflow: ellipsis;
 }
-
-
 
 
 .icons .recordDiv .recordTitle .inlist, .thumbs .recordDiv .recordTitle .inlist{

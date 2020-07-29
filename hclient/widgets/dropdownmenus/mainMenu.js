@@ -29,7 +29,8 @@ $.widget( "heurist.mainMenu", {
     // default options
     options: {
         host_logo:null,
-        login_inforced: true
+        login_inforced: true,
+        is_h6style: false
     },
     
     menues:{},
@@ -45,6 +46,8 @@ $.widget( "heurist.mainMenu", {
     _create: function() {
 
         var that = this;
+        
+        this.options.is_h6style = (window.hWin.HAPI4.sysinfo['layout']=='H6Default');
 
         this.element.css({'height':'100%'}).addClass('ui-heurist-header2')
             .disableSelection();// prevent double click to select text
@@ -65,10 +68,16 @@ $.widget( "heurist.mainMenu", {
             sUpdate = '&nbsp;<span class="ui-icon ui-icon-alert" style="width:16px;display:inline-block;vertical-align: middle;cursor:pointer">';
         }
 
-        $("<div>")                                               
-            .css({'font-size':'0.6em', 'text-align':'center', 'margin-left': '85px', 'padding-top':'12px', 'width':'100%'})
-            .html('<span style="padding-left:20px">v'+window.hWin.HAPI4.sysinfo.version+sUpdate+'</span>').appendTo( this.div_logo );
-            
+        this.div_version = $("<div>")                                               
+            .html('<span>v'+window.hWin.HAPI4.sysinfo.version+sUpdate+'</span>')
+            .appendTo( this.div_logo );
+        if(this.options.is_h6style){
+            this.div_version.css({'font-size':'0.5em', color:'#DAD0E4', 'text-align':'right', 'padding':'16px'});
+                
+        }else{
+            this.div_version.css({'font-size':'0.6em', 'text-align':'center', 'margin-left': '85px', 'padding-top':'12px', 
+                'padding-left':'20px', 'width':'100%'});
+        }
         // bind click events
         this._on( this.div_logo, {
             click: function(event){
@@ -164,8 +173,7 @@ $.widget( "heurist.mainMenu", {
         $("<span>").text(window.hWin.HAPI4.database)
             .css({'font-size':'1.3em', 'font-weight':'bold', 'padding-left':'22px'})
             .appendTo( this.div_dbname );*/
-
-
+            
         // MAIN MENU-----------------------------------------------------
         var he = this.element.height();
 
@@ -189,7 +197,9 @@ $.widget( "heurist.mainMenu", {
         function __include(topic){
              return (!that.options.topics || that.options.topics.indexOf(topic.toLowerCase())>=0);
         }
-        
+        if(this.options.is_h6style){
+            if(__include('Help')) this._initMenu('Help', -1, this.divProfileItems);
+        }
         if(__include('profile')) this._initMenu('Profile', -1, this.divProfileItems);
 
         if(__include('Database')) this._initMenu('Database', -1);            
@@ -207,7 +217,11 @@ $.widget( "heurist.mainMenu", {
         if(__include('Admin')) this._initMenu('Admin', 0, null, 0);
         
         if(__include('FAIMS')) this._initMenu('FAIMS', 1, null, 1);
-        if(__include('Help')) this._initMenu('Help', -1);
+        
+        if(!this.options.is_h6style){
+            if(__include('Help')) this._initMenu('Help', -1);    
+        }
+        
         
         this.divMainMenuItems.menu();
         this.divProfileItems.menu().removeClass('ui-menu-icons');
@@ -217,8 +231,18 @@ $.widget( "heurist.mainMenu", {
 console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left')        );
                 }*/
             
+            
+        // Dashboard - shortcuts ---------------------------------------
+        if(this.options.is_h6style){
+            this.divShortcuts = $( "<div>")            
+                .css({'position':'absolute', left:0, right:0, height:'36px', bottom:-5})
+                .appendTo(this.element)
+                .manageSysDashboard({is_iconlist_mode:true});
+            this.divMainMenu.hide();
+        }
+            
 
-        //host logo and link    
+        //host logo and link -----------------------------------    
         if(window.hWin.HAPI4.sysinfo.host_logo){
             
             $('<div style="height:40px;background:none;padding-left:4px;float:right;color:white">'
@@ -462,6 +486,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         
         this.div_logo.remove();
         this.divMainMenu.remove();
+        if(this.divShortcuts) this.divShortcuts.remove();
         /* remove generated elements
         this.btn_Admin.remove();
         this.btn_Profile.remove();
@@ -518,15 +543,23 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         if(name=='Profile'){
             
             //profile menu header consists of two labels: Settings and Current user name
-            
-            link = $('<a href="#"><span style="display:inline-block;padding-right:20px">Settings</span>' 
-            +'<div class="ui-icon-user" style="display:inline-block;font-size:16px;width:16px;line-height:10px;vertical-align:bottom;"></div>'
+                
+            link = $('<a href="#">'
+            +(this.options.is_h6style?'':'<span style="display:inline-block;padding-right:20px">Settings</span>') 
+            +'<div class="ui-icon-user" style="display:inline-block;font-size:16px;width:16px;line-height:16px;vertical-align:bottom;"></div>'
             +'&nbsp;<div class="usrFullName" style="display:inline-block">'
             +window.hWin.HAPI4.currentUser.ugr_FullName
             +'</div><div style="position:relative;" class="ui-icon ui-icon-carat-1-s"></div></a>');
                                                                                                            
-        }
-        else{
+        }else if(name=='Help' && this.options.is_h6style){
+            
+            link = $('<a href="#">'
+            +(this.options.is_h6style?'':'<span style="display:inline-block;padding-right:20px">Settings</span>') 
+            +'<div class="ui-icon-circle-b-help" style="display:inline-block;font-size:16px;width:16px;line-height:16px;vertical-align:bottom;"></div>'
+            +'&nbsp;<div style="display:inline-block">Help'
+            +'</div><div style="position:relative;" class="ui-icon ui-icon-carat-1-s"></div></a>');
+            
+        }else{
             link = $('<a>',{
                 text: window.hWin.HR(name), href:'#'
             });

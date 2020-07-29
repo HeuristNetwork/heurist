@@ -903,7 +903,7 @@ $.widget( "heurist.resultList", {
     applyViewMode: function(newmode, forceapply){
 
         
-        var allowed = ['list','icons','thumbs','thumbs3','horizontal'];
+        var allowed = ['list','icons','thumbs','thumbs3','horizontal','icons_list'];
 
         if(window.hWin.HEURIST4.util.isempty(newmode) || allowed.indexOf(newmode)<0) {
             newmode = window.hWin.HAPI4.get_prefs('rec_list_viewmode_'+this.options.entityName);
@@ -933,10 +933,10 @@ $.widget( "heurist.resultList", {
                 }
                 newmode = this.options.view_mode;
             }
-            this.div_content.removeClass('list icons thumbs thumbs3 horizontal');
+            this.div_content.removeClass('list icons thumbs thumbs3 horizontal icons_list');
             this.div_content.addClass(newmode);
             
-            if(newmode=='horizontal'){
+            if(newmode=='horizontal'){ // || newmode=='icons_list'){
                 this._on(this.div_content,
                         {'mousewheel':this._recordDivNavigateUpDown
                 /*
@@ -948,13 +948,17 @@ $.widget( "heurist.resultList", {
                 }*/
                 });
                 
-                var h = this.div_content.height();
-                    h = (((h<60) ?60 :((h>200)?230:h))-30) + 'px';
-                this.div_content.find('.recordDiv').css({
-                    height: h,
-                    width: h,
-                    'min-width': h
-                });
+                if(newmode=='horizontal'){
+                
+                    var h = this.div_content.height();
+                        h = (((h<60) ?60 :((h>200)?230:h))-30) + 'px';
+                    this.div_content.find('.recordDiv').css({
+                        height: h,
+                        width: h,
+                        'min-width': h
+                    });
+                    
+                }
                 
             }else{
                 this.div_content.find('.recordDiv').attr('style',null);
@@ -1550,7 +1554,7 @@ $.widget( "heurist.resultList", {
               key = (event.originalEvent.deltaY>0)?40:38;
           }else{
               key = event.which || event.keyCode;
-              if(this.options.view_mode=='horizontal'){
+              if(this.options.view_mode=='horizontal'){  //|| this.options.view_mode=='icons_list'){
                         if (key == 37) { 
                             key = 38;
                         }else if (key == 39) { //right
@@ -1587,9 +1591,10 @@ $.widget( "heurist.resultList", {
               if(curr_sel.length > 0)
               { 
                 event.target = curr_sel[0];
-                this._recordDivOnClick(event);
                 
-                if(this.options.view_mode=='horizontal'){
+                this._recordDivOnClick(event);    
+                
+                if(this.options.view_mode=='horizontal'){ //|| this.options.view_mode=='icons_list'){
                     var spos = this.div_content.scrollLeft();
                     var spos2 = curr_sel.position().left;
                     var offh = spos2 + curr_sel.width() - this.div_content.width() + 10;
@@ -1926,7 +1931,8 @@ $.widget( "heurist.resultList", {
         }
         
         //$.isFunction(this.options.renderer) && 
-        if(this.options.view_mode!='horizontal' && this.options.recordview_onselect=='inline'){ // && this.options.view_mode=='list'
+        if((this.options.view_mode!='horizontal')   // && this.options.view_mode!='icons_list'
+            && this.options.recordview_onselect=='inline'){ // && this.options.view_mode=='list'
 
             var exp_div = this.div_content.find('.record-expand-info');
             var is_already_opened = (exp_div.attr('data-recid')==$rdiv.attr('recid'));
@@ -2548,7 +2554,7 @@ $.widget( "heurist.resultList", {
         }
         
         //special div for horizontal
-        if(this.options.view_mode == 'horizontal'){
+        if(this.options.view_mode == 'horizontal'){  //|| this.options.view_mode == 'icons_list'){
             html = '<div>'+html+'</div>';
         }
         
@@ -2630,7 +2636,7 @@ $.widget( "heurist.resultList", {
 
         $allrecs = this.div_content.find('.recordDiv');
         
-        if(this.options.view_mode == 'horizontal'){
+        if(this.options.view_mode == 'horizontal'){ // || this.options.view_mode == 'icons_list'
             var h = this.div_content.height();
                 h = (((h<60) ?60 :((h>200)?230:h))-30) + 'px';
             $allrecs.css({

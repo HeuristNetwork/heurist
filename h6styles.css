@@ -21,6 +21,16 @@
 body {
     overflow:hidden;
 }
+
+.logo {
+    background-image: url("hclient/assets/v6/h6logo.png") !important;
+    background-repeat: no-repeat !important;
+    background-size: contain;
+    width: 98px;
+    height: 40px;
+}
+
+
 .ui-icon-file-plus { 
     background-image: url(hclient/assets/v6/file-plus.png) !important; 
     width: 18;
