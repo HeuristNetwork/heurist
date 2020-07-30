@@ -23,6 +23,7 @@ function hSvsEdit(args) {
     var _className = "SvsEdit",
     _version   = "0.4",
     edit_dialog = null,
+    keep_values = {'svs_Name':'','svs_Query':'','svs_UGrpID':'','svs_Rules':'','svs_RulesOnly':false,'svs_Notes':'','svs_ViewMode':''},
     callback_method;
 
     /**
@@ -32,6 +33,24 @@ function hSvsEdit(args) {
         //this.currentSearch = currentSearch;
     }
 
+    //
+    //
+    //
+    function _isModified(){
+
+        var $dlg = edit_dialog;
+        if($dlg){
+            
+            for (var key in Object.keys(keep_values)){
+                var ele = $dlg.find('#'+key);
+                if(keep_values[key] !== (ele.attr('type')=='checkbox')?ele.is(':checked'):ele.val()){
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    
     /**
     * Assign values to UI input controls
     *
@@ -155,6 +174,12 @@ function hSvsEdit(args) {
                 }*/
                 //svs_ugrid.parent().show();
                 svs_ugrid.attr('disabled', !(allowChangeGroupID || window.hWin.HEURIST4.util.isempty(groupID)) );
+            }
+
+            for (var i=0; i<Object.keys(keep_values).length; i++){
+                var key = Object.keys(keep_values)[i];
+                var ele = $dlg.find('#'+key);
+                keep_values[key] = (ele.attr('type')=='checkbox')?ele.is(':checked'):ele.val();                
             }
 
             svs_rules_only.on('change',function(e){
@@ -602,7 +627,7 @@ function hSvsEdit(args) {
                     autoOpen: false,
                     height: is_short?360:600,
                     width: 650,                                                                                               
-                    modal: true,
+                    modal: true, //!is_h6style
                     resizable: false,
                     draggable: !is_h6style,
                     title: window.hWin.HR(isRules?'Edit RuleSet':'Save filter criteria'),
@@ -670,7 +695,26 @@ function hSvsEdit(args) {
             edit_dialog.remove();
             edit_dialog = null;
         },
+        
+        //
+        // is opened and modified
+        //
+        isModified: function(){
+            if(edit_dialog && edit_dialog.dialog('instance') && edit_dialog.dialog('isOpen')){
+//console.log('>>>>'+_isModified());                
+                //return _isModified();    
+                return true;
+            }else{
+                return false;
+            }
+        },
 
+        closeEditDialog: function () {
+            if(edit_dialog && edit_dialog.dialog('instance')){
+                edit_dialog.dialog("close");    
+            }
+        },
+        
         showSavedFilterEditDialog: function( mode, groupID, svsID, squery, is_short, position, callback ) {
             _showDialog( mode, groupID, svsID, squery, is_short, position, callback );
         }

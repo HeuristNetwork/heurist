@@ -66,14 +66,17 @@ $.widget( "heurist.mainMenu6", {
                     that._loadSectionMenu(section);
                 });
                 
+                //explore menu in main(left) menu
                 that._on(that.divMainMenu.children('.ui-heurist-explore'),{
                     mouseenter: that._expandMainMenuPanel, //mouseenter mouseover
                     mouseleave: that._collapseMainMenuPanel,
                 });
+                //other entries in main(left) menu
                 that._on(that.divMainMenu.children(':not(.ui-heurist-explore)'), {
                     mouseover: that._mousein_SectionMenu,  
                     mouseleave: that._mouseout_SectionMenu,
                 });
+                //exit form explore menu section
                 that._on(that.element.find('.ui-menu6-section.ui-heurist-explore'), {
                     mouseleave: that._collapseMainMenuPanel
                 });
@@ -95,16 +98,17 @@ $.widget( "heurist.mainMenu6", {
                 that._on(that.divMainMenu.find('.menu-explore'),{
                     mouseenter: that._mousein_ExploreMenu,
                     mouseleave: function(e){
+                        this._myTimeoutId2 = setTimeout(function(){that._closeSectionMenu('explore');}, 600);
                         // that._mouseout_SectionMenu(e);//mouseout   
                         // that._collapseMainMenuPanel(e);
                     }
                 });
-                
+/*                
                 that._on(that.divMainMenu.find('.menu-explore[data-action-onclick="svsAdd"]'), 
                 {click: function(e){
                     that.addSavedSearch();
                 }});
-                
+*/                
         });
 
         $(window.hWin.document).on(window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE
@@ -164,13 +168,23 @@ $.widget( "heurist.mainMenu6", {
                 +' '+window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE
                 +' '+window.hWin.HAPI4.Event.ON_REC_SEARCHSTART);
     },
+    
+    //
+    //
+    //
+    _isExplorerMenu_locked: function(){
+        
+        var isSvsEditVisible = ( this.edit_svs_dialog && this.edit_svs_dialog.isModified() );
+        
+        return (isSvsEditVisible || this._explorer_menu_locked || this.element.find('.ui-selectmenu-open').length>0);
+    },
 
     //
     // collapse main menu panel on explore mouseout
     //    
     _collapseMainMenuPanel: function(is_instant) {
 //console.log(' _collapseMainMenuPanel '+is_instant+ '  '+this._myTimeoutId  );
-        if(this._explorer_menu_locked || this.element.find('.ui-selectmenu-open').length>0) return;
+        if( this._isExplorerMenu_locked() ) return;
         
         if(is_instant && this._myTimeoutId>0){
             clearTimeout(this._myTimeoutId);
@@ -218,7 +232,7 @@ $.widget( "heurist.mainMenu6", {
     //    
     _mouseout_SectionMenu: function(e) {
         
-        if(this._explorer_menu_locked || this.element.find('.ui-selectmenu-open').length>0) return;
+        if( this._isExplorerMenu_locked() ) return;
         
         var that = this;
         
@@ -252,7 +266,7 @@ $.widget( "heurist.mainMenu6", {
     //
     _mousein_SectionMenu: function(e) {
 
-        if(this._explorer_menu_locked || this.element.find('.ui-selectmenu-open').length>0) return;
+        if( this._isExplorerMenu_locked() ) return;
         
         clearTimeout(this._myTimeoutId2); this._myTimeoutId2 = 0;
         clearTimeout(this._myTimeoutId3); this._myTimeoutId3 = 0;
@@ -267,7 +281,7 @@ $.widget( "heurist.mainMenu6", {
             $.each(this.sections, function(i, section){
                 if(section_name==section){
                     if(section!='explore'){
-                        that.menues[section].css('z-index',102).show(); //show over current section menu
+                        that.menues[section].css('z-index',102).show('fade',{},500); //show over current section menu
 //console.log('instant '+section);                        
                         that._collapseMainMenuPanel(true); 
                     }
@@ -293,7 +307,7 @@ $.widget( "heurist.mainMenu6", {
     //
     _mousein_ExploreMenu: function(e) {
         
-        if(this._explorer_menu_locked || this.element.find('.ui-selectmenu-open').length>0) return;
+        if( this._isExplorerMenu_locked() ) return;
         this._explorer_menu_locked = false;
 
         clearTimeout(this._myTimeoutId3); this._myTimeoutId3 = 0;
@@ -338,19 +352,22 @@ $.widget( "heurist.mainMenu6", {
             expandRecordAddSetting = true;
         }      
 
-        
+        //menu section has several containers with particular widgets
         var cont = this.menues['explore'].find('#'+action_name);
         //console.log('_mousein_ExploreMenu '+action_name+'  '+cont.length);            
         if(cont.length==0){
             cont = $('<div id="'+action_name+'" class="explore-widgets">').appendTo(this.menues['explore']);
+        }else if( cont.is(':visible') && action_name!='svs_list'){
+            return;
         }
+        
         //cont.show();
         //var cont = this.menues['explore'];
         var explore_top = '2px',
         explore_height = 'auto',
         explore_left = 204;
 
-        //deay before open explore section menu
+        //delay before open explore section menu
         this._myTimeoutId3 = setTimeout(function(){
 
             that.menues['explore'].find('.explore-widgets').hide(); //hide others
@@ -388,6 +405,11 @@ $.widget( "heurist.mainMenu6", {
                 that.menues['explore'].css({width:'400px',overflow:'hidden'});
 
 
+            }
+            else if(action_name=='svsAdd'){
+                that._closeSectionMenu('explore');
+                that.addSavedSearch( false );
+                return;
             }
             else if(action_name=='svs_list'){
 
@@ -457,10 +479,15 @@ $.widget( "heurist.mainMenu6", {
 
             }
             
-            that.menues['explore'].css({left:explore_left, top:explore_top, height:explore_height});
-            cont.show(); //show current
+            //attempt for non modal that.closeSavedSearch();
             
+            that.menues['explore'].css({left:explore_left, top:explore_top, height:explore_height});
+            
+            //show menu section
             that.menues['explore'].css({'z-index':103}).show(); 
+            
+            cont.show('fade',{},500); //show current widget in menu section
+            
             if(explore_left>201){
                 that.menues_explore_gap.css({top:explore_top, height:that.menues['explore'].height()}).show();
             }else{
@@ -490,6 +517,9 @@ $.widget( "heurist.mainMenu6", {
         this.menues[section].css({'z-index':0}).hide(); 
         this.menues_explore_gap.hide();
         //this.menues[section].css({'z-index':2,left:'200px'}).show(); 
+        if(section=='explore'){
+            //attempt for non modal this.closeSavedSearch();
+        }
     },
     
     //
@@ -732,16 +762,26 @@ console.log('prvent colapse');
     },
 
     //
+    //
+    //
+    closeSavedSearch: function(){
+        if(this.edit_svs_dialog)
+            this.edit_svs_dialog.closeEditDialog();
+    },
+        
+    //
     // define new saved filter/search
     //
-    addSavedSearch: function(){
+    addSavedSearch: function( is_modal ){
 
         if(this.edit_svs_dialog==null){
             this.edit_svs_dialog = new hSvsEdit();    
         }
+        
+        is_modal = (is_modal!==false);
 
         this.edit_svs_dialog.showSavedFilterEditDialog( 'saved', null, null, this.currentSearch , false, 
-                { my: "left top", at: "right+4 top", of:this.divMainMenu}, 
+                        { my: "left top", at: "right+4 top", of:this.divMainMenu}, 
             function(){
                 window.hWin.HAPI4.currentUser.usr_SavedSearch = null;
                 window.hWin.HAPI4.currentUser.ugr_SvsTreeData = null;

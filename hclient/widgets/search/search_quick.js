@@ -19,7 +19,7 @@
 */
 
 
-$.widget( "heurist.search_quick", $.heurist.recordAccess, {
+$.widget( "heurist.search_quick", $.heurist.recordAction, {
 
     // default options
     options: {

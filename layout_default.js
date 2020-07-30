@@ -209,7 +209,7 @@ var cfg_layouts = [
                      dockable:false, dragable:false, css:{'background-color':'white','font-size':'0.9em'}, //AO 2020-01-30 ,'font-size':'12px'
                      options:{empty_remark:null, show_menu:true, support_collection:true, is_h6style:true,
                      XXXrecordDivEvenClass: 'ui-widget-content',
-                     show_savefilter:true, show_search_form:true, show_inner_header:true, 
+                     show_savefilter:false, show_search_form:true, show_inner_header:true, 
                      show_url_as_link:true} }]},
         east:{size:'50%', Xminsize:300, dropable:false,
             tabs:[{dockable:true, dragable:false, resizable:false, adjust_positions:true, //css:{'font-size':'0.95em'},
