@@ -365,12 +365,26 @@ span.fancytree-node:hover{
 .ui-heurist-design-fade{background:<?php uout('design_fade_bg', '#D4DBEA');?> 0% 0% no-repeat padding-box;}
 .ui-heurist-design .ui-heurist-title{color:<?php uout('design_title_color', '#4477B9');?>}
 
+.ui-heurist-design .ui-state-active, 
+.ui-heurist-design .fancytree-active,
+.ui-heurist-design .fancytree-node:hover
+{
+        background:<?php uout('design_active', '#AFBFDA');?> !important;
+}
+
 /* SECTION SCHEME: IMPORT */
 .ui-heurist-import.ui-heurist-header, .ui-heurist-import .ui-heurist-header{
     background:<?php uout('import_bg', '#307D96');?> 0% 0% no-repeat padding-box;
 }
 .ui-heurist-import-fade{background:<?php uout('import_fade_bg', '#9BB8C2');?> 0% 0% no-repeat padding-box;}
 .ui-heurist-import .ui-heurist-title{color:<?php uout('import_title_color', '#307D96');?>}
+
+.ui-heurist-import .ui-state-active, 
+.ui-heurist-import .fancytree-active,
+.ui-heurist-import .fancytree-node:hover
+{
+        background:<?php uout('import_active', '#86CDE8');?> !important;
+}
 
 /* SECTION SCHEME: EXPLORE */
 .ui-heurist-explore.ui-heurist-header, .ui-heurist-explore .ui-heurist-header, 

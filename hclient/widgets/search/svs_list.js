@@ -45,6 +45,8 @@ $.widget( "heurist.svs_list", {
     loaded_saved_searches: null,   //loaded searches for button mode - based on options.allowed_XXX
     svs_order: null,
     search_faceted: null,
+    
+    groups_desc:{}, //cache for groups descriptions
 
     currentSearch: null,
     hSvsEdit: null,
@@ -113,8 +115,8 @@ $.widget( "heurist.svs_list", {
             this.div_header =  $('<div class="ui-heurist-header" style="top:0px;">Saved filter</div>')
                 .appendTo(this.element);
                 
-            this.div_header_sub = $('<div style="top:46px;font-style:italic;font-size:9px;position: absolute;left: 20px;">'
-                    +'These filters are only visible to you</div>')
+            this.div_header_sub = $('<div style="top:46px;font-style:italic;font-size:9px;right:10px;height:auto;position: absolute;left: 20px;">'
+                    +'</div>')
                 .hide()
                 .appendTo(this.element);
         
@@ -668,20 +670,66 @@ $.widget( "heurist.svs_list", {
         if(!treeData) return;
         
         var name = treeData.title;
-        var itop = 36;
-        if(groupID>0){
+        
+        if (groupID>0 && groupID!=window.hWin.HAPI4.currentUser.ugr_ID) {
             name = window.hWin.HAPI4.sysinfo.db_usergroups[groupID];        
+            var that = this;
+
+            function __asjustSubHeader(desc){            
+                    if(!window.hWin.HEURIST4.util.isempty(desc)){
+                        that.div_header_sub.empty().text(desc);
+                        that.div_header_sub.show();
+                        setTimeout(function(){
+                        that.search_tree.css({ top:(that.div_header_sub.height()+46) });    
+                        },50);
+                    }else{
+                        that.search_tree.css({ top:36 });    
+                        that.div_header_sub.hide();
+                    }
+            }
+            if(window.hWin.HEURIST4.util.isnull(that.groups_desc[groupID]))
+            {
+            
+            //search for group description
+            var request = {
+                'a'          : 'search',
+                'entity'     : 'sysGroups',
+                'details'    : 'full',
+                'ugr_ID'     : groupID
+            };
+            window.hWin.HAPI4.EntityMgr.doRequest(request, 
+                function(response){
+                    var desc = '';
+                    if(response.status == window.hWin.ResponseStatus.OK){
+                        var resp = new hRecordSet( response.data );
+                        
+                        var rec = resp.getFirstRecord();
+                        if(rec){
+                            desc = resp.fld(rec, 'ugr_Description');
+                            if(window.hWin.HEURIST4.util.isempty(desc)){
+                                desc  = resp.fld(rec, 'ugr_LongName');    
+                            }
+                        }
+
+                    }else{
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                    }
+                    that.groups_desc[groupID] = desc;
+                    __asjustSubHeader(desc);
+                }
+            );
+            }else{
+                __asjustSubHeader( that.groups_desc[groupID] );
+            }
+            
+        }else if (groupID=='all' || groupID=='bookmark'){
+            name = window.hWin.HR((groupID=='bookmark')?'My Bookmarks':'My Searches');
+            this.div_header_sub.text('These filters are only visible to you').show();
+            this.search_tree.css({top:56});    
+        }else{
+            this.search_tree.css({top:36});    
             this.div_header_sub.hide();
-        }else if (groupID=='all'){
-            name = window.hWin.HR('My Searches');
-            this.div_header_sub.show();
-            itop = 56;
-        }else if (groupID=='bookmark'){
-            name = window.hWin.HR('My Bookmarks')
-            this.div_header_sub.show();
-            itop = 56;
         }
-        this.search_tree.css({top:itop});
         
         this.div_header.text( name );
         
@@ -935,13 +983,7 @@ $.widget( "heurist.svs_list", {
                     if(ui.cmd=="addFolder"){
 
                         setTimeout(function(){
-                            var tree = that.treeviews[groupID];
-                            var node = tree.rootNode;
-                            node.folder = true;
-
-                            node.editCreateNode( "child", {title:"", folder:true}); //New folder
-                            that._saveTreeData( groupID );
-                            $("#addlink"+groupID).css('display', 'none');
+                            that._addNewFolder(groupID);
                             }, 300);
                         //tree.trigger("nodeCommand", {cmd: ui.cmd});
                     }else{
@@ -953,6 +995,19 @@ $.widget( "heurist.svs_list", {
         return context_opts;
     },
 
+    //
+    //
+    //
+    _addNewFolder: function(groupID){
+        var tree = this.treeviews[groupID];
+        var node = tree.rootNode;
+        node.folder = true;
+
+        node.editCreateNode( "child", {title:"", folder:true}); //New folder
+        this._saveTreeData( groupID );
+        $("#addlink"+groupID).css('display', 'none');
+    },
+    
     //
     //
     //
@@ -1524,6 +1579,7 @@ $.widget( "heurist.svs_list", {
                     */
                 ],
                 open: function(){
+                    //prevent collapse heurist main menu 
                     if($.isFunction(that.options.menu_locked)){
                         that.options.menu_locked.call( this, true );
                     }
@@ -1556,33 +1612,66 @@ $.widget( "heurist.svs_list", {
                 }
             });
 
-
             var context_opts = this._getAddContextMenu(groupID);
+            var tree_links;
+            
+            if(this.options.is_h6style){
+            
+                tree_links = $('<div '
+                +'class="ui-heurist-title" style="width: 100%;border-top:1px gray solid; padding:8px 0px 0px 22px;margin-top:4px">'
+                +'Add Filters</div>'
+            +'<ul class="by-usage" style="list-style-type:none;margin:0;padding:6px" data-group="'+groupID+'">'
+                +'<li data-action="saved"><span class="ui-icon ui-icon-plus"/>Simple</li>'
+                +'<li data-action="faceted"><span class="ui-icon ui-icon-box"/>Faceted</li>'
+                +'<li data-action="rules"><span class="ui-icon ui-icon-shuffle"/>RuleSet</li>'
+                +'<li data-action="folder"><span class="ui-icon ui-icon-folder-open"/>Folder</li></ul>');
+                
+                tree_links.find('li').addClass('fancytree-node')
+                            .css({'font-size':'smaller',padding:'2px 14px'});
+                tree_links.find('li > span').css({'margin-right':'4px','font-size':'1em'});
+                
+                this._on(tree_links.find('li'), {click:function(e){
 
-            var append_link = $("<a>",{href:'#'})
-                .html('<span class="ui-icon ui-icon-plus hasmenu2" '
-                    +' style="display:inline-block; vertical-align: bottom"></span>'
-                    +'<span class="hasmenu2">add</span>')
-                .click(function(event){
-                    append_link.contextmenu('open', append_link.find('span.ui-icon') );
-                    //$(this).parent('a').contextmenu('open', $(event.target) );//$(this).parent('a'));
-             });
-             append_link.contextmenu(context_opts);
+                    var ele = $(e.target).is('li')?$(e.target) :$(e.target).parent('li');
+                    var groupID = ele.parent('ul').attr('data-group');
+                    var cmd = ele.attr('data-action');
+                    var node = null;
 
-            //treedata is empty - add div - to show add links
-            var tree_links = $('<div>', {id:"addlink"+groupID})
-            .css({'display': treeData && treeData.length>0?'none':'block', 'padding-left':'1em'} )
-            .append( append_link );
+                    if(cmd=='folder'){
+                        this._addNewFolder( groupID );
+                    }else{
+                        this.editSavedSearch( cmd, groupID, null, null, node );    
+                    }
+                    
+                }});
+            }else{
+
+                var append_link = $("<a>",{href:'#'})
+                    .html('<span class="ui-icon ui-icon-plus hasmenu2" '
+                        +' style="display:inline-block; vertical-align: bottom"></span>'
+                        +'<span class="hasmenu2">add</span>')
+                    .click(function(event){
+                        append_link.contextmenu('open', append_link.find('span.ui-icon') );
+                        //$(this).parent('a').contextmenu('open', $(event.target) );//$(this).parent('a'));
+                 });
+                 append_link.contextmenu(context_opts);
+
+                //treedata is empty - add div - to show add links
+                tree_links = $('<div>', {id:"addlink"+groupID})
+                .css({'display': treeData && treeData.length>0?'none':'block', 'padding-left':'1em'} )
+                .append( append_link );
+                
+            }
 
             
             if(window.hWin.HEURIST4.util.isnull(container)){
-                res = $('<div>').append(tree_links).append(tree);
+                res = $('<div>').append(tree).append(tree_links);
             }else{
                 container.empty();
-                container.append(tree_links).append(tree);
+                container.append(tree).append(tree_links);
                 res = container;
             }
-
+            
             $.each( tree.find('span.fancytree-node'), function( idx, item ){
 
                 var ele = $(item); //.find('span.fancytree-node');
@@ -1965,7 +2054,7 @@ $.widget( "heurist.svs_list", {
         if(window.hWin.HAPI4.currentUser.usr_SavedSearch[svsID]){
             currGroupId = window.hWin.HAPI4.currentUser.usr_SavedSearch[svsID][_GRPID];
             if(currGroupId == window.hWin.HAPI4.currentUser.ugr_ID){
-                 currGroupId = (that.treeviews['all']._id == node.tree._id)?'all':'bookmark';
+                 currGroupId = (node==null || that.treeviews['all']._id == node.tree._id)?'all':'bookmark';
                  isPrivate = true;
             }
         }
@@ -2040,6 +2129,12 @@ $.widget( "heurist.svs_list", {
             if(null == this.edit_dialog){
                 this.edit_dialog = new hSvsEdit();
             }
+            var is_lock = $.isFunction(this.options.menu_locked);
+            if(is_lock) {
+                this.options.menu_locked.call( this, true );
+                setTimeout(function(){that.options.menu_locked.call( that, false );}, 300);
+            }
+            
             //this.edit_dialog.callback_method  = callback;
             this.edit_dialog.showSavedFilterEditDialog( mode, groupID, svsID, squery, is_short, 
                 this.options.is_h6style?{ my: "left top", at: "right+4 top", of: this.element}:null, callback );

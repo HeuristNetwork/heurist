@@ -174,7 +174,7 @@ $.widget( "heurist.search", {
         //promt to be shown when input has complex search expression (json search)
         this.input_search_prompt2 = $( "<span>" )
         .html('<span style="font-size:1em">'+window.hWin.HR("filter")
-                +'</span>&nbsp;&nbsp;<span class="ui-icon ui-icon-eye" style="font-size:2em;width: 1.7em;margin-top:1px"/>')
+                +'</span>&nbsp;&nbsp;<span class="ui-icon ui-icon-eye" style="font-size:1.8em;width: 1.7em;margin-top:1px"/>')
         .css({'width':'370', height:'20px', 'padding':'3px', 'margin':'2px',
               'position': 'absolute'})
         .appendTo( this.div_search_input );

@@ -175,7 +175,7 @@ $.widget( "heurist.mainMenu6", {
     _isExplorerMenu_locked: function(){
         
         var isSvsEditVisible = ( this.edit_svs_dialog && this.edit_svs_dialog.isModified() );
-        
+//console.log('>>>'+isSvsEditVisible);        
         return (isSvsEditVisible || this._explorer_menu_locked || this.element.find('.ui-selectmenu-open').length>0);
     },
 
@@ -183,7 +183,7 @@ $.widget( "heurist.mainMenu6", {
     // collapse main menu panel on explore mouseout
     //    
     _collapseMainMenuPanel: function(is_instant) {
-//console.log(' _collapseMainMenuPanel '+is_instant+ '  '+this._myTimeoutId  );
+
         if( this._isExplorerMenu_locked() ) return;
         
         if(is_instant && this._myTimeoutId>0){
@@ -279,10 +279,9 @@ $.widget( "heurist.mainMenu6", {
             //hide all except active
             var that = this;
             $.each(this.sections, function(i, section){
-                if(section_name==section){
+                if(section_name==section && that._active_section!=section){
                     if(section!='explore'){
                         that.menues[section].css('z-index',102).show('fade',{},500); //show over current section menu
-//console.log('instant '+section);                        
                         that._collapseMainMenuPanel(true); 
                     }
                 }else if(that._active_section!=section || that._active_section=='explore'){
@@ -669,6 +668,7 @@ console.log('prvent colapse');
                 item = $(item);
                 var action_id = item.attr('data-action');
                 if( action_id ){
+                    item.addClass('fancytree-node');
                     var link = widget.mainMenu('menuGetActionLink', action_id);    
                     
                     $('<span class="ui-icon '+link.attr('data-icon')+'"/>'
@@ -688,6 +688,10 @@ console.log('prvent colapse');
         this._on(this.menues[section].find('li[data-action]'),{click:function(e){
             var li = $(e.target);
             if(!li.is('li')) li = li.parents('li');
+            
+            this.menues[section].find('li').removeClass('ui-state-active');
+            li.addClass('ui-state-active');
+            
             this._switchContainer(section, true);
             widget.mainMenu('menuActionById', li.attr('data-action'), 
                 {container:this.containers[section]}
