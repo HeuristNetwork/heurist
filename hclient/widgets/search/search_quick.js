@@ -28,7 +28,6 @@ $.widget( "heurist.search_quick", $.heurist.recordAction, {
         
         isdialog: false, 
         supress_diaog_title: true,
-        mouseover: null, //callback to prevent close h6 menu 
         menu_locked: null, //callback to prevent close h6 menu on mouse exit
         
         button_class: 'ui-button-action',

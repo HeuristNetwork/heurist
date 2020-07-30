@@ -136,6 +136,7 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
         <script type="text/javascript" src="hclient/widgets/search/search.js"></script>
         <script type="text/javascript" src="hclient/widgets/search/search_entity.js"></script>
         <script type="text/javascript" src="hclient/widgets/search/search_quick.js"></script>
+        <script type="text/javascript" src="hclient/widgets/search/search_advanced.js"></script>
         
         <script type="text/javascript" src="hclient/widgets/dropdownmenus/mainMenu.js"></script>
         <script type="text/javascript" src="hclient/widgets/dropdownmenus/mainMenu6.js"></script>

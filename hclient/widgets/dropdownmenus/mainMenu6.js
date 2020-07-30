@@ -386,9 +386,9 @@ $.widget( "heurist.mainMenu6", {
             else if(action_name=='search_quick'){
 
                 if(!cont.search_quick('instance'))
+                    //initialization
                     cont.search_quick({
                         onClose: function() { that._closeSectionMenu('explore'); that._switchContainer('explore'); },
-                        mouseover: function() { that._resetCloseTimers()},
                         menu_locked: function(is_locked){ 
                             that._resetCloseTimers();
                             that._explorer_menu_locked = is_locked; 
@@ -405,6 +405,19 @@ $.widget( "heurist.mainMenu6", {
                 that.menues['explore'].css({width:'400px',overflow:'hidden'});
 
 
+            }
+            else if(action_name=='search_advanced'){
+                
+                if(!cont.search_advanced('instance'))
+                    //initialization
+                    cont.search_advanced({
+                        onClose: function() { that._closeSectionMenu('explore'); that._switchContainer('explore'); },
+                        menu_locked: function(is_locked){ 
+                            that._resetCloseTimers();
+                            that._explorer_menu_locked = is_locked; 
+                    }  });    
+
+                that.menues['explore'].css({width:'606px', overflow:'hidden'});
             }
             else if(action_name=='svsAdd'){
                 that._closeSectionMenu('explore');
