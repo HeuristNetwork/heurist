@@ -779,6 +779,11 @@ EOD;
                 
                 $def_field = $def_dts[$ftId]['commonFields'];
                 
+                if($def_field[$idx_type] == "relmarker"){ //ignore
+                    continue;
+                }
+                
+                
                 $new_values = array();
                 if($def_field[$idx_type] == "enum" || 
                    $def_field[$idx_type] == "relationtype")
