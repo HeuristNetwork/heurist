@@ -785,7 +785,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
     },
 
     //
-    //
+    // h6 style do not popup dialog - show iframe inline
     //
     showDialogInDiv: function(url, options){
 
@@ -801,6 +801,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                
             if($dosframe.length==0)
             {
+                //add h6 style header    
                 _innerTitle = $('<div>').addClass('ui-heurist-header')
                         .appendTo($container);
 
@@ -861,8 +862,12 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                             .css({'position':'absolute', 'right':'34px', 'top':'6px', height:24, width:24})
                             .appendTo(_innerTitle);
                     
-                    window.hWin.HEURIST4.ui.initHelper($info_button, null, options["context_help"]);
-                    //window.hWin.HEURIST4.ui.initDialogHintButtons(_innerTitle, null, options["context_help"], true);
+                    window.hWin.HEURIST4.ui.initHelper({
+                            button:$info_button, 
+                            url:options['context_help'],
+                            position:{my:'right top', at:'right top', of:$container},
+                            container: $container
+                    });
             }
                 
 

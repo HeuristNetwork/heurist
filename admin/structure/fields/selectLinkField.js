@@ -33,10 +33,10 @@ $(document).ready(function() {
 
         var rty_ID, target_ID;
 
-        window.hWin.HEURIST4.ui.initHelper( $('#hint_more_info1'), 
-                            'Link types', 
-                            window.hWin.HAPI4.baseURL+'context_help/link_types.html #content_body',
-                            { my: "left top", at: "left top", of:$(window.frameElement)}, true); 
+        window.hWin.HEURIST4.ui.initHelper( { button:$('#hint_more_info1'), 
+                            title:'Link types', 
+                            url:window.hWin.HAPI4.baseURL+'context_help/link_types.html #content_body',
+                            position:{ my: "left top", at: "left top", of:$(window.frameElement)}, no_init:true} ); 
 /*                            
         window.hWin.HEURIST4.ui.initHelper( $('#hint_more_info2'), 
                             'Field data type: Relationship marker', 

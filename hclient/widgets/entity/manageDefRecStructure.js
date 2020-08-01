@@ -1403,9 +1403,9 @@ dty_TermIDTreeNonSelectableIDs
 
         var help_button = $('<span style="padding-left:20px;color:gray;cursor:pointer" class="ui-icon ui-icon-circle-info"/>')
                 .appendTo(edit_ele.find('.input-div'));
-        window.hWin.HEURIST4.ui.initHelper(help_button, 'Creation of records as children', 
-                    window.hWin.HAPI4.baseURL+'context_help/parent_child_instructions.html #content'
-                    , null, true);                
+        window.hWin.HEURIST4.ui.initHelper( {button:help_button, title:'Creation of records as children', 
+                    url:window.hWin.HAPI4.baseURL+'context_help/parent_child_instructions.html #content',
+                    no_init:true} );                
         
             
         edit_ele= this._editing.getFieldByName('rst_Repeatability');

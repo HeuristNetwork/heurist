@@ -35,10 +35,9 @@
                     var queryBuilder = new hQueryBuilder(query, $('#div_main'));
                     
                     // init helper (see utils.js)
-                    window.hWin.HEURIST4.ui.initHelper( $('#btn_help'), 
-                            'Query Builder', 
-                            '../../context_help/search_query_builder.html #content',
-                            'top');
+                    window.hWin.HEURIST4.ui.initHelper( {button:$('#btn_help'), 
+                            title:'Query Builder', 
+                            url:'../../context_help/search_query_builder.html #content'});
                 }
             }            
         </script>

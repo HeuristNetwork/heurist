@@ -90,7 +90,7 @@ $.widget( "heurist.mainMenu6", {
                 that._switchContainer( 'explore' );
 
                 that._updateDefaultAddRectype();
-                that._createListOfGroups();
+                that._createListOfGroups(); //add list of groups for saved filters
                 
                 that.divMainMenu.find('.menu-text').hide();
                 
@@ -110,16 +110,20 @@ $.widget( "heurist.mainMenu6", {
                 }});
 */                
         });
+        
+        //that.initHelpDiv();
 
         $(window.hWin.document).on(window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE
                 +' '+window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, 
             function(e, data) {
                 //if(e.type == window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE){}
+                //refresh list of rectypes afrer structure edit
                 that._updateDefaultAddRectype();
         });
         
         $(window.hWin.document).on(window.hWin.HAPI4.Event.ON_REC_SEARCHSTART, function(e, data){
             if(data && !data.increment && !data.reset){
+                //keep current search for "Save Filter"
                 that.currentSearch = window.hWin.HEURIST4.util.cloneJSON(data);
             }
         });
@@ -804,6 +808,31 @@ console.log('prvent colapse');
                 window.hWin.HAPI4.currentUser.ugr_SvsTreeData = null;
             }    
         );
+    },
+    
+    //
+    //
+    //
+    initHelpDiv: function(){
+        
+        this.helper_div = $('<div>').addClass('ui-helper-popup').hide().appendTo(this.element);
+        
+        var _innerTitle = $('<div>').addClass('ui-heurist-header').appendTo(this.helper_div);  
+                                
+        $('<span>').appendTo(_innerTitle);
+        var btn = $('<button>')
+                    .button({icon:'ui-icon-closethick',showLabel:false, label:'Close'}) 
+                    .css({'position':'absolute', 'right':'4px', 'top':'6px', height:24, width:24})
+                    .appendTo(_innerTitle);
+                    
+                    
+        this._on( btn, {click : function(){
+                    this.helper_div.hide();
+        }});
+                                
+        $('<div>').css({top:38}).addClass('ent_wrapper').appendTo(this.helper_div);  
+        //this.containers[this._active_section]
     }
+    
     
 });

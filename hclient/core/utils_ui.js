@@ -1751,85 +1751,169 @@ window.hWin.HEURIST4.ui = {
     
     //
     // Inits helper div (slider) and button
-    // 
-    // position top|button- @todo auto detect position
+    //  options:  
+    //      button - ref to element
+    //      no_init - do not init button
+    //      title - header of popup
+    //      url - ref to help file
+    //      position - juquery position - default to bottom of button
+    //      container - adds help to this container rather than popup
     //
-    initHelper: function(help_button, content_title, content_url, position, nobutton){
+    initHelper: function( options ){
+        
+        
+        var $help_button = $(options.button);
 
-        var $help_button = $(help_button);
-
-        if(nobutton!==true){ //do not init button    ui-icon-circle-b-info
+        if(options.no_init!==true){ //do not init button    ui-icon-circle-b-info
             $help_button.button({icons: { primary: "ui-icon-circle-help" }, label:'Show context help', text:false});
         }
         
+        var is_popup = false;
+        if(!options.container){
+            is_popup = true;
+            options.container = $(document.body);
+        }
+        var _innerTitle;
+        var oEffect = {effect:'slide',direction:'right',duration:500};
+        
+        function __closeHelpDiv($helper_div){
+            $helper_div.hide(oEffect);
+            options.container.children('.ent_content_full').css({right:1});
+        }
+        //ui-menu6
+        
+        
         $help_button.on('click', function(){
-                        var $helper_div = $(document.body).find('#helper');
+            
+                        var $helper_div = options.container.find('.ui-helper-popup');
                         
                         if($helper_div.length==0){
-                            $helper_div = $('<div>',{id:'helper'}).hide().appendTo($(document.body));
+                            $helper_div = $('<div>').addClass('ui-helper-popup')
+                                            .hide().appendTo(options.container);
                             
-                            $helper_div.dialog({
-                                        autoOpen: false, 
-                                        title: window.hWin.HR(content_title),
-                                        show: {
-                                            effect: "slide",
-                                            direction : 'right',
-                                            duration: 500
-                                        },
-                                        hide: {
-                                            effect: "slide",
-                                            direction : 'right',
-                                            duration: 500
-                                        }
-                                     });                 
-                        }
-                        
-                        if($helper_div.dialog( "isOpen" )){
-                            $helper_div.dialog( "close" );
-                        }else{                        
-                        
-                            //var div_height = Math.min(500, (document.body).height()-$help_button.top());
-                            //var div_width  = Math.min(600, (document.body).width() *0.8);
-                            divpos = null;
-                            if($.isPlainObject(position)){
-                                divpos = position;
-                                //divpos['of'] = $help_button;
-                            }else if(position=='top'){ //show div above button
-                                divpos = { my: "right bottom", at: "right top", of: $help_button }
+                            if(is_popup){
+                                $helper_div.dialog({
+                                            autoOpen: false, 
+                                            //title: window.hWin.HR(options.title),
+                                            show: oEffect,
+                                            hide: oEffect
+                                         });                 
                             }else{
-                                divpos = { my: "right top", at: "right bottom", of: $help_button };
+                                /*
+                                _innerTitle = $('<div>').addClass('ui-heurist-header').appendTo($helper_div);  
+                                
+                                $('<span>').appendTo(_innerTitle);
+                                $('<button>').button({icon:'ui-icon-closethick',showLabel:false, label:'Close'}) 
+                                                        //classes:'ui-corner-all ui-dialog-titlebar-close'})
+                                         .css({'position':'absolute', 'right':'4px', 'top':'6px', height:24, width:24})
+                                         .appendTo(_innerTitle)
+                                         .on({click:function(){
+                                             $helper_div.hide(oEffect);
+                                             //__onDialogClose();
+                                         }});
+                                
+                                
+                                $('<div>').css({top:38}).addClass('ent_wrapper').appendTo($helper_div);  
+                                */
                             }
-
-                           
-                            $helper_div.load(content_url, function(response, status, xhr){
-                                
-                                if(status=='error'){
-                                    
-                                    window.hWin.HEURIST4.msg.showMsgFlash('Sorry context help is not found');
-                                    
-                                }else{
-
-                                    var div_height = Math.min(400, $(document.body).height()-$help_button.position().top);
-                                    var div_width  = Math.min(700, $(document.body).width() *0.8);
-                                   
-                                    var title = (content_title)?content_title:'Heurist context help';
-                                    var head = $helper_div.find('#content>h2');
-                                    if(head.length==1){
-                                        title = head.text();
-                                        head.empty();
-                                    }
-                                
-                                    if(title!='') $helper_div.dialog('option','title',title);
-                                    $helper_div.dialog('option', {width:div_width, height: 'auto', position: divpos});
-                                    $helper_div.dialog( "open" );
-                                    setTimeout(function(){
-                                            $helper_div.find('#content').scrollTop(1);
-                                    }, 1000);
-                                    
-                                    $( document ).one( "click", function() { $helper_div.dialog( "close" ); });
-                                }
-                            });
                         }
+                        
+                        if(is_popup){
+                            
+                            if($helper_div.dialog( "isOpen" )){
+                                $helper_div.dialog( "close" );
+                            }else{                        
+                            
+                                //var div_height = Math.min(500, (document.body).height()-$help_button.top());
+                                //var div_width  = Math.min(600, (document.body).width() *0.8);
+                                divpos = null;
+                                if($.isPlainObject(position)){
+                                    divpos = position;
+                                    //divpos['of'] = $help_button;
+                                }else if(position=='top'){ //show div above button
+                                    divpos = { my: "right bottom", at: "right top", of: $help_button }
+                                }else{
+                                    divpos = { my: "right top", at: "right bottom", of: $help_button };
+                                }
+                                
+                                $helper_div.load(options.url, function(response, status, xhr){
+                                    
+                                    if(status=='error'){
+                                        
+                                        window.hWin.HEURIST4.msg.showMsgFlash('Sorry context help is not found');
+                                        
+                                    }else{
+
+                                        var div_height = Math.min(400, $(document.body).height()-$help_button.position().top);
+                                        var div_width  = Math.min(700, $(document.body).width() *0.8);
+                                       
+                                        var head = $helper_div.find('#content>h2');
+                                        if(head.length==1){
+                                            if(!options.title) options.title = head.text();
+                                            head.empty();
+                                        }
+                                        if(!options.title){
+                                            options.title = 'Heurist context help';                                      
+                                        }
+                                    
+                                        $helper_div.dialog('option','title', options.title);
+                                        $helper_div.dialog('option', {width:div_width, height: 'auto', position: divpos});
+                                        $helper_div.dialog( "open" );
+                                        setTimeout(function(){
+                                                $helper_div.find('#content').scrollTop(1);
+                                        }, 1000);
+                                    
+                                        //click outside    
+                                        $( document ).one( "click", function() { $helper_div.dialog( "close" ); });
+                                    }
+                                });
+                            }
+                            
+                            
+                        }else{
+                            
+                            if($helper_div.is(':visible')){
+                                __closeHelpDiv($helper_div);                        
+                            }else{
+                                //find('.ent_wrapper')
+                                $helper_div.load(options.url, function(response, status, xhr){
+
+                                    if(status=='error'){
+                                        
+                                        window.hWin.HEURIST4.msg.showMsgFlash('Sorry context help is not found');
+                                        
+                                    }else{
+
+                                        /*
+                                        $helper_div.css({position:'absolute',right:1,top:38,bottom:1,
+                                                    width:300,'font-size':'0.9em',padding:'4px'});
+                                        */
+                                        
+                                        var head = $helper_div.find('#content>h2');
+                                        if(head.length==1){
+                                            if(!options.title) options.title = head.text();
+                                            head.empty();
+                                        }
+                                        if(!options.title){
+                                            options.title = 'Heurist context help';                                      
+                                        }
+                                        
+                                        //_innerTitle.find('span').text( options.title );
+                                        $helper_div.show( 'slide', {direction:'right'}, 500 );                        
+                                        options.container.children('.ent_content_full').css({right:305});
+                                    
+                                        setTimeout(function(){
+                                                $helper_div.find('#content').scrollTop(1);
+                                        }, 1000);
+                                    }
+
+                                
+                                });
+                            }
+                            
+                        } 
+                        
+                        
                  });
                  
                  

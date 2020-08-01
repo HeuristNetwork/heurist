@@ -108,9 +108,9 @@ L.Control.Help = L.Control.extend({
             .addClass('ui-icon ui-icon-help')
             .appendTo(container);
         
-        window.hWin.HEURIST4.ui.initHelper(container, null, 
-                window.hWin.HAPI4.baseURL+'context_help/mapping_overview.html #content',
-                { my: "center center", at: "center center", of: $(window.hWin.document).find('body') },true);
+        window.hWin.HEURIST4.ui.initHelper({ button:container,
+                url:window.hWin.HAPI4.baseURL+'context_help/mapping_overview.html #content',
+                position:{ my: "center center", at: "center center", of: $(window.hWin.document).find('body') }, no_init:true} );
         
         /*L.DomEvent
             .on(container, 'click', this._onClick, this);*/

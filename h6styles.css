@@ -23,7 +23,7 @@ body {
 }
 
 .logo {
-    background-image: url("hclient/assets/v6/h6logo.png") !important;
+    background-image: url("hclient/assets/v6/h6logo_inv.png") !important;
     background-repeat: no-repeat !important;
     background-size: contain;
     width: 98px;
@@ -70,18 +70,20 @@ body {
 /*   MAIN SIDE MENU */
 .ui-menu6{
     height:100%;
-    box-shadow: 3px 1px 3px #00000080;
+    /*box-shadow: 3px 1px 3px #00000080;*/
 }
     
 .ui-menu6 .ui-menu6-section, .ui-menu6 .ui-menu6-container{
     background: #FFFFFF 0% 0% no-repeat padding-box;
-    box-shadow: 2px 3px 10px #00000080;
     border: 0.25px solid #707070;
     border-radius: 3px;
     position:absolute;
     display:none;    
     top:2px;
     bottom:4px;
+}
+.ui-menu6 .ui-menu6-section{
+    box-shadow: 2px 3px 10px #00000080;
 }
 .ui-menu6 .ui-menu6-section{
     left:96px;
@@ -93,6 +95,15 @@ body {
     right: 4px;
 }
 
+.ui-helper-popup{
+    position:absolute;
+    display:none;    
+    top:38px;
+    bottom:4px;
+    right: 4px;
+    width:300px;
+    font-size:0.9em;
+}
 
 .menu-text{
     margin-left:0.5em;

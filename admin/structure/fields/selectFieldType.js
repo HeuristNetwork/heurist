@@ -30,14 +30,14 @@
 */
 $(document).ready(function() {
 	
-        window.hWin.HEURIST4.ui.initHelper( $('#hint_more_info1'), 
-                        'Field data type: Record pointer', 
-                        window.hWin.HAPI4.baseURL+'context_help/field_data_types.html #resource',
-                        { my: "left top", at: "left top", of:$(window.frameElement)}, true); 
-        window.hWin.HEURIST4.ui.initHelper( $('#hint_more_info2'), 
-                        'Field data type: Relationship marker', 
-                        window.hWin.HAPI4.baseURL+'context_help/field_data_types.html #relmarker',
-                        { my: "left top", at: "left top", of:$(window.frameElement)}, true); 
+        window.hWin.HEURIST4.ui.initHelper( {button:$('#hint_more_info1'), 
+                        title:'Field data type: Record pointer', 
+                        utl:window.hWin.HAPI4.baseURL+'context_help/field_data_types.html #resource',
+                        position:{ my: "left top", at: "left top", of:$(window.frameElement)}, no_init:true} ); 
+        window.hWin.HEURIST4.ui.initHelper( {button:$('#hint_more_info2'), 
+                        title:'Field data type: Relationship marker', 
+                        url:window.hWin.HAPI4.baseURL+'context_help/field_data_types.html #relmarker',
+                        position:{ my: "left top", at: "left top", of:$(window.frameElement)}, no_init:true} ); 
 
 	
 /*    
