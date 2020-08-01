@@ -50,9 +50,10 @@ if(!$format) $format='csv';
             // Callback function after initialization
             function onPageInit(success){
                 if(success){
+                    
                     importRecordsCSV = new hImportRecordsCSV(
                                 window.hWin.HEURIST4.util.getUrlParameter('imp_ID', window.location.search), 
-                                <?php echo $max_size; ?>, "<?php echo $format;?>");
+                                <?php echo $max_size; ?>, "<?php echo $format;?>" );
                 }
             }
         
@@ -130,12 +131,16 @@ if(!$format) $format='csv';
     </head>
 
     <!-- HTML -->
-    <body class="ui-heurist-bg-light" style="overflow:hidden;min-height:400px;font-size:0.7em;">
+    <body class="ui-heurist-bg-light ui-heurist-import" style="overflow:hidden;min-height:400px;font-size:0.7em;">
 
 <!-- STEP 1 upload data/select session -->    
-<div style="width:100%; height:100%;" id="divStep1">
+<div style="width:100%; height:100%;padding:20px;" id="divStep1">
+<!--
     <div class="ent_header" style="height:50%;padding:20px;">
-    
+    </div>
+    <div class="ent_content_full" style="top:50%;width:100%;">
+    </div>
+-->    
         
         <div id="divCsvIntro" style="padding:0 20 20 20;min-width:1210" class="format-csv">
         
@@ -153,35 +158,44 @@ If you have missing data for Required fields, you may find it convenient to set 
 
         <div id="divKmlIntro" style="padding:0 20 20 20;min-width:1210;display:none">
 <h4>This function imports a KML file into a set of map-enabled Heurist records</h4><br><br>
-<p>Each spatial object in the KML file generates a Heurist record which also stores attached attributes.  You may select the type of record to be created in a following step.</p><br><br>
-<p>A KML file can also be mapped directly by uploading it as a file attached to a record or storing it as a KML snippet in a text field within a record - use the KML record type for this purpose (standard in all databases). However, plotting KML in this way does not allow any additional information to be attached to the spatial objects, all you get is a single monolithic map layer.</<p><br><br>
+<p>Each spatial object in the KML file generates a Heurist record which also stores attached attributes.  You may select the type of record to be created in a following step.</p>
+<br><br>
+<p>A KML file can also be mapped directly by uploading it as a file attached to a record or storing it as a KML snippet in a text field within a record - use the KML record type for this purpose (standard in all databases). However, plotting KML in this way does not allow any additional information to be attached to the spatial objects, all you get is a single monolithic map layer.<p>
+<br><br>
 <p><a href="<?php echo HEURIST_BASE_URL;?>context_help/kml_import.html">More info</a></p>
         </div>      
         
     
-        <h2 style="display:inline-block;padding:5px;width:280px;text-align:right;" id="lblUploadFile">Upload new file (CSV/TSV)</h2>
+        <h2 class="ui-heurist-title" style="display:inline-block;padding:5px;width:250px;text-align:right;" id="lblUploadFile">
+            Upload new file (CSV/TSV)
+        </h2>
             <input type="file" id="uploadFile" style="display:none">
             <div id="btnUploadFile" title="Browse for CSV/TSV file that contains your data to be imported into Heurist database">
                 Upload File</div>
-            <span class="format-csv">The first line must have field names with correct number of fields.</span>
-            <span>Maximum size <?php echo $s_max_size?> - contact Heurist team if you need to upload a larger file</span>
+            <br>
+            <span class="heurist-helper2 format-csv" style="padding-left:250px">
+               The first line must have field names with correct number of fields.
+            </span>
+            <span class="heurist-helper2 format-csv">Maximum size <?php echo $s_max_size?> - contact Heurist team if you need to upload a larger file</span>
 
         <h2 style="padding:10 0 10 120">OR</h2>
         
-        <h2 style="display:inline-block;padding:5px;width:280px;text-align:right;">Select previously uploaded file</h2>
+        <h2 class="ui-heurist-title" style="display:inline-block;padding:5px;width:250px;text-align:right;">
+            Select previously uploaded file
+        </h2>
             <select id="selImportId" class="text ui-widget-content ui-corner-all" style="width:auto"></select>
             <a href="#" id="btnClearAllSessions"
                 title="All uploaded files will be removed from the sytem. Start this action if you sure that you do not need any import data anymore"
                             style="margin-left: 10px;">Clear all files</a>        
             
         <h2 style="padding:10 0 10 120"  class="format-csv">OR</h2>
-        <h2 style="display:inline-block;padding:5px;width:280px;text-align:right;"  class="format-csv">Paste delimited data in area below</h2>
+        <h2 class="ui-heurist-title format-csv" style="display:inline-block;padding:5px;width:250px;text-align:right;">
+            Paste delimited data in area below
+        </h2>
         <div id="btnUploadData"  class="format-csv"
             title="Upload content of text area below to server side and use it as source for CSV/TSV import operation">Upload Data</div>
-    </div>
-    <div class="ent_content_full" style="top:50%;width:100%;">
-        <textarea id="sourceContent" style="height:100%;width:100%;resize:none;" class="format-csv"></textarea>
-    </div>
+        <br><br>
+        <textarea id="sourceContent" style="min-height:300px;width:90%;resize:none;" class="format-csv"></textarea>
 </div>
 <!-- STEP 2 parse uploaded data -->
 <div style="width:100%; height:100%;display:none;" id="divStep2" class="selectmenu-parent">

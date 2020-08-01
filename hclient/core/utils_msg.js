@@ -798,6 +798,8 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             var $dosframe = $container.find('iframe');
             var _innerTitle = $container.children('.ui-heurist-header');
             var frame_container = $container.children('.ent_content_full');
+            var $info_button;
+            var $help_button;
                
             if($dosframe.length==0)
             {
@@ -806,7 +808,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                         .appendTo($container);
 
                 frame_container = $('<div>').addClass('ent_content_full')
-                        .css({'top':'38px'})
+                        .css({'top':'37px','bottom':'1px'})
                         .appendTo($container);
 
                 
@@ -814,17 +816,20 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                             .css({height:'100%', width:'100%'})
                             .appendTo( frame_container );
             }else{
-                if($dosframe.attr('src')==url){
+                if($dosframe.attr('src')==url){ //not changed
                     $container.show();
                     return;        
                 }
             }
 
+            _innerTitle.empty();
             if(options.title){
-                _innerTitle.text(options['title']).show();
-                frame_container.css('top','38px');
+                _innerTitle.text(options['title']);
+                _innerTitle.show();
+                frame_container.css('top','37px');
             }else{
-                _innerTitle.text('').hide();
+                _innerTitle.text('');
+                _innerTitle.hide();
                 frame_container.css('top','0px');
             }
             
@@ -844,7 +849,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                     return true;
                 }
             };
-            
+//console.log('define buttons');            
             //init close button     
             $('<button>').button({icon:'ui-icon-closethick',showLabel:false, label:'Close'}) 
                                     //classes:'ui-corner-all ui-dialog-titlebar-close'})
@@ -855,9 +860,9 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                      }});
                      
             //init help button     
-            if( options["context_help"] && window.hWin.HEURIST4.ui){
+            if( options["context_help"] && window.hWin.HEURIST4.ui ){
                     
-                    var $info_button = $('<button>').button({icon:'ui-icon-circle-help',showLabel:false, label:'Help'})
+                    $info_button = $('<button>').button({icon:'ui-icon-circle-help',showLabel:false, label:'Help'})
                             //.addClass('dialog-title-button')
                             .css({'position':'absolute', 'right':'34px', 'top':'6px', height:24, width:24})
                             .appendTo(_innerTitle);
@@ -866,8 +871,13 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                             button:$info_button, 
                             url:options['context_help'],
                             position:{my:'right top', at:'right top', of:$container},
-                            container: $container
+                            container: $container,
+                            is_open_at_once: true
                     });
+            }else{
+                //hide helper div
+                frame_container.css({right:1});
+                $container.children('.ui-helper-popup').hide();
             }
                 
 

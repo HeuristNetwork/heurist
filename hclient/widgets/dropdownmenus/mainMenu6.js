@@ -87,7 +87,7 @@ $.widget( "heurist.mainMenu6", {
                 });
 
                 //open explore by default  
-                that._switchContainer( 'explore' );
+                that.switchContainer( 'explore' );
 
                 that._updateDefaultAddRectype();
                 that._createListOfGroups(); //add list of groups for saved filters
@@ -380,7 +380,7 @@ $.widget( "heurist.mainMenu6", {
                 if(!cont.search_entity('instance'))
                     cont.search_entity({use_combined_select:true, 
                         mouseover: function(){that._resetCloseTimers()}, //NOT USED
-                        onClose: function() { that._closeSectionMenu('explore'); that._switchContainer('explore'); }
+                        onClose: function() { that._closeSectionMenu('explore'); that.switchContainer('explore'); }
                     });    
 
                 that.menues['explore'].css({bottom:'4px',width:'200px',overflow:'auto'});
@@ -391,7 +391,7 @@ $.widget( "heurist.mainMenu6", {
                 if(!cont.search_quick('instance'))
                     //initialization
                     cont.search_quick({
-                        onClose: function() { that._closeSectionMenu('explore'); that._switchContainer('explore'); },
+                        onClose: function() { that._closeSectionMenu('explore'); that.switchContainer('explore'); },
                         menu_locked: function(is_locked){ 
                             that._resetCloseTimers();
                             that._explorer_menu_locked = is_locked; 
@@ -414,7 +414,7 @@ $.widget( "heurist.mainMenu6", {
                 if(!cont.search_advanced('instance'))
                     //initialization
                     cont.search_advanced({
-                        onClose: function() { that._closeSectionMenu('explore'); that._switchContainer('explore'); },
+                        onClose: function() { that._closeSectionMenu('explore'); that.switchContainer('explore'); },
                         menu_locked: function(is_locked){ 
                             that._resetCloseTimers();
                             that._explorer_menu_locked = is_locked; 
@@ -438,7 +438,7 @@ $.widget( "heurist.mainMenu6", {
                         is_h6style: true,
                         onClose: function(noptions) { 
                             that._closeSectionMenu('explore'); 
-                            that._switchContainer('explore'); 
+                            that.switchContainer('explore'); 
 
                             if(noptions==null){
                                 //close faceted search
@@ -574,7 +574,7 @@ $.widget( "heurist.mainMenu6", {
     _openSectionMenu: function(e){
         
         var section = this._getSectionName(e);
-        this._switchContainer( section );
+        this.switchContainer( section );
     },
     
     //
@@ -696,7 +696,7 @@ console.log('prvent colapse');
             this.menues[section].find('li').removeClass('ui-state-active');
             li.addClass('ui-state-active');
             
-            this._switchContainer(section, true);
+            this.switchContainer(section, true);
             widget.mainMenu('menuActionById', li.attr('data-action'), 
                 {container:this.containers[section]}
             ); 
@@ -707,7 +707,7 @@ console.log('prvent colapse');
     //
     // switch section on section menu click
     //
-    _switchContainer: function( section, force_show ){
+    switchContainer: function( section, force_show ){
 
         var that = this;
         if(that._active_section!=section ){

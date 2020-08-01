@@ -76,7 +76,7 @@ body {
 .ui-menu6 .ui-menu6-section, .ui-menu6 .ui-menu6-container{
     background: #FFFFFF 0% 0% no-repeat padding-box;
     border: 0.25px solid #707070;
-    border-radius: 3px;
+    border-radius: 4px;
     position:absolute;
     display:none;    
     top:2px;
@@ -98,11 +98,13 @@ body {
 .ui-helper-popup{
     position:absolute;
     display:none;    
-    top:38px;
-    bottom:4px;
-    right: 4px;
+    top:36px;
+    bottom:0px;
+    right: 0px;
     width:300px;
     font-size:0.9em;
+    padding-left: 20px;
+    border-left: 2px solid;
 }
 
 .menu-text{

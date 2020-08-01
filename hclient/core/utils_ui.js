@@ -1758,6 +1758,7 @@ window.hWin.HEURIST4.ui = {
     //      url - ref to help file
     //      position - juquery position - default to bottom of button
     //      container - adds help to this container rather than popup
+    //      is_open_at_once   
     //
     initHelper: function( options ){
         
@@ -1777,8 +1778,8 @@ window.hWin.HEURIST4.ui = {
         var oEffect = {effect:'slide',direction:'right',duration:500};
         
         function __closeHelpDiv($helper_div){
+            oEffect.complete =  function(){ options.container.children('.ent_content_full').css({right:1}); };
             $helper_div.hide(oEffect);
-            options.container.children('.ent_content_full').css({right:1});
         }
         //ui-menu6
         
@@ -1881,6 +1882,7 @@ window.hWin.HEURIST4.ui = {
                                     if(status=='error'){
                                         
                                         window.hWin.HEURIST4.msg.showMsgFlash('Sorry context help is not found');
+                                        __closeHelpDiv($helper_div);
                                         
                                     }else{
 
@@ -1900,7 +1902,7 @@ window.hWin.HEURIST4.ui = {
                                         
                                         //_innerTitle.find('span').text( options.title );
                                         $helper_div.show( 'slide', {direction:'right'}, 500 );                        
-                                        options.container.children('.ent_content_full').css({right:305});
+                                        options.container.children('.ent_content_full').css({right:324});
                                     
                                         setTimeout(function(){
                                                 $helper_div.find('#content').scrollTop(1);
@@ -1916,7 +1918,10 @@ window.hWin.HEURIST4.ui = {
                         
                  });
                  
-                 
+        if(options.is_open_at_once && options.container){
+            options.container.find('.ui-helper-popup').hide();
+            $help_button.click();    
+        }
     },
     
     //

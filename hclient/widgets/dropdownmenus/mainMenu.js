@@ -699,25 +699,41 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         var action_log = item.attr('data-logaction');
         var action_level = item.attr('data-user-admin-status');
         var action_passworded = item.attr('data-pwd');
+        var action_container = item.attr('data-container');
+        
         if(!action_passworded && !window.hWin.HAPI4.has_access(2)) action_passworded = item.attr('data-pwd-nonowner');
         var href = item.attr('data-link');
         var target = item.attr('target');
-        var entity_dialog_options = {},
-            popup_dialog_options = {}; 
+        var entity_dialog_options = {},  //parameters for h6 entity dialog in container
+            popup_dialog_options = {};   //parameters for h6 iframe in container
         
-        if(dialog_options){
+        if(this.options.is_h6style && (dialog_options || action_container)){
+            
+            var container;
+            if(dialog_options && dialog_options['container']){
+                container = dialog_options['container'];
+            }else if(action_container){
+                var section = action_container;
+                $('.ui-menu6').mainMenu6('switchContainer', section, true);
+                container = $('.ui-menu6 > .ui-menu6-container.ui-heurist-'+section);
+            }
+            var pos = null;
+            if(dialog_options && dialog_options['position']){
+                pos = dialog_options['position'];
+            }
+            
             // for entity show dialog inline in target container
             entity_dialog_options = {isdialog: false, 
                                      innerTitle: true,
-                                     container: dialog_options['container']};
+                                     container: container};
                                      
             // for popup dialog show on postion over container
             popup_dialog_options = {
                 is_h6style: true,
                 resizable: false,
                 draggable: false,
-                container: dialog_options['container'],
-                position: dialog_options['position'],
+                container: container,
+                position: pos,
                 maximize: true
             }                                     
         }
@@ -1018,6 +1034,10 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
             if(!window.hWin.HEURIST4.util.isempty(entered_password)){
                  href =  href + '&pwd=' + entered_password;
             }
+
+            if(that.options.is_h6style){
+                 href =  href + '&ll=H6Default';
+            }
             
             if(!window.hWin.HEURIST4.util.isempty(target)){
                 window.open( href, target);    
@@ -1074,7 +1094,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                             }
                     }
                 }
-                
+
                 options = $.extend(popup_dialog_options, options);
                 
                 window.hWin.HEURIST4.msg.showDialog( href, options );    
