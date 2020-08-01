@@ -72,7 +72,7 @@ $.widget( "heurist.mainMenu", {
             .html('<span>v'+window.hWin.HAPI4.sysinfo.version+sUpdate+'</span>')
             .appendTo( this.div_logo );
         if(this.options.is_h6style){
-            this.div_version.css({'font-size':'0.5em', color:'#DAD0E4', 'text-align':'right', 'padding':'16px'});
+            this.div_version.css({'font-size':'0.5em', color:'#DAD0E4', 'text-align':'right', 'padding-top':'12px', 'margin-right':'-35px'});
                 
         }else{
             this.div_version.css({'font-size':'0.6em', 'text-align':'center', 'margin-left': '85px', 'padding-top':'12px', 
