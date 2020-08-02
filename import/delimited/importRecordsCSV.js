@@ -40,15 +40,14 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
     
     exp_level = window.hWin.HAPI4.get_prefs_def('userCompetencyLevel', 2), //beginner default
     
-    session_selector,
+    session_selector;
     
-    is_h6style;
     
     function _init(_imp_ID, _max_upload_size, format){
     
         imp_ID = _imp_ID;
         
-        is_h6style = window.hWin.HAPI4.sysinfo['layout']=='H6Default';
+        var is_h6style = window.hWin.HAPI4.sysinfo['layout']=='H6Default';
         
         if(format=='kml'){
             $('#divKmlIntro').show();

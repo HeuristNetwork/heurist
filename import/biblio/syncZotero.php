@@ -59,13 +59,14 @@ if($dt_SourceRecordID==0){ //this field is critical - need to download it from h
 }
 
 $HEURIST_ZOTEROSYNC = $system->get_system('sys_SyncDefsWithDB');
+/*
 if($HEURIST_ZOTEROSYNC==''){
     $system->addError(HEURIST_ERROR, 'Library key for Zotero synchronisation is not defined. '
                 .'Please configure Zotero connection in Database > Properties');
     include ERROR_REDIR;
     exit();
 }
-
+*/
 $mapping_file = "zoteroMap.xml";
 $fh_data = null;
 
@@ -108,12 +109,33 @@ if($fh_data==null || is_string($fh_data)){
                 ele.style.display = 'block';
                 return true;
             }
+            function open_sysIdentification(){
+               window.hWin.HEURIST4.ui.showEntityDialog('sysIdentification', 
+                    {onClose:function(){
+                        location.reload();
+                    }}); 
+               return false; 
+            }
         </script>
     </head>
 
     <body class="popup">
 
         <?php
+        
+        if($HEURIST_ZOTEROSYNC==''){
+        ?>            
+                <p class="ui-state-error" style="padding:20px;text-align:center">
+                    Library key for Zotero synchronisation is not defined.<br/><br/>
+                    <a href="#" onclick="open_sysIdentification()">
+                    Click here to edit properties which determine Zotero connection</a>
+                </p>                
+                </body>
+                </html>
+
+        <?php            
+            exit();
+        }
 
         // 1) load config file from import/biblio/zoteroMap.xml.
         // This file maps Zotero names to Heurist codes according to context
@@ -257,8 +279,9 @@ if($is_verbose){
 
 
 if( ( is_empty($group_ID) && is_empty($user_ID) ) || is_empty($api_Key) ){
-    print "<div class='ui-state-error'><br />Current Zotero access settings incomplete: ' ".$key.
-    " ' <p>Please configure Zotero connection in Database > Properties.</div></body></html>";
+    print "<div class='ui-state-error' style='padding:20px'>Current Zotero access settings incomplete: ' ".$key
+    .'<br/><br/><a href="#" onclick="open_sysIdentification()">Click here to edit properties which determine Zotero connection</a>'
+    .'</div></body></html>';
     exit;
 }
 
@@ -266,7 +289,8 @@ $zotero = null;
 $zotero = new phpZotero($api_Key);
 
 print "<div><b>zotero has been initiated with api key [$api_Key]</b></div>";
-print "<br>" ;
+print '<br><a href="#" onclick="open_sysIdentification()">Click here to modify properties which determine Zotero connection</a><br><br>';
+
 
 /* test connection
 $items = $zotero->getItemsTop($group_ID,
@@ -298,10 +322,10 @@ if($step=="1"){  //first step - info about current status
     $code = $zotero->getResponseStatus();
 
     if($code>499 ){
-        print "<div class='ui-state-error'><br />Zotero Server Side Error: returns response code: $code.<br /><br />"
+        print "<div class='ui-state-error' style='padding:20px'>Zotero Server Side Error: returns response code: $code.<br /><br />"
         ."Please try this operation later.</div>";
     }else if($code>399){
-        $msg = "<div class='ui-state-error'><br />Error. Cannot connect to Zotero API: returns response code: $code.<br /><br />";
+        $msg = "<div class='ui-state-error' style='padding:20px'>Error. Cannot connect to Zotero API: returns response code: $code.<br /><br />";
         if($code==400 || $code==401 || $code==403){
             $msg = $msg."Please verify Zotero API key in Database > Properties - it may be incorrect or truncated.";
 
@@ -312,9 +336,9 @@ if($step=="1"){  //first step - info about current status
         }
         print $msg."</div>";
     }else if(!$items){
-        print "<div class='ui-state-error'><br />Unrecognized Error: cannot connect to Zotero API: returns response code: $code</div>";
+        print "<div class='ui-state-error' style='padding:20px'>Unrecognized Error: cannot connect to Zotero API: returns response code: $code</div>";
         if($code==0){
-            print "<div class='ui-state-error'><br />Please ask your system administrator to check that the Heurist proxy settings are correctly set.</div>";
+            print "<div class='ui-state-error' style='padding:20px'>Please ask your system administrator to check that the Heurist proxy settings are correctly set.</div>";
         }
     }else{
 

@@ -43,7 +43,7 @@ $s_max_size = round($max_size/1024/1024).' MBytes';
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
         <![endif]-->
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
-        <title>File upload manager</title>
+        <title>Import XML or JSON</title>
         
         <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-ui.js"></script>
@@ -105,7 +105,7 @@ the source database and can download files (eg. images) from it. Registration of
            <p>The database from which the file is exported must first be registered with the Heurist Master Index (only the database owner or the system administrator can register a database). This is required so that all record types, fields and values are identified by global concept codes - this avoids the need to build lots of mapping between the databases, as the required structure can be imported automatically.</p>
 -->        
             <input type="file" id="uploadFile" style="display:none">
-            <button id="btn_UploadData">Select file to import</button>
+            <button id="btn_UploadData" class="ui-button-action">Select file to import</button>
             <span>Maximum size <?php echo $s_max_size?> - contact Heurist team if you need to upload a larger file</span>
         </div>
 
@@ -196,7 +196,7 @@ There are missing fields. Import is not allowed.
 <p>Importing <span id="spanRecCount"></span> items as new records.</p>
 <p>Note: no attempt is made to identify duplicate records - all items imported will create a new record. If you require duplicate record identification and replacement or merging, please <?php echo CONTACT_HEURIST_TEAM;?> for assistance (support at heuristnetwork dot org or use the bug report function)</p>
            <br>
-           <button id="btn_ImportRecords">Import Records</button>
+           <button id="btn_ImportRecords" class="ui-button-action">Import Records</button>
         </div>
        
         <!-- STEP 3 - result  -->

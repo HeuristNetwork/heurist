@@ -216,7 +216,7 @@ $system_folders = $system->getSystemFolders();
                     print "<input name='db' value='".HEURIST_DBNAME."' type='hidden'>";
                     print '<input name="media" value="'.$mediaFolders.'" type="hidden">';
                     print "<input name='exts' value='$mediaExts' type='hidden'>";
-                    print "<input type='submit' value='Continue' class='h3button'/>";
+                    print '<input type="submit" value="Continue" class="h3button"/>';
                 }
             }
             exit();

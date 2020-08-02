@@ -38,7 +38,8 @@ function hImportRecords(_max_upload_size) {
     session_id,
     rectypesInSource,
     detailtypesInSource,
-    source_db;
+    source_db,
+    is_h6style = false;
 
     var targetMissed = 0;
     var targetDtMissed = 0;
@@ -46,6 +47,12 @@ function hImportRecords(_max_upload_size) {
     function _init( _max_upload_size){
     
         var uploadWidget = $('#uploadFile');
+
+        is_h6style = window.hWin.HAPI4.sysinfo['layout']=='H6Default';
+        
+        if(is_h6style){
+            $('.banner').hide();
+        }
         
         //init STEP 1  - upload
         $('button').button();
@@ -657,6 +664,9 @@ function hImportRecords(_max_upload_size) {
         $('.loading').hide();
         if(currentStep>=0){
             $('body > div:not(.loading)').show();
+            if(is_h6style){
+                $('.banner').hide();
+            }
             _showStep( currentStep );    
         }
         
