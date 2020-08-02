@@ -376,11 +376,17 @@ XML;
         if(count($need_record_details)==0){
             $need_record_details = false;
         }
-        if(count($retrieve_fields)==0){ //always include id fields 
-            $retrieve_fields = array('rec_ID','rec_RecTypeID');
+        
+        //always include rec_ID and rec_RecTypeID fields 
+        if(!in_array('rec_ID',$retrieve_fields)){
+            array_push($retrieve_fields,'rec_ID');
             array_push($columns['0'],'rec_ID');
+        }
+        if(!in_array('rec_RecTypeID',$retrieve_fields)){
+            array_push($retrieve_fields,'rec_RecTypeID');
             array_push($columns['0'],'rec_RecTypeID');
         }
+
         $retrieve_fields = implode(',', $retrieve_fields);
         
     }else{

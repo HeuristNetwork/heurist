@@ -952,7 +952,7 @@ $mysqli->commit();
     
         if(is_numeric($local_id) && $local_id>0){ //this is local already
         
-            if($defs[$local_id]){
+            if(@$defs[$local_id]){
                 return $local_id;
             }else{
                 return null; //not found

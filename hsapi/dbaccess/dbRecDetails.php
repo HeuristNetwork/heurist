@@ -857,7 +857,7 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
                if (!is_numeric($ret)) {
                     $sqlErrors[$recID] = 'Cannot update modify date. '.$ret;
                }else{
-                    if(!recordUpdateTitle($this->system, $recID, $rectype_ID, null)){
+                    if(!recordUpdateTitle($this->system, $recID, null, null)){
                         $sqlErrors[$recID] = 'Cannot update record title';
                     }
                }
