@@ -803,6 +803,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                
             if($dosframe.length==0)
             {
+                $container.empty();    
                 //add h6 style header    
                 _innerTitle = $('<div>').addClass('ui-heurist-header')
                         .appendTo($container);

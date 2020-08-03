@@ -351,7 +351,7 @@ span.fancytree-node:hover{
 }
 */
 /* --------------------------------------------------------------------------- */
-
+<?php if(@$_REQUEST['ll']!='H5Default'){ ?>
 /* H6 SPECIFIC */
 .ui-button-action{
     background:<?php uout('button_action_bg', '#3D9946');?> 0% 0% no-repeat padding-box !important;
@@ -384,7 +384,6 @@ span.fancytree-node:hover{
 .ui-heurist-import .ui-heurist-title{
     color:<?php uout('import_title_color', '#307D96');?>
 }
-
 .ui-heurist-import .ui-state-active, 
 .ui-heurist-import .fancytree-active,
 .ui-heurist-import .fancytree-node:hover
@@ -447,7 +446,19 @@ span.fancytree-node:hover{
 .ui-heurist-admin.ui-heurist-header, .ui-heurist-admin .ui-heurist-header{
     background:<?php uout('admin_bg', '#676E80');?> 0% 0% no-repeat padding-box;
 }
+.ui-menu6 .ui-menu6-container.ui-heurist-admin, .ui-heurist-admin .ui-helper-popup{
+    border-width: 2px !important;
+    border-color:<?php uout('admin_bg', '#676E80');?> !important; 
+} 
 .ui-heurist-admin-fade{background:<?php uout('admin_fade_bg', '#D4DBEA');?> 0% 0% no-repeat padding-box;}
-.ui-heurist-admin .ui-heurist-title{color:<?php uout('admin_title_color', '#676E80');?>}
-
+.ui-heurist-admin .ui-heurist-title{
+    color:<?php uout('admin_title_color', '#676E80');?>
+}
+.ui-heurist-admin .ui-state-active, 
+.ui-heurist-admin .fancytree-active,
+.ui-heurist-admin .fancytree-node:hover
+{
+        background:<?php uout('admin_active', '#D4DBEA');?> !important;
+}
+<?php } ?>
 

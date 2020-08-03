@@ -978,7 +978,8 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
             window.hWin.HEURIST4.ui.showEntityDialog('usrReminders');
         }else 
         if(action == "menu-profile-files"){
-            window.hWin.HEURIST4.ui.showEntityDialog('recUploadedFiles',{width:950});
+            //{width:950}
+            window.hWin.HEURIST4.ui.showEntityDialog('recUploadedFiles',entity_dialog_options);
         }else 
         if(action == "menu-profile-groups"){
             window.hWin.HEURIST4.ui.showEntityDialog('sysGroups', entity_dialog_options);
@@ -1046,6 +1047,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                 var options = {};
                 var size_type = item.attr('data-size');
                 var dlg_title = item.attr('data-header');
+                if(!dlg_title) dlg_title = item.text();
                 var dlg_help = item.attr('data-help');
 
                 var size_w = item.attr('data-dialog-width');

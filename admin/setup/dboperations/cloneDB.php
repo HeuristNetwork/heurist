@@ -129,9 +129,13 @@ if(@$_REQUEST['mode']=='2'){
             h2,h3{margin:0}
         </style>
     </head>
-    <body class="popup">
+    <body class="popup ui-heurist-admin">
 
         <script type="text/javascript">
+        
+            $(document).ready(function(){
+                $('#submitBtn').button();
+            })
             //
             // allow only alphanum chars for database name    @todo replace with utils_ui.preventNonAlphaNumeric
             //
@@ -258,12 +262,12 @@ if(@$_REQUEST['mode']=='2'){
                         <p>
                             <label>No data (copy structure definitions only):&nbsp<input type='checkbox' name='nodata' value="1"/></label>
                         </p>
-                        <h3>Enter a name for the cloned database:</h3>
+                        <h3 class="ui-heurist-title">Enter a name for the cloned database:</h3>
                         <div style="margin-left: 40px;">
                             <input type='text' name='targetdbname' id='targetdbname' size="40" onkeypress="{onKeyPress(event)}"/>
                             <input type='submit' id='submitBtn' 
                                 value='Clone "<?=($isCloneTemplate)?$_REQUEST['templatedb']:HEURIST_DBNAME?>"'
-                                class="h3button"/>
+                                class="ui-button-action"/>
                         </div>
 
                     </form>

@@ -1694,7 +1694,7 @@ window.hWin.HEURIST4.ui = {
                     .css({'right':'26px'})
                     .appendTo(titlebar);
                     
-            window.hWin.HEURIST4.ui.initHelper($info_button, null, helpcontent_url);
+            window.hWin.HEURIST4.ui.initHelper({button:$info_button, url:helpcontent_url});
         }
                     
     },
@@ -2602,7 +2602,11 @@ window.hWin.HEURIST4.ui = {
                     .appendTo( $('body') )
                     [widgetName]( options );
             }else{
+                if($(options.container)[widgetName]('instance')){
+                    $(options.container)[widgetName]('destroy');
+                }
                 $(options.container).empty();
+                $(options.container).show();
                 manage_dlg = $(options.container)[widgetName]( options );
             }
             

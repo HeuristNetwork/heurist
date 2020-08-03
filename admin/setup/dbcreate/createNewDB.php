@@ -372,7 +372,7 @@ if($registrationRequired) //show user registration dialog at once
         </style>
     </head>
 
-    <body class="popup">
+    <body class="popup ui-heurist-admin">
     
         <!-- div class="ui-corner-all  ui-widget-content"
                 style="text-align:left; width:70%; min-height:550px; margin:0px auto; padding: 0.5em;background:white;" -->
@@ -393,16 +393,18 @@ if($registrationRequired) //show user registration dialog at once
 
             <div id="createDBForm" style="padding-top:5px;">
 
-                <h3 style="padding:0 0 0 10px;">Creating new database on server</h3>
+                <h3 style="margin-left:40px" class="ui-heurist-title">Creating new database on server</h3>
 
                 <input type="hidden" id="url_template" name="url_template">
                 <input type="hidden" id="exemplar" name="exemplar">
 
-                <div style="border-bottom: 1px solid #7f9db9;padding:10px;margin-bottom:2px;">
-                    <input type="radio" name="dbtype" value="0" id="rb1" checked
-                        onclick="{$('#registered_dbs').hide()}"/><label for="rb1"
-                        class="labelBold" style="padding-left: 2em;">Standard database template</label>
-                    <div style="padding-left: 38px;padding-bottom:10px;width:600px">
+                <div style="margin-left:40px">
+                    <label for="rb1" class="labelBold ui-heurist-title">
+                        <input type="radio" name="dbtype" value="0" id="rb1" checked 
+                            onclick="{$('#registered_dbs').hide()}" style="vertical-align:-0.2em"/>
+                        Standard database template
+                    </label>
+                    <div style="padding:10px 0 10px 26px;width:600px">
                         Gives an uncluttered database with essential record types, fields,
                         terms and relationships, including bibliographic and spatial entities.
                         Recommended for most new databases unless you wish to copy a particular template (next option).
@@ -413,19 +415,21 @@ if($registrationRequired) //show user registration dialog at once
                     <!-- TODO: would be better to import the Shakespeare (or other) exemplar data directly from HML although this will expose all public data to easy copying -->
                     <!-- Note: the value for the radio button indicates the name of the database whose
                     structure will be copied. Data is then inserted from the file <dbname>_data.sql -->
-                    <input type="radio" name="dbtype" value="Heurist_Shakespeare_Exemplar" id="rb3" disabled/>
-                    <label for="rb3"
-                        class="labelBold" style="padding-left: 2em;">Example database (Shakespeare's plays)</label>
+                    <label for="rb3" class="labelBold ui-heurist-title">
+                        <input type="radio" name="dbtype" value="Heurist_Shakespeare_Exemplar" id="rb3" 
+                            disabled style="vertical-align:-0.2em"/>
+                        Example database (Shakespeare's plays)
+                    </label>
 
-                    <div style="padding-left: 38px;padding-bottom:10px;width:600px">
+                    <div style="padding:10px 0 10px 26px;width:600px">
                         THIS DATABASE IS CURRENTLY UNDER DEVELOPMENT - PLEASE DON'T USE THIS OPTION
-                        <br/>A training database consisting of interlinked information about Shakespeare's plays, company, actors, theatres, performances etc.
-                        Use this database as a starting point for becoming familiar with Heurist (See <a href="http://HeuristNetwork.org/screencasts" target="_blank">introductory video</a>).
+                        <br/>
+                        A training database consisting of interlinked information about Shakespeare's plays, company, actors, theatres, performances etc.
+                        Use this database as a starting point for becoming familiar with Heurist<br>(See <a href="http://HeuristNetwork.org/screencasts" target="_blank">introductory video</a>).
                     </div>
 
-                    <div id="nextSteps"
-                        style="padding-left: 38px; wdith:620px;display:none">
-                        <div><b>Suggested next steps</b></div>
+                    <div id="nextSteps" style="padding:10px 0 10px 26px;width:600px;display:none">
+                        <div class="labelBold ui-heurist-title">Suggested next steps</div>
                         <div>
                             <br />After the database is created, we suggest visiting Manage &gt; Structure &gt; Browse templates
                             to download pre-configured templates or individual record types and fields from databases registered with the Heurist Network.
@@ -434,21 +438,23 @@ if($registrationRequired) //show user registration dialog at once
                     </div>
                 </div>
 
+                <div style="border-bottom: 1px solid #7f9db9;"></div>
+                
                 <div id="div_register_entered" style="display: none;">
                     <h3 style="margin:5px 0 10px 38px;color:darkgreen;">Registration information entered</h3>
                 </div>
 
-                <div id="div_create">
+                <div id="div_create" style="margin-left:40px" >
 
                     <div id="div_need_password" style="display:none">
-                        <h3 style="margin-left: 38px">Enter the password set by your system administrator for new database creation</h3>
-                        <div style="margin-left:60px; margin-top: 0px;">
+                        <h3 class="ui-heurist-title">Enter the password set by your system administrator for new database creation</h3>
+                        <div style="margin-top: 0px;">
                             <input type="password" maxlength="64" size="25" id="create_pwd" name="create_pwd">
                         </div>
                     </div>
 
-                    <h3 style="margin-left: 38px">Enter a name for the new database</h3>
-                    <div style="margin-left:60px; margin-top: 0px;">
+                    <h3 class="ui-heurist-title">Enter a name for the new database</h3>
+                    <div style="margin-top: 0px;">
                         <!-- user name used as prefix -->
                         <b><?= HEURIST_DB_PREFIX ?>
                             <input type="text" maxlength="30" size="6" name="uname" id="uname"
@@ -457,22 +463,26 @@ if($registrationRequired) //show user registration dialog at once
                         </b>
                         <b>_</b>
                         <input type="text" maxlength="64" size="30" id="dbname" name="dbname"  onkeypress="{onKeyPress(event);}">
-                        <input id="btnCreateDb" value="Create Database" style="font-weight: bold;"  >
-                        <div style="padding-top:1em; max-width:500px">No spaces or punctuation other than underscore. Database names are case-sensitive. 
-                            <p><i>The user name prefix is editable, and may be left blank, but we suggest using a consistent prefix for personal
-                                databases so that they are easily identified and appear together in the list of databases.</i></p></div>
+                        <input id="btnCreateDb" value="Create Database" style="font-weight: bold;" class="ui-button-action" >
+                        <div style="padding-top:1em; max-width:500px">
+                            No spaces or punctuation other than underscore. Database names are case-sensitive.
+                        </div> 
+                        <div class="heurist-helper3" style="padding-top:1em; max-width:500px">
+                            The user name prefix is editable, and may be left blank, but we suggest using a consistent prefix 
+                            for personal databases so that they are easily identified and appear together in the list of databases.
+                        </div>
                     </div>
 
                 </div>
 
 
-                <div id="div_register" style="display: none;">
+                <div id="div_register" style="margin-left:40px; display: none;">
                     <!-- h3 style="margin-left: 38px">Define Database Administrator</h3 -->
-                    <div style="margin-left: 60px; margin-top: 30px;">
+                    <div style="margin-top: 30px;">
                         <button id="btnRegister" style="font-weight: bold;" />
                     </div>
-                    <div style="padding-left: 38px; margin-top: 20px; margin-bottom: 20px;">
-                        Please register in order to define the user who will become the database owner and administrator.<br>/<br/>
+                    <div style="margin-top: 20px; margin-bottom: 20px;" class="heurist-helper3">
+                        Please register in order to define the user who will become the database owner and administrator.<br><br>
                         If you are already a user of another database on this server, we suggest logging into that database (<a href="../../../index.php">select database here</a>)<br/>
                         and creating your new database with Database &gt; New Database, as this will carry over your login information from the existing database.
                     </div>
@@ -483,23 +493,23 @@ if($registrationRequired) //show user registration dialog at once
             
         <!-- /div -->
         
-        <div id="div_result" style="padding:0px 0 10px 0; font-size:larger;display:none">
-            <h4 style='padding-bottom:10px;margin:0'>Congratulations, your new database  [ <span id="newdbname"></span>  ]  has been created</h4>
+        <div id="div_result" style="margin-left:40px;display:none">
+            <h4 style='padding-bottom:10px;margin:0' class="ui-heurist-title">Congratulations, your new database  [ <span id="newdbname"></span>  ]  has been created</h4>
             <div id="div_login_info">
-                <p style="padding-left:10px"><strong>Admin username:</strong> <span id="newusername"></span></p>
-                <p style="padding-left:10px"><strong>Admin password:</strong> &#60;<i>same as the account you are currently logged in as</i>&#62;</p>
+                <div><strong>Admin username:</strong> <span id="newusername"></span></div>
+                <div><strong>Admin password:</strong> &#60;<i>same as the account you are currently logged in as</i>&#62;</div>
             </div>
             <div class="ui-state-error" id="div_warnings" style="display:none;padding:10px"></div>
-            <p style="padding-left:10px">Log into your new database with the following link:</p>
-            <p style="padding-left:6em"><b><a id="newdblink" href="#" oncontextmenu="return false;" 
-                        title="" onclick="{closeDialog()}" target="blank"></a></b>&nbsp;&nbsp;&nbsp;&nbsp; <i>(we suggest bookmarking this link)</i></p>
+            <div style="padding-top:20px">Log into your new database with the following link:</div>
+            <div style="padding-top:20px"><b><a id="newdblink" href="#" oncontextmenu="return false;" 
+                        title="" onclick="{closeDialog()}" target="blank"></a></b>&nbsp;&nbsp;&nbsp;&nbsp; <i>(we suggest bookmarking this link)</i></div>
 
-            <p style="padding-left:6em">
+            <div style="padding-top:20px;width:600px">
                 After logging in to your new database, we suggest you import some additional entity types from one of the
                 curated Heurist databases, or from one of the other databases listed in the central database catalogue,
                 using Database &gt; Structure &gt; Browse templates 
                 <!--or Database &gt; Structure &gt; Acquire from Templates -->
-            </p>
+            </div>
         </div>        
     </body>
 </html>

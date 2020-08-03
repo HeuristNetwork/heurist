@@ -173,10 +173,10 @@ If you have missing data for Required fields, you may find it convenient to set 
             <div id="btnUploadFile" title="Browse for CSV/TSV file that contains your data to be imported into Heurist database">
                 Upload File</div>
             <br>
-            <span class="heurist-helper2 format-csv" style="padding-left:250px">
+            <span class="heurist-helper2 format-csv" style="padding-left:263px">
                The first line must have field names with correct number of fields.
-            </span>
-            <span class="heurist-helper2 format-csv">Maximum size <?php echo $s_max_size?> - contact Heurist team if you need to upload a larger file</span>
+            </span><br>
+            <span class="heurist-helper2 format-csv" style="padding-left:263px">Maximum size <?php echo $s_max_size?> - contact Heurist team if you need to upload a larger file</span>
 
         <h2 style="padding:10 0 10 120">OR</h2>
         

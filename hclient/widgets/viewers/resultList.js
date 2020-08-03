@@ -470,8 +470,11 @@ $.widget( "heurist.resultList", {
             this.div_content.css({'background':'none'});
         }else{
             //set background to none ???? if inner header visible 
-            this.element.parent().css({'background':'none','border':'none'});
-            this.element.parent().parent().css({'background':'none','border':'none'});
+            //???? this.element.parent().css({'background':'none','border':'none'});
+            //???? this.element.parent().parent().css({'background':'none','border':'none'});
+            if(true || this.element.parent().hasClass('ui-widget-content')){
+                this.element.parent().css({'background':'none','border':'none'});
+            }
 
             //this.div_toolbar.addClass('ui-heurist-bg-light');
             this.div_content.addClass('ui-heurist-bg-light');
@@ -551,7 +554,7 @@ $.widget( "heurist.resultList", {
 
         this.view_mode_selector = $( "<div>" )
         //.css({'position':'absolute','right':right_padding+'px'})
-        .css({'float':'right','padding-right':right_padding+'px'})
+        .css({'float':'right','padding':'2px '+right_padding+'px'})
         .html('<button id="cb1_'+rnd+'" value="list" class="btnset_radio"/>'
             +'<button  id="cb2_'+rnd+'" value="icons" class="btnset_radio"/>'
             +'<button  id="cb3_'+rnd+'" value="thumbs" class="btnset_radio"/>'

@@ -86,7 +86,7 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
     </head>
 
 
-    <body class="popup" style="margin:0 !important; color:black;"">
+    <body class="popup ui-heurist-import" style="margin:0 !important; color:black;"">
 
         <div class="banner">
             <h2>FILE MANAGEMENT</h2>
@@ -397,12 +397,6 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
             $(function () {
                 'use strict';
                 
-                var is_h6style = window.hWin.HAPI4.sysinfo['layout']=='H6Default';
-                
-                if(is_h6style){
-                    $('.banner').hide();
-                }
-
                 window.hWin.HEURIST4.filesWereUploaded = false;
                 
                 // Initialize the jQuery File Upload widget:

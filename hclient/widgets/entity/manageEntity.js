@@ -217,7 +217,8 @@ $.widget( "heurist.manageEntity", {
             layout = 
                 '<div class="ent_wrapper">'
                         + '<div class="recordList" style="display:none;"/>'
-                        + '<div class="ent_content_full editForm" style="top:0"/>'
+                        + '<div class="ent_content editForm" style="top:0;bottom:0"/>'
+                        //+ '<div class="ent_footer editForm-toolbar"/>'
                 +'</div>';
         
         }else{ //custom layout - must contain valid html snippet
@@ -238,6 +239,23 @@ $.widget( "heurist.manageEntity", {
                 .text(this.options['title'])
                 .insertBefore(fele);
             fele.css('top','38px');
+            
+            if(this.options.layout_mode=='editonly' && !this.options.isdialog){
+                $('<div>').addClass('ent_footer editForm-toolbar ui-heurist-header')
+                    .css({'height':'36px','padding':'4px 20px 0px'}).appendTo(fele);
+                this.element.find('.editForm').css('bottom','40px');
+            }else if (this.options['select_mode']=='select_multi' || this.options['select_mode']=='select_roles')
+            {
+                var ele = $('<div>').addClass('ent_footer editForm-toolbar ui-heurist-header')
+                    .css({'height':'36px','padding':'4px 20px 0px'}).insertAfter(fele);
+                fele.css('bottom','40px');
+                
+                var that = this;
+                this._defineActionButton2({text:window.hWin.HR( this.options['selectbutton_label'] ),
+                        css:{'float':'right',margin:'.5em .4em .5em 0'},  
+                        class: 'ui-button-action',
+                        click: function() { that._selectAndClose(); }}, ele);
+            }
         }
         
         //find 3 elements searchForm, recordList+recordList_toolbar, editForm+editForm_toolbar
@@ -457,9 +475,11 @@ $.widget( "heurist.manageEntity", {
         // remove generated elements
         if(this.searchForm) this.searchForm.remove();
         if(this.recordList) this.recordList.remove();
+        if(this.editFormSummary) this.editFormSummary.remove();
+        if(this.editFormPopup) this.editFormPopup.remove();
         if(this.editForm) this.editForm.remove();
+        if(this.editFormToolbar) this.editFormToolbar.remove();
 
-        this.wrapper.remove();
         this._selection = null;
     },
     
@@ -601,6 +621,9 @@ $.widget( "heurist.manageEntity", {
         }
         if(options.css){
             btn.css(options.css);
+        }
+        if(options.class){
+            btn.addClass(options.class);
         }
     },
     
@@ -745,14 +768,14 @@ $.widget( "heurist.manageEntity", {
     _getEditDialogButtons: function(){
 
         var that = this;        
-        return [
-                 {text:window.hWin.HR((this.options.edit_mode=='popup')?'Close':'Cancel'), 
+        var btn_array = [
+                 {text:window.hWin.HR((this.options.edit_mode=='popup' || that.options.isdialog)?'Close':'Drop Changes'), 
                     id:'btnRecCancel',
-                    css:{'float':'right'}, 
+                    css:{'float':'right',margin:'.5em .4em .5em 0'}, 
                     click: function() { 
                         if(that.options.edit_mode=='popup') {
                             that.editFormPopup.dialog('close'); 
-                        }else if(that.options.edit_mode=='editonly') {
+                        }else if(that.options.edit_mode=='editonly' && that.options.isdialog) {
                             that.closeDialog();
                         }else{                                    
                             that._initEditForm_step3(that._currentEditID); //reload
@@ -760,7 +783,8 @@ $.widget( "heurist.manageEntity", {
                     }},
                  {text:window.hWin.HR('Save'),
                     id:'btnRecSave',
-                    css:{'visibility':'hidden', 'float':'right'},  
+                    css:{'visibility':'hidden', 'float':'right',margin:'.5em .4em .5em 0'},  
+                    class: 'ui-button-action',
                     click: function() { that._saveEditAndClose(); }}
                  /* IJ 2018-10-17 request   
                  {text:window.hWin.HR('Remove'), 
@@ -769,6 +793,16 @@ $.widget( "heurist.manageEntity", {
                     click: function() { that._deleteAndClose(); },
                  } */
                  ];
+                 
+                 
+        //dialog buttons SELECT and CLOSE
+        if(this.options['select_mode']=='select_multi' || this.options['select_mode']=='select_roles'){ 
+                btn_array.push({text:window.hWin.HR( this.options['selectbutton_label'] ),
+                        css:{'float':'right',margin:'.5em .4em .5em 0'},  
+                        class: 'ui-button-action',
+                        click: function() { that._selectAndClose(); }}); 
+        }
+        return btn_array;         
     },
 
     //
@@ -868,7 +902,8 @@ $.widget( "heurist.manageEntity", {
                       //that.options.onClose(that._currentEditRecordset);  
                       that.options.onClose.call();
                     } 
-                    $dlg.parent().remove();    
+                    $dlg.remove();    
+                    //???? $dlg.parent().remove();    
                         
                 },
                 buttons: this.options.no_bottom_button_bar?null:btn_array
@@ -947,7 +982,10 @@ $.widget( "heurist.manageEntity", {
             
             this._as_dialog.dialog("close");
             //this.element.dialog('close');
+        }else if(this.element.hasClass('ui-menu6-container')){
+            this.element.hide();
         }
+        
     },
     
     //
@@ -1459,13 +1497,12 @@ $.widget( "heurist.manageEntity", {
                      
             }else if(this.editFormToolbar.length>0){ //initialize action buttons
                 
-                this._toolbar = this.editFormToolbar;
-                this.editFormToolbar.empty();
-                var btns = this._getEditDialogButtons();
-                for(var idx in btns){
-                    this._defineActionButton2(btns[idx], this.editFormToolbar);
-                }
-                
+                    this._toolbar = this.editFormToolbar;
+                    this.editFormToolbar.empty();
+                    var btns = this._getEditDialogButtons();
+                    for(var idx in btns){
+                        this._defineActionButton2(btns[idx], this.editFormToolbar);
+                    }
             }
             
         }

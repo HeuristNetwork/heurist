@@ -21,6 +21,9 @@
 body {
     overflow:hidden;
 }
+body.popup {
+    font-size: 13px;
+}
 
 .logo {
     background-image: url("hclient/assets/v6/h6logo_inv.png") !important;
@@ -65,6 +68,9 @@ body {
 .ui-button-action{
     font-weight:bold  !important;
     text-transform: uppercase;
+}
+.ui-heurist-title{
+    font-size: 14px !important;
 }
 
 /*   MAIN SIDE MENU */
@@ -129,3 +135,8 @@ body {
     position:absolute;
 }
 
+.ui-heurist-admin .banner,
+.ui-heurist-import .banner{
+    display: none;
+    visibility: hidden;
+}

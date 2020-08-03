@@ -61,7 +61,7 @@ if($mode=='2' && file_exists($folder.".zip") ){
             });
         </script>
     </head>
-    <body class="popup" style="padding-top:30px">
+    <body class="popup ui-heurist-admin">
         
         <?php
         //<div class="banner"  style="padding-left:3px"><h2>Complete data archive package</h2></div>    
@@ -71,8 +71,7 @@ if($mode=='2' && file_exists($folder.".zip") ){
         if(!$mode) {
             ?>
 
-            <p><b>This function is available to database adminstrators only (therefore you are a database administrator!).</b>
-            </p>
+            <h3 class="ui-heurist-title">This function is available to database adminstrators only (therefore you are a database administrator!)</h3>
             <p>The data will be exported as a fully self-documenting HML (Heurist XML) file, as a complete MySQL SQL data dump, 
             as textual and wordprocessor descriptions of the structure of Heurist and of your database, and as a directory of 
             attached files (image files, video, XML, maps, documents etc.) which have been uploaded or indexed in situ.
@@ -81,7 +80,7 @@ if($mode=='2' && file_exists($folder.".zip") ){
             </p>
             <p>The output of the process will be made available as a link to a downloadable zip file.
             </p>
-            <h3>Warning</h3>
+            <h3 class="ui-heurist-title">Warning</h3>
             <p>Zipping databases and including lots of images or video may bog down the server and the file may not download
             satisfactorily - in that case it may be better to ask your sysadmin to give you the files separately on a USB drive.</p>
             
@@ -131,11 +130,11 @@ if($mode=='2' && file_exists($folder.".zip") ){
                     </label>
                 </div>
 
-                <div id="buttons" class="actionButtons" style="padding-top:10px;text-align:center">
-                    <input type="button" value="Export" style="margin-right: 20px;padding-left:5px; padding-right:5px;"
+                <div id="buttons" class="actionButtons" style="padding-top:10px;text-align:left">
+                    <input type="button" value="Export" style="margin-right: 20px;" class="ui-button-action"
 onClick="{ $('<div>').addClass('coverall-div').css('zIndex',60000).appendTo('body'); document.getElementById('buttons').style.visibility = 'hidden';  document.forms[0].submit(); }">
 <?php if(@$_REQUEST['inframe']!=1) { ?>                    
-                    <input type="button" value="Cancel"  style="padding-left:5px; padding-right:5px;" onClick="window.close();">
+                    <input type="button" value="Cancel" onClick="window.close();">
 <?php } ?>                    
                 </div>
             </form>
