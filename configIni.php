@@ -62,10 +62,11 @@ of the codebase and rename it to index.html
 
 // *** DO NOT CHANGE VERSION NUMBER, THIS IS SET BY THE HEURIST DEVELOPMENT TEAM ***
 
-$version = "5.2.11"; // sets current program version number, determined by Heurist development lead
+$version = "5.2.12"; // sets current program version number, determined by Heurist development lead
 
 // dates below are the date of release of the given version, and list changes since last release
 
+// h5.2.12 03 Aug 2020 Initial work on version 6 interface, new menu strucutre, design, import, explore, admin mostly working.
 // h5.2.11 12 July 2020 Sort pointer field alphabetically, table view and data table widget
 // h5.2.10 5 July 2020 Consistent ordering of record types in trees, fix crosstabs, convert UTM gridref coords in polygons, first draft data table view in main interface and website widget
 // h5.2.9 21 June 2020 Actve subset function, save CSV specifications, save crosstabs specifications and fixes, fix UTF8 encoding issues, secondary menu/tree navigation widget in web pages, slim down new websites, exclude all but final level retreived by ruleset, improved PID resolver addressing, duplicate saved searches, 
