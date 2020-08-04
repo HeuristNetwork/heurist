@@ -22,9 +22,10 @@ $.widget( "heurist.recordAction", {
     // default options
     options: {
     
+        is_h6style: false,    
         //DIALOG section       
         isdialog: false,     // show as dialog @see  _initDialog(), popupDialog(), closeDialog
-        supress_diaog_title: false,
+        supress_dialog_title: false, //hide dialog title bar (applicable if isdialog=true
         
         height: 400,
         width:  760,
@@ -180,12 +181,13 @@ $.widget( "heurist.recordAction", {
         return [
                  {text:window.hWin.HR('Cancel'), 
                     id:'btnCancel',
-                    css:{'float':'right','margin-left':'30px'}, 
+                    css:{'float':'right','margin-left':'30px','margin-right':'20px'}, 
                     click: function() { 
                         that.closeDialog();
                     }},
                  {text:window.hWin.HR('Go'),
                     id:'btnDoAction',
+                    class:'ui-button-action',
                     disabled:'disabled',
                     css:{'float':'right'},  
                     click: function() { 
@@ -194,6 +196,28 @@ $.widget( "heurist.recordAction", {
                  ];
     },
 
+    //
+    // define action buttons for edit toolbar
+    //
+    _defineActionButton2: function(options, container){        
+        
+        var btn_opts = {label:options.text, icons:options.icons, title:options.title};
+        
+        var btn = $('<button>').button(btn_opts)
+                    .click(options.click)
+                    .appendTo(container);
+        if(options.id){
+            btn.attr('id', options.id);
+        }
+        if(options.css){
+            btn.css(options.css);
+        }
+        if(options.class){
+            btn.addClass(options.class);
+        }
+    },
+    
+    
     //
     // init dialog widget
     // see also popupDialog, closeDialog 
@@ -263,7 +287,7 @@ $.widget( "heurist.recordAction", {
 
             var $dlg = this._as_dialog.dialog("open");
             
-            if(this.options.supress_diaog_title) $dlg.parent().find('.ui-dialog-titlebar').hide();
+            if(this.options.supress_dialog_title) $dlg.parent().find('.ui-dialog-titlebar').hide();
             
             var helpURL = (this.options.helpContent)
                 ?(window.hWin.HAPI4.baseURL+'context_help/'+this.options.helpContent+' #content'):null;

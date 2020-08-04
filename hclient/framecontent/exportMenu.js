@@ -22,32 +22,36 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-function hexportMenu() {
+function hexportMenu( container ) {
     var _className = "exportMenu",
-    _version   = "0.4";
+    _version   = "0.4",
+    dialog_options=null;
 
-    function _init(){
+    function _init( container ){
 
-        _initMenu();        
+        _initMenu( container );        
         
     }
 
-    function _initMenu(){
-        
-        var parentdiv = $('#menu_container');
+    function _initMenu( container ){
 
-        parentdiv.addClass('ui-menu ui-widget ui-widget-content ui-corner-all');
-                
-        parentdiv.find('li').addClass('ui-menu-item');
-                
-       _initLinks(parentdiv);
-       
-       if( window.hWin.HAPI4.sysinfo.db_registeredid>0 ){
-            $('#divWarnAboutReg').hide();    
-       }else{
-            $('#divWarnAboutReg').show();    
-       }
-       
+        if(container && container.attr('id')=='menu_container'){
+            container.addClass('ui-menu ui-widget ui-widget-content ui-corner-all');
+            container.find('li').addClass('ui-menu-item');
+        }
+
+        if(container && container.hasClass('heurist-export-menu6')){
+            _initLinks_v6( container );
+        }else{
+            _initLinks();
+
+            if( window.hWin.HAPI4.sysinfo.db_registeredid>0 ){
+                $('#divWarnAboutReg').hide();    
+            }else{
+                $('#divWarnAboutReg').show();    
+            }
+        }
+
     }
     
     
@@ -99,6 +103,26 @@ function hexportMenu() {
         
     }
 
+    //
+    // init listeners for links in ui-menu version 6
+    //
+    function _initLinks_v6(menu){
+     
+        menu.find('li[data-export-action]').on({click:function(event){
+            
+            var ele = $(event.target);
+            if(!ele.is('li')){
+                ele = ele.parents('li');
+            }
+            var action = ele.attr('data-export-action');
+
+            _menuActionHandler(event, action, ele.attr('data-logaction'), true);
+            
+            return false;
+        }});
+        
+        menu.find('li[data-export-action]').css({'font-size':'smaller', padding:'6px'});
+    }
     
     //
     //
@@ -200,7 +224,7 @@ function hexportMenu() {
             
             //window.hWin.HAPI4.currentRecordsetSelection is assigned in resultListMenu
 
-            window.hWin.HEURIST4.ui.showRecordActionDialog('recordExportCSV');
+            window.hWin.HEURIST4.ui.showRecordActionDialog('recordExportCSV', dialog_options);
             
         }else if(action == "menu-export-hml-resultset"){ // Current resultset, including rules-based expansion iof applied
             _exportRecords({format:'hml', multifile:false, save_as_file:save_as_file});
@@ -226,9 +250,9 @@ function hexportMenu() {
 
         }else if(action == "menu-export-kml"){
             _exportKML(true, save_as_file);
-        }else if(action == "menu-export-rss"){
+        }else if(action == "menu-export-rss"){ //hidden
             _exportFeed('rss');
-        }else if(action == "menu-export-atom"){
+        }else if(action == "menu-export-atom"){ //hidden
             _exportFeed('atom');
         }
       
@@ -412,6 +436,9 @@ function hexportMenu() {
         return false;
     }
 
+    //
+    // hidden
+    //
     function _exportFeed(mode){
 
         if(!window.hWin.HEURIST4.util.isnull(window.hWin.HEURIST4.current_query_request)){
@@ -443,10 +470,14 @@ function hexportMenu() {
         getClass: function () {return _className;},
         isA: function (strClass) {return (strClass === _className);},
         getVersion: function () {return _version;},
+        
+        setDialogOptions: function( _dialog_options ){
+            dialog_options = _dialog_options
+        }
 
     }
 
-    _init();
+    _init( container );
     return that;  //returns object
 }
     

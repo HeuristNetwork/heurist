@@ -30,10 +30,7 @@ require_once(dirname(__FILE__)."/initPage.php");
     // Callback function on initialization
     function onPageInit(success){
         if(success){
-
-            var exportMenu = new hexportMenu();
-
-            var $container = $("<div>").appendTo($("body"));
+            var exportMenu = new hexportMenu( $('body') );
         }
     }            
 </script>

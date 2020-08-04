@@ -380,7 +380,11 @@ $.widget( "heurist.mainMenu6", {
                 if(!cont.search_entity('instance'))
                     cont.search_entity({use_combined_select:true, 
                         mouseover: function(){that._resetCloseTimers()}, //NOT USED
-                        onClose: function() { that._closeSectionMenu('explore'); that.switchContainer('explore'); }
+                        onClose: function() { 
+                                //start search on close
+                                that._closeSectionMenu('explore'); 
+                                that.switchContainer('explore'); 
+                        }
                     });    
 
                 that.menues['explore'].css({bottom:'4px',width:'200px',overflow:'auto'});
@@ -701,6 +705,37 @@ console.log('prvent colapse');
                 {container:this.containers[section]}
             ); 
         }});
+        
+        if(section=='publish'){
+            var that = this;
+            var menu_container = this.menues[section].find('.heurist-export-menu6');
+            $.getScript( window.hWin.HAPI4.baseURL+'hclient/framecontent/exportMenu.js',
+            function() {
+                var exportMenu = new hexportMenu( menu_container );    
+                exportMenu.setDialogOptions({
+                        is_h6style: true,
+                        isdialog: false, 
+                        need_reload: true,
+                        onInitFinished: function(){
+                            that.switchContainer('publish');
+                        },
+                        onClose: function() { that.containers['publish'].hide() },
+                        container: that.containers['publish']});
+            });            
+/*            
+                if(!cont.search_advanced('instance'))
+                    //initialization
+                    cont.search_advanced({
+                        onClose: function() { that._closeSectionMenu('explore'); that.switchContainer('explore'); },
+                        menu_locked: function(is_locked){ 
+                            that._resetCloseTimers();
+                            that._explorer_menu_locked = is_locked; 
+                    }  });    
+*/
+
+            
+            
+        }
         
     },
     

@@ -27,7 +27,7 @@ $.widget( "heurist.search_advanced", $.heurist.recordAction, {
         is_json_query: false,    
         
         isdialog: false, 
-        supress_diaog_title: true,
+        supress_dialog_title: true,
         mouseover: null, //callback to prevent close h6 menu 
         menu_locked: null, //callback to prevent close h6 menu on mouse exit
         

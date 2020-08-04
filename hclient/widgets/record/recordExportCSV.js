@@ -33,6 +33,18 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
 
     selectedFields:null,
     
+    _destroy: function() {
+        this._super(); 
+        
+        var treediv = this.element.find('.rtt-tree');
+        if(!treediv.is(':empty') && treediv.fancytree("instance")){
+            treediv.fancytree("destroy");
+        }
+        treediv.remove();
+        
+        if(this.toolbar)this.toolbar.remove();
+    },
+        
     _initControls: function() {
 
 
@@ -41,10 +53,13 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
 
             $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/entity/configEntity.js', 
                 function(){ 
-                    that._initControls();            
-
+                    if(that._initControls()){
+                        if($.isFunction(that.options.onInitFinished)){
+                            that.options.onInitFinished.call(that);
+                        }        
+                    }
             } );
-            return;            
+            return false;            
         }
 
         this._super();    
@@ -64,7 +79,25 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
         });
 
         this.element.find('#divLoadSettings').configEntity( 'updateList', this.selectRecordScope.val() );    
+        
+        
+        if(!this.options.isdialog && this.options.is_h6style){
+            var fele = this.element.find('.ent_wrapper:first');
+            fele.css({top:'36px',bottom:'40px'});
+            $('<div class="ui-heurist-header">'+this.options.title+'</div>').insertBefore(fele);    
+            this.toolbar = $('<div class="ent_footer button-toolbar ui-heurist-header" style="height:20px"></div>').insertAfter(fele);    
+            //append action buttons
+            this.toolbar.empty();
+            var btns = this._getActionButtons();
+            for(var idx in btns){
+                this._defineActionButton2(btns[idx], this.toolbar);
+            }
+        }
+        
+        
+        
 
+        return true;
     },
 
     //

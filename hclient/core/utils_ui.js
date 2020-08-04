@@ -2735,6 +2735,20 @@ window.hWin.HEURIST4.ui = {
                     .appendTo( doc_body )
                     [actionName]( options );
             }else{
+                
+                if($(options.container)[actionName]('instance')){
+                    
+                    if(options.need_reload===false){
+                        $(options.container).show();
+                        return;
+                    }else{
+                        $(options.container)[actionName]('destroy');
+                    }
+                    
+                }
+                $(options.container).empty();
+                $(options.container).show();
+                
                 manage_dlg = $(options.container)[actionName]( options );
             }
             
