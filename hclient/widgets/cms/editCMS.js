@@ -1,5 +1,5 @@
 /*
-* editCMS.js - 
+* editCMS.js - loads websiteRecord.php in edit mode
 * 
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -123,11 +123,20 @@ function editCMS( options ){
     popup_dlg.load(window.hWin.HAPI4.baseURL+'hclient/widgets/cms/editCMS.html', 
     );
 */    
-    
-    
 
-    var edit_dialog = window.hWin.HEURIST4.msg.showMsgDlgUrl(window.hWin.HAPI4.baseURL
-        +'hclient/widgets/cms/editCMS.html',
+    var edit_dialog;
+    
+    if(options.container){
+        
+        options.container.empty();
+        edit_dialog = options.container;
+        options.container.load(window.hWin.HAPI4.baseURL+'hclient/widgets/cms/editCMS.html',
+            onDialogInit
+        );
+    }else{ 
+
+        edit_dialog = window.hWin.HEURIST4.msg.showMsgDlgUrl(window.hWin.HAPI4.baseURL
+            +'hclient/widgets/cms/editCMS.html',
                 edit_buttons, window.hWin.HR('Define Website'),
                 {open:onDialogInit, width:dim.w*0.95, height:dim.h*0.95, isPopupDlg:true, 
                 close:function(){
@@ -148,6 +157,8 @@ function editCMS( options ){
                         return res;
                     }
                 }});
+                
+    }
 
 
     var layout_opts =  {
@@ -178,11 +189,14 @@ function editCMS( options ){
     //
     function onDialogInit(){
         
-            web_link = edit_dialog.parent().find('.ui-dialog-buttonpane').find('#web_link');
-        
-            if(web_link.length==0){
-                web_link = $('<div>').attr('id','web_link').css({padding:'14px 0 0 12px'})
-                    .appendTo( edit_dialog.parent().find('.ui-dialog-buttonpane') );
+            web_link = null;
+            if(edit_dialog.dialog('instance')){
+                web_link = edit_dialog.parent().find('.ui-dialog-buttonpane').find('#web_link');
+            
+                if(web_link.length==0){
+                    web_link = $('<div>').attr('id','web_link').css({padding:'14px 0 0 12px'})
+                        .appendTo( edit_dialog.parent().find('.ui-dialog-buttonpane') );
+                }
             }
 
 
@@ -191,7 +205,7 @@ function editCMS( options ){
                 isWebPage = (home_page_record_id==-2);
                 
                 //create new set of records - website template -----------------------
-                window.hWin.HEURIST4.msg.bringCoverallToFront(edit_dialog.parents('.ui-dialog')); 
+                window.hWin.HEURIST4.msg.bringCoverallToFront(edit_dialog.dialog('instance')?edit_dialog.parents('.ui-dialog'):null); 
                 window.hWin.HEURIST4.msg.showMsgFlash(
                 (isWebPage
                 ?'Creating default layout (webpage) record'
@@ -249,7 +263,7 @@ function editCMS( options ){
 
                     }else{
                         window.hWin.HEURIST4.msg.showMsgErr(response);
-                        edit_dialog.dialog('close');
+                        if(edit_dialog.dialog('instance'))edit_dialog.dialog('close');
                     }
                 });
 
@@ -368,7 +382,7 @@ function editCMS( options ){
                                     }
                                     */
                                     
-
+                                    //assign listeneres for control buttons on left side panel
                                     var btn_refresh = edit_dialog.find('#btn_refresh');
                                     if(!btn_refresh.button('instance')){
                                         
@@ -463,6 +477,7 @@ function editCMS( options ){
                                                 window.open(url, '_blank');
                                         });
                                         
+                                        if(web_link)
                                         web_link.html('<b>Website URL:</b>&nbsp;<a href="'+url+'" target="_blank" style="color:blue">'+url+'</a>');
                                     }
                                     
@@ -821,7 +836,7 @@ function editCMS( options ){
                     }
                     else{ //request for cms records fails
                         window.hWin.HEURIST4.msg.showMsgErr(response);
-                        edit_dialog.dialog('close');
+                        if(edit_dialog.dialog('instance'))edit_dialog.dialog('close');
                     }
                     
                 }
@@ -887,6 +902,7 @@ function editCMS( options ){
                     window.open(url, '_blank');
             });
             
+            if(web_link)
             web_link.html('<b>Webpage URL:</b>&nbsp;<a href="'+url+'" target="_blank" style="color:blue">'+url+'</a>');
         }
         

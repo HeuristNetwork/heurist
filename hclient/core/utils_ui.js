@@ -2709,6 +2709,7 @@ window.hWin.HEURIST4.ui = {
         if( window.hWin.HEURIST4.util.isNumber( options ) ){
             options = {record_id:options};
         }
+        
         editCMS(  options );
     },
     

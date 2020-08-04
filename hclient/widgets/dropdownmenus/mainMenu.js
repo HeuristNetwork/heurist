@@ -797,7 +797,11 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                     function(){ 
                         var chb = $dlg.find('input[type="checkbox"]');
                         var is_private = chb.is(':checked');
-                        window.hWin.HEURIST4.ui.showEditCMSDialog({record_id:-1, webpage_private:is_private}); 
+                        
+                        popup_dialog_options.record_id = -1;
+                        popup_dialog_options.webpage_private = is_private;
+                        
+                        window.hWin.HEURIST4.ui.showEditCMSDialog(popup_dialog_options); 
                     },'New website');
 
                 }
@@ -813,18 +817,19 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                         
                         if(that.sMsgCmsPrivate!=''){
                             var $dlg = window.hWin.HEURIST4.msg.showMsgDlg(that.sMsgCmsPrivate,
-                               {Continue:function(){ $dlg.dialog('close'); that._select_CMS_Home( false ); }},
+                               {Continue:function(){ $dlg.dialog('close'); that._select_CMS_Home( false, popup_dialog_options ); }},
                                'Non-public website records');
                         }else{
-                            that._select_CMS_Home( false );    
+                            that._select_CMS_Home( false, popup_dialog_options );    
                         }
                         
                         
                         
                     }else{
+                        popup_dialog_options.record_id = -1;
                         window.hWin.HEURIST4.msg.showMsgDlg(
                                 'New website will be created. Continue?',
-                                function(){ window.hWin.HEURIST4.ui.showEditCMSDialog( -1 ); });
+                                function(){ window.hWin.HEURIST4.ui.showEditCMSDialog( popup_dialog_options ); });
                     }
                 });
 
@@ -836,16 +841,17 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                         
                         if(that.sMsgCmsPrivate!=''){
                             var $dlg = window.hWin.HEURIST4.msg.showMsgDlg(that.sMsgCmsPrivate,
-                               {Continue:function(){ $dlg.dialog('close'); that._select_CMS_Home( true ); }},
+                               {Continue:function(){ $dlg.dialog('close'); that._select_CMS_Home( true, popup_dialog_options ); }},
                                'Non-public website records');
                         }else{
-                            that._select_CMS_Home( true );
+                            that._select_CMS_Home( true, popup_dialog_options );
                         }
                         
                     }else if( window.hWin.HAPI4.is_admin() ){
+                        popup_dialog_options.record_id = -1;
                         window.hWin.HEURIST4.msg.showMsgDlg(
                                 'New website will be created. Continue?',
-                                function(){ window.hWin.HEURIST4.ui.showEditCMSDialog( -1 ); });
+                                function(){ window.hWin.HEURIST4.ui.showEditCMSDialog( popup_dialog_options ); });
                     }else{
                         window.hWin.HEURIST4.msg.showMsgFlash('No websites defined',2000);
                     }
@@ -1477,7 +1483,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
     //
     // show popup with list of web home records - on select either view or edit
     //                
-    _select_CMS_Home: function ( is_view_mode ){
+    _select_CMS_Home: function ( is_view_mode, popup_dialog_options ){
         
         var RT_CMS_HOME = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME'];
         if(!(RT_CMS_HOME>0)){
@@ -1494,7 +1500,8 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                 
                 this._openCMS( this.cms_home_private_records_ids );
             }else{
-                window.hWin.HEURIST4.ui.showEditCMSDialog( 0 ); //load the only entry at once
+                popup_dialog_options.record_id = 0;
+                window.hWin.HEURIST4.ui.showEditCMSDialog( popup_dialog_options ); //load the only entry at once
             }
             return;
         }
@@ -1535,7 +1542,8 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                                     if(is_view_mode){
                                         that._openCMS(rec_ID);
                                     }else{
-                                        window.hWin.HEURIST4.ui.showEditCMSDialog( rec_ID );    
+                                        popup_dialog_options.record_id = rec_ID;
+                                        window.hWin.HEURIST4.ui.showEditCMSDialog( popup_dialog_options );    
                                     }
                                     
                                  }
