@@ -720,7 +720,7 @@ EOD;
                     if(@$records_corr_alphanum[$rec_id_an]){ //aplhanum->random int
                         $record_src['rec_ID'] = $records_corr_alphanum[$rec_id_an];
                     }else{
-                        $rand_id = random_int(900000000,999999999);
+                        $rand_id = rand(900000000,999999999); //random_int
                         $records_corr_alphanum[$rec_id_an] = $rand_id;
                         $record_src['rec_ID'] = $rand_id; 
                     }
@@ -961,7 +961,7 @@ EOD;
                                if(@$records_corr_alphanum[$value]){
                                    $value = $records_corr_alphanum[$value];
                                }else{
-                                   $rand_id = random_int(900000000,999999999);
+                                   $rand_id = rand(900000000,999999999); //random_int
                                    $records_corr_alphanum[$value] = $rand_id;
                                    $value = $rand_id; 
                                }
@@ -1301,9 +1301,9 @@ private static function addNewTerm($recTypeID, $dt_id, $term_label, $dbdefs){
 }
     
 }  
-
-if (!function_exists('random_int')) {
-    function random_int($min, $max) {
+/*
+if (!function_exists('random_int2')) {
+    function random_int2($min, $max) {
         if (!function_exists('mcrypt_create_iv')) {
             trigger_error(
                 'mcrypt must be loaded for random_int to work',
@@ -1348,4 +1348,5 @@ if (!function_exists('random_int')) {
         return $result + $min;
     }
 }
+*/
 ?>
