@@ -701,9 +701,9 @@ console.log('prvent colapse');
             li.addClass('ui-state-active');
             
             this.switchContainer(section, true);
-            widget.mainMenu('menuActionById', li.attr('data-action'), 
-                {container:this.containers[section]}
-            ); 
+            widget.mainMenu('menuActionById', li.attr('data-action')); 
+            //{container:this.containers[section]}
+            
         }});
         
         if(section=='publish'){

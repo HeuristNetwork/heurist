@@ -709,13 +709,14 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         
         if(this.options.is_h6style && (dialog_options || action_container)){
             
-            var container;
+            var container, menu_container;
             if(dialog_options && dialog_options['container']){
                 container = dialog_options['container'];
             }else if(action_container){
                 var section = action_container;
                 $('.ui-menu6').mainMenu6('switchContainer', section, true);
                 container = $('.ui-menu6 > .ui-menu6-container.ui-heurist-'+section);
+                menu_container = $('.ui-menu6 > .ui-menu6-section.ui-heurist-'+section); //need for publish/cms
             }
             var pos = null;
             if(dialog_options && dialog_options['position']){
@@ -725,6 +726,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
             // for entity show dialog inline in target container
             entity_dialog_options = {isdialog: false, 
                                      innerTitle: true,
+                                     menu_container: menu_container,
                                      container: container};
                                      
             // for popup dialog show on postion over container
@@ -732,6 +734,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                 is_h6style: true,
                 resizable: false,
                 draggable: false,
+                menu_container: menu_container,
                 container: container,
                 position: pos,
                 maximize: true

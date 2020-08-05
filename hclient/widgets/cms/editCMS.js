@@ -83,9 +83,8 @@ function editCMS( options ){
         {text:window.hWin.HR('Close'), 
             id:'btnRecCancel',
             css:{'float':'right'}, 
-            click: function() {     
-                edit_dialog.dialog('close'); 
-        }}
+            click: closeCMSEditor
+        }
     ];
 
     var body = $(this.document).find('body');
@@ -128,6 +127,13 @@ function editCMS( options ){
     
     if(options.container){
         
+        if(options.menu_container){
+            //hide all menu items 
+            options.menu_container.find('ul').hide();
+            //show cms
+            options.menu_container.find('ul.for_web_site').show();
+        }
+        
         options.container.empty();
         edit_dialog = options.container;
         options.container.load(window.hWin.HAPI4.baseURL+'hclient/widgets/cms/editCMS.html',
@@ -142,21 +148,8 @@ function editCMS( options ){
                 close:function(){
                     edit_dialog.empty();//dialog('destroy');
                 },
-                beforeClose:function(){
-                    var preview_frame = edit_dialog.find('#web_preview');
-                    if(preview_frame[0].contentWindow.cmsEditing){
-                        //check that everything is saved
-                        var res = preview_frame[0].contentWindow.cmsEditing.onEditorExit(
-                        function( need_close_explicitly ){
-                            //exit allowed
-                            if(need_close_explicitly!==false) edit_dialog.dialog('close');    
-                            if($.isFunction(main_callback) && home_page_record_id>0){
-                                   main_callback( home_page_record_id, home_page_record_title ); 
-                            }
-                        });
-                        return res;
-                    }
-                }});
+                beforeClose: beforeCloseCMSEditor
+                });
                 
     }
 
@@ -263,7 +256,7 @@ function editCMS( options ){
 
                     }else{
                         window.hWin.HEURIST4.msg.showMsgErr(response);
-                        if(edit_dialog.dialog('instance'))edit_dialog.dialog('close');
+                        closeCMSEditor();
                     }
                 });
 
@@ -479,7 +472,38 @@ function editCMS( options ){
                                         
                                         if(web_link)
                                         web_link.html('<b>Website URL:</b>&nbsp;<a href="'+url+'" target="_blank" style="color:blue">'+url+'</a>');
-                                    }
+                                        
+                                        edit_dialog.find('#btn_exit').button().click( closeCMSEditor );
+                                        
+                                        
+                                        if(options.menu_container){ //init menu items
+                                            function __onMenuClick(event){
+                                                var btn = edit_dialog.find('#'
+                                                    +$(event.target).attr('data-cms-action'));
+console.log('>>>'+$(event.target).attr('data-cms-action'));                                                    
+                                                if(btn.length>0) btn.click();
+                                            }
+                                            
+                                            options.menu_container.find('li[data-cms-action]').each(
+                                                function(i,item){
+                                                    var li = $(item);
+                                                    var btn = edit_dialog.find('#'+li.attr('data-cms-action'));
+                                                    if(btn.length>0 && btn.button('instance')){
+                                                        li.empty();
+                                                        li.off('click');
+                                                        var icon = btn.button('option','icon');
+                                                        $('<span class="ui-icon '+icon+'" style="cursor: pointer;"></span>'
+                                                        +'<span class="menu-text">'+
+                                                        btn.button('option','label')
+                                                        +'</span>').appendTo(li);
+                                                        li.css({'font-size':'smaller', padding:'6px'});
+                                                        li.on({click:__onMenuClick});
+                                                    }
+                                                }
+                                            );
+                                        }
+                                        
+                                    }//end init buttons
                                     
                                     if(need_refresh_preview){
                                         btn_refresh.click(); //reload home page    
@@ -836,7 +860,7 @@ function editCMS( options ){
                     }
                     else{ //request for cms records fails
                         window.hWin.HEURIST4.msg.showMsgErr(response);
-                        if(edit_dialog.dialog('instance'))edit_dialog.dialog('close');
+                        closeCMSEditor();
                     }
                     
                 }
@@ -989,6 +1013,54 @@ function editCMS( options ){
                     */
     }
     
+    //
+    //
+    //
+    function closeCMSEditor()
+    {
+        if(edit_dialog.dialog('instance')){
+            edit_dialog.dialog('close');     
+        }else if(beforeCloseCMSEditor()){
+            closeCMSEditorFinally();
+        }
+    }
+
+    //
+    //
+    //
+    function closeCMSEditorFinally(){
+        if(edit_dialog.dialog('instance')){
+            edit_dialog.dialog('close');     
+        }else{
+            edit_dialog.hide();
+            //restore menu
+            //hide all menu items 
+            options.menu_container.find('ul').show();
+            //show cms
+            options.menu_container.find('ul.for_web_site').hide();
+            options.menu_container.find('ul.for_web_page').hide();
+        }
+    }
+    
+    //
+    //
+    //
+    function beforeCloseCMSEditor(){
+        var preview_frame = edit_dialog.find('#web_preview');
+        if(preview_frame[0].contentWindow.cmsEditing){
+            //check that everything is saved
+            var res = preview_frame[0].contentWindow.cmsEditing.onEditorExit(
+                function( need_close_explicitly ){
+                    //exit allowed
+                    if(need_close_explicitly!==false) closeCMSEditorFinally();
+                        
+                    if($.isFunction(main_callback) && home_page_record_id>0){
+                        main_callback( home_page_record_id, home_page_record_title ); 
+                    }
+            });
+            return res;
+        }
+    }    
     //
     // Select or create new menu item for website
     //
