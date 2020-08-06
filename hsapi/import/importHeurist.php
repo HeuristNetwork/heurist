@@ -652,7 +652,7 @@ EOD;
         $records = $data['heurist']['records'];
         
         $records_corr_alphanum = array();
-        $records_corr = array(); //source rec id -> target rec id
+        $records_corr = array(); //correspondance: source rec id -> target rec id
         $resource_fields = array(); //source rec id -> field type id -> field value (target recid)
         $keep_rectypes = array(); //keep rectypes for furhter rectitle update
         $recid_already_checked = array(); //keep verified H-ID resource records
@@ -716,12 +716,12 @@ EOD;
                         .$record_src['rec_ID'];
                 
                 if((!ctype_digit($record_src['rec_ID'])) || strlen($record_src['rec_ID'])>9 ){  //4 957 948 868
-                    $rec_id_an = strtolower($record_src['rec_ID']);
-                    if(@$records_corr_alphanum[$rec_id_an]){ //aplhanum->random int
-                        $record_src['rec_ID'] = $records_corr_alphanum[$rec_id_an];
+                    $rec_id_low = strtolower($record_src['rec_ID']);
+                    if(@$records_corr_alphanum[$rec_id_low]){ //aplhanum->random int
+                        $record_src['rec_ID'] = $records_corr_alphanum[$rec_id_low];
                     }else{
                         $rand_id = rand(900000000,999999999); //random_int
-                        $records_corr_alphanum[$rec_id_an] = $rand_id;
+                        $records_corr_alphanum[$rec_id_low] = $rand_id;
                         $record_src['rec_ID'] = $rand_id; 
                     }
                 }
@@ -958,11 +958,12 @@ EOD;
                        }else{                       
 
                            if((!ctype_digit($value)) || strlen($value)>9 ){  //8 724 803 625
-                               if(@$records_corr_alphanum[$value]){
-                                   $value = $records_corr_alphanum[$value];
+                               $rec_id_low = strtolower($value);
+                               if(@$records_corr_alphanum[$rec_id_low]){
+                                   $value = $records_corr_alphanum[$rec_id_low];
                                }else{
                                    $rand_id = rand(900000000,999999999); //random_int
-                                   $records_corr_alphanum[$value] = $rand_id;
+                                   $records_corr_alphanum[$rec_id_low] = $rand_id;
                                    $value = $rand_id; 
                                }
                            }
@@ -1150,7 +1151,7 @@ EOD;
             }
             if(!$is_rollback){ 
                 $idx_mask = $defs['rectypes']['typedefs']['commonNamesToIndex']['rty_TitleMask'];         
-                //update resource fields with new record ids
+                //update recrord title
                 foreach ($keep_rectypes as $rec_id=>$rty_id){
                     $mask = @$defs['rectypes']['typedefs'][$rty_id]['commonFields'][$idx_mask];
                     recordUpdateTitle(self::$system, $rec_id, $mask, null);
