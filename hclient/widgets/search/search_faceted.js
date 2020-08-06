@@ -232,7 +232,7 @@ $.widget( "heurist.search_faceted", {
         if(this.options.params.ui_exit_button===false) this.options.showclosebutton = false;
         
         this.btn_terminate = $( "<button>").appendTo( this.div_toolbar )
-        .button({icon: "ui-icon-cancel", iconPosition:'end', label:'Terminate'}).hide();
+        .button({icon: "ui-icon-cancel", iconPosition:'end', label:'Interrupt'}).hide();
         
         
         this._on( this.btn_submit, { click: "doSearch" });
