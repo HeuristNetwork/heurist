@@ -437,7 +437,7 @@ function hexportMenu( container ) {
     }
 
     //
-    // hidden
+    // hidden - noy used 
     //
     function _exportFeed(mode){
 

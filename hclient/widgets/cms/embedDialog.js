@@ -34,6 +34,8 @@ $.widget( "heurist.embedDialog", {
         //parameters
         layout_rec_id: 0,
         
+        cms_popup_dialog_options: {},
+        
         //listeners
         onInitFinished:null,  //event listener when dialog is fully inited - use to perform initial search with specific parameters
         beforeClose:null,     //to show warning before close
@@ -159,7 +161,9 @@ $.widget( "heurist.embedDialog", {
             
             this._on( this.selectRecordScope, { change: function(){
                 if(this.selectRecordScope.val()>0){
-                    window.hWin.HEURIST4.ui.showEditCMSDialog( this.selectRecordScope.val() );
+                    
+                    this.options.cms_popup_dialog_options.record_id = this.selectRecordScope.val();
+                    window.hWin.HEURIST4.ui.showEditCMSDialog( this.options.cms_popup_dialog_options );
                     that.closeDialog();
                 }
             }} );        
@@ -294,6 +298,12 @@ $.widget( "heurist.embedDialog", {
             }); 
             this._as_dialog = $dlg; 
             
+            if(this.options.cms_popup_dialog_options.container){
+                //$dlg.addClass('ui-heurist-bg-light');
+                $dlg.parent().addClass('ui-dialog-heurist ui-heurist-publish');
+            }
+            
+            
     },
     
     //
@@ -366,8 +376,9 @@ $.widget( "heurist.embedDialog", {
                 
                 var that = this;
                 //create new web page
-                window.hWin.HEURIST4.ui.showEditCMSDialog({
-                    record_id:-2, webpage_title: layout_name});
+                this.options.cms_popup_dialog_options.record_id = -2;
+                this.options.cms_popup_dialog_options.webpage_title = layout_name;
+                window.hWin.HEURIST4.ui.showEditCMSDialog( this.options.cms_popup_dialog_options );
                 /*
                     callback: function(rec_id, rec_title){
                         if(rec_id>0){

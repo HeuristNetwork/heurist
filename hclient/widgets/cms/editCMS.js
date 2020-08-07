@@ -153,7 +153,7 @@ function editCMS( options ){
                 
     }
 
-
+    //not used at the moment
     var layout_opts =  {
         applyDefaultStyles: true,
         togglerContent_open:    '<div class="ui-icon ui-icon-triangle-1-w"></div>',
@@ -431,8 +431,11 @@ function editCMS( options ){
                                                                 element: edit_dialog.find('#web_tree_cont')[0],
                                                                 height: 600,
                                                                 width: 350,
-                                                                position:{my:"left top", at:"left bottom", "of":edit_dialog.find('#btn_edit_menu')},
+                                                //position:{my:"left top", at:"left bottom", "of":edit_dialog.find('#btn_edit_menu')},
+                                                position:{my:"left top", at:"right+4 top", "of":
+                                                    $('.ui-menu6').find('.ui-menu6-section.ui-heurist-publish')},
                                                                 title: window.hWin.HR('Web site menu'),
+                                                                h6style_class: 'ui-heurist-publish',
                                                                 close: function(){
                                                                     _initWebSiteEditor(was_something_edited); 
                                                                 }
@@ -477,12 +480,6 @@ function editCMS( options ){
                                         
                                         
                                         if(options.menu_container){ //init menu items
-                                            function __onMenuClick(event){
-                                                var btn = edit_dialog.find('#'
-                                                    +$(event.target).attr('data-cms-action'));
-console.log('>>>'+$(event.target).attr('data-cms-action'));                                                    
-                                                if(btn.length>0) btn.click();
-                                            }
                                             
                                             options.menu_container.find('li[data-cms-action]').each(
                                                 function(i,item){
@@ -490,17 +487,18 @@ console.log('>>>'+$(event.target).attr('data-cms-action'));
                                                     var btn = edit_dialog.find('#'+li.attr('data-cms-action'));
                                                     if(btn.length>0 && btn.button('instance')){
                                                         li.empty();
-                                                        li.off('click');
                                                         var icon = btn.button('option','icon');
                                                         $('<span class="ui-icon '+icon+'" style="cursor: pointer;"></span>'
                                                         +'<span class="menu-text">'+
                                                         btn.button('option','label')
                                                         +'</span>').appendTo(li);
                                                         li.css({'font-size':'smaller', padding:'6px'});
-                                                        li.on({click:__onMenuClick});
-                                                    }
+                                                   }
                                                 }
                                             );
+                                            edit_dialog.find('.ui-layout-west').hide();
+                                            edit_dialog.find('.ui-layout-center').css({left:0});
+
                                         }
                                         
                                     }//end init buttons
@@ -829,6 +827,8 @@ console.log('>>>'+$(event.target).attr('data-cms-action'));
                         }
                         
                         
+                        
+                            if(options.container) options.container.show();
                         }//!isWebPage
                         
                         if(no_access){
@@ -874,7 +874,16 @@ console.log('>>>'+$(event.target).attr('data-cms-action'));
     //
     function _initWebPageEditor( need_refresh_preview, no_access ){
         
-        edit_dialog.parent().find('.ui-dialog-title').text( window.hWin.HR('Define layout for embedding in an indpendent website') );
+        
+        if(options.menu_container){
+            //hide all menu items 
+            options.menu_container.find('ul').hide();
+            //show cms
+            options.menu_container.find('ul.for_web_page').show();
+            options.container.show();
+        }else{
+            edit_dialog.parent().find('.ui-dialog-title').text( window.hWin.HR('Define layout for embedding in an indpendent website') );
+        }
         
         edit_dialog.find('.cms').children().hide();
         edit_dialog.find('.cms > .for_web_page').css('display','inline-block');//show();
@@ -928,7 +937,32 @@ console.log('>>>'+$(event.target).attr('data-cms-action'));
             
             if(web_link)
             web_link.html('<b>Webpage URL:</b>&nbsp;<a href="'+url+'" target="_blank" style="color:blue">'+url+'</a>');
-        }
+            
+            edit_dialog.find('#btn_exit').button().click( closeCMSEditor );
+            
+            if(options.menu_container){ //init menu items
+                
+                options.menu_container.find('li[data-cms-action]').each(
+                    function(i,item){
+                        var li = $(item);
+                        var btn = edit_dialog.find('#'+li.attr('data-cms-action'));
+                        if(btn.length>0 && btn.button('instance')){
+                            li.empty();
+                            var icon = btn.button('option','icon');
+                            $('<span class="ui-icon '+icon+'" style="cursor: pointer;"></span>'
+                            +'<span class="menu-text">'+
+                            btn.button('option','label')
+                            +'</span>').appendTo(li);
+                            li.css({'font-size':'smaller', padding:'6px'});
+                       }
+                    }
+                );
+                
+                edit_dialog.find('.ui-layout-west').hide();
+                edit_dialog.find('.ui-layout-center').css({left:0});
+            }
+            
+        }//end init buttons
         
         if(need_refresh_preview){
             btn_refresh.click(); //reload home page    

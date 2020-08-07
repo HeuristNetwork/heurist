@@ -700,12 +700,30 @@ console.log('prvent colapse');
             this.menues[section].find('li').removeClass('ui-state-active');
             li.addClass('ui-state-active');
             
-            this.switchContainer(section, true);
+            //this.switchContainer(section, true);
             widget.mainMenu('menuActionById', li.attr('data-action')); 
             //{container:this.containers[section]}
             
         }});
+        if(section=='publish'){
+            this._on(this.menues[section].find('li[data-cms-action]'),{click:function(e){
+                var li = $(e.target);
+                if(!li.is('li')) li = li.parents('li');
+                
+                this.menues[section].find('li').removeClass('ui-state-active');
+                li.addClass('ui-state-active');
+                
+                this.switchContainer('publish', true);
+                
+                
+                var btn = this.containers['publish'].find('#'
+                                                    +li.attr('data-cms-action'));
+                if(btn.length>0) btn.click();
+                
+            }});
+        }
         
+        /*
         if(section=='publish'){
             var that = this;
             var menu_container = this.menues[section].find('.heurist-export-menu6');
@@ -722,20 +740,7 @@ console.log('prvent colapse');
                         onClose: function() { that.containers['publish'].hide() },
                         container: that.containers['publish']});
             });            
-/*            
-                if(!cont.search_advanced('instance'))
-                    //initialization
-                    cont.search_advanced({
-                        onClose: function() { that._closeSectionMenu('explore'); that.switchContainer('explore'); },
-                        menu_locked: function(is_locked){ 
-                            that._resetCloseTimers();
-                            that._explorer_menu_locked = is_locked; 
-                    }  });    
-*/
-
-            
-            
-        }
+        }*/
         
     },
     
@@ -761,7 +766,7 @@ console.log('prvent colapse');
             if(section != 'explore') {
                 that.menues[section].css('z-index',101).show();
             }
-            if(force_show || !that.containers[section].is(':empty')){
+            if(force_show || (section!='publish' && !that.containers[section].is(':empty'))){
                 that.containers[section].show();    
             }
             

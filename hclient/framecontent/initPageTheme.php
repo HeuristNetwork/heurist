@@ -357,6 +357,22 @@ span.fancytree-node:hover{
     background:<?php uout('button_action_bg', '#3D9946');?> 0% 0% no-repeat padding-box !important;
     color:<?php uout('button_action_bg', '#FFFFFF');?> !important;
 }
+.ui-dialog-heurist .ui-dialog-titlebar{
+    background: none;
+    border: none;
+    padding: 10px;
+    color: <?php uout('publish_title_color', '#FFFFFF');?>;    
+}
+.ui-dialog-heurist{
+    border: 0.25px solid #707070 !important;
+    box-shadow: 2px 3px 10px #00000080 !important;
+    border-radius: 4px !important;
+    padding: 0;
+}
+.ui-dialog-heurist .ui-dialog-title{
+    font-size: 1.3em;
+    margin: 0;
+}
 
 /* SECTION SCHEME: DESIGN */
 .ui-heurist-design.ui-heurist-header, .ui-heurist-design .ui-heurist-header{
@@ -396,11 +412,7 @@ span.fancytree-node:hover{
 .ui-heurist-explore .ui-dialog-titlebar,
 .ui-heurist-explore .ui-dialog-buttonpane
 {
-    color: <?php uout('explore_title_color', '#FFFFFF');?>;    
-    background: none;
     background-color: <?php uout('explore_bg', '#523365');?> !important;    
-    border: none;
-    padding: 10px;
 }
 .ui-heurist-explore-fade{background:<?php uout('explore_fade_bg', '#DAD0E4');?> !important;}
 .ui-heurist-explore .ui-heurist-title{color:<?php uout('explore_title_color', '#7B4C98');?>} /* '#7B4C98 */
@@ -424,24 +436,28 @@ span.fancytree-node:hover{
 {
         background:<?php uout('explore_active', '#A487B9');?> !important;
 }
-.ui-heurist-explore.ui-dialog{
-    border: 0.25px solid #707070 !important;
-    box-shadow: 2px 3px 10px #00000080 !important;
-    border-radius: 3px !important;
-    padding: 0;
-}
-.ui-heurist-explore .ui-dialog-title{
-    font-size: 1.3em;
-    margin: 0;
-}
 
 /* SECTION SCHEME: PUBLISH */
-.ui-heurist-publish.ui-heurist-header, .ui-heurist-publish .ui-heurist-header{
-    background:<?php uout('publish_bg', '#627E5D');?> 0% 0% no-repeat padding-box;
+.ui-heurist-publish.ui-heurist-header, .ui-heurist-publish .ui-heurist-header,
+.ui-heurist-publish .ui-dialog-titlebar,
+.ui-heurist-publish .ui-dialog-buttonpane{
+    background:<?php uout('publish_bg', '#627E5D');?> !important;
 }
+.ui-menu6 .ui-menu6-container.ui-heurist-publish, .ui-heurist-publish .ui-helper-popup{
+    border-width: 2px !important;
+    border-color:<?php uout('publish_bg', '#627E5D');?> !important; 
+} 
 .ui-heurist-publish-fade{background:<?php uout('publish_fade_bg', '#CCEAC5');?> 0% 0% no-repeat padding-box;}
-.ui-heurist-publish .ui-heurist-title{color:<?php uout('publish_title_color', '#627E5D');?>}
-
+.ui-heurist-publish .ui-heurist-title{
+    color:<?php uout('publish_title_color', '#627E5D');?>
+}
+.ui-heurist-publish .ui-state-active, 
+.ui-heurist-publish .fancytree-active,
+.ui-heurist-publish .fancytree-node:hover
+{
+    background:<?php uout('publish_active', '#CCEBC5');?> !important;
+}
+    
 /* SECTION SCHEME: ADMIN */
 .ui-heurist-admin.ui-heurist-header, .ui-heurist-admin .ui-heurist-header{
     background:<?php uout('admin_bg', '#676E80');?> 0% 0% no-repeat padding-box;

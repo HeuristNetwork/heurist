@@ -527,7 +527,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                     $dlg.dialog('open');  
                     
                     if(options.is_h6style){
-                            $dlg.parent().addClass('ui-heurist-explore');
+                            $dlg.parent().addClass('ui-dialog-heurist ui-heurist-explore');
                             if(options.position){
                                 $dlg.dialog( 'option', 'position', options.position );   
                                 if(options.maximize){
@@ -731,7 +731,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                         
                         if(options.is_h6style){
                                 $dlg.addClass('ui-heurist-bg-light');
-                                $dlg.parent().addClass('ui-heurist-explore');
+                                $dlg.parent().addClass('ui-dialog-heurist ui-heurist-explore');
                                 if(options.container){
 
                                     $dlg.dialog( 'option', 'position', 
@@ -1002,6 +1002,11 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                 $dlg.parent() //s(".ui-dialog")
                       .css("border", "0 none")
                       .find(".ui-dialog-titlebar").remove();
+            }
+            
+            if(options.h6style_class){
+                $dlg.addClass('ui-heurist-bg-light');
+                $dlg.parent().addClass('ui-dialog-heurist '+options.h6style_class);
             }
             
             return $dlg;
