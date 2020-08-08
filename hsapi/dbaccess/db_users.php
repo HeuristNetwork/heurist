@@ -355,8 +355,7 @@
             $mysqli->query('DELETE FROM usrWorkingSubsets where wss_OwnerUGrpID='.$curr_user_id);
             if ($mysqli->error) {
                     $system->addError(HEURIST_DB_ERROR, 'Can not reset user workset. SQL error: '.$mysqli->error);
-            }else{
-                    $res = 0;
+                    return false;
             }
                 
             if(@$params['clear']!=1){
