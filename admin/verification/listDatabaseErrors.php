@@ -886,14 +886,24 @@ onclick="{document.getElementById('page-inner').style.display = 'none';window.op
             if($recids!=null){
                 $recids = explode(',', $recids);
             }
+            $decade_regex = '/^\d{4}s$/';
+            
             while ($row = $res->fetch_assoc()){
 
                 if(!($row['dtl_Value']==null || trim($row['dtl_Value'])=='')){ //empty dates are not allowed
+
+                    $row['new_value'] = null;
+                    $row['dtl_Value'] = trim($row['dtl_Value']);
+                
+                    if(strlen($row['dtl_Value'])==5 && preg_match( $decade_regex, $row['dtl_Value'] )){
+                        continue;
+                    }
+                
                     //parse and validate value
                     $row['new_value'] = validateAndConvertToISO($row['dtl_Value'], $row['rec_Added']);
                     if($row['new_value']=='Temporal'){
                         continue;
-                    }else if($row['new_value']==trim($row['dtl_Value'])){
+                    }else if($row['new_value']==$row['dtl_Value']){
                         continue;
                     }
                 }else{
@@ -931,8 +941,8 @@ onclick="{document.getElementById('page-inner').style.display = 'none';window.op
                 <div>
                     <h3>Records with incorrect Date fields</h3>
                     <?php
-                    if($wascorrected>1){
-                            print "<div style='margin-bottom:10px'>$wascorrected Date fields were corrected. (gray color in the list)</div>";
+                    if($wascorrected>0){
+                        print "<div style='margin-bottom:10px'>$wascorrected Suggestions for date field corrections (gray color in the list)</div>";
                     }
                     ?>
                     <span>
