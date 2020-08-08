@@ -76,10 +76,10 @@
             if(!$hasGeo){
                 $system->error_exit_api('Service did not return data in an appropriate format');
             }
+        }else if(is_array($remote_data) && count($remote_data)==1){
+                $system->error_exit_api('No records match the search criteria', HEURIST_NOT_FOUND);
         }else{
-            if(!$hasGeo){
                 $system->error_exit_api('Service did not return any data');
-            }
         }
         
         
