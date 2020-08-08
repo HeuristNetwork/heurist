@@ -119,10 +119,13 @@
                 'Only letters, numbers and underscores (_) are allowed in the database name');
         }else{
             // Create database
+            // databse is created wiht utf8 (3-bytes encoding) and case insensetive collation order
+            // Records, recDetails and defTerms are create with utf8mb4 (4bytes encoding) - see blankDBStructure.sql
+            //
             $sql = 'CREATE DATABASE `'.$db_name.'` '
                      .' DEFAULT CHARACTER SET = utf8 DEFAULT COLLATE = utf8_general_ci';
                     //.' DEFAULT CHARACTER SET = utf8mb4 DEFAULT COLLATE = utf8mb4_0900_ai_ci';
-                    //
+                    
                     
             if ($mysqli->query($sql)) {
                 $res = true;
