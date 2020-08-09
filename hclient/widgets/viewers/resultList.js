@@ -415,7 +415,7 @@ $.widget( "heurist.resultList", {
         
         if(this.options.is_h6style){
 
-            $('<div class="result-list-header ui-heurist-header" style="font-size:1em;text-align:left;position:relative"/>')
+            $('<div class="result-list-header ui-heurist-header" style="font-size:1em;text-align:left;padding-left:12px;position:relative"/>')
                 .appendTo( this.div_header );
         }else{
         
