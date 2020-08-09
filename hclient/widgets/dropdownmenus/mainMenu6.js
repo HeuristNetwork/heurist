@@ -114,22 +114,83 @@ $.widget( "heurist.mainMenu6", {
         //that.initHelpDiv();
 
         $(window.hWin.document).on(window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE
-                +' '+window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, 
+                +' '+window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE
+                +' '+window.hWin.HAPI4.Event.ON_REC_SEARCHSTART
+                +' '+window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH, 
             function(e, data) {
-                //if(e.type == window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE){}
-                //refresh list of rectypes afrer structure edit
-                that._updateDefaultAddRectype();
-        });
-        
-        $(window.hWin.document).on(window.hWin.HAPI4.Event.ON_REC_SEARCHSTART, function(e, data){
-            if(data && !data.increment && !data.reset){
-                //keep current search for "Save Filter"
-                that.currentSearch = window.hWin.HEURIST4.util.cloneJSON(data);
-            }
+                
+                if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCHSTART){
+                    
+                    //not need to check realm since this widget the only per instance
+                    //if(data && that.options.search_realm && that.options.search_realm!=data.search_realm) return;
+                    
+                    if(data && !data.increment && !data.reset){
+                        //keep current search for "Save Filter"
+                        that.currentSearch = window.hWin.HEURIST4.util.cloneJSON(data);
+                        that._updateSaveFilterButton(1);
+                    }else if(data.reset){
+                        that.currentSearch = null;
+                        that._updateSaveFilterButton(0);
+                    }
+                    
+                }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH){
+                    
+                    //if(data && that.options.search_realm && that.options.search_realm!=data.search_realm) return;
+                    
+                    // window.hWin.HAPI4.currentRecordset is the same as data.recordset
+                    if(data.recordset && data.recordset.length()>0){
+                        that._updateSaveFilterButton(2);
+                    }else{
+                        that._updateSaveFilterButton(0);
+                    } 
+                    
+                }else{
+                    //if(e.type == window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE){}
+                    //refresh list of rectypes afrer structure edit
+                    that._updateDefaultAddRectype();
+                }
         });
         
         
     }, //end _create
+    
+    //
+    // 0 - disabled
+    // 1 - search in progress
+    // 2 - bounce and ready to save
+    //
+    _updateSaveFilterButton: function( mode ){
+        
+        var btn = this.divMainMenu.find('.menu-explore[data-action="svsAdd"]');
+        
+        if(mode==0){ //disabled
+           
+            //window.hWin.HEURIST4.util.setDisabled(btn, true);
+            btn.hide();//find('span.ui-icon').removeClass('ui-icon-filter-plus');
+            
+        }else if(mode==1){ //search in progress
+            
+            btn.show();
+            btn.find('span.ui-icon')
+                .removeClass('ui-icon-filter-plus')
+                .addClass('ui-icon-loading-status-lines rotate');
+        }else{
+            
+            //window.hWin.HEURIST4.util.setDisabled(btn, false);
+            
+            btn.show();
+            
+            btn.find('span.ui-icon')
+                .removeClass('ui-icon-loading-status-lines rotate')
+                .addClass('ui-icon-filter-plus');
+                
+            btn.effect( 'pulsate', null, 2000 );
+            
+        }
+        
+        
+        
+    },
     
     //
     //  
@@ -170,7 +231,8 @@ $.widget( "heurist.mainMenu6", {
         
         $(window.hWin.document).off(window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE
                 +' '+window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE
-                +' '+window.hWin.HAPI4.Event.ON_REC_SEARCHSTART);
+                +' '+window.hWin.HAPI4.Event.ON_REC_SEARCHSTART
+                +' '+window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH);
     },
     
     //

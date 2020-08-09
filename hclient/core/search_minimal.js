@@ -134,13 +134,12 @@ function hSearchMinimal() {
                         
                         recordset.setRequest( window.hWin.HEURIST4.util.cloneJSON(_query_request) );
 
-                        window.hWin.HAPI4.currentRecordset = recordset;
-                        
-
                 }else{
                     //erorr - trigger event with empty resultset
                     window.hWin.HEURIST4.msg.showMsgErr(response);
                 }
+                
+                window.hWin.HAPI4.currentRecordset = recordset;
                 _searchCompleted( false, recordset );
             }
             
