@@ -1120,7 +1120,7 @@ $.widget( "heurist.resultList", {
 
         if( !window.hWin.HEURIST4.util.isempty(this.options['empty_remark']) ){
             
-            $('<div>').css('padding','10px').html(this.options['empty_remark']).appendTo(this.div_content);
+            $('<div>').css('padding','8px').html(this.options['empty_remark']).appendTo(this.div_content);
 
         }else
         if(this.options.entityName!='records'){
