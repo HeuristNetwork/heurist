@@ -526,7 +526,7 @@ a{
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-wdith:200px;
+    max-wdith:230px;
 }
 .logo_intro{
     background-image: url("<?php echo PDIR;?>hclient/assets/v6/h6logo_intro.png");
@@ -888,7 +888,9 @@ a{
 
                     <div class="entry-box" style="float:right;margin:0 0 0 10px;padding: 4px;width:380px">
 
-                        <a style="float:left;margin-right: 10px;" href="https://www.youtube.com/watch?v=wuh9SRtE8eE&amp;width=640&amp;height=480" title="" target="_blank"><img src="http://heuristnetwork.org/wp-content/uploads/2017/01/PresentationThumbnailIanJohnsonPlay-1.png" class="video_lightbox_anchor_image" alt=""></a>                    
+                        <a style="float:left;margin-right: 10px;" href="https://www.youtube.com/watch?v=wuh9SRtE8eE&amp;width=640&amp;height=480" title="" target="_blank">
+                            <img src="<?php echo HEURIST_BASE_URL;?>hclient/assets/v6/PresentationThumbnailIanJohnsonPlay-1.png" class="video_lightbox_anchor_image" alt="">
+                        </a>                    
 
                         <h4 style="margin:0.5em">Design walkthrough</h4>
                         <div>
@@ -912,7 +914,9 @@ a{
 
                     <div class="entry-box" style="float:right;margin:0 0 0 10px;padding: 4px;width:380px">
 
-                        <a style="float:left;margin-right: 10px;" href="https://www.youtube.com/watch?v=wuh9SRtE8eE&amp;width=640&amp;height=480" title="" target="_blank"><img src="http://heuristnetwork.org/wp-content/uploads/2017/01/PresentationThumbnailIanJohnsonPlay-1.png" class="video_lightbox_anchor_image" alt=""></a>                    
+                        <a style="float:left;margin-right: 10px;" href="https://www.youtube.com/watch?v=wuh9SRtE8eE&amp;width=640&amp;height=480" title="" target="_blank">
+                            <img src="<?php echo HEURIST_BASE_URL;?>hclient/assets/v6/PresentationThumbnailIanJohnsonPlay-1.png" class="video_lightbox_anchor_image" alt="">
+                        </a>                    
 
                         <h4 style="margin:0.5em">Import walkthrough</h4>
                         <div>
@@ -936,7 +940,9 @@ a{
 
                     <div class="entry-box" style="float:right;margin:0 0 0 10px;padding: 4px;width:380px">
 
-                        <a style="float:left;margin-right: 10px;" href="https://www.youtube.com/watch?v=wuh9SRtE8eE&amp;width=640&amp;height=480" title="" target="_blank"><img src="http://heuristnetwork.org/wp-content/uploads/2017/01/PresentationThumbnailIanJohnsonPlay-1.png" class="video_lightbox_anchor_image" alt=""></a>                    
+                        <a style="float:left;margin-right: 10px;" href="https://www.youtube.com/watch?v=wuh9SRtE8eE&amp;width=640&amp;height=480" title="" target="_blank">
+                            <img src="<?php echo HEURIST_BASE_URL;?>hclient/assets/v6/PresentationThumbnailIanJohnsonPlay-1.png" class="video_lightbox_anchor_image" alt="">
+                        </a>                    
 
                         <h4 style="margin:0.5em">Explore walkthrough</h4>
                         <div>
@@ -960,7 +966,9 @@ a{
 
                     <div class="entry-box" style="float:right;margin:0 0 0 10px;padding: 4px;width:380px">
 
-                        <a style="float:left;margin-right: 10px;" href="https://www.youtube.com/watch?v=wuh9SRtE8eE&amp;width=640&amp;height=480" title="" target="_blank"><img src="http://heuristnetwork.org/wp-content/uploads/2017/01/PresentationThumbnailIanJohnsonPlay-1.png" class="video_lightbox_anchor_image" alt=""></a>                    
+                        <a style="float:left;margin-right: 10px;" href="https://www.youtube.com/watch?v=wuh9SRtE8eE&amp;width=640&amp;height=480" title="" target="_blank">
+                            <img src="<?php echo HEURIST_BASE_URL;?>hclient/assets/v6/PresentationThumbnailIanJohnsonPlay-1.png" class="video_lightbox_anchor_image" alt="">
+                        </a>                    
 
                         <h4 style="margin:0.5em">Publish walkthrough</h4>
                         <div>
@@ -1000,6 +1008,6 @@ a{
     </div>
     
     <div class="list_div ui-heurist-header" 
-        style="z-index:999999999; height:auto; max-height:200px; padding:4px;cursor:pointer;display:none"></div>
+        style="z-index:999999999; height:auto; max-height:200px; padding:4px;cursor:pointer;display:none;overflow-y: auto"></div>
 </body>
 </html>
