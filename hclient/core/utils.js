@@ -93,6 +93,28 @@ window.hWin.HEURIST4.util = {
         //return typeof n === 'number' && isFinite(n);
         return !isNaN(parseFloat(n)) && isFinite(n);
     },
+    
+
+    //
+    //
+    //
+    checkRegexp:function ( o, regexp ) {
+        if ( !( regexp.test( o.val() ) ) ) {
+            o.addClass( "ui-state-error" );
+            return false;
+        } else {
+            return true;
+        }
+    },
+    
+    //
+    // From jquery.validate.js (by joern), contributed by Scott Gonzalez: http://projects.scottsplayground.com/email_address_validation/
+    //    
+    checkEmail:function ( email_input ) {
+        
+        return window.hWin.HEURIST4.util.checkRegexp( email_input, /^((([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+(\.([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+)*)|((\x22)((((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(([\x01-\x08\x0b\x0c\x0e-\x1f\x7f]|\x21|[\x23-\x5b]|[\x5d-\x7e]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(\\([\x01-\x09\x0b\x0c\x0d-\x7f]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))))*(((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(\x22)))@((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.?$/i );
+        
+    },    
 
     cloneJSON:function (data){
         try{
@@ -1092,7 +1114,7 @@ window.hWin.HEURIST4.util = {
     //
     //
     //
-     versionCompare: function(v1, v2, options) {
+    versionCompare: function(v1, v2, options) {
          // determines if the version in the cache (v1) is older than the version in configIni.php (v2)
          // used to detect change in version so that user is prompted to clear cache and reload
          // returns -1 if v1 is older, -2 v1 is newer, +1 if they are the same

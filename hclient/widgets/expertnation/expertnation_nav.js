@@ -2532,7 +2532,7 @@ $.widget( "heurist.expertnation_nav", {
             // validate email
             // 
             var email = edit_form.find("#newsletter_type_email");
-            var bValid = window.hWin.HEURIST4.msg.checkEmail(email);
+            var bValid = window.hWin.HEURIST4.util.checkEmail(email);
             if(!bValid){
                 err_text = err_text + ', '+window.hWin.HR('Email does not appear to be valid');
             }

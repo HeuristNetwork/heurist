@@ -308,14 +308,14 @@ $.widget( "heurist.profile_edit", {
             // validate email
             // From jquery.validate.js (by joern), contributed by Scott Gonzalez: http://projects.scottsplayground.com/email_address_validation/
             var email = this.edit_form.find("#ugr_eMail");
-            var bValid = parentWin.HEURIST4.msg.checkEmail(email);
+            var bValid = parentWin.HEURIST4.util.checkEmail(email);
             if(!bValid){
                 err_text = err_text + ', '+window.hWin.HR('Email does not appear to be valid');
             }
 
             // validate login
             var login = this.edit_form.find("#ugr_Name");
-            if(!parentWin.HEURIST4.msg.checkRegexp( login, /^[a-z]([0-9a-z_@.])+$/i)){
+            if(!parentWin.HEURIST4.util.checkRegexp( login, /^[a-z]([0-9a-z_@.])+$/i)){
                 err_text = err_text + ', '+window.hWin.HR('User name should contain ')
                     +'a-z, 0-9, _, @ and begin with a letter';   // "Username may consist of a-z, 0-9, _, @, begin with a letter."
             }else{
@@ -332,7 +332,7 @@ $.widget( "heurist.profile_edit", {
                 password.addClass( "ui-state-error" );
             }else  if(password.val()!=''){
                 /* restrict password to alphanumeric only - removed at 2016-04-29
-                if(!parentWin.HEURIST4.msg.checkRegexp( password, /^([0-9a-zA-Z])+$/)){  //allow : a-z 0-9
+                if(!parentWin.HEURIST4.util.checkRegexp( password, /^([0-9a-zA-Z])+$/)){  //allow : a-z 0-9
                     err_text = err_text + ', '+window.hWin.HR('Wrong password format');
                 }else{*/
                 var ss = parentWin.HEURIST4.msg.checkLength2( password, "password", 3, 16 );

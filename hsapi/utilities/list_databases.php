@@ -23,6 +23,8 @@ if(!defined('PDIR')){
     require_once(dirname(__FILE__).'/../System.php');
 }
 
+$is_json = (@$_REQUEST['format']=='json');
+
 if(!isset($system)){
     $system = new System();
 }
@@ -39,12 +41,27 @@ if( !$system->is_inited() ){  //cannot init system (apparently connection to Dat
 if($system->get_mysqli()!=null) { //server is connected
 
     $list =  mysql__getdatabases4($system->get_mysqli());
-    if(count($list)<1){
+    if(!$is_json && count($list)<1){
         //reditrect to create database
         header('Location: ' . HEURIST_BASE_URL . 'admin/setup/dbcreate/createNewDB.php');
         exit();
     }
 }
+
+if($is_json){
+    
+    header( 'Content-Type: application/json');    
+    
+    if(isset($error_msg) && $error_msg!=''){
+        $response = $this->getError();
+    }else{
+        $response = array("status"=>HEURIST_OK, "data"=> $list);    
+    }    
+        
+    print json_encode( $response );
+    exit();
+}
+
 ?>
 <html>
     <head>
