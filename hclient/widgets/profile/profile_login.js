@@ -226,8 +226,8 @@ function showLoginDialog(isforsed, callback, parentwin, dialog_id){
                         callback(window.hWin.HAPI4.has_access());
                     }else
                     if( isforsed && !window.hWin.HAPI4.has_access() ){
-                        //redirect to select database
-                        window.hWin.location  = window.HAPI4.baseURL; //+ "hsapi/utilities/list_databases.php";
+                        //redirects to intro page - list of all databases
+                        window.hWin.location  = window.HAPI4.baseURL; //intro page 
                     }
                     $dlg.remove();
                 },

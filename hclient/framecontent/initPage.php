@@ -29,8 +29,9 @@ require_once(dirname(__FILE__)."/../../hsapi/System.php");
 
 
 if(defined('IS_INDEX_PAGE')){
-    //if PDIR is defined this script is main (root)
-    define('ERROR_REDIR','hsapi/utilities/list_databases.php');
+    //from main (index) page it redirects to intro
+    $_REQUEST['list'] = 1;
+    define('ERROR_REDIR','intro/index.php'); //redirects to intro page - list of all databases
 }else{
     if(!defined('PDIR')) define('PDIR','../../');  //need for proper path to js and css
     define('ERROR_REDIR', dirname(__FILE__).'/../../hclient/framecontent/infoPage.php');

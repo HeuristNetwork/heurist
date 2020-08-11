@@ -136,7 +136,8 @@ $('#btnDelete').on({click:function(){
                             width:700,
                             height:180,
                             close: function(){
-                                window.hWin.document.location = window.hWin.HAPI4.baseURL; //+ "hsapi/utilities/list_databases.php";
+                                //redirects to intro page - list of all databases
+                                window.hWin.document.location = window.hWin.HAPI4.baseURL; //intro page
                             }
                        }
                     );                

@@ -42,7 +42,7 @@ if($system->get_mysqli()!=null) { //server is connected
 
     $list =  mysql__getdatabases4($system->get_mysqli());
     if(!$is_json && count($list)<1){
-        //reditrect to create database
+        //redirect to create database
         header('Location: ' . HEURIST_BASE_URL . 'admin/setup/dbcreate/createNewDB.php');
         exit();
     }

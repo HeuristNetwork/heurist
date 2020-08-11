@@ -18,9 +18,9 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-require_once(dirname(__FILE__)."/../../hsapi/System.php");
+require_once(dirname(__FILE__)."/../hsapi/System.php");
 
-define('PDIR','../../');
+define('PDIR','../');
 
 // init main system class
 //$system = new System();
@@ -82,81 +82,31 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
     var sysadmin_email = '<?php echo HEURIST_MAIL_TO_ADMIN; ?>';
     var all_databases = {};
 
-    function _showStep2(){
-
-        $('.center-box').hide();
-
-        if(!$('#btnRegisterCancel').button('instance')){
-
-            $('.registration-form').children('div').css('padding-top','5px');
-
-            $('.registration-form').find('.header').each(function(idx, item){
-
-                item = $(item);
-                var ele = item.next('input');
-                if(ele.length==0) ele = item.next('textarea');
-                if(ele.length==1){
-                    ele.attr('autocomplete','off')
-                        .attr('autocorrect','off')
-                        .attr('autocapitalize','none')
-                        .attr('placeholder',item.text());
-                    item.hide();
-                    //ele.value(item.text()).attr('data-heder',item.text());
-                    //ele.on({focus:function(){ if(this.value==$(this).attr('data-heder')) this.value = '';}});
-                }
-
-            });
-
-            var ele = $('.center-box.screen2 label[for="ugr_Captcha"]')
-            ele.parent().css({
-                display: 'inline-block', float: 'left', 'min-width': 90, width: 90});            
-
-            $('#btnRegisterDo').button().on({click: validateRegistration});
-            $('#btnRegisterCancel').button().on({click: _showStep});
-
-
-            $("#contactDetails").html('Email to: System Administrator<br>'+
-                '<a style="padding-left: 60px;" href="mailto:'+sysadmin_email+'">'+sysadmin_email+'</a>');
-
-            $('#cbAgree').on({'change':function(){
-                var ele = $('#btnRegisterDo');
-                if(ele){
-                    if($(this).is(':checked')){
-                        ele.removeAttr("disabled");
-                        ele.removeClass("ui-button-disabled ui-state-disabled");
-                        ele.addClass('ui-button-action');
-                    } else {
-                        ele.attr("disabled", "disabled");
-                        ele.removeClass('ui-button-action');
-                        ele.addClass("ui-button-disabled ui-state-disabled");
-                    }
-                }
-            }});
-            
-            $('#ugr_eMail').on({'blur':function(){
-                if($('#ugr_Name').val()=='') $('#ugr_Name').val(this.value)
-            }});
-            
-            $('#showConditions').on({click: function(){ 
-                if($('#divConditions').is(':empty')){
-                    $('#divConditions').load('<?php echo PDIR; ?>documentation_and_templates/terms_and_conditions.html #content');
-                }
-                _showStep(7);
-                return false;
-            }});
-            
-            $('#btnTermsOK').button().on({click: function(){ $('#cbAgree').prop('checked',true).change(); _showStep2(); }});
-            $('#btnTermsCancel').button().on({click: function(){ $('#cbAgree').prop('checked',false).change(); _showStep2(); }});
-
-        }
-        
-        refreshCaptcha();
-        
-        $('.center-box.screen2').show();
-
-
-    }
-
+/*    
+    screens/steps
+    1. setup intro page - get list of databases (_getDatabases), init controls/search db dropdown (_initControls)
+    2. user registration form - init controls (_showRegistration), validate input data (_validateRegistration)
+    3. define db name - create new database (_doCreateDatabase)
+    4. wait screen  - in progress
+    5. success report
+    6. getting started
+    7. terms and conditions
+    8. list of all databases
+    
+    _getDatabases() - get db list from server
+    _initControls() - init controls on step1 (dropdown search db)
+    _showRegistration() - show user reg form and init controls 
+    _validateRegistration - validate user registration form (step2)
+    _doCreateDatabase - create new database (from step3)
+    _showGetStarted() - getting started (step6)
+    _showDatabaseList()  - all databases (step8)
+    
+    
+*/
+    
+    //
+    //
+    //
     function _showStep(arg){
         var step_no = 1;
         if(window.hWin.HEURIST4.util.isNumber(arg)){
@@ -166,11 +116,96 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
         }
         
         $('.center-box').hide();
-        $('.center-box.screen'+step_no).show();
+        $('.center-box.screen'+step_no).fadeIn(300);
     }
-   
+    
     //
-    //allow only alphanumeric characters for db name
+    //
+    //
+    function _showRegistration(){
+
+     console.log('!!!!');   
+        var screen = $('.center-box.screen2');
+        
+        if(screen.children().length>0){ //is(':empty')
+            
+            refreshCaptcha();
+            _showStep(2);
+            
+        }else{
+            
+            screen.load('user_registration.html',
+                function(){
+
+                    $('.registration-form').children('div').css('padding-top','5px');
+
+                    $('.registration-form').find('.header').each(function(idx, item){
+
+                        item = $(item);
+                        var ele = item.next('input');
+                        if(ele.length==0) ele = item.next('textarea');
+                        if(ele.length==1){
+                            ele.attr('autocomplete','off')
+                                .attr('autocorrect','off')
+                                .attr('autocapitalize','none')
+                                .attr('placeholder',item.text());
+                            item.hide();
+                            //ele.value(item.text()).attr('data-heder',item.text());
+                            //ele.on({focus:function(){ if(this.value==$(this).attr('data-heder')) this.value = '';}});
+                        }
+
+                    });
+
+                    var ele = $('.center-box.screen2 label[for="ugr_Captcha"]')
+                    ele.parent().css({
+                        display: 'inline-block', float: 'left', 'min-width': 90, width: 90});            
+
+                    $('#btnRegisterDo').button().on({click: _validateRegistration});
+                    $('#btnRegisterCancel').button().on({click: _showStep});
+
+
+                    $("#contactDetails").html('Email to: System Administrator<br>'+
+                        '<a style="padding-left: 60px;" href="mailto:'+sysadmin_email+'">'+sysadmin_email+'</a>');
+
+                    $('#cbAgree').on({'change':function(){
+                        var ele = $('#btnRegisterDo');
+                        if(ele){
+                            if($(this).is(':checked')){
+                                ele.removeAttr("disabled");
+                                ele.removeClass("ui-button-disabled ui-state-disabled");
+                                ele.addClass('ui-button-action');
+                            } else {
+                                ele.attr("disabled", "disabled");
+                                ele.removeClass('ui-button-action');
+                                ele.addClass("ui-button-disabled ui-state-disabled");
+                            }
+                        }
+                    }});
+                    
+                    $('#ugr_eMail').on({'blur':function(){
+                        if($('#ugr_Name').val()=='') $('#ugr_Name').val(this.value)
+                    }});
+                    
+                    $('#showConditions').on({click: function(){ 
+                        if($('#divConditions').is(':empty')){
+                            $('#divConditions').load(baseURL+'documentation_and_templates/terms_and_conditions.html #content');
+                        }
+                        _showStep(7);
+                        return false;
+                    }});
+                    
+                    $('#btnTermsOK').button().on({click: function(){ $('#cbAgree').prop('checked',true).change(); _showStep(2); }});
+                    $('#btnTermsCancel').button().on({click: function(){ $('#cbAgree').prop('checked',false).change(); _showStep(2); }});
+
+                    refreshCaptcha();
+                    _showStep(2);
+                });
+        }
+        
+    }
+
+    //
+    // allow only alphanumeric characters for db name
     //
     function onKeyPress(event){
 
@@ -191,7 +226,7 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
     }    
  
     //
-    //
+    // in user reg form
     //
     function refreshCaptcha(){
         $('#ugr_Captcha').val('');
@@ -199,7 +234,7 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
         var id = window.hWin.HEURIST4.util.random();
         if(true){  //simple captcha
             var ele = $('.center-box.screen2 label[for="ugr_Captcha"]')
-            ele.load('<?php echo PDIR; ?>hsapi/utilities/captcha.php?id='+id);
+            ele.load(baseURL+'hsapi/utilities/captcha.php?id='+id);
         }else{ //image captcha
             $dd.empty(); //find("#img").remove();
             $('<img id="img" src="hsapi/utilities/captcha.php?img='+id+'"/>').appendTo($dd);
@@ -207,9 +242,9 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
     }
     
     //
+    // validate user registration form (step2)
     //
-    //
-    function validateRegistration(){
+    function _validateRegistration(){
         
         var regform = $('.registration-form');
         var allFields = regform.find('input, textarea');
@@ -294,11 +329,11 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
             window.hWin.HEURIST4.msg.showMsgErr(err_text);
         }
     }
-    
+
     //
+    // create new database (from step5)
     //
-    //
-    function doCreateDatabase(){
+    function _doCreateDatabase(){
 
         var err_text = window.hWin.HEURIST4.msg.checkLength2( $("#dbname"), 'Database name', 1, 60 );
         
@@ -318,7 +353,7 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
                 }
             });
             
-            var url = '<?php echo PDIR; ?>admin/setup/dboperations/createDB.php';
+            var url = baseURL+'admin/setup/dboperations/createDB.php';
             
             _showStep(4);
             
@@ -342,7 +377,7 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
                     }else{
                         //either wrong captcha or invalid registration values
                         if(response.status == window.hWin.ResponseStatus.ACTION_BLOCKED){
-                            _showStep2(); //back to registration
+                            _showRegistration(); //back to registration
                         }else{
                             _showStep(3); //back to db form
                         }
@@ -356,14 +391,13 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
         }
         
     }
-    
+
     //
-    //
+    // server request for db list
     //    
-    function _getDatabases(){
+    function _getDatabases( show_list ){
         
-        
-            var url = '<?php echo PDIR; ?>hsapi/utilities/list_databases.php';
+            var url = baseURL+'hsapi/utilities/list_databases.php';
             
             var request = {format:'json'};
         
@@ -374,137 +408,199 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
                         
                         all_databases = response.data;
                         
+                        if(Object.keys(all_databases).length>0 && show_list){
+                            _showDatabaseList();
+                        }else{
+                            _initControls();    
+                        }
+                        
                     }else{
                         all_databases = {};
+                        //@todo show error on special screen - not popup
                         window.hWin.HEURIST4.msg.showMsgErr(response, false);
-                    }
-                    
-                    if(Object.keys(all_databases).length>0){
-                        _lookupDatabases();
-                    }else{
-                        $('.existing-user').hide();    
                     }
                     
                 });
     }
     
     //
-    // init db lookup
+    // loads getting started
     //
-    function _lookupDatabases(){
-        $('#search_database')
-            .attr('autocomplete','off')
-            .attr('autocorrect','off')
-            .attr('autocapitalize','none')
-            .on({'keyup': function(event){
-                
-            var list_div = $('.list_div');
-            
-            var inpt = $(event.target);
-            var sval = inpt.val().toLowerCase();
+    function _showGetStarted(){
 
-            if(sval.length>1){
-                list_div.empty(); 
-                var is_added = false;
-                var len = Object.keys(all_databases).length;
-                for (var idx=0;idx<len;idx++){
-                    if(all_databases[idx].toLowerCase().indexOf(sval)>=0){
-                        is_added = true; //res.push( all_databases[idx] );
-                        $('<div class="truncate">'+all_databases[idx]+'</div>').appendTo(list_div);
-                    }
-                }
+        var screen = $('.center-box.screen6');
+        screen.load('getting_started.html',
+            function(){
                 
-                list_div.addClass('ui-widget-content').position({my:'left top', at:'left bottom', of:inpt})
-                    //.css({'max-width':(maxw+'px')});
-                    .css({'max-width':inpt.width()+60});
-                    if(is_added){
-                        list_div.show();    
-                    }else{
-                        list_div.hide();
-                    }
-            }else{
-                list_div.hide();    
-            }                
+                screen.find('img').each(function(i,img){
+                    img = $(img);
+                    img.attr('src',baseURL+'hclient/assets/v6/'+img.attr('data-src'));
+                });
+
+                $('#btnOpenHeurist').button({icon:'ui-icon-arrow-1-e',iconPosition:'end'}).on({click:function(){
+                    var url = $('#newdblink').text();
+                    $('.ent_wrapper').effect('drop',null,500,function(){
+                        location.href = url;    
+                    });
+                }});
                 
-                
-        }   }); 
+                _showStep(6);
+            });
         
-        $('#btnOpenDatabase').on({click:function(){
-            
-                var sval = $('#search_database').val().trim();
-                if(sval==''){
-                    window.hWin.HEURIST4.msg.showMsgFlash('Define database name'); 
-                }else{
-                    var len = Object.keys(all_databases).length;
-                    for (var idx=0;idx<len;idx++){
-                        if(all_databases[idx] == sval){
-                            location.href = baseURL + '?db='+sval;
-                            return;  
-                        }
-                    }
-                    window.hWin.HEURIST4.msg.showMsgFlash('Database "'+sval+'" not found'); 
-                }
-            
-        }});
     }
     
     //
-    // init db lookup
+    // init db lookup - open dropdown list on keypress in search database input
+    //
+    function _initControls(){
+        
+        $('.button-registration').button().on({click:_showRegistration}); //goto step2
+        
+        $('#btnCreateDatabase').button().on({click: _doCreateDatabase}); //on step 3
+        $('#btnGetStarted').button().on({click: _showGetStarted });  //goto step6 - getting started
+        
+        if(Object.keys(all_databases).length>0){
+            
+            //init controls on existing-user div
+            
+            $('#btnNewDatabase').button().show();
+            $('#showDatabaseList').on({click: _showDatabaseList});  //goto step8
+            
+            $(document).on({click: function(event){
+               if($(event.target).parents('.list_div').length==0) { $('.list_div').hide(); };
+            }});
+            
+            $('.list_div').on({click:function(e){
+                        $(e.target).hide();
+                        if($(e.target).hasClass('truncate')){
+                            //navigate to database
+                            $('#search_database').val($(e.target).text());
+                            $('.list_div').hide();
+                            //console.log($(e.target).text());
+                        }
+                    }});
+            
+            $('#search_database')
+                .attr('autocomplete','off')
+                .attr('autocorrect','off')
+                .attr('autocapitalize','none')
+                .on({'keyup': function(event){
+                    
+                var list_div = $('.list_div');
+                
+                var inpt = $(event.target);
+                var sval = inpt.val().toLowerCase();
+
+                if(sval.length>1){
+                    list_div.empty(); 
+                    var is_added = false;
+                    var len = Object.keys(all_databases).length;
+                    for (var idx=0;idx<len;idx++){
+                        if(all_databases[idx].toLowerCase().indexOf(sval)>=0){
+                            is_added = true; //res.push( all_databases[idx] );
+                            $('<div class="truncate">'+all_databases[idx]+'</div>').appendTo(list_div);
+                        }
+                    }
+                    
+                    list_div.addClass('ui-widget-content').position({my:'left top', at:'left bottom', of:inpt})
+                        //.css({'max-width':(maxw+'px')});
+                        .css({'max-width':inpt.width()+60});
+                        if(is_added){
+                            list_div.show();    
+                        }else{
+                            list_div.hide();
+                        }
+                }else{
+                    list_div.hide();    
+                }                
+                    
+                    
+                }}); 
+            
+            $('#btnOpenDatabase').button().on({click:function(){
+                
+                    var sval = $('#search_database').val().trim();
+                    if(sval==''){
+                        window.hWin.HEURIST4.msg.showMsgFlash('Define database name'); 
+                    }else{
+                        var len = Object.keys(all_databases).length;
+                        for (var idx=0;idx<len;idx++){
+                            if(all_databases[idx] == sval){
+                                location.href = baseURL + '?db='+sval;
+                                return;  
+                            }
+                        }
+                        window.hWin.HEURIST4.msg.showMsgFlash('Database "'+sval+'" not found'); 
+                    }
+                
+            }});
+            
+        
+        }else{
+            //no one database found - hide existing user div - force create new database
+            $('.existing-user').hide();    
+        }
+         
+        _showStep(1);
+    }
+    
+    //
+    // opens list of all databases
     //
     function _showDatabaseList(){
 
-        var list_div = $('.center-box.screen8').find('.db-list');
-        list_div.empty();
-        var len = Object.keys(all_databases).length;
-        for (var idx=0;idx<len;idx++){
-            $('<li class="truncate">'+all_databases[idx]+'</li>').appendTo(list_div);
+        var screen = $('.center-box.screen8');
+        var list_div = screen.find('.db-list');
+        
+        if(list_div.children().length==0){
+       
+            $('#filter_database').on({'keyup': function(event){
+                    
+                var list_div = $('.db-list');
+                
+                var inpt = $(event.target);
+                var sval = inpt.val().toLowerCase();
+
+                if(sval.length>1){
+            
+                    list_div.find('li').each(function(i,li){
+                        if(li.innerHTML.toLowerCase().indexOf(sval)>=0){
+                            li.style.display = 'block';
+                        }else{
+                            li.style.display = 'none';
+                        }
+                    });
+            
+                }else{
+                    list_div.find('li').show();
+                }                    
+            }}); 
+
+        
+            list_div.empty();
+            var len = Object.keys(all_databases).length;
+            for (var idx=0;idx<len;idx++){
+                $('<li class="truncate">'+all_databases[idx]+'</li>').appendTo(list_div);
+            }
+
+            // hide loading icon - show title and list
+            screen.find('span.ui-icon').parent().hide();
+            list_div.show();
+            screen.find('h1').show();
+            
+            list_div.find('li').css('cursor','pointer').on({click:function(e){
+                    var dbname  = $(e.target).text();
+                    location.href = baseURL + '?db='+dbname;
+            }});
+            
         }
-
-        $('.center-box.screen8').find('span.ui-icon').parent().hide();
-        list_div.show();
-        
-        list_div.find('li').css('cursor','pointer').on({click:function(e){
-                var dbname  = $(e.target).text();
-                location.href = baseURL + '?db='+dbname;
-        }});
-        
         _showStep(8);
-
     }
  
     // if hAPI is not defined in parent(top most) window we have to create new instance
     $(document).ready(function() {
-        
-        $('.button-registration').button().on({click:_showStep2}); //goto step2
-        
-        $('#btnCreateDatabase').button().on({click: doCreateDatabase});
-        $('#btnGetStarted').button().on({click: _showStep });  //goto step6
-        $('#btnOpenHeurist').button({icon:'ui-icon-arrow-1-e',iconPosition:'end'}).on({click:function(){
-            var url = $('#newdblink').text();
-            $('.ent_wrapper').effect('drop',null,500,function(){
-                location.href = url;    
-            });
-        }});
-        
-        $('#showDatabaseList').on({click: _showDatabaseList});  //goto step8
-        
-        $(document).on({click: function(event){
-           if($(event.target).parents('.list_div').length==0) { $('.list_div').hide(); };
-        }});
-        
-        _getDatabases();
-        
-        $('.list_div').on({click:function(e){
-                    $(e.target).hide();
-                    if($(e.target).hasClass('truncate')){
-                        //navigate to database
-                        $('#search_database').val($(e.target).text());
-                        $('.list_div').hide();
-                        //console.log($(e.target).text());
-                    }
-                }});
-         
-        _showStep(1);
+        _showStep(8);
+        _getDatabases( <?php echo (@$_REQUEST['list']==1)?'true':'false'; ?> );
     });
 </script>
 <style>
@@ -668,101 +764,6 @@ a{
             
             <!-- SCREEN#2 Registration form --> 
             <div class="center-box screen2">
-
-                <h1>Register for Heurist</h1>
-
-                <div class="registration-form"  style="display: inline-block;width:60%">
-                    <div>
-                        <div class="header"><label for="ugr_FirstName">Given name</label></div>
-                        <input type="text" name="ugr_FirstName" id="ugr_FirstName" class="text ui-widget-content ui-corner-all mandatory"  maxlength="40" style="width:35em"/>
-                    </div>
-                    <div>
-                        <div class="header"><label for="ugr_LastName">Family name</label></div>
-                        <input type="text" name="ugr_LastName" id="ugr_LastName" class="text ui-widget-content ui-corner-all mandatory" maxlength="63" style="width:35em"/>
-                    </div>
-                    <div>
-                        <div class="header"><label for="ugr_eMail">Email</label></div>
-                        <input type="text" name="ugr_eMail" id="ugr_eMail" class="text ui-widget-content ui-corner-all mandatory" style="width:35em"/>
-                    </div>
-                    <div>
-                        <div class="header"><label for="ugr_Name">Login name</label></div>
-                        <input type="text" name="ugr_Name" id="ugr_Name" class="text ui-widget-content ui-corner-all mandatory" 
-                            style="width:35em" maxlength="60" />
-                        <div class="heurist-helper1" style="display:none;">
-                            The login field is auto-populated with your email address.
-                            <br />You may change it to a shorter name, eg. your given name or family name.
-                        </div>
-                    </div>
-                    <div>
-                        <div class="header"><label for="ugr_Password">Password</label></div>
-                        <input type="password" name="ugr_Password" id="ugr_Password" class="text ui-widget-content ui-corner-all" style="width:10em;" maxlength="16" />&nbsp;
-                        <i class="helper">3 - 16 characaters.</i>
-                        <div style="font-size: smaller; margin-top: 2px;">
-                        </div>
-                    </div>
-                    <div>
-                        <div class="header"><label for="password2">Repeat password</label></div>
-                        <input type="password" name="password2" id="password2" class="text ui-widget-content ui-corner-all" style="width:10em;" maxlength="16"/>
-                        <div class="heurist-helper1"  style="display:none;">
-                            Note: http:// web traffic is non-encrypted. You should not assume this server is secure.<br />
-                            Therefore, please don't use an important password such as institutional or banking login.<br />
-                            If you need to store data of a confidential nature, such as personal records, please<br />
-                            contact the Heurist team or your system administrator about setting up a secured server.
-                        </div>
-                    </div>
-
-                    <div class="mode-registration">
-                        <div class="header" style="text-align:right;padding:4px"><label for="ugr_Captcha">
-                            <span id="imgdiv" style="float:right;display:inline-block;display:none;"></span></label>
-                        </div>
-                        <div class="heurist-helper1">
-                        </div>
-                        <input type="text" name="ugr_Captcha" id="ugr_Captcha" class="text ui-widget-content ui-corner-all" style="width:10em;" maxlength="16" />
-                        <i class="helper">&nbsp;&nbsp;&nbsp;to prove you're human</i>
-                        <!--
-                        -->
-                    </div>
-
-                    <div>
-                        <div class="header"><label for="ugr_Organisation">Institution/company</label></div>
-                        <input type="text" name="ugr_Organisation" id="ugr_Organisation" class="text ui-widget-content ui-corner-all mandatory" style="width:35em;" maxlength="120"/>
-                        <div class="heurist-helper1" style="display:none;">
-                            Enter 'None' if not affiliated with an institution or company.
-                        </div>
-                    </div>
-
-                    <div>
-                        <div class="header" style="vertical-align:top;"><label for="ugr_Interests">Research interests</label></div>
-                        <textarea id="ugr_Interests" name="ugr_Interests" rows="2" cols="80" style="width:35em;resize:none"
-                            class="text ui-widget-content ui-corner-all mandatory"></textarea>
-                        <div class="heurist-helper1" style="display:none;">
-                            Enter a concise description (up to 250 characters) of your research interests.
-                        </div>
-                    </div>
-
-                    <div>
-                        <div class="header" style="vertical-align:top;"><label for="ugr_URLs">Personal Website URLs</label></div>
-                        <textarea id="ugr_URLs" name="ugr_URLs" rows="3" cols="80" style="width:35em"
-                            class="text ui-widget-content ui-corner-all"></textarea>
-                    </div>
-
-                </div>
-                <div class="entry-box" style="float: right;max-width: 270px;min-height: 229px;padding-top: 20px;">
-                    Note: This system should not be used for the storage of confidential and/or personally-identifiable information, such as health information, without the express permission of the system managers.
-                    <br><br>
-                    <div id="contactDetails"></div>
-                    <br><br>
-                    <input type="checkbox" id="cbAgree"/><label for="cbAgree">I have read and agree to the</label><br>
-                    <a href="#" style="padding-left:20px;" id="showConditions"> Terms and Conditions of Use</a>
-                </div>
-
-                <div style="text-align:center;padding:20px">
-                
-                    <button id="btnRegisterDo" disabled class="ui-button-disabled ui-state-disabled">Register</button>
-                    <button id="btnRegisterCancel" data-step="1">Cancel</button>
-                
-                </div>
-
             </div>  
 
             <!-- SCREEN#3 Enter database name --> 
@@ -822,7 +823,7 @@ a{
                         <span style="font-weight:bold" id="newdblink"></span>
                     </div>
                     
-                    <div style="font-weight:bold;padding:5px 0px 5px 183px">
+                    <div style="font-weight:bold;padding:5px 0px 20px 183px">
                         We suggest bookmarking this address for future access
                     </div>
                     
@@ -842,145 +843,7 @@ a{
 
             <!-- SCREEN#6 Getting started --> 
             <div class="center-box screen6" style="padding:0;border:none;width:1330;height:auto;margin:10px auto;background:none;box-shadow:none">
-
-                <div class="gs-box" style="float:left;width:400px;height:538px">
-                    <h1>Getting started</h1>
-
-                    <div class="helper">                
-                        The rich capabilities of Heurist are structured in the following four functional sets. These videos will give you an overview of each capability in Heurist. 
-                    </div>
-
-                    <div class="helper">                
-                        This help will assist you in using Heurist to quickly create and populate databases, analyse datasets in multiple ways, and publish to external media. For additional help, refer to the <a href="https://heuristnetwork.org" target="_blank">Heurst website</a>.
-                    </div>
-
-                    <h3>The Iterative Database</h3>
-                    <div style="text-align:center">
-                        <img src="<?php echo PDIR;?>hclient/assets/v6/gs_diagram.png" width="320"/>
-                    </div>
-                    <br>
-
-                    <div class="helper">                
-                        Heurist’s comprehensive browser-based database-design environment lets you manage complex Humanities data through iterative revision. 
-                    </div>
-                    <div class="helper">                
-                        Get started immediately with something small and simple, and then modify and extend your database structure as you become more comfortable with it or your data model and needs evolve.                
-                    </div>
-
-                </div>
-
-                <div style="float:right;width:138px">
-                    <button style="height:554px;width:100%" class="ui-button-action" id="btnOpenHeurist">Continue</button>
-                </div>
-                
-                
-                <div class="gs-box" style="margin:0px 10px;display: inline-block;height: auto;width:auto">
-
-                    <div style="float:left">
-                        <img src="<?php echo PDIR;?>hclient/assets/v6/gs_design.png" width="110"/>
-                        <div>
-                            <span style="font-size: large;width: 80px;padding-top: 6px;float: left;">Design</span>
-                            <span class="header" style="max-width: 170px;display: inline-block;font-weight: normal;">
-                                Extend / modify the database structure at any time
-                            </span>         
-                        </div>
-                    </div>
-
-                    <div class="entry-box" style="float:right;margin:0 0 0 10px;padding: 4px;width:380px">
-
-                        <a style="float:left;margin-right: 10px;" href="https://www.youtube.com/watch?v=wuh9SRtE8eE&amp;width=640&amp;height=480" title="" target="_blank">
-                            <img src="<?php echo HEURIST_BASE_URL;?>hclient/assets/v6/PresentationThumbnailIanJohnsonPlay-1.png" class="video_lightbox_anchor_image" alt="">
-                        </a>                    
-
-                        <h4 style="margin:0.5em">Design walkthrough</h4>
-                        <div>
-                            Introduces the basics of setting up a database and modifying it as your needs evolve
-                        </div>                
-                    </div>
-
-                </div>
-
-                <div class="gs-box" style="margin:10px 10px 0px 10px;display: inline-block;height: auto;width:auto">
-
-                    <div style="float:left">
-                        <img src="<?php echo PDIR;?>hclient/assets/v6/gs_import.png" width="110"/>
-                        <div>
-                            <span style="font-size: large;width: 80px;padding-top: 6px;float: left;">Populate</span>
-                            <span class="header" style="max-width: 170px;display: inline-block;font-weight: normal;">
-                                Enter data, Import files, synchronise with web services
-                            </span>         
-                        </div>
-                    </div>
-
-                    <div class="entry-box" style="float:right;margin:0 0 0 10px;padding: 4px;width:380px">
-
-                        <a style="float:left;margin-right: 10px;" href="https://www.youtube.com/watch?v=wuh9SRtE8eE&amp;width=640&amp;height=480" title="" target="_blank">
-                            <img src="<?php echo HEURIST_BASE_URL;?>hclient/assets/v6/PresentationThumbnailIanJohnsonPlay-1.png" class="video_lightbox_anchor_image" alt="">
-                        </a>                    
-
-                        <h4 style="margin:0.5em">Import walkthrough</h4>
-                        <div>
-                            How to import data from existing files and other data management systems
-                        </div>                
-                    </div>
-
-                </div>
-
-                <div class="gs-box" style="margin:10px 10px 0px 10px;display: inline-block;height: auto;width:auto">
-
-                    <div style="float:left">
-                        <img src="<?php echo PDIR;?>hclient/assets/v6/gs_explore.png" width="110"/>
-                        <div>
-                            <span style="font-size: large;width: 80px;padding-top: 6px;float: left;">Explore</span>
-                            <span class="header" style="max-width: 170px;display: inline-block;font-weight: normal;">
-                                Search, filter, list, visualise, analyse and create feeds
-                            </span>         
-                        </div>
-                    </div>
-
-                    <div class="entry-box" style="float:right;margin:0 0 0 10px;padding: 4px;width:380px">
-
-                        <a style="float:left;margin-right: 10px;" href="https://www.youtube.com/watch?v=wuh9SRtE8eE&amp;width=640&amp;height=480" title="" target="_blank">
-                            <img src="<?php echo HEURIST_BASE_URL;?>hclient/assets/v6/PresentationThumbnailIanJohnsonPlay-1.png" class="video_lightbox_anchor_image" alt="">
-                        </a>                    
-
-                        <h4 style="margin:0.5em">Explore walkthrough</h4>
-                        <div>
-                            The basics of adding records, filtering and using data in your database
-                        </div>                
-                    </div>
-
-                </div>
-
-                <div class="gs-box" style="margin:10px 10px 0px 10px;display: inline-block;height: auto;width:auto">
-
-                    <div style="float:left">
-                        <img src="<?php echo PDIR;?>hclient/assets/v6/gs_publish.png" width="110"/>
-                        <div>
-                            <span style="font-size: large;width: 80px;padding-top: 6px;float: left;">Publish</span>
-                            <span class="header" style="max-width: 170px;display: inline-block;font-weight: normal;">
-                                Build data-driven pages / websites and export data
-                            </span>         
-                        </div>
-                    </div>
-
-                    <div class="entry-box" style="float:right;margin:0 0 0 10px;padding: 4px;width:380px">
-
-                        <a style="float:left;margin-right: 10px;" href="https://www.youtube.com/watch?v=wuh9SRtE8eE&amp;width=640&amp;height=480" title="" target="_blank">
-                            <img src="<?php echo HEURIST_BASE_URL;?>hclient/assets/v6/PresentationThumbnailIanJohnsonPlay-1.png" class="video_lightbox_anchor_image" alt="">
-                        </a>                    
-
-                        <h4 style="margin:0.5em">Publish walkthrough</h4>
-                        <div>
-                            Building a website and selective publication and export of data from the database
-                        </div>                
-                    </div>
-
-                </div>
-
-
             </div>            
- 
  
             <!-- SCREEN#7 Terms and conditions --> 
              <div class="center-box screen7">
@@ -995,10 +858,13 @@ a{
             
             <!-- SCREEN#8 Terms and conditions --> 
             <div class="center-box screen8" style="width:1330;height:auto;margin:10px auto;">
-                <h1>Databases</h1>
-                
+                <h1 style="display:none">Databases</h1>
+                <label>Filter: </label>
+                <input id="filter_database" class="text ui-widget-content ui-corner-all" value="" autocomplete="off"/>
+                <button id="btnNewDatabase" onclick="_showStep(1)" class="ui-button-action" style="float:right;display:none">New Database</button>
                 <ul class="db-list" style="display:none">
                 </ul>
+                
                 <div style="text-align: center;padding: 60px 0;">
                     <span class="ui-icon ui-icon-loading-status-circle rotate" style="height: 300px;width: 300px;font-size: 800%;color: rgb(79, 129, 189);"></span>
                 </div>

@@ -265,7 +265,7 @@ if(!defined('PDIR')){
                     }
                 ?>
 <br><br>                
-<a href="<?=HEURIST_BASE_URL?>hsapi/utilities/list_databases.php">Select different database</a>
+<a href="<?=HEURIST_BASE_URL?>">Select different database</a>
             </div>
         </div>
     </body>

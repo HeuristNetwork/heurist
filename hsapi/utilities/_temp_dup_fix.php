@@ -1,7 +1,7 @@
 <?php
 
 /**
-* list_databases.php: Produces page listing available databases
+* 
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
