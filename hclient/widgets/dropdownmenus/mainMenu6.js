@@ -90,8 +90,24 @@ $.widget( "heurist.mainMenu6", {
                     click: that._openSectionMenu
                 });
 
-                //open explore by default  
-                that.switchContainer( 'explore' );
+                //open explore by default, or "design" if db is empty
+                if(window.hWin.HAPI4.sysinfo['db_total_records']<1){
+                    that._active_section = 'explore';
+                    
+                    that.containers['design']
+                        .position({my:'center',at:'center',of:that.element})
+                        //.css({top:that.element.height()/2-250,left:that.element.width()/2-250,width:500,height:500})
+                        .css({width:500,height:400})
+                        .load(window.hWin.HAPI4.baseURL+'hclient/widgets/dropdownmenus/welcome.html',
+                            function(){
+                               var url = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database;
+                               $('.bookmark-url').html('<a href="'+url+'">'+url+'</a>') 
+                            });
+                    that.switchContainer( 'design', true );
+                }else{
+                    that.switchContainer( 'explore' );    
+                }
+                
 
                 that._updateDefaultAddRectype();
                 that._createListOfGroups(); //add list of groups for saved filters
