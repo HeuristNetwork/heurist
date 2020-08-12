@@ -166,6 +166,9 @@ $.widget( "heurist.mainMenu6", {
                         that._updateSaveFilterButton(0);
                     } 
                     
+                }else if(e.type == window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE){
+                    
+                    that._updateDefaultAddRectype(data.preferences);
                 }else{
                     //if(e.type == window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE){}
                     //refresh list of rectypes afrer structure edit
@@ -217,9 +220,9 @@ $.widget( "heurist.mainMenu6", {
     //
     //  
     //
-    _updateDefaultAddRectype: function(){
+    _updateDefaultAddRectype: function( preferences ){
       
-      var prefs = window.hWin.HAPI4.get_prefs('record-add-defaults');
+      var prefs = (preferences)?preferences:window.hWin.HAPI4.get_prefs('record-add-defaults');
       if($.isArray(prefs) && prefs.length>0){
             var rty_ID = prefs[0];
             var ele = this.divMainMenu.find('.menu-explore[data-action="recordAdd"]');
@@ -426,6 +429,8 @@ $.widget( "heurist.mainMenu6", {
     _show_ExploreMenu: function(e) {
         
         var action_name = $(e.target).attr('data-action');
+       
+//console.log(action_name);       
        
         //AAAA this.menues['explore'].hide();
         //this.menues['explore'].find('.explore-widgets').hide();

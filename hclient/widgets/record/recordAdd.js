@@ -35,6 +35,7 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
     },
     
     rectype_list:null,
+    _toolbar: null,
 
     _initControls:function(){
         
@@ -74,6 +75,28 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
                 +'<span class="ui-icon ui-icon-gear" style="cursor:pointer;float:right;margin:0px 6px">Define parameters</span></div>')
                 .insertBefore($dlg); // menu-text
                 
+            //toolbar for control buttons                    
+            this._toolbar = $('<div><div class="ui-dialog-buttonset" style="text-align:right">'
+            +'<button id="btnAddRecord"/>'
+            +'<button id="btnAddRecordInNewWin"/>'
+            +'<button id="btnSavePreferences"/>'
+            +'</div></div>')
+                    .addClass('ent_footer ui-heurist-header')
+                    .hide()    
+                    .css({'height':'36px','padding':'4px 20px 0px'}).insertAfter($dlg);
+                
+
+            this._on(this.element.find('#btnAddRecord').button({label: window.hWin.HR('Add Record').toUpperCase() })
+                .addClass('ui-button-action')
+                .show(), {click:this.doAction});
+            this._on(this.element.find('#btnAddRecordInNewWin').button({icon:'ui-icon-extlink', 
+                    label:window.hWin.HR('Add Record in New Window'), showLabel:false })
+                    .css({color:'white !important',margin:'0 4px'})
+                    .show(), {click:this.doAction});
+            this._on(this.element.find('#btnSavePreferences').button({label: window.hWin.HR('Save').toUpperCase() })
+                .show(), {click:this.doAction});
+
+                
             //list of rectypes
             this.rectype_list = $('<ul class="heurist-selectmenu" '
                 +' style="position:absolute;top:36px;left:0;right:0;bottom:1px;padding:0px;'
@@ -95,20 +118,22 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
             +'<div class="header_narrow" style="padding: 0px 16px 0px 0px;"><label for="sel_recordtype">Type of record to add:</label></div>'
             +'<select id="sel_recordtype" style="width:40ex;max-width:30em"></select>'
             
-            +'<div id="btnAddRecord" style="font-size:0.9em;display:none;margin:0 30px"></div>'
-            +'<div id="btnAddRecordInNewWin" style="font-size:0.9em;display:none;"></div>'
+            //+'<div id="btnAddRecord" style="font-size:0.9em;display:none;margin:0 30px"></div>'
+            //+'<div id="btnAddRecordInNewWin" style="font-size:0.9em;display:none;"></div>'
         +'</div>').prependTo( $dlg ); //<hr style="margin:5px"/>
       
         this._fillSelectRecordTypes( this.options.currentRecType );
       
         if(this.options.get_params_only==false && false){
-            
+                
+                /*
             this._on(this.element.find('#btnAddRecord').button({label: window.hWin.HR('Add Record').toUpperCase() })
                 .addClass('ui-button-action')
                 .show(), {click:this.doAction});
             this._on(this.element.find('#btnAddRecordInNewWin').button({icon:'ui-icon-extlink', 
                     label:window.hWin.HR('Add Record in New Window'), showLabel:false })
                 .show(), {click:this.doAction});
+                */
         }
             //function(event){that.doAction(event)} );
         
@@ -164,13 +189,15 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
         var $icon = this.element.find('.ui-heurist-header > span.ui-icon');
         
         if(is_expand){
+            this._toolbar.show();
             this.rectype_list.hide();
-            $dlg.show();
+            $dlg.css('bottom','40px').show();
             this.element.parent().width(500);
             $icon.css('float','left').removeClass('ui-icon-gear').addClass('ui-icon-carat-2-w');
         }else{
+            this._toolbar.hide();
             this.rectype_list.show();
-            $dlg.hide();
+            $dlg.css('bottom','2px').hide();
             this.element.parent().width(200);
             $icon.css('float','right').removeClass('ui-icon-carat-2-w').addClass('ui-icon-gear');
         }    
@@ -228,10 +255,24 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
                         this.options.currentRecTags, this.options.currentAccessGroups];    
 
             window.hWin.HAPI4.save_pref('record-add-defaults', add_rec_prefs);        
-                
-            window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE, {origin:'recordAdd'});
             
-            if(event && $(event.target).parent('div').attr('id')=='btnAddRecordInNewWin'){
+            window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE, 
+                    {origin:'recordAdd', preferences:add_rec_prefs});
+            
+            var action = null;
+            if(event){
+                var ele = $(event.target);
+                
+                if(ele.is('button')){
+                    action = ele.attr('id');
+                }else{
+                    action = ele.parent('button').attr('id');
+                }
+            }
+                
+            if(action=='btnSavePreferences'){
+                
+            }else if(action=='btnAddRecordInNewWin'){
                 var url = $('#txt_add_link').val();
                 window.open(url, '_blank');
             }else{

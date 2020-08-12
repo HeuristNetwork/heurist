@@ -241,6 +241,7 @@ $.widget( "heurist.manageEntity", {
             fele.css('top','38px');
             
             if(this.options.layout_mode=='editonly' && !this.options.isdialog){
+                //add div for control buttons
                 $('<div>').addClass('ent_footer editForm-toolbar ui-heurist-header')
                     .css({'height':'36px','padding':'4px 20px 0px'}).appendTo(fele);
                 this.element.find('.editForm').css('bottom','40px');

@@ -290,7 +290,7 @@ function hSvsEdit(args) {
         
         is_short = (!(svsID>0) && is_short===true);
         
-        var is_h6style = (window.hWin.HAPI4.sysinfo['layout']=='H6Default');
+        var is_h6style = (window.hWin.HAPI4.sysinfo['layout']!='H5Default');
 
         if(parseInt(svsID)>0){
             var svs = window.hWin.HAPI4.currentUser.usr_SavedSearch[svsID];
