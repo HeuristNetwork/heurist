@@ -111,13 +111,12 @@ $.widget( "heurist.mainMenu", {
             function(){
                 that.btn_dashboard.hide();
 
-                var params = {viewmode: 'thumbs', showonstartup: 1 };
-                window.hWin.HAPI4.save_pref('prefs_sysDashboard', params);     
-
-                window.hWin.HEURIST4.ui.showEntityDialog('sysDashboard',
-                    {onClose:function(){
-                        $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE);
-                }  });}
+                var prefs = window.hWin.HAPI4.get_prefs_def('prefs_sysDashboard', {show_on_startup:1, show_as_ribbon:1});
+                prefs['show_on_startup'] = 1;
+                window.hWin.HAPI4.save_pref('prefs_sysDashboard', prefs);     
+                
+                that.menuActionById('menu-manage-dashboards');
+            }
         ); 
 
         
@@ -234,10 +233,13 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
             
         // Dashboard - shortcuts ---------------------------------------
         if(this.options.is_h6style){
+/*            
+            //show dashboard as a ribbon
             this.divShortcuts = $( "<div>")            
                 .css({'position':'absolute', left:0, right:0, height:'36px', bottom:-5})
                 .appendTo(this.element)
                 .manageSysDashboard({is_iconlist_mode:true});
+*/                
             this.divMainMenu.hide();
         }
             
@@ -462,7 +464,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
             window.hWin.HEURIST4.ui.showEditCMSDialog( cms_record_id );    
         }else*/
         
-        if(window.hWin.HAPI4.sysinfo.db_has_active_dashboard>0){
+        if(window.hWin.HAPI4.sysinfo.db_has_active_dashboard>0 && !this.options.is_h6style){
             this.btn_dashboard.show();  
         }else{
             this.btn_dashboard.hide();  
@@ -473,6 +475,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         }else {
             this._performInitialSearch();
         }
+        //that._dashboardVisibility( false );
     },
 
 
@@ -960,9 +963,10 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         }else 
         if(action == "menu-manage-dashboards"){
             
-           window.hWin.HEURIST4.ui.showEntityDialog('sysDashboard',
+           window.hWin.HEURIST4.ui.showEntityDialog('sysDashboard',  //from menu
                         {onClose:function(){
                             $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE);
+                            //that._dashboardVisibility( false );
                         }  });
         
         }else
@@ -1642,7 +1646,10 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
     //
     _performInitialSearch: function(){
         
-        if(this._initial_search_already_executed) return;
+        if(this._initial_search_already_executed){
+            this._dashboardVisibility( false );
+            return;  
+        } 
         
         this._initial_search_already_executed = true;
         
@@ -1667,14 +1674,77 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                 window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH, {recordset:null});
             }
             
-            if(window.hWin.HAPI4.sysinfo.db_has_active_dashboard>0) {
+            this._dashboardVisibility( true ); //after login
+        }
+    },
+
+    //
+    //
+    //    
+    _dashboardVisibility: function(is_startup){
+
+        var lt = window.hWin.HAPI4.sysinfo['layout']; 
+        if  ((!(lt=='DigitalHarlem' || lt=='DigitalHarlem1935' || lt=='WebSearch'))
+            && (window.hWin.HAPI4.sysinfo.db_has_active_dashboard>0))
+        {
+            
+                var remove_ribbon = true;
                //show dashboard
-               var prefs = window.hWin.HAPI4.get_prefs_def('prefs_sysDashboard', {showonstartup:1});
-               if(prefs.showonstartup==1)
-                        window.hWin.HEURIST4.ui.showEntityDialog('sysDashboard');
+               var prefs = window.hWin.HAPI4.get_prefs_def('prefs_sysDashboard', {show_on_startup:1, show_as_ribbon:1});
+               if(prefs.show_on_startup==1){
+                    if(prefs.show_as_ribbon==1){ //    && lt!='H5Default'
+                        remove_ribbon = false;
+                        if(!this.divShortcuts){
+                            this.divShortcuts = $( "<div>")            
+                                .css({'position':'absolute', left:0, right:0, height:'36px', bottom:-5})
+                                .appendTo(this.element)
+                                .manageSysDashboard({is_iconlist_mode:true});
+                        }else{
+                            //refresh
+                            this.divShortcuts.manageSysDashboard('startSearch');
+                        }
+                    }else{
+                        if(is_startup)
+                            window.hWin.HEURIST4.ui.showEntityDialog('sysDashboard'); //show as poup
+                    }
+               }
+               
+               if(remove_ribbon && this.divShortcuts){
+                     this.divShortcuts.remove();    
+                     this.divShortcuts = null;  
+               } 
+               
+               var that = this;
+               setTimeout( function(){ that._adjustHeight(); },is_startup?1000:10)
+               
+        }
+        
+    },
+    
+    //
+    //
+    //
+    _adjustHeight: function(){
+
+        var ele = this.element.parents('#layout_panes');
+        if(ele){
+
+            var h = 50; //3em;
+            if(this.divMainMenu.is(':visible')) h = h + 32;
+            if(this.divShortcuts){
+                this.divMainMenu.css('bottom',40);
+                h = h + 42;   
+            }else{
+                this.divMainMenu.css('bottom',5);
             }
             
+            ele.children('#north_pane').height(h);
+            ele.children('#center_pane').css({top: h});
+            //window.hWin.HAPI4.LayoutMgr.cardinalPanel('sizePane', ['north', h], this.element.parents('#layout_panes'));
+            
+            
         }
+        
     },
 
     //

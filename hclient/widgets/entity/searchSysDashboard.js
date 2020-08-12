@@ -66,9 +66,9 @@ $.widget( "heurist.searchSysDashboard", $.heurist.searchEntity, {
                     .button({label: window.hWin.HR("Don't show again")})
                 .click(function(e) {
                     
-                    var params = 
-                            {viewmode: 'thumbs',
-                             showonstartup: 0 };
+                    //don't show  dashboard on startup
+                    var params = window.hWin.HAPI4.get_prefs_def('prefs_sysDashboard', {show_as_ribbon:1} );
+                    params['show_on_startup'] = 0;
                     window.hWin.HAPI4.save_pref('prefs_sysDashboard', params);     
                     
                     that._trigger( "onclose" );

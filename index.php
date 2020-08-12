@@ -245,6 +245,16 @@ $(document).on('focusin', function(e) {
                     $( "#heurist-about" ).dialog("close");
                 }
                 
+                
+<?php
+
+     //returns total records in db and counts of active entries in dashboard  
+     list($db_total_records, $db_has_active_dashboard, $db_workset_count) = $system->getTotalRecordsAndDashboard(); 
+     echo 'window.hWin.HAPI4.sysinfo.db_total_records = '.$db_total_records.';';
+     echo 'window.hWin.HAPI4.sysinfo.db_has_active_dashboard = '.$db_has_active_dashboard.';';
+     echo 'window.hWin.HAPI4.sysinfo.db_workset_count = '.$db_workset_count.';';
+?>
+                
                 //
                 // init layout
                 //
@@ -285,15 +295,6 @@ _time_debug = new Date().getTime() / 1000;
            // Performs inital search: parameters from request or from user preferences
            //
            function onInitCompleted_PerformSearch(){
-<?php
-
-     //returns total records in db and counts of active entries in dashboard  
-     list($db_total_records, $db_has_active_dashboard, $db_workset_count) = $system->getTotalRecordsAndDashboard(); 
-     echo 'window.hWin.HAPI4.sysinfo.db_total_records = '.$db_total_records.';';
-     echo 'window.hWin.HAPI4.sysinfo.db_has_active_dashboard = '.$db_has_active_dashboard.';';
-     echo 'window.hWin.HAPI4.sysinfo.db_workset_count = '.$db_workset_count.';';
-?>
-               
                
                 if(window.hWin.HAPI4.sysinfo['layout']=='H4Default'){
                     //switch to FAP tab if q parameter is defined
@@ -361,22 +362,25 @@ _time_debug = new Date().getTime() / 1000;
                             window.hWin.HEURIST4.ui.openRecordEdit(-1, null, {new_record_params:new_record_params});
 
                         }else if(window.hWin.HAPI4.sysinfo.db_has_active_dashboard>0) {
-
+/*
                             var _supress_dashboard = (window.hWin.HEURIST4.util.getUrlParameter('cms', window.hWin.location.search)>0);
-                            //show dashboard (another place - after login in profle_login.js)
-                            var prefs = window.hWin.HAPI4.get_prefs_def('prefs_sysDashboard', {showonstartup:1});
-                            if(_supress_dashboard!==true && prefs.showonstartup==1){
-                                var _keep = window.hWin.HAPI4.sysinfo.db_has_active_dashboard;
-                                window.hWin.HAPI4.sysinfo.db_has_active_dashboard=0;
-                                $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE); //hide button
+                            if(_supress_dashboard!==true){
+                                //show dashboard (another place - _performInitialSearch in mainMenu)
+                                var prefs = window.hWin.HAPI4.get_prefs_def('prefs_sysDashboard', {show_on_startup:1, show_as_ribbon:1});
+                                if(prefs.show_on_startup==1 && prefs.show_as_ribbon!=1)
+                                {
+                                    var _keep = window.hWin.HAPI4.sysinfo.db_has_active_dashboard;
+                                    window.hWin.HAPI4.sysinfo.db_has_active_dashboard=0;
+                                    $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE); //hide button
 
-                                window.hWin.HEURIST4.ui.showEntityDialog('sysDashboard',
-                                    {onClose:function(){
-                                        $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE);
-                                }});
-                                setTimeout(function(){window.hWin.HAPI4.sysinfo.db_has_active_dashboard = _keep;},1000);
+                                    window.hWin.HEURIST4.ui.showEntityDialog('sysDashboard',
+                                        {onClose:function(){
+                                            $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE);
+                                    }});
+                                    setTimeout(function(){window.hWin.HAPI4.sysinfo.db_has_active_dashboard = _keep;},1000);
+                                }
                             }
-
+*/
                         }
                 }
                 
