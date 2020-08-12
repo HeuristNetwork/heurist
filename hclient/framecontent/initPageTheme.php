@@ -190,7 +190,7 @@ select.ui-heurist-header2, input.ui-heurist-header2{
 .ent_wrapper.editor{
     font-size:0.9em;
 }
-.ent_wrapper.editor .header, .header>label{
+.ent_wrapper.editor .header, .header>label, .header_narrow>label{
     color: <?php uout('ce_color', '#6A7C99');?>;
 }
 .ent_wrapper.editor .text{

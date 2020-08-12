@@ -23,7 +23,7 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
     options: {
     
         height: 520,
-        width:  800,
+        width:  520,
         modal:  true,
         init_scope: 'selected',
         title:  'Change Record Access and Ownership',
@@ -32,7 +32,7 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
         currentAccessGroups: null,
         
         htmlContent: 'recordAccess.html',
-        helpContent: 'recordAccess.html' //in context_help folder
+        helpContent: '' //'recordAccess.html' //in context_help folder
     },
 
     _initControls:function(){
@@ -192,7 +192,7 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
         var ele = $('#'+input_id);
         ele.editing_input(ed_options);
         ele.find('.editint-inout-repeat-button').hide();
-        ele.find('.header').css('padding-right','16px');
+        ele.find('.header').css({'padding-right':'16px', 'padding-top':'4px'});
     },
     
     //

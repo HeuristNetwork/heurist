@@ -22,7 +22,7 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
     // default options
     options: {
         is_h6style: false,
-        width: 800,
+        width: 520,
         height: 800,
         title:  'Add new record',
         
@@ -91,17 +91,17 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
         }
         
        //add and init record type selector
-       $('<div id="div_sel_rectype" style="padding: 0.2em; min-width: 600px;" class="input">'
-            +'<div class="header" style="padding: 0 16px 0 16px;"><label for="sel_recordtype">Type of record to add:</label></div>'
+       $('<div id="div_sel_rectype" style="padding: 0.2em;" class="input">'
+            +'<div class="header_narrow" style="padding: 0px 16px 0px 0px;"><label for="sel_recordtype">Type of record to add:</label></div>'
             +'<select id="sel_recordtype" style="width:40ex;max-width:30em"></select>'
             
             +'<div id="btnAddRecord" style="font-size:0.9em;display:none;margin:0 30px"></div>'
             +'<div id="btnAddRecordInNewWin" style="font-size:0.9em;display:none;"></div>'
-        +'</div><hr style="margin:5px"/>').prependTo( $dlg );
+        +'</div>').prependTo( $dlg ); //<hr style="margin:5px"/>
       
         this._fillSelectRecordTypes( this.options.currentRecType );
       
-        if(this.options.get_params_only==false){
+        if(this.options.get_params_only==false && false){
             
             this._on(this.element.find('#btnAddRecord').button({label: window.hWin.HR('Add Record').toUpperCase() })
                 .addClass('ui-button-action')
@@ -130,7 +130,7 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
                 onselect:function(event, data){
                     if(data && data.selection){
                         that.options.currentRecTags = data.astext; //data.selection;
-                        _onRecordScopeChange();
+                        that._onRecordScopeChange();
                     }
                 }
         });
@@ -166,7 +166,7 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
         if(is_expand){
             this.rectype_list.hide();
             $dlg.show();
-            this.element.parent().width(700);
+            this.element.parent().width(500);
             $icon.css('float','left').removeClass('ui-icon-gear').addClass('ui-icon-carat-2-w');
         }else{
             this.rectype_list.show();

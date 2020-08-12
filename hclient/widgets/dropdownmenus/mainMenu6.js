@@ -264,7 +264,11 @@ $.widget( "heurist.mainMenu6", {
         
         var isSvsEditVisible = ( this.edit_svs_dialog && this.edit_svs_dialog.isModified() );
 //console.log('>>>'+isSvsEditVisible);        
-        return (isSvsEditVisible || this._explorer_menu_locked || this.element.find('.ui-selectmenu-open').length>0);
+        return (isSvsEditVisible || this._explorer_menu_locked 
+                || this.element.find('.ui-selectmenu-open').length>0
+                || $('.list_div').is(':visible')      //tag selector dropdown      
+                || $('.ui-widget-overlay.ui-front').is(':visible')   //some modal dialog is open
+                );
     },
 
     //
