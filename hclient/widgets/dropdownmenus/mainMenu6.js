@@ -101,7 +101,9 @@ $.widget( "heurist.mainMenu6", {
                         .load(window.hWin.HAPI4.baseURL+'hclient/widgets/dropdownmenus/welcome.html',
                             function(){
                                var url = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database;
-                               $('.bookmark-url').html('<a href="'+url+'">'+url+'</a>') 
+                               $('.bookmark-url').html('<a href="'+url+'">'+url+'</a>');
+                               $('.template-url').attr('href', window.hWin.HAPI4.baseURL
+                                                +'documentation_and_templates/db_design_template.rtf');
                             });
                     that.switchContainer( 'design', true );
                 }else{
