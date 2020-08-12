@@ -1740,9 +1740,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
             
             ele.children('#north_pane').height(h);
             ele.children('#center_pane').css({top: h});
-            //window.hWin.HAPI4.LayoutMgr.cardinalPanel('sizePane', ['north', h], this.element.parents('#layout_panes'));
-            
-            
+            $('.ui-layout-container').layout().resizeAll();
         }
         
     },
