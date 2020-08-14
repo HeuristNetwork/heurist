@@ -91,7 +91,7 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
                 .show(), {click:this.doAction});
             this._on(this.element.find('#btnAddRecordInNewWin').button({icon:'ui-icon-extlink', 
                     label:window.hWin.HR('Add Record in New Window'), showLabel:false })
-                    .css({color:'white !important',margin:'0 4px'})
+                    .css({background:'revert', margin:'0 4px'})
                     .show(), {click:this.doAction});
             this._on(this.element.find('#btnSavePreferences').button({label: window.hWin.HR('Save').toUpperCase() })
                 .show(), {click:this.doAction});

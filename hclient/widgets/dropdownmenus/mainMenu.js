@@ -878,6 +878,10 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
             window.hWin.HEURIST4.msg.showMsgDlg('Although rollback data has been recorded, '
                                     + 'there is currently no end-user interface way of rolling '
                                     + 'back the database. <br><br>'+window.hWin.HR('New_Function_Contact_Team'));
+
+        }else if(action == "menu-structure-rectypes"){
+
+            window.hWin.HEURIST4.ui.showEntityDialog('defRecTypes', entity_dialog_options);
                                     
         }else if(action == "menu-structure-import" || action == "menu-structure-import-express"){
 
@@ -953,7 +957,16 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                  
                  
         }else 
+        if(action == "menu-import-get-template"){
+
+            window.hWin.HEURIST4.util.downloadURL(window.hWin.HAPI4.baseURL
+                    +'export/xml/flathml.php?file=1&rectype_templates=y&db='
+                    +window.hWin.HAPI4.database);
+            
+        }else
         if(action == 'menu-extract-pdf'){
+            
+            
             //this menu should not be in main menu. IJ request
             var app = window.hWin.HAPI4.LayoutMgr.appGetWidgetById('heurist_resultList');
             if(app && app.widget){
