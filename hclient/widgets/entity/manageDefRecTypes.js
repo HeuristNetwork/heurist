@@ -53,7 +53,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             this.options.use_structure = true;
         }
         
-//console.log(this.options);        
+console.log(this.options);        
         
         if(!this.options.layout_mode) this.options.layout_mode = 'short';
         

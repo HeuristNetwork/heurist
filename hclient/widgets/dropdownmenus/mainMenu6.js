@@ -90,8 +90,16 @@ $.widget( "heurist.mainMenu6", {
                     click: that._openSectionMenu
                 });
 
-                //open explore by default, or "design" if db is empty
-                if(window.hWin.HAPI4.sysinfo['db_total_records']<1){
+                
+                
+                if(true){ //DEBUG
+                    that._active_section = 'explore';
+                    that.switchContainer('design', true);
+                    var widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('mainMenu');
+                    widget.mainMenu('menuActionById', 'menu-structure-rectypes'); 
+                    
+                }else if(window.hWin.HAPI4.sysinfo['db_total_records']<1){
+                    //open explore by default, or "design" if db is empty
                     that._active_section = 'explore';
                     
                     that.containers['design']

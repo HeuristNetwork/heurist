@@ -426,7 +426,7 @@ span.fancytree-node:hover{
     color:<?php uout('explore_bg', '#7B4C98')?> !important;
 }
 .ui-heurist-explore .ui-button-icon-only{
-    background:none !important;
+    background: none;
     color:<?php uout('explore_bg', '#7B4C98')?> !important;
 }
 
