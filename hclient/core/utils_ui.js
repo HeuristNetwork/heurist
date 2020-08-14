@@ -1765,7 +1765,7 @@ window.hWin.HEURIST4.ui = {
         
         var $help_button = $(options.button);
 
-        if(options.no_init!==true){ //do not init button    ui-icon-circle-b-info
+        if(options.no_init!==true){ //do not init button    ui-icon-circle-b-info  carat-2-e
             $help_button.button({icons: { primary: "ui-icon-circle-help" }, label:'Show context help', text:false});
         }
         
@@ -1874,8 +1874,10 @@ window.hWin.HEURIST4.ui = {
                         }else{
                             
                             if($helper_div.is(':visible')){
-                                __closeHelpDiv($helper_div);                        
+                                __closeHelpDiv($helper_div);         
+                                $help_button.button({icons: { primary: "ui-icon-circle-help" }});
                             }else{
+                                $help_button.button({icons: { primary: "ui-icon-carat-2-e" }});
                                 //find('.ent_wrapper')
                                 $helper_div.load(options.url, function(response, status, xhr){
 
