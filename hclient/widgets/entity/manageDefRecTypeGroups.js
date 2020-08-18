@@ -24,7 +24,7 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
     
     _init: function() {
 
-        this.options.layout_mode = 'short';
+        if(!this.options.layout_mode) this.options.layout_mode = 'short';
         this.options.use_cache = true;
         
         if(this.options.edit_mode=='editonly'){
@@ -35,8 +35,8 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
         if(this.options.select_mode!='manager'){
             this.options.edit_mode = 'none';
             this.options.width = 300;
-        }else{
-            this.options.edit_mode = 'inline';   //force inline editor 
+        }else if(this.options.edit_mode == 'inline')
+        {
             this.options.width = 890;
         }
         
@@ -47,7 +47,10 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
             this.editForm.parent().hide();
             this.recordList.parent().css('width','100%');
         }
-        this.recordList.css('top',0);
+
+        if(!this.options.innerTitle){
+            this.recordList.css('top',0);  
+        }        
     },
     
     //  
@@ -82,6 +85,19 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
                 
             });
             
+        if(this.options.innerTitle){
+            //specify add new/save order buttons above record list
+            var btn_array = this._getEditDialogButtons();
+            
+            this._toolbar = this.searchForm;
+            this.searchForm.css({'padding-top': '8px'}).empty();
+            btn_array[0].css['float'] = 'right';
+            btn_array[1].css['float'] = 'right';
+            this._defineActionButton2(btn_array[0], this.searchForm);
+            this._defineActionButton2(btn_array[1], this.searchForm);
+            
+        }
+         
         return true;
     },    
     
@@ -97,7 +113,7 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
         function fld2(fldname, col_width){
             swidth = '';
             if(!window.hWin.HEURIST4.util.isempty(col_width)){
-                swidth = ' style="width:'+col_width+'"';
+                swidth = ' style="display:table-cell;width:'+col_width+';max-width:'+col_width+'"';
             }
             return '<div class="item" '+swidth+'>'+window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, fldname))+'</div>';
         }
@@ -107,17 +123,17 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
         
         var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" style="height:1.3em">';
         if(this.options.select_mode=='select_multi'){
-            html = html + '<div class="recordSelector"><input type="checkbox" /></div><div class="recordTitle">';
+            html = html + '<div class="recordSelector"><input type="checkbox" /></div>';//<div class="recordTitle">';
         }else{
-            html = html + '<div>';
+            //html = html + '<div>';
         }
         
-        html = html + fld2('rtg_Name') + '<div style="position:absolute;right:4px;top:6px">'+fld('rtg_RtCount')+'</div></div>';
+        html = html + fld2('rtg_Name',250);
         
         if(this.options.edit_mode=='popup'){
             html = html
-            + this._defineActionButton({key:'edit',label:'Edit', title:'', icon:'ui-icon-pencil'}, null,'icon_text')
-            + this._defineActionButton({key:'delete',label:'Remove', title:'', icon:'ui-icon-minus'}, null,'icon_text');
+            + this._defineActionButton({key:'edit',label:'Edit', title:'', icon:'ui-icon-pencil', class:'rec_actions_button'}, 
+                            null,'icon_text');
              /*
             + '<div title="Click to edit group" class="rec_edit_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit">'
             +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'
@@ -129,6 +145,14 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
             + '</div>';
             */
         }
+        html = html 
+                +((fld('rtg_RtCount')>0)
+                ?'<div style="display:table-cell;padding:0 4px">'+fld('rtg_RtCount')+'</div>'
+                :this._defineActionButton({key:'delete',label:'Remove', title:'', icon:'ui-icon-delete', class:'rec_actions_button'}, 
+                            null,'icon_text'))
+                + '<div class="selection_pointer" style="display:table-cell">'
+                    +'<span class="ui-icon ui-icon-carat-r"></span></div>';
+        
         
 
         return html+'</div>';
@@ -272,7 +296,7 @@ console.log('>>>>>');
                       click: function() { that._onActionListener(null, 'add'); }},
 
                 {text:window.hWin.HR('Save Order'),
-                      css:{'float':'left',display:'none'}, id:'btnApplyOrder',
+                      css:{'margin-right':'0.5em','float':'left',display:'none'}, id:'btnApplyOrder',
                       click: function() { that._onActionListener(null, 'save-order'); }},
                       
                       

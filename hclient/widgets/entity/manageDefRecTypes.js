@@ -53,7 +53,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             this.options.use_structure = true;
         }
         
-console.log(this.options);        
+//console.log(this.options);        
         
         if(!this.options.layout_mode) this.options.layout_mode = 'short';
         
@@ -74,8 +74,45 @@ console.log(this.options);
             this.options.width = (isNaN(this.options.width) || this.options.width<750)?750:this.options.width;                    
             //this.options.edit_mode = 'none'
         }
-    
+        
         this._super();
+        
+        
+//console.log(this.options.is_h6style +'   '+ this.options.innerTitle);        
+
+        if(this.options.innerTitle){
+            
+            this.options.ui_params ={groupsPresentation:'none'};
+            //add record type group editor
+            this.element.css( {border:'none', 'box-shadow':'none', background:'none'} );
+            
+            this.element.find('.ent_wrapper:first').addClass('ui-dialog-heurist').css('left',328);
+            
+            this.rectype_groups = $('<div>').addClass('ui-dialog-heurist')
+                .css({position: 'absolute',top: 0, bottom: 0, left: 0, width:320, overflow: 'hidden'})
+                .appendTo(this.element);
+                
+            var that = this;                
+            var rg_options = {
+                 isdialog: false, 
+                 innerTitle: true,
+                 container: this.rectype_groups,
+                 title: 'Record type groups',
+                 layout_mode: 'short',
+                 select_mode: 'manager',
+                 onSelect:function(res){
+                     if(window.hWin.HEURIST4.util.isRecordSet(res)){
+                        res = res.getIds();                     
+                        if(res && res.length>0){
+                            that.searchForm.searchDefRecTypes('option','rtg_ID', res[0])
+                        }
+                     }
+                 }
+            };
+            
+                                                                         
+            window.hWin.HEURIST4.ui.showEntityDialog('defRecTypeGroups', rg_options);
+        }
         
     },
     
@@ -441,7 +478,7 @@ console.log(response);
         +     recTitle
         + '</div>';
         
-        // add edit/remove action buttons
+        // add edit/remove action buttons in record lisr
         if(has_buttons){
         
                 
@@ -584,7 +621,7 @@ console.log(response);
         
         this.searchForm.css({'height':iheight});
         this.recordList.css({'top':iheight});     
-
+       
         if(params['groupsPresentation']=='list'){
             this.recordList.css({'left':'171px'});
             this.searchFormList.css({'top':this.recordList.css('top')}).show();
@@ -592,7 +629,7 @@ console.log(response);
             this.searchFormList.hide();
             this.recordList.css('left',0);
         }
-        
+        //this.searchForm.changeUI();
         
         this.saveUiPreferences( params );
         

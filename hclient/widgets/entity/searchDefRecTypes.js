@@ -63,6 +63,9 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
         
         this._on(this.input_search_type,  { change:this.startSearch });
         
+        this._on(this.input_search,  { keyup:this.startSearch });
+
+        
         //@todo - possible to remove
         if( this.options.rtg_ID>0 ){
             this.input_search_group.parent().hide();
@@ -85,11 +88,22 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
             this._on(this.chb_show_already_in_db,  { change:this.startSearch });
             
             this.options.simpleSearch = true;
+        }else{
+            this.element.find('#div_show_already_in_db').hide();
+            
+            this._on(this.element.find('#chb_show_all_groups'),  { change:function(){
+                this.input_search_group.val(this.element.find('#chb_show_all_groups').is(':checked')
+                                            ?'any':this.options.rtg_ID).change();
+            }});
+                        
         }
+        
         if( this.options.simpleSearch){
             this.element.find('#div_search_group').hide();
             this.element.find('#input_sort_type_div').hide();
         }else{
+            
+            
             this.reloadGroupSelector();
         
         
@@ -110,6 +124,20 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
         //this.startSearch();            
     },  
     
+    //
+    //
+    //
+    _setOption: function( key, value ) {
+        this._super( key, value );
+        if(key == 'rtg_ID'){
+            if(!this.element.find('#chb_show_all_groups').is(':checked'))
+                this.element.find('#input_search_group').val(value).change();
+        }
+    },
+    
+    //
+    //
+    //    
     configureUI: function(){
         
         var that = this;
@@ -189,9 +217,19 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
         }else{
             sel_group.hide();
         }
+        
+        this.element.find('#div_show_all_groups').hide();
+        
         if(params['groupsPresentation']=='select'){
-            this.element.find('#div_search_group').show();            
+            this.element.find('#div_search_group').css({'display':'inline-block'});            
+        }else if(params['groupsPresentation']=='none'){
+            
+            this.element.find('#div_search_group').hide();
+            this.element.find('#div_show_all_groups').css({'display':'inline-block'});            
         }else{
+            
+
+            
             //that.element.find('#div_search_group').hide();
         
             //activate tab of list according to selected group
@@ -341,7 +379,24 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
             var request = {}
         
             if(this.input_search.val()!=''){
-                request['rty_Name'] = this.input_search.val();
+                var s = this.input_search.val();
+                if(window.hWin.HEURIST4.util.isNumber(s) && parseInt(s)>0){
+                     request['rty_ID'] = s;   
+                     s = '';
+                }else if (s.indexOf('-')>0){
+                    
+                    var codes = s.split('-');
+                    if(codes.length==2 
+                        && window.hWin.HEURIST4.util.isNumber(codes[0])
+                        && window.hWin.HEURIST4.util.isNumber(codes[1])
+                        && parseInt(codes[0])>0 && parseInt(codes[1])>0 ){
+                        request['rty_OriginatingDBID'] = codes[0];
+                        request['rty_IDInOriginatingDB'] = codes[1];
+                        s = '';
+                    }
+                }
+                
+                if(s!='') request['rty_Name'] = s;
             }
             
             if( this.options.rtg_ID<0 ){
@@ -351,6 +406,7 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
         
             if(this.input_search_group.val()>0){
                 request['rty_RecTypeGroupID'] = this.input_search_group.val();
+                this.options.rtg_ID = request['rty_RecTypeGroupID'];
             }
             
             

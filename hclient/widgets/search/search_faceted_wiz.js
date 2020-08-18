@@ -651,7 +651,7 @@ $.widget( "heurist.search_faceted_wiz", {
             var svs_ugrid = $dlg.find('#svs_UGrpID');
             var svs_rules = $dlg.find('#svs_Rules');
             var svs_rules_only = $dlg.find('#svs_RulesOnly');
-            var svs_filter = $dlg.find('#svs_Query');
+            var svs_filter = $dlg.find('#svs_Query'); //preliminary query
             
             this._on(svs_filter,{keyup:function(){                                 
                         if(svs_filter.val()!=''){

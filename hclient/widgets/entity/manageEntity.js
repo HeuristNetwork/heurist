@@ -118,6 +118,7 @@ $.widget( "heurist.manageEntity", {
         //listeners
         onInitFinished:null,  //event listener when dialog is fully inited - use to perform initial search with specific parameters
         onInitEditForm:null,  //event listener when EDIT form is fully inited - used in manageRecords._afterInitEditForm only to open structure field formlet
+        onSelect:null,
         beforeClose:null,
         onClose:null,
         
@@ -233,18 +234,21 @@ $.widget( "heurist.manageEntity", {
         
         //this.element.css({'font-size':'1em'});
         
-        if(this.options.innerTitle){
+        if(this.options.innerTitle){ 
+            //h6 style 
             var fele = this.element.find('.ent_wrapper:first');
+            fele.children(0).css('top', '38px'); //down manager div to 38
             this._innerTitle = $('<div>').addClass('ui-heurist-header')
                 .text(this.options['title'])
-                .insertBefore(fele);
-            fele.css('top','38px');
+                .insertBefore($(fele.children()[0])); //insert before first wrapper
             
             if(this.options.layout_mode=='editonly' && !this.options.isdialog){
-                //add div for control buttons
+                //add div at bottom for control buttons
                 $('<div>').addClass('ent_footer editForm-toolbar ui-heurist-header')
                     .css({'height':'36px','padding':'4px 20px 0px'}).appendTo(fele);
+                    
                 this.element.find('.editForm').css('bottom','40px');
+                
             }else if (this.options['select_mode']=='select_multi' || this.options['select_mode']=='select_roles')
             {
                 var ele = $('<div>').addClass('ent_footer editForm-toolbar ui-heurist-header')
@@ -554,7 +558,10 @@ $.widget( "heurist.manageEntity", {
         if(mode=='icon_text'){ //for resultList item - buttons will be inited after render complete
 
             var res = '<div title="'+(action.title?action.title:action.label)
-            +'" class="logged-in-only" role="button" aria-disabled="false" data-key="'+action.key+'">';
+            + '" class="logged-in-only'
+            + (action.class?' '+action.class:'')+'"'
+            + (style?' style="'+style+'"':'')
+            +' role="button" aria-disabled="false" data-key="'+action.key+'">';
 
                     if(action.icon){
                         res = res + '<span class="ui-icon '+action.icon+'"></span>';    
@@ -1089,6 +1096,12 @@ $.widget( "heurist.manageEntity", {
             
             if(this.options.select_mode=='select_single'){
                 this._selectAndClose(); //it triggers onselect and closes dialog
+            }else{
+                //todo? use this._trigger( "onselect", null, this._selection);
+                if($.isFunction(this.options.onSelect)){
+                    this.options.onSelect.call( this, this._selection );
+                }
+                
             }
         }
 /*        

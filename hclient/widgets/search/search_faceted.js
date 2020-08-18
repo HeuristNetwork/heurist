@@ -104,13 +104,13 @@ rulesonly
 ui_title - title in user interface
 ui_viewmode - result list viewmode
 title_hierarchy - show hierarchy in facet header
-sup_filter - suplementary filter that is set in design time
-add_filter - additional filter that can be set in run time 
-add_filter_original - original search string for add_filter if it is json
+sup_filter - suplementary (preliminary) filter that is set in design time
+add_filter - additional filter that can be set in run time (via input field - search everything)
+add_filter_original - original search string for add_filter if it is json  - NO USED
 spatial_filter  - spatial filter (optional)
 search_on_reset - search for empty form (on reset and on init)
 
-ui_prelim_filter_toggle   - allow toggle on/off sup_filter
+ui_prelim_filter_toggle   - allow toggle on/off "sup_filter"
 ui_prelim_filter_toggle_mode - direct or reverse mode (0|1)
 ui_prelim_filter_toggle_label - label on UI
 

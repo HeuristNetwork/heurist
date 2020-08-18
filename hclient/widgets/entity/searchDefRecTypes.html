@@ -2,24 +2,31 @@
     <div style="float:right;width:12em">
         <div id="btn_add_record"></div>
         <div id="btn_find_record" style="margin-top:4px"></div>
+        <div id="btn_ui_config"></div>   
     </div>
 
     <div>
         <div style="display:inline-block;padding:0.2em">
             <div class="header4" style="display: inline-block;width:8em;text-align:right;">
-                <label for="input_search" accesskey="N">Find by <U>N</U>ame</label></div>
+                <label for="input_search" accesskey="F" title="Find by name, ID or concept code"><U>F</U>ind</label></div>
             <input id="input_search" class="text ui-widget-content ui-corner-all" 
                 style="width: 130px; margin-right:0.2em"/>
         </div>
 
-        <div id="div_search_group" style="display:inline-block;padding:0.2em">
+        <div style="display:inline-block;padding:0.2em" id="div_show_all_groups">
+            <label title="Show record types in any group" accesskey="A">Show <U>A</U>ll Groups&nbsp;
+            <input id="chb_show_all_groups" class="text ui-widget-content ui-corner-all" 
+                style="margin-right:0.2em" type="checkbox"/></label>
+        </div>
+        
+        <div id="div_search_group" style="display:none;padding:0.2em">
             <div class="header4" style="display: inline-block;Xwidth:8em;text-align:right;">
                 <label for="input_search_group" accesskey="G">in <U>G</U>roup</label></div>
             <select id="input_search_group" class="text ui-widget-content ui-corner-all" 
                 style="width: 130px; margin-right:0.2em"/>
         </div>
         
-        <div id="btn_search_start" style="display:inline-block;"></div>   
+        <div id="btn_search_start" style="display:none;"></div>   
         
         <div style="display:inline-block;padding:0.2em" id="input_sort_type_div">
             <div class="header4" style="display: inline-block;width:4em;text-align:right;">
@@ -33,12 +40,11 @@
         </div>
 
         <div style="display:inline-block;padding:0.2em" id="div_show_already_in_db">
-            <label for="chb_show_already_in_db" title="Show all record types (including that are already in database: allows updating of field list)" accesskey="A">Show <U>A</U>ll</label>
+            <label for="chb_show_already_in_db" title="Show all record types (including that are already in database: allows updating of field list)" accesskey="A">Show <U>A</U>ll&nbsp;
             <input id="chb_show_already_in_db" class="text ui-widget-content ui-corner-all" 
-                style="margin-right:0.2em" type="checkbox">
+                style="margin-right:0.2em" type="checkbox"/></label>
         </div>
 
-        <div id="btn_ui_config" style="float:right;"></div>   
     </div>    
     
     <div id="sel_group" style="position:absolute;height:auto;bottom:0;display:none">

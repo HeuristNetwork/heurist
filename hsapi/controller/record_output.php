@@ -231,7 +231,7 @@
         
     if($is_csv){
         
-        if(@$params['prefs']['csv_headeronly'])
+        if(@$params['prefs']['csv_headeronly'])   //export record type template
         {
             output_HeaderOnly($system, $response, $params);
         }else{
@@ -909,9 +909,15 @@ function writeResults( $streams, $temp_name, $headers, $error_log ) {
             }
         }
         
+        //header('Content-Description: File Transfer');
+        //header('Content-Type: application/octet-stream');
+        //header('Content-Transfer-Encoding: binary');
+
+        
         header('Content-Type: text/csv');
         header('Content-Disposition: attachment; filename='.$filename);
-        header('Content-Length: ' . strlen($out));
+        header('Content-Length: ' . strlen($out)+3);
+        echo "\xEF\xBB\xBF"; // Byte Order Mark        
         exit($out);
         
     }else{

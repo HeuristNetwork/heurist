@@ -401,6 +401,24 @@ div.recordDiv:hover .rec_actions
 {
     display: inline-block;
 }
+div.recordDiv:hover .rec_actions_button 
+{
+    display: table-cell;
+    visibility: visible;
+}
+div.recordDiv .rec_actions_button 
+{
+    display: table-cell;
+    visibility: hidden;
+}
+div.recordDiv .selection_pointer{
+    display: table-cell;
+    visibility: hidden;
+}
+div.recordDiv.selected .selection_pointer{
+    display: table-cell;
+    visibility: visible;
+}
 
 div.recordDiv:hover > .action-button-container,
 div.recordDiv:hover > .rec_actions

@@ -686,8 +686,8 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         }
     },
     
-    //
-    //
+    // dialog_options - not used
+    // parameters from dialog are taken from data- attributes of li element in menu html
     //
     menuActionHandler: function(event, item, dialog_options){
         

@@ -1828,10 +1828,10 @@ window.hWin.HEURIST4.ui = {
                                 //var div_height = Math.min(500, (document.body).height()-$help_button.top());
                                 //var div_width  = Math.min(600, (document.body).width() *0.8);
                                 divpos = null;
-                                if($.isPlainObject(position)){
-                                    divpos = position;
+                                if(options.position && $.isPlainObject(options.position)){
+                                    divpos = options.position;
                                     //divpos['of'] = $help_button;
-                                }else if(position=='top'){ //show div above button
+                                }else if(options.position=='top'){ //show div above button
                                     divpos = { my: "right bottom", at: "right top", of: $help_button }
                                 }else{
                                     divpos = { my: "right top", at: "right bottom", of: $help_button };

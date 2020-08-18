@@ -2184,7 +2184,7 @@ $.widget( "heurist.svs_list", {
     }
     
     , _showRecTypeManager: function(){
-        window.hWin.HAPI4.LayoutMgr.executeCommand('mainMenu', 'menuActionById', 'menu-structure-rectypes');
+        window.hWin.HAPI4.LayoutMgr.executeCommand('mainMenu', 'menuActionById', 'menu-structure-structure');
     }
     
     //
