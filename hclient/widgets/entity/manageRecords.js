@@ -32,6 +32,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     _rts_changed_flag: false,
     _resizeTimer: 0,
     
+    //this.options.edit_structure - open edit structure mode at once and work with fake record
     //this.options.selectOnSave - special case when open edit record from select popup
     //this.options.allowAdminToolbar  - if false hide ModifyStructure, Edit title mask and others
     //this.options.rts_editor  - back reference to manageDefRecStructure widget
@@ -562,7 +563,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             var btns = [];
 
             if(false && this.options.selectOnSave==true){ //always show standard set of buttons
-                var btns = [
+                btns = [
                         {text:window.hWin.HR('Cancel'), 
                               css:{'margin-right':'15px'},
                               click: function() { 
@@ -580,7 +581,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             }else{
                 
                 if(this.options.selectOnSave==true){
-                    var btns = [               
+                    btns = [               
                                 
                         {text:window.hWin.HR('Save'), id:'btnRecSave',
                               accesskey:"S",
@@ -608,9 +609,16 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                               
                               
                               ];    
+                }else if(this.options.edit_structure==true){
+
+                        btns = [ {text:window.hWin.HR('Close'), 
+                              click: function() { 
+                                  that.closeEditDialog( true ); //withot save
+                              }}];
+                    
                 }else{
                 
-                    var btns = [       /*{text:window.hWin.HR('Reload'), id:'btnRecReload',icons:{primary:'ui-icon-refresh'},
+                    btns = [       /*{text:window.hWin.HR('Reload'), id:'btnRecReload',icons:{primary:'ui-icon-refresh'},
                         click: function() { that._initEditForm_step3(that._currentEditID) }},  //reload edit form*/
                               
                               
@@ -868,8 +876,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         //togglerAlign_closed:'top',
                         togglerAlign_closed:16,   //top position   
                         togglerLength_closed:80,  //height of toggler button
-                        initHidden: true,
-                        initClosed: (this.usrPreferences.structure_closed!=0),
+                        initHidden: !this.options.edit_structure,
+                        initClosed: !this.options.edit_structure && (this.usrPreferences.structure_closed!=0),
                         slidable:false,  //otherwise it will be over center and autoclose
                         contentSelector: '.editStructure',   
                         onopen_start : function( ){ 
@@ -926,8 +934,14 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
 
                 this.editFormPopup.show().layout(layout_opts); //.addClass('ui-heurist-bg-light')
                 
-                
-                if(this.usrPreferences.summary_closed==true || this.usrPreferences.summary_closed=='true'){
+                if(this.options.edit_structure){
+                    
+                    this.editFormPopup.layout().hide("east");  
+                    /*this.editFormPopup.layout().open("west");  
+                    var tog = this.editFormPopup.find('.ui-layout-toggler-east');
+                    tog.removeClass('prominent-cardinal-toggler');*/
+                    
+                }else if(this.usrPreferences.summary_closed==true || this.usrPreferences.summary_closed=='true'){
                             var tog = that.editFormPopup.find('.ui-layout-toggler-east');
                             tog.addClass('prominent-cardinal-toggler');
                 }
@@ -1298,6 +1312,9 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             case 3:   //find all reverse links
             
                 var relations = that._currentEditRecordset.getRelations();    
+                
+                if(!relations) break;
+                
                 var direct = relations.direct;
                 var reverse = relations.reverse;
                 var headers = relations.headers;
@@ -1831,7 +1848,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         var that = this;
         var rty_ID = this._currentEditRecTypeID;
         
-        if(this._editing.isModified()){
+        if(!this.options.edit_structure && this._editing.isModified()){
             
                 var sMsg = "Click YES to save changes and modify the record type attributes";
                 window.hWin.HEURIST4.msg.showMsgDlg(sMsg, function(){
@@ -1881,7 +1898,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
 
         var that = this;
         
-        if(this._editing.isModified()){
+        if(!this.options.edit_structure && this._editing.isModified()){
             
                 var sMsg = "Click YES to save changes and modify the record structure.<br><br>"
                             +"If you are unable to save changes, click Cancel and open<br>"
@@ -1902,7 +1919,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             
             this._reloadRtsEditor();
             //show and expand left hand panel 
-            var isClosed = (this.usrPreferences.structure_closed!=0);
+            var isClosed = (!this.options.edit_structure && this.usrPreferences.structure_closed!=0);
             this.editFormPopup.layout().show('west', !isClosed ); 
             if(isClosed){
                         var tog = that.editFormPopup.find('.ui-layout-toggler-west');
@@ -1986,14 +2003,38 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             this.editFormSummary.find('.summary-content').empty();
             //this.editFormSummary.accordion({active: false});
         }
+
+        var record_stub = {"status":"ok","is_insert":true,
+                        "data":{"entityName":"Records","count":"1","reccount":1,
+                        "fields":["rec_ID","rec_URL","rec_RecTypeID","rec_Title",
+                        "rec_OwnerUGrpID","rec_NonOwnerVisibility","rec_Modified","rec_Added","rec_AddedByUGrpID","rec_ScratchPad",
+                        "rec_NonOwnerVisibilityGroups"],
+                        "fields_detail":[],
+                        "records":{"3256":["3256",null,that.options.new_record_params.RecTypeID,"","2","public","2020-08-19 13:53:41",
+                        "2020-08-19 13:53:41","2",null,null]},
+                        "order":["3256"],
+                        "rectypes":[that.options.new_record_params.RecTypeID],
+                        //"limit_warning":false,"memory_warning":null,
+                        //"relations":{"direct":[],"reverse":[],"headers":{"3256":["","56","2","hidden"]}}},
+                        //"request_code":{"script":"record_edit","action":"a"}
+                        }};
+
         
         if(recID==null){
             this._editing.initEditForm(null, null); //clear and hide
         }else if(recID>0){ //edit existing record  - load complete information - full file info, relations, permissions
         
-            window.hWin.HAPI4.RecordMgr.search({q: 'ids:'+recID, w: "e", f:"complete", l:1}, 
-                        function(response){ response.is_insert = (is_insert==true); 
-                                            that._initEditForm_step4(response); });
+            if(that.options.edit_structure){
+                
+                that._initEditForm_step4(record_stub);
+                
+            }else{
+                window.hWin.HAPI4.RecordMgr.search({q: 'ids:'+recID, w: "e", f:"complete", l:1}, 
+                            function(response){ response.is_insert = (is_insert==true); 
+                                                that._initEditForm_step4(response); });
+                
+            }
+        
 
         }else if(recID<0){ //add new record
         
@@ -2037,13 +2078,35 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                that.options.new_record_params['details'][window.hWin.HAPI4.sysinfo['dbconst']['DT_THUMBNAIL']] = 'generate_thumbnail_from_url';
             }
             
+            //
+            // create new temporary record to be edited
+            //
             function __onAddNewRecord(){
                 
                 if(that.options.new_record_params['OwnerUGrpID']=='current_user') {
                     that.options.new_record_params.OwnerUGrpID = window.hWin.HAPI4.user_id();
                 }
                 
-                if(that.options.new_record_params['details']){                     
+
+                if(that.options.edit_structure){ //returns fake record to edit structure only
+/*
+                        var response = {"status":"ok","data":{"queryid":null,"pageno":null,"entityName":"Records","count":"1","offset":0,"reccount":1,"tmcount":0,
+                        "fields":["rec_ID","rec_URL","rec_RecTypeID","rec_Title","rec_OwnerUGrpID","rec_NonOwnerVisibility","rec_Modified","bkm_PwdReminder","rec_Added","rec_AddedByUGrpID","rec_ScratchPad","bkm_Rating","rec_ThumbnailURL",
+                        "rec_NonOwnerVisibilityGroups"],
+                        "fields_detail":[],
+                        "records":{"3256":["3256",null,that.options.new_record_params.RecTypeID,"","2","public","2020-08-19 13:53:41",null,"2020-08-19 13:53:41","2",null,null,null]},
+                        "order":["3256"],
+                        "rectypes":[that.options.new_record_params.RecTypeID],
+                        //"limit_warning":false,"memory_warning":null,
+                        //"relations":{"direct":[],"reverse":[],"headers":{"3256":["","56","2","hidden"]}}},
+                        //"request_code":{"script":"record_edit","action":"a"}
+                        }};
+*/
+                      that._initEditForm_step4(record_stub); //it returns full record data
+                      that.editRecordType(true);
+
+
+                }else if(that.options.new_record_params['details']){                     
                     //need to use save because method "add" inserts only header
                     window.hWin.HAPI4.RecordMgr.saveRecord( that.options.new_record_params,
                         function(response){ 
@@ -2412,7 +2475,9 @@ rectypes.names[rectypeID] + ' is defined as a child of <b>'+names
             var dialog_title = this.options['edit_title'];
             if(!dialog_title){
                  
-                 dialog_title = window.hWin.HR(that._isInsert ?'Add':'Edit') + ' '
+                 dialog_title = window.hWin.HR(
+                                    that.options.edit_structure?'Edit structure for '
+                                      :(that._isInsert ?'Add':'Edit')) + ' '
                                     + window.hWin.HEURIST4.rectypes.names[rectypeID];                         
                                     
             }
@@ -3371,39 +3436,47 @@ rectypes.names[rectypeID] + ' is defined as a child of <b>'+names
         //add record title at the top ======================
         
         if(this.editHeader && this.editHeader.length>0){ 
-
-            this.editHeader.find('.ui-heurist-header2').remove();
             
-            //define header - rectype icon, retype name and record title
-            var ph_gif = window.hWin.HAPI4.baseURL + 'hclient/assets/16x16.gif';
-            var sheader = '<div class="ui-heurist-header2" style="text-align:left;min-height:25px">'
-                    + '<img src="'+ph_gif
-                        + '" width=18 height=18 class="rt-icon" style="border-radius: 50%;padding:2px;background-color:white;'
-                        + 'background-size: 14px 14px;'
-                        + 'vertical-align:middle;margin: 2px 10px 2px 4px; background-image:url(\''
-                        + window.hWin.HAPI4.iconBaseURL+this._currentEditRecTypeID + '\');"/>' 
-                        //+ 'm&color=rgb(255,255,255)\');"/>'
-                        //+ 's&color=rgb(0,0,0)&circle=rgb(255,255,255)\');"/>'  //draw black on white
-                    + '<span style="display:inline-block;vertical-align:middle">'
-                        + window.hWin.HEURIST4.rectypes.names[this._currentEditRecTypeID]                         
-                    + '</span>';
-                    
-            if(!this._isInsert){
-                sheader = sheader + 
-                    '&nbsp;<span style="display:inline-block;padding:0 20px;vertical-align:middle">ID: '+this._currentEditID
-                    + '</span><h3 style="display:inline-block;max-width:900;vertical-align:middle;margin:0" class="truncate">'
-                    + window.hWin.HEURIST4.util.stripTags(this._getField('rec_Title'),'u, i, b, strong')+'</h3>';            
+            if(this.options.edit_structure){
                 
-            
-            }
-            sheader = sheader + '</div>';
-            $(sheader).appendTo(this.editHeader);
-            
-            if(!this._as_dialog){
-                this.element.addClass('manageRecords');                
-                window.hWin.HEURIST4.ui.initDialogHintButtons(this.element, 
-                    '.ui-heurist-header2', //where to put button
-                    window.hWin.HAPI4.baseURL+'context_help/'+this.options.entity.helpContent+' #content');
+                this.editHeader.hide();
+                this.editFormPopup.css('top',0);
+                
+            }else{
+
+                this.editHeader.find('.ui-heurist-header2').remove();
+                
+                //define header - rectype icon, retype name and record title
+                var ph_gif = window.hWin.HAPI4.baseURL + 'hclient/assets/16x16.gif';
+                var sheader = '<div class="ui-heurist-header2" style="text-align:left;min-height:25px">'
+                        + '<img src="'+ph_gif
+                            + '" width=18 height=18 class="rt-icon" style="border-radius: 50%;padding:2px;background-color:white;'
+                            + 'background-size: 14px 14px;'
+                            + 'vertical-align:middle;margin: 2px 10px 2px 4px; background-image:url(\''
+                            + window.hWin.HAPI4.iconBaseURL+this._currentEditRecTypeID + '\');"/>' 
+                            //+ 'm&color=rgb(255,255,255)\');"/>'
+                            //+ 's&color=rgb(0,0,0)&circle=rgb(255,255,255)\');"/>'  //draw black on white
+                        + '<span style="display:inline-block;vertical-align:middle">'
+                            + window.hWin.HEURIST4.rectypes.names[this._currentEditRecTypeID]                         
+                        + '</span>';
+                        
+                if(!this._isInsert){
+                    sheader = sheader + 
+                        '&nbsp;<span style="display:inline-block;padding:0 20px;vertical-align:middle">ID: '+this._currentEditID
+                        + '</span><h3 style="display:inline-block;max-width:900;vertical-align:middle;margin:0" class="truncate">'
+                        + window.hWin.HEURIST4.util.stripTags(this._getField('rec_Title'),'u, i, b, strong')+'</h3>';            
+                    
+                
+                }
+                sheader = sheader + '</div>';
+                $(sheader).appendTo(this.editHeader);
+                
+                if(!this._as_dialog){
+                    this.element.addClass('manageRecords');                
+                    window.hWin.HEURIST4.ui.initDialogHintButtons(this.element, 
+                        '.ui-heurist-header2', //where to put button
+                        window.hWin.HAPI4.baseURL+'context_help/'+this.options.entity.helpContent+' #content');
+                }
             }
         }
 
@@ -3441,17 +3514,23 @@ rectypes.names[rectypeID] + ' is defined as a child of <b>'+names
             });
             //init back button - if there is opened rts editor
             var btn = this.element.find('.btn-edit-rt-back');
+            
+                
             if(btn){
-                btn.button({icon:'ui-icon-gear-crossed'}).show()
-                    .click(function(){ 
-                                    
-                        that.editFormPopup.layout().hide('west');
-                        that.options.rts_editor = null;
-                        that.reloadEditForm( true );
-                        
-                        //that.options.rts_editor.manageDefRecStructure('closeDialog');
-                    });                
-                if(btn_css) btn.css(btn_css);
+                if(that.options.edit_structure){
+                    btn.hide();
+                }else{
+                    btn.button({icon:'ui-icon-gear-crossed'}).show()
+                        .click(function(){ 
+                                        
+                            that.editFormPopup.layout().hide('west');
+                            that.options.rts_editor = null;
+                            that.reloadEditForm( true );
+                            
+                            //that.options.rts_editor.manageDefRecStructure('closeDialog');
+                        });                
+                    if(btn_css) btn.css(btn_css);
+                }
             }
             this.element.find('.btn-edit-rt2').hide();
             

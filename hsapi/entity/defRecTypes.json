@@ -189,7 +189,17 @@
                         "rst_DefaultValue": "1",
                         "rst_FieldConfig":["1","0"]
                     }
+                },
+                {
+                    "dtID": "rty_RecCount",
+                    "dtFields":{
+                        "rst_DisplayName": "Records count",
+                        "rst_Display":"readonly",
+                        "dty_Type":"integer",
+                        "dty_Role":"virtual"
+                    }
                 }
+
                     
                     ]
                 }

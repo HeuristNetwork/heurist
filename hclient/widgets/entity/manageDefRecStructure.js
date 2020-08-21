@@ -58,7 +58,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             this.options.rec_ID_sample = -1; //record id that will be loaded in preview
         }
         if(!(this.options.rty_ID>0)) {
-            this.options.rty_ID = 4; //57; //by default is required   
+            this.options.rty_ID = 4; //57; //by default - it is required   
         }
         this.previewEditor = null; // record editor for preview
         

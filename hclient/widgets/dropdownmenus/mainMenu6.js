@@ -92,11 +92,10 @@ $.widget( "heurist.mainMenu6", {
 
                 
                 
-                if(true){ //DEBUG
-                    that._active_section = 'explore';
-                    that.switchContainer('design', true);
-                    var widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('mainMenu');
-                    widget.mainMenu('menuActionById', 'menu-structure-rectypes'); 
+                if(true){ //DEBUG - open record types 
+                    
+                    //var widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('mainMenu');
+                    //widget.mainMenu('menuActionById', 'menu-structure-rectypes'); 
                     
                 }else if(window.hWin.HAPI4.sysinfo['db_total_records']<1){
                     //open explore by default, or "design" if db is empty
@@ -158,6 +157,7 @@ $.widget( "heurist.mainMenu6", {
                         //keep current search for "Save Filter"
                         that.currentSearch = window.hWin.HEURIST4.util.cloneJSON(data);
                         that._updateSaveFilterButton(1);
+                        that.switchContainer('explore'); 
                     }else if(data.reset){
                         that.currentSearch = null;
                         that._updateSaveFilterButton(0);
@@ -806,6 +806,7 @@ console.log('prvent colapse');
             //{container:this.containers[section]}
             
         }});
+        
         if(section=='publish'){
             this._on(this.menues[section].find('li[data-cms-action]'),{click:function(e){
                 var li = $(e.target);
@@ -822,6 +823,12 @@ console.log('prvent colapse');
                 if(btn.length>0) btn.click();
                 
             }});
+        }else  if (section=='design'){ //DEBUG - open record types 
+            
+                this._active_section = 'explore';
+                this.switchContainer('design', true);
+                this.menues['design'].find('li[data-action="menu-structure-rectypes"]').click();
+            
         }
         
         /*

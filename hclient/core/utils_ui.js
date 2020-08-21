@@ -1954,6 +1954,7 @@ window.hWin.HEURIST4.ui = {
     // rec_ID - record to edit
     // query_or_recordset - recordset or query returns set of records that can be edit in bunch (next/prev buttons)
     // popup_options['onselect'] - define function that accepts added/edited record as recordset
+    // popup_options['edit_structure'] - allows edit structure only
     // 
     openRecordEdit:function(rec_ID, query_or_recordset, popup_options){
         

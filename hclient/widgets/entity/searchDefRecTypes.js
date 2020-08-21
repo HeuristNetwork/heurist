@@ -65,22 +65,8 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
         
         this._on(this.input_search,  { keyup:this.startSearch });
 
-        
-        //@todo - possible to remove
-        if( this.options.rtg_ID>0 ){
-            this.input_search_group.parent().hide();
-            this.input_search_group.val(this.options.rtg_ID);
-        }else if( this.options.rtg_ID<0 ){  //addition of recctype to group
-            //find any rt not in given group
-            //exclude this group from selector
-            this.input_search_group.find('option[value="'+Math.abs(this.options.rtg_ID)+'"]').remove();
-        }else{
-            this.btn_find_record.hide();
-        }
-             
         this.input_sort_type = this.element.find('#input_sort_type');
         this._on(this.input_sort_type,  { change:this.startSearch });
-           
                       
         if( this.options.import_structure ){
             //this.element.find('#div_show_already_in_db').css({'display':'inline-block'});    
@@ -102,11 +88,22 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
             this.element.find('#div_search_group').hide();
             this.element.find('#input_sort_type_div').hide();
         }else{
-            
-            
+
             this.reloadGroupSelector();
         
-        
+            //@todo - possible to remove
+            if( this.options.rtg_ID>0 ){
+                this.input_search_group.parent().hide();
+                this.input_search_group.val(this.options.rtg_ID);
+            }else if( this.options.rtg_ID<0 ){  //addition of recctype to group
+                //find any rt not in given group
+                //exclude this group from selector
+                this.input_search_group.find('option[value="'+Math.abs(this.options.rtg_ID)+'"]').remove();
+            }else{
+                this.btn_find_record.hide();
+            }
+                 
+            
             this.btn_ui_config = this.element.find('#btn_ui_config')
                     //.css({'width':'6em'})
                     .button({label: window.hWin.HR("Configure UI"), showLabel:false, 
@@ -145,18 +142,39 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
         var popele = that.element.find('#div_ui_config');
         
         popele.find('#input_ui_group').val(this.options.ui_params['groupsPresentation']);
+
+        var flist = popele.find( ".toggles" );
+        var opts = this.options.ui_params['fields'];
         
-        popele.find( ".toggles" ).controlgroup( {
+        flist.controlgroup( {
             direction: "vertical"
         } ).sortable();       
         
         popele.find('.ui-checkboxradio-icon').css('color','black');
 
+        //rest all checkboxes
         popele.find('input[type="checkbox"]').prop('checked', '');
-        $(this.options.ui_params['fields']).each(function(idx,val){
+        $(opts).each(function(idx,val)
+        {
             popele.find('input[name="'+val+'"]').prop('checked', 'checked');    
         });
-        popele.find( ".toggles" ).controlgroup('refresh');
+        popele.find('input[name="name"]').prop('checked', 'checked');
+        popele.find('input[name="editstr"]').prop('checked', 'checked');
+        
+        //sort
+        var cnt = flist.children().length;
+        var items = flist.children().sort(
+            function(a, b) {
+                    var vA = opts.indexOf($(a).attr('for'));
+                    var vB = opts.indexOf($(b).attr('for'));
+                    if(!(vA>=0)) vA = cnt;
+                    if(!(vB>=0)) vB = cnt;
+                    return (vA < vB) ? -1 : (vA > vB) ? 1 : 0;
+            });
+        var cop = flist.children();
+        flist.append(items);    
+        
+        flist.controlgroup('refresh');
         
         var $dlg_pce = null;
 
@@ -165,9 +183,15 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
                 click: function() { 
                     
                     var fields = [];
-                    popele.find('input[type="checkbox"]:checked').each(function(idx,item){
+                    /*popele.find('input[type="checkbox"]:checked').each(function(idx,item){
                         fields.push($(item).attr('name'));
-                    })
+                    });*/
+                    flist.children().each(function(idx,item){
+                        var item = $(item).find('input');
+                        if(item.is(':checked')){
+                            fields.push(item.attr('name'));    
+                        }                        
+                    });
                     
                     //get new parameters
                     var params = { 
@@ -188,8 +212,8 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
         $dlg_pce = window.hWin.HEURIST4.msg.showElementAsDialog({
             window:  window.hWin, //opener is top most heurist window
             title: window.hWin.HR('Configure User Interface'),
-            width: 420,
-            height: 550,
+            width: 260,
+            height: 500,
             element:  popele[0],
             //resizable: false,
             buttons: btns
@@ -419,6 +443,8 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
                 request['sort:rty_Modified'] = '-1' 
             }else if(this.input_sort_type.val()=='id'){
                 request['sort:rty_ID'] = '1';   
+            }else if(this.input_sort_type.val()=='count'){
+                request['sort:rty_RecCount'] = '-1';   
             }else{
                 request['sort:rty_Name'] = '1';   
             }

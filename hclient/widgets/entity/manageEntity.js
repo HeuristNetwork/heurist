@@ -493,11 +493,13 @@ $.widget( "heurist.manageEntity", {
     // listener of action button/menu clicks - central listener for action events
     //
     _onActionListener:function(event, action){
+        
+        var recID = 0;
+        
         if(action=='select-and-close'){
              this._selectAndClose();
              return true;
         } else {
-             var recID = 0;
              var keep_action = action;
              if(action && action.action){
                  recID =  action.recID;
@@ -1140,13 +1142,16 @@ $.widget( "heurist.manageEntity", {
     
     _selectAndEditFirstInRecordset:function(subset){
         
-        if(subset && subset.length()>0 && this.options.edit_mode=='inline'){
+        if(subset && subset.length()>0){
                 
                 var rec_ID = subset.getOrder()[0];
                 
                 this.recordList.resultList('setSelected', [rec_ID]);
                 this.selectedRecords([rec_ID]);
-                this._onActionListener(null, {action:'edit'}); //default action of selection
+                
+                if(this.options.edit_mode=='inline'){
+                    this._onActionListener(null, {action:'edit'}); //default action of selection
+                }
         }
     },
 

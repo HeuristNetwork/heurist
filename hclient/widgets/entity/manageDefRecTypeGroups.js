@@ -176,8 +176,6 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
     //
     _afterSaveEventHandler: function( recID, fieldvalues ){
         
-console.log('>>>>>');        
-        
         if(this.options.edit_mode=='editonly'){
             
                 //this.options.select_return_mode='recordset';

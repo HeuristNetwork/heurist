@@ -437,6 +437,11 @@ div.recordDiv.public  > .action-button-container{
     right:80px;
 }
 
+.list .recordDiv > .item{
+    display: table-cell;
+    vertical-align: middle;
+}
+
 div.recordDiv  .action-button {
     height: 16px;
     width: 16px;
@@ -1824,7 +1829,7 @@ option {padding-left:15px;}
 }
 .recordList > .table_header > div{
     border-right: 1px solid gray;
-    display: inline-block;
+    display: table-cell;
     height: 1em;
     padding-left:4px;
 }

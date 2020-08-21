@@ -34,7 +34,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         width:(window.hWin?window.hWin.innerWidth:window.innerWidth)*0.95,
         height:(window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95,
         groupsPresentation:'tab', //'none','tab',list','select'
-//'id','ccode','addrec','filter','count','group','icon','edit','editstr','name',description','show','duplicate','fields','status'        
+//'id','ccode','addrec','filter','count','group','icon','edit','editstr','name',description','show','duplicate','fields','delete'        
         fields:['editstr','name'] 
         },
     
@@ -177,37 +177,10 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             this.recordList.parent().css({'border-right':'lightgray 1px solid'});
             
             
-            this.recordList.resultList({rendererHeader:
-                    function(){
-                    var s = '<div style="width:40px"></div><div style="width:3em">ID</div>'
-                                +'<div style="width:13em">Name</div>'
-                                +'<div style="width:20em;border:none;">Description</div>';
-                        
-                        if (window.hWin.HAPI4.is_admin()){
-                            s = s+'<div style="position:absolute;right:4px;width:60px">Edit</div>';
-                        }
-                        
-                        return s;
-                    }/*,
-                    groupMode:['none','tab','groups'],
-                    groupByField:'rty_RecTypeGroupID',
-                    //groupOnlyOneVisible: true,
-                    groupByCss:'0 1.5em',
-                    rendererGroupHeader: function(grp_val, grp_keep_status){
-
-                        var rectypes = window.hWin.HEURIST4.rectypes;
-                        var idx = rectypes.groups.groupIDToIndex[grp_val];
-
-                        var is_expanded = (grp_keep_status[grp_val]!=0);
-
-                        return rectypes.groups[idx]?('<div data-grp="'+grp_val
-                            +'" style="font-size:0.9em;padding:14px 0 4px 0px;border-bottom:1px solid lightgray">'
-                            +'<span style="display:inline-block;vertical-align:top;padding-top:10px;" class="ui-icon ui-icon-triangle-1-'+(is_expanded?'s':'e')+'"></span>'
-                            +'<div style="display:inline-block;width:70%">'
-                            +'<h2>'+grp_val+'  '+rectypes.groups[idx].name+'</h2>' //+grp_val+' '
-                            +'<div style="padding-top:4px;"><i>'+rectypes.groups[idx].description+'</i></div></div></div>'):'';
-                    }*/
-            });
+            this.recordList.resultList({ 
+                    show_toolbar: false,
+                    list_mode_is_table: true,
+                    rendererHeader:function(){ return that._recordListHeaderRenderer(); }});
             //this.recordList.resultList('applyViewMode');
         }
         
@@ -301,6 +274,21 @@ console.log(response);
                     });                    
                     
                 }else{
+                    if(!window.hWin.HEURIST4.rectypes.counts){
+                        window.hWin.HAPI4.EntityMgr.doRequest({a:'counts',entity:'defRecTypes',
+                                        mode: 'record_count',ugr_ID: window.hWin.HAPI4.user_id()}, 
+                            function(response){
+                                if(response.status == window.hWin.ResponseStatus.OK){
+                                    window.hWin.HEURIST4.rectypes.counts = response.data;
+                                }else{
+                                    window.hWin.HEURIST4.rectypes.counts = {};
+                                }
+                                that._loadData();
+                                
+                            });
+                            return;
+                    }
+                    
                     //take recordset from LOCAL HEURIST.rectypes format     
                     this._cachedRecordset = this.getRecordsetFromStructure();
                 }
@@ -351,6 +339,7 @@ console.log(response);
 
         rdata.fields = rectypes.typedefs.commonFieldNames;
         rdata.fields.unshift('rty_ID');
+        rdata.fields.push('rty_RecCount');
         
         var idx_ccode = 0;
         if(this.options.import_structure){
@@ -379,6 +368,8 @@ console.log(response);
                 }
                 
                 rectype.unshift(r_id);
+                
+                if(rectypes.counts) rectype.push(rectypes.counts[r_id]);
                 
                 rdata.records[r_id] = rectype;
                 rdata.order.push( r_id );
@@ -409,34 +400,142 @@ console.log(response);
     //
     //
     //
+    headerTitles:{},
+    
+    _recordListHeaderRenderer: function(){
+
+        function fld2(col_width, value, style){
+            
+            if(!style) style = '';
+            if(!window.hWin.HEURIST4.util.isempty(col_width)){
+                style += (';max-width: '+col_width+';width:'+col_width);
+            }
+            if(style!='') style = 'style="border-left:1px solid gray;padding:0px 4px;'+style+'"';
+            
+            if(!value){
+                value = '';
+            }
+            return '<div class="item truncate" '+style+'>'+window.hWin.HEURIST4.util.htmlEscape(value)+'</div>';
+        }
+        
+        var html = '';
+        if (!(this.usrPreferences && this.usrPreferences.fields)) return '';
+        var fields = this.usrPreferences.fields;
+        
+        var i = 0;
+        for (;i<fields.length;i++){
+           switch ( fields[i] ) {
+                case 'id': html += fld2('20px','ID','text-align:right'); break;
+                case 'ccode': 
+                    html += fld2('80px','Code','text-align:center');     
+                    break;
+                case 'addrec': 
+                    html += fld2('30px','Add','text-align:center');
+                    break;
+                case 'filter':
+                    html += fld2('30px','Filter','text-align:center');
+                    break;
+                case 'count': 
+                    html += fld2('30px','n=','text-align:center');
+                    break;
+                case 'group': 
+                    html += fld2('30px','Group','text-align:center');
+                    break;
+                case 'icon': 
+                    html += fld2('30px','Icon','text-align:center');
+                    break;
+                case 'edit':  
+                    html += fld2('30px','Attr','text-align:center');
+                    break;
+                case 'editstr': 
+                    html += fld2('30px','Structure','text-align:center');
+                    break;
+                case 'name':  
+                    html += fld2('120px','Name','text-align:left');
+                    break;
+                case 'description':  
+                    html += fld2(null,'Description','max-width:320px;width:50%;'); break;
+                case 'show': 
+                    html += fld2('30px','Show','text-align:center');
+                    break;
+                case 'duplicate': 
+                    html += fld2('30px','Dup','text-align:center');
+                    break;
+                case 'fields': 
+                    html += fld2('30px','Fields','text-align:center');
+                    break;
+                case 'status': 
+                    html += fld2('30px','Status','text-align:center');
+                    break;
+            }   
+        }
+        
+        
+        return html;
+        
+        /*
+        var s = '<div style="width:40px"></div><div style="width:3em">ID</div>'
+                    +'<div style="width:13em">Name</div>'
+                    +'<div style="width:20em;border:none;">Description</div>';
+            
+            if (window.hWin.HAPI4.is_admin()){
+                s = s+'<div style="position:absolute;right:4px;width:60px">Edit</div>';
+            }
+        */    
+    },
+    
+    
     _recordListItemRenderer:function(recordset, record){
         
         function fld(fldname){
             return window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, fldname));
         }
-        function fld2(fldname, col_width){
-            swidth = '';
+        function fld2(fldname, col_width, value, style){
+            
+            if(!style) style = '';
             if(!window.hWin.HEURIST4.util.isempty(col_width)){
-                swidth = ' style="width:'+col_width+'"';
+                style += (';max-width: '+col_width+';width:'+col_width);
             }
-            return '<div class="item" '+swidth+'>'+window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, fldname))+'</div>';
+            if(style!='') style = 'style="padding:0px 4px;'+style+'"';
+            
+            if(!value){
+                value = recordset.fld(record, fldname);
+            }
+            return '<div class="item truncate" '+style+'>'+window.hWin.HEURIST4.util.htmlEscape(value)+'</div>';
         }
         
         //ugr_ID,ugr_Type,ugr_Name,ugr_Description, ugr_eMail,ugr_FirstName,ugr_LastName,ugr_Enabled,ugl_Role
         
         var recID   = fld('rty_ID');
-        
-        var recTitleHint = fld('ugr_Organisation');
-        
-        var recTitle = ''
-        
-        if(false &&  this.options.import_structure){ //Ian dwi
-            recTitle = recTitle + fld2('rty_ID','3.5em')+fld2('rty_ID_local','3.5em');
-        }
-            
-        recTitle = recTitle + fld2('rty_Name','15em')
+        var recTitle = recTitle + fld2('rty_Name','15em')
             + ' : <div class="item" style="font-style:italic;width:45em">'
             + window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, 'rty_Description'))+'</div>'
+
+        if(this.options.import_structure){
+
+            //Ian dwi
+            //recTitle = recTitle + fld2('rty_ID','3.5em')+fld2('rty_ID_local','3.5em');
+            var rtIcon = this.options.import_structure.databaseURL
+                                + '/hsapi/dbaccess/rt_icon.php?db='
+                                + this.options.import_structure.database + '&id=';
+            rtIcon = '';
+            
+            var html_icon = '<div class="recordIcons" style="min-width:16px;padding:0 4px;">' //recid="'+recID+'" bkmk_id="'+bkm_ID+'">'
+            +     '<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
+            +     '"  class="rt-icon" style="background-image: url(&quot;'+rtIcon+'&quot;);">'       //opacity:'+recOpacity+'
+            + '</div>';
+            
+            
+            var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'">'
+            + '<div class="recordSelector"><input type="checkbox" /></div>'
+            + html_icon
+            + '<div class="recordTitle recordTitle2" title="'+fld('rty_Description')
+                            +'" style="right:10px">'
+            +     recTitle
+            + '</div>';
+            
+            return html;
+        }
         
         var rtIcon = window.hWin.HAPI4.getImageUrl(this._entityName, recID, 'icon');
         var recThumb = window.hWin.HAPI4.getImageUrl(this._entityName, recID, 'thumb');
@@ -448,24 +547,81 @@ console.log(response);
         var html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'+recThumb+'&quot;);">'
         +'</div>';
         
-        if(this.options.import_structure){
-            //Ian dwi
-            rtIcon = this.options.import_structure.databaseURL
-                                + '/hsapi/dbaccess/rt_icon.php?db='
-                                + this.options.import_structure.database + '&id=';
-            recThumb = rtIcon+'thumb/th_'+recID;
-            rtIcon = rtIcon + recID;
-            
-            html_thumb = '';
-            rtIcon = '';
-        }
-        
-        var html_icon = '<div class="recordIcons" style="min-width:16px;">' //recid="'+recID+'" bkmk_id="'+bkm_ID+'">'
+        //recordIcons 
+        var html_icon = '<div class="item" style="vertical-align: middle;width:16px;">' //recid="'+recID+'" bkmk_id="'+bkm_ID+'">'
         +     '<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
         +     '"  class="rt-icon" style="background-image: url(&quot;'+rtIcon+'&quot;);">'       //opacity:'+recOpacity+'
-        + '</div>';
+        + '</div>';        
+
+        var html = '';
+        var fields = this.usrPreferences.fields;
+        //fields = ['id','ccode','addrec','filter','count','group','icon','edit','editstr','name','description','show','duplicate','fields','status'];        
         
+        function __action_btn(action,icon,title){
+            return '<div class="item" style="width:30px;text-align:center;"><div title="'+title+'" '
+                    +'class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" '
+                    +'role="button" aria-disabled="false" data-key="'+action+'" style="height:18px;">'
+                    +     '<span class="ui-button-icon-primary ui-icon '+icon+'"></span>'
+                    + '</div></div>'            
+        }
+
         
+        var i = 0;
+        for (;i<fields.length;i++){
+            
+            switch ( fields[i] ) {
+                case 'id': html += fld2('rty_ID','20px',null,'text-align:right'); break;
+                case 'ccode': 
+                    var c1 = recordset.fld(record,'rty_OriginatingDBID');
+                    var c2 = recordset.fld(record,'rty_IDInOriginatingDB');
+                    c1 = (c1>0 && c2>0)?(c1+'-'+c2):'&nbsp;';
+                    html += fld2('','80px', c1,'text-align:center');     
+                    break;
+                case 'addrec': 
+                    html += __action_btn('addrec','ui-icon-plus','Click to add new '+fld('rty_Name'));    
+                    break;
+                case 'filter':
+                    html += __action_btn('filter','ui-icon-search','Click to launch search for '+fld('rty_Name'));
+                    break;
+                case 'count': 
+                    //var cnt = ((window.hWin.HEURIST4.rectypes.counts[recID]>0)?window.hWin.HEURIST4.rectypes.counts[recID]:' ');
+                    html += fld2('rty_RecCount','80px',null,'text-align:right'); break;
+                case 'group': 
+                    html += __action_btn('group','ui-icon-carat-d','Change group');
+                    break;
+                case 'icon': 
+                    html += html_icon; 
+                    break;
+                case 'edit':  
+                    html += __action_btn('edit','ui-icon-pencil','Click to edit record type');
+                    break;
+                case 'editstr': 
+                    html += __action_btn('editstr','ui-icon-list','Click to edit structure');
+                    break;
+                case 'name':  html += fld2('rty_Name','120px'); break;
+                case 'description':  
+                    html += fld2('rty_Description',null,null,
+                        'min-width:320px;max-width:320px;width:50%;font-style:italic;font-size:smaller'); break;
+                case 'show': 
+                    html += __action_btn('show','ui-icon-check-on','Click to show in lists');
+                    break;
+                case 'duplicate': 
+                    html += __action_btn('duplicate','ui-icon-copy','Duplicate record type');
+                    break;
+                case 'fields': 
+                    html += __action_btn('fields','ui-icon-circle-b-info','List of fields');
+                    break;
+                case 'status': 
+                    html += __action_btn('delete','ui-icon-delete','Click to delete record type');
+                    break;
+            }    
+        }
+
+        html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" style="display:table-row;height:28px;">'
+                    + '<div class="recordSelector item"><input type="checkbox" /></div>'
+                    + html+'</div>';
+        
+/*        
         var has_buttons = (this.options.select_mode=='manager' && this.options.edit_mode=='popup');
 
         var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'">'
@@ -483,9 +639,18 @@ console.log(response);
         
                 
                html = html 
-                + '<div class="rec_actions" style="top:4px;width:60px;">'
+                + '<div class="rec_actions" style="top:4px;width:120px;">'
                     + '<div title="Click to edit record type" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit" style="height:16px">'
                     +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'
+                    + '</div>&nbsp;'
+                    + '<div title="Click to edit structure" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="structure" style="height:16px">'
+                    +     '<span class="ui-button-icon-primary ui-icon ui-icon-list"></span><span class="ui-button-text"></span>'
+                    + '</div>&nbsp;'
+                    + '<div title="Duplicate record type" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="duplicate" style="height:16px">'
+                    +     '<span class="ui-button-icon-primary ui-icon ui-icon-copy"></span><span class="ui-button-text"></span>'
+                    + '</div>&nbsp;'
+                    + '<div title="List of fields" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="fields" style="height:16px">'
+                    +     '<span class="ui-button-icon-primary ui-icon ui-icon-circle-b-info"></span><span class="ui-button-text"></span>'
                     + '</div>&nbsp;'
                     + '<div title="Click to delete record type" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="delete" style="height:16px">'
                     +     '<span class="ui-button-icon-primary ui-icon ui-icon-circle-close"></span><span class="ui-button-text"></span>'
@@ -494,11 +659,61 @@ console.log(response);
         
 
         html = html + '</div>';
-
+*/
         return html;
         
     },
+
     
+    
+    //
+    //
+    //
+    _onActionListener:function(event, action){
+
+        var isResolved = this._super(event, action);
+
+        if(!isResolved){
+            
+            var recID = 0;
+
+            if(action && action.action){
+                recID =  action.recID;
+                action = action.action;
+            }
+            if(recID>0){
+
+                if(action=='addrec'){
+                    var new_record_params = {RecTypeID: recID};
+                    window.hWin.HEURIST4.ui.openRecordEdit(-1, null, {new_record_params:new_record_params});
+                    
+                }else if(action=='filter'){
+                    
+                    window.hWin.HAPI4.SearchMgr.doSearch( this, 
+                        {q:'{"t":"'+recID+'"}',detail:'ids',source:this.element.attr('id')} );
+                    //this.closeDialog(true);
+                    
+                }else if(action=='group'){
+                    
+                }else if(action=='editstr'){
+
+                    var new_record_params = {RecTypeID: recID};
+                    window.hWin.HEURIST4.ui.openRecordEdit(-1, null, 
+                        {new_record_params:new_record_params, edit_structure:true});
+
+                }else if(action=='duplicate'){
+                    
+                    this._duplicateType(recID);
+                    
+                }else if(action=='fields'){
+                    
+                }
+                
+            }
+        }
+
+    },
+
     //overwritten    
     _recordListGetFullData:function(arr_ids, pageno, callback){
 
@@ -604,6 +819,8 @@ console.log(response);
             params['groupsPresentation'] = new_params['groupsPresentation']; 
         
             window.hWin.HAPI4.save_pref('prefs_'+this._entityName, params);
+            
+            this.usrPreferences = params;
         }
         return true;
     },
@@ -612,6 +829,9 @@ console.log(response);
     // update ui and call save prefs
     //
     changeUI: function( event, params ){
+        
+console.log('changeUI');
+console.log(params);        
         
         if(this.options.edit_mode=='editonly') return;
         
@@ -629,10 +849,58 @@ console.log(response);
             this.searchFormList.hide();
             this.recordList.css('left',0);
         }
+        
+        this.recordList.resultList('applyViewMode','list', true);
+        //this.recordList.resultList('refreshPage');
         //this.searchForm.changeUI();
         
         this.saveUiPreferences( params );
         
+    },
+    
+    //
+    //
+    //    
+    _refreshClientStructure: function(){
+        window.hWin.HEURIST4.rectypes = context.rectypes;
+        window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE); 
+    },
+    
+    //
+    // duplicate record type and then call edit type dialogue
+    //
+    _duplicateType: function (rectypeID) {
+
+        window.hWin.HEURIST4.msg.showMsgDlg(
+        "Do you really want to duplicate record type # "+rectypeID+"?"
+        , function(){ 
+                
+        
+                function _editAfterDuplicate(response) {
+
+                    if(response.status == window.hWin.ResponseStatus.OK){
+
+                        var rty_ID = Number(response.data.id);
+                        if(rty_ID>0){   
+                            //refresh the local heurist
+                            this._refreshClientStructure(response.data);
+                            
+                            //detect what group
+                            ind_grpfld = window.hWin.HEURIST4.rectypes.typedefs.commonNamesToIndex.rty_RecTypeGroupID;
+                            var grpID = window.hWin.HEURIST4.rectypes.typedefs[rty_ID].commonFields[ind_grpfld];
+
+                        }
+                    }else{
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                    }                                        
+                }
+
+                var baseurl = window.hWin.HAPI4.baseURL + "admin/structure/rectypes/duplicateRectype.php";
+                
+                window.hWin.HEURIST4.util.sendRequest(baseurl, { rtyID:rectypeID }, null, _editAfterDuplicate);
+
+        }, {title:'Confirm',yes:'Continue',no:'Cancel'});
     }
+    
     
 });

@@ -36,6 +36,7 @@
                     <option value="name">Name</option>            
                     <option value="recent">Recent</option>
                     <option value="id">By ID</option>
+                    <option value="count">By Usage</option>
                 </select>
         </div>
 
@@ -51,51 +52,55 @@
     </div>
     
     <div id="div_ui_config" style="display:none">
-            <div style="padding:0.2em">
+            <div style="padding:0.2em;display:none">
                 <div class="header4" style="display: inline-block;width:8em;text-align:right;">
                     <label>Show groups as</label></div>
                 <select id="input_ui_group" class="text ui-widget-content ui-corner-all" 
                     style="width: 130px; margin-right:0.2em">
+                    <option value="none" selected>None</option>
                     <option value="select">Select</option>
                     <option value="tab">Tabs</option>
                     <option value="list">List</option>
                 </select>
             </div>
             <div style="padding:0.2em">
-                <div class="header4" style="display: inline-block;width:8em;text-align:right;vertical-align:top">
-                    <label>Visible fields<br>drag to order</label></div>
-                    <div class="toggles" style="width:200px;">
-                      <label for="rtyid">ID</label>
-                      <input class="field-toggle" type="checkbox" name="rtyid" id="rtyid">
-                      <label for="ccode">Concept code</label>
-                      <input class="toggle" type="checkbox" name="ccode" id="ccode">
-                      <label for="addrec">Add record</label>
-                      <input class="field-toggle" type="checkbox" name="addrec" id="addrec">
-                      <label for="filter">Filter records</label>
-                      <input class="field-toggle" type="checkbox" name="filter" id="filter">
-                      <label for="count">Count</label>
-                      <input class="field-toggle" type="checkbox" name="count" id="count">
+                <!-- <div class="header4" style="display: inline-block;width:8em;text-align:right;vertical-align:top">
+                    <label>Visible fields<br>drag to order</label></div> -->
+                    <div class="heurist-helper3" style="padding-bottom:10px">
+                        Mark columns to be visible. Drag to re-order
+                    </div>
+                    <div class="toggles" style="width:100%;">
+                      <label for="rtyid">ID
+                      <input class="field-toggle" type="checkbox" name="rtyid" id="rtyid"></label>
+                      <label for="ccode">Concept code
+                      <input class="toggle" type="checkbox" name="ccode" id="ccode"></label>
+                      <label for="addrec">Add record
+                      <input class="field-toggle" type="checkbox" name="addrec" id="addrec"></label>
+                      <label for="filter">Filter records
+                      <input class="field-toggle" type="checkbox" name="filter" id="filter"></label>
+                      <label for="count">Count
+                      <input class="field-toggle" type="checkbox" name="count" id="count"></label>
                       
-                      <label for="group">Group</label>
-                      <input class="field-toggle" type="checkbox" name="group" id="group">
-                      <label for="icon">Icon</label>
-                      <input class="field-toggle" type="checkbox" name="icon" id="icon">
-                      <label for="edit">Edit attributes</label>
-                      <input class="field-toggle" type="checkbox" name="edit" id="edit">
-                      <label for="editstr">Structure</label>
-                      <input class="field-toggle" type="checkbox" name="editstr" id="editstr">
-                      <label for="name">Name</label>
-                      <input class="field-toggle" type="checkbox" name="name" id="name">
-                      <label for="description">Description</label>
-                      <input class="field-toggle" type="checkbox" name="description" id="description">
-                      <label for="show">Show</label>
-                      <input class="field-toggle" type="checkbox" name="show" id="show">
-                      <label for="duplicate">Duplicate</label>
-                      <input class="field-toggle" type="checkbox" name="duplicate" id="duplicate">
-                      <label for="fields">Fields</label>
-                      <input class="field-toggle" type="checkbox" name="fields" id="fields">
-                      <label for="status">Status</label>
-                      <input class="field-toggle" type="checkbox" name="status" id="status">
+                      <label for="group">Group
+                      <input class="field-toggle" type="checkbox" name="group" id="group"></label>
+                      <label for="icon">Icon
+                      <input class="field-toggle" type="checkbox" name="icon" id="icon"></label>
+                      <label for="edit">Edit attributes
+                      <input class="field-toggle" type="checkbox" name="edit" id="edit"></label>
+                      <label for="editstr">Structure
+                      <input class="field-toggle" type="checkbox" name="editstr" id="editstr" checked></label>
+                      <label for="name">Name
+                      <input class="field-toggle" type="checkbox" name="name" id="name" checked></label>
+                      <label for="description">Description
+                      <input class="field-toggle" type="checkbox" name="description" id="description"></label>
+                      <label for="show">Show
+                      <input class="field-toggle" type="checkbox" name="show" id="show"></label>
+                      <label for="duplicate">Duplicate
+                      <input class="field-toggle" type="checkbox" name="duplicate" id="duplicate"></label>
+                      <label for="fields">Fields
+                      <input class="field-toggle" type="checkbox" name="fields" id="fields"></label>
+                      <label for="delete">Status
+                      <input class="field-toggle" type="checkbox" name="delete" id="delete"></label>
                       
                     </div>                    
             </div>

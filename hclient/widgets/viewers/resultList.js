@@ -26,6 +26,7 @@ $.widget( "heurist.resultList", {
     options: {
         is_h6style: false,
         view_mode: null, // list|icons|thumbs|preview(thumbs3)|horizontal
+        list_mode_is_table: false,
 
         select_mode:null,//none, manager, select_single, select_multi
         selectbutton_label:'Select',
@@ -964,6 +965,13 @@ $.widget( "heurist.resultList", {
                 }
                 
             }else{
+                if(newmode=='list' && this.options.list_mode_is_table){
+                    this.div_content.css({'display':'table','width':'100%'});
+                }else{
+                    this.div_content.css({'display':'block'});
+                }
+                    
+            
                 this.div_content.find('.recordDiv').attr('style',null);
                 this._off(this.div_content, 'mousewheel');
             }
@@ -982,7 +990,7 @@ $.widget( "heurist.resultList", {
             if(window.hWin.HEURIST4.util.isempty(header_html)){
                 this.div_content_header.hide();
             }else{
-                this.div_content_header.html( header_html ).show();
+                this.div_content_header.html( header_html ).css('display','table');//show();
             }
         } 
     
