@@ -505,8 +505,8 @@ $.widget( "heurist.editing_input", {
     },
     
     _setAutoWidth: function(){
-        
-var that = this; 
+
+        var that = this; 
         //auto width
         if ( this.detailType=='freetext' || this.detailType=='integer' || 
              this.detailType=='float' || this.detailType=='url' || this.detailType=='file'){
@@ -533,6 +533,11 @@ var that = this;
     // returns max width for input element
     //
     getInputWidth: function(){
+        
+        if(this.detailType=='file' && this.configMode.use_assets){
+            return 300;
+        }
+        
         var maxW = 0;
         $.each(this.inputs, function(index, input){ 
             maxW = Math.max(maxW, $(input).width());
@@ -2217,7 +2222,7 @@ var that = this;
                             
                             $('<a href="#"><span class="ui-icon ui-icon-folder-open"/>Upload file</a>')
                                 .click(function(){ $input.click() }).appendTo( ele );                            
-                            $('<br/>').appendTo( ele );                            
+                            $('<br/><br/>').appendTo( ele );                            
                             
                             $('<a href="#" title="Or select from library"><span class="ui-icon ui-icon-grid"/>Library</a>')
                                 .click(function(){                                 
@@ -2226,9 +2231,34 @@ var that = this;
                                             $input_img.find('img').prop('src', res.url);
                                             that.newvalues[$input.attr('id')] = res.path; 
                                             that.onChange(); 
+                                            
+ console.log('!!!!! '+res.path); 
+                                            //HARDCODED!!!! sync icon or thumb to defRecTypes
+                                            if(res.path.indexOf('setup/iconLibrary/')>0){
+                                                var tosync = '', repl, toval;
+                                                if(that.options.dtID=='rty_Thumb'){ tosync = 'rty_Icon'; repl='64'; toval='16';}
+                                                else if(that.options.dtID=='rty_Icon'){tosync = 'rty_Thumb'; repl='16'; toval='64';}
+                                           
+                                                if(tosync){
+                                                    var ele = that.options.editing.getFieldByName(tosync);
+                                                    if(ele){
+                                                        var s_path = res.path;
+                                                        var s_url  = res.url;
+                                                        if(s_path.indexOf('icons8-')>0){
+                                                            s_path = s_path.replace('-'+repl+'.png','-'+toval+'.png')
+                                                            s_url = s_url.replace('-'+repl+'.png','-'+toval+'.png')
+                                                        }
+                                                        
+                                                        ele.editing_input('setValue', s_path.replace(repl,toval) );    
+                                                        ele.find('.image_input').find('img').attr('src', s_url.replace(repl,toval)); 
+                                                    }
+                                                }
+                                            }
+                                            
                                         }
                                     }, assets:that.configMode.use_assets, size:that.configMode.size});
-                                }).appendTo( ele );                            
+                                }).appendTo( ele );                     
+                                
                         }
                             
                 /* 2017-11-08 no more buttons 

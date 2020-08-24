@@ -186,6 +186,8 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
                     /*popele.find('input[type="checkbox"]:checked').each(function(idx,item){
                         fields.push($(item).attr('name'));
                     });*/
+                    flist.find('input[name="name"]').prop('checked', 'checked');
+                    flist.find('input[name="editstr"]').prop('checked', 'checked');
                     flist.children().each(function(idx,item){
                         var item = $(item).find('input');
                         if(item.is(':checked')){
@@ -224,11 +226,11 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
     },
 
     //
+    // update visibility for selectors in filter form
     //
-    //
-    changeUI: function(){
+    changeUI: function( params ){
         
-        if( this.options.simpleSearch) return;
+        if(this.options.simpleSearch) return;
         
         var params = this.options.ui_params;
         

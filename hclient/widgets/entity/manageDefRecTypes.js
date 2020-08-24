@@ -16,6 +16,7 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
+//"use_assets":["admin/setup/iconLibrary/64px/","HEURIST_ICON_DIR/thumb/"],
 
 /*
 we may take data from 
@@ -34,7 +35,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         width:(window.hWin?window.hWin.innerWidth:window.innerWidth)*0.95,
         height:(window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95,
         groupsPresentation:'tab', //'none','tab',list','select'
-//'id','ccode','addrec','filter','count','group','icon','edit','editstr','name',description','show','duplicate','fields','delete'        
+//rtyid,'ccode','addrec','filter','count','group','icon','edit','editstr','name',description','show','duplicate','fields','delete'        
         fields:['editstr','name'] 
         },
     
@@ -82,7 +83,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
 
         if(this.options.innerTitle){
             
-            this.options.ui_params ={groupsPresentation:'none'};
+            if(this.options.ui_params) this.options.ui_params.groupsPresentation = 'none';
             //add record type group editor
             this.element.css( {border:'none', 'box-shadow':'none', background:'none'} );
             
@@ -193,7 +194,9 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         if(this.searchFormList.length>0){
             this.options.searchFormList =  this.searchFormList;
         }
+        
         this.options.ui_params = this.getUiPreferences();
+        
         this.options.onInitCompleted =  function(){
             that._loadData();
             that.changeUI(event, that.options.ui_params);    
@@ -410,7 +413,7 @@ console.log(response);
             if(!window.hWin.HEURIST4.util.isempty(col_width)){
                 style += (';max-width: '+col_width+';width:'+col_width);
             }
-            if(style!='') style = 'style="border-left:1px solid gray;padding:0px 4px;'+style+'"';
+            if(style!='') style = 'style="padding:0px 4px;'+style+'"'; //border-left:1px solid gray;
             
             if(!value){
                 value = '';
@@ -425,7 +428,7 @@ console.log(response);
         var i = 0;
         for (;i<fields.length;i++){
            switch ( fields[i] ) {
-                case 'id': html += fld2('20px','ID','text-align:right'); break;
+                case 'rtyid': html += fld2('20px','ID','text-align:right'); break;
                 case 'ccode': 
                     html += fld2('80px','Code','text-align:center');     
                     break;
@@ -442,7 +445,7 @@ console.log(response);
                     html += fld2('30px','Group','text-align:center');
                     break;
                 case 'icon': 
-                    html += fld2('30px','Icon','text-align:center');
+                    html += fld2('40px','Icon','text-align:center');
                     break;
                 case 'edit':  
                     html += fld2('30px','Attr','text-align:center');
@@ -520,7 +523,7 @@ console.log(response);
                                 + this.options.import_structure.database + '&id=';
             rtIcon = '';
             
-            var html_icon = '<div class="recordIcons" style="min-width:16px;padding:0 4px;">' //recid="'+recID+'" bkmk_id="'+bkm_ID+'">'
+            var html_icon = '<div class="recordIcons" style="min-width:16px;text-align:center;">' //recid="'+recID+'" bkmk_id="'+bkm_ID+'">'
             +     '<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
             +     '"  class="rt-icon" style="background-image: url(&quot;'+rtIcon+'&quot;);">'       //opacity:'+recOpacity+'
             + '</div>';
@@ -548,14 +551,16 @@ console.log(response);
         +'</div>';
         
         //recordIcons 
-        var html_icon = '<div class="item" style="vertical-align: middle;width:16px;">' //recid="'+recID+'" bkmk_id="'+bkm_ID+'">'
+        var html_icon = '<div class="item" style="vertical-align: middle;width:40px;text-align:center">' //recid="'+recID+'" bkmk_id="'+bkm_ID+'">'
         +     '<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
         +     '"  class="rt-icon" style="background-image: url(&quot;'+rtIcon+'&quot;);">'       //opacity:'+recOpacity+'
         + '</div>';        
 
         var html = '';
+        
         var fields = this.usrPreferences.fields;
-        //fields = ['id','ccode','addrec','filter','count','group','icon','edit','editstr','name','description','show','duplicate','fields','status'];        
+//console.log(fields);
+        //fields = ['rtyid','ccode','addrec','filter','count','group','icon','edit','editstr','name','description','show','duplicate','fields','status'];        
         
         function __action_btn(action,icon,title){
             return '<div class="item" style="width:30px;text-align:center;"><div title="'+title+'" '
@@ -570,7 +575,7 @@ console.log(response);
         for (;i<fields.length;i++){
             
             switch ( fields[i] ) {
-                case 'id': html += fld2('rty_ID','20px',null,'text-align:right'); break;
+                case 'rtyid': html += fld2('rty_ID','20px',null,'text-align:right'); break;
                 case 'ccode': 
                     var c1 = recordset.fld(record,'rty_OriginatingDBID');
                     var c2 = recordset.fld(record,'rty_IDInOriginatingDB');
@@ -830,10 +835,10 @@ console.log(response);
     //
     changeUI: function( event, params ){
         
-console.log('changeUI');
-console.log(params);        
-        
         if(this.options.edit_mode=='editonly') return;
+        
+//console.log('changeUI');
+//console.log(params);        
         
         params['tabheight'] = this.searchForm.searchDefRecTypes('changeUI');
         
@@ -850,11 +855,12 @@ console.log(params);
             this.recordList.css('left',0);
         }
         
-        this.recordList.resultList('applyViewMode','list', true);
-        //this.recordList.resultList('refreshPage');
-        //this.searchForm.changeUI();
-        
         this.saveUiPreferences( params );
+        
+        //refresh result list
+        this.recordList.resultList('applyViewMode','list', true);
+        this.recordList.resultList('refreshPage');
+        //this.searchForm.changeUI();
         
     },
     

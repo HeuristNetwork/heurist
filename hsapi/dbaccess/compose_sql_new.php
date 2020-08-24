@@ -76,7 +76,7 @@ recordtype is added to link query  as first predicate
 
 sortby,sort,s - sort phrases must be on top level array - all others will be ignored
 
-sort values:
+sort options:
 
 set, fixed     as defined in ids:            
 r, rating      by bkm_Rating

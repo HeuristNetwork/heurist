@@ -648,7 +648,7 @@ class DbEntityBase
             $ext = strtolower($path_parts['extension']);
             
             if($version!=''){ //copy only icon or thumb
-                $new_name = $path.$version.$recID.'.'.$ext;
+                $new_name = $path.$version.'/'.$recID.'.'.$ext;
                 $isSuccess = fileCopy($tempfile, $new_name);
             }else{
                 $new_name = $path.$recID.'.'.$ext;
