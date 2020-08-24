@@ -2197,10 +2197,10 @@ $.widget( "heurist.editing_input", {
                         var $input_img = $('<div tabindex="0" contenteditable class="image_input fileupload ui-widget-content ui-corner-all" style="border:dashed blue 2px">'
                             + '<img src="'+urlThumb+'" class="image_input">'
                             + '</div>').appendTo( $inputdiv );                
-                       if(this.configMode.entity=='recUploadedFiles'){
+                        if(this.configMode.entity=='recUploadedFiles'){
                            $input_img.css({'min-height':'320px','min-width':'320px'});
                            $input_img.find('img').css({'max-height':'320px','max-width':'320px'});
-                       }
+                        }
                          
                         window.hWin.HAPI4.checkImage(this.configMode.entity, this.options.recID, 
                             this.configMode.version,
@@ -2217,6 +2217,11 @@ $.widget( "heurist.editing_input", {
                         
                         //library browser and explicit file upload buttons
                         if(that.configMode.use_assets){
+                            
+                            if(value){
+                                that.newvalues[$input.attr('id')] = value; 
+                            }
+                            
                             var ele = $('<div style="display:inline-block;vertical-align:top;padding-left:4px"/>')
                             .appendTo( $inputdiv );                            
                             
@@ -2232,7 +2237,6 @@ $.widget( "heurist.editing_input", {
                                             that.newvalues[$input.attr('id')] = res.path; 
                                             that.onChange(); 
                                             
- console.log('!!!!! '+res.path); 
                                             //HARDCODED!!!! sync icon or thumb to defRecTypes
                                             if(res.path.indexOf('setup/iconLibrary/')>0){
                                                 var tosync = '', repl, toval;
@@ -3147,7 +3151,6 @@ console.log('onpaste');
     // recreate input elements and assign values
     //
     setValue: function(values, make_as_nochanged){
-
         //clear ALL previous inputs
         this.input_cell.find('.input-div').remove();
         this.inputs = [];
@@ -3260,6 +3263,7 @@ console.log('onpaste');
             
             for (idx in this.inputs) {
                 var res = this._getValue(this.inputs[idx]);
+             
                 if(!window.hWin.HEURIST4.util.isempty( res )){ 
                     
                     var ele = this.inputs[idx].parents('.input-div');
