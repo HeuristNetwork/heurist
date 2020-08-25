@@ -117,7 +117,7 @@
         
               $lib_path = @$_REQUEST['folders'];
               if(!is_array($lib_path) || count($lib_path)<1){
-                  $lib_path = array('admin/setup/iconLibrary/64px/');
+                  $lib_path = array('admin/setup/iconLibrary/64px/'); //default
               }
         
               $res = folderContent($lib_path, array('png'));

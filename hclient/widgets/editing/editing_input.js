@@ -505,8 +505,8 @@ $.widget( "heurist.editing_input", {
     },
     
     _setAutoWidth: function(){
-        
-var that = this; 
+
+        var that = this; 
         //auto width
         if ( this.detailType=='freetext' || this.detailType=='integer' || 
              this.detailType=='float' || this.detailType=='url' || this.detailType=='file'){
@@ -533,6 +533,11 @@ var that = this;
     // returns max width for input element
     //
     getInputWidth: function(){
+        
+        if(this.detailType=='file' && this.configMode.use_assets){
+            return 300;
+        }
+        
         var maxW = 0;
         $.each(this.inputs, function(index, input){ 
             maxW = Math.max(maxW, $(input).width());
@@ -2192,10 +2197,10 @@ var that = this;
                         var $input_img = $('<div tabindex="0" contenteditable class="image_input fileupload ui-widget-content ui-corner-all" style="border:dashed blue 2px">'
                             + '<img src="'+urlThumb+'" class="image_input">'
                             + '</div>').appendTo( $inputdiv );                
-                       if(this.configMode.entity=='recUploadedFiles'){
+                        if(this.configMode.entity=='recUploadedFiles'){
                            $input_img.css({'min-height':'320px','min-width':'320px'});
                            $input_img.find('img').css({'max-height':'320px','max-width':'320px'});
-                       }
+                        }
                          
                         window.hWin.HAPI4.checkImage(this.configMode.entity, this.options.recID, 
                             this.configMode.version,
@@ -2212,12 +2217,17 @@ var that = this;
                         
                         //library browser and explicit file upload buttons
                         if(that.configMode.use_assets){
+                            
+                            if(value){
+                                that.newvalues[$input.attr('id')] = value; 
+                            }
+                            
                             var ele = $('<div style="display:inline-block;vertical-align:top;padding-left:4px"/>')
                             .appendTo( $inputdiv );                            
                             
                             $('<a href="#"><span class="ui-icon ui-icon-folder-open"/>Upload file</a>')
                                 .click(function(){ $input.click() }).appendTo( ele );                            
-                            $('<br/>').appendTo( ele );                            
+                            $('<br/><br/>').appendTo( ele );                            
                             
                             $('<a href="#" title="Or select from library"><span class="ui-icon ui-icon-grid"/>Library</a>')
                                 .click(function(){                                 
@@ -2226,9 +2236,33 @@ var that = this;
                                             $input_img.find('img').prop('src', res.url);
                                             that.newvalues[$input.attr('id')] = res.path; 
                                             that.onChange(); 
+                                            
+                                            //HARDCODED!!!! sync icon or thumb to defRecTypes
+                                            if(res.path.indexOf('setup/iconLibrary/')>0){
+                                                var tosync = '', repl, toval;
+                                                if(that.options.dtID=='rty_Thumb'){ tosync = 'rty_Icon'; repl='64'; toval='16';}
+                                                else if(that.options.dtID=='rty_Icon'){tosync = 'rty_Thumb'; repl='16'; toval='64';}
+                                           
+                                                if(tosync){
+                                                    var ele = that.options.editing.getFieldByName(tosync);
+                                                    if(ele){
+                                                        var s_path = res.path;
+                                                        var s_url  = res.url;
+                                                        if(s_path.indexOf('icons8-')>0){
+                                                            s_path = s_path.replace('-'+repl+'.png','-'+toval+'.png')
+                                                            s_url = s_url.replace('-'+repl+'.png','-'+toval+'.png')
+                                                        }
+                                                        
+                                                        ele.editing_input('setValue', s_path.replace(repl,toval) );    
+                                                        ele.find('.image_input').find('img').attr('src', s_url.replace(repl,toval)); 
+                                                    }
+                                                }
+                                            }
+                                            
                                         }
                                     }, assets:that.configMode.use_assets, size:that.configMode.size});
-                                }).appendTo( ele );                            
+                                }).appendTo( ele );                     
+                                
                         }
                             
                 /* 2017-11-08 no more buttons 
@@ -3117,7 +3151,6 @@ console.log('onpaste');
     // recreate input elements and assign values
     //
     setValue: function(values, make_as_nochanged){
-
         //clear ALL previous inputs
         this.input_cell.find('.input-div').remove();
         this.inputs = [];
@@ -3230,6 +3263,7 @@ console.log('onpaste');
             
             for (idx in this.inputs) {
                 var res = this._getValue(this.inputs[idx]);
+             
                 if(!window.hWin.HEURIST4.util.isempty( res )){ 
                     
                     var ele = this.inputs[idx].parents('.input-div');

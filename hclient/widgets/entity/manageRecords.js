@@ -2004,7 +2004,9 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             //this.editFormSummary.accordion({active: false});
         }
 
-        var record_stub = {"status":"ok","is_insert":true,
+        var record_stub = {};
+        if(that.options.edit_structure){ //returns fake record to edit structure only
+            record_stub = {"status":"ok","is_insert":true,
                         "data":{"entityName":"Records","count":"1","reccount":1,
                         "fields":["rec_ID","rec_URL","rec_RecTypeID","rec_Title",
                         "rec_OwnerUGrpID","rec_NonOwnerVisibility","rec_Modified","rec_Added","rec_AddedByUGrpID","rec_ScratchPad",
@@ -2018,7 +2020,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         //"relations":{"direct":[],"reverse":[],"headers":{"3256":["","56","2","hidden"]}}},
                         //"request_code":{"script":"record_edit","action":"a"}
                         }};
-
+        }
         
         if(recID==null){
             this._editing.initEditForm(null, null); //clear and hide

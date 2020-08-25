@@ -427,14 +427,24 @@ function hEditing(_options) {
     //to reduce width of edit form set heurist-helper1 to max width of input element
     //
     function adjustHelpWidth(){
+        
+        var maxW = 300;
         if(editing_inputs.length>0){
-            var idx, ele, maxW = 300;
+            var idx, ele; 
             for (idx in editing_inputs) {
                 ele = $(editing_inputs[idx]);
                 maxW = Math.max(maxW, ele.editing_input('getInputWidth'));
             }
         }
-        $container.find('.input-cell > .heurist-helper1').width(maxW);
+        
+        //for all except image selector help
+        $container.find('.input-cell').each(function(i,item){
+               if(!$(item).find('.image_input')) {
+                   $(item).find('.heurist-helper1').width(maxW);
+               }
+        });
+        
+        //$container.find('.input-cell > .heurist-helper1').width(maxW);
     }
     
 

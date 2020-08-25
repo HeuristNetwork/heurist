@@ -88,9 +88,11 @@
                       <label for="edit">Edit attributes
                       <input class="field-toggle" type="checkbox" name="edit" id="edit"></label>
                       <label for="editstr">Structure
-                      <input class="field-toggle" type="checkbox" name="editstr" id="editstr" checked></label>
+                      <input class="field-toggle" type="checkbox" name="editstr" id="editstr" checked
+                                onclick="{$(event.target).prop('checked',true);return false;}"></label>
                       <label for="name">Name
-                      <input class="field-toggle" type="checkbox" name="name" id="name" checked></label>
+                      <input class="field-toggle" type="checkbox" name="name" id="name" checked  
+                                onclick="{$(event.target).prop('checked',true);return false;}"></label>
                       <label for="description">Description
                       <input class="field-toggle" type="checkbox" name="description" id="description"></label>
                       <label for="show">Show

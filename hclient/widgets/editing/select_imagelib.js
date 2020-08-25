@@ -92,7 +92,7 @@ $.widget( "heurist.select_imagelib", {
                                             + recordset.fld(record, 'file_name');
                            }
         
-                           var html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'
+                           var html_thumb = '<div class="recTypeThumb" style="top:0px !important;background-image: url(&quot;'
                             +recThumb+'&quot;);opacity:1;height:'+that.options.size+' !important">'
                             +'</div>';
 

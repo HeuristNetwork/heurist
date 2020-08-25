@@ -362,11 +362,34 @@ class DbDefRecTypes extends DbEntityBase
                         parent::renameEntityImage($icon_file_name, $rty_ID, 'icon');
                     }
                     
+                    //backward capability
+                    $this->copyIconIntoRectypeIcons($rty_ID);
+                    
                 }
             }
         }        
         return $ret;
     }  
+    
+    //
+    // backward capability - copy icon and thumb to rectype-icons
+    //
+    private function copyIconIntoRectypeIcons( $rty_ID ){
+        
+        $entity_name = $this->config['entityName'];
+        $path = HEURIST_FILESTORE_DIR . 'entity/'.$entity_name.'/';
+        
+        $icon = $path.'icon/'.$rty_ID.'.png';
+        if(file_exists( $icon )){
+                $new_name = HEURIST_ICON_DIR.$rty_ID.'.png';
+                $isSuccess = fileCopy($icon, $new_name);
+        }        
+        $thumb = $path.'thumbnail/'.$rty_ID.'.png';
+        if(file_exists( $thumb )){
+                $new_name = HEURIST_ICON_DIR.'thumb/th_'.$rty_ID.'.png';
+                $isSuccess = fileCopy($thumb, $new_name);
+        }        
+    }
             
     //
     // batch action for rectypes

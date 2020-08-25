@@ -1823,14 +1823,16 @@ option {padding-left:15px;}
     
 .recordList > .table_header{
     height: 1.2em;
+    font-size: 0.9em;
+    font-weight: bold;
     width: 100%;
     position: absolute;    
     background: #D8D8DA;
 }
 .recordList > .table_header > div{
-    border-right: 1px solid gray;
+    /*border-right: 1px solid gray;*/
     display: table-cell;
-    height: 1em;
+    height: 1.2em;
     padding-left:4px;
 }
 
