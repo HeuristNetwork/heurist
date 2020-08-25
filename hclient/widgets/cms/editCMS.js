@@ -31,7 +31,8 @@ function editCMS( options ){
      DT_CMS_MENU  = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_MENU'],
 //     DT_CMS_THEME = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_THEME'],
      DT_NAME       = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'];
-     DT_CMS_HEADER = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_HEADER'];
+     DT_CMS_HEADER = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_HEADER'],
+     DT_CMS_PAGETYPE = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_PAGETYPE'];
      
      if(!(RT_CMS_HOME>0 && RT_CMS_MENU>0 && DT_CMS_TOP_MENU>0 && DT_CMS_MENU>0)){
         var $dlg2 = window.hWin.HEURIST4.msg.showMsgDlg('You will need record types '
@@ -217,7 +218,7 @@ function editCMS( options ){
                         $('#spanRecCount2').text(response.data.count_imported);
                         
                         if(isWebPage){
-                            //update title of webpage
+                            //update title and type of webpage
                             if(!window.hWin.HEURIST4.util.isempty(webpage_title)){
                                 
                                 var page_recid = response.data.ids[0];

@@ -1211,6 +1211,12 @@ function hCmsEditing(_options) {
                        .change(function(e){
                            
                            var is_horiz = ($(e.target).val()=='horizontal');
+                           
+                           if($(e.target).val()=='treeview'){
+                               $dlg.find('#expandLevels').show();
+                           }else{
+                               $dlg.find('#expandLevels').hide();
+                           }
 
                            var vals = $dlg.find('#widgetCss').val().split(';');
                            for (var i=0; i<vals.length; i++){

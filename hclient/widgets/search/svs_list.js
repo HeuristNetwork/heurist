@@ -336,40 +336,49 @@ $.widget( "heurist.svs_list", {
             });
             return;
         }
-        
-        
+
         // show saved searches as a list of buttons
         if(this.options.buttons_mode){
 
             this._updateAccordeon();
             return;
 
-        }else if(!window.hWin.HAPI4.has_access()){
-            window.hWin.HAPI4.currentUser.ugr_Groups = {};
-        }else if (this.accordeon && !this.helper_btm) {
+        }else {
+            
+            if(!window.hWin.HAPI4.has_access()){
+                window.hWin.HAPI4.currentUser.ugr_Groups = {'5':'member'};
+            }
+            
+            if (this.accordeon && !this.helper_btm) {
+            
+                if(!window.hWin.HAPI4.has_access()){
+                        this.helper_btm = $( '<div>' ).appendTo( this.accordeon );
+                    
+                }else{
 
-            //new
-            var t1 = '<div style="padding-top:2.5em;font-style:italic;" title="'+this._HINT_FACETED+'">'
-            //+'<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'+'" style="background-image: url(&quot;'+window.hWin.HAPI4.baseURL+'hclient/assets/fa-cubes.png&quot;);vertical-align:middle">'
-            +'<span class="ui-icon ui-icon-box" style="display:inline-block; vertical-align: bottom; font-size:1em"></span>'
-            +'&nbsp;Faceted search</div>'
+                    //new
+                    var t1 = '<div style="padding-top:2.5em;font-style:italic;" title="'+this._HINT_FACETED+'">'
+                    //+'<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'+'" style="background-image: url(&quot;'+window.hWin.HAPI4.baseURL+'hclient/assets/fa-cubes.png&quot;);vertical-align:middle">'
+                    +'<span class="ui-icon ui-icon-box" style="display:inline-block; vertical-align: bottom; font-size:1em"></span>'
+                    +'&nbsp;Faceted search</div>'
 
 
-            +'<div style="font-style:italic;" title="'+this._HINT_WITHRULES+'">'
-            +'<span class="ui-icon ui-icon-plus" style="display:inline-block; vertical-align: bottom; font-size:0.8em;width:0.7em;"></span>'
-            +'<span class="ui-icon ui-icon-shuffle" style="display:inline-block; vertical-align: bottom; font-size:1em;width:0.9em;"></span>'
-            +'&nbsp;Search with rules</div>'
+                    +'<div style="font-style:italic;" title="'+this._HINT_WITHRULES+'">'
+                    +'<span class="ui-icon ui-icon-plus" style="display:inline-block; vertical-align: bottom; font-size:0.8em;width:0.7em;"></span>'
+                    +'<span class="ui-icon ui-icon-shuffle" style="display:inline-block; vertical-align: bottom; font-size:1em;width:0.9em;"></span>'
+                    +'&nbsp;Search with rules</div>'
 
-            +'<div style="font-style:italic;" title="'+this._HINT_RULESET+'">'
-            +'<span class="ui-icon ui-icon-shuffle" style="display:inline-block; vertical-align: bottom; font-size:1em"></span>'
-            +'&nbsp;RuleSet</div>';
+                    +'<div style="font-style:italic;" title="'+this._HINT_RULESET+'">'
+                    +'<span class="ui-icon ui-icon-shuffle" style="display:inline-block; vertical-align: bottom; font-size:1em"></span>'
+                    +'&nbsp;RuleSet</div>';
 
-            this.helper_btm = $( '<div>'+t1+'</div>' )
-            //IAN request 2015-06-23 .addClass('heurist-helper1')
-            .appendTo( this.accordeon );
-            //IAN request 2015-06-23 if(window.hWin.HAPI4.get_prefs('help_on')=='0') this.helper_btm.hide(); // this.helper_btm.css('visibility','hidden');
+                    this.helper_btm = $( '<div>'+t1+'</div>' )
+                    //IAN request 2015-06-23 .addClass('heurist-helper1')
+                    .appendTo( this.accordeon );
+                    //IAN request 2015-06-23 if(window.hWin.HAPI4.get_prefs('help_on')=='0') this.helper_btm.hide(); // this.helper_btm.css('visibility','hidden');
+                }
+            }
         }
-
         this._updateAccordeon();
 
     },
@@ -499,10 +508,9 @@ $.widget( "heurist.svs_list", {
         
         if(islogged || this.isPublished){
 
-            this.helper_btm.before(
-                $('<div>')
-                .addClass('svs-acordeon-group')
-                .html('&nbsp;')); //window.hWin.HR('PERSONAL')
+            this.helper_btm.before($('<div>').addClass('svs-acordeon-group')
+                        .html('&nbsp;')); //window.hWin.HR('PERSONAL')
+                
 
             if(islogged && this.options.searchTreeMode!=1){    
                 
