@@ -205,8 +205,16 @@ window.hWin.HEURIST4.msg.showMsgDlg(
         
         $empty_mark = (trim($content)=='')?' date-empty="1"':'';
         
-        print '<h2 class="webpageheading" '.$empty_mark.'>'.__getValue($rec, DT_NAME).'</h2>'
+        $term_ID = mysql__select_value($mysqli, 
+                'select trm_ID from defTerms where trm_OriginatingDBID=2 and trm_IDInOriginatingDB=6254');
+
+        $isWebPage = ($rec['rec_RecTypeID']==RT_CMS_MENU && __getValue($rec, DT_CMS_PAGETYPE)==$term_ID);
+        if($isWebPage){
+            print $content;
+        }else{
+            print '<h2 class="webpageheading" '.$empty_mark.'>'.__getValue($rec, DT_NAME).'</h2>'
                             .$content;
+        }
     }
     exit();
 }
@@ -492,7 +500,7 @@ function loadPageContent(pageid){
 //console.log('webpage load page content  '+(new Date().getTime() / 1000 - _time_debug));
                       
                       var pagetitle = $($('#main-content').children()[0]);
-                      pagetitle.remove();
+                      if(pagetitle.is('h2.webpageheading')) pagetitle.remove();
                       $('#main-pagetitle').empty();
                       window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, "#main-content" );
                       window.hWin.HEURIST4.msg.sendCoverallToBack();
