@@ -287,7 +287,7 @@ $.widget( "heurist.mapping", {
         
         $('#'+map_element_id).css('padding',0); //reset padding otherwise layout set it to 10px
         
-        this.nativemap = L.map( map_element_id, {zoomControl:false, tb_del:true} )
+        this.nativemap = L.map( map_element_id, {zoomControl:false, tb_del:true, maxZoom:25} )
             .on('load', function(){ } );
 
         //init basemap layer        
@@ -915,8 +915,7 @@ $.widget( "heurist.mapping", {
     zoomToLayer: function(layer_ids){
         
         var bounds = this.getBounds(layer_ids);
-        
-        if(bounds && bounds.isValid()) this.nativemap.fitBounds(bounds);
+        this.zoomToBounds(bounds);
         
     },
 
@@ -939,9 +938,7 @@ $.widget( "heurist.mapping", {
                     var corner1 = L.latLng(bounds[1], bounds[0]),
                         corner2 = L.latLng(bounds[3], bounds[2]);
                     bounds = L.latLngBounds(corner1, corner2);            
-                    if(bounds && bounds.isValid){
-                            this.nativemap.fitBounds(bounds);  
-                    } 
+                    this.zoomToBounds(bounds);
                 }
             }
             
@@ -959,7 +956,15 @@ $.widget( "heurist.mapping", {
                     bounds = L.latLngBounds(bounds);
                 }
             }
-            if(bounds && bounds.isValid()) this.nativemap.fitBounds(bounds);                
+            
+            if(bounds && bounds.isValid()){
+                //this.nativemap.options.maxZoom = null;
+                L.Util.setOptions( this.nativemap, {maxZoom: 17});
+                this.nativemap.fitBounds(bounds);  
+                //this.nativemap.options.maxZoom = 25;
+                L.Util.setOptions( this.nativemap, {maxZoom: 25});
+//console.log('3. '+this.nativemap.options.maxZoom);                
+            } 
         
     },
     
@@ -1735,7 +1740,7 @@ $.widget( "heurist.mapping", {
         });
 
         bounds = this._mergeBounds(bounds);
-        if(bounds && bounds.isValid()) this.nativemap.fitBounds(bounds);
+        this.zoomToBounds(bounds);
     },
 
     
@@ -1861,7 +1866,7 @@ $.widget( "heurist.mapping", {
 
             if(need_zoom!==false){
                 bounds = this._mergeBounds(bounds);
-                if(bounds && bounds.isValid()) this.nativemap.fitBounds(bounds);
+                this.zoomToBounds(bounds);
             }
                 
         }
