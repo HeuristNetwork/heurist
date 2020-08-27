@@ -634,7 +634,8 @@
     * @param mixed $need_transaction - false when record are removed for user/group/rectype deletion
     * @param mixed $check_source_links - prevents action if there are target records that points to given record
     */
-    function recordDelete($system, $recids, $need_transaction=true, $check_source_links=false, $filterByRectype=0, $progress_session_id=null){
+    function recordDelete($system, $recids, $need_transaction=true, 
+                $check_source_links=false, $filterByRectype=0, $progress_session_id=null){
 
         $recids = prepareIds($recids);
         if(count($recids)>0){

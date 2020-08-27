@@ -1218,6 +1218,8 @@ $.widget( "heurist.manageEntity", {
     //
     _afterSaveEventHandler: function( recID, fieldvalues ){
             
+            this.it_was_insert = (this._currentEditID<0);
+        
             window.hWin.HEURIST4.msg.showMsgFlash(this.options.entity.entityTitle+' '+window.hWin.HR('has been saved'));
             if(this.options.edit_mode=='popup'){
                 

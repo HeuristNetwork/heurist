@@ -209,6 +209,10 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             //if there are many widgets need to use base searchentityonfilter
            this._on( this.searchForm, {
                 "searchdefrectypesonfilter": this.filterRecordList,
+                "searchdefrectypesonadd": function() {
+                        this._onActionListener(null, 'add');
+                        //this.addEditRecord(-1); 
+                },
                 "searchdefrectypesonuichange": this.changeUI  //grouping, visible columns  
            });
         }else{
@@ -218,7 +222,6 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                 "searchdefrectypesonuichange": this.changeUI  //grouping, visible columns
                 });
         }
-        
         
         
         return true;
@@ -675,7 +678,8 @@ console.log(response);
     //
     //
     _onActionListener:function(event, action){
-
+        
+        
         var isResolved = this._super(event, action);
 
         if(!isResolved){
@@ -718,7 +722,32 @@ console.log(response);
         }
 
     },
-
+    
+    //
+    // show warning
+    //
+    addEditRecord: function(recID, is_proceed){
+    
+        if(recID<0 && is_proceed !== true){
+            var that = this;
+            window.hWin.HEURIST4.msg.showMsgDlg(
+                    'Before defining new record (entity) types we suggest importing suitable '+
+                    'definitions from templates (Heurist databases registered in the Heurist clearinghouse). '+
+                    'Those with registration IDs less than 1000 are templates curated by the Heurist team. '
+                    +'<br><br>'
+    +'This is particularly important for BIBLIOGRAPHIC record types - the definitions in template #6 (Bibliographic definitions) are ' 
+    +'optimally normalised and ensure compatibility with bibliographic functions such as Zotero synchronisation, Harvard format and inter-database compatibility.'                
+                    +'<br><br>Use main menu:  Design > Browse templates'                
+                    , function(){
+                        that.addEditRecord(recID, true); 
+                        //that._super(recID); 
+                    }, {title:'Confirm',yes:'Continue',no:'Cancel'});
+        
+        }else{
+               this._super(recID); 
+        }
+    },
+    
     //overwritten    
     _recordListGetFullData:function(arr_ids, pageno, callback){
 
@@ -744,28 +773,126 @@ console.log(response);
     //-----
     //
     // adding group ID value for new rectype
+    // open select icon dialog for new record
     //
     _afterInitEditForm: function(){
 
         this._super();
         
         var rty_RecTypeGroupID = this.searchForm.find('#input_search_group').val();
-        if(rty_RecTypeGroupID>0 && !this._currentEditRecordset){ //insert       
+        if(this._currentEditID<0){ //rty_RecTypeGroupID>0 && !this._currentEditRecordset){ //insert       
 
             var ele = this._editing.getFieldByName('rty_RecTypeGroupID');
-            ele.editing_input('setValue', rty_RecTypeGroupID);
+            if(rty_RecTypeGroupID>0) ele.editing_input('setValue', rty_RecTypeGroupID);
+            
+            //open select icon
+            ele = this._editing.getFieldByName('rty_Icon');
+            ele.editing_input('openIconLibrary');
+            
             //hide save button
             if(this._toolbar){
                 this._toolbar.find('#btnRecSave').css('visibility', 'visible');
             }
-        }else
-        //hide after edit init btnRecRemove for status locked 
-        if(false){ //@todo
-            var ele = this._toolbar;
-            ele.find('#btnRecRemove').hide();
-        }
+            
+            //hide title mask
+            ele = this._editing.getFieldByName('rty_TitleMask');
+            ele.editing_input('setValue', 'record [ID]');
+            ele.hide();
+            
+        }else{
+            //hide after edit init btnRecRemove for status locked 
+            if(false){ //@todo
+                var ele = this._toolbar;
+                ele.find('#btnRecRemove').hide();
+            }
+            
+            var that = this;
+            var ele_mask = this._editing.getFieldByName('rty_TitleMask');
 
-    },    
+            function __extendTitleMaskInput( ){
+                
+                var inputs = ele_mask.editing_input('getInputs');
+                var $input = inputs[0];
+
+                $input.removeClass('text').attr('readonly','readonly');
+
+                var $btn_editmask = $( '<span>', {title: 'Edit Mask'})
+                .addClass('smallicon ui-icon ui-icon-pencil')
+                .insertAfter( $input );
+
+                that._on( $btn_editmask, { click: function(){
+
+                    var maskvalue = ele_mask.editing_input('getValues');
+                    maskvalue = maskvalue[0];
+
+                    var sURL = window.hWin.HAPI4.baseURL +   
+                    "admin/structure/rectypes/editRectypeTitle.html?rectypeID="
+                            + that._currentEditID + "&mask="
+                            + encodeURIComponent(maskvalue)+"&db="+window.hWin.HAPI4.database;
+
+                    window.hWin.HEURIST4.msg.showDialog(sURL, {     
+                        "close-on-blur": false,
+                        "no-resize": true,
+                        height: 800,
+                        width: 800,
+                        callback: function(newvalue) {
+                            if(!window.hWin.HEURIST4.util.isnull(newvalue)){
+                                ele_mask.editing_input('setValue', newvalue);
+                                that._editing.setModified(true); //restore flag after autosave
+                                that.onEditFormChange();
+                            }
+                        }
+                    });
+
+                }} );
+                
+            }
+
+            //extent editing for record title
+            ele_mask.editing_input('option', 'onrecreate', __extendTitleMaskInput);
+            __extendTitleMaskInput(ele_mask);
+
+        }
+        
+    },   
+    
+    //
+    //
+    //
+    testTitleMask: function()
+    {
+        if(!rectypeID || rectypeID < 0){
+            var val = "record [ID]";
+            if(document.getElementById("definit").checked && window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME']){
+                val = "["+window.hWin.HEURIST4.detailtypes.names[window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME']]+"]";
+            }
+
+            document.getElementById("rty_TitleMask").value = val
+            titleMaskIsOk = true;
+            updateRectypeOnServer_continue();
+
+        }else{
+
+            var mask = document.getElementById("rty_TitleMask").value;
+            
+            var baseurl = window.hWin.HAPI4.baseURL + "hsapi/controller/rectype_titlemask.php";
+
+            var request = {rty_id:rectypeID, mask:mask, db:window.hWin.HAPI4.database, check:1}; //verify titlemask
+            
+            window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, 
+                function (response) {
+                    if(response.status != window.hWin.ResponseStatus.OK || response.message){
+                        titleMaskIsOk = false;
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                    }else{
+                        titleMaskIsOk = true;
+                        updateRectypeOnServer_continue();
+                    }                                        
+                }
+            );
+
+        }
+    },
     
     //
     // update list after save (refresh)
@@ -785,13 +912,50 @@ console.log(response);
         }
         
         this._super( recID, fieldvalues );
+        
+        if(this.it_was_insert){
+            this.searchForm.searchDefRecTypes('startSearch');
+
+
+            //select Fields For New RecordType
+            var sURL = window.hWin.HAPI4.baseURL + "admin/structure/rectypes/editRectypeSelFields.html";
+
+            var that = this;
+            
+            window.hWin.HEURIST4.msg.showDialog(sURL, {
+                    "close-on-blur": false,
+                    "no-resize": false,
+                    height: 500, //(mode==0?200:250),
+                    width: 700,
+                    title:' Select fields for new record type',
+                    afterclose:function(){
+                        //add fields to structure
+                        
+                        
+                        if($.isFunction(continue_save)){
+                            continue_save.call(that);
+                        }
+                    },
+                    callback:function(context){
+                        _selected_fields = context;
+                    } 
+            });
+            
+        }else{
+            //this.recordList.resultList('refreshPage');      
+        }
+        
+/*        
         this.getRecordSet().setRecord(recID, fieldvalues);
         
         if(this.options.edit_mode == 'editonly'){
             this.closeDialog(true); //force to avoid warning
+        }else if(this._currentEditID<0){
+            this.searchForm.searchDefRecTypes('startSearch');
         }else{
             this.recordList.resultList('refreshPage');  
         }
+*/        
     },
     
     _deleteAndClose: function(unconditionally){

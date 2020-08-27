@@ -40,12 +40,19 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
             this.btn_add_record.hide();
             this.btn_find_record.hide();
         }else{
+            
+            this.btn_add_record
+                    .button({label: window.hWin.HR("Add Record Type"), showLabel:true, 
+                            icon:"ui-icon-plus"})
+                    .addClass('ui-button-action')
+                    .show();
+                    
+            this._on( this.btn_add_record, {
+                        click: function(){
+                            this._trigger( "onadd" );
+                        }} );
+            
             /*
-            this.btn_add_record.css({'min-width':'9m','z-index':2})
-                    .button({label: window.hWin.HR("Add New Record Type"), icon: "ui-icon-plus"})
-                .click(function(e) {
-                    that._trigger( "onadd" );
-                }); 
 
             this.btn_find_record.css({'min-width':'9m','z-index':2})
                     .button({label: window.hWin.HR("Find/Add Record Type"), icon: "ui-icon-search"})
@@ -112,6 +119,7 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
                 this._on( this.btn_ui_config, {
                         click: this.configureUI });
             }
+            
         }
        
         if($.isFunction(this.options.onInitCompleted)){

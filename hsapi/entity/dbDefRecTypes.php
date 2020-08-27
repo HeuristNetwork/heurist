@@ -215,18 +215,16 @@ class DbDefRecTypes extends DbEntityBase
 
         
         //delete temporary records
+        $res = true;
         $query = "select rec_ID from Records where rec_RecTypeID=$rtyID and rec_FlagTemporary=1";
         $recIds = mysql__select_list2($mysqli, $query);
-        $res = recordDelete($system, $recIds, false);
+        if(count($recIds)>0) {
+            $res = recordDelete($this->system, $recIds, false);   
+            $res = ($res['status']==HEURIST_OK);
+        }
 
-        if($res['status']==HEURIST_OK){
+        if($res){
             $res = parent::delete();        
-            
-            //@todo - remove assosiated images
-            
-            
-        }else{
-            $res = false;
         }
         if($res){
             $mysqli->commit();   

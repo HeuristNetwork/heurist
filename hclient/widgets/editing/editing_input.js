@@ -47,6 +47,7 @@ $.widget( "heurist.editing_input", {
         detailtype: null,  //overwrite detail type from db (for example freetext instead of memo)
         
         change: null,  //onchange callback
+        onrecreate: null, //onrefresh callback
         is_insert_mode:false,
         is_faceted_search:false //is input used in faceted search
     },
@@ -2194,12 +2195,12 @@ $.widget( "heurist.editing_input", {
                                 .css({position: 'absolute', margin: '5px 0px 0px 8px'}).insertBefore( $input ); 
                         
                         //container for image
-                        var $input_img = $('<div tabindex="0" contenteditable class="image_input fileupload ui-widget-content ui-corner-all" style="border:dashed blue 2px">'
+                        var $input_img = this.input_img = $('<div tabindex="0" contenteditable class="image_input fileupload ui-widget-content ui-corner-all" style="border:dashed blue 2px">'
                             + '<img src="'+urlThumb+'" class="image_input">'
                             + '</div>').appendTo( $inputdiv );                
                         if(this.configMode.entity=='recUploadedFiles'){
-                           $input_img.css({'min-height':'320px','min-width':'320px'});
-                           $input_img.find('img').css({'max-height':'320px','max-width':'320px'});
+                           this.input_img.css({'min-height':'320px','min-width':'320px'});
+                           this.input_img.find('img').css({'max-height':'320px','max-width':'320px'});
                         }
                          
                         window.hWin.HAPI4.checkImage(this.configMode.entity, this.options.recID, 
@@ -2230,38 +2231,7 @@ $.widget( "heurist.editing_input", {
                             $('<br/><br/>').appendTo( ele );                            
                             
                             $('<a href="#" title="Or select from library"><span class="ui-icon ui-icon-grid"/>Library</a>')
-                                .click(function(){                                 
-                                    $select_imagelib_dlg.select_imagelib({onselect:function(res){
-                                        if(res){
-                                            $input_img.find('img').prop('src', res.url);
-                                            that.newvalues[$input.attr('id')] = res.path; 
-                                            that.onChange(); 
-                                            
-                                            //HARDCODED!!!! sync icon or thumb to defRecTypes
-                                            if(res.path.indexOf('setup/iconLibrary/')>0){
-                                                var tosync = '', repl, toval;
-                                                if(that.options.dtID=='rty_Thumb'){ tosync = 'rty_Icon'; repl='64'; toval='16';}
-                                                else if(that.options.dtID=='rty_Icon'){tosync = 'rty_Thumb'; repl='16'; toval='64';}
-                                           
-                                                if(tosync){
-                                                    var ele = that.options.editing.getFieldByName(tosync);
-                                                    if(ele){
-                                                        var s_path = res.path;
-                                                        var s_url  = res.url;
-                                                        if(s_path.indexOf('icons8-')>0){
-                                                            s_path = s_path.replace('-'+repl+'.png','-'+toval+'.png')
-                                                            s_url = s_url.replace('-'+repl+'.png','-'+toval+'.png')
-                                                        }
-                                                        
-                                                        ele.editing_input('setValue', s_path.replace(repl,toval) );    
-                                                        ele.find('.image_input').find('img').attr('src', s_url.replace(repl,toval)); 
-                                                    }
-                                                }
-                                            }
-                                            
-                                        }
-                                    }, assets:that.configMode.use_assets, size:that.configMode.size});
-                                }).appendTo( ele );                     
+                                .click(this.openIconLibrary).appendTo( ele );                     
                                 
                         }
                             
@@ -2285,7 +2255,7 @@ $.widget( "heurist.editing_input", {
                         var $progress_bar = $progress_dlg.find('.progressbar');
                         var $progressLabel = $progress_dlg.find('.progress-label');
                         
-                        var $select_imagelib_dlg = $('<div/>').hide().appendTo( $inputdiv );//css({'display':'inline-block'}).
+                        this.select_imagelib_dlg = $('<div/>').hide().appendTo( $inputdiv );//css({'display':'inline-block'}).
          
                         $progress_bar.progressbar({
                               value: false,
@@ -2682,6 +2652,47 @@ console.log('onpaste');
         return $input.attr('id');
 
     }, //addInput
+    
+    //
+    //
+    //
+    openIconLibrary: function(){                                 
+        
+        if(!(this.detailType=='file' && this.configMode.use_assets)) return;
+        
+        var that = this;
+        
+        this.select_imagelib_dlg.select_imagelib({onselect:function(res){
+            if(res){
+                that.input_img.find('img').prop('src', res.url);
+                that.newvalues[$(that.inputs[0]).attr('id')] = res.path;  //$input
+                that.onChange(); 
+                
+                //HARDCODED!!!! sync icon or thumb to defRecTypes
+                if(res.path.indexOf('setup/iconLibrary/')>0){
+                    var tosync = '', repl, toval;
+                    if(that.options.dtID=='rty_Thumb'){ tosync = 'rty_Icon'; repl='64'; toval='16';}
+                    else if(that.options.dtID=='rty_Icon'){tosync = 'rty_Thumb'; repl='16'; toval='64';}
+               
+                    if(tosync){
+                        var ele = that.options.editing.getFieldByName(tosync);
+                        if(ele){
+                            var s_path = res.path;
+                            var s_url  = res.url;
+                            if(s_path.indexOf('icons8-')>0){
+                                s_path = s_path.replace('-'+repl+'.png','-'+toval+'.png')
+                                s_url = s_url.replace('-'+repl+'.png','-'+toval+'.png')
+                            }
+                            
+                            ele.editing_input('setValue', s_path.replace(repl,toval) );    
+                            ele.find('.image_input').find('img').attr('src', s_url.replace(repl,toval)); 
+                        }
+                    }
+                }
+                
+            }
+        }, assets:that.configMode.use_assets, size:that.configMode.size});
+    },
     
     //
     //
@@ -3180,6 +3191,12 @@ console.log('onpaste');
         }
         
         this._setAutoWidth();            
+        
+        if($.isFunction(this.options.onrecreate)){
+            this.options.onrecreate.call(this);
+        }
+        
+        
         /*
         if(make_as_nochanged){
             this._setAutoWidth();            

@@ -91,13 +91,12 @@
                  {
                     "dtID": "rty_TitleMask",
                     "dtFields":{
-                        "dty_Type":"blocktext",
+                        "dty_Type":"freetext",
                         "dty_Size":5000,
                         "rst_DisplayWidth":60,
                         "rst_DisplayName": "Title mask",
                         "rst_DisplayHelpText": "The title mask is a string into which data field values are inserted to create a constructed title for each record, e.g. [Title], pp. [Start_Page]-[End_Page] renders a title such as \"Alice in Wonderland, pp. 37-39\". The constructed title is displayed in search results and other lists. [ ] encloses a field name. To insert [ or ], use [[ or ]]",
-                        "rst_RequirementType":"required",
-                        "rst_Display":"readonly"
+                        "rst_RequirementType":"required"
                     }
                 },               
                 {
