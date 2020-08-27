@@ -216,7 +216,8 @@ $.widget( "heurist.mapping", {
     //{name:'Stamen.TopOSMRelief'},
     //{name:'OpenWeatherMap'}
     {name:'Esri.NatGeoWorldMap'},
-    {name:'Esri.WorldGrayCanvas'}
+    {name:'Esri.WorldGrayCanvas'},
+    {name:'None'},
     ],    
     // ---------------    
     // the widget's constructor
@@ -428,8 +429,10 @@ $.widget( "heurist.mapping", {
                 this.basemaplayer.remove();
             }
 
-            this.basemaplayer = L.tileLayer.provider(provider['name'], provider['options'] || {})
+            if(provider['name']!=='None'){
+                this.basemaplayer = L.tileLayer.provider(provider['name'], provider['options'] || {})
                     .addTo(this.nativemap);        
+            }
             
         }   
     },
