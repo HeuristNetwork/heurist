@@ -101,6 +101,24 @@ print "$endToken\n";
 if($isHTML) print "<p>&nbsp;<p>&nbsp;<p>";
 
 // ------------------------------------------------------------------------------------------
+// defVocabularyGroups
+
+print "\n\n\n-- VOCABULARY TYPE GROUPS";print "\n";
+if($isHTML) print "<p>";
+include HEURIST_DIR.'admin/structure/crosswalk/defVocabularyGroupsFields.inc'; // sets value of $flds
+print "-- $flds \n";
+$query = "select $flds from defVocabularyGroups";
+$res = $mysqli->query($query);
+$fmt = 'defVocabularyGroups';   // update format if fields added
+
+if($isHTML) print "<p>";
+print "\n$startToken\n";
+while ($row = $res->fetch_assoc()) { @print_row($row, $fmt); }
+$res->close();
+print "$endToken\n";
+if($isHTML) print "<p>&nbsp;<p>&nbsp;<p>";
+
+// ------------------------------------------------------------------------------------------
 // defDetailTypeGroups
 
 print "\n\n\n-- DETAIL TYPE GROUPS";print "\n";

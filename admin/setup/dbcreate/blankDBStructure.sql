@@ -339,6 +339,23 @@ CREATE TABLE defRelationshipConstraints (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table 'defVocabularyGroups'
+--
+
+CREATE TABLE defVocabularyGroups (
+  vcg_ID tinyint(3) unsigned NOT NULL auto_increment COMMENT 'Vocabulary group ID referenced in vocabs editor',
+  vcg_Name varchar(40) NOT NULL COMMENT 'Name for this group of vocabularies, shown as heading in lists',
+  vcg_Domain enum('enum','relation') NOT NULL default 'terms' COMMENT 'Field of application of the vocabulary - can be both',
+  vcg_Order tinyint(3) unsigned zerofill NOT NULL default '002' COMMENT 'Ordering of vocabulary groups within pulldown lists',
+  vcg_Description varchar(250) default NULL COMMENT 'A description of the vocabulary group and its purpose',
+  vcg_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this vocabulary group record, used to get last updated date for table',
+  PRIMARY KEY  (vcg_ID),
+  UNIQUE KEY vcg_Name (vcg_Name)
+) ENGINE=InnoDB COMMENT='Grouping mechanism for vocabularies in vocabularies/terms editor';
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table 'defTerms'
 --
 
@@ -363,6 +380,7 @@ CREATE TABLE defTerms (
   trm_Code varchar(100) default NULL COMMENT 'Optional code eg. alphanumeric code which may be required for import or export',
   trm_SemanticReferenceURL VARCHAR( 250 ) NULL COMMENT 'The URI to a semantic definition or web page describing the term',
   trm_IllustrationURL VARCHAR( 250 ) NULL COMMENT 'The URL to a picture or other resource illustrating the term. If blank, look for trm_ID.jpg/gif/png in term_images directory',  
+  trm_VocabularyGroupID smallint(5) unsigned NOT NULL default '1' COMMENT 'Vocabulary group to which this term belongs, if a top level term (vocabulary)',
   PRIMARY KEY  (trm_ID),
   KEY trm_ParentTermIDKey (trm_ParentTermID),
   KEY trm_InverseTermIDKey (trm_InverseTermId)
