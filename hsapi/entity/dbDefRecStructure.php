@@ -266,7 +266,8 @@ class DbDefRecStructure extends DbEntityBase
     }
 
     //    
-    // update order for record type
+    // A. update order for fields in record type - see parameter "orders"
+    // B. add set of new fields - see parameter "newfields"
     //
     public function batch_action(){
         
@@ -274,6 +275,18 @@ class DbDefRecStructure extends DbEntityBase
             $this->system->addError(HEURIST_INVALID_REQUEST, 'Record type identificator not defined');
             return false;
         }
+        if(@$this->data['newfields']){
+            return $this->addNewFields();
+        }else if (@$this->data['orders']){
+            return $this->setNewFieldOrder();
+        }
+    }
+        
+    //
+    //
+    //
+    private function setNewFieldOrder(){
+        
         $rty_ID = $this->data['rtyID'];
         
         //dty_ID
@@ -283,7 +296,6 @@ class DbDefRecStructure extends DbEntityBase
             return false;
         }
         
-        //user ids
         $orders = prepareIds(@$this->data['orders'], true);
         if(count($orders)==0){             
             $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid values for fields order');
@@ -317,6 +329,60 @@ class DbDefRecStructure extends DbEntityBase
         return $ret;        
     }
     
+    //
+    //
+    //
+    private function addNewFields(){
+        
+        $rty_ID = $this->data['rtyID'];
+        $newfields = $this->data['newfields'];
+        
+        if(count($newfields)==0){             
+            //if rt structure has zero fields adds 2 default fields: DT_NAME and DT_DESCRIPTION
+            $mysqli = $this->system->get_mysqli();
+            if(mysql__select_value($mysqli,
+                    'SELECT count(*) FROM '.$this->config['tableName']
+                    .' WHERE rst_RecTypeID='.$mysqli->real_escape_string( $rty_ID ))===0){
+                        
+                        $newfields['fields'] = array(DT_NAME,DT_DESCRIPTION);
+                        $newfields['reqs'] = array(DT_NAME);
+            }else{
+                $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid values for new fields');
+                return false;
+            }
+        }
+        
+        $fields = prepareIds($newfields['fields'], false);
+        $reqs   = @$newfields['reqs']?$newfields['reqs']:array();
+        $order = 0;
+        
+        $dt_fields = dbs_GetDetailTypes($this->system, $fields);
+        $dt_fields = $dt_fields['typedefs'];
+        $di = $dt_fields['fieldNamesToIndex'];
+        
+        
+        $records = array();        
+        foreach($fields as $dty_ID){
+        
+            $dt = $dt_fields[$dty_ID]['commonFields'];
+            
+            $records[] = array(
+            'rst_ID'=> $dty_ID,
+            'rst_RecTypeID'=> $rty_ID,
+            'rst_DisplayOrder'=> $order,
+            'rst_DetailTypeID'=> $dty_ID,
+            'rst_DisplayName'=> $dt[$di['dty_Name']],
+            'rst_DisplayHelpText'=> $dt[$di['dty_HelpText']],
+            'rst_RequirementType'=> in_array($dty_ID,$reqs)?'required':'recommended',
+            'rst_MaxValues'=> 1,
+            'rst_DisplayWidth'=>$dt[$di['dty_Type']]=='date'?20:100);
+            $order = $order+10;
+        }
+        
+        $this->data['fields'] = $records;
+        $this->is_addition = true;
+        return $this->save();
+    }
     
     
 }

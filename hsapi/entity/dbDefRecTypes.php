@@ -223,8 +223,21 @@ class DbDefRecTypes extends DbEntityBase
             $res = ($res['status']==HEURIST_OK);
         }
 
+        $query = "DELETE FROM defRecStructure where rst_RecTypeID=$rtyID";
+        $ret = $mysqli->query($query);
+        $affected = $mysqli->affected_rows;
+        if(!$ret){
+            $this->system->addError(HEURIST_DB_ERROR, 
+                    "Cannot delete from table defRecStructure", $mysqli->error);
+            $res = false;
+        }else if($affected===0){
+            $this->system->addError(HEURIST_NOT_FOUND, 'Cannot delete structure for rectype. No entries found');
+            $res = false;
+        }
+       
+        
         if($res){
-            $res = parent::delete();        
+            $res = parent::delete(true);        
         }
         if($res){
             $mysqli->commit();   

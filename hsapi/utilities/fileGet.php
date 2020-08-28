@@ -167,6 +167,17 @@ if($filename){ //download from scratch
                 $filename = $path.$rec_id;
             }
             
+            if($entity_name=='defRecTypes' && !file_exists($filename.'.png')){
+                
+                if($viewmode=='thumb'){
+                    $old_filename = HEURIST_ICON_DIR . 'thumb/th_' . $rec_id . '.png';
+                }else{
+                    $old_filename = HEURIST_ICON_DIR . $rec_id .'.png';
+                }
+                if(file_exists($old_filename)){
+                    copy($old_filename, $filename.'.png');
+                }
+            }
             
             $exts = array('png','jpg','jpeg','jfif','gif');
             foreach ($exts as $ext){

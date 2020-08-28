@@ -1110,7 +1110,7 @@ function dbs_GetRectypeConstraint($system) {
             }
             if($dettypeids[0]!='all'){
                 //detect ID or TYPE
-                if(is_int($dettypeids[0])){
+                if(is_numeric($dettypeids[0])){
                     $where_exp = ' dty_ID in ('.implode(',',$dettypeids).')';        
                 }else{
                     $where_exp = ' dty_Type in (\''.implode("','",$dettypeids).'\')';        

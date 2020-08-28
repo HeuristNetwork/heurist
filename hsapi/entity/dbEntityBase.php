@@ -25,7 +25,7 @@ class DbEntityBase
     // set transaction in save,delete action - otherwise transaction is set on action above (batch action)
     protected $need_transaction = true;
 
-    //reset all primary fields to zero - tp force addition (POST request via API)
+    //reset all primary fields to zero - to force addition (POST request via API)
     protected $is_addition = false;
     
     /*  
@@ -407,7 +407,7 @@ class DbEntityBase
     //
     // returns - deleted:[], no_rights:[], in_use:[]
     //
-    public function delete(){
+    public function delete($disable_foreign_checks=false){
         
         if(!@$this->recordIDs){
             $this->recordIDs = prepareIds($this->data[$this->primaryField]);
@@ -759,7 +759,7 @@ class DbEntityBase
             $this->records[0] = $this->data['fields']; 
             //$this->recordIDs = $record[$this->primaryField];           
         }else{
-             //this is sequental array 
+             //this is 2dim array
             $this->records = $this->data['fields'];
         }
         

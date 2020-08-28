@@ -54,23 +54,33 @@ $.widget( "heurist.searchDefDetailTypes", $.heurist.searchEntity, {
             this.btn_add_record.hide();
             this.btn_find_record.hide();
         }else{
-            this.btn_add_record.css({'min-width':'9m','z-index':2})
-                    .button({label: window.hWin.HR("Define New Field Type"), icon: "ui-icon-plus"})
-                .click(function(e) {
-                    that._trigger( "onadd" );
-                }); 
+            
+            this.btn_add_record
+                    .button({label: window.hWin.HR("Add Base Field"), showLabel:true, 
+                            icon:"ui-icon-plus"})
+                    .addClass('ui-button-action')
+                    .show();
+                    
+            this._on( this.btn_add_record, {
+                        click: function(){
+                            this._trigger( "onadd" );
+                        }} );
         }
         
+        //always hide        
+        this.input_search_group.parent().hide();
+        this.btn_find_record.hide();
         
-        
+        //on start search
+        this._on(this.input_search,  { keyup:this.startSearch });
         this._on(this.input_search_type,  { change:this.startSearch });
         this._on(this.input_search_group,  { change:this.startSearch });
         
         //@todo - possible to remove
+        
         if( this.options.dtg_ID>0 ){
-            this.input_search_group.parent().hide();
             this.input_search_group.val(this.options.dtg_ID);
-        }else if( this.options.dtg_ID<0 ){  //addition of recctype to group
+        }else if( this.options.dtg_ID<0 ){  //addition of rectype to group
             //find any rt not in given group
             //exclude this group from selector
             this.input_search_group.find('option[value="'+Math.abs(this.options.dtg_ID)+'"]').remove();
@@ -80,11 +90,27 @@ $.widget( "heurist.searchDefDetailTypes", $.heurist.searchEntity, {
              
         this.input_sort_type = this.element.find('#input_sort_type');
         this._on(this.input_sort_type,  { change:this.startSearch });
+        
+        this._on(this.element.find('#chb_show_all_groups'),  { change:function(){
+                this.input_search_group.val(this.element.find('#chb_show_all_groups').is(':checked')
+                                            ?'any':this.options.dtg_ID).change();
+        }});
+        
                       
         this.startSearch();            
                 
     },  
-
+    
+    //
+    //
+    //
+    _setOption: function( key, value ) {
+        this._super( key, value );
+        if(key == 'dtg_ID'){
+            if(!this.element.find('#chb_show_all_groups').is(':checked'))
+                this.element.find('#input_search_group').val(value).change();
+        }
+    },
 
     //
     // public methods
@@ -96,8 +122,27 @@ $.widget( "heurist.searchDefDetailTypes", $.heurist.searchEntity, {
             var request = {}
         
             if(this.input_search.val()!=''){
-                request['dty_Name'] = this.input_search.val();
+                var s = this.input_search.val();
+                if(window.hWin.HEURIST4.util.isNumber(s) && parseInt(s)>0){
+                     request['dty_ID'] = s;   
+                     s = '';
+                }else if (s.indexOf('-')>0){
+                    
+                    var codes = s.split('-');
+                    if(codes.length==2 
+                        && window.hWin.HEURIST4.util.isNumber(codes[0])
+                        && window.hWin.HEURIST4.util.isNumber(codes[1])
+                        && parseInt(codes[0])>0 && parseInt(codes[1])>0 ){
+                        request['dty_OriginatingDBID'] = codes[0];
+                        request['dty_IDInOriginatingDB'] = codes[1];
+                        s = '';
+                    }
+                }
+                
+                if(s!='') request['dty_Name'] = s;
             }
+        
+        
             if(this.input_search_type.val()!='' && this.input_search_type.val()!='any'){
                 request['dty_Type'] = this.input_search_type.val();
             }   

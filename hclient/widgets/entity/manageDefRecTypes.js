@@ -573,7 +573,7 @@ console.log(response);
                     + '</div></div>'            
         }
 
-        
+        var grayed = '';
         var i = 0;
         for (;i<fields.length;i++){
             
@@ -611,7 +611,14 @@ console.log(response);
                     html += fld2('rty_Description',null,null,
                         'min-width:320px;max-width:320px;width:50%;font-style:italic;font-size:smaller'); break;
                 case 'show': 
-                    html += __action_btn('show','ui-icon-check-on','Click to show in lists');
+                
+                    if(recordset.fld(record, 'rty_ShowInLists')==1){
+                        html += __action_btn('hide_in_list','ui-icon-check-on','Click to hide in lists');    
+                    }else{
+                        html += __action_btn('show_in_list','ui-icon-check-off','Click to show in lists');
+                        grayed = 'background:lightgray';
+                    }
+                    
                     break;
                 case 'duplicate': 
                     html += __action_btn('duplicate','ui-icon-copy','Duplicate record type');
@@ -620,12 +627,18 @@ console.log(response);
                     html += __action_btn('fields','ui-icon-circle-b-info','List of fields');
                     break;
                 case 'status': 
-                    html += __action_btn('delete','ui-icon-delete','Click to delete record type');
+                    
+                    if(recordset.fld(record, 'rty_Status')=='reserved'){
+                        html += __action_btn('','ui-icon-lock','Status: Reserved');
+                    }else{
+                        html += __action_btn('delete','ui-icon-delete','Status: Open. Click to delete record type');
+                    }    
+                
                     break;
             }    
         }
 
-        html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" style="display:table-row;height:28px;">'
+        html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" style="display:table-row;height:28px;'+grayed+'">'
                     + '<div class="recordSelector item"><input type="checkbox" /></div>'
                     + html+'</div>';
         
@@ -691,7 +704,9 @@ console.log(response);
                 action = action.action;
             }
             if(recID>0){
-
+                
+                var that = this;
+ 
                 if(action=='addrec'){
                     var new_record_params = {RecTypeID: recID};
                     window.hWin.HEURIST4.ui.openRecordEdit(-1, null, {new_record_params:new_record_params});
@@ -710,9 +725,20 @@ console.log(response);
                     window.hWin.HEURIST4.ui.openRecordEdit(-1, null, 
                         {new_record_params:new_record_params, edit_structure:true});
 
+                }else if(action=='show_in_list' || action=='hide_in_list'){
+                    
+                    window.hWin.HEURIST4.msg.bringCoverallToFront(this.recordList);
+                    var newVal = (action=='show_in_list')?1:0;
+                    this._saveEditAndClose({rty_ID:recID, rty_ShowInLists:newVal },
+                        function(){
+                            window.hWin.HEURIST4.msg.sendCoverallToBack();
+                            window.hWin.HEURIST4.dbs.rtyField(recID, 'rty_ShowInLists', newVal);
+                            that.recordList.resultList('refreshPage');  
+                        });
+                    
                 }else if(action=='duplicate'){
                     
-                    this._duplicateType(recID);
+                    //this._duplicateType(recID);
                     
                 }else if(action=='fields'){
                     
@@ -914,13 +940,14 @@ console.log(response);
         this._super( recID, fieldvalues );
         
         if(this.it_was_insert){
-            this.searchForm.searchDefRecTypes('startSearch');
-
+            this.searchForm.searchDefRecTypes('startSearch'); //refresh
 
             //select Fields For New RecordType
             var sURL = window.hWin.HAPI4.baseURL + "admin/structure/rectypes/editRectypeSelFields.html";
 
             var that = this;
+            
+            this._selected_fields = [];
             
             window.hWin.HEURIST4.msg.showDialog(sURL, {
                     "close-on-blur": false,
@@ -929,20 +956,43 @@ console.log(response);
                     width: 700,
                     title:' Select fields for new record type',
                     afterclose:function(){
-                        //add fields to structure
+                        //add fields to structure in any case - by default DT_NAME and DT_DESCRIPTION
+                        if(!window.hWin.HEURIST4.util.isArrayNotEmpty(this._selected_fields)) this._selected_fields = [];
+
+                        var request = {};
+                        request['a']        = 'action'; //batch action
+                        request['entity']   = 'defRecStructure';
+                        request['rtyID']    = recID;
+                        //request['recID']    = dtyIDs;
+                        request['newfields']  = that._selected_fields;
+                        request['request_id'] = window.hWin.HEURIST4.util.random();
                         
-                        
-                        if($.isFunction(continue_save)){
-                            continue_save.call(that);
-                        }
+                        window.hWin.HAPI4.EntityMgr.doRequest(request, 
+                            function(response){
+                                if(response.status == window.hWin.ResponseStatus.OK){
+                                    //show edit structure popup
+                                    window.hWin.HAPI4.EntityMgr.emptyEntityData(null); //reset all cached data for entities
+                                    window.hWin.HAPI4.SystemMgr.get_defs_all( false, window.hWin.document,
+                                        function(){
+                                            that._onActionListener(null, {recID:recID, action:'editstr'} );
+                                        });
+                                    
+                                }else{
+                                    window.hWin.HEURIST4.msg.showMsgErr(response);      
+                                }
+                            });
                     },
                     callback:function(context){
-                        _selected_fields = context;
+                        that._selected_fields = context;
                     } 
             });
             
         }else{
             //this.recordList.resultList('refreshPage');      
+            window.hWin.HAPI4.SystemMgr.get_defs({rectypes:recID, mode:2}, function(response){
+console.log(response);                
+            })
+            //window.hWin.HEURIST4.rectypes.typedefs[recID] = .dtFields[recID]
         }
         
 /*        
@@ -962,6 +1012,7 @@ console.log(response);
     
         if(unconditionally===true){
             this._super(); 
+            
         }else{
             var that = this;
             window.hWin.HEURIST4.msg.showMsgDlg(
@@ -970,6 +1021,29 @@ console.log(response);
         }
     },
     
+    //
+    //
+    //
+    _afterDeleteEvenHandler: function(recID){
+        
+            this._super();
+        
+            var rectypes = window.hWin.HEURIST4.rectypes;
+            if(recID>0 && rectypes.typedefs[recID]){
+                    if(rectypes.counts && rectypes.counts[recID]) delete rectypes.counts[recID];
+                    delete rectypes.names[recID];
+                    delete rectypes.pluralNames[recID];
+                    delete rectypes.typedefs[recID];
+                    window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE); 
+            }
+            
+            this.searchForm.searchDefRecTypes('startSearch'); //refresh
+           
+    },
+    
+    //
+    //
+    //
     getUiPreferences:function(){
         this.usrPreferences = window.hWin.HAPI4.get_prefs_def('prefs_'+this._entityName, this.defaultPrefs);
         /*if(this.usrPreferences.width<600) this.usrPreferences.width=600;
@@ -1031,7 +1105,7 @@ console.log(response);
     //
     //
     //    
-    _refreshClientStructure: function(){
+    _refreshClientStructure: function(context){
         window.hWin.HEURIST4.rectypes = context.rectypes;
         window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE); 
     },

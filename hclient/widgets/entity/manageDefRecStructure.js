@@ -1891,7 +1891,7 @@ dty_TermIDTreeNonSelectableIDs
             var recID = fields['rst_ID'];
             var dt_type = fields['dty_Type'];
             
-            //save structure (tree) in DT_ENTITY_STRUCTURE field
+            //save structure (tree) in DT_ENTITY_STRUCTURE field - EXPERIMENTAL - NOT USED
             if( !this._isFlat &&  (dt_type=='separator' || recID==this.DT_ENTITY_STRUCTURE) )
             {
                 //NOT USED ANYMORE - since we always use flat structure

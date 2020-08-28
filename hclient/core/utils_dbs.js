@@ -1188,9 +1188,9 @@ window.hWin.HEURIST4.dbs = {
     },
     
     //
+    // get rty value
     //
-    //
-    rtyField: function( rty_ID, fieldName ){
+    rtyField: function( rty_ID, fieldName, newValue ){
 
         var rectypes = window.hWin.HEURIST4.rectypes;
         
@@ -1200,13 +1200,19 @@ window.hWin.HEURIST4.dbs = {
         
         if(fieldName){
             if(rfi[fieldName]>=0){
+                if( window.hWin.HEURIST4.util.isempty(newValue) ){
+                    return rectypes.typedefs[rty_ID].commonFields[ rfi[fieldName] ];
+                }else{
+                    rectypes.typedefs[rty_ID].commonFields[ rfi[fieldName] ] = newValue;
+                }
+                
                 return rectypes.typedefs[rty_ID].commonFields[ rfi[fieldName] ];
             }else{
                 return null;
             }
             
         }else{
-            
+            //return all fields
             var res = {};
             for(var i=0; i<rectypes.typedefs[rty_ID].commonFieldNames.length; i++){
                 fieldName = rectypes.typedefs[rty_ID].commonFieldNames[i];

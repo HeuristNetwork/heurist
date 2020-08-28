@@ -21,7 +21,7 @@
 $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
 
     _entityName:'defDetailTypes',
-    fields_list_div: null,
+    fields_list_div: null,  //suggestion list
     set_detail_type_btn: null,
     
     //
@@ -56,23 +56,42 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             this.options.width = (isNaN(this.options.width) || this.options.width<750)?750:this.options.width;                           
             //this.options.edit_mode = 'none';
         }
-        if(this.options.edit_mode == 'inline' && this.options.select_mode=='manager'){
-            this.options.width = 1290;
-        }
 
         this._super();
 
-        if(this.options.edit_mode == 'inline'){
+
+        if(this.options.innerTitle){
             
-            if(this.options.select_mode!='manager'){
-                //hide form 
-                this.editForm.parent().hide();
-                this.recordList.parent().css('width','100%');
-            }else{
-                this.recordList.parent().css('width',380);
-                this.editForm.parent().css('left',381);
-            }
-        }
+            //add record type group editor
+            this.element.css( {border:'none', 'box-shadow':'none', background:'none'} );
+            
+            this.element.find('.ent_wrapper:first').addClass('ui-dialog-heurist').css('left',328);
+            
+            this.fieldtype_groups = $('<div>').addClass('ui-dialog-heurist')
+                .css({position: 'absolute',top: 0, bottom: 0, left: 0, width:320, overflow: 'hidden'})
+                .appendTo(this.element);
+                
+            var that = this;                
+            var rg_options = {
+                 isdialog: false, 
+                 innerTitle: true,
+                 container: this.fieldtype_groups,
+                 title: 'Base field groups',
+                 layout_mode: 'short',
+                 select_mode: 'manager',
+                 onSelect:function(res){
+                     if(window.hWin.HEURIST4.util.isRecordSet(res)){
+                        res = res.getIds();                     
+                        if(res && res.length>0){
+                            that.searchForm.searchDefRecTypes('option','dtg_ID', res[0])
+                        }
+                     }
+                 }
+            };
+            
+                                                                         
+            window.hWin.HEURIST4.ui.showEntityDialog('defDetailTypeGroups', rg_options);
+        }        
     
     },
         
@@ -129,13 +148,10 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         // init search header
         this.searchForm.searchDefDetailTypes(this.options);
         
-        var iheight = 7;
-        if(this.options.edit_mode=='inline'){            
-            iheight = iheight + 6;
-        }else{
-            this.searchForm.css({'min-width': '730px'});
-            this.recordList.css({'min-width': '730px'});
-        }
+        var iheight = 3;
+        this.searchForm.css({'min-width': '730px'});
+        this.recordList.css({'min-width': '730px'});
+
         //init viewer 
         var that = this;
         
