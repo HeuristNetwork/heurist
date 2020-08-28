@@ -290,23 +290,25 @@ function hCmsEditing(_options) {
                 {
                         //first child is webpage title
                         var pagetitle = $($('#main-content').children()[0]);
-                        if(pageid==home_pageid){
-                            pagetitle.empty();
-                        }        
-                        if(is_show_pagetitle){
-                            $('#main-pagetitle').empty().show();
-                        }
-                        //move title to header
-                        pagetitle.addClass("webpageheading");
-                        pagetitle.appendTo($('#main-pagetitle'));
+                        if(pagetitle.is('h2')){
+                            if(pageid==home_pageid){
+                                pagetitle.empty();
+                            }        
+                            if(is_show_pagetitle){
+                                $('#main-pagetitle').empty().show();
+                            }
+                            //move title to header
+                            pagetitle.addClass("webpageheading");
+                            pagetitle.appendTo($('#main-pagetitle'));
                         
-                        if(pagetitle.attr('date-empty')==1){
-                            pagetitle.attr('date-empty',0);
-                            window.hWin.HEURIST4.msg.showMsgDlg(
-                                'This menu item does not have associated page content.'
-                                +'<br>It will not be selectable in the website. '
-                                +'<br>We recommend this for parent menus.',null,null,
-                                {my:'left top', at:'left+200 top+100', of:$('#main-content-container')});    
+                            if(pagetitle.attr('date-empty')==1){
+                                pagetitle.attr('date-empty',0);
+                                window.hWin.HEURIST4.msg.showMsgDlg(
+                                    'This menu item does not have associated page content.'
+                                    +'<br>It will not be selectable in the website. '
+                                    +'<br>We recommend this for parent menus.',null,null,
+                                    {my:'left top', at:'left+200 top+100', of:$('#main-content-container')});    
+                            }
                         }
                         
                         //assign content to editor
