@@ -760,7 +760,17 @@ window.hWin.HEURIST4.ui = {
     createRectypeGroupSelect: function(selObj, topOptions, rectypes) {
 
         window.hWin.HEURIST4.ui.createSelector(selObj, topOptions);
-
+        
+        
+        window.hWin.HAPI4.EntityMgr.getEntityData('defRecTypeGroups', false,
+            function(response){        
+                //response = response.getSubSetByRequest({'sort:rtg_Order':1}, null);
+                response.each(function(recID, record){
+                    window.hWin.HEURIST4.ui.addoption(selObj, recID, this.fld(record,'rtg_Name'));
+                });
+            });
+        
+/*
         if(!rectypes) rectypes = window.hWin.HEURIST4.rectypes;
         
         var index;
@@ -779,7 +789,7 @@ window.hWin.HEURIST4.ui = {
                 window.hWin.HEURIST4.ui.addoption(selObj, rectypes.groups[index].id, name);
             }
         }
-
+*/
         return selObj;
 
     },
@@ -796,7 +806,6 @@ window.hWin.HEURIST4.ui = {
 
         for (index in detailtypes.groups){
             if (index == "groupIDToIndex" ){
-                //rectypes.groups[index].showTypes.length < 1)
                 continue;
             }
 
@@ -2636,6 +2645,7 @@ window.hWin.HEURIST4.ui = {
                 // all done
                 window.hWin.HEURIST4.ui.showEntityDialog(entityName, options);
             }).fail(function(error) {
+                //console.log(error);                
                 // one or more scripts failed to load
                 window.hWin.HEURIST4.msg.showMsgWorkInProgress();
             }).always(function() {

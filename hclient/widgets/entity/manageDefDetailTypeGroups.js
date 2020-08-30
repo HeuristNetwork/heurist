@@ -24,13 +24,13 @@ $.widget( "heurist.manageDefDetailTypeGroups", $.heurist.manageEntity, {
     
     _init: function() {
 
-        this.options.layout_mode = 'short';
+        if(!this.options.layout_mode) this.options.layout_mode = 'short';
         this.options.use_cache = true;
+        
         if(this.options.select_mode!='manager'){
             this.options.edit_mode = 'none';
             this.options.width = 300;
-        }else{
-            this.options.edit_mode = 'inline';   //force inline editor 
+        }else if(this.options.edit_mode == 'inline') {
             this.options.width = 890;
         }
         
@@ -41,7 +41,10 @@ $.widget( "heurist.manageDefDetailTypeGroups", $.heurist.manageEntity, {
             this.editForm.parent().hide();
             this.recordList.parent().css('width','100%');
         }
-        this.recordList.css('top',0);
+
+        if(!this.options.innerTitle){
+            this.recordList.css('top',0);  
+        }        
     },
     
     //  
@@ -72,6 +75,27 @@ $.widget( "heurist.manageDefDetailTypeGroups", $.heurist.manageEntity, {
                 
             });
             
+        if(this.options.innerTitle){
+            //specify add new/save order buttons above record list
+            var btn_array = [
+                {showText:true, icons:{primary:'ui-icon-plus'},text:window.hWin.HR('Add Group'),
+                      css:{'margin-right':'0.5em','float':'right'}, id:'btnAddButton',
+                      click: function() { that._onActionListener(null, 'add'); }},
+
+                {text:window.hWin.HR('Save Order'),
+                      css:{'margin-right':'0.5em','float':'right',display:'none'}, id:'btnApplyOrder',
+                      click: function() { that._onActionListener(null, 'save-order'); }}];
+
+            
+            this._toolbar = this.searchForm;
+            this.searchForm.css({'padding-top': '8px'}).empty();
+            btn_array[0].css['float'] = 'right'; btn_array[0].css['display'] = 'block';
+            btn_array[1].css['float'] = 'right';
+            this._defineActionButton2(btn_array[0], this.searchForm);
+            this._defineActionButton2(btn_array[1], this.searchForm);
+            
+        }
+        
         return true;
     },    
     
@@ -87,7 +111,7 @@ $.widget( "heurist.manageDefDetailTypeGroups", $.heurist.manageEntity, {
         function fld2(fldname, col_width){
             swidth = '';
             if(!window.hWin.HEURIST4.util.isempty(col_width)){
-                swidth = ' style="width:'+col_width+'"';
+                swidth = ' style="display:table-cell;width:'+col_width+';max-width:'+col_width+'"';
             }
             return '<div class="item" '+swidth+'>'+window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, fldname))+'</div>';
         }
@@ -97,17 +121,18 @@ $.widget( "heurist.manageDefDetailTypeGroups", $.heurist.manageEntity, {
         
         var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" style="height:1.3em">';
         if(this.options.select_mode=='select_multi'){
-            html = html + '<div class="recordSelector"><input type="checkbox" /></div><div class="recordTitle">';
+            html = html + '<div class="recordSelector"><input type="checkbox" /></div>';//<div class="recordTitle">';
         }else{
-            html = html + '<div>';
+            //html = html + '<div>';
         }
         
-        html = html + fld2('dtg_Name') + '<div style="position:absolute;right:4px;top:6px">'+fld('dtg_FieldCount')+'</div></div>';
+        html = html + fld2('dtg_Name',250);
         
         if(this.options.edit_mode=='popup'){
             html = html
-            + this._defineActionButton({key:'edit',label:'Edit', title:'', icon:'ui-icon-pencil'}, null,'icon_text')
-            + this._defineActionButton({key:'delete',label:'Remove', title:'', icon:'ui-icon-minus'}, null,'icon_text');
+            + this._defineActionButton({key:'edit',label:'Edit', title:'', icon:'ui-icon-pencil', class:'rec_actions_button'},
+                    null,'icon_text');
+            //+ this._defineActionButton({key:'delete',label:'Remove', title:'', icon:'ui-icon-minus'}, null,'icon_text');
              /*
             + '<div title="Click to edit group" class="rec_edit_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit">'
             +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'
@@ -119,6 +144,14 @@ $.widget( "heurist.manageDefDetailTypeGroups", $.heurist.manageEntity, {
             + '</div>';
             */
         }
+
+        html = html 
+                +((fld('dtg_FieldCount')>0)
+                ?'<div style="display:table-cell;padding:0 4px">'+fld('dtg_FieldCount')+'</div>'
+                :this._defineActionButton({key:'delete',label:'Remove', title:'', icon:'ui-icon-delete', class:'rec_actions_button'}, 
+                            null,'icon_text'))
+                + '<div class="selection_pointer" style="display:table-cell">'
+                    +'<span class="ui-icon ui-icon-carat-r"></span></div>';
         
 
         return html+'</div>';
@@ -136,6 +169,24 @@ $.widget( "heurist.manageDefDetailTypeGroups", $.heurist.manageEntity, {
             this._selectAndEditFirstInRecordset(data.recordset);
         }
     },
+    
+    //
+    // update list after save (refresh)
+    //
+    /*
+    _afterSaveEventHandler: function( recID, fieldvalues ){
+        
+        window.hWin.HEURIST4.dbs.dtgRefresh( recID, fieldvalues );
+        this._super( recID, fieldvalues );
+    },
+    _afterDeleteEvenHandler: function( recID ){
+        if(window.hWin.HEURIST4.detailtypes.groups[recID]){
+            delete window.hWin.HEURIST4.detailtypes.groups[recID];
+        }
+        window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, 'detailtypes'); 
+        this._super( recID );
+    },
+    */
     
     //
     // can remove group with assigned fields
@@ -226,20 +277,18 @@ $.widget( "heurist.manageDefDetailTypeGroups", $.heurist.manageEntity, {
         }
             
     },  
-      
+/*      
     _getEditDialogButtons: function(){
                                     
             var that = this;        
             
-            var btns = [       /*{text:window.hWin.HR('Reload'), id:'btnRecReload',icons:{primary:'ui-icon-refresh'},
-                click: function() { that._initEditForm_step3(that._currentEditID) }},  //reload edit form*/
-                      
-                {showText:true, icons:{primary:'ui-icon-plus'},text:window.hWin.HR('Add New Group'),
-                      css:{'margin-right':'0.5em','float':'left'}, id:'btnAddButton',
+            var btns = [ 
+                {showText:true, icons:{primary:'ui-icon-plus'},text:window.hWin.HR('Add Group'),
+                      css:{'margin-right':'0.5em','float':'left',display:'none'}, id:'btnAddButton',
                       click: function() { that._onActionListener(null, 'add'); }},
 
                 {text:window.hWin.HR('Save Order'),
-                      css:{'float':'left',display:'none'}, id:'btnApplyOrder',
+                      css:{'margin-right':'0.5em','float':'left',display:'none'}, id:'btnApplyOrder',
                       click: function() { that._onActionListener(null, 'save-order'); }},
                       
                       
@@ -255,6 +304,7 @@ $.widget( "heurist.manageDefDetailTypeGroups", $.heurist.manageEntity, {
                       accesskey:"S",
                       css:{'font-weight':'bold','float':'right'},
                       click: function() { that._saveEditAndClose( null, 'none' ); }},
+                      
                 {text:window.hWin.HR('Delete'), id:'btnRecDelete',
                       css:{'float':'right',display:'none'},
                       click: function() { that._onActionListener(null, 'delete'); }},
@@ -263,5 +313,5 @@ $.widget( "heurist.manageDefDetailTypeGroups", $.heurist.manageEntity, {
         
             return btns;
     },
-    
+*/    
 });

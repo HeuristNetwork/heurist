@@ -440,6 +440,7 @@ div.recordDiv.public  > .action-button-container{
 .list .recordDiv > .item{
     display: table-cell;
     vertical-align: middle;
+    padding: 0 2px;
 }
 
 div.recordDiv  .action-button {
@@ -1822,7 +1823,7 @@ option {padding-left:15px;}
 }
     
 .recordList > .table_header{
-    height: 1.2em;
+    height: 1.5em;
     font-size: 0.9em;
     font-weight: bold;
     width: 100%;
@@ -1830,10 +1831,14 @@ option {padding-left:15px;}
     background: #D8D8DA;
 }
 .recordList > .table_header > div{
-    /*border-right: 1px solid gray;*/
+    border-right: 1px solid gray;
+    display: inline-block;
+    height: 1.5em;
+    padding:0 2px;
+    /*
     display: table-cell;
-    height: 1.2em;
     padding-left:4px;
+    */
 }
 
 /* always visible */
@@ -2137,4 +2142,8 @@ li.edit-form-tab > a{
 }
 .ui-tabs-paging-disabled {
     visibility: hidden;
+}
+
+.ui-drag-drop{
+    border: 2px solid blue !important;
 }

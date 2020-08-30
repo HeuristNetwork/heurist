@@ -80,7 +80,7 @@ $.widget( "heurist.manageEntity", {
         filter_groups: null,
 
         in_popup_dialog: false, //rare case when it is opened in popup iframe
-        coverall_on_save: false,
+        coverall_on_save: true,
         
         //EDIT section
         // none - edit from and buttons are hiiden
@@ -1143,14 +1143,23 @@ $.widget( "heurist.manageEntity", {
     _selectAndEditFirstInRecordset:function(subset){
         
         if(subset && subset.length()>0){
+            
+                var rec_ID;
                 
-                var rec_ID = subset.getOrder()[0];
+                var sels = this.selectedRecords();
+                if(sels && sels.length()>0){
+                    rec_ID = sels.getOrder()[0];
+                }else{
+                    rec_ID = subset.getOrder()[0];
+                }
                 
-                this.recordList.resultList('setSelected', [rec_ID]);
-                this.selectedRecords([rec_ID]);
-                
-                if(this.options.edit_mode=='inline'){
-                    this._onActionListener(null, {action:'edit'}); //default action of selection
+                if(rec_ID){
+                    this.recordList.resultList('setSelected', [rec_ID]);
+                    this.selectedRecords([rec_ID]);
+                    
+                    if(this.options.edit_mode=='inline'){
+                        this._onActionListener(null, {action:'edit'}); //default action of selection
+                    }
                 }
         }
     },
@@ -1241,6 +1250,8 @@ $.widget( "heurist.manageEntity", {
             
     },
     
+//    _time_debug:0,
+    
     //-----------------------------------------------------
     //
     // send update request and close popup if edit is in dialog
@@ -1248,6 +1259,8 @@ $.widget( "heurist.manageEntity", {
     //
     _saveEditAndClose: function( fields, afterAction ){
 
+//this._time_debug = new Date().getTime() / 1000;
+        
             if(window.hWin.HAPI4.is_callserver_in_progress()) {
                 //console.log('prevent repeatative call')
                 return;   
@@ -1256,6 +1269,7 @@ $.widget( "heurist.manageEntity", {
             if(!fields){
                 fields = this._getValidatedValues(); 
             }
+
             
             if(fields==null) return; //validation failed
         
@@ -1272,10 +1286,20 @@ $.widget( "heurist.manageEntity", {
                     }
                 }
                 
+                //if(this._toolbar) this._toolbar.css('visibility','hidden'); //hide();               
+                
                 var that = this;                                                
                 //that.loadanimation(true);
                 window.hWin.HAPI4.EntityMgr.doRequest(request, 
                     function(response){
+
+                        //if(that._toolbar) that._toolbar.css('visibility','visible');//.show();               
+                        
+/*                        
+var fin_time = new Date().getTime() / 1000;
+console.log('save '+(  fin_time - this._time_debug));
+this._time_debug = fin_time;
+*/
                         
                         window.hWin.HEURIST4.msg.sendCoverallToBack();
                         

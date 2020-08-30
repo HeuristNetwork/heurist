@@ -1863,6 +1863,22 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 return;                           
         }
 
+        
+        var popup_options = {
+                select_mode: 'manager',
+                edit_mode: 'editonly', //only edit form is visible, list is hidden
+                rec_ID: rty_ID,
+                selectOnSave: true,
+                height: 820,
+                onClose: function(){
+                    //refresh icon, title, mask
+                    that._initEditForm_step3(that._currentEditID);
+                }
+            };
+        window.hWin.HEURIST4.ui.showEntityDialog('defRecTypes', popup_options);
+        
+        
+/* v3 editor        
         var sURL = window.hWin.HAPI4.baseURL 
                     + "admin/structure/rectypes/editRectype.html?supress=1&db="
                     + window.hWin.HAPI4.database +"&rectypeID="+rty_ID;
@@ -1882,6 +1898,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     that._initEditForm_step3(that._currentEditID);
                 }
         });
+*/        
     },
     
     //

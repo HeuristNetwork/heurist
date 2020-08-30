@@ -83,19 +83,22 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
             this.options.simpleSearch = true;
         }else{
             this.element.find('#div_show_already_in_db').hide();
-            
-            this._on(this.element.find('#chb_show_all_groups'),  { change:function(){
+            this._on(this.element.find('#chb_show_all_groups'),  { change:this.startSearch });
+            /*
+            function(){
                 this.input_search_group.val(this.element.find('#chb_show_all_groups').is(':checked')
                                             ?'any':this.options.rtg_ID).change();
-            }});
+            }});*/
                         
         }
+        
+        this.element.find('#div_search_group').hide();
         
         if( this.options.simpleSearch){
             this.element.find('#div_search_group').hide();
             this.element.find('#input_sort_type_div').hide();
         }else{
-
+            /*
             this.reloadGroupSelector();
         
             //@todo - possible to remove
@@ -109,6 +112,7 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
             }else{
                 this.btn_find_record.hide();
             }
+            */
                  
             
             this.btn_ui_config = this.element.find('#btn_ui_config')
@@ -136,7 +140,8 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
         this._super( key, value );
         if(key == 'rtg_ID'){
             if(!this.element.find('#chb_show_all_groups').is(':checked'))
-                this.element.find('#input_search_group').val(value).change();
+                this.startSearch();
+                //this.element.find('#input_search_group').val(value).change();
         }
     },
     
@@ -252,8 +257,7 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
             sel_group.hide();
         }
         
-        this.element.find('#div_show_all_groups').hide();
-        
+        /*
         if(params['groupsPresentation']=='select'){
             this.element.find('#div_search_group').css({'display':'inline-block'});            
         }else if(params['groupsPresentation']=='none'){
@@ -262,10 +266,6 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
             this.element.find('#div_show_all_groups').css({'display':'inline-block'});            
         }else{
             
-
-            
-            //that.element.find('#div_search_group').hide();
-        
             //activate tab of list according to selected group
             var grpid =  this.input_search_group.val();
             
@@ -284,11 +284,13 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
             this.searchList.find('li').removeClass('ui-state-active');
             this.searchList.find('li[value="'+grpid+'"]').addClass('ui-state-active');
         }
+        */
         
         return tabheight;
     },
-    
-    //
+
+/*    
+    // NOT USED
     //  recreate groups listings - selector, tab and list
     //
     reloadGroupSelector: function (rectypes){
@@ -358,16 +360,6 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
                 window.hWin.HEURIST4.ui.showEntityDialog('defRecTypeGroups', 
                     {edit_mode:'editonly', rec_ID: $(event.target).parent().attr('data-grp'), //select_mode:'single', 
                     onselect:function(event, data){
-                        /*
-                        $('#selected_div').empty();
-                        var s = 'Selected ';
-                        if(data && data.selection)
-                        for(i in data.selection){
-                            if(i>=0)
-                                s = s+data.selection[i]+'<br>';
-                        }
-                        $('#selected_div').html(s);
-                        */
                     }                    
                     } );
             }
@@ -393,15 +385,9 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
                     $(ui.selected).addClass('ui-state-active');
                     that.input_search_group.val( $(ui.selected).attr('value') ).change();
                 }}).css({width:'100%',height:'100%'});
-            
-            /*
-            this._on( searchList, { change: function(event){
-                this.input_search_group.val( $(event.target).val() ).change();
-            }});
-            */
         }
-        
     },
+*/        
     
     //
     // public methods
@@ -409,6 +395,8 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
     startSearch: function(){
         
             this._super();
+            
+            if(!this.input_search) return;
             
             var request = {}
         
@@ -438,11 +426,16 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
                 request['not:rty_RecTypeGroupID'] = Math.abs(this.options.rtg_ID);
             }
         
+            if(!this.element.find('#chb_show_all_groups').is(':checked') && this.options.rtg_ID>0){
+                request['rty_RecTypeGroupID'] = this.options.rtg_ID;
+            }
+        
+/*            
             if(this.input_search_group.val()>0){
                 request['rty_RecTypeGroupID'] = this.input_search_group.val();
                 this.options.rtg_ID = request['rty_RecTypeGroupID'];
             }
-            
+*/            
             
             if(this.chb_show_already_in_db && !this.chb_show_already_in_db.is(':checked')){
                     request['rty_ID_local'] = '=0';

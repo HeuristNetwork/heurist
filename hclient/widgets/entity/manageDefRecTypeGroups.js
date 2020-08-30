@@ -27,16 +27,10 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
         if(!this.options.layout_mode) this.options.layout_mode = 'short';
         this.options.use_cache = true;
         
-        if(this.options.edit_mode=='editonly'){
-            //this.options.select_mode = 'manager';
-            this.options.layout_mode = 'editonly';
-            this.options.width = 600;
-        }else
         if(this.options.select_mode!='manager'){
             this.options.edit_mode = 'none';
             this.options.width = 300;
-        }else if(this.options.edit_mode == 'inline')
-        {
+        }else if(this.options.edit_mode == 'inline') {
             this.options.width = 890;
         }
         
@@ -51,7 +45,26 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
         if(!this.options.innerTitle){
             this.recordList.css('top',0);  
         }        
+        
+        var that = this;
+        
+        $(window.hWin.document).on(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, 
+            function(e, data) { 
+                if(!data || data=='rectypes'){
+console.log('reload groups');                    
+                    that._loadData();
+                }
+            });
+        
     },
+    
+    _destroy: function() {
+        
+       $(window.hWin.document).off(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE);
+        
+       this._super(); 
+    },
+    
     
     //  
     // invoked from _init after load entity config    
@@ -69,30 +82,56 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
 
         var that = this;
         
-        this.recordList.resultList('option', 'show_toolbar', false);
-        if(this.options.edit_mode == 'inline'){
-            this.recordList.resultList('option', 'sortable', true);
-            this.recordList.resultList('option', 'onSortStop', function(){
+        this.recordList.resultList({
+                show_toolbar:false,
+                sortable: true,
+                onSortStop: function(){
                 that._toolbar.find('#btnApplyOrder').show();
-            });
-        }
+                },
+                droppable: function(){
+                    
+                    that.recordList.find('.recordDiv')  //.recordDiv, ,.recordDiv>.item
+                        .droppable({
+                            //accept: '.rt_draggable',
+                            scope: 'rtg_change',
+                            hoverClass: 'ui-drag-drop',
+                            drop: function( event, ui ){
+//console.log(event.target);                                
+                                var trg = $(event.target).hasClass('recordDiv')
+                                            ?$(event.target)
+                                            :$(event.target).parents('.recordDiv');
 
-        window.hWin.HAPI4.EntityMgr.getEntityData(this._entityName, false,
-            function(response){
-                that._cachedRecordset = response.getSubSetByRequest({'sort:rtg_Order':1}, null);
-                that.recordList.resultList('updateResultSet', that._cachedRecordset);
-                that._selectAndEditFirstInRecordset(response);
-                
-            });
+//console.log(' < '+$(ui.draggable).parent().attr('recid'));
+//console.log(trg.attr('recid'));
+                                            
+                    var rty_ID = $(ui.draggable).parent().attr('recid');
+                    var rtg_ID = trg.attr('recid');
+                    
+                            if(rty_ID>0 && rtg_ID>0 && that.options.reference_rt_manger){
+                                    
+                                    that.options.reference_rt_manger
+                                        .manageDefRecTypes('changeRectypeGroup',{rty_ID:rty_ID, rty_RecTypeGroupID:rtg_ID });
+                            }
+                        }});
+                }
+        });
+        
+
+        this._loadData();
             
         if(this.options.innerTitle){
             //specify add new/save order buttons above record list
-            var btn_array = this._getEditDialogButtons();
-            
+            var btn_array = [
+                {showText:true, icons:{primary:'ui-icon-plus'},text:window.hWin.HR('Add Group'),
+                      css:{'margin-right':'0.5em','float':'right'}, id:'btnAddButton',
+                      click: function() { that._onActionListener(null, 'add'); }},
+
+                {text:window.hWin.HR('Save Order'),
+                      css:{'margin-right':'0.5em','float':'right',display:'none'}, id:'btnApplyOrder',
+                      click: function() { that._onActionListener(null, 'save-order'); }}];
+
             this._toolbar = this.searchForm;
             this.searchForm.css({'padding-top': '8px'}).empty();
-            btn_array[0].css['float'] = 'right';
-            btn_array[1].css['float'] = 'right';
             this._defineActionButton2(btn_array[0], this.searchForm);
             this._defineActionButton2(btn_array[1], this.searchForm);
             
@@ -101,15 +140,28 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
         return true;
     },    
     
+    //
+    //
+    //
+    _loadData: function(){
+        
+        var that = this;
+        
+        window.hWin.HAPI4.EntityMgr.getEntityData(this._entityName, false,
+            function(response){
+                that._cachedRecordset = response;//.getSubSetByRequest({'sort:rtg_Order':1}, null);
+                that.recordList.resultList('updateResultSet', that._cachedRecordset);
+                that._selectAndEditFirstInRecordset(response);
+            });
+        
+    },
+    
     //----------------------
     //
     // customized item renderer for search result list
     //
     _recordListItemRenderer: function(recordset, record){
         
-        function fld(fldname){
-            return window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, fldname));
-        }
         function fld2(fldname, col_width){
             swidth = '';
             if(!window.hWin.HEURIST4.util.isempty(col_width)){
@@ -118,7 +170,7 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
             return '<div class="item" '+swidth+'>'+window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, fldname))+'</div>';
         }
         
-        var recID   = fld('rtg_ID');
+        var recID   = recordset.fld(record, 'rtg_ID');
         var recTitle = fld2('rtg_ID','4em')+fld2('rtg_Name');
         
         var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" style="height:1.3em">';
@@ -129,7 +181,7 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
         }
         
         html = html + fld2('rtg_Name',250);
-        
+      
         if(this.options.edit_mode=='popup'){
             html = html
             + this._defineActionButton({key:'edit',label:'Edit', title:'', icon:'ui-icon-pencil', class:'rec_actions_button'}, 
@@ -145,9 +197,15 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
             + '</div>';
             */
         }
+        
+        //var cnt = window.hWin.HEURIST4.dbs.rtgField(recID, 'rtg_RtCount');
+        //recordset.setFld(record, 'rtg_RtCount', cnt);
+        
+        var cnt = recordset.fld(record, 'rtg_RtCount');
+        
         html = html 
-                +((fld('rtg_RtCount')>0)
-                ?'<div style="display:table-cell;padding:0 4px">'+fld('rtg_RtCount')+'</div>'
+                +((cnt>0)
+                ?'<div style="display:table-cell;padding:0 4px">'+cnt+'</div>'
                 :this._defineActionButton({key:'delete',label:'Remove', title:'', icon:'ui-icon-delete', class:'rec_actions_button'}, 
                             null,'icon_text'))
                 + '<div class="selection_pointer" style="display:table-cell">'
@@ -176,6 +234,8 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
     //
     _afterSaveEventHandler: function( recID, fieldvalues ){
         
+        //window.hWin.HEURIST4.dbs.rtgRefresh( recID, fieldvalues );
+        
         if(this.options.edit_mode=='editonly'){
             
                 //this.options.select_return_mode='recordset';
@@ -191,18 +251,41 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
                 
         this._super( recID, fieldvalues );
     },
+
+/*    
+    _afterDeleteEvenHandler: function( recID ){
+        
+        if(window.hWin.HEURIST4.rectypes.groups[recID]){
+            delete window.hWin.HEURIST4.rectypes.groups[recID];
+            //empty groups are invisible in lists anyway
+            //window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, 'rectypes'); 
+        }
+        this._super( recID );
+    },
+*/
     
     //
-    // can remove group with assigned fields
+    // cant remove group with assigned fields
     //     
-    _deleteAndClose: function(){    
-            if(this._getField('rtg_RtCount')>0){
-                window.hWin.HEURIST4.msg.showMsgFlash('Can\'t remove non empty group');  
-                return;                
-            }
+    _deleteAndClose: function(unconditionally){
+
+        if(this._getField('rtg_RtCount')>0){
+            window.hWin.HEURIST4.msg.showMsgFlash('Can\'t remove non empty group');  
+            return;                
+        }
+    
+        if(unconditionally===true){
+            this._super(); 
             
-            this._super();
+        }else{
+            var that = this;
+            window.hWin.HEURIST4.msg.showMsgDlg(
+                'Are you sure you wish to delete this record type group? Proceed?', function(){ that._deleteAndClose(true) }, 
+                {title:'Warning',yes:'Proceed',no:'Cancel'});        
+        }
     },
+    
+    
     
     //
     // extend for save order
@@ -216,6 +299,7 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
 
             var recordset = this.recordList.resultList('getRecordSet');
             //assign new value for rtg_Order and save on server side
+            //var groups = window.hWin.HEURIST4.rectypes.groups;
             var rec_order = recordset.getOrder();
             var idx = 0, len = rec_order.length;
             var fields = [];
@@ -227,6 +311,13 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
                     recordset.setFld(record, 'rtg_Order', newval);        
                     fields.push({"rtg_ID":rec_order[idx], "rtg_Order":newval});
                 }
+                //update in local definitions
+                /*
+                var keep = groups[idx];
+                groups[idx] = groups[groups.groupIDToIndex[rec_order[idx]]];
+                groups.groupIDToIndex[rec_order[idx]] = keep;
+                groups.groupIDToIndex[rec_order[idx]] = idx;
+                */
             }
             if(fields.length>0){
 
@@ -244,13 +335,14 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
                         if(response.status == window.hWin.ResponseStatus.OK){
                             //that._afterSaveEventHandler( recID, fields );
                             that._toolbar.find('#btnApplyOrder').hide();
+                            window.hWin.HEURIST4.rtgRefresh();
                         }else{
                             window.hWin.HEURIST4.msg.showMsgErr(response);
                         }
                 });
 
             }else{
-                that._toolbar.find('#btnApplyOrder').hide();
+                this._toolbar.find('#btnApplyOrder').hide();
             }
 
         }
@@ -281,16 +373,18 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
         }
             
     },
-    
+  
+/*    
     _getEditDialogButtons: function(){
                                     
             var that = this;        
             
-            var btns = [       /*{text:window.hWin.HR('Reload'), id:'btnRecReload',icons:{primary:'ui-icon-refresh'},
-                click: function() { that._initEditForm_step3(that._currentEditID) }},  //reload edit form*/
+            var btns = [       
+            //{text:window.hWin.HR('Reload'), id:'btnRecReload',icons:{primary:'ui-icon-refresh'},
+            //    click: function() { that._initEditForm_step3(that._currentEditID) }},  //reload edit form
                       
                 {showText:true, icons:{primary:'ui-icon-plus'},text:window.hWin.HR('Add Group'),
-                      css:{'margin-right':'0.5em','float':'left'}, id:'btnAddButton',
+                      css:{'margin-right':'0.5em','float':'left',display:'none'}, id:'btnAddButton',
                       click: function() { that._onActionListener(null, 'add'); }},
 
                 {text:window.hWin.HR('Save Order'),
@@ -304,11 +398,12 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
                           that.closeDialog(); 
                       }},
                 {text:window.hWin.HR('Drop Changes'), id:'btnRecCancel', 
-                      css:{'margin-left':'0.5em','float':'right'},
+                      css:{'margin-left':'0.5em','float':'right',display:'none'},
                       click: function() { that._initEditForm_step3(that._currentEditID) }},  //reload edit form
                 {text:window.hWin.HR('Save'), id:'btnRecSave',
                       accesskey:"S",
                       css:{'font-weight':'bold','float':'right'},
+                      class:'ui-button-action',
                       click: function() { that._saveEditAndClose( null, 'none' ); }},
                       
                 {text:window.hWin.HR('Delete'), id:'btnRecDelete',
@@ -319,4 +414,5 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
         
             return btns;
     },
+*/    
 });

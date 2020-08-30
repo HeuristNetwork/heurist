@@ -53,7 +53,8 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         }else
         //for selection mode set some options
         if(this.options.select_mode!='manager'){
-            this.options.width = (isNaN(this.options.width) || this.options.width<750)?750:this.options.width;                           
+            this.options.width = (isNaN(this.options.width) || this.options.width<750)?750:this.options.width;                       
+            this.options.edit_mode = 'popup';    
             //this.options.edit_mode = 'none';
         }
 
@@ -83,7 +84,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                      if(window.hWin.HEURIST4.util.isRecordSet(res)){
                         res = res.getIds();                     
                         if(res && res.length>0){
-                            that.searchForm.searchDefRecTypes('option','dtg_ID', res[0])
+                            that.searchForm.searchDefDetailTypes('option','dtg_ID', res[0])
                         }
                      }
                  }
@@ -148,42 +149,24 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         // init search header
         this.searchForm.searchDefDetailTypes(this.options);
         
-        var iheight = 3;
+        //var iheight = 3;
         this.searchForm.css({'min-width': '730px'});
         this.recordList.css({'min-width': '730px'});
 
         //init viewer 
         var that = this;
         
-        this.searchForm.css({'height':iheight+'em',padding:'10px'});
-        this.recordList.css({'top':iheight+0.5+'em'});
-        
-        this.recordList.resultList('option', 'show_toolbar', false);
-        this.recordList.resultList('option', 'pagesize', 9999);
-        this.recordList.resultList('option', 'view_mode', 'list');
+        this.searchForm.css({padding:'6px'});
+        //this.recordList.css({'top':iheight+0.5+'em'});
         
         if(this.options.select_mode=='manager'){
-            this.recordList.parent().css({'border-right':'lightgray 1px solid'});
             
-            
-            this.recordList.resultList('option','rendererHeader',
-                    function(){
-                    var s = '<div style="width:10px"></div><div style="width:3em">ID</div>'
-                                +'<div style="width:13em">Name</div>'
-                                +(that.options.edit_mode!='inline'
-                                    ?'<div style="width:22em;">Description</div>':'')
-                                +'<div style="width:13em">Data Type</div>';    
-                        
-                        if (window.hWin.HAPI4.is_admin()){
-                            s = s+'<div style="position:absolute;right:4px;width:60px">Edit</div>';
-                        }
-                        
-                        return s;
-                    }
-                );
-            //this.recordList.resultList('applyViewMode');
+            this.recordList.resultList({ 
+                    show_toolbar: false,
+                    pagesize: 99999,
+                    list_mode_is_table: true,
+                    rendererHeader:function(){ return that._recordListHeaderRenderer(); }});
         }
-
         
         if(this.options.use_cache){
 
@@ -202,18 +185,21 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             }
                 
             this._on( this.searchForm, {
-                "searchdefdetailtypesonfilter": this.filterRecordList
+                "searchdefdetailtypesonfilter": this.filterRecordList,
+                "searchdefdetailtypesonadd": function() {
+                        this._onActionListener(null, 'add'); //this.addEditRecord(-1);
+                }
                 });
                 
-        }    
+        }else{
+            this._on( this.searchForm, {
+                    "searchdefdetailtypesonresult": this.updateRecordList,
+                    "searchdefdetailtypesonadd": function() { this.addEditRecord(-1); }
+                    });
+            
+        }
             
         
-        this._on( this.searchForm, {
-                "searchdefdetailtypesonresult": this.updateRecordList,
-                "searchdefdetailtypesonadd": function() { this.addEditRecord(-1); }
-                });
-
-
         
         return true;
     },            
@@ -249,6 +235,69 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
 
         return new hRecordSet(rdata);
     },
+
+
+    visible_fields: ['dtyid','edit','name','type','description','show','usedin','status'], //'ccode','group',       
+    //----------------------
+    //
+    //
+    //
+    _recordListHeaderRenderer: function(){
+
+        function fld2(col_width, value, style){
+            
+            if(!style) style = '';
+            if(!window.hWin.HEURIST4.util.isempty(col_width)){
+                style += (';width:'+col_width);
+            }
+            if(style!='') style = 'style=";'+style+'"'; //border-left:1px solid gray;
+            
+            if(!value){
+                value = '';
+            }
+            return '<div class="item truncate" '+style+'>'+window.hWin.HEURIST4.util.htmlEscape(value)+'</div>';
+        }
+        
+        var html = '';
+        //if (!(this.usrPreferences && this.usrPreferences.fields)) return '';
+        var fields = this.visible_fields; //this.usrPreferences.fields;
+        
+        var i = 0;
+        for (;i<fields.length;i++){
+           switch ( fields[i] ) {
+                case 'dtyid': html += fld2('20px','ID','text-align:right'); break;
+                case 'ccode': 
+                    html += fld2('80px','Code','text-align:center');     
+                    break;
+                case 'group': 
+                    html += fld2('30px','Group','text-align:center');
+                    break;
+                case 'edit':  
+                    html += fld2('30px','Edit','text-align:center');
+                    break;
+                case 'name':  
+                    html += fld2('120px','Name','text-align:left');
+                    break;
+                case 'type': 
+                    html += fld2('40px','Type','text-align:left');
+                    break;
+                case 'description':  
+                    html += fld2(null,'Description',''); break;
+                case 'show': 
+                    html += fld2('30px','Show','text-align:center');
+                    break;
+                case 'usedin': 
+                    html += fld2('30px','Fields','text-align:center');
+                    break;
+                case 'status': 
+                    html += fld2('30px','Status','text-align:center');
+                    break;
+            }   
+        }
+        
+        
+        return html;
+    },
     
     //----------------------
     //
@@ -257,104 +306,134 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
     _recordListItemRenderer:function(recordset, record){
         
         function fld(fldname){
-            return recordset.fld(record, fldname);
+            return window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, fldname));
         }
-        function fld2(fldname, col_width){
-            swidth = '';
+        function fld2(fldname, col_width, value, style){
+            
+            if(!style) style = '';
             if(!window.hWin.HEURIST4.util.isempty(col_width)){
-                swidth = ' style="width:'+col_width+'"';
+                style += (';max-width: '+col_width+';width:'+col_width);
             }
-            return '<div class="item" '+swidth+'>'+window.hWin.HEURIST4.util.htmlEscape(fld(fldname))+'</div>';
+            if(style!='') style = 'style=";'+style+'"';  //padding:0px 4px
+            
+            if(!value){
+                value = recordset.fld(record, fldname);
+            }
+            return '<div class="item truncate" '+style+'>'+window.hWin.HEURIST4.util.htmlEscape(value)+'</div>';
         }
-        
-        var is_narrow = (this.options.edit_mode=='inline');
         
         var recID   = fld('dty_ID');
-        
-        var recTitle = fld2('dty_ID','4em')
-                + fld2('dty_Name','14em')
-                + (is_narrow?'':('<div class="item inlist" style="width:25em;">'+fld('dty_HelpText')+'</div>'))
-                + '<div class="item'+(is_narrow?'':' inlist')+'" style="width:10em;">'+window.hWin.HEURIST4.detailtypes.lookups[fld('dty_Type')]+'</div>';
 
-        var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID
-                    +'" style="height:'+(is_narrow?'1.3':'2.5')+'em">';
+        var html = '';
+        
+        var fields = this.visible_fields; //this.usrPreferences.fields;
+        
+        function __action_btn(action,icon,title){
+            return '<div class="item" style="width:30px;text-align:center;"><div title="'+title+'" '
+                    +'class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" '
+                    +'role="button" aria-disabled="false" data-key="'+action+'" style="height:18px;">'
+                    +     '<span class="ui-button-icon-primary ui-icon '+icon+'"></span>'
+                    + '</div></div>'            
+        }
+
+        var grayed = '';
+        var i = 0;
+        for (;i<fields.length;i++){
+            
+            switch ( fields[i] ) {
+                case 'dtyid': html += fld2('dty_ID','20px',null,'text-align:right'); break;
+                case 'ccode': 
+                    var c1 = recordset.fld(record,'dty_OriginatingDBID');
+                    var c2 = recordset.fld(record,'dty_IDInOriginatingDB');
+                    c1 = (c1>0 && c2>0)?(c1+'-'+c2):' ';
+                    html += fld2('','80px', c1,'text-align:center');     
+                    break;
+                case 'group': 
+                    html += __action_btn('group','ui-icon-carat-d','Change group');
+                    break;
+                case 'edit':  
+                    html += __action_btn('edit','ui-icon-pencil','Click to edit base field');
+                    break;
+                case 'name':  html += fld2('dty_Name','120px'); break;
+                case 'type':  html += fld2('dty_Type','40px'); break;
+                case 'description':  
+                    html += fld2('dty_HelpText',null,null,
+                        'min-width:320px;max-width:320px;width:50%;font-style:italic;font-size:smaller'); break;
+                case 'show': 
+                
+                    if(recordset.fld(record, 'dty_ShowInLists')==1){
+                        html += __action_btn('hide_in_list','ui-icon-check-on','Click to hide in lists');    
+                    }else{
+                        html += __action_btn('show_in_list','ui-icon-check-off','Click to show in lists');
+                        grayed = 'background:lightgray';
+                    }
                     
-        if(this.options.select_mode=='select_multi'){
-            html = html + '<div class="recordSelector"><input type="checkbox" /></div><div class="recordTitle" style="left:24px">';
-        }else{
-             html = html + '<div class="recordTitle" style="left:24px">' 
-        }
+                    break;
+                case 'usedin': 
+                    html += __action_btn('fields','ui-icon-circle-b-info','Used in rectypes');
+                    break;
+                case 'status': 
+                    
+                    if(recordset.fld(record, 'dty_Status')=='reserved'){
+                        html += __action_btn('','ui-icon-lock','Status: Reserved');
+                    }else{
+                        html += __action_btn('delete','ui-icon-delete','Status: Open. Click to delete base field');
+                    }    
                 
-        html = html + recTitle + '</div>';
-        
-        // add edit/remove action buttons
-        //@todo we have _rendererActionButton and _defineActionButton - remove ?
-        //current user is admin of database managers
-        if(this.options.select_mode=='manager' && this.options.edit_mode=='popup' && window.hWin.HAPI4.is_admin()){
-                
-            html = html + '<div class="rec_actions user-list" style="top:4px;width:60px;">'
-                    + '<div title="Click to edit field" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit" style="height:16px">'
-                    +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'
-                    + '</div>&nbsp;&nbsp;';
-               if(fld('dty_Status')=='reserved'){ 
-                    html = html      
-                    + '<div title="Status: reserved - Locked" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" style="height:16px">'
-                    +     '<span class="ui-button-icon-primary ui-icon ui-icon-lock"></span><span class="ui-button-text"></span>'
-                    + '</div>';    
-               }else{
-                    html = html      
-                    + '<div title="Status: '+fld('dty_Status')+' - Delete" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="delete" style="height:16px">'
-                    +     '<span class="ui-button-icon-primary ui-icon ui-icon-circle-close"></span><span class="ui-button-text"></span>'
-                    + '</div>';    
-               }   
-             html = html + '</div>'                   
+                    break;
+            }    
         }
-        
-        if(false && this.options.edit_mode=='popup'){
-                //+ (showActionInList?this._rendererActionButton('edit'):'');
-            html = html
-            + this._defineActionButton({key:'edit',label:'Edit', title:'', icon:'ui-icon-pencil'}, null,'icon_text')
-            + this._defineActionButton({key:'delete',label:'Remove', title:'', icon:'ui-icon-minus'}, null,'icon_text');
 
-        }
-            
-        /* special case for show in list checkbox
-        html = html 
-            +  '<div title="Make type visible in user accessible lists" class="item inlist logged-in-only" '
-            + 'style="width:3em;padding-top:5px" role="button" aria-disabled="false" data-key="show-in-list">'
-            +     '<input type="checkbox" checked="'+(fld('dty_ShowInLists')==0?'':'checked')+'" />'
-            + '</div>';
-            
-            var group_selectoptions = this.searchForm.find('#sel_group').html();
-                        
-            html = html 
-                //  counter and link to rectype + this._rendererActionButton('duplicate')
-                //group selector
-            +  '<div title="Change group" class="item inlist logged-in-only"'
-            +  ' style="width:8em;padding-top:3px" data-key2="group-change">'
-            +     '<select style="max-width:7.5em;font-size:1em" data-grpid="'+fld('dty_DetailTypeGroupID')
-            + '">'+group_selectoptions+'</select>'
-            +  '</div>'
-                + this._rendererActionButton('delete');
-        */
-        
-        html = html + '</div>'; //close recordDiv
-        
-        /* 
-            html = html 
-        +'<div title="Click to edit group" class="rec_edit_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit">'
-        +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'
-        + '</div>&nbsp;&nbsp;'
-        + '<div title="Click to delete group" class="rec_view_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="delete">'
-        +     '<span class="ui-button-icon-primary ui-icon ui-icon-circle-close"></span><span class="ui-button-text"></span>'
-        + '</div>'
-        + '</div>';*/
-
+        html = '<div class="recordDiv" recid="'+recID+'" style="display:table-row;height:28px;'+grayed+'">'
+                    + '<div class="recordSelector item"><input type="checkbox" /></div>'
+                    + html+'</div>';
 
         return html;
         
     },
+    
+    //
+    //
+    //
+    _onActionListener:function(event, action){
         
+        
+        var isResolved = this._super(event, action);
+
+        if(!isResolved){
+            
+            var recID = 0;
+
+            if(action && action.action){
+                recID =  action.recID;
+                action = action.action;
+            }
+            if(recID>0){
+                
+                var that = this;
+ 
+                if(action=='group'){
+                    
+                }else if(action=='show_in_list' || action=='hide_in_list'){
+                    
+                    window.hWin.HEURIST4.msg.bringCoverallToFront(this.recordList);
+                    var newVal = (action=='show_in_list')?1:0;
+                    this._saveEditAndClose({dty_ID:recID, rty_ShowInLists:newVal },
+                        function(){
+                            window.hWin.HEURIST4.msg.sendCoverallToBack();
+                            window.hWin.HEURIST4.dbs.dtyField(recID, 'dty_ShowInLists', newVal);
+                            that.recordList.resultList('refreshPage');  
+                        });
+                    
+                }else if(action=='usedin'){
+                    
+                }
+                
+            }
+        }
+
+    },
+       
     //
     // can remove group with assigned fields
     //     
@@ -377,6 +456,27 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         }
         
     },
+    
+    //
+    //
+    //
+    _afterDeleteEvenHandler: function(recID){
+        
+            this._super();
+        
+            var detailtypes = window.hWin.HEURIST4.detailtypes;
+            if(recID>0 && detailtypes.typedefs[recID]){
+
+                    delete detailtypes.names[recID];
+                    delete detailtypes.rectypeUsage[recID];
+                    delete detailtypes.typedefs[recID];
+                    window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, 'detailtypes'); 
+            }
+            
+            this.searchForm.searchDefRecTypes('startSearch'); //refresh
+           
+    },
+    
 
     //-----
     //
@@ -1030,20 +1130,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
     _afterSaveEventHandler: function( recID, fieldvalues ){
 
         //update local definitions
-        var detailtypes = window.hWin.HEURIST4.detailtypes;
-        var fi = window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex;
-        if(!detailtypes.typedefs[recID]){
-            detailtypes.typedefs[recID] = {commonFields:[]};
-            var len = Object.keys(fi).length;
-            for(var i=0; i<len; i++) detailtypes.typedefs[recID].commonFields.push('');
-        }
-        //var recset = this.getRecordSet()
-        //var record = recset.getById(recID);
-        var fields = detailtypes.typedefs[recID].commonFields;
-        for(var fname in fi)
-        if(fname){
-            fields[fi[fname]] = fieldvalues[fname]; //recset.fld(record, fname);
-        }
+        window.hWin.HEURIST4.dbs.dtyRefresh( recID, fieldvalues );
 
         // close on addition of new record in select_single mode    
         if(this._currentEditID<0 && 

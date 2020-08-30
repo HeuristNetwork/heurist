@@ -9,8 +9,8 @@
         
         "searchFormContent": "searchDefDetailTypes.html",
         
-        "entityTitle": "Field Types",
-        "entityTitlePlural": "Field Types",
+        "entityTitle": "Base Field",
+        "entityTitlePlural": "Base Fields",
         "empty_remark": "Please use the search field above to locate relevant field (partial string match on title)",
         
         "fields": [

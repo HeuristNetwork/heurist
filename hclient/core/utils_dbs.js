@@ -1200,9 +1200,7 @@ window.hWin.HEURIST4.dbs = {
         
         if(fieldName){
             if(rfi[fieldName]>=0){
-                if( window.hWin.HEURIST4.util.isempty(newValue) ){
-                    return rectypes.typedefs[rty_ID].commonFields[ rfi[fieldName] ];
-                }else{
+                if( !window.hWin.HEURIST4.util.isempty(newValue) ){
                     rectypes.typedefs[rty_ID].commonFields[ rfi[fieldName] ] = newValue;
                 }
                 
@@ -1212,7 +1210,7 @@ window.hWin.HEURIST4.dbs = {
             }
             
         }else{
-            //return all fields
+            //return all fields for given rectype
             var res = {};
             for(var i=0; i<rectypes.typedefs[rty_ID].commonFieldNames.length; i++){
                 fieldName = rectypes.typedefs[rty_ID].commonFieldNames[i];
@@ -1223,9 +1221,40 @@ window.hWin.HEURIST4.dbs = {
     },
     
     //
+    // refresh record type in HEURIST4.rectypes
+    //
+    rtyRefresh: function( rty_ID, callback ){
+        
+            if(!(rty_ID>0)) rty_ID = 'all';
+        
+            window.hWin.HAPI4.SystemMgr.get_defs({rectypes:rty_ID, mode:2}, function(response){
+               
+                if(response.status == window.hWin.ResponseStatus.OK){
+                    if(rty_ID=='all'){
+                        var keep_counts = window.hWin.HEURIST4.rectypes.counts;    
+                        window.hWin.HEURIST4.rectypes = response.data.rectypes;
+                        window.hWin.HEURIST4.rectypes.counts = keep_counts;    
+                    }else{
+                        window.hWin.HEURIST4.rectypes.typedefs[ rty_ID ] = response.data.rectypes.typedefs[ rty_ID ];
+                        window.hWin.HEURIST4.rectypes.names[ rty_ID ] = response.data.rectypes.names[ rty_ID ];
+                        window.hWin.HEURIST4.rectypes.pluralNames[ rty_ID ] = response.data.rectypes.pluralNames[ rty_ID ];
+                    }
+                    
+                    if($.isFunction(callback)){
+                        callback.call();
+                    }else{
+                        window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, 'rectypes');    
+                    }
+                    
+                }
+            })
+        
+    },
+    
     //
     //
-    dtyField: function( dty_ID, fieldName ){
+    //
+    dtyField: function( dty_ID, fieldName, newValue ){
 
         var detailtypes = window.hWin.HEURIST4.detailtypes;
                         
@@ -1235,6 +1264,11 @@ window.hWin.HEURIST4.dbs = {
         
         if(fieldName){
             if(dfi[fieldName]>=0){
+
+                if( !window.hWin.HEURIST4.util.isempty(newValue) ){
+                    detailtypes.typedefs[dty_ID].commonFields[ dfi[fieldName] ] = newValue;
+                }
+                    
                 return detailtypes.typedefs[dty_ID].commonFields[ dfi[fieldName] ];
             }else{
                 return null;
@@ -1242,18 +1276,116 @@ window.hWin.HEURIST4.dbs = {
             
         }else{
             
-            var res = {};
-            for(var i=0; i<detailtypes.typedefs.commonFieldNames.length; i++){
-                fieldName = detailtypes.typedefs.commonFieldNames[i];
-                res[fieldName] = detailtypes.typedefs[dty_ID].commonFields[ dfi[fieldName] ];
-            }
-            return res;            
+                var res = {};
+                for(var i=0; i<detailtypes.typedefs.commonFieldNames.length; i++){
+                    fieldName = detailtypes.typedefs.commonFieldNames[i];
+                    res[fieldName] = detailtypes.typedefs[dty_ID].commonFields[ dfi[fieldName] ];
+                }
+                return res;            
         }
-    }
+    },
     
+    //
+    //
+    //
+    dtyRefresh: function (dty_ID, fieldvalues){
+        
+        if(fieldvalues){
+            
+            var detailtypes = window.hWin.HEURIST4.detailtypes;
+            var fi = window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex;
+            if(!detailtypes.typedefs[dty_ID]){
+                detailtypes.typedefs[dty_ID] = {commonFields:[]};
+                var len = Object.keys(fi).length;
+                for(var i=0; i<len; i++) detailtypes.typedefs[dty_ID].commonFields.push('');
+            }
 
+            var fields = detailtypes.typedefs[dty_ID].commonFields;
+            for(var fname in fi)
+            if(fname){
+                fields[fi[fname]] = fieldvalues[fname];
+            }
+
+            window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, 'detailtypes');
+            
+        }else{
+            
+            window.hWin.HAPI4.SystemMgr.get_defs({rectypes:dty_ID, mode:2}, function(response){
+               
+                if(response.status == window.hWin.ResponseStatus.OK){
+                    window.hWin.HEURIST4.detailtypes.typedefs[ dty_ID ] = response.data.detailtypes.typedefs[ dty_ID ];
+                    window.hWin.HEURIST4.detailtypes.names[ dty_ID ] = response.data.detailtypes.names[ dty_ID ];
+                    window.hWin.HEURIST4.detailtypes.rectypeUsage[ dty_ID ] = response.data.detailtypes.rectypeUsage[ dty_ID ];
+                    
+                    window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, 'detailtypes');
+                }
+            })
+            
+        }
+        
+        
+    },
     
+    rtgRefresh: function(){
+        
+        window.hWin.HAPI4.EntityMgr.getEntityData('defRecTypeGroups', true, 
+            function(response){
+                window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, 'rectypes');
+            });
+    },
+
+/*    
+    dtgRefresh: function (rec_ID, fieldvalues){
+        
+        var groups = window.hWin.HEURIST4.detailtypes.groups;
+        var idx = groups.groupIDToIndex[rec_ID];
+        if(!(idx>=0)){
+            idx = Object.keys(groups).length;
+            groups[idx] = {id:rec_ID, allTypes:[],showTypes:[],order:'999'};
+            groups.groupIDToIndex[rec_ID] = idx;
+        }
+        
+        groups[idx]['name'] = fieldvalues['dtg_Name'];
+        groups[idx]['description'] = fieldvalues['dtg_Description'];
+        
+        window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, 'detailtypes');
+    },
     
+    rtgRefresh: function (rec_ID, fieldvalues){
+
+        var groups = window.hWin.HEURIST4.rectypes.groups;
+        
+        var idx = groups.groupIDToIndex[rec_ID];
+        if(!(idx>=0)){
+            idx = Object.keys(groups).length;
+            groups[idx] = {id:rec_ID, allTypes:[],showTypes:[],order:'999'};
+            groups.groupIDToIndex[rec_ID] = idx;
+        }
+        
+        groups[idx]['name'] = fieldvalues['rtg_Name'];
+        groups[idx]['description'] = fieldvalues['rtg_Description'];
+        
+        
+        
+    },
+    
+    //
+    //
+    //
+    rtgField: function( rtg_ID, fieldName ){
+        
+        var groups = window.hWin.HEURIST4.rectypes.groups;
+        var idx = groups.groupIDToIndex[rtg_ID];
+        
+        if(fieldName='rtg_RtCount'){
+            return groups[idx]['allTypes'].length;
+        }
+        if(fieldName=='rtg_Description') fieldName = 'description';
+        else if(fieldName=='rtg_Name') fieldName = 'name';
+        return groups[idx][fieldName];
+        
+    }
+*/
 }//end dbs
 
 }

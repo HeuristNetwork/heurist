@@ -150,7 +150,7 @@ $.widget( "heurist.manageSysDatabases", $.heurist.manageEntity, {
         var regID = fld('sys_dbRegisteredID');
         regID = (regID>0?regID:'');
         
-        var recTitle = frm(recID.substr(4),'40em');
+        var recTitle = frm(recID.substr(4),'40em'); //remove prefix hdb_
         /*
         var recTitle = frm(recID.substr(4),'14em')
                       //+frm(fld('sys_Version'),'4em')

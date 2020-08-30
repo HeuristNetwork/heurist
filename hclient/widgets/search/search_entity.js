@@ -195,7 +195,9 @@ $.widget( "heurist.search_entity", {
             window.hWin.HAPI4.Event.ON_REC_UPDATE
             + ' ' + window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, 
             function(e, data) { 
-                that._recreateRectypeSelectors();
+                if(!data || data=='rectypes'){
+                    that._recreateRectypeSelectors();
+                }
             });
             
             

@@ -75,6 +75,8 @@ $.widget( "heurist.resultList", {
         
         sortable: false, //allows drag and sort entries
         onSortStop: null,
+        draggable: null, //callback function to init dragable
+        droppable: null, //callback function to init dropable (see refreshPage)
 
         //event
         onselect: null,  //on select event for non event based
@@ -800,17 +802,34 @@ $.widget( "heurist.resultList", {
 */
         var has_content_header = this.div_content_header && this.div_content_header.is(':visible');
         //!window.hWin.HEURIST4.util.isempty(this.div_content_header.html());
-        
-        if(has_content_header){ //table_header
-            top = top + this.div_content_header.height()-2;
-        }
 
-        this.div_content.css({'top': top+'px'}); //'110px'});
-        
         if(has_content_header){ //table_header
+        
             this.div_content_header
                     .position({my:'left bottom', at:'left top', of:this.div_content});
+                    
+            //adjust columns width in header with columns width in div_content
+            var header_columns = this.div_content_header.find('.item');
+            var cols = this.div_content.find('.recordDiv:first').find('.item');
+            var tot = 0;
+            cols.each(function(i, col_item){
+                if(i>0 & i<header_columns.length){ //skip recordSelector
+                    $(header_columns[i-1]).width( $(col_item).width() );    
+                    tot = tot + $(col_item).width() + 4;
+                }
+            });
+            //adjust last column
+            if(header_columns.length>0){
+                $(header_columns[header_columns.length-1]).width( this.div_content_header.width()-tot-20 );    
+            }
+            
+            top = top + this.div_content_header.height()-2;
         }
+        
+        //move content down to leave space for header
+        this.div_content.css({'top': top+'px'}); //'110px'});
+
+        
         
     },
     //
@@ -990,7 +1009,7 @@ $.widget( "heurist.resultList", {
             if(window.hWin.HEURIST4.util.isempty(header_html)){
                 this.div_content_header.hide();
             }else{
-                this.div_content_header.html( header_html ).css('display','table');//show();
+                this.div_content_header.html( header_html ).show(); //css('display','table');
             }
         } 
     
@@ -1257,7 +1276,7 @@ $.widget( "heurist.resultList", {
     //
     _renderRecord_html_stub: function(recID){
 
-        var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" >'
+        var html = '<div class="recordDiv" recid="'+recID+'" >' //id="rd'+recID+'" 
         + '<div class="recordIcons">'
         +     '<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif">'
         + '</div>'
@@ -1405,7 +1424,7 @@ $.widget( "heurist.resultList", {
 
         // construct the line or block
         var html = '<div class="recordDiv '+this.options.recordDivClass
-        +'" id="rd'+recID+'" recid="'+recID+'" '+pwd+' rectype="'+rectypeID+'" bkmk_id="'+bkm_ID+'">'
+        +'" recid="'+recID+'" '+pwd+' rectype="'+rectypeID+'" bkmk_id="'+bkm_ID+'">' //id="rd'+recID+'" 
         + html_thumb
         
         + '<div class="recordIcons">' //recid="'+recID+'" bkmk_id="'+bkm_ID+'">'
@@ -2405,7 +2424,7 @@ $.widget( "heurist.resultList", {
                     .appendTo( this.document.find('body') )
                     .menu({
                         select: function( event, ui ) {
-                            var page =  Number(ui.item.attr('id').substr(4));
+                            var page =  Number(ui.item.attr('recid')); 
                             that._renderPage(page);
                     }})
                     .hide();
@@ -2740,6 +2759,13 @@ $.widget( "heurist.resultList", {
             }});
             //$allrecs.draggable({containment:this.div_content});    
         }
+        if($.isFunction(this.options.draggable)){
+            this.options.draggable.call();
+        }
+        if($.isFunction(this.options.droppable)){
+            this.options.droppable.call();
+        }
+
         
 
         /* show image on hover
@@ -2969,7 +2995,7 @@ $.widget( "heurist.resultList", {
                    pagesize: 9999999999999,
                    renderer: function(recordset, record){ 
                        var recID = recordset.fld(record, 'rec_ID');
-                        return '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'">'
+                        return '<div class="recordDiv" recid="'+recID+'">'  //id="rd'+recID+'" 
                                 //+'<span style="min-width:150px">'
                                 //+ recID + '</span>'
                                 + window.hWin.HEURIST4.util.htmlEscape( recordset.fld(record, 'rec_Title') ) 

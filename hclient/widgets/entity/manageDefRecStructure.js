@@ -1082,7 +1082,7 @@ dty_TermIDTreeNonSelectableIDs
         }
         
         
-        window.hWin.HEURIST4.ui.showEntityDialog('DefDetailTypes', popup_options);
+        window.hWin.HEURIST4.ui.showEntityDialog('defDetailTypes', popup_options);
     },
     
     //

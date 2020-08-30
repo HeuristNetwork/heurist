@@ -77,8 +77,8 @@ class DbDefRecTypeGroups extends DbEntityBase
             
         }else if(@$this->data['details']=='list'){
 
-            $this->data['details'] = 'rtg_ID,rtg_Name,rtg_Description,rtg_Order,'
-            .'(select count(rty_ID) from defRecTypes where rtg_ID=rty_RecTypeGroupID) as rtg_RtCount ';
+            $this->data['details'] = 'rtg_ID,rtg_Name,rtg_Description,rtg_Order'
+            .',(select count(rty_ID) from defRecTypes where rtg_ID=rty_RecTypeGroupID) as rtg_RtCount ';
             
         }else if(@$this->data['details']=='full'){
             
@@ -116,7 +116,7 @@ class DbDefRecTypeGroups extends DbEntityBase
          if(count($where)>0){
             $query = $query.' WHERE '.implode(' AND ',$where);
          }
-         $query = $query.$this->searchMgr->getLimit().$this->searchMgr->getOffset();
+         $query = $query.' ORDER BY rtg_Order '.$this->searchMgr->getLimit().$this->searchMgr->getOffset();
         
 
         $res = $this->searchMgr->execute($query, $is_ids_only, $this->config['entityName']);
