@@ -68,9 +68,7 @@ $.widget( "heurist.manageDefFileExtToMimetype", $.heurist.manageEntity, {
         var that = this;
         window.hWin.HAPI4.EntityMgr.getEntityData(this.options.entity.entityName, false,
             function(response){
-                that._cachedRecordset = response;
-                that.recordList.resultList('updateResultSet', response);
-                that._selectAndEditFirstInRecordset(response);
+                that.updateRecordList(null, {recordset:response});
             });
             
         this._on( this.searchForm, {
@@ -118,21 +116,13 @@ $.widget( "heurist.manageDefFileExtToMimetype", $.heurist.manageEntity, {
     },
 
     updateRecordList: function( event, data ){
-        //this._super(event, data);
-        if (data){
-            if(this.options.use_cache){
-                this._cachedRecordset = data.recordset;
-                //there is n filter feature in this form - thus, show list directly
-            }
-            this.recordList.resultList('updateResultSet', data.recordset, data.request);
-            this._selectAndEditFirstInRecordset(data.recordset); 
-        }
+        this._super(event, data);
+        this._selectAndEditFirstInRecordset();
     },
     
     filterRecordList: function(event, request){
         var subset = this._super(event, request);
         this._selectAndEditFirstInRecordset(subset);
-       
     },
     
     _initEditForm_step3: function(recID){

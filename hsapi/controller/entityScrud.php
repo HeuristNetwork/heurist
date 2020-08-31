@@ -59,19 +59,51 @@
     stripScriptTagInRequest($_REQUEST);
     
     if($system->init(@$_REQUEST['db'])){
-    
-        $entity_name = @$_REQUEST['entity'];
-        $classname = 'Db'.ucfirst($entity_name);
-        $entity = new $classname($system, $_REQUEST);
-        //$r = new ReflectionClass($classname);
-        //$entity = $r->newInstanceArgs($system, $_REQUEST);        
-        //$entity->$method();
 
-        if(!$entity){
-            $this->system->addError(HEURIST_INVALID_REQUEST, "Wrong entity parameter: $entity_name");
-        }else{
-            $res = $entity->run();    
+        $res = array();        
+        $entities = array();
+        
+        if(@$_REQUEST['a']=='search' && @$_REQUEST['multi']==1 && @$_REQUEST['entity']=='all'){ 
+            //search can be performed for several entities at once
+            $entities = array('rtg','dtg','rty');
+        }else {
+            $entities = @$_REQUEST['entity'];
         }
+        
+        if(!is_array($entities)){
+            $entities = array( $entities );
+        }
+        
+        //replace aliases
+        foreach($entities as $idx=>$entity_name){
+            if($entity_name=='rtg') $entities[$idx] = 'defRecTypeGroups';
+            else if($entity_name=='dtg') $entities[$idx] = 'defDetailTypeGroups';
+            else if($entity_name=='rty') $entities[$idx] = 'defRecTypes';
+        }
+        
+        
+        foreach($entities as $entity_name){
+    
+            //$entity_name = @$_REQUEST['entity'];
+            $_REQUEST['entity'] = $entity_name;
+            $classname = 'Db'.ucfirst($entity_name);
+            $entity = new $classname($system, $_REQUEST);
+            //$r = new ReflectionClass($classname);
+            //$entity = $r->newInstanceArgs($system, $_REQUEST);        
+            //$entity->$method();
+
+            if(!$entity){
+                $this->system->addError(HEURIST_INVALID_REQUEST, "Wrong entity parameter: $entity_name");
+                break;
+            }else{
+                if(@$_REQUEST['multi']==1){
+                    $res[$entity_name] = $entity->run();
+                }else{
+                    $res = $entity->run();        
+                }
+            }
+            
+        }//for
 
     }
     

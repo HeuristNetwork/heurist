@@ -1065,7 +1065,7 @@ window.hWin.HEURIST4.dbs = {
         return  $arr_rectypes;
         
     },
-    
+
     //
     // returns true if rectype has a field in its structure
     //
@@ -1094,6 +1094,84 @@ window.hWin.HEURIST4.dbs = {
         return false;
     },
 
+    //--------------------------------------------------------------------------
+    
+    /*
+    shortcuts for working wit db definitions
+    
+    $Db = window.hWin.HEURIST4.dbs
+    
+    rty,dty,rts,rtg,dtg,trm = dbdef(entityName,....)  access hEntityMgr.entity_data[entityName]
+    
+    set(entityName, id, field, newvalue)    
+        id - localcode or concept code. For rst this are 2 params rtyID, dtyID
+        field - field name. If empty returns entire record
+        newvalue - assign value of field
+    
+    */
+    
+    rtg: function(rec_ID, fieldName, newValue){
+        return $Db.getset('defRecTypeGroups', rec_ID, fieldName, newValue);        
+    },
+
+    dtg: function(rec_ID, fieldName, newValue){
+        return $Db.getset('defDetailTypeGroups', rec_ID, fieldName, newValue);        
+    },
+
+    rty: function(rec_ID, fieldName, newValue){
+        return $Db.getset('defRecTypes', rec_ID, fieldName, newValue);        
+    },
+    
+    getset: function(entityName, rec_ID, fieldName, newValue){
+        if(newValue){
+            $Db.set(entityName, rec_ID, fieldName, newValue);        
+            return null;
+        }else{
+            return $Db.get(entityName, rec_ID, fieldName);        
+        }
+    },
+    
+    //
+    // returns 
+    // recordset if rec_ID not defined
+    // record - as object if fieldName not defined
+    //    
+    get: function (entityName, rec_ID, fieldName){
+        //it is assumed that db definitions ara always exists on client side
+        var recset = window.hWin.HAPI4.EntityMgr.getEntityData(entityName); 
+        
+        if(rec_ID>0){
+            
+            if(fieldName){
+                return recset.fld(rec_ID, fieldName);
+            }else{
+                return recset.getRecord(rec_ID); //returns JSON {fieldname:value,....}
+            }
+            
+        }else{
+            return recset;
+        }
+        
+    },
+
+    //
+    // assign value of field and entire record
+    //
+    set: function (entityName, rec_ID, fieldName, newValue){
+
+        if(rec_ID>0){
+        
+            var recset = window.hWin.HAPI4.EntityMgr.getEntityData(entityName); 
+            
+            if(fieldName){
+                recset.setFldById(rec_ID, fieldName, newValue);
+            }else{
+                recset.addRecord(rec_ID, newValue);
+            }
+            
+        }
+    },
+    //--------------------------------------------------------------------------
     
     /*
         To facilitate access to db defintions
@@ -1243,7 +1321,7 @@ window.hWin.HEURIST4.dbs = {
                     if($.isFunction(callback)){
                         callback.call();
                     }else{
-                        window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, 'rectypes');    
+                        window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, 'rty');    
                     }
                     
                 }
@@ -1326,66 +1404,9 @@ window.hWin.HEURIST4.dbs = {
         
     },
     
-    rtgRefresh: function(){
-        
-        window.hWin.HAPI4.EntityMgr.getEntityData('defRecTypeGroups', true, 
-            function(response){
-                window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, 'rectypes');
-            });
-    },
 
-/*    
-    dtgRefresh: function (rec_ID, fieldvalues){
-        
-        var groups = window.hWin.HEURIST4.detailtypes.groups;
-        var idx = groups.groupIDToIndex[rec_ID];
-        if(!(idx>=0)){
-            idx = Object.keys(groups).length;
-            groups[idx] = {id:rec_ID, allTypes:[],showTypes:[],order:'999'};
-            groups.groupIDToIndex[rec_ID] = idx;
-        }
-        
-        groups[idx]['name'] = fieldvalues['dtg_Name'];
-        groups[idx]['description'] = fieldvalues['dtg_Description'];
-        
-        window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, 'detailtypes');
-    },
-    
-    rtgRefresh: function (rec_ID, fieldvalues){
-
-        var groups = window.hWin.HEURIST4.rectypes.groups;
-        
-        var idx = groups.groupIDToIndex[rec_ID];
-        if(!(idx>=0)){
-            idx = Object.keys(groups).length;
-            groups[idx] = {id:rec_ID, allTypes:[],showTypes:[],order:'999'};
-            groups.groupIDToIndex[rec_ID] = idx;
-        }
-        
-        groups[idx]['name'] = fieldvalues['rtg_Name'];
-        groups[idx]['description'] = fieldvalues['rtg_Description'];
-        
-        
-        
-    },
-    
-    //
-    //
-    //
-    rtgField: function( rtg_ID, fieldName ){
-        
-        var groups = window.hWin.HEURIST4.rectypes.groups;
-        var idx = groups.groupIDToIndex[rtg_ID];
-        
-        if(fieldName='rtg_RtCount'){
-            return groups[idx]['allTypes'].length;
-        }
-        if(fieldName=='rtg_Description') fieldName = 'description';
-        else if(fieldName=='rtg_Name') fieldName = 'name';
-        return groups[idx][fieldName];
-        
-    }
-*/
 }//end dbs
 
+//alias
+var $Db = window.hWin.HEURIST4.dbs;
 }

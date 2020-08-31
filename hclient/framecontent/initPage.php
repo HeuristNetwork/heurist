@@ -281,7 +281,9 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
                     if(window.hWin.HAPI4.sysinfo['layout']!='WebSearch')
                             onAboutInit();
                 }
-
+                
+                window.hWin.HAPI4.EntityMgr.refreshEntityData('all');
+                
                 window.hWin.HAPI4.SystemMgr.get_defs({rectypes:'all', terms:'all', detailtypes:'all', mode:2}, function(response){
                     if(response.status == window.hWin.ResponseStatus.OK){
                         window.hWin.HEURIST4.rectypes = response.data.rectypes;

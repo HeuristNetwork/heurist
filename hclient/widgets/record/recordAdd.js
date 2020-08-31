@@ -164,7 +164,7 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
         var that = this;
         $(window.hWin.document).on(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, 
             function(e, data) { 
-                if(!data || data=='rectypes'){
+                if(!data || data.type=='rtg' || data.type=='rty'){
                     that._fillSelectRecordTypes(that.options.currentRecType);    
                 }
             });

@@ -47,11 +47,14 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
         }        
         
         var that = this;
-        
+
+        //refresh list        
         $(window.hWin.document).on(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, 
             function(e, data) { 
-                if(!data || data=='rectypes'){
-console.log('reload groups');                    
+                if(!data || 
+                   (data.source != that.uuid && data.type == 'rtg'))
+                {
+//console.log('reload groups '+that.uuid);                    
                     that._loadData();
                 }
             });
@@ -117,8 +120,6 @@ console.log('reload groups');
         });
         
 
-        this._loadData();
-            
         if(this.options.innerTitle){
             //specify add new/save order buttons above record list
             var btn_array = [
@@ -136,6 +137,8 @@ console.log('reload groups');
             this._defineActionButton2(btn_array[1], this.searchForm);
             
         }
+        
+        that._loadData();
          
         return true;
     },    
@@ -147,10 +150,12 @@ console.log('reload groups');
         
         var that = this;
         
+        
+console.log('rtg getEntityData '+this.uuid);        
+
         window.hWin.HAPI4.EntityMgr.getEntityData(this._entityName, false,
             function(response){
-                that._cachedRecordset = response;//.getSubSetByRequest({'sort:rtg_Order':1}, null);
-                that.recordList.resultList('updateResultSet', that._cachedRecordset);
+                that.updateRecordList(null, {recordset:response});
                 that._selectAndEditFirstInRecordset(response);
             });
         
@@ -198,9 +203,6 @@ console.log('reload groups');
             */
         }
         
-        //var cnt = window.hWin.HEURIST4.dbs.rtgField(recID, 'rtg_RtCount');
-        //recordset.setFld(record, 'rtg_RtCount', cnt);
-        
         var cnt = recordset.fld(record, 'rtg_RtCount');
         
         html = html 
@@ -217,24 +219,20 @@ console.log('reload groups');
         
     },
 
-    updateRecordList: function( event, data ){
-        //this._super(event, data);
-        if (data){
-            if(this.options.use_cache){
-                this._cachedRecordset = data.recordset;
-                //there is no filter feature in this form - thus, show list directly
-            }
-            this.recordList.resultList('updateResultSet', data.recordset, data.request);
-            this._selectAndEditFirstInRecordset(data.recordset);
-        }
+    
+    //
+    //
+    //
+    _triggerRefresh: function(){
+        window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, 
+            {source:this.uuid,  type:'rtg'});    
     },
+    
     
     //
     // update list after save (refresh)
     //
     _afterSaveEventHandler: function( recID, fieldvalues ){
-        
-        //window.hWin.HEURIST4.dbs.rtgRefresh( recID, fieldvalues );
         
         if(this.options.edit_mode=='editonly'){
             
@@ -245,24 +243,22 @@ console.log('reload groups');
                 this._selection.addRecord(recID, fieldvalues);
                 this._currentEditID = null;
                 this._selectAndClose();
-                //this.closeDialog(true); //force to avoid warning
-                return;        
+        }else{
+                this._super( recID, fieldvalues );
         }
-                
-        this._super( recID, fieldvalues );
+    
+        this._triggerRefresh();    
+        
     },
 
-/*    
+    
     _afterDeleteEvenHandler: function( recID ){
         
-        if(window.hWin.HEURIST4.rectypes.groups[recID]){
-            delete window.hWin.HEURIST4.rectypes.groups[recID];
-            //empty groups are invisible in lists anyway
-            //window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, 'rectypes'); 
-        }
         this._super( recID );
+        
+        this._triggerRefresh();    
+        
     },
-*/
     
     //
     // cant remove group with assigned fields
@@ -297,9 +293,8 @@ console.log('reload groups');
         if(action=='save-order'){
 
 
-            var recordset = this.recordList.resultList('getRecordSet');
+            var recordset = this.getRecordSet();
             //assign new value for rtg_Order and save on server side
-            //var groups = window.hWin.HEURIST4.rectypes.groups;
             var rec_order = recordset.getOrder();
             var idx = 0, len = rec_order.length;
             var fields = [];
@@ -311,13 +306,6 @@ console.log('reload groups');
                     recordset.setFld(record, 'rtg_Order', newval);        
                     fields.push({"rtg_ID":rec_order[idx], "rtg_Order":newval});
                 }
-                //update in local definitions
-                /*
-                var keep = groups[idx];
-                groups[idx] = groups[groups.groupIDToIndex[rec_order[idx]]];
-                groups.groupIDToIndex[rec_order[idx]] = keep;
-                groups.groupIDToIndex[rec_order[idx]] = idx;
-                */
             }
             if(fields.length>0){
 
@@ -335,7 +323,6 @@ console.log('reload groups');
                         if(response.status == window.hWin.ResponseStatus.OK){
                             //that._afterSaveEventHandler( recID, fields );
                             that._toolbar.find('#btnApplyOrder').hide();
-                            window.hWin.HEURIST4.rtgRefresh();
                         }else{
                             window.hWin.HEURIST4.msg.showMsgErr(response);
                         }

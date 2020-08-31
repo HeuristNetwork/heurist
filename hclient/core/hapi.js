@@ -1193,18 +1193,53 @@ prof =Profile
             },
 
             
+            //
+            // refresh several entity data at once
+            // 
+            refreshEntityData:function(entityNames, callback){
+
+                _callserver('entityScrud', {a:'search', 'multi':1, 'entity':entityNames, 'details':'full'},
+                    function(response){
+                        if(response.status == window.hWin.ResponseStatus.OK){
+
+console.log( 'refreshEntityData' );
+console.log( entityNames );
+
+                            for(var entityName in response.data){
+                                entity_data[entityName] = new hRecordSet(response.data[entityName]);    
+                            }
+
+                            if($.isFunction(callback)) callback();  
+                            
+                        }else{
+                            window.hWin.HEURIST4.msg.showMsgErr(response);
+                        }
+                    }
+
+                );
+            },
+            
+            
             //load entire entity data and store it in cache (applicable for entities with count < ~1500)
             // entityScrud.action = search
+            //
+            // entityName - name name or array of names or "all" for all db definitions
             //
             getEntityData:function(entityName, force_reload, callback){
 
                 if($.isEmptyObject(entity_data[entityName]) || force_reload==true){
-                    
+
+console.log('getEntityData '+entityName);
+
                     _callserver('entityScrud', {a:'search', 'entity':entityName, 'details':'list'},
                        function(response){
                             if(response.status == window.hWin.ResponseStatus.OK){
-                                entity_data[response.data.entityName] = new hRecordSet(response.data);
-                                if($.isFunction(callback)) callback(entity_data[response.data.entityName]);
+                                
+                                entity_data[response.data.entityName] = new hRecordSet(response.data);    
+                                
+                                if($.isFunction(callback)){
+                                        callback(entity_data[response.data.entityName]);  
+                                } 
                             }else{
                                 window.hWin.HEURIST4.msg.showMsgErr(response);
                             }

@@ -1124,10 +1124,15 @@ $.widget( "heurist.manageEntity", {
             if(this.options.use_cache){
                 this._cachedRecordset = data.recordset;
     
-            }else if(this.options.list_mode=='default'){
+            }
+            
+            if(this.options.list_mode=='default'){
                 this.recordList.resultList('updateResultSet', data.recordset, data.request);
             }
             
+            //
+            // restore selection
+            //
             if(this.options.selection_on_init && this.options['select_mode']=='select_multi'){
                 this.recordList.resultList('setMultiSelction', this.options.selection_on_init);
                 //this.selectedRecords( this.options.selection_on_init );
@@ -1140,27 +1145,25 @@ $.widget( "heurist.manageEntity", {
         this.recordList.resultList('refreshPage');  
     },
     
+    
     _selectAndEditFirstInRecordset:function(subset){
         
-        if(subset && subset.length()>0){
+        var rec_ID;
+        
+        var sels = this.selectedRecords();
+        if(sels && sels.length()>0){
+            rec_ID = sels.getOrder()[0];
+        }else if(subset && subset.length()>0){
+            rec_ID = subset.getOrder()[0];
+        }
+        
+        if(rec_ID){
+            this.recordList.resultList('setSelected', [rec_ID]);
+            this.selectedRecords([rec_ID]);
             
-                var rec_ID;
-                
-                var sels = this.selectedRecords();
-                if(sels && sels.length()>0){
-                    rec_ID = sels.getOrder()[0];
-                }else{
-                    rec_ID = subset.getOrder()[0];
-                }
-                
-                if(rec_ID){
-                    this.recordList.resultList('setSelected', [rec_ID]);
-                    this.selectedRecords([rec_ID]);
-                    
-                    if(this.options.edit_mode=='inline'){
-                        this._onActionListener(null, {action:'edit'}); //default action of selection
-                    }
-                }
+            if(this.options.edit_mode=='inline'){
+                this._onActionListener(null, {action:'edit'}); //default action of selection
+            }
         }
     },
 
@@ -1310,7 +1313,7 @@ this._time_debug = fin_time;
                             
                             //update record in cache
                             if(that.options.use_cache && that._cachedRecordset){
-                                that._cachedRecordset.addRecord(recID, fields);
+                                that._cachedRecordset.addRecord(recID, fields); //add or update record in cache
                             }else{
                                 //add/update record in recordset in _afterSaveEventHandler depends on entity
                             }

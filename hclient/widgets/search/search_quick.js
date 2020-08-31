@@ -251,6 +251,7 @@ $.widget( "heurist.search_quick", $.heurist.recordAction, {
         allowed.splice(allowed.indexOf("relmarker"),1);
         
         var exp_level = window.hWin.HAPI4.get_prefs_def('userCompetencyLevel', 2);
+        
         select_rectype = window.hWin.HEURIST4.ui.createRectypeSelectNew(select_rectype.get(0), 
                     {useIcons: false, useCounts:true, useGroups:true, useIds: (exp_level<2), 
                         topOptions:window.hWin.HR('Any record type'), useHtmlSelect:false});

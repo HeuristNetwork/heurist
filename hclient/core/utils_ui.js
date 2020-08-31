@@ -759,64 +759,25 @@ window.hWin.HEURIST4.ui = {
     //
     createRectypeGroupSelect: function(selObj, topOptions, rectypes) {
 
-        window.hWin.HEURIST4.ui.createSelector(selObj, topOptions);
+        var recset = $Db.rtg();
+        var options = recset.makeKeyValueArray('rtg_Name');
+        if(topOptions) options = options.concat(topOptions, options)
         
+        window.hWin.HEURIST4.ui.createSelector(selObj, options);
         
-        window.hWin.HAPI4.EntityMgr.getEntityData('defRecTypeGroups', false,
-            function(response){        
-                //response = response.getSubSetByRequest({'sort:rtg_Order':1}, null);
-                response.each(function(recID, record){
-                    window.hWin.HEURIST4.ui.addoption(selObj, recID, this.fld(record,'rtg_Name'));
-                });
-            });
-        
-/*
-        if(!rectypes) rectypes = window.hWin.HEURIST4.rectypes;
-        
-        var index;
-
-        if(!rectypes) return selObj;
-
-
-        for (index in rectypes.groups){
-            if (index == "groupIDToIndex" ){
-                //rectypes.groups[index].showTypes.length < 1)
-                continue;
-            }
-
-            var name = rectypes.groups[index].name;
-            if(!window.hWin.HEURIST4.util.isnull(name)){
-                window.hWin.HEURIST4.ui.addoption(selObj, rectypes.groups[index].id, name);
-            }
-        }
-*/
         return selObj;
 
     },
     
     createDetailtypeGroupSelect: function(selObj, topOptions) {
 
-        window.hWin.HEURIST4.ui.createSelector(selObj, topOptions);
-
-        var detailtypes = window.hWin.HEURIST4.detailtypes,
-        index;
-
-        if(!detailtypes) return selObj;
-
-
-        for (index in detailtypes.groups){
-            if (index == "groupIDToIndex" ){
-                continue;
-            }
-
-            var name = detailtypes.groups[index].name;
-            if(!window.hWin.HEURIST4.util.isnull(name)){
-                window.hWin.HEURIST4.ui.addoption(selObj, detailtypes.groups[index].id, name);
-            }
-        }
-
+        var recset = $Db.dtg();
+        var options = recset.makeKeyValueArray('dtg_Name');
+        if(topOptions) options = options.concat(topOptions, options)
+        
+        window.hWin.HEURIST4.ui.createSelector(selObj, options);
+        
         return selObj;
-
     },
 
     //
@@ -836,8 +797,7 @@ window.hWin.HEURIST4.ui = {
         var topOptions = options.topOptions;
         var useHtmlSelect = (options.useHtmlSelect===true);
         var useIcons = (options.useIcons===true); //!useHtmlSelect && 
-        var useCounts = (options.useCounts===true 
-                            && !window.hWin.HEURIST4.util.isnull(window.hWin.HEURIST4.rectypes.counts));
+        var useCounts = (options.useCounts===true);
         var useGroups = (options.useGroups!==false);
         var useIds = (options.useIds===true);
         var useCheckboxes = (options.useCheckboxes===true);
@@ -848,30 +808,33 @@ window.hWin.HEURIST4.ui = {
 
         useHtmlSelect = (useHtmlSelect===true);
         
-        var rectypes = window.hWin.HEURIST4.rectypes,
-        index;
+        //recorset 
+        var rectypes = $Db.rty();
+        var index;
 
         if(rectypes){ 
-
 
         if(!window.hWin.HEURIST4.util.isempty(rectypeList)){
 
             if(!window.hWin.HEURIST4.util.isArray(rectypeList)){
-                rectypeList = rectypeList.split(',');
+                rectypeList = rectypesrectypeList.split(',');
             }
         }else if(!useGroups){ //all rectypes however plain list (not grouped)
-            rectypeList = Object.keys(window.hWin.HEURIST4.rectypes.names);
+            rectypeList = rectypes.getIds();
         }else{
             rectypeList = []; //all rectypes
         }
         
-        if(!useGroups || (rectypeList.length>0 && rectypeList.length<4)){  //show only specified list of rectypes
+        if(!useGroups || (rectypeList.length>0 && rectypeList.length<7)){  //show only specified list of rectypes
         
             if(useCounts){//sort by count
                 rectypeList.sort(function(a,b){
-                     if(isNaN(window.hWin.HEURIST4.rectypes.counts[a])) window.hWin.HEURIST4.rectypes.counts[a] = 0;
-                     if(isNaN(window.hWin.HEURIST4.rectypes.counts[b])) window.hWin.HEURIST4.rectypes.counts[b] = 0;
-                     return Number(window.hWin.HEURIST4.rectypes.counts[a])<Number(window.hWin.HEURIST4.rectypes.counts[b])?1:-1;
+                     var ac = $Db.rty(a,'rty_Usage');   
+                     var bc = $Db.rty(b,'rty_Usage');   
+                                        
+                     if(isNaN(ac)) ac = 0;
+                     if(isNaN(bc)) bc = 0;
+                     return Number(ac)<Number(bc)?1:-1;
                 });
             }
             
@@ -881,13 +844,13 @@ window.hWin.HEURIST4.ui = {
             {
                 if(idx){
                     var rectypeID = rectypeList[idx];
-                    var name = rectypes.names[rectypeID];
+                    var name = $Db.rty(rectypeID,'rty_Name');
                     if(!window.hWin.HEURIST4.util.isnull(name))
                     {
 
                         var rty_Count = 0;
                         if(useCounts){
-                            rty_Count = window.hWin.HEURIST4.rectypes.counts[rectypeID];
+                            rty_Count = $Db.rty(rectypeID,'rty_Usage');
                             if(isNaN(rty_Count) || rty_Count<1) continue;
                         }
                         
@@ -915,93 +878,80 @@ window.hWin.HEURIST4.ui = {
             
         }else{  //show rectypes separated by groups
         
-            var indexName = showAllRectypes?'allTypes':'showTypes';
-        
-            for (index in rectypes.groups){
-                if (index == "groupIDToIndex" ||
-                    rectypes.groups[index][indexName].length < 1) {
-                    continue;
+            //var groups = $Db.rtg().makeKeyValueArray('rtg_Name');
+            var groups = {};
+            var groups_order = $Db.rtg().getSubSetByRequest({ 'sort:rtg_Order':1 });
+            
+            groups_order.each(function(rtgID, record){
+                groups[rtgID] = {title:$Db.rtg(rtgID,'rtg_Name'),rty:[]};
+            });
+            
+            //scan all rectypes and group by rtg groups        
+            rectypes.each(function(rtyID, record){
+                
+                if ((rectypeList.length==0 
+                    || window.hWin.HEURIST4.util.findArrayIndex(rtyID, rectypeList)>=0)
+                    &&
+                    (showAllRectypes || $Db.rty(rtyID,'rty_ShowInLists')==1)){
+                        
+                   groups[$Db.rty(rtyID,'rty_RecTypeGroupID')]['rty'].push(rtyID);
                 }
-                //show group if at least one rectype is visible
-                if(rectypeList.length>0){
-                    var notfound = true;
-                    for (var recTypeIDIndex in rectypes.groups[index][indexName]){
-                        var rectypeID = rectypes.groups[index][indexName][recTypeIDIndex];
-                        if(rectypeList.indexOf(rectypeID)>=0){
-                            notfound = false;
-                            break;
-                        }
+                
+            });
+            
+            groups_order = groups_order.getOrder();
+            
+            for(var k=0; k<groups_order.length; k++){
+                
+                var rtgID  = groups_order[k];
+                if(groups[rtgID].rty.length>0){
+                
+                    //add header    
+                    if(useHtmlSelect){
+                        var grp = document.createElement("optgroup");
+                        grp.label = groups[rtgID].title;
+                        selObj.appendChild(grp);
+                    }else{
+                        var opt = window.hWin.HEURIST4.ui.addoption(selObj, 0, groups[rtgID].title);
+                        $(opt).attr('disabled', 'disabled');
+                        $(opt).attr('group', 1);
                     }
-                    if(notfound) continue;
-                }
-                
-                if(useHtmlSelect){
-                    var grp = document.createElement("optgroup");
-                    grp.label = rectypes.groups[index].name;
-                    selObj.appendChild(grp);
-                }else{
-                    var opt = window.hWin.HEURIST4.ui.addoption(selObj, 0, rectypes.groups[index].name);
-                    $(opt).attr('disabled', 'disabled');
-                    $(opt).attr('group', 1);
-                }
+                    
+                    //add rectypes
+                    for (var i=0; i<groups[rtgID].rty.length; i++){
+                        
+                        var rtyID = groups[rtgID]['rty'][i];
+                        var name = $Db.rty(rtyID, 'rty_Name');
 
-                var idx_desc = rectypes.typedefs.commonNamesToIndex.rty_Description;
-                
-                for (var recTypeIDIndex in rectypes.groups[index][indexName])
-                {
-                    var rectypeID = rectypes.groups[index][indexName][recTypeIDIndex];
-                    var name = rectypes.names[rectypeID];
-
-                    if(!window.hWin.HEURIST4.util.isnull(name) && 
-                        (rectypeList.length==0 || rectypeList.indexOf(rectypeID)>=0) )
-                    {
-                        var opt = window.hWin.HEURIST4.ui.addoption(selObj, rectypeID, name);
+                        var opt = window.hWin.HEURIST4.ui.addoption(selObj, rtyID, name);
                         $(opt).attr('depth', 1);
                         
-                        var desc = rectypes.typedefs[rectypeID].commonFields[idx_desc];
-                        $(opt).attr('title', desc);
+                        $(opt).attr('title', $Db.rtg(rtyID, 'rty_Description'));
                         
                         
                         if(useIcons){
-                            var icon = window.hWin.HAPI4.iconBaseURL + rectypeID + '.png';
+                            var icon = window.hWin.HAPI4.iconBaseURL + rtyID + '.png';
                             $(opt).attr('icon-url', icon);
                         }
                         if(useCounts){
-                            $(opt).attr('rt-count', window.hWin.HEURIST4.rectypes.counts[rectypeID]);
+                            $(opt).attr('rt-count',$Db.rty(rtyID, 'rty_Usage'));
                         }
                         if(useIds){
-                            $(opt).attr('entity-id', rectypeID);
+                            $(opt).attr('entity-id', rtyID);
                         }
                         if(useCheckboxes){
-                            var r = window.hWin.HEURIST4.util.findArrayIndex(rectypeID, options.marked);
+                            var r = window.hWin.HEURIST4.util.findArrayIndex(rtyID, options.marked);
                             $(opt).attr('rt-checkbox', (r>=0)?1:0);
-                            $(opt).attr('data-id', rectypeID);
+                            $(opt).attr('data-id', rtyID);
                         }
-                        
-                        
                     }
+                    
                 }
-                
             }
             
+ 
             if(rectypeList.length>0){
                 $(selObj).val(rectypeList[0]);
-                
-                /* make it per widget - since need to reassign onchange listener
-                //refill on structure change
-                $(window.hWin.document).on(
-                    window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE,
-                    function(e, data) {
-                        
-                        if($(selObj).hSelect("instance")!=undefined){
-                            $(selObj).hSelect("destroy"); 
-                        }
-                        $(selObj).empty();
-
-                        window.hWin.HEURIST4.ui.createRectypeSelect(selObj, rectypeList, topOptions, useHtmlSelect);
-                    }
-                );
-                */
             }
             
         }
@@ -1012,8 +962,7 @@ window.hWin.HEURIST4.ui = {
         return $(selObj);
     },
 
-    
-    //
+    // NOT USED
     // get selector for record types tree
     //
     // rectypeTree - constraint options to this list, otherwise show entire list of rectypes separated by groups
@@ -1086,6 +1035,8 @@ window.hWin.HEURIST4.ui = {
     *
     * rtyIDs - record type ID otherwise returns all field types grouped by field groups
     * allowedlist - of data types to this list 
+    * 
+    * usage search.js, search_quick.js, recordAction.js
     */
     createRectypeDetailSelect: function(selObj, rtyIDs, allowedlist, topOptions, options ) {
 

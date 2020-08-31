@@ -89,7 +89,7 @@ class DbDefRecTypes extends DbEntityBase
             .'rty_Status,rty_OriginatingDBID,rty_IDInOriginatingDB,rty_ShowInLists,rty_RecTypeGroupID,rty_ReferenceURL,'
             .'rty_ShowURLOnEditForm,rty_ShowDescriptionOnEditForm,rty_Modified';
             
-            //$needCount = true;  //need count only for all groups
+            $needCount = true;
             
         }else{
             $needCheck = true;
@@ -123,9 +123,23 @@ class DbDefRecTypes extends DbEntityBase
             }
         }  
          
-        if($needCount){ //find count of groups where given user is a memmber   
-            array_push($this->data['details'],
-                '(select count(rec_ID) from Records where (rec_RecTypeID=rty_ID)) as rty_Usage');
+        if($needCount){ //find count of groups where given user is a member   
+        
+            $query2 = 'SELECT count(r0.rec_ID) from Records r0 ';
+            $where2 = ' WHERE (r0.rec_RecTypeID=rty_ID) ';
+                
+            $usr_ID = $this->system->get_user_id();
+                
+            if(($usr_ID>0) || ($usr_ID===0)){
+                $conds = $this->_getRecordOwnerConditions($usr_ID);
+                $query2 = $query2 . $conds[0];
+                $where2 = $where2 . ' AND '.$conds[1];      
+            }else{
+                $where2 = $where2 . 'AND (not r0.rec_FlagTemporary)';
+            }
+
+            array_push($this->data['details'], '('.$query2.$where2.') as rty_Usage');
+                
         }
         
         $is_ids_only = (count($this->data['details'])==1);

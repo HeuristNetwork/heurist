@@ -1993,10 +1993,6 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 title: window.hWin.HR('Edit record structure'),
                 afterclose: function(){
                     that._initEditForm_step3(that._currentEditID); //reload form    
-                    /*reload structure definitions w/o message
-                    window.hWin.HAPI4.SystemMgr.get_defs_all( false, window.hWin.document, function(){
-                        that._initEditForm_step3(that._currentEditID); //reload form    
-                    } );*/
                 }
             });        
         }

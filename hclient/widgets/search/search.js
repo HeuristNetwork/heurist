@@ -883,7 +883,8 @@ $.widget( "heurist.search", {
             
 
             //ART that.div_search.css('display','none');
-        }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH){ //search completed
+        }else 
+        if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH){ //search completed
 
             //accept events from the same realm only
             if(!that._isSameRealm(data)) return;
@@ -901,7 +902,8 @@ $.widget( "heurist.search", {
                 }
             }
 
-        }else if(e.type == window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE){
+        }else 
+        if(e.type == window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE){
 
             if(this.search_assistant!=null){
                 if(this.search_assistant_popup!=null && this.search_assistant_popup.dialog('instance')){

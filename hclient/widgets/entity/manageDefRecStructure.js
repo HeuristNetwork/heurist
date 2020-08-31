@@ -879,19 +879,8 @@ dty_TermIDTreeNonSelectableIDs
     },
     
     updateRecordList: function( event, data ){
-        //this._super(event, data);
-        if (data){
-            if(this.options.use_cache){
-                this._cachedRecordset = data.recordset;
-                //there is no filter feature in this form - thus, show list directly
-            }
-            this.recordList.resultList('updateResultSet', data.recordset, data.request);
-            this._selectAndEditFirstInRecordset(this.recordList);
-            
-            //var treeData = this._cachedRecordset.getTreeViewData('trm_Label','trm_ParentTermID');
-            //this._initTreeView( treeData );
-
-        }
+        this._super(event, data);
+        this._selectAndEditFirstInRecordset();
     },
         
     //

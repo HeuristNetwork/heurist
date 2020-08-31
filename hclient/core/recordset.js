@@ -128,6 +128,7 @@ function hRecordSet(initdata) {
         return result;
     }    
     
+
     //
     //
     //
@@ -1195,6 +1196,9 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
         * Returns field value by fieldname for given record
         */
         fld: function(record, fldName){
+            if(!$.isArray(record)){
+                record = records[record];
+            }
             return _getFieldValue(record, fldName);
         },
 
@@ -1229,14 +1233,30 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
             }
         },
         
-        /**
-        * returns record by id
-        * 
-        * @param recID
-        */
+        //
+        // returns record by id
+        //
         getById: function(recID){
             return records[recID];
         },
+
+        
+        //
+        // returns array of {recid:fieldvalue} for all records
+        //
+        makeKeyValueArray:function(titlefield){
+            return _makeKeyValueArray(titlefield);
+        },
+        
+        //
+        // returns record as JSON object
+        //
+        getRecord:function(recID){
+            var record = this.getById(recID);
+            return _getAllFields(record);
+        },
+
+        
         
         /**
         * returns all record ids from recordset
@@ -1751,6 +1771,15 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
             fields = _fields;
         },
         
+        //
+        // returns dty_IDs
+        // applicable for Heurist records only
+        //
+        getDetailsFieldTypes:function(){
+            return _getDetailsFieldTypes();    
+        },
+        
+        
         //  
         //  list of record ids that belong to main request (search)
         //  since some records may belong to results of rules requests (linked, related records) 
@@ -1864,10 +1893,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
         getRelations:function(){
             return relations_ids;    
         },
-        
-        makeKeyValueArray:function(titlefield){
-            return _makeKeyValueArray(titlefield);
-        },
+
         
         removeRecord:function(recID){
             delete records[recID];           //@todo check how it affect select_multi
@@ -1925,19 +1951,6 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
             }else{
                 return this.addRecord(recID, record);
             }
-        },
-        
-        //
-        // returns record as JSON object
-        //
-        getRecord:function(recID){
-            var record = this.getById(recID);
-            return _getAllFields(record);
-        },
-
-        
-        getDetailsFieldTypes:function(){
-            return _getDetailsFieldTypes();    
         },
         
         //

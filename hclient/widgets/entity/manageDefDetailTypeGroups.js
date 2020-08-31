@@ -69,10 +69,7 @@ $.widget( "heurist.manageDefDetailTypeGroups", $.heurist.manageEntity, {
 
         window.hWin.HAPI4.EntityMgr.getEntityData(this._entityName, false,
             function(response){
-                that._cachedRecordset = response.getSubSetByRequest({'sort:dtg_Order':1}, null);
-                that.recordList.resultList('updateResultSet', that._cachedRecordset);
-                that._selectAndEditFirstInRecordset(response);
-                
+                that.updateRecordList(null, {recordset:response});
             });
             
         if(this.options.innerTitle){
@@ -158,18 +155,6 @@ $.widget( "heurist.manageDefDetailTypeGroups", $.heurist.manageEntity, {
         
     },
 
-    updateRecordList: function( event, data ){
-        //this._super(event, data);
-        if (data){
-            if(this.options.use_cache){
-                this._cachedRecordset = data.recordset;
-                //there is no filter feature in this form - thus, show list directly
-            }
-            this.recordList.resultList('updateResultSet', data.recordset, data.request);
-            this._selectAndEditFirstInRecordset(data.recordset);
-        }
-    },
-    
     //
     // update list after save (refresh)
     //
@@ -210,7 +195,7 @@ $.widget( "heurist.manageDefDetailTypeGroups", $.heurist.manageEntity, {
         if(action=='save-order'){
 
 
-            var recordset = this.recordList.resultList('getRecordSet');
+            var recordset = this.getRecordSet();
             //assign new value for dtg_Order and save on server side
             var rec_order = recordset.getOrder();
             var idx = 0, len = rec_order.length;
