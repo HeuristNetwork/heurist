@@ -374,7 +374,7 @@ dty_TermIDTreeNonSelectableIDs
                         if(!isSep ){
                             title = '<span style="padding-left:20px">' + title 
                                     +'</span><span style="font-size:smaller">  ('
-                                    +window.hWin.HEURIST4.detailtypes.lookups[recset.fld(record,'dty_Type')]
+                                    +window.hWin.HEURIST4.dbs.baseFieldType[recset.fld(record,'dty_Type')]
                                     +')</span>';
                         }
                         if(req=='forbidden'){
@@ -558,7 +558,7 @@ dty_TermIDTreeNonSelectableIDs
                                 var req = recset.fld(record,'rst_RequirementType');
                                 var title = recset.fld(record,'rst_DisplayName')
                                     +'<span style="font-size:smaller">  ('
-                                    +window.hWin.HEURIST4.detailtypes.lookups[recset.fld(record,'dty_Type')]
+                                    +window.hWin.HEURIST4.dbs.baseFieldType[recset.fld(record,'dty_Type')]
                                     +')</span>';
                                 node.extraClasses = req;
                                 $(node.li).addClass(req);
@@ -841,7 +841,7 @@ dty_TermIDTreeNonSelectableIDs
         
         var recTitle = fld2('rst_ID','4em')
                 + fld2('rst_DisplayName','14em')
-                + ' ('+window.hWin.HEURIST4.detailtypes.lookups[fld('dty_Type')]+')';
+                + ' ('+window.hWin.HEURIST4.dbs.baseFieldType[fld('dty_Type')]+')';
 
         var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID
                     +'" style="height:'+(is_narrow?'1.3':'2.5')+'em">'
@@ -1089,8 +1089,6 @@ dty_TermIDTreeNonSelectableIDs
         }
         
         //check that this field is not exists in structure
-        var dtFields = window.hWin.HEURIST4.detailtypes.typedefs[dty_ID].commonFields;
-        var fi = window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex;
         
         var fields = {
             rst_ID: dty_ID,
@@ -1098,8 +1096,8 @@ dty_TermIDTreeNonSelectableIDs
             rst_DisplayOrder: "001",
             rst_DetailTypeID: dty_ID,
             //rst_Modified: "2020-03-16 15:31:23"
-            rst_DisplayName: dtFields[fi['dty_Name']],
-            rst_DisplayHelpText: dtFields[fi['dty_HelpText']],
+            rst_DisplayName: $Db.dty(dty_ID,'dty_Name'),
+            rst_DisplayHelpText: $Db.dty(dty_ID,'dty_HelpText'),
             rst_RequirementType: rst_fields['rst_RequirementType'] ?rst_fields['rst_RequirementType']:'optional',
             //rst_Repeatability: 'single',
             rst_MaxValues: (rst_fields['rst_MaxValues']>=0) ?rst_fields['rst_MaxValues']:'1',  //0 repeatable
@@ -1840,7 +1838,7 @@ dty_TermIDTreeNonSelectableIDs
         if(type!='separator'){
             title =  '<span style="padding-left:20px;">' + title 
                     + '</span><span style="font-size:smaller;">  ('
-                    +window.hWin.HEURIST4.detailtypes.lookups[type]
+                    +window.hWin.HEURIST4.dbs.baseFieldType[type]
                     +')</span>';
         }
         if(req=='forbidden'){
@@ -1898,7 +1896,7 @@ dty_TermIDTreeNonSelectableIDs
                             if(!isSep){
                                 title =  '<span style="padding-left:20px">' + title 
                                         + '</span><span style="font-size:smaller">  ('
-                                        +window.hWin.HEURIST4.detailtypes.lookups[fields['dty_Type']]
+                                        +window.hWin.HEURIST4.dbs.baseFieldType[fields['dty_Type']]
                                         +')</span>';
                             }
                             if(req=='forbidden'){
@@ -2061,7 +2059,7 @@ dty_TermIDTreeNonSelectableIDs
                         if(!isSep){
                             title =  '<span style="padding-left:20px">' + title 
                                         + '</span><span style="font-size:smaller;">  ('
-                                    +window.hWin.HEURIST4.detailtypes.lookups[recset.fld(record,'dty_Type')]
+                                    +window.hWin.HEURIST4.dbs.baseFieldType[recset.fld(record,'dty_Type')]
                                     +')</span>';
                         }
                         if(req=='forbidden'){
@@ -2115,102 +2113,53 @@ dty_TermIDTreeNonSelectableIDs
             //find seprator field type ID that is not yet added to this record strucuture
             var that = this;
             var ft_separator_id =  null;
-            var ft_separator_group =  window.hWin.HEURIST4.detailtypes.groups[0].id;
-            var dtypes = window.hWin.HEURIST4.detailtypes.typedefs;
-            var fi = window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex;
-            var fnames = window.hWin.HEURIST4.detailtypes.typedefs.commonFieldNames;
+            var ft_separator_group =  $Db.dtg().getOrders()[0]; //add to first group
             var recDetTypes = window.hWin.HEURIST4.rectypes.typedefs[rty_ID].dtFields;
 
-            var ind, k = 1;
-            for (ind in dtypes){
-                if(!window.hWin.HEURIST4.util.isnull(ind) && !isNaN(Number(ind)) ){
-                    if(dtypes[ind].commonFields[fi.dty_Type]==="separator"){
-                        k++;
-                        ft_separator_group = dtypes[ind].commonFields[fi.dty_DetailTypeGroupID];
-                        if(window.hWin.HEURIST4.util.isnull(recDetTypes[ind])){
-                            ft_separator_id = ind; //not used yet
-                            break;
-                        }
-                    }
-                }
-            }
-
+            var k = 1;
+            $Db.dty().each(function(dty_ID, rec){
+               if($Db.dty(dty_ID,'dty_Type')=='separator'){
+                   k++;
+                   if(window.hWin.HEURIST4.util.isnull(recDetTypes[dty_ID])){
+                       ft_separator_group = $Db.dty(dty_ID,'dty_DetailTypeGroupID');
+                       ft_separator_id = dty_ID; //not used yet
+                       return false;
+                   }
+                   
+               } 
+            });
+                        
             if(!window.hWin.HEURIST4.util.isnull(ft_separator_id)){
                 this.addNewFieldToStructure( ft_separator_id );
             }else{ //"not used" separator field type not found - create new one
-
-                var _detailType = [];//new Array();
-
-                _detailType[fnames[fi.dty_Name]] = 'DIVIDER '+k;
-                _detailType[fnames[fi.dty_ExtendedDescription]] = '';
-                _detailType[fnames[fi.dty_Type]] = 'separator';
-                _detailType[fnames[fi.dty_OrderInGroup]] = 0;
-                _detailType[fnames[fi.dty_HelpText]] = ''; //'Dividers serve to break the data entry form up into sections';
-                _detailType[fnames[fi.dty_ShowInLists]] = 1;
-                _detailType[fnames[fi.dty_Status]] = 'open';
-                _detailType[fnames[fi.dty_DetailTypeGroupID]] = ft_separator_group;
-                _detailType[fnames[fi.dty_FieldSetRectypeID]] = null;
-                _detailType[fnames[fi.dty_JsonTermIDTree]] = null;
-                _detailType[fnames[fi.dty_TermIDTreeNonSelectableIDs]] = null;
-                _detailType[fnames[fi.dty_PtrTargetRectypeIDs]] = null;
-                _detailType[fnames[fi.dty_NonOwnerVisibility]] = 'viewable';
-
-
-                var oDetailType = {detailtype:{
-                    colNames:{common:[]},
-                    defs: {}
-                }};
-
-                oDetailType.detailtype.defs[-1] = {};
-                oDetailType.detailtype.defs[-1].common = [];
-
-                var fname;
-                for (fname in _detailType){
-                    if(!window.hWin.HEURIST4.util.isnull(fname)){
-                        oDetailType.detailtype.colNames.common.push(fname);
-                        oDetailType.detailtype.defs[-1].common.push(_detailType[fname]);
-                    }
-                }
-
-                var str = JSON.stringify(oDetailType);
-
-
-                function __addNewSeparator(response) {
+            
+                var fields = {                
+                    dty_DetailTypeGroupID: ft_separator_group,
+                    dty_ID: -1,
+                    dty_Name: 'DIVIDER'+k,
+                    dty_NonOwnerVisibility: "viewable",
+                    dty_Status: "open",
+                    dty_Type: "separator"};
                     
-                    if(response.status == window.hWin.ResponseStatus.OK){
-        
-                        var error = false,
-                        report = "",
-                        ind;
-    //console.log('added on server '+(new Date().getTime() / 1000 - _time_debug));            
-    //_time_debug = new Date().getTime() / 1000;                       
+                var request = {
+                    'a'          : 'save',
+                    'entity'     : this.options.entity.entityName,
+                    'fields'     : fields                     
+                    };
+                window.hWin.HAPI4.EntityMgr.doRequest(request, 
+                    function(response){
+                        if(response.status == window.hWin.ResponseStatus.OK){
+                            var dty_ID = response.data[0];
+                            fields[ 'dty_ID' ] = (''+dty_ID);
                         
-                        for(ind in response.data.result){
-                            if( !window.hWin.HEURIST4.util.isnull(ind) ){
-                                var item = response.data.result[ind];
-                                if(isNaN(item)){
-                                    window.hWin.HEURIST4.msg.showMsgErr(item);
-                                    error = true;
-                                }else{
-                                    ft_separator_id = ""+Math.abs(Number(item));
-
-                                    //refresh the local heurist
-                                    window.hWin.HEURIST4.detailtypes = response.data.detailtypes;
-                                    that.addNewFieldToStructure( ft_separator_id );
-                                }
-                            }
+                            $Db.dty(recID, null, fields); //add on client side  
+                            
+                            that.addNewFieldToStructure( dty_ID );
+                        }else{
+                            window.hWin.HEURIST4.msg.showMsgErr(response);
                         }
-                    }else{
-                        window.hWin.HEURIST4.msg.showMsgErr(response);
-                    }
-                }
-                                       
-    //            _time_debug = new Date().getTime() / 1000;                       
-    //console.log('send save separator')            
-                //
-                var baseurl = window.hWin.HAPI4.baseURL + "admin/structure/saveStructure.php";
-                var request = {method:'saveDT', db:window.hWin.HAPI4.database, data:oDetailType};    //add separator
-                window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, __addNewSeparator);
+
+                    });
             }  
         }else{
         

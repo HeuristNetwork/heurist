@@ -226,10 +226,9 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
         if(!isnull(dty_ids) && window.hWin.HEURIST4){
 
             //detect geo and time fields from recordset        
-            var dtype_idx = window.hWin.HEURIST4.detailtypes.typedefs['fieldNamesToIndex']['dty_Type'];
             
             for (var i=0; i<dty_ids.length; i++) {
-                var dtype = window.hWin.HEURIST4.detailtypes.typedefs[dty_ids[i]]['commonFields'][dtype_idx];
+                var dtype = $Db.dty(dty_ids[i],'dty_Type');
                 if(dtype=='date' || dtype=='year'){
                     timefields.push(dty_ids[i]);
                 }else if(dtype=='geo'){
@@ -297,7 +296,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                             if(timefields[k]==DT_START_DATE){
                                 startDate = datetime[m];
                                 if(singleFieldName==null){
-                                     singleFieldName = window.hWin.HEURIST4.detailtypes.names[timefields[k]];
+                                     singleFieldName = $Db.dty(timefields[k], 'dty_Name');
                                 }    
                             }else if(timefields[k]==DT_END_DATE){
                                 endDate  = datetime[m]; 
@@ -305,7 +304,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                                 dres = window.hWin.HEURIST4.util.parseDates(datetime[m]);
                                 if(dres){
                                     dates.push(dres);
-                                    singleFieldName = window.hWin.HEURIST4.detailtypes.names[timefields[k]];
+                                    singleFieldName = $Db.dty(timefields[k], 'dty_Name');
                                 }     
                             }
                         }
@@ -645,10 +644,8 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
         if(!isnull(dty_ids) && window.hWin.HEURIST4){
 
             //detect geo and time fields from recordset        
-            var dtype_idx = window.hWin.HEURIST4.detailtypes.typedefs['fieldNamesToIndex']['dty_Type'];
-            
             for (var i=0; i<dty_ids.length; i++) {
-                var dtype = window.hWin.HEURIST4.detailtypes.typedefs[dty_ids[i]]['commonFields'][dtype_idx];
+                var dtype = $Db.dty(dty_ids[i], 'dty_Type');
                 if(dtype=='date' || dtype=='year'){
                     timefields.push(dty_ids[i]);
                 }else if(dtype=='geo'){
@@ -687,7 +684,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                             if(timefields[k]==DT_START_DATE){
                                 startDate = datetime[m];
                                 if(singleFieldName==null){
-                                     singleFieldName = window.hWin.HEURIST4.detailtypes.names[timefields[k]];
+                                     singleFieldName = $Db.dty(timefields[k], 'dty_Name');
                                 }    
                             }else if(timefields[k]==DT_END_DATE){
                                 endDate  = datetime[m]; 
@@ -695,7 +692,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                                 dres = window.hWin.HEURIST4.util.parseDates(datetime[m]);
                                 if(dres){
                                     dates.push(dres);
-                                    singleFieldName = window.hWin.HEURIST4.detailtypes.names[timefields[k]];
+                                    singleFieldName = $Db.dty(timefields[k], 'dty_Name');
                                 }     
                             }
                         }
@@ -873,10 +870,9 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
         if(!isnull(record) && !isnull(dty_ids) && window.hWin.HEURIST4){
 
             //find resource fields and its values
-            var dtype_idx = window.hWin.HEURIST4.detailtypes.typedefs['fieldNamesToIndex']['dty_Type'];
             
             for (var i=0; i<dty_ids.length; i++) {
-                var dtype = window.hWin.HEURIST4.detailtypes.typedefs[dty_ids[i]]['commonFields'][dtype_idx];
+                var dtype = $Db.dty(dty_ids[i], 'dty_Type');
                 if(dtype=='resource'){
                     
                     var fldvalue = _getFieldValues(record, dty_ids[i]);

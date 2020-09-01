@@ -127,10 +127,10 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
         }
        
         if($.isFunction(this.options.onInitCompleted)){
-console.log('onInitCompleted');            
             this.options.onInitCompleted.call();
+        }else{
+            this.startSearch();              
         }
-        //this.startSearch();            
     },  
     
     //

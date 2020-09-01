@@ -1122,6 +1122,10 @@ window.hWin.HEURIST4.dbs = {
         return $Db.getset('defRecTypes', rec_ID, fieldName, newValue);        
     },
     
+    dty: function(rec_ID, fieldName, newValue){
+        return $Db.getset('defDetailTypes', rec_ID, fieldName, newValue);        
+    },
+    
     getset: function(entityName, rec_ID, fieldName, newValue){
         if(newValue){
             $Db.set(entityName, rec_ID, fieldName, newValue);        

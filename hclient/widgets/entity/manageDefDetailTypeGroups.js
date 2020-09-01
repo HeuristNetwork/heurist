@@ -45,6 +45,26 @@ $.widget( "heurist.manageDefDetailTypeGroups", $.heurist.manageEntity, {
         if(!this.options.innerTitle){
             this.recordList.css('top',0);  
         }        
+        
+        var that = this;
+
+        //refresh list        
+        $(window.hWin.document).on(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, 
+            function(e, data) { 
+                if(!data || 
+                   (data.source != that.uuid && data.type == 'dtg'))
+                {
+                    that._loadData();
+                }
+            });
+        
+    },
+    
+    _destroy: function() {
+        
+       $(window.hWin.document).off(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE);
+        
+       this._super(); 
     },
     
     //  
@@ -55,23 +75,41 @@ $.widget( "heurist.manageDefDetailTypeGroups", $.heurist.manageEntity, {
         if(!this._super()){
             return false;
         }
-
             
         var that = this;
         
-        this.recordList.resultList('option', 'show_toolbar', false);
-        if(this.options.edit_mode == 'inline'){
-            this.recordList.resultList('option', 'sortable', true);
-            this.recordList.resultList('option', 'onSortStop', function(){
-                that._toolbar.find('#btnApplyOrder').show();
-            });
-        }
+        this.recordList.resultList({
+                show_toolbar:false,
+                sortable: true,
+                onSortStop: function(){
+                    that._toolbar.find('#btnApplyOrder').show();
+                },
+                droppable: function(){
+                    
+                    that.recordList.find('.recordDiv')  //.recordDiv, ,.recordDiv>.item
+                        .droppable({
+                            //accept: '.rt_draggable',
+                            scope: 'dtg_change',
+                            hoverClass: 'ui-drag-drop',
+                            drop: function( event, ui ){
 
-        window.hWin.HAPI4.EntityMgr.getEntityData(this._entityName, false,
-            function(response){
-                that.updateRecordList(null, {recordset:response});
-            });
-            
+                                var trg = $(event.target).hasClass('recordDiv')
+                                            ?$(event.target)
+                                            :$(event.target).parents('.recordDiv');
+                                            
+                                var dty_ID = $(ui.draggable).parent().attr('recid');
+                                var dtg_ID = trg.attr('recid');
+                    
+                                if(dty_ID>0 && dtg_ID>0 && that.options.reference_dt_manger){
+                                        
+                                        that.options.reference_dt_manger
+                                            .manageDefDetailTypes('changeDetailtypeGroup',{dty_ID:dty_ID, dty_DetailTypeGroupID:dtg_ID });
+                                }
+                        }});
+                }
+        });
+        
+        
         if(this.options.innerTitle){
             //specify add new/save order buttons above record list
             var btn_array = [
@@ -83,18 +121,32 @@ $.widget( "heurist.manageDefDetailTypeGroups", $.heurist.manageEntity, {
                       css:{'margin-right':'0.5em','float':'right',display:'none'}, id:'btnApplyOrder',
                       click: function() { that._onActionListener(null, 'save-order'); }}];
 
-            
             this._toolbar = this.searchForm;
             this.searchForm.css({'padding-top': '8px'}).empty();
-            btn_array[0].css['float'] = 'right'; btn_array[0].css['display'] = 'block';
-            btn_array[1].css['float'] = 'right';
             this._defineActionButton2(btn_array[0], this.searchForm);
             this._defineActionButton2(btn_array[1], this.searchForm);
             
         }
+
+        that._loadData();
         
         return true;
     },    
+    
+    //
+    //
+    //
+    _loadData: function(){
+        
+        var that = this;
+
+        window.hWin.HAPI4.EntityMgr.getEntityData(this._entityName, false,
+            function(response){
+                that.updateRecordList(null, {recordset:response});
+                that._selectAndEditFirstInRecordset(response);
+            });
+        
+    },
     
     //----------------------
     //
@@ -102,9 +154,6 @@ $.widget( "heurist.manageDefDetailTypeGroups", $.heurist.manageEntity, {
     //
     _recordListItemRenderer: function(recordset, record){
         
-        function fld(fldname){
-            return window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, fldname));
-        }
         function fld2(fldname, col_width){
             swidth = '';
             if(!window.hWin.HEURIST4.util.isempty(col_width)){
@@ -113,7 +162,7 @@ $.widget( "heurist.manageDefDetailTypeGroups", $.heurist.manageEntity, {
             return '<div class="item" '+swidth+'>'+window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, fldname))+'</div>';
         }
         
-        var recID   = fld('dtg_ID');
+        var recID   = recordset.fld(record, 'dtg_ID');
         var recTitle = fld2('dtg_ID','4em')+fld2('dtg_Name');
         
         var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" style="height:1.3em">';
@@ -129,22 +178,13 @@ $.widget( "heurist.manageDefDetailTypeGroups", $.heurist.manageEntity, {
             html = html
             + this._defineActionButton({key:'edit',label:'Edit', title:'', icon:'ui-icon-pencil', class:'rec_actions_button'},
                     null,'icon_text');
-            //+ this._defineActionButton({key:'delete',label:'Remove', title:'', icon:'ui-icon-minus'}, null,'icon_text');
-             /*
-            + '<div title="Click to edit group" class="rec_edit_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit">'
-            +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'
-            + '</div>&nbsp;&nbsp;'
-            
-             
-            + '<div title="Click to delete group" class="rec_view_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="delete">'
-            +     '<span class="ui-button-icon-primary ui-icon ui-icon-circle-close"></span><span class="ui-button-text"></span>'
-            + '</div>';
-            */
         }
 
+        var cnt = recordset.fld(record, 'dtg_FieldCount');
+        
         html = html 
-                +((fld('dtg_FieldCount')>0)
-                ?'<div style="display:table-cell;padding:0 4px">'+fld('dtg_FieldCount')+'</div>'
+                +((cnt>0)
+                ?'<div style="display:table-cell;padding:0 4px">'+cnt+'</div>'
                 :this._defineActionButton({key:'delete',label:'Remove', title:'', icon:'ui-icon-delete', class:'rec_actions_button'}, 
                             null,'icon_text'))
                 + '<div class="selection_pointer" style="display:table-cell">'
@@ -156,33 +196,60 @@ $.widget( "heurist.manageDefDetailTypeGroups", $.heurist.manageEntity, {
     },
 
     //
+    //
+    //
+    _triggerRefresh: function(){
+        window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, 
+            {source:this.uuid,  type:'dtg'});    
+    },
+        
+    //
     // update list after save (refresh)
     //
-    /*
     _afterSaveEventHandler: function( recID, fieldvalues ){
         
-        window.hWin.HEURIST4.dbs.dtgRefresh( recID, fieldvalues );
-        this._super( recID, fieldvalues );
-    },
-    _afterDeleteEvenHandler: function( recID ){
-        if(window.hWin.HEURIST4.detailtypes.groups[recID]){
-            delete window.hWin.HEURIST4.detailtypes.groups[recID];
+        if(this.options.edit_mode=='editonly'){
+            
+                this._selection = new hRecordSet();
+                this._selection.addRecord(recID, fieldvalues);
+                this._currentEditID = null;
+                this._selectAndClose();
+        }else{
+                this._super( recID, fieldvalues );
         }
-        window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, 'detailtypes'); 
-        this._super( recID );
+    
+        this._triggerRefresh();    
+        
     },
-    */
+
+    
+    //
+    //
+    //
+    _afterDeleteEvenHandler: function( recID ){
+        this._super( recID );
+        this._triggerRefresh();    
+    },
     
     //
     // can remove group with assigned fields
     //     
-    _deleteAndClose: function(){    
-            if(this._getField('dtg_FieldCount')>0){
-                window.hWin.HEURIST4.msg.showMsgFlash('Can\'t remove non empty group');  
-                return;                
-            }
-            
-            this._super();
+    _deleteAndClose: function(unconditionally){    
+        
+        if(this._getField('dtg_FieldCount')>0){
+            window.hWin.HEURIST4.msg.showMsgFlash('Can\'t remove non empty group');  
+            return;                
+        }
+
+        if(unconditionally===true){
+            this._super(); 
+
+        }else{
+            var that = this;
+            window.hWin.HEURIST4.msg.showMsgDlg(
+                'Are you sure you wish to delete this base field group? Proceed?', function(){ that._deleteAndClose(true) }, 
+                {title:'Warning',yes:'Proceed',no:'Cancel'});        
+        }
     },
     
     //
@@ -223,7 +290,6 @@ $.widget( "heurist.manageDefDetailTypeGroups", $.heurist.manageEntity, {
                 window.hWin.HAPI4.EntityMgr.doRequest(request, 
                     function(response){
                         if(response.status == window.hWin.ResponseStatus.OK){
-                            //that._afterSaveEventHandler( recID, fields );
                             that._toolbar.find('#btnApplyOrder').hide();
                         }else{
                             window.hWin.HEURIST4.msg.showMsgErr(response);

@@ -142,7 +142,7 @@
                 "groupHeader": "Additional information",
                 "groupTitleVisible": true,
                 "groupType": "accordion",
-                    "children":[
+                "children":[
 
                 {
                     "dtID": "rty_RecTypeGroupID",

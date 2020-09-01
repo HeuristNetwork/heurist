@@ -80,7 +80,7 @@ class DbDefRecTypes extends DbEntityBase
             
         }else if(@$this->data['details']=='list'){
             
-            $this->data['details'] = 'rty_ID,rty_Name,rty_Description,rty_ShowInLists,rty_RecTypeGroupID';
+            $this->data['details'] = 'rty_ID,rty_Name,rty_Description,rty_ShowInLists,rty_Status,rty_RecTypeGroupID';
             //$needCount = true;  //need count only for all groups
             
         }else if(@$this->data['details']=='full'){

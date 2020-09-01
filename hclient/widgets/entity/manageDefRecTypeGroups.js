@@ -54,7 +54,6 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
                 if(!data || 
                    (data.source != that.uuid && data.type == 'rtg'))
                 {
-//console.log('reload groups '+that.uuid);                    
                     that._loadData();
                 }
             });
@@ -78,18 +77,13 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
             return false;
         }
 
-        if(this.options.edit_mode=='editonly'){
-            this._initEditorOnly();
-            return;
-        }
-
         var that = this;
         
         this.recordList.resultList({
                 show_toolbar:false,
                 sortable: true,
                 onSortStop: function(){
-                that._toolbar.find('#btnApplyOrder').show();
+                    that._toolbar.find('#btnApplyOrder').show();
                 },
                 droppable: function(){
                     
@@ -99,13 +93,10 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
                             scope: 'rtg_change',
                             hoverClass: 'ui-drag-drop',
                             drop: function( event, ui ){
-//console.log(event.target);                                
+
                                 var trg = $(event.target).hasClass('recordDiv')
                                             ?$(event.target)
                                             :$(event.target).parents('.recordDiv');
-
-//console.log(' < '+$(ui.draggable).parent().attr('recid'));
-//console.log(trg.attr('recid'));
                                             
                     var rty_ID = $(ui.draggable).parent().attr('recid');
                     var rtg_ID = trg.attr('recid');
@@ -149,9 +140,6 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
     _loadData: function(){
         
         var that = this;
-        
-        
-console.log('rtg getEntityData '+this.uuid);        
 
         window.hWin.HAPI4.EntityMgr.getEntityData(this._entityName, false,
             function(response){
@@ -191,16 +179,6 @@ console.log('rtg getEntityData '+this.uuid);
             html = html
             + this._defineActionButton({key:'edit',label:'Edit', title:'', icon:'ui-icon-pencil', class:'rec_actions_button'}, 
                             null,'icon_text');
-             /*
-            + '<div title="Click to edit group" class="rec_edit_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit">'
-            +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'
-            + '</div>&nbsp;&nbsp;'
-            
-             
-            + '<div title="Click to delete group" class="rec_view_link logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="delete">'
-            +     '<span class="ui-button-icon-primary ui-icon ui-icon-circle-close"></span><span class="ui-button-text"></span>'
-            + '</div>';
-            */
         }
         
         var cnt = recordset.fld(record, 'rtg_RtCount');
@@ -228,7 +206,6 @@ console.log('rtg getEntityData '+this.uuid);
             {source:this.uuid,  type:'rtg'});    
     },
     
-    
     //
     // update list after save (refresh)
     //
@@ -236,10 +213,7 @@ console.log('rtg getEntityData '+this.uuid);
         
         if(this.options.edit_mode=='editonly'){
             
-                //this.options.select_return_mode='recordset';
-            
                 this._selection = new hRecordSet();
-                //{fields:{}, order:[recID], records:[fieldvalues]});
                 this._selection.addRecord(recID, fieldvalues);
                 this._currentEditID = null;
                 this._selectAndClose();
@@ -251,13 +225,12 @@ console.log('rtg getEntityData '+this.uuid);
         
     },
 
-    
+    //
+    //
+    //
     _afterDeleteEvenHandler: function( recID ){
-        
         this._super( recID );
-        
         this._triggerRefresh();    
-        
     },
     
     //
@@ -280,8 +253,6 @@ console.log('rtg getEntityData '+this.uuid);
                 {title:'Warning',yes:'Proceed',no:'Cancel'});        
         }
     },
-    
-    
     
     //
     // extend for save order
@@ -321,7 +292,6 @@ console.log('rtg getEntityData '+this.uuid);
                 window.hWin.HAPI4.EntityMgr.doRequest(request, 
                     function(response){
                         if(response.status == window.hWin.ResponseStatus.OK){
-                            //that._afterSaveEventHandler( recID, fields );
                             that._toolbar.find('#btnApplyOrder').hide();
                         }else{
                             window.hWin.HEURIST4.msg.showMsgErr(response);

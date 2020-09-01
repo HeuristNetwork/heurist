@@ -28,12 +28,12 @@ $.widget( "heurist.searchDefDetailTypes", $.heurist.searchEntity, {
         this.input_search_type = this.element.find('#input_search_type');   //field type
         var vals = [{key:'any',title:'any type'}];
         
-        for (var key in window.hWin.HEURIST4.detailtypes.lookups)
-        if(!window.hWin.HEURIST4.util.isempty(window.hWin.HEURIST4.detailtypes.lookups[key])){
+        for (var key in window.hWin.HEURIST4.dbs.baseFieldType)
+        if(!window.hWin.HEURIST4.util.isempty(window.hWin.HEURIST4.dbs.baseFieldType[key])){
             if(key!='calculated')
-                vals.push({key:key,title:window.hWin.HEURIST4.detailtypes.lookups[key]});
+                vals.push({key:key,title:window.hWin.HEURIST4.dbs.baseFieldType[key]});
         }
-        //$.extend(vals, window.hWin.HEURIST4.detailtypes.lookups);
+
         window.hWin.HEURIST4.ui.createSelector(this.input_search_type[0], vals);
 
         this.input_search_group = this.element.find('#input_search_group');   //detail group
@@ -97,8 +97,11 @@ $.widget( "heurist.searchDefDetailTypes", $.heurist.searchEntity, {
         }});
         
                       
-        this.startSearch();            
-                
+        if($.isFunction(this.options.onInitCompleted)){
+            this.options.onInitCompleted.call();
+        }else{
+            this.startSearch();              
+        }
     },  
     
     //
@@ -198,7 +201,6 @@ $.widget( "heurist.searchDefDetailTypes", $.heurist.searchEntity, {
                     });
                     
             }            
-            
             
     },
     

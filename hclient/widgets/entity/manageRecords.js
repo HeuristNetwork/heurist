@@ -2238,7 +2238,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         
         var dt = null;
         if(window.hWin.HEURIST4.detailtypes.typedefs[detailTypeID]){
-         dt = window.hWin.HEURIST4.detailtypes.typedefs[detailTypeID]['commonFields'];
+            dt = window.hWin.HEURIST4.detailtypes.typedefs[detailTypeID]['commonFields'];
         }
         
         var fieldIndexMap = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex;

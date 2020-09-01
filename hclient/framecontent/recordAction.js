@@ -211,7 +211,9 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
 
         var fieldSelect = $('#sel_fieldtype').get(0);
         if(init_scope_type>0){
-            window.hWin.HEURIST4.ui.createSelector(fieldSelect, {key:init_scope_type, title:window.hWin.HEURIST4.detailtypes.names[init_scope_type]});
+            window.hWin.HEURIST4.ui.createSelector(fieldSelect, 
+                {key:init_scope_type, title: $Db.dty(init_scope_type, 'dty_Name')});
+                
         }else{
 
             var scope_type = selectRecordScope.val();
@@ -249,7 +251,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                 rtyIDs = [scope_type];
             }
 
-            var allowed = Object.keys(window.hWin.HEURIST4.detailtypes.lookups);
+            var allowed = Object.keys(window.hWin.HEURIST4.dbs.baseFieldType);
             allowed.splice(allowed.indexOf("separator"),1);
             allowed.splice(allowed.indexOf("relmarker"),1);
             allowed.splice(allowed.indexOf("geo"),1);
@@ -324,8 +326,6 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
         var dtID = $('#sel_fieldtype').val();//
 
         if(window.hWin.HEURIST4.util.isempty(dtID)) return;
-
-        var dtidx = window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex['dty_Type'];
 
         var scope_type = selectRecordScope.val();
         if(Number(scope_type)>0){

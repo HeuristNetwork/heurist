@@ -123,7 +123,7 @@ class DbDefDetailTypeGroups extends DbEntityBase
          if(count($where)>0){
             $query = $query.' WHERE '.implode(' AND ',$where);
          }
-         $query = $query.$this->searchMgr->getLimit()
+         $query = $query.' ORDER BY dtg_Order '.$this->searchMgr->getLimit()
                         .$this->searchMgr->getOffset();
         
 

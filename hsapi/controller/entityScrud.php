@@ -65,7 +65,7 @@
         
         if(@$_REQUEST['a']=='search' && @$_REQUEST['multi']==1 && @$_REQUEST['entity']=='all'){ 
             //search can be performed for several entities at once
-            $entities = array('rtg','dtg','rty');
+            $entities = array('rtg','dtg','rty','dty');
         }else {
             $entities = @$_REQUEST['entity'];
         }
@@ -79,6 +79,7 @@
             if($entity_name=='rtg') $entities[$idx] = 'defRecTypeGroups';
             else if($entity_name=='dtg') $entities[$idx] = 'defDetailTypeGroups';
             else if($entity_name=='rty') $entities[$idx] = 'defRecTypes';
+            else if($entity_name=='dty') $entities[$idx] = 'defDetailTypes';
         }
         
         

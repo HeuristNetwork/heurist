@@ -36,7 +36,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         height:(window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95,
         groupsPresentation:'tab', //'none','tab',list','select'
 //rtyid,'ccode','addrec','filter','count','group','icon','edit','editstr','name','description','show','duplicate','fields','status'        
-        fields:['count','icon','editstr','name',,'description','show','duplicate','fields','status'] 
+        fields:['count','icon','editstr','name','description','show','duplicate','fields','status'] 
         },
     
     //
@@ -179,7 +179,6 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                         that.recordList.find('.rt_draggable > .item').draggable({ // 
                                     revert: true,
                                     helper: function(){ 
-//console.log(this);                                        
                                         return $('<div class="rt_draggable ui-drag-drop" recid="'+
                                             $(this).parent().attr('recid')
                                         +'" style="width:300;padding:4px;text-align:center;font-size:0.8em;background:#EDF5FF"'
@@ -262,8 +261,6 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
     // invoked after all elements are inited 
     //
     _loadData: function(){
-        
-console.log('_loadData rectypes');
         
         var that = this;
       
@@ -750,7 +747,7 @@ console.log('_loadData rectypes');
 
                 }else if(action=='show_in_list' || action=='hide_in_list'){
                     
-                    window.hWin.HEURIST4.msg.bringCoverallToFront(this.recordList);
+                    //window.hWin.HEURIST4.msg.bringCoverallToFront(this.recordList);
                     var newVal = (action=='show_in_list')?1:0;
                     this._saveEditAndClose({rty_ID:recID, rty_ShowInLists:newVal });
                     /*
@@ -774,53 +771,40 @@ console.log('_loadData rectypes');
 
     },
     
-    //
-    // show warning
-    //
-    addEditRecord: function(recID, is_proceed){
     
-        if(recID<0 && is_proceed !== true){
+    _deleteAndClose: function(unconditionally){
+    
+        if(unconditionally===true){
+            this.deleted_from_group_ID = $Db.rty(this._currentEditID,'rty_RecTypeGroupID');
+            this._super(); 
+        }else{
+            this.deleted_from_group_ID = 0;
             var that = this;
             window.hWin.HEURIST4.msg.showMsgDlg(
-                    'Before defining new record (entity) types we suggest importing suitable '+
-                    'definitions from templates (Heurist databases registered in the Heurist clearinghouse). '+
-                    'Those with registration IDs less than 1000 are templates curated by the Heurist team. '
-                    +'<br><br>'
-    +'This is particularly important for BIBLIOGRAPHIC record types - the definitions in template #6 (Bibliographic definitions) are ' 
-    +'optimally normalised and ensure compatibility with bibliographic functions such as Zotero synchronisation, Harvard format and inter-database compatibility.'                
-                    +'<br><br>Use main menu:  Design > Browse templates'                
-                    , function(){
-                        that.addEditRecord(recID, true); 
-                        //that._super(recID); 
-                    }, {title:'Confirm',yes:'Continue',no:'Cancel'});
-        
-        }else{
-               this._super(recID); 
+                'Are you sure you wish to delete this record type? Proceed?', function(){ that._deleteAndClose(true) }, 
+                {title:'Warning',yes:'Proceed',no:'Cancel'});        
         }
     },
     
-    //overwritten    
-    _recordListGetFullData:function(arr_ids, pageno, callback){
+    //
+    //
+    //
+    _afterDeleteEvenHandler: function(recID){
 
-console.log('_recordListGetFullData')        
-        var request = {
-                'a'          : 'search',
-                'entity'     : this.options.entity.entityName,
-                'details'    : 'list',
-                'pageno'     : pageno,
-                'db'         : this.options.database  
-                
-        };
-        var rty_RecTypeGroupID = this.searchForm.find('#input_search_group').val();
-        if(rty_RecTypeGroupID>0){
-            request['rty_RecTypeGroupID'] = rty_RecTypeGroupID;
-        }
         
-        
-        request[this.options.entity.keyField] = arr_ids;
-        window.hWin.HAPI4.EntityMgr.doRequest(request, callback);
+            this._super(recID);
+            
+            this.updateGroupCount(this.deleted_from_group_ID, -1);
+            
+            //backward capability - remove later        
+            var rectypes = window.hWin.HEURIST4.rectypes;
+            if(recID>0 && rectypes.typedefs[recID]){
+                    delete rectypes.names[recID];
+                    delete rectypes.pluralNames[recID];
+                    delete rectypes.typedefs[recID];
+            }
+           
     },
-    
     
     //-----
     //
@@ -834,6 +818,11 @@ console.log('_recordListGetFullData')
         var rty_RecTypeGroupID = this.options.rtg_ID; //this.searchForm.find('#input_search_group').val();
         if(this._currentEditID<0){ //rty_RecTypeGroupID>0 && !this._currentEditRecordset){ //insert       
 
+        
+            if(!(rty_RecTypeGroupID>0)){ //take first from list of groups
+                rty_RecTypeGroupID = $Db.rtg().getOrder()[0];                
+            }
+        
             var ele = this._editing.getFieldByName('rty_RecTypeGroupID');
             if(rty_RecTypeGroupID>0) ele.editing_input('setValue', rty_RecTypeGroupID);
             
@@ -907,7 +896,56 @@ console.log('_recordListGetFullData')
         }
         
     },   
+        
+    //
+    // show warning
+    //
+    addEditRecord: function(recID, is_proceed){
     
+        if(recID<0 && is_proceed !== true){
+            var that = this;
+            window.hWin.HEURIST4.msg.showMsgDlg(
+                    'Before defining new record (entity) types we suggest importing suitable '+
+                    'definitions from templates (Heurist databases registered in the Heurist clearinghouse). '+
+                    'Those with registration IDs less than 1000 are templates curated by the Heurist team. '
+                    +'<br><br>'
+    +'This is particularly important for BIBLIOGRAPHIC record types - the definitions in template #6 (Bibliographic definitions) are ' 
+    +'optimally normalised and ensure compatibility with bibliographic functions such as Zotero synchronisation, Harvard format and inter-database compatibility.'                
+                    +'<br><br>Use main menu:  Design > Browse templates'                
+                    , function(){
+                        that.addEditRecord(recID, true); 
+                        //that._super(recID); 
+                    }, {title:'Confirm',yes:'Continue',no:'Cancel'});
+        
+        }else{
+               this._super(recID); 
+        }
+    },
+    
+    //overwritten     NOT USED
+    _recordListGetFullData:function(arr_ids, pageno, callback){
+
+console.log('_recordListGetFullData')        
+        var request = {
+                'a'          : 'search',
+                'entity'     : this.options.entity.entityName,
+                'details'    : 'list',
+                'pageno'     : pageno,
+                'db'         : this.options.database  
+                
+        };
+        var rty_RecTypeGroupID = this.searchForm.find('#input_search_group').val();
+        if(rty_RecTypeGroupID>0){
+            request['rty_RecTypeGroupID'] = rty_RecTypeGroupID;
+        }
+        
+        
+        request[this.options.entity.keyField] = arr_ids;
+        window.hWin.HAPI4.EntityMgr.doRequest(request, callback);
+    },
+    
+    
+
     //
     // @todo
     //
@@ -916,7 +954,7 @@ console.log('_recordListGetFullData')
         if(!rectypeID || rectypeID < 0){
             var val = "record [ID]";
             if(document.getElementById("definit").checked && window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME']){
-                val = "["+window.hWin.HEURIST4.detailtypes.names[window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME']]+"]";
+                val = "["+ $Db.dty(window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'], 'dty_Name') +"]";
             }
 
             document.getElementById("rty_TitleMask").value = val
@@ -1012,10 +1050,7 @@ console.log('_recordListGetFullData')
                                     function(){
                                         that._onActionListener(null, {recID:recID, action:'editstr'} );
                                         var rtg_ID = $Db.rty(recID,'rty_RecTypeGroupID');
-                                        var cnt = parseInt($Db.rtg(rtg_ID,'rtg_RtCount'));
-                                        var cnt = (isNaN(cnt)?0:cnt)+1
-                                        $Db.rtg(rtg_ID,'rtg_RtCount',cnt);
-                                        that._triggerRefresh('rtg');
+                                        that.updateGroupCount(rtg_ID, 1);
                                     });
                                     
                                 }else{
@@ -1045,46 +1080,19 @@ console.log('_recordListGetFullData')
 */        
     },
     
-    _deleteAndClose: function(unconditionally){
+    //
+    //
+    //
+    updateGroupCount:function(rtg_ID,  delta){
     
-        if(unconditionally===true){
-            this.deleted_from_rtg_ID = $Db.rty(this._currentEditID,'rty_RecTypeGroupID');
-            this._super(); 
-        }else{
-            this.deleted_from_rtg_ID = 0;
-            var that = this;
-            window.hWin.HEURIST4.msg.showMsgDlg(
-                'Are you sure you wish to delete this record type? Proceed?', function(){ that._deleteAndClose(true) }, 
-                {title:'Warning',yes:'Proceed',no:'Cancel'});        
-        }
-    },
-    
-    //
-    //
-    //
-    _afterDeleteEvenHandler: function(recID){
-
-        
-            this._super(recID);
-            
-            if(this.deleted_from_rtg_ID>0){
-                var rtg_ID =  this.deleted_from_rtg_ID;
-                var cnt = parseInt($Db.rtg(rtg_ID,'rtg_RtCount'));
-                var cnt = (isNaN(cnt)?0:cnt-1);
-                $Db.rtg(rtg_ID,'rtg_RtCount',cnt);
-            }
-            
+        if(rtg_ID>0){
+            var cnt = parseInt($Db.rtg(rtg_ID,'rtg_RtCount'));
+            var cnt = (isNaN(cnt)?0:cnt)+delta;
+            if(cnt<0) cnt = 0;
+            $Db.rtg(rtg_ID,'rtg_RtCount',cnt);
             this._triggerRefresh('rtg');
-            
-            //backward capability - remove later        
-            var rectypes = window.hWin.HEURIST4.rectypes;
-            if(recID>0 && rectypes.typedefs[recID]){
-                    delete rectypes.names[recID];
-                    delete rectypes.pluralNames[recID];
-                    delete rectypes.typedefs[recID];
-            }
-           
-    },
+        }
+    },    
     
     //
     //
@@ -1182,33 +1190,33 @@ console.log('_recordListGetFullData')
                 window.hWin.HEURIST4.util.sendRequest(baseurl, { rtyID:rectypeID }, null, _editAfterDuplicate);
 
         }, {title:'Confirm',yes:'Continue',no:'Cancel'});
-    }
+    },
 
 
     //
     //
     //                                
-    , changeRectypeGroup: function(params){                                    
-                    window.hWin.HEURIST4.msg.bringCoverallToFront(this.recordList);
+    changeRectypeGroup: function(params){                                    
+        window.hWin.HEURIST4.msg.bringCoverallToFront(this.recordList);
 
-    var that = this;
-    this._saveEditAndClose( params ,
-        function(){
-            window.hWin.HEURIST4.msg.sendCoverallToBack();
-            window.hWin.HAPI4.EntityMgr.refreshEntityData('rtg',
-                function(){
-                    that._triggerRefresh('rtg');
-                }
-             )
-/*            
-            //change groups
-            var id = params.rty_ID;
-            var rtg = params.rty_RecTypeGroupID
-            var new_id = window.hWin.HEURIST4.dbs.rtyField(id,'rty_RecTypeGroupID', rtg);
-            window.hWin.HEURIST4.dbs.rtgRefresh(); //refresh groups counts after change group
-*/            
+        var that = this;
+        this._saveEditAndClose( params ,
+            function(){
+                window.hWin.HEURIST4.msg.sendCoverallToBack();
+                window.hWin.HAPI4.EntityMgr.refreshEntityData('rtg',
+                    function(){
+                        that._triggerRefresh('rtg');
+                    }
+                )
+                /*            
+                //change groups
+                var id = params.rty_ID;
+                var rtg = params.rty_RecTypeGroupID
+                var new_id = window.hWin.HEURIST4.dbs.rtyField(id,'rty_RecTypeGroupID', rtg);
+                window.hWin.HEURIST4.dbs.rtgRefresh(); //refresh groups counts after change group
+                */            
         });
     }                                    
-    
+
     
 });

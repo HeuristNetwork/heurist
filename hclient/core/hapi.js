@@ -718,6 +718,8 @@ prof =Profile
                         window.hWin.HEURIST4.terms = response.data.terms;
                         window.hWin.HEURIST4.detailtypes = response.data.detailtypes;
                         
+                        window.hWin.HEURIST4.dbs.baseFieldType = window.hWin.HEURIST4.detailtypes.lookups;
+                        
                         if (is_message==true) {
                             $dlg = window.hWin.HEURIST4.msg.showMsgDlg('Database structure definitions in browser memory have been refreshed.<br>'+
                                 'You may need to reload pages to see changes.');
@@ -1162,15 +1164,24 @@ prof =Profile
                                 var entity_cfg = response.data;
 
                                 //find key and title fields
-                                var idx;
-                                for(idx in entity_cfg.fields){
-                                    if(entity_cfg.fields[idx]['keyField']==true){
-                                        entity_cfg.keyField = entity_cfg.fields[idx]['dtID'];
-                                    }
-                                    if(entity_cfg.fields[idx]['titleField']==true){
-                                        entity_cfg.titleField = entity_cfg.fields[idx]['dtID'];
+                                function __findFields(fields){
+                                    var idx;
+                                    for(idx in fields){
+                                        if(fields[idx].children){
+                                            __findFields(fields[idx].children);
+                                        }else{
+                                            if(fields[idx]['keyField']==true){
+                                                entity_cfg.keyField = fields[idx]['dtID'];
+                                            }
+                                            if(fields[idx]['titleField']==true){
+                                                entity_cfg.titleField = fields[idx]['dtID'];
+                                            }
+                                        }
                                     }
                                 }
+                                
+                                __findFields( entity_cfg.fields );
+                                
                                 entity_configs[response.data.entityName] = entity_cfg;
 
                                 callback(entity_cfg);
