@@ -90,6 +90,7 @@ $.widget( "heurist.searchEntity", {
                     
             //this is default search field - define it in your instance of html            
             this.input_search = this.element.find('#input_search');
+            if(!this.input_search) this.input_search = this.element.find('.input_search');
             if(!window.hWin.HEURIST4.util.isempty(this.options.filter_title)) {
                 this.input_search.val(this.options.filter_title);    
             }

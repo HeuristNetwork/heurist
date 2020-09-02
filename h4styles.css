@@ -420,12 +420,14 @@ div.recordDiv.selected .selection_pointer{
     visibility: visible;
 }
 
+div.groupHeader:hover > .action-button-container,
 div.recordDiv:hover > .action-button-container,
 div.recordDiv:hover > .rec_actions
 {
     display: block;
 }
-div.recordDiv  > .action-button-container,
+div.groupHeader > .action-button-container,
+div.recordDiv > .action-button-container,
 div.recordDiv  .rec_actions {
     display: none;
 }

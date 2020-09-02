@@ -59,7 +59,6 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         if(!this.options.layout_mode) this.options.layout_mode = 'short';
         
         //this.options.select_return_mode = 'recordset';
-        this.options.edit_need_load_fullrecord = true;
         this.options.edit_height = 640;
         this.options.edit_width = 1000;
         this.options.height = 640;
@@ -133,25 +132,6 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             return;
         }
         
-        //update dialog title
-        if(this.options.isdialog){ // &&  !this.options.title
-            var title = null;
-            
-            if(this.options.title){
-                title = this.options.title;
-            }else
-            if(this.options.select_mode=='select_single'){
-               title = 'Select Record Type'; 
-            }else
-            if(this.options.select_mode=='select_multi'){
-               title = 'Select Record Types'; 
-            }else{
-                title = 'Manage Record Types';    
-            }
-            
-            this._as_dialog.dialog('option','title', title);    
-        }
-        
         var iheight = 0;
         if(this.searchForm.css('display')=='none'){
         
@@ -219,6 +199,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                      select_mode: 'manager',
                      reference_rt_manger: that.element,
                      onSelect:function(res){
+console.log('onSELECT!!!!');
                          if(window.hWin.HEURIST4.util.isRecordSet(res)){
                             res = res.getIds();                     
                             if(res && res.length>0){

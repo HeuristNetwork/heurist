@@ -398,7 +398,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
             var allTerms = details[fi['rst_FilteredJsonTermIDTree']];
             var headerTerms = details[fi['dty_TermIDTreeNonSelectableIDs']];
-            var termlist = window.hWin.HEURIST4.ui.getPlainTermsList(detailtype, allTerms, headerTerms);
+            var termlist = window.hWin.HEURIST4.dbs.getPlainTermsList(detailtype, allTerms, headerTerms);
 
             fields3[name].values = termlist;
 

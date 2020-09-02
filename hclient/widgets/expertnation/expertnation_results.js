@@ -124,7 +124,7 @@ $.widget( "heurist.expertnation_results", $.heurist.resultList, {
             fullName = fld(DT_INITIALS);        
         }
         if(!window.hWin.HEURIST4.util.isempty(fld(DT_HONOR))){
-            fullName = window.hWin.HEURIST4.ui.getTermValue( fld(DT_HONOR) )+' '+fullName;
+            fullName = window.hWin.HEURIST4.dbs.getTermValue( fld(DT_HONOR) )+' '+fullName;
         }
         fullName = fullName + ' ' + fld(DT_NAME);
         

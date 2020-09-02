@@ -473,7 +473,7 @@ function output_CSV($system, $data, $params){
                 
                     $vals = array();
                     
-                    //if(window.hWin.HEURIST4.ui.isTermInList(this.detailType, allTerms, headerTerms, direct[k]['trmID']))
+                    //if(window.hWin.HEURIST4.dbs.isTermInList(this.detailType, allTerms, headerTerms, direct[k]['trmID']))
                 
                     foreach($related_recs['direct'] as $relation){
                         $target_rt = $related_recs['headers'][$relation->targetID][1];

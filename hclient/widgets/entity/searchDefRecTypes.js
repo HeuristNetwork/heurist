@@ -126,6 +126,7 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
             
         }
        
+console.log('searchRecTypes INITED');       
         if($.isFunction(this.options.onInitCompleted)){
             this.options.onInitCompleted.call();
         }else{

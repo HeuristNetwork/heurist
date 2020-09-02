@@ -492,7 +492,7 @@ $.widget( "heurist.manageEntity", {
     //
     // listener of action button/menu clicks - central listener for action events
     //
-    _onActionListener:function(event, action){
+    _onActionListener: function(event, action){
         
         var recID = 0;
         
@@ -563,6 +563,7 @@ $.widget( "heurist.manageEntity", {
             + '" class="logged-in-only'
             + (action.class?' '+action.class:'')+'"'
             + (style?' style="'+style+'"':'')
+            + (action.recid>0?(' data-recid="'+action.recid>+'"'):'')
             +' role="button" aria-disabled="false" data-key="'+action.key+'">';
 
                     if(action.icon){
@@ -580,7 +581,7 @@ $.widget( "heurist.manageEntity", {
             if(mode=='icon'){
                 
                     //class="item inlist logged-in-only" '
-                    btn = $('<div>',{title:action.title, 'aria-disabled':false, 'data-key':action.key})
+                    btn = $('<div>',{title:action.title, 'aria-disabled':false, 'data-key':action.key, 'data-recid':action.recid})
                             .css(style)
                             .appendTo(container);
                     if(action.icon){
@@ -591,7 +592,7 @@ $.widget( "heurist.manageEntity", {
                 
             }else{
                 
-                    btn = $('<div>',{'data-key':action.key}).button(
+                    btn = $('<div>',{'data-key':action.key,'data-recid':action.recid}).button(
                             {icons: {primary: action.icon}, 
                              text: (mode!='small'), 
                              title: action.title, 
@@ -605,9 +606,12 @@ $.widget( "heurist.manageEntity", {
                     
             }        
             this._on(btn, {'click':function( event ) {
+                        window.hWin.HEURIST4.util.stopEvent( event ); 
                         var ele = $(event.target);
                         var key = ele.attr('data-key') || ele.parent().attr('data-key');
-                        this._onActionListener(null, key);
+                        var recid = ele.attr('data-recid') || ele.parent().attr('data-recid');
+console.log('>>>>'+key);                        
+                        this._onActionListener(null, {action:key, recID:recid} );
                         //that._trigger( "onaction", null, key );
                     }});
                     
@@ -693,10 +697,19 @@ $.widget( "heurist.manageEntity", {
     //
     //
     //
-    _initEditorOnly: function(){
+    _initEditorOnly: function( recset ){
         
             //load user for given record id
             if(this.options.rec_ID>0){
+                
+                    var that = this;                                                
+                    
+                    if( recset && recset.length()>0 ){
+                        that.updateRecordList(null, {recordset:recset});
+                        that.addEditRecord( this.options.rec_ID );
+                        return;
+                    }
+                
                     var request = {};
                     request[this.options.entity.tablePrefix+'_ID']  = this.options.rec_ID;
                     request['a']          = 'search'; //action
@@ -706,7 +719,6 @@ $.widget( "heurist.manageEntity", {
                     
                     //request['DBGSESSID'] = '423997564615200001;d=1,p=0,c=0';
 
-                    var that = this;                                                
                     
                     window.hWin.HAPI4.EntityMgr.doRequest(request, 
                         function(response){

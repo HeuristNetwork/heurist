@@ -657,6 +657,64 @@
         return $sysValues;
     }
     
+    
+    //
+    //
+    //
+    function updateDatabseToLatest3($system){
+        
+        $ret = false;        
+        $mysqli = $system->get_mysqli();
+      
+        //create new tables
+        $value = mysql__select_value($mysqli, "SHOW TABLES LIKE 'defVocabularyGroups'");
+        if($value==null || $value==""){        
+            
+$query = "CREATE TABLE defVocabularyGroups (
+  vcg_ID tinyint(3) unsigned NOT NULL auto_increment COMMENT 'Vocabulary group ID referenced in vocabs editor',
+  vcg_Name varchar(40) NOT NULL COMMENT 'Name for this group of vocabularies, shown as heading in lists',
+  vcg_Domain enum('enum','relation') NOT NULL default 'enum' COMMENT 'Field of application of the vocabulary - can be both',
+  vcg_Order tinyint(3) unsigned zerofill NOT NULL default '002' COMMENT 'Ordering of vocabulary groups within pulldown lists',
+  vcg_Description varchar(250) default NULL COMMENT 'A description of the vocabulary group and its purpose',
+  vcg_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this vocabulary group record, used to get last updated date for table',
+  PRIMARY KEY  (vcg_ID),
+  UNIQUE KEY vcg_Name (vcg_Name)
+) ENGINE=InnoDB COMMENT='Grouping mechanism for vocabularies in vocabularies/terms editor'";
+            
+            $res = $mysqli->query($query);
+            if(!$res){
+                $system->addError(HEURIST_DB_ERROR, 'Cannot create defVocabularyGroups', $mysqli->error);
+                return false;
+            }
+            $report[] = 'defVocabularyGroups created';
+            
+            $mysqli->query('INSERT INTO defVocabularyGroups (vcg_Name) VALUES ("User-defined")');
+            $mysqli->query('INSERT INTO defVocabularyGroups (vcg_Name) VALUES ("Semantic web")');
+            $mysqli->query('INSERT INTO defVocabularyGroups (vcg_Name) VALUES ("Place")');
+            $mysqli->query('INSERT INTO defVocabularyGroups (vcg_Name) VALUES ("People,  events, biography")');
+            $mysqli->query('INSERT INTO defVocabularyGroups (vcg_Name) VALUES ("Bibliographic, copyright")');
+            $mysqli->query('INSERT INTO defVocabularyGroups (vcg_Name) VALUES ("Spatial")');
+            $mysqli->query('INSERT INTO defVocabularyGroups (vcg_Name) VALUES ("Categorisation and flags")');
+            $mysqli->query('INSERT INTO defVocabularyGroups (vcg_Name) VALUES ("Internal")');
+            $mysqli->query('INSERT INTO defVocabularyGroups (vcg_Name) VALUES ("Relationships")');
+            
+            //alter table
+            $query = "ALTER TABLE `defTerms` ADD COLUMN trm_VocabularyGroupID smallint(5) unsigned NULL default '1' COMMENT 'Vocabulary group to which this term belongs, if a top level term (vocabulary)'";
+             
+            $res = $mysqli->query($query);
+            if(!$res){
+                $system->addError(HEURIST_DB_ERROR, 'Cannot modify defTerms to add trm_VocabularyGroupID', $mysqli->error);
+                return false;
+            }
+            $mysqli->query('UPDATE defTerms set trm_VocabularyGroupID=9 where (NOT (trm_ParentTermID>0)) and trm_Domain="relation"');
+            
+            $report[] = 'defTerms: trm_VocabularyGroupID added';            
+            
+        }
+      
+        
+    }
+    
     //
     //
     //
@@ -694,7 +752,7 @@
         if($res) $res->close();
         if(!$row_cnt){ //column not defined
             //alter table
-            $query = "ALTER TABLE ".$db_name.".`defRecStructure` ADD COLUMN `rst_PointerBrowseFilter` varchar(255)  DEFAULT NULL COMMENT 'When adding record pointer values, defines a Heurist filter to restrict the list of target records browsed' AFTER `rst_CreateChildIfRecPtr`, ADD COLUMN `rst_PointerMode` enum('addorbrowse','addonly','browseonly') DEFAULT 'addorbrowse' COMMENT 'When adding record pointer values, default or null = show both add and browse, otherwise only allow add or only allow browse-for-existing' AFTER `rst_CreateChildIfRecPtr`;";
+            $query = "ALTER TABLE `defRecStructure` ADD COLUMN `rst_PointerBrowseFilter` varchar(255)  DEFAULT NULL COMMENT 'When adding record pointer values, defines a Heurist filter to restrict the list of target records browsed' AFTER `rst_CreateChildIfRecPtr`, ADD COLUMN `rst_PointerMode` enum('addorbrowse','addonly','browseonly') DEFAULT 'addorbrowse' COMMENT 'When adding record pointer values, default or null = show both add and browse, otherwise only allow add or only allow browse-for-existing' AFTER `rst_CreateChildIfRecPtr`;";
              
             $res = $mysqli->query($query);
             if(!$res){

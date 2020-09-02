@@ -58,6 +58,7 @@ $.widget( "heurist.resultList", {
         
         groupByMode: null, //[null|'none','tab','accordion'],
         groupByField:null,
+        groupByRecordset: null,
         groupOnlyOneVisible:false,
         groupByCss:null, //css for group content
 
@@ -2484,6 +2485,7 @@ $.widget( "heurist.resultList", {
     , _renderPage: function(pageno, recordset, is_retained_selection){
 
         var idx, len, pagesize;
+        var that = this;
 
         if(is_retained_selection){ //draw retained selection
 
@@ -2570,16 +2572,31 @@ $.widget( "heurist.resultList", {
                 }   
             }
 
-            //
-            for (var grp_val in html_groups){
-                var gheader = (hasRender)
-                    ?this.options.rendererGroupHeader.call(this, grp_val, this._grp_keep_status)
-                    :'<div style="width:100%">'+grp_val+'</div>';  
+            function __drawGroupHeader(i, grp_val){
                 
-                var is_expanded = ($.isEmptyObject(this._grp_keep_status) || this._grp_keep_status[grp_val]==1);
-                html += (gheader+'<div data-grp-content="'+grp_val
-                    +'" style="display:'+(is_expanded?'block':'none')
-                    +'">'+html_groups[grp_val]+'</div>');
+                    if(!html_groups[grp_val]){
+                        html_groups[grp_val] = 'empty';  
+                        that._grp_keep_status[grp_val] = 0;
+                    }
+                    
+                    var is_expanded = ($.isEmptyObject(that._grp_keep_status) || that._grp_keep_status[grp_val]==1);
+                    
+                    var gheader = (hasRender)
+                        ?that.options.rendererGroupHeader.call(that, grp_val, is_expanded)
+                        :'<div style="width:100%">'+grp_val+'</div>';  
+                        
+                    html += (gheader+'<div data-grp-content="'+grp_val
+                        +'" style="display:'+(is_expanded?'block':'none')
+                        +'">'+html_groups[grp_val]+'</div>');
+            }
+            
+            if(this.options.groupByRecordset){
+                $.each(this.options.groupByRecordset.getOrder(),__drawGroupHeader);
+            }else{
+                //
+                for (var grp_val in html_groups){
+                    __drawGroupHeader(0, grp_val);
+                }
             }
         }
         
@@ -2607,12 +2624,12 @@ $.widget( "heurist.resultList", {
                         if(ele.is(':visible')){
                             that._grp_keep_status[grp_val] = 0;
                             ele.hide();
-                            btn.find('span.ui-icon').removeClass('ui-icon-triangle-1-s').addClass('ui-icon-triangle-1-e');
+                            btn.find('.expand_button').removeClass('ui-icon-triangle-1-s').addClass('ui-icon-triangle-1-e');
                         }else{
                             if(that.options.groupOnlyOneVisible){
                                 //collapse other groups
                                 that.div_content.find('div[data-grp]')
-                                        .find('span.ui-icon')
+                                        .find('.expand_button')
                                         .removeClass('ui-icon-triangle-1-s').addClass('ui-icon-triangle-1-e');
                                 that.div_content.find('div[data-grp-content]').hide();
                                 that._grp_keep_status = {};
@@ -2623,7 +2640,7 @@ $.widget( "heurist.resultList", {
                             
                             
                             ele.show();
-                            btn.find('span.ui-icon').removeClass('ui-icon-triangle-1-e').addClass("ui-icon-triangle-1-s");
+                            btn.find('.expand_button').removeClass('ui-icon-triangle-1-e').addClass("ui-icon-triangle-1-s");
                         }
                     });
         }

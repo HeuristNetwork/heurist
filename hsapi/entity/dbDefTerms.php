@@ -126,11 +126,16 @@ class DbDefTerms extends DbEntityBase
             
         }else if(@$this->data['details']=='list'){
 
-            $this->data['details'] = 'trm_ID,trm_Label,trm_InverseTermId,trm_Description,trm_Domain,trm_ParentTermID,trm_Code,trm_Status';
+            $this->data['details'] = 'trm_ID,trm_Label,trm_InverseTermId,trm_Description,trm_Domain,trm_ParentTermID'
+            .',trm_VocabularyGroupID,trm_Code,trm_Status';
             
         }else if(@$this->data['details']=='full'){
 
-            $this->data['details'] = implode(',', array_keys($this->fields) );
+            $this->data['details'] = 'trm_ID,trm_Label,trm_InverseTermId,trm_ParentTermID'
+            .',trm_VocabularyGroupID,trm_Code,trm_Status'; //trm_Description,trm_Domain,trm_Modified
+            
+            
+            //$this->data['details'] = implode(',', array_keys($this->fields) );
         }
         
         if(!is_array($this->data['details'])){ //specific list of fields

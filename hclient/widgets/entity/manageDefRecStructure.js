@@ -67,7 +67,6 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         this.options.use_structure = true;
         
         //this.options.select_return_mode = 'recordset';
-        this.options.edit_need_load_fullrecord = false;
         this.options.edit_height = 640;
         this.options.edit_width = 640;
         

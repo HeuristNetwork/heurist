@@ -1426,7 +1426,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
         //
         //  returns subset by rerquest/filter
         //
-        // request:  { sort:fieldName , =fieldName:value, fieldName:value }
+        // request:  { "sort:fieldName":-1|1 , fieldName:=value, fieldName:value, fieldName:'NULL' }
         // structure [{dtID:fieldname, dtFields:{dty_Type: } }]
         getSubSetByRequest: function(request, structure){
             
@@ -1466,6 +1466,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                     if(window.hWin.HEURIST4.util.isempty(request[fieldName])) {
                         delete request[fieldName];    
                     }else if(fieldName.indexOf('sort:')<0){
+                        
                         //find data type
                         dataTypes[fieldName] = __getDataType(fieldName, structure);
                         
@@ -1523,7 +1524,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                             var fldvalue = this.fld(record,fieldName);
                             
                             if(window.hWin.HEURIST4.util.isnull(fldvalue)){
-                                isOK = false;
+                                isOK = (cmp_value=='NULL');
                                 break;                            
                             }else{
                                 var cmp_value;
@@ -1951,7 +1952,9 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
         
         //
         //returns data as JSON array for fancytree
-        // fieldTitle, fieldLink - fields for key, title and hierarchy link
+        // {key: title:  children: folder:}
+        // fieldTitle,  - field name for title
+        // fieldLink  -  field name for hierarchy link
         //
         getTreeViewData:function(fieldTitle, fieldLink){
             

@@ -1117,7 +1117,7 @@ $.widget( "heurist.editing_input", {
                         
                         var allTerms = this.f('rst_FilteredJsonTermIDTree');        
                         var headerTerms = this.f('rst_TermIDTreeNonSelectableIDs') || this.f('dty_TermIDTreeNonSelectableIDs');
-                        //var terms = window.hWin.HEURIST4.ui.getPlainTermsList(this.detailType, allTerms, headerTerms, null);
+                        //var terms = window.hWin.HEURIST4.dbs.getPlainTermsList(this.detailType, allTerms, headerTerms, null);
 
                         var ph_gif = window.hWin.HAPI4.baseURL + 'hclient/assets/16x16.gif';
                         var headers = relations.headers;
@@ -1132,7 +1132,7 @@ $.widget( "heurist.editing_input", {
                             if(direct[k]['trmID']>0){ //relation   
                             
                                 
-                                if(window.hWin.HEURIST4.ui.isTermInList(this.detailType, allTerms, headerTerms, direct[k]['trmID']))
+                                if(window.hWin.HEURIST4.dbs.isTermInList(this.detailType, allTerms, headerTerms, direct[k]['trmID']))
                                 { //it satisfies to allowed relationship types
 
                                         //verify that target rectype is satisfy to constraints and trmID allowed
@@ -1180,7 +1180,7 @@ $.widget( "heurist.editing_input", {
                             //direct[k]['dtID']==this.options.dtID && 
                             if(reverse[k]['trmID']>0){ //relation   
                                 
-                                if(window.hWin.HEURIST4.ui.isTermInList(this.detailType, allTerms, headerTerms, reverse[k]['trmID']))
+                                if(window.hWin.HEURIST4.dbs.isTermInList(this.detailType, allTerms, headerTerms, reverse[k]['trmID']))
                                 { //it satisfies to allowed relationship types
                                 
                                         //verify that target rectype is satisfy to constraints and trmID allowed
@@ -1204,7 +1204,7 @@ $.widget( "heurist.editing_input", {
                                                         .appendTo($inputdiv);
                                             }
                                             
-                                            var invTermID = window.hWin.HEURIST4.ui.getInverseTermById(reverse[k]['trmID']);
+                                            var invTermID = window.hWin.HEURIST4.dbs.getInverseTermById(reverse[k]['trmID']);
                                             
                                             var ele = window.hWin.HEURIST4.ui.createRecordLinkInfo($inputdiv, 
                                                 {rec_ID: targetID, 
@@ -3477,7 +3477,7 @@ console.log('onpaste');
 
         }else if(this.detailType=="enum" || this.detailType=="relationtype"){
 
-            disp_value = window.hWin.HEURIST4.ui.getTermValue(value, true);
+            disp_value = window.hWin.HEURIST4.dbs.getTermValue(value, true);
 
             if(window.hWin.HEURIST4.util.isempty(value)) {
                 disp_value = 'term missing. id '+termID

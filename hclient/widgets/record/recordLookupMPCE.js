@@ -74,10 +74,10 @@ console.log(record);
 //Accessing list of values for a vocabulary
 //In this case list of all Parisian keywords (vocab 6953) to allow decoding of the IDs and choice from eg. a dropdown
 
-    var terms = window.hWin.HEURIST4.ui.getPlainTermsList('enum',6953);
+    var terms = window.hWin.HEURIST4.dbs.getPlainTermsList('enum',6953);
     
-console.log('TERMS');            
-console.log(terms); 
+//console.log('TERMS');            
+//console.log(terms); 
 
     var selObj = window.hWin.HEURIST4.ui.createTermSelectExt2( this.element.find('#select_keywords')[0],
             {datatype:'enum', 

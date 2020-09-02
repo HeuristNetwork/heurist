@@ -98,25 +98,6 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             return;
         }
         
-        //update dialog title
-        if(this.options.isdialog){ // &&  !this.options.title
-            var title = null;
-            
-            if(this.options.title){
-                title = this.options.title;
-            }else
-            if(this.options.select_mode=='select_single'){
-               title = 'Select Field Type'; 
-            }else
-            if(this.options.select_mode=='select_multi'){
-               title = 'Select Field Types'; 
-            }else{
-                title = 'Manage Field Types';    
-            }
-            
-            this._as_dialog.dialog('option','title', title);    
-        }
-        
         this.searchForm.css({'min-width': '730px', padding:'6px'});
         this.recordList.css({'min-width': '730px'});
 

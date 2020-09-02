@@ -18,9 +18,9 @@
 */
 
 
-$.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
+$.widget( "heurist.manageDefVocabularyGroups", $.heurist.manageEntity, {
     
-    _entityName:'defRecTypeGroups',
+    _entityName:'defVocabularyGroups',
     
     _init: function() {
 
@@ -30,8 +30,6 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
         if(this.options.select_mode!='manager'){
             this.options.edit_mode = 'none';
             this.options.width = 300;
-        }else if(this.options.edit_mode == 'inline') {
-            this.options.width = 890;
         }
         
         this._super();
@@ -46,27 +44,7 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
             this.recordList.css('top',0);  
         }        
         
-        var that = this;
-
-        //refresh list        
-        $(window.hWin.document).on(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, 
-            function(e, data) { 
-                if(!data || 
-                   (data.source != that.uuid && data.type == 'rtg'))
-                {
-                    that._loadData();
-                }
-            });
-        
     },
-    
-    _destroy: function() {
-        
-       $(window.hWin.document).off(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE);
-        
-       this._super(); 
-    },
-    
     
     //  
     // invoked from _init after load entity config    
@@ -75,6 +53,13 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
 
         if(!this._super()){
             return false;
+        }
+        
+        if(this.options.edit_mode=='editonly'){
+            this._initEditorOnly( this.options.rec_ID>0
+                    ?$Db.vcg().getSubSetByIds([this.options.rec_ID])
+                    :null );
+            return;
         }
 
         var that = this;
@@ -98,13 +83,13 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
                                             ?$(event.target)
                                             :$(event.target).parents('.recordDiv');
                                             
-                    var rty_ID = $(ui.draggable).parent().attr('recid');
-                    var rtg_ID = trg.attr('recid');
+                    var trm_ID = $(ui.draggable).parent().attr('recid');
+                    var vcg_ID = trg.attr('recid');
                     
                             if(rty_ID>0 && rtg_ID>0 && that.options.reference_rt_manger){
                                     
-                                    that.options.reference_rt_manger
-                                        .manageDefRecTypes('changeRectypeGroup',{rty_ID:rty_ID, rty_RecTypeGroupID:rtg_ID });
+                                    that.options.reference_trm_manger
+                                        .manageDefRecTypes('changeVocabularyGroup',{trm_ID:trm_ID, trm_VocabularyGroupID:vcg_ID });
                             }
                         }});
                 }
@@ -138,10 +123,8 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
     //
     //
     _loadData: function(){
-        
-
-        this.updateRecordList(null, {recordset:$Db.rtg()});
-        this._selectAndEditFirstInRecordset($Db.rtg());
+        this.updateRecordList(null, {recordset:$Db.vcg()});
+        this._selectAndEditFirstInRecordset($Db.vcg());
 /*
         var that = this;
         window.hWin.HAPI4.EntityMgr.getEntityData(this._entityName, false,
@@ -166,8 +149,8 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
             return '<div class="item" '+swidth+'>'+window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, fldname))+'</div>';
         }
         
-        var recID   = recordset.fld(record, 'rtg_ID');
-        var recTitle = fld2('rtg_ID','4em')+fld2('rtg_Name');
+        var recID   = recordset.fld(record, 'vcg_ID');
+        var recTitle = fld2('vcg_ID','4em')+fld2('vcg_Name');
         
         var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" style="height:1.3em">';
         if(this.options.select_mode=='select_multi'){
@@ -176,7 +159,7 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
             //html = html + '<div>';
         }
         
-        html = html + fld2('rtg_Name',250);
+        html = html + fld2('vcg_Name',250);
       
         if(this.options.edit_mode=='popup'){
             html = html
@@ -184,13 +167,9 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
                             null,'icon_text');
         }
         
-        var cnt = recordset.fld(record, 'rtg_RtCount');
-        
         html = html 
-                +((cnt>0)
-                ?'<div style="display:table-cell;padding:0 4px">'+cnt+'</div>'
-                :this._defineActionButton({key:'delete',label:'Remove', title:'', icon:'ui-icon-delete', class:'rec_actions_button'}, 
-                            null,'icon_text'))
+                + this._defineActionButton({key:'delete',label:'Remove', title:'', icon:'ui-icon-delete', class:'rec_actions_button'}, 
+                            null,'icon_text')
                 + '<div class="selection_pointer" style="display:table-cell">'
                     +'<span class="ui-icon ui-icon-carat-r"></span></div>';
         
@@ -200,13 +179,12 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
         
     },
 
-    
     //
     //
     //
     _triggerRefresh: function(){
         window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, 
-            {source:this.uuid,  type:'rtg'});    
+            {source:this.uuid,  type:'vcg'});    
     },
     
     //
@@ -241,7 +219,7 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
     //     
     _deleteAndClose: function(unconditionally){
 
-        if(this._getField('rtg_RtCount')>0){
+        if(false){
             window.hWin.HEURIST4.msg.showMsgFlash('Can\'t remove non empty group');  
             return;                
         }
@@ -252,7 +230,7 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
         }else{
             var that = this;
             window.hWin.HEURIST4.msg.showMsgDlg(
-                'Are you sure you wish to delete this record type group? Proceed?', function(){ that._deleteAndClose(true) }, 
+                'Are you sure you wish to delete this vocabulary group? Proceed?', function(){ that._deleteAndClose(true) }, 
                 {title:'Warning',yes:'Proceed',no:'Cancel'});        
         }
     },
@@ -268,17 +246,17 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
 
 
             var recordset = this.getRecordSet();
-            //assign new value for rtg_Order and save on server side
+            //assign new value for vcg_Order and save on server side
             var rec_order = recordset.getOrder();
             var idx = 0, len = rec_order.length;
             var fields = [];
             for(; (idx<len); idx++) {
                 var record = recordset.getById(rec_order[idx]);
-                var oldval = recordset.fld(record, 'rtg_Order');
+                var oldval = recordset.fld(record, 'vcg_Order');
                 var newval = String(idx+1).lpad(0,3);
                 if(oldval!=newval){
-                    recordset.setFld(record, 'rtg_Order', newval);        
-                    fields.push({"rtg_ID":rec_order[idx], "rtg_Order":newval});
+                    recordset.setFld(record, 'vcg_Order', newval);        
+                    fields.push({"vcg_ID":rec_order[idx], "vcg_Order":newval});
                 }
             }
             if(fields.length>0){
@@ -309,6 +287,7 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
 
     },
     
+/*    
     //
     // extend dialog button bar
     //    
@@ -316,8 +295,7 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
         
         if(this._toolbar){
             this._toolbar.find('.ui-dialog-buttonset').css({'width':'100%','text-align':'right'});
-            this._toolbar.find('#btnRecDelete').css('display', 
-                    (recID>0 && this._getField('rtg_RtCount')==0) ?'block':'none');
+            this._toolbar.find('#btnRecDelete').show();
         }
         
         this._super(recID);
@@ -329,50 +307,10 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
         if(this._toolbar){
             var isChanged = this._editing.isModified();
             this._toolbar.find('#btnRecDelete').css('display', 
-                    (isChanged || this._getField('rtg_RtCount')>0)?'none':'block');
+                    (isChanged?'none':'block'));
         }
             
     },
-  
-/*    
-    _getEditDialogButtons: function(){
-                                    
-            var that = this;        
-            
-            var btns = [       
-            //{text:window.hWin.HR('Reload'), id:'btnRecReload',icons:{primary:'ui-icon-refresh'},
-            //    click: function() { that._initEditForm_step3(that._currentEditID) }},  //reload edit form
-                      
-                {showText:true, icons:{primary:'ui-icon-plus'},text:window.hWin.HR('Add Group'),
-                      css:{'margin-right':'0.5em','float':'left',display:'none'}, id:'btnAddButton',
-                      click: function() { that._onActionListener(null, 'add'); }},
-
-                {text:window.hWin.HR('Save Order'),
-                      css:{'margin-right':'0.5em','float':'left',display:'none'}, id:'btnApplyOrder',
-                      click: function() { that._onActionListener(null, 'save-order'); }},
-                      
-                      
-                {text:window.hWin.HR('Close'), 
-                      css:{'margin-left':'3em','float':'right'},
-                      click: function() { 
-                          that.closeDialog(); 
-                      }},
-                {text:window.hWin.HR('Drop Changes'), id:'btnRecCancel', 
-                      css:{'margin-left':'0.5em','float':'right',display:'none'},
-                      click: function() { that._initEditForm_step3(that._currentEditID) }},  //reload edit form
-                {text:window.hWin.HR('Save'), id:'btnRecSave',
-                      accesskey:"S",
-                      css:{'font-weight':'bold','float':'right'},
-                      class:'ui-button-action',
-                      click: function() { that._saveEditAndClose( null, 'none' ); }},
-                      
-                {text:window.hWin.HR('Delete'), id:'btnRecDelete',
-                      css:{'float':'right',display:'none'},
-                      click: function() { that._onActionListener(null, 'delete'); }},
-                                      
-                      ];
-        
-            return btns;
-    },
-*/    
+*/  
+   
 });

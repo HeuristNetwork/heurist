@@ -25,15 +25,9 @@ Selectors:
 addoption - helper function to add option to select element
 createSelector - create SELECT element (if selObj is null) and fill with given options
 
-getChildrenTerms - returns entire terms tree or only part of it for selected termID
-getChildrenLabels - returns all tems labels of children terms for given term
 createTermSelectExt   - create/fill SELECT for terms or returns JSON array 
 createTermSelectExt2  - the same but parameters are passed as options object
 createVocabularySelect - creatres selector with vocabularies only (top level terms)
-getTermValue - Returns label and code for term by id
-getTermDesc
-getPlainTermsList
-getFullTermLabel
 
 createRectypeGroupSelect - get SELECT for record type groups
 createDetailtypeGroupSelect
@@ -264,215 +258,6 @@ window.hWin.HEURIST4.ui = {
         return selObj;
     },    
     
-    //
-    // returns list of all children for given trm_ParentTermID in lower case
-    //
-    getChildrenLabels: function(trm_ParentDomain, trm_ParentTermID){
-        
-            var trm_ParentChildren = [];
-        
-            //get list of children labels
-            function __getSiblings(children){
-                for(trmID in children){
-                    if(children.hasOwnProperty(trmID)){
-                        if(trmID==trm_ParentTermID){
-                            for(var id in children[trmID]){
-                                if(children[trmID].hasOwnProperty(id)){
-                                    var term = allterms.termsByDomainLookup[trm_ParentDomain][id];
-                                    if(term && term[0])
-                                        trm_ParentChildren.push(term[0].toLowerCase());
-                                }
-                            }
-                            break;
-                        }else{
-                            __getSiblings(children[trmID]);
-                        }
-                    }
-                }
-            }
-            
-            var allterms = window.hWin.HEURIST4.terms;
- 
-            
-            var trmID, tree = allterms.treesByDomain[trm_ParentDomain];
-            __getSiblings(tree);  
-              
-            return trm_ParentChildren;
-    },
-    
-    getTermById: function(termID){
-        
-        var terms = window.hWin.HEURIST4.terms;
-        if(!terms || window.hWin.HEURIST4.util.isempty(termID)) return '';
-        
-        var term, termLookup = terms.termsByDomainLookup['enum'];
-        if(termLookup[termID]){
-            term = termLookup[termID];
-        }else{
-            termLookup = terms.termsByDomainLookup['relation'];
-            term = termLookup[termID];
-        }
-        
-        return term;
-    },
-
-    // get inverse term id
-    //
-    getInverseTermById: function(termID){
-        var term = window.hWin.HEURIST4.ui.getTermById(termID);
-        if(term){
-            var terms = window.hWin.HEURIST4.terms;
-            var invTermID = term[terms.fieldNamesToIndex['trm_InverseTermID']];
-            if(invTermID>0) return invTermID;
-            return termID;
-        }
-        return '';
-    },
-    
-    //
-    // Returns label and code for term by id
-    //
-    getTermValue: function(termID, withcode){
-
-        var term = window.hWin.HEURIST4.ui.getTermById(termID);    
-        
-        var termName, termCode='';
-
-        if(term){
-            var terms = window.hWin.HEURIST4.terms;
-            termName = term[terms.fieldNamesToIndex['trm_Label']];
-            termCode = term[terms.fieldNamesToIndex['trm_Code']];
-            if(window.hWin.HEURIST4.util.isempty(termCode)){
-                termCode = '';
-            }else{
-                termCode = " ("+termCode+")";
-            }
-        } else {
-            termName = 'not found term#'+termID;
-        }
-
-        return termName+(withcode ?termCode :'');
-    },
-    
-    //
-    // get description of label for term
-    //
-    getTermDesc: function(termID){
-
-        var term = window.hWin.HEURIST4.ui.getTermById(termID);    
-        if(term){
-
-            var terms = window.hWin.HEURIST4.terms;
-            var termDesc = term[terms.fieldNamesToIndex['trm_Description']];
-            if(window.hWin.HEURIST4.util.isempty(termDesc)){
-                return term[terms.fieldNamesToIndex['trm_Label']];
-            }else{
-                return termDesc;
-            }
-            
-        }else{
-            return 'not found term#'+termID;
-        }
-
-    },
-
-    // 
-    //
-    // see crosstabs
-    //
-    getPlainTermsList: function(datatype, termIDTree, headerTermIDsList, selectedTermID) {
-        
-        //var selObj = window.hWin.HEURIST4.ui.createTermSelectExt(null, datatype, termIDTree, headerTermIDsList);
-        
-        var selObj = window.hWin.HEURIST4.ui.createTermSelectExt2(null,
-            {datatype:datatype, termIDTree:termIDTree, headerTermIDsList:headerTermIDsList,
-             defaultTermID:null, topOptions:null, needArray:false, useHtmlSelect:true});
-        
-
-        var reslist = [];
-
-        if(selObj){
-            selObj = selObj[0];
-            for (var i=0; i<selObj.length; i++){
-                if(!selObj.options[i].disabled){
-                    reslist.push({id: parseInt(selObj.options[i].value), text:selObj.options[i].text});
-                }
-            }
-        }
-        return reslist;
-    },
-
-    //
-    // check that given selectedTermID is among allowed termIDTree (except headerTermIDsList)
-    //
-    isTermInList: function(datatype, termIDTree, headerTermIDsList, selectedTermID) {
-        
-        //var selObj = window.hWin.HEURIST4.ui.createTermSelectExt(null, datatype, termIDTree, headerTermIDsList);
-
-        var selObj = window.hWin.HEURIST4.ui.createTermSelectExt2(null,
-            {datatype:datatype, termIDTree:termIDTree, headerTermIDsList:headerTermIDsList,
-             defaultTermID:null, topOptions:null, needArray:false, useHtmlSelect:true});
-        
-        if(selObj){
-            selObj = selObj[0];
-            for (var i=0; i<selObj.length; i++){
-                if(!selObj.options[i].disabled){
-                    if(selObj.options[i].value==selectedTermID){
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
-    },
-    
-    //
-    // return term by selectedTermID and its children as well as comma-separated list of non-disabled ancestors
-    // it uses createTermSelectExt to get the entire tree
-    // used in search_faceted
-    //
-    getChildrenTerms: function(datatype, termIDTree, headerTermIDsList, selectedTermID) {
-
-        var termtree = window.hWin.HEURIST4.ui.createTermSelectExt(null, datatype, termIDTree, headerTermIDsList, 
-                                                                        null, null, true);
-        /*
-        function __setParents(parent, terms){
-
-        for (var i=0; i<terms.length; i++)
-        {
-        if(!terms[i].parents){
-        terms[i].parents = [];
-        }else{
-        terms[i].parents = terms[i].parents.concat(parent.parents);
-        }
-        terms[i].parents.unshift(parent);
-
-        __setParents(terms[i], terms[i].children);
-        }
-        }
-        */
-        function __findTerm(termId, parent, terms)
-        {
-            for (var i=0; i<terms.length; i++){
-
-                if(terms[i].id==termId){
-                    return terms[i];
-                }else{
-                    var res = __findTerm(termId, terms[i], terms[i].children);
-                    if(res!=null){
-                        return res;
-                    }
-                }
-            }
-            return null; //not found in this level
-        }
-
-        var root = {id:null, text:window.hWin.HR('all'), children:termtree};
-
-        //__setParents(root, termtree);
-
-        return window.hWin.HEURIST4.util.isnull(selectedTermID)?root:__findTerm(selectedTermID, root, termtree);
-    },
 
     /**
     * create/fill SELECT for terms or returns JSON array 
@@ -2156,7 +1941,7 @@ window.hWin.HEURIST4.ui = {
         
         var reltype = ''
         if(info['trm_ID']>0){
-            reltype = window.hWin.HEURIST4.ui.getTermValue(info['trm_ID']);
+            reltype = window.hWin.HEURIST4.dbs.getTermValue(info['trm_ID']);
             reltype = '<div class="detailType" style="display:table-cell;min-width:'
                 + Math.max(19, Math.min(reltype.length,25))+'ex;">'
                 + reltype + '</div>'
@@ -2309,9 +2094,9 @@ window.hWin.HEURIST4.ui = {
                                         var term_ID = recordset.fld(record,DT_RELATION_TYPE);
                                         //update relation type !!!!
                                         if(info['is_inward']){
-                                            term_ID = window.hWin.HEURIST4.ui.getInverseTermById(term_ID);
+                                            term_ID = window.hWin.HEURIST4.dbs.getInverseTermById(term_ID);
                                         }
-                                        ele.find('.detailType').text(window.hWin.HEURIST4.ui.getTermValue(term_ID)); 
+                                        ele.find('.detailType').text(window.hWin.HEURIST4.dbs.getTermValue(term_ID)); 
                                         var related_ID = recordset.fld(record, DT_RELATED_REC_ID);  
 
                                         // e - search for temp also
@@ -2586,6 +2371,8 @@ window.hWin.HEURIST4.ui = {
                  entityName=='DefDetailTypeGroups' || 
                  entityName=='DefRecTypeGroups' || 
                  entityName=='DefRecStructure' || 
+                 entityName=='DefTerms' || 
+                 entityName=='DefVocabularyGroups' || 
                  entityName=='SysBugreport')){ 
                 scripts.push(path+'search'+entityName+'.js');
             }

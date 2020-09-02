@@ -59,7 +59,7 @@
                     "dtID": "trm_Description",
                     "dtFields":{
                         "dty_Type":"blocktext",
-                        "rst_DisplayName":"Default help text:",
+                        "rst_DisplayName":"Description:",
                         "dty_Size":1000,
                         "rst_DisplayWidth":60,
                         "rst_DisplayHelpText": "A concise but comprehensive description of this term or category."
@@ -112,6 +112,13 @@
                     }
                 },
                 {
+                    "dtID": "trm_VocabularyGroupID",
+                    "dtFields":{
+                        "dty_Type":"integer",
+                        "rst_Display":"hidden"
+                    }
+                },
+                {
                     "dtID": "trm_Domain",
                     "dtFields":{
                         "dty_Type":"enum",
@@ -125,7 +132,7 @@
                         "dty_Type":"file",
                         "rst_DisplayName":"Thumbnail:",
                         "rst_DisplayHelpText": "Image to represent this term. Uploaded image will be scaled to 400x400", 
-                        "rst_FieldConfig":{"entity":"defTerms", "accept":".png,.jpg,.gif", "size":200},
+                        "rst_FieldConfig":{"entity":"defTerms", "accept":".png,.jpg,.gif", "size":400},
                         "dty_Role":"virtual"
                     }
                 }

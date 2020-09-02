@@ -4026,7 +4026,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         var skip_dup=0, skip_long=0, skip_long=0, skip_na=0;
         
         //list of all children for given trm_ParentTermID in lower case
-        var trm_ParentChildren = window.hWin.HEURIST4.ui.getChildrenLabels('enum', trm_ParentTermID);
+        var trm_ParentChildren = window.hWin.HEURIST4.dbs.getChildrenLabels('enum', trm_ParentTermID);
         
         for(var i=0;i<newvalues.length;i++){
                 

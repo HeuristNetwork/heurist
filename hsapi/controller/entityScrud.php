@@ -33,6 +33,7 @@
     require_once (dirname(__FILE__).'/../entity/dbDefDetailTypeGroups.php');
     require_once (dirname(__FILE__).'/../entity/dbDefFileExtToMimetype.php');
     require_once (dirname(__FILE__).'/../entity/dbDefTerms.php');
+    require_once (dirname(__FILE__).'/../entity/dbDefVocabularyGroups.php');
     require_once (dirname(__FILE__).'/../entity/dbDefRecTypeGroups.php');
     require_once (dirname(__FILE__).'/../entity/dbDefDetailTypes.php');
     require_once (dirname(__FILE__).'/../entity/dbDefRecTypes.php');
@@ -65,7 +66,7 @@
         
         if(@$_REQUEST['a']=='search' && @$_REQUEST['multi']==1 && @$_REQUEST['entity']=='all'){ 
             //search can be performed for several entities at once
-            $entities = array('rtg','dtg','rty','dty');
+            $entities = array('rtg','dtg','rty','dty','trm','vcg');
         }else {
             $entities = @$_REQUEST['entity'];
         }
@@ -80,6 +81,8 @@
             else if($entity_name=='dtg') $entities[$idx] = 'defDetailTypeGroups';
             else if($entity_name=='rty') $entities[$idx] = 'defRecTypes';
             else if($entity_name=='dty') $entities[$idx] = 'defDetailTypes';
+            else if($entity_name=='trm') $entities[$idx] = 'defTerms';
+            else if($entity_name=='vcg') $entities[$idx] = 'defVocabularyGroups';
         }
         
         

@@ -22,16 +22,21 @@ Selectors:
 
 TERMS
 
-getChildrenLabels - returns all tems labels of children terms for given term
+getChildrenLabels - returns all terms labels of children terms for given term
+getChildrenTerms - returns entire terms tree or only part of it for selected termID
+
 getTermById
 getInverseTermById
-getTermValue - Returns label and code for term by id
-getColorFromTermValue - Returns hex color by label or code for term by id
-getTermDesc
 
-getPlainTermsList
-isTermInList
-getChildrenTerms - returns entire terms tree or only part of it for selected termID
+getTermValue - returns label and code for term by id
+
+getColorFromTermValue - Returns hex color by label or code for term by id
+
+getTermDesc - not used
+
+getPlainTermsList - see crosstabs, search_faceted  {id:trm_ID, text:trm_Label}
+
+isTermInList - check that given selectedTermID is among allowed termIDTree (except headerTermIDsList)
 
 
 RECTYPES
@@ -115,7 +120,7 @@ window.hWin.HEURIST4.dbs = {
     // get inverse term id
     //
     getInverseTermById: function(termID){
-        var term = window.hWin.HEURIST4.ui.getTermById(termID);
+        var term = window.hWin.HEURIST4.dbs.getTermById(termID);
         if(term){
             var terms = window.hWin.HEURIST4.terms;
             var invTermID = term[terms.fieldNamesToIndex['trm_InverseTermID']];
@@ -130,7 +135,7 @@ window.hWin.HEURIST4.dbs = {
     //
     getTermValue: function(termID, withcode){
 
-        var term = window.hWin.HEURIST4.ui.getTermById(termID);    
+        var term = window.hWin.HEURIST4.dbs.getTermById(termID);    
         
         var termName, termCode='';
 
@@ -155,7 +160,7 @@ window.hWin.HEURIST4.dbs = {
     //
     getColorFromTermValue: function(termID){
 
-        var term = window.hWin.HEURIST4.ui.getTermById(termID);    
+        var term = window.hWin.HEURIST4.dbs.getTermById(termID);    
         
         var termName, termCode='';
 
@@ -176,13 +181,12 @@ window.hWin.HEURIST4.dbs = {
         return termCode;
     },
 
-    
-    //
-    // get description of label for term
+    // NOT USED  see expernation.js
+    // get description or label for term
     //
     getTermDesc: function(termID){
 
-        var term = window.hWin.HEURIST4.ui.getTermById(termID);    
+        var term = window.hWin.HEURIST4.dbs.getTermById(termID);    
         if(term){
 
             var terms = window.hWin.HEURIST4.terms;
@@ -200,8 +204,8 @@ window.hWin.HEURIST4.dbs = {
     },
 
     // 
-    //
-    // see crosstabs
+    // 
+    // see crosstabs  {id:trm_ID, text:trm_Label}
     //
     getPlainTermsList: function(datatype, termIDTree, headerTermIDsList, selectedTermID) {
         
@@ -226,7 +230,7 @@ window.hWin.HEURIST4.dbs = {
     },
 
     //
-    //
+    // check that given selectedTermID is among allowed termIDTree (except headerTermIDsList)
     //
     isTermInList: function(datatype, termIDTree, headerTermIDsList, selectedTermID) {
         
@@ -252,7 +256,7 @@ window.hWin.HEURIST4.dbs = {
     //
     // return term by selectedTermID and its children as well as comma-separated list of non-disabled ancestors
     // it uses createTermSelectExt to get the entire tree
-    // used in search_faceted
+    // used in search_faceted.js  
     //
     getChildrenTerms: function(datatype, termIDTree, headerTermIDsList, selectedTermID) {
 
@@ -301,8 +305,8 @@ window.hWin.HEURIST4.dbs = {
     /*
      
       returns rectype structure as treeview data
-      there is similar method on client side - however on clinet side it is faster
-      used for treeview in import structure, facet wiz
+      there is similar method on server side - however on clinet side it is faster
+      used for treeview in import structure, faceted search wizard
       todo - use it in smarty editor
      
       fieldtypes - 
@@ -1118,12 +1122,20 @@ window.hWin.HEURIST4.dbs = {
         return $Db.getset('defDetailTypeGroups', rec_ID, fieldName, newValue);        
     },
 
+    vcg: function(rec_ID, fieldName, newValue){
+        return $Db.getset('defVocabularyGroups', rec_ID, fieldName, newValue);        
+    },
+    
     rty: function(rec_ID, fieldName, newValue){
         return $Db.getset('defRecTypes', rec_ID, fieldName, newValue);        
     },
     
     dty: function(rec_ID, fieldName, newValue){
         return $Db.getset('defDetailTypes', rec_ID, fieldName, newValue);        
+    },
+
+    trm: function(rec_ID, fieldName, newValue){
+        return $Db.getset('defTerms', rec_ID, fieldName, newValue);        
     },
     
     getset: function(entityName, rec_ID, fieldName, newValue){

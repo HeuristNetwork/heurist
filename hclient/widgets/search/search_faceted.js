@@ -1679,7 +1679,7 @@ if(!detailtypes[dtID]){
                         var allTerms = detailtypes[dtID]['commonFields'][detailtypes['fieldNamesToIndex']['dty_JsonTermIDTree']],
                         disabledTerms = detailtypes[dtID]['commonFields'][detailtypes['fieldNamesToIndex']['dty_TermIDTreeNonSelectableIDs']];
                         
-                        var term = window.hWin.HEURIST4.ui.getChildrenTerms('enum', allTerms, disabledTerms, null ); //get entire tree
+                        var term = window.hWin.HEURIST4.dbs.getChildrenTerms('enum', allTerms, disabledTerms, null ); //get entire tree
                         
                         //field.selectedvalue = {text:label, value:value, step:step};                    
                         
@@ -2244,7 +2244,7 @@ if(!detailtypes[dtID]){
                             
                             //for enum get term label w/o code
                             if(field['type']=='enum' && cterm[0]>0){
-                                cterm[0] = window.hWin.HEURIST4.ui.getTermValue(cterm[0], false);    
+                                cterm[0] = window.hWin.HEURIST4.dbs.getTermValue(cterm[0], false);    
                             }
 
                             var f_link = this._createFacetLink(facet_index, {text:cterm[0], value:cterm[2], count:cterm[1]}, display_mode);

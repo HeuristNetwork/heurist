@@ -1525,7 +1525,8 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
                 return null;
             }
             
-            updateDatabseToLatest2($this);
+            updateDatabseToLatest3($this);
+            //updateDatabseToLatest2($this);
             /*
             $rep = updateDatabseToLatest($this);
             if($rep===false){

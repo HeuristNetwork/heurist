@@ -52,7 +52,7 @@ function hImportDefTerms(_trm_ParentTermID) {
                 trm_ParentDomain = 'enum';
             }
 
-            //todo use window.hWin.HEURIST4.ui.getChildrenLabels
+            //todo use window.hWin.HEURIST4.dbs.getChildrenLabels
                 
             //get list of children labels
             function __getSiblings(children){

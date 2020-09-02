@@ -1360,7 +1360,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         
                         if(sRel_Ids.length<25){
                         
-                            var invTermID = window.hWin.HEURIST4.ui.getInverseTermById(reverse[k]['trmID']);
+                            var invTermID = window.hWin.HEURIST4.dbs.getInverseTermById(reverse[k]['trmID']);
                             
                             var ele = window.hWin.HEURIST4.ui.createRecordLinkInfo(panel, 
                                 {rec_ID: sourceID, 
