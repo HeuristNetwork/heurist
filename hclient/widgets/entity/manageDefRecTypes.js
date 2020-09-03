@@ -80,19 +80,6 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         
 //console.log(this.options.is_h6style +'   '+ this.options.innerTitle);        
 
-        if(this.options.innerTitle){
-            
-            if(this.options.ui_params) this.options.ui_params.groupsPresentation = 'none';
-            //add record type group editor
-            this.element.css( {border:'none', 'box-shadow':'none', background:'none'} );
-            
-            this.element.find('.ent_wrapper:first').addClass('ui-dialog-heurist').css('left',328);
-            
-            this.rectype_groups = $('<div>').addClass('ui-dialog-heurist')
-                .css({position: 'absolute',top: 0, bottom: 0, left: 0, width:320, overflow: 'hidden'})
-                .appendTo(this.element);
-        }                
-        
         var that = this;
         
         $(window.hWin.document).on(
@@ -150,6 +137,21 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         
         if(this.options.select_mode=='manager'){
             
+            
+            if(this.options.innerTitle){
+                
+                if(this.options.ui_params) this.options.ui_params.groupsPresentation = 'none';
+                //add record type group editor
+                this.element.css( {border:'none', 'box-shadow':'none', background:'none'} );
+                
+                this.element.find('.ent_wrapper:first').addClass('ui-dialog-heurist').css('left',328);
+                
+                this.rectype_groups = $('<div>').addClass('ui-dialog-heurist')
+                    .css({position: 'absolute',top: 0, bottom: 0, left: 0, width:320, overflow: 'hidden'})
+                    .appendTo(this.element);
+            }                
+            
+          
             this.recordList.resultList({ 
                     show_toolbar: false,
                     list_mode_is_table: true,
@@ -178,10 +180,13 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             this.recordList.resultList( this.options.recordList );
         }
 
-        this.searchFormList = this.element.find('.searchForm-list');
+        /* to remove
+        this.searchFormList = $('<div class="ent_content_full searchForm-list" style="display:none;width:170px"/>')
+                    .insertAfter(this.recordList);
         if(this.searchFormList.length>0){
             this.options.searchFormList =  this.searchFormList;
         }
+        */
         
         this.options.ui_params = this.getUiPreferences();
 
@@ -1119,6 +1124,7 @@ console.log('_recordListGetFullData')
         this.searchForm.css({'height':iheight});
         this.recordList.css({'top':iheight});     
        
+/*       
         if(params['groupsPresentation']=='list'){
             this.recordList.css({'left':'171px'});
             this.searchFormList.css({'top':this.recordList.css('top')}).show();
@@ -1126,7 +1132,7 @@ console.log('_recordListGetFullData')
             this.searchFormList.hide();
             this.recordList.css('left',0);
         }
-        
+*/        
         this.saveUiPreferences( params );
         
         //refresh result list

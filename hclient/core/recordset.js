@@ -1956,7 +1956,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
         // fieldTitle,  - field name for title
         // fieldLink  -  field name for hierarchy link
         //
-        getTreeViewData:function(fieldTitle, fieldLink){
+        getTreeViewData:function(fieldTitle, fieldLink, rootID){
             
             /*
             source: [
@@ -1968,12 +1968,13 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
   ]
             */
             
-            //find vocabs only
+            //find vocabs only - ids that have children
             var recID, vocabs = [];
             for(recID in records){
                 var record = records[recID];
                 var id = this.fld(record, fieldLink);
-                if(!window.hWin.HEURIST4.util.isempty(id) && id>0 && $.inArray(recID, vocabs)<0) { //vocabs.indexOf(id)<0){
+                if(!window.hWin.HEURIST4.util.isempty(id) && id>0 
+                    && window.hWin.HEURIST4.util.findArrayIndex(recID,vocabs)<0) { //  $.inArray(recID, vocabs)
                     vocabs.push(id);
                 }
             }
@@ -1988,7 +1989,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                     
                     if(parentId==id){
                         var node = {title: that.fld(record,fieldTitle), key: recID};
-                        if($.inArray(recID, vocabs)>-1){
+                        if(window.hWin.HEURIST4.util.findArrayIndex(recID, vocabs)>-1){  //$.inArray(recID, vocabs)>-1
                             var children = __addChilds( that, recID );
                             if(children.length>0){
                                 node['children'] = children;
@@ -2001,7 +2002,12 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                 return res;
             }
             
-            var res = __addChilds(this, null);
+            var res = __addChilds(this, rootID);
+            
+            if(rootID>0){
+                //res = [{key:rootID, title:'root', folder:true, children:res }];    
+            }
+            
  /*           
             for(recID in records){
                 var record = records[recID];
@@ -2035,7 +2041,51 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
 */            
             refs = null;
             return res;
+        },
+        
+        getAllChildrenIds:function(fieldLink, rootID){
+            
+            if(rootID>0){
+                
+                //find vocabs only - ids that have children
+                var recID, vocabs = [];
+                for(recID in records){
+                    var record = records[recID];
+                    var id = this.fld(record, fieldLink);
+                    if(!window.hWin.HEURIST4.util.isempty(id) && id>0 
+                        && window.hWin.HEURIST4.util.findArrayIndex(recID,vocabs)<0) { //  $.inArray(recID, vocabs)
+                        vocabs.push(id);
+                    }
+                }
+                
+                function __addChilds(that, parentId){
+                    var recID, res = [];
+                    for(recID in records){
+                        var record = records[recID];
+                        
+                        var id = that.fld(record, fieldLink);
+                        if(window.hWin.HEURIST4.util.isempty(id) || id==0) id = null;
+                        
+                        if(parentId==id){
+                            
+                            res.push(recID);
+                            
+                            if(window.hWin.HEURIST4.util.findArrayIndex(recID, vocabs)>-1){  //$.inArray(recID, vocabs)>-1
+                                var children = __addChilds( that, recID );
+                                if(children.length>0){
+                                    res = res.concat(children);
+                                }
+                            }
+                        }
+                    }
+                    return res;
+                }
+                
+                var res = __addChilds(this, rootID);
+                return res;
+            }
         }
+
     }
 
     _init(initdata);

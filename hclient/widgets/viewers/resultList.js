@@ -824,7 +824,7 @@ $.widget( "heurist.resultList", {
                 $(header_columns[header_columns.length-1]).width( this.div_content_header.width()-tot-20 );    
             }
             
-            top = top + this.div_content_header.height()-2;
+            top = top + this.div_content_header.height();
         }
         
         //move content down to leave space for header

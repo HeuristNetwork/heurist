@@ -334,6 +334,60 @@ class DbDefTerms extends DbEntityBase
     }
     
     //
+    //
+    //    
+    protected function prepareRecords(){
+    
+        $ret = parent::prepareRecords();
+
+        //add specific field values
+        foreach($this->records as $idx=>$record){
+
+            //validate duplication on the same level
+            $mysqli = $this->system->get_mysqli();
+            
+            if($this->records[$idx]['trm_ParentTermID']>0){
+                $sWhere = ' AND (trm_ParentTermID='.$this->records[$idx]['trm_ParentTermID'].')';    
+                $s2 = 'Term';
+                
+                $s3 = 'Duplicate label ('.$this->records[$idx]['trm_Label'].') ';
+                if(@$this->records[$idx]['trm_Code']){
+                    $s3 = s3.' or code ('.$this->records[$idx]['trm_Code'].') ';
+                }
+                
+                $s3 = s3.' at the same branch/level in the tree';
+            }else{
+                $this->records[$idx]['trm_ParentTermID'] = null;
+                $sWhere = ' AND (NOT (trm_ParentTermID>0))';    
+                $s2 = 'Vocabulary';
+                $s3 = 'The provided name already exists';
+            }
+            
+            $res = mysql__select_value($mysqli,
+                    "SELECT trm_ID FROM ".$this->config['tableName']."  WHERE (trm_Label='"
+                    .$mysqli->real_escape_string( $this->records[$idx]['trm_Label'])."'" 
+                    .(@$this->records[$idx]['trm_Code']
+                        ?' OR trm_Label="'.$mysqli->real_escape_string( $this->records[$idx]['trm_Code'] ).'"'
+                        :'')
+                    .') '.$sWhere );
+                    
+            if($res>0 && $res!=@$this->records[$idx]['trm_ID']){
+                $this->system->addError(HEURIST_ACTION_BLOCKED, $s2.' cannot be saved. '.s3);
+                return false;
+            }
+
+            $this->records[$idx]['trm_Modified'] = date('Y-m-d H:i:s'); //reset
+            if(@$this->records[$idx]['trm_Domain']!='relation') $this->records[$idx]['trm_Domain'] = 'enum';
+            if(!@$this->records[$idx]['trm_Status']) $this->records[$idx]['trm_Status'] = 'open';
+            if(!(@$this->records[$idx]['trm_InverseTermId']>0)) $this->records[$idx]['trm_InverseTermId'] = null;
+            
+            $this->records[$idx]['is_new'] = (!(@$this->records[$idx]['trm_ID']>0));
+        }
+        
+        return $ret;
+    }     
+    
+    //
     // returns array of saved record ids or false
     //
     public function save(){
@@ -379,6 +433,7 @@ class DbDefTerms extends DbEntityBase
             return $ret;
     }
     
+
     
 }
 ?>

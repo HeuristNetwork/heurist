@@ -196,6 +196,12 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageSysDashboard.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchSysDashboard.js"></script>
         
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageDefRecTypes.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/searchDefRecTypes.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageDefRecTypeGroups.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageDefTerms.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageDefVocabularyGroups.js"></script>
+
         
         <script type="text/javascript" src="<?php echo PDIR;?>admin/structure/import/importStructure.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>viewers/map/mapPublish.js"></script>

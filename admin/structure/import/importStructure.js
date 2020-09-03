@@ -528,7 +528,8 @@ $.widget( "heurist.importStructure", {
 
                         return rectypes.groups[idx]?('<div data-grp="'+grp_val
                             +'" style="font-size:0.9em;padding:14px 0 4px 0px;border-bottom:1px solid lightgray">'
-                            +'<span style="display:inline-block;vertical-align:top;padding-top:10px;" class="ui-icon ui-icon-triangle-1-'+(is_expanded?'s':'e')+'"></span>'
+                            +'<span style="display:inline-block;vertical-align:top;padding-top:10px;" '
+                            +'class="expand_button ui-icon ui-icon-triangle-1-'+(is_expanded?'s':'e')+'"></span>'
                             +'<div style="display:inline-block;width:70%">'
                             +'<h2 style="margin:0">'+grp_val+'  '+rectypes.groups[idx].name+'</h2>' //+grp_val+' '
                             +'<div style="padding-top:4px;"><i>'+rectypes.groups[idx].description+'</i></div></div></div>'):'';

@@ -56,9 +56,10 @@ $.widget( "heurist.manageDefVocabularyGroups", $.heurist.manageEntity, {
         }
         
         if(this.options.edit_mode=='editonly'){
-            this._initEditorOnly( this.options.rec_ID>0
+            this._initEditorOnly( $Db.vcg() );
+                    /*this.options.rec_ID>0
                     ?$Db.vcg().getSubSetByIds([this.options.rec_ID])
-                    :null );
+                    :null );*/
             return;
         }
 
@@ -240,48 +241,15 @@ $.widget( "heurist.manageDefVocabularyGroups", $.heurist.manageEntity, {
     //
     _onActionListener: function(event, action){
 
-        this._super(event, action);
+        var isresolved = this._super(event, action);
 
-        if(action=='save-order'){
-
-
+        if(!isresolved && action=='save-order'){
+            
             var recordset = this.getRecordSet();
-            //assign new value for vcg_Order and save on server side
-            var rec_order = recordset.getOrder();
-            var idx = 0, len = rec_order.length;
-            var fields = [];
-            for(; (idx<len); idx++) {
-                var record = recordset.getById(rec_order[idx]);
-                var oldval = recordset.fld(record, 'vcg_Order');
-                var newval = String(idx+1).lpad(0,3);
-                if(oldval!=newval){
-                    recordset.setFld(record, 'vcg_Order', newval);        
-                    fields.push({"vcg_ID":rec_order[idx], "vcg_Order":newval});
-                }
-            }
-            if(fields.length>0){
-
-                var request = {
-                    'a'          : 'save',
-                    'entity'     : this._entityName,
-                    'request_id' : window.hWin.HEURIST4.util.random(),
-                    'fields'     : fields                     
-                };
-
-                var that = this;                                                
-                //that.loadanimation(true);
-                window.hWin.HAPI4.EntityMgr.doRequest(request, 
-                    function(response){
-                        if(response.status == window.hWin.ResponseStatus.OK){
-                            that._toolbar.find('#btnApplyOrder').hide();
-                        }else{
-                            window.hWin.HEURIST4.msg.showMsgErr(response);
-                        }
-                });
-
-            }else{
-                this._toolbar.find('#btnApplyOrder').hide();
-            }
+            var that = this;
+            window.hWin.HEURIST4.dbs.applyOrder(recordset, 'vcg', function(res){
+                that._toolbar.find('#btnApplyOrder').hide();
+            });
 
         }
 

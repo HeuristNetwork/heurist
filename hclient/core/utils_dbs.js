@@ -1420,6 +1420,54 @@ window.hWin.HEURIST4.dbs = {
         
     },
     
+    //
+    //
+    //
+    applyOrder: function(recordset, prefix, callback){
+
+        var entityName = recordset.entityName;
+        var fieldId    = prefix+'_ID'; 
+        var fieldOrder = prefix+'_Order';
+        
+        //assign new value for vcg_Order and save on server side
+        var rec_order = recordset.getOrder();
+        var idx = 0, len = rec_order.length;
+        var fields = [];
+        for(; (idx<len); idx++) {
+            var record = recordset.getById(rec_order[idx]);
+            var oldval = recordset.fld(record, fieldOrder);
+            var newval = String(idx+1).lpad(0,3);
+            if(oldval!=newval){
+                recordset.setFld(record, fieldOrder, newval);        
+                var fld = {};
+                fld[fieldId] = rec_order[idx];
+                fld[fieldOrder] = newval;
+                fields.push(fld);
+            }
+        }
+        if(fields.length>0){
+
+            var request = {
+                'a'          : 'save',
+                'entity'     : entityName,
+                'request_id' : window.hWin.HEURIST4.util.random(),
+                'fields'     : fields                     
+            };
+
+            window.hWin.HAPI4.EntityMgr.doRequest(request, 
+                function(response){
+                    if(response.status == window.hWin.ResponseStatus.OK){
+                        if($.isFunction(callback)) callback.call();
+                    }else{
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                    }
+            });
+
+        }else{
+            if($.isFunction(callback)) callback.call();
+        }
+    }
+    
 
 }//end dbs
 

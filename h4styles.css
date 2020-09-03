@@ -397,10 +397,6 @@ rec_edit_link
 rec_actions  see specific manage entities
 */
 
-div.recordDiv:hover .rec_actions 
-{
-    display: inline-block;
-}
 div.recordDiv:hover .rec_actions_button 
 {
     display: table-cell;
@@ -422,7 +418,7 @@ div.recordDiv.selected .selection_pointer{
 
 div.groupHeader:hover > .action-button-container,
 div.recordDiv:hover > .action-button-container,
-div.recordDiv:hover > .rec_actions
+div.recordDiv:hover .rec_actions 
 {
     display: block;
 }
@@ -452,10 +448,10 @@ div.recordDiv  .action-button {
 }
 
 div.recordDiv > .action-button-container,
-div.recordDiv  .rec_actions
+div.recordDiv .rec_actions
 {
     position: absolute;
-    top: 2px;
+    top: 4px;
     right: 2px;
 }
 

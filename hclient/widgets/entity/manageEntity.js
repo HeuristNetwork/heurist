@@ -181,7 +181,6 @@ $.widget( "heurist.manageEntity", {
                 '<div class="ent_wrapper">'
                         +'<div class="ent_wrapper" style="width:320px">'
                         +    '<div class="ent_header searchForm"/>'     
-                        +    '<div class="ent_content_full searchForm-list" style="display:none;width:170px"/>'
                         +    '<div class="ent_content_full recordList"/>'
                         +'</div>'
                         +'<div class="ent_wrapper" style="left:321px">'
@@ -492,6 +491,8 @@ $.widget( "heurist.manageEntity", {
     //
     // listener of action button/menu clicks - central listener for action events
     //
+    pre_action:null,
+    
     _onActionListener: function(event, action){
         
         var recID = 0;
@@ -505,6 +506,15 @@ $.widget( "heurist.manageEntity", {
                  recID =  action.recID;
                  action = action.action;
              }
+             
+             if(this.pre_action && 
+                this.pre_action.action==action && this.pre_action.recID==recID){
+                 return true; //prevent repeatable clicks
+             }
+             this.pre_action = {action:action, recID:recID};
+             var that = this;
+             setTimeout(function(){that.pre_action=null},1000);
+             
              if(action=='add'){
                     this.addEditRecord(-1);
                     return true;
@@ -625,7 +635,7 @@ console.log('>>>>'+key);
     //
     _defineActionButton2: function(options, container){        
         
-        var btn_opts = {label:options.text, icons:options.icons, title:options.title};
+        var btn_opts = {label:options.text, icons:options.icons, title:options.title, showLabel:options.showText!==false};
         
         var btn = $('<button>').button(btn_opts)
                     .click(options.click)
@@ -698,18 +708,18 @@ console.log('>>>>'+key);
     //
     //
     _initEditorOnly: function( recset ){
+
+            if( recset && recset.length()>0 ){
+                    this.updateRecordList(null, {recordset:recset});
+                    this.addEditRecord( this.options.rec_ID );
+                    return;
+            }
         
             //load user for given record id
             if(this.options.rec_ID>0){
                 
                     var that = this;                                                
                     
-                    if( recset && recset.length()>0 ){
-                        that.updateRecordList(null, {recordset:recset});
-                        that.addEditRecord( this.options.rec_ID );
-                        return;
-                    }
-                
                     var request = {};
                     request[this.options.entity.tablePrefix+'_ID']  = this.options.rec_ID;
                     request['a']          = 'search'; //action
