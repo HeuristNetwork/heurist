@@ -90,6 +90,7 @@ class DbDefTerms extends DbEntityBase
               return false;   
         }
         
+        $orderBy = '';
         //compose WHERE 
         $where = array();    
         
@@ -134,7 +135,7 @@ class DbDefTerms extends DbEntityBase
             $this->data['details'] = 'trm_ID,trm_Label,trm_InverseTermId,trm_ParentTermID'
             .',trm_VocabularyGroupID,trm_Code,trm_Status'; //trm_Description,trm_Domain,trm_Modified
             
-            
+            //$orderBy = ' ORDER BY trm_Label ';
             //$this->data['details'] = implode(',', array_keys($this->fields) );
         }
         
@@ -167,7 +168,7 @@ class DbDefTerms extends DbEntityBase
          if(count($where)>0){
             $query = $query.' WHERE '.implode(' AND ',$where);
          }
-         $query = $query.$this->searchMgr->getLimit().$this->searchMgr->getOffset();
+         $query = $query.$orderBy.$this->searchMgr->getLimit().$this->searchMgr->getOffset();
         
         $res = $this->searchMgr->execute($query, $is_ids_only, 'defTerms');
         return $res;

@@ -58,6 +58,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                     that._loadData();
                 }else
                 if(data && data.type == 'vcg' && that.options.auxilary=='vocabulary'){
+                    //update groups
                     that.recordList.resultList({groupByRecordset:$Db.vcg()});
                     that.recordList.resultList('refreshPage');
                 }
@@ -289,11 +290,12 @@ console.log(rec_order);
                             if(res && res.length>0){
                                 //filter by vocabulary
                                 that.options.trm_ParentTermID = res[0];
-                                var ids = that.getRecordSet().getAllChildrenIds('trm_ParentTermID',that.options.trm_ParentTermID);
-                                that.filterRecordList(null, {'trm_ParentTermID':ids, 'sort:trm_Label':1});
                                 
-                                //that.filterRecordList(null, {'trm_ParentTermID':('='+that.options.trm_ParentTermID), 'sort:trm_Label':1});
-//@todo                                that.searchForm.searchDefRecTypes('option','rtg_ID', res[0])
+                                if(that.getRecordSet()!==null){
+                                    
+                                    that._filterByVocabulary();
+
+                                }
                             }
                          }
                      }
@@ -315,7 +317,7 @@ console.log(rec_order);
         this.recordList.resultList( this.options.recordList );
             
             
-        that._loadData();
+        that._loadData(true);
         
         return true;
     },            
@@ -323,17 +325,54 @@ console.log(rec_order);
     //
     // invoked after all elements are inited 
     //
-    _loadData: function(){
+    _loadData: function( is_first_call ){
         
         if(this.options.auxilary=='vocabulary'){
             //show vocabs only
             var recset = $Db.trm().getSubSetByRequest({'trm_ParentTermID':'=0', 'sort:trm_Label':1},
                                      this.options.entity.fields);
             this.updateRecordList(null, {recordset:recset});
+            
+            //initial selection
+            //find first vocab 
+            if(is_first_call==true){
+                var rdiv = this.recordList.find('.recordDiv:first');
+                var rec_ID = rdiv.attr('recid');
+                rdiv.parent('div[data-grp-content]').show();
+console.log(rec_ID);                
+                rdiv.click();
+                //this.recordList.resultList('setSelected', [rec_ID]);
+            }
+            
         }else{
             this.updateRecordList(null, {recordset:$Db.trm()});
+            if(is_first_call==true) this._filterByVocabulary();
         }
         
+    },
+    
+    _filterByVocabulary: function(){
+
+        if(this.options.trm_ParentTermID>0 && this.options.auxilary!='vocabulary'){ 
+            
+            this.setTitle('Manage Terms: '+$Db.trm(this.options.trm_ParentTermID,'trm_Label'));
+           //this.filterRecordList(null, {'trm_ParentTermID':ids, 'sort:trm_Label':1});
+            
+            var ids = $Db.trm().getAllChildrenIds('trm_ParentTermID',this.options.trm_ParentTermID);
+            
+            var subset = this.getRecordSet().getSubSetByIds(ids);
+            subset = subset.getSubSetByRequest({'sort:trm_Label':1}, this.options.entity.fields);
+            this.recordList.resultList('updateResultSet', subset, null);
+
+            if(this.recordTree && this.recordTree.fancytree('instance')){
+
+                //filtered
+                var treedata = subset.getTreeViewData('trm_Label', 'trm_ParentTermID',
+                                            this.options.trm_ParentTermID);
+                var tree = this.recordTree.fancytree('getTree');
+                tree.reload(treedata);
+            }
+        }
     },
     
     _recordListItemRenderer:function(recordset, record){
@@ -667,7 +706,7 @@ console.log('activated');
     
     //
     //
-    //
+    /*
     filterRecordList: function( event, request ){
         
         var subset = this._super(event, request);
@@ -682,7 +721,7 @@ console.log('activated');
             tree.reload(treedata);
             
         }
-    }
+    }*/
 
     
     
