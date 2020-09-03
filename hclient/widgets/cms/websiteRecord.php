@@ -885,7 +885,7 @@ if ($page_template!=null && substr($page_template,-4,4)=='.tpl') {
             </div>    
         </div>
         
-        <div id="main-menu" class="mceNonEditable" style="float:left;width:100%;min-height:40px;padding-top:16px;color:black;font-size:1.1em;" data-heurist-app-id="heurist_Navigation" data-generated="1">
+        <div id="main-menu" class="mceNonEditable" style="position: absolute;top: 88px;width:100%;min-height:40px;padding-top:16px;color:black;font-size:1.1em;" data-heurist-app-id="heurist_Navigation" data-generated="1">
             <div class="widget-design-header" style="padding: 10px;"><img style="vertical-align: middle;"
              height="22" /> <strong>navigation</strong><a class="edit" style="padding: 0 10px;" title="Click to edit" href="#">edit</a>  <a class="remove" href="#">remove</a> height:50px width:100%</div>
             <span class="widget-options" style="font-style: italic; display: none;">{"menu_recIDs":"<?php print $rec_id;?>","use_next_level":true,"orientation":"horizontal","init_at_once":true}</span>
