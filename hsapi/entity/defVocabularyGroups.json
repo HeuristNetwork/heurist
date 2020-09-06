@@ -57,9 +57,14 @@
                     "dtID": "vcg_Domain",
                     "dtFields":{
                         "dty_Type":"enum",
-                        "rst_Display":"hidden",
-                        "rst_FieldConfig":["enum","relation"]
-                    }
+                        "rst_DisplayName": "Use as:",
+                        "rst_DisplayHelpText": "Define the usage of the terms (can be both)",
+                        "rst_DefaultValue": "enum",
+                        "rst_FieldConfig":[
+                            {"key":"enum","title":"Terms"},
+                            {"key":"relation","title":"Relation types"}
+                        ]  
+                   }
                 },
                 {
                     "dtID": "vcg_Order",

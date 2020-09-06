@@ -196,14 +196,6 @@ $.widget( "heurist.manageDefDetailTypeGroups", $.heurist.manageEntity, {
     },
 
     //
-    //
-    //
-    _triggerRefresh: function(){
-        window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, 
-            {source:this.uuid,  type:'dtg'});    
-    },
-        
-    //
     // update list after save (refresh)
     //
     _afterSaveEventHandler: function( recID, fieldvalues ){

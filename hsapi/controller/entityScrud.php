@@ -56,6 +56,8 @@
     $system = new System();
     $entity = null;
     
+    $need_config = false;
+    
     //sanitizeRequest($_REQUEST);  it brokes json strings
     stripScriptTagInRequest($_REQUEST);
     
@@ -64,8 +66,9 @@
         $res = array();        
         $entities = array();
         
-        if(@$_REQUEST['a']=='search' && @$_REQUEST['multi']==1 && @$_REQUEST['entity']=='all'){ 
+        if(@$_REQUEST['a']=='search' && @$_REQUEST['entity']=='all'){ 
             //search can be performed for several entities at once
+            $need_config = array();
             $entities = array('rtg','dtg','rty','dty','trm','vcg');
         }else {
             $entities = @$_REQUEST['entity'];
@@ -100,8 +103,12 @@
                 $this->system->addError(HEURIST_INVALID_REQUEST, "Wrong entity parameter: $entity_name");
                 break;
             }else{
-                if(@$_REQUEST['multi']==1){
+                if(count($entities)>1){
                     $res[$entity_name] = $entity->run();
+                    if($need_config!==false){
+                        $need_config[$entity_name] = $entity->config();    
+                    }
+                    
                 }else{
                     $res = $entity->run();        
                 }
@@ -119,7 +126,6 @@
             
         }else{
             $response = array("status"=>HEURIST_OK, "data"=> $res);
-            
             
             header("Access-Control-Allow-Origin: *");
             header('Content-type: application/json;charset=UTF-8');
@@ -143,6 +149,10 @@
             $response = $system->getError();
         }else{
             $response = array("status"=>HEURIST_OK, "data"=> $res);
+            
+            if($need_config!==false){
+                $response['config'] = $need_config;
+            }
         }
         print json_encode($response);
     }

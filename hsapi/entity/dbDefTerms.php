@@ -116,6 +116,8 @@ class DbDefTerms extends DbEntityBase
         if($pred!=null) array_push($where, $pred);
 
        
+       $needCheck = false;
+       
         //compose SELECT it depends on param 'details' ------------------------
         if(@$this->data['details']=='id'){
         
@@ -132,23 +134,28 @@ class DbDefTerms extends DbEntityBase
             
         }else if(@$this->data['details']=='full'){
 
-            $this->data['details'] = 'trm_ID,trm_Label,trm_InverseTermId,trm_ParentTermID'
+            $this->data['details'] = 'trm_ID,trm_Label,trm_InverseTermId,IFNULL(trm_ParentTermID, 0) as trm_ParentTermID'
             .',trm_VocabularyGroupID,trm_Code,trm_Status'; //trm_Description,trm_Domain,trm_Modified
+            
             
             //$orderBy = ' ORDER BY trm_Label ';
             //$this->data['details'] = implode(',', array_keys($this->fields) );
+        }else {
+            $needCheck = true;
         }
         
         if(!is_array($this->data['details'])){ //specific list of fields
             $this->data['details'] = explode(',', $this->data['details']);
         }
-        
-        //validate names of fields
-        foreach($this->data['details'] as $fieldname){
-            if(!@$this->fields[$fieldname]){
-                $this->system->addError(HEURIST_INVALID_REQUEST, "Invalid field name ".$fieldname);
-                return false;
-            }            
+            
+        if($needCheck){
+            //validate names of fields
+            foreach($this->data['details'] as $fieldname){
+                if(!@$this->fields[$fieldname]){
+                    $this->system->addError(HEURIST_INVALID_REQUEST, "Invalid field name ".$fieldname);
+                    return false;
+                }            
+            }
         }
 
         //ID field is mandatory and MUST be first in the list

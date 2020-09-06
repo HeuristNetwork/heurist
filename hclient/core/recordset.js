@@ -1192,7 +1192,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
         * Returns field value by fieldname for given record
         */
         fld: function(record, fldName){
-            if(!$.isArray(record)){
+            if(!($.isArray(record) || $.isPlainObject(record))){
                 record = records[record];
             }
             return _getFieldValue(record, fldName);
@@ -1249,7 +1249,11 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
         //
         getRecord:function(recID){
             var record = this.getById(recID);
-            return _getAllFields(record);
+            if(record){
+                return _getAllFields(record);
+            }else{
+                return null;
+            }
         },
 
         
@@ -1999,6 +2003,11 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                         res.push( node );
                     }
                 }
+                //sort by fieldTitle
+                res.sort(function(a,b){
+                    return a.title>b.title ?1:-1;    
+                });
+                
                 return res;
             }
             

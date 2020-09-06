@@ -44,6 +44,8 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
     //    
     _init: function() {
         
+//this._time_debug = new Date().getTime() / 1000;
+        
         //define it to load recordtypes from other server/database - if defined it allows selection only
         if(this.options.import_structure){ //for example https://heuristplus.sydney.edu.au/heurist/?db=Heurist_Reference_Set
             if(this.options.select_mode=='manager') this.options.select_mode='select_single';
@@ -190,9 +192,14 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         
         this.options.ui_params = this.getUiPreferences();
 
+//console.log( 'initControls  ' + (new Date().getTime() / 1000 - this._time_debug));
+//this._time_debug = new Date().getTime() / 1000;
+        
         this.options.onInitCompleted =  function(){
-            that._loadData();
-            that.changeUI(event, that.options.ui_params);    
+
+//console.log( 'onInitCompleted  ' + (new Date().getTime() / 1000 - that._time_debug));
+//that._time_debug = new Date().getTime() / 1000;
+
             
             if(that.options.innerTitle){
                 var rg_options = {
@@ -204,8 +211,16 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                      select_mode: 'manager',
                      reference_rt_manger: that.element,
                      onSelect:function(res){
-console.log('onSELECT!!!!');
+                         
+//console.log( 'onSELECT!!!!  ' + (new Date().getTime() / 1000 - that._time_debug));
+//that._time_debug = new Date().getTime() / 1000;
+
                          if(window.hWin.HEURIST4.util.isRecordSet(res)){
+                             
+                            if(!that.getRecordSet()){
+                                that._loadData( true );
+                            }
+                             
                             res = res.getIds();                     
                             if(res && res.length>0){
                                 that.options.rtg_ID = res[0];
@@ -215,7 +230,11 @@ console.log('onSELECT!!!!');
                      }
                 };
                 window.hWin.HEURIST4.ui.showEntityDialog('defRecTypeGroups', rg_options);
+            }else{
+                that._loadData( true );
             }
+
+            that.changeUI(event, that.options.ui_params);    
             
         }
         
@@ -246,7 +265,7 @@ console.log('onSELECT!!!!');
     //
     // invoked after all elements are inited 
     //
-    _loadData: function(){
+    _loadData: function(is_first){
         
         var that = this;
       
@@ -308,7 +327,7 @@ console.log('onSELECT!!!!');
                 //usual via entity
                 //shorter
                 this.updateRecordList(null, {recordset:$Db.rty()});
-                this.searchForm.searchDefRecTypes('startSearch');
+                if(is_first!==true)this.searchForm.searchDefRecTypes('startSearch');
                 
                 /*
                 //longer but safer - since it reloads data if it is missed locally
@@ -971,14 +990,6 @@ console.log('_recordListGetFullData')
     },
     
     //
-    //
-    //
-    _triggerRefresh: function( type ){
-        window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, 
-            { source:this.uuid, type:type });    
-    },
-    
-    //
     // update list after save (refresh)
     //
     _afterSaveEventHandler: function( recID, fieldvalues ){
@@ -1133,12 +1144,11 @@ console.log('_recordListGetFullData')
             this.recordList.css('left',0);
         }
 */        
-        this.saveUiPreferences( params );
+        if(event) this.saveUiPreferences( params );
         
         //refresh result list
         this.recordList.resultList('applyViewMode','list', true);
         this.recordList.resultList('refreshPage');
-        //this.searchForm.changeUI();
         
     },
     

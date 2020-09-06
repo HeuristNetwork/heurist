@@ -202,14 +202,6 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
 
     
     //
-    //
-    //
-    _triggerRefresh: function(){
-        window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, 
-            {source:this.uuid,  type:'rtg'});    
-    },
-    
-    //
     // update list after save (refresh)
     //
     _afterSaveEventHandler: function( recID, fieldvalues ){
@@ -224,7 +216,7 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
                 this._super( recID, fieldvalues );
         }
     
-        this._triggerRefresh();    
+        this._triggerRefresh('rtg');    
         
     },
 
@@ -233,7 +225,7 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
     //
     _afterDeleteEvenHandler: function( recID ){
         this._super( recID );
-        this._triggerRefresh();    
+        this._triggerRefresh('rtg');    
     },
     
     //

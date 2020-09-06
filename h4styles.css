@@ -416,7 +416,9 @@ div.recordDiv.selected .selection_pointer{
     visibility: visible;
 }
 
-div.groupHeader:hover > .action-button-container,
+div.groupHeader:hover > .action-button-container{
+    display:table-cell;
+}
 div.recordDiv:hover > .action-button-container,
 div.recordDiv:hover .rec_actions 
 {
@@ -439,6 +441,9 @@ div.recordDiv.public  > .action-button-container{
     display: table-cell;
     vertical-align: middle;
     padding: 0 2px;
+}
+.thumbs .recordDiv > .item{
+    max-width: 135px !important;
 }
 
 div.recordDiv  .action-button {

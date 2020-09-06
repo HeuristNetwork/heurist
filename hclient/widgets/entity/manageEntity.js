@@ -183,7 +183,7 @@ $.widget( "heurist.manageEntity", {
                         +    '<div class="ent_header searchForm"/>'     
                         +    '<div class="ent_content_full recordList"/>'
                         +'</div>'
-                        +'<div class="ent_wrapper" style="left:321px">'
+                        +'<div class="ent_wrapper editFormContainer" style="left:321px">'
                         //+    '<div class="ent_header editForm-toolbar"/>'
                         +    '<div class="ent_content_full editForm" style="top:0"/>'
                         +'</div>'
@@ -217,7 +217,7 @@ $.widget( "heurist.manageEntity", {
             layout = 
                 '<div class="ent_wrapper">'
                         + '<div class="recordList" style="display:none;"/>'
-                        + '<div class="ent_content editForm" style="top:0;bottom:0"/>'
+                        + '<div class="ent_content editForm ui-widget" style="top:0;bottom:0"/>'
                         //+ '<div class="ent_footer editForm-toolbar"/>'
                 +'</div>';
         
@@ -238,8 +238,8 @@ $.widget( "heurist.manageEntity", {
             var fele = this.element.find('.ent_wrapper:first');
             fele.children(0).css('top', '38px'); //down manager div to 38
             this._innerTitle = $('<div>').addClass('ui-heurist-header')
-                .text(this.options['title'])
-                .insertBefore($(fele.children()[0])); //insert before first wrapper
+            .html('<span class="title">'+this.options['title']+'</span>')
+            .insertBefore($(fele.children()[0])); //insert before first wrapper
             
             if(this.options.layout_mode=='editonly' && !this.options.isdialog){
                 //add div at bottom for control buttons
@@ -308,8 +308,12 @@ $.widget( "heurist.manageEntity", {
         var that = this;
         if(!window.hWin.HEURIST4.util.isempty(this._entityName)){
             //entity should be loaded from server
+//this._time_debug = new Date().getTime() / 1000;
             window.hWin.HAPI4.EntityMgr.getEntityConfig(this._entityName, 
                     function(entity){
+//console.log( 'getEntityConfig  ' + (new Date().getTime() / 1000 - this._time_debug));
+//this._time_debug = new Date().getTime() / 1000;
+                        
                         that.options.entity = entity;
                         if(that._initControls()){
                             if($.isFunction(that.options.onInitFinished)){
@@ -337,7 +341,7 @@ $.widget( "heurist.manageEntity", {
         this.options['title'] = title;
         
         if(this._innerTitle){
-            this._innerTitle.text( title );    
+            this._innerTitle.find('span.title').text( title );    
         }else if(this._as_dialog && this._as_dialog.dialog('instance')) {
             this._as_dialog.dialog('option', 'title', title);
         }
@@ -492,8 +496,13 @@ $.widget( "heurist.manageEntity", {
     // listener of action button/menu clicks - central listener for action events
     //
     pre_action:null,
+    pre_action_timer:null,
     
     _onActionListener: function(event, action){
+        
+        if(window.hWin.HAPI4.is_callserver_in_progress()) {
+            return;
+        }
         
         var recID = 0;
         
@@ -506,14 +515,16 @@ $.widget( "heurist.manageEntity", {
                  recID =  action.recID;
                  action = action.action;
              }
+             var that = this;
              
              if(this.pre_action && 
-                this.pre_action.action==action && this.pre_action.recID==recID){
+                this.pre_action.action==action){ // && this.pre_action.recID==recID
+                 clearTimeout(this.pre_action_timer);
+                 this.pre_action_timer = setTimeout(function(){that.pre_action=null},500);
                  return true; //prevent repeatable clicks
              }
              this.pre_action = {action:action, recID:recID};
-             var that = this;
-             setTimeout(function(){that.pre_action=null},1000);
+             this.pre_action_timer = setTimeout(function(){that.pre_action=null},500);
              
              if(action=='add'){
                     this.addEditRecord(-1);
@@ -563,12 +574,12 @@ $.widget( "heurist.manageEntity", {
     // mode - full|small|icon|icon_text - full is default mode
     _defineActionButton: function(action, container, mode, style){        
         
-        if(!style) style = {};
+        
         if(!action.icon) action.icon = '';
         action.title = (!action.title)?'':window.hWin.HR(action.title);
 
         if(mode=='icon_text'){ //for resultList item - buttons will be inited after render complete
-
+        
             var res = '<div title="'+(action.title?action.title:action.label)
             + '" class="logged-in-only'
             + (action.class?' '+action.class:'')+'"'
@@ -587,6 +598,8 @@ $.widget( "heurist.manageEntity", {
         }else {
             if(!container) return;
             var btn;
+            
+            if(!style) style = {};
             
             if(mode=='icon'){
                 
@@ -791,7 +804,7 @@ console.log('>>>>'+key);
                 if(this._as_dialog){
                     return this._as_dialog.parents('.ui-dialog'); 
                 }else {
-                    return $(document).find('div.ui-widget')[0];
+                    return this.editForm.parent();// $(document).find('div.ui-widget')[0];
                 }
             }
             return null;
@@ -803,7 +816,8 @@ console.log('>>>>'+key);
         var btn_array = [
                  {text:window.hWin.HR((this.options.edit_mode=='popup' || that.options.isdialog)?'Close':'Drop Changes'), 
                     id:'btnRecCancel',
-                    css:{'float':'right',margin:'.5em .4em .5em 0'}, 
+                    css:{'visibility':(this.options.edit_mode=='popup'?'visible':'hidden')
+                        ,'float':'right',margin:'.5em .4em .5em 0'}, 
                     click: function() { 
                         if(that.options.edit_mode=='popup') {
                             that.editFormPopup.dialog('close'); 
@@ -1248,12 +1262,17 @@ console.log('>>>>'+key);
 
     //  -----------------------------------------------------
     //
-    //  after save event handler
+    //  after save event handlers
     //
+    
+    // this handler is always executed
+    _afterSaveEventHandler2: function( recID, fieldvalues ){
+    
+    },
+    
+    //this handler optionally executed (not executed if afterAction in saveEditAndClose is specified)
     _afterSaveEventHandler: function( recID, fieldvalues ){
             
-            this.it_was_insert = (this._currentEditID<0);
-        
             window.hWin.HEURIST4.msg.showMsgFlash(this.options.entity.entityTitle+' '+window.hWin.HR('has been saved'));
             if(this.options.edit_mode=='popup'){
                 
@@ -1275,7 +1294,8 @@ console.log('>>>>'+key);
             
     },
     
-//    _time_debug:0,
+//    
+    _time_debug:0,
     
     //-----------------------------------------------------
     //
@@ -1284,10 +1304,8 @@ console.log('>>>>'+key);
     //
     _saveEditAndClose: function( fields, afterAction ){
 
-//this._time_debug = new Date().getTime() / 1000;
-        
             if(window.hWin.HAPI4.is_callserver_in_progress()) {
-                //console.log('prevent repeatative call')
+//console.log('prevent repeatative call')
                 return;   
             }
         
@@ -1306,8 +1324,11 @@ console.log('>>>>'+key);
                 };
              
                 if(this.options.coverall_on_save) {
-                    if(this.options.edit_mode=='popup' && this._edit_dialog){
-                        window.hWin.HEURIST4.msg.bringCoverallToFront(this._edit_dialog.parents('.ui-dialog'));   
+                    if(this.options.edit_mode=='popup' && this._edit_dialog || this.options.edit_mode=='editonly'){  
+                        //window.hWin.HEURIST4.msg.bringCoverallToFront(this._edit_dialog.parents('.ui-dialog'));   
+                        window.hWin.HEURIST4.msg.bringCoverallToFront(this._getEditDialog());   
+                    }else {
+                        window.hWin.HEURIST4.msg.bringCoverallToFront(this.editForm);   
                     }
                 }
                 
@@ -1339,6 +1360,15 @@ this._time_debug = fin_time;
                             }else{
                                 //add/update record in recordset in _afterSaveEventHandler depends on entity
                             }
+                            
+                            if(that.options.edit_mode=='inline' || that.options.edit_mode=='editonly'){
+                                that._editing.setModified(false);
+                                that.onEditFormChange(true); //update buttons
+                            }
+                            
+                            that.it_was_insert = (that._currentEditID<0);
+                            
+                            that._afterSaveEventHandler2( recID, fields );        
                             
                             if($.isFunction(afterAction)){
                                 afterAction.call(this, recID, fields);
@@ -1437,6 +1467,7 @@ this._time_debug = fin_time;
             var isChanged = this._editing.isModified();
             mode = isChanged?'visible':'hidden';
         }
+        
         //show/hide save,cancel,remove buttons
         var ele = this._toolbar;
         if(ele){
@@ -1444,6 +1475,9 @@ this._time_debug = fin_time;
                     ele.find('#btnRecCancel').css('visibility', mode);
             }
             ele.find('#btnRecSave').css('visibility', mode);
+            if(this.options.edit_mode!='popup'){
+                ele.find('#btnRecCancel').css('visibility', mode);    
+            }
             /* IJ 2018-10-17 request   
             if(this._currentEditRecordset==null){            
                 ele.find('#btnRecRemove').css('visibility', 'hidden');
@@ -1805,7 +1839,18 @@ this._time_debug = fin_time;
                 }
         }
         return -1;
-    }
+    },
     
+    //
+    //
+    //
+    _triggerRefresh: function( type, recID ){
+//console.log($(this.document).find('body').text().trim().substring(1,20));        
+//$(this.document).trigger(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, { source:this.uuid, type:type, recID: recID });
+        
+        window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, 
+            { source:this.uuid, type:type, recID: recID });    
+           
+    }
 });
 

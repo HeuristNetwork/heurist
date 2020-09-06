@@ -43,37 +43,84 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             this.options.select_mode = 'manager';
             this.options.layout_mode = 'editonly';
         }
+        if(this.options.auxilary=='vocabulary'){
+            this.options.edit_height = 440;
+        }else{
+            this.options.edit_height = 660;
+
+        }
         
         this._super();
         
         var that = this;
         
-        $(window.hWin.document).on(
-            window.hWin.HAPI4.Event.ON_REC_UPDATE
-            + ' ' + window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, 
-            function(e, data) { 
+        
+        window.hWin.HAPI4.addEventListener(this, window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, 
+        function(data) { 
+            
+if(data){                
+    console.log(this.uuid+'  '+data.source+'  '+this.options.auxilary+'  '+data.type);
+}
                 if(!data || 
-                   (data.source != that.uuid && data.type == 'trm'))
+                   (data.source != that.uuid && data.type == this.options.auxilary))
                 {
                     that._loadData();
                 }else
+                if(data && data.type == 'vocabulary' && that.options.auxilary=='vocabulary'){
+
+                
+                }else
                 if(data && data.type == 'vcg' && that.options.auxilary=='vocabulary'){
-                    //update groups
-                    that.recordList.resultList({groupByRecordset:$Db.vcg()});
-                    that.recordList.resultList('refreshPage');
+                                     
+                    //update vocabulary groups
+                    if(data.recID>0){
+                        var recID = data.recID;
+                        var is_delete = ($Db.vcg(recID)==null);
+                        var cont = that.recordList.find('.div-result-list-content');
+                        if(is_delete){
+                            cont.find('div[data-grp='+recID+']').remove();
+                            cont.find('div[data-grp-content='+recID+']').remove();
+                        }else {
+                            var header = cont.find('div[data-grp='+recID+']');
+                            var is_insert = (header.length==0);
+                            var content = that.rendererVocabularyGroupHeader(recID, false);
+                            if(is_insert){
+                                header = $(content).appendTo(cont);
+                                $('<div data-grp-content="'+recID+'">empty</div>').hide().appendTo(cont);
+                            }else{
+                                $(header).replaceWith($(content));
+                            }
+                            that.initVocabularyGroups(recID);
+                        }
+                        
+                    }else{
+                        //relaod all
+                        that.recordList.resultList({groupByRecordset:$Db.vcg()});    
+                        that.recordList.resultList('refreshPage');
+                    }
                 }
                 
-            });
+            
+        });
         
+/*        
+        $(this.document).on(
+            window.hWin.HAPI4.Event.ON_REC_UPDATE
+            + ' ' + window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, 
+            function(e, data) { 
+            });
+*/        
         
     },
     
     _destroy: function() {
-        
+console.log( '_destroy' );
+       window.hWin.HAPI4.removeEventListener(this, window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE);     
+/*        
        $(window.hWin.document).off(
             window.hWin.HAPI4.Event.ON_REC_UPDATE
             + ' ' + window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE);
-            
+*/            
        if(this.recordTree) this.recordTree.remove();
         
        this._super(); 
@@ -89,7 +136,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         }
         
         if(this.options.edit_mode=='editonly'){
-            this._initEditorOnly();
+            this._initEditorOnly( this.options.edit_recordset );
             return;
         }
        
@@ -134,87 +181,12 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                                     //delay: 200
                                 });
                     },
-                    droppable: function(){
-                        
-                        that.recordList.find('div[data-grp]')  //.recordDiv, ,.recordDiv>.item
-                            .droppable({
-                                //accept: '.rt_draggable',
-                                scope: 'vcg_change',
-                                hoverClass: 'ui-drag-drop',
-                                drop: function( event, ui ){
-
-                                    var trg = $(event.target);
-                                    //.hasClass('recordDiv')?$(event.target):$(event.target).parents('.recordDiv');
-                                                
-                                    var trm_ID = $(ui.draggable).attr('recid'); //parent().
-                                    var vcg_ID = trg.attr('data-grp');
-                                    if(trm_ID>0 && vcg_ID>0){
-                                        
-                                            var ele = that.recordList.find('div[data-grp-content='+vcg_ID+']');
-                                            ele.show();
-                                            if(ele.text()=='empty') ele.empty();
-                                            $(ui.draggable).appendTo(ele);
-                                            
-                                            that.changeVocabularyGroup({trm_ID:trm_ID, trm_VocabularyGroupID:vcg_ID });
-                                    }
-                            }});
-                            
-                        //init buttons in header    
-                        var conts = that.recordList.find('div[data-grp]');
-                        $.each(conts, function(i, cont){
-                            var grp_val = $(cont).attr('data-grp');
-                            cont = $(cont).find('.action-button-container')
-                            that._defineActionButton({key:'edit-group',label:'Edit group', title:'', icon:'ui-icon-pencil', 
-                                    class:'rec_actions_button', recid:grp_val}, cont, 'small');
-                            that._defineActionButton({key:'delete-group',label:'Remove group', title:'', icon:'ui-icon-delete', 
-                                    class:'rec_actions_button', recid:grp_val}, cont, 'small');
-                        });
-                        
-                        that.recordList.sortable({
-                            items: conts,
-                            stop:function(event, ui){
-
-                            var recset = $Db.vcg();
-                            var rec_order = recset.getOrder();
-
-                            var conts = that.recordList.find('div[data-grp]');
-                            conts.each(function(index, rdiv){
-                                var rec_id = $(rdiv).attr('data-grp');
-                                rec_order[index] = rec_id;
-                                
-                                that.recordList.find('div[data-grp-content='+rec_id+']')
-                                    .insertAfter($(rdiv));
-                            });
-                            recset.setOrder(rec_order);
-                            
-console.log(rec_order);                            
-                            window.hWin.HEURIST4.dbs.applyOrder(recset,'vcg');
-
-                        }});
-
-
-                    },
+                    droppable: function(){that.initVocabularyGroups();}, //called after page render 
                     groupByField:'trm_VocabularyGroupID',
                     groupOnlyOneVisible: false,
                     groupByRecordset: $Db.vcg(),
                     //groupByCss:'0 1.5em',
-                    rendererGroupHeader: function(grp_val, is_expanded){
-
-                        var desc = $Db.vcg(grp_val, 'vcg_Description');
-                        if(!desc) desc = '';
-
-                        return '<div class="groupHeader" data-grp="'+grp_val
-                            +'" style="font-size:0.9em;padding:4px 0 4px 0px;border-bottom:1px solid lightgray">'
-                            +'<span style="display:inline-block;vertical-align:top;padding-top:5px;" '
-                                    +'class="expand_button ui-icon ui-icon-triangle-1-'+(is_expanded?'s':'e')+'"></span>'
-                            +'<div style="display:inline-block;width:70%">'
-                            +'<div style="font-weight:bold;margin:0">'
-                            +$Db.vcg(grp_val, 'vcg_Name')+'</div>'
-                             //+grp_val+' '
-                            +'<div style="padding-top:4px;font-size:smaller;"><i>'+desc+'</i></div></div>'
-                            +'<div style="float:right" class="action-button-container"></div>'
-                            +'</div>';
-                    },
+                    rendererGroupHeader: this.rendererVocabularyGroupHeader,
                     
                     
                 };
@@ -229,7 +201,7 @@ console.log(rec_order);
                 //add record type group editor  3px solid red
                 this.element.css( {border:'none', 'box-shadow':'none', background:'none'} );
                 
-                this.element.find('.ent_wrapper:first').addClass('ui-dialog-heurist').css('left',288);
+                this.main_element = this.element.find('.ent_wrapper:first').addClass('ui-dialog-heurist').css({'left':288});
                 
                 this.vocabulary_groups = $('<div>').addClass('ui-dialog-heurist')
                     .css({position: 'absolute',top: 0, bottom: 0, left: 0, width:280, overflow: 'hidden'})
@@ -237,22 +209,28 @@ console.log(rec_order);
                     .appendTo(this.element);
                 
                 //console.log('vocab cont '+this.vocabulary_groups.attr('id'));               
-             
-                        
+                
+                //min width for editor 480
+                this.inline_editor_container = $('<div>').addClass('ui-dialog-heurist')
+                    .css({position: 'absolute',top: 0, bottom: 0, right: 0, left:746, overflow: 'hidden'})  //606px
+                    .hide()
+                    .uniqueId()
+                    .appendTo(this.element);
+                
                 //show particular terms for vocabulary 
                 var btn_array = [
                     {showText:true, icons:{primary:'ui-icon-plus'}, text:window.hWin.HR('Add Term'),
                           css:{'margin-right':'0.5em','float':'right'}, id:'btnAddButton',
                           click: function() { that._onActionListener(null, 'add'); }},
 
-                    {showText:true, icons:{primary:'ui-icon-arrowthick-1-e'}, text:window.hWin.HR('Import Terms'),
-                          css:{'margin-right':'0.5em','float':'right'}, id:'btnImportVocab',
-                          click: function() { that._onActionListener(null, 'vocab-import'); }},
-                    
-                    {showText:true, icons:{primary:'ui-icon-arrowthick-1-w'}, text:window.hWin.HR('Export Terms'),
+                    {showText:true, icons:{primary:'ui-icon-arrowthick-1-e'}, text:window.hWin.HR('Export Terms'),
                           css:{'margin-right':'0.5em','float':'right'}, id:'btnExportVocab',
                           click: function() { that._onActionListener(null, 'export-import'); }},
                           
+                    {showText:true, icons:{primary:'ui-icon-arrowthick-1-w'}, text:window.hWin.HR('Import Terms'),
+                          css:{'margin-right':'0.5em','float':'right'}, id:'btnImportVocab',
+                          click: function() { that._onActionListener(null, 'vocab-import'); }},
+                    
                     {showText:false, icons:{primary:'ui-icon-menu'}, text:window.hWin.HR('Show as plain list'),
                           css:{'margin-right':'0.5em','float':'left'}, id:'btnViewMode_List',
                           click: function() { that._onActionListener(null, 'viewmode-list'); }},
@@ -306,6 +284,12 @@ console.log(rec_order);
 //console.log('init vocabs grp '+this.vocabulary_groups.attr('id'));               
                 window.hWin.HEURIST4.ui.showEntityDialog('defTerms', rg_options);
                 
+                this.btn_inine_editor = $('<span class="ui-icon ui-icon-carat-2-w" style="cursor:pointer;float:right;margin:0px 6px">'
+                    +'Inline Editor</span>').appendTo(this._innerTitle);
+                
+                this._on(this.btn_inine_editor, {click: this._expandInlineEditor});
+                    
+                    
             }
 
         
@@ -321,6 +305,233 @@ console.log(rec_order);
         
         return true;
     },            
+    
+    //
+    //
+    //
+    rendererVocabularyGroupHeader: function(grp_val, is_expanded){
+
+            var desc = $Db.vcg(grp_val, 'vcg_Description');
+            if(!desc) desc = '';
+
+            return '<div class="groupHeader" data-grp="'+grp_val
+                +'" style="font-size:0.9em;padding:4px 0 4px 0px;border-bottom:1px solid lightgray">'
+                +'<span style="display:table-cell;vertical-align:top;padding:2px;" '
+                        +'class="expand_button ui-icon ui-icon-triangle-1-'+(is_expanded?'s':'e')+'"></span>'
+                +'<div style="display:table-cell;width:180px">'
+                +'<div style="font-weight:bold;margin:0;line-height:19px">'
+                +$Db.vcg(grp_val, 'vcg_Name')+'</div>'
+                 //+grp_val+' '
+                +'<div style="padding-top:4px;font-size:smaller;"><i>'+desc+'</i></div></div>'
+                +'<div style="min-width:70px" class="action-button-container"></div>'
+                +'</div>';
+    },
+    
+    //
+    //
+    //
+    initVocabularyGroups: function(grp_val){
+        
+        var that = this;
+        
+            var conts = that.recordList.find('div[data-grp'+(grp_val>0?('='+grp_val):'')+']');
+            $.each(conts, function(i, cont){
+                var grp_val = $(cont).attr('data-grp');
+                cont = $(cont).find('.action-button-container')
+                that._defineActionButton({key:'vocab-add',label:'Add Vocaulary', title:'', icon:'ui-icon-plus', 
+                        recid:grp_val}, cont, 'small');
+                that._defineActionButton({key:'edit-group',label:'Edit group', title:'', icon:'ui-icon-pencil', 
+                        recid:grp_val}, cont, 'small');
+                that._defineActionButton({key:'delete-group',label:'Remove group', title:'', icon:'ui-icon-delete', 
+                        recid:grp_val}, cont, 'small'); //class:'rec_actions_button', 
+            });
+            
+            var conts = that.recordList.find('div[data-grp]');
+
+            //to accept DnD of vocabularies            
+            conts.find('div[data-grp]')  //.recordDiv, ,.recordDiv>.item
+                .droppable({
+                    //accept: '.rt_draggable',
+                    scope: 'vcg_change',
+                    hoverClass: 'ui-drag-drop',
+                    drop: function( event, ui ){
+
+                        var trg = $(event.target);
+                        //.hasClass('recordDiv')?$(event.target):$(event.target).parents('.recordDiv');
+                                    
+                        var trm_ID = $(ui.draggable).attr('recid'); //parent().
+                        var vcg_ID = trg.attr('data-grp');
+                        if(trm_ID>0 && vcg_ID>0){
+                            
+                                var ele = that.recordList.find('div[data-grp-content='+vcg_ID+']');
+                                ele.show();
+                                if(ele.text()=='empty') ele.empty();
+                                $(ui.draggable).appendTo(ele);
+                                
+                                that.changeVocabularyGroup({trm_ID:trm_ID, trm_VocabularyGroupID:vcg_ID });
+                        }
+                }});
+            
+            that.recordList.sortable({
+                items: conts,
+                stop:function(event, ui){
+
+                var recset = $Db.vcg();
+                var rec_order = recset.getOrder();
+
+                var conts = that.recordList.find('div[data-grp]');
+                conts.each(function(index, rdiv){
+                    var rec_id = $(rdiv).attr('data-grp');
+                    rec_order[index] = rec_id;
+                    
+                    that.recordList.find('div[data-grp-content='+rec_id+']')
+                        .insertAfter($(rdiv));
+                });
+                recset.setOrder(rec_order);
+                
+                window.hWin.HEURIST4.dbs.applyOrder(recset,'vcg');
+
+            }});
+                        
+            
+    },
+    
+    //
+    //
+    //
+    _expandInlineEditor: function(){
+        
+        var isExpanded = this.btn_inine_editor.hasClass('ui-icon-carat-2-e');
+        var iWidth = 0;
+        
+        if(isExpanded){
+            ///hide
+            this.btn_inine_editor.removeClass('ui-icon-carat-2-e')
+                                 .addClass('ui-icon-carat-2-w');
+            this.main_element.css('width', 'auto');
+            this.inline_editor_container.hide();                 
+            
+            this.options.edit_mode = "popup";
+
+            //this.editForm.appendTo(this.element.find('.editFormContainer')); 
+            
+        }else{
+            //show
+            this.btn_inine_editor.removeClass('ui-icon-carat-2-w')
+                                 .addClass('ui-icon-carat-2-e');
+                                 
+            iWidth = 450; //310
+            this.inline_editor_container.css('left', iWidth+296);  //746 or 606
+            
+            if(this.inline_editor_container.width()<600){
+                iWidth = 310
+                this.inline_editor_container.css('left', iWidth+296);  //746 or 606
+            }
+            
+            this.main_element.css('width', iWidth);
+            this.inline_editor_container.show();     
+            
+            this.options.edit_mode = "inline";
+            //this.editForm.appendTo(this.inline_editor_container);
+            this._onActionListener(null, 'edit');
+        }
+        
+        if(this.main_element.width()<450){
+            this.main_element.find('#btnImportVocab').button({showLabel:false});
+            this.main_element.find('#btnExportVocab').button({showLabel:false});
+        }else{
+            this.main_element.find('#btnImportVocab').button({showLabel:true});
+            this.main_element.find('#btnExportVocab').button({showLabel:true});
+        }
+    },
+
+    //
+    //
+    //
+    selectedRecords: function(selected_recs){
+        
+        var res = this._super( selected_recs );            
+
+        if(selected_recs && this.options.auxilary=='vocabulary' && this.options.reference_trm_manger &&
+            this.options.reference_trm_manger.manageDefTerms('option','edit_mode')=='inline'){
+                      
+            //inline editor for vocabularies          
+            this._onActionListener(event, {action:'edit'});
+            /*
+            var container  = this.options.reference_trm_manger.manageDefTerms('getEditorInline');
+            this._showEditorInline(container, recID);
+            */
+        }
+
+        
+        return res;
+    },
+    
+    //
+    //
+    //
+    addEditRecord: function(recID)
+    {   
+        if(this.options.auxilary=='vocabulary' && this.options.reference_trm_manger &&
+            this.options.reference_trm_manger.manageDefTerms('option','edit_mode')=='inline'){
+                      
+            //inline editor for vocabularies          
+                        
+            var container  = this.options.reference_trm_manger.manageDefTerms('getEditorInline');
+            this._showEditorInline(container, recID);
+                        
+        }else if(this.options.edit_mode == "inline"){
+
+            //inline editor for terms
+            
+            this._showEditorInline(this.inline_editor_container, recID);
+            
+        }else{
+            this._super( recID );            
+        }
+    },
+    
+    //
+    //
+    //
+    getEditorInline: function(){
+        return this.inline_editor_container;
+    },
+    
+    //
+    //
+    //
+    _showEditorInline: function(container, recID){
+        
+                
+                if(container.manageDefTerms('instance') 
+                    && container.manageDefTerms('option','auxilary')==this.options.auxilary)
+                {
+                        
+                    container.manageDefTerms('option','edit_recordset', this.recordList.resultList('getRecordSet'));
+                    container.manageDefTerms('option','trm_ParentTermID', this.options.trm_ParentTermID);
+                    container.manageDefTerms('option','trm_VocabularyGroupID', this.options.trm_VocabularyGroupID);
+                    container.manageDefTerms( 'addEditRecord', recID );
+                    
+                }else{
+                    var rg_options = {
+                         isdialog: false, 
+                         innerTitle: true,
+                         container: container,
+                         title: 'Edit '+this.options.auxilary,
+                         select_mode: 'manager',
+                         edit_mode: 'editonly',
+                         edit_recordset: this.recordList.resultList('getRecordSet'), //filterd one
+                         auxilary: this.options.auxilary,
+                         rec_ID: recID,
+                         trm_ParentTermID: this.options.trm_ParentTermID,
+                         trm_VocabularyGroupID: this.options.trm_VocabularyGroupID
+                    };
+                    window.hWin.HEURIST4.ui.showEntityDialog('defTerms', rg_options); // it recreates  
+                }
+                
+    },    
+    
     
     //
     // invoked after all elements are inited 
@@ -339,14 +550,16 @@ console.log(rec_order);
                 var rdiv = this.recordList.find('.recordDiv:first');
                 var rec_ID = rdiv.attr('recid');
                 rdiv.parent('div[data-grp-content]').show();
-console.log(rec_ID);                
+                rdiv.parent().prev().find('.expand_button')
+                    .removeClass('ui-icon-triangle-1-e').addClass('ui-icon-triangle-1-s');
                 rdiv.click();
                 //this.recordList.resultList('setSelected', [rec_ID]);
             }
             
         }else{
             this.updateRecordList(null, {recordset:$Db.trm()});
-            if(is_first_call==true) this._filterByVocabulary();
+            //if(is_first_call==true) 
+            this._filterByVocabulary();
         }
         
     },
@@ -377,88 +590,49 @@ console.log(rec_ID);
     
     _recordListItemRenderer:function(recordset, record){
         
-        function fld(fldname){
-            return window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, fldname));
-        }
-        function fld2(fldname, col_width, value, style){
-            
-            if(!style) style = '';
-            if(!window.hWin.HEURIST4.util.isempty(col_width)){
-                style += (';max-width: '+col_width+';width:'+col_width);
-            }
-            if(style!='') style = 'style="'+style+'"'; //padding:0px 4px;
-            
-            if(!value){
-                value = recordset.fld(record, fldname);
-            }
-            return '<div class="item truncate" '+style+'>'+window.hWin.HEURIST4.util.htmlEscape(value)+'</div>';
-        }
-        
         //ugr_ID,ugr_Type,ugr_Name,ugr_Description, ugr_eMail,ugr_FirstName,ugr_LastName,ugr_Enabled,ugl_Role
         
-        var recID   = fld('trm_ID');
-        var recTitle = fld2('trm_Label','15em');
-/*            + ' : <div class="item" style="font-style:italic;width:45em">'
-            + window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, 'trm_Description'))+'</div>'*/
+        var recID = recordset.fld(record, 'trm_ID');
+        var recTitle = '<div class="item truncate" style="max-width:220px;width:220px">'
+            +window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, 'trm_Label'))+'</div>';
 
-
-        var recThumb = window.hWin.HAPI4.getImageUrl(this._entityName, recID, 'thumb');
+        var html;
         
-        var html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'+recThumb+'&quot;);">'
-        +'</div>';
+        if(this.options.auxilary=='vocabulary'){
+            
+            html = '<div class="recordDiv rt_draggable" style="padding-right:0" recid="'+recID+'">'
+                    + '<div class="recordSelector item"><input type="checkbox" /></div>'
+                    + recTitle 
+                    + this._defineActionButton({key:'edit',label:'Edit Vocabulary', 
+                        title:'', icon:'ui-icon-pencil',class:'rec_actions_button'}, 
+                        null,'icon_text') 
+                    + this._defineActionButton({key:'delete',label:'Remove Vocabulary', 
+                        title:'', icon:'ui-icon-delete',class:'rec_actions_button'},
+                        null,'icon_text')
+                    + '<div class="selection_pointer" style="display:table-cell">'
+                        +'<span class="ui-icon ui-icon-carat-r"></span></div>'
+                    +'</div>';
+            
+        }else{
 
-        var html = '<div class="recordDiv rt_draggable" recid="'+recID+'">'
+            var recThumb = window.hWin.HAPI4.getImageUrl(this._entityName, recID, 'thumb');
+            
+            var html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'
+                                    +recThumb+'&quot;);"></div>';
+
+            html = '<div class="recordDiv" recid="'+recID+'">'
                     + '<div class="recordSelector item"><input type="checkbox" /></div>'
                     + html_thumb + recTitle 
                     + '<div class="rec_actions">'
-                    
-                    + this._defineActionButton({key:'edit',label:'Edit', 
-                        title:'', icon:'ui-icon-pencil', class:'rec_actions_button'}, //+this.options.auxilary
+                    + this._defineActionButton({key:'edit',label:'Edit Term', 
+                        title:'', icon:'ui-icon-pencil',class:'rec_actions_button'},
                         null,'icon_text') 
-                    + this._defineActionButton({key:'delete',label:'Remove', 
-                        title:'', icon:'ui-icon-delete', class:'rec_actions_button'},
+                    + this._defineActionButton({key:'delete',label:'Remove Term', 
+                        title:'', icon:'ui-icon-delete',class:'rec_actions_button'},
                         null,'icon_text')
                     +'</div></div>';
-        
-/*        
-        var has_buttons = (this.options.select_mode=='manager' && this.options.edit_mode=='popup');
-
-        var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'">'
-        + html_thumb
-        + '<div class="recordSelector"><input type="checkbox" /></div>'
-        + html_icon
-        + '<div class="recordTitle recordTitle2" title="'+fld('rty_Description')
-                        +'" style="right:'+(has_buttons?'60px':'10px')
-                        + (this.options.import_structure?';left:30px':'')+'">'
-        +     recTitle
-        + '</div>';
-        
-        // add edit/remove action buttons in record lisr
-        if(has_buttons){
-        
-                
-               html = html 
-                + '<div class="rec_actions" style="top:4px;width:120px;">'
-                    + '<div title="Click to edit record type" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit" style="height:16px">'
-                    +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'
-                    + '</div>&nbsp;'
-                    + '<div title="Click to edit structure" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="structure" style="height:16px">'
-                    +     '<span class="ui-button-icon-primary ui-icon ui-icon-list"></span><span class="ui-button-text"></span>'
-                    + '</div>&nbsp;'
-                    + '<div title="Duplicate record type" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="duplicate" style="height:16px">'
-                    +     '<span class="ui-button-icon-primary ui-icon ui-icon-copy"></span><span class="ui-button-text"></span>'
-                    + '</div>&nbsp;'
-                    + '<div title="List of fields" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="fields" style="height:16px">'
-                    +     '<span class="ui-button-icon-primary ui-icon ui-icon-circle-b-info"></span><span class="ui-button-text"></span>'
-                    + '</div>&nbsp;'
-                    + '<div title="Click to delete record type" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="delete" style="height:16px">'
-                    +     '<span class="ui-button-icon-primary ui-icon ui-icon-circle-close"></span><span class="ui-button-text"></span>'
-                    + '</div></div>';
         }
         
-
-        html = html + '</div>';
-*/
         return html;
         
     },
@@ -475,24 +649,126 @@ console.log(rec_ID);
         }
     },
     
+    //
+    //
+    //
+    _afterDeleteEvenHandler: function(recID){
+        this._super(recID); 
+        
+        $Db.trm().removeRecord(recID);  
+    },
+    
     
     //-----
     //
-    // adding group ID value for new rectype
-    // open select icon dialog for new record
+    // show hide some elements on edit form according to type: 
+    //    vocab/term and enum/relation
     //
     _afterInitEditForm: function(){
         this._super();
+        
+        var ele;
+        var isVocab = !(this.options.trm_ParentTermID>0);
+        if(isVocab){
+            
+            //this.setTitle('Edit Vocabulary')
+        
+            //hide fields for vocab    
+            this._editing.getFieldByName('trm_InverseTermId').hide();
+            this._editing.getFieldByName('trm_Code').hide();
+            this._editing.getFieldByName('trm_Thumb').hide();
+
+            //change label            
+            this._editing.getFieldByName('trm_Label').find('.header').text('Vocabulary Name');
+            
+            //assign devault values
+            
+            if(this.options.trm_VocabularyGroupID>0){
+                ele = this._editing.getFieldByName('trm_VocabularyGroupID');
+                ele.editing_input('setValue', this.options.trm_VocabularyGroupID, true);
+            }
+            
+        }else{
+            
+            var isRelation = (false);
+            if(!isRelation){
+                this._editing.getFieldByName('trm_InverseTermId').hide();
+            }
+            
+            ele = this._editing.getFieldByName('trm_ParentTermID')
+            ele.editing_input('setValue', this.options.trm_ParentTermID, true);
+            
+            
+        }
+        ele = this._editing.getFieldByName('trm_Domain')
+        ele.editing_input('setValue', 'enum', true);
+        
     },   
         
     //
-    //
-    //
-    _triggerRefresh: function( type ){
-        window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, 
-            { source:this.uuid, type:type });    
+    //  Add PREV/NEXT buttons
+    //    
+    _getEditDialogButtons: function(){
+        var btns = this._super();
+        
+        if(this.options.auxilary!=='vocabulary'){
+        
+            var recset = this.recordList.resultList('getRecordSet');
+            var isNavVisible = (recset && recset.length()>1);
+            
+    //console.log( isNavVisible + recset.length());        
+
+            var that = this;
+            
+            btns.push({showText:false, icons:{primary:'ui-icon-circle-triangle-w'},text:window.hWin.HR('Previous'),
+                                  css:{'display':isNavVisible?'inline-block':'none','margin-right':'0.5em'}, id:'btnPrev',
+                                  click: function( recID, fields ) { 
+                                        //that._afterSaveEventHandler( recID, fields ); 
+                                        that._navigateToRec(-1); 
+                                  }});
+                                  
+            btns.push({showText:false, icons:{secondary:'ui-icon-circle-triangle-e'},text:window.hWin.HR('Next'),
+                                  css:{'display':isNavVisible?'inline-block':'none','margin-left':'0.5em','margin-right':'1.5em'}, id:'btnNext',
+                                  click: function( recID, fields ) { 
+                                        //that._afterSaveEventHandler( recID, fields ); 
+                                        that._navigateToRec(1); 
+                                  }});
+        }
+        return btns;
+        
     },
     
+    //
+    //
+    //
+    _navigateToRec: function(dest){
+        if(this._currentEditID>0){
+                var recset = this.recordList.resultList('getRecordSet');
+                var order  = recset.getOrder();
+                var idx = window.hWin.HEURIST4.util.findArrayIndex(this._currentEditID, order);//order.indexOf(Number(this._currentEditID));
+                idx = idx + dest;
+                if(idx>=0 && idx<order.length){
+                    
+                    var newRecID = order[idx];
+                    var that = this;
+                    
+                    if(this._editing.isModified()){
+  
+                        that.addEditRecord(newRecID);
+                        
+                    }else if(this._toolbar) {
+                        //this._toolbar.find('#divNav').html( (idx+1)+'/'+order.length);
+                        
+                        window.hWin.HEURIST4.util.setDisabled(this._toolbar.find('#btnPrev'), (idx==0));
+                        window.hWin.HEURIST4.util.setDisabled(this._toolbar.find('#btnNext'), (idx+1==order.length));
+                        
+                        if(dest!=0){
+                            this.addEditRecord(newRecID);
+                        }
+                    }
+                }
+        }
+    },    
     //
     // update list after save (refresh)
     //
@@ -513,11 +789,16 @@ console.log(rec_ID);
         }
         
         this._super( recID, fieldvalues );
-        
+    },
+    
+    _afterSaveEventHandler2: function( recID, fieldvalues ){  
         if(this.it_was_insert){
-            this._loadData()
+            if($Db.trm(recID)==null){
+                $Db.trm().addRecord(recID, fieldvalues);                
+            }
+            this._loadData();
         }
-        this._triggerRefresh('rty');
+        this._triggerRefresh(this.options.auxilary);
         
 /*        
         this.getRecordSet().setRecord(recID, fieldvalues);
@@ -550,34 +831,49 @@ console.log(rec_ID);
     },
     
     //
-    // extend for add-group
+    // extend for group actions
     //
     _onActionListener: function(event, action){
+        
+        var keep_action = action;
+        if(action && action.action){
+            recID =  action.recID;
+            action = action.action;
+        }
+        
+        if(action=='vocab-add' && recID>0){
+            this.options.trm_VocabularyGroupID = recID;
+            this.addEditRecord(-1);        
+            return true;
+        }
+        this.options.trm_VocabularyGroupID = -1;
+        
 
-        var is_resolved = this._super(event, action);
+        var is_resolved = this._super(event, keep_action);
 
         if(!is_resolved){
-
+/*
             if(action && action.action){
                 recID =  action.recID;
                 action = action.action;
             }
-            
+*/            
+            var that = this;
+
             if(action=='add-group' || action=='edit-group'){
 
                 if(action=='add-group') recID = -1;
-
-                var that = this;
 
                 var entity_dialog_options = {
                     select_mode: 'manager',
                     edit_mode: 'editonly', //only edit form is visible, list is hidden
                     //select_return_mode:'recordset',
+                    title: (action=='add-group'?'Add':'Edit')+' Vocabulary Group',
                     rec_ID: recID,
                     selectOnSave:true,
                     onselect:function(res){
                         if(res && window.hWin.HEURIST4.util.isArrayNotEmpty(res.selection)){
-                            that._triggerRefresh('vcg');
+                            //that._triggerRefresh('vcg', recID);
                             //var vcb_ID = res.selection[0];
                         }
                     }
@@ -585,24 +881,28 @@ console.log(rec_ID);
                 window.hWin.HEURIST4.ui.showEntityDialog('defVocabularyGroups', entity_dialog_options);
             }else if(action=='delete-group' && recID>0){
                 
-                var request = {
-                    'a'          : 'delete',
-                    'entity'     : 'defVocabularyGroups',
-                    'recID'      : recID                     
-                    };
+                window.hWin.HEURIST4.msg.showMsgDlg(
+                        'Are you sure you wish to delete this vocabulary type? Proceed?', function(){
+                            
+                            var request = {
+                                'a'          : 'delete',
+                                'entity'     : 'defVocabularyGroups',
+                                'recID'      : recID                     
+                                };
+                            window.hWin.HAPI4.EntityMgr.doRequest(request, 
+                                function(response){
+                                    if(response.status == window.hWin.ResponseStatus.OK){
+                                        $Db.vcg().removeRecord( recID );
+                                        that._triggerRefresh('vcg', recID);
+                                    }else{
+                                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                                    }
+                                });
+                            
+                        }, 
+                {title:'Warning',yes:'Proceed',no:'Cancel'});        
                 
-                var that = this;                                                
                 
-                window.hWin.HAPI4.EntityMgr.doRequest(request, 
-                    function(response){
-                        if(response.status == window.hWin.ResponseStatus.OK){
-                            $Db.vcg().removeRecord( recID );
-                            that._triggerRefresh('vcg');
-                        }else{
-                            window.hWin.HEURIST4.msg.showMsgErr(response);
-                        }
-                    });
-                    
             }else if(action=='vocab-import'){
                 
             }else if(action=='vocab-export'){
@@ -640,9 +940,10 @@ console.log(rec_ID);
                         activate: function(event, data){
                             // A node was activated: display its details
                             //_onNodeClick(data);
-console.log('activated');
+console.log('NODE activated');
                         },
-                    });
+                    })
+                    .css({'font-weight':'normal !important'});
                 }
 
                 this.recordTree.css({top:this.recordList.position().top}).show();      

@@ -1161,30 +1161,14 @@ prof =Profile
                        function(response){
                             if(response.status == window.hWin.ResponseStatus.OK){
 
-                                var entity_cfg = response.data;
-
+                                entity_configs[response.data.entityName] = response.data;
+                                
                                 //find key and title fields
-                                function __findFields(fields){
-                                    var idx;
-                                    for(idx in fields){
-                                        if(fields[idx].children){
-                                            __findFields(fields[idx].children);
-                                        }else{
-                                            if(fields[idx]['keyField']==true){
-                                                entity_cfg.keyField = fields[idx]['dtID'];
-                                            }
-                                            if(fields[idx]['titleField']==true){
-                                                entity_cfg.titleField = fields[idx]['dtID'];
-                                            }
-                                        }
-                                    }
-                                }
-                                
-                                __findFields( entity_cfg.fields );
-                                
-                                entity_configs[response.data.entityName] = entity_cfg;
+                                window.hWin.HAPI4.EntityMgr.resolveFields(response.data.entityName);
 
-                                callback(entity_cfg);
+console.log('get config>>>>'+response.data.entityName);
+                                
+                                callback(entity_configs[response.data.entityName]);
                             }else{
                                 window.hWin.HEURIST4.msg.showMsgErr(response);
                             }
@@ -1203,13 +1187,43 @@ prof =Profile
                 }
             },
 
+            //
+            //  find key and title fields
+            //
+            resolveFields: function(entityName){
+
+                var entity_cfg = entity_configs[entityName];
+
+                if(entity_cfg){
+
+                    function __findFields(fields){
+                        var idx;
+                        for(idx in fields){
+                            if(fields[idx].children){
+                                __findFields(fields[idx].children);
+                            }else{
+                                if(fields[idx]['keyField']==true){
+                                    entity_cfg.keyField = fields[idx]['dtID'];
+                                }
+                                if(fields[idx]['titleField']==true){
+                                    entity_cfg.titleField = fields[idx]['dtID'];
+                                }
+                            }
+                        }
+                    }
+
+                    __findFields( entity_cfg.fields );
+
+                }
+            },
             
             //
             // refresh several entity data at once
             // 
             refreshEntityData:function(entityNames, callback){
 
-                _callserver('entityScrud', {a:'search', 'multi':1, 'entity':entityNames, 'details':'full'},
+                 //'multi':1,   
+                _callserver('entityScrud', {a:'search', 'entity':entityNames, 'details':'full'},
                     function(response){
                         if(response.status == window.hWin.ResponseStatus.OK){
 
@@ -1218,6 +1232,14 @@ console.log( entityNames );
 
                             for(var entityName in response.data){
                                 entity_data[entityName] = new hRecordSet(response.data[entityName]);    
+                                
+                                if(response.config && response.config[entityName]){
+                                    
+                                    entity_configs[entityName] = response.config[entityName];
+                                    //find key and title fields
+                                    window.hWin.HAPI4.EntityMgr.resolveFields(entityName);
+                                }
+                                
                             }
 
                             if($.isFunction(callback)) callback();  
@@ -1572,6 +1594,15 @@ console.log('getEntityData '+entityName);
             _listeners.push( {obj:object, event_type:event_type, callback:callback} );
         },
         
+        removeEventListener:function( object, event_type ){
+            for (var i=0; i<_listeners.length; i++){
+                if(_listeners[i].event_type == event_type && _listeners[i].obj == object){
+console.log('remove '+event_type);                    
+                    _listeners.splice(i,1);
+                    return;
+                }
+            }
+        },
 
         user_id: function(){
                 return that.currentUser['ugr_ID'];  

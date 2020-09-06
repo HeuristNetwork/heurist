@@ -180,14 +180,7 @@ $.widget( "heurist.manageDefVocabularyGroups", $.heurist.manageEntity, {
         
     },
 
-    //
-    //
-    //
-    _triggerRefresh: function(){
-        window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, 
-            {source:this.uuid,  type:'vcg'});    
-    },
-    
+  
     //
     // update list after save (refresh)
     //
@@ -203,7 +196,7 @@ $.widget( "heurist.manageDefVocabularyGroups", $.heurist.manageEntity, {
                 this._super( recID, fieldvalues );
         }
     
-        this._triggerRefresh();    
+        this._triggerRefresh('vcg', recID);    
         
     },
 
@@ -212,7 +205,7 @@ $.widget( "heurist.manageDefVocabularyGroups", $.heurist.manageEntity, {
     //
     _afterDeleteEvenHandler: function( recID ){
         this._super( recID );
-        this._triggerRefresh();    
+        this._triggerRefresh('vcg', recID);    
     },
     
     //

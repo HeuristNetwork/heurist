@@ -138,7 +138,7 @@ class DbDefRecTypes extends DbEntityBase
                 $where2 = $where2 . 'AND (not r0.rec_FlagTemporary)';
             }
 
-            array_push($this->data['details'], '('.$query2.$where2.') as rty_Usage');
+            array_push($this->data['details'], '('.$query2.$where2.') as rty_RecCount');
                 
         }
         

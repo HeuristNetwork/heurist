@@ -602,7 +602,7 @@ window.hWin.HEURIST4.ui = {
         if(!window.hWin.HEURIST4.util.isempty(rectypeList)){
 
             if(!window.hWin.HEURIST4.util.isArray(rectypeList)){
-                rectypeList = rectypesrectypeList.split(',');
+                rectypeList = rectypeList.split(',');
             }
         }else if(!useGroups){ //all rectypes however plain list (not grouped)
             rectypeList = rectypes.getIds();
