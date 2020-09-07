@@ -144,14 +144,15 @@
                 "groupType": "accordion",
                 "children":[
 
+                
                 {
                     "dtID": "rty_RecTypeGroupID",
                     "dtFields":{
-                        "dty_Type":"resource",
-                        "rst_DisplayName": "Display group:",
-                        "rst_DisplayHelpText": "Record types are grouped together into related types for easier management. Add new groups from the record type management screen.",
-                        "rst_RequirementType":"required",
-                        "rst_FieldConfig": {"entity":"defRecTypeGroups"}
+                        "dty_Type":"enum",
+                        "rst_DisplayName":"Display group:",
+                        "rst_DisplayHelpText": "Record types are grouped together into related types for easier management. Add new groups from the record type management screen.", 
+                        "rst_FieldConfig": {"entity":"defRecTypeGroups"},
+                        "rst_RequirementType":"required"
                     }
                 },
                 {

@@ -31,6 +31,8 @@ createVocabularySelect - creatres selector with vocabularies only (top level ter
 
 createRectypeGroupSelect - get SELECT for record type groups
 createDetailtypeGroupSelect
+createVocabularyGroupSelect
+
 createRectypeSelect - get SELECT for record types   
 createRectypeDetailSelect - get SELECT for details of given recordtype
 createRectypeTreeSelect - get SELECT for hierarchy of record types   
@@ -540,29 +542,123 @@ window.hWin.HEURIST4.ui = {
 
     
     //
+    //
+    //
+    createTermSelectExt3: function(selObj, datatype, termIDTree, headerTermIDsList, defaultTermID, topOptions, needArray) {
+        return window.hWin.HEURIST4.ui.createTermSelectExt2(selObj,
+            {datatype:datatype, termIDTree:termIDTree, headerTermIDsList:headerTermIDsList,
+             defaultTermID:defaultTermID, topOptions:topOptions, needArray:needArray, useHtmlSelect:false});
+    },
+
+    //
+    // useGroups - true - grouped by vocabulary tabs, or group id
+    //
+    createVocabularySelect: function(selObj, options) {
+        
+        var defaultTermID =  options.defaultTermID,
+            topOptions = options.topOptions,
+            useGroups = options.useGroups;
+            
+        if (!(useGroups>0 || useGroups===false)){
+            useGroups = true;
+        }
+
+        //vocab groups    
+        var vocabs = {'0':[]};
+        if(useGroups===true){
+            //vgroups = recset.makeKeyValueArray('vcg_Name'); //returns key: title: array 
+            vocabs = {};
+            $Db.vcg().each(function(id,rec){ vocabs[id] = []; });
+        }else if (useGroups>0){
+            vocabs = {};
+            vocabs[useGroups] = [];
+        }
+        
+        //find all vocabularies and group them 
+        $Db.trm().each(function(trmID, record){
+           var parent_id = this.fld(record, 'trm_ParentTermID'); 
+           if(!(parent_id>0)){
+               var grp_id = this.fld(record, 'trm_VocabularyGroupID');
+               if(useGroups===true || useGroups == grp_id){
+                   vocabs[grp_id].push(trmID);
+               }else if(useGroups===false){
+                   vocabs['0'].push(trmID);
+               }
+           }
+        });
+        
+        //create selector 
+        selObj = window.hWin.HEURIST4.ui.createSelector(selObj, topOptions);
+        
+        //add optgroups and options
+        $.each(Object.keys(vocabs),function(i,grp_id){
+            
+            if(useGroups===true && vocabs[grp_id].length>1 && grp_id>0){
+                //add group header
+                var opt = window.hWin.HEURIST4.ui.addoption(selObj, grp_id, $Db.vcg(grp_id,'vcg_Name'));
+                $(opt).attr('disabled', 'disabled');
+                $(opt).attr('group', 1);
+            }
+                    
+            //sort by name within group
+            vocabs[grp_id].sort(function(a,b){
+                return $Db.trm(a,'trm_Label')<$Db.trm(b,'trm_Label')?-1:1;
+            });
+            
+            $.each(vocabs[grp_id],function(i,trm_id){
+                var trm_name = $Db.trm(trm_id,'trm_Label');
+                var opt = window.hWin.HEURIST4.ui.addoption(selObj, trm_id, trm_name);
+                $(opt).attr('depth', 1);
+                
+                if (trm_id == defaultTermID || trm_name == defaultTermID) {
+                        opt.selected = true;
+                }
+                
+            });
+        });
+        
+        //init selectmenu
+        selObj = window.hWin.HEURIST4.ui.initHSelect(selObj, false);
+
+        return $(selObj);
+        
+    },
+    
+    
+    //
     // get selector for record type groups
     //
-    createRectypeGroupSelect: function(selObj, topOptions, rectypes) {
+    createEntityGroupSelect: function(entity, selObj, topOptions) {
 
-        var recset = $Db.rtg();
-        var options = recset.makeKeyValueArray('rtg_Name');
-        if(topOptions) options = options.concat(topOptions, options)
+        var recset = $Db[entity]();
+        var options = recset.makeKeyValueArray(entity+'_Name');
+        
+        if(!(window.hWin.HEURIST4.util.isArray(topOptions) ||
+           window.hWin.HEURIST4.util.isempty(topOptions) ||
+           topOptions===false)){
+            if(topOptions===true) topOptions = '  ';  // <blank>
+            topOptions = [{key:'', title:topOptions}];
+        }
+
+        if(topOptions){
+            options = topOptions.concat(options);
+        } 
         
         window.hWin.HEURIST4.ui.createSelector(selObj, options);
         
         return selObj;
+    },
 
+    createRectypeGroupSelect: function(selObj, topOptions) {
+        return window.hWin.HEURIST4.ui.createEntityGroupSelect('rtg', selObj, topOptions);
     },
     
     createDetailtypeGroupSelect: function(selObj, topOptions) {
-
-        var recset = $Db.dtg();
-        var options = recset.makeKeyValueArray('dtg_Name');
-        if(topOptions) options = options.concat(topOptions, options)
-        
-        window.hWin.HEURIST4.ui.createSelector(selObj, options);
-        
-        return selObj;
+        return window.hWin.HEURIST4.ui.createEntityGroupSelect('dtg', selObj, topOptions);
+    },
+    
+    createVocabularyGroupSelect: function(selObj, topOptions) {
+        return window.hWin.HEURIST4.ui.createEntityGroupSelect('vcg', selObj, topOptions);
     },
 
     //
@@ -593,7 +689,7 @@ window.hWin.HEURIST4.ui = {
 
         useHtmlSelect = (useHtmlSelect===true);
         
-        //recorset 
+        //recordset 
         var rectypes = $Db.rty();
         var index;
 
@@ -701,7 +797,8 @@ window.hWin.HEURIST4.ui = {
                         $(opt).attr('disabled', 'disabled');
                         $(opt).attr('group', 1);
                     }
-                    
+
+
                     //add rectypes
                     for (var i=0; i<groups[rtgID].rty.length; i++){
                         
@@ -2242,8 +2339,6 @@ window.hWin.HEURIST4.ui = {
     // configMode.filter_group
     createEntitySelector: function(selObj, configMode, topOptions, callback){
         
-        selObj = window.hWin.HEURIST4.ui.createSelector(selObj, null);
-       
         var request = {a:'search','details':'name'};
         var fieldTitle;
         
@@ -2264,7 +2359,22 @@ window.hWin.HEURIST4.ui = {
             request['entity'] = 'defTerms';
             request['trm_Domain'] = configMode.filter_group;
             request['trm_ParentTermID'] = [0,'NULL']; //get vocabs only
+        }else if(configMode.entity=='defRecTypeGroups'){
             
+            selObj = window.hWin.HEURIST4.ui.createRectypeGroupSelect(selObj, topOptions);
+            return selObj;
+            
+        }else if(configMode.entity=='defDetailTypeGroups'){
+            
+            selObj = window.hWin.HEURIST4.ui.createDetailtypeGroupSelect(selObj, topOptions);
+            return selObj;
+
+        }else if(configMode.entity=='defVocabularyGroups'){
+            
+            selObj = window.hWin.HEURIST4.ui.createVocabularyGroupSelect(selObj, topOptions);
+            return selObj;
+            
+/*            
         }else if(configMode.entity=='DefRecTypeGroups'){
             fieldTitle = 'rtg_Name';
             request['entity'] = 'defRecTypeGroups';
@@ -2282,16 +2392,18 @@ window.hWin.HEURIST4.ui = {
             fieldTitle = 'dtg_Name';
             request['entity'] = 'defDetailTypes';
             request['dty_DetailTypeGroupID'] = configMode.filter_group;
-            
+*/          
         }else if(configMode.entity=='SysImportFiles'){
             fieldTitle = 'sif_TempDataTable';//'imp_table';
             request['entity'] = 'sysImportFiles';
             request['ugr_ID'] = configMode.filter_group;
-        }else{
-            return selObj;
         }
+
+        selObj = window.hWin.HEURIST4.ui.createSelector(selObj, null);
         
-        window.hWin.HAPI4.EntityMgr.doRequest(request,
+        if(request['entity']){
+        
+            window.hWin.HAPI4.EntityMgr.doRequest(request,
                     function(response){
                         if(response.status == window.hWin.ResponseStatus.OK){
                             
@@ -2323,8 +2435,8 @@ window.hWin.HEURIST4.ui = {
                         
                     });
                               
-        
-          return selObj;
+        }
+        return selObj;
     },
 
     //

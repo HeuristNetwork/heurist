@@ -114,13 +114,13 @@ function hRecordSet(initdata) {
         
         var result = [];
         
-        for(idx in records){
+        for(idx in order){
             if(idx)
             {
-                record = records[idx];
+                key = order[idx];
                 
-                key       = record[0],
-                title     = _getFieldValue(record, namefield),
+                record = records[key];
+                title = _getFieldValue(record, namefield),
                 
                 result.push({key:key, title:title});
             }
@@ -2052,6 +2052,9 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
             return res;
         },
         
+        //
+        // get flat array of all linked children records
+        //
         getAllChildrenIds:function(fieldLink, rootID){
             
             if(rootID>0){

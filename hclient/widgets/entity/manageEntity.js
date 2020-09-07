@@ -196,7 +196,7 @@ $.widget( "heurist.manageEntity", {
                                 +    '<div class="ent_content_full recordList" style="top:0"/>'
                             +'</div>'
 
-        }else if(this.options.layout_mode=='tabbed'){ //for terms
+        }else if(this.options.layout_mode=='tabbed'){ //for terms - REMOVE
         
             layout = 
                 '<div class="ent_wrapper">'
@@ -232,24 +232,27 @@ $.widget( "heurist.manageEntity", {
         }
         
         //this.element.css({'font-size':'1em'});
+        var fele = this.element.find('.ent_wrapper:first');
         
         if(this.options.innerTitle){ 
             //h6 style 
-            var fele = this.element.find('.ent_wrapper:first');
             fele.children(0).css('top', '38px'); //down manager div to 38
             this._innerTitle = $('<div>').addClass('ui-heurist-header')
             .html('<span class="title">'+this.options['title']+'</span>')
             .insertBefore($(fele.children()[0])); //insert before first wrapper
+        }
             
-            if(this.options.layout_mode=='editonly' && !this.options.isdialog){
+        if(this.options.layout_mode=='editonly' && !this.options.isdialog){
                 //add div at bottom for control buttons
                 $('<div>').addClass('ent_footer editForm-toolbar ui-heurist-header')
                     .css({'height':'36px','padding':'4px 20px 0px'}).appendTo(fele);
                     
                 this.element.find('.editForm').css('bottom','40px');
                 
-            }else if (this.options['select_mode']=='select_multi' || this.options['select_mode']=='select_roles')
-            {
+                this._toolbar = this.element.find('.editForm-toolbar');
+                
+        }else if (this.options['select_mode']=='select_multi' || this.options['select_mode']=='select_roles')
+        {
                 var ele = $('<div>').addClass('ent_footer editForm-toolbar ui-heurist-header')
                     .css({'height':'36px','padding':'4px 20px 0px'}).insertAfter(fele);
                 fele.css('bottom','40px');
@@ -259,7 +262,6 @@ $.widget( "heurist.manageEntity", {
                         css:{'float':'right',margin:'.5em .4em .5em 0'},  
                         class: 'ui-button-action',
                         click: function() { that._selectAndClose(); }}, ele);
-            }
         }
         
         //find 3 elements searchForm, recordList+recordList_toolbar, editForm+editForm_toolbar
@@ -633,7 +635,7 @@ $.widget( "heurist.manageEntity", {
                         var ele = $(event.target);
                         var key = ele.attr('data-key') || ele.parent().attr('data-key');
                         var recid = ele.attr('data-recid') || ele.parent().attr('data-recid');
-console.log('>>>>'+key);                        
+
                         this._onActionListener(null, {action:key, recID:recid} );
                         //that._trigger( "onaction", null, key );
                     }});
@@ -956,7 +958,9 @@ console.log('>>>>'+key);
             }); 
             this._as_dialog = $dlg; 
             
-            if(options.edit_mode == 'editonly' || options.edit_mode == 'inline'){
+            if (options.edit_mode == 'editonly' || options.edit_mode == 'inline')
+            {
+                
                 this._toolbar = this._as_dialog.parent().find('.ui-dialog-buttonpane');
                 //assign unique identificator to get proper position of child edit dialogs
                 this._toolbar.attr('posid','edit'+this._entityName+'-'+(new Date()).getTime());
@@ -1162,17 +1166,20 @@ console.log('>>>>'+key);
     
             }
             
-            if(this.options.list_mode=='default'){
-                this.recordList.resultList('updateResultSet', data.recordset, data.request);
-            }
+            if(this.recordList.resultList('instance')){ //for editonly recordList is not inited
             
-            //
-            // restore selection
-            //
-            if(this.options.selection_on_init && this.options['select_mode']=='select_multi'){
-                this.recordList.resultList('setMultiSelction', this.options.selection_on_init);
-                //this.selectedRecords( this.options.selection_on_init );
-                this.options.selection_on_init = null;
+                if(this.options.list_mode=='default'){
+                    this.recordList.resultList('updateResultSet', data.recordset, data.request);
+                }
+                
+                //
+                // restore selection
+                //
+                if(this.options.selection_on_init && this.options['select_mode']=='select_multi'){
+                    this.recordList.resultList('setMultiSelction', this.options.selection_on_init);
+                    //this.selectedRecords( this.options.selection_on_init );
+                    this.options.selection_on_init = null;
+                }
             }
         }
     },
@@ -1362,8 +1369,8 @@ this._time_debug = fin_time;
                             }
                             
                             if(that.options.edit_mode=='inline' || that.options.edit_mode=='editonly'){
-                                that._editing.setModified(false);
-                                that.onEditFormChange(true); //update buttons
+                                that._editing.setModified(0);
+                                that.onEditFormChange(); //update buttons
                             }
                             
                             that.it_was_insert = (that._currentEditID<0);
@@ -1467,7 +1474,7 @@ this._time_debug = fin_time;
             var isChanged = this._editing.isModified();
             mode = isChanged?'visible':'hidden';
         }
-        
+
         //show/hide save,cancel,remove buttons
         var ele = this._toolbar;
         if(ele){
@@ -1601,6 +1608,7 @@ this._time_debug = fin_time;
                      
             }else if(this.editFormToolbar.length>0){ //initialize action buttons
                 
+console.log('editFormToolbar');                
                     this._toolbar = this.editFormToolbar;
                     this.editFormToolbar.empty();
                     var btns = this._getEditDialogButtons();

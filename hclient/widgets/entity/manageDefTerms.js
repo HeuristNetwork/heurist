@@ -157,7 +157,7 @@ console.log( '_destroy' );
                           click: function() { that._onActionListener(null, 'save-order'); }}];
 
                 this._toolbar = this.searchForm;
-                this.searchForm.css({'padding-top': '8px'}).empty();
+                this.searchForm.css({'padding-top': this.options.innerTitle?'8px':'4px' }).empty();
                 this._defineActionButton2(btn_array[0], this.searchForm);
                 //this._defineActionButton2(btn_array[1], this.searchForm);
                 
@@ -219,6 +219,10 @@ console.log( '_destroy' );
                 
                 //show particular terms for vocabulary 
                 var btn_array = [
+                    {showText:false, icons:{primary:'ui-icon-carat-2-w'}, text:window.hWin.HR('Show inline Editor'),
+                          css:{'margin-right':'0.5em','float':'right'}, id:'btnExpandEditor',
+                          click: function() { that._expandInlineEditor(); }},
+                          
                     {showText:true, icons:{primary:'ui-icon-plus'}, text:window.hWin.HR('Add Term'),
                           css:{'margin-right':'0.5em','float':'right'}, id:'btnAddButton',
                           click: function() { that._onActionListener(null, 'add'); }},
@@ -243,7 +247,7 @@ console.log( '_destroy' );
                     ];
 
                 this._toolbar = this.searchForm;
-                this.searchForm.css({'padding-top': '8px'}).empty();
+                this.searchForm.css({'padding-top': this.options.innerTitle?'8px':'4px'}).empty();
                 for(var idx in btn_array){
                         this._defineActionButton2(btn_array[idx], this.searchForm);
                 }
@@ -256,7 +260,7 @@ console.log( '_destroy' );
                 //group options
                 var rg_options = {
                      isdialog: false, 
-                     innerTitle: true,
+                     innerTitle: that.options.innerTitle,
                      container: that.vocabulary_groups,
                      title: 'Vocabulary groups',
                      select_mode: 'manager',
@@ -284,10 +288,18 @@ console.log( '_destroy' );
 //console.log('init vocabs grp '+this.vocabulary_groups.attr('id'));               
                 window.hWin.HEURIST4.ui.showEntityDialog('defTerms', rg_options);
                 
-                this.btn_inine_editor = $('<span class="ui-icon ui-icon-carat-2-w" style="cursor:pointer;float:right;margin:0px 6px">'
-                    +'Inline Editor</span>').appendTo(this._innerTitle);
                 
-                this._on(this.btn_inine_editor, {click: this._expandInlineEditor});
+                if(this.options.innerTitle){
+                    this.btn_inine_editor = $('<span class="ui-icon ui-icon-carat-2-w" style="cursor:pointer;float:right;margin:0px 6px">'
+                        +'Inline Editor</span>').appendTo(this._innerTitle);
+                    
+                    this._on(this.btn_inine_editor, {click: this._expandInlineEditor});
+                }else{
+                    this.btn_inine_editor = this._toolbar.find('#btnExpandEditor'); 
+                    if(this.options.isdialog){
+                        this._as_dialog.parents('.ui-dialog').find('.ui-dialog-buttonpane').hide();    
+                    }
+                }
                     
                     
             }
@@ -401,13 +413,19 @@ console.log( '_destroy' );
     //
     _expandInlineEditor: function(){
         
-        var isExpanded = this.btn_inine_editor.hasClass('ui-icon-carat-2-e');
+        var isExpanded = this.btn_inine_editor.button('instance')
+                            ? (this.btn_inine_editor.button('option','icon')=='ui-icon-carat-2-e')
+                            : this.btn_inine_editor.hasClass('ui-icon-carat-2-e');
         var iWidth = 0;
         
         if(isExpanded){
             ///hide
-            this.btn_inine_editor.removeClass('ui-icon-carat-2-e')
+            if(this.btn_inine_editor.button('instance')){
+                this.btn_inine_editor.button({icon:'ui-icon-carat-2-w'});
+            }else{
+                this.btn_inine_editor.removeClass('ui-icon-carat-2-e')
                                  .addClass('ui-icon-carat-2-w');
+            }
             this.main_element.css('width', 'auto');
             this.inline_editor_container.hide();                 
             
@@ -417,8 +435,12 @@ console.log( '_destroy' );
             
         }else{
             //show
-            this.btn_inine_editor.removeClass('ui-icon-carat-2-w')
+            if(this.btn_inine_editor.button('instance')){
+                this.btn_inine_editor.button({icon:'ui-icon-carat-2-e'});
+            }else{
+                this.btn_inine_editor.removeClass('ui-icon-carat-2-w')
                                  .addClass('ui-icon-carat-2-e');
+            }
                                  
             iWidth = 450; //310
             this.inline_editor_container.css('left', iWidth+296);  //746 or 606
@@ -516,7 +538,7 @@ console.log( '_destroy' );
                 }else{
                     var rg_options = {
                          isdialog: false, 
-                         innerTitle: true,
+                         innerTitle: this.options.innerTitle,
                          container: container,
                          title: 'Edit '+this.options.auxilary,
                          select_mode: 'manager',
@@ -671,7 +693,9 @@ console.log( '_destroy' );
         var isVocab = !(this.options.trm_ParentTermID>0);
         if(isVocab){
             
-            //this.setTitle('Edit Vocabulary')
+            if(this._edit_dialog && this._edit_dialog.dialog('instance')){
+                this._edit_dialog.dialog('option', 'title', 'Edit Vocabulary');
+            }
         
             //hide fields for vocab    
             this._editing.getFieldByName('trm_InverseTermId').hide();
@@ -695,8 +719,11 @@ console.log( '_destroy' );
                 this._editing.getFieldByName('trm_InverseTermId').hide();
             }
             
-            ele = this._editing.getFieldByName('trm_ParentTermID')
+            ele = this._editing.getFieldByName('trm_ParentTermID');
             ele.editing_input('setValue', this.options.trm_ParentTermID, true);
+            
+            ele = this._editing.getFieldByName('trm_VocabularyGroupID').hide();
+            ele.editing_input('fset', 'rst_RequirementType', 'optional');
             
             
         }
@@ -721,14 +748,14 @@ console.log( '_destroy' );
             var that = this;
             
             btns.push({showText:false, icons:{primary:'ui-icon-circle-triangle-w'},text:window.hWin.HR('Previous'),
-                                  css:{'display':isNavVisible?'inline-block':'none','margin-right':'0.5em'}, id:'btnPrev',
+                                  css:{'display':isNavVisible?'inline-block':'none','margin':'0.5em 0.4em 0.5em 0px'}, id:'btnPrev',
                                   click: function( recID, fields ) { 
                                         //that._afterSaveEventHandler( recID, fields ); 
                                         that._navigateToRec(-1); 
                                   }});
                                   
             btns.push({showText:false, icons:{secondary:'ui-icon-circle-triangle-e'},text:window.hWin.HR('Next'),
-                                  css:{'display':isNavVisible?'inline-block':'none','margin-left':'0.5em','margin-right':'1.5em'}, id:'btnNext',
+                                  css:{'display':isNavVisible?'inline-block':'none','margin':'0.5em 0.4em 0.5em 0px','margin-right':'1.5em'}, id:'btnNext',
                                   click: function( recID, fields ) { 
                                         //that._afterSaveEventHandler( recID, fields ); 
                                         that._navigateToRec(1); 

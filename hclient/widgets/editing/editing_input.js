@@ -2984,9 +2984,10 @@ console.log('onpaste');
                     //this.configMode.filter_group
                     //if($input==null || $input.length==0) $input = $('<select>').uniqueId();
 
+                    var selObj = window.hWin.HEURIST4.ui.createEntitySelector($input.get(0), this.configMode, 'select...', null);
+                    window.hWin.HEURIST4.ui.initHSelect(selObj, false); 
+                    
                     //add add/browse buttons
-                    window.hWin.HEURIST4.ui.createEntitySelector($input.get(0), this.configMode, false, null);
-
                     if(this.configMode.button_browse){
 
                     }
@@ -3025,6 +3026,7 @@ console.log('onpaste');
                     window.hWin.HEURIST4.ui.initHSelect(selObj, this.options.useHtmlSelect);
                 }
             }
+            
             if(!window.hWin.HEURIST4.util.isnull(value)){
                 
                 if($($input).attr('radiogroup')){
@@ -3354,6 +3356,19 @@ console.log('onpaste');
         
             return false;        
         
+        }
+    },
+
+    //
+    //
+    //    
+    setUnchanged: function(){
+        
+        this.options.values = [];
+                
+        var idx;
+        for (idx in this.inputs) {
+            this.options.values.push(this._getValue(this.inputs[idx]));
         }
     },
     

@@ -1016,6 +1016,17 @@ that._time_debug = new Date().getTime() / 1000;
             term_type="relation";
         }
 
+        var that = this;
+        window.hWin.HEURIST4.ui.showEntityDialog('defTerms', 
+                {isdialog: true, 
+                 innerTitle: false,
+                 width: 1200, height:700,
+                 onClose: function(){
+                     that._recreateTermsVocabSelector();
+                 }
+        });
+              
+/* H3 version        
         var sURL = window.hWin.HAPI4.baseURL + "admin/structure/terms/editTerms.php?"+
         "popup=1&treetype="+term_type+"&db="+window.hWin.HAPI4.database;
 
@@ -1040,7 +1051,7 @@ that._time_debug = new Date().getTime() / 1000;
                 //_recreateTermsPreviewSelector();
             }
         });
-
+*/
     },    
     
     //
@@ -1066,9 +1077,8 @@ that._time_debug = new Date().getTime() / 1000;
         }
         
         var orig_selector = this.enum_container.find("#selVocab");
-        var selnew = window.hWin.HEURIST4.ui.createTermSelectExt2(orig_selector[0], 
-            {vocabsOnly:true, datatype:term_type, topOptions:'select...', useHtmlSelect:false, 
-                defaultTermID:is_vocabulary?defaultTermID:0 })
+        var selnew = window.hWin.HEURIST4.ui.createVocabularySelect(orig_selector[0],
+                    {topOptions:'select...', defaultTermID:is_vocabulary?defaultTermID:0}); 
 
         this._off(orig_selector, 'change');
         this._on(orig_selector, {change: function(event){

@@ -720,8 +720,23 @@ function hEditing(_options) {
         },
         
         setModified: function(val){
-            wasModified = (val===false)?2:1;
+            if(val===0){
+                wasModified = 0;    
+                var idx;
+                for (idx in editing_inputs) {
+                    ele = $(editing_inputs[idx]);
+                    
+                    if(ele.editing_input('instance')){
+                        ele.editing_input('setUnchanged');
+                    }
+                }
+                
+            }else{
+                wasModified = (val===false)?2:1;
+            }
         },
+        
+        
         
         getContainer: function(){
             return $container;

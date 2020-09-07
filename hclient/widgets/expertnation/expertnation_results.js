@@ -215,11 +215,11 @@ $.widget( "heurist.expertnation_results", $.heurist.resultList, {
                         if(window.hWin.HEURIST4.util.isArrayNotEmpty(aval)){
 
                             var term_id = aval[0];
-                            if(!window.hWin.HEURIST4.terms.termsByDomainLookup.enum[term_id]){
+                            if(!$Db.trm(trmID,'trm_Label')){
                                 console.log('term '+term_id+' not found');
                                 return 'term#'+term_id;   
                             }else{
-                                return window.hWin.HEURIST4.terms.termsByDomainLookup.enum[term_id][0];
+                                return $Db.trm(trmID,'trm_Label');
                             }
                         }
                     }

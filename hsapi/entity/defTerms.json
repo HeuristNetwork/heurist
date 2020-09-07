@@ -31,6 +31,16 @@
                     }
                 },
                 {
+                    "dtID": "trm_VocabularyGroupID",
+                    "dtFields":{
+                        "dty_Type":"enum",
+                        "rst_DisplayName":"Group:",
+                        "rst_DisplayHelpText": "Vocabulary group", 
+                        "rst_FieldConfig": {"entity":"defVocabularyGroups"},
+                        "rst_RequirementType":"required"
+                    }
+                },
+                {
                     "dtID": "trm_Label",
                     "titleField": true,
                     "dtFields":{
@@ -106,13 +116,6 @@
                 },
                 {
                     "dtID": "trm_ParentTermID",
-                    "dtFields":{
-                        "dty_Type":"integer",
-                        "rst_Display":"hidden"
-                    }
-                },
-                {
-                    "dtID": "trm_VocabularyGroupID",
                     "dtFields":{
                         "dty_Type":"integer",
                         "rst_Display":"hidden"
