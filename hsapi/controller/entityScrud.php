@@ -67,9 +67,10 @@
         $entities = array();
         
         if(@$_REQUEST['a']=='search' && @$_REQUEST['entity']=='all'){ 
+            // see HAPI4.refreshEntityData
             //search can be performed for several entities at once
             $need_config = array();
-            $entities = array('rtg','dtg','rty','dty','trm','vcg');
+            $entities = array('rtg','dtg','rty','dty','trm','vcg','rst');
         }else {
             $entities = @$_REQUEST['entity'];
         }
@@ -86,6 +87,10 @@
             else if($entity_name=='dty') $entities[$idx] = 'defDetailTypes';
             else if($entity_name=='trm') $entities[$idx] = 'defTerms';
             else if($entity_name=='vcg') $entities[$idx] = 'defVocabularyGroups';
+            else if($entity_name=='rst') {
+                $entities[$idx] = 'defRecStructure';   
+                $_REQUEST['details'] = 'list';
+            }
         }
         
         

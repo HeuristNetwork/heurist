@@ -82,7 +82,11 @@ class DbDefRecStructure extends DbEntityBase
 
             $this->data['details'] = 'rst_ID,rst_DisplayName';
 
-        }else if(@$this->data['details']=='list' || @$this->data['details']=='full'){
+        }else if(@$this->data['details']=='list'){
+        
+            $this->data['details'] = 'rst_ID,rst_RecTypeID,rst_DetailTypeID,rst_DisplayName';
+        
+        }else if(@$this->data['details']=='full'){
             //all fields from configuration json
 
             $this->data['details'] = implode(',', $this->fieldNames);
@@ -99,10 +103,12 @@ class DbDefRecStructure extends DbEntityBase
             "if(rst_DisplayHelpText is not null and (dty_Type='separator' OR CHAR_LENGTH(rst_DisplayHelpText)>0),rst_DisplayHelpText,dty_HelpText) as rst_DisplayHelpText",
             //here we check for an override in the recTypeStrucutre for ExtendedDescription which is a rectype specific ExtendedDescription, use detailType ExtendedDescription as default
             "if(rst_DisplayExtendedDescription is not null and CHAR_LENGTH(rst_DisplayExtendedDescription)>0,rst_DisplayExtendedDescription,dty_ExtendedDescription) as rst_DisplayExtendedDescription",
-            "rst_DisplayOrder", "rst_DisplayWidth", "rst_DisplayHeight", "rst_DefaultValue", "rst_RecordMatchOrder", "rst_CalcFunctionID", "rst_RequirementType",
+            "rst_DisplayOrder", "rst_DisplayWidth", "rst_DisplayHeight", "rst_DefaultValue", 
+            //XXX "rst_RecordMatchOrder", "rst_CalcFunctionID",
+            "rst_RequirementType",
             "rst_NonOwnerVisibility", "rst_Status", "rst_OriginatingDBID", "rst_MaxValues", "rst_MinValues",
             //here we check for an override in the recTypeStrucutre for displayGroup
-            "dty_DetailTypeGroupID as rst_DisplayDetailTypeGroupID",
+            //XXX "dty_DetailTypeGroupID as rst_DisplayDetailTypeGroupID",
             //here we check for an override in the recTypeStrucutre for TermIDTree which is a subset of the detailType dty_JsonTermIDTree
             "dty_JsonTermIDTree as rst_FilteredJsonTermIDTree",
             //here we check for an override in the recTypeStrucutre for Pointer types which is a subset of the detailType dty_PtrTargetRectypeIDs

@@ -76,10 +76,15 @@ $.widget( "heurist.mainMenu6", {
                     mouseleave: that._collapseMainMenuPanel,
                 });
                 //other entries in main(left) menu
+                /* 
+                remove these remarks to enable temp appearing section menu on mouse over 
+                without it they can be opened by click only
+                
                 that._on(that.divMainMenu.children(':not(.ui-heurist-explore)'), {
                     mouseover: that._mousein_SectionMenu,  
                     mouseleave: that._mouseout_SectionMenu,
                 });
+                */
                 //exit form explore menu section
                 that._on(that.element.find('.ui-menu6-section.ui-heurist-explore'), {
                     mouseleave: that._collapseMainMenuPanel

@@ -2256,9 +2256,9 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         ffr[fieldIndexMap['rst_TermIDTreeNonSelectableIDs']] = (dt?dt[dtyFieldNamesIndexMap['dty_TermIDTreeNonSelectableIDs']]:"");
         ffr[fieldIndexMap['rst_MaxValues']] = 1;
         ffr[fieldIndexMap['rst_MinValues']] = 0;
-        ffr[fieldIndexMap['rst_CalcFunctionID']] = null;
+        ffr[fieldIndexMap['rst_CalcFunctionID']] = null; //!!!!
         ffr[fieldIndexMap['rst_DefaultValue']] = null;
-        ffr[fieldIndexMap['rst_DisplayDetailTypeGroupID']] = (dt?dt[dtyFieldNamesIndexMap['dty_DetailTypeGroupID']]:"");
+        ffr[fieldIndexMap['rst_DisplayDetailTypeGroupID']] = (dt?dt[dtyFieldNamesIndexMap['dty_DetailTypeGroupID']]:"");  //!!!
         ffr[fieldIndexMap['rst_DisplayExtendedDescription']] = (dt?dt[dtyFieldNamesIndexMap['dty_ExtendedDescription']]:"");
         ffr[fieldIndexMap['rst_DisplayHelpText']] = (dt?dt[dtyFieldNamesIndexMap['dty_HelpText']]:"");
         ffr[fieldIndexMap['rst_DisplayOrder']] = (order>0)?order:999;
@@ -2271,7 +2271,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         ffr[fieldIndexMap['rst_OriginatingDBID']] = 0;
         ffr[fieldIndexMap['rst_PtrFilteredIDs']] = (dt?dt[dtyFieldNamesIndexMap['dty_PtrTargetRectypeIDs']]:"");
         ffr[fieldIndexMap['rst_CreateChildIfRecPtr']] = 0;
-        ffr[fieldIndexMap['rst_RecordMatchOrder']] = 0;
+        ffr[fieldIndexMap['rst_RecordMatchOrder']] = 0; //!!!!
         ffr[fieldIndexMap['rst_RequirementType']] = 'optional';
         ffr[fieldIndexMap['rst_Status']] = (dt?dt[dtyFieldNamesIndexMap['dty_Status']]:"open");
         ffr[fieldIndexMap['dty_Type']] = (dt?dt[dtyFieldNamesIndexMap['dty_Type']]:"freetext");

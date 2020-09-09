@@ -114,16 +114,17 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
         if(this.options.innerTitle){
             //specify add new/save order buttons above record list
             var btn_array = [
-                {showText:true, icons:{primary:'ui-icon-plus'},text:window.hWin.HR('Add Group'),
+                {showText:true, icons:{primary:'ui-icon-plus'},text:window.hWin.HR('Add'),
                       css:{'margin-right':'0.5em','float':'right'}, id:'btnAddButton',
                       click: function() { that._onActionListener(null, 'add'); }},
 
-                {text:window.hWin.HR('Save Order'),
+                {text:window.hWin.HR('Save'),
                       css:{'margin-right':'0.5em','float':'right',display:'none'}, id:'btnApplyOrder',
                       click: function() { that._onActionListener(null, 'save-order'); }}];
 
             this._toolbar = this.searchForm;
             this.searchForm.css({'padding-top': '8px'}).empty();
+            $('<h4>Record Type Groups</h4>').css({'margin':4, float:'left'}).appendTo(this.searchForm);
             this._defineActionButton2(btn_array[0], this.searchForm);
             this._defineActionButton2(btn_array[1], this.searchForm);
             
@@ -184,7 +185,7 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
                             null,'icon_text');
         }
         
-        var cnt = recordset.fld(record, 'rtg_RtCount');
+        var cnt = 0;//recordset.fld(record, 'rtg_RtCount');
         
         html = html 
                 +((cnt>0)
@@ -233,7 +234,7 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
     //     
     _deleteAndClose: function(unconditionally){
 
-        if(this._getField('rtg_RtCount')>0){
+        if(false && this._getField('rtg_RtCount')>0){
             window.hWin.HEURIST4.msg.showMsgFlash('Can\'t remove non empty group');  
             return;                
         }
@@ -270,13 +271,13 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
     
     //
     // extend dialog button bar
-    //    
+    //
+    /*    
     _initEditForm_step3: function(recID){
         
         if(this._toolbar){
             this._toolbar.find('.ui-dialog-buttonset').css({'width':'100%','text-align':'right'});
-            this._toolbar.find('#btnRecDelete').css('display', 
-                    (recID>0 && this._getField('rtg_RtCount')==0) ?'block':'none');
+            this._toolbar.find('#btnRecDelete').css('display', (recID>0 && this._getField('rtg_RtCount')==0) ?'block':'none');
         }
         
         this._super(recID);
@@ -287,11 +288,11 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
             
         if(this._toolbar){
             var isChanged = this._editing.isModified();
-            this._toolbar.find('#btnRecDelete').css('display', 
-                    (isChanged || this._getField('rtg_RtCount')>0)?'none':'block');
+            this._toolbar.find('#btnRecDelete').css('display', (isChanged || this._getField('rtg_RtCount')>0)?'none':'block');
         }
             
     },
+    */
   
 /*    
     _getEditDialogButtons: function(){

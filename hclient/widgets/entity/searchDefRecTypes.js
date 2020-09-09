@@ -42,7 +42,7 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
         }else{
             
             this.btn_add_record
-                    .button({label: window.hWin.HR("Add Record Type"), showLabel:true, 
+                    .button({label: window.hWin.HR("Add"), showLabel:true, 
                             icon:"ui-icon-plus"})
                     .addClass('ui-button-action')
                     .show();
@@ -79,9 +79,11 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
             //this.element.find('#div_show_already_in_db').css({'display':'inline-block'});    
             this.chb_show_already_in_db = this.element.find('#chb_show_already_in_db');
             this._on(this.chb_show_already_in_db,  { change:this.startSearch });
+            this.element.find('#div_group_information').hide();
             
             this.options.simpleSearch = true;
         }else{
+            this.element.find('#div_group_information').show();
             this.element.find('#div_show_already_in_db').hide();
             this._on(this.element.find('#chb_show_all_groups'),  { change:this.startSearch });
             /*
@@ -155,8 +157,6 @@ console.log('searchRecTypes INITED');
 
         var popele = that.element.find('#div_ui_config');
         
-        popele.find('#input_ui_group').val(this.options.ui_params['groupsPresentation']);
-
         var flist = popele.find( ".toggles" );
         var opts = this.options.ui_params['fields'];
         
@@ -211,7 +211,6 @@ console.log('searchRecTypes INITED');
                     
                     //get new parameters
                     var params = { 
-                        groupsPresentation: popele.find( '#input_ui_group' ).val(),
                         fields: fields
                     };
                     
@@ -237,57 +236,6 @@ console.log('searchRecTypes INITED');
 
 
 
-    },
-
-    //
-    // update visibility for selectors in filter form
-    //
-    changeUI: function( params ){
-        
-        if(this.options.simpleSearch) return;
-        
-        var params = this.options.ui_params;
-        
-        var sel_group = this.element.find('#sel_group');
-        var tabheight = 0;
-        
-        if(params['groupsPresentation']=='tab'){
-            sel_group.show();
-            tabheight = sel_group.height();
-        }else{
-            sel_group.hide();
-        }
-        
-        /*
-        if(params['groupsPresentation']=='select'){
-            this.element.find('#div_search_group').css({'display':'inline-block'});            
-        }else if(params['groupsPresentation']=='none'){
-            
-            this.element.find('#div_search_group').hide();
-            this.element.find('#div_show_all_groups').css({'display':'inline-block'});            
-        }else{
-            
-            //activate tab of list according to selected group
-            var grpid =  this.input_search_group.val();
-            
-            if(grpid=='any'){
-                //select first after "any groupd"
-                //this.input_search_group.val(this.input_search_group.first('option').attr('value')).change();
-                this.input_search_group[0].selectedIndex = 1;
-                this.input_search_group.change();
-                grpid =  this.input_search_group.val();
-            }
-            
-            var tab = this.selectGroup.find('li[data-grp="'+grpid+'"]');
-            var tabidx = this.selectGroup.find('ul').children().index(tab);
-            this.selectGroup.tabs('option','active', tabidx);
-            
-            this.searchList.find('li').removeClass('ui-state-active');
-            this.searchList.find('li[value="'+grpid+'"]').addClass('ui-state-active');
-        }
-        */
-        
-        return tabheight;
     },
 
 /*    
@@ -427,9 +375,16 @@ console.log('searchRecTypes INITED');
                 request['not:rty_RecTypeGroupID'] = Math.abs(this.options.rtg_ID);
             }
         
+            var sGroupTitle = '<h4 style="margin:0">';
             if(!this.element.find('#chb_show_all_groups').is(':checked') && this.options.rtg_ID>0){
                 request['rty_RecTypeGroupID'] = this.options.rtg_ID;
+                sGroupTitle += ($Db.rtg(this.options.rtg_ID,'rtg_Name')
+                                    +'</h5><div class="heurist-helper3 truncate" style="font-size:0.7em">'
+                                    +$Db.rtg(this.options.rtg_ID,'rtg_Description')+'</div>');
+            }else{
+                sGroupTitle += 'Record types</h4><div class="heurist-helper3" style="font-size:0.7em">All record type groups</div>';
             }
+            this.element.find('#div_group_information').html(sGroupTitle);
         
 /*            
             if(this.input_search_group.val()>0){

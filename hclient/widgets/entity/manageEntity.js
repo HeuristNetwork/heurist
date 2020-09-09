@@ -234,7 +234,7 @@ $.widget( "heurist.manageEntity", {
         //this.element.css({'font-size':'1em'});
         var fele = this.element.find('.ent_wrapper:first');
         
-        if(this.options.innerTitle){ 
+        if(false && this.options.innerTitle){ 
             //h6 style 
             fele.children(0).css('top', '38px'); //down manager div to 38
             this._innerTitle = $('<div>').addClass('ui-heurist-header')

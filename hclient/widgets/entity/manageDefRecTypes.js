@@ -27,6 +27,9 @@ we may take data from
 $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
    
     _entityName:'defRecTypes',
+    fieldSelectorLast:null,
+    fieldSelector:null,
+    fieldSelectorOrig:null,
     
     is_new_icons: true,
 
@@ -34,7 +37,6 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
     defaultPrefs:{
         width:(window.hWin?window.hWin.innerWidth:window.innerWidth)*0.95,
         height:(window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95,
-        groupsPresentation:'tab', //'none','tab',list','select'
 //rtyid,'ccode','addrec','filter','count','group','icon','edit','editstr','name','description','show','duplicate','fields','status'        
         fields:['count','icon','editstr','name','description','show','duplicate','fields','status'] 
         },
@@ -120,19 +122,10 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             this._initEditorOnly();
             return;
         }
-        
-        var iheight = 0;
-        if(this.searchForm.css('display')=='none'){
-        
-        }else{
-            iheight = this.options.simpleSearch?3:7;
-            if(this.options.edit_mode=='inline'){            
-                iheight = iheight + 6;
-            }
-            this.searchForm.css({'height':iheight+'em',padding:'6px', 'min-width': '530px'});
-            iheight = iheight+0.5;
-        }
-        this.recordList.css({'top':iheight+'em', 'min-width': '530px'});
+
+        this.searchForm.css({padding:'6px', 'min-width': '660px'});
+        this.recordList.css({'min-width': '660px'});
+        this.searchForm.parent().css({'overflow-x':'auto'});
         
         //init viewer 
         var that = this;
@@ -142,7 +135,6 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             
             if(this.options.innerTitle){
                 
-                if(this.options.ui_params) this.options.ui_params.groupsPresentation = 'none';
                 //add record type group editor
                 this.element.css( {border:'none', 'box-shadow':'none', background:'none'} );
                 
@@ -225,6 +217,8 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                             if(res && res.length>0){
                                 that.options.rtg_ID = res[0];
                                 that.searchForm.searchDefRecTypes('option','rtg_ID', res[0])
+                            }else{
+                                //that.options.rtg_ID = -1;
                             }
                          }
                      }
@@ -478,7 +472,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                     html += fld2('40px','Icon','text-align:center');
                     break;
                 case 'edit':  
-                    html += fld2('30px','Attr','text-align:center');
+                    html += fld2('30px','Attr','text-align:center;font-size:12px');
                     break;
                 case 'editstr': 
                     html += fld2('30px','Edit','text-align:center');
@@ -489,16 +483,16 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                 case 'description':  
                     html += fld2(null,'Description',''); break;
                 case 'show': 
-                    html += fld2('30px','Show','text-align:center');
+                    html += fld2('30px','Show','text-align:center;font-size:12px');
                     break;
                 case 'duplicate': 
-                    html += fld2('30px','Dup','text-align:center');
+                    html += fld2('30px','Dup','text-align:center;font-size:12px');
                     break;
                 case 'fields': 
-                    html += fld2('30px','Fields','text-align:center');
+                    html += fld2('30px','Info','text-align:center;font-size:12px');
                     break;
                 case 'status': 
-                    html += fld2('30px','Status','text-align:center');
+                    html += fld2('30px','Del','text-align:center;font-size:12px');
                     break;
             }   
         }
@@ -723,9 +717,11 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         if(!isResolved){
             
             var recID = 0;
+            var target = null;
 
             if(action && action.action){
                 recID =  action.recID;
+                target = action.target;
                 action = action.action;
             }
             if(recID>0){
@@ -745,7 +741,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                 }else if(action=='group'){
                     
                 }else if(action=='editstr'){
-
+                
                     var new_record_params = {RecTypeID: recID};
                     window.hWin.HEURIST4.ui.openRecordEdit(-1, null, 
                         {new_record_params:new_record_params, edit_structure:true});
@@ -768,7 +764,50 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                     //this._duplicateType(recID);
                     
                 }else if(action=='fields'){
+                    //show selectmenu with list of fields
+                    if(this.fieldSelectorLast!=recID){
+                        this.fieldSelectorLast   = recID;
+                        var details = $Db.rst_idx(recID);
+                        if(!details) return;
+                        var options = [];
+                        for(var dty_ID in details){
+                            if($Db.dty(dty_ID,'dty_Type')!='separator')
+                                options.push({key:dty_ID, title:$Db.rst(details[dty_ID],'rst_DisplayName')});
+                        }
+                        
+                        if(!this.fieldSelector){
+                            this.fieldSelectorOrig = document.createElement("select");    
+                            window.hWin.HEURIST4.ui.fillSelector(this.fieldSelectorOrig, options);
+                            this.fieldSelector = window.hWin.HEURIST4.ui.initHSelect(this.fieldSelectorOrig, false);
+                            
+                            var menu = this.fieldSelector.hSelect( "menuWidget" );
+                            menu.css({'max-height':'350px'});                        
+                                this.fieldSelector.hSelect({change: function(event, data){
+    //console.log('SEELCT >>> '+data.item.value);                        
+                                var rg_options = {
+                                     isdialog: true, 
+                                     edit_mode: 'editonly',
+                                     select_mode: 'manager',
+                                     rec_ID: data.item.value,
+                                     onSelect:function(res){
+                                     }
+                                };
+                                window.hWin.HEURIST4.ui.showEntityDialog('defDetailTypes', rg_options);
+    
+                            }});
+                            
+                        }else{
+                            $(this.fieldSelectorOrig).empty();
+                            window.hWin.HEURIST4.ui.fillSelector(this.fieldSelectorOrig, options);
+                            this.fieldSelector.hSelect('refresh');
+                        }
+                    }
+                    this.fieldSelector.hSelect('open');
+                    this.fieldSelector.val(-1);
+                    this.fieldSelector.hSelect('menuWidget')
+                        .position({my: "left top", at: "left+10 bottom-4", of: $(target)});
                     
+                    this.fieldSelector.hSelect('hideOnMouseLeave', $(target));
                 }
                 
             }
@@ -1109,7 +1148,6 @@ console.log('_recordListGetFullData')
             var params = this.getUiPreferences();
             
             params['fields'] = new_params['fields']; 
-            params['groupsPresentation'] = new_params['groupsPresentation']; 
         
             window.hWin.HAPI4.save_pref('prefs_'+this._entityName, params);
             
@@ -1125,25 +1163,11 @@ console.log('_recordListGetFullData')
         
         if(this.options.edit_mode=='editonly') return;
         
-//console.log('changeUI');
-//console.log(params);        
-        
-        params['tabheight'] = this.searchForm.searchDefRecTypes('changeUI');
-        
-        var iheight = 40+(params['tabheight']>0?params['tabheight']:0);
+        var iheight = 80;
         
         this.searchForm.css({'height':iheight});
         this.recordList.css({'top':iheight});     
        
-/*       
-        if(params['groupsPresentation']=='list'){
-            this.recordList.css({'left':'171px'});
-            this.searchFormList.css({'top':this.recordList.css('top')}).show();
-        }else{
-            this.searchFormList.hide();
-            this.recordList.css('left',0);
-        }
-*/        
         if(event) this.saveUiPreferences( params );
         
         //refresh result list

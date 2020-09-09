@@ -56,7 +56,7 @@ $.widget( "heurist.searchDefDetailTypes", $.heurist.searchEntity, {
         }else{
             
             this.btn_add_record
-                    .button({label: window.hWin.HR("Add Base Field"), showLabel:true, 
+                    .button({label: window.hWin.HR("Add"), showLabel:true, 
                             icon:"ui-icon-plus"})
                     .addClass('ui-button-action')
                     .show();
@@ -150,15 +150,25 @@ $.widget( "heurist.searchDefDetailTypes", $.heurist.searchEntity, {
                 request['dty_Type'] = this.input_search_type.val();
             }   
             
+            
+            var sGroupTitle = '';
             if( this.options.dtg_ID<0 ){
                 //find not in given group
                 request['not:dty_DetailTypeGroupID'] = Math.abs(this.options.dtg_ID);
-            }
+            }else{
         
-            if(this.input_search_group.val()>0){
-                request['dty_DetailTypeGroupID'] = this.input_search_group.val();
+                sGroupTitle = '<h4 style="margin:0">';
+                if(this.input_search_group.val()>0){
+                    var dtg_id = this.input_search_group.val();
+                    request['dty_DetailTypeGroupID'] = dtg_id;
+                    sGroupTitle += ($Db.dtg(dtg_id,'dtg_Name')
+                                        +'</h5><div class="heurist-helper3 truncate" style="font-size:0.7em">'
+                                        +$Db.dtg(dtg_id,'dtg_Description')+'</div>');
+                }else{
+                    sGroupTitle += 'Base field types</h4><div class="heurist-helper3" style="font-size:0.7em">All base field type groups</div>';
+                }
             }
-            
+            this.element.find('#div_group_information').html(sGroupTitle);
             
             this.input_sort_type = this.element.find('#input_sort_type');
             if(this.input_sort_type.val()=='recent'){

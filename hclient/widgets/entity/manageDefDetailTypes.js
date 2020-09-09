@@ -29,7 +29,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
     //    
     _init: function() {
 
-this._time_debug = new Date().getTime() / 1000;
+//this._time_debug = new Date().getTime() / 1000;
         
         //allow select existing fieldtype by typing
         //or add new field both to defDetailTypes and defRecStructure
@@ -100,8 +100,9 @@ this._time_debug = new Date().getTime() / 1000;
             return;
         }
         
-        this.searchForm.css({'min-width': '730px', padding:'6px'});
-        this.recordList.css({'min-width': '730px'});
+        this.searchForm.css({'min-width': '780px', padding:'6px', height:80});
+        this.recordList.css({'min-width': '780px', top:80});
+        this.searchForm.parent().css({'overflow-x':'auto'});
 
         var that = this;
         
@@ -133,8 +134,8 @@ this._time_debug = new Date().getTime() / 1000;
             });
         }
         
-console.log( 'DT initControls  ' + (new Date().getTime() / 1000 - this._time_debug));
-this._time_debug = new Date().getTime() / 1000;
+//console.log( 'DT initControls  ' + (new Date().getTime() / 1000 - this._time_debug));
+//this._time_debug = new Date().getTime() / 1000;
         
         this.options.onInitCompleted =  function(){
             
@@ -149,8 +150,8 @@ this._time_debug = new Date().getTime() / 1000;
                      reference_dt_manger: that.element,
                      onSelect:function(res){
                          
-console.log( 'DT onSELECT!!!!  ' + (new Date().getTime() / 1000 - that._time_debug));
-that._time_debug = new Date().getTime() / 1000;
+//console.log( 'DT onSELECT!!!!  ' + (new Date().getTime() / 1000 - that._time_debug));
+//that._time_debug = new Date().getTime() / 1000;
                          
                          if(window.hWin.HEURIST4.util.isRecordSet(res)){
                              

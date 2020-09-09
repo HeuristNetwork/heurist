@@ -129,13 +129,15 @@ class DbDefTerms extends DbEntityBase
             
         }else if(@$this->data['details']=='list'){
 
-            $this->data['details'] = 'trm_ID,trm_Label,trm_InverseTermId,trm_Description,trm_Domain,trm_ParentTermID'
+            $this->data['details'] = 'trm_ID,trm_Label,trm_InverseTermId,trm_Description,'
+            .'trm_Domain,IFNULL(trm_ParentTermID, 0) as trm_ParentTermID'
             .',trm_VocabularyGroupID,trm_Code,trm_Status';
             
         }else if(@$this->data['details']=='full'){
 
-            $this->data['details'] = 'trm_ID,trm_Label,trm_InverseTermId,IFNULL(trm_ParentTermID, 0) as trm_ParentTermID'
-            .',trm_VocabularyGroupID,trm_Code,trm_Status'; //trm_Description,trm_Domain,trm_Modified
+            $this->data['details'] = 'trm_ID,trm_Label,trm_Description,trm_InverseTermId,'
+            .'IFNULL(trm_ParentTermID, 0) as trm_ParentTermID'
+            .',trm_VocabularyGroupID,trm_Code,trm_Status,trm_SemanticReferenceURL'; //trm_Description,trm_Domain,trm_Modified
             
             
             //$orderBy = ' ORDER BY trm_Label ';

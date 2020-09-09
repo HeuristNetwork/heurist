@@ -58,9 +58,6 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         window.hWin.HAPI4.addEventListener(this, window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, 
         function(data) { 
             
-if(data){                
-    console.log(this.uuid+'  '+data.source+'  '+this.options.auxilary+'  '+data.type);
-}
                 if(!data || 
                    (data.source != that.uuid && data.type == this.options.auxilary))
                 {
@@ -247,7 +244,14 @@ console.log( '_destroy' );
                     ];
 
                 this._toolbar = this.searchForm;
-                this.searchForm.css({'padding-top': this.options.innerTitle?'8px':'4px'}).empty();
+                
+                //padding:'6px'
+                this.searchForm.css({'min-width': '315px', 'padding-top':this.options.innerTitle?'8px':'4px', height:80})
+                            .empty();                                     
+                this.recordList.css({'min-width': '315px', top:80});
+                this.searchForm.parent().css({'overflow-x':'auto'});
+                $('<div>').attr('id','div_group_information').css({'max-height':'40px','max-height':'40px'}).appendTo(this.searchForm);
+                
                 for(var idx in btn_array){
                         this._defineActionButton2(btn_array[idx], this.searchForm);
                 }
@@ -289,7 +293,7 @@ console.log( '_destroy' );
                 window.hWin.HEURIST4.ui.showEntityDialog('defTerms', rg_options);
                 
                 
-                if(this.options.innerTitle){
+                if(this._innerTitle){
                     this.btn_inine_editor = $('<span class="ui-icon ui-icon-carat-2-w" style="cursor:pointer;float:right;margin:0px 6px">'
                         +'Inline Editor</span>').appendTo(this._innerTitle);
                     
@@ -443,11 +447,11 @@ console.log( '_destroy' );
             }
                                  
             iWidth = 450; //310
-            this.inline_editor_container.css('left', iWidth+296);  //746 or 606
+            this.inline_editor_container.css('left', iWidth+296);  //746 or 626
             
             if(this.inline_editor_container.width()<600){
-                iWidth = 310
-                this.inline_editor_container.css('left', iWidth+296);  //746 or 606
+                iWidth = 330
+                this.inline_editor_container.css('left', iWidth+296);  //746 or 626
             }
             
             this.main_element.css('width', iWidth);
@@ -588,13 +592,18 @@ console.log( '_destroy' );
     
     _filterByVocabulary: function(){
 
-        if(this.options.trm_ParentTermID>0 && this.options.auxilary!='vocabulary'){ 
-            
-            this.setTitle('Manage Terms: '+$Db.trm(this.options.trm_ParentTermID,'trm_Label'));
-           //this.filterRecordList(null, {'trm_ParentTermID':ids, 'sort:trm_Label':1});
-            
-            var ids = $Db.trm().getAllChildrenIds('trm_ParentTermID',this.options.trm_ParentTermID);
-            
+        if(this.options.auxilary=='vocabulary') return;
+
+        var sGroupTitle = '<h4 style="margin:0">';
+        if(this.options.trm_ParentTermID>0){ 
+
+            var vocab_id = this.options.trm_ParentTermID;
+
+            this.setTitle('Manage Terms: '+$Db.trm(vocab_id,'trm_Label'));
+            //this.filterRecordList(null, {'trm_ParentTermID':ids, 'sort:trm_Label':1});
+
+            var ids = $Db.trm().getAllChildrenIds('trm_ParentTermID',vocab_id);
+
             var subset = this.getRecordSet().getSubSetByIds(ids);
             subset = subset.getSubSetByRequest({'sort:trm_Label':1}, this.options.entity.fields);
             this.recordList.resultList('updateResultSet', subset, null);
@@ -603,11 +612,20 @@ console.log( '_destroy' );
 
                 //filtered
                 var treedata = subset.getTreeViewData('trm_Label', 'trm_ParentTermID',
-                                            this.options.trm_ParentTermID);
+                    vocab_id);
                 var tree = this.recordTree.fancytree('getTree');
                 tree.reload(treedata);
             }
+
+            sGroupTitle += ($Db.trm(vocab_id,'trm_Label')
+                +'</h5><div class="heurist-helper3" style="font-size:0.7em;height:23px;overflow:hidden;">'
+                +$Db.trm(vocab_id,'trm_Description')+'&nbsp;</div>');
+
+        }else{
+            sGroupTitle += 'Terms and Relation types</h4>';
         }
+        this.searchForm.find('#div_group_information').html(sGroupTitle);
+
     },
     
     _recordListItemRenderer:function(recordset, record){

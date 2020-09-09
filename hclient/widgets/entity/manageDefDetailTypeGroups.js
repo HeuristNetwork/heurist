@@ -113,16 +113,17 @@ $.widget( "heurist.manageDefDetailTypeGroups", $.heurist.manageEntity, {
         if(this.options.innerTitle){
             //specify add new/save order buttons above record list
             var btn_array = [
-                {showText:true, icons:{primary:'ui-icon-plus'},text:window.hWin.HR('Add Group'),
+                {showText:true, icons:{primary:'ui-icon-plus'},text:window.hWin.HR('Add'),
                       css:{'margin-right':'0.5em','float':'right'}, id:'btnAddButton',
                       click: function() { that._onActionListener(null, 'add'); }},
 
-                {text:window.hWin.HR('Save Order'),
+                {text:window.hWin.HR('Save'),
                       css:{'margin-right':'0.5em','float':'right',display:'none'}, id:'btnApplyOrder',
                       click: function() { that._onActionListener(null, 'save-order'); }}];
 
             this._toolbar = this.searchForm;
             this.searchForm.css({'padding-top': '8px'}).empty();
+            $('<h4>Base Fields Groups</h4>').css({'margin':4, float:'left'}).appendTo(this.searchForm);
             this._defineActionButton2(btn_array[0], this.searchForm);
             this._defineActionButton2(btn_array[1], this.searchForm);
             
@@ -180,7 +181,7 @@ $.widget( "heurist.manageDefDetailTypeGroups", $.heurist.manageEntity, {
                     null,'icon_text');
         }
 
-        var cnt = recordset.fld(record, 'dtg_FieldCount');
+        var cnt = 0;//recordset.fld(record, 'dtg_FieldCount');
         
         html = html 
                 +((cnt>0)
@@ -228,7 +229,7 @@ $.widget( "heurist.manageDefDetailTypeGroups", $.heurist.manageEntity, {
     //     
     _deleteAndClose: function(unconditionally){    
         
-        if(this._getField('dtg_FieldCount')>0){
+        if(false && this._getField('dtg_FieldCount')>0){
             window.hWin.HEURIST4.msg.showMsgFlash('Can\'t remove non empty group');  
             return;                
         }
@@ -264,7 +265,8 @@ $.widget( "heurist.manageDefDetailTypeGroups", $.heurist.manageEntity, {
     
     //
     // extend dialog button bar
-    //    
+    //
+    /*    
     _initEditForm_step3: function(recID){
         
         if(this._toolbar){
@@ -286,6 +288,7 @@ $.widget( "heurist.manageDefDetailTypeGroups", $.heurist.manageEntity, {
         }
             
     },  
+    */
 /*      
     _getEditDialogButtons: function(){
                                     

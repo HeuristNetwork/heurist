@@ -1166,8 +1166,6 @@ prof =Profile
                                 //find key and title fields
                                 window.hWin.HAPI4.EntityMgr.resolveFields(response.data.entityName);
 
-console.log('get config>>>>'+response.data.entityName);
-                                
                                 callback(entity_configs[response.data.entityName]);
                             }else{
                                 window.hWin.HEURIST4.msg.showMsgErr(response);
@@ -1213,9 +1211,28 @@ console.log('get config>>>>'+response.data.entityName);
                     }
 
                     __findFields( entity_cfg.fields );
-
+                    
                 }
             },
+            
+            //
+            //
+            //
+            createRstIndex: function(){
+                var rst_index = {}
+                var recset = entity_data['defRecStructure'];
+                recset.each(function(rst_ID, record){
+                    
+                    var rty_ID = recset.fld(record,'rst_RecTypeID');
+                    var dty_ID = recset.fld(record,'rst_DetailTypeID');
+                    
+                    if(!rst_index[rty_ID]) rst_index[rty_ID] = {};
+                    if(!rst_index[rty_ID][dty_ID]) rst_index[rty_ID][dty_ID] = rst_ID;
+                        
+                });
+                entity_data['rst_Index'] = rst_index;
+            },
+
             
             //
             // refresh several entity data at once
@@ -1227,9 +1244,6 @@ console.log('get config>>>>'+response.data.entityName);
                     function(response){
                         if(response.status == window.hWin.ResponseStatus.OK){
 
-console.log( 'refreshEntityData' );
-console.log( entityNames );
-
                             for(var entityName in response.data){
                                 entity_data[entityName] = new hRecordSet(response.data[entityName]);    
                                 
@@ -1240,6 +1254,10 @@ console.log( entityNames );
                                     window.hWin.HAPI4.EntityMgr.resolveFields(entityName);
                                 }
                                 
+                                //build rst index
+                                if(entityName=='defRecStructure'){
+                                    window.hWin.HAPI4.EntityMgr.createRstIndex();
+                                }
                             }
 
                             if($.isFunction(callback)) callback();  
@@ -1290,6 +1308,9 @@ console.log('getEntityData '+entityName);
                 }
             },
             
+            //
+            // direct access
+            //
             getEntityData2: function(entityName){
                 return entity_data[entityName];     
             },

@@ -1137,6 +1137,11 @@ window.hWin.HEURIST4.dbs = {
     trm: function(rec_ID, fieldName, newValue){
         return $Db.getset('defTerms', rec_ID, fieldName, newValue);        
     },
+
+    rst: function(rec_ID, fieldName, newValue){
+        return $Db.getset('defRecStructure', rec_ID, fieldName, newValue);        
+    },
+    
     
     getset: function(entityName, rec_ID, fieldName, newValue){
         if(newValue){
@@ -1187,6 +1192,42 @@ window.hWin.HEURIST4.dbs = {
             
         }
     },
+
+    //  
+    //special behavior for defRecStructure
+    //    
+    rst_idx: function(rty_ID, dty_ID, fieldName){
+        
+        if(rty_ID>0){
+            
+            //rst_ID:{dty_ID:rstID, ..... }
+            var details = window.hWin.HAPI4.EntityMgr.getEntityData2('rst_Index');
+            
+            if(!details || !details[rty_ID]){
+                return null;
+            }else if(dty_ID>0){
+                var rst_ID = details[rty_ID][dty_ID];
+                
+                if(!(rst_ID>0)){
+                    return null;
+                }else if(fieldName){
+                    return recset.fld(rst_ID,fieldName);    
+                }else{
+                    return recset.getRecord(rst_ID); //json for paticular detail
+                }
+            }else{
+                return details[rty_ID]; //array of rst_ID
+            }
+            
+        }else{
+            return recset;
+        }
+        //create group
+        
+        //return $Db.getset('defRecStructure', rec_ID, fieldName, newValue);        
+    },
+    
+    
     //--------------------------------------------------------------------------
     
     /*

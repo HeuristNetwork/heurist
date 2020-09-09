@@ -356,7 +356,7 @@
             if ($mysqli->error) {
                     $system->addError(HEURIST_DB_ERROR, 'Can not reset user workset. SQL error: '.$mysqli->error);
             }else{
-                    $res = 0;
+                    $res = true;
             }
                 
             if(@$params['clear']!=1){

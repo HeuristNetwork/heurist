@@ -1697,7 +1697,7 @@ $.widget( "heurist.resultList", {
         if(!window.hWin.HEURIST4.util.isempty(action)){ //action_btn && action_btn.length()>0){
             //var action = action_btn.attr('data-key');
             if(this.options.renderer){
-                this._trigger( "onaction", null, {action:action, recID:selected_rec_ID});
+                this._trigger( "onaction", null, {action:action, recID:selected_rec_ID, target:$target});
 
             }else if (action=='edit'){
 
