@@ -70,8 +70,10 @@ $.widget( "heurist.manageDefVocabularyGroups", $.heurist.manageEntity, {
         this.recordList.resultList({
                 show_toolbar:false,
                 sortable: true,
+                empty_remark: 'No vocabulary groups. Add new group',
                 onSortStop: function(){
-                    that._toolbar.find('#btnApplyOrder').show();
+                    that._onActionListener(null, 'save-order');
+                    //that._toolbar.find('#btnApplyOrder').show();
                 },
                 droppable: function(){
                     
@@ -102,7 +104,7 @@ $.widget( "heurist.manageDefVocabularyGroups", $.heurist.manageEntity, {
         if(this.options.isFrontUI){
             //specify add new/save order buttons above record list
             var btn_array = [
-                {showText:true, icons:{primary:'ui-icon-plus'},text:window.hWin.HR('Add Group'),
+                {showText:true, icons:{primary:'ui-icon-plus'},text:window.hWin.HR('Add'),
                       css:{'margin-right':'0.5em','float':'right'}, id:'btnAddButton',
                       click: function() { that._onActionListener(null, 'add'); }},
 
@@ -115,6 +117,9 @@ $.widget( "heurist.manageDefVocabularyGroups", $.heurist.manageEntity, {
             this._defineActionButton2(btn_array[0], this.searchForm);
             this._defineActionButton2(btn_array[1], this.searchForm);
             
+            $('<h3 style="float:left;margin: 0 10px 0 0; vertical-align: middle;">Vocabulary Groups</h3>')
+                .appendTo( this.searchForm );
+                      
         }
         
         that._loadData();

@@ -200,9 +200,6 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                      select_mode: 'manager',
                      reference_rt_manger: that.element,
                      onSelect:function(res){
-                         
-//console.log( 'onSELECT!!!!  ' + (new Date().getTime() / 1000 - that._time_debug));
-//that._time_debug = new Date().getTime() / 1000;
 
                          if(window.hWin.HEURIST4.util.isRecordSet(res)){
                              

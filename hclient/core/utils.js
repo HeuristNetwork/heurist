@@ -658,8 +658,12 @@ window.hWin.HEURIST4.util = {
         '"': '&quot;',  //&#34
         "'": '&#039;'
       };
-
-      return text? (''+text).replace(/[&<>"']/g, function(m) { return map[m]; }):'';
+      
+      if(window.hWin.HEURIST4.util.isempty(text)){
+          return '';
+      }else{
+          return (''+text).replace(/[&<>"']/g, function(m) { return map[m]; })
+      }
     },  
     
     //

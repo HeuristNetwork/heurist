@@ -10,12 +10,6 @@
         
         "entityTitle": "Term",
         "entityTitlePlural": "Terms",
-        "empty_remark": "Please use the search field above to locate relevant term (partial string match on title)",
-
-        "sel_actions": [{"key":"edit", "title":"Edit Term"},
-                        {"key":"delete", "title":"Remove Term"}],
-        "btn_actions": [{"key":"add", "title":"Add New Vocabulary"},
-                        {"key":"add_term", "title":"Add New Term"}],
 
         "reference_query": {},
         
