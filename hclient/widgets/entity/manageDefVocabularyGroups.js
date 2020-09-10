@@ -24,6 +24,8 @@ $.widget( "heurist.manageDefVocabularyGroups", $.heurist.manageEntity, {
     
     _init: function() {
 
+        this.options.innerTitle = false;
+        
         if(!this.options.layout_mode) this.options.layout_mode = 'short';
         this.options.use_cache = true;
         
@@ -40,7 +42,7 @@ $.widget( "heurist.manageDefVocabularyGroups", $.heurist.manageEntity, {
             this.recordList.parent().css('width','100%');
         }
 
-        if(!this.options.innerTitle){
+        if(!this.options.isFrontUI){
             this.recordList.css('top',0);  
         }        
         
@@ -97,7 +99,7 @@ $.widget( "heurist.manageDefVocabularyGroups", $.heurist.manageEntity, {
         });
         
 
-        if(this.options.innerTitle){
+        if(this.options.isFrontUI){
             //specify add new/save order buttons above record list
             var btn_array = [
                 {showText:true, icons:{primary:'ui-icon-plus'},text:window.hWin.HR('Add Group'),

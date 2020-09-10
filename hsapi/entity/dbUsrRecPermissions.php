@@ -268,7 +268,7 @@ class DbUsrRecPermissions extends DbEntityBase
     // delete permissions for given Record IDs or Group IDs
     // see parameters $this->data['rcp_RecID'] or $this->data['rcp_UGrpID']
     //
-    public function delete(){
+    public function delete($disable_foreign_checks = false){
         
         //extract records from $_REQUEST data 
         

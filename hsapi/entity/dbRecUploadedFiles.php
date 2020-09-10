@@ -496,7 +496,7 @@ class DbRecUploadedFiles extends DbEntityBase
     //
     //
     //
-    public function delete(){
+    public function delete($disable_foreign_checks = false){
         
         $this->recordIDs = prepareIds($this->data[$this->primaryField]);
 

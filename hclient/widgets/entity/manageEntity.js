@@ -64,6 +64,7 @@ $.widget( "heurist.manageEntity", {
         width:  760,
         modal:  true,
         title:  '',
+        isFrontUI: false,  //special behaviour for front interface
         innerTitle: false, //show title as top panel 
         
         //LIST section 
@@ -234,8 +235,8 @@ $.widget( "heurist.manageEntity", {
         //this.element.css({'font-size':'1em'});
         var fele = this.element.find('.ent_wrapper:first');
         
-        if(false && this.options.innerTitle){ 
-            //h6 style 
+        if(this.options.innerTitle){ 
+            
             fele.children(0).css('top', '38px'); //down manager div to 38
             this._innerTitle = $('<div>').addClass('ui-heurist-header')
             .html('<span class="title">'+this.options['title']+'</span>')

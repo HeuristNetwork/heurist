@@ -228,9 +228,9 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
         if(type=='record'){
             if(settings.isDatabaseStructure){
                 rty_ID = selector.substr(2);
-                if(window.hWin.HEURIST4.rectypes.typedefs[rty_ID]){
-                    var fidx = window.hWin.HEURIST4.rectypes.typedefs['commonNamesToIndex']['rty_Description'];
-                    rollover = rollover + ' ' + window.hWin.HEURIST4.rectypes.typedefs[rty_ID].commonFields[fidx];
+                var desc = $Db.rty(rty_ID, 'rty_Description');
+                if(desc!=null)
+                    rollover = rollover + ' ' + desc;
                 }else{
                     console.log('rectype not found '+rty_ID);
                 }

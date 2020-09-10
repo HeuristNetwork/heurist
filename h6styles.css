@@ -140,3 +140,8 @@ body.popup {
     display: none;
     visibility: hidden;
 }
+.ui-suppress-border-and-shadow{
+    border:none !important;
+    box-shadow:none !important;
+    background:none !important;
+}

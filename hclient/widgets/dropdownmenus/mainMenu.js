@@ -1,4 +1,4 @@
-/**
+    /**
 * mainMenu.js : Top Main Menu panel
 *
 * @package     Heurist academic knowledge management system
@@ -719,6 +719,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                 var section = action_container;
                 if(section!='publish') $('.ui-menu6').mainMenu6('switchContainer', section, true);
                 container = $('.ui-menu6 > .ui-menu6-container.ui-heurist-'+section);
+                container.removeClass('ui-suppress-border-and-shadow');
                 menu_container = $('.ui-menu6 > .ui-menu6-section.ui-heurist-'+section); //need for publish/cms
             }
             var pos = null;
@@ -728,12 +729,15 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
             
             // for entity show dialog inline in target container
             entity_dialog_options = {isdialog: false, 
+                                     isFrontUI: true, 
                                      innerTitle: true,
+                                     isFrontUI: true, //inline in main screen
                                      menu_container: menu_container,
                                      container: container};
                                      
-            // for popup dialog show on postion over container
+            // for popup dialog show on postion over container (notdragable)
             popup_dialog_options = {
+                innerTitle: true,
                 is_h6style: true,
                 isdialog: false,
                 resizable: false,
@@ -893,15 +897,27 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                                     
         }else if(action == "menu-structure-import" || action == "menu-structure-import-express"){
 
-            var opts = {isdialog: true};
+            var opts = {};
             if(action == "menu-structure-import-express"){
                 opts['source_database_id'] = 3;    
                 opts['title'] = 'Import structural definitions into current database from Heurist Reference Set';
             }
             
-            var manage_dlg = $('<div id="heurist-dialog-importRectypes-'+window.hWin.HEURIST4.util.random()+'">')
+            if(popup_dialog_options){
+
+                opts = $.extend(popup_dialog_options, opts);
+                $(opts.container).empty();
+                opts.container.importStructure( opts );
+                
+            }else{
+                
+                opts['isdialog'] = true;
+                
+                var manage_dlg = $('<div id="heurist-dialog-importRectypes-'+window.hWin.HEURIST4.util.random()+'">')
                     .appendTo( $('body') )
                     .importStructure( opts );
+                
+            }
             
         }else 
         if(action == "menu-structure-mimetypes"){

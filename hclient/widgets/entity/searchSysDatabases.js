@@ -30,6 +30,8 @@ $.widget( "heurist.searchSysDatabases", $.heurist.searchEntity, {
         this.input_sort_type.parent().hide();
         this._on(this.input_sort_type,  { change:this.startSearch });
 
+        this._on(this.input_search,  { keyup:this.startSearch });
+        
         this.input_search.focus();         
     },  
 
@@ -37,7 +39,6 @@ $.widget( "heurist.searchSysDatabases", $.heurist.searchEntity, {
     // public methods
     //
     startSearch: function(){
-        
             this._super();
             
             var request = {};

@@ -710,8 +710,8 @@ window.hWin.HEURIST4.ui = {
         
             if(useCounts){//sort by count
                 rectypeList.sort(function(a,b){
-                     var ac = $Db.rty(a,'rty_Usage');   
-                     var bc = $Db.rty(b,'rty_Usage');   
+                     var ac = $Db.rty(a,'rty_RecCount');   
+                     var bc = $Db.rty(b,'rty_RecCount');   
                                         
                      if(isNaN(ac)) ac = 0;
                      if(isNaN(bc)) bc = 0;
@@ -725,13 +725,13 @@ window.hWin.HEURIST4.ui = {
             {
                 if(idx){
                     var rectypeID = rectypeList[idx];
-                    var name = $Db.rty(rectypeID,'rty_Name');
+                    var name = window.hWin.HEURIST4.util.htmlEscape($Db.rty(rectypeID,'rty_Name'));
                     if(!window.hWin.HEURIST4.util.isnull(name))
                     {
 
                         var rty_Count = 0;
                         if(useCounts){
-                            rty_Count = $Db.rty(rectypeID,'rty_Usage');
+                            rty_Count = $Db.rty(rectypeID,'rty_RecCount');
                             if(isNaN(rty_Count) || rty_Count<1) continue;
                         }
                         
@@ -803,7 +803,7 @@ window.hWin.HEURIST4.ui = {
                     for (var i=0; i<groups[rtgID].rty.length; i++){
                         
                         var rtyID = groups[rtgID]['rty'][i];
-                        var name = $Db.rty(rtyID, 'rty_Name');
+                        var name = window.hWin.HEURIST4.util.htmlEscape($Db.rty(rtyID, 'rty_Name'));
 
                         var opt = window.hWin.HEURIST4.ui.addoption(selObj, rtyID, name);
                         $(opt).attr('depth', 1);
@@ -816,7 +816,7 @@ window.hWin.HEURIST4.ui = {
                             $(opt).attr('icon-url', icon);
                         }
                         if(useCounts){
-                            $(opt).attr('rt-count',$Db.rty(rtyID, 'rty_Usage'));
+                            $(opt).attr('rt-count',$Db.rty(rtyID, 'rty_RecCount'));
                         }
                         if(useIds){
                             $(opt).attr('entity-id', rtyID);

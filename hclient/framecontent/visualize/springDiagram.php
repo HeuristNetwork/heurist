@@ -176,9 +176,9 @@ function onPageInit(success){
                         var relationName = "Floating relationship";
                         if(dtID > 0) {
                             //type = window.hWin.HEURIST4.detailtypes.typedefs[dtID].commonFields[1];
-                            relationName = window.hWin.HEURIST4.detailtypes.names[dtID];
+                            relationName = $Db.dty(dt_ID, 'dty_Name');
                         }else if(trmID > 0) {
-                            relationName = window.hWin.HEURIST4.terms.termsByDomainLookup['relation'][trmID][0];
+                            relationName = $Db.trm(trmID, 'trm_Label');
                         }
 
                         // Link check

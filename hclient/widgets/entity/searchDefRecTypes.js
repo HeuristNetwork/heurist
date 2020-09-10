@@ -36,9 +36,14 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
         this.btn_add_record = this.element.find('#btn_add_record');
         this.btn_find_record = this.element.find('#btn_find_record');
 
-        if(this.options.edit_mode=='none'){
-            this.btn_add_record.hide();
-            this.btn_find_record.hide();
+        if(this.options.edit_mode=='none' || this.options.import_structure){
+            this.btn_add_record.parent().hide();
+            //this.btn_find_record.hide();
+            //this.element.find('#inner_title').hide();
+            
+            var ele = this.element.find('#div_show_all_groups');
+            ele.parent().css('float','left');
+            ele.hide();
         }else{
             
             this.btn_add_record
@@ -128,7 +133,6 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
             
         }
        
-console.log('searchRecTypes INITED');       
         if($.isFunction(this.options.onInitCompleted)){
             this.options.onInitCompleted.call();
         }else{
@@ -370,6 +374,14 @@ console.log('searchRecTypes INITED');
                 if(s!='') request['rty_Name'] = s;
             }
             
+            if(this.options.import_structure){
+
+                if(this.chb_show_already_in_db && !this.chb_show_already_in_db.is(':checked')){
+                        request['rty_ID_local'] = '=0';
+                }
+                
+            }else{
+            
             if( this.options.rtg_ID<0 ){
                 //not in given group
                 request['not:rty_RecTypeGroupID'] = Math.abs(this.options.rtg_ID);
@@ -392,9 +404,6 @@ console.log('searchRecTypes INITED');
                 this.options.rtg_ID = request['rty_RecTypeGroupID'];
             }
 */            
-            
-            if(this.chb_show_already_in_db && !this.chb_show_already_in_db.is(':checked')){
-                    request['rty_ID_local'] = '=0';
             }
             
             this.input_sort_type = this.element.find('#input_sort_type');

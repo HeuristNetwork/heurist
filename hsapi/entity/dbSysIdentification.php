@@ -127,7 +127,7 @@ class DbSysIdentification extends DbEntityBase
     //
     // deletion not allowed for db properties
     //
-    public function delete(){
+    public function delete($disable_foreign_checks = false){
     }
 
     

@@ -24,31 +24,8 @@
     */
 
     require_once (dirname(__FILE__).'/../System.php');
-
-    require_once (dirname(__FILE__).'/../entity/dbUsrTags.php');
-    require_once (dirname(__FILE__).'/../entity/dbSysDatabases.php');
-    require_once (dirname(__FILE__).'/../entity/dbSysIdentification.php');
-    require_once (dirname(__FILE__).'/../entity/dbSysGroups.php');
-    require_once (dirname(__FILE__).'/../entity/dbSysUsers.php');
-    require_once (dirname(__FILE__).'/../entity/dbDefDetailTypeGroups.php');
-    require_once (dirname(__FILE__).'/../entity/dbDefFileExtToMimetype.php');
-    require_once (dirname(__FILE__).'/../entity/dbDefTerms.php');
-    require_once (dirname(__FILE__).'/../entity/dbDefVocabularyGroups.php');
-    require_once (dirname(__FILE__).'/../entity/dbDefRecTypeGroups.php');
-    require_once (dirname(__FILE__).'/../entity/dbDefDetailTypes.php');
-    require_once (dirname(__FILE__).'/../entity/dbDefRecTypes.php');
-    require_once (dirname(__FILE__).'/../entity/dbDefRecStructure.php');
-    require_once (dirname(__FILE__).'/../entity/dbSysArchive.php');
-    require_once (dirname(__FILE__).'/../entity/dbSysBugreport.php');
-    require_once (dirname(__FILE__).'/../entity/dbSysDashboard.php');
-    require_once (dirname(__FILE__).'/../entity/dbSysImportFiles.php');
-    require_once (dirname(__FILE__).'/../entity/dbRecThreadedComments.php');
-    require_once (dirname(__FILE__).'/../entity/dbRecUploadedFiles.php');
-    require_once (dirname(__FILE__).'/../entity/dbRecords.php');
-    require_once (dirname(__FILE__).'/../entity/dbUsrBookmarks.php');
-    require_once (dirname(__FILE__).'/../entity/dbUsrReminders.php');
-    require_once (dirname(__FILE__).'/../entity/dbUsrSavedSearches.php');
     require_once (dirname(__FILE__).'/../dbaccess/utils_db.php');
+    require_once ('entityScrudSrv.php');
 
     $response = array();
     $res = false;
@@ -68,61 +45,11 @@
         
         if(@$_REQUEST['a']=='search' && @$_REQUEST['entity']=='all'){ 
             // see HAPI4.refreshEntityData
-            //search can be performed for several entities at once
-            $need_config = array();
-            $entities = array('rtg','dtg','rty','dty','trm','vcg','rst');
+            $res = entityRefreshDefs($system, true);
         }else {
-            $entities = @$_REQUEST['entity'];
+            $res = entityExecute($system, $_REQUEST);
         }
-        
-        if(!is_array($entities)){
-            $entities = array( $entities );
-        }
-        
-        //replace aliases
-        foreach($entities as $idx=>$entity_name){
-            if($entity_name=='rtg') $entities[$idx] = 'defRecTypeGroups';
-            else if($entity_name=='dtg') $entities[$idx] = 'defDetailTypeGroups';
-            else if($entity_name=='rty') $entities[$idx] = 'defRecTypes';
-            else if($entity_name=='dty') $entities[$idx] = 'defDetailTypes';
-            else if($entity_name=='trm') $entities[$idx] = 'defTerms';
-            else if($entity_name=='vcg') $entities[$idx] = 'defVocabularyGroups';
-            else if($entity_name=='rst') {
-                $entities[$idx] = 'defRecStructure';   
-                $_REQUEST['details'] = 'list';
-            }
-        }
-        
-        
-        foreach($entities as $entity_name){
-    
-            //$entity_name = @$_REQUEST['entity'];
-            $_REQUEST['entity'] = $entity_name;
-            $classname = 'Db'.ucfirst($entity_name);
-            $entity = new $classname($system, $_REQUEST);
-            //$r = new ReflectionClass($classname);
-            //$entity = $r->newInstanceArgs($system, $_REQUEST);        
-            //$entity->$method();
-
-            if(!$entity){
-                $this->system->addError(HEURIST_INVALID_REQUEST, "Wrong entity parameter: $entity_name");
-                break;
-            }else{
-                if(count($entities)>1){
-                    $res[$entity_name] = $entity->run();
-                    if($need_config!==false){
-                        $need_config[$entity_name] = $entity->config();    
-                    }
-                    
-                }else{
-                    $res = $entity->run();        
-                }
-            }
-            
-        }//for
-
     }
-    
     
     if(@$_REQUEST['restapi']==1){
         if( is_bool($res) && !$res ){
@@ -154,10 +81,6 @@
             $response = $system->getError();
         }else{
             $response = array("status"=>HEURIST_OK, "data"=> $res);
-            
-            if($need_config!==false){
-                $response['config'] = $need_config;
-            }
         }
         print json_encode($response);
     }

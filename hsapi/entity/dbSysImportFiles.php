@@ -170,7 +170,7 @@ class DbSysImportFiles extends DbEntityBase
     //
     //
     //
-    public function delete(){
+    public function delete($disable_foreign_checks = false){
         
         if(!$this->_validatePermission()){
             return false;

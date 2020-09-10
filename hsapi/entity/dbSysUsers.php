@@ -350,7 +350,7 @@ class DbSysUsers extends DbEntityBase
     //
     //
     //
-    public function delete(){
+    public function delete($disable_foreign_checks = false){
         
         $this->recordIDs = prepareIds($this->data[$this->primaryField]);
         if(in_array(2, $this->recordIDs)){

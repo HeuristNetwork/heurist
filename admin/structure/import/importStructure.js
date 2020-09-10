@@ -89,13 +89,23 @@ $.widget( "heurist.importStructure", {
             this._initDialog();
         }
 
+        var layout, sTop = '0';
+        if(this.options.innerTitle){
+            layout = ('<div class="ui-heurist-header">'+this.options['title']+'</div>');
+            sTop = '38px';
+        }
+        
         //init layout
-        var layout = 
-        '<div class="ent_wrapper" style="min-width:1000px">'
+        layout = layout + 
+        '<div class="ent_wrapper" style="top:'+sTop+'">' //;min-width:1000px
+        
+        //1. database selector
         +'<div class="ent_wrapper" id="panel_dbs">'
         +    '<div class="ent_header searchForm"/>'     
         +    '<div class="ent_content_full recordList"/>'
         +'</div>'
+        
+        //2. List of rectortypes to be imported
         +'<div class="ent_wrapper" id="panel_rty" style="display:none">'
 
         +'<div class="ent_header" style="padding:4px;">'
@@ -148,13 +158,14 @@ $.widget( "heurist.importStructure", {
 
         +'</div>'
 
-        //report after comletion of import
+        //3. report after completion of import
         +'<div class="ent_wrapper" id="panel_report" style="display:none">'
         +    '<div class="ent_content_full" style="bottom:2.8em;top:0;padding:10px"/>'
         +    '<div class="ent_footer" style="text-align:center"><div id="btn_close_panel_report"/></div>'
         +'</div>'
 
         +'</div>';
+        
         $(layout).appendTo(this.element);
 
         this.panel_report = this.element.find('#panel_report');
@@ -276,15 +287,17 @@ $.widget( "heurist.importStructure", {
 
                 //init buttons
                 that.btn_search_start = that.searchForm_dbs.find('#btn_search_start')
+                .show()
                 //.css({'width':'6em'})
                 .button({label: window.hWin.HR("Start search"), showLabel:false, 
                     icon:"ui-icon-search", iconPosition:'end'});
 
 
                 //this is default search field - define it in your instance of html            
-                that.input_search = that.searchForm_dbs.find('#input_search');
+                that.input_search = that.searchForm_dbs.find('.input_search');
 
                 that._on( that.input_search, { keypress: that.startSearchOnEnterPress });
+                //that._on( this.input_search,  { keyup:this.startSearch_dbs });
                 that._on( that.btn_search_start, { click: that.startSearch_dbs });            
 
                 //that.searchForm_dbs.find('#input_search_type_div2').show();
@@ -364,9 +377,8 @@ $.widget( "heurist.importStructure", {
         //show dialog if required 
         if(this.options.isdialog){
             this.popupDialog();
+            this._fixWidth();
         }
-
-        this._fixWidth();
 
         window.hWin.HEURIST4.ui.applyCompetencyLevel(-1, this.element); 
 
@@ -934,6 +946,9 @@ $.widget( "heurist.importStructure", {
         this._as_dialog = $dlg; 
     },
 
+    //
+    // adjust width according to width of parent dialog
+    //
     _fixWidth: function() {//fix bug
         var correctWidth = this.element.parent().width()-24;
         this.element.css({overflow: 'none !important','width':correctWidth });
@@ -1002,19 +1017,22 @@ $.widget( "heurist.importStructure", {
 
                 var report = ''
                 
-                if( window.hWin.HEURIST4.util.isArrayNotEmpty(response.report.added) ){
-                    report = 'Added: ';
-                    for(idx in response.report.added){
-                        report += (window.hWin.HEURIST4.rectypes.names[response.report.added[idx]]+', ');    
+                if(response.report){
+                
+                    if( window.hWin.HEURIST4.util.isArrayNotEmpty(response.report.added) ){
+                        report = 'Added: ';
+                        for(idx in response.report.added){
+                            report += (window.hWin.HEURIST4.rectypes.names[response.report.added[idx]]+', ');    
+                        }
+                        report = report.substr(0,report.length-2)+'<br>';
                     }
-                    report = report.substr(0,report.length-2)+'<br>';
-                }
-                if( window.hWin.HEURIST4.util.isArrayNotEmpty(response.report.updated) ){
-                    report += '<br>Updated: ';
-                    for(idx in response.report.updated){
-                        report += (window.hWin.HEURIST4.rectypes.names[response.report.updated[idx]]+', ');    
+                    if( window.hWin.HEURIST4.util.isArrayNotEmpty(response.report.updated) ){
+                        report += '<br>Updated: ';
+                        for(idx in response.report.updated){
+                            report += (window.hWin.HEURIST4.rectypes.names[response.report.updated[idx]]+', ');    
+                        }
+                        report = report.substr(0,report.length-2);
                     }
-                    report = report.substr(0,report.length-2);
                 }
                 
                 /* Detail report

@@ -223,7 +223,7 @@ class DbUsrTags extends DbEntityBase
     * 
     * @returns  array of 'deleted', 'no enough right' and 'in use' ids
     */
-    public function delete(){
+    public function delete($disable_foreign_checks = false){
         
         $this->recordIDs = prepareIds($this->data[$this->primaryField]);
 

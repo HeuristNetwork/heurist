@@ -94,7 +94,7 @@
             //combination of db and record type id eg. 1126-13            
             $code = @$_REQUEST['code']; //this is not concept code - these are source database and rectype id in it
             //concept code is unique for record type unfortunately it does not specify exactly what database is preferable as a source of donwloading
-            
+         
             $isOK = false;  
 ini_set('max_execution_time', 0);
             $importDef = new DbsImport( $system );
@@ -113,7 +113,7 @@ ini_set('max_execution_time', 0);
             $response = $importDef->getReport(true); //with updated definitions and sysinfo
 
             $response['status'] = HEURIST_OK;            
-            
+
         }else{
 
             //$currentUser = $system->getCurrentUser();

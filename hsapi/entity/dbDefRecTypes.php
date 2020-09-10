@@ -123,7 +123,7 @@ class DbDefRecTypes extends DbEntityBase
             }
         }  
          
-        if($needCount){ //find count of groups where given user is a member   
+        if($needCount){ //find count of records by rectype
         
             $query2 = 'SELECT count(r0.rec_ID) from Records r0 ';
             $where2 = ' WHERE (r0.rec_RecTypeID=rty_ID) ';
@@ -167,7 +167,7 @@ class DbDefRecTypes extends DbEntityBase
     //
     //
     //
-    public function delete(){
+    public function delete($disable_foreign_checks = false){
 
         $this->recordIDs = prepareIds($this->data[$this->primaryField]);
 
@@ -198,7 +198,7 @@ class DbDefRecTypes extends DbEntityBase
                 }
                 $errMsg= $errMsg."</ul></div>";
                 
-                $system->addError(HEURIST_ACTION_BLOCKED, $errMsg);
+                $this->system->addError(HEURIST_ACTION_BLOCKED, $errMsg);
                 return false;
         }
         
@@ -209,7 +209,7 @@ class DbDefRecTypes extends DbEntityBase
         if($val!=null && $val!=''){
                 $places = explode(',', $val);
                 if (in_array($rtyID, $places)) {
-                    $system->addError(HEURIST_ACTION_BLOCKED, "You cannot delete record type $rtyID. "
+                    $this->system->addError(HEURIST_ACTION_BLOCKED, "You cannot delete record type $rtyID. "
                                 ." It is referenced as 'treat as places for mapping' in database properties");
                     return false;
                 }
@@ -367,7 +367,7 @@ class DbDefRecTypes extends DbEntityBase
 
                             $res = mysql__exec_param_query($mysqli, $query, $parameters, true);
                             if(!is_numeric($res)){
-                                $system->addError(HEURIST_DB_ERROR, 
+                                $this->system->addError(HEURIST_DB_ERROR, 
                                     'SQL error updating title mask for record type '.$rty_ID, $res);
                             }
                     }

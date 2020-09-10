@@ -240,7 +240,7 @@ own"0","viewable",NULL,NULL,NULL,NULL
     //
     // delete group
     //
-    public function delete(){
+    public function delete($disable_foreign_checks = false){
         return false;
     }
 

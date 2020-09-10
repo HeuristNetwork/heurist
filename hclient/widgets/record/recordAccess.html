@@ -33,27 +33,26 @@
 
 <!-- <hr style="margin:5px"/> -->
 
-<div id="div_sel_access" style="min-width: 480px;" class="input">
+<div id="div_sel_access" class="input">
     <div class="header_narrow" style="padding:  0px 16px 0px 0px;"><label>Record is viewable by:</label></div>
+    <div></div>
+</div>
+<div id="div_sel_access" style="min-width: 480px;display:block;padding-left:80px" class="input">
     
     <div class="detailRow access-hidden" style="padding-bottom:1em;">
         <label><input type="radio" name="rb_Access" value="hidden" id="rb_Access-hidden">
         User or group specified above</label>
     </div>
-    <div class="detailRow" style="padding-bottom:1em;display:none">
-        <!-- <label><input type="radio" name="rb_Access" value="viewable" id="rb_Access-viewable-group"></label> -->
-    </div>
-    <div class="detailRow access-hidden" style="padding-bottom:1em;">
-        Members of the following groups can also view the record(s)
-        <div id="sel_AccessGroups"  style="padding: 0.2em;min-width:480px;display:none" class="input"></div>
+    <div id="div_AccessGroups" class="detailRow access-hidden" style="padding-bottom:1em;display:none">
+        <label class="heurist-helper3">Members of the following groups can also view the record(s)</label><br><br>
+        <div id="sel_AccessGroups"  style="padding:0.2em;min-width:480px;display:table-row" class="input"></div>
     </div>
 </div>
 
 
 <div id="div_sel_access3" style="padding:0.2em; min-width: 480px;" class="input">
 
-    <div class="header_narrow" style="padding:  0px 16px 0px 0px"><label>&nbsp;</label></div>    
-    <div class="detailRow" style="padding-bottom:1em;">
+    <div class="detailRow" style="padding-bottom:1em;display:block;padding-left:80px">
         <label><input type="radio" name="rb_Access" value="viewable" id="rb_Access-viewable">
         Any logged-in user can view the record(s)</label>
     </div>
@@ -65,7 +64,7 @@
         <div style="margin-left: 20px; font-style: italic;">Can be auto-set whenever a public record is edited.</div>
     </div>
     -->
-    <div class="detailRow" style="padding-bottom:20px">
+    <div class="detailRow" style="padding-bottom:20px;display:block;padding-left:80px">
         <label>
         <input type="radio" name="rb_Access" value="public" id="rb_Access-public">
         Public - viewable for anyone in published live view<br>including data export eg.XML requested without a login</label>

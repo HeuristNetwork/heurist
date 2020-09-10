@@ -279,7 +279,7 @@ class DbSysGroups extends DbEntityBase
     //
     // delete group
     //
-    public function delete(){
+    public function delete($disable_foreign_checks = false){
         
         $this->recordIDs = prepareIds($this->data[$this->primaryField]);
         if(in_array(1, $this->recordIDs)){

@@ -44,6 +44,9 @@ $.widget( "heurist.mainMenu6", {
     edit_svs_dialog: null,
     
     currentSearch: null,
+    
+    coverAll: null,
+
 
     // the widget's constructor
     _create: function() {
@@ -54,6 +57,11 @@ $.widget( "heurist.mainMenu6", {
         .addClass('selectmenu-parent')
         .disableSelection();// prevent double click to select text
 
+        this.coverAll = $('<div>').addClass('coverall-div-bare')
+            .css({'background-color': '#000', opacity: '0.6',zIndex:102,  
+            filter: 'progid:DXImageTransform.Microsoft.Alpha(opacity=60)'})
+            .hide()
+            .appendTo( this.element );
         //91 200    
         this.divMainMenu = $('<div>')
         .css({position:'absolute',width:'91px',top:'2px',left:'0px',bottom:'4px',
@@ -133,8 +141,6 @@ $.widget( "heurist.mainMenu6", {
                     mouseenter: that._mousein_ExploreMenu,
                     mouseleave: function(e){
                         this._myTimeoutId2 = setTimeout(function(){that._closeSectionMenu('explore');}, 600);
-                        // that._mouseout_SectionMenu(e);//mouseout   
-                        // that._collapseMainMenuPanel(e);
                     }
                 });
 /*                
@@ -302,6 +308,8 @@ $.widget( "heurist.mainMenu6", {
         var that = this;
         this._myTimeoutId = setTimeout(function() {
             that._myTimeoutId = 0;
+
+            that.coverAll.hide();
             
             that.menues_explore_gap.hide();
             that.divMainMenu.find('.menu-text').hide();
@@ -324,6 +332,9 @@ $.widget( "heurist.mainMenu6", {
         clearTimeout(this._myTimeoutId); //terminate collapse
         this._myTimeoutId = 0;
         if(this.divMainMenu.width()==200) return; //already expanded
+        
+        this.coverAll.show();
+        
         var that = this;
         this._mouseout_SectionMenu();
         this.divMainMenu.stop().effect('size',  { to: { width: 200 } }, 500,
@@ -454,7 +465,7 @@ $.widget( "heurist.mainMenu6", {
             
         if(action_name == 'recordAdd'){
             if($(e.target).attr('data-id')>0){
-                delay = 2000;
+                delay = 1000;
             }
         }else if(action_name=='recordAddSettings'){
             action_name = 'recordAdd';
@@ -587,7 +598,7 @@ $.widget( "heurist.mainMenu6", {
             }
             else if(action_name=='recordAdd'){
 
-                that.menues['explore'].css({bottom:'4px',width:'200px',overflow:'auto'});
+                that.menues['explore'].css({bottom:'4px',width:'300px',overflow:'auto'});
 
                 if(!cont.recordAdd('instance')){
                     cont.recordAdd({
@@ -640,6 +651,7 @@ $.widget( "heurist.mainMenu6", {
     //
     //
     _closeSectionMenu: function( section ){
+        
         this.menues[section].css({'z-index':0}).hide(); 
         this.menues_explore_gap.hide();
         //this.menues[section].css({'z-index':2,left:'200px'}).show(); 
@@ -798,7 +810,7 @@ console.log('prvent colapse');
                     .addClass('ui-heurist-title')  //apply color
                     .css({cursor:'pointer'});
         
-        //execute            
+        //execute menu on click           
         this._on(this.menues[section].find('li[data-action]'),{click:function(e){
             var li = $(e.target);
             if(!li.is('li')) li = li.parents('li');

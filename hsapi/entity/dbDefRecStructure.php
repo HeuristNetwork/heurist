@@ -247,7 +247,7 @@ class DbDefRecStructure extends DbEntityBase
         return $results;    
     } 
     
-    public function delete(){
+    public function delete($disable_foreign_checks = false){
         
         if(@$this->data['recID'] && strpos($this->data['recID'],'.')){
             list($rty_ID, $dty_ID) = explode('.', $this->data['recID']);

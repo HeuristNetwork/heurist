@@ -20,6 +20,7 @@
 */
 require_once(dirname(__FILE__).'/../System.php');
 require_once(dirname(__FILE__).'/../dbaccess/db_structure.php');
+require_once (dirname(__FILE__).'/../controller/entityScrudSrv.php');
 require_once('dbsTerms.php');
 
 require_once(dirname(__FILE__).'/../utilities/utils_file.php');
@@ -1470,6 +1471,9 @@ $mysqli->commit();
             $resp['defs'] = array('rectypes'=>$trg_rectypes,'detailtypes'=>$trg_detailtypes,'terms'=>$trg_terms);
             $data = $this->system->getCurrentUserAndSysInfo(true);
             $resp['defs']['sysinfo'] = $data['sysinfo'];
+            
+            $resp['defs']['entities'] = entityRefreshDefs($this->system, false);
+            
         }
         return $resp;    
     }    

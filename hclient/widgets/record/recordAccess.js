@@ -79,7 +79,7 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
             ele.empty();
             this._createGroupSelectorElement('sel_AccessGroups', this.options.currentAccessGroups);    
         }
-        ele.hide();    
+        //ele.hide();    
 
         if(!window.hWin.HEURIST4.util.isempty(this.options.currentOwner) || this.options.currentOwner==0){
             
@@ -107,10 +107,10 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
         if(this.options.currentAccess){
             //fieldSelect.val(this.options.currentOwner);
             
-            if( this.options.currentAccess=='hidden' ||
-                (this.options.currentAccess=='viewable' && this.options.currentAccessGroups)){
+            if( this.options.currentAccess=='hidden'){
+                //|| (this.options.currentAccess=='viewable' && this.options.currentAccessGroups)){
                 this.element.find('#rb_Access-hidden').prop('checked', true); //was viewable-group
-                this.element.find('#sel_AccessGroups').css({display:'table-row'});
+                this.element.find('#div_AccessGroups').show();//css({display:'table-row'});
             }else{
                 this.element.find('#rb_Access-'+this.options.currentAccess).prop('checked', true);
                 
@@ -132,9 +132,9 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
         $('input[name="rb_Access"]').change(function(){
             
             if($('#rb_Access-hidden').prop('checked')){ //was viewable-group
-                $('#sel_AccessGroups').css({display:'table-row'});
+                $('#div_AccessGroups').show();//css({display:'table-row'});
             }else{
-                $('#sel_AccessGroups').hide();
+                $('#div_AccessGroups').hide();
             }
            
             that._onRecordScopeChange();

@@ -145,7 +145,6 @@ $.widget( "heurist.manageSysDatabases", $.heurist.manageEntity, {
         var recID   = fld('sys_Database');
         
         var dbName = fld('sys_dbName');
-//console.log('>>>'+dbName);        
         if(dbName=='Please enter a DB name ...') dbName = '';
         var regID = fld('sys_dbRegisteredID');
         regID = (regID>0?regID:'');
@@ -202,7 +201,6 @@ $.widget( "heurist.manageSysDatabases", $.heurist.manageEntity, {
     },
     
     filterRecordList: function(event, request){
-        
         if(this.options.except_current==true){
             var subset = this._cachedRecordset.getSubSetByRequest(request, this.options.entity.fields);
             subset = subset.getSubSetByRequest({'sys_Database':'!=hdb_'+window.hWin.HAPI4.database}, this.options.entity.fields);

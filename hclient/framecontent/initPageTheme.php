@@ -378,6 +378,10 @@ span.fancytree-node:hover{
 .ui-heurist-design.ui-heurist-header, .ui-heurist-design .ui-heurist-header{
     background:<?php uout('design_bg', '#305586');?> 0% 0% no-repeat padding-box;
 }
+.ui-menu6 .ui-menu6-container.ui-heurist-design, .ui-heurist-design .ui-helper-popup{
+    border-width: 2px !important;
+    border-color:<?php uout('design_bg', '#305586');?> !important; 
+} 
 .ui-heurist-design-fade{background:<?php uout('design_fade_bg', '#D4DBEA');?> 0% 0% no-repeat padding-box;}
 .ui-heurist-design .ui-heurist-title{color:<?php uout('design_title_color', '#4477B9');?>}
 

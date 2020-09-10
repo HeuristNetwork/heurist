@@ -191,6 +191,7 @@ $.widget( "heurist.search_entity", {
                 that._refresh();
             }
         });*/
+        /*
         $(window.hWin.document).on(
             window.hWin.HAPI4.Event.ON_REC_UPDATE
             + ' ' + window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, 
@@ -199,6 +200,15 @@ $.widget( "heurist.search_entity", {
                     that._recreateRectypeSelectors();
                 }
             });
+        */
+            
+        window.hWin.HAPI4.addEventListener(this, window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, 
+            function(data) { 
+                if(!data || data.type=='rty'){
+                    that._recreateRectypeSelectors();
+                }
+            });
+            
             
             
         //this.div_search.find('.div-table-cell').css('vertical-align','top');
@@ -285,7 +295,7 @@ $.widget( "heurist.search_entity", {
             
             if(rty_ID>0) {           
 
-                var cnt = $Db.rty(rty_ID,'rty_Usage');
+                var cnt = $Db.rty(rty_ID,'rty_RecCount');
                 if(!(cnt>0)) cnt = 0;    
                 
                 if(this.options.use_combined_select){
@@ -552,8 +562,8 @@ $.widget( "heurist.search_entity", {
     // revert other modifications here
     ,_destroy: function() {
 
-        $(window.hWin.document).off(window.hWin.HAPI4.Event.ON_REC_UPDATE
-          + ' ' + window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE);
+        //$(window.hWin.document).off(window.hWin.HAPI4.Event.ON_REC_UPDATE+ ' ' + window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE);
+        window.hWin.HAPI4.removeEventListener(this, window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE);        
         
         this.div_entity_btns.find('.entity-filter-button').remove();
 

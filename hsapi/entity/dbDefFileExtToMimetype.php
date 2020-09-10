@@ -175,7 +175,7 @@ class DbDefFileExtToMimetype extends DbEntityBase
     //
     // since in this table primary key is varchar need special treatment
     //
-    public function delete(){
+    public function delete($disable_foreign_checks = false){
 
         if(!$this->_validatePermission()){
             return false;

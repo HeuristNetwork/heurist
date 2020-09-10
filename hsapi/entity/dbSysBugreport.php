@@ -176,7 +176,7 @@ class DbSysBugreport extends DbEntityBase
     //
     //
     //
-    public function delete(){
+    public function delete($disable_foreign_checks = false){
         return false;
     }
     

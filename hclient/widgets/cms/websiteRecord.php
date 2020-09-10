@@ -161,6 +161,7 @@ $hasAccess = ($rec['rec_NonOwnerVisibility'] == 'public' || $system->is_admin() 
     $system->is_member($rec['rec_OwnerUGrpID']) );   //owner
 
 if(!$hasAccess){
+//@todo The Heurist website at this address is not yet publicly accessible.        
     $message = 'You are not a member of the workgroup that owns the Heurist record #'
         .$rec_id.', and cannot therefore view this information.';
     include ERROR_REDIR;

@@ -33,6 +33,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
     //    
     _init: function() {
         
+        this.options.innerTitle = false;
+        
         this.options.use_cache = true;
         this.options.use_structure = false
         
@@ -111,7 +113,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
     },
     
     _destroy: function() {
-console.log( '_destroy' );
+
        window.hWin.HAPI4.removeEventListener(this, window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE);     
 /*        
        $(window.hWin.document).off(
@@ -154,7 +156,7 @@ console.log( '_destroy' );
                           click: function() { that._onActionListener(null, 'save-order'); }}];
 
                 this._toolbar = this.searchForm;
-                this.searchForm.css({'padding-top': this.options.innerTitle?'8px':'4px' }).empty();
+                this.searchForm.css({'padding-top': this.options.isFrontUI?'8px':'4px' }).empty();
                 this._defineActionButton2(btn_array[0], this.searchForm);
                 //this._defineActionButton2(btn_array[1], this.searchForm);
                 
@@ -193,10 +195,8 @@ console.log( '_destroy' );
             }else{
                 
         
-                //if(this.options.innerTitle && !this.options.auxilary){
-            
-                //add record type group editor  3px solid red
-                this.element.css( {border:'none', 'box-shadow':'none', background:'none'} );
+                //add vocab group and vocabs panels
+                this.element.addClass('ui-suppress-border-and-shadow');
                 
                 this.main_element = this.element.find('.ent_wrapper:first').addClass('ui-dialog-heurist').css({'left':288});
                 
@@ -246,7 +246,7 @@ console.log( '_destroy' );
                 this._toolbar = this.searchForm;
                 
                 //padding:'6px'
-                this.searchForm.css({'min-width': '315px', 'padding-top':this.options.innerTitle?'8px':'4px', height:80})
+                this.searchForm.css({'min-width': '315px', 'padding-top':this.options.isFrontUI?'8px':'4px', height:80})
                             .empty();                                     
                 this.recordList.css({'min-width': '315px', top:80});
                 this.searchForm.parent().css({'overflow-x':'auto'});
@@ -264,7 +264,7 @@ console.log( '_destroy' );
                 //group options
                 var rg_options = {
                      isdialog: false, 
-                     innerTitle: that.options.innerTitle,
+                     isFrontUI: true,
                      container: that.vocabulary_groups,
                      title: 'Vocabulary groups',
                      select_mode: 'manager',
@@ -542,7 +542,7 @@ console.log( '_destroy' );
                 }else{
                     var rg_options = {
                          isdialog: false, 
-                         innerTitle: this.options.innerTitle,
+                         isFrontUI: true,
                          container: container,
                          title: 'Edit '+this.options.auxilary,
                          select_mode: 'manager',

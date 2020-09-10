@@ -35,6 +35,8 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         //or add new field both to defDetailTypes and defRecStructure
         //this.options.newFieldForRtyID = 0; 
         
+        this.options.innerTitle = false;
+        
         this.options.layout_mode = 'short';
         this.options.use_cache = true;
         this.options.use_structure = false;
@@ -62,10 +64,10 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
 
         this._super();
 
-        if(this.options.innerTitle){
+        if(this.options.isFrontUI){
             
-            //add record type group editor
-            this.element.css( {border:'none', 'box-shadow':'none', background:'none'} );
+            //add fields group editor
+            this.element.addClass('ui-suppress-border-and-shadow');
             
             this.element.find('.ent_wrapper:first').addClass('ui-dialog-heurist').css('left',328);
             
@@ -139,10 +141,10 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         
         this.options.onInitCompleted =  function(){
             
-            if(that.options.innerTitle){
+            if(that.options.isFrontUI){
                 var rg_options = {
                      isdialog: false, 
-                     innerTitle: true,
+                     isFrontUI: true,
                      container: that.fieldtype_groups,
                      title: 'Base field groups',
                      layout_mode: 'short',

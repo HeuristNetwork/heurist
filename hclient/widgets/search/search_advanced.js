@@ -65,10 +65,11 @@ $.widget( "heurist.search_advanced", $.heurist.recordAction, {
         this.popupDialog();
         
         
-        $(window.hWin.document).on(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, 
-            function(e, data) { 
+        window.hWin.HAPI4.addEventListener(this, window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, 
+            function(data) { 
                 that._recreateSelectors();
             });
+            
 
         this._recreateSelectors();       
         
@@ -89,7 +90,9 @@ $.widget( "heurist.search_advanced", $.heurist.recordAction, {
     // revert other modifications here
     _destroy: function() {
 
-        $(window.hWin.document).off(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE);
+        //$(window.hWin.document).off(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE);
+        window.hWin.HAPI4.removeEventListener(this, window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE);        
+
         
         //this.div_entity_btns.remove();
     },

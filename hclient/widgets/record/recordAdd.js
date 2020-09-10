@@ -1,4 +1,5 @@
 /**
+/**
 * recordAccess.js - apply ownership and access rights
 *
 * @package     Heurist academic knowledge management system
@@ -24,7 +25,7 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
         is_h6style: false,
         width: 520,
         height: 800,
-        title:  'Add new record',
+        title:  'Add Record', //'Record addition settings'
         
         currentRecordset: {},  //stub
         currentRecType: 0,
@@ -71,9 +72,9 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
             $dlg.css({top:'36px',bottom:'2px','overflow-y':'auto',position:'absolute',width:'auto', margin: '0px','font-size':'0.9em'}).hide();
 
             //titlebar            
-            var ele = $('<div class="ui-heurist-header" style="top:0px;">'+this.options.title
-                +'<span class="ui-icon ui-icon-gear" style="cursor:pointer;float:right;margin:0px 6px">Define parameters</span></div>')
+            this._innerTitle = $('<div class="ui-heurist-header" style="top:0px;">'+this.options.title+'</div>')
                 .insertBefore($dlg); // menu-text
+//'<span class="ui-icon ui-icon-gear" style="cursor:pointer;float:right;margin:0px 6px">Define parameters</span>                
                 
             //toolbar for control buttons                    
             this._toolbar = $('<div><div class="ui-dialog-buttonset" style="text-align:right">'
@@ -97,17 +98,24 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
                 .show(), {click:this.doAction});
 
                 
-            //list of rectypes
-            this.rectype_list = $('<ul class="heurist-selectmenu" '
-                +' style="position:absolute;top:36px;left:0;right:0;bottom:1px;padding:0px;'
-                +'font-size:smaller;overflow-y:auto;list-style-type:none"></ul>')
-                .insertBefore($dlg);
+            this.expandBtn = $('<button>').button({icon:'ui-icon-gear',label:'Permission settings'})
+                    .addClass('ui-heurist-btn-header1')
+                    .css({position:'absolute',top:'43px',left:6}) 
+                    .insertBefore($dlg);
                 
-            this._on(ele.find('.ui-icon-gear'), {click: function(e){ 
+            this._on(this.expandBtn, {click: function(e){ 
                 
                 this.doExpand( this.rectype_list.is(':visible') );
                 
             }});
+            
+            //list of rectypes
+            this.rectype_list = $('<ul class="heurist-selectmenu" '
+                +' style="position:absolute;top:56px;left:0;right:0;bottom:1px;padding:0px;'
+                +'font-size:smaller;overflow-y:auto;list-style-type:none"></ul>')
+                .insertBefore($dlg);
+            
+            
             
             this.doExpand( this.options.isExpanded );
                 
@@ -121,6 +129,10 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
             //+'<div id="btnAddRecord" style="font-size:0.9em;display:none;margin:0 30px"></div>'
             //+'<div id="btnAddRecordInNewWin" style="font-size:0.9em;display:none;"></div>'
         +'</div>').prependTo( $dlg ); //<hr style="margin:5px"/>
+
+       $('<div class="heurist-helper3" style="padding:10px 0;display:block">This settings will be applied and remembered when you select a record type from the list</div>')
+            .prependTo( $dlg );
+
       
         this._fillSelectRecordTypes( this.options.currentRecType );
       
@@ -162,8 +174,10 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
         
         
         var that = this;
-        $(window.hWin.document).on(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, 
-            function(e, data) { 
+        //
+        //$(window.hWin.document).on(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, 
+        window.hWin.HAPI4.addEventListener(this, window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, 
+            function(data) { 
                 if(!data || data.type=='rtg' || data.type=='rty'){
                     that._fillSelectRecordTypes(that.options.currentRecType);    
                 }
@@ -178,7 +192,8 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
     // events bound via _on are removed automatically
     // revert other modifications here
     _destroy: function() {
-        $(window.hWin.document).off(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE);
+        //$(window.hWin.document).off(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE);
+        window.hWin.HAPI4.removeEventListener(this, window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE);        
         return this._super();
     },
     
@@ -187,21 +202,27 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
     //    
     doExpand: function(is_expand){
 
+        if(!this._toolbar) return;
+        
         var $dlg = this.element.children('fieldset');
-        var $icon = this.element.find('.ui-heurist-header > span.ui-icon');
+        //var $icon = this.element.find('.ui-heurist-header > span.ui-icon');
         
         if(is_expand){
             this._toolbar.show();
             this.rectype_list.hide();
+            this.expandBtn.hide();
             $dlg.css('bottom','40px').show();
             this.element.parent().width(500);
-            $icon.css('float','left').removeClass('ui-icon-gear').addClass('ui-icon-carat-2-w');
+            //$icon.css('float','left').removeClass('ui-icon-gear').addClass('ui-icon-carat-2-w');
+            this._innerTitle.text('Record addition settings');
         }else{
             this._toolbar.hide();
             this.rectype_list.show();
+            this.expandBtn.show();
             $dlg.css('bottom','2px').hide();
             this.element.parent().width(200);
-            $icon.css('float','right').removeClass('ui-icon-carat-2-w').addClass('ui-icon-gear');
+            //$icon.css('float','right').removeClass('ui-icon-carat-2-w').addClass('ui-icon-gear');
+            this._innerTitle.text('Add Record');
         }    
                 
         

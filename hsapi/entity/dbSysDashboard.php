@@ -201,7 +201,7 @@ class DbSysDashboard extends DbEntityBase
     //
     // delete group
     //
-    public function delete(){
+    public function delete($disable_foreign_checks = false){
         
         $ret = parent::delete();
 

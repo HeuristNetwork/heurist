@@ -189,15 +189,14 @@ class DbSysDatabases extends DbEntityBase
         
         }//from index database
     }
-    
-    //
-    // nothing to save/delete in central index
-    // all operations are performed by database indexes
-    //
-    public function delete(){
-    }
-    public function save(){    
-    }
 
+    //
+    // deletion and not allowed
+    //
+    public function delete($disable_foreign_checks = false){
+    }
+    public function save(){
+    }
+    
 }
 ?>

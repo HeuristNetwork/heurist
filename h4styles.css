@@ -688,9 +688,13 @@ div .selected_last{
     display:none;
 }
 
+div.icons,div.thumbs,div.thumbs3{
+    padding-left:3px;    
+}
+
 /* special mode for dahsboard */
 div.div-result-list-content.icons_list{
-    text-align: center;    
+    text-align: center;
 }
 .icons_list .recordDiv, .icons_list .recordDiv:hover {
     -moz-user-select: none;
@@ -1836,9 +1840,9 @@ option {padding-left:15px;}
 .recordList > .table_header > div{
     border-right: 1px solid gray;
     display: inline-block;
-    height: 1.5em;
-    padding:0 2px;
+    padding:2px;
     /*
+    height: 1.5em;
     display: table-cell;
     padding-left:4px;
     */

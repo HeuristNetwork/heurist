@@ -48,6 +48,8 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         
 //this._time_debug = new Date().getTime() / 1000;
         
+        this.options.innerTitle = false;
+        
         //define it to load recordtypes from other server/database - if defined it allows selection only
         if(this.options.import_structure){ //for example https://heuristplus.sydney.edu.au/heurist/?db=Heurist_Reference_Set
             if(this.options.select_mode=='manager') this.options.select_mode='select_single';
@@ -82,29 +84,24 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         this._super();
         
         
-//console.log(this.options.is_h6style +'   '+ this.options.innerTitle);        
-
         var that = this;
         
-        $(window.hWin.document).on(
-            window.hWin.HAPI4.Event.ON_REC_UPDATE
-            + ' ' + window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, 
-            function(e, data) { 
-                if(!data || 
-                   (data.source != that.uuid && data.type == 'rty'))
-                {
-                    that._loadData();
-                }
-            });
-        
-        
+        //ON_REC_UPDATE
+        if(!this.options.import_structure){        
+            window.hWin.HAPI4.addEventListener(this, window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, 
+                function(data) { 
+                    if(!data || 
+                       (data.source != that.uuid && data.type == 'rty'))
+                    {
+                        that._loadData();
+                    }
+                });
+        }
     },
     
     _destroy: function() {
         
-       $(window.hWin.document).off(
-            window.hWin.HAPI4.Event.ON_REC_UPDATE
-            + ' ' + window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE);
+       window.hWin.HAPI4.removeEventListener(this, window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE);        
         
        this._super(); 
     },
@@ -133,10 +130,10 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         if(this.options.select_mode=='manager'){
             
             
-            if(this.options.innerTitle){
+            if(this.options.isFrontUI){
                 
                 //add record type group editor
-                this.element.css( {border:'none', 'box-shadow':'none', background:'none'} );
+                this.element.addClass('ui-suppress-border-and-shadow');
                 
                 this.element.find('.ent_wrapper:first').addClass('ui-dialog-heurist').css('left',328);
                 
@@ -193,10 +190,10 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
 //that._time_debug = new Date().getTime() / 1000;
 
             
-            if(that.options.innerTitle){
+            if(that.options.isFrontUI){
                 var rg_options = {
                      isdialog: false, 
-                     innerTitle: true,
+                     isFrontUI: true,
                      container: that.rectype_groups,
                      title: 'Record type groups',
                      layout_mode: 'short',
@@ -321,7 +318,9 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                 //usual via entity
                 //shorter
                 this.updateRecordList(null, {recordset:$Db.rty()});
-                if(is_first!==true)this.searchForm.searchDefRecTypes('startSearch');
+                if(is_first!==true && this.searchForm.searchDefRecTypes('instance')){
+                    this.searchForm.searchDefRecTypes('startSearch');    
+                }
                 
                 /*
                 //longer but safer - since it reloads data if it is missed locally
@@ -359,7 +358,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             //reload groups for remote rectypes            
             //var ele = this.element.find('#input_search_group');   //rectype group
             rectypes = window.hWin.HEURIST4.util.cloneJSON(rectypes);
-            this.searchForm.searchDefRecTypes('reloadGroupSelector', rectypes); //get remote groups
+            //this.searchForm.searchDefRecTypes('reloadGroupSelector', rectypes); //get remote groups
             
             //var ele = this.searchForm.find('#input_search_group');
             //window.hWin.HEURIST4.ui.createRectypeGroupSelect(ele[0],
@@ -368,12 +367,13 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
 
         rdata.fields = rectypes.typedefs.commonFieldNames;
         rdata.fields.unshift('rty_ID');
-        rdata.fields.push('rty_RecCount');
         
         var idx_ccode = 0;
         if(this.options.import_structure){
             rdata.fields.push('rty_ID_local');
             idx_ccode = window.hWin.HEURIST4.rectypes.typedefs.commonNamesToIndex.rty_ConceptID;
+        }else{
+            rdata.fields.push('rty_RecCount');
         }
 
         var idx_visibility = rectypes.typedefs.commonNamesToIndex.rty_ShowInLists;
@@ -541,7 +541,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         if(this.options.import_structure){
 
             //Ian dwi
-            //recTitle = recTitle + fld2('rty_ID','3.5em')+fld2('rty_ID_local','3.5em');
+//recTitle = recTitle + fld2('rty_ID','3.5em')+fld2('rty_ID_local','3.5em');
             var rtIcon = this.options.import_structure.databaseURL
                                 + '/hsapi/dbaccess/rt_icon.php?db='
                                 + this.options.import_structure.database + '&id=';
@@ -1163,7 +1163,7 @@ console.log('_recordListGetFullData')
         
         if(this.options.edit_mode=='editonly') return;
         
-        var iheight = 80;
+        var iheight = this.options.import_structure?40:80;
         
         this.searchForm.css({'height':iheight});
         this.recordList.css({'top':iheight});     

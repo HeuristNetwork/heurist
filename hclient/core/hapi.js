@@ -768,11 +768,25 @@ prof =Profile
 
                         //refresh local definitions
                         if(response.defs){
+                            if(response.defs.sysinfo) window.hWin.HAPI4.sysinfo = response.defs.sysinfo; //constants
+                            
+                            //old way
                             if(response.defs.rectypes) window.hWin.HEURIST4.rectypes = response.defs.rectypes;
                             if(response.defs.detailtypes) window.hWin.HEURIST4.detailtypes = response.defs.detailtypes;
                             if(response.defs.terms) window.hWin.HEURIST4.terms = response.defs.terms;
-                            if(response.defs.sysinfo) window.hWin.HAPI4.sysinfo = response.defs.sysinfo; //constants
+                            
+                            //new way
+                            if(response.defs.entities)
+                            for(var entityName in response.defs.entities){
+                                window.hWin.HAPI4.EntityMgr.setEntityData(entityName,
+                                        new hRecordSet(response.defs.entities[entityName]));    
+                                //build rst index
+                                if(entityName=='defRecStructure'){
+                                    window.hWin.HAPI4.EntityMgr.createRstIndex();
+                                }
+                            }
                         }
+console.log('TRIGER);');                      
                         window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE);
                     }
                     if($.isFunction(callback)){
@@ -1246,17 +1260,17 @@ prof =Profile
 
                             for(var entityName in response.data){
                                 entity_data[entityName] = new hRecordSet(response.data[entityName]);    
-                                
-                                if(response.config && response.config[entityName]){
-                                    
-                                    entity_configs[entityName] = response.config[entityName];
-                                    //find key and title fields
-                                    window.hWin.HAPI4.EntityMgr.resolveFields(entityName);
-                                }
-                                
+
                                 //build rst index
                                 if(entityName=='defRecStructure'){
                                     window.hWin.HAPI4.EntityMgr.createRstIndex();
+                                }
+
+                                
+                                if(response.data[entityName]['config']){
+                                    entity_configs[entityName] = response.data[entityName]['config'];
+                                    //find key and title fields
+                                    window.hWin.HAPI4.EntityMgr.resolveFields(entityName);
                                 }
                             }
 
