@@ -31,7 +31,7 @@
                         "rst_DisplayName":"Group:",
                         "rst_DisplayHelpText": "Vocabulary group", 
                         "rst_FieldConfig": {"entity":"defVocabularyGroups"},
-                        "rst_RequirementType":"required"
+                        "rst_RequirementType":"recommended"
                     }
                 },
                 {
@@ -66,6 +66,7 @@
                         "rst_DisplayName":"Description:",
                         "dty_Size":1000,
                         "rst_DisplayWidth":60,
+                        "rst_DisplayHeight":2,
                         "rst_DisplayHelpText": "A concise but comprehensive description of this term or category."
                     }
                 },

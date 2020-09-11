@@ -937,7 +937,7 @@ $.widget( "heurist.resultList", {
 
         if(!this.div_content.hasClass(newmode) || forceapply===true){
             
-            this._closeExpandedDivs();
+            this.closeExpandedDivs();
             
             //var $allrecs = this.div_content.find('.recordDiv');
             if(newmode){
@@ -1657,7 +1657,7 @@ $.widget( "heurist.resultList", {
     //
     // close expanded recordDivs
     //
-    _closeExpandedDivs: function(){
+    closeExpandedDivs: function(){
         var exp_div = this.div_content.find('.record-expand-info');
         
         if(exp_div.length>0){
@@ -1967,10 +1967,10 @@ $.widget( "heurist.resultList", {
 
             var exp_div = this.div_content.find('.record-expand-info');
             var is_already_opened = (exp_div.attr('data-recid')==$rdiv.attr('recid'));
-            //close other expanded recordDivs
-            this._closeExpandedDivs();
             
             if(!is_already_opened){
+                //close other expanded recordDivs
+                this.closeExpandedDivs();
                 
                 /*
                 var tmp_parent = $('<div class="list tmp_parent">').insertBefore($rdiv);
@@ -1980,7 +1980,7 @@ $.widget( "heurist.resultList", {
             
                 //expand selected recordDiv and draw record details inline
                 if($.isFunction(this.options.rendererExpandDetails)){
-                    this.options.rendererExpandDetails.call(this, recordset, record);
+                    this.options.rendererExpandDetails.call(this, this._currentRecordset, $rdiv.attr('recid'));
                     //this.options.rendererExpandDetails(selected_rec_ID, ele, function(){ ele.removeClass('loading'); });
                 }else {
                     

@@ -232,31 +232,33 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 
                 //show particular terms for vocabulary 
                 var btn_array = [
-                    {showText:false, icons:{primary:'ui-icon-carat-2-w'}, text:window.hWin.HR('Show inline Editor'),
+                    /*{showText:false, icons:{primary:'ui-icon-carat-2-w'}, text:window.hWin.HR('Show inline Editor'),
                           css:{'margin-right':'0.5em','float':'right'}, id:'btnExpandEditor',
-                          click: function() { that._expandInlineEditor(); }},
+                          click: function() { that._expandInlineEditor(); }},*/
                           
-                    {showText:true, icons:{primary:'ui-icon-plus'}, text:window.hWin.HR('Add Term'),
-                          css:{'margin-right':'0.5em','float':'right'}, id:'btnAddButton',
+                    {showText:true, icons:{primary:'ui-icon-plus'}, text:window.hWin.HR('Add'),
+                          css:{'margin-right':'0.5em','display':'inline-block'}, id:'btnAddButton',
                           click: function() { that._onActionListener(null, 'add'); }},
 
-                    {showText:true, icons:{primary:'ui-icon-arrowthick-1-e'}, text:window.hWin.HR('Export Terms'),
-                          css:{'margin-right':'0.5em','float':'right'}, id:'btnExportVocab',
+                    {showText:false, icons:{primary:'ui-icon-arrowthickstop-1-n'}, text:window.hWin.HR('Export Terms'), //ui-icon-arrowthick-1-e
+                          css:{'margin-right':'0.5em','display':'inline-block'}, id:'btnExportVocab',
                           click: function() { that._onActionListener(null, 'export-import'); }},
                           
-                    {showText:true, icons:{primary:'ui-icon-arrowthick-1-w'}, text:window.hWin.HR('Import Terms'),
-                          css:{'margin-right':'0.5em','float':'right'}, id:'btnImportVocab',
-                          click: function() { that._onActionListener(null, 'vocab-import'); }},
+                    {showText:false, icons:{primary:'ui-icon-arrowthickstop-1-s'}, text:window.hWin.HR('Import Terms'), //ui-icon-arrowthick-1-w
+                          css:{'margin-right':'0.5em','display':'inline-block'}, id:'btnImportVocab',
+                          click: function() { that._onActionListener(null, 'vocab-import'); }}
+                    ];
                     
+                var btn_array2 = [
                     {showText:false, icons:{primary:'ui-icon-menu'}, text:window.hWin.HR('Show as plain list'),
-                          css:{'margin-right':'0.5em','float':'left'}, id:'btnViewMode_List',
+                          css:{'margin-right':'0.5em','display':'inline-block'}, id:'btnViewMode_List',
                           click: function() { that._onActionListener(null, 'viewmode-list'); }},
                     {showText:false, icons:{primary:'ui-icon-structure'}, text:window.hWin.HR('Show as tree'),
-                          css:{'margin-right':'0.5em','float':'left'}, id:'btnViewMode_Tree',
+                          css:{'margin-right':'0.5em','display':'inline-block'}, id:'btnViewMode_Tree',
                           click: function() { that._onActionListener(null, 'viewmode-tree'); }},
                     {showText:false, icons:{primary:'ui-icon-view-icons'}, text:window.hWin.HR('Show as images'),
-                          css:{'margin-right':'0.5em','float':'left'}, id:'btnViewMode_List',
-                          click: function() { that._onActionListener(null, 'viewmode-thumbs'); }},
+                          css:{'margin-right':'0.5em','display':'inline-block'}, id:'btnViewMode_List',
+                          click: function() { that._onActionListener(null, 'viewmode-thumbs'); }}
                     ];
 
                 this._toolbar = this.searchForm;
@@ -266,16 +268,45 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                             .empty();                                     
                 this.recordList.css({'min-width': '315px', top:80});
                 this.searchForm.parent().css({'overflow-x':'auto'});
-                $('<div>').attr('id','div_group_information').css({'max-height':'40px','max-height':'40px'}).appendTo(this.searchForm);
                 
+                $('<div>'
+                    +'<h3 style="display:inline-block;margin: 0 10px 0 0; vertical-align: middle;">Terms</h3>'
+                  +'</div>'
+                  +'<div style="display:table;width:100%;">'
+                  +'<div id="div_group_information" style="padding-top:13px;min-height:3em;max-width:350px;display:table-cell;"></div>'
+                  +'<div style="min-width:70px;text-align:right;display:table-cell;" id="btn_container"></div></div>')
+                .appendTo(this.searchForm);
+                
+                var c1 = this.searchForm.find('div:first');
                 for(var idx in btn_array){
-                        this._defineActionButton2(btn_array[idx], this.searchForm);
+                        this._defineActionButton2(btn_array[idx], c1);
+                }
+                c1 = this.searchForm.find('#btn_container');
+                for(var idx in btn_array2){
+                        this._defineActionButton2(btn_array2[idx], c1);
                 }
                 
                 this.options.recordList = {
                     empty_remark: 'No terms in selected vocabulary. Add or import new ones',
                     show_toolbar: false,
                     view_mode: 'list',
+                    recordview_onselect:'inline',
+                    rendererExpandDetails: function(recordset, trm_id){
+                        if(this.options.view_mode=='list'){
+                            var $rdiv = $(this.element).find('div[recid='+trm_id+']');
+                            var ele = $('<div>')
+                                .attr('data-recid', $rdiv.attr('recid'))
+                                .css({'width':'100%','max-height':'445px','overflow':'hidden','padding-top':'5px','height':'445px'})
+                                .addClass('record-expand-info');
+                            ele.appendTo($rdiv);
+                            
+                            that._showEditorInline(ele, trm_id);
+                            
+                            ele.find('.ent_wrapper:first').css('top',25);
+                        }else{
+                            that.addEditRecord(trm_id);
+                        }
+                    }
                 };
                 
                 //group options
@@ -514,37 +545,6 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
     //
     //
     //
-    addEditRecord: function(recID)
-    {   
-        if(this.options.auxilary=='vocabulary' && this.options.reference_trm_manger &&
-            this.options.reference_trm_manger.manageDefTerms('option','edit_mode')=='inline'){
-                      
-            //inline editor for vocabularies          
-                        
-            var container  = this.options.reference_trm_manger.manageDefTerms('getEditorInline');
-            this._showEditorInline(container, recID);
-                        
-        }else if(this.options.edit_mode == "inline"){
-
-            //inline editor for terms
-            
-            this._showEditorInline(this.inline_editor_container, recID);
-            
-        }else{
-            this._super( recID );            
-        }
-    },
-    
-    //
-    //
-    //
-    getEditorInline: function(){
-        return this.inline_editor_container;
-    },
-    
-    //
-    //
-    //
     _showEditorInline: function(container, recID){
         
                 
@@ -552,12 +552,17 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                     && container.manageDefTerms('option','auxilary')==this.options.auxilary)
                 {
                         
+console.log('RELOAD editpr');
+                    
                     container.manageDefTerms('option','edit_recordset', this.recordList.resultList('getRecordSet'));
                     container.manageDefTerms('option','trm_ParentTermID', this.options.trm_ParentTermID);
                     container.manageDefTerms('option','trm_VocabularyGroupID', this.options.trm_VocabularyGroupID);
                     container.manageDefTerms( 'addEditRecord', recID );
                     
                 }else{
+console.log('init editpr');
+
+                    var that = this;
                     var rg_options = {
                          isdialog: false, 
                          isFrontUI: true,
@@ -569,7 +574,10 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                          auxilary: this.options.auxilary,
                          rec_ID: recID,
                          trm_ParentTermID: this.options.trm_ParentTermID,
-                         trm_VocabularyGroupID: this.options.trm_VocabularyGroupID
+                         trm_VocabularyGroupID: this.options.trm_VocabularyGroupID,
+                         onClose: function(){
+                                that.recordList.resultList('closeExpandedDivs');
+                         }
                     };
                     window.hWin.HEURIST4.ui.showEntityDialog('defTerms', rg_options); // it recreates  
                 }
@@ -656,7 +664,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 }
 
                 sGroupTitle += ($Db.trm(vocab_id,'trm_Label')
-                    +'</h4><div class="heurist-helper3" style="font-size:0.7em;height:23px;overflow:hidden;">'
+                    +'</h4><div class="heurist-helper3 truncate" style="font-size:0.7em;">'
                     +$Db.trm(vocab_id,'trm_Description')+'&nbsp;</div>');
 
             }else{
@@ -765,10 +773,13 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             
             //assign devault values
             
+            ele = this._editing.getFieldByName('trm_VocabularyGroupID');
             if(this.options.trm_VocabularyGroupID>0){
-                ele = this._editing.getFieldByName('trm_VocabularyGroupID');
                 ele.editing_input('setValue', this.options.trm_VocabularyGroupID, true);
             }
+
+            ele.show();
+            ele.editing_input('fset', 'rst_RequirementType', 'required');
             
         }else{
             
@@ -780,16 +791,42 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             ele = this._editing.getFieldByName('trm_ParentTermID');
             ele.editing_input('setValue', this.options.trm_ParentTermID, true);
             
-            ele = this._editing.getFieldByName('trm_VocabularyGroupID').hide();
-            ele.editing_input('fset', 'rst_RequirementType', 'optional');
-            
+            this._editing.getFieldByName('trm_VocabularyGroupID').hide();
             
         }
         ele = this._editing.getFieldByName('trm_Domain')
         ele.editing_input('setValue', 'enum', true);
         
     },   
+
+
+    //
+    //
+    //
+    _getEditDialogButtons: function(){
+        var btns = this._super();
         
+        if(this.options.edit_mode=='editonly'){
+        
+            var that = this;
+          
+            btns[0].text = 'Close';
+            btns[0].css['visibility'] = 'visible';
+            btns[0].class = 'alwaysvisible';
+            
+            btns[0].click = function(){
+                if(that.defaultBeforeClose()){
+                    if($.isFunction(that.options.onClose)){
+                      that.options.onClose.call();
+                    } 
+                }
+            };
+      
+        }
+        return btns;  
+    },
+  
+/*        
     //
     //  Add PREV/NEXT buttons
     //    
@@ -854,11 +891,14 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 }
         }
     },    
+*/    
     //
     // update list after save (refresh)
     //
     _afterSaveEventHandler: function( recID, fieldvalues ){
 
+        if(this.options.edit_mode=='editonly') return
+        
         // close on addition of new record in select_single mode    
         //this._currentEditID<0 && 
         if(this.options.select_mode=='select_single'){
@@ -880,6 +920,9 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
     // this event handler os always called
     // 
     _afterSaveEventHandler2: function( recID, fieldvalues ){  
+        
+        //if(this.options.edit_mode=='editonly') return;
+        
         if(this.it_was_insert){
             if($Db.trm(recID)==null){
                 $Db.trm().addRecord(recID, fieldvalues);                
@@ -948,7 +991,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             }
 */            
             var that = this;
-
+/*
             if(action=='add-group' || action=='edit-group'){
 
                 if(action=='add-group') recID = -1;
@@ -992,7 +1035,9 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 {title:'Warning',yes:'Proceed',no:'Cancel'});        
                 
                 
-            }else if(action=='vocab-import'){
+            }else 
+*/            
+            if(action=='vocab-import'){
                 
             }else if(action=='vocab-export'){
                 

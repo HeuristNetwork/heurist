@@ -245,10 +245,10 @@ $.widget( "heurist.manageEntity", {
             
         if(this.options.layout_mode=='editonly' && !this.options.isdialog){
                 //add div at bottom for control buttons
-                $('<div>').addClass('ent_footer editForm-toolbar ui-heurist-header')
+                $('<div>').addClass('ent_footer editForm-toolbar')
                     .css({'height':'36px','padding':'4px 20px 0px'}).appendTo(fele);
                     
-                this.element.find('.editForm').css('bottom','40px');
+                this.element.find('.editForm').css({'bottom':'40px'});
                 
                 this._toolbar = this.element.find('.editForm-toolbar');
                 
@@ -948,8 +948,8 @@ $.widget( "heurist.manageEntity", {
 */              
                     
                     if($.isFunction(that.options.onClose)){
-                      //that.options.onClose(that._currentEditRecordset);  
-                      that.options.onClose.call();
+                        //that.options.onClose(that._currentEditRecordset);  
+                        that.options.onClose.call();
                     } 
                     $dlg.remove();    
                     //???? $dlg.parent().remove();    
@@ -1036,6 +1036,10 @@ $.widget( "heurist.manageEntity", {
         }else if(this.element.hasClass('ui-menu6-container')){
             this.element.hide();
         }
+        
+        if(!this.options.isdialog && $.isFunction(this.options.onClose)){
+            this.options.onClose.call();
+        } 
         
     },
     
@@ -1479,13 +1483,11 @@ this._time_debug = fin_time;
         //show/hide save,cancel,remove buttons
         var ele = this._toolbar;
         if(ele){
-            if(this.options.edit_mode=='inline') { //for popup and editonly always visible
-                    ele.find('#btnRecCancel').css('visibility', mode);
+            var btn = ele.find('#btnRecCancel');
+            if(this.options.edit_mode!='popup' && !btn.hasClass('alwaysvisible')) { //for popup and editonly always visible
+                    btn.css('visibility', mode);
             }
             ele.find('#btnRecSave').css('visibility', mode);
-            if(this.options.edit_mode!='popup'){
-                ele.find('#btnRecCancel').css('visibility', mode);    
-            }
             /* IJ 2018-10-17 request   
             if(this._currentEditRecordset==null){            
                 ele.find('#btnRecRemove').css('visibility', 'hidden');

@@ -105,7 +105,7 @@ $.widget( "heurist.manageDefVocabularyGroups", $.heurist.manageEntity, {
             //specify add new/save order buttons above record list
             var btn_array = [
                 {showText:true, icons:{primary:'ui-icon-plus'},text:window.hWin.HR('Add'),
-                      css:{'margin-right':'0.5em','float':'right'}, id:'btnAddButton',
+                      css:{'margin-right':'0.5em','float':'left'}, id:'btnAddButton',
                       click: function() { that._onActionListener(null, 'add'); }},
 
                 {text:window.hWin.HR('Save Order'),
@@ -114,11 +114,11 @@ $.widget( "heurist.manageDefVocabularyGroups", $.heurist.manageEntity, {
 
             this._toolbar = this.searchForm;
             this.searchForm.css({'padding-top': '8px'}).empty();
-            this._defineActionButton2(btn_array[0], this.searchForm);
-            this._defineActionButton2(btn_array[1], this.searchForm);
+            //this._defineActionButton2(btn_array[1], this.searchForm);
             
             $('<h3 style="float:left;margin: 0 10px 0 0; vertical-align: middle;">Vocabulary Groups</h3>')
                 .appendTo( this.searchForm );
+            this._defineActionButton2(btn_array[0], this.searchForm);
                       
         }
         
