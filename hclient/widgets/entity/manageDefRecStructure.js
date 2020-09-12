@@ -226,7 +226,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                 this._cachedRecordset = this._getRecordsetFromStructure();
                 this.recordList.resultList('updateResultSet', this._cachedRecordset);
                 
-                //this._selectAndEditFirstInRecordset(this._cachedRecordset);
+                //this.selectRecordInRecordset();
             
                 //var treeData = this._cachedRecordset.getTreeViewData('trm_Label','trm_ParentTermID');
                 this._initTreeView();
@@ -879,7 +879,7 @@ dty_TermIDTreeNonSelectableIDs
     
     updateRecordList: function( event, data ){
         this._super(event, data);
-        this._selectAndEditFirstInRecordset();
+        this.selectRecordInRecordset();
     },
         
     //

@@ -752,7 +752,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             //list of fields that are already in record type
             var aUsage = {};
             if(rty_ID>0 && window.hWin.HEURIST4.rectypes.typedefs[rty_ID]){
-                aUsage = window.hWin.HEURIST4.rectypes.typedefs[rty_ID].dtFields;   
+                aUsage = window.hWin.HEURIST4.rectypes.typedefs[rty_ID].dtFields;     //!!!!!!
             }
             
             var entered = input_name.val().toLowerCase();
@@ -773,7 +773,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                     if(field_name.toLowerCase()==entered.toLowerCase()){
                         ele = first_ele;
                     }else{
-                        ele = $('<div class="truncate">').appendTo(this.fields_list_div);
+                        ele = $('<div class="truncate">').appendTo(that.fields_list_div);
                     }
 
                     is_added = true;

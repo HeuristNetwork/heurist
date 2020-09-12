@@ -146,7 +146,7 @@ $.widget( "heurist.manageDefDetailTypeGroups", $.heurist.manageEntity, {
         window.hWin.HAPI4.EntityMgr.getEntityData(this._entityName, false,
             function(response){
                 that.updateRecordList(null, {recordset:response});
-                that._selectAndEditFirstInRecordset(response);
+                that.selectRecordInRecordset();
             });
         
     },

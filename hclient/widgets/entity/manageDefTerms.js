@@ -27,6 +27,7 @@ we may take data from
 $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
    
     _entityName:'defTerms',
+    fields_list_div: null,  //term search result
     
     //
     //                                                  
@@ -63,40 +64,12 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 if(!data || 
                    (data.source != that.uuid && data.type == this.options.auxilary))
                 {
-                    that._loadData();
+                    that.refreshRecordList();
+                    //that._loadData();
                 }else
                 if(data && data.type == 'vocabulary' && that.options.auxilary=='vocabulary'){
 
                 
-                }else
-                if(data && data.type == 'vcg' && that.options.auxilary=='vocabulary'){
-                                     
-                    //update vocabulary groups
-                    if(fasle && data.recID>0){  //AAAA!!!!
-                        var recID = data.recID;
-                        var is_delete = ($Db.vcg(recID)==null);
-                        var cont = that.recordList.find('.div-result-list-content');
-                        if(is_delete){
-                            cont.find('div[data-grp='+recID+']').remove();
-                            cont.find('div[data-grp-content='+recID+']').remove();
-                        }else {
-                            var header = cont.find('div[data-grp='+recID+']');
-                            var is_insert = (header.length==0);
-                            var content = that.rendererVocabularyGroupHeader(recID, false);
-                            if(is_insert){
-                                header = $(content).appendTo(cont);
-                                $('<div data-grp-content="'+recID+'">empty</div>').hide().appendTo(cont);
-                            }else{
-                                $(header).replaceWith($(content));
-                            }
-                            that.initVocabularyGroups(recID);
-                        }
-                        
-                    }else{
-                        //relaod all
-                        that.recordList.resultList({groupByRecordset:$Db.vcg()});    
-                        that.recordList.resultList('refreshPage');
-                    }
                 }
                 
             
@@ -114,6 +87,10 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
     
     _destroy: function() {
 
+        if(this.fields_list_div){
+            this.fields_list_div.remove();
+        }
+        
        window.hWin.HAPI4.removeEventListener(this, window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE);     
 /*        
        $(window.hWin.document).off(
@@ -179,6 +156,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 this.options.recordList = {
                     empty_remark: 'No vocabularies in this groups. Add new one',
                     show_toolbar: false,
+                    pagesize:99999,
                     view_mode: 'list'
                 };
 
@@ -199,11 +177,17 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                             if(res && res.length>0){
                                 //filter by vocabulary
                                 that.options.trm_VocabularyGroupID = res[0];
-                                if(that.getRecordSet()!==null){
-                                    that._filterByVocabulary();
-                                }
                             }
+                         }else if(res>0){
+                            that.options.trm_VocabularyGroupID = res; 
+                         }else{
+                            that.options.trm_VocabularyGroupID = -1  
                          }
+                         
+                         if(that.getRecordSet()!==null){
+                            that._filterByVocabulary();
+                         }
+                         
                      }
                 };
                 window.hWin.HEURIST4.ui.showEntityDialog('defVocabularyGroups', rg_options);
@@ -221,20 +205,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                     .uniqueId()
                     .appendTo(this.element);
                 
-                //console.log('vocab cont '+this.vocabularies_div.attr('id'));               
-                
-                //min width for editor 480
-                this.inline_editor_container = $('<div>').addClass('ui-dialog-heurist')
-                    .css({position: 'absolute',top: 0, bottom: 0, right: 0, left:746, overflow: 'hidden'})  //606px
-                    .hide()
-                    .uniqueId()
-                    .appendTo(this.element);
-                
                 //show particular terms for vocabulary 
                 var btn_array = [
-                    /*{showText:false, icons:{primary:'ui-icon-carat-2-w'}, text:window.hWin.HR('Show inline Editor'),
-                          css:{'margin-right':'0.5em','float':'right'}, id:'btnExpandEditor',
-                          click: function() { that._expandInlineEditor(); }},*/
                           
                     {showText:true, icons:{primary:'ui-icon-plus'}, text:window.hWin.HR('Add'),
                           css:{'margin-right':'0.5em','display':'inline-block'}, id:'btnAddButton',
@@ -281,6 +253,15 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 for(var idx in btn_array){
                         this._defineActionButton2(btn_array[idx], c1);
                 }
+                //add input search
+                c1 = $('<div style="float:right"><label>Find: </label>'
+                +'<input type="text" style="width:10em" class="text ui-widget-content ui-corner-all"/></div>')
+                .appendTo(c1);
+                
+                this._on(c1.find('input'), {
+                    //keypress: window.hWin.HEURIST4.ui.preventChars,
+                    keyup: this._onFindTerms }); //keyup
+                
                 c1 = this.searchForm.find('#btn_container');
                 for(var idx in btn_array2){
                         this._defineActionButton2(btn_array2[idx], c1);
@@ -290,6 +271,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                     empty_remark: 'No terms in selected vocabulary. Add or import new ones',
                     show_toolbar: false,
                     view_mode: 'list',
+                    pagesize: 999999,
                     recordview_onselect:'inline',
                     rendererExpandDetails: function(recordset, trm_id){
                         if(this.options.view_mode=='list'){
@@ -314,7 +296,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                      isdialog: false, 
                      isFrontUI: true,
                      container: that.vocabularies_div,
-                     title: 'Vocabulary groups',
+                     title: 'Vocabularies',
                      select_mode: 'manager',
                      reference_trm_manger: that.element,
                      auxilary: 'vocabulary',
@@ -324,10 +306,14 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                             if(res && res.length>0){
                                 //filter by vocabulary
                                 that.options.trm_ParentTermID = res[0];
-                                if(that.getRecordSet()!==null){
-                                    that._filterByVocabulary();
-                                }
                             }
+                         }else if(res>0){
+                             that.options.trm_ParentTermID = res;
+                         }else{
+                             that.options.trm_ParentTermID = -1;
+                         }
+                         if(that.getRecordSet()!==null){
+                                that._filterByVocabulary();
                          }
                      }
                 };
@@ -337,23 +323,9 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 //console.log('init vocabs grp '+this.vocabularies_div.attr('id'));               
                 window.hWin.HEURIST4.ui.showEntityDialog('defTerms', rg_options);
                 
-                
-                if(this._innerTitle){
-                    this.btn_inine_editor = $('<span class="ui-icon ui-icon-carat-2-w" style="cursor:pointer;float:right;margin:0px 6px">'
-                        +'Inline Editor</span>').appendTo(this._innerTitle);
-                    
-                    this._on(this.btn_inine_editor, {click: this._expandInlineEditor});
-                }else{
-                    this.btn_inine_editor = this._toolbar.find('#btnExpandEditor'); 
-                    if(this.options.isdialog){
-                        this._as_dialog.parents('.ui-dialog').find('.ui-dialog-buttonpane').hide();    
-                    }
-                }
-                    
-                    
             }
 
-        
+            
         }
 
 
@@ -365,164 +337,28 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         that._loadData(true);
         
         return true;
-    },            
+    },   
     
-    //
-    // AAAAA!!!!
-    //
-    rendererVocabularyGroupHeader: function(grp_val, is_expanded){
-        return '';
-        
-
-            var desc = $Db.vcg(grp_val, 'vcg_Description');
-            if(!desc) desc = '';
-
-            return '<div class="groupHeader" data-grp="'+grp_val
-                +'" style="font-size:0.9em;padding:4px 0 4px 0px;border-bottom:1px solid lightgray">'
-                +'<span style="display:table-cell;vertical-align:top;padding:2px;" '
-                        +'class="expand_button ui-icon ui-icon-triangle-1-'+(is_expanded?'s':'e')+'"></span>'
-                +'<div style="display:table-cell;width:180px">'
-                +'<div style="font-weight:bold;margin:0;line-height:19px">'
-                +$Db.vcg(grp_val, 'vcg_Name')+'</div>'
-                 //+grp_val+' '
-                +'<div style="padding-top:4px;font-size:smaller;"><i>'+desc+'</i></div></div>'
-                +'<div style="min-width:70px" class="action-button-container"></div>'
-                +'</div>';
-    },
-    
-    //
-    // AAAAA!!!!
-    //
-    initVocabularyGroups: function(grp_val){
-        
-        return;
-        
-        var that = this;
-        
-            var conts = that.recordList.find('div[data-grp'+(grp_val>0?('='+grp_val):'')+']');
-            $.each(conts, function(i, cont){
-                var grp_val = $(cont).attr('data-grp');
-                cont = $(cont).find('.action-button-container')
-                that._defineActionButton({key:'vocab-add',label:'Add Vocaulary', title:'', icon:'ui-icon-plus', 
-                        recid:grp_val}, cont, 'small');
-                that._defineActionButton({key:'edit-group',label:'Edit group', title:'', icon:'ui-icon-pencil', 
-                        recid:grp_val}, cont, 'small');
-                that._defineActionButton({key:'delete-group',label:'Remove group', title:'', icon:'ui-icon-delete', 
-                        recid:grp_val}, cont, 'small'); //class:'rec_actions_button', 
-            });
-            
-            var conts = that.recordList.find('div[data-grp]');
-
-            //to accept DnD of vocabularies            
-            conts.find('div[data-grp]')  //.recordDiv, ,.recordDiv>.item
-                .droppable({
-                    //accept: '.rt_draggable',
-                    scope: 'vcg_change',
-                    hoverClass: 'ui-drag-drop',
-                    drop: function( event, ui ){
-
-                        var trg = $(event.target);
-                        //.hasClass('recordDiv')?$(event.target):$(event.target).parents('.recordDiv');
-                                    
-                        var trm_ID = $(ui.draggable).attr('recid'); //parent().
-                        var vcg_ID = trg.attr('data-grp');
-                        if(trm_ID>0 && vcg_ID>0){
-                            
-                                var ele = that.recordList.find('div[data-grp-content='+vcg_ID+']');
-                                ele.show();
-                                if(ele.text()=='empty') ele.empty();
-                                $(ui.draggable).appendTo(ele);
-                                
-                                that.changeVocabularyGroup({trm_ID:trm_ID, trm_VocabularyGroupID:vcg_ID });
-                        }
-                }});
-            
-            that.recordList.sortable({
-                items: conts,
-                stop:function(event, ui){
-
-                var recset = $Db.vcg();
-                var rec_order = recset.getOrder();
-
-                var conts = that.recordList.find('div[data-grp]');
-                conts.each(function(index, rdiv){
-                    var rec_id = $(rdiv).attr('data-grp');
-                    rec_order[index] = rec_id;
-                    
-                    that.recordList.find('div[data-grp-content='+rec_id+']')
-                        .insertAfter($(rdiv));
-                });
-                recset.setOrder(rec_order);
-                
-                window.hWin.HEURIST4.dbs.applyOrder(recset,'vcg');
-
-            }});
-                        
-            
-    },
     
     //
     //
     //
-    _expandInlineEditor: function(){
+    selectVocabulary: function(vocab_id){
         
-        var isExpanded = this.btn_inine_editor.button('instance')
-                            ? (this.btn_inine_editor.button('option','icon')=='ui-icon-carat-2-e')
-                            : this.btn_inine_editor.hasClass('ui-icon-carat-2-e');
-        var iWidth = 0;
-        
-        if(isExpanded){
-            ///hide
-            if(this.btn_inine_editor.button('instance')){
-                this.btn_inine_editor.button({icon:'ui-icon-carat-2-w'});
-            }else{
-                this.btn_inine_editor.removeClass('ui-icon-carat-2-e')
-                                 .addClass('ui-icon-carat-2-w');
-            }
-            this.main_element.css('width', 'auto');
-            this.inline_editor_container.hide();                 
-            
-            this.options.edit_mode = "popup";
+        var vcg_ID = $Db.trm(vocab_id, 'trm_VocabularyGroupID');
 
-            //this.editForm.appendTo(this.element.find('.editFormContainer')); 
-            
-        }else{
-            //show
-            if(this.btn_inine_editor.button('instance')){
-                this.btn_inine_editor.button({icon:'ui-icon-carat-2-e'});
-            }else{
-                this.btn_inine_editor.removeClass('ui-icon-carat-2-w')
-                                 .addClass('ui-icon-carat-2-e');
-            }
-                                 
-            iWidth = 450; //310
-            this.inline_editor_container.css('left', iWidth+296);  //746 or 626
-            
-            if(this.inline_editor_container.width()<600){
-                iWidth = 330
-                this.inline_editor_container.css('left', iWidth+296);  //746 or 626
-            }
-            
-            this.main_element.css('width', iWidth);
-            this.inline_editor_container.show();     
-            
-            this.options.edit_mode = "inline";
-            //this.editForm.appendTo(this.inline_editor_container);
-            this._onActionListener(null, 'edit');
+        if(vcg_ID>0){
+            this.vocabulary_groups.manageDefVocabularyGroups('selectRecordInRecordset', vcg_ID);    
+            var that = this;
+            setTimeout(function(){that.selectRecordInRecordset(vocab_id);},300);
         }
         
-        if(this.main_element.width()<450){
-            this.main_element.find('#btnImportVocab').button({showLabel:false});
-            this.main_element.find('#btnExportVocab').button({showLabel:false});
-        }else{
-            this.main_element.find('#btnImportVocab').button({showLabel:true});
-            this.main_element.find('#btnExportVocab').button({showLabel:true});
-        }
-    },
-
+    },         
+            
+    
     //
     //
-    //
+    /*
     selectedRecords: function(selected_recs){
         
         var res = this._super( selected_recs );            
@@ -532,15 +368,9 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                       
             //inline editor for vocabularies          
             this._onActionListener(event, {action:'edit'});
-            /*
-            var container  = this.options.reference_trm_manger.manageDefTerms('getEditorInline');
-            this._showEditorInline(container, recID);
-            */
         }
-
-        
         return res;
-    },
+    },*/
     
     //
     //
@@ -551,8 +381,6 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 if(container.manageDefTerms('instance') 
                     && container.manageDefTerms('option','auxilary')==this.options.auxilary)
                 {
-                        
-console.log('RELOAD editpr');
                     
                     container.manageDefTerms('option','edit_recordset', this.recordList.resultList('getRecordSet'));
                     container.manageDefTerms('option','trm_ParentTermID', this.options.trm_ParentTermID);
@@ -560,7 +388,6 @@ console.log('RELOAD editpr');
                     container.manageDefTerms( 'addEditRecord', recID );
                     
                 }else{
-console.log('init editpr');
 
                     var that = this;
                     var rg_options = {
@@ -596,18 +423,6 @@ console.log('init editpr');
                                      this.options.entity.fields);
             this.updateRecordList(null, {recordset:recset});
             
-            //initial selection
-            //find first vocab 
-            if(is_first_call==true){
-                var rdiv = this.recordList.find('.recordDiv:first');
-                var rec_ID = rdiv.attr('recid');
-                rdiv.parent('div[data-grp-content]').show();
-                rdiv.parent().prev().find('.expand_button')
-                    .removeClass('ui-icon-triangle-1-e').addClass('ui-icon-triangle-1-s');
-                rdiv.click();
-                //this.recordList.resultList('setSelected', [rec_ID]);
-            }
-            
         }else{
             this.updateRecordList(null, {recordset:$Db.trm()});
             //if(is_first_call==true) 
@@ -633,6 +448,16 @@ console.log('init editpr');
                                         +'</h4><div class="heurist-helper3 truncate" style="font-size:0.7em">'
                                         + window.hWin.HEURIST4.util.htmlEscape($Db.vcg(vcg_id,'vcg_Description'))
                                         +'</div>');
+                
+                //initial selection
+                var rdiv = this.recordList.find('.recordDiv:first');
+                if(rdiv.length){
+                    var rec_ID = rdiv.attr('recid');
+                    rdiv.click();
+                }else if($.isFunction(this.options.onSelect)){
+                        this.options.onSelect.call( this, null );
+                }
+                    
                 
             }else{
                 sGroupTitle += '</h4>';
@@ -668,7 +493,10 @@ console.log('init editpr');
                     +$Db.trm(vocab_id,'trm_Description')+'&nbsp;</div>');
 
             }else{
-                sGroupTitle += 'Terms and Relation types</h4>';
+                this.recordList.resultList('clearAllRecordDivs',null,
+                             '<div style="padding: 8px;">Select vocabulary on the left</div>');
+
+                sGroupTitle += '</h4>';
             }
             
         }
@@ -932,17 +760,6 @@ console.log('init editpr');
         }
         this._triggerRefresh(this.options.auxilary);
         
-/*        
-        this.getRecordSet().setRecord(recID, fieldvalues);
-        
-        if(this.options.edit_mode == 'editonly'){
-            this.closeDialog(true); //force to avoid warning
-        }else if(this._currentEditID<0){
-            this.searchForm.searchDefRecTypes('startSearch');
-        }else{
-            this.recordList.resultList('refreshPage');  
-        }
-*/        
     },
     
     //
@@ -973,13 +790,22 @@ console.log('init editpr');
             action = action.action;
         }
         
-        if(action=='add' && this.options.auxilary=='vocabulary' && this.options.trm_VocabularyGroupID>0){
+        if(action=='add'){
+            
+            if(this.options.auxilary=='vocabulary'){
+                if(this.options.trm_VocabularyGroupID<0){
+                    window.hWin.HEURIST4.msg.showMsgFlash('Vocabulary group is not defined');
+                    return true;        
+                }
+            }else if(this.options.trm_ParentTermID<0){
+                    window.hWin.HEURIST4.msg.showMsgFlash('Vocabulary is not defined');                
+                    return true;        
+            }
             ///this.options.trm_VocabularyGroupID = recID;
             this.addEditRecord(-1);        
             return true;
         }
-        this.options.trm_VocabularyGroupID = -1;
-        
+        //this.options.trm_VocabularyGroupID = -1;
 
         var is_resolved = this._super(event, keep_action);
 
@@ -1158,6 +984,112 @@ console.log('NODE activated');
         }
     }*/
 
+
+    //
+    // show dropdown for field suggestions to be added
+    //
+    _onFindTerms: function(event){
+        
+        var input_name = $(event.target);
+        
+        if(this.fields_list_div == null){
+            //init for the first time
+            this.fields_list_div = $('<div class="list_div" '
+                +'style="z-index:999999999;height:auto;max-height:200px;padding:4px;cursor:pointer;overflow-y:auto"></div>')
+                .css({border: '1px solid rgba(0, 0, 0, 0.2)', margin: '2px 0px', background:'#F4F2F4'})
+                .appendTo(this.element);
+            this.fields_list_div.hide();
+            
+            this._on( $(document), {click: function(event){
+               if($(event.target).parents('.list_div').length==0) { 
+                    this.fields_list_div.hide(); 
+               };
+            }});
+        }
+        
+        var setdis = input_name.val().length<3;
+
+        //find terms
+        if(input_name.val().length>1){
+           
+            var term_name, term_code, is_added = false;
+                
+            this.fields_list_div.empty();  
+            
+            var that = this;
+            
+            var entered = input_name.val().toLowerCase();
+                            
+            //find among fields that are not in current record type
+            $Db.trm().each(function(trm_ID, rec){
+
+                term_name = $Db.trm(trm_ID, 'trm_Label');
+                term_code  = $Db.trm(trm_ID, 'trm_Code');
+
+                if(term_name.toLowerCase().indexOf( entered )>=0 || 
+                   (term_code && term_code.toLowerCase().indexOf( entered )>=0))
+                {
+                    var ele = $('<div class="truncate">').appendTo(that.fields_list_div);
+                    
+                    //find parents
+                    var s = '', ids = [trm_ID];
+                    do{
+                        var term_parent = $Db.trm(trm_ID, 'trm_ParentTermID');
+                        if(term_parent>0){
+                            ids.push(term_parent);
+                            s = $Db.trm(term_parent, 'trm_Label') + ' - ' + s;
+                        }
+                        trm_ID = term_parent;
+                    }while(term_parent>0);
+                    
+                    //get vocabulary group
+                    //var vcg_ID = $Db.trm(trm_ID, 'trm_VocabularyGroupID');
+                    //ids.push(vcg_ID);
+                    
+
+                    is_added = true;
+                    ele.attr('trm_IDs',ids.join(','))
+                    .text( s + term_name + (term_code?(' ('+term_code+')'):'') )
+                    .click( function(event){
+                        window.hWin.HEURIST4.util.stopEvent(event);
+
+                        var ele = $(event.target).hide();
+                        var trm_IDs = ele.attr('trm_IDs').split(',');
+                        
+                        if(trm_IDs){
+                            that.fields_list_div.hide();
+                            
+                            //select vocabulary group, select vocab
+                            var vocab_id  = trm_IDs[trm_IDs.length-1];
+                            that.vocabularies_div.manageDefTerms('selectVocabulary', vocab_id);
+                            if(trm_IDs.length>1){
+                                setTimeout(function(){that.selectRecordInRecordset(trm_IDs[0]);},500);    
+                            }
+                            
+
+        
+                            input_name.val('').focus();
+                        }
+                    });
+
+                }                
+            });
+
+
+            if(is_added){
+                this.fields_list_div.position({my:'right top', at:'right bottom', of:input_name})
+                    //.css({'max-width':(maxw+'px')});
+                    .css({'max-width':input_name.width()+120});
+                this.fields_list_div.show();    
+            }else{
+                this.fields_list_div.hide();
+            }
+
+      }else{
+            this.fields_list_div.hide();  
+      }
+
+    },
     
     
 });

@@ -201,7 +201,7 @@ $.widget( "heurist.resultList", {
                     if(data.reset){
                         
                         //fake restart
-                        that._clearAllRecordDivs('');
+                        that.clearAllRecordDivs('');
                         //that.loadanimation(true);
                         that._renderStartupMessageComposedFromRecord();
                         
@@ -225,7 +225,7 @@ $.widget( "heurist.resultList", {
                                 
                             }
                             
-                            that._clearAllRecordDivs(new_title);
+                            that.clearAllRecordDivs(new_title);
                             
                             if(that.search_save_hint){
                                 that.search_save_hint.attr('show_hint', data.qname?0:1);
@@ -1035,7 +1035,7 @@ $.widget( "heurist.resultList", {
     //
     //
     //
-    _clearAllRecordDivs: function(new_title){
+    clearAllRecordDivs: function(new_title, message){
 
         $('.password-reminder-popup').dialog('close');
         //this._currentRecordset = null;
@@ -1052,7 +1052,7 @@ $.widget( "heurist.resultList", {
             
             var $allrecs = this.div_content.find('.recordDiv');
             this._off( $allrecs, "click");
-            this.div_content[0].innerHTML = '';//.empty();  //clear
+            this.div_content[0].innerHTML = message?message:'';//.empty();  //clear
         }
 
         if(new_title!=null){
@@ -1083,7 +1083,7 @@ $.widget( "heurist.resultList", {
     updateResultSet: function( recordset, request ){
 
         this.loadanimation(false);
-        this._clearAllRecordDivs(null);
+        this.clearAllRecordDivs(null);
         this._renderPagesNavigator();
         this._renderRecordsIncrementally(recordset);
         this._showHideOnWidth()
@@ -1660,6 +1660,7 @@ $.widget( "heurist.resultList", {
     closeExpandedDivs: function(){
         var exp_div = this.div_content.find('.record-expand-info');
         
+        var spos = this.div_content.scrollTop();
         if(exp_div.length>0){
             exp_div.remove();
             /*
@@ -1669,7 +1670,11 @@ $.widget( "heurist.resultList", {
             rdiv2.css({'height':'','width':''}).insertBefore(tmp_parent);
             tmp_parent.remove();
             */
+            
+            this.div_content.scrollTop(spos);
         }
+                            
+
     },
     
     //
@@ -2132,6 +2137,12 @@ $.widget( "heurist.resultList", {
                         //}
                     }
                 });
+                if(recIDs_list.length==1){
+                    var rdiv = this.div_content.find('.recordDiv[recid='+recIDs_list[0]+']');
+                    if(rdiv.length>0 && rdiv.position()){
+                        this.div_content.scrollTop(rdiv.position().top);
+                    }
+                }
 
             }
         }
@@ -2519,7 +2530,7 @@ $.widget( "heurist.resultList", {
         }
         
         
-        this._clearAllRecordDivs(null);
+        this.clearAllRecordDivs(null);
 
         var recs = recordset.getRecords();
         var rec_order = recordset.getOrder();

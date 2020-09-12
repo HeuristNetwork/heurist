@@ -144,13 +144,13 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
         
 
         this.updateRecordList(null, {recordset:$Db.rtg()});
-        this._selectAndEditFirstInRecordset($Db.rtg());
+        this.selectRecordInRecordset();
 /*
         var that = this;
         window.hWin.HAPI4.EntityMgr.getEntityData(this._entityName, false,
             function(response){
                 that.updateRecordList(null, {recordset:response});
-                that._selectAndEditFirstInRecordset(response);
+                that.selectRecordInRecordset();
             });
 */        
     },

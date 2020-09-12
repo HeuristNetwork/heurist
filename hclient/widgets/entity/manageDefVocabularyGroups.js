@@ -132,13 +132,13 @@ $.widget( "heurist.manageDefVocabularyGroups", $.heurist.manageEntity, {
     //
     _loadData: function(){
         this.updateRecordList(null, {recordset:$Db.vcg()});
-        this._selectAndEditFirstInRecordset($Db.vcg());
+        this.selectRecordInRecordset();
 /*
         var that = this;
         window.hWin.HAPI4.EntityMgr.getEntityData(this._entityName, false,
             function(response){
                 that.updateRecordList(null, {recordset:response});
-                that._selectAndEditFirstInRecordset(response);
+                that.selectRecordInRecordset();
             });
 */        
     },

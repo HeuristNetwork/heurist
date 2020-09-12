@@ -117,12 +117,12 @@ $.widget( "heurist.manageDefFileExtToMimetype", $.heurist.manageEntity, {
 
     updateRecordList: function( event, data ){
         this._super(event, data);
-        this._selectAndEditFirstInRecordset();
+        this.selectRecordInRecordset();
     },
     
     filterRecordList: function(event, request){
         var subset = this._super(event, request);
-        this._selectAndEditFirstInRecordset(subset);
+        this.selectRecordInRecordset(subset);
     },
     
     _initEditForm_step3: function(recID){
