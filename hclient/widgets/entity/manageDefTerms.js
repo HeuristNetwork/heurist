@@ -64,12 +64,14 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 if(!data || 
                    (data.source != that.uuid && data.type == this.options.auxilary))
                 {
+console.log('RELOAD TERMS '+this.options.auxilary);                    
                     that.refreshRecordList();
                     //that._loadData();
                 }else
-                if(data && data.type == 'vocabulary' && that.options.auxilary=='vocabulary'){
-
-                
+                if(data && data.type == 'vcg' && that.options.auxilary=='vocabulary'){
+console.log('RELOAD VOCS');                    
+                    that._filterByVocabulary();
+                    //that._loadData();
                 }
                 
             
@@ -137,7 +139,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
                 this._toolbar = this.searchForm;
                 
-                $('<div style="float:left;">'
+                $('<div>'
                     +'<h3 style="display:inline-block;margin: 0 10px 0 0; vertical-align: middle;">Vocabularies</h3>'
                     //+'<div id="btn_add_record" style="display:inline-block"></div>'
                   +'</div>'
@@ -145,11 +147,11 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 .appendTo(this.searchForm);
                 
                 this._defineActionButton2({showText:true, icons:{primary:'ui-icon-plus'},text:window.hWin.HR('Add'),
-                          css:{'margin-right':'0.5em','float':'right'}, id:'btnAddButton',
+                          css:{'margin-right':'0.5em','display':'inline-block'}, id:'btnAddButton',
                           click: function() { that._onActionListener(null, 'add'); }}, 
                             this.searchForm.find('div:first'));
                 
-                this.searchForm.css({'padding-top': this.options.isFrontUI?'8px':'4px', height:80});
+                this.searchForm.css({'padding-top':this.options.isFrontUI?'8px':'4px', height:80});
                 this.recordList.css({ top:80});
                 
                 
@@ -157,19 +159,57 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                     empty_remark: 'No vocabularies in this groups. Add new one',
                     show_toolbar: false,
                     pagesize:99999,
-                    view_mode: 'list'
+                    view_mode: 'list',
+                    
+                    draggable: function(){
+                        
+                        that.recordList.find('.rt_draggable > .item').draggable({ // 
+                                    revert: true,
+                                    helper: function(){ 
+                                        return $('<div class="rt_draggable ui-drag-drop" recid="'+
+                                            $(this).parent().attr('recid')
+                                        +'" style="width:300;padding:4px;text-align:center;font-size:0.8em;background:#EDF5FF"'
+                                        +'>Drag and drop to group item to change vocabulary group</div>'); 
+                                    },
+                                    zIndex:100,
+                                    appendTo:'body',
+                                    scope: 'vcg_change'
+                                });   
+                    },
+                    
+                    droppable: function(){
+                    
+                    that.recordList.find('.recordDiv')  //.recordDiv, ,.recordDiv>.item
+                        .droppable({
+                            scope: 'vocab_change',
+                            hoverClass: 'ui-drag-drop',
+                            drop: function( event, ui ){
+
+                                var trg = $(event.target).hasClass('recordDiv')
+                                            ?$(event.target)
+                                            :$(event.target).parents('.recordDiv');
+                                            
+                                var trm_ID = $(ui.draggable).parent().attr('recid');
+                                var trm_ParentTermID = trg.attr('recid');
+                                if(trm_ID>0 && trm_ParentTermID>0 && that.options.reference_trm_manger){
+                                    that.options.reference_trm_manger
+                                        .manageDefTerms('changeVocabularyGroup',{trm_ID:trm_ID, trm_ParentTermID:trm_ParentTermID });
+                                }
+                        }});
+                }
+
                 };
 
                 this.recordList.uniqueId();
                 
                 var rg_options = {
                      isdialog: false, 
-                     isFrontUI: true,
+                     isFrontUI: this.options.isFrontUI,
                      container: that.vocabulary_groups,
                      title: 'Vocabulary groups',
                      layout_mode: 'short',
                      select_mode: 'manager',
-                     reference_rt_manger: that.element,
+                     reference_vocab_manger: that.element,
                      onSelect:function(res){
 
                          if(window.hWin.HEURIST4.util.isRecordSet(res)){
@@ -288,13 +328,29 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                         }else{
                             that.addEditRecord(trm_id);
                         }
-                    }
+                    },
+                    draggable: function(){
+                        
+                        that.recordList.find('.rt_draggable > .item').draggable({ // 
+                                    revert: true,
+                                    helper: function(){ 
+                                        return $('<div class="rt_draggable ui-drag-drop" recid="'+
+                                            $(this).parent().attr('recid')
+                                        +'" style="width:300;padding:4px;text-align:center;font-size:0.8em;background:#EDF5FF"'
+                                        +'>Drag and drop to vocabulary item to change it</div>'); 
+                                    },
+                                    zIndex:100,
+                                    appendTo:'body',
+                                    scope: 'vocab_change'
+                                });   
+                    }                    
+                    
                 };
                 
                 //group options
                 var rg_options = {
                      isdialog: false, 
-                     isFrontUI: true,
+                     isFrontUI: this.options.isFrontUI,
                      container: that.vocabularies_div,
                      title: 'Vocabularies',
                      select_mode: 'manager',
@@ -426,8 +482,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         }else{
             this.updateRecordList(null, {recordset:$Db.trm()});
             //if(is_first_call==true) 
-            this._filterByVocabulary();
         }
+        this._filterByVocabulary();
         
     },
     
@@ -536,7 +592,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             var html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'
                                     +recThumb+'&quot;);"></div>';
 
-            html = '<div class="recordDiv" recid="'+recID+'">'
+            html = '<div class="recordDiv rt_draggable" recid="'+recID+'">'
                     + '<div class="recordSelector item"><input type="checkbox" /></div>'
                     + html_thumb + recTitle 
                     + '<div class="rec_actions">'
@@ -725,7 +781,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
     //
     _afterSaveEventHandler: function( recID, fieldvalues ){
 
-        if(this.options.edit_mode=='editonly') return
+        if(this.options.edit_mode=='editonly') return;
         
         // close on addition of new record in select_single mode    
         //this._currentEditID<0 && 
@@ -770,11 +826,10 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         var that = this;
         this._saveEditAndClose( params ,
             function(){
-                /*window.hWin.HAPI4.EntityMgr.refreshEntityData('rtg',
-                    function(){
-                        that._triggerRefresh('rtg');
-                    }
-                )*/
+                if(params.trm_ParentTermID>0){
+                    that._filterByVocabulary();
+                }
+                that._triggerRefresh((params.trm_ParentTermID)?'term':'vcg');
         });
         
     },

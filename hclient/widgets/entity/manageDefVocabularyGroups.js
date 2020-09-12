@@ -42,10 +42,6 @@ $.widget( "heurist.manageDefVocabularyGroups", $.heurist.manageEntity, {
             this.recordList.parent().css('width','100%');
         }
 
-        if(!this.options.isFrontUI){
-            this.recordList.css('top',0);  
-        }        
-        
     },
     
     //  
@@ -80,7 +76,7 @@ $.widget( "heurist.manageDefVocabularyGroups", $.heurist.manageEntity, {
                     that.recordList.find('.recordDiv')  //.recordDiv, ,.recordDiv>.item
                         .droppable({
                             //accept: '.rt_draggable',
-                            scope: 'rtg_change',
+                            scope: 'vcg_change',
                             hoverClass: 'ui-drag-drop',
                             drop: function( event, ui ){
 
@@ -90,22 +86,21 @@ $.widget( "heurist.manageDefVocabularyGroups", $.heurist.manageEntity, {
                                             
                     var trm_ID = $(ui.draggable).parent().attr('recid');
                     var vcg_ID = trg.attr('recid');
-                    
-                            if(rty_ID>0 && rtg_ID>0 && that.options.reference_rt_manger){
+console.log(trm_ID+' to '+vcg_ID)                    
+                            if(trm_ID>0 && vcg_ID>0 && that.options.reference_vocab_manger){
                                     
-                                    that.options.reference_trm_manger
-                                        .manageDefRecTypes('changeVocabularyGroup',{trm_ID:trm_ID, trm_VocabularyGroupID:vcg_ID });
+                                    that.options.reference_vocab_manger
+                                        .manageDefTerms('changeVocabularyGroup',{trm_ID:trm_ID, trm_VocabularyGroupID:vcg_ID });
                             }
                         }});
                 }
         });
         
 
-        if(this.options.isFrontUI){
             //specify add new/save order buttons above record list
             var btn_array = [
                 {showText:true, icons:{primary:'ui-icon-plus'},text:window.hWin.HR('Add'),
-                      css:{'margin-right':'0.5em','float':'left'}, id:'btnAddButton',
+                      css:{'margin-right':'0.5em','display':'inline-block'}, id:'btnAddButton',
                       click: function() { that._onActionListener(null, 'add'); }},
 
                 {text:window.hWin.HR('Save Order'),
@@ -113,16 +108,14 @@ $.widget( "heurist.manageDefVocabularyGroups", $.heurist.manageEntity, {
                       click: function() { that._onActionListener(null, 'save-order'); }}];
 
             this._toolbar = this.searchForm;
-            this.searchForm.css({'padding-top': '8px'}).empty();
+            this.searchForm.css({'padding-top': this.options.isFrontUI?'8px':'4px'}).empty();
             //this._defineActionButton2(btn_array[1], this.searchForm);
             
-            $('<h3 style="float:left;margin: 0 10px 0 0; vertical-align: middle;">Vocabulary Groups</h3>')
+            $('<h3 style="display:inline-block;margin: 0 10px 0 0; vertical-align: middle;">Vocabulary Groups</h3>')
                 .appendTo( this.searchForm );
             this._defineActionButton2(btn_array[0], this.searchForm);
-                      
-        }
         
-        that._loadData();
+        this._loadData();
          
         return true;
     },    
