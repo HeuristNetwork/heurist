@@ -10,7 +10,7 @@
         
         "entityTitle": "Record type",
         "entityTitlePlural": "Record types",
-        "empty_remark": "Please use the search fields above to locate relevant record type",
+        "empty_remark": "",
 
 
         "fields": [

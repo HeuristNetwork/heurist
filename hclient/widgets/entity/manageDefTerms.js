@@ -684,7 +684,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         if(isVocab){
             
             if(this._edit_dialog && this._edit_dialog.dialog('instance')){
-                this._edit_dialog.dialog('option', 'title', 'Edit Vocabulary');
+                this._edit_dialog.dialog('option', 'title', (this._currentEditID>0?'Edit':'Add')+' Vocabulary');
             }
         
             //hide fields for vocab    
@@ -708,6 +708,14 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             
         }else{
             
+
+            if(this._edit_dialog && this._edit_dialog.dialog('instance')){
+                var s = (this._currentEditID>0?'Edit':'Add')+' Term';
+                if(this.options.trm_ParentTermID>0){
+                    s = s + ' in vocabulary '+$Db.trm(this.options.trm_ParentTermID,'trm_Label');
+                }
+                this._edit_dialog.dialog('option', 'title', s);
+            }
             
             ele = this._editing.getFieldByName('trm_ParentTermID');
             ele.editing_input('setValue', this.options.trm_ParentTermID, true);
@@ -731,10 +739,12 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         ele = this._editing.getFieldByName('trm_Domain')
         ele.editing_input('setValue', currentDomain, true);
         
+        ele = this._editing.getFieldByName('trm_ID');
         if(this._currentEditID>0 && this._getField('trm_OriginatingDBID')>0){
-            ele = this._editing.getFieldByName('trm_ID');
             $('<span>&nbsp;&nbsp;('+this._getField('trm_OriginatingDBID')+'-'+this._getField('trm_IDInOriginatingDB')+')</span>')   
             .appendTo( ele.find('.input-div') );
+        }else{
+            ele.hide();
         }
         
     },   

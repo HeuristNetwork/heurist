@@ -46,7 +46,6 @@
                         "dty_Role":"title",
                         "dty_Size":63,
                         "rst_DisplayName": "File name:",
-                        "rst_DisplayHelpText": "Lorem ipsum....", 
                         "rst_RequirementType":"required"
                     }
                 },

@@ -39,7 +39,7 @@
                         "dty_Role":"title",
                         "dty_Size":63,
                         "rst_DisplayName": "Group name:",
-                        "rst_DisplayHelpText": "Lorem ipsum....", 
+                        "rst_DisplayHelpText": "", 
                         "rst_RequirementType":"required",
                         "rst_DisplayWidth":40 
                     }
@@ -75,7 +75,7 @@
                     "dtID": "dtg_FieldCount",
                     "dtFields":{
                         "rst_DisplayName": "Contains fields:",
-                        "rst_Display":"readonly",
+                        "rst_Display":"hidden",
                         "dty_Type":"integer",
                         "dty_Role":"virtual"
                     }

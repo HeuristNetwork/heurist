@@ -39,7 +39,6 @@
                         "dty_Size":63,
                         "rst_DisplayWidth":40,
                         "rst_DisplayName": "Group name:",
-                        "rst_DisplayHelpText": "Lorem ipsum....", 
                         "rst_RequirementType":"required"
                     }
                 },
@@ -74,7 +73,7 @@
                     "dtID": "rtg_RtCount",
                     "dtFields":{
                         "rst_DisplayName": "Contains record types:",
-                        "rst_Display":"readonly",
+                        "rst_Display":"hidden",
                         "dty_Type":"integer",
                         "dty_Role":"virtual"
                     }

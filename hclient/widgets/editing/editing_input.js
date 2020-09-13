@@ -851,6 +851,8 @@ $.widget( "heurist.editing_input", {
                     
                     var all_term_ids = $.map($input.find('option'), function(e) { return e.value; });
                     
+                    //@todo - rewrite to $Db.trm select_single
+                    
                     var request = {};
                     request['a']          = 'search'; //action
                     request['entity']     = 'defTerms';//this.options.entity.entityName;
@@ -897,9 +899,32 @@ $.widget( "heurist.editing_input", {
                 .appendTo( $inputdiv );
                 //.button({icons:{primary: 'ui-icon-gear'},text:false});
                 
+                //
+                // open add term popup
+                //
                 this._on( $btn_termedit, { click: function(){
                     
                 if(this.is_disabled) return;
+                /*
+                var rg_options = {
+                         isdialog: true, 
+                         isFrontUI: true,
+                         container: container,
+                         title: 'Edit '+this.options.auxilary,
+                         select_mode: 'manager',
+                         edit_mode: 'editonly',
+                         edit_recordset: this.recordList.resultList('getRecordSet'), //filterd one
+                         auxilary: this.options.auxilary,
+                         rec_ID: recID,
+                         trm_ParentTermID: this.options.trm_ParentTermID,
+                         trm_VocabularyGroupID: this.options.trm_VocabularyGroupID,
+                         onClose: function(){
+                                that.recordList.resultList('closeExpandedDivs');
+                         }
+                    };
+                    window.hWin.HEURIST4.ui.showEntityDialog('defTerms', rg_options); // it recreates  
+                */
+                
                     
                 if(isVocabulary){
 

@@ -84,7 +84,8 @@ $.widget( "heurist.manageDefDetailTypeGroups", $.heurist.manageEntity, {
                 show_toolbar:false,
                 sortable: true,
                 onSortStop: function(){
-                    that._toolbar.find('#btnApplyOrder').show();
+                    that._onActionListener(null, 'save-order');
+                    //that._toolbar.find('#btnApplyOrder').show();
                 },
                 droppable: function(){
                     
