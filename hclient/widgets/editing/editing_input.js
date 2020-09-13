@@ -3252,6 +3252,10 @@ console.log('onpaste');
     getConfigMode: function(){
         return this.configMode;
     },
+
+    setConfigMode: function(newval){
+        return this.configMode = newval;
+    },
     
     //
     //restore original order of repeatable elements

@@ -137,7 +137,8 @@ class DbDefTerms extends DbEntityBase
 
             $this->data['details'] = 'trm_ID,trm_Label,trm_Description,trm_InverseTermId,'
             .'IFNULL(trm_ParentTermID, 0) as trm_ParentTermID'
-            .',trm_VocabularyGroupID,trm_Code,trm_Status,trm_SemanticReferenceURL'; //trm_Description,trm_Domain,trm_Modified
+            .',trm_VocabularyGroupID,trm_Code,trm_Status,trm_SemanticReferenceURL'
+            .',trm_OriginatingDBID,trm_IDInOriginatingDB'; //,trm_Domain,trm_Modified
             
             
             //$orderBy = ' ORDER BY trm_Label ';
@@ -356,33 +357,37 @@ class DbDefTerms extends DbEntityBase
             //validate duplication on the same level
             $mysqli = $this->system->get_mysqli();
             
-            if($this->records[$idx]['trm_ParentTermID']>0){
-                $sWhere = ' AND (trm_ParentTermID='.$this->records[$idx]['trm_ParentTermID'].')';    
-                $s2 = 'Term';
-                
-                $s3 = 'Duplicate label ('.$this->records[$idx]['trm_Label'].') ';
-                if(@$this->records[$idx]['trm_Code']){
-                    $s3 = s3.' or code ('.$this->records[$idx]['trm_Code'].') ';
+            if(@$this->records[$idx]['trm_Label']){
+            
+                if(@$this->records[$idx]['trm_ParentTermID']>0){
+                    $sWhere = ' AND (trm_ParentTermID='.$this->records[$idx]['trm_ParentTermID'].')';    
+                    $s2 = 'Term';
+                    
+                    $s3 = 'Duplicate label ('.$this->records[$idx]['trm_Label'].') ';
+                    if(@$this->records[$idx]['trm_Code']){
+                        $s3 = $s3.' or code ('.$this->records[$idx]['trm_Code'].') ';
+                    }
+                    
+                    $s3 = $s3.' at the same branch/level in the tree';
+                }else{
+                    $this->records[$idx]['trm_ParentTermID'] = null;
+                    $sWhere = ' AND (NOT (trm_ParentTermID>0))';    
+                    $s2 = 'Vocabulary';
+                    $s3 = 'The provided name already exists';
                 }
                 
-                $s3 = s3.' at the same branch/level in the tree';
-            }else{
-                $this->records[$idx]['trm_ParentTermID'] = null;
-                $sWhere = ' AND (NOT (trm_ParentTermID>0))';    
-                $s2 = 'Vocabulary';
-                $s3 = 'The provided name already exists';
+                $res = mysql__select_value($mysqli,
+                        "SELECT trm_ID FROM ".$this->config['tableName']."  WHERE (trm_Label='"
+                        .$mysqli->real_escape_string( $this->records[$idx]['trm_Label'])."'" 
+                        .(@$this->records[$idx]['trm_Code']
+                            ?' OR trm_Code="'.$mysqli->real_escape_string( $this->records[$idx]['trm_Code'] ).'"'
+                            :'')
+                        .') '.$sWhere );
+                        
             }
-            
-            $res = mysql__select_value($mysqli,
-                    "SELECT trm_ID FROM ".$this->config['tableName']."  WHERE (trm_Label='"
-                    .$mysqli->real_escape_string( $this->records[$idx]['trm_Label'])."'" 
-                    .(@$this->records[$idx]['trm_Code']
-                        ?' OR trm_Label="'.$mysqli->real_escape_string( $this->records[$idx]['trm_Code'] ).'"'
-                        :'')
-                    .') '.$sWhere );
                     
             if($res>0 && $res!=@$this->records[$idx]['trm_ID']){
-                $this->system->addError(HEURIST_ACTION_BLOCKED, $s2.' cannot be saved. '.s3);
+                $this->system->addError(HEURIST_ACTION_BLOCKED, $s2.' cannot be saved. '.$s3);
                 return false;
             }
 

@@ -552,12 +552,15 @@ window.hWin.HEURIST4.ui = {
 
     //
     // useGroups - true - grouped by vocabulary tabs, or group id
+    // domain - any enum relation for useGroup = true
     //
     createVocabularySelect: function(selObj, options) {
         
         var defaultTermID =  options.defaultTermID,
             topOptions = options.topOptions,
             useGroups = options.useGroups;
+            
+        var domain = (options.domain=='enum' || options.domain=='relation')?options.domain:null;
             
         if (!(useGroups>0 || useGroups===false)){
             useGroups = true;
@@ -568,7 +571,11 @@ window.hWin.HEURIST4.ui = {
         if(useGroups===true){
             //vgroups = recset.makeKeyValueArray('vcg_Name'); //returns key: title: array 
             vocabs = {};
-            $Db.vcg().each(function(id,rec){ vocabs[id] = []; });
+            $Db.vcg().each(function(id,rec){ 
+                if(domain==null || domain==$Db.vcg(id,'vcg_Domain')){
+                    vocabs[id] = []; 
+                }
+            });
         }else if (useGroups>0){
             vocabs = {};
             vocabs[useGroups] = [];
@@ -576,10 +583,11 @@ window.hWin.HEURIST4.ui = {
         
         //find all vocabularies and group them 
         $Db.trm().each(function(trmID, record){
-           var parent_id = this.fld(record, 'trm_ParentTermID'); 
-           if(!(parent_id>0)){
-               var grp_id = this.fld(record, 'trm_VocabularyGroupID');
-               if(useGroups===true || useGroups == grp_id){
+           //var parent_id = this.fld(record, 'trm_ParentTermID'); 
+           var grp_id = this.fld(record, 'trm_VocabularyGroupID');
+           if(grp_id>0){ //!(parent_id>0)){
+               if(vocabs[grp_id]){ //useGroups===true || useGroups == grp_id
+                   //if(!vocabs[grp_id]) grp_id = 1;
                    vocabs[grp_id].push(trmID);
                }else if(useGroups===false){
                    vocabs['0'].push(trmID);

@@ -162,16 +162,20 @@ class DbDefVocabularyGroups extends DbEntityBase
 
             //validate duplication
             $mysqli = $this->system->get_mysqli();
-            $res = mysql__select_value($mysqli,
-                    "SELECT vcg_ID FROM ".$this->config['tableName']."  WHERE vcg_Name='"
-                    .$mysqli->real_escape_string( $this->records[$idx]['vcg_Name'])."'");
-            if($res>0 && $res!=@$this->records[$idx]['vcg_ID']){
-                $this->system->addError(HEURIST_ACTION_BLOCKED, 'Vocabulary group cannot be saved. The provided name already exists');
-                return false;
+            
+            if(@$this->records[$idx]['vcg_Name']){
+                $res = mysql__select_value($mysqli,
+                        "SELECT vcg_ID FROM ".$this->config['tableName']."  WHERE vcg_Name='"
+                        .$mysqli->real_escape_string( $this->records[$idx]['vcg_Name'])."'");
+                if($res>0 && $res!=@$this->records[$idx]['vcg_ID']){
+                    $this->system->addError(HEURIST_ACTION_BLOCKED, 'Vocabulary group cannot be saved. The provided name already exists');
+                    return false;
+                }
             }
 
             $this->records[$idx]['vcg_Modified'] = date('Y-m-d H:i:s'); //reset
-            $this->records[$idx]['vcg_Domain'] = ($this->records[$idx]['vcg_ID']==9?'relation':'enum');
+            $this->records[$idx]['vcg_Domain'] = ($this->records[$idx]['vcg_ID']==9 
+                        || @$this->records[$idx]['vcg_Domain']=='relation')?'relation':'enum';
             
             if(!(@$this->records[$idx]['vcg_Order']>0)){
                 $this->records[$idx]['vcg_Order'] = 2;

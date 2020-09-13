@@ -696,19 +696,83 @@ $query = "CREATE TABLE defVocabularyGroups (
             $mysqli->query('INSERT INTO defVocabularyGroups (vcg_Name) VALUES ("Spatial")');
             $mysqli->query('INSERT INTO defVocabularyGroups (vcg_Name) VALUES ("Categorisation and flags")');
             $mysqli->query('INSERT INTO defVocabularyGroups (vcg_Name) VALUES ("Internal")');
-            $mysqli->query('INSERT INTO defVocabularyGroups (vcg_Name) VALUES ("Relationships")');
+            $mysqli->query('INSERT INTO defVocabularyGroups (vcg_Name,vcg_Domain) VALUES ("Relationships","relation")');
             
             //alter table
-            $query = "ALTER TABLE `defTerms` ADD COLUMN trm_VocabularyGroupID smallint(5) unsigned NULL default '1' COMMENT 'Vocabulary group to which this term belongs, if a top level term (vocabulary)'";
-             
+            //verify that required column exists
+            $query = "SHOW COLUMNS FROM `defTerms` LIKE 'trm_VocabularyGroupID'";
             $res = $mysqli->query($query);
-            if(!$res){
-                $system->addError(HEURIST_DB_ERROR, 'Cannot modify defTerms to add trm_VocabularyGroupID', $mysqli->error);
-                return false;
+            $row_cnt = $res->num_rows;
+            if($res) $res->close();
+            if(!$row_cnt){ //column not defined
+                $query = "ALTER TABLE `defTerms` ADD COLUMN trm_VocabularyGroupID smallint(5) unsigned NULL default '1' COMMENT 'Vocabulary group to which this term belongs, if a top level term (vocabulary)'";
+                 
+                $res = $mysqli->query($query);
+                if(!$res){
+                    $system->addError(HEURIST_DB_ERROR, 'Cannot modify defTerms to add trm_VocabularyGroupID', $mysqli->error);
+                    return false;
+                }
             }
             $mysqli->query('UPDATE defTerms set trm_VocabularyGroupID=9 where (NOT (trm_ParentTermID>0)) and trm_Domain="relation"');
+
+            //Semantic web
+            $mysqli->query('UPDATE defTerms set trm_VocabularyGroupID=2 where trm_OriginatingDBID=2 AND '
+            .'trm_IDInOriginatingDB IN (5668,5520,5805,5792,6091,5445,5842,6177,6214)');
+            //Place
+            $mysqli->query('UPDATE defTerms set trm_VocabularyGroupID=3 where (trm_OriginatingDBID=2 AND '
+            .'trm_IDInOriginatingDB IN (509,506)) OR (trm_OriginatingDBID=3 AND trm_IDInOriginatingDB=5039');
+            //People,  events, biography
+            $mysqli->query('UPDATE defTerms set trm_VocabularyGroupID=4 where (trm_OriginatingDBID=2 AND '
+            .'trm_IDInOriginatingDB IN (5389,500,501,507,496,497,5432,505,511,513))'
+            .' OR (trm_OriginatingDBID=3 AND trm_IDInOriginatingDB=5065)'
+            .' OR (trm_OriginatingDBID=9 AND trm_IDInOriginatingDB=3297)'
+            .' OR (trm_OriginatingDBID=1161 AND trm_IDInOriginatingDB=5419)');
+            //Bibliographic, copyright
+            $mysqli->query('UPDATE defTerms set trm_VocabularyGroupID=5 where (trm_OriginatingDBID=2 AND '
+            .'trm_IDInOriginatingDB=503)'
+            .' OR (trm_OriginatingDBID=3 AND trm_IDInOriginatingDB IN (5024,5021,5012,5099))'
+            .' OR (trm_OriginatingDBID=1144 AND trm_IDInOriginatingDB=5986)');
+            //Spatial
+            $mysqli->query('UPDATE defTerms set trm_VocabularyGroupID=6 where (trm_OriginatingDBID=2 AND '
+            .'trm_IDInOriginatingDB IN (512,5362,5440,510,546,551))'
+            .' OR (trm_OriginatingDBID=3 AND trm_IDInOriginatingDB IN (5087,5080,5091,5073,5080,5028,5083,5077))'
+            .' OR (trm_OriginatingDBID=1125 AND trm_IDInOriginatingDB IN (3659,3339))');
+            //Categorisation and flags
+            $mysqli->query('UPDATE defTerms set trm_VocabularyGroupID=7 where (trm_OriginatingDBID=2 AND '
+            .'trm_IDInOriginatingDB IN (508,498,530))'
+            .' OR (trm_OriginatingDBID=3 AND trm_IDInOriginatingDB IN (5030,3440))'
+            .' OR (trm_OriginatingDBID=99 AND trm_IDInOriginatingDB=5445)'
+            .' OR (trm_OriginatingDBID=1125 AND trm_IDInOriginatingDB=3339)'
+            .' OR (trm_OriginatingDBID=1144 AND trm_IDInOriginatingDB IN (6002,5993))');
+            //Internal
+            $mysqli->query('UPDATE defTerms set trm_VocabularyGroupID=8 where trm_OriginatingDBID=2 AND '
+            .'trm_IDInOriginatingDB IN (533,3272,520,6252,6250)');
+            
             
             $report[] = 'defTerms: trm_VocabularyGroupID added';            
+            
+        }
+        
+        $value = mysql__select_value($mysqli, "SHOW TABLES LIKE 'defTermsLinks'");
+        if($value==null || $value==""){        
+            
+$query = "CREATE TABLE defTermsLinks (
+  trl_ID mediumint(8) unsigned NOT NULL auto_increment COMMENT 'Primary key for vocablary-terms hierarchy',
+  trl_ParentID smallint(5) unsigned NOT NULL COMMENT 'The ID of the parent/owner term in the hierarchy',
+  trl_TermID smallint(5) unsigned NOT NULL COMMENT 'Term identificator',
+  PRIMARY KEY  (trl_ID),
+  UNIQUE KEY trl_CompositeKey (trl_ParentID,trl_TermID)
+) ENGINE=InnoDB COMMENT='Identifies hierarchy of vocabularies and terms'";
+            
+            $res = $mysqli->query($query);
+            if(!$res){
+                $system->addError(HEURIST_DB_ERROR, 'Cannot create defTermsLinks', $mysqli->error);
+                return false;
+            }
+            $report[] = 'defTermsLinks created';
+            
+            $mysqli->query('INSERT INTO defTermsLinks (trl_ParentID, trl_TermID) '
+            .'SELECT trm_ParentTermID, trm_ID FROM defTerms WHERE trm_ParentTermID>0');
             
         }
       

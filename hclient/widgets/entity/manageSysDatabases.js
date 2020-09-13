@@ -158,7 +158,7 @@ $.widget( "heurist.manageSysDatabases", $.heurist.manageEntity, {
                       +frm(fld('sus_Role'), '6em')
                       +frm(fld('sus_Count'), '5em');
         */              
-        var recTitleHint = '';//fld('sys_dbDescription');
+        var recTitleHint = ''//fld('sys_dbDescription');
         
         var rtIcon = window.hWin.HAPI4.getImageUrl(this._entityName, 0, 'icon');
         var recThumb = window.hWin.HAPI4.getImageUrl(this._entityName, recID, 'thumb');
@@ -173,7 +173,7 @@ $.widget( "heurist.manageSysDatabases", $.heurist.manageEntity, {
         +     '<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
         +     '" style="background-image: url(&quot;'+rtIcon+'&quot;);">'
         + '</div>'
-        + '<div class="recordTitle" title="'+recTitleHint+'">'
+        + '<div class="recordTitle">'  // title="'+recTitleHint+'"
         +     recTitle 
         + '</div>';
 

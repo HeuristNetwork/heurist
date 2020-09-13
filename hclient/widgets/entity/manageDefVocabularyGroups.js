@@ -86,9 +86,8 @@ $.widget( "heurist.manageDefVocabularyGroups", $.heurist.manageEntity, {
                                             
                     var trm_ID = $(ui.draggable).parent().attr('recid');
                     var vcg_ID = trg.attr('recid');
-console.log(trm_ID+' to '+vcg_ID)                    
+//console.log(trm_ID+' to '+vcg_ID)                    
                             if(trm_ID>0 && vcg_ID>0 && that.options.reference_vocab_manger){
-                                    
                                     that.options.reference_vocab_manger
                                         .manageDefTerms('changeVocabularyGroup',{trm_ID:trm_ID, trm_VocabularyGroupID:vcg_ID });
                             }
@@ -161,6 +160,8 @@ console.log(trm_ID+' to '+vcg_ID)
         }
         
         html = html + fld2('vcg_Name',250);
+        
+        html = html + ((recordset.fld(record, 'vcg_Domain')=='enum')?'':'<div style="display: table-cell;font-size:smaller" class="item">(relation)</div>');
       
         if(this.options.edit_mode=='popup'){
             html = html

@@ -847,14 +847,17 @@ $.widget( "heurist.importStructure", {
 
         var html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'+recThumb+'&quot;);opacity:1">'
         +'</div>';
+        
+        var w = this.recordList_dbs.width()-550;
+        if(w<150) w = 150;
 
-        var recTitle = '<div class="item" style="width:3em">'+recID+'</div>'
+        var recTitleContent = '<div class="item" style="width:3em">'+recID+'</div>'
         +'<div class="item" style="width:25em;'+(recID<1000?'font-weight:bold':'')
         +'">'+dbName+'</div>'
         +'<div class="item" style="width:4em">'
         +((recID<1000 && recAllowClone==1)?'<span data-key="clone" style="cursor:pointer;text-decoration:underline">clone</span>'
             :'')+'</div>'
-        +'<div class="item" style="width:56em" title="'+recTitle+'">'+recTitle+'</div>';
+        +'<div class="item" style="width:'+w+'px"  title="'+recTitle+'">'+recTitle+'</div>';  //  
         /*+'<div class="item" style="width:2em;padding-left:4px"><a href="'
         +recURL+'?db='+dbName+'" target="_blank" title="'
         +window.hWin.HEURIST4.util.htmlEscape(recURL)+'">'
@@ -873,8 +876,8 @@ $.widget( "heurist.importStructure", {
         +     '<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'
         +     '" style="background-image: url(&quot;'+rtIcon+'&quot;);">'
         + '</div>'
-        + '<div class="recordTitle" style="left:40px !important">'
-        +     recTitle 
+        + '<div style="left:40px !important" class="recordTitle">'
+        +     recTitleContent 
         + '</div><div class="action-button-container">';
         
         

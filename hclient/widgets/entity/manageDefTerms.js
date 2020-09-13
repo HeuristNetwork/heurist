@@ -64,12 +64,10 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 if(!data || 
                    (data.source != that.uuid && data.type == this.options.auxilary))
                 {
-console.log('RELOAD TERMS '+this.options.auxilary);                    
                     that.refreshRecordList();
                     //that._loadData();
                 }else
                 if(data && data.type == 'vcg' && that.options.auxilary=='vocabulary'){
-console.log('RELOAD VOCS');                    
                     that._filterByVocabulary();
                     //that._loadData();
                 }
@@ -383,12 +381,53 @@ console.log('RELOAD VOCS');
 
             
         }
+        else if(this.options.select_mode=='select_single'){
+            
+            
+                var c1 = this.searchForm;//.find('div:first');
 
+                //add vocabulary
+                var sel = $('<div style="float:left"><label>Vocabulary: </label>'
+                +'<select type="text" style="width:10em" class="text ui-widget-content ui-corner-all"></select></div>')
+                .appendTo(c1);
+                
+                //add input search
+                c1 = $('<div style="float:right"><label>Find: </label>'
+                +'<input type="text" style="width:10em" class="text ui-widget-content ui-corner-all"/></div>')
+                .appendTo(c1);
+                
+                this._on(c1.find('input'), {
+                    //keypress: window.hWin.HEURIST4.ui.preventChars,
+                    keyup: this._onFindTerms }); //keyup
+                    
+                    
+                this.setTitle('Select '+(this.options.filter_groups=='enum')?'term':'relation');
+
+                sel = sel.find('select');
+                this.vocabularies_sel = 
+                            window.hWin.HEURIST4.ui.createVocabularySelect(sel[0], {useGroups:true, 
+                            domain: this.options.filter_groups,
+                            defaultTermID: this.options.initial_filter });
+                this._on(this.vocabularies_sel, {
+                    change:function(event){
+                        this.options.trm_ParentTermID = $(event.target).val();
+                        this._filterByVocabulary();
+                    } }); 
+
+            
+                this.options.recordList = {
+                    empty_remark: 'Select vocabulary',
+                    show_toolbar: false,
+                    view_mode: 'list',
+                    pagesize: 999999};
+                    
+                this.options.trm_ParentTermID = this.options.initial_filter;
+                //this._onActionListener(null, 'viewmode-tree');
+        }
 
 //console.log('init list '+this.options.auxilary+'  '+this.recordList.attr('id'));                    
         
         this.recordList.resultList( this.options.recordList );
-            
             
         that._loadData(true);
         
@@ -526,7 +565,7 @@ console.log('RELOAD VOCS');
 
                 var vocab_id = this.options.trm_ParentTermID;
 
-                this.setTitle('Manage Terms: '+$Db.trm(vocab_id,'trm_Label'));
+                //this.setTitle('Manage Terms: '+$Db.trm(vocab_id,'trm_Label'));
                 //this.filterRecordList(null, {'trm_ParentTermID':ids, 'sort:trm_Label':1});
 
                 var ids = $Db.trm().getAllChildrenIds('trm_ParentTermID',vocab_id);
@@ -550,7 +589,8 @@ console.log('RELOAD VOCS');
 
             }else{
                 this.recordList.resultList('clearAllRecordDivs',null,
-                             '<div style="padding: 8px;">Select vocabulary on the left</div>');
+                             '<div style="padding: 8px;">Select vocabulary'+
+                             ((this.options.select_mode=='select_single')?'':' on the left')+'</div>');
 
                 sGroupTitle += '</h4>';
             }
@@ -639,7 +679,7 @@ console.log('RELOAD VOCS');
     _afterInitEditForm: function(){
         this._super();
         
-        var ele;
+        var ele, currentDomain='enum';
         var isVocab = !(this.options.trm_ParentTermID>0);
         if(isVocab){
             
@@ -660,6 +700,7 @@ console.log('RELOAD VOCS');
             ele = this._editing.getFieldByName('trm_VocabularyGroupID');
             if(this.options.trm_VocabularyGroupID>0){
                 ele.editing_input('setValue', this.options.trm_VocabularyGroupID, true);
+                currentDomain = $Db.vcg( this.options.trm_VocabularyGroupID, 'vcg_Domain' );
             }
 
             ele.show();
@@ -667,19 +708,34 @@ console.log('RELOAD VOCS');
             
         }else{
             
-            var isRelation = (false);
-            if(!isRelation){
-                this._editing.getFieldByName('trm_InverseTermId').hide();
-            }
             
             ele = this._editing.getFieldByName('trm_ParentTermID');
             ele.editing_input('setValue', this.options.trm_ParentTermID, true);
             
             this._editing.getFieldByName('trm_VocabularyGroupID').hide();
             
+
+            var vocab_ID = $Db.getTermVocab(this.options.trm_ParentTermID);
+            currentDomain = $Db.vcg( $Db.trm(vocab_ID, 'trm_VocabularyGroupID'), 'vcg_Domain' );
+            if( currentDomain=='enum' ){
+                this._editing.getFieldByName('trm_InverseTermId').hide();
+            }else{
+                ele = this._editing.getFieldByName('trm_InverseTermId');
+                ele.show();
+                var cfg = ele.editing_input('getConfigMode');
+                cfg.initial_filter = vocab_ID;
+                ele.editing_input('setConfigMode', cfg);
+            }
         }
+        
         ele = this._editing.getFieldByName('trm_Domain')
-        ele.editing_input('setValue', 'enum', true);
+        ele.editing_input('setValue', currentDomain, true);
+        
+        if(this._currentEditID>0 && this._getField('trm_OriginatingDBID')>0){
+            ele = this._editing.getFieldByName('trm_ID');
+            $('<span>&nbsp;&nbsp;('+this._getField('trm_OriginatingDBID')+'-'+this._getField('trm_IDInOriginatingDB')+')</span>')   
+            .appendTo( ele.find('.input-div') );
+        }
         
     },   
 
@@ -1074,7 +1130,7 @@ console.log('NODE activated');
             var that = this;
             
             var entered = input_name.val().toLowerCase();
-                            
+                
             //find among fields that are not in current record type
             $Db.trm().each(function(trm_ID, rec){
 
@@ -1097,35 +1153,46 @@ console.log('NODE activated');
                         trm_ID = term_parent;
                     }while(term_parent>0);
                     
+                    var is_valid_domain = true;
                     //get vocabulary group
-                    //var vcg_ID = $Db.trm(trm_ID, 'trm_VocabularyGroupID');
-                    //ids.push(vcg_ID);
+                    if(that.options.filter_groups){
+                        var vcg_ID = $Db.trm(ids[ids.length-1], 'trm_VocabularyGroupID');
+                        is_valid_domain = (vcg_ID>0 && $Db.vcg(vcg_ID,'vcg_Domain')==that.options.filter_groups);
+                    }
                     
+                    if(is_valid_domain){
 
-                    is_added = true;
-                    ele.attr('trm_IDs',ids.join(','))
-                    .text( s + term_name + (term_code?(' ('+term_code+')'):'') )
-                    .click( function(event){
-                        window.hWin.HEURIST4.util.stopEvent(event);
+                        is_added = true;
+                        ele.attr('trm_IDs',ids.join(','))
+                        .text( s + term_name + (term_code?(' ('+term_code+')'):'') )
+                        .click( function(event){
+                            window.hWin.HEURIST4.util.stopEvent(event);
 
-                        var ele = $(event.target).hide();
-                        var trm_IDs = ele.attr('trm_IDs').split(',');
-                        
-                        if(trm_IDs){
-                            that.fields_list_div.hide();
-                            
-                            //select vocabulary group, select vocab
-                            var vocab_id  = trm_IDs[trm_IDs.length-1];
-                            that.vocabularies_div.manageDefTerms('selectVocabulary', vocab_id);
-                            if(trm_IDs.length>1){
-                                setTimeout(function(){that.selectRecordInRecordset(trm_IDs[0]);},500);    
+                            var ele = $(event.target).hide();
+                            var trm_IDs = ele.attr('trm_IDs').split(',');
+
+                            if(trm_IDs){
+                                that.fields_list_div.hide();
+
+                                //select vocabulary group, select vocab
+                                var vocab_id  = trm_IDs[trm_IDs.length-1];
+                                
+                                if(that.options.select_mode=='select_single'){
+                                    that.vocabularies_sel.val(vocab_id);//.change();
+                                }else{
+                                    that.vocabularies_div.manageDefTerms('selectVocabulary', vocab_id);
+                                }
+                                
+                                if(trm_IDs.length>1){
+                                    setTimeout(function(){that.selectRecordInRecordset(trm_IDs[0]);},500);    
+                                }
+
+
+
+                                input_name.val('').focus();
                             }
-                            
-
-        
-                            input_name.val('').focus();
-                        }
-                    });
+                        });
+                    }
 
                 }                
             });

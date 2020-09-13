@@ -55,11 +55,40 @@ findByConceptCode
 if (!window.hWin.HEURIST4){
     window.hWin.HEURIST4 = {};
 }
+
 //init only once
 if (!window.hWin.HEURIST4.dbs) 
 {
 
 window.hWin.HEURIST4.dbs = {
+
+    //
+    // return vocabulary for given term
+    //    
+    getTermVocab: function(trm_ID){
+        var trm_ParentTermID;
+        do{
+            trm_ParentTermID = $Db.trm(trm_ID, 'trm_ParentTermID');
+            if(trm_ParentTermID>0){
+                trm_ID = trm_ParentTermID;
+            }else{
+                break;
+            }
+        }while (trm_ParentTermID>0);
+        
+        return trm_ID;        
+    },
+
+    //
+    // returns vocab group for given term
+    //
+    getTermVocabGroup: function(trm_ID){
+        
+        var trm_ID = $Db.getTermVocab(trm_ID);
+        
+        return $db.trm(trm_ID,'trm_VocabularyGroupID')
+        
+    },
     
     //
     // return list of all children for given trm_ParentTermID in lower case
@@ -1512,6 +1541,7 @@ window.hWin.HEURIST4.dbs = {
 
 }//end dbs
 
-//alias
-var $Db = window.hWin.HEURIST4.dbs;
 }
+//alias
+var $Db = window.hWin.HEURIST4.dbs;    
+

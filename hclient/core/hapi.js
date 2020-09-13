@@ -1230,7 +1230,7 @@ console.log('TRIGER);');
             },
             
             //
-            //
+            // rty_ID[dty_ID] = rst_ID
             //
             createRstIndex: function(){
                 var rst_index = {}
