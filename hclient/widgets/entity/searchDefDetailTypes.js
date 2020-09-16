@@ -59,6 +59,7 @@ $.widget( "heurist.searchDefDetailTypes", $.heurist.searchEntity, {
                     .button({label: window.hWin.HR("Add"), showLabel:true, 
                             icon:"ui-icon-plus"})
                     .addClass('ui-button-action')
+                    .css({padding:'2px'})
                     .show();
                     
             this._on( this.btn_add_record, {

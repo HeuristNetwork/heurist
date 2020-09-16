@@ -71,6 +71,7 @@ $.widget( "heurist.resultList", {
         
         // smarty template or url (or todo function) to draw inline record details when recordview_onselect='inline'. (LINE view mode only)
         rendererExpandDetails: null,  //name of smarty template or function to draw expanded details
+        expandDetailsOnClick: true,
 
         searchfull: null,  // custom function to search full data
         
@@ -1670,6 +1671,9 @@ $.widget( "heurist.resultList", {
             rdiv2.css({'height':'','width':''}).insertBefore(tmp_parent);
             tmp_parent.remove();
             */
+            if(this.options.view_mode=='thumbs'){
+                this.div_content.find('.recordDiv').css({height:'154px', width:'128px'});
+            }
             
             this.div_content.scrollTop(spos);
         }
@@ -1968,8 +1972,24 @@ $.widget( "heurist.resultList", {
         
         //$.isFunction(this.options.renderer) && 
         if((this.options.view_mode!='horizontal')   // && this.options.view_mode!='icons_list'
-            && this.options.recordview_onselect=='inline'){ // && this.options.view_mode=='list'
+            && this.options.recordview_onselect=='inline'
+            && this.options.expandDetailsOnClick){ // && this.options.view_mode=='list'
 
+            this.expandDetailsInline( selected_rec_ID );
+        }
+        
+
+        this.triggerSelection();
+    },
+    
+    //
+    //
+    //
+    expandDetailsInline: function(recID){
+        
+        var $rdiv = this.div_content.find('div[recid='+recID+']');
+        if($rdiv.length==0) return;
+        
             var exp_div = this.div_content.find('.record-expand-info');
             var is_already_opened = (exp_div.attr('data-recid')==$rdiv.attr('recid'));
             
@@ -2040,16 +2060,12 @@ $.widget( "heurist.resultList", {
                     }  
                     
                 }
-            }
-        }
+            }        
         
-
-        this.triggerSelection();
     },
     
-    
     //
-    //
+    // trigger global event
     //
     triggerSelection: function(){
 

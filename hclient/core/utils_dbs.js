@@ -1211,7 +1211,7 @@ window.hWin.HEURIST4.dbs = {
 
                 //sort children by name
                 children.sort(function(a,b){
-                    return recset.fld(a,'trm_Label')<recset.fld(b,'trm_Label')?-1:1;        
+                    return recset.fld(a,'trm_Label').toLowerCase()<recset.fld(b,'trm_Label').toLowerCase()?-1:1;        
                 });
                 
                 if(mode=='tree'){

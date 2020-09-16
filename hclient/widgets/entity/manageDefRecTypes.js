@@ -622,7 +622,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                     html += __action_btn('edit','ui-icon-pencil','Click to edit record type');
                     break;
                 case 'editstr': 
-                    html += __action_btn('editstr','ui-icon-list','Click to edit structure');
+                    html += __action_btn('editstr','ui-icon-pencil','Click to edit structure');
                     break;
                 case 'name':  html += fld2('rty_Name','120px'); break;
                 case 'description':  

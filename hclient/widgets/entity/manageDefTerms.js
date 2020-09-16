@@ -145,7 +145,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 .appendTo(this.searchForm);
                 
                 this._defineActionButton2({showText:true, icons:{primary:'ui-icon-plus'},text:window.hWin.HR('Add'), //Add Vocab
-                          css:{'margin-right':'0.5em','display':'inline-block'}, id:'btnAddButton',
+                          css:{'margin-right':'0.5em','display':'inline-block',padding:'2px'}, id:'btnAddButton',
                           click: function() { that._onActionListener(null, 'add'); }}, 
                             this.searchForm.find('div:first'));
                 
@@ -247,19 +247,19 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 var btn_array = [
                           
                     {showText:true, icons:{primary:'ui-icon-plus'}, text:window.hWin.HR('Add'), //Add Term
-                          css:{'margin-right':'0.5em','display':'inline-block'}, id:'btnAddButton',
+                          css:{'margin-right':'0.5em','display':'inline-block',padding:'2px'}, id:'btnAddButton',
                           click: function() { that._onActionListener(null, 'add'); }},
 
                     {showText:true, icons:{primary:'ui-icon-link'}, text:window.hWin.HR('Reference'), //Add Term
-                          css:{'margin-right':'0.5em','display':'inline-block'}, id:'btnAddButton',
+                          css:{'margin-right':'0.5em','display':'inline-block',padding:'2px'}, id:'btnAddButton',
                           click: function() { that._onActionListener(null, 'add-reference'); }},
                           
                     {showText:false, icons:{primary:'ui-icon-arrowthickstop-1-n'}, text:window.hWin.HR('Export Terms'), //ui-icon-arrowthick-1-e
-                          css:{'margin-right':'0.5em','display':'inline-block'}, id:'btnExportVocab',
+                          css:{'margin-right':'0.5em','display':'inline-block',padding:'2px'}, id:'btnExportVocab',
                           click: function() { that._onActionListener(null, 'export-import'); }},
                           
-                    {showText:false, icons:{primary:'ui-icon-arrowthickstop-1-s'}, text:window.hWin.HR('Import Terms'), //ui-icon-arrowthick-1-w
-                          css:{'margin-right':'0.5em','display':'inline-block'}, id:'btnImportVocab',
+                    {showText:false, icons:{primary:'ui-icon-arrowthickstop-1-s',padding:'2px'}, text:window.hWin.HR('Import Terms'), //ui-icon-arrowthick-1-w
+                          css:{'margin-right':'0.5em','display':'inline-block',padding:'2px'}, id:'btnImportVocab',
                           click: function() { that._onActionListener(null, 'vocab-import'); }}
                     ];
                     
@@ -315,18 +315,32 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                     view_mode: 'list',
                     pagesize: 999999,
                     recordview_onselect:'inline',
+                    expandDetailsOnClick: false,
                     rendererExpandDetails: function(recordset, trm_id){
-                        if(this.options.view_mode=='list'){
+                        if(true || this.options.view_mode=='list'){
                             var $rdiv = $(this.element).find('div[recid='+trm_id+']');
                             var ele = $('<div>')
                                 .attr('data-recid', $rdiv.attr('recid'))
-                                .css({'width':'100%','max-height':'445px','overflow':'hidden','padding-top':'5px','height':'445px'})
+                                .css({'max-height':'255px','overflow':'hidden','height':'255px', })
                                 .addClass('record-expand-info');
                             ele.appendTo($rdiv);
                             
+                            $rdiv.addClass('selected');
+                            
+                            if(this.options.view_mode!='list'){
+                                $rdiv.css({width:'97%', height:'266px', outline:'red'});
+                                ele.css('position','initial');
+                            }
+                            
                             that._showEditorInline(ele, trm_id);
                             
-                            ele.find('.ent_wrapper:first').css('top',25);
+                            if(this.options.view_mode=='list'){
+                                ele.css('width','100%');
+                                ele.find('.ent_wrapper:first').css({'top':25,margin:'4px 5%',border:'1px gray solid'});
+                            }else{
+                                ele.find('.ent_wrapper:first').css({'top':25});
+                            }
+                            
                         }else{
                             that.addEditRecord(trm_id);
                         }
@@ -626,11 +640,13 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         var sPad = '';
         var sRef = '';
         if(this.options.auxilary=='vocabulary'){
-            sBold = 'font-weight:bold';
+            sBold = 'font-weight:bold;';
             if(recordset.fld(record, 'trm_Domain')=='relation'){
                 sWidth = '167';
             }
+            sWidth = 'max-width:'+sWidth+'px;min-width:'+sWidth+'px;';
         }else{
+            sWidth = 'display:inline-block;padding-top:4px;';
 //console.log(recordset.fld(record, 'trm_Parents'));            
             var lvl = (recordset.fld(record, 'trm_Parents').split(',').length);
             sPad = 'padding-left:'+(lvl*20);
@@ -639,8 +655,9 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             sRef = (this.options.trm_ParentTermID==vocab_id)?'':' <span style="color:blue;font-size:smaller;">(ref)</span>';
         }
         
-        var recTitle = '<div class="item truncate" style="max-width:'+sWidth+'px;min-width:'+sWidth+'px;'+sBold+';'+sPad+'">'
-            +recID+'  '+window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, 'trm_Label'))+sRef+'</div>';
+        var recTitle = '<div class="item truncate" style="'+sWidth+sBold+sPad+'">'
+            //+recID+'  '
+            +window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, 'trm_Label'))+sRef+'</div>';
 
         var html;
         
@@ -673,12 +690,15 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             html = '<div class="recordDiv rt_draggable" recid="'+recID+'">'
                     + '<div class="recordSelector item"><input type="checkbox" /></div>'
                     + html_thumb + recTitle 
-                    + '<div class="rec_actions">'
-                    + this._defineActionButton({key:'edit',label:'Edit Term', 
+                    + '<div class="rec_action_link2" style="padding-left:4px">'
+                    + this._defineActionButton({key:'edit-inline',label:'Edit Term', 
                         title:'', icon:'ui-icon-pencil',class:'rec_actions_button'},
                         null,'icon_text') 
                     + this._defineActionButton({key:'delete',label:'Remove Term', 
                         title:'', icon:'ui-icon-delete',class:'rec_actions_button'},
+                        null,'icon_text')
+                    + this._defineActionButton({key:'add-child',label:'Add child', 
+                        title:'', icon:'ui-icon-plus',class:'rec_actions_button'},
                         null,'icon_text')
                     +'</div></div>';
         }
@@ -845,73 +865,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         }
         return btns;  
     },
-  
-/*        
-    //
-    //  Add PREV/NEXT buttons
-    //    
-    _getEditDialogButtons: function(){
-        var btns = this._super();
-        
-        if(this.options.auxilary!=='vocabulary'){
-        
-            var recset = this.recordList.resultList('getRecordSet');
-            var isNavVisible = (recset && recset.length()>1);
-            
-    //console.log( isNavVisible + recset.length());        
-
-            var that = this;
-            
-            btns.push({showText:false, icons:{primary:'ui-icon-circle-triangle-w'},text:window.hWin.HR('Previous'),
-                                  css:{'display':isNavVisible?'inline-block':'none','margin':'0.5em 0.4em 0.5em 0px'}, id:'btnPrev',
-                                  click: function( recID, fields ) { 
-                                        //that._afterSaveEventHandler( recID, fields ); 
-                                        that._navigateToRec(-1); 
-                                  }});
-                                  
-            btns.push({showText:false, icons:{secondary:'ui-icon-circle-triangle-e'},text:window.hWin.HR('Next'),
-                                  css:{'display':isNavVisible?'inline-block':'none','margin':'0.5em 0.4em 0.5em 0px','margin-right':'1.5em'}, id:'btnNext',
-                                  click: function( recID, fields ) { 
-                                        //that._afterSaveEventHandler( recID, fields ); 
-                                        that._navigateToRec(1); 
-                                  }});
-        }
-        return btns;
-        
-    },
     
-    //
-    //
-    //
-    _navigateToRec: function(dest){
-        if(this._currentEditID>0){
-                var recset = this.recordList.resultList('getRecordSet');
-                var order  = recset.getOrder();
-                var idx = window.hWin.HEURIST4.util.findArrayIndex(this._currentEditID, order);//order.indexOf(Number(this._currentEditID));
-                idx = idx + dest;
-                if(idx>=0 && idx<order.length){
-                    
-                    var newRecID = order[idx];
-                    var that = this;
-                    
-                    if(this._editing.isModified()){
-  
-                        that.addEditRecord(newRecID);
-                        
-                    }else if(this._toolbar) {
-                        //this._toolbar.find('#divNav').html( (idx+1)+'/'+order.length);
-                        
-                        window.hWin.HEURIST4.util.setDisabled(this._toolbar.find('#btnPrev'), (idx==0));
-                        window.hWin.HEURIST4.util.setDisabled(this._toolbar.find('#btnNext'), (idx+1==order.length));
-                        
-                        if(dest!=0){
-                            this.addEditRecord(newRecID);
-                        }
-                    }
-                }
-        }
-    },    
-*/    
     //
     // update list after save (refresh)
     //
@@ -1061,6 +1015,12 @@ console.log('Error !!! Parnet not found for '+trm_ID);
             }
             
             window.hWin.HEURIST4.ui.showEntityDialog('defTerms', popup_options);
+            
+        }else if(action=='edit-inline'){
+            
+            this.recordList.resultList('expandDetailsInline', recID);
+            
+            return true;
             
         }else if(action=='delete'){
             

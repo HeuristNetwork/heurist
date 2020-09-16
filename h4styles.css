@@ -514,6 +514,21 @@ div.recordDiv.public > .recordIcons > span {
     display: none !important;    
 }
 
+div.recordDiv:hover > .rec_action_link2{
+    visibility:visible;
+    vertical-align: bottom;
+}
+div.recordDiv > .rec_action_link2{
+    visibility:hidden;
+    display: inline-block;
+}
+.thumbs div.recordDiv > .rec_action_link2{
+    position:absolute;
+    right:2;
+    top:6;
+}
+
+
 /* actions for user list */
 div.recordDiv:hover > .rec_action_link{
     visibility:visible;
