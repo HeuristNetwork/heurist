@@ -88,6 +88,8 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
             
             this.options.simpleSearch = true;
         }else{
+            
+            this.input_search.parent().hide();
             this.element.find('#div_group_information').show();
             this.element.find('#div_show_already_in_db').hide();
             this._on(this.element.find('#chb_show_all_groups'),  { change:this.startSearch });
@@ -389,11 +391,14 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
         
             var sGroupTitle = '<h4 style="margin:0">';
             if(!this.element.find('#chb_show_all_groups').is(':checked') && this.options.rtg_ID>0){
+                this.input_search.parent().hide();
+
                 request['rty_RecTypeGroupID'] = this.options.rtg_ID;
                 sGroupTitle += ($Db.rtg(this.options.rtg_ID,'rtg_Name')
                                     +'</h5><div class="heurist-helper3 truncate" style="font-size:0.7em">'
                                     +$Db.rtg(this.options.rtg_ID,'rtg_Description')+'</div>');
             }else{
+                this.input_search.parent().show();
                 sGroupTitle += 'Record types</h4><div class="heurist-helper3" style="font-size:0.7em">All record type groups</div>';
             }
             this.element.find('#div_group_information').html(sGroupTitle);

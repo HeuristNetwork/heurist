@@ -79,13 +79,8 @@ console.log(record);
 //console.log('TERMS');            
 //console.log(terms); 
 
-    var selObj = window.hWin.HEURIST4.ui.createTermSelectExt2( this.element.find('#select_keywords')[0],
-            {datatype:'enum', 
-             termIDTree:6953, 
-             headerTermIDsList:null,  //array of disabled terms
-             defaultTermID:null,   //default/selected term
-             topOptions:null,      //top options  [{key:0, title:'...select me...'},....]
-             useHtmlSelect:false}); //use native select of jquery select
+    var selObj = window.hWin.HEURIST4.ui.createTermSelect( this.element.find('#select_keywords')[0],
+                    {vocab_id:6953}); //use native select of jquery select
     
 
 //Reading data for a specific record type

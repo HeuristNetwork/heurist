@@ -696,7 +696,7 @@ $query = "CREATE TABLE defVocabularyGroups (
             $mysqli->query('INSERT INTO defVocabularyGroups (vcg_Name) VALUES ("Spatial")');
             $mysqli->query('INSERT INTO defVocabularyGroups (vcg_Name) VALUES ("Categorisation and flags")');
             $mysqli->query('INSERT INTO defVocabularyGroups (vcg_Name) VALUES ("Internal")');
-            $mysqli->query('INSERT INTO defVocabularyGroups (vcg_Name,vcg_Domain) VALUES ("Relationships","relation")');
+            $mysqli->query('INSERT INTO defVocabularyGroups (vcg_Name,vcg_Domain) VALUES ("RELATIONSHIPS","relation")');
             
             //alter table
             //verify that required column exists
@@ -773,6 +773,41 @@ $query = "CREATE TABLE defTermsLinks (
             
             $mysqli->query('INSERT INTO defTermsLinks (trl_ParentID, trl_TermID) '
             .'SELECT trm_ParentTermID, trm_ID FROM defTerms WHERE trm_ParentTermID>0');
+            
+            
+            $res = $mysqli->query('DROP TRIGGER IF EXISTS defTerms_last_insert');
+
+            ///$res = $mysqli->query('DELIMITER $$');
+            $res = $mysqli->query('CREATE DEFINER=CURRENT_USER TRIGGER `defTerms_last_insert` AFTER INSERT ON `defTerms` FOR EACH ROW
+            begin
+                update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="defTerms";
+                
+                if NEW.trm_ParentTermID > 0 then
+                    insert into defTermsLinks (trl_ParentID,trl_TermID)
+                            values (NEW.trm_ParentTermID, NEW.trm_ID);
+                end if;
+            end');  
+            
+            $res = $mysqli->query('DROP TRIGGER IF EXISTS defTerms_last_update');
+
+            $res = $mysqli->query('CREATE DEFINER=CURRENT_USER TRIGGER `defTerms_last_update` AFTER UPDATE ON `defTerms`
+            FOR EACH ROW
+            begin
+                update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="defTerms";
+                
+                if NEW.trm_ParentTermID != OLD.trm_ParentTermID then
+                    update defTermsLinks SET trl_ParentID=NEW.trm_ParentTermID
+                        where trl_ParentID=OLD.trm_ParentTermID and trl_TermID=NEW.trm_ID;
+                end if;
+            end');
+            
+            $res = $mysqli->query('DROP TRIGGER IF EXISTS defTerms_last_delete');
+            $res = $mysqli->query('CREATE DEFINER=CURRENT_USER  TRIGGER `defTerms_last_delete` AFTER DELETE ON `defTerms` FOR EACH ROW
+            begin
+                update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="defTerms";
+                delete ignore from defTermsLinks where trl_TermID=OLD.trm_ID || trl_ParentID=OLD.trm_ID;
+            end');            
+            //$mysqli->query('DELIMITER ;');            
             
         }
       

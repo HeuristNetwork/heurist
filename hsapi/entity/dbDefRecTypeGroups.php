@@ -173,15 +173,17 @@ class DbDefRecTypeGroups extends DbEntityBase
         foreach($this->records as $idx=>$record){
 
             //validate duplication
-            $mysqli = $this->system->get_mysqli();
-            $res = mysql__select_value($mysqli,
-                    "SELECT rtg_ID FROM ".$this->config['tableName']."  WHERE rtg_Name='"
-                    .$mysqli->real_escape_string( $this->records[$idx]['rtg_Name'])."'");
-            if($res>0 && $res!=@$this->records[$idx]['rtg_ID']){
-                $this->system->addError(HEURIST_ACTION_BLOCKED, 'Record type group cannot be saved. The provided name already exists');
-                return false;
+            if(@$this->records[$idx]['rtg_Name']){
+                $mysqli = $this->system->get_mysqli();
+                $res = mysql__select_value($mysqli,
+                        "SELECT rtg_ID FROM ".$this->config['tableName']."  WHERE rtg_Name='"
+                        .$mysqli->real_escape_string( $this->records[$idx]['rtg_Name'])."'");
+                if($res>0 && $res!=@$this->records[$idx]['rtg_ID']){
+                    $this->system->addError(HEURIST_ACTION_BLOCKED, 'Record type group cannot be saved. The provided name already exists');
+                    return false;
+                }
             }
-
+            
             $this->records[$idx]['rtg_Modified'] = date('Y-m-d H:i:s'); //reset
             
             if(!(@$this->records[$idx]['rtg_Order']>0)){

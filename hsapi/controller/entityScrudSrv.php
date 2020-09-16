@@ -98,6 +98,9 @@
             if($need_config!==false && $res[$entity_name]!==false){
                 $need_config[$entity_name]['config'] = $entity->config();    
             }
+            if($entity_name == 'defTerms'){
+                $res[$entity_name]['trm_Links'] = $entity->getTermLinks();
+            }
             
         }
         return $res;

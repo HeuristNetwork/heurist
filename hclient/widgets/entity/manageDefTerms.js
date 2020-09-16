@@ -144,7 +144,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                   +'<div id="div_group_information" style="padding-top: 13px;width:100%;min-height:3em;clear:both"></div>')
                 .appendTo(this.searchForm);
                 
-                this._defineActionButton2({showText:true, icons:{primary:'ui-icon-plus'},text:window.hWin.HR('Add'),
+                this._defineActionButton2({showText:true, icons:{primary:'ui-icon-plus'},text:window.hWin.HR('Add'), //Add Vocab
                           css:{'margin-right':'0.5em','display':'inline-block'}, id:'btnAddButton',
                           click: function() { that._onActionListener(null, 'add'); }}, 
                             this.searchForm.find('div:first'));
@@ -246,10 +246,14 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 //show particular terms for vocabulary 
                 var btn_array = [
                           
-                    {showText:true, icons:{primary:'ui-icon-plus'}, text:window.hWin.HR('Add'),
+                    {showText:true, icons:{primary:'ui-icon-plus'}, text:window.hWin.HR('Add'), //Add Term
                           css:{'margin-right':'0.5em','display':'inline-block'}, id:'btnAddButton',
                           click: function() { that._onActionListener(null, 'add'); }},
 
+                    {showText:true, icons:{primary:'ui-icon-link'}, text:window.hWin.HR('Reference'), //Add Term
+                          css:{'margin-right':'0.5em','display':'inline-block'}, id:'btnAddButton',
+                          click: function() { that._onActionListener(null, 'add-reference'); }},
+                          
                     {showText:false, icons:{primary:'ui-icon-arrowthickstop-1-n'}, text:window.hWin.HR('Export Terms'), //ui-icon-arrowthick-1-e
                           css:{'margin-right':'0.5em','display':'inline-block'}, id:'btnExportVocab',
                           click: function() { that._onActionListener(null, 'export-import'); }},
@@ -263,9 +267,9 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                     {showText:false, icons:{primary:'ui-icon-menu'}, text:window.hWin.HR('Show as plain list'),
                           css:{'margin-right':'0.5em','display':'inline-block'}, id:'btnViewMode_List',
                           click: function() { that._onActionListener(null, 'viewmode-list'); }},
-                    {showText:false, icons:{primary:'ui-icon-structure'}, text:window.hWin.HR('Show as tree'),
+                    /*{showText:false, icons:{primary:'ui-icon-structure'}, text:window.hWin.HR('Show as tree'),
                           css:{'margin-right':'0.5em','display':'inline-block'}, id:'btnViewMode_Tree',
-                          click: function() { that._onActionListener(null, 'viewmode-tree'); }},
+                          click: function() { that._onActionListener(null, 'viewmode-tree'); }},*/
                     {showText:false, icons:{primary:'ui-icon-view-icons'}, text:window.hWin.HR('Show as images'),
                           css:{'margin-right':'0.5em','display':'inline-block'}, id:'btnViewMode_List',
                           click: function() { that._onActionListener(null, 'viewmode-thumbs'); }}
@@ -381,14 +385,14 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
             
         }
-        else if(this.options.select_mode=='select_single'){
+        else { //if(this.options.select_mode=='select_single' || this.options.select_mode=='select_multi'){
             
             
                 var c1 = this.searchForm;//.find('div:first');
 
                 //add vocabulary
-                var sel = $('<div style="float:left"><label>Vocabulary: </label>'
-                +'<select type="text" style="width:10em" class="text ui-widget-content ui-corner-all"></select></div>')
+                var sel = $('<div style="float:left"><label>Select vocabulary: </label>'
+                +'<select type="text" style="min-width:15em;" class="text ui-widget-content ui-corner-all"></select></div>')
                 .appendTo(c1);
                 
                 //add input search
@@ -401,7 +405,10 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                     keyup: this._onFindTerms }); //keyup
                     
                     
-                this.setTitle('Select '+(this.options.filter_groups=='enum')?'term':'relation');
+                if(!this.options.title){
+                    this.setTitle('Select '+(this.options.filter_groups=='enum'?'term':'relation'));    
+                }
+                //this.setTitle(this.options.title);
 
                 sel = sel.find('select');
                 this.vocabularies_sel = 
@@ -423,6 +430,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                     
                 this.options.trm_ParentTermID = this.options.initial_filter;
                 //this._onActionListener(null, 'viewmode-tree');
+                
         }
 
 //console.log('init list '+this.options.auxilary+'  '+this.recordList.attr('id'));                    
@@ -530,6 +538,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
     //
     //
     _filterByVocabulary: function(){
+        
+        if(!this.getRecordSet()) return;
 
         var sGroupTitle = '<h4 style="margin:0">';
         if(this.options.auxilary=='vocabulary'){
@@ -561,24 +571,27 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             
         }else{
 
-            if(this.options.trm_ParentTermID>0){ 
+            if(this.options.trm_ParentTermID>0){ //filter by vocabulary
 
                 var vocab_id = this.options.trm_ParentTermID;
 
                 //this.setTitle('Manage Terms: '+$Db.trm(vocab_id,'trm_Label'));
                 //this.filterRecordList(null, {'trm_ParentTermID':ids, 'sort:trm_Label':1});
-
-                var ids = $Db.trm().getAllChildrenIds('trm_ParentTermID',vocab_id);
-
+                
+                var subset = $Db.trm_TreeData(vocab_id, 0);
+//console.log(subset.getRecords());                
+/*
+                var ids = $Db.trm().getAllChildrenIds('trm_ParentTermID', vocab_id);
                 var subset = this.getRecordSet().getSubSetByIds(ids);
                 subset = subset.getSubSetByRequest({'sort:trm_Label':1}, this.options.entity.fields);
+*/                
                 this.recordList.resultList('updateResultSet', subset, null);
 
                 if(this.recordTree && this.recordTree.fancytree('instance')){
 
                     //filtered
-                    var treedata = subset.getTreeViewData('trm_Label', 'trm_ParentTermID',
-                        vocab_id);
+                    var treedata = $Db.trm_TreeData(vocab_id, 1);
+                    // subset.getTreeViewData('trm_Label', 'trm_ParentTermID',vocab_id);
                     var tree = this.recordTree.fancytree('getTree');
                     tree.reload(treedata);
                 }
@@ -590,7 +603,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             }else{
                 this.recordList.resultList('clearAllRecordDivs',null,
                              '<div style="padding: 8px;">Select vocabulary'+
-                             ((this.options.select_mode=='select_single')?'':' on the left')+'</div>');
+                             ((this.options.select_mode!='manager')?'':' on the left')+'</div>');
 
                 sGroupTitle += '</h4>';
             }
@@ -600,13 +613,34 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
     },
     
+    //
+    //
+    //
     _recordListItemRenderer:function(recordset, record){
         
         //ugr_ID,ugr_Type,ugr_Name,ugr_Description, ugr_eMail,ugr_FirstName,ugr_LastName,ugr_Enabled,ugl_Role
-        
         var recID = recordset.fld(record, 'trm_ID');
-        var recTitle = '<div class="item truncate" style="max-width:220px;width:220px">'
-            +window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, 'trm_Label'))+'</div>';
+        
+        var sBold = '';
+        var sWidth = '212';
+        var sPad = '';
+        var sRef = '';
+        if(this.options.auxilary=='vocabulary'){
+            sBold = 'font-weight:bold';
+            if(recordset.fld(record, 'trm_Domain')=='relation'){
+                sWidth = '167';
+            }
+        }else{
+//console.log(recordset.fld(record, 'trm_Parents'));            
+            var lvl = (recordset.fld(record, 'trm_Parents').split(',').length);
+            sPad = 'padding-left:'+(lvl*20);
+            
+            var vocab_id = $Db.getTermVocab(recID);
+            sRef = (this.options.trm_ParentTermID==vocab_id)?'':' <span style="color:blue;font-size:smaller;">(ref)</span>';
+        }
+        
+        var recTitle = '<div class="item truncate" style="max-width:'+sWidth+'px;min-width:'+sWidth+'px;'+sBold+';'+sPad+'">'
+            +recID+'  '+window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, 'trm_Label'))+sRef+'</div>';
 
         var html;
         
@@ -615,6 +649,10 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             html = '<div class="recordDiv rt_draggable" style="padding-right:0" recid="'+recID+'">'
                     + '<div class="recordSelector item"><input type="checkbox" /></div>'
                     + recTitle 
+                    
+                    +((recordset.fld(record, 'trm_Domain')=='enum')
+                      ?'':'<div style="display: table-cell;font-size:smaller" class="item">(relation)</div>')
+                    
                     + this._defineActionButton({key:'edit',label:'Edit Vocabulary', 
                         title:'', icon:'ui-icon-pencil',class:'rec_actions_button'}, 
                         null,'icon_text') 
@@ -631,7 +669,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             
             var html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'
                                     +recThumb+'&quot;);"></div>';
-
+                                    
             html = '<div class="recordDiv rt_draggable" recid="'+recID+'">'
                     + '<div class="recordSelector item"><input type="checkbox" /></div>'
                     + html_thumb + recTitle 
@@ -656,7 +694,9 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         }else{
             var that = this;
             window.hWin.HEURIST4.msg.showMsgDlg(
-                'Are you sure you wish to delete this term? Proceed?', function(){ that._deleteAndClose(true) }, 
+                'Are you sure you wish to delete this '
+                +this.options.auxilary+'? Proceed?', 
+                function(){ that._deleteAndClose(true) }, 
                 {title:'Warning',yes:'Proceed',no:'Cancel'});        
         }
     },
@@ -667,7 +707,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
     _afterDeleteEvenHandler: function(recID){
         this._super(recID); 
         
-        $Db.trm().removeRecord(recID);  
+        //@todo!!! if (isNotRef) $Db.trm_RemoveLinks(recID);
+        $Db.trm().removeRecord(recID);  //from record set
     },
     
     
@@ -679,7 +720,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
     _afterInitEditForm: function(){
         this._super();
         
-        var ele, currentDomain='enum';
+        var ele, currentDomain = null;
         var isVocab = !(this.options.trm_ParentTermID>0);
         if(isVocab){
             
@@ -696,9 +737,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             this._editing.getFieldByName('trm_Label').find('.header').text('Vocabulary Name');
             
             //assign devault values
-            
             ele = this._editing.getFieldByName('trm_VocabularyGroupID');
-            if(this.options.trm_VocabularyGroupID>0){
+            if(this._currentEditID<0 && this.options.trm_VocabularyGroupID>0){
                 ele.editing_input('setValue', this.options.trm_VocabularyGroupID, true);
                 currentDomain = $Db.vcg( this.options.trm_VocabularyGroupID, 'vcg_Domain' );
             }
@@ -708,13 +748,13 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             
         }else{
             
-
-            if(this._edit_dialog && this._edit_dialog.dialog('instance')){
+            var dlg = this._getEditDialog(true);
+            if(dlg && dlg.dialog('instance')){
                 var s = (this._currentEditID>0?'Edit':'Add')+' Term';
                 if(this.options.trm_ParentTermID>0){
                     s = s + ' in vocabulary '+$Db.trm(this.options.trm_ParentTermID,'trm_Label');
                 }
-                this._edit_dialog.dialog('option', 'title', s);
+                dlg.dialog('option', 'title', s);
             }
             
             ele = this._editing.getFieldByName('trm_ParentTermID');
@@ -724,7 +764,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             
 
             var vocab_ID = $Db.getTermVocab(this.options.trm_ParentTermID);
-            currentDomain = $Db.vcg( $Db.trm(vocab_ID, 'trm_VocabularyGroupID'), 'vcg_Domain' );
+            currentDomain = $Db.trm(vocab_ID, 'trm_Domain');
             if( currentDomain=='enum' ){
                 this._editing.getFieldByName('trm_InverseTermId').hide();
             }else{
@@ -737,7 +777,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         }
         
         ele = this._editing.getFieldByName('trm_Domain')
-        ele.editing_input('setValue', currentDomain, true);
+        if(currentDomain!==null) ele.editing_input('setValue', currentDomain, true);
+        if(isVocab) ele.show();
         
         ele = this._editing.getFieldByName('trm_ID');
         if(this._currentEditID>0 && this._getField('trm_OriginatingDBID')>0){
@@ -759,18 +800,47 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         if(this.options.edit_mode=='editonly'){
         
             var that = this;
-          
-            btns[0].text = 'Close';
-            btns[0].css['visibility'] = 'visible';
-            btns[0].class = 'alwaysvisible';
             
-            btns[0].click = function(){
-                if(that.defaultBeforeClose()){
-                    if($.isFunction(that.options.onClose)){
-                      that.options.onClose.call();
-                    } 
-                }
-            };
+            if(this.options.container){
+                //inside resultList
+          
+                btns[0].text = 'Close';
+                btns[0].css['visibility'] = 'visible';
+                btns[0].class = 'alwaysvisible';
+                
+                btns[0].click = function(){
+                    if(that.defaultBeforeClose()){
+                        if($.isFunction(that.options.onClose)){
+                          that.options.onClose.call();
+                        } 
+                    }
+                };
+                
+            }else{
+                btns.push(
+                 {text:window.hWin.HR('Edit All'),
+                    id:'btnEditAll',
+                    css:{'float':'left',margin:'.5em .4em .5em 0'},  
+                    click: function() { 
+                        var rg_options = {
+                            height:800, width:1300,
+                            onInitFinished: function(){
+                                var that2 = this;
+                                setTimeout(function(){
+                                    that2.vocabularies_div.manageDefTerms('selectVocabulary', that.options.trm_ParentTermID);
+                                },500);
+                            },
+                            onClose: that.options.onClose
+                        };
+                        that.options.onClose = null;
+                        that._currentEditID=null; 
+                        that.closeDialog(true);
+                        // $dlg.dialog('close');
+                        //that._saveEditAndClose(); 
+                        window.hWin.HEURIST4.ui.showEntityDialog('defTerms', rg_options);
+                    }}                
+                );
+            }
       
         }
         return btns;  
@@ -858,9 +928,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 this._selection.addRecord(recID, fieldvalues);
                 this._selectAndClose();
                 
-                
                 return;    
-                    
         }
         
         this._super( recID, fieldvalues );
@@ -871,11 +939,17 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
     // 
     _afterSaveEventHandler2: function( recID, fieldvalues ){  
         
-        //if(this.options.edit_mode=='editonly') return;
-        
         if(this.it_was_insert){
-            if($Db.trm(recID)==null){
-                $Db.trm().addRecord(recID, fieldvalues);                
+            if(recID>0){ 
+                if($Db.trm(recID)==null)
+                    $Db.trm().addRecord(recID, fieldvalues);                
+                
+                var parent_id = $Db.trm(recID, 'trm_ParentTermID');                
+                if(parent_id>0){
+                    var t_idx = window.hWin.HAPI4.EntityMgr.getEntityData('trm_Links'); 
+                    if(!t_idx[parent_id]) t_idx[parent_id] = []; 
+                    t_idx[parent_id].push(recID);
+                }
             }
             this._filterByVocabulary();
             //this._loadData();
@@ -889,14 +963,47 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
     //                                
     changeVocabularyGroup: function(params){                                    
         
-        var that = this;
-        this._saveEditAndClose( params ,
-            function(){
-                if(params.trm_ParentTermID>0){
-                    that._filterByVocabulary();
-                }
-                that._triggerRefresh((params.trm_ParentTermID)?'term':'vcg');
-        });
+        
+        var trm_ID = params['trm_ID'];
+        var new_vocab_id = params['trm_ParentTermID'];
+        var old_parent_id = -1;
+        var parents = $Db.trm(trm_ID, 'trm_Parents');
+        if(parents){
+            parents = parents.split(',');
+            old_parent_id = parents[0];
+        }
+        if(old_parent_id<0){
+console.log('Error !!! Parnet not found for '+trm_ID);
+            return;
+        }
+        var vocab_id = $Db.getTermVocab(trm_ID);
+        var isRef = (this.options.trm_ParentTermID!=vocab_id);
+        
+        //check that selected terms are already in this vocabulary
+        var trm_ids = $Db.trm_TreeData(new_vocab_id, 'set');
+        if(window.hWin.HEURIST4.util.findArrayIndex(trm_ID, trm_ids)>=0){
+            window.hWin.HEURIST4.msg.showMsgErr( (isRef?'Term':'Reference')
+                + ' "'+$Db.trm(trm_ID, 'trm_Label')
+                +'" is already in vocabulary "'+$Db.trm(new_vocab_id,'trm_Label')+'"'); 
+            return;
+        }
+        
+        if(isRef){
+            //change parent for reference
+            this.setTermReferences(new_vocab_id, trm_ID, old_parent_id);
+        }else{
+        
+            var that = this;
+            this._saveEditAndClose( params ,
+                function(){
+                    if(params.trm_ParentTermID>0){
+                        that.changeParentInIndex(new_vocab_id, trm_ID, old_parent_id);
+                        that._filterByVocabulary();
+                    }
+                    that._triggerRefresh((params.trm_ParentTermID)?'term':'vcg');
+            });
+            
+        }
         
     },
     
@@ -904,6 +1011,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
     // extend for group actions
     //
     _onActionListener: function(event, action){
+
+        var that = this;
         
         var keep_action = action;
         if(action && action.action){
@@ -925,6 +1034,86 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             ///this.options.trm_VocabularyGroupID = recID;
             this.addEditRecord(-1);        
             return true;
+        }else if(action=='add-reference'){
+            
+            if(this.options.trm_ParentTermID<0){
+                window.hWin.HEURIST4.msg.showMsgFlash('Vocabulary is not defined');                
+                return true;        
+            }            
+            //open multi selector
+            var popup_options = {
+                select_mode:'select_multi',
+                height: (window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95,
+                title: ('Select terms to be added to vocabulary "'
+                        + $Db.trm(this.options.trm_ParentTermID,'trm_Label')
+                        + '" by reference'),
+                onselect:function(event, data){
+
+                    var sels;
+                    if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
+                        sels = data.selection.getIds();
+                    }else{
+                        sels = data.selection;
+                    }
+                    //add new term to vocabulary by reference
+                    that.setTermReferences(that.options.trm_ParentTermID, sels, null);
+                }
+            }
+            
+            window.hWin.HEURIST4.ui.showEntityDialog('defTerms', popup_options);
+            
+        }else if(action=='delete'){
+            
+            if(this.options.auxilary=='vocabulary'){
+               //check for children 
+               if($Db.trm_HasChildren(recID)){
+                    window.hWin.HEURIST4.msg.showMsgFlash('Vocabulary has children. Remove them first');                
+                    return true;   
+               }
+                
+            }else{
+            
+                //check for reference    
+                var vocab_id = $Db.getTermVocab(recID);
+                var isRef = (this.options.trm_ParentTermID!=vocab_id);
+                if(isRef){
+                    window.hWin.HEURIST4.msg.showMsgDlg(
+                        'You are going to remove the term reference. Actual term retains. Proceed?', 
+                        function(){ 
+                            //find parent 
+                            var parents = $Db.trm(recID, 'trm_Parents');
+                            if(parents){
+                                parents = parents.split(',');
+                                parent_id = parents[0];
+                                //remove from trm_Links
+                                that.setTermReferences(null,recID,parent_id);
+                            }
+                                
+                        }, 
+                        {title:'Info',yes:'Proceed',no:'Cancel'});        
+                    return true;
+                }else{
+                    //check usage as reference
+                    var v_ids = $Db.trm_getAllVocabs(recID);
+                    if(v_ids.length>1){
+                        var names = [];
+                        for(var i=0; i<v_ids.length; i++){
+                            names.push($Db.trm(v_ids[i],'trm_Label'));    
+                        }
+                        window.hWin.HEURIST4.msg.showMsgDlg(
+                        'The term you are deleting is referenced by the '+names.join(', ')
+                        +' vocabularies. If you delete it it will be removed from those vocabularies. Proceed?',
+                        function(){ that._currentEditID = recID; that._deleteAndClose(true) }, 
+                        {title:'Info',yes:'Proceed',no:'Cancel'});        
+                        return true;
+                    }
+                }
+            
+            }
+            
+            this._currentEditID = recID; 
+            this._deleteAndClose();
+            return true;
         }
         //this.options.trm_VocabularyGroupID = -1;
 
@@ -937,7 +1126,6 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 action = action.action;
             }
 */            
-            var that = this;
 /*
             if(action=='add-group' || action=='edit-group'){
 
@@ -1009,9 +1197,12 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                         .insertAfter(this.recordList);
 
                                    //this.getRecordSet()
+/*                                   
                     var treedata = this.recordList.resultList('getRecordSet')
                             .getTreeViewData('trm_Label', 'trm_ParentTermID',
                                                  this.options.trm_ParentTermID);
+*/                                                 
+                    var treedata = $Db.trm_TreeData(this.options.trm_ParentTermID, 1);
                         
                     this.recordTree.fancytree(
                     {
@@ -1033,6 +1224,77 @@ console.log('NODE activated');
             }
 
         }
+    },
+    
+    //
+    // add terms to vocabulary by reference
+    //
+    setTermReferences: function(new_vocab_id, term_IDs, old_vocab_id){
+        
+            if(new_vocab_id>0){
+                //addition - check that selected terms are already in this vocabulary
+                var trm_ids = $Db.trm_TreeData(new_vocab_id, 'set');
+                for(var i=0; i<term_IDs.length; i++){
+                    if(window.hWin.HEURIST4.util.findArrayIndex(term_IDs[i], trm_ids)>=0){
+                        window.hWin.HEURIST4.msg.showMsgErr('Term "'+$Db.trm(term_IDs[i],'trm_Label')
+                            +'" is already in vocabulary "'+$Db.trm(new_vocab_id,'trm_Label')+'"'); 
+                        return;
+                    }
+                }
+            }
+      
+            var request = {
+                'a'          : 'action',
+                'reference'  : 1,
+                'entity'     : this.options.entity.entityName,
+                'request_id' : window.hWin.HEURIST4.util.random(),
+                'old_ParentTermID': old_vocab_id,  
+                'new_ParentTermID': new_vocab_id,  
+                'trm_ID': term_IDs                   
+                };
+             
+            var that = this;   
+            
+            window.hWin.HEURIST4.msg.bringCoverallToFront();                                             
+                
+            window.hWin.HAPI4.EntityMgr.doRequest(request, 
+                function(response){
+                    window.hWin.HEURIST4.msg.sendCoverallToBack();
+                        
+                    if(response.status == window.hWin.ResponseStatus.OK){
+                        
+                        //window.hWin.HAPI4.EntityMgr.setEntityData('trm_Links', response.data); 
+                        that.changeParentInIndex(new_vocab_id, term_IDs, old_vocab_id);
+
+                        that.it_was_insert = true;
+                        that._afterSaveEventHandler2();//to reset filter and trigger global refresh
+                        
+                    }else{
+                        window.hWin.HEURIST4.msg.showMsgErr(response);                        
+                    }
+                });   
+        
+    },
+    
+    changeParentInIndex: function(new_parent_id, term_ID, old_parent_id){
+
+            var t_idx = window.hWin.HAPI4.EntityMgr.getEntityData('trm_Links'); 
+            if(new_parent_id>0){
+                if(!t_idx[new_parent_id]) t_idx[new_parent_id] = []; 
+                if($.isArray(term_ID)){
+                    t_idx[new_parent_id] = t_idx[new_parent_id].concat( term_ID );
+                }else{
+                    t_idx[new_parent_id].push(term_ID);
+                }
+                    
+            }
+            if(old_parent_id>0){
+                var k = window.hWin.HEURIST4.util.findArrayIndex(term_ID, t_idx[old_parent_id]);    
+                if(k>=0){
+                    t_idx[old_parent_id].splice(k,1);
+                }
+            }
+        
     },
     
     //
@@ -1085,26 +1347,6 @@ console.log('NODE activated');
         }
         
     },
-    
-    //
-    //
-    /*
-    filterRecordList: function( event, request ){
-        
-        var subset = this._super(event, request);
-        
-
-        if(this.options.auxilary!='vocabulary' && this.recordTree && this.recordTree.fancytree('instance')){
-
-            //filtered
-            var treedata = subset.getTreeViewData('trm_Label', 'trm_ParentTermID',
-                                                 this.options.trm_ParentTermID);
-            var tree = this.recordTree.fancytree('getTree');
-            tree.reload(treedata);
-            
-        }
-    }*/
-
 
     //
     // show dropdown for field suggestions to be added
@@ -1166,8 +1408,7 @@ console.log('NODE activated');
                     var is_valid_domain = true;
                     //get vocabulary group
                     if(that.options.filter_groups){
-                        var vcg_ID = $Db.trm(ids[ids.length-1], 'trm_VocabularyGroupID');
-                        is_valid_domain = (vcg_ID>0 && $Db.vcg(vcg_ID,'vcg_Domain')==that.options.filter_groups);
+                        is_valid_domain = ($Db.trm(ids[ids.length-1], 'trm_Domain')==that.options.filter_groups);
                     }
                     
                     if(is_valid_domain){
@@ -1187,7 +1428,7 @@ console.log('NODE activated');
                                 //select vocabulary group, select vocab
                                 var vocab_id  = trm_IDs[trm_IDs.length-1];
                                 
-                                if(that.options.select_mode=='select_single'){
+                                if(that.options.select_mode!='manager'){
                                     that.vocabularies_sel.val(vocab_id);//.change();
                                 }else{
                                     that.vocabularies_div.manageDefTerms('selectVocabulary', vocab_id);

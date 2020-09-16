@@ -57,8 +57,8 @@
                     "dtID": "vcg_Domain",
                     "dtFields":{
                         "dty_Type":"enum",
-                        "rst_DisplayName": "Use as:",
-                        "rst_DisplayHelpText": "Define the usage of the terms (can be both)",
+                        "rst_DisplayName": "Domain:",
+                        "rst_DisplayHelpText": "Default domain for new vocabularies for this group",
                         "rst_DefaultValue": "enum",
                         "rst_FieldConfig":[
                             {"key":"enum","title":"Terms"},

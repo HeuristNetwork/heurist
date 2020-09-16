@@ -33,6 +33,7 @@
 // popupDialog
 // closeDialog
 
+//defaultBeforeClose
 //_selectAndClose - event handler for select-and-close (select_multi) or for any selection event for select_single
 // selectedRecords get and set selected records 
     
@@ -243,26 +244,28 @@ $.widget( "heurist.manageEntity", {
             .insertBefore($(fele.children()[0])); //insert before first wrapper
         }
             
-        if(this.options.layout_mode=='editonly' && !this.options.isdialog){
-                //add div at bottom for control buttons
-                $('<div>').addClass('ent_footer editForm-toolbar')
-                    .css({'height':'36px','padding':'4px 20px 0px'}).appendTo(fele);
+        if(!this.options.isdialog){
+            if(this.options.layout_mode=='editonly'){
+                    //add div at bottom for control buttons
+                    $('<div>').addClass('ent_footer editForm-toolbar')
+                        .css({'height':'36px','padding':'4px 20px 0px'}).appendTo(fele);
+                        
+                    this.element.find('.editForm').css({'bottom':'40px'});
                     
-                this.element.find('.editForm').css({'bottom':'40px'});
-                
-                this._toolbar = this.element.find('.editForm-toolbar');
-                
-        }else if (this.options['select_mode']=='select_multi' || this.options['select_mode']=='select_roles')
-        {
-                var ele = $('<div>').addClass('ent_footer editForm-toolbar ui-heurist-header')
-                    .css({'height':'36px','padding':'4px 20px 0px'}).insertAfter(fele);
-                fele.css('bottom','40px');
-                
-                var that = this;
-                this._defineActionButton2({text:window.hWin.HR( this.options['selectbutton_label'] ),
-                        css:{'float':'right',margin:'.5em .4em .5em 0'},  
-                        class: 'ui-button-action',
-                        click: function() { that._selectAndClose(); }}, ele);
+                    this._toolbar = this.element.find('.editForm-toolbar');
+                    
+            }else if(this.options['select_mode']=='select_multi' || this.options['select_mode']=='select_roles')
+            {
+                    var ele = $('<div>').addClass('ent_footer editForm-toolbar ui-heurist-header')
+                        .css({'height':'36px','padding':'4px 20px 0px'}).insertAfter(fele);
+                    fele.css('bottom','40px');
+                    
+                    var that = this;
+                    this._defineActionButton2({text:window.hWin.HR( this.options['selectbutton_label'] ),
+                            css:{'float':'right',margin:'.5em .4em .5em 0'},  
+                            class: 'ui-button-action',
+                            click: function() { that._selectAndClose(); }}, ele);
+            }
         }
         
         //find 3 elements searchForm, recordList+recordList_toolbar, editForm+editForm_toolbar
@@ -799,15 +802,15 @@ $.widget( "heurist.manageEntity", {
     //
     //
     //
-    _getEditDialog: function(){
+    _getEditDialog: function(dlg_instance){
             if(this.options.edit_mode=='popup' && this._edit_dialog){
-                return this._edit_dialog.parents('.ui-dialog'); 
+                return dlg_instance?this._edit_dialog  :this._edit_dialog.parents('.ui-dialog'); 
             }else if(this.options.edit_mode=='editonly'){
 
                 if(this._as_dialog){
-                    return this._as_dialog.parents('.ui-dialog'); 
+                    return dlg_instance?this._as_dialog :this._as_dialog.parents('.ui-dialog'); 
                 }else {
-                    return this.editForm.parent();// $(document).find('div.ui-widget')[0];
+                    return dlg_instance?null :this.editForm.parent();// $(document).find('div.ui-widget')[0];
                 }
             }
             return null;

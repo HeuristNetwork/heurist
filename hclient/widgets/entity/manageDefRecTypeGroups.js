@@ -162,16 +162,7 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
     //
     _recordListItemRenderer: function(recordset, record){
         
-        function fld2(fldname, col_width){
-            swidth = '';
-            if(!window.hWin.HEURIST4.util.isempty(col_width)){
-                swidth = ' style="display:table-cell;width:'+col_width+';max-width:'+col_width+'"';
-            }
-            return '<div class="item" '+swidth+'>'+window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, fldname))+'</div>';
-        }
-        
         var recID   = recordset.fld(record, 'rtg_ID');
-        var recTitle = fld2('rtg_ID','4em')+fld2('rtg_Name');
         
         var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" style="height:1.3em">';
         if(this.options.select_mode=='select_multi'){
@@ -180,8 +171,10 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
             //html = html + '<div>';
         }
         
-        html = html + fld2('rtg_Name',250);
-      
+        html = html + 
+            '<div class="item" style="font-weight:bold;display:table-cell;width:250;max-width:250">'
+            +window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, 'rtg_Name'))+'</div>';
+        
         if(this.options.edit_mode=='popup'){
             html = html
             + this._defineActionButton({key:'edit',label:'Edit', title:'', icon:'ui-icon-pencil', class:'rec_actions_button'}, 

@@ -424,6 +424,7 @@ class DbEntityBase
         
         $mysqli = $this->system->get_mysqli();
         
+        
         $mysqli->query('SET foreign_key_checks = 0');
         $query = 'DELETE FROM '.$this->config['tableName'].' WHERE '.$this->primaryField.' in ('.implode(',', $this->recordIDs).')';
         $ret = $mysqli->query($query);
@@ -432,7 +433,7 @@ class DbEntityBase
         
         if(!$ret){
             $this->system->addError(HEURIST_DB_ERROR, 
-                    "Cannot delete from table ".$this->config['entityName'], $mysqli->error);
+                    'Cannot delete from table '.$this->config['entityName'], $mysqli->error);
             return false;
         }else if($affected===0){
             $this->system->addError(HEURIST_NOT_FOUND, 'Cannot delete. No entries found');

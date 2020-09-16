@@ -1121,9 +1121,8 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                 term_type="relation";
             }
             
-            var new_selector = window.hWin.HEURIST4.ui.createTermSelectExt2(null,
-                {datatype:term_type, termIDTree:allTerms, headerTermIDsList:disTerms,
-                    defaultTermID:null, topOptions:false, supressTermCode:true, useHtmlSelect:false});
+            var new_selector = window.hWin.HEURIST4.ui.createTermSelect(null,
+                    {vocab_id:allTerms, topOptions:false, supressTermCode:true});
             
             new_selector.css({'backgroundColor':'#cccccc','min-width':'120px','max-width':'120px','margin':'0px 4px'})
                     .change(function(event){event.target.selectedIndex=0;}).show();

@@ -485,7 +485,8 @@ $.widget( "heurist.ruleBuilder", {
                         //this.label_3.show();
                         this.select_reltype.show();
                         this.select_reltype.prop('disabled', false);
-                        window.hWin.HEURIST4.ui.createTermSelectExt(this.select_reltype.get(0), 'relation', arr_field.terms, arr_field.terms_dis, null, 'Any relationship type', false, true);
+                        window.hWin.HEURIST4.ui.createTermSelect(this.select_reltype.get(0),
+                                    {vocab_id:arr_field.terms, topOptions:'Any relationship type'});
                     }
                     //reduced list of constraints
                     window.hWin.HEURIST4.ui.createRectypeSelect(this.select_target_rectype.get(0), arr_field.rectypes, null, true); //arr_field.rectypes.length>1?'any':null);

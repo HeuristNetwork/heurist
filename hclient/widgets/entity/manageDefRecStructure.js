@@ -1648,17 +1648,6 @@ dty_TermIDTreeNonSelectableIDs
             if(term_type!="enum"){
                 term_type="relation";
             }
-/*
-            var new_selector = $('<select>');
-            edit_ele.find('.input-div').prepend(new_selector); 
-            
-            new_selector = window.hWin.HEURIST4.ui.createTermSelectExt2(new_selector[0],
-                {datatype:term_type, termIDTree:allTerms, headerTermIDsList:disTerms,
-                    defaultTermID:null, topOptions:false, supressTermCode:true, useHtmlSelect:false});
-            
-            new_selector.css({'backgroundColor':'#cccccc','min-width':'220px'})
-                    .change(function(event){event.target.selectedIndex=0;});
-*/            
         }
 
         var defval = this._editing.getValue('rst_DefaultValue')[0];
@@ -1679,9 +1668,6 @@ dty_TermIDTreeNonSelectableIDs
         ele.editing_input('fset','rst_TermIDTreeNonSelectableIDs', disTerms);
         ele.editing_input('setValue',[defval]);
         */
-            
-        
-        
     },
     
     //

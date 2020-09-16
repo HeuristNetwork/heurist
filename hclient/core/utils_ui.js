@@ -542,12 +542,56 @@ window.hWin.HEURIST4.ui = {
 
     
     //
+    // options: vocab_id, topOptions, defaultTermID, useHtmlSelect:false
     //
-    //
-    createTermSelectExt3: function(selObj, datatype, termIDTree, headerTermIDsList, defaultTermID, topOptions, needArray) {
-        return window.hWin.HEURIST4.ui.createTermSelectExt2(selObj,
-            {datatype:datatype, termIDTree:termIDTree, headerTermIDsList:headerTermIDsList,
-             defaultTermID:defaultTermID, topOptions:topOptions, needArray:needArray, useHtmlSelect:false});
+    createTermSelect: function(selObj, options){
+      
+        var vocab_id =  options.vocab_id, 
+            defaultTermID =  options.defaultTermID>0?options.defaultTermID:null,
+            topOptions =  options.topOptions,
+            supressTermCode = options.supressTermCode,
+            useHtmlSelect  = (options.useHtmlSelect===true);
+        
+        //create selector 
+        selObj = window.hWin.HEURIST4.ui.createSelector(selObj, topOptions);
+            
+        var data = $Db.trm_TreeData(vocab_id, 2);                
+        var termCode;
+        
+        //add optgroups and options
+        for(var i=0; i<data.length-1; i++){
+            
+            
+            if(supressTermCode || window.hWin.HEURIST4.util.isempty(data[i].code)){
+                termCode = '';
+            }else{
+                termCode = " [code "+data[i].code+"]";
+            }
+            
+            var opt = window.hWin.HEURIST4.ui.addoption(selObj, 
+                                            data[i].key, data[i].title+termCode);
+            $(opt).attr('depth', data[i].depth);
+
+            if (data[i].key == defaultTermID || data[i].title == defaultTermID) {
+                    opt.selected = true;
+            }
+            /*            
+            $(opt).attr('term-img', hasImage?1:0);
+            if(useIds && termID>0){
+                $(opt).attr('entity-id', termID);
+            }
+            if(termParents!=''){
+                $(opt).attr('parents', termParents);
+                $(opt).attr('term-orig', origName);  
+                $(opt).attr('term-view', termName+termCode);
+            }             
+            */
+        }//for
+        
+        //init selectmenu
+        selObj = window.hWin.HEURIST4.ui.initHSelect(selObj, useHtmlSelect);
+
+        return $(selObj);
     },
 
     //
@@ -555,86 +599,87 @@ window.hWin.HEURIST4.ui = {
     // domain - any enum relation for useGroup = true
     //
     createVocabularySelect: function(selObj, options) {
-        
+
         var defaultTermID =  options.defaultTermID,
-            topOptions = options.topOptions,
-            useGroups = options.useGroups;
-            
+        topOptions = options.topOptions,
+        useGroups = options.useGroups;
+
         var domain = (options.domain=='enum' || options.domain=='relation')?options.domain:null;
-            
+
         if (!(useGroups>0 || useGroups===false)){
             useGroups = true;
         }
 
         //vocab groups    
-        var vocabs = {'0':[]};
-        if(useGroups===true){
-            //vgroups = recset.makeKeyValueArray('vcg_Name'); //returns key: title: array 
-            vocabs = {};
-            $Db.vcg().each(function(id,rec){ 
-                if(domain==null || domain==$Db.vcg(id,'vcg_Domain')){
-                    vocabs[id] = []; 
-                }
-            });
-        }else if (useGroups>0){
-            vocabs = {};
-            vocabs[useGroups] = [];
+        var vgroups, vocabs = {};
+        if(useGroups!==true){
+            if(useGroups===false){
+                vocabs['0'] = [];
+            }else if(useGroups>0){
+                vocabs[useGroups] = [];
+            }
         }
-        
-        //find all vocabularies and group them 
+
+        //find all vocabularies and group them by vocab groups
         $Db.trm().each(function(trmID, record){
-           //var parent_id = this.fld(record, 'trm_ParentTermID'); 
-           var grp_id = this.fld(record, 'trm_VocabularyGroupID');
-           if(grp_id>0){ //!(parent_id>0)){
-               if(vocabs[grp_id]){ //useGroups===true || useGroups == grp_id
-                   //if(!vocabs[grp_id]) grp_id = 1;
-                   vocabs[grp_id].push(trmID);
-               }else if(useGroups===false){
-                   vocabs['0'].push(trmID);
-               }
-           }
+            var parent_id = this.fld(record, 'trm_ParentTermID');
+            if(!(parent_id>0)){
+                var grp_id = this.fld(record, 'trm_VocabularyGroupID');
+                if(grp_id>0){ 
+                    if(useGroups===false){
+                        vocabs['0'].push(trmID);
+                    }else if(useGroups===true){
+                        if(domain==null || domain==$Db.trm(trmID,'trm_Domain')){
+                            if(!vocabs[grp_id]) vocabs[grp_id] = [];
+                            vocabs[grp_id].push(trmID);
+                        }
+                    }else if(useGroups>0 && useGroups==grp_id){
+                        vocabs[grp_id].push(trmID);
+                    }
+                }
+            }
         });
-        
+
         //create selector 
         selObj = window.hWin.HEURIST4.ui.createSelector(selObj, topOptions);
-        
+
         //add optgroups and options
         $.each(Object.keys(vocabs),function(i,grp_id){
-            
-            if(useGroups===true && vocabs[grp_id].length>1 && grp_id>0){
+
+            if(useGroups===true  && grp_id>0 && vocabs[grp_id].length>1){
                 //add group header
                 var opt = window.hWin.HEURIST4.ui.addoption(selObj, grp_id, $Db.vcg(grp_id,'vcg_Name'));
                 $(opt).attr('disabled', 'disabled');
                 $(opt).attr('group', 1);
             }
-                    
+
             //sort by name within group
             vocabs[grp_id].sort(function(a,b){
                 return $Db.trm(a,'trm_Label')<$Db.trm(b,'trm_Label')?-1:1;
             });
-            
+
             $.each(vocabs[grp_id],function(i,trm_id){
                 var trm_name = $Db.trm(trm_id,'trm_Label');
                 var opt = window.hWin.HEURIST4.ui.addoption(selObj, trm_id, trm_name);
                 $(opt).attr('depth', 1);
-                
+
                 if (trm_id == defaultTermID || trm_name == defaultTermID) {
-                        opt.selected = true;
+                    opt.selected = true;
                 }
-                
+
             });
         });
-        
+
         //init selectmenu
         selObj = window.hWin.HEURIST4.ui.initHSelect(selObj, false);
 
         return $(selObj);
-        
+
     },
-    
-    
+
+
     //
-    // get selector for record type groups
+    // get selector for record/detail/vocabulary type groups
     //
     createEntityGroupSelect: function(entity, selObj, topOptions) {
 
@@ -2046,10 +2091,9 @@ window.hWin.HEURIST4.ui = {
         
         var reltype = ''
         if(info['trm_ID']>0){
-            reltype = window.hWin.HEURIST4.dbs.getTermValue(info['trm_ID']);
             reltype = '<div class="detailType" style="display:table-cell;min-width:'
                 + Math.max(19, Math.min(reltype.length,25))+'ex;">'
-                + reltype + '</div>'
+                + $Db.trm(info['trm_ID'], 'trm_Label') + '</div>'
         }
         
         var ele = $('<div class="link-div ui-widget-content ui-corner-all"  data-relID="'
@@ -2201,7 +2245,7 @@ window.hWin.HEURIST4.ui = {
                                         if(info['is_inward']){
                                             term_ID = window.hWin.HEURIST4.dbs.getInverseTermById(term_ID);
                                         }
-                                        ele.find('.detailType').text(window.hWin.HEURIST4.dbs.getTermValue(term_ID)); 
+                                        ele.find('.detailType').text($Db.trm(info['trm_ID'], 'trm_Label')); 
                                         var related_ID = recordset.fld(record, DT_RELATED_REC_ID);  
 
                                         // e - search for temp also

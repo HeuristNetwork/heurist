@@ -1099,7 +1099,7 @@ $.widget( "heurist.search", {
                                   rt = q[1];
                               }
                         }
-                        if(rt>0 && window.hWin.HEURIST4.rectypes.names[rt]){
+                        if(rt>0 && $Db.rty(rt,'rty_Name')){
 
                             var sel = that.search_assistant.find(".sa_rectype");
                             sel.val(rt);
@@ -1231,7 +1231,7 @@ $.widget( "heurist.search", {
                     {useIcons: false, useCounts:true, useGroups:true, useIds: (exp_level<2), 
                         topOptions:window.hWin.HR('Any record type'), useHtmlSelect:false});
 
-        var allowed = Object.keys(window.hWin.HEURIST4.detailtypes.lookups);
+        var allowed = Object.keys(window.hWin.HEURIST4.dbs.baseFieldType);
         allowed.splice(allowed.indexOf("separator"),1);
         allowed.splice(allowed.indexOf("geo"),1);
         allowed.splice(allowed.indexOf("relmarker"),1);
@@ -1281,12 +1281,7 @@ $.widget( "heurist.search", {
                     {key:'p', title:window.hWin.HR("popularity")}];
 
                 if(Number(rectype)>0){
-                    topOptions.push({optgroup:'yes', title:window.hWin.HEURIST4.rectypes.names[rectype]+' '+window.hWin.HR('fields')});
-                    /*
-                    var grp = document.createElement("optgroup");
-                    grp.label =  window.hWin.HEURIST4.rectypes.names[rectype]+' '+window.hWin.HR('fields');
-                    select_sortby.get(0).appendChild(grp);
-                    */
+                    topOptions.push({optgroup:'yes', title:$Db.rty(rectype,'rty_Name')+' '+window.hWin.HR('fields')});
                 }
                 select_sortby = window.hWin.HEURIST4.ui.createRectypeDetailSelect(
                         that.search_assistant.find(".sa_sortby").get(0), rectype, allowed, topOptions,
@@ -1331,26 +1326,20 @@ $.widget( "heurist.search", {
                     
                     $dlg.find(".fld_coord").hide();
                 
-                    var detailtypes = window.hWin.HEURIST4.detailtypes.typedefs;
                     var detailType = '';
 
                     if(Number(dtID)>0){
-                        detailType = detailtypes[dtID].commonFields[detailtypes.fieldNamesToIndex['dty_Type']];
+                        detailType = $Db.dty(dtID,'dty_Type');
                     }
                     if(detailType=='enum'  || detailType=='relationtype'){
                         $dlg.find(".fld_contain").hide();
                         $dlg.find(".fld_enum").show();
-                        //fill terms
-                        var allTerms = detailtypes[dtID]['commonFields'][detailtypes['fieldNamesToIndex']['dty_JsonTermIDTree']],
-                        disabledTerms = detailtypes[dtID]['commonFields'][detailtypes['fieldNamesToIndex']['dty_TermIDTreeNonSelectableIDs']];
 
                         var select_terms = $dlg.find(".sa_termvalue");
 
-                        window.hWin.HEURIST4.ui.createTermSelectExt2(select_terms.get(0),
-                        {datatype:detailType, termIDTree:allTerms, headerTermIDsList:disabledTerms, defaultTermID:null,
-                            useIds: true, 
-                            topOptions:[{ key:'any', title:window.hWin.HR('<any>')},{ key:'blank', title:'  '}], //window.hWin.HR('<blank>')
-                            needArray:false, useHtmlSelect:false});
+                        window.hWin.HEURIST4.ui.createTermSelect(select_terms.get(0),
+                            {vocab_id: $Db.dty(dtID,'dty_JsonTermIDTree'),
+                                topOptions:[{ key:'any', title:window.hWin.HR('<any>')},{ key:'blank', title:'  '}] });
                                              
                         that._on( select_terms, { change: function(event){
                                 this.calcShowSimpleSearch();
@@ -1491,7 +1480,7 @@ $.widget( "heurist.search", {
                 var detailType = '';
 
                 if(Number(fld)>0){
-                    var detailType = detailtypes[fld].commonFields[detailtypes.fieldNamesToIndex['dty_Type']];
+                    var detailType = $Db.dty(dtID,'dty_Type');
                     isEnum = (detailType=='enum'  || detailType=='relationtype');
                 }
                 

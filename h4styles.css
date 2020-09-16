@@ -907,7 +907,7 @@ div.div-result-list-content.icons_list{
     display: inline-block;
 }
 .list .recordDiv .recordSelector {
-    display: inline-block;
+/*    display: inline-block; */
     padding-top:5px;
 }
 

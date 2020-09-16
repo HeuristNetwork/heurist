@@ -21,18 +21,17 @@
 Selectors:
 
 TERMS
-
-getChildrenLabels - returns all terms labels of children terms for given term
-getChildrenTerms - returns entire terms tree or only part of it for selected termID
-
 getTermById
+
 getInverseTermById
 
 getTermValue - returns label and code for term by id
 
 getColorFromTermValue - Returns hex color by label or code for term by id
 
-getTermDesc - not used
+
+getChildrenTerms - returns entire terms tree or only part of it for selected termID
+
 
 getPlainTermsList - see crosstabs, search_faceted  {id:trm_ID, text:trm_Label}
 
@@ -63,7 +62,7 @@ if (!window.hWin.HEURIST4.dbs)
 window.hWin.HEURIST4.dbs = {
 
     //
-    // return vocabulary for given term
+    // return vocabulary for given term - real vocabulary (not by reference)
     //    
     getTermVocab: function(trm_ID){
         var trm_ParentTermID;
@@ -90,88 +89,18 @@ window.hWin.HEURIST4.dbs = {
         
     },
     
-    //
-    // return list of all children for given trm_ParentTermID in lower case
-    //
-    getChildrenLabels: function(trm_ParentDomain, trm_ParentTermID){
-        
-            var trm_ParentChildren = [];
-        
-            //get list of children labels
-            function __getSiblings(children){
-                for(trmID in children){
-                    if(children.hasOwnProperty(trmID)){
-                        if(trmID==trm_ParentTermID){
-                            for(var id in children[trmID]){
-                                if(children[trmID].hasOwnProperty(id)){
-                                    var term = allterms.termsByDomainLookup[trm_ParentDomain][id];
-                                    if(term && term[0])
-                                        trm_ParentChildren.push(term[0].toLowerCase());
-                                }
-                            }
-                            break;
-                        }else{
-                            __getSiblings(children[trmID]);
-                        }
-                    }
-                }
-            }
-            
-            var allterms = window.hWin.HEURIST4.terms;
- 
-            
-            var trmID, tree = allterms.treesByDomain[trm_ParentDomain];
-            __getSiblings(tree);  
-              
-            return trm_ParentChildren;
-    },
-    
-    //
-    //
-    //
-    getTermById: function(termID){
-        
-        var terms = window.hWin.HEURIST4.terms;
-        if(!terms || window.hWin.HEURIST4.util.isempty(termID)) return '';
-        
-        var term, termLookup = terms.termsByDomainLookup['enum'];
-        if(termLookup[termID]){
-            term = termLookup[termID];
-        }else{
-            termLookup = terms.termsByDomainLookup['relation'];
-            term = termLookup[termID];
-        }
-        
-        return term;
-    },
-
-    //
-    // get inverse term id
-    //
-    getInverseTermById: function(termID){
-        var term = window.hWin.HEURIST4.dbs.getTermById(termID);
-        if(term){
-            var terms = window.hWin.HEURIST4.terms;
-            var invTermID = term[terms.fieldNamesToIndex['trm_InverseTermID']];
-            if(invTermID>0) return invTermID;
-            return termID;
-        }
-        return '';
-    },
     
     //
     // Returns label and code for term by id
     //
     getTermValue: function(termID, withcode){
-
-        var term = window.hWin.HEURIST4.dbs.getTermById(termID);    
         
+        var term = $Db.trm(termID);
         var termName, termCode='';
 
         if(term){
-            var terms = window.hWin.HEURIST4.terms;
-            termName = term[terms.fieldNamesToIndex['trm_Label']];
-            termCode = term[terms.fieldNamesToIndex['trm_Code']];
+            termName = term['trm_Label'];
+            termCode = term['trm_Code'];
             if(window.hWin.HEURIST4.util.isempty(termCode)){
                 termCode = '';
             }else{
@@ -183,20 +112,33 @@ window.hWin.HEURIST4.dbs = {
 
         return termName+(withcode ?termCode :'');
     },
-
+    
+    //
+    // get inverse term id
+    //
+    getInverseTermById: function(termID){
+        var term = $Db.trm(termID);
+        if(term){
+            var invTermID = term['trm_InverseTermID'];
+            if(invTermID>0) return invTermID;
+            return termID;
+        }
+        return '';
+    },
+    
     //
     // Returns hex color by label or code for term by id
     //
     getColorFromTermValue: function(termID){
 
-        var term = window.hWin.HEURIST4.dbs.getTermById(termID);    
+        var term = $Db.trm(termID);
         
         var termName, termCode='';
 
         if(term){
-            var terms = window.hWin.HEURIST4.terms;
-            termName = term[terms.fieldNamesToIndex['trm_Label']];
-            termCode = term[terms.fieldNamesToIndex['trm_Code']];
+
+            termName = term['trm_Label'];
+            termCode = term['trm_Code'];
             if(window.hWin.HEURIST4.util.isempty(termCode)){
                 var cnames = window.hWin.HEURIST4.ui.getColorArr('names');
                 var idx = window.hWin.HEURIST4.util.findArrayIndex(termName.toLowerCase(),cnames);
@@ -210,35 +152,11 @@ window.hWin.HEURIST4.dbs = {
         return termCode;
     },
 
-    // NOT USED  see expernation.js
-    // get description or label for term
-    //
-    getTermDesc: function(termID){
-
-        var term = window.hWin.HEURIST4.dbs.getTermById(termID);    
-        if(term){
-
-            var terms = window.hWin.HEURIST4.terms;
-            var termDesc = term[terms.fieldNamesToIndex['trm_Description']];
-            if(window.hWin.HEURIST4.util.isempty(termDesc)){
-                return term[terms.fieldNamesToIndex['trm_Label']];
-            }else{
-                return termDesc;
-            }
-            
-        }else{
-            return 'not found term#'+termID;
-        }
-
-    },
-
     // 
     // 
     // see crosstabs  {id:trm_ID, text:trm_Label}
     //
     getPlainTermsList: function(datatype, termIDTree, headerTermIDsList, selectedTermID) {
-        
-        //var selObj = window.hWin.HEURIST4.ui.createTermSelectExt(null, datatype, termIDTree, headerTermIDsList);
         
         var selObj = window.hWin.HEURIST4.ui.createTermSelectExt2(null,
             {datatype:datatype, termIDTree:termIDTree, headerTermIDsList:headerTermIDsList,
@@ -1224,8 +1142,11 @@ window.hWin.HEURIST4.dbs = {
 
     //  
     //special behavior for defRecStructure
+    // it returns value for given field or entire recstrucure field
     //    
     rst_idx: function(rty_ID, dty_ID, fieldName){
+        
+        var recset = window.hWin.HAPI4.EntityMgr.getEntityData('defRecStructure'); 
         
         if(rty_ID>0){
             
@@ -1240,7 +1161,7 @@ window.hWin.HEURIST4.dbs = {
                 if(!(rst_ID>0)){
                     return null;
                 }else if(fieldName){
-                    return recset.fld(rst_ID,fieldName);    
+                    return recset.fld(rst_ID, fieldName);    
                 }else{
                     return recset.getRecord(rst_ID); //json for paticular detail
                 }
@@ -1256,7 +1177,183 @@ window.hWin.HEURIST4.dbs = {
         //return $Db.getset('defRecStructure', rec_ID, fieldName, newValue);        
     },
     
+    //
+    // it uses trm_Links
+    // mode - 0, flat - returns recordset, 
+    //        1, tree - returns treedata for fancytree
+    //        2, select - return array of options for selector
+    //        3, set  - array of ids 
+    //        4, labels - array of labels in lower case 
+    //
+    trm_TreeData: function(vocab_id, mode){
+        
+        var recset = window.hWin.HAPI4.EntityMgr.getEntityData('defTerms');
+        //parent:[children]
+        var t_idx = window.hWin.HAPI4.EntityMgr.getEntityData('trm_Links'); 
+        var trm_ids = [];
+        
+        if(window.hWin.HEURIST4.util.isNumber(mode)){
+            if(mode==1) mode='tree'
+            else if(mode==2) mode='select'
+            else if(mode==3) mode='set'
+            else if(mode==4) mode='labels'
+            else mode='flat';
+        }
+        
+
+        function __addChilds(recID, lvl_parents){
+        
+            var node = {title: recset.fld(recID, 'trm_Label'), key: recID};
+
+            var children = t_idx[recID]; //array of children ids
+            
+            if(children && children.length>0){
+
+                //sort children by name
+                children.sort(function(a,b){
+                    return recset.fld(a,'trm_Label')<recset.fld(b,'trm_Label')?-1:1;        
+                });
+                
+                if(mode=='tree'){
+
+                    var child_nodes = [];  
+                    for(var i=0; i<children.length;i++){  
+                        child_nodes.push( __addChilds(children[i]) );          
+                    }
+                    node['children'] = child_nodes;
+                    node['folder'] = true;
+
+                }else if(mode=='select'){
+
+                    for(var i=0; i<children.length;i++){ 
+                        recID = children[i];
+                        trm_ids.push({title: recset.fld(recID, 'trm_Label'), 
+                                      code: recset.fld(recID, 'trm_Code'),
+                                      key: recID, depth:lvl_parents});
+                        __addChilds(recID, lvl_parents+1);
+                    }
+
+                }else if(mode=='set' || mode=='labels'){
+                    
+                    for(var i=0; i<children.length;i++){  
+                        recID = children[i];
+                        trm_ids.push(mode=='labels'?recset.fld(recID, 'trm_Label').toLowerCase() 
+                                                   :recID);
+                        __addChilds(recID);
+                    }
+                    
+                }else{ //gather ids onlys - for recordset
+
+                    lvl_parents = lvl_parents?lvl_parents.split(','):[];
+                    lvl_parents.push(recID);
+
+                    for(var i=0; i<children.length;i++){  
+                        recID = children[i];
+                        trm_ids.push(recID);
+
+                        recset.setFldById(recID, 'trm_Parents', lvl_parents.join(','));
+                        __addChilds(recID, lvl_parents.join(','));
+                    }
+
+                }
+            }
+            
+            return node;
+        }
+        
+        var res = __addChilds(vocab_id, 0);
+        
+        if(mode=='tree'){
+            return res['children'];
+        }else if(mode=='select'){
+            return trm_ids;
+        }else if(mode=='set' || mode=='labels'){
+            return trm_ids;
+        }else{
+            return recset.getSubSetByIds(trm_ids);
+        }
+        
+    },
     
+    //
+    //
+    //
+    trm_HasChildren: function(trm_id){
+        var t_idx = window.hWin.HAPI4.EntityMgr.getEntityData('trm_Links'); 
+        var children = t_idx[recID];
+        return (children && children.length>0);
+    },
+    
+    //
+    // get array of vocabularies by reference
+    //
+    trm_getAllVocabs: function(trm_id){
+        var t_idx = window.hWin.HAPI4.EntityMgr.getEntityData('trm_Links'); 
+        
+        var res = [];
+        var parents = Object.keys(t_idx);
+        for (var i=0; i<parents.length; i++){
+            var parent_ID = parents[i];
+            var k = window.hWin.HEURIST4.util.findArrayIndex(trm_id, t_idx[parent_ID]);
+            if(k>=0){
+                var trm_ParentTermID = $Db.trm(parent_ID, 'trm_ParentTermID');
+                if(trm_ParentTermID>0){
+                    res = res.concat($Db.trm_getAllVocabs(parent_ID));
+                }else{
+                    //vocabulary!
+                    res.push( parent_ID );     
+                }
+            }
+        }
+        return res;
+    },
+    
+    //
+    // remove any mention of term in hierarchy or in given vocabulary
+    //
+    trm_RemoveLinks: function(trm_id){
+        var t_idx = window.hWin.HAPI4.EntityMgr.getEntityData('trm_Links'); 
+        var parents = Object.keys(t_idx);
+        var i = 0;
+        while(i<parents.length){
+            if(parents[i]==trm_id){
+                delete parents[i];   
+            }else{
+                var k = window.hWin.HEURIST4.util.findArrayIndex(trm_id, t_idx[parent_ID]);
+                if(k>=0){
+                    parents[i].splice(k,1);
+                }
+                i = i +1;
+            }
+        }
+    },
+    
+    // NOT USED
+    // remove any term in given vocabulary
+    //    
+    trm_RemoveLink: function(trm_id, vocab_id){
+        
+        var t_idx = window.hWin.HAPI4.EntityMgr.getEntityData('trm_Links'); 
+        
+        if(t_idx[vocab_id]){
+            var k = window.hWin.HEURIST4.util.findArrayIndex(trm_id, t_idx[vocab_id]);    
+            if(k>=0){
+                parents[i].splice(k,1);
+                return true
+            }else{
+                //find on next level
+                for(var i=0; i<t_idx[vocab_id].length; i++){
+                    if($Db.trm_RemoveLink(trm_id, t_idx[vocab_id][i])){
+                        return true;
+                    }
+                }
+            }
+        }else{
+            //no children
+            return false;
+        }
+    },
+        
     //--------------------------------------------------------------------------
     
     /*

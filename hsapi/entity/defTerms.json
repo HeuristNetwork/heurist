@@ -119,9 +119,12 @@
                 {
                     "dtID": "trm_Domain",
                     "dtFields":{
-                        "dty_Type":"enum",
+                        "dty_Type":"boolean",
+                        "rst_DisplayName":"Use for relations:",
+                        "rst_DefaultValue": "enum",
                         "rst_Display":"hidden",
-                        "rst_FieldConfig":["enum","relation"]
+                        "rst_FieldConfig":["relation","enum"],
+                        "rst_DisplayHelpText": "This vocabulary can be used for relationship type (set this only if you want the vocabulary to appear as an option under Relationship type)"
                     }
                 },
                 {
@@ -131,6 +134,15 @@
                         "rst_DisplayName":"Thumbnail:",
                         "rst_DisplayHelpText": "Image to represent this term. Uploaded image will be scaled to 400x400", 
                         "rst_FieldConfig":{"entity":"defTerms", "accept":".png,.jpg,.gif", "size":400},
+                        "dty_Role":"virtual"
+                    }
+                },
+                {
+                    "dtID": "trm_Parents",
+                    "dtFields":{
+                        "rst_DisplayName": "List of parent terms:",
+                        "rst_Display":"hidden",
+                        "dty_Type":"freetext",
                         "dty_Role":"virtual"
                     }
                 }

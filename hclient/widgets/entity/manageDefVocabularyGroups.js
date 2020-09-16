@@ -141,16 +141,8 @@ $.widget( "heurist.manageDefVocabularyGroups", $.heurist.manageEntity, {
     //
     _recordListItemRenderer: function(recordset, record){
         
-        function fld2(fldname, col_width){
-            swidth = '';
-            if(!window.hWin.HEURIST4.util.isempty(col_width)){
-                swidth = ' style="display:table-cell;width:'+col_width+';max-width:'+col_width+'"';
-            }
-            return '<div class="item" '+swidth+'>'+window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, fldname))+'</div>';
-        }
         
         var recID   = recordset.fld(record, 'vcg_ID');
-        var recTitle = fld2('vcg_ID','4em')+fld2('vcg_Name');
         
         var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" style="height:1.3em">';
         if(this.options.select_mode=='select_multi'){
@@ -159,10 +151,9 @@ $.widget( "heurist.manageDefVocabularyGroups", $.heurist.manageEntity, {
             //html = html + '<div>';
         }
         
-        html = html + fld2('vcg_Name',250);
+        html = html + '<div class="item" style="display:table-cell;min-width:210px;max-width:210px;font-weight:bold;font-size:14px">'
+                +window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, 'vcg_Name'))+'</div>'; 
         
-        html = html + ((recordset.fld(record, 'vcg_Domain')=='enum')?'':'<div style="display: table-cell;font-size:smaller" class="item">(relation)</div>');
-      
         if(this.options.edit_mode=='popup'){
             html = html
             + this._defineActionButton({key:'edit',label:'Edit', title:'', icon:'ui-icon-pencil', class:'rec_actions_button'}, 

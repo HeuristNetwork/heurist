@@ -137,8 +137,8 @@ class DbDefTerms extends DbEntityBase
 
             $this->data['details'] = 'trm_ID,trm_Label,trm_Description,trm_InverseTermId,'
             .'IFNULL(trm_ParentTermID, 0) as trm_ParentTermID'
-            .',trm_VocabularyGroupID,trm_Code,trm_Status,trm_SemanticReferenceURL'
-            .',trm_OriginatingDBID,trm_IDInOriginatingDB'; //,trm_Domain,trm_Modified
+            .',trm_VocabularyGroupID,trm_Code,trm_Status,trm_Domain,trm_SemanticReferenceURL'
+            .',trm_OriginatingDBID,trm_IDInOriginatingDB, "" as trm_Parents'; //trm_Modified
             
             
             //$orderBy = ' ORDER BY trm_Label ';
@@ -184,6 +184,37 @@ class DbDefTerms extends DbEntityBase
         return $res;
 
     }
+
+    //
+    //
+    //    
+    public function getTermLinks(){
+
+        $matches = array();
+        
+        $mysqli = $this->system->get_mysqli();    
+        
+        //compose query
+        $query = 'SELECT trl_ParentID, trl_TermID FROM defTermsLinks ORDER BY trl_ParentID';
+        
+        $res = $mysqli->query($query);
+        if ($res){
+            while ($row = $res->fetch_row()){
+                    
+                if(@$matches[$row[0]]){
+                    $matches[$row[0]][] = $row[1];
+                }else{
+                    $matches[$row[0]] = array($row[1]);
+                }
+            }
+            $res->close();
+        }
+        
+        
+        return $matches;
+        
+    }
+    
 
     //
     // trm_Label may have periods. Periods are taken as indicators of hierarchy.
@@ -410,8 +441,9 @@ class DbDefTerms extends DbEntityBase
         
         $ret = parent::save();
 
+        //treat thumbnail image
         if($ret!==false){
-            //treat thumbnail image
+            
             foreach($this->records as $record){
                 if(in_array(@$record['trm_ID'], $ret)){
                     $thumb_file_name = @$record['trm_Thumb'];
@@ -426,16 +458,69 @@ class DbDefTerms extends DbEntityBase
         
         return $ret;
     } 
-    
+
+    //
+    //
+    //    
     public function batch_action(){
 
             $mysqli = $this->system->get_mysqli();        
-        
+
             $this->need_transaction = false;
-        
             $keep_autocommit = mysql__begin_transaction($mysqli);
-        
-            $ret = $this->saveHierarchy();
+
+            $ret = true;
+            
+            if(@$this->data['reference']){
+                
+                $trm_IDs = prepareIds($this->data['trm_ID']);
+                
+                if(count($trm_IDs)==0){
+                             
+                    $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid set of identificators');
+                    $ret = false;
+                    
+                }else{
+                    //old_ParentTermID
+                    //new_ParentTermID
+                
+                    foreach($trm_IDs as $trm_ID){
+                    
+                        if(@$this->data['new_ParentTermID']>0){
+                            $res = mysql__select_value($mysqli, 
+                            'SELECT trl_TermID FROM defTermsLinks WHERE trl_ParentID='
+                                .$this->data['new_ParentTermID']
+                                .' AND trl_TermID='.$trm_ID);
+                            if(!($res>0)){
+                                $ret = $mysqli->query(
+                                    'insert into defTermsLinks (trl_ParentID,trl_TermID)'
+                                        .'values ('.$this->data['new_ParentTermID'].','.$trm_ID.')');
+                                if(!$ret){
+                                    $this->system->addError(HEURIST_DB_ERROR, 
+                                        'Cannot insert to defTermsLinks table', $mysqli->error);
+                                    $ret =false;
+                                    break;
+                                }
+                            }
+                        }
+                        if(@$this->data['old_ParentTermID']>0){
+                                $ret = $mysqli->query(
+                                    'delete from defTermsLinks where trl_ParentID='
+                                    .$this->data['old_ParentTermID'].' AND trl_TermID='.$trm_ID);
+
+                                if(!$ret){
+                                    $this->system->addError(HEURIST_DB_ERROR, 
+                                        'Cannot delete from defTermsLinks table', $mysqli->error);
+                                    $ret =false;
+                                    break;
+                                }
+                        }
+                    }
+                }
+                
+            }else{
+                $ret = $this->saveHierarchy();
+            }
         
             if($ret===false){
                 $mysqli->rollback();
@@ -444,6 +529,7 @@ class DbDefTerms extends DbEntityBase
             }
             
             if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+            
         
             return $ret;
     }

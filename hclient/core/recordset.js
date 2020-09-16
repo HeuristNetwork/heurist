@@ -1414,17 +1414,19 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
 
             }else{
                 var idx;
+                var _order = [];
                 for(idx=0; idx<rec_ids.length; idx++)
                 {
                     recID = rec_ids[idx];
                     if(records[recID]){
                         _records[recID] = records[recID];    
+                        _order.push(recID);
                     }
                 }
 
             }
             
-            return this.getSubSet(_records);
+            return this.getSubSet(_records, _order);
         },
         
         //

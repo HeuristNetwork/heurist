@@ -991,7 +991,7 @@ $.widget( "heurist.expertnation_nav", {
                                             res.push('<a href="'
                                                 + window.hWin.HAPI4.baseURL+'tertiary-study/'
                                                 + term_id +'/a" onclick="{return window.hWin.enResolver(event);}">'
-                                                + window.hWin.HEURIST4.dbs.getTermValue( term_id )+'</a>'); //was getTermDesc
+                                                + $Db.getTermValue( term_id )+'</a>'); //was getTermDesc
                                         }
                                     }
                                 }//for
@@ -1433,7 +1433,7 @@ $.widget( "heurist.expertnation_nav", {
                     var sDegree = '<a href="'
                     + window.hWin.HAPI4.baseURL+'tertiary-study/'
                     + term_id +'/a" onclick="{return window.hWin.enResolver(event);}">'
-                    + window.hWin.HEURIST4.dbs.getTermValue( term_id )+'</a>'; //getTermDesc
+                    + $Db.getTermValue( term_id )+'</a>'; //getTermDesc
 
                     var is_awarded = (that.recset.fld(record, 120)==532); //flag gegree awarded    
 
@@ -1663,7 +1663,7 @@ $.widget( "heurist.expertnation_nav", {
 
                     //name of award
                     var awardID = that.recset.fld(record, 98);
-                    var sAward = window.hWin.HEURIST4.dbs.getTermValue( awardID ); //was getTermDesc
+                    var sAward = $Db.getTermValue( awardID ); //was getTermDesc
 
                     sAward = '<a href="'
                     + window.hWin.HAPI4.baseURL+'military-award/'
@@ -2338,7 +2338,7 @@ $.widget( "heurist.expertnation_nav", {
     __getTerm: function(termID){
         var res = '';
         if(termID>0){
-            res = window.hWin.HEURIST4.dbs.getTermValue(termID);
+            res = $Db.getTermValue(termID);
             if(res.indexOf('not found')==0) res = '';
         }
         return res;

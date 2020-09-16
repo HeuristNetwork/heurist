@@ -2244,7 +2244,7 @@ if(!detailtypes[dtID]){
                             
                             //for enum get term label w/o code
                             if(field['type']=='enum' && cterm[0]>0){
-                                cterm[0] = window.hWin.HEURIST4.dbs.getTermValue(cterm[0], false);    
+                                cterm[0] = $Db.getTermValue(cterm[0], false);    
                             }
 
                             var f_link = this._createFacetLink(facet_index, {text:cterm[0], value:cterm[2], count:cterm[1]}, display_mode);

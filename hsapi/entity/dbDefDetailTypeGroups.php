@@ -183,13 +183,15 @@ class DbDefDetailTypeGroups extends DbEntityBase
         foreach($this->records as $idx=>$record){
 
             //validate duplication
-            $mysqli = $this->system->get_mysqli();
-            $res = mysql__select_value($mysqli,
-                    "SELECT dtg_ID FROM ".$this->config['tableName']."  WHERE dtg_Name='"
-                    .$mysqli->real_escape_string( $this->records[$idx]['dtg_Name'])."'");
-            if($res>0 && $res!=@$this->records[$idx]['dtg_ID']){
-                $this->system->addError(HEURIST_ACTION_BLOCKED, 'Field type group cannot be saved. The provided name already exists');
-                return false;
+            if(@$this->records[$idx]['dtg_Name']){
+                $mysqli = $this->system->get_mysqli();
+                $res = mysql__select_value($mysqli,
+                        "SELECT dtg_ID FROM ".$this->config['tableName']."  WHERE dtg_Name='"
+                        .$mysqli->real_escape_string( $this->records[$idx]['dtg_Name'] )."'");
+                if($res>0 && $res!=@$this->records[$idx]['dtg_ID']){
+                    $this->system->addError(HEURIST_ACTION_BLOCKED, 'Field type group cannot be saved. The provided name already exists');
+                    return false;
+                }
             }
 
             $this->records[$idx]['dtg_Modified'] = date('Y-m-d H:i:s'); //reset

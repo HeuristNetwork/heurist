@@ -783,10 +783,12 @@ prof =Profile
                                 //build rst index
                                 if(entityName=='defRecStructure'){
                                     window.hWin.HAPI4.EntityMgr.createRstIndex();
+                                }else if(entityName=='defTerms'){
+                                    entity_data['trm_Links'] = response.defs.entities[entityName]['trm_Links'];
                                 }
                             }
                         }
-console.log('TRIGER);');                      
+
                         window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE);
                     }
                     if($.isFunction(callback)){
@@ -1264,8 +1266,9 @@ console.log('TRIGER);');
                                 //build rst index
                                 if(entityName=='defRecStructure'){
                                     window.hWin.HAPI4.EntityMgr.createRstIndex();
+                                }else if(entityName=='defTerms'){
+                                    entity_data['trm_Links'] = response.data[entityName]['trm_Links'];
                                 }
-
                                 
                                 if(response.data[entityName]['config']){
                                     entity_configs[entityName] = response.data[entityName]['config'];
@@ -1632,7 +1635,7 @@ console.log('getEntityData '+entityName);
         removeEventListener:function( object, event_type ){
             for (var i=0; i<_listeners.length; i++){
                 if(_listeners[i].event_type == event_type && _listeners[i].obj == object){
-console.log('remove '+event_type);                    
+                   
                     _listeners.splice(i,1);
                     return;
                 }

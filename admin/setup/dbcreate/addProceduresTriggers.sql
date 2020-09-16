@@ -394,6 +394,7 @@ DELIMITER $$
     end if;
 	end$$
 
+    
 DELIMITER ;
 DELIMITER $$
 
@@ -762,6 +763,7 @@ DELIMITER ;
 
 DELIMITER $$
 
+
 --  			insert
 	DROP TRIGGER IF EXISTS defTerms_last_insert$$
 
@@ -770,10 +772,14 @@ DELIMITER $$
 	TRIGGER `defTerms_last_insert`
 	AFTER INSERT ON `defTerms`
 	FOR EACH ROW
-		update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="defTerms"$$
-
-DELIMITER ;
-DELIMITER $$
+    begin
+		update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="defTerms";
+        
+        if NEW.trm_ParentTermID > 0 then
+            insert into defTermsLinks (trl_ParentID,trl_TermID)
+                    values (NEW.trm_ParentTermID, NEW.trm_ID);
+        end if;
+    end$$        
 
 --  			update
 	DROP TRIGGER IF EXISTS defTerms_last_update$$
@@ -783,10 +789,14 @@ DELIMITER $$
 	TRIGGER `defTerms_last_update`
 	AFTER UPDATE ON `defTerms`
 	FOR EACH ROW
-		update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="defTerms"$$
-
-DELIMITER ;
-DELIMITER $$
+    begin
+		update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="defTerms";
+        
+        if NEW.trm_ParentTermID != OLD.trm_ParentTermID then
+            update defTermsLinks SET trl_ParentID=NEW.trm_ParentTermID
+                where trl_ParentID=OLD.trm_ParentTermID and trl_TermID=NEW.trm_ID;
+        end if;
+    end$$
 
 --  			delete
 	DROP TRIGGER IF EXISTS defTerms_last_delete$$
@@ -796,8 +806,11 @@ DELIMITER $$
 	TRIGGER `defTerms_last_delete`
 	AFTER DELETE ON `defTerms`
 	FOR EACH ROW
-		update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="defTerms"$$
+    begin
+		update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="defTerms";
 
+        delete ignore from defTermsLinks where trl_TermID=OLD.trm_ID || trl_ParentID=OLD.trm_ID;
+    end$$            
 DELIMITER ;
 
 -- ------------------------------------------------------------------------------

@@ -905,27 +905,35 @@ $.widget( "heurist.editing_input", {
                 this._on( $btn_termedit, { click: function(){
                     
                 if(this.is_disabled) return;
-                /*
+                
+                var vocab_id = Number(allTerms);
+                
                 var rg_options = {
                          isdialog: true, 
-                         isFrontUI: true,
-                         container: container,
-                         title: 'Edit '+this.options.auxilary,
                          select_mode: 'manager',
                          edit_mode: 'editonly',
-                         edit_recordset: this.recordList.resultList('getRecordSet'), //filterd one
-                         auxilary: this.options.auxilary,
-                         rec_ID: recID,
-                         trm_ParentTermID: this.options.trm_ParentTermID,
-                         trm_VocabularyGroupID: this.options.trm_VocabularyGroupID,
+                         height: 240,
+                         rec_ID: -1,
+                         trm_ParentTermID: vocab_id,
                          onClose: function(){
-                                that.recordList.resultList('closeExpandedDivs');
+                             
+console.log('close edit terms - recreate selector');                             
+                             //recreate selector
+                            $.each(that.inputs, function(index, input){ 
+                                input = $(input);
+                                input.css('width','auto');
+                                input = that._recreateSelector(input, true);
+                                input.change( __onTermChange );
+                            });
+                            
+                            __showHideSelByImage();
+                                
                          }
                     };
-                    window.hWin.HEURIST4.ui.showEntityDialog('defTerms', rg_options); // it recreates  
-                */
+                window.hWin.HEURIST4.ui.showEntityDialog('defTerms', rg_options); // it recreates  
                 
-                    
+                return;
+                
                 if(isVocabulary){
 
                     var type = (this.detailType!='enum')?'relation':'enum';
@@ -996,21 +1004,22 @@ $.widget( "heurist.editing_input", {
         }
         else if(this.detailType=='boolean'){//----------------------------------------------------
 
-            $input = $( '<input>',{type:'checkbox', value:'1'} )
+            $input = $( '<input>',{type:'checkbox'} )
             .uniqueId()
             .addClass('text ui-widget-content ui-corner-all')
             .css('vertical-align','-3px')
             .change(function(){that.onChange();})
             .appendTo( $inputdiv );
             
-            
             if($.isArray(this.configMode)){
-                
+                $input.prop('value', this.configMode[0]);
                 $input.prop('checked', (this.configMode.indexOf(value)==0) );
-                
-            }else if(!(value==false || value=='0' || value=='n')){
-                $input.prop('checked','checked');
-            }
+            }else{
+                $input.prop('value', '1');
+                if(!(value==false || value=='0' || value=='n')){
+                    $input.prop('checked','checked');
+                }
+            } 
 
         }
         else if(this.detailType=='rectype'){  //@todo it seems NOT USED, need refer via resource type and entity mgr
@@ -3086,8 +3095,8 @@ console.log('onpaste');
             //this.options.useHtmlSelect native select produce double space for option  Chrome touch screen
             
             //vocabulary
-            $input = window.hWin.HEURIST4.ui.createTermSelectExt2($input.get(0),
-                {datatype:dt_type, termIDTree:allTerms, headerTermIDsList:headerTerms,
+            $input = window.hWin.HEURIST4.ui.createTermSelect($input.get(0),
+                {vocab_id:allTerms, //headerTermIDsList:headerTerms,
                     defaultTermID:value, topOptions:topOptions, supressTermCode:true, 
                     useHtmlSelect:this.options.useHtmlSelect});
         
@@ -3521,7 +3530,7 @@ console.log('onpaste');
 
         }else if(this.detailType=="enum" || this.detailType=="relationtype"){
 
-            disp_value = window.hWin.HEURIST4.dbs.getTermValue(value, true);
+            disp_value = $Db.getTermValue(value);
 
             if(window.hWin.HEURIST4.util.isempty(value)) {
                 disp_value = 'term missing. id '+termID
