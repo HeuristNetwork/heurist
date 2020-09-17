@@ -1319,9 +1319,9 @@ window.hWin.HEURIST4.dbs = {
             if(parents[i]==trm_id){
                 delete parents[i];   
             }else{
-                var k = window.hWin.HEURIST4.util.findArrayIndex(trm_id, t_idx[parent_ID]);
+                var k = window.hWin.HEURIST4.util.findArrayIndex(trm_id, t_idx[parents[i]]);
                 if(k>=0){
-                    parents[i].splice(k,1);
+                    t_idx[parents[i]].splice(k,1);
                 }
                 i = i +1;
             }
