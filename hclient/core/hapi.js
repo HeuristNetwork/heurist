@@ -707,8 +707,12 @@ prof =Profile
             ,get_defs_all: function(is_message, document, callback){
                 
                 window.hWin.HEURIST4.msg.bringCoverallToFront();
+                
+                var that = this;
+                
+                window.hWin.HAPI4.EntityMgr.refreshEntityData('all', function(){
 
-                this.get_defs({rectypes:'all', terms:'all', detailtypes:'all', mode:2}, function(response){
+                that.get_defs({rectypes:'all', terms:'all', detailtypes:'all', mode:2}, function(response){
                     
                     window.hWin.HEURIST4.msg.sendCoverallToBack();
                     
@@ -731,6 +735,8 @@ prof =Profile
                         window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE);
                         
                     }
+                });
+                
                 });
 
             },

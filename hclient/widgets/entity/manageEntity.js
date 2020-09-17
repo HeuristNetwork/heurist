@@ -347,7 +347,7 @@ $.widget( "heurist.manageEntity", {
         this.options['title'] = title;
         
         if(this._innerTitle){
-            this._innerTitle.find('span.title').text( title );    
+            this._innerTitle.find('span.title').html( title );    
         }else if(this._as_dialog && this._as_dialog.dialog('instance')) {
             this._as_dialog.dialog('option', 'title', title);
         }

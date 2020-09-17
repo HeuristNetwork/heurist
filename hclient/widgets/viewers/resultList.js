@@ -1674,6 +1674,7 @@ $.widget( "heurist.resultList", {
             if(this.options.view_mode=='thumbs'){
                 this.div_content.find('.recordDiv').css({height:'154px', width:'128px'});
             }
+            this.div_content.find('.recordDiv').removeClass('expanded');
             
             this.div_content.scrollTop(spos);
         }

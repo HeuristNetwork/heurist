@@ -89,8 +89,6 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         
         //this.editForm.empty();
 
-        this.editHeader = this.element.find('.editHeader');
-        
         var hasSearchForm = (this.searchForm && this.searchForm.length>0);
         
         if(this.options.edit_mode=='inline' || this.options.edit_mode=='editonly'){
@@ -2487,11 +2485,12 @@ rectypes.names[rectypeID] + ' is defined as a child of <b>'+names
                 
             }
             
+/*
             var dialog_title = this.options['edit_title'];
             if(!dialog_title){
                  
                  dialog_title = window.hWin.HR(
-                                    that.options.edit_structure?'Edit structure for '
+                                    that.options.edit_structure?'Modify structure for '
                                       :(that._isInsert ?'Add':'Edit')) + ' '
                                     + window.hWin.HEURIST4.rectypes.names[rectypeID];                         
                                     
@@ -2502,7 +2501,7 @@ rectypes.names[rectypeID] + ' is defined as a child of <b>'+names
             }else if(this.options.edit_mode=='editonly' && this._as_dialog){
                 that._as_dialog.dialog('option','title', dialog_title); 
             }
-                
+*/    
             
        
             //@todo ? - move it inside editing
@@ -3274,7 +3273,7 @@ rectypes.names[rectypeID] + ' is defined as a child of <b>'+names
         
         var ishelp_on = (this.usrPreferences['help_on']==true || this.usrPreferences['help_on']=='true');
         var isfields_on = this.usrPreferences['optfields']==true || this.usrPreferences['optfields']=='true';
-        var btn_css = {'font-weight': 'bold', color:'#7D9AAA', background:'#ecf1fb' };
+        var btn_css = {'font-weight': 'bold', color:'#7D9AAA', background:'none' }; //#ecf1fb
         
         if( this.element.find('.chb_opt_fields').length==0 )
         {  //not inited yet
@@ -3311,7 +3310,7 @@ rectypes.names[rectypeID] + ' is defined as a child of <b>'+names
                 
                 this.element.find('.btns-admin-only').show();
 
-                this.element.find('.btn-edit-rt').button().css(btn_css)
+                this.element.find('.btn-edit-rt').button().css(btn_css).css({'padding':'4.5px'})
                         .click(function(){that.editRecordTypeAttributes();}); //was editRecordType(false)
                         
                 var btn = this.element.find('.btn-edit-rt2').button({icon:'ui-icon-gear',label:'Modify<br>structure'}).css(btn_css)
@@ -3450,51 +3449,82 @@ rectypes.names[rectypeID] + ' is defined as a child of <b>'+names
         }
         //add record title at the top ======================
         
-        if(this.editHeader && this.editHeader.length>0){ 
+            //this.editFormPopup.css('top',0);
             
-            if(this.options.edit_structure){
-                
-                this.editHeader.hide();
-                this.editFormPopup.css('top',0);
-                
-            }else{
-
-                this.editHeader.find('.ui-heurist-header2').remove();
-                
-                //define header - rectype icon, retype name and record title
-                var ph_gif = window.hWin.HAPI4.baseURL + 'hclient/assets/16x16.gif';
-                var sheader = '<div class="ui-heurist-header2" style="text-align:left;min-height:25px">'
-                        + '<img src="'+ph_gif
-                            + '" width=18 height=18 class="rt-icon" style="border-radius: 50%;padding:2px;background-color:white;'
-                            + 'background-size: 14px 14px;'
-                            + 'vertical-align:middle;margin: 2px 10px 2px 4px; background-image:url(\''
-                            + window.hWin.HAPI4.iconBaseURL+this._currentEditRecTypeID + '\');"/>' 
-                            //+ 'm&color=rgb(255,255,255)\');"/>'
-                            //+ 's&color=rgb(0,0,0)&circle=rgb(255,255,255)\');"/>'  //draw black on white
-                        + '<span style="display:inline-block;vertical-align:middle">'
-                            + window.hWin.HEURIST4.rectypes.names[this._currentEditRecTypeID]                         
-                        + '</span>';
-                        
-                if(!this._isInsert){
-                    sheader = sheader + 
-                        '&nbsp;<span style="display:inline-block;padding:0 20px;vertical-align:middle">ID: '+this._currentEditID
-                        + '</span><h3 style="display:inline-block;max-width:900;vertical-align:middle;margin:0" class="truncate">'
-                        + window.hWin.HEURIST4.util.stripTags(this._getField('rec_Title'),'u, i, b, strong')+'</h3>';            
+        this.editHeader = this.element.find('.editHeader');
+            
+            
+        var sheader = '<div style="text-align:left;min-height:25px" class="edit-record-title">';  ///class="ui-heurist-header2" 
+        
+        if(this.options.edit_structure){
+            
+            sheader = sheader + 
+            '<h3 style="display:inline-block;max-width:900;vertical-align:middle;margin:0">'
+            +'Modify record structure for '+$Db.rty(this._currentEditRecTypeID,'rty_Name')
+            +'</h3>';
+            
+        }else{
+            
+            //define header - rectype icon, retype name and record title
+            var ph_gif = window.hWin.HAPI4.baseURL + 'hclient/assets/16x16.gif';
+            sheader = sheader + '<img src="'+ph_gif
+                        + '" width=18 height=18 class="rt-icon" style="border-radius: 50%;padding:2px;background-color:white;'
+                        + 'background-size: 14px 14px;'
+                        + 'vertical-align:middle;margin: 2px 10px 2px 4px; background-image:url(\''
+                        + window.hWin.HAPI4.iconBaseURL+this._currentEditRecTypeID + '\');"/>' 
+                        //+ 'm&color=rgb(255,255,255)\');"/>'
+                        //+ 's&color=rgb(0,0,0)&circle=rgb(255,255,255)\');"/>'  //draw black on white
+                    + '<span style="display:inline-block;vertical-align:middle">'
+                        + $Db.rty(this._currentEditRecTypeID,'rty_Name')
+                    + '</span>';
                     
-                
-                }
-                sheader = sheader + '</div>';
-                $(sheader).appendTo(this.editHeader);
-                
-                if(!this._as_dialog){
-                    this.element.addClass('manageRecords');                
-                    window.hWin.HEURIST4.ui.initDialogHintButtons(this.element, 
-                        '.ui-heurist-header2', //where to put button
-                        window.hWin.HAPI4.baseURL+'context_help/'+this.options.entity.helpContent+' #content');
-                }
+            if(!this._isInsert){
+                sheader = sheader + 
+                    '&nbsp;<span style="display:inline-block;padding:0 20px;vertical-align:middle">ID: '+this._currentEditID
+                    + '</span><h3 style="display:inline-block;max-width:900;vertical-align:middle;margin:0" class="truncate">'
+                    + window.hWin.HEURIST4.util.stripTags(this._getField('rec_Title'),'u, i, b, strong')+'</h3>';            
             }
         }
+        sheader = sheader + '</div>';
 
+        if(this._as_dialog){
+                
+            var ele = this._as_dialog.parent().find('.ui-dialog-titlebar')
+                .addClass('ui-heurist-header');
+
+            if(this.options.edit_structure){
+                this._as_dialog.parent().addClass('ui-heurist-design');
+            }else{
+                this._as_dialog.parent().addClass('ui-heurist-explore');
+            }
+            
+
+            
+            ele.find('.ui-dialog-title').hide();
+            ele.find('.edit-record-title').remove(); //remove previous
+            ele.append(sheader);
+                
+            this.editFormPopup.css('top',0);   
+            if(this.editHeader) this.editHeader.hide();
+        }else{
+            
+            this.element.addClass('ui-heurist-explore');
+            this.editHeader.addClass('ui-heurist-header');
+            //remove previous
+            this.editHeader.find('.edit-record-title').remove();
+            $(sheader).appendTo(this.editHeader);
+            
+            this.editHeader.css('height',30);
+            this.editFormPopup.css('top',34);   
+        }
+        
+        if(!this._as_dialog){
+            this.element.addClass('manageRecords');                
+            window.hWin.HEURIST4.ui.initDialogHintButtons(this.element, 
+                '.ui-heurist-header2', //where to put button
+                window.hWin.HAPI4.baseURL+'context_help/'+this.options.entity.helpContent+' #content');
+        }
+        
         //need refresh layout to init overflows(scrollbars)        
         if(this.editFormSummary && this.editFormSummary.length>0){
              this.editFormPopup.layout().resizeAll();

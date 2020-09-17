@@ -325,7 +325,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                                 .addClass('record-expand-info');
                             ele.appendTo($rdiv);
                             
-                            $rdiv.addClass('selected');
+                            $rdiv.addClass('selected expanded');
                             
                             if(this.options.view_mode!='list'){
                                 $rdiv.css({width:'97%', height:'266px', outline:'red'});
@@ -639,6 +639,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         var sWidth = '212';
         var sPad = '';
         var sRef = '';
+        var sHint = '';
         if(this.options.auxilary=='vocabulary'){
             sBold = 'font-weight:bold;';
             if(recordset.fld(record, 'trm_Domain')=='relation'){
@@ -651,11 +652,19 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             var lvl = (recordset.fld(record, 'trm_Parents').split(',').length);
             sPad = 'padding-left:'+(lvl*20);
             
-            var vocab_id = $Db.getTermVocab(recID);
-            sRef = (this.options.trm_ParentTermID==vocab_id)?'':' <span style="color:blue;font-size:smaller;">(ref)</span>';
+            var vocab_id = $Db.getTermVocab(recID); //real vocab
+            if(this.options.trm_ParentTermID!=vocab_id){
+                
+                var sHint = 'title="This is a reference to a term defined in the '
+                +window.hWin.HEURIST4.util.htmlEscape($Db.vcg($Db.trm(vocab_id,'trm_VocabularyGroupID'), 'vcg_Name'))+'.'
+                +window.hWin.HEURIST4.util.htmlEscape($Db.trm(vocab_id, 'trm_Label'))+' vocabulary."';
+                
+                sRef = '<span style="color:blue;font-size:smaller;">(ref)</span>';
+            }
+            
         }
         
-        var recTitle = '<div class="item truncate" style="'+sWidth+sBold+sPad+'">'
+        var recTitle = '<div class="item truncate" style="'+sWidth+sBold+sPad+'" '+sHint+'>'
             //+recID+'  '
             +window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, 'trm_Label'))+sRef+'</div>';
 

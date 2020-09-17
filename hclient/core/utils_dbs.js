@@ -85,7 +85,7 @@ window.hWin.HEURIST4.dbs = {
         
         var trm_ID = $Db.getTermVocab(trm_ID);
         
-        return $db.trm(trm_ID,'trm_VocabularyGroupID')
+        return $Db.trm(trm_ID,'trm_VocabularyGroupID');
         
     },
     

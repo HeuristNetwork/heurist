@@ -1204,7 +1204,7 @@ dty_TermIDTreeNonSelectableIDs
                         layout_mode:'<div class="ent_wrapper editor">'
                             + '<div class="ent_content_full recordList"  style="display:none;"/>'
 
-                            + '<div class="ent_header editHeader"></div>'
+                            //+ '<div class="ent_header editHeader"></div>'
                             + '<div class="editFormDialog ent_content" style="bottom:0px">'
                                     + '<div class="ui-layout-center"><div class="editForm"/></div>'
                                     + '<div class="ui-layout-east"><div class="editFormSummary">....</div></div>'

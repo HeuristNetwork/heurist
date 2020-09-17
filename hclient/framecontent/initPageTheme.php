@@ -184,9 +184,11 @@ select.ui-heurist-header2, input.ui-heurist-header2{
 }
 
 /* EDITOR CONTENT */
+<?php if(@$_REQUEST['ll']=='H5Default'){ ?>
 .recordEditor, .ent_wrapper.editor{
     background-color:<?php uout('ce_bg', '#ECF1FB');?> !important;
 }
+<?php }  ?>
 .ent_wrapper.editor{
     font-size:0.9em;
 }
@@ -417,6 +419,7 @@ span.fancytree-node:hover{
 .ui-heurist-explore .ui-dialog-buttonpane
 {
     background-color: <?php uout('explore_bg', '#523365');?> !important;    
+    color: white;
 }
 .ui-heurist-explore-fade{background:<?php uout('explore_fade_bg', '#DAD0E4');?> !important;}
 .ui-heurist-explore .ui-heurist-title{color:<?php uout('explore_title_color', '#7B4C98');?>} /* '#7B4C98 */
@@ -438,7 +441,7 @@ span.fancytree-node:hover{
 .ui-heurist-explore .fancytree-active,
 .ui-heurist-explore .fancytree-node:hover
 {
-        background:<?php uout('explore_active', '#A487B9');?> !important;
+    background:<?php uout('explore_active', '#A487B9');?> !important;
 }
 
 /* SECTION SCHEME: PUBLISH */
