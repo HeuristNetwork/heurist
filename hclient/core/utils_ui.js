@@ -1889,7 +1889,8 @@ window.hWin.HEURIST4.ui = {
 
                         //+ '<div class="ent_header editHeader"></div>'
                         + '<div class="editFormDialog ent_content_full">'
-                                + '<div class="ui-layout-west"><div class="editStructure treeview_with_header" style="background:white">..</div></div>' //container for rts_editor
+                                + '<div class="ui-layout-west"><div class="editStructure treeview_with_header" style="background:white">'
+                                    +'</div></div>' //container for rts_editor
                                 + '<div class="ui-layout-center"><div class="editForm"/></div>'
                                 + '<div class="ui-layout-east"><div class="editFormSummary">....</div></div>'
                                 //+ '<div class="ui-layout-south><div class="editForm-toolbar"/></div>'

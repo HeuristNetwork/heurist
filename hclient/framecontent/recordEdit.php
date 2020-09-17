@@ -270,7 +270,7 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
 
                             + '<div class="ent_header editHeader"></div>'
                             + '<div class="editFormDialog ent_content">'
-                                    + '<div class="ui-layout-west"><div class="editStructure treeview_with_header" style="background:white">..</div></div>' //container for rts_editor
+                                    + '<div class="ui-layout-west"><div class="editStructure treeview_with_header" style="background:white">'       +'</div></div>' //container for rts_editor
                                     + '<div class="ui-layout-center"><div class="editForm"/></div>'
                                     + '<div class="ui-layout-east"><div class="editFormSummary">....</div></div>'
                                     //+ '<div class="ui-layout-south><div class="editForm-toolbar"/></div>'

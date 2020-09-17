@@ -45,7 +45,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         help_on:true,
         
         structure_closed: 1,          
-        structure_width:280,
+        structure_width:180, //280,
         
         summary_closed:true,          
         summary_width:400, 
@@ -3458,9 +3458,11 @@ rectypes.names[rectypeID] + ' is defined as a child of <b>'+names
         
         if(this.options.edit_structure){
             
-            sheader = sheader + 
-            '<h3 style="display:inline-block;max-width:900;vertical-align:middle;margin:0">'
-            +'Modify record structure for '+$Db.rty(this._currentEditRecTypeID,'rty_Name')
+            sheader = sheader  
+            +'<span style="display:inline-block;padding:5 10px 5px 0;vertical-align:middle">'
+            +'Modify record structure for</span>'
+            +'<h3 style="display:inline-block;max-width:900;vertical-align:middle;margin:0">'
+            +$Db.rty(this._currentEditRecTypeID,'rty_Name')
             +'</h3>';
             
         }else{

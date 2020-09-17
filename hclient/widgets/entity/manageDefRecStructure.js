@@ -84,11 +84,12 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             this.options.layout_mode = 
                 '<div class="treeview_with_header" style="background:white">'
                     +'<div style="padding:10px 20px 4px 10px;border-bottom:1px solid lightgray">' //instruction and close button
-                        +'<span style="font-style:italic;display:inline-block">Drag heading or field to reposition<br>Select field or click gearwheel to modify</span>&nbsp;&nbsp;&nbsp;'
+                        +'<span style="font-style:italic;display:inline-block">Drag to reposition<br>'
+                        +'Select or <span class="ui-icon ui-icon-gear" style="font-size: small;"/> to modify</span>&nbsp;&nbsp;&nbsp;'
                         //+'<button style="vertical-align:top;margin-top:4px;" class="closeRtsEditor"/>'
                         +'<span style="position:absolute; right:4px;width:32px;top:26px;height:32px;font-size:32px;cursor:pointer" class="closeTreePanel ui-icon ui-icon-carat-2-w"/>'
                     +'</div>'
-                    +'<div class="treeView"/>' //treeview
+                    +'<div class="treeView" style="margin-left:-27px;"/>' //treeview
                     +'<div class="editForm editFormRtStructure" style="top:0px;display:none">EDITOR</div>'
                     +'<div class="recordList" style="display:none"/>'
                 +'</div>';
@@ -105,11 +106,12 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                         +'<div class="ui-layout-west">'
                                 +'<div class="treeview_with_header" style="background:white">'
                                     +'<div style="padding:10px 20px 4px 10px;border-bottom:1px solid lightgray">' //instruction and close button
-                                        +'<span style="font-style:italic;display:inline-block">Drag heading or field to reposition<br>Select field or click gearwheel to modify</span>&nbsp;&nbsp;&nbsp;'
+                                        +'<span style="font-style:italic;display:inline-block">Drag to reposition<br>'
+                                        +'Select or <span class="ui-icon ui-icon-gear" style="font-size: small;"/> to modify</span>&nbsp;&nbsp;&nbsp;'
                                         //+'<button style="vertical-align:top;margin-top:4px;" class="closeRtsEditor"/>'
                                         +'<span style="position:absolute; right:4px;width:32px;top:26px;height:32px;font-size:32px;cursor:pointer" class="closeTreePanel ui-icon ui-icon-carat-2-w"/>'
                                     +'</div>'
-                                    +'<div class="treeView"/>' //treeview
+                                    +'<div class="treeView" style="margin-left:-27px;"/>' //treeview
                                 +'</div>'
                         +'</div>'
                                 
@@ -371,10 +373,9 @@ dty_TermIDTreeNonSelectableIDs
                         var title = recset.fld(record,'rst_DisplayName');
                         var req = recset.fld(record,'rst_RequirementType');
                         if(!isSep ){
-                            title = '<span style="padding-left:20px">' + title 
-                                    +'</span><span style="font-size:smaller">  ('
-                                    +window.hWin.HEURIST4.dbs.baseFieldType[recset.fld(record,'dty_Type')]
-                                    +')</span>';
+                            title = '<span style="padding-left:10px">' + title 
+                                    +'</span>';
+//<span style="font-size:smaller">  ('+window.hWin.HEURIST4.dbs.baseFieldType[recset.fld(record,'dty_Type')]+')</span>
                         }
                         if(req=='forbidden'){
                             title =  title + '<span style="font-size:smaller;text-transform:none;"> (hidden)</span>';
