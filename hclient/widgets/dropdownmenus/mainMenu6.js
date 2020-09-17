@@ -187,7 +187,7 @@ $.widget( "heurist.mainMenu6", {
                     
                 }else if(e.type == window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE){
                     
-                    that._updateDefaultAddRectype(data.preferences);
+                    that._updateDefaultAddRectype();//data.preferences
                 }else{
                     //if(e.type == window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE){}
                     //refresh list of rectypes afrer structure edit
@@ -209,26 +209,29 @@ $.widget( "heurist.mainMenu6", {
         
         if(mode==0){ //disabled
            
-            //window.hWin.HEURIST4.util.setDisabled(btn, true);
-            btn.hide();//find('span.ui-icon').removeClass('ui-icon-filter-plus');
+            
+            //btn.hide();//
+            btn.find('span.ui-icon')
+                .removeClass('ui-icon-loading-status-lines rotate')
+                .addClass('ui-icon-filter-plus');
+            window.hWin.HEURIST4.util.setDisabled(btn, true);
             
         }else if(mode==1){ //search in progress
             
-            btn.show();
+            //btn.show();
             btn.find('span.ui-icon')
                 .removeClass('ui-icon-filter-plus')
                 .addClass('ui-icon-loading-status-lines rotate');
         }else{
             
-            //window.hWin.HEURIST4.util.setDisabled(btn, false);
-            
-            btn.show();
+            window.hWin.HEURIST4.util.setDisabled(btn, false);
+            //btn.show();
             
             btn.find('span.ui-icon')
                 .removeClass('ui-icon-loading-status-lines rotate')
                 .addClass('ui-icon-filter-plus');
                 
-            btn.effect( 'pulsate', null, 2000 );
+            btn.effect( 'pulsate', null, 4000 );
             
         }
         
@@ -250,7 +253,7 @@ $.widget( "heurist.mainMenu6", {
                 ele.find('.menu-text.truncate').html('Add <i>'+$Db.rty(rty_ID,'rty_Name')+'</i>');
                 ele.attr('data-id', rty_ID);
                 this._on(ele, {click: function(e){
-                    var ele = $(e.target).is('li')?$(e.target):$(e.target).parent('li');
+                    var ele = $(e.target).is('li')?$(e.target):$(e.target).parents('li');
                     var rty_ID = ele.attr('data-id');
                     window.hWin.HEURIST4.ui.openRecordEdit(-1, null,{new_record_params:{RecTypeID:rty_ID}});
                 }});
@@ -260,6 +263,11 @@ $.widget( "heurist.mainMenu6", {
                 this._off(ele, 'click');
             }
       }
+      
+      var bm_on = (window.hWin.HAPI4.get_prefs('bookmarks_on')=='1');
+      var ele = this.divMainMenu.find('.menu-explore[data-action="svs_list"][data-id="bookmark"]')
+      if(bm_on) ele.show();
+      else ele.hide();
       
     },
     
@@ -910,12 +918,15 @@ console.log('prvent colapse');
     //
     _createListOfGroups: function(){
         
-        var s = '<li class="menu-explore" data-action="svs_list" data-id="all">'
-            +'<span class="ui-icon ui-icon-user"/><span class="menu-text">'+window.hWin.HR('My Searches')
-            +'</span></li>'
-            +'<li class="menu-explore" data-action="svs_list" data-id="bookmark">'
+        var bm_on = (window.hWin.HAPI4.get_prefs('bookmarks_on')=='1');
+        
+        
+        var s = '<li class="menu-explore" data-action="svs_list" data-id="bookmark" style="display:'+(bm_on?'block':'none')+'">'
             +'<span class="ui-icon ui-icon-user"/><span class="menu-text">'+window.hWin.HR('My Bookmarks')
-            +'</span></li>';
+            +'</span></li>'
+            +'<li class="menu-explore" data-action="svs_list" data-id="all">'
+            +'<span class="ui-icon ui-icon-user"/><span class="menu-text">'+window.hWin.HR('My Searches')
+            +'</span></li>'            
         
         var groups = window.hWin.HAPI4.currentUser.ugr_Groups;
         for (var groupID in groups)

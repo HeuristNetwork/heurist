@@ -304,7 +304,7 @@ $.widget( "heurist.search", {
         this.btn_search_domain = $( "<button>", {
             label: window.hWin.HR("filter option")
         })
-        .css({'font-size':'1.45em','vertical-align':'top'}) 
+        .css({'font-size':'1em','vertical-align':'top'}) 
         .appendTo( this.div_search_as_user )
         .addClass(this.options.button_class+' heurist-bookmark-search')
         .button({icon:'ui-icon-carat-1-s',  label: window.hWin.HR("filter domain"), showLabel:false});
