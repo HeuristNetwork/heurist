@@ -27,6 +27,30 @@ DROP procedure IF EXISTS `set_all_hhash`;
 DROP FUNCTION IF EXISTS NEW_LEVENSHTEIN ;
 DROP FUNCTION IF EXISTS NEW_LIPOSUCTION;
 
+DROP TRIGGER IF EXISTS sysUGrps_last_insert;
+DROP TRIGGER IF EXISTS sysUGrps_last_update;
+DROP TRIGGER IF EXISTS sysUsrGrpLinks_last_insert;
+DROP TRIGGER IF EXISTS sysUsrGrpLinks_last_update;
+DROP TRIGGER IF EXISTS defDetailTypes_last_insert;
+DROP TRIGGER IF EXISTS defDetailTypes_last_update;
+DROP TRIGGER IF EXISTS defDetailTypes_delete;
+DROP TRIGGER IF EXISTS defRecTypes_last_insert;
+DROP TRIGGER IF EXISTS defRecTypes_last_update;
+DROP TRIGGER IF EXISTS defRecTypes_delete;
+DROP TRIGGER IF EXISTS defRecStructure_last_insert;
+DROP TRIGGER IF EXISTS defRecStructure_last_update;
+DROP TRIGGER IF EXISTS defRecStructure_last_delete;
+DROP TRIGGER IF EXISTS defRelationshipConstraints_last_insert;
+DROP TRIGGER IF EXISTS defRelationshipConstraints_last_update;
+DROP TRIGGER IF EXISTS defRelationshipConstraints_last_delete;
+DROP TRIGGER IF EXISTS defRecTypeGroups_insert;
+DROP TRIGGER IF EXISTS defRecTypeGroups_update;
+DROP TRIGGER IF EXISTS defRecTypeGroups_delete;
+DROP TRIGGER IF EXISTS defDetailTypeGroups_insert;
+DROP TRIGGER IF EXISTS defDetailTypeGroups_update;
+DROP TRIGGER IF EXISTS defDetailTypeGroups_delete;
+
+
 DELIMITER $$
 
 
@@ -272,9 +296,6 @@ FROM recDetails where dtl_ID=OLD.dtl_ID INTO @raw_detail;
 -- set NEW.dtl_ValShortened = ifnull(NEW_LIPOSUCTION(NEW.dtl_Value), '');
 	end$$
 
-DELIMITER ;
-DELIMITER $$
-
 	DROP TRIGGER IF EXISTS update_Details_trigger$$
 
 	CREATE
@@ -354,14 +375,9 @@ FROM recDetails where dtl_ID=OLD.dtl_ID INTO @raw_detail;
     
         delete ignore from recLinks where rl_DetailID=OLD.dtl_ID;
     end$$
-    
-    
-DELIMITER ;
 
 -- ------------------------------------------------------------------------------
 -- --------Records
-
-DELIMITER $$
 
 	DROP TRIGGER IF EXISTS insert_record_trigger$$
 
@@ -394,9 +410,6 @@ DELIMITER $$
     end if;
 	end$$
 
-    
-DELIMITER ;
-DELIMITER $$
 
 -- dynamic expression is not allowed in triggers
 --    DROP PROCEDURE IF EXISTS logRecord$$
@@ -522,9 +535,6 @@ DELIMITER $$
 		end if;
 	end$$
 
-DELIMITER ;
-DELIMITER $$
-
 	DROP TRIGGER IF EXISTS delete_record_trigger$$
 
 	CREATE
@@ -558,12 +568,8 @@ DELIMITER $$
         delete ignore from recLinks where rl_RelationID=OLD.rec_ID or rl_SourceID=OLD.rec_ID or rl_TargetID=OLD.rec_ID;
 	end$$
 
-DELIMITER ;
-
 -- ------------------------------------------------------------------------------
 -- --------usrBookmarks
-
-DELIMITER $$
 
 	DROP TRIGGER IF EXISTS usrBookmarks_update$$
 
@@ -574,195 +580,8 @@ DELIMITER $$
 	FOR EACH ROW
 		set NEW.bkm_Modified = now()$$
 
-DELIMITER ;
-
--- ------------------------------------------------------------------------------
--- --------sysUGrps
-
-DELIMITER $$
-
-DROP TRIGGER IF EXISTS sysUGrps_last_insert$$
-DROP TRIGGER IF EXISTS sysUGrps_last_update$$
-
-
---  			insert
-	CREATE
-	DEFINER=CURRENT_USER 
-	TRIGGER `sysUGrps_last_insert`
-	AFTER INSERT ON `sysUGrps`
-	FOR EACH ROW
-		update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="sysUGrps"$$
-
-
-    CREATE
-    DEFINER=CURRENT_USER 
-    TRIGGER `sysUGrps_last_update`
-    AFTER UPDATE ON `sysUGrps`
-    FOR EACH ROW
-    begin
-        update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="sysUGrps";
-    end$$
-    
-DELIMITER ;
-
--- ------------------------------------------------------------------------------
--- --------sysUsrGrpLinks
-
-DELIMITER $$
-
-DROP TRIGGER IF EXISTS sysUsrGrpLinks_last_insert$$
-DROP TRIGGER IF EXISTS sysUsrGrpLinks_last_update$$
-
-    CREATE
-    DEFINER=CURRENT_USER 
-    TRIGGER `sysUsrGrpLinks_last_insert`
-    AFTER INSERT ON `sysUsrGrpLinks`
-    FOR EACH ROW
-    begin
-       update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="sysUsrGrpLinks";
-    end$$
-
-    CREATE
-    DEFINER=CURRENT_USER 
-    TRIGGER `sysUsrGrpLinks_last_update`
-    AFTER UPDATE ON `sysUsrGrpLinks`
-    FOR EACH ROW
-    begin
-       update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="sysUsrGrpLinks";
-    end$$
-
-DELIMITER ;
-
--- ------------------------------------------------------------------------------
--- --------defDetailTypes
-
-DELIMITER $$
-
---  			insert
-	DROP TRIGGER IF EXISTS defDetailTypes_last_insert$$
-
-	CREATE
-	DEFINER=CURRENT_USER 
-	TRIGGER `defDetailTypes_last_insert`
-	AFTER INSERT ON `defDetailTypes`
-	FOR EACH ROW
-		update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="defDetailTypes"$$
-
-DELIMITER ;
-DELIMITER $$
-
---  			update
-	DROP TRIGGER IF EXISTS defDetailTypes_last_update$$
-
-	CREATE
-	DEFINER=CURRENT_USER 
-	TRIGGER `defDetailTypes_last_update`
-	AFTER UPDATE ON `defDetailTypes`
-	FOR EACH ROW
-		update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="defDetailTypes"$$
-
-DELIMITER ;
-DELIMITER $$
-
---  			delete
-	DROP TRIGGER IF EXISTS defDetailTypes_delete$$
-
-	CREATE
-	DEFINER=CURRENT_USER 
-	TRIGGER `defDetailTypes_delete`
-	AFTER DELETE ON `defDetailTypes`
-	FOR EACH ROW
-			update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="defDetailTypes"$$
-
-DELIMITER ;
-
--- ------------------------------------------------------------------------------
--- --------defRecTypes
-
-DELIMITER $$
-
---  			insert
-	DROP TRIGGER IF EXISTS defRecTypes_last_insert$$
-
-	CREATE
-	DEFINER=CURRENT_USER 
-	TRIGGER `defRecTypes_last_insert`
-	AFTER INSERT ON `defRecTypes`
-	FOR EACH ROW
-		update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="defRecTypes"$$
-
-DELIMITER ;
-DELIMITER $$
-
---  			update
-	DROP TRIGGER IF EXISTS defRecTypes_last_update$$
-
-	CREATE
-	DEFINER=CURRENT_USER 
-	TRIGGER `defRecTypes_last_update`
-	AFTER UPDATE ON `defRecTypes`
-	FOR EACH ROW
-		update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="defRecTypes"$$
-
-DELIMITER ;
-DELIMITER $$
-
---  			delete
-	DROP TRIGGER IF EXISTS defRecTypes_delete$$
-
-	CREATE
-	DEFINER=CURRENT_USER 
-	TRIGGER `defRecTypes_delete`
-	AFTER DELETE ON `defRecTypes`
-	FOR EACH ROW
-			update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="defRecTypes"$$
-
-DELIMITER ;
--- ------------------------------------------------------------------------------
--- --------defRecStructure
-DELIMITER $$
-
---  			insert
-	DROP TRIGGER IF EXISTS defRecStructure_last_insert$$
-
-	CREATE DEFINER=CURRENT_USER 
-	TRIGGER `defRecStructure_last_insert`
-	AFTER INSERT ON `defRecStructure`
-	FOR EACH ROW
-		update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="defRecStructure"$$
-
-DELIMITER ;
-DELIMITER $$
-
---  			update
-	DROP TRIGGER IF EXISTS defRecStructure_last_update$$
-
-	CREATE DEFINER=CURRENT_USER 
-	TRIGGER `defRecStructure_last_update`
-	AFTER UPDATE ON `defRecStructure`
-	FOR EACH ROW
-		update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="defRecStructure"$$
-
-DELIMITER ;
-DELIMITER $$
-
---  			delete
--- 5/9/11 This trigger gives an error "multiple triggers with the same action time and event for one table" not yet supported
-	DROP TRIGGER IF EXISTS defRecStructure_last_delete$$
-
-	CREATE DEFINER=CURRENT_USER 
-	TRIGGER `defRecStructure_last_delete`
-	AFTER DELETE ON `defRecStructure`
-	FOR EACH ROW
-		update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="defRecStructure"$$
-
-DELIMITER ;
-
 -- ------------------------------------------------------------------------------
 -- --------defTerms
-
-DELIMITER $$
-
 
 --  			insert
 	DROP TRIGGER IF EXISTS defTerms_last_insert$$
@@ -773,8 +592,6 @@ DELIMITER $$
 	AFTER INSERT ON `defTerms`
 	FOR EACH ROW
     begin
-		update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="defTerms";
-        
         if NEW.trm_ParentTermID > 0 then
             insert into defTermsLinks (trl_ParentID,trl_TermID)
                     values (NEW.trm_ParentTermID, NEW.trm_ID);
@@ -790,8 +607,6 @@ DELIMITER $$
 	AFTER UPDATE ON `defTerms`
 	FOR EACH ROW
     begin
-		update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="defTerms";
-        
         if NEW.trm_ParentTermID != OLD.trm_ParentTermID then
             update defTermsLinks SET trl_ParentID=NEW.trm_ParentTermID
                 where trl_ParentID=OLD.trm_ParentTermID and trl_TermID=NEW.trm_ID;
@@ -807,138 +622,7 @@ DELIMITER $$
 	AFTER DELETE ON `defTerms`
 	FOR EACH ROW
     begin
-		update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="defTerms";
-
         delete ignore from defTermsLinks where trl_TermID=OLD.trm_ID || trl_ParentID=OLD.trm_ID;
     end$$            
 DELIMITER ;
 
--- ------------------------------------------------------------------------------
--- --------defRelationshipConstraints
-
-DELIMITER $$
-
---  			insert
-	DROP TRIGGER IF EXISTS defRelationshipConstraints_last_insert$$
-
-	CREATE
-	DEFINER=CURRENT_USER 
-	TRIGGER `defRelationshipConstraints_last_insert`
-	AFTER INSERT ON `defRelationshipConstraints`
-	FOR EACH ROW
-		update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="defRelationshipConstraints"$$
-
-DELIMITER ;
-DELIMITER $$
-
---  			update
-	DROP TRIGGER IF EXISTS defRelationshipConstraints_last_update$$
-
-	CREATE
-	DEFINER=CURRENT_USER 
-	TRIGGER `defRelationshipConstraints_last_update`
-	AFTER UPDATE ON `defRelationshipConstraints`
-	FOR EACH ROW
-		update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="defRelationshipConstraints"$$
-
-DELIMITER ;
-DELIMITER $$
-
---  			delete
-	DROP TRIGGER IF EXISTS defRelationshipConstraints_last_delete$$
-
-	CREATE
-	DEFINER=CURRENT_USER 
-	TRIGGER `defRelationshipConstraints_last_delete`
-	AFTER DELETE ON `defRelationshipConstraints`
-	FOR EACH ROW
-		update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="defRelationshipConstraints"$$
-
-DELIMITER ;
-
--- --------------------------------------------------------------------------------
--- --------defRecTypeGroups
-
--- ** New triggers from Artem 5/4/2011
-DELIMITER $$
-
---  			insert
-	DROP TRIGGER IF EXISTS defRecTypeGroups_insert$$
-
-	CREATE
-	DEFINER=CURRENT_USER 
-	TRIGGER `defRecTypeGroups_insert`
-	AFTER INSERT ON `defRecTypeGroups`
-	FOR EACH ROW
-		update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="defRecTypeGroups"$$
-
-DELIMITER ;
-DELIMITER $$
-
---  			update
-	DROP TRIGGER IF EXISTS defRecTypeGroups_update$$
-
-	CREATE
-	DEFINER=CURRENT_USER 
-	TRIGGER `defRecTypeGroups_update`
-	AFTER UPDATE ON `defRecTypeGroups`
-	FOR EACH ROW
-		update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="defRecTypeGroups"$$
-
-DELIMITER ;
-DELIMITER $$
-
---  			delete
-	DROP TRIGGER IF EXISTS defRecTypeGroups_delete$$
-
-	CREATE
-	DEFINER=CURRENT_USER 
-	TRIGGER `defRecTypeGroups_delete`
-	AFTER DELETE ON `defRecTypeGroups`
-	FOR EACH ROW
-		update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="defRecTypeGroups"$$
-
-DELIMITER ;
-
--- --------------------------------------------------------------------------------
--- --------defDetailTypeGroups
-
-DELIMITER $$
-
---  			insert
-	DROP TRIGGER IF EXISTS defDetailTypeGroups_insert$$
-
-	CREATE
-	DEFINER=CURRENT_USER 
-	TRIGGER `defDetailTypeGroups_insert`
-	AFTER INSERT ON `defDetailTypeGroups`
-	FOR EACH ROW
-		update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="defDetailTypeGroups"$$
-
-DELIMITER ;
-DELIMITER $$
-
---  			update
-	DROP TRIGGER IF EXISTS defDetailTypeGroups_update$$
-
-	CREATE
-	DEFINER=CURRENT_USER 
-	TRIGGER `defDetailTypeGroups_update`
-	AFTER UPDATE ON `defDetailTypeGroups`
-	FOR EACH ROW
-		update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="defDetailTypeGroups"$$
-
-DELIMITER ;
-DELIMITER $$
-
---  			delete
-	DROP TRIGGER IF EXISTS defDetailTypeGroups_delete$$
-
-		CREATE
-		DEFINER=CURRENT_USER 
-	TRIGGER `defDetailTypeGroups_delete`
-	AFTER DELETE ON `defDetailTypeGroups`
-		FOR EACH ROW
-		update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="defDetailTypeGroups"$$
-
-DELIMITER ;

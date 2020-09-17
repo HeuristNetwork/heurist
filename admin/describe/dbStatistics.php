@@ -138,7 +138,7 @@ foreach ($dbs as $db){
     */
     mysql__select_val("select max(rec_Modified)  from ".$db.".Records"),
     //mysql__select_val("select max(ugr_LastLoginTime)  from ".$db.".sysUGrps") );
-    mysql__select_val("select max(tlu_DateStamp) from ".$db.".sysTableLastUpdated") );
+    mysql__select_value($mysqli, "select max(rst_Modified) from defRecStructure") );
 
     $owner = mysql__select_row($mysqli, "SELECT concat(ugr_FirstName,' ',ugr_LastName),ugr_eMail,ugr_Organisation ".
         "FROM ".$db.".sysUGrps where ugr_id=2");

@@ -780,8 +780,6 @@ $query = "CREATE TABLE defTermsLinks (
             ///$res = $mysqli->query('DELIMITER $$');
             $res = $mysqli->query('CREATE DEFINER=CURRENT_USER TRIGGER `defTerms_last_insert` AFTER INSERT ON `defTerms` FOR EACH ROW
             begin
-                update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="defTerms";
-                
                 if NEW.trm_ParentTermID > 0 then
                     insert into defTermsLinks (trl_ParentID,trl_TermID)
                             values (NEW.trm_ParentTermID, NEW.trm_ID);
@@ -793,8 +791,6 @@ $query = "CREATE TABLE defTermsLinks (
             $res = $mysqli->query('CREATE DEFINER=CURRENT_USER TRIGGER `defTerms_last_update` AFTER UPDATE ON `defTerms`
             FOR EACH ROW
             begin
-                update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="defTerms";
-                
                 if NEW.trm_ParentTermID != OLD.trm_ParentTermID then
                     update defTermsLinks SET trl_ParentID=NEW.trm_ParentTermID
                         where trl_ParentID=OLD.trm_ParentTermID and trl_TermID=NEW.trm_ID;
@@ -804,10 +800,33 @@ $query = "CREATE TABLE defTermsLinks (
             $res = $mysqli->query('DROP TRIGGER IF EXISTS defTerms_last_delete');
             $res = $mysqli->query('CREATE DEFINER=CURRENT_USER  TRIGGER `defTerms_last_delete` AFTER DELETE ON `defTerms` FOR EACH ROW
             begin
-                update sysTableLastUpdated set tlu_DateStamp=now() where tlu_TableName="defTerms";
                 delete ignore from defTermsLinks where trl_TermID=OLD.trm_ID || trl_ParentID=OLD.trm_ID;
             end');            
             //$mysqli->query('DELIMITER ;');            
+            
+$mysqli->query('DROP TRIGGER IF EXISTS sysUGrps_last_insert');
+$mysqli->query('DROP TRIGGER IF EXISTS sysUGrps_last_update');
+$mysqli->query('DROP TRIGGER IF EXISTS sysUsrGrpLinks_last_insert');
+$mysqli->query('DROP TRIGGER IF EXISTS sysUsrGrpLinks_last_update');
+$mysqli->query('DROP TRIGGER IF EXISTS defDetailTypes_last_insert');
+$mysqli->query('DROP TRIGGER IF EXISTS defDetailTypes_last_update');
+$mysqli->query('DROP TRIGGER IF EXISTS defDetailTypes_delete');
+$mysqli->query('DROP TRIGGER IF EXISTS defRecTypes_last_insert');
+$mysqli->query('DROP TRIGGER IF EXISTS defRecTypes_last_update');
+$mysqli->query('DROP TRIGGER IF EXISTS defRecTypes_delete');
+$mysqli->query('DROP TRIGGER IF EXISTS defRecStructure_last_insert');
+$mysqli->query('DROP TRIGGER IF EXISTS defRecStructure_last_update');
+$mysqli->query('DROP TRIGGER IF EXISTS defRecStructure_last_delete');
+$mysqli->query('DROP TRIGGER IF EXISTS defRelationshipConstraints_last_insert');
+$mysqli->query('DROP TRIGGER IF EXISTS defRelationshipConstraints_last_update');
+$mysqli->query('DROP TRIGGER IF EXISTS defRelationshipConstraints_last_delete');
+$mysqli->query('DROP TRIGGER IF EXISTS defRecTypeGroups_insert');
+$mysqli->query('DROP TRIGGER IF EXISTS defRecTypeGroups_update');
+$mysqli->query('DROP TRIGGER IF EXISTS defRecTypeGroups_delete');
+$mysqli->query('DROP TRIGGER IF EXISTS defDetailTypeGroups_insert');
+$mysqli->query('DROP TRIGGER IF EXISTS defDetailTypeGroups_update');
+$mysqli->query('DROP TRIGGER IF EXISTS defDetailTypeGroups_delete');
+$mysqli->query('DROP TABLE IF EXISTS sysTableLastUpdated');
             
         }
       

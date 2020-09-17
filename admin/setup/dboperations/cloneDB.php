@@ -24,7 +24,7 @@
   Cloning workflow:
 
     1. Create empty database with blankDBStructure.sql
-    2. Empty sysIdentification, sysTableLastUpdated, sysUsrGrpLinks, sysUGrps, defLanguages
+    2. Empty sysIdentification, sysUsrGrpLinks, sysUGrps, defLanguages
     3. Copy ALL tables  
     4. reset reginfo
     5. Create indexes and procedures
@@ -314,7 +314,6 @@ function cloneDatabase($targetdbname, $nodata=false, $templateddb, $user_id) {
     // Connect to new database and  Remove initial values from empty database
     mysql__usedatabase($mysqli, $targetdbname_full);
     $mysqli->query('delete from sysIdentification where 1');
-    $mysqli->query('delete from sysTableLastUpdated where 1');
     $mysqli->query('delete from defLanguages where 1');
     
     if($isCloneTemplate){

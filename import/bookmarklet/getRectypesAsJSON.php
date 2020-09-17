@@ -49,7 +49,7 @@ $mysqli = $system->get_mysqli();
 
 header("Content-type: text/javascript");
 
-$lastModified = mysql__select_value($mysqli, "select tlu_DateStamp from sysTableLastUpdated where tlu_TableName = 'defRecTypes'");
+$lastModified = mysql__select_value($mysqli, "select max(rty_Modified) from defRecTypes");
 $lastModified = strtotime($lastModified[0]);
 
 if (strtotime(@$_SERVER["HTTP_IF_MODIFIED_SINCE"]) > $lastModified) {

@@ -694,19 +694,6 @@ CREATE TABLE sysLocks (
 -- --------------------------------------------------------
 
 --
--- Table structure for table 'sysTableLastUpdated'
---
-
-CREATE TABLE sysTableLastUpdated (
-  tlu_TableName varchar(40) NOT NULL COMMENT 'Name of table for which we are recording time of last update',
-  tlu_DateStamp datetime NOT NULL default '1000-01-01 00:00:00' COMMENT 'Date and time of last update of table',
-  tlu_CommonObj tinyint(1) unsigned NOT NULL default '1' COMMENT 'Indicates tables which contain data defs required in common-obj',
-  PRIMARY KEY  (tlu_TableName)
-) ENGINE=InnoDB COMMENT='Datestamp, determines if updates since definitions loaded in';
-
--- --------------------------------------------------------
-
---
 -- Table structure for table 'sysUGrps'
 --
 
@@ -1046,30 +1033,6 @@ CREATE TABLE usrWorkingSubsets (
 
   -- Note: database sub version updated manually to '1' at 6pm 22/8/12
   -- 0 is everyone, 1 is the owning admins group, 2 is default dbAdmin user
-
--- These are critical to the working of the definitions caching system, without these
--- the system will not 'see' stuff which is addded to the definitions''
-INSERT INTO `sysTableLastUpdated` VALUES ('defCalcFunctions', CURRENT_TIMESTAMP, 1);
-INSERT INTO `sysTableLastUpdated` VALUES ('defCrosswalk', CURRENT_TIMESTAMP, 1);
-INSERT INTO `sysTableLastUpdated` VALUES ('defDetailTypeGroups', CURRENT_TIMESTAMP, 1);
-INSERT INTO `sysTableLastUpdated` VALUES ('defDetailTypes', CURRENT_TIMESTAMP, 1);
-INSERT INTO `sysTableLastUpdated` VALUES ('defFileExtToMimetype', CURRENT_TIMESTAMP, 1);
-INSERT INTO `sysTableLastUpdated` VALUES ('defLanguages', CURRENT_TIMESTAMP, 1);
-INSERT INTO `sysTableLastUpdated` VALUES ('defOntologies', CURRENT_TIMESTAMP, 1);
-INSERT INTO `sysTableLastUpdated` VALUES ('defRecStructure', CURRENT_TIMESTAMP, 1);
-INSERT INTO `sysTableLastUpdated` VALUES ('defRecTypeGroups', CURRENT_TIMESTAMP, 1);
-INSERT INTO `sysTableLastUpdated` VALUES ('defRecTypes', CURRENT_TIMESTAMP, 1);
-INSERT INTO `sysTableLastUpdated` VALUES ('defRelationshipConstraints', CURRENT_TIMESTAMP, 1);
-INSERT INTO `sysTableLastUpdated` VALUES ('defTerms', CURRENT_TIMESTAMP, 1);
-INSERT INTO `sysTableLastUpdated` VALUES ('defTranslations', CURRENT_TIMESTAMP, 1);
-INSERT INTO `sysTableLastUpdated` VALUES ('defURLPrefixes', CURRENT_TIMESTAMP, 1);
-INSERT INTO `sysTableLastUpdated` VALUES ('sysDBNameCache', CURRENT_TIMESTAMP, 1);
-INSERT INTO `sysTableLastUpdated` VALUES ('sysIdentification', CURRENT_TIMESTAMP, 1);
-INSERT INTO `sysTableLastUpdated` VALUES ('sysUGrps', CURRENT_TIMESTAMP, 1);
-INSERT INTO `sysTableLastUpdated` VALUES ('sysUsrGrpLinks', CURRENT_TIMESTAMP, 1);
-INSERT INTO `sysTableLastUpdated` VALUES ('usrHyperlinkFilters', CURRENT_TIMESTAMP, 1);
-INSERT INTO `sysTableLastUpdated` VALUES ('usrTags', CURRENT_TIMESTAMP, 1);
-
 
 -- The owners of the database - always group 1
 INSERT INTO sysUGrps (ugr_ID,ugr_Name,ugr_LongName,ugr_Description,ugr_Type,ugr_Password,ugr_eMail,ugr_Enabled,ugr_FirstName,ugr_LastName)
