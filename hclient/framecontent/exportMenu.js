@@ -289,13 +289,13 @@ function hexportMenu() {
                 }else {
                     if(opts.questionResolved!==true){
                         var $expdlg = window.hWin.HEURIST4.msg.showMsgDlg(
-'<p>The records you are exporting may contain pointers to other records which are not in your current results set. These records may additionally point to other records.</p>'                
+'<p>The records you are exporting may be linked to other records. They may contain record pointer fields targeting records which are not in your current results set, or may be the target of record pointer fields in records which are not in your results set. These records may additionally point to or be pointed at by other records. These additional records can be ignored or included as follows.</p>'                
 //+'<p>Heurist follows the chain of related records, which will be included in the XML or JSON output. The total number of records exported will therefore exceed the results count indicated.</p>'
 //+'<p>To disable this feature and export current result only uncheck "Follow pointers"</p>'
-+'<p style="padding:20px 0"><label><input type="radio" name="links" value="direct" style="float:left;margin-right:8px;" checked/>Follow pointers and relationship markers in records <b>(recommended)</b></label>'
-+'<br><br><label><input type="radio" name="links" value="direct_links" style="float:left;margin-right:8px;"/>Follow only pointers, ignore relationship markers <warning about losing relationships></label>'
-+'<br><br><label><input type="radio" name="links" value="none" style="float:left;margin-right:8px;"/>Don\'t follow pointers or relationship markers (you will lose any data which is referenced by pointer fields in the exported records)</label>'
-+'<br><br><label><input type="radio" name="links" value="all" style="float:left;margin-right:8px;"/>Follow ALL connections including reverse pointers" (warning: any commonly used connection, such as to Places, will result in a near-total dump of the database)</label></p>'
++'<p style="padding:20px 0"><label><input type="radio" name="links" value="direct" style="float:left;margin-right:8px;" checked/>Follow forward pointers and relationship markers in records <b>(recommended)</b></label>'
++'<br><br><label><input type="radio" name="links" value="direct_links" style="float:left;margin-right:8px;"/>Follow only forward record pointers, ignore relationship markers (relationship records connecting the results set records to other records will not be included)</label>'
++'<br><br><label><input type="radio" name="links" value="none" style="float:left;margin-right:8px;"/>Don\'t follow record pointers or relationship markers (you will lose any data which is referenced by record pointer fields in the exported records, as well as all relationships)</label>'
++'<br><br><label><input type="radio" name="links" value="all" style="float:left;margin-right:8px;"/>Follow ALL connections including all relationships and reverse pointers" (warning: any commonly used connection, such as to Places, will result in a near-total dump of the database)</label></p>'
                         , function(){ 
                             
                             var val = $expdlg.find('input[name="links"]:checked').val();
