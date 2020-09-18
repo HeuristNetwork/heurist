@@ -29,51 +29,51 @@ function hexportMenu() {
     function _init(){
 
         _initMenu();        
-        
+
     }
 
     function _initMenu(){
-        
+
         var parentdiv = $('#menu_container');
 
         parentdiv.addClass('ui-menu ui-widget ui-widget-content ui-corner-all');
-                
+
         parentdiv.find('li').addClass('ui-menu-item');
-                
-       _initLinks(parentdiv);
-       
-       if( window.hWin.HAPI4.sysinfo.db_registeredid>0 ){
+
+        _initLinks(parentdiv);
+
+        if( window.hWin.HAPI4.sysinfo.db_registeredid>0 ){
             $('#divWarnAboutReg').hide();    
-       }else{
+        }else{
             $('#divWarnAboutReg').show();    
-       }
-       
+        }
+
     }
-    
-    
+
+
     //init listeners for auto-popup links
     function _initLinks(menu){
 
         $('.export-button').each(function(){
             var ele = $(this);
-            
+
             //find url
             var lnk = ele.parent().find('a').css({'text-decoration':'none','color':'black'});
             var href = lnk.attr('href');
             if(!window.hWin.HEURIST4.util.isempty(href)){
-                
+
                 if(href!='#'){
-                href = href + (href.indexOf('?')>0?'&':'?') + 'db=' + window.hWin.HAPI4.database;
+                    href = href + (href.indexOf('?')>0?'&':'?') + 'db=' + window.hWin.HAPI4.database;
                     if(lnk.hasClass('h3link')){
                         //h3link class on menus implies location of older (vsn 3) code
                         href = window.hWin.HAPI4.baseURL + href;
                     }
                 }
-                
+
                 lnk.attr('href', href).click(
                     function(event){
                         var save_as_file = true;
-                        
+
                         var ele = $(event.target);
                         if(ele.is('span')){
                             save_as_file = false;
@@ -91,22 +91,22 @@ function hexportMenu() {
             }
 
             ele.button().click(
-                    function(event){
-                        $(this).parent().find('a').click();
-                    });
-            
+                function(event){
+                    $(this).parent().find('a').click();
+            });
+
         });
-        
+
     }
 
-    
+
     //
     //
     //    
     function _onPopupLink(event){
-        
+
         var action = $(event.target).attr('id');
-        
+
         var body = $(window.hWin.document).find('body');
         var dim = {h:body.innerHeight   (), w:body.innerWidth()},
         link = $(event.target);
@@ -135,21 +135,21 @@ function hexportMenu() {
         }
 
         var url = link.attr('href');
-        
-            if(!window.hWin.HEURIST4.util.isnull(window.hWin.HEURIST4.current_query_request)){
-                
-                var q = encodeURIComponent(window.hWin.HEURIST4.current_query_request.q);
-                if(!window.hWin.HEURIST4.util.isempty(q)) q = '&'+q;
-                if(!window.hWin.HEURIST4.util.isempty(window.hWin.HEURIST4.current_query_request.rules)){
-                    q = q + '&rules=' + encodeURIComponent(window.hWin.HEURIST4.current_query_request.rules);
-                }
-                url = url + '&w=all&a=1' + q;
+
+        if(!window.hWin.HEURIST4.util.isnull(window.hWin.HEURIST4.current_query_request)){
+
+            var q = encodeURIComponent(window.hWin.HEURIST4.current_query_request.q);
+            if(!window.hWin.HEURIST4.util.isempty(q)) q = '&'+q;
+            if(!window.hWin.HEURIST4.util.isempty(window.hWin.HEURIST4.current_query_request.rules)){
+                q = q + '&rules=' + encodeURIComponent(window.hWin.HEURIST4.current_query_request.rules);
             }
-        
-        
-        
+            url = url + '&w=all&a=1' + q;
+        }
+
+
+
         if (link.hasClass('refresh_structure')) {
-               options['afterclose'] = this._refreshLists;
+            options['afterclose'] = this._refreshLists;
         }
 
         if(link && link.attr('data-logaction')){
@@ -166,7 +166,7 @@ function hexportMenu() {
         event.preventDefault();
         return false;
     }
-    
+
     //
     // similar in resultListMenu
     //
@@ -174,13 +174,13 @@ function hexportMenu() {
         var recIDs_all = window.hWin.HAPI4.getSelection("all", true);
         if (window.hWin.HEURIST4.util.isempty(recIDs_all)) {
             window.hWin.HEURIST4.msg.showMsgDlg('No results found. '
-            +'Please modify search/filter to return at least one result record.');
+                +'Please modify search/filter to return at least one result record.');
             return true;
         }else{
             return false;
         }
     }
-    
+
     //
     //
     //
@@ -189,54 +189,54 @@ function hexportMenu() {
         if(action_log){
             window.hWin.HAPI4.SystemMgr.user_log(action_log);
         }
-        
+
         window.hWin.HAPI4.SystemMgr.verify_credentials(
-        function(){
-        
-        if(action == "menu-export-csv"){
-        
-           
-            if(isResultSetEmpty()) return;
-            
-            //window.hWin.HAPI4.currentRecordsetSelection is assigned in resultListMenu
+            function(){
 
-            window.hWin.HEURIST4.ui.showRecordActionDialog('recordExportCSV');
-            
-        }else if(action == "menu-export-hml-resultset"){ // Current resultset, including rules-based expansion iof applied
-            _exportRecords({format:'hml', multifile:false, save_as_file:save_as_file});
-            
-/*            
-        }else if(action == "menu-export-hml-selected"){ // Currently selected records only
-            _exportRecords({format:'hml', isAll:false, multifile:false, save_as_file:save_as_file});
-            
-        }else if(action == "menu-export-hml-plusrelated"){ // Current resulteset plus any related records
-            _exportRecords({format:'hml', isAll:true, includeRelated:true, multifile:false, save_as_file:save_as_file});
-*/
-        }else if(action == "menu-export-hml-multifile"){ // selected + related
-            _exportRecords({format:'hml', save_as_file:save_as_file});
-            
-        }else if(action == "menu-export-json"){ 
-            _exportRecords({format:'json', save_as_file:save_as_file});
-            
-        }else if(action == "menu-export-geojson"){ 
-            _exportRecords({format:'geojson', save_as_file:save_as_file});
-            
-        }else if(action == "menu-export-gephi"){ 
-            _exportRecords({format:'gephi', save_as_file:save_as_file});
+                if(action == "menu-export-csv"){
 
-        }else if(action == "menu-export-kml"){
-            _exportKML(true, save_as_file);
-        }else if(action == "menu-export-rss"){
-            _exportFeed('rss');
-        }else if(action == "menu-export-atom"){
-            _exportFeed('atom');
-        }
-      
+
+                    if(isResultSetEmpty()) return;
+
+                    //window.hWin.HAPI4.currentRecordsetSelection is assigned in resultListMenu
+
+                    window.hWin.HEURIST4.ui.showRecordActionDialog('recordExportCSV');
+
+                }else if(action == "menu-export-hml-resultset"){ // Current resultset, including rules-based expansion iof applied
+                    _exportRecords({format:'hml', multifile:false, save_as_file:save_as_file});
+
+                    /*            
+                    }else if(action == "menu-export-hml-selected"){ // Currently selected records only
+                    _exportRecords({format:'hml', isAll:false, multifile:false, save_as_file:save_as_file});
+
+                    }else if(action == "menu-export-hml-plusrelated"){ // Current resulteset plus any related records
+                    _exportRecords({format:'hml', isAll:true, includeRelated:true, multifile:false, save_as_file:save_as_file});
+                    */
+                }else if(action == "menu-export-hml-multifile"){ // selected + related
+                    _exportRecords({format:'hml', save_as_file:save_as_file});
+
+                }else if(action == "menu-export-json"){ 
+                    _exportRecords({format:'json', save_as_file:save_as_file});
+
+                }else if(action == "menu-export-geojson"){ 
+                    _exportRecords({format:'geojson', save_as_file:save_as_file});
+
+                }else if(action == "menu-export-gephi"){ 
+                    _exportRecords({format:'gephi', save_as_file:save_as_file});
+
+                }else if(action == "menu-export-kml"){
+                    _exportKML(true, save_as_file);
+                }else if(action == "menu-export-rss"){
+                    _exportFeed('rss');
+                }else if(action == "menu-export-atom"){
+                    _exportFeed('atom');
+                }
+
         });
-        
+
         event.preventDefault();
     }    
-    
+
     //
     // opts: {format, isAll, includeRelated, multifile, save_as_file}
     //
@@ -244,28 +244,28 @@ function hexportMenu() {
 
         var q = "",
         layoutString,rtFilter,relFilter,ptrFilter;
-        
+
         var isEntireDb = false;
-        
+
         opts.isAll = (opts.isAll!==false);
         opts.multifile = (opts.multifile===true);
 
         if(opts.isAll){
 
             if(!window.hWin.HEURIST4.util.isnull(window.hWin.HEURIST4.current_query_request)){
-                
+
                 q = window.hWin.HEURIST4.util.composeHeuristQuery2(window.hWin.HEURIST4.current_query_request, true);
-                
+
                 /*
                 q = encodeURIComponent(window.hWin.HEURIST4.current_query_request.q);
                 if(!window.hWin.HEURIST4.util.isempty(window.hWin.HEURIST4.current_query_request.rules)){
-                    q = q + '&rules=' + encodeURIComponent(window.hWin.HEURIST4.current_query_request.rules);
+                q = q + '&rules=' + encodeURIComponent(window.hWin.HEURIST4.current_query_request.rules);
                 }
                 */
-                        
+
                 isEntireDb = (window.hWin.HAPI4.currentRecordset && 
                     window.hWin.HAPI4.currentRecordset.length()==window.hWin.HAPI4.sysinfo.db_total_records);
-                    
+
             }
 
         }else{    //selected only
@@ -279,7 +279,7 @@ function hexportMenu() {
         }
 
         if(q!=''){
-            
+
             var script; 
             var params = '';
             if(true || $('#followPointers').is(':checked')){
@@ -289,76 +289,75 @@ function hexportMenu() {
                 }else {
                     if(opts.questionResolved!==true){
                         var $expdlg = window.hWin.HEURIST4.msg.showMsgDlg(
-'<p>The records you are exporting may be linked to other records. They may contain record pointer fields targeting records which are not in your current results set, or may be the target of record pointer fields in records which are not in your results set. These records may additionally point to or be pointed at by other records. These additional records can be ignored or included as follows.</p>'                
-//+'<p>Heurist follows the chain of related records, which will be included in the XML or JSON output. The total number of records exported will therefore exceed the results count indicated.</p>'
-//+'<p>To disable this feature and export current result only uncheck "Follow pointers"</p>'
-+'<p style="padding:20px 0"><label><input type="radio" name="links" value="direct" style="float:left;margin-right:8px;" checked/>Follow forward pointers and relationship markers in records <b>(recommended)</b></label>'
-+'<br><br><label><input type="radio" name="links" value="direct_links" style="float:left;margin-right:8px;"/>Follow only forward record pointers, ignore relationship markers (relationship records connecting the results set records to other records will not be included)</label>'
-+'<br><br><label><input type="radio" name="links" value="none" style="float:left;margin-right:8px;"/>Don\'t follow record pointers or relationship markers (you will lose any data which is referenced by record pointer fields in the exported records, as well as all relationships)</label>'
-+'<br><br><label><input type="radio" name="links" value="all" style="float:left;margin-right:8px;"/>Follow ALL connections including all relationships and reverse pointers" (warning: any commonly used connection, such as to Places, will result in a near-total dump of the database)</label></p>'
-                        , function(){ 
-                            
-                            var val = $expdlg.find('input[name="links"]:checked').val();
-                            
-                            opts.linksMode = val;
-                            opts.questionResolved=true; 
-                            _exportRecords( opts ); 
-                        },
-                        {
-                            yes: 'Proceed',
-                            no: 'Cancel'
+                            '<p>The records you are exporting may be linked to other records. They may contain record pointer fields targeting records which are not in your current results set, or may be the target of record pointer fields in records which are not in your results set. These records may additionally point to or be pointed at by other records. These additional records can be ignored or included as follows. Note that relationship records point AT other records and may or may not be referenced by a relationship marker field.</p>'                
+                            +'<p style="padding:20px 0"><label><input type="radio" name="links" value="direct" style="float:left;margin-right:8px;" checked/>Follow <u>forward</u> pointers and relationship markers in records <b>(recommended)</b></label>'
+                            +'<br><br><label><input type="radio" name="links" value="direct_links" style="float:left;margin-right:8px;"/>Follow only <u>forward</u> record pointers, ignore relationship markers (relationship records connecting the results set records to other records will not be included)</label>'
+                            +'<br><br><label><input type="radio" name="links" value="none" style="float:left;margin-right:8px;"/>Don\'t follow record pointers or relationship markers (you will lose any data which is referenced by record pointer fields in the exported records, as well as all relationships)</label>'
+                            // 18 SEP 2020 TODO NEW OPTION TO ADD +'<br><br><label><input type="radio" name="links" value="all" style="float:left;margin-right:8px;"/>Follow ALL relationships referenced by a relationship marker and reverse pointers from non-relationship records (warning: any commonly used connection, such as to Places, will result in a near-total dump of the database)</label></p>'
+                            +'<br><br><label><input type="radio" name="links" value="all" style="float:left;margin-right:8px;"/>Follow ALL connections including all relationships and reverse pointers (warning: any commonly used connection, such as to Places, will result in a near-total dump of the database)</label></p>'
+                            , function(){ 
+
+                                var val = $expdlg.find('input[name="links"]:checked').val();
+
+                                opts.linksMode = val;
+                                opts.questionResolved=true; 
+                                _exportRecords( opts ); 
+                            },
+                            {
+                                yes: 'Proceed',
+                                no: 'Cancel'
                         });
-                        
+
                         return;
                     }
                     params =  'depth=all';
                 }
-                
+
             }
             /*
             else{
-                if ((opts.format === 'hml' || opts.format === 'json') && !opts.confirmNotFollowPointers) {
-                    window.hWin.HEURIST4.msg.showMsgDlg(
-                        '<p><span style="color:red">WARNING:</span> by allowing the export of records without following pointers, ' +
-                        'you will lose any data which is referenced by pointer fields in the exported records. ' +
-                        'This may be acceptable for simple lists eg. of places or person names, ' +
-                        'but you need to understand the nature of the exported records to be sure that you are not ' +
-                        'losing essential data.</p>' +
-                        '<p>Exporting and importing a CSV file will give you more control on what fields are exported.</p>' +
-                        '<p>Are you sure?</p>', function(){
-                            opts.confirmNotFollowPointers = true;
-                            _exportRecords(opts);
-                        }, {
-                            yes: 'Proceed',
-                            no: 'Cancel'
-                        });
-                    return;
-                }
-                params =  'depth='+(opts.includeRelated?1:0);
+            if ((opts.format === 'hml' || opts.format === 'json') && !opts.confirmNotFollowPointers) {
+            window.hWin.HEURIST4.msg.showMsgDlg(
+            '<p><span style="color:red">WARNING:</span> by allowing the export of records without following pointers, ' +
+            'you will lose any data which is referenced by pointer fields in the exported records. ' +
+            'This may be acceptable for simple lists eg. of places or person names, ' +
+            'but you need to understand the nature of the exported records to be sure that you are not ' +
+            'losing essential data.</p>' +
+            '<p>Exporting and importing a CSV file will give you more control on what fields are exported.</p>' +
+            '<p>Are you sure?</p>', function(){
+            opts.confirmNotFollowPointers = true;
+            _exportRecords(opts);
+            }, {
+            yes: 'Proceed',
+            no: 'Cancel'
+            });
+            return;
+            }
+            params =  'depth='+(opts.includeRelated?1:0);
             }
             */
-            
+
             params =  params + (opts.linksMode?('&linkmode='+opts.linksMode):'');  
-            
+
             if(opts.format=='hml'){
                 script = 'export/xml/flathml.php';                
-                
+
                 //multifile is for HuNI  
                 params =  params + (opts.multifile?'&multifile=1':'');  
-               
+
             }else{
                 script = 'hsapi/controller/record_output.php';
                 params = params + '&format='+opts.format+'&defs=0&extended='+($('#extendedJSON').is(':checked')?2:1);
-                
+
                 if(opts.format=='gephi' && $('#limitGEPHI').is(':checked')){
                     params = params + '&limit=1000';    
                 }
             }
-            
+
             if(opts.save_as_file){          
                 params = params + '&file=1'; //save as file
             }
-                
+
 
             var url = window.hWin.HAPI4.baseURL + script + 
             q + 
@@ -376,7 +375,7 @@ function hexportMenu() {
 
         return false;
     }
-     
+
     function _exportKML(isAll, save_as_file){
 
         var q = "";
@@ -404,8 +403,8 @@ function hexportMenu() {
             if(save_as_file){
                 url = url + '&file=1';
             }
-            
-            
+
+
             window.open(url, '_blank');
         }
 
@@ -436,7 +435,7 @@ function hexportMenu() {
             }
         }
     }     
-     
+
     //public members
     var that = {
 
@@ -449,4 +448,3 @@ function hexportMenu() {
     _init();
     return that;  //returns object
 }
-    
