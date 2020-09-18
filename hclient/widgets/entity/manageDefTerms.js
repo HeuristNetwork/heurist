@@ -394,7 +394,25 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                                         }
                                     }
                             }
-                            })
+                            });
+
+                        // move to root of vocabulary                                
+                        that.recordList.find('.div-result-list-content')
+                            .droppable({
+                                scope: 'vocab_change',
+                                hoverClass: 'ui-drag-drop',
+                                drop: function( event, ui ){
+                                  
+                                    var trm_ID = $(ui.draggable).parent().attr('recid');
+                                    var trm_ParentTermID = that.options.trm_VocabularyID;
+                                    if(trm_ID>0){
+                                        if(!that.cbMergeOnDnD.is(':checked')){
+                                            that.changeVocabularyGroup({ trm_ID:trm_ID, trm_ParentTermID:trm_ParentTermID }, true);    
+                                        }
+                                    }
+                                }});
+                            
+                        
                     }
                     
                 };
@@ -1149,7 +1167,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
     //
     // Change vocab group (for vocabularies) or parent for term
     //                                
-    changeVocabularyGroup: function(params){                                    
+    changeVocabularyGroup: function(params, no_check){                                    
         
         if(params['trm_ParentTermID']>0){
         
@@ -1173,6 +1191,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
     console.log('Error !!! Parent not found for '+trm_ID);
                 return;
             }
+            
+            if(no_check!==true){
             
             //if new parent is vocabulary
             if( !($Db.trm(new_parent_id, 'trm_ParentTermID')>0) ){
@@ -1218,7 +1238,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 }else{
                     return;
                 }
-                
+            }
+            
             }
             
             if(isRef){
