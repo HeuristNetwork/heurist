@@ -249,7 +249,7 @@ $.widget( "heurist.editing_input", {
         
         this.input_prompt = $( "<div>")
         .html( help_text && !this.options.suppress_prompts ?help_text:'' )
-        .addClass('heurist-helper1').css('padding-bottom','1em');
+        .addClass('heurist-helper1').css('padding','0.2em 0');
         // we use applyCompetencyLevel from now
         //if(window.hWin.HAPI4.get_prefs('help_on')!=1){
         //    this.input_prompt.hide();

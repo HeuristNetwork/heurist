@@ -467,7 +467,7 @@
         $ret = null;
         $primary_field_type = 'integer';
 
-        if(is_array($table_prefix)){
+        if(is_array($table_prefix)){ //fields
             
             $fields = array();  
             foreach($table_prefix as $fieldname=>$field_config){

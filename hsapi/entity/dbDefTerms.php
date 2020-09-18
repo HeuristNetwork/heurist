@@ -518,6 +518,71 @@ class DbDefTerms extends DbEntityBase
                     }
                 }
                 
+            }else if(@$this->data['merge_id']>0 && @$this->data['retain_id']>0){
+                
+                $merge_id = $this->data['merge_id'];
+                $retain_id = $this->data['retain_id'];
+                
+                //check usage
+                $ret = $this->isTermInUse($merge_id, true, false);
+                    
+                if($ret){
+                    //1. change parent id for all children terms
+                    $query = "update defTerms set trm_ParentTermID = $retain_id where trm_ParentTermID = $merge_id";
+                    $res = $mysqli->query($query);
+                    if ($mysqli->error) {
+                        $this->system->addError(HEURIST_DB_ERROR,
+                            'SQL error - cannot change parent term for $merge_id from defTerms table', $mysqli->error);
+                        $ret = false; 
+                    }
+                }
+                if($ret){
+                    //2. update entries in recDetails for all detail type enum or reltype
+                    $query = "update recDetails, defDetailTypes set dtl_Value=".$retain_id
+                    ." where (dty_ID = dtl_DetailTypeID ) and "
+                    ." (dty_Type='enum' or dty_Type='relationtype') and "
+                    ." (dtl_Value=".$merge_id.")";
+
+                    $res = $mysqli->query($query);
+                    if ($mysqli->error) {
+                        $this->system->addError(HEURIST_DB_ERROR,
+                            'SQL error in mergeTerms updating record details', $mysqli->error);
+                        $ret = false; 
+                    }
+                }
+                if($ret){
+                    //3. delete term $merge_id
+                    $query = "delete from defTerms where trm_ID = $merge_id";
+                    $res = $mysqli->query($query);
+                    if ($mysqli->error) {
+                        $this->system->addError(HEURIST_DB_ERROR,
+                            "SQL error deleting term $merge_id from defTerms table", $mysqli->error);
+                        $ret = false; 
+                    }
+                }
+                if($ret){
+                
+                    //4. update term $retain_id
+                    $values = array('trm_ID'=>$retain_id);
+                    if(@$this->data['trm_Code']) $values['trm_Code'] = $this->data['trm_Code'];
+                    if(@$this->data['trm_Description']) $values['trm_Description'] = $this->data['trm_Description'];
+                    
+                    if(count($values)>1){
+                    
+                        $ret = mysql__insertupdate($mysqli, 
+                                                $this->config['tableName'], $this->fields,
+                                                $values );
+
+                        if(!$ret){
+                            $this->system->addError(HEURIST_ACTION_BLOCKED, 
+                                    'Cannot save data in table '.$this->config['entityName'], $ret);
+                            $ret = false;
+                        }                    
+                    
+                    }
+                    
+                }
+                
             }else{
                 $ret = $this->saveHierarchy();
             }
@@ -532,6 +597,13 @@ class DbDefTerms extends DbEntityBase
             
         
             return $ret;
+    }
+    
+    //
+    //
+    //
+    private function isTermInUse($trmID, $infield, $indetails){
+        return true;    
     }
     
 

@@ -257,7 +257,7 @@ fieldset > div > .header{
 fieldset > div > .input-cell{
     display:table-cell;
     min-width:120px;
-    padding-bottom:0.2em;
+    padding-bottom:0.5em;
 }
 fieldset.ontop > div > .input-cell{
     display:block;
@@ -445,7 +445,26 @@ div.recordDiv.public  > .action-button-container{
     padding: 0 2px;
 }
 .thumbs .recordDiv > .item{
-    max-width: 135px !important;
+    max-width: 130px !important;
+}
+
+.recordDiv > .description{
+    font-style:italic;
+    font-size:smaller;
+}
+.thumbs .recordDiv > .description{
+    position: absolute;   
+    max-width: 130px !important;
+    max-height: 130px;
+    overflow: hidden;
+}
+.list .recordDiv > .description{
+    display:inline-block;
+    max-width:400px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align:middle;
 }
 
 div.recordDiv  .action-button {

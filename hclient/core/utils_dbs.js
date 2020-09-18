@@ -1286,6 +1286,7 @@ window.hWin.HEURIST4.dbs = {
     
     //
     // get array of vocabularies by reference
+    // (where the given tag directly or by referecne belongs to)
     //
     trm_getAllVocabs: function(trm_id){
         var t_idx = window.hWin.HAPI4.EntityMgr.getEntityData('trm_Links'); 
@@ -1309,7 +1310,7 @@ window.hWin.HEURIST4.dbs = {
     },
     
     //
-    // remove any mention of term in hierarchy or in given vocabulary
+    // remove any mention of term from hierarchy
     //
     trm_RemoveLinks: function(trm_id){
         var t_idx = window.hWin.HAPI4.EntityMgr.getEntityData('trm_Links'); 
@@ -1325,32 +1326,6 @@ window.hWin.HEURIST4.dbs = {
                 }
                 i = i +1;
             }
-        }
-    },
-    
-    // NOT USED
-    // remove any term in given vocabulary
-    //    
-    trm_RemoveLink: function(trm_id, vocab_id){
-        
-        var t_idx = window.hWin.HAPI4.EntityMgr.getEntityData('trm_Links'); 
-        
-        if(t_idx[vocab_id]){
-            var k = window.hWin.HEURIST4.util.findArrayIndex(trm_id, t_idx[vocab_id]);    
-            if(k>=0){
-                parents[i].splice(k,1);
-                return true
-            }else{
-                //find on next level
-                for(var i=0; i<t_idx[vocab_id].length; i++){
-                    if($Db.trm_RemoveLink(trm_id, t_idx[vocab_id][i])){
-                        return true;
-                    }
-                }
-            }
-        }else{
-            //no children
-            return false;
         }
     },
         

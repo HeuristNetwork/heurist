@@ -253,7 +253,7 @@ function EditTerms() {
             termName != _currentNode.data.label ||
             $('#trm_SemanticReferenceURL').val().trim() != _currentNode.data.trm_SemanticReferenceURL ||
             $('#edDescription').val().trim() != _currentNode.data.description ||
-            $('#edCode').val().trim() != _currentNode.data.termcode ||
+            $('#edCode').val().trim() != _currentNode.data.termdesc ||
             $('#trm_Status').val() != _currentNode.data.status ||
             iInverseId != iInverseId_prev;
         }
@@ -336,11 +336,11 @@ function EditTerms() {
                 if(Hul.isnull(node.data.description)) {
                     node.data.description="";
                 }
-                if(Hul.isnull(node.data.termcode)) {
-                    node.data.termcode="";
+                if(Hul.isnull(node.data.termdesc)) {
+                    node.data.termdesc="";
                 }
                 $('#edDescription').val(node.data.description);
-                $('#edCode').val(node.data.termcode);
+                $('#edCode').val(node.data.termdesc);
                 $('#trm_SemanticReferenceURL').val(node.data.trm_SemanticReferenceURL);
 
                 //image
@@ -678,7 +678,7 @@ function EditTerms() {
                 document.getElementById ('div_SaveMessage').style.display = "inline-block";
                 setTimeout(function(){document.getElementById ('div_SaveMessage').style.display = "none";}, 2000);*/
 
-                //@todo !!!! verify that we need this code
+                //@todo !!!! verify that we need this desc
                 /*
                 if(_termTree2==null){
                     _fillTreeView(_termTree1);
@@ -769,7 +769,7 @@ function EditTerms() {
 
         var wasChanged = ((_currentNode.data.label !== sName) ||
             (_currentNode.data.description !== sDesc) ||
-            (_currentNode.data.termcode !== sCode) ||
+            (_currentNode.data.termdesc !== sCode) ||
             (_currentNode.data.status !== sStatus) ||
             (_currentNode.data.trm_SemanticReferenceURL !== sRefURI) ||
             (iParentId_prev !== iParentId) ||
@@ -790,7 +790,7 @@ function EditTerms() {
 
             var swarn = "";
             if(Hul.isempty(sName)){
-                swarn = "The term cannot be blank (the standard code, description and image are optional)"
+                swarn = "The term cannot be blank (the standard desc, description and image are optional)"
             }else {
                 //IJ 2014-04-09 swarn = window.hWin.HEURIST4.ui.validateName(sName, "Field 'Display Name'");
             }
@@ -841,7 +841,7 @@ function EditTerms() {
 
                     nodeForAction.data.label = sName;
                     nodeForAction.data.description = sDesc;
-                    nodeForAction.data.termcode = sCode;
+                    nodeForAction.data.termdesc = sCode;
                     nodeForAction.data.status = sStatus;
 
                     nodeForAction.data.inverseid = iInverseId;
@@ -862,7 +862,7 @@ function EditTerms() {
     /**
     *
     */
-    function _validateDups(node, new_name, new_code){
+    function _validateDups(node, new_name, new_desc){
 
         // var sibs = node.getSiblings(); //getSiblings is a function for YuI, we updated the tree to fancyTree
         var sibs = node.getChildren();
@@ -873,8 +873,8 @@ function EditTerms() {
                     alert("Duplicate term '"+new_name+"' - there is already a term with the same label in this branch at this level.");
                     return false;
                 }
-                if(new_code!='' && sibs[ind].data.termcode == new_code){
-                    alert("There is already a term with the standard code '"+new_code+"' in this branch.");
+                if(new_desc!='' && sibs[ind].data.termdesc == new_desc){
+                    alert("There is already a term with the standard desc '"+new_desc+"' in this branch.");
                     return false;
                 }
             }
@@ -920,8 +920,8 @@ function EditTerms() {
         alert("There is already a term with the same label in this branch");
         return;
         }
-        if(sibs[ind].data.termcode == node.data.termcode){
-        alert("There is already a term with the same code in this branch");
+        if(sibs[ind].data.termdesc == node.data.termdesc){
+        alert("There is already a term with the same desc in this branch");
         return;
         }
         }
@@ -938,7 +938,7 @@ function EditTerms() {
 
         //PLEASE NOTE use "node.label' for YUI TREE INSTEAD OF 'term.label'
         oTerms.terms.defs[term.id] = [term.label, term.inverseid, term.description, term.domain, 
-                term.parent_id, term.status, term.termcode, term.trm_SemanticReferenceURL ];
+                term.parent_id, term.status, term.termdesc, term.trm_SemanticReferenceURL ];
 
         //var str = JSON.stringify(oTerms);
 
@@ -1207,8 +1207,8 @@ function EditTerms() {
 
         window.hWin.HEURIST4.msg.showDialog(sURL, {
                 "close-on-blur": false,
-                "no-resize": true,
-                height: 500,
+                //"no-resize": true,
+                height: 250,
                 width: 500,
                 callback: function(newparent_id) {
                     if(newparent_id) {
@@ -1321,7 +1321,7 @@ function EditTerms() {
                 domain:_currentDomain,
                 label: value.label,
                 description:value.description,
-                termcode : value.termcode,
+                termdesc : value.termdesc,
                 trm_SemanticReferenceURL: value.trm_SemanticReferenceURL,
                 inverseid: null,
                 folder:true,
@@ -1345,7 +1345,7 @@ function EditTerms() {
                 domain:_currentDomain,
                 label: value.label,
                 description:value.description,
-                termcode : value.termcode,
+                termdesc : value.termdesc,
                 trm_SemanticReferenceURL: value.trm_SemanticReferenceURL,
                 inverseid: null,
                 folder:true,
@@ -1503,7 +1503,7 @@ function EditTerms() {
                                 term.folder = false;
                                 term.conceptid = null;
                                 term.description = arTerm[fi.trm_Description];
-                                term.termcode = arTerm[fi.trm_Code];
+                                term.termdesc = arTerm[fi.trm_Code];
                                 term.trm_SemanticReferenceURL = arTerm[fi.trm_SemanticReferenceURL];
                                 term.parent_id = arTerm[fi.trm_ParentTermID];
                                     //context.parent; //_currentNode.data.id;
@@ -1954,7 +1954,7 @@ function EditTerms() {
                 term.domain = _currentDomain;
                 term.label = Hul.isempty(arTerm[fi.trm_Label])?'ERROR N/A':arTerm[fi.trm_Label];
                 term.description = arTerm[fi.trm_Description];
-                term.termcode  = arTerm[fi.trm_Code];
+                term.termdesc  = arTerm[fi.trm_Code];
                 term.trm_SemanticReferenceURL = arTerm[fi.trm_SemanticReferenceURL];
                 term.inverseid = arTerm[fi.trm_InverseTermID];
                 term.status = arTerm[fi.trm_Status];
@@ -1983,7 +1983,7 @@ function EditTerms() {
                                 _term.domain = _currentDomain;
                                 _term.label = Hul.isempty(_arTerm[fi.trm_Label])?'ERROR N/A':_arTerm[fi.trm_Label];
                                 _term.description =_arTerm[fi.trm_Description];
-                                _term.termcode  =  _arTerm[fi.trm_Code];
+                                _term.termdesc  =  _arTerm[fi.trm_Code];
                                 _term.trm_SemanticReferenceURL = _arTerm[fi.trm_SemanticReferenceURL];
                                 _term.inverseid = _arTerm[fi.trm_InverseTermID];
                                 _term.status = _arTerm[fi.trm_Status];
@@ -1992,7 +1992,7 @@ function EditTerms() {
 
                                 // childNode = parentEntry.addNode(term);
 
-                                children.push({id:child,parent_id:parent_id,conceptid:_arTerm[fi.trm_ConceptID],domain:_currentDomain, label:_term.label, description:_arTerm[fi.trm_Description],termcode:_arTerm[fi.trm_Code],
+                                children.push({id:child,parent_id:parent_id,conceptid:_arTerm[fi.trm_ConceptID],domain:_currentDomain, label:_term.label, description:_arTerm[fi.trm_Description],termdesc:_arTerm[fi.trm_Code],
                             trm_SemanticReferenceURL:_arTerm[fi.trm_SemanticReferenceURL],
                             inverseid:_arTerm[fi.trm_InverseTermID],status:_arTerm[fi.trm_Status],original_db:_arTerm[fi.trm_OriginatingDBID], title:_term.label,folder:true,children: __createChildren(parentNode[child], _term.id)});
 
@@ -2007,7 +2007,7 @@ function EditTerms() {
 
                 var parentNode = treesByDomain[termid];
                 //all: { title: window.hWin.HR('My Searches'), folder: true,
-                treedata.push({id:termid,parent_id:term.parent_id,conceptid:term.conceptid,domain:term.domain, label:term.label, description:term.description,termcode:term.termcode,
+                treedata.push({id:termid,parent_id:term.parent_id,conceptid:term.conceptid,domain:term.domain, label:term.label, description:term.description,termdesc:term.termdesc,
                 trm_SemanticReferenceURL:term.trm_SemanticReferenceURL,
                 inverseid:term.inverseid,status:term.status,original_db:term.original_db,title:term.label,folder:true,children:__createChildren(parentNode, termid)});
 
@@ -2144,7 +2144,7 @@ function EditTerms() {
                       :'')
                    +'<span class="ui-icon ui-icon-close" title="Delete this term (if unused in database)"></span>'
                    //+'<span class="ui-icon ui-icon-image" title="Add an image which illustrates this term"></span>'
-                   +'<span class="ui-icon ui-icon-arrowthick-1-w" title="IMPORT a comma-delimited list of terms (and optional codes and labels) as children of this term"></span>'
+                   +'<span class="ui-icon ui-icon-arrowthick-1-w" title="IMPORT a comma-delimited list of terms (and optional descs and labels) as children of this term"></span>'
                    +'<span class="ui-icon ui-icon-arrowthick-1-e" title="EXPORT this vocabulary to a text file"></span>'
                    +'</div>').appendTo(item);
                    

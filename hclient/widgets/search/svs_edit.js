@@ -286,11 +286,13 @@ function hSvsEdit(args) {
     * @param is_short - works only for addition (from save fixed order)
     * @param callback
     */
-    function _showDialog( mode, groupID, svsID, squery, is_short, position, callback ){
+    function _showDialog( mode, groupID, svsID, squery, is_short, position, callback, is_modal, is_h6style){
         
         is_short = (!(svsID>0) && is_short===true);
+        is_modal = (is_modal!==false);
+        is_h6style = (is_h6style===true);
         
-        var is_h6style = (window.hWin.HAPI4.sysinfo['layout']!='H5Default');
+        //var is_h6style = (window.hWin.HAPI4.sysinfo['layout']!='H5Default');
 
         if(parseInt(svsID)>0){
             var svs = window.hWin.HAPI4.currentUser.usr_SavedSearch[svsID];
@@ -627,7 +629,7 @@ function hSvsEdit(args) {
                     autoOpen: false,
                     height: is_short?360:600,
                     width: 650,                                                                                               
-                    modal: true, //!is_h6style
+                    modal: is_modal, //!is_h6style
                     resizable: false,
                     draggable: !is_h6style,
                     title: window.hWin.HR(isRules?'Edit RuleSet':'Save filter criteria'),
@@ -676,6 +678,7 @@ function hSvsEdit(args) {
             if(position!=null){
                 edit_dialog.dialog( 'option', 'position', position );   
             }
+            edit_dialog.dialog( 'option', 'modal', is_modal );   
             
             edit_dialog.dialog("open");
         }
@@ -715,8 +718,8 @@ function hSvsEdit(args) {
             }
         },
         
-        showSavedFilterEditDialog: function( mode, groupID, svsID, squery, is_short, position, callback ) {
-            _showDialog( mode, groupID, svsID, squery, is_short, position, callback );
+        showSavedFilterEditDialog: function( mode, groupID, svsID, squery, is_short, position, callback, is_modal, is_h6style ) {
+            _showDialog( mode, groupID, svsID, squery, is_short, position, callback, is_modal, is_h6style );
         }
 
     }

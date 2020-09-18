@@ -293,7 +293,8 @@ $.widget( "heurist.mainMenu6", {
     _isExplorerMenu_locked: function(){
         
         var isSvsEditVisible = ( this.edit_svs_dialog && this.edit_svs_dialog.isModified() );
-//console.log('>>>'+isSvsEditVisible);        
+        //isSvsEditVisible = false;
+console.log('>>>'+isSvsEditVisible);        
         return (isSvsEditVisible || this._explorer_menu_locked 
                 || this.element.find('.ui-selectmenu-open').length>0
                 || $('.list_div').is(':visible')      //tag selector dropdown      
@@ -499,6 +500,11 @@ $.widget( "heurist.mainMenu6", {
         this._myTimeoutId3 = setTimeout(function(){
 
             that.menues['explore'].find('.explore-widgets').hide(); //hide others
+            if(action_name!='svsAdd'){
+                //attempt for non modal 
+console.log('close in _show_ExploreMenu');                
+                that.closeSavedSearch();
+            }
         
             if(action_name=='search_entity'){
 
@@ -624,8 +630,6 @@ $.widget( "heurist.mainMenu6", {
 
             }
             
-            //attempt for non modal that.closeSavedSearch();
-            
             that.menues['explore'].css({left:explore_left, top:explore_top, height:explore_height});
             
             //show menu section
@@ -664,7 +668,10 @@ $.widget( "heurist.mainMenu6", {
         this.menues_explore_gap.hide();
         //this.menues[section].css({'z-index':2,left:'200px'}).show(); 
         if(section=='explore'){
-            //attempt for non modal this.closeSavedSearch();
+            //attempt for non modal 
+console.log('close in _closeSectionMenu');                
+            
+            this.closeSavedSearch();
         }
     },
     
@@ -982,7 +989,7 @@ console.log('prvent colapse');
             function(){
                 window.hWin.HAPI4.currentUser.usr_SavedSearch = null;
                 window.hWin.HAPI4.currentUser.ugr_SvsTreeData = null;
-            }    
+            }, is_modal, true    
         );
     },
     
