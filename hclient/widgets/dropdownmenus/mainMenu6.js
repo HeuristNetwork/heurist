@@ -80,7 +80,8 @@ $.widget( "heurist.mainMenu6", {
                 
                 //explore menu in main(left) menu
                 that._on(that.divMainMenu.children('.ui-heurist-explore'),{
-                    mouseenter: that._expandMainMenuPanel, //mouseenter mouseover
+                    //mouseenter: that._expandMainMenuPanel, //mouseenter mouseover
+                    click: that._expandMainMenuPanel,
                     mouseleave: that._collapseMainMenuPanel,
                 });
                 //other entries in main(left) menu
@@ -294,7 +295,7 @@ $.widget( "heurist.mainMenu6", {
         
         var isSvsEditVisible = ( this.edit_svs_dialog && this.edit_svs_dialog.isModified() );
         //isSvsEditVisible = false;
-console.log('>>>'+isSvsEditVisible);        
+//console.log('>>>'+isSvsEditVisible);        
         return (isSvsEditVisible || this._explorer_menu_locked 
                 || this.element.find('.ui-selectmenu-open').length>0
                 || $('.list_div').is(':visible')      //tag selector dropdown      
@@ -436,6 +437,8 @@ console.log('>>>'+isSvsEditVisible);
         
         if( this._isExplorerMenu_locked() ) return;
         this._explorer_menu_locked = false;
+        
+        this._expandMainMenuPanel();
 
         clearTimeout(this._myTimeoutId3); this._myTimeoutId3 = 0;
         this._resetCloseTimers();
@@ -669,7 +672,7 @@ console.log('close in _show_ExploreMenu');
         //this.menues[section].css({'z-index':2,left:'200px'}).show(); 
         if(section=='explore'){
             //attempt for non modal 
-console.log('close in _closeSectionMenu');                
+//console.log('close in _closeSectionMenu');                
             
             this.closeSavedSearch();
         }
