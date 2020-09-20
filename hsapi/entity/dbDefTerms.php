@@ -214,7 +214,6 @@ class DbDefTerms extends DbEntityBase
         return $matches;
         
     }
-    
 
     //
     // trm_Label may have periods. Periods are taken as indicators of hierarchy.
@@ -525,6 +524,11 @@ class DbDefTerms extends DbEntityBase
                 
                 //check usage
                 $ret = $this->isTermInUse($merge_id, true, false);
+                if(is_array($ret)){
+                    $this->system->addError(HEURIST_ACTION_BLOCKED,
+                            'Cannot merge '.$merge_id.'. This term has references', $ret);
+                    $ret = false; 
+                }
                     
                 if($ret){
                     //1. change parent id for all children terms
@@ -532,7 +536,7 @@ class DbDefTerms extends DbEntityBase
                     $res = $mysqli->query($query);
                     if ($mysqli->error) {
                         $this->system->addError(HEURIST_DB_ERROR,
-                            'SQL error - cannot change parent term for $merge_id from defTerms table', $mysqli->error);
+                            'SQL error - cannot change parent term for '.$merge_id.' from defTerms table', $mysqli->error);
                         $ret = false; 
                     }
                 }
@@ -600,13 +604,70 @@ class DbDefTerms extends DbEntityBase
     }
     
     //
+    // returns list of fields (where vocabulary is in use) and number of records
     //
-    //
-    private function isTermInUse($trmID, $infield, $indetails){
-        return true;    
-    }
-    
+    private function isTermInUse($trm_ID, $infield, $indetails){
 
+        $mysqli = $this->system->get_mysqli();        
+        
+        $ret = array('children'=>0, 'detailtypes'=>array(), 'reccount'=>0);
+
+        //first level children
+        $query = 'SELECT count(trl_TermID) FROM defTermsLinks WHERE trl_ParentID='
+                            .$trm_ID;
+        $ret['children'] = mysql__select_value($mysqli, $query);
+        
+
+        if($infield){
+            //find possible entries in defDetailTypes dty_JsonTermIDTree
+            $query = 'SELECT dty_ID FROM defDetailTypes WHERE '
+                .'(dty_JsonTermIDTree='.$trm_ID.') '
+                .'AND (dty_Type=\'enum\' or dty_Type=\'relationtype\')';
+            $ret['detailtypes'] = mysql__select_list2($mysqli, $query);
+            
+            //TODO: need to check inverseid or it will error by foreign key constraint?
+        }
+
+        //find usage in recDetails
+        if($indetails){
+
+            $query = "SELECT count(distinct dtl_RecID) FROM recDetails, defDetailTypes "
+            ."WHERE (dty_ID = dtl_DetailTypeID ) AND "
+            ."(dty_Type='enum' or dty_Type='relationtype') AND "
+            ."(dtl_Value=$trm_ID)";
+            $ret['reccount'] = mysql__select_value($mysqli, $query);
+
+        }
+
+        if($ret['children']>0 || count($ret['detailtypes'])>0 || $ret['reccount']){
+            return $ret;    
+        }else{
+            return false;
+        }
+        
+        
+    }
+
+
+    protected function _validatePermission()
+    {
+        if(@$this->data['a'] == 'delete'){
+            
+            if(!@$this->recordIDs){
+                $this->recordIDs = prepareIds($this->data[$this->primaryField]);
+            }
+            
+            foreach($this->recordIDs as $trm_ID){
+                $ret = $this->isTermInUse($trm_ID, true, true); 
+                if($ret!==false){
+                    $this->system->addError(HEURIST_ACTION_BLOCKED,
+                            'Cannot delete '.$trm_ID.'. This term has references'); //$ret
+                    return false; 
+                }
+            }
+        }
+        return true;
+    }
     
 }
 ?>
