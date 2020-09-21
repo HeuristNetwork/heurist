@@ -29,6 +29,7 @@ $.widget( "heurist.mainMenu6", {
     },
     
     sections: ['design','import','explore','publish','admin'],
+    //sections: ['admin','design','import','publish','explore'],
     
     menues:{}, //section menu - div with menu actions
     containers:{}, //operation containers (next to section menu)
@@ -106,12 +107,7 @@ $.widget( "heurist.mainMenu6", {
 
                 
                 
-                if(true){ //DEBUG - open record types 
-                    
-                    //var widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('mainMenu');
-                    //widget.mainMenu('menuActionById', 'menu-structure-rectypes'); 
-                    
-                }else if(window.hWin.HAPI4.sysinfo['db_total_records']<1){
+                if(window.hWin.HAPI4.sysinfo['db_total_records']<1){
                     //open explore by default, or "design" if db is empty
                     that._active_section = 'explore';
                     
@@ -138,7 +134,7 @@ $.widget( "heurist.mainMenu6", {
                 that.divMainMenu.find('.menu-text').hide();
                 
                 //init explore menu items 
-                that._on(that.divMainMenu.find('.menu-explore'),{
+                that._on(that.divMainMenu.find('.menu-explore > span'),{
                     mouseenter: that._mousein_ExploreMenu,
                     mouseleave: function(e){
                         this._myTimeoutId2 = setTimeout(function(){that._closeSectionMenu('explore');}, 600);
@@ -443,9 +439,11 @@ $.widget( "heurist.mainMenu6", {
         clearTimeout(this._myTimeoutId3); this._myTimeoutId3 = 0;
         this._resetCloseTimers();
         this.divMainMenu.find('li.menu-explore > .menu-text').css('text-decoration', 'none');
-        $(e.target).find('.menu-text').css('text-decoration','underline');
         
-        if(!$(e.target).attr('data-action')){
+        var ele = $(e.target).is('li')?$(e.target):$(e.target).parent('li');
+        
+        ele.find('.menu-text').css('text-decoration','underline');
+        if(!ele.attr('data-action')){
             var that = this;
             this._myTimeoutId3 = setTimeout(function(){
                     that.menues['explore'].hide();
@@ -464,7 +462,9 @@ $.widget( "heurist.mainMenu6", {
     //        
     _show_ExploreMenu: function(e) {
         
-        var action_name = $(e.target).attr('data-action');
+        var menu_item = $(e.target).is('li')?$(e.target):$(e.target).parent('li');
+        
+        var action_name = menu_item.attr('data-action');
        
 //console.log(action_name);       
        
@@ -476,7 +476,7 @@ $.widget( "heurist.mainMenu6", {
             delay = 500;
             
         if(action_name == 'recordAdd'){
-            if($(e.target).attr('data-id')>0){
+            if(menu_item.attr('data-id')>0){
                 delay = 1000;
             }
         }else if(action_name=='recordAddSettings'){
@@ -505,7 +505,7 @@ $.widget( "heurist.mainMenu6", {
             that.menues['explore'].find('.explore-widgets').hide(); //hide others
             if(action_name!='svsAdd'){
                 //attempt for non modal 
-console.log('close in _show_ExploreMenu');                
+//console.log('close in _show_ExploreMenu');                
                 that.closeSavedSearch();
             }
         
@@ -535,7 +535,7 @@ console.log('close in _show_ExploreMenu');
                             that._explorer_menu_locked = is_locked; 
                     }  });    
 
-                explore_top = $(e.target).position().top;
+                explore_top = menu_item.position().top;
                 explore_height = 268+36;
                 explore_left = 201;
                 if(explore_top+explore_height>that.element.innerHeight()){
@@ -569,7 +569,7 @@ console.log('close in _show_ExploreMenu');
 
                 that.menues['explore'].css({bottom:'4px',width:'300px',overflow:'auto'});
 
-                var group_ID = (e)?[$(e.target).attr('data-id')]:null;
+                var group_ID = (e)?[menu_item.attr('data-id')]:null;
 
                 if(!cont.svs_list('instance')){
                     cont.svs_list({
@@ -859,11 +859,11 @@ console.log('prvent colapse');
                 
             }});
         }else  if (section=='design'){ //DEBUG - open record types 
-            
+            /* DEBUG    
                 this._active_section = 'explore';
                 this.switchContainer('design', true);
                 this.menues['design'].find('li[data-action="menu-structure-rectypes"]').click();
-            
+            */
         }
         
         /*
