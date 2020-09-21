@@ -980,6 +980,11 @@ $.widget( "heurist.manageEntity", {
         
         var that = this;
         if(that._editing && that._editing.isModified() && that._currentEditID!=null){
+            if(this.options.edit_structure){
+                that._currentEditID=null; that.closeDialog();
+                return true;
+            }
+            
             var $dlg, buttons = {};
             buttons['Save'] = function(){ that._saveEditAndClose(null, 'close'); $dlg.dialog('close'); }; 
             buttons['Ignore and close'] = function(){ that._currentEditID=null; that.closeDialog(); $dlg.dialog('close'); };
@@ -1331,6 +1336,10 @@ $.widget( "heurist.manageEntity", {
 //console.log('prevent repeatative call')
                 return;   
             }
+            
+            if(this.options.edit_structure){
+               return;
+            }            
         
             if(!fields){
                 fields = this._getValidatedValues(); 
@@ -1384,8 +1393,8 @@ this._time_debug = fin_time;
                                 //add/update record in recordset in _afterSaveEventHandler depends on entity
                             }
                             
-                            if(that.options.edit_mode=='inline' || that.options.edit_mode=='editonly'){
-                                that._editing.setModified(0);
+                            if((that.options.edit_mode=='inline' || that.options.edit_mode=='editonly')){
+                                if(that._editing) that._editing.setModified(0);
                                 that.onEditFormChange(); //update buttons
                             }
                             

@@ -1032,6 +1032,7 @@ dty_TermIDTreeNonSelectableIDs
                 var tree = this._treeview.fancytree("getTree");
                 node = tree.getNodeByKey(arg2);
                 if(node) node.setActive();
+                after_dty_ID = arg2;
             }
             
             //add new field to this record type structure
@@ -1044,7 +1045,7 @@ dty_TermIDTreeNonSelectableIDs
                 if(res && res.selection){
                     if(window.hWin.HEURIST4.util.isArrayNotEmpty(res.selection)){
                         var dty_ID = res.selection[0];
-                        that.addNewFieldToStructure(dty_ID, res.rst_fields);
+                        that.addNewFieldToStructure(dty_ID, after_dty_ID, res.rst_fields);
                     }else
                     if(window.hWin.HEURIST4.util.isRecordSet(res.selection)){
                         var recordset = res.selection;
@@ -1077,7 +1078,7 @@ dty_TermIDTreeNonSelectableIDs
     //
     //
     //
-    addNewFieldToStructure: function(dty_ID, rst_fields){
+    addNewFieldToStructure: function(dty_ID, after_dty_ID, rst_fields){
         
         if(this._cachedRecordset.getById(dty_ID) ){ //window.hWin.HEURIST4.rectypes.typedefs[this.options.rty_ID].dtFields[dty_ID]){
             window.hWin.HEURIST4.msg.showMsgFlash('Such field already exists in structure');
@@ -1144,12 +1145,22 @@ dty_TermIDTreeNonSelectableIDs
                     
                     that._cachedRecordset.setRecord(recID, fields);
                     
+                    
+                    
                     var tree = that._treeview.fancytree("getTree");
-                    var parentnode = tree.getActiveNode();
-                    if(!parentnode) return;
+                    var parentnode;
+                    if(after_dty_ID>0){
+                        parentnode = tree.getNodeByKey(after_dty_ID);
+                    }else{
+                       parentnode = tree.getActiveNode();
+                    }
+                    if(!parentnode){
+console.log('No active tree node!!!!')                      
+                        return;  
+                    } 
                     
                     //add new node to tree
-                    parentnode.addNode({key:recID}, parentnode.folder?'firstChild':'after');
+                    parentnode.addNode({key:recID}, (parentnode.folder==true)?'firstChild':'after');
                     if(parentnode.folder){
                         parentnode.setExpanded(true);
                     }
@@ -1822,7 +1833,7 @@ dty_TermIDTreeNonSelectableIDs
     _composeTreeItem: function(title, type, req){
         
         if(type!='separator'){
-            title =  '<span style="padding-left:20px;">' + title 
+            title =  '<span style="padding-left:10px;">' + title 
                     + '</span><span style="font-size:smaller;">  ('
                     +window.hWin.HEURIST4.dbs.baseFieldType[type]
                     +')</span>';
@@ -1880,7 +1891,7 @@ dty_TermIDTreeNonSelectableIDs
                             var title = fields['rst_DisplayName'];
                             var req = fields['rst_RequirementType'];
                             if(!isSep){
-                                title =  '<span style="padding-left:20px">' + title 
+                                title =  '<span style="padding-left:10px">' + title 
                                         + '</span><span style="font-size:smaller">  ('
                                         +window.hWin.HEURIST4.dbs.baseFieldType[fields['dty_Type']]
                                         +')</span>';
@@ -2043,7 +2054,7 @@ dty_TermIDTreeNonSelectableIDs
                         var title = recset.fld(record, 'rst_DisplayName');
                         var req = recset.fld(record,'rst_RequirementType');
                         if(!isSep){
-                            title =  '<span style="padding-left:20px">' + title 
+                            title =  '<span style="padding-left:10px">' + title 
                                         + '</span><span style="font-size:smaller;">  ('
                                     +window.hWin.HEURIST4.dbs.baseFieldType[recset.fld(record,'dty_Type')]
                                     +')</span>';
@@ -2116,7 +2127,7 @@ dty_TermIDTreeNonSelectableIDs
             });
                         
             if(!window.hWin.HEURIST4.util.isnull(ft_separator_id)){
-                this.addNewFieldToStructure( ft_separator_id );
+                this.addNewFieldToStructure( ft_separator_id, after_dtid );
             }else{ //"not used" separator field type not found - create new one
             
                 var fields = {                
@@ -2140,7 +2151,7 @@ dty_TermIDTreeNonSelectableIDs
                         
                             $Db.dty(recID, null, fields); //add on client side  
                             
-                            that.addNewFieldToStructure( dty_ID );
+                            that.addNewFieldToStructure( dty_ID, after_dtid );
                         }else{
                             window.hWin.HEURIST4.msg.showMsgErr(response);
                         }

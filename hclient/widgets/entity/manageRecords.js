@@ -301,7 +301,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     //
     saveQuickWithoutValidation: function( _callback ){
       
-        if(this._editing.isModified()){
+        if(!this.options.edit_structure && this._editing.isModified()){
             var fields = this._editing.getValues(false);
             fields['no_validation'] = 1; //do not validate required fields
             this._saveEditAndClose( fields, _callback);           
