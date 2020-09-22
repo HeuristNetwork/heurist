@@ -908,13 +908,14 @@ $.widget( "heurist.editing_input", {
                 
                 var vocab_id = Number(allTerms);
                 
+                //add new term to specified vocabulary
                 var rg_options = {
                          isdialog: true, 
                          select_mode: 'manager',
                          edit_mode: 'editonly',
                          height: 240,
                          rec_ID: -1,
-                         trm_ParentTermID: vocab_id,
+                         trm_VocabularyID: vocab_id,
                          onClose: function(){
                              
 console.log('close edit terms - recreate selector');                             

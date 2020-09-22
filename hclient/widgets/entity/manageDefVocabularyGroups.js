@@ -20,6 +20,8 @@
 
 $.widget( "heurist.manageDefVocabularyGroups", $.heurist.manageEntity, {
     
+    //options.selection_on_init - initial selection
+    
     _entityName:'defVocabularyGroups',
     
     _init: function() {
@@ -86,7 +88,6 @@ $.widget( "heurist.manageDefVocabularyGroups", $.heurist.manageEntity, {
                                             
                     var trm_ID = $(ui.draggable).parent().attr('recid');
                     var vcg_ID = trg.attr('recid');
-//console.log(trm_ID+' to '+vcg_ID)                    
                             if(trm_ID>0 && vcg_ID>0 && that.options.reference_vocab_manger){
                                     that.options.reference_vocab_manger
                                         .manageDefTerms('changeVocabularyGroup',{trm_ID:trm_ID, trm_VocabularyGroupID:vcg_ID });
@@ -124,7 +125,9 @@ $.widget( "heurist.manageDefVocabularyGroups", $.heurist.manageEntity, {
     //
     _loadData: function(){
         this.updateRecordList(null, {recordset:$Db.vcg()});
-        this.selectRecordInRecordset();
+        this.selectRecordInRecordset( this.options.selection_on_init );
+        this.options.selection_on_init = null;
+            
 /*
         var that = this;
         window.hWin.HAPI4.EntityMgr.getEntityData(this._entityName, false,

@@ -25,6 +25,14 @@ we may take data from
 3) use_cache = true + use_structure - use HEURSIT4.rectypes
 */
 $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
+    
+    /*
+    options
+        initial_filter - initial vocabulary ID
+        filter_groups -  restrict domain: null-any, enum or relation
+    
+    */
+    
    
     _entityName:'defTerms',
     fields_list_div: null,  //term search result
@@ -201,7 +209,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 };
 
                 this.recordList.uniqueId();
-                
+
                 var rg_options = {
                      isdialog: false, 
                      isFrontUI: this.options.isFrontUI,
@@ -215,7 +223,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                          if(window.hWin.HEURIST4.util.isRecordSet(res)){
                             res = res.getIds();                     
                             if(res && res.length>0){
-                                //filter by vocabulary
+                                //filter by vocabulary group
                                 that.options.trm_VocabularyGroupID = res[0];
                             }
                          }else if(res>0){
@@ -230,9 +238,18 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                          
                      }
                 };
+
+                //initially selected vocabulary
+                if(this.options.selection_on_init>0){
+                    //is vocabulary
+                    var vcg_ID = $Db.trm(this.options.selection_on_init, 'trm_VocabularyGroupID');
+                    rg_options['selection_on_init'] = vcg_ID;
+                }
+                
                 window.hWin.HEURIST4.ui.showEntityDialog('defVocabularyGroups', rg_options);
                 
-            }else{ //terms ------------------------------------------
+            }
+            else{ //terms ------------------------------------------
                 
         
                 //add vocab group and vocabs panels
@@ -427,6 +444,14 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                      reference_trm_manger: that.element,
                      auxilary: 'vocabulary',
                      onSelect:function(res){
+
+                         /*
+                         if(that.options.selection_on_init>0){
+
+                             that.options.trm_VocabularyID = that.options.selection_on_init;
+                             that.options.selection_on_init = null;
+                             
+                         }else */
                          if(window.hWin.HEURIST4.util.isRecordSet(res)){
                             res = res.getIds();                     
                             if(res && res.length>0){
@@ -438,15 +463,20 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                          }else{
                              that.options.trm_VocabularyID = -1;
                          }
+                         
                          if(that.getRecordSet()!==null){
                                 that._filterByVocabulary();
                          }
                      }
                 };
                 
+                //initially selected vocabulary
+                if(this.options.selection_on_init>0){
+                    rg_options['selection_on_init'] = this.options.selection_on_init;
+                }
+                
                 this.recordList.uniqueId();
                 
-//console.log('init vocabs grp '+this.vocabularies_div.attr('id'));               
                 window.hWin.HEURIST4.ui.showEntityDialog('defTerms', rg_options);
                 
             }
@@ -501,8 +531,6 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 
         }
 
-//console.log('init list '+this.options.auxilary+'  '+this.recordList.attr('id'));                    
-        
         this.recordList.resultList( this.options.recordList );
             
         that._loadData(true);
@@ -623,14 +651,18 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                                         +'</div>');
                 
                 //initial selection
-                var rdiv = this.recordList.find('.recordDiv:first');
-                if(rdiv.length){
-                    var rec_ID = rdiv.attr('recid');
-                    rdiv.click();
-                }else if($.isFunction(this.options.onSelect)){
-                        this.options.onSelect.call( this, null );
-                }
-                    
+                if(this.options.selection_on_init>0){
+                        this.selectRecordInRecordset( this.options.selection_on_init );    
+                        this.options.selection_on_init = null;
+                }else{
+                    var rdiv = this.recordList.find('.recordDiv:first');
+                    if(rdiv.length){
+                        var rec_ID = rdiv.attr('recid');
+                        rdiv.click();
+                    }else if($.isFunction(this.options.onSelect)){
+                            this.options.onSelect.call( this, null );
+                    }
+                }                    
                 
             }else{
                 sGroupTitle += '</h4>';
@@ -697,7 +729,6 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             sWidth = 'max-width:'+sWidth+'px;min-width:'+sWidth+'px;';
         }else{
             sWidth = 'display:inline-block;padding-top:4px;';
-//console.log(recordset.fld(record, 'trm_Parents'));            
             var lvl = (recordset.fld(record, 'trm_Parents').split(',').length);
             sPad = 'padding-left:'+(lvl*20);
             
@@ -850,7 +881,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             if(dlg && dlg.dialog('instance')){
                 var s = (this._currentEditID>0?'Edit':'Add')+' Term';
                 if(this.options.trm_VocabularyID>0){
-                    s = s + ' in vocabulary '+$Db.trm(this.options.trm_VocabularyID,'trm_Label');
+                    s = s + ' to vocabulary "'
+                        +window.hWin.HEURIST4.util.htmlEscape($Db.trm(this.options.trm_VocabularyID,'trm_Label'))+'"';
                 }
                 dlg.dialog('option', 'title', s);
             }
@@ -902,14 +934,14 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         
     },   
 
-
+    
     //
     //
     //
     _getEditDialogButtons: function(){
         var btns = this._super();
         
-        if(this.options.edit_mode=='editonly'){
+        if(this.options.edit_mode=='editonly'){ //for popup
         
             var that = this;
             
@@ -929,6 +961,22 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 };
                 
             }else{
+                
+                btns[0].text = 'Close';
+                btns[0].css['visibility'] = 'visible';
+                btns[0].class = 'alwaysvisible';
+
+                btns[0].click = function(){
+                    if(that.defaultBeforeClose()){
+                        if($.isFunction(that.options.onClose)){
+                            that.options.onClose.call( this, that.options.trm_VocabularyID );
+                        } 
+                        that._currentEditID = null; 
+                        that.options.onClose = null;
+                        that.closeDialog(true);
+                    }
+                };
+                
                 btns.push(
                  {text:window.hWin.HR('Edit All'),
                     id:'btnEditAll',
@@ -963,7 +1011,22 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
     //
     _afterSaveEventHandler: function( recID, fieldvalues ){
 
-        if(this.options.edit_mode=='editonly') return;
+        if(this.options.edit_mode=='editonly'){
+            if(!this.options.container){ //for popup
+
+                var isVocab = !($Db.trm(recID,'trm_ParentTermID')>0);
+                var sName = (isVocab)?'Vocabulary':'Term';
+                if(isVocab){
+                    this.options.trm_VocabularyID = recID;    
+                }
+                window.hWin.HEURIST4.msg.showMsgFlash(sName+' '+window.hWin.HR('has been saved'));
+                this._currentEditID = -1;
+                this._initEditForm_step3(this._currentEditID); //reload 
+                var that = this;
+                setTimeout(function(){that._editing.setFocus();},1500);
+            }
+            return;
+        }
         
         // close on addition of new record in select_single mode    
         //this._currentEditID<0 && 
@@ -1750,7 +1813,7 @@ console.log('NODE activated');
 
     },
     
-    
+    //
     //
     getUiPreferences:function(){
         this.usrPreferences = window.hWin.HAPI4.get_prefs_def('prefs_'+this._entityName, {

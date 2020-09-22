@@ -247,7 +247,7 @@ $.widget( "heurist.mainMenu6", {
             var ele = this.divMainMenu.find('.menu-explore[data-action="recordAdd"]');
 
             if(rty_ID>0 && $Db.rty(rty_ID,'rty_Name')){
-                ele.find('.menu-text.truncate').html('Add <i>'+$Db.rty(rty_ID,'rty_Name')+'</i>');
+                ele.find('.menu-text.truncate').html('Add <i>'+ window.hWin.HEURIST4.util.htmlEscape($Db.rty(rty_ID,'rty_Name'))+'</i>');
                 ele.attr('data-id', rty_ID);
                 this._on(ele, {click: function(e){
                     var ele = $(e.target).is('li')?$(e.target):$(e.target).parents('li');

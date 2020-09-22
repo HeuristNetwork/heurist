@@ -25,9 +25,13 @@ Selectors:
 addoption - helper function to add option to select element
 createSelector - create SELECT element (if selObj is null) and fill with given options
 
-createTermSelectExt   - create/fill SELECT for terms or returns JSON array 
-createTermSelectExt2  - the same but parameters are passed as options object
+
+OLD createTermSelectExt   - create/fill SELECT for terms or returns JSON array 
+OLD createTermSelectExt2  - the same but parameters are passed as options object
+
 createVocabularySelect - creatres selector with vocabularies only (top level terms)
+createTermSelect
+
 
 createRectypeGroupSelect - get SELECT for record type groups
 createDetailtypeGroupSelect
@@ -559,7 +563,7 @@ window.hWin.HEURIST4.ui = {
         var termCode;
         
         //add optgroups and options
-        for(var i=0; i<data.length-1; i++){
+        for(var i=0; i<data.length; i++){
             
             
             if(supressTermCode || window.hWin.HEURIST4.util.isempty(data[i].code)){

@@ -447,10 +447,6 @@ $.widget( "heurist.ruleBuilder", {
         this.select_fields.prop("selectedIndex",0);//.val('');
         this._onSelectFieldtype();
 
-        // TODO: remove big block of debug or old code
-        // selObj, datatype, termIDTree, headerTermIDsList, defaultTermID, topOptions, needArray
-        //window.hWin.HEURIST4.ui.createTermSelectExt(this.select_reltype.get(0), 'relation', arr_terms, arr_terms_dis, null, arr_fields, false);
-
     },
 
 

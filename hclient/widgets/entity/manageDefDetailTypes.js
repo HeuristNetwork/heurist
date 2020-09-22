@@ -507,8 +507,9 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                 dty_DetailTypeGroupID = $Db.dtg().getOrder()[0];                
             }
 
-            var ele = this._editing.getFieldByName('dty_DetailTypeGroupID');
-            ele.editing_input('setValue', dty_DetailTypeGroupID, true);
+            this._editing.setFieldValueByName('dty_DetailTypeGroupID', dty_DetailTypeGroupID);
+            //var ele = this._editing.getFieldByName('dty_DetailTypeGroupID');
+            //ele.editing_input('setValue', dty_DetailTypeGroupID, true);
         }
         
         //fill init values of virtual fields
@@ -837,20 +838,24 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             
             this.enum_container = ele;
             
-            if( !(this._currentEditID>0) && (full_mode!==true) ){ //insert
+            if(true ||  !(this._currentEditID>0) && (full_mode!==true) ){ //insert
             
                 $('<div style="line-height:2ex;padding-top:4px">'
                         +'<div id="enumVocabulary" style="display:inline-block;">' //padding-left:4px;
                             +'<select id="selVocab" class="sel_width"></select>'
-                            +'<span id="termsPreview1"></span>'
+                            +'<span id="termsPreview1" style="display:none;padding-left:10px">'
+                                +'<label style="width:60px;min-width:60px">Preview</label><select id="selPreview"></select>'
+                            +'</span>'
                             +'<div style="padding:5px 3px">'
-                                +'<a href="#" id="add_advanced">advanced</a>&nbsp;'
-                                +'<a href="#" id="add_vocabulary" style="margin-left:90px;">add a vocabulary</a>&nbsp;'
+                                //+'<a href="#" id="add_advanced">advanced</a>&nbsp;'  style="margin-left:90px;"
+                                +'<a href="#" id="add_vocabulary">add a vocabulary</a>&nbsp;'
+                                +'<a href="#" id="add_terms" style="padding-left:10px">add terms to vocabulary</a>&nbsp;'
+                                +'<a href="#" id="show_terms_1" style="padding-left:10px">edit terms tree</a>'
                             +'</div>'
                         +'</div>'
                 +'</div>').appendTo(this.enum_container);
             
-            }else{
+            }else{     //@todo remove
             
                 $('<div style="line-height:2ex;padding-top:4px">'
                         +'<label style="text-align:left;line-height:19px;vertical-align:top">'
@@ -890,16 +895,18 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                     }
                 }});
             this._on(this.enum_container.find('#add_vocabulary'),{click: this._onAddVocabOrTerms});
+            this._on(this.enum_container.find('#show_terms_1'),{click: this._showOtherTerms}); //manage defTerms
             this._on(this.enum_container.find('#add_terms'),{click: this._onAddVocabOrTerms});
-            this._on(this.enum_container.find('#show_terms_1'),{click: this._showOtherTerms});
+            /*
             this._on(this.enum_container.find('#show_terms_2'),{click: this._showOtherTerms});
             this._on(this.enum_container.find('#add_advanced'),{click: function(){
                 
                 this._activateEnumControls(this._editing.getFieldByName('dty_Mode_enum'), true);
             }});
-            
             this.enum_container.find('#btnSelectTerms').button();
             this._on(this.enum_container.find('#btnSelectTerms'),{click: this._onSelectTerms});
+            */
+            
             
             this._recreateTermsVocabSelector();
             //this._recreateTermsPreviewSelector();
@@ -925,7 +932,40 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         var vocab_id =  this.enum_container.find("#selVocab").val();
         var is_frist_time = true;
         var that = this;
-
+        
+        
+        //add new term to specified vocabulary
+        var rg_options = {
+                 isdialog: true, 
+                 select_mode: 'manager',
+                 edit_mode: 'editonly',
+                 height: 240,
+                 rec_ID: -1,
+                 onClose: function( context ){
+                    if(context>0){
+                        that._editing.setFieldValueByName('dty_JsonTermIDTree', context);
+                    }
+                    that._recreateTermsVocabSelector();                      
+                    
+                 }
+            };
+            
+            if(is_add_vocab){
+                  rg_options['title'] = 'Add new vocabulary';
+                  rg_options['auxilary'] = 'vocabulary';
+            }else if(vocab_id>0){
+                  //rg_options['title'] = 'Add term to vocabulary "'+$Db.trm(vocab_id,'trm_Label')+'"';
+                  rg_options['trm_VocabularyID'] = vocab_id;
+            }else{
+                  window.hWin.HEURIST4.msg.showMsgFlash('Select of add vocabulary first');          
+            }
+        
+            
+            
+        window.hWin.HEURIST4.ui.showEntityDialog('defTerms', rg_options); // it recreates  
+        
+        
+/*
         var sURL = window.hWin.HAPI4.baseURL +
         "admin/structure/terms/editTermForm.php?treetype="+term_type
             +"&parent="+(is_add_vocab?0:vocab_id)
@@ -965,13 +1005,14 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                 }
             }
         });
-
+*/
     },
 
     /**
-    * _onSelectTerms
+    * @todo - remove 
+    * _onSelectTerms 
     *
-    * Shows a popup window where user can select terms to create a term tree as wanted
+    * Shows a popup window where user can select terms individually and creates a term tree as wanted
     */
     _onSelectTerms: function(){
 
@@ -1010,7 +1051,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
     },
 
     //
-    //
+    // Opens defTerms manager
     //
     _showOtherTerms:function(event){
 
@@ -1018,11 +1059,13 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         if(term_type!="enum"){
             term_type="relation";
         }
+        var vocab_id =  this.enum_container.find("#selVocab").val();
 
         var that = this;
         window.hWin.HEURIST4.ui.showEntityDialog('defTerms', 
                 {isdialog: true, 
                  innerTitle: false,
+                 selection_on_init: vocab_id,  //selected vocabulary  
                  width: 1200, height:700,
                  onClose: function(){
                      that._recreateTermsVocabSelector();
@@ -1060,9 +1103,9 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
     //
     //
     //
-    _recreateTermsVocabSelector: function(){
+    _recreateTermsVocabSelector: function(newval){
         
-        var allTerms = this._editing.getValue('dty_JsonTermIDTree')[0];
+        var allTerms = newval>0?newval:this._editing.getValue('dty_JsonTermIDTree')[0];
         
         var term_type = this._editing.getValue('dty_Type')[0];
         if(term_type!="enum"){
@@ -1109,33 +1152,31 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         //remove old selector
         var preview_sel = this.enum_container.find("#termsPreview1");
         
-        preview_sel.empty();
-        this.enum_container.find('#termsPreview2').empty();
+        //preview_sel.empty();
+        //this.enum_container.find('#termsPreview2').empty();
 
         if(!window.hWin.HEURIST4.util.isempty(allTerms)) {
             
-            var disTerms = this._editing.getValue('dty_TermIDTreeNonSelectableIDs')[0];
+            var disTerms = this._editing.getValue('dty_TermIDTreeNonSelectableIDs')[0];  //@todo remove - is not used anymore
             
             var term_type = this._editing.getValue('dty_Type')[0];
             if(term_type!="enum"){
                 term_type="relation";
             }
-            
-            var new_selector = window.hWin.HEURIST4.ui.createTermSelect(null,
-                    {vocab_id:allTerms, topOptions:false, supressTermCode:true});
-            
-            new_selector.css({'backgroundColor':'#cccccc','min-width':'120px','max-width':'120px','margin':'0px 4px'})
-                    .change(function(event){event.target.selectedIndex=0;}).show();
-            
+
             //append to first preview
-            preview_sel
-                .append($('<label style="width:60px;min-width:60px">Preview</label>'))
-                .append(new_selector); 
-            preview_sel.css({'padding-left':'10px'});
-            //append to second preview    
-            $('#termsPreview2')
-                .append($('<label style="width:60px;min-width:60px">Preview</label>'))
-                .append(new_selector.clone());
+            var new_selector = preview_sel.find('#selPreview');
+            
+            new_selector = window.hWin.HEURIST4.ui.createTermSelect(new_selector[0],
+                    {vocab_id:allTerms, topOptions:false, supressTermCode:true});
+
+            preview_sel.css({'display':'inline-block'});
+            
+            //new_selector.css({'backgroundColor':'#cccccc','min-width':'120px','max-width':'120px','margin':'0px 4px'})
+            //        .change(function(event){event.target.selectedIndex=0;}).show();
+            
+        }else{
+            preview_sel.hide();
         }
         
     },
@@ -1147,7 +1188,6 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
     // update list after save (refresh)
     //
     _afterSaveEventHandler: function( recID, fieldvalues ){
-console.log('_afterSaveEventHandler');
         
         // close on addition of new record in select_single mode    
         if(this._currentEditID<0 && 

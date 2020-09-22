@@ -77,18 +77,6 @@ window.hWin.HEURIST4.dbs = {
         
         return trm_ID;        
     },
-
-    //
-    // returns vocab group for given term
-    //
-    getTermVocabGroup: function(trm_ID){
-        
-        var trm_ID = $Db.getTermVocab(trm_ID);
-        
-        return $Db.trm(trm_ID,'trm_VocabularyGroupID');
-        
-    },
-    
     
     //
     // Returns label and code for term by id
