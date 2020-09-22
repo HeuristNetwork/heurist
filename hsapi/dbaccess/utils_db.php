@@ -663,8 +663,20 @@
     //
     function updateDatabseToLatest3($system){
         
+        return;
+        
         $ret = false;        
         $mysqli = $system->get_mysqli();
+
+        $version = mysql__select_row_assoc($mysqli, "SELECT sys_dbVersion,sys_dbSubVersion,sys_dbSubSubVersion FROM sysIdentification");
+
+        if (!($version['sys_dbVersion']==1 && $version['sys_dbSubVersion']==2 &&
+           $version['sys_dbSubSubVersion']<1)){
+           
+           return;     
+        }else{
+            $mysqli->query('UPDATE sysIdentification SET sys_dbSubSubVersion=1 WHERE sys_ID=1');
+        }
       
         //create new tables
         $value = mysql__select_value($mysqli, "SHOW TABLES LIKE 'defVocabularyGroups'");
@@ -752,7 +764,9 @@ $query = "CREATE TABLE defVocabularyGroups (
             $report[] = 'defTerms: trm_VocabularyGroupID added';            
             
         }
-        
+             
+        //$mysqli->query('DROP TABLE IF EXISTS defTermsLinks');
+             
         $value = mysql__select_value($mysqli, "SHOW TABLES LIKE 'defTermsLinks'");
         if($value==null || $value==""){        
             
@@ -803,38 +817,114 @@ $query = "CREATE TABLE defTermsLinks (
                 delete ignore from defTermsLinks where trl_TermID=OLD.trm_ID || trl_ParentID=OLD.trm_ID;
             end');            
             //$mysqli->query('DELIMITER ;');            
+
+
+            $vocab_group = 7;//
             
-$mysqli->query('DROP TRIGGER IF EXISTS sysUGrps_last_insert');
-$mysqli->query('DROP TRIGGER IF EXISTS sysUGrps_last_update');
-$mysqli->query('DROP TRIGGER IF EXISTS sysUsrGrpLinks_last_insert');
-$mysqli->query('DROP TRIGGER IF EXISTS sysUsrGrpLinks_last_update');
-$mysqli->query('DROP TRIGGER IF EXISTS defDetailTypes_last_insert');
-$mysqli->query('DROP TRIGGER IF EXISTS defDetailTypes_last_update');
-$mysqli->query('DROP TRIGGER IF EXISTS defDetailTypes_delete');
-$mysqli->query('DROP TRIGGER IF EXISTS defRecTypes_last_insert');
-$mysqli->query('DROP TRIGGER IF EXISTS defRecTypes_last_update');
-$mysqli->query('DROP TRIGGER IF EXISTS defRecTypes_delete');
-$mysqli->query('DROP TRIGGER IF EXISTS defRecStructure_last_insert');
-$mysqli->query('DROP TRIGGER IF EXISTS defRecStructure_last_update');
-$mysqli->query('DROP TRIGGER IF EXISTS defRecStructure_last_delete');
-$mysqli->query('DROP TRIGGER IF EXISTS defRelationshipConstraints_last_insert');
-$mysqli->query('DROP TRIGGER IF EXISTS defRelationshipConstraints_last_update');
-$mysqli->query('DROP TRIGGER IF EXISTS defRelationshipConstraints_last_delete');
-$mysqli->query('DROP TRIGGER IF EXISTS defRecTypeGroups_insert');
-$mysqli->query('DROP TRIGGER IF EXISTS defRecTypeGroups_update');
-$mysqli->query('DROP TRIGGER IF EXISTS defRecTypeGroups_delete');
-$mysqli->query('DROP TRIGGER IF EXISTS defDetailTypeGroups_insert');
-$mysqli->query('DROP TRIGGER IF EXISTS defDetailTypeGroups_update');
-$mysqli->query('DROP TRIGGER IF EXISTS defDetailTypeGroups_delete');
-$mysqli->query('DROP TABLE IF EXISTS sysTableLastUpdated');
+            //converts custom-selected term tree to vocab with references
+            $query = 'SELECT dty_Name,dty_JsonTermIDTree, dty_TermIDTreeNonSelectableIDs, dty_ID, dty_Type FROM '
+                     .'defDetailTypes WHERE  dty_Type="enum" or dty_Type="relmarker"';
+        
+            $res = $mysqli->query($query);
+            while (($row = $res->fetch_row())) {
+                //if the only numeric - assume this is vocabulary
+                if(@$row[1]>0 && is_numeric(@$row[1])){
+                    continue;
+                }
+                
+                $domain = $row[4]=='enum'?'enum':'relation';
+                $name = $row[0].' - selection';
+                
+                $cnt = mysql__select_value($mysqli, "SELECT count(trm_ID) FROM defTerms WHERE trm_Label LIKE '".$name."%'");
+                if($cnt>0){
+                   $name = $name . '  ' . $cnt; 
+                }
+
+error_log($row[3].'  '.$name);                
+                
+                //{"11":{"518":{},"519":{}},"94":{},"95":{},"3260":{"3115":{"3100":{}}}}
+                $terms = json_decode(@$row[1], true);
+                
+                if($terms){
+                    
+                    //add new vocabulary
+                    $vocab_id = mysql__insertupdate($mysqli, 'defTerms', 'trm', array(
+                                'trm_Label'=>$name,
+                                'trm_Domain'=>$domain,
+                                'trm_VocabularyGroupID'=>$vocab_group));
+                        
+                    //parent->term_id
+                    $terms_links = _prepare_terms($vocab_id, $terms);
+                    
+                    foreach ($terms_links as $line){
+                        $mysqli->query('INSERT INTO defTermsLinks(trl_ParentID, trl_TermID) VALUES('.$line[0].','.$line[1].')');    
+                    }
+
+                    //dty_TermIDTreeNonSelectableIDs=dty_JsonTermIDTree, 
+                    $query = 'UPDATE defDetailTypes SET dty_JsonTermIDTree='
+                                .$vocab_id.' WHERE dty_ID='.$row[3];
+                    $mysqli->query($query);
+
+                }else{
+                    error_log(" bummer ".@$row[1]);                
+                }
+            }
+
             
+        }
+        
+        $value = mysql__select_value($mysqli, "SHOW TABLES LIKE 'sysTableLastUpdated'");
+        if($value)
+        {        
+            $mysqli->query('DROP TRIGGER IF EXISTS sysUGrps_last_insert');
+            $mysqli->query('DROP TRIGGER IF EXISTS sysUGrps_last_update');
+            $mysqli->query('DROP TRIGGER IF EXISTS sysUsrGrpLinks_last_insert');
+            $mysqli->query('DROP TRIGGER IF EXISTS sysUsrGrpLinks_last_update');
+            $mysqli->query('DROP TRIGGER IF EXISTS defDetailTypes_last_insert');
+            $mysqli->query('DROP TRIGGER IF EXISTS defDetailTypes_last_update');
+            $mysqli->query('DROP TRIGGER IF EXISTS defDetailTypes_delete');
+            $mysqli->query('DROP TRIGGER IF EXISTS defRecTypes_last_insert');
+            $mysqli->query('DROP TRIGGER IF EXISTS defRecTypes_last_update');
+            $mysqli->query('DROP TRIGGER IF EXISTS defRecTypes_delete');
+            $mysqli->query('DROP TRIGGER IF EXISTS defRecStructure_last_insert');
+            $mysqli->query('DROP TRIGGER IF EXISTS defRecStructure_last_update');
+            $mysqli->query('DROP TRIGGER IF EXISTS defRecStructure_last_delete');
+            $mysqli->query('DROP TRIGGER IF EXISTS defRelationshipConstraints_last_insert');
+            $mysqli->query('DROP TRIGGER IF EXISTS defRelationshipConstraints_last_update');
+            $mysqli->query('DROP TRIGGER IF EXISTS defRelationshipConstraints_last_delete');
+            $mysqli->query('DROP TRIGGER IF EXISTS defRecTypeGroups_insert');
+            $mysqli->query('DROP TRIGGER IF EXISTS defRecTypeGroups_update');
+            $mysqli->query('DROP TRIGGER IF EXISTS defRecTypeGroups_delete');
+            $mysqli->query('DROP TRIGGER IF EXISTS defDetailTypeGroups_insert');
+            $mysqli->query('DROP TRIGGER IF EXISTS defDetailTypeGroups_update');
+            $mysqli->query('DROP TRIGGER IF EXISTS defDetailTypeGroups_delete');
+            $mysqli->query('DROP TABLE IF EXISTS sysTableLastUpdated');            
         }
       
         
+        
+    }
+    
+    // {"11":{"518":{},"519":{}},"94":{},"95":{},"3260":{"3115":{"3100":{}}}}
+    function _prepare_terms($parent_id, $terms){
+        $res = array();       
+        foreach($terms as $trm_ID=>$children){
+            array_push($res, array($parent_id, $trm_ID));
+            if($children && count($children)>0){
+                $res2 = _prepare_terms($trm_ID, $children);
+                $res = array_merge($res, $res2);
+            }
+        }
+        return $res;
     }
     
     //
+    //  adds/modifies columns in defRecStructure
+    //     rst_DefaultValue, rst_PointerBrowseFilter, rst_PointerMode
+    // 
+    //  creates table usrWorkingSubsets
     //
+    //  adds  defTerms.trm_SemanticReferenceURL
     //
     function updateDatabseToLatest2($system){
 
@@ -924,8 +1014,17 @@ $query = 'CREATE TABLE usrWorkingSubsets ( '
         
         return $ret;
     }
+    
     //
+    //  Creates usrRecPermissions, sysDashboard
     //
+    //  Adds sysIdentification.sys_TreatAsPlaceRefForMapping
+    //
+    //  Adds defRecStructure.rst_CreateChildIfRecPtr
+    //  Modifies sysUGrps.ugr_NavigationTree,   ugr_Preferences to MEDIUMTEXT
+    //           usrBookmarks.bkm_Notes
+    //
+    //  Adds detail field 247 (child to parent reference)   
     //
     function updateDatabseToLatest($system){
         
