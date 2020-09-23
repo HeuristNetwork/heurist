@@ -118,6 +118,7 @@ $system->defineConstants();
 
 $mysqli = $system->get_mysqli();
 
+$isEmptyHomePage = false;
 $open_page_on_init = @$_REQUEST['initid'];
 if(!($open_page_on_init>0)) $open_page_on_init = @$_REQUEST['pageid'];
 if(!($open_page_on_init>0)) $open_page_on_init = 0;
@@ -127,6 +128,7 @@ if(!($rec_id>0)) $rec_id = @$_REQUEST['recid'];
 if(!($rec_id>0)) $rec_id = @$_REQUEST['id'];
 if(!($rec_id>0))
 {
+    //if recID is not defined - find fist available "CMS home" record
     
     $rec_id = mysql__select_value($mysqli, 'select rec_ID from Records '
     .' WHERE rec_FlagTemporary=0 AND rec_NonOwnerVisibility="public" '
@@ -237,6 +239,12 @@ $meta_description = htmlspecialchars(__getValue($rec, DT_SHORT_SUMMARY));
 $show_pagetitle = (ConceptCode::getTermConceptID(__getValue($rec, DT_CMS_PAGETITLE))!=='99-5447');
 
 
+if(!$isWebPage && __getValue($rec,DT_EXTENDED_DESCRIPTION)==''){
+    //home page is empty
+    $isEmptyHomePage = true;
+}
+
+
 $external_files = @$rec['details'][DT_CMS_EXTFILES];
 if($external_files!=null){
     if(!is_array($external_files)){
@@ -322,7 +330,7 @@ if (($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1')
 
 <script>
     var _time_debug = new Date().getTime() / 1000;
-//    console.log('webpage start');
+    var page_first_not_empty = 0;
     var home_page_record_id=<?php echo $rec_id; ?>;
     var init_page_record_id=<?php echo $open_page_on_init; ?>;
     var is_embed =<?php echo array_key_exists('embed', $_REQUEST)?'true':'false'; ?>;
@@ -458,16 +466,22 @@ _time_debug = new Date().getTime() / 1000;
         topmenu.attr('data-heurist-app-id','heurist_Navigation');
                
         window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, "#main-header",
-            {heurist_Navigation:{menu_recIDs:home_page_record_id, use_next_level:true, 
-            orientation:'horizontal',
-            toplevel_css:{background:bg_color}, //'rgba(112,146,190,0.7)'
-            aftermenuselect: afterPageLoad
+            {heurist_Navigation:{
+                    menu_recIDs: home_page_record_id, 
+                    use_next_level: true, 
+                    orientation: 'horizontal',
+                    toplevel_css: {background:bg_color}, //'rgba(112,146,190,0.7)'
+                    aftermenuselect: afterPageLoad,
+                    onInitComplete: function(not_empty_page){
+                        //load given page or home page content
+                        <?php if($isEmptyHomePage) echo 'if(not_empty_page){ home_page_record_id=not_empty_page;}'; ?>
+                        
+                        loadPageContent(init_page_record_id>0 ?init_page_record_id :home_page_record_id);
+                    }
             }} );
             
         $('#main-menu').show();
         
-        //load given page or home page content
-        loadPageContent(init_page_record_id>0 ?init_page_record_id :home_page_record_id);
         
         $(document).trigger(window.hWin.HAPI4.Event.ON_SYSTEM_INITED, []);
         
@@ -488,9 +502,17 @@ function loadPageContent(pageid){
               $('#main-content').empty().load(window.hWin.HAPI4.baseURL+'?db='
                         +window.hWin.HAPI4.database+'&field=1&recid='+pageid,
                   function(){
-                      
-//console.log('webpage load page content  '+(new Date().getTime() / 1000 - _time_debug));
-                      
+/*                      
+                    var isempty = window.hWin.HEURIST4.util.isempty($('#main-content').text().trim());   
+console.log('webpage load page content  '+isempty); //+(new Date().getTime() / 1000 - _time_debug)
+                    if(true || isempty){
+                                pageid = $('#main-menu > div[widgetid="heurist_Navigation"]').navigation('getFirstPageWithContent');
+                                if(pageid>0){
+                                        loadPageContent(pageid);    
+                                }
+                                return;
+                    }
+*/                      
                       var pagetitle = $($('#main-content').children()[0]);
                       pagetitle.remove();
                       $('#main-pagetitle').empty();

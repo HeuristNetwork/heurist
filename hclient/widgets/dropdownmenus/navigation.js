@@ -27,11 +27,14 @@ $.widget( "heurist.navigation", {
        use_next_level: false,  //if top level consists of the single entry use next level of menues
        onmenuselect: null,   //for cms edit mode it performs special behavior
        aftermenuselect: null,
-       toplevel_css:null  //css for top level items
+       toplevel_css:null,  //css for top level items
+       onInitComplete: null
     },
 
     pageStyles:{},  //menu_id=>styles
     pageStyles_original:{}, //keep to restore  element_id=>css
+    
+    first_not_empty_page_id:0,
 
     _current_query_string:'',
 
@@ -171,6 +174,10 @@ $.widget( "heurist.navigation", {
                     var pageStyle = resdata.fld(record, DT_CMS_CSS);
                     var showTitle = (resdata.fld(record, DT_CMS_PAGETITLE)=='5949');
                     var hasContent = !window.hWin.HEURIST4.util.isempty(resdata.fld(record, DT_EXTENDED_DESCRIPTION))
+                    
+                    if(!(that.first_not_empty_page_id>0) && hasContent){
+                        that.first_not_empty_page_id = page_id;
+                    }
 
                     if(pageStyle){
                         that.pageStyles[page_id] = window.hWin.HEURIST4.util.cssToJson(pageStyle);    
@@ -345,6 +352,12 @@ $.widget( "heurist.navigation", {
             //
             this._on(this.divMainMenuItems.find('a').addClass('truncate'),{click:this._onMenuClickEvent});
         }
+        
+        
+        if($.isFunction(this.options.onInitComplete)){
+            this.options.onInitComplete.call(this, this.first_not_empty_page_id);
+        }
+
         
         
         //this._refresh();
@@ -571,6 +584,10 @@ $.widget( "heurist.navigation", {
     // custom, widget-specific, cleanup.
     _destroy: function() {
         if(this.divMainMenu) this.divMainMenu.remove();
+    },
+    
+    getFirstPageWithContent: function(){
+        return this.first_not_empty_page_id;
     }
     
 });

@@ -188,6 +188,7 @@ function hCmsEditing(_options) {
             
             topmenu.show();
             
+            
             //init home page content
             __iniLoadPageById( init_pageid>0?init_pageid:home_pageid );
             
@@ -283,7 +284,6 @@ function hCmsEditing(_options) {
             
             //var ele = $('#main-content').find('div[widgetid="heurist_Search"]');
             //if(ele.length>0 && ele.search('instance')) ele.search('destroy');
-            
             current_pageid = pageid;
             $('#main-content').empty().load(window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database
                 +'&field=1&recid='+pageid, function()
@@ -302,11 +302,17 @@ function hCmsEditing(_options) {
                         
                         if(pagetitle.attr('date-empty')==1){
                             pagetitle.attr('date-empty',0);
-                            window.hWin.HEURIST4.msg.showMsgDlg(
-                                'This menu item does not have associated page content.'
-                                +'<br>It will not be selectable in the website. '
-                                +'<br>We recommend this for parent menus.',null,null,
-                                {my:'left top', at:'left+200 top+100', of:$('#main-content-container')});    
+                            
+                            if(pageid==home_pageid){
+                                window.hWin.HEURIST4.msg.showMsgFlash('Home page is empty. First menu item will be loaded');
+                            }else{
+                                window.hWin.HEURIST4.msg.showMsgDlg(
+                                    'This menu item does not have associated page content.'
+                                    +'<br>It will not be selectable in the website. '
+                                    +'<br>We recommend this for parent menus.',null,null,
+                                    {my:'left top', at:'left+200 top+100', of:$('#main-content-container')});    
+                            }
+                            
                         }
                         
                         //assign content to editor

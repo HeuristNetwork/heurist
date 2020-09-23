@@ -685,26 +685,27 @@ $.widget( "heurist.editing_input", {
                 
                 if( isCMS_content ){
                     
+                    var fstatus = '';
                     var fname = (this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_HEADER'])
                                 ?'Custom header':'Edit page content';
                                 
                     if (this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME']
                         && this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_HEADER'])
                         { // Only show this for the CMS Home record type
-                        
-                        var fstatus = (window.hWin.HEURIST4.util.isempty(value))
-                        ?'No custom header defined'
-                        :'Delete html from this field to use default page header.';
+                            fstatus = (window.hWin.HEURIST4.util.isempty(value))
+                            ?'No custom header defined'
+                            :'Delete html from this field to use default page header.';
                         }
-                        else
-                        { var fstatus = '';}
+                    else if(this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME']
+                        && this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION']){
+                            fstatus = 'Leave this field blank if you wish the first menu entry to load automatically on startup.';    
+                    }
                     
                     var div_prompt = $('<div style="line-height:20px"><b>Please use the '
                         + fname
                         + ' button in the <span>website editor</span> to edit this field. '
                         + fstatus+'</b></div>')
                         .insertBefore($input);
-                    
                     $input.hide();
                     
                     $btn_edit_switcher.text('edit html as text')
