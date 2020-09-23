@@ -14,7 +14,7 @@
 },
 {
     "rty_ID": "1268-53",
-    "database":"MPCE_Mapping_Print_Charting_Enlightenment",
+    "database":"mpce_1",
     "label": "Lookup MPCE",
     "dialog": "recordLookupMPCE",
     "fields": { }

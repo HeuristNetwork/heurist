@@ -128,9 +128,21 @@ private static function readDataFile($filename, $type=null, $validate=true){
 //
 private static function hmlToJson($filename){
 
-    $xml_doc = simplexml_load_file($filename);
+    $xml_doc = simplexml_load_file($filename,'SimpleXMLElement',LIBXML_PARSEHUGE);
     if($xml_doc==null || is_string($xml_doc)){
         self::$system->addError(HEURIST_ACTION_BLOCKED, 'It appears that xml is corrupted.');
+ 
+ //$xml = explode("\n", $xmlstr);
+        
+    $errors = libxml_get_errors();
+
+    foreach ($errors as $error) {
+        error_log( display_xml_error($error, null) );
+    }
+
+    //error_log(libxml_get_last_error());
+    
+    libxml_clear_errors();       
         return null;
     }
     if($xml_doc==null || is_string($xml_doc) || !$xml_doc->database){
