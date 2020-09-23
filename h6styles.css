@@ -117,10 +117,14 @@ body.popup {
     margin-left:0.5em;
     cursor: pointer;
 }
-.menu-explore{
+.menu-explore,.menu-explore2{
     font-size:smaller;
     padding:6px;
 }
+.menu-explore:hover, .menu-explore2:hover{
+    text-decoration:underline;
+}
+
 .ui-heurist-header{
     /*font: Bold 20px/26px Roboto;*/
     font-weight:bold;

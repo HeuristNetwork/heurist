@@ -112,7 +112,7 @@ $.widget( "heurist.svs_list", {
         if(this.options.is_h6style){
             this.element.css({'overflow':'hidden'});
             //add title 
-            this.div_header =  $('<div class="ui-heurist-header" style="top:0px;">Saved filter</div>')
+            this.div_header =  $('<div class="ui-heurist-header" style="top:0px;">Saved filters <span style="font-style:italic;font-size:x-small">by workgroups</span></div>')
                 .appendTo(this.element);
                 
             this.div_header_sub = $('<div style="top:46px;font-style:italic;font-size:9px;right:10px;height:auto;position: absolute;left: 20px;">'
@@ -120,7 +120,10 @@ $.widget( "heurist.svs_list", {
                 .hide()
                 .appendTo(this.element);
         
-            this.search_tree.css({top:'36px',bottom:'0px', width:'100%', 'padding-top':'6px', position:'absolute','font-size':'0.9em'});
+            //this.search_tree.css({top:'36px',bottom:'0px', width:'100%', 'padding-top':'6px', position:'absolute','font-size':'0.9em'});
+            
+            this.accordeon = $( "<div>" ).css({'top':36, 'bottom':0, 'width':'100%','position': 'absolute', 'overflow':'auto','font-size':'0.9em'})
+                        .appendTo( this.search_tree );
         }else{
             this.element.css({'overflow-y':'auto','font-size':'0.8em'});
             
@@ -356,22 +359,22 @@ $.widget( "heurist.svs_list", {
         }else if (this.accordeon && !this.helper_btm) {
 
             //new
-            var t1 = '<div style="padding-top:2.5em;font-style:italic;" title="'+this._HINT_FACETED+'">'
+            var t1 = '<div title="'+this._HINT_FACETED+'">'
             //+'<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'+'" style="background-image: url(&quot;'+window.hWin.HAPI4.baseURL+'hclient/assets/fa-cubes.png&quot;);vertical-align:middle">'
-            +'<span class="ui-icon ui-icon-box" style="display:inline-block; vertical-align: bottom; font-size:1em"></span>'
+            +'<span class="ui-icon ui-icon-box" style="color:orange;display:inline-block; vertical-align: bottom; font-size:1em"></span>'
             +'&nbsp;Faceted search</div>'
 
 
-            +'<div style="font-style:italic;" title="'+this._HINT_WITHRULES+'">'
-            +'<span class="ui-icon ui-icon-plus" style="display:inline-block; vertical-align: bottom; font-size:0.8em;width:0.7em;"></span>'
-            +'<span class="ui-icon ui-icon-shuffle" style="display:inline-block; vertical-align: bottom; font-size:1em;width:0.9em;"></span>'
+            +'<div title="'+this._HINT_WITHRULES+'">'
+            +'<span class="ui-icon ui-icon-plus" style="color:orange;display:inline-block; vertical-align: bottom; font-size:0.8em;width:0.7em;"></span>'
+            +'<span class="ui-icon ui-icon-shuffle" style="color:orange;display:inline-block; vertical-align: bottom; font-size:1em;width:0.9em;"></span>'
             +'&nbsp;Search with rules</div>'
 
-            +'<div style="font-style:italic;" title="'+this._HINT_RULESET+'">'
-            +'<span class="ui-icon ui-icon-shuffle" style="display:inline-block; vertical-align: bottom; font-size:1em"></span>'
+            +'<div title="'+this._HINT_RULESET+'">'
+            +'<span class="ui-icon ui-icon-shuffle" style="color:orange;display:inline-block; vertical-align: bottom; font-size:1em"></span>'
             +'&nbsp;RuleSet</div>';
 
-            this.helper_btm = $( '<div>'+t1+'</div>' )
+            this.helper_btm = $( '<div class="heurist-helper3" style="float:right;padding:2.5em 0.5em 0 0;">'+t1+'</div>' )
             //IAN request 2015-06-23 .addClass('heurist-helper1')
             .appendTo( this.accordeon );
             //IAN request 2015-06-23 if(window.hWin.HAPI4.get_prefs('help_on')=='0') this.helper_btm.hide(); // this.helper_btm.css('visibility','hidden');
@@ -500,17 +503,18 @@ $.widget( "heurist.svs_list", {
         }
         
         
-        if(this.options.is_h6style){
+        if(false && this.options.is_h6style){ //!!!!!!
             this._updateTreeViewByGroup();
             return;    
         }
         
-        this.accordeon.css('top',this.div_header.height());
+        this.accordeon.css('top', this.options.is_h6style?36:this.div_header.height());
         
         var container_width = this.accordeon.width();
         
         if(islogged || this.isPublished){
 
+            if(!this.options.is_h6style)
             this.helper_btm.before(
                 $('<div>')
                 .addClass('svs-acordeon-group')
@@ -758,7 +762,7 @@ $.widget( "heurist.svs_list", {
     //
     refreshSubsetSign: function(){
         
-        if(this.div_header){
+        if(this.div_header && !this.options.is_h6style){
 
             var container = this.div_header.find('div.subset-active-div');
             
@@ -1021,7 +1025,8 @@ $.widget( "heurist.svs_list", {
             sIcon = 'group';
         }
 
-        var $header = $('<h3 class="hasmenu2" grpid="'+domain+'" style="margin:0"><span class="ui-icon ui-icon-'+sIcon+'" '
+        var $header = $('<h3 class="hasmenu2" grpid="'+domain
+            +'" style="outline:none;margin:10px 0 0 0;background:none !important"><span class="ui-icon ui-icon-'+sIcon+'" '
             + 'style="display:inline-block;padding:0 4px"></span><span style="vertical-align:top;">'
             + name+'</span><span style="font-size:0.8em;font-weight:normal;vertical-align:top;line-height: 1.8em;"> ('
             + ((sIcon=='user')?'private':'workgroup')
@@ -1131,7 +1136,7 @@ $.widget( "heurist.svs_list", {
                     var s = '', s1='';
                     if(node.folder){
                         //
-                        s1 = '<span class="ui-icon-folder-open ui-icon" style="font-size:0.9em;"></span>';
+                        s1 = '<span class="ui-icon-folder-open ui-icon" style="color:orange;top: 3px;"></span>&nbsp;';
                         $span.find("> span.fancytree-title").html(s1 +
                             '<div style="display:inline-block;vertical-align:top;">'+node.title+'</div>');  //padding:2 0 0 3;
                         //vertical-align:top;  font-weight:normal !important
@@ -1192,7 +1197,7 @@ $.widget( "heurist.svs_list", {
                             //'<span style="display:inline-block;">'+node.title+ '</span>'
                             //'<div style="display:inline-block;">'+node.title+'</div>'
                             //
-                            $span.find("> span.fancytree-title").html(s+' '+node.title);
+                            $span.find("> span.fancytree-title").html(node.title+' '+s);
                         }
                         $span.attr('title', s_hint2)
                     }
@@ -1615,7 +1620,7 @@ $.widget( "heurist.svs_list", {
             var context_opts = this._getAddContextMenu(groupID);
             var tree_links;
             
-            if(this.options.is_h6style){
+            if(false && this.options.is_h6style){
             
                 tree_links = $('<div '
                 +'class="ui-heurist-title" style="width: 100%;border-top:1px gray solid; padding:8px 0px 0px 22px;margin-top:4px">'
@@ -1712,7 +1717,8 @@ $.widget( "heurist.svs_list", {
             });
             
 
-        }else{
+        }
+        else{
             //not logged in
             tree.fancytree(fancytree_options);
 
@@ -1748,6 +1754,12 @@ $.widget( "heurist.svs_list", {
 
         this.treeviews[groupID] = tree.fancytree("getTree");
 
+        
+        if(this.options.is_h6style){
+            res.css({'background':'transparent','overflow':'hidden',border:'none'});
+        }
+        
+        
         return res;
 
     },

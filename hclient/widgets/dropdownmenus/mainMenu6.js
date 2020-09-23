@@ -134,7 +134,7 @@ $.widget( "heurist.mainMenu6", {
                 that.divMainMenu.find('.menu-text').hide();
                 
                 //init explore menu items 
-                that._on(that.divMainMenu.find('.menu-explore > span'),{
+                that._on(that.divMainMenu.find('.menu-explore > span, #filter_by_groups'),{
                     mouseenter: that._mousein_ExploreMenu,
                     mouseleave: function(e){
                         this._myTimeoutId2 = setTimeout(function(){that._closeSectionMenu('explore');}, 600);
@@ -247,7 +247,7 @@ $.widget( "heurist.mainMenu6", {
             var ele = this.divMainMenu.find('.menu-explore[data-action="recordAdd"]');
 
             if(rty_ID>0 && $Db.rty(rty_ID,'rty_Name')){
-                ele.find('.menu-text.truncate').html('Add <i>'+ window.hWin.HEURIST4.util.htmlEscape($Db.rty(rty_ID,'rty_Name'))+'</i>');
+                ele.find('.menu-text').css('margin-left',0).html('Add <i>'+ window.hWin.HEURIST4.util.htmlEscape($Db.rty(rty_ID,'rty_Name'))+'</i>');
                 ele.attr('data-id', rty_ID);
                 this._on(ele, {click: function(e){
                     var ele = $(e.target).is('li')?$(e.target):$(e.target).parents('li');
@@ -262,7 +262,7 @@ $.widget( "heurist.mainMenu6", {
       }
       
       var bm_on = (window.hWin.HAPI4.get_prefs('bookmarks_on')=='1');
-      var ele = this.divMainMenu.find('.menu-explore[data-action="svs_list"][data-id="bookmark"]')
+      var ele = this.divMainMenu.find('.menu-explore2[data-action="svs_list"][data-id="bookmark"]')
       if(bm_on) ele.show();
       else ele.hide();
       
@@ -363,7 +363,7 @@ $.widget( "heurist.mainMenu6", {
         
 //console.log('_mouseout_SectionMenu');        
         clearTimeout(this._myTimeoutId3); this._myTimeoutId3 = 0;
-        that.divMainMenu.find('li.menu-explore > .menu-text').css('text-decoration', 'none');
+        //that.divMainMenu.find('li.menu-explore > .menu-text').css('text-decoration', 'none');
         
         function __closeAllsectionMenu() {
         
@@ -438,20 +438,31 @@ $.widget( "heurist.mainMenu6", {
 
         clearTimeout(this._myTimeoutId3); this._myTimeoutId3 = 0;
         this._resetCloseTimers();
-        this.divMainMenu.find('li.menu-explore > .menu-text').css('text-decoration', 'none');
+        //this.divMainMenu.find('li.menu-explore > .menu-text').css('text-decoration', 'none');
         
-        var ele = $(e.target).is('li')?$(e.target):$(e.target).parent('li');
+        var ele, hasAction = false;
         
-        ele.find('.menu-text').css('text-decoration','underline');
-        if(!ele.attr('data-action')){
+        if($(e.target).attr('id')=='filter_by_groups'){
+            hasAction = true;
+        }else{
+
+            ele = $(e.target).is('li')?$(e.target):$(e.target).parents('li');
+            if(ele){
+                //ele.find('.menu-text').css('text-decoration','underline');
+                hasAction = ele.attr('data-action');
+            }
+        }
+        
+        if(hasAction){
+console.log('_show_ExploreMenu '+hasAction);            
+            this._show_ExploreMenu(e);    
+        } else {
             var that = this;
             this._myTimeoutId3 = setTimeout(function(){
+console.log('hide explore');                            
                     that.menues['explore'].hide();
                     that.menues_explore_gap.hide();
             },500);
-            
-        } else {
-            this._show_ExploreMenu(e);    
         }
     
         
@@ -462,11 +473,17 @@ $.widget( "heurist.mainMenu6", {
     //        
     _show_ExploreMenu: function(e) {
         
-        var menu_item = $(e.target).is('li')?$(e.target):$(e.target).parent('li');
+        var menu_item, action_name;
+
+        if($(e.target).attr('id')=='filter_by_groups'){
+            menu_item = $(e.target);
+        }else{
+            menu_item = $(e.target).is('li')?$(e.target):$(e.target).parents('li');
+        }
+        action_name = menu_item.attr('data-action');
         
-        var action_name = menu_item.attr('data-action');
        
-//console.log(action_name);       
+console.log(action_name);       
        
         //AAAA this.menues['explore'].hide();
         //this.menues['explore'].find('.explore-widgets').hide();
@@ -600,7 +617,7 @@ $.widget( "heurist.mainMenu6", {
 
                             } 
                         },
-                        allowed_UGrpID:group_ID,
+                        //!!!!!! allowed_UGrpID:group_ID,
                         menu_locked: function(is_locked){ 
                             that._resetCloseTimers();
                             that._explorer_menu_locked = is_locked; 
@@ -608,7 +625,7 @@ $.widget( "heurist.mainMenu6", {
                         //mouseover: function() { that._resetCloseTimers()},
                     });  
                 }else{
-                    cont.svs_list('option', 'allowed_UGrpID', group_ID);                        
+                    //cont.svs_list('option', 'allowed_UGrpID', group_ID);                        
                 }
 
 
@@ -931,10 +948,10 @@ console.log('prvent colapse');
         var bm_on = (window.hWin.HAPI4.get_prefs('bookmarks_on')=='1');
         
         
-        var s = '<li class="menu-explore" data-action="svs_list" data-id="bookmark" style="display:'+(bm_on?'block':'none')+'">'
+        var s = '<li class="menu-explore2" data-action="svs_list" data-id="bookmark" style="display:'+(bm_on?'block':'none')+'">'
             +'<span class="ui-icon ui-icon-user"/><span class="menu-text">'+window.hWin.HR('My Bookmarks')
             +'</span></li>'
-            +'<li class="menu-explore" data-action="svs_list" data-id="all">'
+            +'<li class="menu-explore2" data-action="svs_list" data-id="all">'
             +'<span class="ui-icon ui-icon-user"/><span class="menu-text">'+window.hWin.HR('My Searches')
             +'</span></li>'            
         
@@ -950,14 +967,14 @@ console.log('prvent colapse');
                     sicon = 'globe';
                 }
                 
-                s = s + '<li class="menu-explore" data-action="svs_list" data-id="'+groupID+'">'
+                s = s + '<li class="menu-explore2" data-action="svs_list" data-id="'+groupID+'">'
                     +'<span class="ui-icon ui-icon-'+sicon+'"/><span class="menu-text">'+name
                     +'</span></li>';
             }
         }
         
         var cont = this.divMainMenu.find('#filter_by_groups');
-        cont.children().not(':first').remove();
+        cont.children().remove(); //.not(':first')
         $(s).appendTo(cont);
 
         /*        

@@ -1400,10 +1400,16 @@ ul.fancytree-container ul{
     font-weight: normal;
     padding-top: 0.3em;
 }
+/* h6
 .svs-acordeon{
     font-size: 0.97em;
     margin-left: 7px;
 }
+*/
+.svs-acordeon{
+    font-size: 1em;
+}
+
 .svs-acordeon > h3 > .ui-accordion-header-icon{
     top:40% !important;
 }
@@ -1422,9 +1428,10 @@ ul.fancytree-container ul{
 .svs-type-icon{
     display:inline-block;
     height:1em;
-    top:2px;
+    top:0px;
     font-size:0.9em;
     width:1em;
+    color:orange;
 }
 
 ul > li:hover > div.svs-contextmenu{ /*, ul > li.leaves:hover > div.svs-contextmenu2*/
@@ -2029,7 +2036,7 @@ input[type="file"] {
 }
 
 .tree-accordeon-header{
-    background:none !important;
+    background:transparent !important;
     border: none !important;
     font-weight:bold !important;
     padding-bottom: 0 !important;
