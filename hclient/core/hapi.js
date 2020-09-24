@@ -807,7 +807,7 @@ prof =Profile
             //
             //
             versionCheck: function(){
-console.log('versionCheck '+lt);
+
                 //@todo define parameter in layout "production=true"
                 var lt = window.hWin.HAPI4.sysinfo['layout'];
                 if(! (lt=='Beyond1914' ||  lt=='UAdelaide' ||

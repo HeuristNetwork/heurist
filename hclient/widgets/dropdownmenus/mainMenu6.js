@@ -106,7 +106,6 @@ $.widget( "heurist.mainMenu6", {
                 });
 
                 
-                
                 if(window.hWin.HAPI4.sysinfo['db_total_records']<1){
                     //open explore by default, or "design" if db is empty
                     that._active_section = 'explore';
@@ -165,6 +164,7 @@ $.widget( "heurist.mainMenu6", {
                         //keep current search for "Save Filter"
                         that.currentSearch = window.hWin.HEURIST4.util.cloneJSON(data);
                         that._updateSaveFilterButton(1);
+
                         that.switchContainer('explore'); 
                     }else if(data.reset){
                         that.currentSearch = null;
@@ -454,12 +454,10 @@ $.widget( "heurist.mainMenu6", {
         }
         
         if(hasAction){
-console.log('_show_ExploreMenu '+hasAction);            
             this._show_ExploreMenu(e);    
         } else {
             var that = this;
             this._myTimeoutId3 = setTimeout(function(){
-console.log('hide explore');                            
                     that.menues['explore'].hide();
                     that.menues_explore_gap.hide();
             },500);
@@ -482,9 +480,6 @@ console.log('hide explore');
         }
         action_name = menu_item.attr('data-action');
         
-       
-console.log(action_name);       
-       
         //AAAA this.menues['explore'].hide();
         //this.menues['explore'].find('.explore-widgets').hide();
         
@@ -853,6 +848,13 @@ console.log('prvent colapse');
             this.menues[section].find('li').removeClass('ui-state-active');
             li.addClass('ui-state-active');
             
+            
+            if(section=='design'){    
+console.log('resotre');                    
+                    $(this.containers[section])
+                        .css({left:'304px',right: '4px',top:'2px',bottom:'4px',width:'auto',height:'auto'});
+            }
+            
             //this.switchContainer(section, true);
             widget.mainMenu('menuActionById', li.attr('data-action')); 
             //{container:this.containers[section]}
@@ -876,6 +878,8 @@ console.log('prvent colapse');
                 
             }});
         }else  if (section=='design'){ //DEBUG - open record types 
+        
+        
             /* DEBUG    
                 this._active_section = 'explore';
                 this.switchContainer('design', true);

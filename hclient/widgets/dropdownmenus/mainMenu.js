@@ -1682,7 +1682,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
     //
     //
     _performInitialSearch: function(){
-        
+    
         if(this._initial_search_already_executed){
             this._dashboardVisibility( false );
             return;  
@@ -1695,24 +1695,43 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
             
         var cms_record_id = window.hWin.HEURIST4.util.getUrlParameter('cms', window.hWin.location.search);
         if(cms_record_id>0){
-            
+
             window.hWin.HEURIST4.ui.showEditCMSDialog( cms_record_id );    
-            
-        }else if(!(lt=='DigitalHarlem' || lt=='DigitalHarlem1935' || lt=='WebSearch')){
-        
-            var init_search = window.hWin.HAPI4.get_prefs('defaultSearch');
-            if(!window.hWin.HEURIST4.util.isempty(init_search)){
-                var request = {q: init_search, w: 'a', f: 'map', source:'init' };
-                setTimeout(function(){
-                    window.hWin.HAPI4.SearchMgr.doSearch(window.hWin.document, request);//initial search
-                }, 3000);
-            }else{
-                //trigger search finish to init some widgets
-                window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH, {recordset:null});
+
+        }else if(!(lt=='Beyond1914' ||  lt=='UAdelaide' ||
+            lt=='DigitalHarlem' || lt=='DigitalHarlem1935' || lt=='WebSearch' )){
+
+                if(window.hWin.HAPI4.sysinfo['db_total_records']>0){      
+                    var init_search = window.hWin.HEURIST4.util.getUrlParameter('q', window.hWin.location.search);
+                    var qdomain;
+                    var rules = null;
+                    if(init_search){
+                        qdomain = window.hWin.HEURIST4.util.getUrlParameter('w', window.hWin.location.search);
+                        rules = window.hWin.HEURIST4.util.getUrlParameter('rules', window.hWin.location.search);
+                    }else{
+                        init_search = window.hWin.HAPI4.get_prefs('defaultSearch'); 
+                    }
+                    if(!qdomain) qdomain = 'a';
+
+
+                    console.log('_performInitialSearch '+init_search);        
+
+                    if(!window.hWin.HEURIST4.util.isempty(init_search)){
+                        var request = {q: init_search, w: qdomain, f: 'map', source:'init' };
+
+                        if(rules) request['rules'] = rules;
+
+                        setTimeout(function(){
+                            window.hWin.HAPI4.SearchMgr.doSearch(window.hWin.document, request);//initial search
+                            }, 1000);
+                    }else{
+                        //trigger search finish to init some widgets
+                        window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH, {recordset:null});
+                    }
+
+                }
+                this._dashboardVisibility( true ); //after login
             }
-            
-            this._dashboardVisibility( true ); //after login
-        }
     },
 
     //

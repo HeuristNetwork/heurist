@@ -645,7 +645,13 @@ console.log('Cardinal layout widget does not have proper options');
                     var layout_opts = lpane.apps[0].options.tabs;
 //console.log('>>>>>');                                        
 //console.log(layout_opts);                    
-                    var $cardinal_container = $('#'+lpane.apps[0].options.container);
+                    var $cardinal_container;
+                    if(lpane.apps[0].options.container){
+                        $cardinal_container = $('#'+lpane.apps[0].options.container);   
+                    }else{
+                        $cardinal_container = $pane;
+                    }
+                     
                   
                     // container:'', tabs:{north:{id:"xxx"},center:{id:"xxx",size:300, minsize:150}...}
                     //
@@ -684,7 +690,10 @@ console.log('Cardinal layout widget does not have proper options');
                         __toogleIcons($cardinal_container, 'west', 'e', 'w');
                         __toogleIcons($cardinal_container, 'east', 'w', 'e');
                     }
-                    $pane.hide();  //or remove?
+                    if($cardinal_container.attr('id') != $pane.attr('id')){
+                        $pane.hide();  //or remove?
+                    }
+                            
                     
                     return;
                     

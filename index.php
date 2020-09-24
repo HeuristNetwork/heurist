@@ -392,9 +392,12 @@ _time_debug = new Date().getTime() / 1000;
                 
                 
                 //perform search in the case that parameter "q" is defined
+/*  see mainMenu.js function _performInitialSearch
                 var qsearch = '<?php echo trim(str_replace("'","\'",@$_REQUEST['q'])); ?>';
+console.log('initial in index.php '+qsearch);                
+                
                 if(window.hWin.HAPI4.sysinfo.db_total_records>0 && !window.hWin.HEURIST4.util.isempty(qsearch)){
-                    
+                                            
                     var qdomain = '<?=@$_REQUEST['w']?>';
                     var rules = '<?=@$_REQUEST['rules']?>';
                     if(window.hWin.HEURIST4.util.isempty(qdomain)) qdomain = 'a';
@@ -404,29 +407,12 @@ _time_debug = new Date().getTime() / 1000;
                             window.hWin.HAPI4.SearchMgr.doSearch(document, request);
                     }, 3000);
                 }
-                else if(!(lt=='DigitalHarlem' || lt=='DigitalHarlem1935' || lt=='WebSearch')){
-                    /* see mainMenu.js
-                    if (!window.hWin.HEURIST4.util.getUrlParameter('cms')){
-                        var init_search = window.hWin.HAPI4.get_prefs('defaultSearch');
-
-                        if(window.hWin.HAPI4.sysinfo.db_total_records>100 && 
-                           !window.hWin.HEURIST4.util.isempty(init_search))
-                        {
-                            var request = {q: init_search, w: 'a', f: 'map', source:'init' };
-                            setTimeout(function(){
-                                window.hWin.HAPI4.SearchMgr.doSearch(document, request);
-                            }, 3000);
-                        }else{
-                            //trigger search finish to init some widgets
-                            $(document).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH, {recordset:null} );   
-                        }
-                    }
-                    */
-                }
+*/                
                 //if database is empty show welcome screen
                 //if(!(window.hWin.HAPI4.sysinfo.db_total_records>0)){
                 //    showTipOfTheDay(false);
                 //}
+                
                 if(lt=='WebSearch'){
                         var active_tab = '<?php echo str_replace("'","\'",@$_REQUEST['views']);?>';
                         if(active_tab){
