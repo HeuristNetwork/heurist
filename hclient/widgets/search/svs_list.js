@@ -514,13 +514,15 @@ $.widget( "heurist.svs_list", {
         
         if(islogged || this.isPublished){
 
+            /*
             if(!this.options.is_h6style)
             this.helper_btm.before(
                 $('<div>')
                 .addClass('svs-acordeon-group')
                 .html('&nbsp;')); //window.hWin.HR('PERSONAL')
+            */
 
-            if(islogged && this.options.searchTreeMode!=1){    
+            if(islogged && this.options.searchTreeMode!=1 && this.helper_btm){    
                 
                 this.helper_btm.before(
                     $('<div>')

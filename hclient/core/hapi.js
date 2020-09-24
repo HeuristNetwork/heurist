@@ -807,7 +807,7 @@ prof =Profile
             //
             //
             versionCheck: function(){
-
+console.log('versionCheck '+lt);
                 //@todo define parameter in layout "production=true"
                 var lt = window.hWin.HAPI4.sysinfo['layout'];
                 if(! (lt=='Beyond1914' ||  lt=='UAdelaide' ||
@@ -837,7 +837,7 @@ prof =Profile
                         }
                         window.hWin.HAPI4.save_pref('version_in_cache', window.hWin.HAPI4.sysinfo['version']);
                         if(need_exit) return true;
-
+                        
                         var res = window.hWin.HEURIST4.util.versionCompare(window.hWin.HAPI4.sysinfo.db_version_req, 
                             window.hWin.HAPI4.sysinfo.db_version);   
                         if(res==-2){ //-2= db_version_req newer
@@ -1449,6 +1449,7 @@ console.log('getEntityData '+entityName);
                 if(!(lt=='Beyond1914' ||  lt=='UAdelaide' ||
                     lt=='DigitalHarlem' || lt=='DigitalHarlem1935' || lt=='WebSearch' )){
 
+                    if(window.hWin.HEURIST4 && window.hWin.HEURIST4.ui)                        
                     window.hWin.HEURIST4.ui.onInactiveStart(5000, function(){  //300000 5 minutes 
                         //check that still logged in
                         window.hWin.HAPI4.SystemMgr.verify_credentials(function(){

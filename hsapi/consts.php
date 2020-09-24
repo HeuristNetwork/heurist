@@ -26,7 +26,7 @@
 //       in particualr this duplication of HEURIST_MIN_DB_VERSION and any other explicit constants
 
 define('HEURIST_VERSION', $version);  //code version is defined congigIni.php
-define('HEURIST_MIN_DBVERSION', "1.2.0"); //minimal version of db for current version of code
+define('HEURIST_MIN_DBVERSION', "1.3.0"); //minimal version of db for current version of code
 
 define('HEURIST_MAIN_SERVER', 'https://heuristplus.sydney.edu.au');
 define('HEURIST_INDEX_BASE_URL', 'https://heuristplus.sydney.edu.au/heurist/'); //central index database url

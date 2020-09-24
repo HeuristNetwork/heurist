@@ -37,7 +37,7 @@ if(!defined('PDIR')){
     $trg_maj = intval($trg_ver[0]);
     $trg_min = intval($trg_ver[1]);
                                    
-    if( $src_maj==$trg_maj && $src_min == $trg_min ){ //versions are ok redirect ot main page
+    if( $src_maj==$trg_maj && $src_min == $trg_min ){ //versions are ok redirect to main page
         header('Location: ' . HEURIST_BASE_URL . '?db=' . $_REQUEST['db']);
         exit();
     }
@@ -106,23 +106,50 @@ if(!defined('PDIR')){
             <div style="margin-top:24px;">
                 <h2>Heurist Database Version upgrade</h2>
             </div>
-            <div style="height:auto; margin-top:24px; overflow-y:auto;text-align:left;">
+            <div style="position:absolute;top:100px;bottom:10px;width: 99%;overflow-y:auto;text-align:left;">
 
                 <?php
 
                     if($system->is_admin() && @$_REQUEST['mode']=='action' && $src_maj==$trg_maj){ //upgrade minor versions
-
+                    //2d iteration ACTION!!!
                         $upgrade_success = true;
                         $keep_minver = $src_min;
                         $dir = HEURIST_DIR.'admin/setup/dbupgrade/';
                         while ($src_min<$trg_min) {
-                            $filename = "DBUpgrade_$src_maj.$src_min.0_to_$trg_maj.".($src_min+1).".0.sql";
+                            $filename = "DBUpgrade_$src_maj.$src_min.0_to_$trg_maj.".($src_min+1).'.0';
+                            
+                            if($trg_maj==1 && $src_min==2){
+                                $filename = $filename.'.php';    
+                            }else{
+                                $filename = $filename.'.sql';    
+                            }
+                            
                             if( file_exists($dir.$filename) ){
+                                
+                                if($trg_maj==1 && $src_min==2){
+                                    include($filename);
+                                    $rep = updateDatabseTo_v3($system);    //PHP
+                                }else{
+                                    $rep = executeScript($dir.$filename);  //SQL
+                                }
 
-                                if(executeScript($dir.$filename)){
+                                if($rep){
                                     $src_min++;
+                                    
+                                    if(is_array($rep)){
+                                        foreach($rep as $msg){
+                                            print '<p>'.$msg.'</p>';
+                                        }    
+                                    }
                                     print "<p>Upgraded to ".$src_maj.".".$src_min.".0</p>";
                                 }else{
+                                    $error = $system->getError();
+                                    if($error){
+                                        print '<p style="color:red">'
+                                            .$error[0]['message']
+                                            .'<br>'.@$error[0]['sysmsg'].'</p>';
+                                    }
+                                    
                                     $upgrade_success = false;
                                     break;
                                 }
@@ -150,6 +177,7 @@ if(!defined('PDIR')){
 
                     }
                     else{
+                    //1d itweration INFORMATION!!!
                     ?>
 
                     <p>Your database <b> <?=HEURIST_DBNAME?> </b> currently uses database format version 
@@ -273,11 +301,11 @@ if(!defined('PDIR')){
 
 <?php
     function executeScript($filename){
-
-                    if(db_script(HEURIST_DBNAME_FULL, $filename)){
-                       return true;
-?>                    }else{
-                        
+        
+        if(db_script(HEURIST_DBNAME_FULL, $filename)){
+            return true;
+        }else{
+?>                        
                 <div class="ui-state-error" style="width:90%;margin:auto;margin-top:10px;padding:10px;">
                     <span class="ui-icon ui-icon-alert" style="float: left; margin: .3em;"></span>
                     Error: Unable to execute $filename for database <?php echo HEURIST_DBNAME; ?><br>
@@ -285,8 +313,8 @@ if(!defined('PDIR')){
                     <button onclick="showLoginDialog(true)">Login</button>
                 </div>
 <?php                        
-                        return false;
-                    }
+            return false;
+        }
 
 /* OLD APPROACH
         $cmdline="mysql -h".HEURIST_DBSERVER_NAME." -u".ADMIN_DBUSERNAME." -p".ADMIN_DBUSERPSWD." -D".DATABASE." < ".$filename;

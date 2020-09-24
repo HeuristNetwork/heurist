@@ -661,6 +661,7 @@
     //
     //
     //
+    /*
     function updateDatabseToLatest3($system){
         
         return;
@@ -788,7 +789,6 @@ $query = "CREATE TABLE defTermsLinks (
             $mysqli->query('INSERT INTO defTermsLinks (trl_ParentID, trl_TermID) '
             .'SELECT trm_ParentTermID, trm_ID FROM defTerms WHERE trm_ParentTermID>0');
             
-            
             $res = $mysqli->query('DROP TRIGGER IF EXISTS defTerms_last_insert');
 
             ///$res = $mysqli->query('DELIMITER $$');
@@ -817,7 +817,6 @@ $query = "CREATE TABLE defTermsLinks (
                 delete ignore from defTermsLinks where trl_TermID=OLD.trm_ID || trl_ParentID=OLD.trm_ID;
             end');            
             //$mysqli->query('DELIMITER ;');            
-
 
             $vocab_group = 7;//
             
@@ -900,7 +899,6 @@ error_log($row[3].'  '.$name);
             $mysqli->query('DROP TRIGGER IF EXISTS defDetailTypeGroups_delete');
             $mysqli->query('DROP TABLE IF EXISTS sysTableLastUpdated');            
         }
-      
         
         
     }
@@ -917,6 +915,7 @@ error_log($row[3].'  '.$name);
         }
         return $res;
     }
+    */
     
     //
     //  adds/modifies columns in defRecStructure
@@ -926,6 +925,7 @@ error_log($row[3].'  '.$name);
     //
     //  adds  defTerms.trm_SemanticReferenceURL
     //
+    /*
     function updateDatabseToLatest2($system){
 
         $report = array();
@@ -1014,7 +1014,7 @@ $query = 'CREATE TABLE usrWorkingSubsets ( '
         
         return $ret;
     }
-    
+    */
     //
     //  Creates usrRecPermissions, sysDashboard
     //
@@ -1026,6 +1026,7 @@ $query = 'CREATE TABLE usrWorkingSubsets ( '
     //
     //  Adds detail field 247 (child to parent reference)   
     //
+    /*
     function updateDatabseToLatest($system){
         
         $mysqli = $system->get_mysqli();
@@ -1091,7 +1092,7 @@ $query = 'CREATE TABLE sysDashboard ('
             $report[] = 'sysIdentification: sys_TreatAsPlaceRefForMapping added';
         }
         
-        //verify that required column exists in sysUGrps
+        //verify that required column exists in defRecStructure  it was in 1.2
         $query = "SHOW COLUMNS FROM `defRecStructure` LIKE 'rst_CreateChildIfRecPtr'";
         $res = $mysqli->query($query);
         $row_cnt = $res->num_rows;
@@ -1178,7 +1179,7 @@ $query = 'CREATE TABLE sysDashboard ('
         
         return $report;
     }
-
+    */
 
     /**
     * Check that db function exists
