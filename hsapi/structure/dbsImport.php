@@ -39,8 +39,9 @@ class DbsImport {
     private $imp_fieldtypes;
     private $fields_correspondence;
         
-    private $imp_terms;
+    private $imp_terms;  //ids of source vocabularies to be imported
     private $terms_correspondence;
+    private $vcg_correspondence; //vocab group src->target ids
             
     private $source_defs = null;
     private $target_defs = null;
@@ -157,16 +158,23 @@ $time_debug2 = $time_debug;
         if (!($db_reg_id>0)) {
             //@todo - check missed definitions
             //return true;
-            $this->system->addError(HEURIST_INVALID_REQUEST, "Not possible to determine an origin database id (source of import)");
+            $this->system->addError(HEURIST_ERROR, "Not possible to determine an origin database id (source of import)");
             return false;
         }
         if(!(count($local_ids)>0 || $cCode)){
-            $this->system->addError(HEURIST_INVALID_REQUEST, "Neither concept code nor local id is defined");
+            $this->system->addError(HEURIST_ERROR, "Neither concept code nor local id is defined");
             return false;
         }
 
         // 1. get database url by database id
         $database_url = $this->_getDatabaseURL($db_reg_id);
+        
+        //TEMPORARY SOLUTION
+        if(strpos($database_url,'https://heuristplus.sydney.edu.au/heurist/')===0){
+            $database_url = str_replace('/heurist/','/h6-ao/',$database_url);
+        }
+        
+        
 
 if(_DBG) error_log('get db url '.(microtime(true)-$time_debug));        
 $time_debug = microtime(true);        
@@ -180,6 +188,18 @@ $time_debug = microtime(true);
         if (!$this->source_defs) {
             return false; //see $system->getError
         }
+        
+        if(@$this->source_defs['terms']){
+            
+            if(!@$this->source_defs['terms']['groups'] || 
+                !(@$this->source_defs['terms']['fieldNamesToIndex']['trm_VocabularyGroupID']>0)){
+                
+                $this->system->addError(HEURIST_ERROR, 'Database registration URL '.$database_url.' returns old version of database definitions. '
+                .'Either database is not upgraded or URL refers to old version of code');
+                return false;
+            }
+        }
+        
 
 if(_DBG) error_log('get src defs '.(microtime(true)-$time_debug));        
 $time_debug = microtime(true);        
@@ -237,6 +257,7 @@ $time_debug = microtime(true);
         $this->fields_correspondence = array();  //import field id -> target id - IMPORTANT for proper titlemask conversion
         //$fields_correspondence_existed = array();
         $this->terms_correspondence = array(); //"enum"=>array(), "relation"=>array());
+        $this->vcg_correspondence = array();
         //$terms_correspondence_existed = array();
         $this->rectypes_upddated  = array();
         $this->rectypes_added  = array();
@@ -989,9 +1010,10 @@ $mysqli->commit();
     
     // 
     // Find vocabularies to be imported
-    // Fill global $this->imp_terms with the top most vocabulary
+    // It fills global $this->imp_terms with the top most vocabulary
+    //
     // $terms_ids - list of terms (json or csv) from field definition
-    // $imp_terms - list of source vocabulary ids to be imported
+    // $this->imp_terms - list of source vocabulary ids to be imported
     //
     private function _getTopMostVocabulary($terms_ids, $domain){
 
@@ -1147,6 +1169,9 @@ $mysqli->commit();
         if($term_id==null){
             //loop through all this->imp_terms
             
+            //fills $this->vcg_correspondence
+            $this->_importVocabularyGroups($this->imp_terms[$domain]);
+            
             //top level import vocabularies
             foreach($this->imp_terms[$domain] as $term_id){
                 $res = $this->_importVocabulary($term_id, $domain, 
@@ -1167,6 +1192,7 @@ $mysqli->commit();
             $idx_code  = intval($terms['fieldNamesToIndex']["trm_Code"]);
             $idx_origin_dbid  = intval($terms['fieldNamesToIndex']["trm_OriginatingDBID"]);
             $idx_origin_id  = intval($terms['fieldNamesToIndex']["trm_IDInOriginatingDB"]);
+            $idx_vocab_group_id  = intval($terms['fieldNamesToIndex']["trm_VocabularyGroupID"]);
 
             $term_import = $terms['termsByDomainLookup'][$domain][$term_id];
 
@@ -1194,12 +1220,16 @@ $mysqli->commit();
                                                             null, $domain, $idx_code);
                     $term_import[$idx_label] = $this->targetTerms->doDisambiguateTerms($term_import[$idx_label],
                                                             null, $domain, $idx_label);
+                    
+                    $term_import[$idx_vocab_group_id] = $this->vcg_correspondence[$term_import[$idx_vocab_group_id]];                                                            
+                                                            
                 }else{
                     $term_import[$idx_code] = $this->targetTerms->doDisambiguateTerms2($term_import[$idx_code], $same_level_labels['code']);
                     $term_import[$idx_label] = $this->targetTerms->doDisambiguateTerms2($term_import[$idx_label], $same_level_labels['label']);
+                    
+                    $term_import[$idx_vocab_group_id] = 0;
                 }
                 
-
                 //fill original ids (concept codes) if missed
                 if($term_import[$idx_ccode] && (!$term_import[$idx_origin_dbid] || !$term_import[$idx_origin_id])){
                     $codes = explode("-",$term_import[$idx_ccode]);
@@ -1250,7 +1280,80 @@ $mysqli->commit();
             
             return $new_term_id;
         }
+    }//_importVocabulary
+    
+    //
+    // check vocabulry group by name and import if missed
+    //   
+    private function _importVocabularyGroups($src_vocab_ids){
+
+        $columnNames = array("vcg_Name","vcg_Domain","vcg_Order","vcg_Description");
+        $idx_vcg_grp = $this->source_defs['terms']['fieldNamesToIndex']['trm_VocabularyGroupID'];
+        $idx_parent = $this->source_defs['terms']['fieldNamesToIndex']['trm_ParentTermID'];
+        
+        $mysqli = $this->system->get_mysqli();
+        
+        foreach($src_vocab_ids as $term_id){
+            
+            $rt = $this->sourceTerms->getTerm($term_id);
+
+            $parent_id = @$rt[$idx_parent];
+            if($parent_id>0) continue; //this is not vocabulary
+            
+            $grp_id = @$rt[$idx_vcg_grp];
+
+            if(!$grp_id){
+                $this->error_exit2("Vocabulary Group ID is not defined for vocabulary #'".$term_id."'. in source database");
+                return false;
+            }
+
+            $src_group=null;
+
+            if(@$this->vcg_correspondence[$grp_id]){ //already found
+                continue;
+            }
+            
+            //find group in source by ID
+            $src_group = @$this->source_defs['terms']['groups'][$grp_id];
+
+            if($src_group==null){
+                $this->error_exit2("Can't find vocabulary group #".$grp_id." for vocabulary #'".$term_id."'. in source database");
+                return false;
+            }
+            $grp_name = @$src_group['vcg_Name'];
+            if(!$grp_name){
+                $this->error_exit2("Name of group is empty. Can't add group #".$grp_id." for vocabulary #'"
+                    .$term_id."'. in source database");
+                return false;
+            }
+
+            //get name and try to find in target by name
+            $isNotFound = true;
+            foreach ($this->target_defs['terms']['groups'] as $id=>$group){
+                if(is_numeric($id) && trim($group['vcg_Name'])== trim($grp_name)){
+                    $this->vcg_correspondence[$grp_id] = $id;
+                    $isNotFound = false;
+                    break;
+                }
+            }
+
+            if($isNotFound){
+                
+                $src_group['vcg_ID'] = -1;
+                $new_grp_id = mysql__insertupdate($mysqli,'defVocabularyGroups','vcg',$src_group);
+
+                if( is_numeric($new_grp_id) ){
+                    $this->vcg_correspondence[$grp_id] = $new_grp_id;
+                    $src_group['vcg_ID'] = $new_grp_id;
+                    $this->target_defs['terms']['groups'][$new_grp_id] = $src_group;
+                }else{
+                    $this->error_exit2("Can't add vocabulary group '".$grp_name."'. ".@$res['error']);
+                    return false;
+                }
+            }
+        }
     }
+    
 
     // @todo
     // Copy record type icon and thumbnail from source to destination database

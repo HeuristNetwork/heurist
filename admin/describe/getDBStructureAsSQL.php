@@ -120,6 +120,25 @@ print "$endToken\n";
 if($isHTML) print "<p>&nbsp;<p>&nbsp;<p>";
 
 // ------------------------------------------------------------------------------------------
+// defVocabularyGroups
+
+print "\n\n\n-- VOCABULARY GROUPS";print "\n";
+if($isHTML) print "<p>";
+include HEURIST_DIR.'admin/structure/crosswalk/defVocabularyGroupsFields.inc'; // sets value of $flds
+print "-- $flds \n";
+$query = "select $flds from defVocabularyGroups";
+$res = $mysqli->query($query);
+$fmt = 'defVocabularyGroups'; // update format if fields added
+
+if($isHTML) print "<p>";
+print "\n$startToken\n";
+while ($row = $res->fetch_assoc()) { @print_row($row, $fmt); }
+$res->close();
+
+print "$endToken\n";
+if($isHTML) print "<p>&nbsp;<p>&nbsp;<p>";
+
+// ------------------------------------------------------------------------------------------
 // Detail Type ONTOLOGIES
 print "\n\n\n-- ONTOLOGIES";print "\n";
 if($isHTML) print "<p>";
@@ -150,6 +169,26 @@ print "-- $flds \n";
 $query = "select $flds from defTerms";
 $res = $mysqli->query($query);
 $fmt = 'defTerms';  // update format if fields added
+
+if($isHTML) print "<p>";
+print "\n$startToken\n";
+while ($row = $res->fetch_assoc()) {   @print_row($row, $fmt); }
+$res->close();
+
+print "$endToken\n";
+if($isHTML) print "<p>&nbsp;<p>&nbsp;<p>";
+
+// ------------------------------------------------------------------------------------------
+// TERMS Links by reference   - export terms by reference ONLY
+
+print "\n\n\n-- TERMS REFERENCES";print "\n";
+if($isHTML) print "<p>";
+include HEURIST_DIR.'admin/structure/crosswalk/defTermsLinksFields.inc'; // sets value of $flds
+print "-- $flds \n";
+//$query = "select $flds from defTermsLinks";
+$query = "select $flds from defTermsLinks r, defTerms t where trl_TermID=trm_ID AND trl_ParentID!=trm_ParentTermID";
+$res = $mysqli->query($query);
+$fmt = 'defTermsLinks';  // update format if fields added
 
 if($isHTML) print "<p>";
 print "\n$startToken\n";
@@ -638,11 +677,17 @@ function print_row($row,$fmt) {
             '$trm_OriginatingDBID','$trm_NameInOriginatingDB','$trm_IDInOriginatingDB',
             '$row[trm_AddedByImport]','$row[trm_IsLocalExtension]','$row[trm_Domain]','$row[trm_OntID]',
             '$row[trm_ChildCount]','$row[trm_ParentTermID]','$row[trm_Depth]','$row[trm_Modified]','$row[trm_LocallyModified]',
-            '$row[trm_Code]','$trm_SemanticReferenceURL','$trm_IllustrationURL'),";
+            '$row[trm_Code]','$trm_SemanticReferenceURL','$trm_IllustrationURL','$row[trm_VocabularyGroupID]'),";
             // WARNING! This needs to be updated in sync with new db structure to be added for DB Version 1.2.0 for FAIMS compatibility
             // '$row[trm_ReferenceURL]','$row[trm_IllustrationURL]'),"; // for db version 1.2.0 @ 1/10/13
             break;
 
+        case 'defTermsLinks': // terms by reference
+
+            print "('$row[trl_ID]','$row[trl_ParentID]','$row[trl_TermID]'),";
+        
+            break;
+        
         case 'defOntologies': // Data from Ontologies table
             $ont_ShortName = $mysqli->real_escape_string($row['ont_ShortName']);
             $ont_FullName = $mysqli->real_escape_string($row['ont_FullName']);
@@ -685,6 +730,13 @@ function print_row($row,$fmt) {
             print "('$row[dtg_ID]','$dtg_Name','$row[dtg_Order]','$dtg_Description'),";
             break;
 
+        case 'defVocabularyGroups': // Data from defVocabularyGroups table
+            $vcg_Name = $mysqli->real_escape_string($row['vcg_Name']);
+            $vcg_Description = $mysqli->real_escape_string($row['vcg_Description']);
+            print "('$row[vcg_ID]','$vcg_Name','$row[vcg_Domain]','$row[vcg_Order]','$vcg_Description'),";
+            break;
+            
+            
         case 'defTranslations':
             $trn_Translation = $mysqli->real_escape_string($row['trn_Translation']);
             print "('$row[trn_ID]','$row[trn_Source]','$row[trn_Code]','$row[trn_LanguageCode3]','$trn_Translation'),";

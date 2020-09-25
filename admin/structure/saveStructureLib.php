@@ -172,7 +172,8 @@ $trmColumnNames = array(
     "trm_Modified"=>"s",
     "trm_LocallyModified"=>"i",
     "trm_Code"=>"s",
-    "trm_SemanticReferenceURL"=>"s"
+    "trm_SemanticReferenceURL"=>"s",
+    "trm_VocabularyGroupID"=>"i"
 );
 
 //

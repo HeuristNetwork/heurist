@@ -1,7 +1,7 @@
 <?php
 /**
 * importDefinitions.php - add definitions to database
-* see createDB - creates database defintions from file created with getDBStructureAsSQL. coreDefinitions.txt
+* see createDB - it creates database defintions from file created with getDBStructureAsSQL. coreDefinitions.txt
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -140,8 +140,10 @@ class ImportDefinitions {
         $tables = array('',
         'defRecTypeGroups', 
         'defDetailTypeGroups', 
+        'defVocabularyGroups', 
         'defOntologies',
         'defTerms',        
+        'defTermsLinks',        
         'defRecTypes',
         'defDetailTypes',
         'defRecStructure',        

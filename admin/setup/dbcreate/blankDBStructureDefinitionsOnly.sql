@@ -25,7 +25,7 @@
 
 -- defCalcFunctions, defCrosswalk, defDetailTypes,defFileExtToMimetype, defLanguages, defOntologies,
 -- defRecStructure, defRecTypeGroups, defRecTypes, defRelationshipConstraints,
--- defTerms, defTranslations, sysIdentification, sysUGrps, sysUsrGrpLinks, usrTags
+-- defVocabularyGroups,defTerms, defTranslations, sysIdentification, sysUGrps, sysUsrGrpLinks, usrTags
 
 -- ***** THIS FILE MUST BE UPDATED IF THE DATABASE STRUCTURE IS CHANGED, see version # below
 --       Extract the relevant tables from blankDBStructure.sql
@@ -315,6 +315,23 @@ CREATE TABLE defRelationshipConstraints (
   KEY rcs_TargetRectypeID (rcs_TargetRectypeID),
   KEY rcs_SourceRecTypeID (rcs_SourceRectypeID)
 ) ENGINE=InnoDB  COMMENT='Constrain target-rectype/vocabularies/values for a pointer d';
+
+-- --------------------------------------------------------
+--
+-- Table structure for table 'defVocabularyGroups'
+--
+
+CREATE TABLE defVocabularyGroups (
+  vcg_ID tinyint(3) unsigned NOT NULL auto_increment COMMENT 'Vocabulary group ID referenced in vocabs editor',
+  vcg_Name varchar(40) NOT NULL COMMENT 'Name for this group of vocabularies, shown as heading in lists',
+  vcg_Domain enum('enum','relation') NOT NULL default 'enum' COMMENT 'Field of application of the vocabulary - can be both',
+  vcg_Order tinyint(3) unsigned zerofill NOT NULL default '002' COMMENT 'Ordering of vocabulary groups within pulldown lists',
+  vcg_Description varchar(250) default NULL COMMENT 'A description of the vocabulary group and its purpose',
+  vcg_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this vocabulary group record, used to get last updated date for table',
+  PRIMARY KEY  (vcg_ID),
+  UNIQUE KEY vcg_Name (vcg_Name)
+) ENGINE=InnoDB COMMENT='Grouping mechanism for vocabularies in vocabularies/terms editor';
+
 
 -- --------------------------------------------------------
 

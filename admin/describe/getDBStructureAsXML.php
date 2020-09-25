@@ -116,6 +116,20 @@ $res->close();
 print "</DetailTypeGroups>";
 
 // ------------------------------------------------------------------------------------------
+// defVocabularyGroups
+
+print "\n\n<VocabularyGroups>";
+include HEURIST_DIR.'admin/structure/crosswalk/defVocabularyGroupsFields.inc'; // sets value of $flds
+$query = "select $flds from defVocabularyGroups";
+$res = $mysqli->query($query);
+$fmt = 'defVocabularyGroups'; // update format if fields added
+print "\n\n<!-- $flds -->";
+while ($row = $res->fetch_assoc()) { @print_row($row, $fmt, $flds); }
+$res->close();
+
+print "</VocabularyGroups>";
+
+// ------------------------------------------------------------------------------------------
 // Detail Type ONTOLOGIES
 
 print "\n\n<Ontologies>";
@@ -429,6 +443,18 @@ function print_row($row,$fmt,$flds) {
             print "</dtg>";
             break;
 
+        case 'defVocabularyGroups': // Data from vocab groups table
+            $vcg_Name = html_escape($row['vcg_Name']);
+            $vcg_Description = html_escape($row['vcg_Description']);
+            print "<vcg>";
+            print "<vcg_ID>$row[vcg_ID]</vcg_ID>".
+            "<vcg_Name>$vcg_Name</vcg_Name>".
+            "<vcg_Domain>$row[vcg_Domain]</vcg_Domain>".
+            "<vcg_Order>$row[vcg_Order]</vcg_Order>".
+            "<vcg_Description>$vcg_Description</vcg_Description>";
+            print "</vcg>";
+            break;
+
         case 'defRecTypes': // Data from the defRecTypes table
             if($row['rty_ID'] != 0) {
                 $rty_Name = html_escape($row['rty_Name']); // escapes RTF-8 characters
@@ -593,8 +619,11 @@ function print_row($row,$fmt,$flds) {
             "<trm_Modified>$row[trm_Modified]</trm_Modified>".
             "<trm_LocallyModified>$row[trm_LocallyModified]</trm_LocallyModified>".
             "<trm_Code>$trm_Code</trm_Code>";
+            "<trm_SemanticReferenceURL>$row[trm_SemanticReferenceURL]</trm_SemanticReferenceURL>";
+            "<trm_IllustrationURL>$row[trm_IllustrationURL]</trm_IllustrationURL>";
+            "<trm_VocabularyGroupID>$row[trm_VocabularyGroupID]</trm_VocabularyGroupID>";
             // WARNING! This needs to be updated in sync with new db structure to be added for DB Version 1.2.0 for FAIMS compatibility
-            // '$row[trm_ReferenceURL]','$row[trm_IllustrationURL]'),"; // for db version 1.2.0 @ 1/10/13
+            // '$row[trm_SemanticReferenceURL]','$row[trm_IllustrationURL]'),"; // for db version 1.2.0 @ 1/10/13
             print "</trm>";
             break;
 

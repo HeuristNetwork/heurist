@@ -533,6 +533,42 @@ function dbs_GetRectypeConstraint($system) {
         $terms['treesByDomain'] = array(
                 'relation' => __getTermTree($system, "relation", "exact"), 
                 'enum' => __getTermTree($system, "enum", "exact"));
+                
+        //get vocabulary groups 
+        $vcgGroups = array();//'groupIDToIndex' => array());
+        $query = 'SELECT vcg_ID, vcg_Name, vcg_Domain, vcg_Order, vcg_Description FROM defVocabularyGroups';
+        $res = $mysqli->query($query);
+        if($res){
+            while ($row = $res->fetch_assoc()) {
+                $vcgGroups[$row['vcg_ID']] = $row;
+                //groupIDToIndex['groupIDToIndex'][$row["vcg_ID"]] = $index++;
+            }                
+            $res->close();
+        }else{
+            error_log('DATABASE: '.$system->dbname().'. Error retrieving vocabulary groups '.$mysqli->error);
+        }
+        $terms['groups'] = $vcgGroups;
+        
+        //terms by reference
+        $matches = array(); 
+        $query = 'select trl_ParentID,trl_TermID from defTermsLinks r, defTerms t '
+        .'where trl_TermID=trm_ID AND trl_ParentID!=trm_ParentTermID ORDER BY trl_ParentID';
+        $res = $mysqli->query($query);
+        if ($res){
+            while ($row = $res->fetch_row()){
+                    
+                if(@$matches[$row[0]]){
+                    $matches[$row[0]][] = $row[1];
+                }else{
+                    $matches[$row[0]] = array($row[1]);
+                }
+            }
+            $res->close();
+        }else{
+            error_log('DATABASE: '.$system->dbname().'. Error retrieving terms by reference '.$mysqli->error);
+        }
+        $terms['references'] = $matches;
+                
         //ARTEM setCachedData($cacheKey, $terms);
         return $terms;
         
@@ -994,7 +1030,7 @@ function dbs_GetRectypeConstraint($system) {
             //                    "trm_NameInOriginatingDB",
             "trm_IDInOriginatingDB", "trm_AddedByImport", "trm_IsLocalExtension", "trm_Domain", "trm_OntID", "trm_ChildCount", 
             "trm_ParentTermID", "trm_Depth", "trm_Modified", "trm_LocallyModified", "trm_Code", 
-            "trm_SemanticReferenceURL", "trm_ConceptID");
+            "trm_SemanticReferenceURL", "trm_VocabularyGroupID", "trm_ConceptID");
     }
 
     //

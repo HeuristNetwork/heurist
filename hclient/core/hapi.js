@@ -761,6 +761,8 @@ prof =Profile
             
             //
             // imports database defintions 
+            // databaseID - source database 
+            // definitionID - rectype id to be imported
             //
             import_definitions: function(databaseID, definitionID, callback){
              
@@ -790,7 +792,8 @@ prof =Profile
                                 if(entityName=='defRecStructure'){
                                     window.hWin.HAPI4.EntityMgr.createRstIndex();
                                 }else if(entityName=='defTerms'){
-                                    entity_data['trm_Links'] = response.defs.entities[entityName]['trm_Links'];
+                                    window.hWin.HAPI4.EntityMgr.setEntityData('trm_Links',
+                                        response.defs.entities[entityName]['trm_Links']);
                                 }
                             }
                         }

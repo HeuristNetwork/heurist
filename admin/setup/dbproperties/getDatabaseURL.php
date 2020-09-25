@@ -31,7 +31,7 @@ require_once(dirname(__FILE__)."/../../../hsapi/System.php");
 $isOutSideRequest = (strpos(HEURIST_INDEX_BASE_URL, HEURIST_SERVER_URL)===false);
 if($isOutSideRequest){ //this is request from outside - redirect to master index    
 
-    $reg_url =   HEURIST_INDEX_BASE_URL 
+    $reg_url = HEURIST_INDEX_BASE_URL 
     .'admin/setup/dbproperties/getDatabaseURL.php?db='.HEURIST_INDEX_DATABASE
     .'&remote=1&id='.$database_id;
 

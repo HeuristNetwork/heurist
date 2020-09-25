@@ -412,7 +412,7 @@ class DbUtils {
 
                 if($level<2 || execute_db_script(self::$system, $database_name_full, 
                     HEURIST_DIR."admin/setup/dbcreate/addProceduresTriggers.sql",
-                    'Cannot add referential constraints')){
+                    'Cannot create procedures and triggers')){
 
                     // echo_flush ('OK');
                     return true;

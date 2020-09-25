@@ -1193,6 +1193,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         if(this._currentEditID<0 && 
             (this.options.selectOnSave===true || this.options.select_mode=='select_single'))
         {
+                $Db.dty().addRecord(recID, fieldvalues); 
                 this._selection = new hRecordSet();
                 this._selection.addRecord(recID, fieldvalues);
                 this._selectAndClose();
