@@ -171,32 +171,34 @@ $.widget( "heurist.search", {
                 this._setFocus();
         }} );
 
-        //promt to be shown when input has complex search expression (json search)
-        this.input_search_prompt2 = $( "<span>" )
-        .html('<span style="font-size:1em">'+window.hWin.HR("filter")
-                +'</span>&nbsp;&nbsp;<span class="ui-icon ui-icon-eye" style="font-size:1.8em;width: 1.7em;margin-top:1px"/>')
-        .css({'width':'370', height:'20px', 'padding':'3px', 'margin':'2px',
-              'position': 'absolute'})
-        .appendTo( this.div_search_input );
-        this._on( this.input_search_prompt2, {click: function(){
-                this.input_search_prompt2.hide();
-                this._setFocus();
-        }} );
 
         this.input_search = $( "<textarea>" )
         .css({'margin-right':'0.2em', 'height':'41px', 
-            'max-height':'70px',
+            'max-height':'70px', 'resize':'none', 
             'padding':'0.4em',
             'min-height':'41px', 'line-height': '14px', 
             'min-width':'10em', 'width':'100%', 'padding-right':'18px' })  //was width:sz_input, 'max-width':sz_input,  
         .addClass("text ui-widget-content ui-corner-all")
         .appendTo(  this.div_search_input );
         
+        
+        //promt to be shown when input has complex search expression (json search)
+        this.input_search_prompt2 = $( "<span>" )
+        .html('<span style="font-size:1em">'+window.hWin.HR("filter")
+                +'</span>&nbsp;&nbsp;<span class="ui-icon ui-icon-eye" style="font-size:1.8em;width: 1.7em;margin-top:1px"/>')
+        .css({ height:'20px', 'padding':'3px', 'margin':'2px', 'position':'relative'})
+        .appendTo( this.div_search_input );
+        this._on( this.input_search_prompt2, {click: function(){
+                this.input_search_prompt2.hide();
+                this._setFocus();
+        }} );
+        
+        
         if(this._is_publication || this.options.is_h6style){
-            this.input_search.css({'resize':'none', 'height':'30px','min-height':'30px','padding':'2px 18px 2px 2px', 'width':'400'});
-            this.input_search_prompt2.addClass('ui-widget-content').css({border:'none'});
+            this.input_search.css({'height':'30px','min-height':'30px','padding':'2px 18px 2px 2px', 'width':'400'});
+            this.input_search_prompt2.addClass('ui-widget-content').css({border:'none',top:'-30px'});
         }else{
-            this.input_search_prompt2.css({'background':'#F4F2F4'});
+            this.input_search_prompt2.css({'background':'#F4F2F4',top:'-40px'});
         }
         
         // AAAA
@@ -214,17 +216,20 @@ $.widget( "heurist.search", {
         }else{
             
             if(this.options.is_h6style){
-                this.div_search_input.css({'width':'70%','max-width':'470px','min-width':'300px'});  
+                this.div_search_input.css({'width':'70%','max-width':'470px','min-width':'300px',height:'30px'});  
                 this.input_search.css({'width':'100%'});  
             }else{
-                this.div_search.css({'display':'table-row'});
+                this.div_search.css({'display':'table-row',height:'30px'});
             }
         }
             
         
         //help link
-        if(this._is_publication){
-            var div_search_help_links = $('<div>').css('padding-top','2px').appendTo(this.div_search_input);
+        if(!this._is_publication && this.options.is_h6style){
+            var div_search_help_links = $('<div>')
+                //.css({position: 'absolute', top:'auto', 'font-size':'10px'})
+                .css({position: 'relative', top:'-28px', 'font-size':'10px'})
+                .appendTo(this.div_search_input);
 
             var link = $('<span title="Show syntax and examples of the Heurist query/filter language">'
             +'filter help <span class="ui-icon ui-icon-info" style="font-size:0.8em"></span></span>')                
@@ -858,9 +863,15 @@ $.widget( "heurist.search", {
                             that._refresh();
                         }
                         if( true || window.hWin.HEURIST4.util.isJSON(data.q) || qs.length>100 ){
-                            that.input_search_prompt2.css({
-                                width:(that.input_search.width()-30),
-                                height:(that.input_search.height()-5)}).show();
+                            if(that.options.is_h6style){
+                                that.input_search_prompt2.css('display','block');    
+                            }else{
+                                that.input_search_prompt2.css({
+                                    display:'block',
+                                    width:(that.input_search.width()-30),
+                                    height:(that.input_search.height()-3)});
+                            }
+                            
                         }
                     }
                 }
@@ -1524,9 +1535,14 @@ $.widget( "heurist.search", {
         this.input_search.val(q);
         this.input_search.change();
         
-        this.input_search_prompt2.css({
+        if(this.options.is_h6style){
+            this.input_search_prompt2.css('display','block');    
+        }else{
+            this.input_search_prompt2.css({
+                display:'block',
                 width:(this.input_search.width()-30),
-                height:(this.input_search.height()-5)}).show();
+                height:(this.input_search.height()-3)});
+        }
 
         //e = window.hWin.HEURIST4.util.stopEvent(e);
     }

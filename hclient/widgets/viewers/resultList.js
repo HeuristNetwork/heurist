@@ -602,7 +602,7 @@ $.widget( "heurist.resultList", {
                         btn_visible_newrecord: false,
                         search_button_label: 'Filter',
                         btn_entity_filter: false})
-                    .css({display:'block','max-height':'50px',padding:'10px 4px',width:'100%'})
+                    .css({display:'block','max-height':'50px',padding:'10px 0px 20px 4px',width:'100%'})
                     .appendTo(this.div_header);
         
         }
