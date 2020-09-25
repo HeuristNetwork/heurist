@@ -381,27 +381,59 @@ span.fancytree-node:hover{
 .ui-heurist-design .ui-dialog-titlebar,
 .ui-heurist-design .ui-dialog-buttonpane
 {
-    background:<?php uout('design_bg', '#305586');?>  !important;
+    background:<?php uout('design_bg', '#523365');?>  !important;
     color: white;
 }
 .ui-menu6 .ui-menu6-container.ui-heurist-design, .ui-heurist-design .ui-helper-popup{
     border-width: 2px !important;
-    border-color:<?php uout('design_bg', '#305586');?> !important; 
+    border-color:<?php uout('design_bg', '#523365');?> !important; 
 } 
-.ui-heurist-design-fade{background:<?php uout('design_fade_bg', '#D4DBEA');?> 0% 0% no-repeat padding-box;}
-.ui-heurist-design .ui-heurist-title{color:<?php uout('design_title_color', '#4477B9');?>}
+.ui-heurist-design-fade{background:<?php uout('design_fade_bg', '#DAD0E4');?> 0% 0% no-repeat padding-box;}
+.ui-heurist-design .ui-heurist-title{color:<?php uout('design_title_color', '#7B4C98');?>}
 
 .ui-heurist-design .ui-widget-content,
 .ui-heurist-design .ui-selectmenu-button{
-    background:<?php uout('design_fade_bg', '#D4DBEA');?>
+    background:<?php uout('design_fade_bg', '#DAD0E4');?>
 }
 
 .ui-heurist-design .ui-state-active, 
 .ui-heurist-design .fancytree-active,
 .ui-heurist-design .fancytree-node:hover
 {
-        background:<?php uout('design_active', '#AFBFDA');?> !important;
+        background:<?php uout('design_active', '#A487B9');?> !important;
 }
+
+/* SECTION SCHEME: EXPLORE */
+.ui-heurist-explore.ui-heurist-header, .ui-heurist-explore .ui-heurist-header, 
+.ui-heurist-explore .ui-dialog-titlebar,
+.ui-heurist-explore .ui-dialog-buttonpane
+{
+    background-color: <?php uout('explore_bg', '#305586');?> !important;    
+    color: white;
+}
+.ui-heurist-explore-fade{background:<?php uout('explore_fade_bg', '#D4DBEA');?> !important;}
+.ui-heurist-explore .ui-heurist-title{color:<?php uout('explore_title_color', '#4477B9');?>} 
+.ui-heurist-explore .ui-widget-content,
+.ui-heurist-explore .ui-selectmenu-button{
+    background:<?php uout('explore_title_color', '#D4DBEA');?>
+}
+.ui-heurist-explore .ui-heurist-btn-header1{    
+    background:none !important;
+    border:1px solid <?php uout('explore_bg', '#4477B9')?> !important;
+    color:<?php uout('explore_bg', '#4477B9')?> !important;
+}
+.ui-heurist-explore .ui-button-icon-only{
+    background: none;
+    color:<?php uout('explore_bg', '#4477B9')?> !important;
+}
+
+.ui-heurist-explore .ui-state-active, 
+.ui-heurist-explore .fancytree-active,
+.ui-heurist-explore .fancytree-node:hover
+{
+    background:<?php uout('explore_active', '#AFBFDA');?> !important;
+}
+
 
 /* SECTION SCHEME: IMPORT */
 .ui-heurist-import.ui-heurist-header, .ui-heurist-import .ui-heurist-header{
@@ -420,37 +452,6 @@ span.fancytree-node:hover{
 .ui-heurist-import .fancytree-node:hover
 {
         background:<?php uout('import_active', '#86CDE8');?> !important;
-}
-
-/* SECTION SCHEME: EXPLORE */
-.ui-heurist-explore.ui-heurist-header, .ui-heurist-explore .ui-heurist-header, 
-.ui-heurist-explore .ui-dialog-titlebar,
-.ui-heurist-explore .ui-dialog-buttonpane
-{
-    background-color: <?php uout('explore_bg', '#523365');?> !important;    
-    color: white;
-}
-.ui-heurist-explore-fade{background:<?php uout('explore_fade_bg', '#DAD0E4');?> !important;}
-.ui-heurist-explore .ui-heurist-title{color:<?php uout('explore_title_color', '#7B4C98');?>} /* '#7B4C98 */
-.ui-heurist-explore .ui-widget-content,
-.ui-heurist-explore .ui-selectmenu-button{
-    background:<?php uout('explore_title_color', '#DAD0E4');?>
-}
-.ui-heurist-explore .ui-heurist-btn-header1{    
-    background:none !important;
-    border:1px solid <?php uout('explore_bg', '#7B4C98')?> !important;
-    color:<?php uout('explore_bg', '#7B4C98')?> !important;
-}
-.ui-heurist-explore .ui-button-icon-only{
-    background: none;
-    color:<?php uout('explore_bg', '#7B4C98')?> !important;
-}
-
-.ui-heurist-explore .ui-state-active, 
-.ui-heurist-explore .fancytree-active,
-.ui-heurist-explore .fancytree-node:hover
-{
-    background:<?php uout('explore_active', '#A487B9');?> !important;
 }
 
 /* SECTION SCHEME: PUBLISH */
