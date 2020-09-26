@@ -195,7 +195,8 @@ $.widget( "heurist.search_faceted", {
         
             if(this.options.is_h6style){
                 
-                this.div_title = $('<div class="ui-heurist-header truncate" style="position:relative;width:211px;padding:10px">')
+                this.div_title = $('<div class="ui-heurist-header truncate" '
+                    +'style="position:relative;width:211px;padding:10px;font-size: 0.9em;">')
                     .appendTo( this.div_header );
                 
             }else{
@@ -377,6 +378,9 @@ $.widget( "heurist.search_faceted", {
     _refreshTitle: function(){    
         var new_title = '';
         if(this.div_title) {
+            if(this.options.is_h6style){
+                new_title = 'Define filter values';
+            }else
             if(this.options.params.ui_title){ //from settings
                 new_title = this.options.params.ui_title;
             }else{

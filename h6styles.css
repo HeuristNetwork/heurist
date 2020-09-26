@@ -121,7 +121,7 @@ body.popup {
     font-size:smaller;
     padding:6px;
 }
-.menu-explore:hover, .menu-explore2:hover{
+.menu-explore2:hover{
     text-decoration:underline;
 }
 

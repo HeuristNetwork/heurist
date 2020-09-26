@@ -68,7 +68,7 @@ $.widget( "heurist.search_quick", $.heurist.recordAction, {
             //add title 
             $dlg.css({top:'36px',position:'absolute',width: 'auto', margin: '0px','font-size':'0.9em'});
             
-            $('<div class="ui-heurist-header" style="top:0px;">Quick search</div>')
+            $('<div class="ui-heurist-header" style="top:0px;">Search builder</div>')
                 .insertBefore($dlg);
         }else{
              $dlg.addClass('ui-heurist-header1');

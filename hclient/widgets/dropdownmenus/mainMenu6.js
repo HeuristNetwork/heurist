@@ -37,6 +37,16 @@ $.widget( "heurist.mainMenu6", {
     _myTimeoutId: 0, //delay on collapse main menu
     _myTimeoutId2: 0, //delay on close section menu
     _myTimeoutId3: 0, //delay on show explore section menu
+    _myTimeoutId4: 0, //delay on close explore section menu
+    
+    _delayOnCollapseMainMenu: 800,
+    _delayOnCollapse_SectionMenu: 600,
+    _delayOnCollapse_ExploreMenu: 600,
+    
+    _delayOnShow_ExploreMenu: 5, //500,
+    _delayOnShow_AddRecordMenu: 10, //1000,
+    
+    
     _explorer_menu_locked: false,
     _active_section: null,
     
@@ -132,11 +142,11 @@ $.widget( "heurist.mainMenu6", {
                 
                 that.divMainMenu.find('.menu-text').hide();
                 
-                //init explore menu items 
-                that._on(that.divMainMenu.find('.menu-explore > span, #filter_by_groups'),{
+                //init explore menu items    .menu-explore > span, #filter_by_groups                                             
+                that._on(that.divMainMenu.find('.menu-explore, #filter_by_groups'),{
                     mouseenter: that._mousein_ExploreMenu,
                     mouseleave: function(e){
-                        this._myTimeoutId2 = setTimeout(function(){that._closeSectionMenu('explore');}, 600);
+                        this._myTimeoutId2 = setTimeout(function(){that._closeSectionMenu('explore');}, this._delayOnCollapse_SectionMenu); //600
                     }
                 });
 /*                
@@ -327,7 +337,7 @@ $.widget( "heurist.mainMenu6", {
                 //console.log(' _collapsed');                
                 //that.divMainMenu.css({'box-shadow':null});
             });
-        }, is_instant===true?10:800);
+        }, is_instant===true?10:this._delayOnCollapseMainMenu); //800
     },
     
     //
@@ -366,6 +376,9 @@ $.widget( "heurist.mainMenu6", {
         //that.divMainMenu.find('li.menu-explore > .menu-text').css('text-decoration', 'none');
         
         function __closeAllsectionMenu() {
+            
+            that.divMainMenu.find('li.menu-explore > .menu-text').css('text-decoration', 'none');
+            that.divMainMenu.find('li.menu-explore2 > .menu-text').css('text-decoration', 'none');
         
             var section_name = that._getSectionName(e);
 //console.log('__closeAllsectionMenu '+section_name);       
@@ -380,7 +393,7 @@ $.widget( "heurist.mainMenu6", {
         }        
         
         if(e){
-            this._myTimeoutId2 = setTimeout(__closeAllsectionMenu,500);
+            this._myTimeoutId2 = setTimeout(__closeAllsectionMenu,this._delayOnCollapse_SectionMenu); // 600
         }else{
             __closeAllsectionMenu();
         }
@@ -422,8 +435,9 @@ $.widget( "heurist.mainMenu6", {
     // prevent close section and main menu
     //
     _resetCloseTimers: function(){
-        clearTimeout(this._myTimeoutId2); this._myTimeoutId2 = 0;
-        clearTimeout(this._myTimeoutId); this._myTimeoutId = 0;
+        clearTimeout(this._myTimeoutId4); this._myTimeoutId4 = 0; //delay on collapse main menu
+        clearTimeout(this._myTimeoutId2); this._myTimeoutId2 = 0; //delay on collapse main menu
+        clearTimeout(this._myTimeoutId); this._myTimeoutId = 0; //delay on close section menu
     },
 
     //
@@ -438,7 +452,8 @@ $.widget( "heurist.mainMenu6", {
 
         clearTimeout(this._myTimeoutId3); this._myTimeoutId3 = 0;
         this._resetCloseTimers();
-        //this.divMainMenu.find('li.menu-explore > .menu-text').css('text-decoration', 'none');
+        this.divMainMenu.find('li.menu-explore > .menu-text').css('text-decoration', 'none');
+        this.divMainMenu.find('li.menu-explore2 > .menu-text').css('text-decoration', 'none');
         
         var ele, hasAction = false;
         
@@ -448,7 +463,7 @@ $.widget( "heurist.mainMenu6", {
 
             ele = $(e.target).is('li')?$(e.target):$(e.target).parents('li');
             if(ele){
-                //ele.find('.menu-text').css('text-decoration','underline');
+                ele.find('.menu-text').css('text-decoration','underline');
                 hasAction = ele.attr('data-action');
             }
         }
@@ -457,10 +472,10 @@ $.widget( "heurist.mainMenu6", {
             this._show_ExploreMenu(e);    
         } else {
             var that = this;
-            this._myTimeoutId3 = setTimeout(function(){
+            this._myTimeoutId4 = setTimeout(function(){
                     that.menues['explore'].hide();
                     that.menues_explore_gap.hide();
-            },500);
+            }, this._delayOnCollapse_ExploreMenu); //500
         }
     
         
@@ -485,11 +500,11 @@ $.widget( "heurist.mainMenu6", {
         
         var that = this,
             expandRecordAddSetting = false,
-            delay = 500;
+            delay = this._delayOnShow_ExploreMenu; //500
             
         if(action_name == 'recordAdd'){
             if(menu_item.attr('data-id')>0){
-                delay = 1000;
+                delay = this._delayOnShow_AddRecordMenu; //1000;
             }
         }else if(action_name=='recordAddSettings'){
             action_name = 'recordAdd';
@@ -511,9 +526,14 @@ $.widget( "heurist.mainMenu6", {
         explore_height = 'auto',
         explore_left = 204;
 
+        
+        clearTimeout(this._myTimeoutId3); this._myTimeoutId3 = 0; 
+        
         //delay before open explore section menu
         this._myTimeoutId3 = setTimeout(function(){
 
+//console.log('_show_ExploreMenu '+action_name);            
+            
             that.menues['explore'].find('.explore-widgets').hide(); //hide others
             if(action_name!='svsAdd'){
                 //attempt for non modal 
@@ -650,7 +670,7 @@ $.widget( "heurist.mainMenu6", {
             //show menu section
             that.menues['explore'].css({'z-index':103}).show(); 
             
-            cont.show('fade',{},500); //show current widget in menu section
+            cont.show('fade',{},delay>=500?500:10); //show current widget in menu section
             
             if(explore_left>201){
                 that.menues_explore_gap.css({top:explore_top, height:that.menues['explore'].height()}).show();

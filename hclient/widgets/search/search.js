@@ -165,7 +165,7 @@ $.widget( "heurist.search", {
         this.input_search_prompt = $( "<span>" )
         .text(this._is_publication?'':window.hWin.HR("enter search/filter or use filter builder at right"))
         .addClass('graytext')
-        .css({'font-size':'0.8em', 'margin': '20px 0 0 0.5em','position': 'absolute'})
+        .css({'font-size':'0.8em', 'margin': '18px 0 0 0.5em','position': 'absolute'})
         .appendTo( this.div_search_input );
         this._on( this.input_search_prompt, {click: function(){
                 this._setFocus();
@@ -228,7 +228,7 @@ $.widget( "heurist.search", {
         if(!this._is_publication && this.options.is_h6style){
             var div_search_help_links = $('<div>')
                 //.css({position: 'absolute', top:'auto', 'font-size':'10px'})
-                .css({position: 'relative', top:'-28px', 'font-size':'10px'})
+                .css({position: 'absolute',top:' 76px','font-size':'10px'})
                 .appendTo(this.div_search_input);
 
             var link = $('<span title="Show syntax and examples of the Heurist query/filter language">'
