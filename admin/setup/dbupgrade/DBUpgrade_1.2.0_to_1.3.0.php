@@ -276,7 +276,8 @@ $query = "CREATE TABLE defVocabularyGroups (
         
         //-----------------------------
         $value = mysql__select_value($mysqli, "SHOW TABLES LIKE 'defTermsLinks'");
-        if($value==null || $value==""){        
+        $needCreateTermsLinks = ($value==null || $value=="");
+        if($needCreateTermsLinks){        
             
 $query = "CREATE TABLE defTermsLinks (
   trl_ID mediumint(8) unsigned NOT NULL auto_increment COMMENT 'Primary key for vocablary-terms hierarchy',
@@ -292,42 +293,45 @@ $query = "CREATE TABLE defTermsLinks (
                 return false;
             }
             $report[] = 'defTermsLinks created';
+            
+        }else{
+            $report[] = 'defTermsLinks already exists';            
+        }
 
-            $res = $mysqli->query('DROP TRIGGER IF EXISTS defTerms_last_insert');
-            $res = $mysqli->query('CREATE DEFINER=CURRENT_USER TRIGGER `defTerms_last_insert` AFTER INSERT ON `defTerms` FOR EACH ROW
-            begin
-                if NEW.trm_ParentTermID > 0 then
-                    insert into defTermsLinks (trl_ParentID,trl_TermID)
-                            values (NEW.trm_ParentTermID, NEW.trm_ID);
-                end if;
-            end');  
-            
-            $res = $mysqli->query('DROP TRIGGER IF EXISTS defTerms_last_update');
 
-            $res = $mysqli->query('CREATE DEFINER=CURRENT_USER TRIGGER `defTerms_last_update` AFTER UPDATE ON `defTerms`
-            FOR EACH ROW
-            begin
-                if NEW.trm_ParentTermID != OLD.trm_ParentTermID then
-                    update defTermsLinks SET trl_ParentID=NEW.trm_ParentTermID
-                        where trl_ParentID=OLD.trm_ParentTermID and trl_TermID=NEW.trm_ID;
-                end if;
-            end');
-            
-            $res = $mysqli->query('DROP TRIGGER IF EXISTS defTerms_last_delete');
-            $res = $mysqli->query('CREATE DEFINER=CURRENT_USER  TRIGGER `defTerms_last_delete` AFTER DELETE ON `defTerms` FOR EACH ROW
-            begin
-                delete ignore from defTermsLinks where trl_TermID=OLD.trm_ID || trl_ParentID=OLD.trm_ID;
-            end');            
-            
-            $report[] = 'defTerms triggers updated';
-            
+        $res = $mysqli->query('DROP TRIGGER IF EXISTS defTerms_last_insert');
+        $res = $mysqli->query('CREATE DEFINER=CURRENT_USER TRIGGER `defTerms_last_insert` AFTER INSERT ON `defTerms` FOR EACH ROW
+        begin
+            if NEW.trm_ParentTermID > 0 then
+                insert into defTermsLinks (trl_ParentID,trl_TermID)
+                        values (NEW.trm_ParentTermID, NEW.trm_ID);
+            end if;
+        end');  
+        
+        $res = $mysqli->query('DROP TRIGGER IF EXISTS defTerms_last_update');
+
+        $res = $mysqli->query('CREATE DEFINER=CURRENT_USER TRIGGER `defTerms_last_update` AFTER UPDATE ON `defTerms`
+        FOR EACH ROW
+        begin
+            if NEW.trm_ParentTermID != OLD.trm_ParentTermID then
+                update defTermsLinks SET trl_ParentID=NEW.trm_ParentTermID
+                    where trl_ParentID=OLD.trm_ParentTermID and trl_TermID=NEW.trm_ID;
+            end if;
+        end');
+        
+        $res = $mysqli->query('DROP TRIGGER IF EXISTS defTerms_last_delete');
+        $res = $mysqli->query('CREATE DEFINER=CURRENT_USER  TRIGGER `defTerms_last_delete` AFTER DELETE ON `defTerms` FOR EACH ROW
+        begin
+            delete ignore from defTermsLinks where trl_TermID=OLD.trm_ID || trl_ParentID=OLD.trm_ID;
+        end');            
+        
+        $report[] = 'defTerms triggers updated';
+
+        if($needCreateTermsLinks){
             // fill values
             $res = fillTermsLinks( $mysqli );
         
             $report = array_merge($report, $res);
-        
-        }else{
-            $report[] = 'defTermsLinks already exists';            
         }
         
         $value = mysql__select_value($mysqli, "SHOW TABLES LIKE 'sysTableLastUpdated'");
