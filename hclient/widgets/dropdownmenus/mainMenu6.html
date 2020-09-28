@@ -28,24 +28,25 @@
 <div class="ui-heurist-explore ui-heurist-header2" 
     style="top:180px;left:0;right:0px;bottom:0px;overflow-y:auto;position:absolute;text-align:center;background-color:rgb(43,43,65) !important;">
     <!-- position:absolute;bottom:74px;top:112px  left:0;right:0; -->
-    <ul style="border-bottom:1px gray solid;list-style-type:none;margin:0;padding:12px">
-        <li style="padding:6px">Addition</li>
+    <span style="display:block;margin:0;padding:12px 6px">
+        <span class="section-head">Addition</span>
+    </span>
+    <ul style="border-bottom:1px gray solid;list-style-type:none;margin:0;padding:0px 30px 12px 0px">
         <li class="menu-explore" data-action="recordAdd">
             <span class="ui-icon ui-icon-file-plus"/>
-            <span class="menu-text" style="max-width:125px;">Add record</span>
+            <span class="menu-text truncate" style="display:inline-block;max-width:105px;">Add record</span>
         </li>
 <!--        
         <li class="menu-explore" data-action="recordAddSettings" style="font-size:0.7em;padding:4px 20px 0px">
             <span class="ui-icon ui-icon-gear menu-text"/><span class="menu-text">Settings</span><span>&nbsp;</span>
         </li>
 -->                
-
     </ul>
 
-    <ul style="border-bottom:1px gray solid;list-style-type:none;margin:0;padding:12px">
-
-        <li style="padding:6px">Filters</li>
-
+    <span style="display:block;margin:0;padding:12px 6px">
+        <span class="section-head">Filters</span>
+    </span>
+    <ul style="border-bottom:1px gray solid;list-style-type:none;margin:0;padding:0px 30px 12px 0px">
         <li class="menu-explore" data-action="search_entity">
             <span class="ui-icon ui-icon-entity"/><span class="menu-text">Entities</span>
         </li>
@@ -63,12 +64,11 @@
     </ul>
 
     
-    <ul style="list-style-type:none;margin:0;padding:12px 12px 0px 12px">
-
-        <li style="padding:6px">Saved filters <span class="menu-text" style="cursor:default;font-size:9px;font-style:italic">by workgroup</span></li>
-
-    </ul>
-    <ul style="list-style-type:none;margin:0;padding:0 12px 12px 12px" id="filter_by_groups" data-action="svs_list">
+    <span style="display:block;margin:0;padding:12px 6px">
+        <span class="section-head">Saved filters<br>
+        <span class="menu-text" style="cursor:default;font-size:9px;font-style:italic;padding-left:10px">by workgroup</span></span>
+    </span>                                                              
+    <ul style="list-style-type:none;margin:0;padding:0px 30px 12px 0px" id="filter_by_groups" data-action="svs_list">
     
     </ul>
 

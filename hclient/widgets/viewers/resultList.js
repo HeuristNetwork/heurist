@@ -1538,6 +1538,9 @@ $.widget( "heurist.resultList", {
     //
     //
     _recordDivOnHover: function(event){
+        
+        if($.isFunction(this.options.renderer)) return;
+    
         var $rdiv = $(event.target);
         if($rdiv.hasClass('rt-icon') && !$rdiv.attr('title')){
 
@@ -2676,7 +2679,8 @@ $.widget( "heurist.resultList", {
         
         function ___ontooltip(){
                 var ele = $( this );
-                return ele.attr('title');
+                var s = ele.attr('title');
+                return window.hWin.HEURIST4.util.isempty(s)?'AAAA':s;
         }
         
         this.div_content.find('div.recordTitle').tooltip({content: ___ontooltip}); //title may have html format - use jquery tooltip

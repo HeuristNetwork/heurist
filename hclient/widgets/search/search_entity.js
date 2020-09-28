@@ -274,7 +274,7 @@ $.widget( "heurist.search_entity", {
                         //+'<img src="'+item.attr('icon-url')+'"/>'
                         +'<div class="menu-text truncate" style="max-width:130px;display:inline-block;">'
                         +item.text()+'</div>'
-                        +'<span style="float:right;min-width:20px">'+item.attr('rt-count')+'</span>'
+                        +'<span style="float:right;min-width:20px">'+(item.attr('rt-count')>=0?item.attr('rt-count'):'')+'</span>'
                        +'</li>').appendTo(cont);    
                 });
             }
@@ -307,7 +307,7 @@ $.widget( "heurist.search_entity", {
                         +'<div class="menu-text truncate" style="max-width:130px;display:inline-block;">'
                         + $Db.rty(rty_ID,'rty_Name')+'</div>'
                         +'<span style="float:right;">'
-                        +cnt+'</span>'
+                        +(cnt>=0?cnt:'')+'</span>'
                        +'</li>').appendTo(cont);
                     
                 }else{

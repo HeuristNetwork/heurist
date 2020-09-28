@@ -150,8 +150,10 @@ $.widget( "heurist.search_faceted", {
         search_realm: null,
         preliminary_filter:null,
         svs_ID: null,
-        onclose: null// callback
+        onclose: null,// callback
+        is_publication: false
     },
+    
 
     cached_counts:[], //stored results of get_facets by stringified query index
     _input_fields:{},
@@ -174,6 +176,10 @@ $.widget( "heurist.search_faceted", {
     // the widget's constructor
     _create: function() {
         
+        if(this.element.parents('.mceNonEditable').length>0){
+            this.options.is_publication = true;
+        }
+        
         this._use_multifield = window.hWin.HAPI4.database=='johns_hamburg' &&
                 window.hWin.HEURIST4.util.findArrayIndex(this.options.svs_ID,[20,21,22,23,24,28,30,31])>=0;
 
@@ -193,7 +199,7 @@ $.widget( "heurist.search_faceted", {
         
         if(!this.options.ispreview){     
         
-            if(this.options.is_h6style){
+            if(this.options.is_h6style && !this.options.is_publication){
                 
                 this.div_title = $('<div class="ui-heurist-header truncate" '
                     +'style="position:relative;width:211px;padding:10px;font-size: 0.9em;">')
@@ -256,7 +262,7 @@ $.widget( "heurist.search_faceted", {
         .css({"top":((this.div_title)?'6em':'2em'),"bottom":0,"position":"absolute"}) //was top 3.6
         .appendTo( this.element );
         
-        if(this.options.is_h6style){
+        if(this.options.is_h6style && !this.options.is_publication){
             this.facets_list_container.css({left:0,right:0,'font-size':'0.9em'});    
         }else{
             this.facets_list_container.css({left:'1em',right:'0.5em'});    
@@ -378,9 +384,7 @@ $.widget( "heurist.search_faceted", {
     _refreshTitle: function(){    
         var new_title = '';
         if(this.div_title) {
-            if(this.options.is_h6style){
-                new_title = 'Define filter values';
-            }else
+            
             if(this.options.params.ui_title){ //from settings
                 new_title = this.options.params.ui_title;
             }else{
@@ -407,6 +411,13 @@ $.widget( "heurist.search_faceted", {
                 }
             }
             if(window.hWin.HEURIST4.util.isnull(new_title)) new_title='';
+            else if(this.options.is_h6style && !this.options.is_publication){
+                new_title = '<span style="font-size:smaller">'
+                +'<span class="ui-icon ui-icon-filter" style="width:16px;height:16px;background-size:contain;"/>filter: </span>'
+                +new_title;
+            }
+            
+
             this.div_title.html(new_title);
         }
     },
@@ -2366,9 +2377,9 @@ if(!detailtypes[dtID]){
             f_link_content = $("<span>").text(cterm.text);
             
             if(display_mode=='block'){         
-            
+
                 var top_parent = this.element.parents('.mceNonEditable');
-                if(top_parent.length>0){ //this is web publication 
+                if(this.options.is_publication){ //this is web publication  top_parent.length>0
                     f_link_content.css('width',top_parent.width()*0.6).addClass('truncate');
                 }else{
                     f_link_content.css('width',this.element.width()-100).addClass('truncate');    //was 80 this.facets_list_container.width()*0.6
