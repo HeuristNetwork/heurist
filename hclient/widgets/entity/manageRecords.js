@@ -2382,8 +2382,10 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     return;
                 }else{
                     that._isInsert = response.is_insert;     
-                }                
-                allowCreateIndependentChildRecord = (response.allowCreateIndependentChildRecord!==true);
+                }       
+                         
+                allowCreateIndependentChildRecord = that.options.edit_structure ||
+                             (response.allowCreateIndependentChildRecord===true);
             }
             
             var rectypeID = that._getField('rec_RecTypeID');
@@ -2394,7 +2396,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             that._currentEditID = that._getField('rec_ID');;
             that._currentEditRecTypeID = rectypeID;
             
-            if(that._isInsert && allowCreateIndependentChildRecord &&!(that.options.parententity>0)){
+            if(that._isInsert && (!allowCreateIndependentChildRecord) &&!(that.options.parententity>0)){
                 //special verification - prevent unparented records
                 //IMHO it should be optional
                 // 1. if rectype is set as target for one of Parent/child pointer fields 
@@ -2422,6 +2424,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 }
                 
                 if(parentRtys.length>0){
+                    
                     var names = [];
                     $(parentRtys).each(function(i,id){
                         names.push(rectypes.names[id]);
@@ -3312,11 +3315,25 @@ rectypes.names[rectypeID] + ' is defined as a child of <b>'+names
 
                 this.element.find('.btn-edit-rt').button().css(btn_css).css({'padding':'4.5px'})
                         .click(function(){that.editRecordTypeAttributes();}); //was editRecordType(false)
+                
+                var btn = this.element.find('.btn-edit-rt2');        
+                if(this.options.edit_structure){
+
+                    btn.button({icon:'ui-icon-pencil',label:'Edit attributes<br>(name, icon ...)'})
+                            .css(btn_css)
+                            .width(150).show()
+                            .click(function(){that.editRecordTypeAttributes(true);});
+                
+                    this.element.find('.btn-edit-rt').hide();
+                }else{
+                    btn.button({icon:'ui-icon-gear',label:'Modify<br>structure'})
+                            .css(btn_css)
+                            .width(100)
+                            .click(function(){that.editRecordType(true);});
+                }                        
                         
-                var btn = this.element.find('.btn-edit-rt2').button({icon:'ui-icon-gear',label:'Modify<br>structure'}).css(btn_css)
-                        .width(100)
-                        .click(function(){that.editRecordType(true);});
-                btn.find('.ui-button-icon').css({'font-size':'25px','float':'left',width:'25px',height:'25px','margin-top':'0px'});
+                btn.find('.ui-button-icon')
+                            .css({'font-size':'25px','float':'left',width:'25px',height:'25px','margin-top':'0px'});
                         
                 this.element.find('.btn-edit-rt-titlemask').button({icon:'ui-icon-pencil'})
                         .css(btn_css).click(function(){that.editRecordTypeTitle();});
@@ -3579,7 +3596,9 @@ rectypes.names[rectypeID] + ' is defined as a child of <b>'+names
                     if(btn_css) btn.css(btn_css);
                 }
             }
-            this.element.find('.btn-edit-rt2').hide();
+            if(!this.options.edit_structure){
+                this.element.find('.btn-edit-rt2').hide();
+            }
             
             //switch on optional fields and hide checckbox
             this.element.find('.chb_opt_fields').prop('checked',true).hide().change();
