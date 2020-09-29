@@ -286,11 +286,12 @@ function hSvsEdit(args) {
     * @param is_short - works only for addition (from save fixed order)
     * @param callback
     */
-    function _showDialog( mode, groupID, svsID, squery, is_short, position, callback, is_modal, is_h6style){
+    function _showDialog( mode, groupID, svsID, squery, is_short, position, callback, is_modal, is_h6style, menu_locked, reset_svs_edit){
         
         is_short = (!(svsID>0) && is_short===true);
         is_modal = (is_modal!==false);
         is_h6style = (is_h6style===true);
+        reset_svs_edit = (reset_svs_edit!==false);
         
         //var is_h6style = (window.hWin.HAPI4.sysinfo['layout']!='H5Default');
 
@@ -646,7 +647,7 @@ function hSvsEdit(args) {
                         }}
                     ],
                     close: function() {
-                        allFields.val( "input, textarea" ).removeClass( "ui-state-error" );
+                        allFields.removeClass( "ui-state-error" );
                     }
                 });
                 
@@ -661,11 +662,21 @@ function hSvsEdit(args) {
                 if(is_h6style){
                     $dlg.parent().addClass('ui-heurist-explore');
                 }
+                if($.isFunction(menu_locked)){  //@todo add call on open rulebuilder
+                    $dlg.parent('.ui-dialog').on({
+                        mouseover:function(){ menu_locked.call( this, false, false );},
+                        mouseleave: function(e){ menu_locked.call( this, false, true ) }}); //that.closeEditDialog();
+                }
 
             });
         }else{
             //show dialogue
-            var isRules = _fromDataToUI(svsID, squery, groupID, allowChangeGroupID);
+            var isRules = false;
+            
+            if(reset_svs_edit){
+                isRules = _fromDataToUI(svsID, squery, groupID, allowChangeGroupID);
+            }
+            
             edit_dialog.dialog("option",'title', window.hWin.HR(isRules?'Edit RuleSet':'Edit saved filter criteria'));
 
             edit_dialog.dialog("option",'height', is_short?360:600 );
@@ -682,6 +693,8 @@ function hSvsEdit(args) {
             
             edit_dialog.dialog("open");
         }
+        
+        return edit_dialog;
 
     } //end  _showDialog
 
@@ -695,6 +708,8 @@ function hSvsEdit(args) {
 
         remove: function () {
             //remove edit dialog from body
+            edit_dialog.parent('.ui-dialog').off('mouseover mouseleave');
+            
             edit_dialog.remove();
             edit_dialog = null;
         },
@@ -718,10 +733,12 @@ function hSvsEdit(args) {
             }
         },
         
-        showSavedFilterEditDialog: function( mode, groupID, svsID, squery, is_short, position, callback, is_modal, is_h6style ) {
-            _showDialog( mode, groupID, svsID, squery, is_short, position, callback, is_modal, is_h6style );
+        showSavedFilterEditDialog: function( mode, groupID, svsID, squery, is_short, 
+                    position, callback, is_modal, is_h6style, menu_locked, reset_svs_edit ) 
+        {
+            return _showDialog( mode, groupID, svsID, squery, is_short, position, callback, is_modal, is_h6style, menu_locked, reset_svs_edit );
         }
-
+        
     }
 
     _init(args);

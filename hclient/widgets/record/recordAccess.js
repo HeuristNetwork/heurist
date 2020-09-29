@@ -66,10 +66,12 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
 
         //define group selector for edit
         var ele = this.element.find('#sel_OwnerGroups');
+        /*
         if(!ele.editing_input('instance')){
             ele.empty();
             this._createGroupSelectorElement('sel_OwnerGroups', null);    
         }
+        */
         ele.hide();    
         
         
@@ -129,12 +131,12 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
             
         });
         
-        $('input[name="rb_Access"]').change(function(){
+        this.element.find('input[name="rb_Access"]').change(function(){
             
-            if($('#rb_Access-hidden').prop('checked')){ //was viewable-group
-                $('#div_AccessGroups').show();//css({display:'table-row'});
+            if(this.element.find('#rb_Access-hidden').prop('checked')){ //was viewable-group
+                this.element.find('#div_AccessGroups').show();//css({display:'table-row'});
             }else{
-                $('#div_AccessGroups').hide();
+                this.element.find('#div_AccessGroups').hide();
             }
            
             that._onRecordScopeChange();
@@ -189,7 +191,7 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
         ele.find('.header').css({'min-width':'150px','text-align':'right'})
         */
         
-        var ele = $('#'+input_id);
+        var ele = this.element.find('#'+input_id);
         ele.editing_input(ed_options);
         ele.find('.editint-inout-repeat-button').hide();
         ele.find('.header').css({'padding-right':'16px', 'padding-top':'4px'});
@@ -235,8 +237,8 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
             
             visibility='viewable';
             
-        }else if(visibility=='hidden' && $('#sel_AccessGroups').editing_input('instance')){
-            var sel = $('#sel_AccessGroups').editing_input('getValues');
+        }else if(visibility=='hidden' && this.element.find('#sel_AccessGroups').editing_input('instance')){
+            var sel = this.element.find('#sel_AccessGroups').editing_input('getValues');
 
             if(sel && sel.length>0 && sel[0]!=''){
                 visibility='viewable';

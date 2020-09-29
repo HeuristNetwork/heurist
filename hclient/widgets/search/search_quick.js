@@ -173,7 +173,7 @@ $.widget( "heurist.search_quick", $.heurist.recordAction, {
 
 */        
         $dlg.find(".sa_spatial").button();
-        that._on( $dlg.find(".sa_spatial"), {
+        that._on( $dlg.find(".sa_spatial"), {    //opens digitizer
             click: function(event){
                 
                 if($.isFunction(this.options.menu_locked)){

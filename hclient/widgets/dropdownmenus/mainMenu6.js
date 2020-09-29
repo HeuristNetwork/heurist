@@ -58,6 +58,7 @@ $.widget( "heurist.mainMenu6", {
     edit_svs_dialog: null,
     
     currentSearch: null,
+    reset_svs_edit: true,
     
     coverAll: null,
 
@@ -188,6 +189,7 @@ $.widget( "heurist.mainMenu6", {
                     //not need to check realm since this widget the only per instance
                     //if(data && that.options.search_realm && that.options.search_realm!=data.search_realm) return;
                     
+                    that.reset_svs_edit = true;
                     if(data && !data.increment && !data.reset){
                         //keep current search for "Save Filter"
                         that.currentSearch = window.hWin.HEURIST4.util.cloneJSON(data);
@@ -324,7 +326,7 @@ $.widget( "heurist.mainMenu6", {
         var isSvsEditVisible = ( this.edit_svs_dialog && this.edit_svs_dialog.isModified() );
         //isSvsEditVisible = false;
 //console.log('>>>'+isSvsEditVisible);        
-        return (isSvsEditVisible || this._explorer_menu_locked 
+        return (this._explorer_menu_locked    //isSvsEditVisible || 
                 || this.element.find('.ui-selectmenu-open').length>0
                 || $('.list_div').is(':visible')      //tag selector dropdown      
                 || $('.ui-widget-overlay.ui-front').is(':visible')   //some modal dialog is open
@@ -1066,14 +1068,34 @@ console.log('resotre');
         }
         
         is_modal = (is_modal!==false);
+        
+        var that = this;
 
-        this.edit_svs_dialog.showSavedFilterEditDialog( 'saved', null, null, this.currentSearch , false, 
-                        { my: "left top", at: "right+4 top", of:this.divMainMenu}, 
+        var $dlg = this.edit_svs_dialog.showSavedFilterEditDialog( 'saved', null, null, this.currentSearch , false, 
+                        null,
+                        //{left:(this._widthMenu+4), top:this.divMainMenu.position().y},    
+                        //{ my: "left top", at: (this._widthMenu+4)+'px top', of:this.divMainMenu},/ /"right+4 top", }, 
             function(){
                 window.hWin.HAPI4.currentUser.usr_SavedSearch = null;
                 window.hWin.HAPI4.currentUser.ugr_SvsTreeData = null;
-            }, is_modal, true    
+            }, is_modal, true,                                                                                                         
+            function(is_locked, is_mouseleave){  //menu_locked
+                if(is_mouseleave){
+                    that._collapseMainMenuPanel()
+                }else{
+                    that._resetCloseTimers();    
+                    that._explorer_menu_locked = is_locked; 
+                }
+            },
+            that.reset_svs_edit
         );
+        
+        setTimeout(function(){
+            $dlg.parent('.ui-dialog').css({top:that.divMainMenu.offset().top, left:(that._widthMenu+4)});    
+        },200);
+        
+        
+        that.reset_svs_edit = false;
     },
     
     //

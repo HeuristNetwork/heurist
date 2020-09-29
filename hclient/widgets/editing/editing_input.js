@@ -1595,7 +1595,6 @@ console.log('close edit terms - recreate selector');
         }
         else if(this.detailType=='resource') //----------------------------------------------------
         {
-            
             //replace input with div
             $input = $( "<div>").css({'display':'inline-block','vertical-align':'middle','min-wdith':'25ex'})
                             .uniqueId().appendTo( $inputdiv );
