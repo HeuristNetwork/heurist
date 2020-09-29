@@ -67,7 +67,7 @@ $.widget( "heurist.searchSysDashboard", $.heurist.searchEntity, {
                 .click(function(e) {
                     
                     //don't show  dashboard on startup
-                    var params = window.hWin.HAPI4.get_prefs_def('prefs_sysDashboard', {show_as_ribbon:1} );
+                    var params = window.hWin.HAPI4.get_prefs_def('prefs_sysDashboard', {show_as_ribbon:0} );
                     params['show_on_startup'] = 0;
                     window.hWin.HAPI4.save_pref('prefs_sysDashboard', params);     
                     

@@ -111,7 +111,7 @@ $.widget( "heurist.mainMenu", {
             function(){
                 that.btn_dashboard.hide();
 
-                var prefs = window.hWin.HAPI4.get_prefs_def('prefs_sysDashboard', {show_on_startup:1, show_as_ribbon:1});
+                var prefs = window.hWin.HAPI4.get_prefs_def('prefs_sysDashboard', {show_on_startup:0, show_as_ribbon:0});
                 prefs['show_on_startup'] = 1;
                 window.hWin.HAPI4.save_pref('prefs_sysDashboard', prefs);     
                 
@@ -1746,7 +1746,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
             
                 var remove_ribbon = true;
                //show dashboard
-               var prefs = window.hWin.HAPI4.get_prefs_def('prefs_sysDashboard', {show_on_startup:1, show_as_ribbon:1});
+               var prefs = window.hWin.HAPI4.get_prefs_def('prefs_sysDashboard', {show_on_startup:0, show_as_ribbon:0});
                if(prefs.show_on_startup==1){
                     if(prefs.show_as_ribbon==1){ //    && lt!='H5Default'
                         remove_ribbon = false;

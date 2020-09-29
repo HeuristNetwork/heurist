@@ -26,7 +26,7 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
     },
 
     _entityName:'sysDashboard',
-    defaultPrefs: {viewmode:'thumbs3', show_on_startup:1, show_as_ribbon:1},
+    defaultPrefs: {viewmode:'thumbs3', show_on_startup:0, show_as_ribbon:0},
     
     //
     //
