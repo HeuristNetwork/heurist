@@ -812,7 +812,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 }
             }
             html = html 
-                + '</div><div class="description">'  //item truncate 
+                + '</div><div class="truncate description_term">'  //item truncate 
                 + window.hWin.HEURIST4.util.htmlEscape($Db.trm(recID, 'trm_Description'))
                 + '</div></div>';
         }

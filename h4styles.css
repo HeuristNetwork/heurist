@@ -448,6 +448,15 @@ div.recordDiv.public  > .action-button-container{
     max-width: 130px !important;
 }
 
+.recordDiv > .description_term{
+    float: right;
+    max-width: 65%;
+    width: 65%;
+    font-size: smaller;
+    font-style: italic;
+    padding-top: 4px;
+}
+
 .recordDiv > .description{
     font-style:italic;
     font-size:smaller;
