@@ -54,12 +54,13 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             this.options.select_mode = 'manager';
             this.options.layout_mode = 'editonly';
         }
+        /*
         if(this.options.auxilary=='vocabulary'){
             this.options.edit_height = 440;
         }else{
             this.options.edit_height = 660;
-
-        }
+        }*/
+        this.options.edit_height = 440;
         
         this._super();
         
@@ -200,6 +201,12 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                                 var trm_ID = $(ui.draggable).parent().attr('recid');
                                 var vocab_id = trg.attr('recid');
                                 if(trm_ID>0 && vocab_id>0 && that.options.reference_trm_manger){
+                                    
+                                    if(that.options.reference_trm_manger.find('#rbDnD_merge').is(':checked')){
+                                        window.hWin.HEURIST4.msg.showMsgFlash('Merge is allowed within vocabulary only');
+                                        return false;  
+                                    } 
+                                    
                                     that.options.reference_trm_manger
                                         .manageDefTerms('changeVocabularyGroup',{trm_ID:trm_ID, trm_ParentTermID:vocab_id });
                                 }
@@ -269,8 +276,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                           css:{'margin-right':'0.5em','display':'inline-block',padding:'2px'}, id:'btnAddButton',
                           click: function() { that._onActionListener(null, 'add'); }},
 
-                    {showText:true, icons:{primary:'ui-icon-link'}, text:window.hWin.HR('Reference'), //Add Term
-                          css:{'margin-right':'0.5em','display':'inline-block',padding:'2px'}, id:'btnAddButton',
+                    {showText:true, icons:{primary:'ui-icon-link'}, text:window.hWin.HR('Ref'), //Add Term
+                          css:{'margin-right':'0.5em','display':'inline-block',padding:'2px'}, id:'btnAddButton2',
                           click: function() { that._onActionListener(null, 'add-reference'); }},
                           
                     {showText:false, icons:{primary:'ui-icon-arrowthickstop-1-n'}, text:window.hWin.HR('Export Terms'), //ui-icon-arrowthick-1-e
@@ -297,7 +304,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 this._toolbar = this.searchForm;
                 
                 //padding:'6px'
-                this.searchForm.css({'min-width': '315px', 'padding-top':this.options.isFrontUI?'8px':'4px', height:80})
+                this.searchForm.css({'min-width': '470px', 'padding-top':this.options.isFrontUI?'8px':'4px', height:80})
                             .empty();                                     
                 this.recordList.css({'min-width': '315px', top:80});
                 this.searchForm.parent().css({'overflow-x':'auto'});
@@ -317,12 +324,13 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                         this._defineActionButton2(btn_array[idx], c1);
                 }
                 
-                $('<label style="font-size:smaller"><input type="checkbox"/> Merge on drag and drop</label>')
+                $('<span style="font-size:10px">drag to <label><input type="radio" name="rbDnD" id="rbDnD_move" checked/>move<label> '
+                    +'<label><input type="radio" name="rbDnD" id="rbDnD_merge"/>merge<label></span>')
                     .appendTo(c1);
                 
                 //add input search
                 var c1 = $('<div style="float:right"><label>Find: </label>'
-                +'<input type="text" style="width:10em" class="text ui-widget-content ui-corner-all"/></div>')
+                +'<input type="text" style="width:6em" class="text ui-widget-content ui-corner-all"/></div>')
                 .appendTo(c1);
                 
                 this._on(c1.find('input'), {
@@ -335,7 +343,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                         this._defineActionButton2(btn_array2[idx], c1);
                 }
                 
-                this.cbMergeOnDnD = this.searchForm.find('input[type="checkbox"]');
+                this.rbMergeOnDnD = this.searchForm.find('#rbDnD_merge');
                 
                 this.options.recordList = {
                     empty_remark: 'No terms in selected vocabulary. Add or import new ones',
@@ -404,7 +412,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                                     var trm_ParentTermID = trg.attr('recid');
                                     if(trm_ID!=trm_ParentTermID && trm_ID>0 && trm_ParentTermID>0){
                                         
-                                        if(that.cbMergeOnDnD.is(':checked')){
+                                        if(that.rbMergeOnDnD.is(':checked')){
                                             that.mergeTerms({trm_ID:trm_ID, trm_ParentTermID:trm_ParentTermID });    
                                         }else{
                                             that.changeVocabularyGroup({trm_ID:trm_ID, trm_ParentTermID:trm_ParentTermID });    
@@ -423,7 +431,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                                     var trm_ID = $(ui.draggable).parent().attr('recid');
                                     var trm_ParentTermID = that.options.trm_VocabularyID;
                                     if(trm_ID>0){
-                                        if(!that.cbMergeOnDnD.is(':checked')){
+                                        if(!that.rbMergeOnDnD.is(':checked')){
                                             that.changeVocabularyGroup({ trm_ID:trm_ID, trm_ParentTermID:trm_ParentTermID }, true);    
                                         }
                                     }
@@ -598,6 +606,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                          edit_mode: 'editonly',
                          edit_recordset: this.recordList.resultList('getRecordSet'), //filterd one
                          auxilary: this.options.auxilary,
+                         reference_trm_manger: this.element,
                          rec_ID: recID,
                          trm_VocabularyID: this.options.trm_VocabularyID,
                          trm_VocabularyGroupID: this.options.trm_VocabularyGroupID,
@@ -922,13 +931,21 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         }
         
         var ishelp_on = (this.usrPreferences['help_on']==true || this.usrPreferences['help_on']=='true');
-        ele = $('<div><label style="float:right;padding-right:30px"><input type="checkbox" '
-                        +(ishelp_on?'checked':'')+'/>show explanations</label></div>').prependTo(this.editForm);
+        ele = $('<div style="position:absolute;right:6px;top:4px;"><label><input type="checkbox" '
+                        +(ishelp_on?'checked':'')+'/>explanations</label></div>').prependTo(this.editForm);
         this._on( ele.find('input'), {change: function( event){
             var ishelp_on = $(event.target).is(':checked');
             this.usrPreferences['help_on'] = ishelp_on;
             window.hWin.HEURIST4.ui.switchHintState2(ishelp_on, this.editForm, '.heurist-helper1');
         }});
+        
+        if(!isVocab){
+            this.editForm.find('.header').css({'min-width':80,width:80});
+            this.editForm.css({'overflow-x': 'hidden'});
+            
+            this._toolbar.addClass('ui-heurist-bg-light');
+        }
+        
         //this.editForm.find('.heurist-helper1').removeClass('heurist-helper1').addClass('heurist-helper3');
         window.hWin.HEURIST4.ui.switchHintState2(ishelp_on, this.editForm, '.heurist-helper1');
         
@@ -946,7 +963,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             var that = this;
             
             if(this.options.container){
-                //inside resultList
+                //inlin/inside resultList - edit terms
           
                 btns[0].text = 'Close';
                 btns[0].css['visibility'] = 'visible';
@@ -959,6 +976,22 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                         } 
                     }
                 };
+                
+                btns.push(
+                 {text:window.hWin.HR('Add Child'),
+                    //id:'btnAddChild',
+                    icon:'ui-icon-plus',
+                    css:{'float':'left',margin:'.5em .4em .5em 0'},  
+                    click: function() { 
+                        if(that.options.reference_trm_manger && that.options.reference_trm_manger.manageDefTerms('instance')){
+                            that.options.reference_trm_manger.manageDefTerms('option','trm_ParentTermID',that._currentEditID);
+                            that.options.reference_trm_manger.manageDefTerms('addEditRecord',-1);
+                        }
+                        //that._onActionListener(null, {action:'add-child', recID:that._currentEditID}); 
+                    }}
+                );
+                
+                
                 
             }else{
                 
@@ -1263,9 +1296,9 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 //1. check that selected terms are already in this vocabulary
                 var trm_ids = $Db.trm_TreeData(new_parent_id, 'set'); //ids
                 if(window.hWin.HEURIST4.util.findArrayIndex(trm_ID, trm_ids)>=0){
-                    window.hWin.HEURIST4.msg.showMsgErr( (isRef?'Term':'Reference')
+                    window.hWin.HEURIST4.msg.showMsgDlg( (isRef?'Term':'Reference')
                         + ' "'+$Db.trm(trm_ID, 'trm_Label')
-                        +'" is already in vocabulary "'+$Db.trm(new_parent_id,'trm_Label')+'"'); 
+                        +'" is already in vocabulary "'+$Db.trm(new_parent_id,'trm_Label')+'"',null,'Duplication'); 
                     return;
                 }
             
@@ -1273,9 +1306,13 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 var trm_labels = $Db.trm_TreeData(new_parent_id, 'labels'); //labels in lowcase
                 var lbl = $Db.trm(trm_ID, 'trm_Label');
                 if(trm_labels.indexOf(lbl.toLowerCase())>=0){
-                    window.hWin.HEURIST4.msg.showMsgErr( (isRef?'Term':'Reference')
+                    window.hWin.HEURIST4.msg.showMsgDlg( (isRef?'Term':'Reference')
                         + ' with name "'+lbl
-                        +'" is already in vocabulary "'+$Db.trm(new_parent_id,'trm_Label')+'"'); 
+                        +'" is already in vocabulary "'+$Db.trm(new_parent_id,'trm_Label')+'"'
+                        +'<p>To make this move, edit the term so that it is different from any in the top level '
+                        +'of the vocabulary to which you wish to move it. Once moved, you can merge within '
+                        +'the vocabulary or reposition the term and edit it appropriately.</p>'
+                        ,null,'Duplication'); 
                     return;
                 }
             }else{

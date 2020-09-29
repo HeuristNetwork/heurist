@@ -15,16 +15,6 @@
         
         "fields": [
                 {
-                    "dtID": "trm_ID",
-                    "keyField": true,
-                    "dtFields":{
-                        "dty_Type":"integer",
-                        "dty_Role":"primary",
-                        "rst_DisplayName": "ID:",
-                        "rst_Display":"readonly"
-                    }
-                },
-                {
                     "dtID": "trm_VocabularyGroupID",
                     "dtFields":{
                         "dty_Type":"enum",
@@ -42,9 +32,9 @@
                         "dty_Role":"title",
                         "dty_Size":500,
                         "rst_DisplayName": "Term (label):",
-                        "rst_DisplayHelpText": "The term or label describing the category. The label is the normal way of expressing the term. Dropdowns are ordered alphabetically. Precede terms with 01, 02, 03 ... to control order if require", 
+                        "rst_DisplayHelpText": "The term in human-readable form.<br>Dropdowns are ordered alphabetically within each tree branch.<br>Precede terms with 01, 02, 03 ... to control order if required.", 
                         "rst_DisplayExtendedDescription":"",
-                        "rst_DisplayWidth":60,
+                        "rst_DisplayWidth":40,
                         "rst_DefaultValue":"",
                         "rst_RequirementType":"required",
                         "rst_MaxValues":1
@@ -77,29 +67,7 @@
                         "dty_Size":100,
                         "rst_DisplayWidth":30,
                         "rst_DisplayName":"Standard code:",
-                        "rst_DisplayHelpText": "A domain or international standard code for this term or category. May also be used for a local code value to be used in importing data."
-                    }
-                },
-                {
-                    "dtID": "trm_SemanticReferenceURL",
-                    "dtFields":{
-                        "dty_Type":"freetext",
-                        "dty_Size":250,
-                        "rst_DisplayWidth":60,
-                        "rst_DisplayName":"Semantic/Reference URI:",
-                        "rst_DisplayHelpText": "The URI to a semantic definition or web page describing the term"
-                    }
-                },
-                {
-                    "dtID": "trm_Status",
-                    "dtFields":{
-                        "dty_Type":"enum",
-                        "rst_DisplayName":"Status:",
-                        "rst_DisplayHelpText": "'Reserved' for the system, cannot be changed; 'Approved' for community standards; 'Pending' for work in progress; 'Open' for freely modifiable/personal record types", 
-                        "rst_DisplayExtendedDescription":"",
-                        "rst_DisplayWidth":30,
-                        "rst_DefaultValue":"open",
-                        "rst_FieldConfig":["open","reserved","approved","pending"]
+                        "rst_DisplayHelpText": "A domain or international standard code for this term.<br>Can also be used for a local alphanumeric code for<br>data import or ordering."
                     }
                 },
                 {
@@ -128,16 +96,6 @@
                     }
                 },
                 {
-                    "dtID": "trm_Thumb",
-                    "dtFields":{
-                        "dty_Type":"file",
-                        "rst_DisplayName":"Thumbnail:",
-                        "rst_DisplayHelpText": "Image to represent this term. Uploaded image will be scaled to 400x400", 
-                        "rst_FieldConfig":{"entity":"defTerms", "accept":".png,.jpg,.gif", "size":400},
-                        "dty_Role":"virtual"
-                    }
-                },
-                {
                     "dtID": "trm_Parents",
                     "dtFields":{
                         "rst_DisplayName": "List of parent terms:",
@@ -145,7 +103,55 @@
                         "dty_Type":"freetext",
                         "dty_Role":"virtual"
                     }
-                }
-                
+                },
+
+                {
+                "groupHeader": "more",
+                "groupTitleVisible": true,
+                "groupType": "accordion",
+                "children":[
+                    {
+                        "dtID": "trm_SemanticReferenceURL",
+                        "dtFields":{
+                            "dty_Type":"freetext",
+                            "dty_Size":250,
+                            "rst_DisplayWidth":60,
+                            "rst_DisplayName":"Semantic / Reference URI:",
+                            "rst_DisplayHelpText": "The URI to a semantic definition or web page describing the term"
+                        }
+                    },
+                    {
+                        "dtID": "trm_Status",
+                        "dtFields":{
+                            "dty_Type":"enum",
+                            "rst_DisplayName":"Status:",
+                            "rst_DisplayHelpText": "'Reserved' for the system, cannot be changed; 'Approved' for community standards; 'Pending' for work in progress; 'Open' for freely modifiable/personal record types", 
+                            "rst_DisplayExtendedDescription":"",
+                            "rst_DisplayWidth":30,
+                            "rst_DefaultValue":"open",
+                            "rst_FieldConfig":["open","reserved","approved","pending"]
+                        }
+                    },
+                    {
+                        "dtID": "trm_Thumb",
+                        "dtFields":{
+                            "dty_Type":"file",
+                            "rst_DisplayName":"Thumbnail:",
+                            "rst_DisplayHelpText": "Image to represent this term. Uploaded image will be scaled to 400x400", 
+                            "rst_FieldConfig":{"entity":"defTerms", "accept":".png,.jpg,.gif", "size":400},
+                            "dty_Role":"virtual"
+                        }
+                    },
+                    {
+                        "dtID": "trm_ID",
+                        "keyField": true,
+                        "dtFields":{
+                            "dty_Type":"integer",
+                            "dty_Role":"primary",
+                            "rst_DisplayName": "ID:",
+                            "rst_Display":"readonly"
+                        }
+                    }
+                ]}                
      ]
 }
