@@ -148,7 +148,7 @@ if($filename){ //download from scratch
             }
             $rec_id = 1;    
             $path = HEURIST_FILESTORE_ROOT . $db_name . '/entity/sysIdentification/';    
-        }
+        } 
         
         if (!($rec_id>0)) {
             $filename = $rec_id;   
@@ -160,12 +160,12 @@ if($filename){ //download from scratch
         }else{
         
             if($viewmode=='thumb'){
-                $filename = $path.'thumbnail/'.$rec_id; 
+                $path = $path.'thumbnail/';
             }else if($viewmode=='icon'){
-                $filename = $path.'icon/'.$rec_id;    
-            }else{
-                $filename = $path.$rec_id;
+                $path = $path.'icon/';
             }
+            $filename = $path.$rec_id;
+            
             
             if($entity_name=='defRecTypes' && !file_exists($filename.'.png')){
                 
@@ -174,8 +174,15 @@ if($filename){ //download from scratch
                 }else{
                     $old_filename = HEURIST_ICON_DIR . $rec_id .'.png';
                 }
+                //copy from rectype-icons to new location - entity folder
                 if(file_exists($old_filename)){
-                    copy($old_filename, $filename.'.png');
+                    
+                    //recreate entity folder
+                    if(folderCreate($path, true)){
+                        copy($old_filename, $filename.'.png');
+                    }else{
+                        error_log('CANT CREATE FOLDER '.$path);
+                    }
                 }
             }
             

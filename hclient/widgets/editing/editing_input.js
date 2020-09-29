@@ -2269,7 +2269,7 @@ console.log('close edit terms - recreate selector');
                             $('<br/><br/>').appendTo( ele );                            
                             
                             $('<a href="#" title="Or select from library"><span class="ui-icon ui-icon-grid"/>Library</a>')
-                                .click(this.openIconLibrary).appendTo( ele );                     
+                                .click(function(){that.openIconLibrary()}).appendTo( ele );                     
                                 
                         }
                             
