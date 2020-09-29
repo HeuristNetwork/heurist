@@ -879,8 +879,13 @@ console.log('prvent colapse');
                      +'<span class="menu-text truncate" style="max-width: 109px;">'+link.text()+'</span>')
                     .appendTo(item);
                     
-                    item.css({'font-size':'smaller', padding:'6px'})
-                        .attr('title',link.attr('title'));
+                    if(action_id=='menu-import-get-template'){
+                        item.css({'font-size':'10px', padding:'0 0 0 20px'})
+                    }else{
+                        item.css({'font-size':'smaller', padding:'6px'})    
+                    }
+                    
+                    item.attr('title',link.attr('title'));
                 }
             });
             
