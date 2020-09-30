@@ -8,7 +8,7 @@
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
 * @author      Ian Johnson     <ian.johnson@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4
+* @version     2
 */
 
 /*
@@ -27,42 +27,22 @@
 <div class="ui-heurist-explore ui-heurist-header" style="top:144px;border-top:1px solid lightgray;">Explore</div>
 <div class="ui-heurist-explore ui-heurist-header2" 
     style="top:180px;left:0;right:0px;bottom:0px;overflow-y:auto;position:absolute;text-align:center;background-color:rgb(43,43,65) !important;">
-    <!-- position:absolute;bottom:74px;top:112px  left:0;right:0; -->
-    <span style="display:block;margin:0;padding:12px 6px">
-        <span class="section-head">Addition</span>
-    </span>
-    <ul style="border-bottom:1px gray solid;list-style-type:none;margin:0;padding:0px 30px 12px 0px">
-        <li class="menu-explore" data-action="recordAdd">
+
+    <ul style="border-bottom:1px gray solid;list-style-type:none;margin:0;padding:12px 30px 12px 0px">
+        <li class="menu-explore" data-action="recordAdd" style="margin-bottom:12px">
             <span class="ui-icon ui-icon-file-plus"/>
             <span class="menu-text truncate" style="display:inline-block;max-width:105px;">Add record</span>
         </li>
-<!--        
-        <li class="menu-explore" data-action="recordAddSettings" style="font-size:0.7em;padding:4px 20px 0px">
-            <span class="ui-icon ui-icon-gear menu-text"/><span class="menu-text">Settings</span><span>&nbsp;</span>
-        </li>
--->                
-    </ul>
-
-    <span style="display:block;margin:0;padding:12px 6px">
-        <span class="section-head">Filters</span>
-    </span>
-    <ul style="border-bottom:1px gray solid;list-style-type:none;margin:0;padding:0px 30px 12px 0px">
         <li class="menu-explore" data-action="search_entity">
             <span class="ui-icon ui-icon-entity"/><span class="menu-text">Entities</span>
         </li>
         <li class="menu-explore" data-action="search_quick">
             <span class="ui-icon ui-icon-magnify-search"/><span class="menu-text">Search builder</span>
         </li>
-        <!--
-        <li class="menu-explore" data-action="search_advanced">
-            <span class="ui-icon ui-icon-database-search"/><span class="menu-text">Advanced search</span>
-        </li>
-        -->
         <li class="menu-explore"  data-action="svsAdd">
             <span class="ui-icon ui-icon-filter-plus"/><span class="menu-text">Save filter</span>
         </li>
     </ul>
-
     
     <span style="display:block;margin:0;padding:12px 6px">
         <span class="section-head">Saved filters<br>
@@ -71,6 +51,7 @@
     <ul style="list-style-type:none;margin:0;padding:0px 30px 12px 0px" id="filter_by_groups" data-action="svs_list">
     
     </ul>
+    <div id="svs_list" style="position:absolute;bottom:0px;left:0px;right:0px;top:175px;font-size:0.8em;background:none;display:none;"></div>
 
 </div>
 <!-- style="position:absolute;bottom:37;height:37px" -->

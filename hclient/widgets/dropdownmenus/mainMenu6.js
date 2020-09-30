@@ -60,6 +60,9 @@ $.widget( "heurist.mainMenu6", {
     currentSearch: null,
     reset_svs_edit: true,
     
+    is_svslist_inline: true,
+    svs_list: null,
+    
     coverAll: null,
 
 
@@ -204,7 +207,7 @@ $.widget( "heurist.mainMenu6", {
                 }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH){
                     
                     //if(data && that.options.search_realm && that.options.search_realm!=data.search_realm) return;
-                    
+                    that.coverAll.hide();
                     // window.hWin.HAPI4.currentRecordset is the same as data.recordset
                     if(data.recordset && data.recordset.length()>0){
                         that._updateSaveFilterButton(2);
@@ -358,6 +361,9 @@ $.widget( "heurist.mainMenu6", {
             that.divMainMenu.find('.ui-heurist-header2').css({'text-align':'center'});
             that.divMainMenu.find('.section-head').css({'padding-left':'0px'});
             
+            that.divMainMenu.find('#svs_list').hide();
+            that.divMainMenu.find('#filter_by_groups').show();
+            
             that.divMainMenu.stop().effect('size',  { to: { width: 91 } }, is_instant===true?10:300, function(){
                 //that.divMainMenu.find('.menu-text').hide();
                 that.divMainMenu.css({bottom:'4px',height:'auto'});
@@ -390,6 +396,28 @@ $.widget( "heurist.mainMenu6", {
                     that.divMainMenu.css({bottom:'4px',height:'auto'});
                     that.divMainMenu.find('.menu-explore').css({padding:'6px 2px 6px 16px'});
                     //that.divMainMenu.css({'box-shadow':'rgba(0, 0, 0, 0.5) 5px 0px 0px'});
+                    
+                    if(that.is_svslist_inline){
+                        //change parent for cont? 
+                        that.divMainMenu.find('#filter_by_groups').hide();
+                        
+                        if(that.svs_list){
+                            that.svs_list.show();
+                        }else{
+                            that.divMainMenu.find('#svs_list').show();
+                            that.svs_list = that._init_SvsList(that.divMainMenu.find('#svs_list'));  
+                            //that.svs_list.css({background:'none',color:'white'})
+                        } 
+                        /*
+                            that.svs_list.find('.svs-header').each(function(i,item)
+                                    {
+                                        $(item).css({'font-style':'italic','color':'red !important'});   
+                                    });
+                            that.svs_list.find('.ui-accordion-content').css({'color':'white !important'});
+                        */
+                    }
+                    
+                    
                 });
     },
     
@@ -629,13 +657,63 @@ $.widget( "heurist.mainMenu6", {
             }
             else if(action_name=='svs_list'){
 
+                if(that.is_svslist_inline) return;
+                
+                //set size of menu section
                 that.menues['explore'].css({bottom:'4px',width:'300px',overflow:'auto'});
 
                 var group_ID = (e)?[menu_item.attr('data-id')]:null;
+                
+                that.svs_list = that._init_SvsList(cont, group_ID);
 
+            }
+            else if(action_name=='recordAdd'){
+
+                that.menues['explore'].css({bottom:'4px',width:'300px',overflow:'auto'});
+
+                if(!cont.recordAdd('instance')){
+                    cont.recordAdd({
+                        is_h6style: true,
+                        onClose: function() { that._closeSectionMenu('explore');},
+                        isExpanded: expandRecordAddSetting,
+                        mouseover: function() { that._resetCloseTimers()},
+                        menu_locked: function(is_locked){ 
+                            that._resetCloseTimers();
+                            that._explorer_menu_locked = is_locked; 
+                    }  });  
+                }else{
+                    cont.recordAdd('doExpand', expandRecordAddSetting);                        
+                }
+
+            }//endif
+            
+            that.menues['explore'].css({left:explore_left, top:explore_top, height:explore_height});
+            
+            //show menu section
+            that.menues['explore'].css({'z-index':103}).show(); 
+            
+            cont.show('fade',{},delay>=500?500:10); //show current widget in menu section
+            
+            if(explore_left>that._widthMenu+1){ //201
+                that.menues_explore_gap.css({top:explore_top, height:that.menues['explore'].height()}).show();
+            }else{
+                that.menues_explore_gap.hide();
+            }
+        }, delay);
+        
+    },    
+    
+    //
+    //
+    //
+    _init_SvsList: function(cont, group_ID){
+        
                 if(!cont.svs_list('instance')){
+                    var that = this;
+                    
                     cont.svs_list({
                         is_h6style: true,
+                        hide_header: that.is_svslist_inline,
                         onClose: function(noptions) { 
                             that._closeSectionMenu('explore'); 
                             that.switchContainer('explore'); 
@@ -662,54 +740,20 @@ $.widget( "heurist.mainMenu6", {
 
                             } 
                         },
-                        //!!!!!! allowed_UGrpID:group_ID,
+                        //show all groups! allowed_UGrpID:group_ID,
                         menu_locked: function(is_locked){ 
                             that._resetCloseTimers();
                             that._explorer_menu_locked = is_locked; 
                         }                            
                         //mouseover: function() { that._resetCloseTimers()},
-                    });  
+                    }); 
+                    
                 }else{
                     //cont.svs_list('option', 'allowed_UGrpID', group_ID);                        
                 }
-
-
-            }
-            else if(action_name=='recordAdd'){
-
-                that.menues['explore'].css({bottom:'4px',width:'300px',overflow:'auto'});
-
-                if(!cont.recordAdd('instance')){
-                    cont.recordAdd({
-                        is_h6style: true,
-                        onClose: function() { that._closeSectionMenu('explore');},
-                        isExpanded: expandRecordAddSetting,
-                        mouseover: function() { that._resetCloseTimers()},
-                        menu_locked: function(is_locked){ 
-                            that._resetCloseTimers();
-                            that._explorer_menu_locked = is_locked; 
-                    }  });  
-                }else{
-                    cont.recordAdd('doExpand', expandRecordAddSetting);                        
-                }
-
-            }
-            
-            that.menues['explore'].css({left:explore_left, top:explore_top, height:explore_height});
-            
-            //show menu section
-            that.menues['explore'].css({'z-index':103}).show(); 
-            
-            cont.show('fade',{},delay>=500?500:10); //show current widget in menu section
-            
-            if(explore_left>that._widthMenu+1){ //201
-                that.menues_explore_gap.css({top:explore_top, height:that.menues['explore'].height()}).show();
-            }else{
-                that.menues_explore_gap.hide();
-            }
-        }, delay);
-        
-    },    
+                
+                return cont;        
+    },
     
     //
     //

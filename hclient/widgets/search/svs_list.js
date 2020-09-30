@@ -38,7 +38,8 @@ $.widget( "heurist.svs_list", {
         onclose_search:null,  //function to be called on close faceted search
         sup_filter:null,       //suplementary filter for faceted search
         
-        menu_locked: null
+        menu_locked: null,
+        hide_header: false  //todo rename - inline main menu
     },
 
     isPublished: false,
@@ -124,6 +125,14 @@ $.widget( "heurist.svs_list", {
             
             this.accordeon = $( "<div>" ).css({'top':36, 'bottom':0, 'width':'100%','position': 'absolute', 'overflow':'auto','font-size':'0.9em'})
                         .appendTo( this.search_tree );
+                        
+            if(this.options.hide_header){
+                this.div_header.hide();
+                this.accordeon.css({'top':0});
+console.log('!!!!!!!');                
+            }
+            
+                        
         }else{
             this.element.css({'overflow-y':'auto','font-size':'0.8em'});
             
@@ -282,7 +291,7 @@ $.widget( "heurist.svs_list", {
     }, //end _create
 
     _adjustAccordionTop: function(){
-        if(this.btn_search_save && this.accordeon){
+        if(this.btn_search_save && this.accordeon && !this.options.hide_header){
 
             if(window.hWin.HAPI4.currentRecordset && window.hWin.HAPI4.currentRecordset.length()>0)
             {
@@ -508,7 +517,12 @@ $.widget( "heurist.svs_list", {
             return;    
         }
         
-        this.accordeon.css('top', this.options.is_h6style?36:this.div_header.height());
+        if(this.options.hide_header){
+            this.accordeon.css('top', 0);    
+        }else{
+            this.accordeon.css('top', this.options.is_h6style?36:this.div_header.height());    
+        }
+        
         
         var container_width = this.accordeon.width();
         
@@ -846,7 +860,7 @@ $.widget( "heurist.svs_list", {
         }
 
         this.accordeon.hide();
-        this.accordeon.css('top',this.div_header.height());
+        this.accordeon.css('top',this.options.hide_header?0:this.div_header.height());
         this.accordeon.empty();
         this.search_tree.css('overflow','hidden');
         if(this.direct_search_div) {
@@ -1018,6 +1032,8 @@ $.widget( "heurist.svs_list", {
     //
     //
     _defineHeader: function(name, domain){
+        
+        var sColor='', sIcon;
 
         if(domain=='all' || domain=='bookmark' || domain=='entity'){
             sIcon = 'user';
@@ -1026,9 +1042,12 @@ $.widget( "heurist.svs_list", {
         }else {
             sIcon = 'group';
         }
+        if(this.options.hide_header){
+            sColor = 'color:white !important;';
+        }
 
         var $header = $('<h3 class="hasmenu2" grpid="'+domain
-            +'" style="outline:none;margin:10px 0 0 0;background:none !important"><span class="ui-icon ui-icon-'+sIcon+'" '
+            +'" style="outline:none;margin:10px 0 0 0;background:none !important;'+sColor+'"><span class="ui-icon ui-icon-'+sIcon+'" '
             + 'style="display:inline-block;padding:0 4px"></span><span style="vertical-align:top;">'
             + name+'</span><span style="font-size:0.8em;font-weight:normal;vertical-align:top;line-height: 1.8em;"> ('
             + ((sIcon=='user')?'private':'workgroup')
@@ -1672,7 +1691,12 @@ $.widget( "heurist.svs_list", {
 
             
             if(window.hWin.HEURIST4.util.isnull(container)){
-                res = $('<div>').append(tree).append(tree_links);
+                var sColor = '';
+                if(this.options.hide_header){
+                    sColor = ' style="color:white !important"';    
+                }
+
+                res = $('<div'+sColor+'>').append(tree).append(tree_links);
             }else{
                 container.empty();
                 container.append(tree).append(tree_links);
