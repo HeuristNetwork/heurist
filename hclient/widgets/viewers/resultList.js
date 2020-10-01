@@ -1710,6 +1710,7 @@ $.widget( "heurist.resultList", {
         if(!window.hWin.HEURIST4.util.isempty(action)){ //action_btn && action_btn.length()>0){
             //var action = action_btn.attr('data-key');
             if(this.options.renderer){
+                //custom handler
                 this._trigger( "onaction", null, {action:action, recID:selected_rec_ID, target:$target});
 
             }else if (action=='edit'){
@@ -1738,7 +1739,9 @@ $.widget( "heurist.resultList", {
                 var url = window.hWin.HAPI4.baseURL + "?fmt=edit&db="+window.hWin.HAPI4.database+"&recID="+selected_rec_ID;
                 window.open(url, "_new");
             }
-            return;
+            
+            // remove this remark to prevent selection on action button click
+            //return;
         }
 
         var ispwdreminder = $target.hasClass('rec_pwdrem'); //this is password reminder click
@@ -2751,14 +2754,23 @@ $.widget( "heurist.resultList", {
 
                         event.preventDefault();
                         
+                        /* old way
                         var query = null;
                         if(this._currentRecordset && this._currentRecordset.length()<1000){
                             query = 'ids:'+this._currentRecordset.getIds().join(',');
                         }else{
                             query = this._query_request;
                         }
-
                         window.hWin.HEURIST4.ui.openRecordInPopup(selected_rec_ID, query, true, null);
+                        */
+                        var ordered_recordset = null;
+                        if(this._currentRecordset){
+                            ordered_recordset = this._currentRecordset;
+                        }else{
+                            ordered_recordset = this._query_request;
+                        }
+                        window.hWin.HEURIST4.ui.openRecordInPopup(selected_rec_ID, ordered_recordset, true, null);                        
+                        
                         //@todo callback to change rectitle    
                     }else{
                         this._recordDivOnClick(event);

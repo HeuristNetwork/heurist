@@ -1803,7 +1803,7 @@ window.hWin.HEURIST4.ui = {
                                         
                                         //_innerTitle.find('span').text( options.title );
                                         $helper_div.show( 'slide', {direction:'right'}, 500 );                        
-                                        options.container.children('.ent_content_full').css({right:324});
+                                        options.container.children('.ent_content_full').css({right:424});
                                     
                                         setTimeout(function(){
                                                 $helper_div.find('#content').scrollTop(1);
@@ -1919,7 +1919,7 @@ window.hWin.HEURIST4.ui = {
                             if(!$.isPlainObject(query_or_recordset)){ //just string
                                 query_request = {q:query_or_recordset, w:'all'};
                             }
-                        }else if(rec_ID>0){
+                        }else if(query_request==null && rec_ID>0){
                             query_request = {q:'ids:'+rec_ID, w:'e'}; //including temporary
                         }
                         

@@ -171,6 +171,12 @@ $.widget( "heurist.mainMenu6", {
                                     },  this._delayOnCollapse_SectionMenu); //600
                     }
                 });
+                
+                
+                that._on(that.divMainMenu.find('.saved-filters'),{
+                    click: that._show_ExploreMenu
+                });
+                
 /*                
                 that._on(that.divMainMenu.find('.menu-explore[data-action-onclick="svsAdd"]'), 
                 {click: function(e){
@@ -186,7 +192,7 @@ $.widget( "heurist.mainMenu6", {
                 +' '+window.hWin.HAPI4.Event.ON_REC_SEARCHSTART
                 +' '+window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH, 
             function(e, data) {
-                
+              
                 if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCHSTART){
                     
                     //not need to check realm since this widget the only per instance
@@ -216,8 +222,11 @@ $.widget( "heurist.mainMenu6", {
                     } 
                     
                 }else if(e.type == window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE){
-                    
-                    that._updateDefaultAddRectype();//data.preferences
+                    if(data && data.origin=='recordAdd'){
+                        that._updateDefaultAddRectype( data.preferences );
+                    }else{
+                        that._updateDefaultAddRectype();
+                    }
                 }else{
                     //if(e.type == window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE){}
                     //refresh list of rectypes afrer structure edit
@@ -400,13 +409,21 @@ $.widget( "heurist.mainMenu6", {
                     if(that.is_svslist_inline){
                         //change parent for cont? 
                         that.divMainMenu.find('#filter_by_groups').hide();
-                        
+
                         if(that.svs_list){
+console.log(that.svs_list.parent().attr('class'));
+                            
+                            if(!that.svs_list.parent().hasClass('ui-heurist-header2')){
+                                that.svs_list.detach().appendTo(that.divMainMenu.find('.ui-heurist-header2'));
+                                that.svs_list.css({'top':188, 'font-size':'0.8em'});
+                                that.svs_list.svs_list('option','container_width',170);
+                                that.svs_list.svs_list('option','hide_header', true);
+                            }
                             that.svs_list.show();
                         }else{
                             that.divMainMenu.find('#svs_list').show();
                             that.svs_list = that._init_SvsList(that.divMainMenu.find('#svs_list'));  
-                            //that.svs_list.css({background:'none',color:'white'})
+                            //that.svs_list.css({background:'none'})
                         } 
                         /*
                             that.svs_list.find('.svs-header').each(function(i,item)
@@ -543,12 +560,13 @@ $.widget( "heurist.mainMenu6", {
         
         var menu_item, action_name;
 
-        if($(e.target).attr('id')=='filter_by_groups'){ //NOT USED
-            menu_item = $(e.target);
+        if($(e.target).hasClass('saved-filters')){
+            action_name = 'svs_list';         
         }else{
             menu_item = $(e.target).is('li')?$(e.target):$(e.target).parents('li');
+            action_name = menu_item.attr('data-action');
         }
-        action_name = menu_item.attr('data-action');
+        //action_name = menu_item.attr('data-action');
         
         if(this._current_explore_action==action_name) return;
         this._current_explore_action = action_name;
@@ -656,20 +674,25 @@ $.widget( "heurist.mainMenu6", {
                 return;
             }
             else if(action_name=='svs_list'){
-
-                if(that.is_svslist_inline) return;
                 
+                that.menues['explore'].css({bottom:'4px',width:'300px',overflow:'auto'});
+                //cont.width(300);
+                that.svs_list.detach().appendTo(cont);
+                that.svs_list.css({'top':0, 'font-size':'1em'}).show();
+                that.svs_list.svs_list('option','container_width',300);
+                that.svs_list.svs_list('option','hide_header', false);
+
+                /*    
+                if(that.is_svslist_inline) return;
                 //set size of menu section
                 that.menues['explore'].css({bottom:'4px',width:'300px',overflow:'auto'});
-
                 var group_ID = (e)?[menu_item.attr('data-id')]:null;
-                
                 that.svs_list = that._init_SvsList(cont, group_ID);
-
+                */
             }
             else if(action_name=='recordAdd'){
 
-                that.menues['explore'].css({bottom:'4px',width:'300px',overflow:'auto'});
+                that.menues['explore'].css({bottom:'4px',width:'300px',overflow:'hidden'});
 
                 if(!cont.recordAdd('instance')){
                     cont.recordAdd({
@@ -754,6 +777,7 @@ $.widget( "heurist.mainMenu6", {
                 
                 return cont;        
     },
+    
     
     //
     //
@@ -1054,10 +1078,10 @@ console.log('resotre');
         var bm_on = (window.hWin.HAPI4.get_prefs('bookmarks_on')=='1');
         
         
-        var s = '<li class="menu-explore" data-action="svs_list" data-id="bookmark" style="display:'+(bm_on?'block':'none')+'">'
+        var s = '<li class="menu-explore" data-id="bookmark" style="display:'+(bm_on?'block':'none')+'">'  //data-action="svs_list" 
             +'<span class="ui-icon ui-icon-user"/><span class="menu-text">'+window.hWin.HR('My Bookmarks')
             +'</span></li>'
-            +'<li class="menu-explore" data-action="svs_list" data-id="all">'
+            +'<li class="menu-explore" data-id="all">'  //data-action="svs_list" 
             +'<span class="ui-icon ui-icon-user"/><span class="menu-text">'+window.hWin.HR('My Searches')
             +'</span></li>'            
         
@@ -1075,7 +1099,7 @@ console.log('resotre');
                     sicon = 'globe';
                 }
                 
-                s = s + '<li class="menu-explore" data-action="svs_list" data-id="'+groupID+'">'
+                s = s + '<li class="menu-explore" data-id="'+groupID+'">' // data-action="svs_list" 
                     +'<span class="ui-icon ui-icon-'+sicon+'"/><span class="menu-text'+struncate+'">'
                     +name
                     +'</span></li>';

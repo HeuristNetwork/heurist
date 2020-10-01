@@ -39,7 +39,8 @@ $.widget( "heurist.svs_list", {
         sup_filter:null,       //suplementary filter for faceted search
         
         menu_locked: null,
-        hide_header: false  //todo rename - inline main menu
+        hide_header: false,  //todo rename - inline main menu
+        container_width:0
     },
 
     isPublished: false,
@@ -105,7 +106,7 @@ $.widget( "heurist.svs_list", {
         this.element.parent().css({'overflow':'hidden'});
         
         //panel to show list of saved filters
-        this.search_tree = $( "<div>" ).appendTo( this.element );
+        this.search_tree = $( "<div>" ).css('width','100%').appendTo( this.element );
         //panel to show faceted search when it is activated
         this.search_faceted = $( "<div>", {id:this.element.attr('id')+'_search_faceted'} )
                     .css({'height':'100%'}).appendTo( this.element ).hide();
@@ -114,6 +115,7 @@ $.widget( "heurist.svs_list", {
             this.element.css({'overflow':'hidden'});
             //add title 
             this.div_header =  $('<div class="ui-heurist-header" style="top:0px;">Saved filters <span style="font-style:italic;font-size:x-small">by workgroups</span></div>')
+                .hide()
                 .appendTo(this.element);
                 
             this.div_header_sub = $('<div style="top:46px;font-style:italic;font-size:9px;right:10px;height:auto;position: absolute;left: 20px;">'
@@ -126,12 +128,6 @@ $.widget( "heurist.svs_list", {
             this.accordeon = $( "<div>" ).css({'top':36, 'bottom':0, 'width':'100%','position': 'absolute', 'overflow':'auto','font-size':'0.9em'})
                         .appendTo( this.search_tree );
                         
-            if(this.options.hide_header){
-                this.div_header.hide();
-                this.accordeon.css({'top':0});
-console.log('!!!!!!!');                
-            }
-            
                         
         }else{
             this.element.css({'overflow-y':'auto','font-size':'0.8em'});
@@ -290,17 +286,30 @@ console.log('!!!!!!!');
         this._refresh();
     }, //end _create
 
+    //
+    //
+    //
     _adjustAccordionTop: function(){
-        if(this.btn_search_save && this.accordeon && !this.options.hide_header){
+        
+        if(!this.accordeon) return;
+        
+        if(this.options.hide_header){
+            this.div_header.hide();
+            this.accordeon.css({'top':0});
+        }else{
+            this.div_header.show();
+            
+            var is_vis = -1;
 
-            if(window.hWin.HAPI4.currentRecordset && window.hWin.HAPI4.currentRecordset.length()>0)
-            {
-                this.btn_search_save.show();
-            }else{
-                this.btn_search_save.hide();
-
+            if(this.btn_search_save){
+                if(window.hWin.HAPI4.currentRecordset && window.hWin.HAPI4.currentRecordset.length()>0)
+                {
+                    this.btn_search_save.show();
+                    is_vis = 0;
+                }else{
+                    this.btn_search_save.hide();
+                }
             }
-            var is_vis = (this.btn_search_save.is(':visible'))?0:-1;
             var px = 0;//window.hWin.HEURIST4.util.em(2.5);
             this.accordeon.css('top', this.div_header.height() + is_vis*px + 5);
         }
@@ -315,7 +324,7 @@ console.log('!!!!!!!');
         if(key=='onclose_search' && this.search_faceted && 
             $.isFunction(this.search_faceted.search_faceted) && this.search_faceted.search_faceted('instance')){
             this.search_faceted.search_faceted('option', 'onclose', value);
-        }else if(key=='allowed_UGrpID'){
+        }else if(key=='allowed_UGrpID' || key=='hide_header'){
             this._refresh();
         }
     },
@@ -356,7 +365,6 @@ console.log('!!!!!!!');
             return;
         }
         
-        
         // show saved searches as a list of buttons
         if(this.options.buttons_mode){
 
@@ -365,30 +373,7 @@ console.log('!!!!!!!');
 
         }else if(!window.hWin.HAPI4.has_access()){
             window.hWin.HAPI4.currentUser.ugr_Groups = {};
-        }else if (this.accordeon && !this.helper_btm) {
-
-            //new
-            var t1 = '<div title="'+this._HINT_FACETED+'">'
-            //+'<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'+'" style="background-image: url(&quot;'+window.hWin.HAPI4.baseURL+'hclient/assets/fa-cubes.png&quot;);vertical-align:middle">'
-            +'<span class="ui-icon ui-icon-box" style="color:orange;display:inline-block; vertical-align: bottom; font-size:1em"></span>'
-            +'&nbsp;Faceted search</div>'
-
-
-            +'<div title="'+this._HINT_WITHRULES+'">'
-            +'<span class="ui-icon ui-icon-plus" style="color:orange;display:inline-block; vertical-align: bottom; font-size:0.8em;width:0.7em;"></span>'
-            +'<span class="ui-icon ui-icon-shuffle" style="color:orange;display:inline-block; vertical-align: bottom; font-size:1em;width:0.9em;"></span>'
-            +'&nbsp;Search with rules</div>'
-
-            +'<div title="'+this._HINT_RULESET+'">'
-            +'<span class="ui-icon ui-icon-shuffle" style="color:orange;display:inline-block; vertical-align: bottom; font-size:1em"></span>'
-            +'&nbsp;RuleSet</div>';
-
-            this.helper_btm = $( '<div class="heurist-helper3" style="float:right;padding:2.5em 0.5em 0 0;">'+t1+'</div>' )
-            //IAN request 2015-06-23 .addClass('heurist-helper1')
-            .appendTo( this.accordeon );
-            //IAN request 2015-06-23 if(window.hWin.HAPI4.get_prefs('help_on')=='0') this.helper_btm.hide(); // this.helper_btm.css('visibility','hidden');
         }
-
         this._updateAccordeon();
 
     },
@@ -447,10 +432,38 @@ console.log('!!!!!!!');
         }
 
         if(this.accordeon){
-            this._adjustAccordionTop();
-            this.accordeon.hide();
+            //this._adjustAccordionTop();
         }
+        if(this.helper_btm){
+            this.helper_btm.remove()   
+            this.helper_btm = null;
+        }
+        this.accordeon.empty();
+        this.accordeon.hide();
+        
+        if (!this.helper_btm) {
 
+            //new
+            var t1 = '<div title="'+this._HINT_FACETED+'">'
+            //+'<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'+'" style="background-image: url(&quot;'+window.hWin.HAPI4.baseURL+'hclient/assets/fa-cubes.png&quot;);vertical-align:middle">'
+            +'<span class="ui-icon ui-icon-box" style="color:orange;display:inline-block; vertical-align: bottom; font-size:1em"></span>'
+            +'&nbsp;Faceted search</div>'
+
+
+            +'<div title="'+this._HINT_WITHRULES+'">'
+            +'<span class="ui-icon ui-icon-plus" style="color:orange;display:inline-block; vertical-align: bottom; font-size:0.8em;width:0.7em;"></span>'
+            +'<span class="ui-icon ui-icon-shuffle" style="color:orange;display:inline-block; vertical-align: bottom; font-size:1em;width:0.9em;"></span>'
+            +'&nbsp;Search with rules</div>'
+
+            +'<div title="'+this._HINT_RULESET+'">'
+            +'<span class="ui-icon ui-icon-shuffle" style="color:orange;display:inline-block; vertical-align: bottom; font-size:1em"></span>'
+            +'&nbsp;RuleSet</div>';
+
+            this.helper_btm = $( '<div class="heurist-helper3" style="float:right;padding:2.5em 0.5em 0 0;">'+t1+'</div>' )
+            //IAN request 2015-06-23 .addClass('heurist-helper1')
+            .appendTo( this.accordeon );
+            //IAN request 2015-06-23 if(window.hWin.HAPI4.get_prefs('help_on')=='0') this.helper_btm.hide(); // this.helper_btm.css('visibility','hidden');
+        }
 
         var islogged = (window.hWin.HAPI4.has_access());
         //if not logged in show only "my searches/all records"
@@ -517,14 +530,19 @@ console.log('!!!!!!!');
             return;    
         }
         
+        this._adjustAccordionTop();
+        /*
         if(this.options.hide_header){
             this.accordeon.css('top', 0);    
         }else{
             this.accordeon.css('top', this.options.is_h6style?36:this.div_header.height());    
-        }
+        }*/
         
         
-        var container_width = this.accordeon.width();
+        if(!(this.options.container_width>0))
+            this.options.container_width = this.accordeon.width();
+        
+//console.log(this.options.container_width+'  t='+this.search_tree.width()+'  e='+this.element.width());
         
         if(islogged || this.isPublished){
 
@@ -544,14 +562,14 @@ console.log('!!!!!!!');
                     .addClass('heurist-bookmark-search')  //need find in preferences
                     .css('display', (window.hWin.HAPI4.get_prefs('bookmarks_on')=='1')?'block':'none')
                     .append( this._defineHeader(window.hWin.HR('My Bookmarks'), 'bookmark'))
-                    .append( this._defineContent('bookmark',container_width) ) );
+                    .append( this._defineContent('bookmark',this.options.container_width) ) );
 
                 this.helper_btm.before(
                     $('<div>')
                     .attr('grpid',  'all').addClass('svs-acordeon')
                     //.css('border','none')
                     .append( this._defineHeader(window.hWin.HR('My Searches'), 'all'))
-                    .append( this._defineContent('all',container_width) ));
+                    .append( this._defineContent('all',this.options.container_width) ));
                 
             }
                 
@@ -572,7 +590,7 @@ console.log('!!!!!!!');
                             $('<div>')
                             .attr('grpid',  groupID).addClass('svs-acordeon')
                             .append( this._defineHeader(name, groupID))
-                            .append( this._defineContent(groupID,container_width) ));
+                            .append( this._defineContent(groupID,this.options.container_width) ));
                         
                         //get description for user    
                         window.hWin.HAPI4.SystemMgr.user_get( { UGrpID: groupID},
@@ -593,7 +611,7 @@ console.log('!!!!!!!');
             ($('<div>')
                 .attr('grpid',  'all').addClass('svs-acordeon')
                 .append( this._defineHeader(window.hWin.HR('Predefined Searches'), 'all'))
-                .append( this._defineContent('all',container_width) )).appendTo( this.accordeon );
+                .append( this._defineContent('all',this.options.container_width) )).appendTo( this.accordeon );
 
 
         }
@@ -1255,7 +1273,9 @@ console.log('!!!!!!!');
 
                     //data.node.setSelected(true);
                     //remove highlight from others
-                    that.search_tree.find('li.ui-state-active').removeClass('ui-state-active');
+                    that.element.find('.ui-fancytree').find('li.ui-state-active').removeClass('ui-state-active');
+                    that.element.find('.ui-fancytree').find('span.fancytree-active').removeClass('fancytree-active');
+                    
                     that.doSearch( svs_ID, qname, qsearch, event.target );
                     setTimeout(function(){
                         that.search_tree.find('div.svs-contextmenu2').parent().addClass('leaves');

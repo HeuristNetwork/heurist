@@ -400,7 +400,7 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
                                     +$Db.rtg(this.options.rtg_ID,'rtg_Description')+'</div>');
             }else{
                 this.input_search.parent().show();
-                sGroupTitle += 'Record types</h4><div class="heurist-helper3" style="font-size:0.7em">All record type groups</div>';
+                sGroupTitle += 'All Groups</h4><div class="heurist-helper3" style="font-size:0.7em">All record type groups</div>';
             }
             this.element.find('#div_group_information').html(sGroupTitle);
         

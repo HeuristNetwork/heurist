@@ -107,10 +107,11 @@ body.popup {
     top:36px;
     bottom:0px;
     right: 0px;
-    width:300px;
+    width:450px;
     font-size:0.9em;
     padding-left: 20px;
     border-left: 2px solid;
+    background: white;
 }
 
 .menu-text{

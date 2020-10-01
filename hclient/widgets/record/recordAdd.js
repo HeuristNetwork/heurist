@@ -32,7 +32,7 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
         currentRecTags: null,
         scope_types: 'none',
         get_params_only: false,
-        isExpanded: false,
+        isExpanded: false
     },
     
     rectype_list:null,
@@ -279,6 +279,7 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
 
             window.hWin.HAPI4.save_pref('record-add-defaults', add_rec_prefs);        
             
+console.log('ON_PREFERENCES_CHANGE');            
             window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE, 
                     {origin:'recordAdd', preferences:add_rec_prefs});
             
