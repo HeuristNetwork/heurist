@@ -470,7 +470,7 @@ _time_debug = new Date().getTime() / 1000;
                     menu_recIDs: home_page_record_id, 
                     use_next_level: true, 
                     orientation: 'horizontal',
-                    toplevel_css: {background:bg_color}, //'rgba(112,146,190,0.7)'
+                    toplevel_css: {background:'none'}, //bg_color 'rgba(112,146,190,0.7)'
                     aftermenuselect: afterPageLoad,
                     onInitComplete: function(not_empty_page){
                         //load given page or home page content
@@ -694,7 +694,10 @@ $website_title -> #main-title>h2
   
   if($('#main-logo-alt').length>0){
   <?php if($image_altlogo){ ?>
-      $('#main-logo-alt').css({'background-size':'contain','background-image':'url(\'<?php print $image_altlogo;?>\')'}).show();
+      $('#main-logo-alt').css({'background-size':'contain',
+                'background-position': 'top',
+                'background-repeat': 'no-repeat',
+                'background-image':'url(\'<?php print $image_altlogo;?>\')'}).show();
   <?php }else{ ?>
       $('#main-logo-alt').hide();
   <?php } ?>
@@ -703,11 +706,14 @@ $website_title -> #main-title>h2
   <?php if($website_title){ ?>
   var ele = $('#main-title');
   if(ele.length>0){
-      ele.empty();
+      ele.empty().hide();
       $('<h2 style="font-size:1.7em;margin-top:4px;padding:0 10px;"><?php print htmlspecialchars($website_title, ENT_QUOTES);?></h2>').appendTo(ele);
       if(!$('#main-logo-alt').is(':visible')){
             ele.css({right:10}); 
       }
+      ele.fadeIn(3000);
+      setTimeout(function(){ ele.css({left:$('#main-logo').width()+10 }); },2000);
+      
   }
   <?php } ?>
 
@@ -915,11 +921,11 @@ if ($page_template!=null && substr($page_template,-4,4)=='.tpl') {
         
     } else {
 ?>                        
-        <div id="main-logo" class="mceNonEditable header-element" style="position:absolute;top:10;left:10;max-height:90px;max-width:270px;border:2px solid red;"></div>
+        <div id="main-logo" class="mceNonEditable header-element" style="position:absolute;top:10;left:10;max-height:90px;max-width:270px;border:2px none red;"></div>
         
-        <div id="main-logo-alt" class="mceNonEditable header-element" style="position:absolute;top:10;right:10;max-height:90px;max-width:270px;border:2px solid red;"></div>
+        <div id="main-logo-alt" class="mceNonEditable header-element" style="position:absolute;top:10;right:10;height:70px;width:270px;border:2px none red;"></div>
         
-        <div id="main-title" class="mceNonEditable header-element" style="position:absolute;top:10;left:280;right:280;max-height:90px;border:2px solid green;"></div>
+        <div id="main-title" class="mceNonEditable header-element" style="position:absolute;top:10;left:280;right:280;max-height:90px;border:2px none green;"></div>
         
         <div id="main-host" style="position:absolute;top:80;right:10;" class=" header-element">
             <div id="host_info" style="float:right;line-height:38px;height:40px;margin-right: 0px;">
@@ -935,7 +941,7 @@ if ($page_template!=null && substr($page_template,-4,4)=='.tpl') {
             </div>    
         </div>
         
-        <div id="main-menu" class="mceNonEditable header-element" style="position:absolute;top:110;width:100%;min-height:40px;border:2px solid yellow;color:black;font-size:1.1em;" data-heurist-app-id="heurist_Navigation" data-generated="1">
+        <div id="main-menu" class="mceNonEditable header-element" style="position:absolute;top:110;width:100%;min-height:40px;border:2px none yellow;color:black;font-size:1.1em;" data-heurist-app-id="heurist_Navigation" data-generated="1">
             <div class="widget-design-header" style="padding: 10px;"><img style="vertical-align: middle;"
              height="22" /> <strong>navigation</strong><a class="edit" style="padding: 0 10px;" title="Click to edit" href="#">edit</a>  <a class="remove" href="#">remove</a> height:50px width:100%</div>
             <span class="widget-options" style="font-style: italic; display: none;">{"menu_recIDs":"<?php print $rec_id;?>","use_next_level":true,"orientation":"horizontal","init_at_once":true}</span>
