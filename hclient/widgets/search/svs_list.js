@@ -539,9 +539,9 @@ $.widget( "heurist.svs_list", {
         }*/
         
         
-        if(!(this.options.container_width>0))
+        if(!(this.options.container_width>0)){
             this.options.container_width = this.accordeon.width();
-        
+        }
 //console.log(this.options.container_width+'  t='+this.search_tree.width()+'  e='+this.element.width());
         
         if(islogged || this.isPublished){
@@ -1055,8 +1055,10 @@ $.widget( "heurist.svs_list", {
 
         if(domain=='all' || domain=='bookmark' || domain=='entity'){
             sIcon = 'user';
-        }else if(domain=='dbs'){
+        }else if(domain=='dbs' || domain==1){
             sIcon = 'database';
+        }else if(domain==5){
+            sIcon = 'globe';
         }else {
             sIcon = 'group';
         }
@@ -1064,12 +1066,21 @@ $.widget( "heurist.svs_list", {
             sColor = 'color:white !important;';
         }
 
+        var sWidth = '60%';
+        var sInfo = '';
+        if(this.options.container_width>250){
+            sWidth = this.options.container_width - 120;
+            sInfo = '<span style="font-size:0.8em;font-weight:normal;vertical-align:top;line-height: 1.8em;"> ('
+            + ((sIcon=='user')?'private':'workgroup')
+            + ')</span>';
+        }else if(this.options.container_width>0){
+            sWidth = this.options.container_width - 52;
+        }
+        
         var $header = $('<h3 class="hasmenu2" grpid="'+domain
             +'" style="outline:none;margin:10px 0 0 0;background:none !important;'+sColor+'"><span class="ui-icon ui-icon-'+sIcon+'" '
-            + 'style="display:inline-block;padding:0 4px"></span><span style="vertical-align:top;">'
-            + name+'</span><span style="font-size:0.8em;font-weight:normal;vertical-align:top;line-height: 1.8em;"> ('
-            + ((sIcon=='user')?'private':'workgroup')
-            + ')</span></h3>').addClass('tree-accordeon-header svs-header');
+            + 'style="display:inline-block;padding:0 4px"></span><span style="display:inline-block;vertical-align:top;width:'+sWidth+'" class="truncate">'
+            + name+'</span>'+sInfo+'</h3>').addClass('tree-accordeon-header svs-header');
 
         if('dbs'!=domain){
 //console.log('adddddd');            

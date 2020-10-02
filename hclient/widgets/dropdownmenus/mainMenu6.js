@@ -165,6 +165,7 @@ $.widget( "heurist.mainMenu6", {
                     }
                 });
                 that._on(that.divMainMenu.find('#filter_by_groups'),{ //, #filter_by_groups
+                    mouseenter: that._mousein_ExploreMenu,
                     mouseleave: function(e){
                             this._myTimeoutId2 = setTimeout(function(){
                                         that._closeSectionMenu('explore');
@@ -411,7 +412,6 @@ $.widget( "heurist.mainMenu6", {
                         that.divMainMenu.find('#filter_by_groups').hide();
 
                         if(that.svs_list){
-console.log(that.svs_list.parent().attr('class'));
                             
                             if(!that.svs_list.parent().hasClass('ui-heurist-header2')){
                                 that.svs_list.detach().appendTo(that.divMainMenu.find('.ui-heurist-header2'));
@@ -529,8 +529,8 @@ console.log(that.svs_list.parent().attr('class'));
         
         var ele, hasAction = false;
         
-        if($(e.target).attr('id')=='filter_by_groups'){  //NOT USED
-            hasAction = true;
+        if($(e.target).attr('id')=='filter_by_groups'){
+            hasAction = false;
         }else{
 
             ele = $(e.target).is('li')?$(e.target):$(e.target).parents('li');
@@ -560,7 +560,7 @@ console.log(that.svs_list.parent().attr('class'));
         
         var menu_item, action_name;
 
-        if($(e.target).hasClass('saved-filters')){
+        if($(e.target).hasClass('saved-filters') || $(e.target).parent().hasClass('saved-filters')){
             action_name = 'svs_list';         
         }else{
             menu_item = $(e.target).is('li')?$(e.target):$(e.target).parents('li');
