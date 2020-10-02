@@ -32,6 +32,9 @@ function hCmsEditing(_options) {
         _version   = "0.4";
 
     var main_content = $('body').find('#main-content');
+    var main_menu = $('body').find('#main-menu');
+    var main_header = $('body').find('#main-header');
+    
     var home_pageid = main_content.attr('data-homepageid'),
         init_pageid = main_content.attr('data-initid'),
         is_viewonly = (main_content.attr('data-viewonly')==1),
@@ -56,7 +59,7 @@ function hCmsEditing(_options) {
              
         //window.hWin.HEURIST4.msg.bringCoverallToFront(ele);
         main_content.show();
-        $('#main-menu').hide();
+        main_menu.hide();
         
         //cfg_widgets is from layout_defaults=.js 
         LayoutMgr.init(cfg_widgets, null);
@@ -164,16 +167,16 @@ function hCmsEditing(_options) {
         setTimeout(function(){
             __alignButtons();
             
-            var bg_color = $('#main-header').css('background');
+            var bg_color = main_header.css('background');
 
             //init main menu in header
-            var topmenu = $('#main-menu');
+            var topmenu = main_menu; //$('#main-menu');
             topmenu.attr('data-heurist-app-id','heurist_Navigation');
             
             header_content_generated = (topmenu.attr('data-generated')==1);
             topmenu.attr('data-generated', 0).show();
             
-            header_content_raw = $("#main-header").html();
+            header_content_raw = main_header.html();
             
             topmenu.hide();
             
@@ -183,7 +186,7 @@ function hCmsEditing(_options) {
                 , orientation:'horizontal'
                 , onmenuselect:__iniLoadPageById    //load page on select menu item
                 //aftermenuselect: afterPageLoad,  //function in header websiteRecord.php
-                , toplevel_css:{background:bg_color}  //'rgba(112,146,190,0.7)' ,color:'white','margin-right':'24px'
+                , toplevel_css:{background:'none'} //bg_color  //'rgba(112,146,190,0.7)' ,color:'white','margin-right':'24px'
                 }} ); 
             
             topmenu.show();
@@ -198,7 +201,7 @@ function hCmsEditing(_options) {
             
         },500);
 
-        var itop = $('#main-header').height();
+        var itop = main_header.height();
             
         $('<input id="edit_mode" type="hidden"/>').appendTo(main_content.parent());
             
@@ -282,23 +285,25 @@ function hCmsEditing(_options) {
             window.hWin.HEURIST4.msg.bringCoverallToFront($('body').find('.ent_wrapper'));
             
             
+            //edit_dialog.find('#web_preview').attr('src', surl);                                            
+            
             //var ele = $('#main-content').find('div[widgetid="heurist_Search"]');
             //if(ele.length>0 && ele.search('instance')) ele.search('destroy');
             current_pageid = pageid;
-            $('#main-content').empty().load(window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database
+            main_content.empty().load(window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database
                 +'&field=1&recid='+pageid, function()
                 {
                         //first child is webpage title
-                        var pagetitle = $($('#main-content').children()[0]);
+                        var pagetitle = $(main_content.children()[0]);
                         if(pageid==home_pageid){
                             pagetitle.empty();
                         }        
                         if(is_show_pagetitle){
-                            $('#main-pagetitle').empty().show();
+                            main_header.find('#main-pagetitle').empty().show();
                         }
                         //move title to header
                         pagetitle.addClass("webpageheading");
-                        pagetitle.appendTo($('#main-pagetitle'));
+                        pagetitle.appendTo(main_header.find('#main-pagetitle'));
                         
                         if(pagetitle.attr('date-empty')==1){
                             pagetitle.attr('date-empty',0);
@@ -584,7 +589,7 @@ function hCmsEditing(_options) {
                 //$('#btn_inline_editor').position({my:'right top',at:'right-90 top-15',of:$('#main-content')}).show();
                 //$('#btn_inline_editor3').position({my:'right top',at:'right-40 top-15',of:$('#main-content')}).show();
                 
-                var ele = $('#main-pagetitle > h2');
+                var ele = main_header.find('#main-pagetitle > h2');
                 if(ele.length>0){
                     var pos = {my:'left top', at:'right+20 top+2', of:$('#main-pagetitle > h2')};   
                     $('#btn_inline_editor4').position(pos).show();
@@ -1563,8 +1568,8 @@ function hCmsEditing(_options) {
         $('#btn_inline_editor').hide();
         $('#btn_inline_editor3').hide();
         $('#btn_inline_editor4').hide();
-        $('#main-content').parent().css('overflow-y','hidden');
-        $('#main-content').hide();
+        main_content.parent().css('overflow-y','hidden');
+        main_content.hide();
         $('#edit_mode').val(1).click();//to disable left panel
         
         last_save_content = $('.tinymce-body').val();
@@ -1591,8 +1596,8 @@ function hCmsEditing(_options) {
                     $('#btn_inline_editor').text('Edit page content');
                     $('#btn_inline_editor3').text('source');
                     
-                    $('#main-content').parent().css('overflow-y','hidden');
-                    $('#main-content').hide();
+                    main_content.parent().css('overflow-y','hidden');
+                    main_content.hide();
                     $('#edit_mode').val(1).click();//to disable left panel
                     //original_editor_content 
                     last_save_content = $('.tinymce-body').val();
@@ -1625,8 +1630,8 @@ function hCmsEditing(_options) {
             $('#btn_inline_editor3').text('Save');  //change label from "source" to "Save"
             $('#btn_inline_editor5').show();
             
-            $('#main-content').parent().css('overflow-y','hidden');
-            $('#main-content').hide();
+            main_content.parent().css('overflow-y','hidden');
+            main_content.hide();
             $('#edit_mode').val(1).click();//to disable left panel
             $('.tinymce-body').show();
             original_editor_content = $('.tinymce-body').val();

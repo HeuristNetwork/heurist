@@ -379,6 +379,7 @@ function editCMS( options ){
                                     var btn_refresh = edit_dialog.find('#btn_refresh');
                                     if(!btn_refresh.button('instance')){
                                         
+                                        //init buttons
                                         if(!no_access){
                                             edit_dialog.find('#btn_edit_home').button().click(function(){
                                                 _editHomePageRecord();
