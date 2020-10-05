@@ -43,8 +43,8 @@ $.widget( "heurist.mainMenu6", {
     _delayOnCollapse_SectionMenu: 600,
     _delayOnCollapse_ExploreMenu: 600,
     
-    _delayOnShow_ExploreMenu: 5, //500,
-    _delayOnShow_AddRecordMenu: 10, //1000,
+    _delayOnShow_ExploreMenu: 200, //5 500,
+    _delayOnShow_AddRecordMenu: 200, //10 1000,
     
     _widthMenu: 170,
     
@@ -299,6 +299,7 @@ $.widget( "heurist.mainMenu6", {
                 this._on(ele, {click: function(e){
                     var ele = $(e.target).is('li')?$(e.target):$(e.target).parents('li');
                     var rty_ID = ele.attr('data-id');
+                    this.coverAll.hide();
                     window.hWin.HEURIST4.ui.openRecordEdit(-1, null,{new_record_params:{RecTypeID:rty_ID}});
                 }});
             }else{
@@ -699,6 +700,9 @@ $.widget( "heurist.mainMenu6", {
                         is_h6style: true,
                         onClose: function() { that._closeSectionMenu('explore');},
                         isExpanded: expandRecordAddSetting,
+                        onClose: function(){
+                            that.coverAll.hide();
+                        },
                         mouseover: function() { that._resetCloseTimers()},
                         menu_locked: function(is_locked){ 
                             that._resetCloseTimers();
@@ -973,7 +977,6 @@ console.log('prvent colapse');
             
             
             if(section=='design'){    
-console.log('resotre');                    
                     $(this.containers[section])
                         .css({left:'304px',right: '4px',top:'2px',bottom:'4px',width:'auto',height:'auto'});
             }
