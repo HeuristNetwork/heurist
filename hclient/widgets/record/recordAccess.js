@@ -63,7 +63,7 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
             that._onRecordScopeChange();
             
         });
-
+        
         //define group selector for edit
         var ele = this.element.find('#sel_OwnerGroups');
         /*
@@ -133,20 +133,21 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
         
         this.element.find('input[name="rb_Access"]').change(function(){
             
-            if(this.element.find('#rb_Access-hidden').prop('checked')){ //was viewable-group
-                this.element.find('#div_AccessGroups').show();//css({display:'table-row'});
+            if(that.element.find('#rb_Access-hidden').prop('checked')){ //was viewable-group
+                that.element.find('#div_AccessGroups').show();//css({display:'table-row'});
             }else{
-                this.element.find('#div_AccessGroups').hide();
+                that.element.find('#div_AccessGroups').hide();
             }
            
             that._onRecordScopeChange();
         });
         
-        if(this.options.scope_types=='none'){
-            this._onRecordScopeChange();    
-        }
-        
+        this._onRecordScopeChange();
+        //if(this.options.scope_types=='none'){
+        //    this._onRecordScopeChange();    
+        //}
         return this._super();
+        
     },
 
     //    

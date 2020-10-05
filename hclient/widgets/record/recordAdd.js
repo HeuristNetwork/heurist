@@ -279,7 +279,6 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
 
             window.hWin.HAPI4.save_pref('record-add-defaults', add_rec_prefs);        
             
-console.log('ON_PREFERENCES_CHANGE');            
             window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE, 
                     {origin:'recordAdd', preferences:add_rec_prefs});
             
@@ -324,7 +323,9 @@ console.log('ON_PREFERENCES_CHANGE');
             that._onRecordScopeChange();
         }});
         
-        $(ele).val(value).hSelect("refresh"); 
+        if(value>0){
+            $(ele).val(value).hSelect("refresh"); 
+        }
         
         if(this.rectype_list){
             
@@ -410,7 +411,6 @@ console.log('ON_PREFERENCES_CHANGE');
     //
     _onRecordScopeChange: function () 
     {
-        
         var isdisabled = !this.getSelectedParameters( false );
         
         window.hWin.HEURIST4.util.setDisabled( this.element.parents('.ui-dialog').find('#btnDoAction'), isdisabled );

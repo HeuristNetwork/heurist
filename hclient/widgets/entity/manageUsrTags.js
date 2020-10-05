@@ -690,7 +690,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
                     ?('<div class="header" style="display: inline-block;text-align:right;padding:0 16px 0 0">'
                         +'<label>Find/assign:</label></div>'):'')
                 + ' <input type="text" style="width:15ex;margin-right:10px" size="60"/>&nbsp;in&nbsp;&nbsp;'
-                + '<select style="max-width:280px"></select>&nbsp;'
+                + '<select style="max-width:220px"></select>&nbsp;'
                 + '<div class="rec_action_link" data-key="add" style="margin-left:10px;visibility:visible !important"/>'
                 + '</div>').appendTo(panel);
                 
