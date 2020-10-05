@@ -194,12 +194,15 @@ $rtysWithInvalidRectypeConstraint = @$lists["rt_defvalues"];
             A:link {
                 color: #6A7C99;    
             }
+            h3.res-valid{
+                color: #6aa84f !important;        
+            }
         </style>
 
     </head>
 
 
-    <body class="popup">
+    <body class="popup" style="overflow:auto">
 
         <div class="banner">
             <h2>Check for invalid definitions and data (invalid pointers, terms, missing required, excess values etc.)</h2>
@@ -280,7 +283,7 @@ $rtysWithInvalidRectypeConstraint = @$lists["rt_defvalues"];
             }
 
             if($wrongUser_Add==0 && $wrongUser_Owner==0){
-                print "<div><h3>All record have valid Owner and Added by User references</h3></div>";
+                print '<div><h3 class="res-valid">OK: All record have valid Owner and Added by User references</h3></div>';
                 if($wasassigned1>0){
                     print "<div>$wasassigned1 records 'Added by' value were set to user # 2 Database Manager</div>";
                 }
@@ -387,7 +390,7 @@ $rtysWithInvalidRectypeConstraint = @$lists["rt_defvalues"];
                 }
 
             }else{
-                print "<br/><h3>All field type definitions are valid</h3>";
+                print '<br/><h3 class="res-valid">OK: All field type definitions are valid</h3>';
             }
 
             if(count(@$rtysWithInvalidRectypeConstraint)>0){
@@ -408,7 +411,7 @@ You can edit the record type structure by clicking on the name in the list below
                 }//for
             
             }else{
-                print "<br/><h3>All default values in record type structures are valid</h3>";
+                print '<br/><h3 class="res-valid">OK: All default values in record type structures are valid</h3>';
             }            
             ?>
             <!-- CHECK DATA CONSISTENCY -->
@@ -455,7 +458,7 @@ You can edit the record type structure by clicking on the name in the list below
             print '<a name="pointer_targets"/>';
                 
             if(count($bibs)==0){
-                print "<div><h3>All record pointers point to a valid record</h3></div>";
+                print '<div><h3 class="res-valid">OK: All record pointers point to a valid record</h3></div>';
                 if($wasdeleted>1){
                     print "<div>$wasdeleted invalid pointer(s) were removed from database</div>";
                 }
@@ -532,7 +535,7 @@ You can edit the record type structure by clicking on the name in the list below
                 <a name="target_types"/>
                 <?php
                 if (count($bibs) == 0) {
-                    print "<h3>All record pointers point to the correct record type</h3>";
+                    print '<h3 class="res-valid">OK: All record pointers point to the correct record type</h3>';
                 }
                 else
                 {
@@ -682,7 +685,7 @@ while ($row = $res->fetch_assoc()){
 
                 
                 if (count($bibs1) == 0) {
-                    print "<h3>All parent records are correctly referenced by their child records</h3><br>";
+                    print '<h3 class="res-valid">OK: All parent records are correctly referenced by their child records</h3><br>';
                     if($wasdeleted1>1){
                         print "<div>$wasdeleted1 invalid pointer(s) were removed from database</div>";
                     }
@@ -729,7 +732,7 @@ href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl
                 
                 
                 if (count($bibs2) == 0) {
-                    print "<br><h3>All parent records correctly reference records which believe they are their children</h3><br>";
+                    print '<br><h3 class="res-valid">OK: All parent records correctly reference records which believe they are their children</h3><br>';
                     if($wasdeleted2>1){
                         print "<div>$wasdeleted2 invalid pointer(s) were removed from database</div>";
                     }
@@ -808,7 +811,7 @@ href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['chi
            
             print '<a name="empty_fields"/>';
             if($total_count_rows<1){
-                 print '<div><h3>All records don\'t have empty fields</h3></div>';
+                 print '<div><h3 class="res-valid">OK: All records don\'t have empty fields</h3></div>';
             }
             if($wascorrected>1){
                  print "<div>$wascorrected empty fields were deleted</div>";
@@ -922,7 +925,7 @@ onclick="{document.getElementById('page-inner').style.display = 'none';window.op
             print '<a name="date_values"/>';
             
             if(count($bibs)==0){
-                print '<div><h3>All records have recognisable Date values</h3></div>';
+                print '<div><h3 class="res-valid">OK: All records have recognisable Date values</h3></div>';
             }
             else
             {
@@ -1024,7 +1027,7 @@ onclick="{var ids=get_selected_by_name('recCB5'); if(ids){document.getElementByI
 
             print '<a name="term_values"/>';
             if(count($bibs)==0){
-                print "<div><h3>All records have recognisable term values</h3></div>";
+                print '<div><h3 class="res-valid">OK: All records have recognisable term values</h3></div>';
                 if($wasdeleted>1){
                     print "<div>$wasdeleted invalid term value(s) were removed from database</div>";
                 }
@@ -1141,7 +1144,7 @@ src="<?php echo HEURIST_BASE_URL.'common/images/16x16.gif'?>">&nbsp;<?= $row['dt
             }
 
                 if (count($ids) == 0) {
-                    print "<h3>All records have valid terms (terms are as specified for each field)</h3>";
+                    print '<h3 class="res-valid">OK: All records have valid terms (terms are as specified for each field)</h3>';
                 }else{
                     echo '</table><br>';   
                     echo '<span><a target=_new id="link_wrongterms" href='.HEURIST_BASE_URL.'?db='.HEURIST_DBNAME
@@ -1178,7 +1181,7 @@ src="<?php echo HEURIST_BASE_URL.'common/images/16x16.gif'?>">&nbsp;<?= $row['dt
             }
 
             if(count($bibs)==0){
-                print "<h3>No single value fields exceed 1 value</h3>";
+                print '<h3 class="res-valid">OK: No single value fields exceed 1 value</h3>';
             }
             else
             {
@@ -1265,7 +1268,7 @@ src="<?php echo HEURIST_BASE_URL.'common/images/16x16.gif'?>">&nbsp;<?= $row['dt
             }
 
             if(count($bibs)==0){
-                print "<div><h3>No required fields with missing or empty values</h3></div>";
+                print '<div><h3 class="res-valid">OK: No required fields with missing or empty values</h3></div>';
             }
             else
             {
@@ -1358,7 +1361,7 @@ src="<?php echo HEURIST_BASE_URL.'common/images/16x16.gif'?>">&nbsp;
             <div>
                 <?php
                 if (count($bibs) == 0) {
-                    print "<h3>No extraneous fields (fields not defined in the list for the record type)</h3>";
+                    print '<h3 class="res-valid">OK: No extraneous fields (fields not defined in the list for the record type)</h3>';
                 }
                 else
                 {

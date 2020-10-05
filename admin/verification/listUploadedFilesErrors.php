@@ -78,7 +78,7 @@ $mysqli = $system->get_mysqli();
     </head>
 
 
-    <body class="popup">
+    <body class="popup" style="overflow:auto">
 
         <div id="in_porgress" class="coverall-div" style="display:none;"><h2>Repairing....</h2></div>    
     
