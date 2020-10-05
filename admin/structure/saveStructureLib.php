@@ -198,7 +198,12 @@ function handleError($msg, $query, $sqlerror=null){
         $sqlerror = $mysqli->error;
     }
 
-    $system->addError(HEURIST_DB_ERROR, 'SQL error on db structure modification. '.$msg.'. Query: '.$query, $sqlerror);
+    $system->addError(HEURIST_DB_ERROR, 
+    'An error occurred on a request to the underlying SQL database.'.
+    '<br>Please contact the Heurist team if the reason is not clear.'.
+    '<p>Specific description: '.$sqlerror.'</p>'.
+    '<p>Heurist system details: '.$msg.'</p>'.
+    '<p>SQL query: '.$query.'</p>');
 
     return false;//array('error'=> '!');
 }
