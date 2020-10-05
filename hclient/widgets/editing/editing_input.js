@@ -1242,14 +1242,14 @@ console.log('close edit terms - recreate selector');
                                                         .appendTo($inputdiv);
                                             }
                                             
-                                            var invTermID = window.hWin.HEURIST4.dbs.getInverseTermById(reverse[k]['trmID']);
+                                            //var invTermID = window.hWin.HEURIST4.dbs.getInverseTermById(reverse[k]['trmID']);
                                             
                                             var ele = window.hWin.HEURIST4.ui.createRecordLinkInfo($inputdiv, 
                                                 {rec_ID: targetID, 
                                                  rec_Title: headers[targetID][0], 
                                                  rec_RecTypeID: targetRectypeID, 
                                                  relation_recID: reverse[k]['relationID'], 
-                                                 trm_ID: invTermID,
+                                                 trm_ID: reverse[k]['trmID'], //invTermID,
                                                  dtl_StartDate: reverse[k]['dtl_StartDate'], 
                                                  dtl_EndDate: reverse[k]['dtl_EndDate'],
                                                  is_inward: true
@@ -3080,7 +3080,7 @@ console.log('onpaste');
 
             var headerTerms = '';
             if(this.options.dtID==window.hWin.HAPI4.sysinfo['dbconst']['DT_RELATION_TYPE']){ //specific behaviour - show all
-                allTerms = 0;
+                allTerms = 'relation'; //show all possible relations
             }else{
                 allTerms = this.f('rst_FilteredJsonTermIDTree');        
                 //headerTerms - disabled terms
@@ -3112,14 +3112,12 @@ console.log('onpaste');
             //value is not allowed
             if( !window.hWin.HEURIST4.util.isempty(allTerms) &&
                 window.hWin.HEURIST4.util.isNumber(value) && $input.val()!=value){
-                
-                var terms = window.hWin.HEURIST4.terms;
-                var termLookup = terms.termsByDomainLookup[dt_type];
-                var sMsg = '';
-                if(window.hWin.HEURIST4.util.isnull(termLookup[value])){
+                    
+                var name = $Db.trm(value,'trm_Label');
+                if(window.hWin.HEURIST4.util.isempty(name)){
                     sMsg = 'The term code '+value+' recorded for this field is not recognised. Please select a term from the dropdown.';
                 }else{
-                    sMsg = 'The term "'+termLookup[value][terms.fieldNamesToIndex['trm_Label']]+'" (code '+value+') is not valid for this field. '
+                    sMsg = 'The term "'+name+'" (code '+value+') is not valid for this field. '
                     +'Please select from dropdown or modify field definition to include this term';
                 }
                 this.showErrorMsg(sMsg);

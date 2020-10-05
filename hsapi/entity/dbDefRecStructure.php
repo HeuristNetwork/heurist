@@ -84,7 +84,7 @@ class DbDefRecStructure extends DbEntityBase
 
         }else if(@$this->data['details']=='list'){
         
-            $this->data['details'] = 'rst_ID,rst_RecTypeID,rst_DetailTypeID,rst_DisplayName';
+            $this->data['details'] = 'rst_ID,rst_RecTypeID,rst_DetailTypeID,rst_DisplayName,rst_RequirementType,rst_CreateChildIfRecPtr';
         
         }else if(@$this->data['details']=='full'){
             //all fields from configuration json

@@ -29,7 +29,6 @@ getTermValue - returns label and code for term by id
 
 getColorFromTermValue - Returns hex color by label or code for term by id
 
-
 getChildrenTerms - returns entire terms tree or only part of it for selected termID
 
 
@@ -107,7 +106,7 @@ window.hWin.HEURIST4.dbs = {
     getInverseTermById: function(termID){
         var term = $Db.trm(termID);
         if(term){
-            var invTermID = term['trm_InverseTermID'];
+            var invTermID = term['trm_InverseTermId'];
             if(invTermID>0) return invTermID;
             return termID;
         }
@@ -1006,6 +1005,51 @@ window.hWin.HEURIST4.dbs = {
     },
 
     //
+    // returns array of record types that points to given record type
+    // rt_id => field id
+    /*
+    getLinkedRecordTypesReverse2: function($rty_ID, db_structure, parent_child_only){
+        
+        if(!db_structure){
+            db_structure = window.hWin.HEURIST4;
+        }
+        
+        if(parent_child_only!==true) parent_child_only = false;
+
+        var details = $Db.rst();
+        //recset.fld(rst_ID, fieldName);
+        //var $arr_rectypes = {};
+        var res = {};
+        
+        details.each(function(rst_ID, field){
+            field = $Db.rst(rst_ID);
+            
+            if(field['rst_RecTypeID']!=$rty_ID){
+                var dty_ID = field['rst_DetailTypeID'];
+                var dty_Type = $Db.dty(dty_ID, 'dty_Type');
+                if((dty_Type=='resource' || dty_Type=='relmarker') 
+                    && field['rst_RequirementType']!='forbidden')
+                {
+                    if(parent_child_only && field['rst_CreateChildIfRecPtr']!=1){
+                        //skip      
+                    }else{
+                    
+                        var ptr = field['rst_PtrFilteredIDs'];
+                        if(ptr && findArrayIndex($rty_ID, ptr.split(','))>=0)
+                        {
+                            //$arr_rectypes[field['rst_RecTypeID']] = field['rst_DetailTypeID'];
+                            res.push(dty_ID);      
+                        }
+                    }
+                }
+            }
+        });
+        
+        return res;
+    },
+    */
+    
+    //
     // returns true if rectype has a field in its structure
     //
     hasFields: function( $rt_ID, fieldtype, db_structure ){
@@ -1129,7 +1173,7 @@ window.hWin.HEURIST4.dbs = {
     },
 
     //  
-    //special behavior for defRecStructure
+    // special behavior for defRecStructure
     // it returns value for given field or entire recstrucure field
     //    
     rst_idx: function(rty_ID, dty_ID, fieldName){
@@ -1138,7 +1182,7 @@ window.hWin.HEURIST4.dbs = {
         
         if(rty_ID>0){
             
-            //rst_ID:{dty_ID:rstID, ..... }
+            //rty_ID:{dty_ID:rstID, ..... }
             var details = window.hWin.HAPI4.EntityMgr.getEntityData2('rst_Index');
             
             if(!details || !details[rty_ID]){
@@ -1167,6 +1211,8 @@ window.hWin.HEURIST4.dbs = {
     
     //
     // it uses trm_Links
+    //
+    // vocab_id - id or "relation"
     // mode - 0, flat - returns recordset, 
     //        1, tree - returns treedata for fancytree
     //        2, select - return array of options for selector
@@ -1179,6 +1225,7 @@ window.hWin.HEURIST4.dbs = {
         //parent:[children]
         var t_idx = window.hWin.HAPI4.EntityMgr.getEntityData('trm_Links'); 
         var trm_ids = [];
+        var res = {};
         
         if(window.hWin.HEURIST4.util.isNumber(mode)){
             if(mode==1) mode='tree'
@@ -1189,9 +1236,16 @@ window.hWin.HEURIST4.dbs = {
         }
         
 
-        function __addChilds(recID, lvl_parents){
+        function __addChilds(recID, lvl_parents, include_vocab){
         
             var node = {title: recset.fld(recID, 'trm_Label'), key: recID};
+            
+            if(include_vocab && lvl_parents==0){
+                node.is_vocab = true;
+                trm_ids.push({title: recset.fld(recID, 'trm_Label'), 
+                                is_vocab: true,
+                                key: recID, depth:lvl_parents});
+            }
 
             var children = t_idx[recID]; //array of children ids
             
@@ -1249,7 +1303,17 @@ window.hWin.HEURIST4.dbs = {
             return node;
         }
         
-        var res = __addChilds(vocab_id, 0);
+        if(vocab_id=='relation'){
+            //find all vocabulary with domain "relation"
+            var vocab_ids = $Db.trm_getVocabs('relation');
+            for (var i=0; i<vocab_ids.length; i++){
+                var trm_ID = vocab_ids[i];
+                res = __addChilds(trm_ID, 0, true);
+            }
+            
+        }else{
+            res = __addChilds(vocab_id, 0, false);
+        }
         
         if(mode=='tree'){
             return res['children'];
@@ -1271,10 +1335,31 @@ window.hWin.HEURIST4.dbs = {
         var children = t_idx[recID];
         return (children && children.length>0);
     },
+
+
+    //
+    //
+    //
+    trm_getVocabs: function(domain){
+
+        var t_idx = window.hWin.HAPI4.EntityMgr.getEntityData('trm_Links'); 
+        var res = [];
+        var parents = Object.keys(t_idx);
+        for (var i=0; i<parents.length; i++){ //first level
+            var trm_ID = parents[i];
+            var trm_ParentTermID = $Db.trm(trm_ID, 'trm_ParentTermID');
+            if(!(trm_ParentTermID>0)){
+                if(!domain || $Db.trm(trm_ID, 'trm_Domain')==domain)
+                res.push(trm_ID);    
+            }
+        }
+        
+        return res;
+    },
     
     //
     // get array of vocabularies by reference
-    // (where the given tag directly or by referecne belongs to)
+    // (where the given term directly or by referecne belongs to)
     //
     trm_getAllVocabs: function(trm_id){
         var t_idx = window.hWin.HAPI4.EntityMgr.getEntityData('trm_Links'); 

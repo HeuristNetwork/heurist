@@ -1241,21 +1241,63 @@ prof =Profile
             },
             
             //
-            // rty_ID[dty_ID] = rst_ID
+            // 1) index   rty_ID[dty_ID] = rst_ID
+            // 2) reverse links rty <- dty_ID - list of resource and relmarker fields that refers this rectype
+            // 3) direct links  rty -> rty_IDs - linked to 
+            // 4) reverse links rty <- rty_IDs - linked from
             //
             createRstIndex: function(){
-                var rst_index = {}
+                var rst_index = {};
+                var rst_references = {}; //list of resource and relmarker fields that refers this rectype
+                var rst_reverse = {};    //linked FROM rectypes
+                var rst_direct = {};     //linked TO rectypes
+                
                 var recset = entity_data['defRecStructure'];
                 recset.each(function(rst_ID, record){
                     
+                    //rstfield = recset.getRecord(rst_ID)
                     var rty_ID = recset.fld(record,'rst_RecTypeID');
                     var dty_ID = recset.fld(record,'rst_DetailTypeID');
                     
                     if(!rst_index[rty_ID]) rst_index[rty_ID] = {};
                     if(!rst_index[rty_ID][dty_ID]) rst_index[rty_ID][dty_ID] = rst_ID;
+
+                    //links
+                    var dty_Type = $Db.dty(dty_ID, 'dty_Type');
+                    if((dty_Type=='resource' || dty_Type=='relmarker') 
+                        && recset.fld(record,'rst_RequirementType')!='forbidden')
+                    {
+                        var ptr = $Db.dty(dty_ID, 'dty_PtrTargetRectypeIDs');
+                        if(ptr){
+                           ptr = ptr.split(',');
+                           if(ptr.length>0){
+                               //direct links
+                               if(!rst_direct[rty_ID]) rst_direct[rty_ID] = [];  
+                               rst_direct[rty_ID] = rst_direct[rty_ID].concat(ptr);
+                               
+                               for(var i=0; i<ptr.length; i++){
+                                   var target_rty = ptr[i];
+                                   if(rst_references[target_rty]){
+                                       if(rst_references[target_rty].indexOf(dty_ID)<0){
+                                           rst_references[target_rty].push(dty_ID);
+                                       }
+                                       if(rst_reverse[target_rty].indexOf(rty_ID)<0){
+                                           rst_reverse[target_rty].push(rty_ID);
+                                       }
+                                   }else{
+                                        rst_reverse[target_rty] = [rty_ID];
+                                        rst_references[target_rty] = [dty_ID];
+                                   }
+                               }
+                           }
+                        }
+                    }
+                    
                         
                 });
+                
                 entity_data['rst_Index'] = rst_index;
+                entity_data['rst_Links'] = {direct:rst_direct, reverse:rst_reverse, refs:rst_references };
             },
 
             

@@ -565,19 +565,30 @@ window.hWin.HEURIST4.ui = {
         //add optgroups and options
         for(var i=0; i<data.length; i++){
             
-            
-            if(supressTermCode || window.hWin.HEURIST4.util.isempty(data[i].code)){
-                termCode = '';
+            if(data[i].is_vocab){
+                
+                var opt = window.hWin.HEURIST4.ui.addoption(selObj, 
+                                                    data[i].key, data[i].title);
+                
+                $(opt).attr('disabled', 'disabled');
+                $(opt).attr('group', 1);
+                
             }else{
-                termCode = " [code "+data[i].code+"]";
-            }
             
-            var opt = window.hWin.HEURIST4.ui.addoption(selObj, 
-                                            data[i].key, data[i].title+termCode);
-            $(opt).attr('depth', data[i].depth);
+                if(supressTermCode || window.hWin.HEURIST4.util.isempty(data[i].code)){
+                    termCode = '';
+                }else{
+                    termCode = " [code "+data[i].code+"]";
+                }
+                
+                var opt = window.hWin.HEURIST4.ui.addoption(selObj, 
+                                                data[i].key, data[i].title+termCode);
+                $(opt).attr('depth', data[i].depth);
 
-            if (data[i].key == defaultTermID || data[i].title == defaultTermID) {
-                    opt.selected = true;
+                if (data[i].key == defaultTermID || data[i].title == defaultTermID) {
+                        opt.selected = true;
+                }
+                
             }
             /*            
             $(opt).attr('term-img', hasImage?1:0);
@@ -2096,9 +2107,14 @@ window.hWin.HEURIST4.ui = {
         
         var reltype = ''
         if(info['trm_ID']>0){
+            var term_ID = info['trm_ID'];
+            if (info['is_inward']){
+                term_ID = window.hWin.HEURIST4.dbs.getInverseTermById(term_ID);    
+            }
+            
             reltype = '<div class="detailType" style="display:table-cell;min-width:'
                 + Math.max(19, Math.min(reltype.length,25))+'ex;">'
-                + $Db.trm(info['trm_ID'], 'trm_Label') + '</div>'
+                + $Db.trm(term_ID, 'trm_Label') + '</div>'
         }
         
         var ele = $('<div class="link-div ui-widget-content ui-corner-all"  data-relID="'
