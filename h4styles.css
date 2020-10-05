@@ -450,8 +450,8 @@ div.recordDiv.public  > .action-button-container{
 
 .recordDiv > .description_term{
     float: right;
-    max-width: 65%;
-    width: 65%;
+    max-width: 50%;
+    width: 50%;
     font-size: smaller;
     font-style: italic;
     padding-top: 4px;
@@ -534,7 +534,7 @@ div.recordDiv.public .action-button > .ui-button-icon-primary{
     top:6px !important;
     max-width:160px;
 }
-div.recordDiv.public .rec_edit_link_ext{
+div.recordDiv.public .rec_edit_link_ext, .thumbs .rec_edit_link_ext{
     display:none;
 }
 /* hide bookmark icons for public */
