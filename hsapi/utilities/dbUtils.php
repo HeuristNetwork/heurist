@@ -83,45 +83,28 @@ class DbUtils {
 
         if($dbID>0){
                     $mysqli = self::$mysqli;
-                    //@todo why 3 actions for every table????? 
                     $result = 0;
-                    $res = $mysqli->query("update defRecTypes set rty_OriginatingDBID='$dbID' ".
-                        "where (rty_OriginatingDBID = '0') OR (rty_OriginatingDBID IS NULL) ");
-                    if (!$res) {$result = 1; }
-                    $res = $mysqli->query("update defRecTypes set rty_NameInOriginatingDB=rty_Name ".
-                        "where (rty_NameInOriginatingDB = '') OR (rty_NameInOriginatingDB IS NULL)");
-                    if (!$res) {$result = 1; }
-                    $res = $mysqli->query("update defRecTypes set rty_IDInOriginatingDB=rty_ID ".
-                        "where (rty_IDInOriginatingDB = '0') OR (rty_IDInOriginatingDB IS NULL) ");
-                    if (!$res) {$result = 1; }
+                    $res = $mysqli->query("update defRecTypes set "
+                        ."rty_OriginatingDBID='$dbID',rty_NameInOriginatingDB=rty_Name,rty_IDInOriginatingDB=rty_ID "
+                        ."where (rty_OriginatingDBID = '0') OR (rty_OriginatingDBID IS NULL) ");
+                    if ($res===false) {$result = 1; }
                     // Fields
-                    $res = $mysqli->query("update defDetailTypes set dty_OriginatingDBID='$dbID' ".
-                        "where (dty_OriginatingDBID = '0') OR (dty_OriginatingDBID IS NULL) ");
-                    if (!$res) {$result = 1; }
-                    $res = $mysqli->query("update defDetailTypes set dty_NameInOriginatingDB=dty_Name ".
-                        "where (dty_NameInOriginatingDB = '') OR (dty_NameInOriginatingDB IS NULL)");
-                    if (!$res) {$result = 1; }
-                    $res = $mysqli->query("update defDetailTypes set dty_IDInOriginatingDB=dty_ID ".
-                        "where (dty_IDInOriginatingDB = '0') OR (dty_IDInOriginatingDB IS NULL) ");
-                    if (!$res) {$result = 1; }
+                    $res = $mysqli->query("update defDetailTypes set "
+                        ."dty_OriginatingDBID='$dbID',dty_NameInOriginatingDB=dty_Name,dty_IDInOriginatingDB=dty_ID "
+                        ."where (dty_OriginatingDBID = '0') OR (dty_OriginatingDBID IS NULL) ");
+                    if ($res===false) {$result = 1; }
                     // Terms
-                    $res = $mysqli->query("update defTerms set trm_OriginatingDBID='$dbID' ".
-                        "where (trm_OriginatingDBID = '0') OR (trm_OriginatingDBID IS NULL) ");
-                    if (!$res) {$result = 1; }
-                    $res = $mysqli->query("update defTerms set trm_NameInOriginatingDB=trm_Label ".
-                        "where (trm_NameInOriginatingDB = '') OR (trm_NameInOriginatingDB IS NULL)");
-                    if (!$res) {$result = 1; }
-                    $res = $mysqli->query("update defTerms set trm_IDInOriginatingDB=trm_ID ".
-                        "where (trm_IDInOriginatingDB = '0') OR (trm_IDInOriginatingDB IS NULL) ");
-                    if (!$res) {$result = 1; }
+                    $res = $mysqli->query("update defTerms set "
+                        ."trm_OriginatingDBID='$dbID',trm_NameInOriginatingDB=trm_Label,trm_IDInOriginatingDB=trm_ID "
+                        ."where (trm_OriginatingDBID = '0') OR (trm_OriginatingDBID IS NULL) ");
+                    if ($res===false) {$result = 1; }
 
                     
-                    if (!$res){
+                    if ($result == 1){
                         self::$system->addError(HEURIST_DB_ERROR,
-                                    'Error on database registration '.$db_name, $mysqli->error);
+                                    'Error on update IDs "IDInOriginatingDB" fields for database registration '.$dbID, $mysqli->error);
+                        $res = false;
                     }
-                    
-                    $res = ($result==0);
         }
         return $res;
     }    

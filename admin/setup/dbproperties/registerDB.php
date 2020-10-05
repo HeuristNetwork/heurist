@@ -418,7 +418,7 @@ function registerDatabase() {
                         $result = DbUtils::databaseRegister( $dbID );
                         
                         if (!$result) {
-                            echo '<div class=wrap><div class="ui-state-error">Unable to set all values for originating DB information for '.HEURIST_DBNAME.' - one of the update queries failed</div></div>';
+                            echo '<div class=wrap><div class="ui-state-error">Unable to set all values for originating DB information for '.HEURIST_DBNAME.' - one of the update queries failed. Please report a bug to Heurist team</div></div>';
                         }
                         ?>
                         <script> // automatically call Heurist_Master_Index metadata edit form for this database
