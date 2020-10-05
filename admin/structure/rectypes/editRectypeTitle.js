@@ -46,6 +46,7 @@ function EditRectypeTitle() {
     var _className = "EditRectypeTitle",
     _rectypeID,
     _varsTree; //treeview object
+    var action_in_progress = false;
 
     /**
      * Initialization of input form
@@ -531,9 +532,13 @@ function EditRectypeTitle() {
             return false;
         }
         
+        if(action_in_progress) return;
+        action_in_progress = true;
+        
         var res = _varsTree.getNodesBy(__loopNodes);
         if(res && res.length>0){
             alert('You have not yet inserted the selected fields in the title mask. Please click Insert Fields, or unselect the fields in the tree.');
+            action_in_progress = false;
             return;
         }
         
@@ -547,6 +552,7 @@ function EditRectypeTitle() {
             function (response) {
                 if(response.status != window.hWin.ResponseStatus.OK || response.message){
                     window.hWin.HEURIST4.msg.showMsgErr(response);
+                    action_in_progress = false;
                 }else{
                     _doSave_Step2_SaveRectype();
                 }                                        
@@ -583,10 +589,12 @@ function EditRectypeTitle() {
                             _updateTitleMask();        
                         }else{
                             window.hWin.HEURIST4.msg.showMsgErr(response);
+                            action_in_progress = false;
                         }
                     }                
                 );
             }else{
+                action_in_progress = false;
                 window.close(newvalue);
             }                    
             
@@ -607,6 +615,7 @@ function EditRectypeTitle() {
                 height: 400,
                 width: 400,
                 callback: function(context) {
+                    action_in_progress = false;
                 }
         });
         
