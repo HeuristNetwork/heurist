@@ -135,7 +135,7 @@ $.widget( "heurist.search", {
 
         // Search functions container
         //'height':'100%', 'float':'left'   , 'min-width':sz_search  ,  
-        this.div_search   = $('<div>').css({ 'width':'100%' }).appendTo( this.element );
+        this.div_search   = $('<div>').css({ 'width':'100%', display:'table-row' }).appendTo( this.element );
 
                
         
@@ -718,7 +718,7 @@ $.widget( "heurist.search", {
             $(this.element).find('.div-table-cell.logged-in-only').css({'display':'table-cell'});
             
             if(this.options.is_h6style){
-                $(this.element).find('.div-table-cell:visible').css({'display':'inline-block'});    
+                $(this.element).find('.div-table-cell:visible').css({'display':'table-cell'});
             }
             
             //$(this.element).find('.logged-in-only').css('visibility','visible');
@@ -728,7 +728,12 @@ $.widget( "heurist.search", {
             $(this.element).find('.logged-in-only').hide();
             //$(this.element).find('.logged-in-only').css('visibility','hidden');
             //$(this.element).find('.logged-out-only').css('visibility','visible');
+            
             $(this.element).find('.logged-out-only').show();
+            if(this.options.is_h6style){
+                $(this.element).find('.div-table-cell:visible').css({'display':'table-cell'});
+            }
+            
         }
 
 //ART        $(this.element).find('.div-table-cell').height( $(this.element).height() );
