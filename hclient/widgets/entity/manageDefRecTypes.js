@@ -583,11 +583,12 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
 //console.log(fields);
         //fields = ['rtyid','ccode','addrec','filter','count','group','icon','edit','editstr','name','description','show','duplicate','fields','status'];        
         
-        function __action_btn(action,icon,title){
+        function __action_btn(action,icon,title,color){
+            if(!color) color = '#555555';            
             return '<div class="item" style="width:30px;text-align:center;"><div title="'+title+'" '
                     +'class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" '
                     +'role="button" aria-disabled="false" data-key="'+action+'" style="height:18px;">'
-                    +     '<span class="ui-button-icon-primary ui-icon '+icon+'"></span>'
+                    +     '<span class="ui-button-icon-primary ui-icon '+icon+'" style="color:'+color+'"></span>'
                     + '</div></div>'            
         }
 
@@ -614,7 +615,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                     html += fld2('rty_RecCount','40px',null,'text-align:right'); break;
                 case 'group': 
                     html += __action_btn('group','ui-icon-carat-d','Change group');
-                    break;
+                    break;                         
                 case 'icon': 
                     html += html_icon; 
                     break;
@@ -645,11 +646,21 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                     html += __action_btn('fields','ui-icon-circle-b-info','List of fields');
                     break;
                 case 'status': 
-                    
+                
                     if(recordset.fld(record, 'rty_Status')=='reserved'){
-                        html += __action_btn('','ui-icon-lock','Status: Reserved');
+                        html += __action_btn('','ui-icon-lock','This is a reserved record type common to all Heurist databases. It cannot be deleted.','gray');
                     }else{
-                        html += __action_btn('delete','ui-icon-delete','Status: Open. Click to delete record type');
+                        if(recordset.fld(record,'rty_RecCount')>0){
+                            html += __action_btn('','ui-icon-trash-b','To allow deletion, use Explore > Entities to find and delete all records.');    
+                        }else{
+                            var links = window.hWin.HAPI4.EntityMgr.getEntityData('rst_Links')
+                            var is_referenced = (links['refs'] && links['refs'][recID]);
+                            if(is_referenced){
+                                html += __action_btn('delete','ui-icon-trash-b','This record type is referenced. Click to show references');    
+                            }else{
+                                html += __action_btn('delete','ui-icon-trash','Click to delete this record type');        
+                            }
+                        }
                     }    
                 
                     break;
@@ -708,6 +719,41 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
     //
     _onActionListener:function(event, action){
         
+
+        if(action && action.action=='delete'){
+            
+            var links = window.hWin.HAPI4.EntityMgr.getEntityData('rst_Links')
+            if(links['refs'] && links['refs'][action.recID]){
+                var res = links['refs'][action.recID];
+                var sList = '';
+                for(var i=0; i<res.length; i++){
+                    sList += ('<a href="#" data-dty_ID="'+res[i]+'">'+$Db.dty(res[i],'dty_Name')+'</a>');
+                }
+                
+                $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
+                '<p><b>'+$Db.rty(action.recID,'rty_Name')+'</b> is referenced by the following fields:</p>'
+                + sList
+                +'<p>Please remove these fields altogether, or click the links above <br>to modify base field (will affect all record types which use it).</p>'
+                , null, {title:'Warning'});        
+                
+                this._on($dlg.find('a[data-dty_ID]'),{click:function(e){
+                    
+                    var rg_options = {
+                         isdialog: true, 
+                         edit_mode: 'editonly',
+                         select_mode: 'manager',
+                         rec_ID: $(e.target).attr('data-dty_ID'),
+                         onSelect:function(res){
+                         }
+                    };
+                    window.hWin.HEURIST4.ui.showEntityDialog('defDetailTypes', rg_options);
+                    return false;                    
+                }});
+                
+                return;
+            }
+        }
+
         
         var isResolved = this._super(event, action);
 
@@ -764,7 +810,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                     //show selectmenu with list of fields
                     if(this.fieldSelectorLast!=recID){
                         this.fieldSelectorLast   = recID;
-                        var details = $Db.rst_idx(recID);
+                        var details = $Db.rst_idx(recID); //get all fields for given rectype
                         if(!details) return;
                         var options = [];
                         for(var dty_ID in details){

@@ -69,10 +69,10 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             //add fields group editor
             this.element.addClass('ui-suppress-border-and-shadow');
             
-            this.element.find('.ent_wrapper:first').addClass('ui-dialog-heurist').css('left',328);
+            this.element.find('.ent_wrapper:first').addClass('ui-dialog-heurist').css('left',228);
             
             this.fieldtype_groups = $('<div data-container="ABBBBBB">').addClass('ui-dialog-heurist')
-                .css({position: 'absolute',top: 0, bottom: 0, left: 0, width:320, overflow: 'hidden'})
+                .css({position: 'absolute',top: 0, bottom: 0, left: 0, width:220, overflow: 'hidden'})
                 .appendTo(this.element);
 
         }        
@@ -291,7 +291,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                     html += fld2('120px','Name','text-align:left');
                     break;
                 case 'type': 
-                    html += fld2('40px','Type','text-align:left');
+                    html += fld2('60px','Type','text-align:left');
                     break;
                 case 'description':  
                     html += fld2(null,'Description',''); break;
@@ -367,7 +367,10 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                     html += __action_btn('edit','ui-icon-pencil','Click to edit base field');
                     break;
                 case 'name':  html += fld2('dty_Name','120px'); break;
-                case 'type':  html += fld2('dty_Type','40px'); break;
+                case 'type':  
+                
+                    html += fld2('', '60px', window.hWin.HEURIST4.dbs.baseFieldType[recordset.fld(record,'dty_Type')]); 
+                    break;
                 case 'description':  
                     html += fld2('dty_HelpText',null,null,
                         'min-width:320px;max-width:320px;width:50%;font-style:italic;font-size:smaller'); break;

@@ -135,10 +135,10 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             if(this.options.auxilary=='vocabulary'){
                 //vocabulary groups
                 
-                this.main_element = this.element.find('.ent_wrapper:first').addClass('ui-dialog-heurist').css({'left':288});
+                this.main_element = this.element.find('.ent_wrapper:first').addClass('ui-dialog-heurist').css({'left':248});
                 
                 this.vocabulary_groups = $('<div>').addClass('ui-dialog-heurist')
-                    .css({position: 'absolute',top: 0, bottom: 0, left: 0, width:280, overflow: 'hidden'})
+                    .css({position: 'absolute',top: 0, bottom: 0, left: 0, width:240, overflow: 'hidden'})
                     .uniqueId()
                     .appendTo(this.element);
                 
@@ -262,10 +262,10 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 //add vocab group and vocabs panels
                 this.element.addClass('ui-suppress-border-and-shadow');
                 
-                this.main_element = this.element.find('.ent_wrapper:first').addClass('ui-dialog-heurist').css({'left':576}); //
+                this.main_element = this.element.find('.ent_wrapper:first').addClass('ui-dialog-heurist').css({'left':544}); //
                 
                 this.vocabularies_div = $('<div>').addClass('ui-dialog-heurist')
-                    .css({position: 'absolute',top: 0, bottom: 0, left: 0, width:568, overflow: 'hidden'}) //280
+                    .css({position: 'absolute',top: 0, bottom: 0, left: 0, width:536, overflow: 'hidden'}) //280
                     .uniqueId()
                     .appendTo(this.element);
                 
@@ -737,7 +737,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             }
             sWidth = 'max-width:'+sWidth+'px;min-width:'+sWidth+'px;';
         }else{
-            sWidth = 'display:inline-block;padding-top:4px;';
+            sWidth = 'display:inline-block;padding-top:4px;width:20%;';
             var lvl = (recordset.fld(record, 'trm_Parents').split(',').length);
             sPad = 'padding-left:'+(lvl*20);
             
@@ -751,7 +751,6 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 
                 sRef = '<span style="color:blue;font-size:smaller;">(ref)</span>';
             }
-            
         }
         
         var recTitle = '<div class="item truncate" style="'+sWidth+sBold+sPad+'" '+sHint+'>'
@@ -787,9 +786,9 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                                     +recThumb+'&quot;);opacity:1"></div>';
                                     
             html = '<div class="recordDiv rt_draggable" recid="'+recID+'">'
-                        + '<div class="recordSelector" style="display:inline-block"><input type="checkbox" /></div>'
+                        + '<div class="recordSelector" style="display:inline-block;"><input type="checkbox" /></div>'
                         + html_thumb + recTitle
-                        + '<div class="rec_action_link2" style="padding-left:4px">';
+                        + '<div class="rec_action_link2" style="padding-left:4px;width:10%">';
                         
             if(this.options.select_mode=='manager'){
                 if(sRef){
@@ -1077,7 +1076,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
     },
     
     // 
-    // this event handler os always called
+    // this event handler is always called
     // 
     _afterSaveEventHandler2: function( recID, fieldvalues ){  
         
@@ -1095,6 +1094,14 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             }
             this._filterByVocabulary();
             //this._loadData();
+            //expand formlet
+            if(this.options.auxilary=='term'){
+                var that = this;
+                setTimeout(function(){
+                   that.recordList.resultList('expandDetailsInline',recID); 
+                },1000);
+            }
+            
         }
         this._triggerRefresh(this.options.auxilary);
         

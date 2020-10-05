@@ -154,7 +154,7 @@ $.widget( "heurist.manageDefVocabularyGroups", $.heurist.manageEntity, {
             //html = html + '<div>';
         }
         
-        html = html + '<div class="item" style="display:table-cell;min-width:210px;max-width:210px;font-weight:bold;font-size:14px">'
+        html = html + '<div class="item truncate" style="display:table-cell;min-width:170px;max-width:170px;font-weight:bold;font-size:14px">'
                 +window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, 'vcg_Name'))+'</div>'; 
         
         if(this.options.edit_mode=='popup'){

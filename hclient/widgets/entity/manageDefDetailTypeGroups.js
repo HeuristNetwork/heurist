@@ -168,7 +168,7 @@ $.widget( "heurist.manageDefDetailTypeGroups", $.heurist.manageEntity, {
         }
         
         html = html + 
-            '<div class="item" style="font-weight:bold;display:table-cell;width:250;max-width:250">'
+            '<div class="item truncate" style="font-weight:bold;display:table-cell;width:150;max-width:150">'
             +window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, 'dtg_Name'))+'</div>';
         
         if(this.options.edit_mode=='popup'){
