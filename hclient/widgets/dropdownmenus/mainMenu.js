@@ -1077,7 +1077,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
             }
 
             if(that.options.is_h6style){
-                 href =  href + '&ll=H6Default';
+                 href =  href + '&ll=H6Default&t='+((new Date()).getTime());
             }
             
             if(!window.hWin.HEURIST4.util.isempty(target)){
