@@ -246,12 +246,20 @@ function hCmsEditing(_options) {
     function __iniLoadPageById( pageid ){                    
      
        var edited_content = __getEditorContent();
-       
+     
        var is_changed = (edited_content!=null);
-       if(is_header_editor){
-            is_changed = is_changed && header_content_raw != edited_content;
-       }else{
-            is_changed = is_changed && last_save_content != edited_content;
+       if(is_changed){
+           
+           edited_content = edited_content.replace(/(\r\n|\n|\r|\&nbsp;)/gm, "");
+       
+//console.log(edited_content);       
+//console.log(last_save_content.replace(/(\r\n|\n|\r|\&nbsp;)/gm, ""));       
+
+           if(is_header_editor){
+                is_changed = is_changed && header_content_raw.replace(/(\r\n|\n|\r|\&nbsp;)/gm, "") != edited_content;
+           }else{
+                is_changed = is_changed && last_save_content.replace(/(\r\n|\n|\r|\&nbsp;)/gm, "") != edited_content;
+           }
        }
        
        if( is_changed ){ //was_modified
@@ -303,7 +311,7 @@ function hCmsEditing(_options) {
                         }
                         //move title to header
                         pagetitle.addClass("webpageheading");
-                        pagetitle.appendTo(main_header.find('#main-pagetitle'));
+                        pagetitle.detach().appendTo(main_header.find('#main-pagetitle'));
                         
                         if(pagetitle.attr('date-empty')==1){
                             pagetitle.attr('date-empty',0);
@@ -1601,7 +1609,7 @@ function hCmsEditing(_options) {
                     $('#edit_mode').val(1).click();//to disable left panel
                     //original_editor_content 
                     last_save_content = $('.tinymce-body').val();
-//console.log('_editPageContent '+last_save_content);                
+console.log('_editPageContent '+last_save_content);                
                     
                     $('.tinymce-body').show();
                     tinymce.init(inlineEditorConfig);

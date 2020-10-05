@@ -669,7 +669,7 @@ _time_debug = new Date().getTime() / 1000;
                 +'" target="_blank" style="text-decoration:none;color:black;">'
                         +'<label>at: </label>'
                         +'<img src="'+window.hWin.HAPI4.sysinfo.host_logo
-                        +'" height="40" align="center"></a></div>')
+                        +'" height="35" align="center"></a></div>')
             .appendTo( $('#host_info') );
         }
     });
@@ -921,13 +921,13 @@ if ($page_template!=null && substr($page_template,-4,4)=='.tpl') {
         
     } else {
 ?>                        
-        <div id="main-logo" class="mceNonEditable header-element" style="position:absolute;top:10;left:10;max-height:90px;max-width:270px;border:2px none red;"></div>
+        <div id="main-logo" class="mceNonEditable header-element" style="position:absolute;top:20;left:10;max-height:90px;max-width:270px;border:2px none red;"></div>
         
-        <div id="main-logo-alt" class="mceNonEditable header-element" style="position:absolute;top:10;right:10;height:70px;width:270px;border:2px none red;"></div>
+        <div id="main-logo-alt" class="mceNonEditable header-element" style="position:absolute;top:20;right:10;height:70px;width:270px;border:2px none red;"></div>
         
-        <div id="main-title" class="mceNonEditable header-element" style="position:absolute;top:10;left:280;right:280;max-height:90px;border:2px none green;"></div>
+        <div id="main-title" class="mceNonEditable header-element" style="position:absolute;top:20;left:280;right:280;max-height:90px;border:2px none green;"></div>
         
-        <div id="main-host" style="position:absolute;top:80;right:10;" class=" header-element">
+        <div id="main-host" style="position:absolute;top:110;right:10;" class=" header-element">
             <div id="host_info" style="float:right;line-height:38px;height:40px;margin-right: 0px;">
             </div>
             <div style="float:right;padding:0 10px;height:40px;line-height: 38px;">  <!-- background: white; color:black;-->
@@ -936,10 +936,10 @@ if ($page_template!=null && substr($page_template,-4,4)=='.tpl') {
                 powered by <img src="<?php echo HEURIST_BASE_URL ?>hclient/assets/h4_icon_16x16.png" style="vertical-align:sub"> Heurist
             </a> 
             </div>
-            <div style="text-align: right;margin-right: 15px;font-size:0.8em">
-                <a href="mailto:<?php echo @$site_owner['ugr_eMail']; ?>">site owner</a>
-            </div>    
         </div>
+        <div style="position:absolute;top:5;right:10;font-size:0.8em">
+                <a href="mailto:<?php echo @$site_owner['ugr_eMail']; ?>">site owner</a>
+        </div>    
         
         <div id="main-menu" class="mceNonEditable header-element" style="position:absolute;top:110;width:100%;min-height:40px;border:2px none yellow;color:black;font-size:1.1em;" data-heurist-app-id="heurist_Navigation" data-generated="1">
             <div class="widget-design-header" style="padding: 10px;"><img style="vertical-align: middle;"
@@ -952,7 +952,7 @@ if ($page_template!=null && substr($page_template,-4,4)=='.tpl') {
 
 if(!$edit_Available && $system->is_member(2)){
         print '<a href="'.HEURIST_BASE_URL.'?db='.$system->dbname().'&cms='.$rec_id.'" id="btn_editor" target="_blank" '
-        .'style="position:absolute;right:40px; top:2px;" class="cms-button">Web site editor</a>';
+        .'style="position:absolute;right:100px; top:5px;" class="cms-button">Web site editor</a>';
 }
     ?>  
         <div id="main-pagetitle" class="ui-heurist-bg-light" style="display:none">loading...</div>       

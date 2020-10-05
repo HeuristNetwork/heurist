@@ -282,7 +282,7 @@ function editCMS( options ){
         );
         
     }
-
+    
     //  
     // search all website records: home, menu, pages
     // create menu tree data
@@ -381,11 +381,11 @@ function editCMS( options ){
                                         
                                         //init buttons
                                         if(!no_access){
-                                            edit_dialog.find('#btn_edit_home').button().click(function(){
+                                            edit_dialog.find('#btn_edit_home').button({icon:'ui-icon-pencil'}).click(function(){
                                                 _editHomePageRecord();
                                             });
                                             
-                                            edit_dialog.find('#btn_edit_header_content').button().click(function(){
+                                            edit_dialog.find('#btn_edit_header_content').button({icon:'ui-icon-window-minimize'}).click(function(){
                                                 var preview_frame = edit_dialog.find('#web_preview');
                                                 preview_frame[0].contentWindow.cmsEditing.editHeaderContent();
                                             });
@@ -393,21 +393,23 @@ function editCMS( options ){
                                                 var preview_frame = edit_dialog.find('#web_preview');
                                                 preview_frame[0].contentWindow.cmsEditing.resetHeaderContent();
                                             });
-                                            edit_dialog.find('#btn_edit_page_content').button({icon:'ui-icon-pencil'}).click(function(){
+                                            edit_dialog.find('#btn_edit_page_content').button({icon:'ui-icon-window'}).click(function(){
                                                 var preview_frame = edit_dialog.find('#web_preview');
                                                 //preview_frame[0].contentWindow.editPageContent();
                                                 preview_frame[0].contentWindow.cmsEditing.editPageContent();
                                             });
-                                            edit_dialog.find('#btn_edit_page_source').button({icon:'ui-icon-pencil'}).click(function(){
+                                            edit_dialog.find('#btn_edit_page_source').button({icon:'ui-icon-script'}).click(function(){
                                                 var preview_frame = edit_dialog.find('#web_preview');
                                                 preview_frame[0].contentWindow.cmsEditing.editPageSource();
                                             });
+                                            /*
                                             edit_dialog.find('#btn_edit_page_record').button().click(function(){
                                                 var preview_frame = edit_dialog.find('#web_preview');
                                                 //preview_frame[0].contentWindow.editPageRecord();
                                                 
                                                 preview_frame[0].contentWindow.cmsEditing.editPageRecord();
                                             });
+                                            */
                                            
                                         
                                             //add new root menu
@@ -424,7 +426,7 @@ function editCMS( options ){
                                         }//no access
 
                                         
-                                        edit_dialog.find('#btn_edit_menu').button().click(function(){
+                                        edit_dialog.find('#btn_edit_menu').button({icon:'ui-icon-menu'}).click(function(){
                                             
                                                         was_something_edited = false;
                                                 
@@ -477,7 +479,7 @@ function editCMS( options ){
                                         if(web_link)
                                         web_link.html('<b>Website URL:</b>&nbsp;<a href="'+url+'" target="_blank" style="color:blue">'+url+'</a>');
                                         
-                                        edit_dialog.find('#btn_exit').button().click( closeCMSEditor );
+                                        edit_dialog.find('#btn_exit').button({icon:'ui-icon-arrowthick-1-w'}).click( closeCMSEditor );
                                         
                                         
                                         if(options.menu_container){ //init menu items
@@ -792,6 +794,7 @@ function editCMS( options ){
                                         window.hWin.HAPI4.RecordMgr.batch_details(request, function(response){
                                                 //window.hWin.HEURIST4.msg.sendCoverallToBack();
                                                 if(response.status == hWin.ResponseStatus.OK){
+                                                    was_something_edited = true;
                                                     window.hWin.HEURIST4.msg.showMsgFlash('saved');
                                                 }else{
                                                     window.hWin.HEURIST4.msg.showMsgErr(response);
@@ -893,18 +896,20 @@ function editCMS( options ){
         if(!btn_refresh.button('instance')){
         
             if(!no_access){
-                edit_dialog.find('#btn_edit_page_content2').button({icon:'ui-icon-pencil'}).click(function(){
+                edit_dialog.find('#btn_edit_page_content2').button({icon:'ui-icon-window'}).click(function(){
                     var preview_frame = edit_dialog.find('#web_preview');
                     preview_frame[0].contentWindow.cmsEditing.editPageContent();
                 });
-                edit_dialog.find('#btn_edit_page_source2').button({icon:'ui-icon-pencil'}).click(function(){
+                edit_dialog.find('#btn_edit_page_source2').button({icon:'ui-icon-script'}).click(function(){
                     var preview_frame = edit_dialog.find('#web_preview');
                     preview_frame[0].contentWindow.cmsEditing.editPageSource();
                 });
-                edit_dialog.find('#btn_edit_page_record').button().click(function(){
+                edit_dialog.find('#btn_edit_page_record').button({icon:'ui-icon-pencil'}).click(function(){
                     var preview_frame = edit_dialog.find('#web_preview');
                     //preview_frame[0].contentWindow.editPageRecord();
-                    preview_frame[0].contentWindow.cmsEditing.editPageRecord();
+                    //preview_frame[0].contentWindow.cmsEditing.editPageRecord();
+                    
+                    _editHomePageRecord();
                 });
                
                 var preview_frame = edit_dialog.find('#web_preview');
@@ -924,7 +929,7 @@ function editCMS( options ){
             //
             //
             //
-            edit_dialog.find('#btn_embed_dialog').button().click(function(){
+            edit_dialog.find('#btn_embed_dialog').button({icon:'ui-icon-extlink'}).click(function(){
                 window.hWin.HEURIST4.ui.showRecordActionDialog('embedDialog',{layout_rec_id: home_page_record_id});
             });
             
@@ -939,7 +944,7 @@ function editCMS( options ){
             if(web_link)
             web_link.html('<b>Webpage URL:</b>&nbsp;<a href="'+url+'" target="_blank" style="color:blue">'+url+'</a>');
             
-            edit_dialog.find('#btn_exit').button().click( closeCMSEditor );
+            edit_dialog.find('#btn_exit').button({icon:'ui-icon-arrowthick-1-w'}).click( closeCMSEditor );
             
             if(options.menu_container){ //init menu items
                 

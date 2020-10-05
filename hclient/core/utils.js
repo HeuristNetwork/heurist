@@ -692,7 +692,11 @@ window.hWin.HEURIST4.util = {
                 $(this).replaceWith(content);
             });   
             
-            text =  $(link).html();    
+            if(window.hWin.HEURIST4.util.isempty(whitelist)){
+                text =  $(link).text().trim();    
+            }else{
+                text =  $(link).html();    
+            }
             
             document.body.removeChild(link); 
             link = null;

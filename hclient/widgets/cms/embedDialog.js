@@ -429,7 +429,9 @@ $.widget( "heurist.embedDialog", {
                                 var record = records[idx];
                                 window.hWin.HEURIST4.ui.addoption(selScope,
                                     resdata.fld(record, 'rec_ID'),
-                                    window.hWin.HEURIST4.util.stripTags( resdata.fld(record, 'rec_Title') ));
+                                    //resdata.fld(record, 'rec_Title') );
+                                    window.hWin.HEURIST4.util.stripTags(resdata.fld(record, 'rec_Title')) );
+                                    //window.hWin.HEURIST4.util.htmlEscape(resdata.fld(record, 'rec_Title')) ); 
                             }
                         }//for
                         
