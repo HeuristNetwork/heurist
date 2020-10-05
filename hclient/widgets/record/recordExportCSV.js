@@ -214,7 +214,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                     
                 window.hWin.HEURIST4.ui.addoption(selScope,
                     (rectype_Ids.length>1)?'current':rectype_Ids[0],
-                    msg); //+' (count=' + this._currentRecordset.length()+')'
+                    msg +' (count=' + this._currentRecordset.length()+')');
         }
         
         if (this._currentRecordsetSelIds &&  this._currentRecordsetSelIds.length > 0) {
