@@ -1056,7 +1056,7 @@ error_log(print_r($_REQUEST, true));
     * @return mixed
     */
     public function is_admin(){
-        return ( $this->has_access( $this->get_system('sys_OwnerGroupID') ) );
+        return ($this->get_user_id()>0 && $this->has_access( $this->get_system('sys_OwnerGroupID') ) );
     }
     
     /**

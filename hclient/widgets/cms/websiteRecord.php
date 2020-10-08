@@ -113,6 +113,8 @@ loads main page for logo, icon, banner, style
 
 
 */
+//print 'SORRY DEBUG in PROGRESS<br>';
+
 
 $system->defineConstants();
 
@@ -136,7 +138,8 @@ if(!($rec_id>0))
     
     if(!($rec_id>0)){
         //@todo find first record of 99-51 rectype
-        $message = 'Sorry, there are no publicly accessible websites defined for this database. Please ask the owner to publish their website(s).';
+        $message = 'Sorry, there are no publicly accessible websites defined for this database. '
+        .'Please ask the owner to publish their website(s).';
         include ERROR_REDIR;
         exit();
     }
@@ -158,9 +161,26 @@ if($rec==null){
     exit();
 }
 
-$hasAccess = ($rec['rec_NonOwnerVisibility'] == 'public' || $system->is_admin() ||
-    ($system->get_user_id()>0 && $rec['rec_NonOwnerVisibility'] !== 'hidden') ||    //visible for logged 
-    $system->is_member($rec['rec_OwnerUGrpID']) );   //owner
+$hasAccess = (($rec['rec_NonOwnerVisibility'] == 'public') || 
+               $system->is_admin() ||
+    ( ($system->get_user_id()>0) && 
+            ($rec['rec_NonOwnerVisibility'] !== 'hidden' ||    //visible for logged 
+             $system->is_member($rec['rec_OwnerUGrpID']) )) );   //owner
+
+/*             
+print $rec_id.'<br>';
+print $rec['rec_NonOwnerVisibility'].'<br>';    
+print $system->get_user_id().'  >'.($system->is_admin()===true).'<br>';
+print $rec['rec_OwnerUGrpID'].'<br>'; 
+print $hasAccess.'<br>'; 
+print '--------<br>'; 
+print ($rec['rec_NonOwnerVisibility'] === 'public').'<br>'; 
+print ($system->is_admin()===true).'<br>'; 
+print ($system->get_user_id()>0).'<br>'; 
+print ($rec['rec_NonOwnerVisibility'] !== 'hidden').'<br>'; 
+print  $system->is_member($rec['rec_OwnerUGrpID']);
+exit();
+*/
 
 if(!$hasAccess){
 //@todo The Heurist website at this address is not yet publicly accessible.        
@@ -214,11 +234,14 @@ window.hWin.HEURIST4.msg.showMsgDlg(
 }
 //-----------------------
 
-if(!($rec['rec_RecTypeID']==RT_CMS_HOME || $rec['rec_RecTypeID']==RT_CMS_MENU)){
-    $message = 'Record #'.$rec_id.' is not allowed record type. Expecting Website Home Page';
+if(!($rec['rec_RecTypeID']==RT_CMS_HOME || 
+        ($rec['rec_RecTypeID']==RT_CMS_MENU && ConceptCode::getTermConceptID(__getValue($rec,DT_CMS_PAGETYPE))=='2-6254')  )){
+    $message = 'Record #'.$rec_id.' is not allowed record type. Expecting Website Home Page or Standalone Web Page';
     include ERROR_REDIR;
     exit();
-}
+}                
+
+   
 
 $isWebPage = ($rec['rec_RecTypeID']==RT_CMS_MENU); //standalone web page - Heurist embed
 
@@ -236,7 +259,7 @@ $image_logo = $image_logo?'<img style="max-height:80px" src="'.$image_logo.'">'
 
 $meta_keywords = htmlspecialchars(__getValue($rec, DT_CMS_KEYWORDS));
 $meta_description = htmlspecialchars(__getValue($rec, DT_SHORT_SUMMARY));
-$show_pagetitle = (ConceptCode::getTermConceptID(__getValue($rec, DT_CMS_PAGETITLE))!=='99-5447');
+$show_pagetitle = ((__getValue($rec, DT_CMS_PAGETITLE))!=='99-5447');
 
 
 if(!$isWebPage && __getValue($rec,DT_EXTENDED_DESCRIPTION)==''){

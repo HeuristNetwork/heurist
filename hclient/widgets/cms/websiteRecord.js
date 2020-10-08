@@ -32,6 +32,7 @@ function hCmsEditing(_options) {
         _version   = "0.4";
 
     var main_content = $('body').find('#main-content');
+console.log('assign main_content');        
     var main_menu = $('body').find('#main-menu');
     var main_header = $('body').find('#main-header');
     
@@ -230,11 +231,14 @@ function hCmsEditing(_options) {
         $('<a href="#" id="btn_inline_editor5">Cancel</a>')
             .appendTo($('body'))
             .addClass('ui-front cms-button')
-            .click(function () {
+            .click(function (event) {
                 __hideEditor();
 //console.log(original_editor_content);
                 //restore original
                 $('.tinymce-body').val(original_editor_content);
+                
+                window.hWin.HEURIST4.util.stopEvent(event);
+                return false;
             })
             .show();
 
@@ -1593,33 +1597,37 @@ function hCmsEditing(_options) {
     //
     // opens tinymce for cotent editor
     //
-    function _editPageContent(){
+    function _editPageContent(event){
         
         is_header_editor = false;
-     
-                    $('#btn_inline_editor').hide();
-                    $('#btn_inline_editor3').hide();
-                    $('#btn_inline_editor4').hide();
-                    $('#btn_inline_editor5').hide();
-                    $('#btn_inline_editor').text('Edit page content');
-                    $('#btn_inline_editor3').text('source');
+
+        $('#btn_inline_editor').hide();
+        $('#btn_inline_editor3').hide();
+        $('#btn_inline_editor4').hide();
+        $('#btn_inline_editor5').hide();
+        $('#btn_inline_editor').text('Edit page content');
+        $('#btn_inline_editor3').text('source');
+
+        main_content.parent().css('overflow-y','hidden');
+        main_content.hide();
+        $('#edit_mode').val(1).click();//to disable left panel
+        //original_editor_content 
+        last_save_content = $('.tinymce-body').val();
+        //console.log('_editPageContent '+last_save_content);                
+
+        $('.tinymce-body').show();
+        tinymce.init(inlineEditorConfig);
+
+        /*setTimeout(function(){
+        $('.mce-tinymce').css({position:'absolute',
+        top:140,  //
+        bottom:20 //$('#main-content').css('bottom')
+        });    
+        },500);*/
+
+        window.hWin.HEURIST4.util.stopEvent(event);
+        return false;
                     
-                    main_content.parent().css('overflow-y','hidden');
-                    main_content.hide();
-                    $('#edit_mode').val(1).click();//to disable left panel
-                    //original_editor_content 
-                    last_save_content = $('.tinymce-body').val();
-console.log('_editPageContent '+last_save_content);                
-                    
-                    $('.tinymce-body').show();
-                    tinymce.init(inlineEditorConfig);
-                    
-                    /*setTimeout(function(){
-                        $('.mce-tinymce').css({position:'absolute',
-                            top:140,  //
-                            bottom:20 //$('#main-content').css('bottom')
-                        });    
-                    },500);*/
     }        
     
     //
@@ -1640,12 +1648,13 @@ console.log('_editPageContent '+last_save_content);
             
             main_content.parent().css('overflow-y','hidden');
             main_content.hide();
-            $('#edit_mode').val(1).click();//to disable left panel
+            //$('#edit_mode').val(1).click();//to disable left panel
             $('.tinymce-body').show();
             original_editor_content = $('.tinymce-body').val();
+            
         }
-                    
-
+        window.hWin.HEURIST4.util.stopEvent(event);
+        return false;
     }    
     
     var allow_close_dialog = false;
