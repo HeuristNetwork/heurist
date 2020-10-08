@@ -414,6 +414,7 @@ function smarty_output_filter_strip_js($tpl_source, Smarty_Internal_Template $te
         $config = HTMLPurifier_Config::createDefault();
         $config->set('Cache', 'SerializerPath', HEURIST_SCRATCHSPACE_DIR);
         $config->set('CSS.Trusted', true);
+        $config->set('Attr.AllowedFrameTargets','_blank');
         //$config->set('HTML.Trusted', true);
         //$config->set('Filter.ExtractStyleBlocks', true);
         $purifier = new HTMLPurifier($config);
