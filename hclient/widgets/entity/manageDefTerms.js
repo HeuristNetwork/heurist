@@ -280,7 +280,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                           css:{'margin-right':'0.5em','display':'inline-block',padding:'2px'}, id:'btnAddButton2',
                           click: function() { that._onActionListener(null, 'add-reference'); }},
                           
-                    {showText:false, icons:{primary:'ui-icon-arrowthickstop-1-n'}, text:window.hWin.HR('Export Terms'), //ui-icon-arrowthick-1-e
+                    {showText:false, icons:{primary:'ui-icon-export'}, text:window.hWin.HR('Export Terms'), //ui-icon-arrowthick-1-e
                           css:{'margin-right':'0.5em','display':'inline-block',padding:'2px'}, id:'btnExportVocab',
                           click: function() { that._onActionListener(null, 'vocab-export'); }},
                           
@@ -648,6 +648,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
         var sGroupTitle = '<h4 style="margin:0">';
         if(this.options.auxilary=='vocabulary'){
+            //filter by group
             
             if(this.options.trm_VocabularyGroupID>0){
 
@@ -1567,6 +1568,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 */            
             if(action=='vocab-import'){
                 
+                this._importTerms(this.options.trm_VocabularyID, false);
+                
             }else if(action=='vocab-export'){
                 
             }else if(action=='viewmode-list'){
@@ -1699,7 +1702,8 @@ console.log('NODE activated');
             window.hWin.HEURIST4.msg.showMsgFlash('Vocabulary not defined');
             return;
         }
-        
+
+        var that = this;        
         var sURL = window.hWin.HAPI4.baseURL + "import/delimited/importDefTerms.php?db="
             + window.hWin.HAPI4.database +
             "&trm_ID="+vocab_id;
@@ -1713,31 +1717,18 @@ console.log('NODE activated');
                 height: 600,
                 width: 800,
                 'context_help':window.hWin.HAPI4.baseURL+'context_help/defTerms.html #import',
-                callback: this._importTerms_complete
+                callback: function(context){
+                    if(context && context.result)
+                    {
+                        that._triggerRefresh(this.options.auxilary);    
+                        
+                        window.hWin.HEURIST4.msg.showMsgDlg(context.result.length
+                            + ' term'
+                            + (context.result.length>1?'s were':' was')
+                            + ' added.', null, 'Terms imported');
+                    }    
+                }
             });
-        
-    },
-    
-    _importTerms_complete: function(vocab_id){
-        if(!Hul.isnull(context) && !Hul.isnull(context.terms))
-        {
-            window.hWin.HEURIST4.msg.showMsgDlg(context.result.length
-                + ' term'
-                + (context.result.length>1?'s were':' was')
-                + ' added.', null, 'Terms imported');
-                
-            window.hWin.HEURIST4.terms = context.terms;
-            var res = context.result;
-            //mainParentNode = (context.parent===0)?tree.getRoot():_findNodeById(context.parent);  //_currentNode, //??????
-            
-            //add records to $Db.trm
-            
-            //recreate tree view data
-            
-            //refresh resulList and treeview
-    
-    
-        }
         
     },
 
@@ -1874,6 +1865,65 @@ console.log('NODE activated');
    
         return true;
     },
+    
+    /**
+    * invokes popup to import list of terms from file
+    */
+    _importTerms: function(parent_ID, isVocab) {
+
+        
+            if(isVocab){
+                
+                    sTitle = 'Import vocabularies for vocabulary group '+
+                        window.hWin.HEURIST4.util.htmlEscape($Db.vcg(parent_ID,'vcg_Name'));                
+            }else{
+                    var isTerm = ($Db.trm(parent_ID,'trm_ParentTermID')>0);
+                
+                    sTitle = 'Import terms '+(isTerm?'as children for term ' :'for vocabulary ')+
+                        window.hWin.HEURIST4.util.htmlEscape($Db.trm(parent_ID,'trm_Name'));                
+            }
+
+            var that = this;
+
+            var sURL = window.hWin.HAPI4.baseURL + "import/delimited/importDefTerms.php?db="
+            + window.hWin.HAPI4.database +
+            (isVocab?'&trm_ID=':'&vcg_ID=')+parent_ID;
+            
+
+            window.hWin.HEURIST4.msg.showDialog(sURL, {
+                "close-on-blur": false,
+                "no-resize": false,
+                title: sTitle,
+                height: 600,
+                width: 800,
+                'context_help':window.hWin.HAPI4.baseURL+'context_help/defTerms.html #import',
+                callback: function(context){ that._importTermsComplete(context); }
+            });
+
+    },
+
+    /**
+    *  Add the list of imported terms
+    */
+    _importTermsComplete: function(context){
+        if(!Hul.isnull(context) && !Hul.isnull(context.terms))
+        {
+            window.hWin.HEURIST4.msg.showMsgDlg(context.result.length
+                + ' term'
+                + (context.result.length>1?'s were':' was')
+                + ' added.', null, 'Terms imported');
+            window.hWin.HEURIST4.terms = context.terms;
+
+            var that = this;
+            window.hWin.HAPI4.EntityMgr.refreshEntityData('trm',
+                    function(){
+                        that._triggerRefresh(this.options.auxilary);
+                    }
+            )
+            
+        }
+    }
+    
     
     
 });

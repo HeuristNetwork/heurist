@@ -20,67 +20,64 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-function hImportDefTerms(_trm_ParentTermID) {
+function hImportDefTerms(_trm_ParentTermID, _vcg_ID) {
     var _className = "ImportDefTerms",
     _version   = "0.4",
     
     _parseddata = null,
     _prepareddata,
     
-    trm_ParentTermID,
+    trm_ParentTermID, vcg_ID,
     trm_ParentDomain,
+    trm_VocabularyID,
+    vcg_ID,
     trm_ParentChildren= [];
     
-    function _init(_trm_ParentTermID){
+    function _init(_trm_ParentTermID, _vcg_ID){
+                
                                            
         trm_ParentTermID = _trm_ParentTermID;
+        trm_VocabularyID = 0;
+        vcg_ID = _vcg_ID;
+        trm_ParentDomain = 'enum';
 
-        if(trm_ParentTermID>0){
-            //find parent entry
-            var allterms = window.hWin.HEURIST4.terms;
-            
-            //get domain   
-            if(window.hWin.HEURIST4.util.isnull(allterms.termsByDomainLookup.enum[trm_ParentTermID])){
-                if(window.hWin.HEURIST4.util.isnull(allterms.termsByDomainLookup.relation[trm_ParentTermID])){
-                            $('body').empty();
-                            $('body').html('<h2>Parent term #'+trm_ParentTermID+' not found</h2>');
-                            return;
-                }else{
-                    trm_ParentDomain = 'relation';
-                }
+        if(vcg_ID>0){
+            //check group
+            if($Db.vcg(vcg_ID)==null){
+                    $('body').empty();
+                    $('body').html('<h2>Vocabulary group #'+vcg_ID+' not found</h2>');
+                    return;
             }else{
-                trm_ParentDomain = 'enum';
-            }
-
-            //todo use window.hWin.HEURIST4.dbs.getChildrenLabels
-                
-            //get list of children labels
-            function __getSiblings(children){
-                for(trmID in children){
-                    if(children.hasOwnProperty(trmID)){
-                        if(trmID==trm_ParentTermID){
-                            for(var id in children[trmID]){
-                                if(children[trmID].hasOwnProperty(id)){
-                                    var term = allterms.termsByDomainLookup[trm_ParentDomain][id];
-                                    if(term && term[0])
-                                        trm_ParentChildren.push(term[0].toLowerCase());
-                                }
-                            }
-                            break;
-                        }else{
-                            __getSiblings(children[trmID]);
-                        }
-                    }
-                }
+                    trm_ParentDomain = $Db.vcg(vcg_ID,'vcg_Domain');
             }
             
-            var trmID, tree = allterms.treesByDomain[trm_ParentDomain];
-            __getSiblings(tree);
-                
+            //get all vocabs in group
+            $Db.trm().each(function(trm_ID,rec){
+                if($Db.trm(trm_ID, 'trm_VocabularyGroupID')==vcg_ID && !($Db.trm(trm_ID, 'trm_ParentTermID')>0)){
+                    trm_ParentChildren.push($Db.trm(trm_ID, 'trm_Labels').toLowerCase());        
+                }
+            });
+            
+            
+        }else if(trm_ParentTermID>0){
+            //get domain   
+            if($Db.vcg(trm_ParentTermID)==null){
+                    $('body').empty();
+                    $('body').html('<h2>Vocabulary #'+trm_ParentTermID+' not found</h2>');
+                    return;
+            }else{
+                trm_VocabularyID = $Db.trm(trm_ID,'trm_ParentTermID');   
+                if(trm_VocabularyID>0){
+                    trm_ParentDomain = $Db.trm(trm_VocabularyID,'trm_Domain');   
+                }
+            }
+
+            //get flat list of children labels in lower case
+            trm_ParentChildren = $Db.trm_TreeData(trm_ParentDomain, 'labels');
             
         }else{
             $('body').empty();
-            $('body').html('<h2>Parent term is not defined</h2>');
+            $('body').html('<h2>Neither vocabulary group nor vocabulary defined</h2>');
             return;
         }
         
@@ -420,8 +417,10 @@ function hImportDefTerms(_trm_ParentTermID) {
                             }
                             labels.push(lbl.toLowerCase());
                             record['trm_Label'] = lbl;
-                            record['trm_ParentTermID'] = trm_ParentTermID;
                             record['trm_Domain'] = trm_ParentDomain;
+                            
+                            if(trm_ParentTermID>0) record['trm_ParentTermID'] = trm_ParentTermID;
+                            if(vcg_ID>0) record['trm_VocabularyGroupID'] = vcg_ID;
                             
                             if(field_desc>-1 && field_desc<_parseddata[i].length){
                                 record['trm_Description'] = _parseddata[i][field_desc];
@@ -508,7 +507,7 @@ function hImportDefTerms(_trm_ParentTermID) {
                                 + (recIDs.length>1?'s were':' was')
                                 + ' added.', null, 'Terms imported'); // Title was an unhelpful and inelegant "Info"
                                 */    
-                                    window.close( {result:recIDs, parent:trm_ParentTermID, terms:response.data.terms } );
+                                    window.close( { result:recIDs } );
                                 }else{
                                     window.hWin.HEURIST4.msg.showMsgErr('Cannot obtain term definitions, possible database corruption, please consult Heurist developers');
                                 }
@@ -530,7 +529,7 @@ function hImportDefTerms(_trm_ParentTermID) {
 
     }
 
-    _init(_trm_ParentTermID);
+    _init(_trm_ParentTermID, _vcg_ID);
     return that;  //returns object
 }
     

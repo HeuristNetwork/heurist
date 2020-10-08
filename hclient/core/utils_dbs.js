@@ -139,7 +139,7 @@ window.hWin.HEURIST4.dbs = {
         return termCode;
     },
 
-    // 
+    // !!!!!!!!!!!!!!!!!!!! 
     // 
     // see crosstabs  {id:trm_ID, text:trm_Label}
     //
@@ -163,7 +163,7 @@ window.hWin.HEURIST4.dbs = {
         return reslist;
     },
 
-    //
+    //  !!!!!!!!!!!!!!!!!!!!!!!!!!
     // check that given selectedTermID is among allowed termIDTree (except headerTermIDsList)
     //
     isTermInList: function(datatype, termIDTree, headerTermIDsList, selectedTermID) {
@@ -187,7 +187,7 @@ window.hWin.HEURIST4.dbs = {
         return false;
     },
     
-    //
+    //  !!!!!!!!
     // return term by selectedTermID and its children as well as comma-separated list of non-disabled ancestors
     // it uses createTermSelectExt to get the entire tree
     // used in search_faceted.js  
@@ -1215,9 +1215,9 @@ window.hWin.HEURIST4.dbs = {
     // vocab_id - id or "relation"
     // mode - 0, flat - returns recordset, 
     //        1, tree - returns treedata for fancytree
-    //        2, select - return array of options for selector
+    //        2, select - return array of options for selector (with depth and is_vocab)
     //        3, set  - array of ids 
-    //        4, labels - array of labels in lower case 
+    //        4, labels - flat array of labels in lower case 
     //
     trm_TreeData: function(vocab_id, mode){
         
