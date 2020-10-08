@@ -417,6 +417,12 @@ span.fancytree-node:hover{
 .ui-heurist-explore .ui-selectmenu-button{
     background:<?php uout('explore_title_color', '#D4DBEA');?>
 }
+/* button within menu section */
+.ui-heurist-import .ui-heurist-btn-header1{    
+    background:none !important;
+    border:1px solid <?php uout('import_bg', '#307D96')?> !important;
+    color:<?php uout('import_bg', '#307D96')?> !important;
+}
 .ui-heurist-explore .ui-heurist-btn-header1{    
     background:none !important;
     border:1px solid <?php uout('explore_bg', '#4477B9')?> !important;

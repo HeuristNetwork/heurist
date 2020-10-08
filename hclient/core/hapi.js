@@ -712,6 +712,7 @@ prof =Profile
                 
                 window.hWin.HAPI4.EntityMgr.refreshEntityData('all', function(){
 
+                    //get defintions in nold format
                 that.get_defs({rectypes:'all', terms:'all', detailtypes:'all', mode:2}, function(response){
                     
                     window.hWin.HEURIST4.msg.sendCoverallToBack();
@@ -1318,6 +1319,7 @@ prof =Profile
                                 if(entityName=='defRecStructure'){
                                     window.hWin.HAPI4.EntityMgr.createRstIndex();
                                 }else if(entityName=='defTerms'){
+//console.log('HEREEE!!!!!');                                   
                                     entity_data['trm_Links'] = response.data[entityName]['trm_Links'];
                                 }
                                 
@@ -1348,7 +1350,7 @@ prof =Profile
 
                 if($.isEmptyObject(entity_data[entityName]) || force_reload==true){
 
-console.log('getEntityData '+entityName);
+//console.log('getEntityData '+entityName);
 
                     _callserver('entityScrud', {a:'search', 'entity':entityName, 'details':'list'},
                        function(response){

@@ -40,6 +40,12 @@ body.popup {
     height: 18;
     background-size: contain;
 }
+.ui-icon-file-plus-import { 
+    background-image: url(hclient/assets/v6/file-plus-import.png) !important; 
+    width: 18;
+    height: 18;
+    background-size: contain;
+}
 .ui-icon-entity { 
     background-image: url(hclient/assets/v6/entity.png) !important; 
     width: 18;
@@ -60,6 +66,12 @@ body.popup {
 }
 .ui-icon-filter-plus { 
     background-image: url(hclient/assets/v6/filter-plus.png) !important; 
+    width: 18;
+    height: 18;
+    background-size: contain;
+}
+.ui-icon-export { 
+    background-image: url(hclient/assets/v6/export.png) !important; 
     width: 18;
     height: 18;
     background-size: contain;

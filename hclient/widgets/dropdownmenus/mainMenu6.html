@@ -22,17 +22,30 @@
 
 <div class="ui-heurist-admin ui-heurist-header" style="top:0px;">Admin</div>
 <div class="ui-heurist-design ui-heurist-header" style="top:36px;border-top:1px solid lightgray;">Design</div>
-<div class="ui-heurist-import ui-heurist-header" style="top:72px;border-top:1px solid lightgray;">Import</div>
+<div class="ui-heurist-import ui-heurist-header" style="top:72px;border-top:1px solid lightgray;">Input</div>
+<!--
+<div class="ui-heurist-import ui-heurist-header" 
+    style="top:108px;left:0;height:36px;position:absolute;text-align:center;font-weight: normal;">
+    <ul style="list-style-type:none;margin:0;padding:0px 30px 0px 0px">
+        <li class="menu-explore" data-action="recordAdd">
+            <span class="ui-icon ui-icon-file-plus"/>
+            <span class="menu-text truncate" style="display:inline-block;max-width:105px;">Add record</span>
+        </li>
+    </ul>
+</div>
+-->
 <div class="ui-heurist-publish ui-heurist-header" style="top:108px;border-top:1px solid lightgray;">Publish</div>
 <div class="ui-heurist-explore ui-heurist-header" style="top:144px;border-top:1px solid lightgray;">Explore</div>
 <div class="ui-heurist-explore ui-heurist-header2" 
     style="top:180px;left:0;right:0px;bottom:0px;overflow-y:auto;position:absolute;text-align:center;background-color:rgb(43,43,65) !important;">
 
     <ul style="border-bottom:1px gray solid;list-style-type:none;margin:0;padding:12px 30px 12px 0px">
+<!--    
         <li class="menu-explore" data-action="recordAdd" style="margin-bottom:12px">
             <span class="ui-icon ui-icon-file-plus"/>
             <span class="menu-text truncate" style="display:inline-block;max-width:105px;">Add record</span>
         </li>
+-->        
         <li class="menu-explore" data-action="search_entity">
             <span class="ui-icon ui-icon-entity"/><span class="menu-text">Entities</span>
         </li>
@@ -50,11 +63,12 @@
             <span class="menu-text ui-icon ui-icon-arrowthick-1-ne" style="float:right;font-size:1.3em;padding-top:8px;"></span>
         </span>
     </span>                                                              
-    <ul style="list-style-type:none;margin:0;padding:0px 0px 12px 0px;position:absolute;bottom:0px;left:0px;right:30px;top:188px" 
+    <ul style="list-style-type:none;margin:0;padding:0px 0px 12px 0px;position:absolute;bottom:0px;left:0px;right:30px;top:144px" 
             id="filter_by_groups">
     
     </ul>
-    <div id="svs_list" style="position:absolute;bottom:0px;left:0px;right:0px;top:188px;font-size:0.8em;background:none;display:none;"></div>
+    <!-- was 188px -->
+    <div id="svs_list" style="position:absolute;bottom:0px;left:0px;right:0px;top:144px;font-size:0.8em;background:lightgray;color:black;display:none;"></div>
 
 </div>
 <!-- style="position:absolute;bottom:37;height:37px" -->

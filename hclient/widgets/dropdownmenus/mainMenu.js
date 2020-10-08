@@ -1714,8 +1714,6 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                     if(!qdomain) qdomain = 'a';
 
 
-                    console.log('_performInitialSearch '+init_search);        
-
                     if(!window.hWin.HEURIST4.util.isempty(init_search)){
                         var request = {q: init_search, w: qdomain, f: 'map', source:'init' };
 
@@ -1796,7 +1794,9 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
             
             ele.children('#north_pane').height(h);
             ele.children('#center_pane').css({top: h});
-            $('.ui-layout-container').layout().resizeAll();
+            if($('.ui-layout-container').length<0){
+                $('.ui-layout-container').layout().resizeAll();
+            }
         }
         
     },

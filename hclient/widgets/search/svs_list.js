@@ -1062,8 +1062,8 @@ $.widget( "heurist.svs_list", {
         }else {
             sIcon = 'group';
         }
-        if(this.options.hide_header){
-            sColor = 'color:white !important;';
+        if(this.options.hide_header){ //IJ don't want inverted color anymore
+            //sColor = 'color:white !important;';
         }
 
         var sWidth = '60%';
@@ -1723,8 +1723,8 @@ $.widget( "heurist.svs_list", {
             
             if(window.hWin.HEURIST4.util.isnull(container)){
                 var sColor = '';
-                if(this.options.hide_header){
-                    sColor = ' style="color:white !important"';    
+                if(this.options.hide_header){ //IJ don't want inverted color anymore
+                    //sColor = ' style="color:white !important"';    
                 }
 
                 res = $('<div'+sColor+'>').append(tree).append(tree_links);
