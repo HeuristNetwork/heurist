@@ -43,9 +43,9 @@
         $res = array();        
         $entities = array();
         
-        if(@$_REQUEST['a']=='search' && @$_REQUEST['entity']=='all'){ 
+        if(@$_REQUEST['a']=='structure'){ 
             // see HAPI4.refreshEntityData
-            $res = entityRefreshDefs($system, true);
+            $res = entityRefreshDefs($system, $_REQUEST['entity'], true);
         }else {
             $res = entityExecute($system, $_REQUEST);
         }

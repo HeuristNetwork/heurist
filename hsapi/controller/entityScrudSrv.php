@@ -76,9 +76,14 @@
     //
     //
     //    
-    function entityRefreshDefs( $system, $need_config ){
+    function entityRefreshDefs( $system, $entities, $need_config ){
         
-        $entities = array('rtg','dtg','rty','dty','trm','vcg','rst');
+        if($entities=='all'){
+            $entities = array('rtg','dtg','rty','dty','trm','vcg','rst');
+        }else if(!is_array($entities)){
+            $entities = explode(',',$entities);
+        }
+            
         $params = array();
         $res = array();
         if($need_config!==false) $need_config = array();

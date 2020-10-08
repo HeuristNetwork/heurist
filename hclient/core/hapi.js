@@ -1308,7 +1308,7 @@ prof =Profile
             refreshEntityData:function(entityNames, callback){
 
                  //'multi':1,   
-                _callserver('entityScrud', {a:'search', 'entity':entityNames, 'details':'full'},
+                _callserver('entityScrud', {a:'structure', 'entity':entityNames, 'details':'full'},
                     function(response){
                         if(response.status == window.hWin.ResponseStatus.OK){
 

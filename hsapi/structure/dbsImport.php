@@ -1575,7 +1575,7 @@ $mysqli->commit();
             $data = $this->system->getCurrentUserAndSysInfo(true);
             $resp['defs']['sysinfo'] = $data['sysinfo'];
             
-            $resp['defs']['entities'] = entityRefreshDefs($this->system, false);
+            $resp['defs']['entities'] = entityRefreshDefs($this->system, 'all', false);
             
         }
         return $resp;    

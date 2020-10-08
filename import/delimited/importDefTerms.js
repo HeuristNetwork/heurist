@@ -61,19 +61,17 @@ function hImportDefTerms(_trm_ParentTermID, _vcg_ID) {
             
         }else if(trm_ParentTermID>0){
             //get domain   
-            if($Db.vcg(trm_ParentTermID)==null){
+            if($Db.trm(trm_ParentTermID)==null){
                     $('body').empty();
                     $('body').html('<h2>Vocabulary #'+trm_ParentTermID+' not found</h2>');
                     return;
             }else{
-                trm_VocabularyID = $Db.trm(trm_ID,'trm_ParentTermID');   
-                if(trm_VocabularyID>0){
-                    trm_ParentDomain = $Db.trm(trm_VocabularyID,'trm_Domain');   
-                }
+                trm_VocabularyID = $Db.getTermVocab(trm_ParentTermID);
+                trm_ParentDomain = $Db.trm(trm_VocabularyID,'trm_Domain');   
             }
 
             //get flat list of children labels in lower case
-            trm_ParentChildren = $Db.trm_TreeData(trm_ParentDomain, 'labels');
+            trm_ParentChildren = $Db.trm_TreeData(trm_VocabularyID, 'labels');
             
         }else{
             $('body').empty();
@@ -498,18 +496,21 @@ function hImportDefTerms(_trm_ParentTermID, _vcg_ID) {
                         if(response.status == window.hWin.ResponseStatus.OK){
 
                             var recIDs = response.data;
-                            
+                            //refresh local defintions
                             window.hWin.HAPI4.SystemMgr.get_defs({terms:'all', mode:2}, function(response){
                                 if(response.status == window.hWin.ResponseStatus.OK){
-                                /*    
-                            window.hWin.HEURIST4.msg.showMsgDlg(recIDs.length
-                                + ' term'
-                                + (recIDs.length>1?'s were':' was')
-                                + ' added.', null, 'Terms imported'); // Title was an unhelpful and inelegant "Info"
-                                */    
-                                    window.close( { result:recIDs } );
+                                    
+                                    window.hWin.HEURIST4.terms = response.data.terms;  
+                                    
+                                    window.hWin.HAPI4.EntityMgr.refreshEntityData('trm',
+                                            function(){
+                                                window.close( { result:recIDs } );            
+                                            }
+                                    )
+                                    
                                 }else{
-                                    window.hWin.HEURIST4.msg.showMsgErr('Cannot obtain term definitions, possible database corruption, please consult Heurist developers');
+                                    window.hWin.HEURIST4.msg.showMsgErr('Cannot obtain term definitions, possible database corruption,'
+                                    +' please consult Heurist developers');
                                 }
                             });
                             

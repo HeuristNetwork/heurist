@@ -227,13 +227,21 @@ class DbDefTerms extends DbEntityBase
         
         //create tree array $record['trm_ParentTermID']
         if(count($this->records)>0){
+            
+            if($this->records[0]['trm_VocabularyGroupID']>0){
+                return $this->save();
+            }
+                        
+            
             //group by parent term ID
             $records_by_prent_id = array();
             foreach($this->records as $idx => $record){
-                if(!@$records_by_prent_id[$record['trm_ParentTermID']]){
-                    $records_by_prent_id[$record['trm_ParentTermID']] = array();
+                if($record['trm_ParentTermID']>0){
+                    if(!@$records_by_prent_id[$record['trm_ParentTermID']]){
+                        $records_by_prent_id[$record['trm_ParentTermID']] = array();
+                    }
+                    $records_by_prent_id[$record['trm_ParentTermID']][] = $record;
                 }
-                $records_by_prent_id[$record['trm_ParentTermID']][] = $record;
             }
             
             $terms_added = array();
@@ -265,6 +273,9 @@ class DbDefTerms extends DbEntityBase
         return $terms_added;
     }
     
+    //
+    //
+    //
     private function parseHierarchy($input) {
         $result = array();
 
@@ -390,6 +401,9 @@ class DbDefTerms extends DbEntityBase
             if(@$this->records[$idx]['trm_Label']){
             
                 if(@$this->records[$idx]['trm_ParentTermID']>0){
+                    
+                    //@todo find all labels per vocabulary in low case - check that new one is unique 
+                    
                     $sWhere = ' AND (trm_ParentTermID='.$this->records[$idx]['trm_ParentTermID'].')';    
                     $s2 = 'Term';
                     
@@ -470,8 +484,10 @@ class DbDefTerms extends DbEntityBase
 
             $ret = true;
             
-            if(@$this->data['reference']){
-                
+            if(@$this->data['reference'])
+            {
+                //add term to vocabuary by reference
+                    
                 $trm_IDs = prepareIds($this->data['trm_ID']);
                 
                 if(count($trm_IDs)==0){
@@ -517,7 +533,10 @@ class DbDefTerms extends DbEntityBase
                     }
                 }
                 
-            }else if(@$this->data['merge_id']>0 && @$this->data['retain_id']>0){
+            }
+            else if(@$this->data['merge_id']>0 && @$this->data['retain_id']>0)
+            {
+                //MERGE TERMS
                 
                 $merge_id = $this->data['merge_id'];
                 $retain_id = $this->data['retain_id'];
@@ -588,6 +607,7 @@ class DbDefTerms extends DbEntityBase
                 }
                 
             }else{
+                //import terms (from csv)
                 $ret = $this->saveHierarchy();
             }
         
