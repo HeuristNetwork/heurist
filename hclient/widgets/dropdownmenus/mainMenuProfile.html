@@ -18,9 +18,8 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
--->
-
 <li>PROFILE</li>
+-->
 
 <li style="padding-left:5px;">
     <a href="#" 
@@ -41,10 +40,16 @@
 </li>
 
 <li>-</li>
-
-<li>ACCESS</li>
-
 <li style="padding-left:5px;">
+    <a href="#"
+        id="menu-profile-info" data-logaction="prof_Userinfo"
+        title="User personal information">My user info</a>
+</li>
+
+<!--
+<li>ACCESS</li>
+-->
+<li style="padding-left:5px;display:none;">
     <a href="#"
         id="menu-profile-groups" data-logaction="prof_Workgroups"
         data-icon="ui-icon-users"
@@ -52,14 +57,7 @@
         data-container="admin"
         title="List of groups you are member of">My workgroups</a>
 </li>
-
-<li style="padding-left:5px;">
-    <a href="#"
-        id="menu-profile-info" data-logaction="prof_Userinfo"
-        title="User personal information">My user info</a>
-</li>
-
-<li style="padding-left:5px;" class="admin-only">
+<li style="padding-left:5px;display:none;" class="admin-only">
     <a href="#"
         id="menu-profile-users" data-logaction="prof_Users"
         data-icon="ui-icon-user"
@@ -68,7 +66,7 @@
         title="Add and edit database users, including authorization of new users. Use Manage Workgroups to allocate users to workgroups and define roles within workgroups">Manage users</a>
 </li>
 
-<li style="padding-left:5px;" class="admin-only">
+<li style="padding-left:5px;display:none;" class="admin-only">
     <a href="#"
         id="menu-profile-import" data-logaction="prof_ImportUser"
         data-icon="ui-icon-download"
@@ -77,7 +75,6 @@
         title="Import users one at a time from another database on the system, including user name, password and email address - users are NOT assigned to workgroups">Import user</a>
 </li>
 
-<li>-</li>
 
 <li style="padding-left:5px;">
     <a href="#" id="menu-profile-logout" title="Log out Heurist">Log out</a>

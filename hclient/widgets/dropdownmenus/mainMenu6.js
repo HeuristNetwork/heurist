@@ -311,8 +311,8 @@ $.widget( "heurist.mainMenu6", {
             if(ele.length>0){
 
                 if(rty_ID>0 && $Db.rty(rty_ID,'rty_Name')){
-                    ele.find('.menu-text').css('margin-left',0).html('Add <i>'
-                            +window.hWin.HEURIST4.util.htmlEscape($Db.rty(rty_ID,'rty_Name'))+'</i>');
+                    ele.find('.menu-text').css('margin-left',0).html('Add&nbsp;&nbsp; [<i>'
+                            +window.hWin.HEURIST4.util.htmlEscape($Db.rty(rty_ID,'rty_Name'))+'</i>]');
                     ele.attr('data-id', rty_ID);
                     this._off(ele, 'click');
                     this._on(ele, {click: function(e){
