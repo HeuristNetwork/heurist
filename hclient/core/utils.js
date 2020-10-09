@@ -1042,6 +1042,9 @@ window.hWin.HEURIST4.util = {
             window.hWin.HEURIST4.util.downloadData(filename, elHtml, mimeType);
     }, 
        
+    //
+    // download some data locally
+    //
     downloadData: function (filename, data, mimeType) {
         
         mimeType = mimeType || 'text/plain';

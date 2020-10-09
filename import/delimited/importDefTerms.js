@@ -51,12 +51,17 @@ function hImportDefTerms(_trm_ParentTermID, _vcg_ID) {
                     trm_ParentDomain = $Db.vcg(vcg_ID,'vcg_Domain');
             }
             
-            //get all vocabs in group
+            //get all vocabs 
+            trm_ParentChildren = $Db.trm_getVocabs();
+            $.each(trm_ParentChildren,function(i,trm_ID){
+                trm_ParentChildren[i] = $Db.trm(trm_ID, 'trm_Label').toLowerCase();
+            });
+            /*
             $Db.trm().each(function(trm_ID,rec){
                 if($Db.trm(trm_ID, 'trm_VocabularyGroupID')==vcg_ID && !($Db.trm(trm_ID, 'trm_ParentTermID')>0)){
-                    trm_ParentChildren.push($Db.trm(trm_ID, 'trm_Labels').toLowerCase());        
+                    trm_ParentChildren.push($Db.trm(trm_ID, 'trm_Label').toLowerCase());        
                 }
-            });
+            });*/
             
             
         }else if(trm_ParentTermID>0){

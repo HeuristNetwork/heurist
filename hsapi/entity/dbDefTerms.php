@@ -415,7 +415,7 @@ class DbDefTerms extends DbEntityBase
                     $s3 = $s3.' at the same branch/level in the tree';
                 }else{
                     $this->records[$idx]['trm_ParentTermID'] = null;
-                    $sWhere = ' AND (NOT (trm_ParentTermID>0))';    
+                    $sWhere = ' AND (trm_ParentTermID IS NULL OR trm_ParentTermID=0)';    
                     $s2 = 'Vocabulary';
                     $s3 = 'The provided name already exists';
                 }

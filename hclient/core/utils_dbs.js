@@ -1338,7 +1338,7 @@ window.hWin.HEURIST4.dbs = {
 
 
     //
-    //
+    // get all vocabularies for given domain
     //
     trm_getVocabs: function(domain){
 
@@ -1350,7 +1350,7 @@ window.hWin.HEURIST4.dbs = {
             var trm_ParentTermID = $Db.trm(trm_ID, 'trm_ParentTermID');
             if(!(trm_ParentTermID>0)){
                 if(!domain || $Db.trm(trm_ID, 'trm_Domain')==domain)
-                res.push(trm_ID);    
+                    res.push(trm_ID);    
             }
         }
         

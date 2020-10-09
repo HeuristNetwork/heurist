@@ -155,10 +155,27 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                   +'<div id="div_group_information" style="padding-top: 13px;width:100%;min-height:3em;clear:both"></div>')
                 .appendTo(this.searchForm);
                 
-                this._defineActionButton2({showText:true, icons:{primary:'ui-icon-plus'},text:window.hWin.HR('Add'), //Add Vocab
+                            
+                var btn_array = [
+                          
+                    {showText:true, icons:{primary:'ui-icon-plus'}, text:window.hWin.HR('Add'), //Add Vocab
                           css:{'margin-right':'0.5em','display':'inline-block',padding:'2px'}, id:'btnAddButton',
-                          click: function() { that._onActionListener(null, 'add'); }}, 
-                            this.searchForm.find('div:first'));
+                          click: function() { that._onActionListener(null, 'add'); }},
+                    {showText:false, icons:{primary:'ui-icon-upload'}, text:window.hWin.HR('Export Vocabularies'),
+                          css:{'margin-right':'0.5em','display':'inline-block',padding:'2px'}, id:'btnExportVocab',
+                          click: function() { that._onActionListener(null, 'term-export'); }},
+                    {showText:false, icons:{primary:'ui-icon-download',padding:'2px'}, text:window.hWin.HR('Import Vocabularies'),
+                          css:{'margin-right':'0.5em','display':'inline-block',padding:'2px'}, id:'btnImportVocab',
+                          click: function() { that._onActionListener(null, 'term-import'); }}
+                    ];
+                    
+                //add, import buttons
+                var c1 = this.searchForm.find('div:first');
+                for(var idx in btn_array){
+                        this._defineActionButton2(btn_array[idx], c1);
+                }
+                    
+                            
                 
                 this.searchForm.css({'padding-top':this.options.isFrontUI?'8px':'4px', height:80});
                 this.recordList.css({ top:80});
@@ -280,13 +297,13 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                           css:{'margin-right':'0.5em','display':'inline-block',padding:'2px'}, id:'btnAddButton2',
                           click: function() { that._onActionListener(null, 'add-reference'); }},
                           
-                    {showText:false, icons:{primary:'ui-icon-arrowthickstop-1-n'}, text:window.hWin.HR('Export Terms'), //ui-icon-arrowthick-1-e
+                    {showText:false, icons:{primary:'ui-icon-upload'}, text:window.hWin.HR('Export Terms'), //ui-icon-arrowthick-1-e
                           css:{'margin-right':'0.5em','display':'inline-block',padding:'2px'}, id:'btnExportVocab',
-                          click: function() { that._onActionListener(null, 'vocab-export'); }},
+                          click: function() { that._onActionListener(null, 'term-export'); }},
                           
-                    {showText:false, icons:{primary:'ui-icon-arrowthickstop-1-s',padding:'2px'}, text:window.hWin.HR('Import Terms'), //ui-icon-arrowthick-1-w
+                    {showText:false, icons:{primary:'ui-icon-download',padding:'2px'}, text:window.hWin.HR('Import Terms'), //ui-icon-arrowthick-1-w
                           css:{'margin-right':'0.5em','display':'inline-block',padding:'2px'}, id:'btnImportVocab',
-                          click: function() { that._onActionListener(null, 'vocab-import'); }}
+                          click: function() { that._onActionListener(null, 'term-import'); }}
                     ];
                     
                 var btn_array2 = [
@@ -979,7 +996,6 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 
                 btns.push(
                  {text:window.hWin.HR('Add Child'),
-                    //id:'btnAddChild',
                     icon:'ui-icon-plus',
                     css:{'float':'left',margin:'.5em .4em .5em 0'},  
                     click: function() { 
@@ -987,7 +1003,16 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                             that.options.reference_trm_manger.manageDefTerms('option','trm_ParentTermID',that._currentEditID);
                             that.options.reference_trm_manger.manageDefTerms('addEditRecord',-1);
                         }
-                        //that._onActionListener(null, {action:'add-child', recID:that._currentEditID}); 
+                    }});
+                btns.push(    
+                 {text:window.hWin.HR('Import terms'),
+                    icon:'ui-icon-download',
+                    showLabel:false,
+                    css:{'float':'left',margin:'.5em .4em .5em 0'},  
+                    click: function() { 
+                        if(that.options.reference_trm_manger && that.options.reference_trm_manger.manageDefTerms('instance')){
+                            that.options.reference_trm_manger.manageDefTerms('importTerms',that._currentEditID,false);
+                        }
                     }}
                 );
                 
@@ -1566,11 +1591,22 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 
             }else 
 */            
-            if(action=='vocab-import'){
+            if(action=='term-import'){
                 
-                this._importTerms(this.options.trm_VocabularyID, false);
+                if(this.options.auxilary=='vocabulary'){
+                    this.importTerms(this.options.trm_VocabularyGroupID, true);
+                }else{
+                    this.importTerms(this.options.trm_VocabularyID, false);    
+                }
                 
-            }else if(action=='vocab-export'){
+            }else if(action=='term-export'){
+                
+                if(this.options.auxilary=='vocabulary'){
+                    this.exportTerms(this.options.trm_VocabularyGroupID, true);
+                }else{
+                    this.exportTerms(this.options.trm_VocabularyID, false);    
+                }
+                
                 
             }else if(action=='viewmode-list'){
 
@@ -1851,7 +1887,7 @@ console.log('NODE activated');
     //
     // invokes popup to import list of terms from file
     //
-    _importTerms: function(parent_ID, isVocab) {
+    importTerms: function(parent_ID, isVocab) {
 
         
             if(isVocab){
@@ -1874,7 +1910,7 @@ console.log('NODE activated');
 
             window.hWin.HEURIST4.msg.showDialog(sURL, {
                 "close-on-blur": false,
-                "no-resize": false,
+                "no-resize": false,                  
                 title: sTitle,
                 height: 600,
                 width: 800,
@@ -1883,8 +1919,12 @@ console.log('NODE activated');
                     
                     if(context && context.result)
                     {
-                        that._filterByVocabulary();
-                        //that._triggerRefresh(that.options.auxilary);
+                        if(that.options.auxilary=='vocabulary'){
+                            that._loadData();
+                        }else{
+                            that._filterByVocabulary();    
+                        }
+                        
                         
                         window.hWin.HEURIST4.msg.showMsgDlg(context.result.length
                             + ' term'
@@ -1898,6 +1938,54 @@ console.log('NODE activated');
             });
 
     },
-
     
+    //
+    // invokes popup to import list of terms from file
+    //
+    exportTerms: function(parent_ID, isVocab) {
+    
+        var trm_Children = [];
+        if(isVocab){
+            var vocabs = $Db.trm_getVocabs();
+            $.each(vocabs, function(i,trm_ID){  
+               if($Db.trm(trm_ID, 'trm_VocabularyGroupID')==parent_ID){
+                   trm_Children.push(trm_ID);
+               }
+            });
+            /*
+            $Db.trm().each(function(trm_ID,rec){
+                if($Db.trm(trm_ID, 'trm_VocabularyGroupID')==parent_ID && !($Db.trm(trm_ID, 'trm_ParentTermID')>0)){
+                    trm_Children.push(trm_ID);        
+                }
+            });     
+            */
+            s = 'Vocabulary,Internal code,Vocabulary group,Group internal code,Standard Code,Description\n';
+        }else{
+            trm_Children = $Db.trm_TreeData(parent_ID, 'set');
+            s = 'Term,Internal code,Parent term,Parent internal code,Standard Code,Description\n';
+        }   
+        
+        
+        for(var i=0; i<trm_Children.length; i++){
+            var trm_ID = trm_Children[i];
+            var term = $Db.trm(trm_ID);
+
+            var aline = ['"'+term['trm_Label']+'"',trm_ID,'',0,'"'+term['trm_Code']+'"','"'+term['trm_Description']+'"'];
+            
+            if(isVocab){
+                var parent_ID = term['trm_VocabularyGroupID'];
+                aline[2] = '"'+$Db.vcg(parent_ID,'vcg_Name')+'"';
+                aline[3] = parent_ID;
+            }else{
+                var parent_ID = term['trm_ParentTermID'];
+                aline[2] = '"'+$Db.trm(parent_ID,'trm_Label')+'"';
+                aline[3] = parent_ID;
+            }
+            
+            s = s + aline.join(',') + '\n';
+        }
+        
+        
+        window.hWin.HEURIST4.util.downloadData('heurist_vocabulary.csv', s, 'text/csv');
+    }    
 });
