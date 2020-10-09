@@ -408,6 +408,12 @@ $.widget( "heurist.mainMenu6", {
                 that._closeSectionMenu('explore');
                 //console.log(' _collapsed');                
                 //that.divMainMenu.css({'box-shadow':null});
+                if (that.menues[that._active_section]) 
+                {
+                    that.menues[that._active_section].css({left:96});
+                }   
+                
+                
             });
         }, is_instant===true?10:this._delayOnCollapseMainMenu); //800
     },
@@ -467,6 +473,11 @@ $.widget( "heurist.mainMenu6", {
                         */
                     }
                     
+                    if (!(that.containers[that._active_section] &&
+                        that.containers[that._active_section].is(':visible'))) 
+                    {
+                        that.menues[that._active_section].css({left:that._widthMenu+5});
+                    }   
                     
                 });
     },
