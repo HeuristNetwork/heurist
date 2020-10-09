@@ -330,6 +330,7 @@ if(@$_REQUEST['linkmode']){//direct, direct_links, none, all
         
     }else if($_REQUEST['linkmode']=='direct'){
         $_REQUEST['revexpand'] = 'no';
+        $_REQUEST['rev'] = 'no';
         
     }else if($_REQUEST['linkmode']=='direct_links'){
         $_REQUEST['revexpand'] = 'no';
@@ -784,7 +785,7 @@ function buildGraphStructure($rec_ids, &$recSet) {
 
 //-----------------------------
 //
-// new set of functions to find linkes and related records dynamically
+// new set of functions to find links and related records dynamically
 //
 function _getReversePointers($rec_id, $depth){
 
