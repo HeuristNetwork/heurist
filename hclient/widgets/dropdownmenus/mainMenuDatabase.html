@@ -75,12 +75,16 @@
 <li data-user-admin-status="0" data-user-experience-level="1">-</li>
 
 <li><a href="admin/setup/dboperations/deleteCurrentDB.php"
-        data-user-admin-status="0" data-user-experience-level="1" data-pwd-nonowner="DatabaseDeletion"  data-icon="ui-icon-delet"
+        id="menu-database-delete"
+        data-container="admin"
+        data-user-admin-status="0" data-user-experience-level="1" data-pwd-nonowner="DatabaseDeletion"  data-icon="ui-icon-trash"
         title="Delete the current database completely - cannot be undone, although data is copied to a backup which could be reloaded by a system administrator">
         Delete</a>
 </li>
 
 <li><a href="admin/setup/dboperations/clearCurrentDB.php"
+        id="menu-database-clear"
+        data-container="admin"
         data-user-admin-status="0"  data-user-experience-level="1" data-pwd-nonowner="DatabaseDeletion"  data-icon="ui-icon-erase"
         title="Clear all data (records, values, attached files) from the current database. Database structure - record types, fields, terms, constraints - is unaffected">
         Delete content</a>
