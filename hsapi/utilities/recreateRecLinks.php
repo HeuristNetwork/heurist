@@ -1,7 +1,6 @@
 <?php
     require_once (dirname(__FILE__).'/../System.php');
-    require_once (dirname(__FILE__).'/../dbaccess/utils_db.php');
-
+    
     $system = new System();
     if( ! $system->init(@$_REQUEST['db']) ){
         //get error and response

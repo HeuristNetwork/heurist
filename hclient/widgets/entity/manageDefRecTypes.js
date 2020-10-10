@@ -90,6 +90,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         if(!this.options.import_structure){        
             window.hWin.HAPI4.addEventListener(this, window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, 
                 function(data) { 
+console.log(data);                    
                     if(!data || 
                        (data.source != that.uuid && data.type == 'rty'))
                     {
@@ -804,7 +805,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                     
                 }else if(action=='duplicate'){
                     
-                    //this._duplicateType(recID);
+                    this._duplicateType(recID);
                     
                 }else if(action=='fields'){
                     //show selectmenu with list of fields
@@ -1237,11 +1238,11 @@ console.log('_recordListGetFullData')
                         var rty_ID = Number(response.data.id);
                         if(rty_ID>0){   
                             //refresh the local heurist
-                            this._refreshClientStructure(response.data);
+                            window.hWin.HEURIST4.rectypes = response.data.rectypes; //@todo remove
                             
-                            //detect what group
-                            ind_grpfld = window.hWin.HEURIST4.rectypes.typedefs.commonNamesToIndex.rty_RecTypeGroupID;
-                            var grpID = window.hWin.HEURIST4.rectypes.typedefs[rty_ID].commonFields[ind_grpfld];
+                            window.hWin.HAPI4.EntityMgr.refreshEntityData('rty,rst',function(){
+                                 window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE);
+                            }); 
 
                         }
                     }else{
@@ -1249,7 +1250,7 @@ console.log('_recordListGetFullData')
                     }                                        
                 }
 
-                var baseurl = window.hWin.HAPI4.baseURL + "admin/structure/rectypes/duplicateRectype.php";
+                var baseurl = window.hWin.HAPI4.baseURL + "hsapi/utilities/duplicateRectype.php";
                 
                 window.hWin.HEURIST4.util.sendRequest(baseurl, { rtyID:rectypeID }, null, _editAfterDuplicate);
 

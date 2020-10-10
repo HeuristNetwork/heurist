@@ -475,8 +475,11 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
     _afterDeleteEvenHandler: function(recID){
         
             this._super();
+
+            this.searchForm.searchDefDetailTypes('startSearch');
+            this._triggerRefresh('dty');
             
-            this.updateGroupCount(this.deleted_from_group_ID, -1);
+            //this.updateGroupCount(this.deleted_from_group_ID, -1);
             
 /*        
             //backward capability - remove later
@@ -1211,9 +1214,10 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             this.closeDialog(true); //force to avoid warning
         }else if(this.it_was_insert){
             this.searchForm.searchDefDetailTypes('startSearch');
+            this._triggerRefresh('dty');
             
-            var dtg_ID = $Db.dty(recID,'dty_DetailTypeGroupID');
-            this.updateGroupCount(dtg_ID, 1);
+            //var dtg_ID = $Db.dty(recID,'dty_DetailTypeGroupID');
+            //this.updateGroupCount(dtg_ID, 1);
         }else{
             this._triggerRefresh('dty');    
         }        
@@ -1222,10 +1226,10 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
     },
 
     //
-    //
+    // NOT USED ANYMORE
     //
     updateGroupCount:function(dtg_ID,  delta){
-    
+        
         if(dtg_ID>0){
             var cnt = parseInt($Db.dtg(dtg_ID,'dtg_FieldCount'));
             var cnt = (isNaN(cnt)?0:cnt)+delta;
@@ -1233,7 +1237,6 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             $Db.dtg(dtg_ID,'dtg_FieldCount',cnt);
             this._triggerRefresh('dtg');
         }
-
     },    
     
     
