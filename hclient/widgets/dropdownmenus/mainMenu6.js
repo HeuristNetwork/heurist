@@ -450,10 +450,10 @@ $.widget( "heurist.mainMenu6", {
 
                         if(that.svs_list){
                             
-                            if(!that.svs_list.parent().hasClass('ui-heurist-header2')){
+                              if(!that.svs_list.parent().hasClass('ui-heurist-header2')){
                                 //show in left main menu
                                 that.svs_list.detach().appendTo(that.divMainMenu.find('.ui-heurist-header2'));
-                                that.svs_list.css({'top':188, 'font-size':'0.8em'});
+                                that.svs_list.css({'top':144, 'font-size':'0.8em'});
                                 that.svs_list.svs_list('option','container_width',170);
                                 that.svs_list.svs_list('option','hide_header', true);
                                 that._on(that.svs_list,{mouseenter: that._resetCloseTimers});//_expandMainMenuPanel});

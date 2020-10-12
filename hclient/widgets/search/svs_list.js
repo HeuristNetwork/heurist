@@ -310,8 +310,13 @@ $.widget( "heurist.svs_list", {
                     this.btn_search_save.hide();
                 }
             }
-            var px = 0;//window.hWin.HEURIST4.util.em(2.5);
-            this.accordeon.css('top', this.div_header.height() + is_vis*px + 5);
+            
+            if(this.options.is_h6style){
+                this.accordeon.css('top', 36);
+            }else{
+                var px = 0;//window.hWin.HEURIST4.util.em(2.5);
+                this.accordeon.css('top', this.div_header.height() + is_vis*px + 5);
+            }
         }
     },
 
