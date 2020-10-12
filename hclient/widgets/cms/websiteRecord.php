@@ -730,7 +730,7 @@ $website_title -> #main-title>h2
   var ele = $('#main-title');
   if(ele.length>0){
       ele.empty().hide();
-      $('<h2 style="font-size:1.7em;margin-top:4px;padding:0 10px;"><?php print htmlspecialchars($website_title, ENT_QUOTES);?></h2>').appendTo(ele);
+      $('<h2 style="font-size:1.7em;margin-top:4px;padding:0 10px;max-height:80px;overflow: hidden;"><?php print htmlspecialchars($website_title, ENT_QUOTES);?></h2>').appendTo(ele);
       if(!$('#main-logo-alt').is(':visible')){
             ele.css({right:10}); 
       }
