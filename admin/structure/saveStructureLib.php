@@ -1364,6 +1364,25 @@ function updateDetailType($commonNames,$dtyID,$dt) {
 //========================================
 
 //================================
+function addTermReference( $parentID, $trmID, $ext_db) {
+    global $system;
+
+    if($ext_db==null){
+        $ext_db = $system->get_mysqli();
+    }
+
+    $ret = $ext_db->query(
+        'insert into defTermsLinks (trl_ParentID,trl_TermID)'
+            .'values ('.$parentID.','.$trmID.')');
+    if(!$ret){
+        $this->system->addError(HEURIST_DB_ERROR, 
+            'Cannot insert to defTermsLinks table', $ext_db->error);
+        return false;
+    }else{
+        return true;
+    }
+}
+
 /**
 * update terms
 * 

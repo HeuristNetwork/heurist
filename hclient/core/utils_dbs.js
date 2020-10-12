@@ -29,8 +29,16 @@ getTermValue - returns label and code for term by id
 
 getColorFromTermValue - Returns hex color by label or code for term by id
 
-getChildrenTerms - returns entire terms tree or only part of it for selected termID
 
+    trm_TreeData  - returns hierarchy for given vocabulary as a flat array, recordset or tree data
+    trm_HasChildren - is given term has children
+    trm_getVocabs - get all vocabularies OR for given domain
+    trm_getAllVocabs - get all vocab where term presents directly or by reference
+    trm_RemoveLinks - remove all entries of term from trm_Links
+    
+
+
+getChildrenTerms - returns entire terms tree or only part of it for selected termID
 
 getPlainTermsList - see crosstabs, search_faceted  {id:trm_ID, text:trm_Label}
 
@@ -1210,8 +1218,8 @@ window.hWin.HEURIST4.dbs = {
     },
     
     //
-    // it uses trm_Links
-    //
+    // Returns hierarchy for given vocabulary as a flat array, recordset or tree data
+    // (it uses trm_Links)
     // vocab_id - id or "relation"
     // mode - 0, flat - returns recordset, 
     //        1, tree - returns treedata for fancytree
@@ -1328,7 +1336,7 @@ window.hWin.HEURIST4.dbs = {
     },
     
     //
-    //
+    // is given term has children
     //
     trm_HasChildren: function(trm_id){
         var t_idx = window.hWin.HAPI4.EntityMgr.getEntityData('trm_Links'); 
@@ -1338,7 +1346,7 @@ window.hWin.HEURIST4.dbs = {
 
 
     //
-    // get all vocabularies for given domain
+    // get all vocabularies OR for given domain
     //
     trm_getVocabs: function(domain){
 
@@ -1383,7 +1391,7 @@ window.hWin.HEURIST4.dbs = {
     },
     
     //
-    // remove any mention of term from hierarchy
+    // remove any mention of term from hierarchy (trm_Links)
     //
     trm_RemoveLinks: function(trm_id){
         var t_idx = window.hWin.HAPI4.EntityMgr.getEntityData('trm_Links'); 

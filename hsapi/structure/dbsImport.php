@@ -818,7 +818,7 @@ $mysqli->commit();
             return false;
         }
         
-        if(strpos($remote_url, HEURIST_SERVER_URL)===0){ //same domain
+        if(strpos($remote_url, HEURIST_SERVER_URL)===0){ //same server
 
           $defs = array();  
           
@@ -1174,8 +1174,11 @@ $mysqli->commit();
             
             //top level import vocabularies
             foreach($this->imp_terms[$domain] as $term_id){
-                $res = $this->_importVocabulary($term_id, $domain, 
-                            @$this->source_defs['terms']['treesByDomain'][$domain][$term_id]);  //children
+                $children = @$this->source_defs['terms']['trm_Links']
+                                ?@$this->source_defs['terms']['trm_Links'][$term_id]   //new structure with terms by reference
+                                :@$this->source_defs['terms']['treesByDomain'][$domain][$term_id];
+                                
+                $res = $this->_importVocabulary($term_id, $domain, $children);                  
                 if(!$res) return false;
             }
             
@@ -1200,8 +1203,21 @@ $mysqli->commit();
             $new_term_id = $this->targetTerms->findTermByConceptCode($term_import[$idx_ccode], $domain);
 
             if($new_term_id){
-                //such term already exists
-                //$terms_correspondence_existed[$term_id] = $new_term_id;
+                //this term aready exists in target - add it as reference to this vocabulary
+                $all_terms = $this->targetTerms->treeData($parent_id,3);
+                if(!in_array($new_term_id, $all_terms)){
+                    //add as reference
+                    $res = addTermReference($parent_id, $new_term_id, $this->system->get_mysqli()); //see saveStructureLib
+                    if($res!==false){
+                        $this->targetTerms->addNewTermRef($parent_id, $new_term_id); //add in memory
+                        
+                    }else{
+                        $this->system->addError(HEURIST_ERROR,
+                        "Can't add term ".$term_id.' '.print_r($term_import, true)."  ".$res);
+                        return false;
+                    }
+                }
+                                
                 $new_term_id = -$new_term_id;
             }else{
                 //if not found add new term
@@ -1211,9 +1227,8 @@ $mysqli->commit();
                 $term_import[$idx_inverseid] = @$this->terms_correspondence[$term_import[$idx_inverseid]]; //@todo - after all terms addition?
                 
                 //get level - all terms of the same level - to search same name and codes
-                //$lvl_src = $this->targetTerms->findChildren($term_import[$idx_parentid], $domain);
                 
-                //verify that code and label is unique for the same level in target(local) db
+                //verify that code and label is unique for the same vocabulary in target(local) db
                 if($parent_id==null){
                     //for vocabularies
                     $term_import[$idx_code] = $this->targetTerms->doDisambiguateTerms($term_import[$idx_code], 
@@ -1262,7 +1277,14 @@ $mysqli->commit();
                 //find same level codes and labels in target
                 $lvl_src = $this->targetTerms->getSameLevelLabelsAndCodes($target_parent_id, $domain);
                 
-                foreach($children as $id=>$children2){
+                foreach($children as $id){
+                    
+                    if(@$this->source_defs['terms']['trm_Links']){
+                        $children2 = @$this->source_defs['terms']['trm_Links'][$id];
+                    }else{
+                        $children2 = @$children[$id];
+                    }
+                    
                     //($term_id, $domain, $children=null, $parent_id=null, $same_level_labels=null)
                     $new_id = $this->_importVocabulary($id, $domain, $children2, $target_parent_id, $lvl_src);
                     if($new_id>0){
@@ -1270,7 +1292,7 @@ $mysqli->commit();
                         $lvl_src['code'][] = $this->targetTerms->getTermCode($new_id);
                         $lvl_src['label'][] = $this->targetTerms->getTermLabel($new_id);
                     } else if($new_id<0){ 
-                        //already exists
+                        //this term aready exists in target - add it as reference to this vocabulary
                     }else {
                         return false;
                     }

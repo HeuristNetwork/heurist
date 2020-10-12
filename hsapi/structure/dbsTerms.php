@@ -27,14 +27,15 @@
     *  getTermCode
     *  getTerm
     *  getSiblings
-    *  findChildren
+    *  treeData($parent_id, $mode) - returns tree of flat array of children ids
     *  addNewTerm
-    *  addChild    
+    *  addNewTermRef
+    *  addChild - private
     *  getTopMostTermParent
     *  doDisambiguateTerms
     *  getSameLevelLabelsAndCodes
     *  getAllowedTermsForField
-    *  getListForParent - flat list
+    *  getListForParent - flat list  @todo replace with treeData
     */
     
 class DbsTerms
@@ -210,45 +211,92 @@ class DbsTerms
     }
 
     //
-    //
+    // NOT USED
     //
     public function getSiblings($term_id, $domain) {
         
         $idx_term_parent = $this->data['fieldNamesToIndex']['trm_ParentTermID'];
         $term = $this->getTerm($term_id, $domain);
         
-        return $this->findChildren($term[$idx_term_parent], $domain);
+        return $this->treeData($term[$idx_term_parent], 3);
     }
-     
-    //
-    //
-    // 
-    public function findChildren($parent_id, $lvl) {
+    
 
-        if($parent_id>0){
-           
-            if(!is_array($lvl)){
-                $lvl = $this->data['treesByDomain'][$lvl];
-            }
+    // $parent_id -  parent term
+    // mode - 1, tree - returns treedata for fancytree
+    //        3, set  - array of ids 
+    //        4, labels - flat array of labels in lower case 
+    //
+    public function treeData($parent_id, $mode){
+        
+        $t_idx = $this->data['trm_Links']; 
+        $res = array();
+        
+        $children = @$this->data['trm_Links'][$parent_id];
+        
+        if(is_array($children) && count($children)>0){
             
-            foreach($lvl as $trmId=>$childs){
-                if($trmId==$parent_id){
-                    return $childs;
-                }else if(count($childs)>0){
-                    $res = $this->findChildren($parent_id, $childs);
-                    if(is_array($res) && count($res)>0){
-                        return $res;
+            foreach($children as $trm_ID){
+                
+                $res2 = $this->treeData($trm_ID, $mode);
+                if(count($res2)>0){
+                    if($mode==1){ //tree
+                        $res[$parent_id] = $res;
+                    }else{ //flat array
+                    
+                        if($mode==1){
+                            array_push($res, $trm_ID);
+                        }else{
+                            array_push($res, strtolower($this->getTermLabel($trm_ID)));
+                        }
+                            
+                        $res = array_merge($res,$res2);
                     }
                 }
             }
-
-            return null;
-        }else{
-            return $this->data['treesByDomain'][$lvl];
         }
-
+        return $res;
+    }
+    
+    //
+    // get all labels and codes of childrent for giveb parent term
+    //
+    public function getSameLevelLabelsAndCodes($parent_id, $domain){
+        
+        $lvl_src = array('code'=>array(),'label'=>array());
+        
+        if($parent_id>0){
+            $children = $this->treeData($parent_id, 3); //ids
+            if(count($children)>0){
+                $idx_code = intval($this->data['fieldNamesToIndex']["trm_Code"]);
+                $idx_label = intval($this->data['fieldNamesToIndex']["trm_Label"]);
+                
+                foreach($children as $trmId){
+                    $code = removeLastNum(trim($this->data['termsByDomainLookup'][$domain][$trmId][$idx_code]));
+                    $label = removeLastNum(trim($this->data['termsByDomainLookup'][$domain][$trmId][$idx_label]));
+                    $lvl_src['code'][] = $code;
+                    $lvl_src['label'][] = $label;
+                }
+            }
+        }
+        
+        return $lvl_src;
     }
 
+    
+    
+    //
+    //
+    //
+    public function addNewTermRef($parent_id, $new_term_id){
+        
+        if(@$this->data['trm_Links'][$parent_id]){
+            $this->data['trm_Links'][$parent_id][] = $new_term_id;
+        }else{
+            $this->data['trm_Links'][$parent_id] = array($new_term_id);
+        }
+    }
+    
     //
     //
     //
@@ -262,10 +310,11 @@ class DbsTerms
         
         $this->data['termsByDomainLookup'][$domain][$new_term_id] = $term_to_add;
         $this->addChild($this->data['treesByDomain'][$domain], $parent_id, $new_term_id);
+        $this->addNewTermRef($parent_id, $new_term_id);
         
     }
     
-    public function addChild(&$lvl, $parent_id, $new_term_id) {
+    private function addChild(&$lvl, $parent_id, $new_term_id) {
 
         if($parent_id>0){
            
@@ -342,31 +391,6 @@ class DbsTerms
         return $this->doDisambiguateTerms2($term_import, $lvl_values);
     }
     
-    //
-    //
-    //
-    public function getSameLevelLabelsAndCodes($parent_id, $domain){
-        
-        $lvl_src = array('code'=>array(),'label'=>array());
-        
-        if($parent_id>0){
-            $children = $this->findChildren($parent_id, $domain);
-            if(count($children)>0){
-                $idx_code = intval($this->data['fieldNamesToIndex']["trm_Code"]);
-                $idx_label = intval($this->data['fieldNamesToIndex']["trm_Label"]);
-                
-                foreach($children as $trmId=>$children2){
-                    $code = removeLastNum(trim($this->data['termsByDomainLookup'][$domain][$trmId][$idx_code]));
-                    $label = removeLastNum(trim($this->data['termsByDomainLookup'][$domain][$trmId][$idx_label]));
-                    $lvl_src['code'][] = $code;
-                    $lvl_src['label'][] = $label;
-                }
-            }
-        }
-        
-        return $lvl_src;
-    }
-
     /**
     * Avoid the same labels and codes on the same level
     * 

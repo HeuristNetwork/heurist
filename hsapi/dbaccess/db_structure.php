@@ -533,6 +533,25 @@ function dbs_GetRectypeConstraint($system) {
         $terms['treesByDomain'] = array(
                 'relation' => __getTermTree($system, "relation", "exact"), 
                 'enum' => __getTermTree($system, "enum", "exact"));
+
+
+                
+        //see dbDefTerms->getTermLinks
+        $query = 'SELECT trl_ParentID, trl_TermID FROM defTermsLinks ORDER BY trl_ParentID';
+        $res = $mysqli->query($query);
+        $matches = array();
+        if ($res){
+            while ($row = $res->fetch_row()){
+                    
+                if(@$matches[$row[0]]){
+                    $matches[$row[0]][] = $row[1];
+                }else{
+                    $matches[$row[0]] = array($row[1]);
+                }
+            }
+            $res->close();
+            $terms['trm_Links'] = $matches;
+        }
                 
         //get vocabulary groups 
         $vcgGroups = array();//'groupIDToIndex' => array());
