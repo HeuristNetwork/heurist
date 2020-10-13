@@ -92,7 +92,8 @@ $.widget( "heurist.resultList", {
         search_realm:  null,  //accepts search/selection events from elements of the same realm only
         search_initial: null,  //NOT USED query string or svs_ID for initial search
         
-        supress_load_fullrecord: false, //do not load full record data
+        supress_load_fullrecord: false //do not load full record data
+        
     },
 
     _is_publication:false, //this is CMS publication - take css from parent
@@ -2561,7 +2562,7 @@ $.widget( "heurist.resultList", {
         var rec_onpage = [];
 
         var html = '', html_groups = {}, recID;
-
+        
         for(; (idx<len && this._count_of_divs<pagesize); idx++) {
             recID = rec_order[idx];
             if(recID){

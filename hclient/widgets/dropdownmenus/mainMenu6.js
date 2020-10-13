@@ -1027,9 +1027,20 @@ console.log('prvent colapse');
                 }
             });
             
-        this.menues[section].find('.ui-icon')
+        $(this.menues[section].children()[1]).find('.ui-icon')
                     .addClass('ui-heurist-title')  //apply color
                     .css({cursor:'pointer'});
+                    
+        this.menues[section].find('.ui-icon-circle-b-help').css({cursor:'pointer'});
+        this._on(this.menues[section].find('.ui-icon-circle-b-help'),
+            {click:function(e){
+                this.containers[section].empty();
+                this.containers[section]
+                    .load(window.hWin.HAPI4.baseURL+'context_help/menu_'+section+'.html #content')
+                    .css({left:'304px',right: '4px',top:'2px',bottom:'4px',width:'auto',height:'auto'})
+                    .show();
+            }}
+        );
         
         //execute menu on click           
         this._on(this.menues[section].find('li[data-action]'),{click:function(e){
@@ -1160,7 +1171,15 @@ console.log('prvent colapse');
             
         }else if(force_show){
             that.containers[section].show();    
+        }else{
+            return;
         }
+        
+        if(section == 'explore') {
+            if(that.containers[section].hasClass('ui-layout-container'))
+                 that.containers[section].layout().resizeAll();
+        }
+
     },
 
     //-----------------------------------------------------------------
@@ -1238,6 +1257,7 @@ console.log('prvent colapse');
             function(){
                 window.hWin.HAPI4.currentUser.usr_SavedSearch = null;
                 window.hWin.HAPI4.currentUser.ugr_SvsTreeData = null;
+                that.svs_list.svs_list('option','hide_header',true);//to trigger refresh
             }, is_modal, true,                                                                                                         
             function(is_locked, is_mouseleave){  //menu_locked
                 if(is_mouseleave){

@@ -743,34 +743,37 @@ div.icons,div.thumbs,div.thumbs3{
 
 /* special mode for dahsboard */
 div.div-result-list-content.icons_list{
-    text-align: center;
+    text-align: left;
 }
 .icons_list .recordDiv, .icons_list .recordDiv:hover {
     -moz-user-select: none;
-    border: none;
     box-shadow: none;
     display: inline-block;
     font-size: 0.9em !important;
-    margin: 6px 2px;
 
     min-width: 150px;
-    width : 150px;
-    height: 24px;
+    width : auto;
     padding: 0;
     position: relative;
     background: none;
+    
+    border: none;
+    height: 36px;
+    border-right: 1px solid lightgray;
+    margin: 0;    
 }
 .icons_list .recordDiv .recTypeThumb{
-    top:2px;
+    top:10px;
+    left:10px;
     width: 16px;
     height: 16px;
 }
 .icons_list .recordDiv .recordTitle {
-    top: 6px;
-    left: 22px;    
+    top: 12px;
+    left: 38px;    
 }
 .icons_list .recordDiv .recordTitle > .item {
-    max-width:130px;
+    max-width:110px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;

@@ -49,17 +49,26 @@ $.widget( "heurist.searchSysDashboard", $.heurist.searchEntity, {
 
         this.btn_set_mode = this.element.find('#btn_set_mode')
                 .css({'min-width':'9m','z-index':2})
-                    .button({label: window.hWin.HR("View dashboard")})
+                    .button({label: window.hWin.HR("View shortcuts")})
                 .click(function(e) {
-                    that._trigger( "viewmode" );
+                    window.hWin.HAPI4.save_pref('prefs_sysDashboard', 
+                        {show_as_ribbon:1, 
+                         show_on_startup: 1 });     
+                    that._trigger( "onclose" );
+                    
+                    //that._trigger( "viewmode" );
                 }); 
 
-        this.btn_close_mode = this.element.find('#btn_close_dashboard')
-                .css({'min-width':'9m'})
-                    .button({label: window.hWin.HR("Close dashboard")})
+        this.btn_close_mode = this.element.find('#btn_close_mode')
+                .css({'min-width':'9m','z-index':2})
+                    .button({label: window.hWin.HR("Hide shortcuts")})
                 .click(function(e) {
+                    window.hWin.HAPI4.save_pref('prefs_sysDashboard', 
+                        {show_as_ribbon:1, 
+                         show_on_startup:0 });     
                     that._trigger( "onclose" );
                 }); 
+                
                 
         this.btn_show_on_startup = this.element.find('#btn_show_on_startup2')
                 .css({'min-width':'9m'})

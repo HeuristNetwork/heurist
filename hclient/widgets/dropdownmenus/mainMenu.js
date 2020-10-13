@@ -999,12 +999,14 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
             
         }else 
         if(action == "menu-manage-dashboards"){
+           
+           entity_dialog_options['is_iconlist_mode'] = false;
+           entity_dialog_options['isViewMode'] = false;
+           entity_dialog_options['onClose'] = function(){
+                            setTimeout('$(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE)',1000);
+                        }; 
             
-           window.hWin.HEURIST4.ui.showEntityDialog('sysDashboard',  //from menu
-                        {onClose:function(){
-                            $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE);
-                            //that._dashboardVisibility( false );
-                        }  });
+           window.hWin.HEURIST4.ui.showEntityDialog('sysDashboard', entity_dialog_options);
         
         }else
         if(action == "menu-help-bugreport"){
@@ -1750,9 +1752,9 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                         remove_ribbon = false;
                         if(!this.divShortcuts){
                             this.divShortcuts = $( "<div>")            
-                                .css({'position':'absolute', left:0, right:0, height:'36px', bottom:-5})
+                                .css({'position':'absolute', left:0, right:-2, height:'36px', bottom:0})
                                 .appendTo(this.element)
-                                .manageSysDashboard({is_iconlist_mode:true});
+                                .manageSysDashboard({is_iconlist_mode:true, isViewMode:true});
                         }else{
                             //refresh
                             this.divShortcuts.manageSysDashboard('startSearch');
@@ -1769,6 +1771,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                } 
                
                var that = this;
+               //this._adjustHeight();
                setTimeout( function(){ that._adjustHeight(); },is_startup?1000:10)
                
         }
@@ -1781,10 +1784,11 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
     _adjustHeight: function(){
 
         var ele = this.element.parents('#layout_panes');
+//console.log(' layout_panes '+ele.length+'  '+(this.divShortcuts==null));        
         if(ele){
-
             var h = 50; //3em;
-            if(this.divMainMenu.is(':visible')) h = h + 32;
+            
+            if(this.divMainMenu.is(':visible')) h = h + 22;
             if(this.divShortcuts){
                 this.divMainMenu.css('bottom',40);
                 h = h + 42;   
@@ -1794,9 +1798,14 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
             
             ele.children('#north_pane').height(h);
             ele.children('#center_pane').css({top: h});
-            if($('.ui-layout-container').length<0){
-                $('.ui-layout-container').layout().resizeAll();
+//console.log(' ui-layout-container '+$('.ui-layout-container').length);        
+            
+            if($('.ui-layout-container').length>0){
+                //$('.ui-layout-pane').css({'height':'auto'});
+                var layout = $('.ui-layout-container').layout();
+                layout.resizeAll();
             }
+            
         }
         
     },

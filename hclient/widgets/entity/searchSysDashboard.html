@@ -4,10 +4,11 @@
     <div style="position: absolute;z-index: 1999;left: 10px;top: 20px;">
         <div id="btn_add_record" style="display:inline-block"></div>
         <div id="btn_apply_order"></div>
-        <div id="btn_set_mode" style="margin-left:20px" title ="Turn back to presentation mode"></div>
+        <div id="btn_set_mode" style="margin-left:20px" title="Close form and view/refresh shortcuts"></div>
+        <div id="btn_close_mode" style="margin-left:20px" title="Close form and hide shortcuts"></div>
 
-        <label style="vertical-align:middle;padding-left:20px"><input id="show_as_ribbon" type="checkbox">&nbsp;Show dashboard as ribbon</label>
-        <label style="vertical-align:middle;padding-left:20px"><input id="show_on_startup" type="checkbox">&nbsp;Show dashboard on startup</label>
+        <label style="display:none;vertical-align:middle;padding-left:20px"><input id="show_as_ribbon" type="checkbox" checked>&nbsp;Show shortcuts as a bar</label>
+        <label style="display:none;vertical-align:middle;padding-left:20px"><input id="show_on_startup" type="checkbox" checked>&nbsp;Show shortcuts on startup</label>
         <span class="heurist-helper1" style="vertical-align:middle;padding-left:40px">Drag and drop to re-order</span>
     </div>
 
@@ -48,8 +49,8 @@
    <!--
    <label style="position:absolute;right:180px;top:40px;font-size: 0.8em;"><input id="show_on_startup2" type="checkbox">&nbsp;Show dashboard on startup</label>
    -->
-   <div style="position:absolute;right: 25em;top: 2em;">
-        <a href="#" id="edit_dashboard"><span class="ui-icon ui-icon-pencil"/>&nbsp;Edit dashboard</a>
+   <div style="display:none;position:absolute;right: 25em;top: 2em;">
+        <a href="#" id="edit_dashboard"><span class="ui-icon ui-icon-pencil"/>&nbsp;Edit shortcuts</a>
    </div>
 
    <div id="btn_close_dashboard" style="position:absolute;right:13.5em;top:1.5em" title="Dashboard will continue to open whenever Heurist is loaded"></div>
