@@ -116,12 +116,12 @@ window.hWin.HEURIST4.collection = {
 
         if(!window.hWin.HEURIST4.util.isempty(window.hWin.HEURIST4.collection._collection)){
 
-            var  app = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('svs_list');
-            if(app && app.widget){
+            var  widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('svs_list');
+            if(widget){
                 //call method editSavedSearch - save collection as search
 
                 // mode, groupID, svsID, squery
-                $(app.widget).svs_list('editSavedSearch', 'saved', null, null, 'ids:'
+                widget.svs_list('editSavedSearch', 'saved', null, null, 'ids:'
                     +window.hWin.HEURIST4.collection._collection.join(","));
             }
         }

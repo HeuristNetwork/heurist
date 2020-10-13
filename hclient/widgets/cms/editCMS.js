@@ -1073,12 +1073,17 @@ function editCMS( options ){
             edit_dialog.dialog('close');     
         }else{
             edit_dialog.hide();
-            //restore menu
-            //hide all menu items 
-            options.menu_container.find('ul').show();
-            //show cms
-            options.menu_container.find('ul.for_web_site').hide();
-            options.menu_container.find('ul.for_web_page').hide();
+            if(options.container){
+                options.container.empty();
+                //restore menu
+                //hide all menu items in mainMenu6_publish
+                if(options.menu_container){
+                    options.menu_container.find('ul').show();
+                    //show cms
+                    options.menu_container.find('ul.for_web_site').hide();
+                    options.menu_container.find('ul.for_web_page').hide();
+                }
+            }
         }
     }
     

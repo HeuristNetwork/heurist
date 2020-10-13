@@ -717,7 +717,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                 container = dialog_options['container'];
             }else if(action_container){
                 var section = action_container;
-                if(section!='publish') $('.ui-menu6').mainMenu6('switchContainer', section, true);
+                $('.ui-menu6').mainMenu6('switchContainer', section, true);
                 container = $('.ui-menu6 > .ui-menu6-container.ui-heurist-'+section);
                 container.removeClass('ui-suppress-border-and-shadow');
                 menu_container = $('.ui-menu6 > .ui-menu6-section.ui-heurist-'+section); //need for publish/cms
@@ -939,9 +939,14 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                popup_dialog_options.onClose = function() { 
                    popup_dialog_options.container.hide() 
                };
+               
+               popup_dialog_options.menu_container.find('ul').show();
+               popup_dialog_options.menu_container.find('ul.for_web_site').hide();
+               popup_dialog_options.menu_container.find('ul.for_web_page').hide();
             }
             
             if(that.isResultSetEmpty()) return;
+            
             window.hWin.HEURIST4.ui.showRecordActionDialog('recordExportCSV', popup_dialog_options);
 
         }else 

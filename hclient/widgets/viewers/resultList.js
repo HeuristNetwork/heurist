@@ -663,13 +663,14 @@ $.widget( "heurist.resultList", {
 
             this._on( this.btn_search_save, {  click: function(){
                 window.hWin.HAPI4.SystemMgr.verify_credentials(function(){
+                    
                     var  app = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('svs_list');
                     if(app && app.widget){
                         $(app.widget).svs_list('editSavedSearch', 'saved'); //call public method
                     }else{
-                        app = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('mainMenu6');
-                        if(app && app.widget){
-                            $(app.widget).mainMenu6('addSavedSearch', 'saved'); //call public method
+                        var widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('mainMenu6');
+                        if(widget){
+                            widget.mainMenu6('addSavedSearch', 'saved'); //call public method
                         }
                         
                     } 
@@ -3108,10 +3109,10 @@ $.widget( "heurist.resultList", {
                         }
                     
                         //call for saved searches dialog
-                        var  app = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('svs_list');
-                        if(app && app.widget){
-                            var squery = 'ids:'+new_rec_order.join(',')+' sortby:set';
-                            $(app.widget).svs_list('editSavedSearch', 'saved', null, svsID, squery, null, true); //call public method
+                        var squery = 'ids:'+new_rec_order.join(',')+' sortby:set';
+                        var  widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('svs_list');
+                        if(widget){
+                            widget.svs_list('editSavedSearch', 'saved', null, svsID, squery, null, true); //call public method
                         }
                     }
                 }},

@@ -139,6 +139,27 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
         
         //load all menu commands
         var menu_entries = [];
+        menu_entries.push({key:'',title:'select command ...'});
+        menu_entries.push({key:'menu-import-add-record',title:'Add record'});
+        menu_entries.push({key:'action-AddRecord',title:'Add record - specific type'});
+        menu_entries.push({key:'menu-help-bugreport',title:'Bug report'});
+        menu_entries.push({key:'menu-manage-archive',title:'Create archive package'});
+        menu_entries.push({key:'menu-structure-rectypes',title:'Edit record types'});
+        menu_entries.push({key:'menu-structure-vocabterms',title:'Edit vocabularies'});
+        menu_entries.push({key:'menu-structure-fieldtypes',title:'Edit base fields'});
+        menu_entries.push({key:'menu-profile-groups',title:'Edit workgroups'});
+        menu_entries.push({key:'menu-cms-edit',title:'Edit website'});
+        menu_entries.push({key:'action-CreateFilter',title:'Filter builder'});
+        menu_entries.push({key:'action-SearchById',title:'Filter - saved filter'});
+        menu_entries.push({key:'action-Search',title:'Filter - specific string'});
+        menu_entries.push({key:'menu-export-csv',title:'Export CSV'});
+        menu_entries.push({key:'menu-help-online',title:'Help'});
+        menu_entries.push({key:'menu-files-upload',title:'Import media'});
+        menu_entries.push({key:'menu-profile-files',title:'Manage files'});
+        menu_entries.push({key:'menu-profile-preferences',title:'Preferences'});
+        menu_entries.push({key:'menu-structure-refresh',title:'Refresh memory'});
+        menu_entries.push({key:'menu-structure-verify',title:'Verify integrity'});
+/*
         var widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('mainMenu');
         if(widget){
             menu_entries = widget.mainMenu('menuGetAllActions');
@@ -150,7 +171,7 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
                 menu_entries.unshift( {key:'',title:'select command ...'});
             }
         }
-        
+*/        
         //get all saved searches
         var saved_searches = [];
         var ssearches = window.hWin.HAPI4.currentUser.usr_SavedSearch;
@@ -468,7 +489,7 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
         
         var specialWidth = '';
         
-        if (this.options.isViewMode) {
+        if (this.options.isViewMode & !this.options.is_iconlist_mode) {
             specialWidth = 'width:250px';
             //detect if there is no description
             recordset.each( function(id, record){
@@ -499,8 +520,9 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
         var html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'+recThumb+'&quot;);opacity:'+recOpacity+'">'
         +'</div>';
 
+        //id="rd'+recID+'" 
         var html = '<div class="recordDiv landscape'+(this.options.isViewMode?' dashboard outline_suppress':'')
-        +'" id="rd'+recID+'" recid="'+recID+'" style="cursor:pointer;'+specialWidth+'">'
+        +'" recid="'+recID+'" style="cursor:pointer;'+specialWidth+'">'
         + html_thumb;
         
         if(!this.options.isViewMode && this.options.select_mode=='manager' && this.options.edit_mode=='popup'){
@@ -559,17 +581,18 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
             if(this.options.isViewMode){
                 var command = this._selection.fld(record, 'dsh_CommandToRun');
                 var params = this._selection.fld(record, 'dsh_Parameters');
-    
+                var dsh_ID = this._selection.fld(record, 'dsh_ID');
+                
                 if(command.indexOf('menu-')==0){ //main menu action
                 
                     //temporal fix (error in coreDefinition.txt)
-                    if(command=='menu-export-csv' && this._selection.fld(record, 'dsh_ID')==10){
+                    if(command=='menu-export-csv' && dsh_ID==10){
                         command = 'menu-import-csv';
                     }
 
-                    var app = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('mainMenu');
-                    if(app && app.widget){
-                        $(app.widget).mainMenu('menuActionById', command);
+                    var widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('mainMenu');
+                    if(widget){
+                        widget.mainMenu('menuActionById', command);
                     }
 
                 }else if(command=='action-AddRecord'){ //add new record
@@ -578,36 +601,42 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
                         window.hWin.HEURIST4.ui.openRecordEdit(-1, null, {new_record_params:params});
                     }
                 
-                }else if(command=='action-SearchById'){ //add new record
+                }else if(command=='action-SearchById'){ //search saved filter
                     
                     this.closeDialog();
                 
                     var svsID = this._selection.fld(record, 'dsh_Parameters');
-                    var app1 = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('svs_list');
-                    if(app1 && app1.widget){
-                        $(app1.widget).svs_list('doSearchByID', svsID);        
+                    var widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('svs_list');
+                    if(widget){
+                        widget.svs_list('doSearchByID', svsID);        
                     }
                     
 
-                }else if(command=='action-Search'){ //add new record
+                }else if(command=='action-Search'){ //search query saved as param
                 
                     this.closeDialog();
                 
                     var qsearch = this._selection.fld(record, 'dsh_Parameters');
                     
-                    var app1 = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('svs_list');
-                    if(app1 && app1.widget){
-                        $(app1.widget).svs_list('doSearch', '', qsearch, false);        
+                    var widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('svs_list');
+                    if(widget){
+                        widget.svs_list('doSearch', 0, '', qsearch, false);        
                     }
 
 
                 }else if(command=='action-CreateFilter'){ //add new record
                 
                     this.closeDialog();
-                
-                    var app1 = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('search');
-                    if(app1 && app1.widget){
-                        $(app1.widget).search('showSearchAssistant');        
+
+                    var widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('mainMenu6');
+                    if(widget){
+                         var ele = this.element.find('div.recordDiv[recid='+dsh_ID+']');
+                         widget.mainMenu6('show_ExploreMenu', null, 'search_quick', {top:0, left:ele.offset().left });
+                    }else{
+                        widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('search');
+                        if(widget){
+                            widget.search('showSearchAssistant');        
+                        }
                     }
                
                 }

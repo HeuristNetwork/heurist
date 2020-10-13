@@ -374,10 +374,10 @@ $.widget( "heurist.search", {
 
             this._on( this.btn_search_save, {  click: function(){
                 window.hWin.HAPI4.SystemMgr.verify_credentials(function(){ 
-                var  app = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('svs_list');
-                if(app && app.widget){
-                    $(app.widget).svs_list('editSavedSearch', 'saved'); //call public method
-                }
+                    var widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('svs_list');
+                    if(widget){
+                        widget.svs_list('editSavedSearch', 'saved'); //call public method
+                    }
                 });
             } });
         }

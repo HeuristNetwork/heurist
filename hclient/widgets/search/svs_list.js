@@ -1899,9 +1899,12 @@ $.widget( "heurist.svs_list", {
             window.hWin.HAPI4.SystemMgr.ssearch_get( { svsIDs:svs_ID },
                 function(response){
                     if(response.status == window.hWin.ResponseStatus.OK){
-
-                        var qsearch = response.data[svs_ID][_QUERY];
-                        that.doSearch( svs_ID, query_name || svs_ID, qsearch, null );
+                        if(response.data[svs_ID]){
+                            var qsearch = response.data[svs_ID][_QUERY];
+                            that.doSearch( svs_ID, query_name || svs_ID, qsearch, null );
+                        }else{
+                            window.hWin.HEURIST4.msg.showMsgFlash('Saved filter not found ( ID: '+svs_ID+' )');    
+                        }
                     }
             });
             
@@ -1973,7 +1976,7 @@ $.widget( "heurist.svs_list", {
 
                         if(!$.isFunction($('body')['search_faceted'])){
                             $.getScript( window.hWin.HAPI4.baseURL + 'hclient/widgets/search/search_faceted.js', function() {
-                                that.doSearch( qname, qsearch, ele );
+                                that.doSearch( 0, qname, qsearch, ele );
                             });
                             return;
                         }else

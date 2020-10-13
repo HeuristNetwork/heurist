@@ -46,7 +46,7 @@ function hLayout(args) {
 
     
     function _appGetWidgetByName( widgetname ){
-
+        
         var i;
         for(i=0; i<widgets.length; i++){
             if(widgets[i].widgetname==widgetname){
@@ -1424,6 +1424,14 @@ console.log('Cardinal layout widget does not have proper options');
         },
 
         getWidgetByName: function( widgetname ){
+            
+            if(widgetname=='svs_list'){
+                var app2 = _appGetWidgetByName('mainMenu6');
+                if(app2.widget){
+                    return $(app2.widget).mainMenu6('getSvsList');
+                }
+            }  
+            
             var app = _appGetWidgetByName( widgetname );
             if(app && app.widget){
                 return $(app.widget);

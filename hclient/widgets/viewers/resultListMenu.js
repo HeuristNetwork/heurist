@@ -322,9 +322,9 @@ console.log(menu.find('.ui-menu-item').css('padding'));
         if(action == "menu-search-quick"){  //H4
 
             //hack $('#btn_search_assistant').click();
-            var app = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('search');  //window.hWin.HAPI4.LayoutMgr.appGetWidgetById('ha10');
-            if(app && app.widget){
-                $(app.widget).search('showSearchAssistant');
+            var widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('search');  //window.hWin.HAPI4.LayoutMgr.appGetWidgetById('ha10');
+            if(widget){
+                widget.search('showSearchAssistant');
             }
 
         }else if(action == "menu-search-advanced"){ //H3
@@ -347,17 +347,17 @@ console.log(menu.find('.ui-menu-item').css('padding'));
 
         }else if(action == "menu-search-save"){  //H4
 
-            var  app = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('svs_list');  //window.hWin.HAPI4.LayoutMgr.appGetWidgetById('ha13');
-            if(app && app.widget){
-                $(app.widget).svs_list('editSavedSearch', 'saved'); //call public method editRules
+            var  widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('svs_list');  //window.hWin.HAPI4.LayoutMgr.appGetWidgetById('ha13');
+            if(widget){
+                widget.svs_list('editSavedSearch', 'saved'); //call public method editRules
                 //$(app.widget).search_links('editSavedSearch', null, null, 'saved'); //call method editSavedSearch - save current search
             }
 
         }else if(action == "menu-search-rulebuilder"){
 
-            var  app = window.hWin.HAPI4.LayoutMgr.appGetWidgetByName('svs_list');  //window.hWin.HAPI4.LayoutMgr.appGetWidgetById('ha13');
-            if(app && app.widget){
-                $(app.widget).svs_list('editSavedSearch', 'rules'); //call public method editRules
+            var  widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('svs_list');  //window.hWin.HAPI4.LayoutMgr.appGetWidgetById('ha13');
+            if(widget){
+                widget.svs_list('editSavedSearch', 'rules'); //call public method editRules
                 // $(app.widget).search_links('editRules', null); //call public method editRules
             }
 

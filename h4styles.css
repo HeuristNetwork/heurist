@@ -751,7 +751,7 @@ div.div-result-list-content.icons_list{
     display: inline-block;
     font-size: 0.9em !important;
 
-    min-width: 150px;
+    min-width: 50px;
     width : auto;
     padding: 0;
     position: relative;
@@ -769,11 +769,13 @@ div.div-result-list-content.icons_list{
     height: 16px;
 }
 .icons_list .recordDiv .recordTitle {
-    top: 12px;
-    left: 38px;    
+    position:relative;
+    /*top: 12px;
+    left: 38px;*/
 }
 .icons_list .recordDiv .recordTitle > .item {
-    max-width:110px;
+    /*max-width:110px;*/
+    padding: 12px 10 8 31px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
