@@ -523,7 +523,7 @@ $.widget( "heurist.navigation", {
                             }
                             if(page_footer.length>0){
                                 page_footer.appendTo( $(page_target) );
-                                $(page_target).css({'min-height':$(page_target).parent().height()-90 });
+                                $(page_target).css({'min-height':$(page_target).parent().height()-page_footer.height()-10 });
                             } 
                             
                             window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, page_target );
