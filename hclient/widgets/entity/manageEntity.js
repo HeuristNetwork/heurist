@@ -1228,7 +1228,8 @@ $.widget( "heurist.manageEntity", {
     },
     
     refreshRecordList: function(){
-        this.recordList.resultList('refreshPage');  
+        if(this.recordList && this.recordList.resultList('instance'))
+            this.recordList.resultList('refreshPage');  
     },
 
     //
@@ -1631,7 +1632,6 @@ this._time_debug = fin_time;
                      
             }else if(this.editFormToolbar.length>0){ //initialize action buttons
                 
-console.log('editFormToolbar');                
                     this._toolbar = this.editFormToolbar;
                     this.editFormToolbar.empty();
                     var btns = this._getEditDialogButtons();

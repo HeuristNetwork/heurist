@@ -766,7 +766,7 @@ dty_TermIDTreeNonSelectableIDs
 
                         that._saveEditAndClose(fields, function( recID, fields ){
                             
-                            //update only retype of maxval field
+                            //update only rectype of maxval field
                             that._cachedRecordset.setFldById(recID, fieldName, newVal);
                             window.hWin.HEURIST4.rectypes.typedefs[that.options.rty_ID].dtFields[recID]
                                 [window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex[fieldName]] = newVal;
@@ -1061,6 +1061,8 @@ dty_TermIDTreeNonSelectableIDs
                 var fields = window.hWin.HEURIST4.dbs.rstField(that.options.rty_ID, dtyID);
                 that._cachedRecordset.setRecord(dtyID, fields);
 //console.log(fields);
+//console.log($Db.rst_idx(that.options.rty_ID, dtyID));
+
                 //reload formlet after edit
                 that._initEditForm_step3( dtyID );
                 //make it changed
@@ -1076,7 +1078,7 @@ dty_TermIDTreeNonSelectableIDs
     },
     
     //
-    //
+    // add field to structure
     //
     addNewFieldToStructure: function(dty_ID, after_dty_ID, rst_fields){
         
@@ -1144,8 +1146,6 @@ dty_TermIDTreeNonSelectableIDs
                     fields['rst_ID'] = recID;
                     
                     that._cachedRecordset.setRecord(recID, fields);
-                    
-                    
                     
                     var tree = that._treeview.fancytree("getTree");
                     var parentnode;
@@ -1367,34 +1367,35 @@ console.log('No active tree node!!!!')
             
         //----------
         // hint with base field details
-        var dt_fields = window.hWin.HEURIST4.dbs.dtyField(this._currentEditID);
-        
-        var s = dt_fields['dty_HelpText'];
-        var s1 = '', k = 0;
-        if(s){
-            s = s.trim();
-            while (k<s.length && k<500){
-                s1 = s1 + s.substring(k,k+60) + "\n";
-                k = k + 60;
+        var baseFieldDetails = "ID: "+this._currentEditID;        
+        var dt_fields = $Db.dty(this._currentEditID);
+        if(dt_fields){
+            var s = dt_fields['dty_HelpText'];
+            var s1 = '', k = 0;
+            if(s){
+                s = s.trim();
+                while (k<s.length && k<500){
+                    s1 = s1 + s.substring(k,k+60) + "\n";
+                    k = k + 60;
+                }
             }
-        }
-        var s2 = ''; 
-        s = dt_fields['dty_ExtendedDescription'];
-        if(s){
-            s = s.trim();
-            k = 0;
-            while (k<s.length && k<500){
-                s2 = s2 + s.substring(k,k+60) + "\n";
-                k = k + 60;
+            var s2 = ''; 
+            s = dt_fields['dty_ExtendedDescription'];
+            if(s){
+                s = s.trim();
+                k = 0;
+                while (k<s.length && k<500){
+                    s2 = s2 + s.substring(k,k+60) + "\n";
+                    k = k + 60;
+                }
             }
-        }
 
-        var baseFieldDetails = 
-        "ID: "+this._currentEditID+
-        (dt_fields['dty_ConceptID']?("\n\nConcept code: "+dt_fields['dty_ConceptID']):'')+
-        "\n\nBase field type: "+dt_fields['dty_Name']+"\n\n"+
-        ((s1!='')?("Help: "+s1+"\n"):'')+
-        ((s2!='')?("Ext: "+s2+"\n"):'');
+            baseFieldDetails +=
+            (dt_fields['dty_ConceptID']?("\n\nConcept code: "+dt_fields['dty_ConceptID']):'')+
+            "\n\nBase field type: "+dt_fields['dty_Name']+"\n\n"+
+            ((s1!='')?("Help: "+s1+"\n"):'')+
+            ((s2!='')?("Ext: "+s2+"\n"):'');
+        }
         
         //----------------
         var edit_ele = this._editing.getFieldByName('rst_CreateChildIfRecPtr');

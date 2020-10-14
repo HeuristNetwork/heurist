@@ -544,7 +544,7 @@ $.widget( "heurist.search_entity", {
             //var request = window.hWin.HEURIST4.util.parseHeuristQuery(qsearch);
 
             var request = {};
-            request.q = '{"t":"'+rty_ID+'"}';
+            request.q = 't:'+rty_ID; //'{"t":"'+rty_ID+'"}';
             request.w  = 'a';
             request.qname = $Db.rty(rty_ID, 'rty_Plural');
             request.detail = 'ids';

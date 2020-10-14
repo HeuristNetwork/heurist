@@ -1304,7 +1304,10 @@ function output_HeaderOnly($system, $data, $params)
                     $headers[$rty_ID][] = $field['name'].': Lookup list';
                     $placeholders[] = $field['name'].'. Use to create value control lists';
                     //get list of terms
-                    $terms = $defTerms->getAllowedTermsForField( $field['term_ids'], $field['nonsel'], $field['domain'] );
+                    $vocabId = $field['term_ids'];
+                    $terms = $defTerms->treeData($vocabId, 3);
+                    array_unshift($terms, $vocabId); 
+                    
                     $max_count = max($max_count, count($terms));    
                     $terms_pickup[$rty_ID][$dtid]['terms'] = $terms;
                 }

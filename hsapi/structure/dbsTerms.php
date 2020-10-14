@@ -35,7 +35,6 @@
     *  doDisambiguateTerms
     *  getSameLevelLabelsAndCodes
     *  getAllowedTermsForField
-    *  getListForParent - flat list  @todo replace with treeData
     */
     
 class DbsTerms
@@ -229,27 +228,42 @@ class DbsTerms
     //
     public function treeData($parent_id, $mode){
         
-        $t_idx = $this->data['trm_Links']; 
-        $res = array();
+        if($mode=='set'){
+            $mode = 3;
+        }else if($mode=='tree'){
+            $mode = 1;
+        }else{
+            $mode = 4;
+        }
+        
+        
+        if($mode==1){
+            $res = array($parent_id=>array());
+        }else{
+            $res = array();    
+        }
         
         $children = @$this->data['trm_Links'][$parent_id];
         
         if(is_array($children) && count($children)>0){
-            
+
             foreach($children as $trm_ID){
+
+                if($mode==1){ //tree
+                    $res[$parent_id][$trm_ID] = array(); 
+                }else if($mode==3){
+                    array_push($res, $trm_ID);
+                }else{
+                    array_push($res, strtolower($this->getTermLabel($trm_ID)));
+                }
                 
                 $res2 = $this->treeData($trm_ID, $mode);
                 if(count($res2)>0){
-                    if($mode==1){ //tree
-                        $res[$parent_id] = $res;
-                    }else{ //flat array
-                    
-                        if($mode==1){
-                            array_push($res, $trm_ID);
-                        }else{
-                            array_push($res, strtolower($this->getTermLabel($trm_ID)));
-                        }
-                            
+                    if($mode==1){ 
+                        //tree
+                        $res[$trm_ID] = $res2;
+                    }else{ 
+                        //flat array
                         $res = array_merge($res,$res2);
                     }
                 }
@@ -416,69 +430,7 @@ class DbsTerms
         }
         return $term_value;
     }
-    
-    // @todo  - verify - it is used in the only place - record_output
-    //
-    // $terms_ids - vocab id or selected terms
-    // $terms_nonen - disabled terrms
-    // return term ids
-    //
-    public function getAllowedTermsForField($terms_ids, $terms_none, $domain){
-        
-            $allowed_terms = null;
 
-            $terms = $this->getTermsFromFormat($terms_ids, $domain); //parse
-
-            if (($cntTrm = count($terms)) > 0) {
-                if ($cntTrm == 1) { //vocabulary
-                    $vocabId = $terms[0];
-                            
-                    $terms = $this->getListForParent($terms[0], $domain);
-                    if(!in_array($vocabId, $terms))
-                        array_unshift($terms, $vocabId);
-                }else{
-                    //???????
-                    /*
-                    $nonTerms = getAllTermsForField($terms_none, $domain);
-                    if (count($nonTerms) > 0) {
-                        $terms = array_diff($terms, $nonTerms);
-                    }
-                    */
-                }
-                if (!empty($terms)) {
-                    $allowed_terms = $terms;
-                }
-            }
-            
-            return $allowed_terms;
-        
-    }
-    
-    //
-    //
-    //
-    public function getListForParent($term_id, $domain, $getalldescents = true){
-
-        $offspring = array();
-
-        if(is_array($domain)){
-            $lvl = $domain;
-        }else{
-            $lvl = $this->data['treesByDomain'][$domain];
-        }
-        foreach($lvl as $sub_term_id=>$childs){
-
-            if($term_id==null || $sub_term_id == $term_id){
-                array_push($offspring, $sub_term_id);
-                if( $getalldescents && count($childs)>0) {
-                    $offspring = array_merge($offspring, $this->getListForParent(null, $childs) );
-                }
-            }
-        }
-
-        return $offspring;
-        
-    }
     
 }  
 ?>

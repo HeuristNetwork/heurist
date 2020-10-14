@@ -185,11 +185,12 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
                     parent_dtid = parent_dtid.substr(2);
                 }
                 parentcode = parent_rtid+':'+parent_dtid;
-                var fieldtitle = window.hWin.HEURIST4.dbs.rstField(parent_rtid, parent_dtid, 'rst_DisplayName');
+                
+                var fieldtitle = $Db.rst_idx(parent_rtid, parent_dtid, 'rst_DisplayName');
                 
                 this._addSelectedColumn(parentcode, fieldtitle);    
                 
-                title = window.hWin.HEURIST4.rectypes.names[rtid] +'.'+ title;        
+                title = $Db.rty(rtid,'rty_Name') +'.'+ title;        
             }
 
             var header_fields = {id:'rec_ID',title:'rec_Title',url:'rec_URL',modified:'rec_Modified',tags:'rec_Tags'};
@@ -263,10 +264,10 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
                 $(opt).attr('disabled','disabled').attr('visiblity','hidden').css({display:'none'});
             }
             for (var rty in rectype_Ids){
-                    if(rty>=0 && window.hWin.HEURIST4.rectypes.pluralNames[rectype_Ids[rty]]){
+                    if(rty>=0 && $Db.rty(rectype_Ids[rty],'rty_Plural')){
                         rty = rectype_Ids[rty];
                         window.hWin.HEURIST4.ui.addoption(selScope,rty,
-                                window.hWin.HEURIST4.rectypes.pluralNames[rty]); //'only: '+
+                                $Db.rty(rty,'rty_Plural')); //'only: '+
                     }
             }
         }

@@ -184,6 +184,9 @@ function addParam($parameters, $type, $val){
     if($type=="s" && $val!=null){
         $val = trim($val);
     }
+    //else if($type=="i" && $val==null){
+    //    $val = 0;
+    //}
     array_push($parameters, $val);
     return $parameters;
 }
@@ -1215,7 +1218,7 @@ function createDetailTypes($commonNames, $dt) {
         $querycols = "";
         foreach ($commonNames as $colName) {
             $val = array_shift($dt['common']);
-            if(@$dtyColumnNames[$colName]){
+            if(@$dtyColumnNames[$colName] && $colName!='dty_FieldSetRectypeID'){
 
                 if($query!="") {
                     $query = $query.",";
@@ -1375,7 +1378,7 @@ function addTermReference( $parentID, $trmID, $ext_db) {
         'insert into defTermsLinks (trl_ParentID,trl_TermID)'
             .'values ('.$parentID.','.$trmID.')');
     if(!$ret){
-        $this->system->addError(HEURIST_DB_ERROR, 
+        $system->addError(HEURIST_DB_ERROR, 
             'Cannot insert to defTermsLinks table', $ext_db->error);
         return false;
     }else{

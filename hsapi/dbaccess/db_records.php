@@ -1614,7 +1614,7 @@
                         if($is_strict){
 
                             if(!$terms){
-                                $terms = dbs_GetTerms($system);
+                                $terms = new DbsTerms($system, dbs_GetTerms($system));
                             }
 
                             $term_domain = ($det_types[$dtyID]=="enum"?"enum":"relation");
@@ -2114,7 +2114,7 @@
         }
         return null;
     }
-    
+ /*   
     // @todo use DbsTerms
     // @todo REMOVE - all these functions are duplicated in DbsTerms and db_structure
     //
@@ -2203,28 +2203,13 @@
 
         return null; //not found
     }
-
+  */
     // see VerifyValue
     function isValidTerm($system, $term_tocheck, $domain, $dtyID, $rectype)
     {
-        global $recstructures, $detailtypes;
+        global $recstructures, $detailtypes, $terms;
 
         $terms_ids = null;
-
-        //terms constraints are not defined in rectype structure anymore
-        /*
-        $recstr = dbs_GetRectypeStructure($system, $recstructures, $rectype);
-        if($recstr && @$recstr['dtFields'][$dtyID])
-        {
-            $val = $recstr['dtFields'][$dtyID];
-            $idx = $recstructures['dtFieldNamesToIndex']['rst_FilteredJsonTermIDTree'];
-            $terms_ids = $val[$idx];
-            $idx = $recstructures['dtFieldNamesToIndex']['rst_TermIDTreeNonSelectableIDs'];
-            $terms_none = $val[$idx];
-        }else{
-            //detail type may be not in rectype structure
-        }
-        */
 
         $dtype = getDetailType($system, $detailtypes, $dtyID);
         if ($dtype) {
@@ -2235,11 +2220,11 @@
         }
 
         if($terms_ids){
-            
-            //see DbsTerms->getAllTermsForField
+        
+            //get all terms for given vocabulary
+            $allowed_terms = $terms->treeData($terms_ids,'set');
 
-            $allowed_terms = null;
-
+            /*
             $terms = getTermsFromFormat2($terms_ids, $domain); //parse
 
             if (($cntTrm = count($terms)) > 0) {
@@ -2257,6 +2242,7 @@
                     $allowed_terms = $terms;
                 }
             }
+            */
 
             return $allowed_terms && in_array($term_tocheck, $allowed_terms);
         }

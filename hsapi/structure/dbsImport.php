@@ -382,8 +382,9 @@ $time_debug = microtime(true);
 $time_debug2 = $time_debug;
         
         // I. Add Terms (whole vocabulary)
-        if(! ($this->_importVocabulary(null, "enum") && 
-              $this->_importVocabulary(null, "relation")) ){
+        $stub = array();
+        if(! ($this->_importVocabulary(null, "enum", $stub) && 
+              $this->_importVocabulary(null, "relation", $stub)) ){
 
             $mysqli->rollback();
             $mysqli->close();
@@ -1163,7 +1164,7 @@ $mysqli->commit();
      $same_level_labels - labels and codes on the same level to disambiguate
      
     */ 
-    private function _importVocabulary($term_id, $domain, $children=null, $parent_id=null, $same_level_labels=null){
+    private function _importVocabulary($term_id, $domain, &$all_terms_in_vocab, $children=null, $parent_id=null, $same_level_labels=null){
         
 
         if($term_id==null){
@@ -1172,13 +1173,16 @@ $mysqli->commit();
             //fills $this->vcg_correspondence
             $this->_importVocabularyGroups($this->imp_terms[$domain]);
             
+            
             //top level import vocabularies
             foreach($this->imp_terms[$domain] as $term_id){
                 $children = @$this->source_defs['terms']['trm_Links']
                                 ?@$this->source_defs['terms']['trm_Links'][$term_id]   //new structure with terms by reference
                                 :@$this->source_defs['terms']['treesByDomain'][$domain][$term_id];
+
+                $all_terms_in_vocab = $this->targetTerms->treeData($term_id,3);
                                 
-                $res = $this->_importVocabulary($term_id, $domain, $children);                  
+                $res = $this->_importVocabulary($term_id, $domain, $all_terms_in_vocab, $children, null, null);                  
                 if(!$res) return false;
             }
             
@@ -1204,17 +1208,22 @@ $mysqli->commit();
 
             if($new_term_id){
                 //this term aready exists in target - add it as reference to this vocabulary
-                $all_terms = $this->targetTerms->treeData($parent_id,3);
-                if(!in_array($new_term_id, $all_terms)){
-                    //add as reference
-                    $res = addTermReference($parent_id, $new_term_id, $this->system->get_mysqli()); //see saveStructureLib
-                    if($res!==false){
-                        $this->targetTerms->addNewTermRef($parent_id, $new_term_id); //add in memory
-                        
-                    }else{
-                        $this->system->addError(HEURIST_ERROR,
-                        "Can't add term ".$term_id.' '.print_r($term_import, true)."  ".$res);
-                        return false;
+                if($parent_id>0){
+                    if($new_term_id==5368 || $new_term_id==6304){
+                        error_log('!!!!');
+                    }
+                    
+                    if(!in_array($new_term_id, $all_terms_in_vocab)){
+                        //add as reference
+                        $res = addTermReference($parent_id, $new_term_id, $this->system->get_mysqli()); //see saveStructureLib
+                        if($res!==false){
+                            array_push($all_terms_in_vocab, $new_term_id);
+                            $this->targetTerms->addNewTermRef($parent_id, $new_term_id); //add in memory
+                            
+                        }else{
+                            //$this->system->addError(HEURIST_ERROR, "Can't add reference ".$term_id.' to '.$parent_id);
+                            return false;
+                        }
                     }
                 }
                                 
@@ -1260,6 +1269,7 @@ $mysqli->commit();
                     
                     $this->targetTerms->addNewTerm($new_term_id, $term_import); //add in memory
                     
+                    array_push($all_terms_in_vocab, $new_term_id);
                 }else{
                     $this->system->addError(HEURIST_ERROR,
                     "Can't add term ".$term_id.' '.print_r($term_import, true)."  ".$res);
@@ -1286,7 +1296,7 @@ $mysqli->commit();
                     }
                     
                     //($term_id, $domain, $children=null, $parent_id=null, $same_level_labels=null)
-                    $new_id = $this->_importVocabulary($id, $domain, $children2, $target_parent_id, $lvl_src);
+                    $new_id = $this->_importVocabulary($id, $domain, $all_terms_in_vocab, $children2, $target_parent_id, $lvl_src);
                     if($new_id>0){
                         //new term - add to codes and labels
                         $lvl_src['code'][] = $this->targetTerms->getTermCode($new_id);
