@@ -493,7 +493,7 @@ $.widget( "heurist.navigation", {
                 if(page_target[0]!='#') page_target = '#'+page_target;
 
                 var continue_load_page = function() {
-
+                    
                     if(pageCss && Object.keys(pageCss).length>0){
                         if(!that.pageStyles_original[page_target]){ //keep to restore
                             that.pageStyles_original[page_target] = $(page_target).clone();
@@ -504,6 +504,9 @@ $.widget( "heurist.navigation", {
                         //document.getElementById(page_target.substr(1)).style = that.pageStyles_original[page_target];
                         $(page_target).replaceWith(that.pageStyles_original[page_target]);                            
                     }
+                    
+                    var page_footer = $(page_target).find('.page-footer');
+                    if(page_footer.length>0) page_footer.detach();
 
                     $(page_target).empty().load(page_url,
                         function(){
@@ -518,6 +521,11 @@ $.widget( "heurist.navigation", {
                                     pagetitle.remove();
                                 }
                             }
+                            if(page_footer.length>0){
+                                page_footer.appendTo( $(page_target) );
+                                $(page_target).css({'min-height':$(page_target).parent().height()-90 });
+                            } 
+                            
                             window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, page_target );
                             //window.hWin.HEURIST4.msg.sendCoverallToBack();
                             if($.isFunction(that.options.aftermenuselect)){

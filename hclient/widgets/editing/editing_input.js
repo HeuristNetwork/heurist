@@ -681,13 +681,22 @@ $.widget( "heurist.editing_input", {
                          this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'] ||
                          this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME']) &&
                         (this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_EXTENDED_DESCRIPTION'] || 
-                         this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_HEADER'] ));
+                         this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_HEADER'] || 
+                         this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_FOOTER']));
                 
                 if( isCMS_content ){
                     
                     var fstatus = '';
-                    var fname = (this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_HEADER'])
-                                ?'Custom header':'Edit page content';
+                    var fname = 'Edit page content';
+                    if(this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_HEADER']){
+                        fname = 'Custom header';
+                    }else if(this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_FOOTER']){
+                        fname = 'Custom footer';
+                        fstatus = (window.hWin.HEURIST4.util.isempty(value))
+                            ?'No custom footer defined'
+                            :'Delete html from this field to use default page footer.';
+                    }
+                                
                                 
                     if (this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME']
                         && this.options.dtID == window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_HEADER'])
