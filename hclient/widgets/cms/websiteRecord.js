@@ -48,6 +48,11 @@ console.log('assign main_content');
     var is_header_editor = false;
     var header_content_raw = null;
     var header_content_generated = true;
+    
+    var is_footer_editor = false;
+    var footer_content_raw = null;
+    var footer_content_generated = true;
+    
     var original_editor_content = '';
     var LayoutMgr = new hLayout(); //to avoid interferene with  window.hWin.HAPI4.LayoutMgr  
 
@@ -176,7 +181,7 @@ console.log('assign main_content');
             
             header_content_generated = (topmenu.attr('data-generated')==1);
             topmenu.attr('data-generated', 0).show();
-            
+
             header_content_raw = main_header.html();
             
             topmenu.hide();
@@ -192,10 +197,14 @@ console.log('assign main_content');
             
             topmenu.show();
             
-            
             //init home page content
             __iniLoadPageById( init_pageid>0?init_pageid:home_pageid );
+
             
+            footer_content_raw = $('#page-footer > .page-footer-content').html();
+            footer_content_generated = (footer_content_raw=='');
+console.log('foter:'+footer_content_raw);
+
             $(document).trigger(window.hWin.HAPI4.Event.ON_SYSTEM_INITED, []);
             
             //window.hWin.HEURIST4.msg.sendCoverallToBack();
@@ -261,6 +270,8 @@ console.log('assign main_content');
 
            if(is_header_editor){
                 is_changed = is_changed && header_content_raw.replace(/(\r\n|\n|\r|\&nbsp;)/gm, "") != edited_content;
+           }else if(is_footer_editor){
+                is_changed = is_changed && footer_content_raw.replace(/(\r\n|\n|\r|\&nbsp;)/gm, "") != edited_content;
            }else{
                 is_changed = is_changed && last_save_content.replace(/(\r\n|\n|\r|\&nbsp;)/gm, "") != edited_content;
            }
@@ -436,6 +447,14 @@ console.log('assign main_content');
                     recIDs: home_pageid,
                     dtyID: window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_HEADER'],
                     rVal: newval};
+                    
+        }else if(is_footer_editor){
+
+            request = {a: 'addreplace',
+                    recIDs: home_pageid,
+                    dtyID: window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_FOOTER'],
+                    rVal: newval};
+            
         }else{
             if(window.hWin.HEURIST4.util.isempty(newval)){
                 request = {a: 'delete',
@@ -466,13 +485,18 @@ console.log('assign main_content');
 
                         window.hWin.HEURIST4.msg.showMsgFlash('saved');
                         
-                        if(!is_header_editor){
+                        if(is_header_editor){
+                            header_content_raw = newval;
+                            
+                        }else if(is_footer_editor){
+                            footer_content_raw = newval;
+                            
+                        }else{
                             last_save_content = newval;
 //console.log('was saved '+last_save_content);                        
                             was_modified = true;     
-                        }else{
-                            header_content_raw = newval;
                         }
+                        
                         if($.isFunction(need_close)){
                             need_close.call();
                         }else if (need_close===true){
@@ -528,7 +552,14 @@ console.log('assign main_content');
 //console.log('restore 1 '+last_save_content);                        
                 $('.tinymce-body').val(last_save_content); 
                 last_save_content = null;
+            }else if(is_footer_editor){
+                
+                $('.page-footer-content').html(footer_content_raw);
+                
+                $('.tinymce-body').val(last_save_content); 
+                last_save_content = null;
             }
+            is_footer_editor = false;
             is_header_editor = false;
             
             if(new_pageid>0){
@@ -1593,6 +1624,42 @@ console.log('assign main_content');
         
         tinymce.init(inlineEditorConfig);
     }
+
+
+    //
+    // opens tinymce for website footer
+    //
+    function _editFooterContent(){
+        
+        if(footer_content_generated){
+            window.hWin.HEURIST4.msg.showMsgDlg(
+'<p>If you decide to use a custom page footer, you must take into account that right part of footer is reserverd for host/siteowner information</p>'
++'<p>To change styles for footer use #page-footer id in "Custom CSS" field</p>' 
++'<p>Create custom page footer?</p>',            
+                function(){
+                    footer_content_generated = false;
+                    _editFooterContent();    
+                });
+                return;
+        }
+        
+        $('#btn_inline_editor').hide();
+        $('#btn_inline_editor3').hide();
+        $('#btn_inline_editor4').hide();
+        main_content.parent().css('overflow-y','hidden');
+        main_content.hide();
+        $('#edit_mode').val(1).click();//to disable left panel
+        
+        last_save_content = $('.tinymce-body').val();
+        $('.tinymce-body').val(footer_content_raw);
+        
+        $('.tinymce-body').show();
+        
+        is_footer_editor = true;
+        
+        tinymce.init(inlineEditorConfig);
+    }
+
     
     //
     // opens tinymce for cotent editor
@@ -1724,6 +1791,10 @@ console.log('assign main_content');
         
         editHeaderContent: function(){
             _editHeaderContent();
+        },
+
+        editFooterContent: function(){
+            _editFooterContent();
         },
         
         resetHeaderContent: function (){

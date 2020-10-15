@@ -746,7 +746,12 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                 container: container,
                 position: pos,
                 maximize: true
-            }                                     
+            }
+            
+            if(dialog_options && dialog_options['record_id']>0){
+                popup_dialog_options.record_id = dialog_options['record_id'];
+            }
+                                                 
         }
         
         //  -1 no verification
@@ -822,27 +827,37 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         }else if(action == "menu-cms-edit"){
 
                 var RT_CMS_HOME = window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_HOME'];
+                
+                if(popup_dialog_options.record_id>0){
+                    
+                        window.hWin.HEURIST4.ui.showEditCMSDialog( popup_dialog_options );                    
+                    
+                }else{
+                
 
-                that._getCountWebSiteRecords(function(){
-                    if(RT_CMS_HOME>0 && that.cms_home_records_count>0){
-                        
-                        if(that.sMsgCmsPrivate!=''){
-                            var $dlg = window.hWin.HEURIST4.msg.showMsgDlg(that.sMsgCmsPrivate,
-                               {Continue:function(){ $dlg.dialog('close'); that._select_CMS_Home( false, popup_dialog_options ); }},
-                               'Non-public website records');
+                    that._getCountWebSiteRecords(function(){
+                        if(RT_CMS_HOME>0 && that.cms_home_records_count>0){
+                            
+                            if(that.sMsgCmsPrivate!=''){
+                                var $dlg = window.hWin.HEURIST4.msg.showMsgDlg(that.sMsgCmsPrivate,
+                                   {Continue:function(){ 
+                                        $dlg.dialog('close'); 
+                                        that._select_CMS_Home( false, popup_dialog_options ); 
+                                   }},
+                                   'Non-public website records');
+                            }else{
+                                that._select_CMS_Home( false, popup_dialog_options );    
+                            }
+                            
                         }else{
-                            that._select_CMS_Home( false, popup_dialog_options );    
+                            popup_dialog_options.record_id = -1;
+                            window.hWin.HEURIST4.msg.showMsgDlg(
+                                    'New website will be created. Continue?',
+                                    function(){ window.hWin.HEURIST4.ui.showEditCMSDialog( popup_dialog_options ); });
                         }
-                        
-                        
-                        
-                    }else{
-                        popup_dialog_options.record_id = -1;
-                        window.hWin.HEURIST4.msg.showMsgDlg(
-                                'New website will be created. Continue?',
-                                function(){ window.hWin.HEURIST4.ui.showEditCMSDialog( popup_dialog_options ); });
-                    }
-                });
+                    });
+                
+                }
 
         }else if(action == "menu-cms-view"){
 
@@ -1700,12 +1715,16 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         var lt = window.hWin.HAPI4.sysinfo['layout']; 
         //if(window.hWin.HEURIST4.util.getUrlParameter('cms')){
             
+        
         var cms_record_id = window.hWin.HEURIST4.util.getUrlParameter('cms', window.hWin.location.search);
         if(cms_record_id>0){
+            
+            //this.menuActionById('menu-cms-edit', {record_id:cms_record_id});
 
-            window.hWin.HEURIST4.ui.showEditCMSDialog( cms_record_id );    
+            //window.hWin.HEURIST4.ui.showEditCMSDialog( cms_record_id );    
 
-        }else if(!(lt=='Beyond1914' ||  lt=='UAdelaide' ||
+        }else 
+        if(!(lt=='Beyond1914' ||  lt=='UAdelaide' ||
             lt=='DigitalHarlem' || lt=='DigitalHarlem1935' || lt=='WebSearch' )){
 
                 if(window.hWin.HAPI4.sysinfo['db_total_records']>0){      

@@ -505,7 +505,7 @@ $.widget( "heurist.navigation", {
                         $(page_target).replaceWith(that.pageStyles_original[page_target]);                            
                     }
                     
-                    var page_footer = $(page_target).find('.page-footer');
+                    var page_footer = $(page_target).find('#page-footer');
                     if(page_footer.length>0) page_footer.detach();
 
                     $(page_target).empty().load(page_url,

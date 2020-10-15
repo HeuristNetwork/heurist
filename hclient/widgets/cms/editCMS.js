@@ -393,6 +393,11 @@ function editCMS( options ){
                                                 var preview_frame = edit_dialog.find('#web_preview');
                                                 preview_frame[0].contentWindow.cmsEditing.resetHeaderContent();
                                             });
+                                            edit_dialog.find('#btn_edit_footer_content').button({icon:'ui-icon-window-minimize'}).click(function(){
+                                                var preview_frame = edit_dialog.find('#web_preview');
+                                                preview_frame[0].contentWindow.cmsEditing.editFooterContent();
+                                            });
+                                            
                                             edit_dialog.find('#btn_edit_page_content').button({icon:'ui-icon-window'}).click(function(){
                                                 var preview_frame = edit_dialog.find('#web_preview');
                                                 //preview_frame[0].contentWindow.editPageContent();
@@ -501,6 +506,9 @@ function editCMS( options ){
                                             );
                                             edit_dialog.find('.ui-layout-west').hide();
                                             edit_dialog.find('.ui-layout-center').css({left:0});
+                                        }else{
+                                            edit_dialog.find('.ui-layout-west').show();
+                                            edit_dialog.find('.ui-layout-center').css({left:210});
 
                                         }
                                         

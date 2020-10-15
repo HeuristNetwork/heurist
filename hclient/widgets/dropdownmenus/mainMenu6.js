@@ -189,6 +189,14 @@ $.widget( "heurist.mainMenu6", {
                 
                 that._on($(document),{mouseleave: that._resetCloseTimers });
                 
+                
+                var cms_record_id = window.hWin.HEURIST4.util.getUrlParameter('cms', window.hWin.location.search);
+                if(cms_record_id>0){
+                    var widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('mainMenu');
+                    widget.mainMenu('menuActionById','menu-cms-edit',{record_id:cms_record_id});
+                }
+                
+                
 /*                
                 that._on(that.divMainMenu.find('.menu-explore[data-action-onclick="svsAdd"]'), 
                 {click: function(e){
