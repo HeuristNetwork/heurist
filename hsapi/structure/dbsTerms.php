@@ -232,7 +232,7 @@ class DbsTerms
             $mode = 3;
         }else if($mode=='tree'){
             $mode = 1;
-        }else{
+        }else if($mode=='labels'){
             $mode = 4;
         }
         

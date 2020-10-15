@@ -1209,9 +1209,6 @@ $mysqli->commit();
             if($new_term_id){
                 //this term aready exists in target - add it as reference to this vocabulary
                 if($parent_id>0){
-                    if($new_term_id==5368 || $new_term_id==6304){
-                        error_log('!!!!');
-                    }
                     
                     if(!in_array($new_term_id, $all_terms_in_vocab)){
                         //add as reference
