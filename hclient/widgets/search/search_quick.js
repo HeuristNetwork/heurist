@@ -244,7 +244,7 @@ $.widget( "heurist.search_quick", $.heurist.recordAction, {
         var select_terms = $dlg.find(".sa_termvalue");
         var sortasc =  $dlg.find('.sa_sortasc');
         
-        var allowed = Object.keys(window.hWin.HEURIST4.dbs.baseFieldType);
+        var allowed = Object.keys($Db.baseFieldType);
         allowed.splice(allowed.indexOf("separator"),1);
         allowed.splice(allowed.indexOf("geo"),1);
         allowed.splice(allowed.indexOf("relmarker"),1);

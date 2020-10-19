@@ -375,7 +375,7 @@ dty_TermIDTreeNonSelectableIDs
                         if(!isSep ){
                             title = '<span style="padding-left:10px">' + title 
                                     +'</span>';
-//<span style="font-size:smaller">  ('+window.hWin.HEURIST4.dbs.baseFieldType[recset.fld(record,'dty_Type')]+')</span>
+//<span style="font-size:smaller">  ('+$Db.baseFieldType[recset.fld(record,'dty_Type')]+')</span>
                         }
                         if(req=='forbidden'){
                             title =  title + '<span style="font-size:smaller;text-transform:none;"> (hidden)</span>';
@@ -558,7 +558,7 @@ dty_TermIDTreeNonSelectableIDs
                                 var req = recset.fld(record,'rst_RequirementType');
                                 var title = recset.fld(record,'rst_DisplayName')
                                     +'<span style="font-size:smaller">  ('
-                                    +window.hWin.HEURIST4.dbs.baseFieldType[recset.fld(record,'dty_Type')]
+                                    +$Db.baseFieldType[recset.fld(record,'dty_Type')]
                                     +')</span>';
                                 node.extraClasses = req;
                                 $(node.li).addClass(req);
@@ -841,7 +841,7 @@ dty_TermIDTreeNonSelectableIDs
         
         var recTitle = fld2('rst_ID','4em')
                 + fld2('rst_DisplayName','14em')
-                + ' ('+window.hWin.HEURIST4.dbs.baseFieldType[fld('dty_Type')]+')';
+                + ' ('+$Db.baseFieldType[fld('dty_Type')]+')';
 
         var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID
                     +'" style="height:'+(is_narrow?'1.3':'2.5')+'em">'
@@ -1836,7 +1836,7 @@ console.log('No active tree node!!!!')
         if(type!='separator'){
             title =  '<span style="padding-left:10px;">' + title 
                     + '</span><span style="font-size:smaller;">  ('
-                    +window.hWin.HEURIST4.dbs.baseFieldType[type]
+                    +$Db.baseFieldType[type]
                     +')</span>';
         }
         if(req=='forbidden'){
@@ -1894,7 +1894,7 @@ console.log('No active tree node!!!!')
                             if(!isSep){
                                 title =  '<span style="padding-left:10px">' + title 
                                         + '</span><span style="font-size:smaller">  ('
-                                        +window.hWin.HEURIST4.dbs.baseFieldType[fields['dty_Type']]
+                                        +$Db.baseFieldType[fields['dty_Type']]
                                         +')</span>';
                             }
                             if(req=='forbidden'){
@@ -2057,7 +2057,7 @@ console.log('No active tree node!!!!')
                         if(!isSep){
                             title =  '<span style="padding-left:10px">' + title 
                                         + '</span><span style="font-size:smaller;">  ('
-                                    +window.hWin.HEURIST4.dbs.baseFieldType[recset.fld(record,'dty_Type')]
+                                    +$Db.baseFieldType[recset.fld(record,'dty_Type')]
                                     +')</span>';
                         }
                         if(req=='forbidden'){

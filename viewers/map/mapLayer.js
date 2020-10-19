@@ -83,12 +83,10 @@ function hMapLayer( _options ) {
             
             var tileUrlFunc = null; 
 
-            var idx_ccode = window.hWin.HEURIST4.terms.fieldNamesToIndex.trm_ConceptID;
+            var ccode1 = $Db.getConceptID('trm', tilingSchema);
+            var ccode2 = $Db.getConceptID('trm', mimeType);
             
-            tilingSchema = window.hWin.HEURIST4.terms.termsByDomainLookup['enum'][tilingSchema];
-            mimeType = window.hWin.HEURIST4.terms.termsByDomainLookup['enum'][mimeType];
-            
-            if(tilingSchema && tilingSchema[idx_ccode]=='2-549'){ //virtual earth
+            if(ccode1=='2-549'){ //virtual earth
 
                 tileUrlFunc = function (a,b) {
 
@@ -106,7 +104,7 @@ function hMapLayer( _options ) {
 
 
                     var res = sourceURL + __tileToQuadKey(a.x,a.y,b) 
-                    + (mimeType && mimeType[idx_ccode] == '2-540'? ".png" : ".gif");
+                    + (ccode2=='2-540'? ".png" : ".gif");
                     return res;
                 };
 
@@ -118,7 +116,7 @@ function hMapLayer( _options ) {
 
                     var bound = Math.pow(2, zoom);
                     var tile_url = sourceURL + "/" + zoom + "/" + coord.x + "/" + (bound - coord.y - 1) 
-                    + (mimeType && mimeType[idx_ccode] == '2-540'? ".png" : ".gif");
+                    + (ccode2=='2-540'? ".png" : ".gif");
                     //console.log("URL: " + tile_url);
                
                     return tile_url;

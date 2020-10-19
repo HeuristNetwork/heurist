@@ -1104,9 +1104,6 @@ function ShowReps() {
         }
 
 
-        var idx_maxval = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex.rst_MaxValues;
-        var idx_dtype  = window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex.dty_Type;
-
         var first_node = null;
 
         //internal function
@@ -1156,10 +1153,10 @@ function ShowReps() {
                     var dtid = term.this_id.substring(1);
 
                     if(vartype=='f' && window.hWin.HEURIST4.util.isNumber(dtid) ){
-                        term.dtype = window.hWin.HEURIST4.detailtypes.typedefs[dtid].commonFields[idx_dtype];
+                        term.dtype = $Db.dty(dtid, 'dty_Type');
 
                         if(window.hWin.HEURIST4.rectypes.typedefs[rectype_id] && window.hWin.HEURIST4.rectypes.typedefs[rectype_id].dtFields[dtid]){
-                            var maxval = window.hWin.HEURIST4.rectypes.typedefs[rectype_id].dtFields[dtid][idx_maxval];
+                            var maxval = $Db.rst_idx(rectype_id, dtid, 'rst_MaxValues');
                             is_single = (Number(maxval)===1);
                         }
                     }else if (term.this_id=="Relationship") {
@@ -1818,9 +1815,9 @@ this_id       : "term"
                 id  = id.substring(1);
 
                 if(type=="r"){
-                    return ucwords(window.hWin.HEURIST4.rectypes.names[id]);
+                    return ucwords($Db.rty(id, 'rty_Name'));
                 }else{
-                    return ucwords(window.hWin.HEURIST4.detailtypes.names[id]);
+                    return ucwords($Db.dty(id, 'dty_Name'));
                 }
             }
 

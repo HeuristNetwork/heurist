@@ -227,22 +227,14 @@ function hRecordAddLink() {
     // 
     function _fillSelectFieldTypes(party, recRecTypeID, oppositeRecTypeID) {
         
-        var fi_name = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex['rst_DisplayName'], 
-            fi_constraints = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex['rst_PtrFilteredIDs'], 
-            fi_type = window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex['dty_Type'],
-            fi_term =  window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex['rst_FilteredJsonTermIDTree'],
-            fi_term_dis =  window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex['rst_TermIDTreeNonSelectableIDs'],
-            hasSomeLinks = false;
+        var hasSomeLinks = false;
 
         $('#'+party+'_field').empty();
         
-        //var $fieldset = $('#target_field').empty(); //@todo clear target selection only in case constraints were changed
+        var dtFields = $Db.rst_idx(rty);
+        for (var dty in dtFields) {
             
-        if(window.hWin.HEURIST4.rectypes.typedefs[recRecTypeID]) {   
-        // get structures for both record types and filter out link and relation maker fields
-        for (dty in window.hWin.HEURIST4.rectypes.typedefs[recRecTypeID].dtFields) {
-            
-            var field_type = window.hWin.HEURIST4.detailtypes.typedefs[dty].commonFields[fi_type];
+            var field_type = $Db.dty(dty, 'dty_Type');
             
             if(!(field_type=='resource' || field_type=='relmarker')){
                  continue;
@@ -259,8 +251,8 @@ function hRecordAddLink() {
             var details = window.hWin.HEURIST4.rectypes.typedefs[recRecTypeID].dtFields[dty];
 
             //get name, contraints
-            var dtyName = details[fi_name];
-            var dtyPtrConstraints = details[fi_constraints];
+            var dtyName = $Db.rst_idx(recRecTypeID, dty, 'rst_DisplayName');
+            var dtyPtrConstraints = $Db.dty(dty, 'dty_PtrTargetRectypeIDs');
             var recTypeIds = null;
             if(!window.hWin.HEURIST4.util.isempty(dtyPtrConstraints)){
                 recTypeIds = dtyPtrConstraints.split(',');
@@ -307,10 +299,6 @@ function hRecordAddLink() {
                 }
     */                
                 if(field_type=='relmarker'){
-                    
-                    var terms = details[fi_term],
-                        terms_dis = details[fi_term_dis],
-                        currvalue = null;
                     
                     _createInputElement_Relation( party, recRecTypeID, dty ); 
                     

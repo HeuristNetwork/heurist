@@ -699,7 +699,7 @@ term.id+'\', -1)">&nbsp;&nbsp;all</a>&nbsp;'; //+termsByDomainLookup[parentEleme
 			_setDisabledTerms();
 		}catch(e) { }
 
-        $input = window.hWin.HEURIST4.ui.createTermSelectExt2(null,
+        $input = createTermSelectExt2(null,
                 {datatype:_datatype, termIDTree:termIDTree, headerTermIDsList:(disabledTermsList || ""),
                     defaultTermID:null, topOptions:false, supressTermCode:true, useHtmlSelect:false});
         

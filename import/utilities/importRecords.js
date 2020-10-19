@@ -218,8 +218,6 @@ function hImportRecords(_max_upload_size) {
         var cnt_local_dt = 0;
         targetMissed = 0;
         targetDtMissed = 0;
-        var idx_ccode_rt = window.hWin.HEURIST4.rectypes.typedefs.commonNamesToIndex.rty_ConceptID;
-        var idx_ccode_dt = window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex.dty_ConceptID;
         
         function __cntlbl(rt, dt){
             
@@ -249,13 +247,13 @@ function hImportRecords(_max_upload_size) {
             
             if(afterSync && rectype['code'] &&!(rectype['target_RecTypeID']>0)){
                 //try to find again
-                rectype['target_RecTypeID'] = window.hWin.HEURIST4.dbs.findByConceptCode(rectype['code'], window.hWin.HEURIST4.rectypes, idx_ccode_rt);
+                rectype['target_RecTypeID'] = $Db.getLocalID( 'rty', rectype['code'] );
             }
 
             var target_id;
             if(rectype['target_RecTypeID']>0){
                 target_id = rectype['target_RecTypeID']+'\t'+
-                window.hWin.HEURIST4.rectypes.names[rectype['target_RecTypeID']]+'\n';
+                $Db.rty( rectype['target_RecTypeID'], 'rty_Name')+'\n';
 
                 recCount = recCount + rectype['count'];
 
@@ -292,14 +290,13 @@ function hImportRecords(_max_upload_size) {
                 
                 if(afterSync && detailtype['code'] &&!(detailtype['target_dtyID']>0)){
                     //try to find again
-                    detailtype['target_dtyID'] = window.hWin.HEURIST4.dbs.findByConceptCode(detailtype['code'], 
-                                    window.hWin.HEURIST4.detailtypes.typedefs, idx_ccode_dt);
+                    detailtype['target_dtyID'] = $Db.getLocalID( 'dty', detailtype['code'] );
                 }
 
                 var target_id;
                 if(detailtype['target_dtyID']>0){
                     target_id = detailtype['target_dtyID']+'\t'+
-                    window.hWin.HEURIST4.detailtypes.names[detailtype['target_dtyID']]+'\n';
+                        $Db.dty(detailtype['target_dtyID'], 'dty_Name' )+'\n';
                 }else{
                     
                     var is_issue = (detailtype['code'] && (afterSync || !(source_db>0)));
@@ -457,19 +454,6 @@ function hImportRecords(_max_upload_size) {
                     $('body > div:not(.loading)').show();
                     
                     if(response.status == window.hWin.ResponseStatus.OK){
-                        //hide progress and go to step2 - import records
-                        /*update local definitions
-                        if(response.data.data){
-                            //update definitions on client side
-                            if(response.data.data.rectypes) window.hWin.HEURIST4.rectypes = response.data.data.rectypes;
-                            if(response.data.data.detailtypes) window.hWin.HEURIST4.detailtypes = response.data.data.detailtypes;
-                            if(response.data.data.terms) window.hWin.HEURIST4.terms = response.data.data.terms;
-                            //show report
-                            if(response.data.report){
-                                window.hWin.HEURIST4.msg.showMsgDlg('<div style="font:small"><table>'
-                                    +response.data.report.rectypes+'</table></div>',null,'Result of import definitions');
-                            }
-                        }*/
                         //refresh database definitions
                         window.hWin.HAPI4.SystemMgr.get_defs_all( false, window.hWin.document, 
                         function(){

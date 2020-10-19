@@ -1918,7 +1918,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         if(!mapping_flds) mapping_flds = {};
 
         
-        var allowed = Object.keys(window.hWin.HEURIST4.detailtypes.lookups);
+        var allowed = Object.keys($Db.baseFieldType);
         allowed.splice(allowed.indexOf("separator"),1);
         //allowed.splice(allowed.indexOf("file"),1);
         allowed.splice(allowed.indexOf("resource"),1);
@@ -3674,11 +3674,6 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                     }
 
 
-                    var detDefs = window.hWin.HEURIST4.detailtypes;
-                    var detLookup = detDefs['lookups'];
-                    detDefs = detDefs['typedefs'];
-                    var idx_dt_type = detDefs['fieldNamesToIndex']['dty_Type'];
-                    var idx_dt_name = detDefs['fieldNamesToIndex']['dty_Name'];
     /*
         //find distinct terms values
         $is_enum = false;
@@ -3728,14 +3723,14 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                     var dt_id = res['mapped_fields'][checked_field]; //from validation
                 
                         
-                    if(dt_id>0 && detDefs[dt_id]['commonFields'][idx_dt_type]=='enum'){ //button to add terms
+                    if(dt_id>0 && $Db.dty(dt_id, 'dty_Type')=='enum'){ //button to add terms
                     
                         var cnt = ($.isArray(tabs[k]['values_error']) && tabs[k]['values_error'].length>0)
                                         ?tabs[k]['values_error'].length:0;
                         if(cnt>0){                 
                             s = s + '<button class="add_terms" tab_id="'+k+'" dt_id="'+dt_id+'" style="padding: 4px 8px !important;">'
                             +'Adds '+cnt+' new terms to this field</button>';
-                              //'"'+detDefs[dt_id]['commonFields'][idx_dt_name]+'"</button>';
+                              //'"'+$Db.dty(dt_id, 'dty_Name')+'"</button>';
                             
                             s = s + '&nbsp;<button class="add_all_terms" style="padding: 4px 8px !important;display:none">'
                                   +'Adds new terms to all fields</button>';
@@ -3785,7 +3780,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                         
                         s = s + '<th style="color:red">'+colname
                              + '<br><font style="font-size:10px;font-weight:normal">'
-                             + (dt_id>0?detLookup[detDefs[dt_id]['commonFields'][idx_dt_type]] :dt_id)
+                             + (dt_id>0?$Db.baseFieldType[$Db.dty(dt_id, 'dty_Type')] :dt_id)
                              + '</th>';
                              
                         err_col = i;
@@ -3942,25 +3937,22 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         
         if(window.hWin.HEURIST4.util.isempty(newvalues)) return;
 
-        var label_idx = window.hWin.HEURIST4.terms.fieldNamesToIndex['trm_Label'];
-
-        var fi_name =  window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex['dty_Name'];
-        var fieldname = window.hWin.HEURIST4.detailtypes.typedefs[dt_id].commonFields[fi_name];
+        var fieldname = $Db.dty(dt_id, 'dty_Name');
         
         if(!(trm_ParentTermID>0)){
             //detect vocabulary, if selection of terms add to special vocabulary  "Auto-added terms"
         
-            var fi_term =  window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex['dty_JsonTermIDTree'];
-            var terms = window.hWin.HEURIST4.detailtypes.typedefs[dt_id].commonFields[fi_term];
-            
+            var terms = $Db.trm(dt_id, 'dty_JsonTermIDTree');
 
-            if(window.hWin.HEURIST4.util.isNumber(terms)){ //this is vocabulary
+            if(window.hWin.HEURIST4.util.isNumber(terms) && terms>0){ //this is vocabulary
                 trm_ParentTermID = Number(terms);
             }else{
                 //this is a set of terms - find special vocabulary  'Auto-added terms'
-                for (trmID in window.hWin.HEURIST4.terms.termsByDomainLookup['enum']){
+                var vocabs = $Db.trm_getVocabs('enum');
+                for (var i=0; i<vocabs.length; i++){
+                    var trmID = vocabs[i];
                     if(trmID>0)
-                     if(window.hWin.HEURIST4.terms.termsByDomainLookup['enum'][trmID][label_idx]=='Auto-added terms'){
+                        if($Db.trm(trmID,'trm_Label')=='Auto-added terms'){
                             trm_ParentTermID = trmID;
                             break;
                      }
@@ -3991,7 +3983,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         }//find parent term id
         
         if(trm_ParentLabel==''){
-            trm_ParentLabel = window.hWin.HEURIST4.terms.termsByDomainLookup['enum'][trm_ParentTermID][label_idx];
+            trm_ParentLabel = $Db.trm(trm_ParentTermID,'trm_Label');
         }
         
         

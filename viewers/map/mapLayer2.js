@@ -120,13 +120,11 @@ function hMapLayer2( _options ) {
             var layer_options = {minZoom:minZoom , maxZoom:maxZoom};
             
             var tileUrlFunc = null; 
-
-            var idx_ccode = window.hWin.HEURIST4.terms.fieldNamesToIndex.trm_ConceptID;
-
-            tilingSchema = window.hWin.HEURIST4.terms.termsByDomainLookup['enum'][tilingSchema];
-            mimeType = window.hWin.HEURIST4.terms.termsByDomainLookup['enum'][mimeType];
-
-            if(tilingSchema && tilingSchema[idx_ccode]=='2-549'){ //virtual earth
+            
+            var ccode1 = $Db.getConceptID('trm', tilingSchema);
+            var ccode2 = $Db.getConceptID('trm', mimeType);
+            
+            if(ccode1=='2-549'){ //virtual earth
                 
                 layer_options['BingLayer'] = true;
 
@@ -140,19 +138,19 @@ function hMapLayer2( _options ) {
 
                 if(layer_url.indexOf('{q}')<0){
                     layer_url = layer_url + '{q}'
-                                + (mimeType && mimeType[idx_ccode] == '2-540'? ".png" : ".gif");
+                                + (ccode2 == '2-540'? ".png" : ".gif");
                 }
                 
             }else{
                 
                 if(layer_url.indexOf('{x}')<0){
                     layer_url = layer_url + '/{z}/{x}/{y}'
-                                + (mimeType && mimeType[idx_ccode] == '2-540'? ".png" : ".gif");
+                                + (ccode2 == '2-540'? ".png" : ".gif");
                 }
                 
                 if(layer_url.indexOf('http://')===0){
                     
-                    var mimetype = 'image/'+(mimeType && mimeType[idx_ccode] == '2-540'? "png" : "gif");
+                    var mimetype = 'image/'+(ccode2 == '2-540'? "png" : "gif");
                     
                     //load via proxy
                     layer_url = window.hWin.HAPI4.baseURL 

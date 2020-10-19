@@ -354,7 +354,7 @@ function DetailTypeEditor() {
         if(!Hul.isempty(allTerms)) {
             //var el_sel = Hul.createTermSelect(allTerms, disabledTerms, datatype, null);
             
-            $input = window.hWin.HEURIST4.ui.createTermSelectExt2(null,
+            $input = createTermSelectExt2(null,
                 {datatype:datatype, termIDTree:allTerms, headerTermIDsList:disabledTerms,
                     defaultTermID:null, topOptions:false, supressTermCode:true, useHtmlSelect:false});
             

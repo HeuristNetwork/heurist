@@ -251,7 +251,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                 rtyIDs = [scope_type];
             }
 
-            var allowed = Object.keys(window.hWin.HEURIST4.dbs.baseFieldType);
+            var allowed = Object.keys($Db.baseFieldType);
             allowed.splice(allowed.indexOf("separator"),1);
             allowed.splice(allowed.indexOf("relmarker"),1);
             allowed.splice(allowed.indexOf("geo"),1);

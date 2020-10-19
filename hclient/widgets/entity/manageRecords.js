@@ -2202,29 +2202,21 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
 
         var parentRecordTypes = []; //result
         
-        var fieldIndexMap = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex;
-        //var dtyFieldNamesIndexMap = window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex;
-        
         childRecordType = ''+childRecordType; //must be strig otherwise indexOf fails
         
-        var rtyID, dtyID, allrectypes = window.hWin.HEURIST4.rectypes.typedefs;
-        for (rtyID in allrectypes)
-        if(rtyID>0){
-
-            var fields = allrectypes[rtyID].dtFields;
+        var recset = $Db.rst_idx();
+        recset.each2(function(i,record){
             
-            for (dtyID in fields)
-            if(dtyID>0 && 
-                fields[dtyID][fieldIndexMap['dty_Type']]=='resource' &&
-                fields[dtyID][fieldIndexMap['rst_CreateChildIfRecPtr']]==1)
-            { //for all fields in this rectype
-                var ptrIds = fields[dtyID][fieldIndexMap['rst_PtrFilteredIDs']];
-                if(ptrIds.split(',').indexOf(childRecordType)>=0){
-                    parentRecordTypes.push(rtyID);
-                    break;
+            if(record['rst_CreateChildIfRecPtr']==1){
+                var fieldtype = $Db.dty(record['rst_DetailTypeID'], 'dty_Type');
+                var constraint = $Db.dty(record['rst_DetailTypeID'], 'dty_PtrTargetRectypeIDs');
+                if(fieldtype=='resource' && constraint && constraint.split(',').indexOf((childRecordType))>=0){
+                        parentRecordTypes.push(record['rst_RecTypeID']);
+                        //return false;
                 }
             }
-        }
+        });
+        
         
         return parentRecordTypes;
     },

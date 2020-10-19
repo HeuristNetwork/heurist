@@ -1075,7 +1075,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
 
         
         if( (!$.isPlainObject(record)) && !isnull(record) && records[record]){
-            record = records[record];
+            record = records[record]; //record id is assumed
         }
         
         if(isnull(record) || window.hWin.HEURIST4.util.isempty(fldname)){
@@ -1192,9 +1192,6 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
         * Returns field value by fieldname for given record
         */
         fld: function(record, fldName){
-            if(!($.isArray(record) || $.isPlainObject(record))){
-                record = records[record];
-            }
             return _getFieldValue(record, fldName);
         },
 
@@ -1363,6 +1360,21 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
             }
             
         },
+
+        // returns record in callback as json with fieldnames
+        each2: function( callback ){
+        
+            for(var i=0; i<order.length; i++){
+                var recID = order[i];
+                var record = that.getRecord(recID);
+                var res = callback.call(that, recID, record);
+                if(res === false){
+                    break;
+                }
+            }
+            
+        },
+
             
         /**
         * Returns recordSet with the same field and structure definitions

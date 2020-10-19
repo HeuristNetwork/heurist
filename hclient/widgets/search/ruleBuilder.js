@@ -35,16 +35,13 @@ $.widget( "heurist.ruleBuilder", {
     },
 
     _selection: null,     // current set of selected records
-    _arr_fields:[],
+    _arr_fields:[],       // all direct and reverse resource and relation fields
+    
     _arr_rectypes:[],          //list of all target rectypes for current selected source rt
-    //_arr_rectypes_subset:[],   //list of all target rectypes for current selected source rt and selected field type
 
-    _has_relation:'0',
-    _has_pointers:'0',
-    _has_rev_relation:'0',
-    _has_rev_pointers:'0',
-
+    //
     // the widget's constructor
+    //
     _create: function() {
 
         var that = this;
@@ -125,8 +122,6 @@ $.widget( "heurist.ruleBuilder", {
 
         //event handlers
         this._on( this.select_source_rectype, { change: this._onSelectRectype });
-
-        this._on( this.select_fields, { change: this._onSelectFieldtype });
 
         //this._on( this.select_target_rectype, { change: this._generateQuery });
         //this._on( this.select_reltype, { change: this._generateQuery });
@@ -258,208 +253,143 @@ $.widget( "heurist.ruleBuilder", {
         // b. relation types for relmarkers
         // c. all recordtypes contrained in pointer and relmarkers fields
 
-        var rectypes = window.hWin.HEURIST4.rectypes,
-        details = rectypes.typedefs[rt_ID],
-        source_rt_name = rectypes.names[rt_ID];
-        
-
-        if(details){
-            details = details.dtFields;
-        }else{
-            return;
-        }
-
-        var fi_name = rectypes.typedefs.dtFieldNamesToIndex['rst_DisplayName'],
-        fi_type = rectypes.typedefs.dtFieldNamesToIndex['dty_Type'],
-        fi_rectypes = rectypes.typedefs.dtFieldNamesToIndex['rst_PtrFilteredIDs'],
-        fi_term = rectypes.typedefs.dtFieldNamesToIndex['rst_FilteredJsonTermIDTree'],
-        fi_term_dis = rectypes.typedefs.dtFieldNamesToIndex['rst_TermIDTreeNonSelectableIDs'];
-
-        var arr_fields = [], arr_rectypes = []; //arr_terms = [], arr_terms_dis = [],
-
-        this._has_relation = '0';
-        this._has_pointers = '0';
-        this._has_rev_relation = '0';
-        this._has_rev_pointers = '0';
+        var source_rt_name = $Db.rty(rt_ID,'rty_Name');
 
         var rtyID, dtyID;
-        for (dtyID in details){ //serch on record type structure definition
-            if(dtyID){
-
-                if(details[dtyID][fi_type]=='resource' || details[dtyID][fi_type]=='relmarker'){
-
-                    var name = details[dtyID][fi_name];
-
-                    if(!window.hWin.HEURIST4.util.isempty(name)){
-
-                        name = window.hWin.HEURIST4.util.trim_IanGt(name);
-
-                        //find constraints
-                        var constraints = details[dtyID][fi_rectypes];
-                        constraints = ( typeof(constraints) === "string" && !window.hWin.HEURIST4.util.isempty(constraints) )
-                        ? constraints.split(","):[];  // $.parseJSON(temp)
-                        if(!window.hWin.HEURIST4.util.isArray(constraints)){
-                            constraints = [constraints];
-                        }
-                        if(constraints.length>0) arr_rectypes = arr_rectypes.concat(constraints);
-
-                        //
-                        if(details[dtyID][fi_type]=='relmarker'){ // relationship marker field
-
-                            this._has_relation = '1';
-
-                            var temp = details[dtyID][fi_term_dis];
-                            temp = ( typeof(temp) === "string" && !window.hWin.HEURIST4.util.isempty(temp) )
-                            ?  temp.split(",") :[];
-                            if(temp.length>0) arr_terms_dis = arr_terms_dis.concat(temp);
-                            arr_fields.push({key:dtyID, title: source_rt_name + ' >> ' + name, 
-                                    terms:details[dtyID][fi_term], terms_dis:temp, rectypes:constraints});
-
-                        }else{ // pointer field
-
-                            this._has_pointers = '1';
-                            arr_fields.push({key:dtyID, title:source_rt_name + ' >> ' + name, rectypes:constraints});
-                        }
-
-                    }
-                }
-
-            }
-        }
-        //find all reverse links (pointers and relation that point to selected rt_ID)
-        var alldetails = rectypes.typedefs;
-        for (rtyID in alldetails)
-            if(rtyID && rtyID!=rt_ID){
-                details = alldetails[rtyID].dtFields;
-                for (dtyID in details){
-                    if(dtyID){
-
-                        if(details[dtyID][fi_type]=='resource' || details[dtyID][fi_type]=='relmarker'){
-
-                            var name = details[dtyID][fi_name];
-
-                            if(!window.hWin.HEURIST4.util.isempty(name)){
-
-                                name = window.hWin.HEURIST4.util.trim_IanGt(name);
-
-                                //find constraints
-                                var constraints = details[dtyID][fi_rectypes];
-                                constraints = ( typeof(constraints) === "string" && !window.hWin.HEURIST4.util.isempty(constraints) )
+        var vocab_id;
+        var arr_direct = {};
+        var arr_reverse = {};
+        var arr_rectypes = []; //all targets
+        
+        $Db.rst_idx().each2(function(rstID, record){
+            
+            dtyID = record['rst_DetailTypeID'];
+            var fieldtype = $Db.dty(dtyID, 'dty_Type');
+            
+            if(fieldtype=='resource' || fieldtype=='relmarker'){
+                rtyID = record['rst_RecTypeID'];
+                
+                var constraints = $Db.dty(dtyID, 'dty_PtrTargetRectypeIDs');
+                constraints = ( typeof(constraints) === "string" && !window.hWin.HEURIST4.util.isempty(constraints) )
                                 ? constraints.split(","):[];  // $.parseJSON(temp)
-                                if(!window.hWin.HEURIST4.util.isArray(constraints)){
-                                    constraints = [constraints];
-                                }
-                                //verify that selected record type is in this constaint
-                                if(constraints.length<1 || constraints.indexOf(rt_ID)<0) continue;
-
-                                //temp arr_rectypes.push(rtyID);
-
-                                var isnotfound = true;
-                                var i, len = arr_fields.length;
-                                for (i=0;i<len;i++){
-                                    if( arr_fields[i].key == (dtyID+'r')){   //this reverse field may be added already
-                                        //temp arr_fields[i].rectypes.push(rtyID);
-                                        if(arr_fields[i].isreverse){
-                                            arr_fields[i].rectypes.push(rtyID); //temp
-                                        
-                                            var tlen = arr_fields[i].title.length; //text on dropdown already too long    
-                                            if(tlen<73){
-                                                if(tlen>=70){
-                                                    arr_fields[i].title = arr_fields[i].title.substr(0,70)+'...';
-                                                }else{
-                                                    var rt_name = alldetails[rtyID].commonFields[0];
-                                                    //'<< '+rt_name + ' . ' + name
-                                                    arr_fields[i].title = '<< '+rt_name+' | '+arr_fields[i].title.substr(3,tlen-1);
-                                                }
-                                            }
-                                            isnotfound = false;
-                                            break;
-                                        }
-
-                                    }
-                                }//for fields
-
-                                //
-                                if(isnotfound){ //it means this is reverse
-
-                                    name = window.hWin.HEURIST4.detailtypes.typedefs[dtyID].commonFields[1];
-                                    name = window.hWin.HEURIST4.util.trim_IanGt(name);
-
-                                    var rt_name = alldetails[rtyID].commonFields[0];
-
-                                    if(details[dtyID][fi_type]=='relmarker'){ // reverse relationship marker
-
-                                        this._has_rev_relation = '1';
-
-                                        var temp = details[dtyID][fi_term_dis];
-                                        temp = ( typeof(temp) === "string" && !window.hWin.HEURIST4.util.isempty(temp) ) 
-                                                        ?  temp.split(",") :[];
-                                                        
-                                        if(temp.length>0) arr_terms_dis = arr_terms_dis.concat(temp);
-
-                                        arr_fields.push({key:(dtyID+'r'), title:'<< '
-                                                    +rt_name + ' . ' + name, terms:details[dtyID][fi_term],
-
-                                            terms_dis:temp, rectypes:[rtyID], isreverse:true, dtyID:dtyID });
-
-                                    }else{ // reverse pointer
-
-                                        this._has_rev_pointers = '1';
-                                        arr_fields.push({key:(dtyID+'r'), title:'<< '
-                                                    +rt_name + ' . ' + name, rectypes:[rtyID], isreverse:true, dtyID:dtyID });
-                                    }
-                                } // reverse pointer
-
+                vocab_id = 0;
+                       
+                if(rtyID==rt_ID){
+                    //direct
+                    name = record['rst_DisplayName'];
+                    name = window.hWin.HEURIST4.util.trim_IanGt(name);
+                
+                    if(fieldtype=='relmarker'){
+                        vocab_id = $Db.dty(dtyID, 'dty_JsonTermIDTree');
+                    }    
+                    arr_direct[dtyID] = {key:dtyID, title: source_rt_name + ' >> ' + name, 
+                                    terms:vocab_id, rectypes:constraints};
+                    
+                    arr_rectypes = arr_rectypes.concat(constraints);
+                    
+                }else if(constraints.indexOf(rt_ID)>=0){
+                    
+                    rt_name = $Db.rty(rtyID, 'rty_Name');
+                    //is it inversed
+                    name = $Db.dty(dtyID, 'dty_Name');
+                    name = window.hWin.HEURIST4.util.trim_IanGt(name);
+                    
+                    if(fieldtype=='relmarker'){
+                        vocab_id = $Db.dty(dtyID, 'dty_JsonTermIDTree');
+                    }
+                    
+                    var key = (dtyID+'r');
+                    
+                    if(arr_reverse[key]){
+                        //already exists - add rectype name
+                        var title = arr_reverse[key].title;
+                        var tlen = title.length; //text on dropdown already too long    
+                        if(tlen<73){
+                            if(tlen>=70){
+                                title = title.substr(0,70)+'...';
+                            }else{
+                                title = '<< '+rt_name+' | '+title.substr(3,tlen-1);
                             }
                         }
-
+                        arr_reverse[key].title = title;
+                        arr_reverse[key].rectypes.push(rtyID);
+                    }else{
+                        arr_reverse[key] = {key:key, 
+                                    title:'<< '+rt_name + ' . ' + name, 
+                                    terms:vocab_id,
+                                    rectypes:[rtyID], isreverse:true, dtyID:dtyID };
                     }
                 }
+            }
+        });
+
+
+        this._arr_rectypes = $.unique(arr_rectypes);
+        
+        //make list of options for selector
+        // relation than links
+        this._arr_fields = arr_direct;
+        
+        var arr_link = [], arr_rels = [];
+        for(var dtyID in arr_direct){
+            var opt = {key:arr_direct[dtyID].key, title:arr_direct[dtyID].title};
+            if(arr_direct[dtyID].terms>0){
+                arr_rels.push(opt);    
+            }else{
+                arr_link.push(opt); 
+            }
+        }
+        for(var dtyID in arr_reverse){
+            var opt = {key:arr_reverse[dtyID].key, title:arr_reverse[dtyID].title};
+            if(arr_reverse[dtyID].terms>0){
+                arr_rels.push(opt);    
+            }else{
+                arr_link.push(opt); 
+            }
+            this._arr_fields[dtyID] = arr_reverse[dtyID];
+        }
+        
+        var arr_options = [];
+        if(arr_rels.length>0){
+            arr_options.push({optgroup:true, key:0, title:'Relationships', disabled:true, group:1});
+            arr_options = arr_options.concat(arr_rels);
+        }
+        if(arr_link.length>0){
+            arr_options.push({optgroup:true, key:0, title:'Pointers', disabled:true, group:1});
+            arr_options = arr_options.concat(arr_link);
+        }
+        
+         //add any as a first element
+        if(arr_link.length>0 && arr_rels.length>0){
+            arr_options.unshift({key:'', title:'Any pointer or relationship'});
+        }else if(arr_link.length>0){
+            arr_options.unshift({key:'', title:'Any pointer'});
+        }else if(arr_rels.length>0){
+            arr_options.unshift({key:'', title:'Any relationship'});
         }
 
-        arr_rectypes = $.unique(arr_rectypes);
-        //arr_terms_dis = $.unique(arr_terms_dis);
-
-        this._arr_fields = arr_fields;
-        this._arr_rectypes = arr_rectypes;
-        //this._arr_rectypes_subset = arr_rectypes;
-
-        // TODO: remove big block of debug or old code
-        //fill selectors
-        /*window.hWin.HEURIST4.ui.createRectypeSelect(this.select_target_rectype.get(0), arr_rectypes, 'any');
-
-        if(this.select_target_rectype.find("option").length>2){
-        this.select_target_rectype.show();
-        }else{
-        this.select_target_rectype.hide();
-        }
-        */
-        if(arr_fields.length!=1){
-            arr_fields.unshift({key:'', title:'Any pointer or relationship'}); //add any as a first element
-            this.select_fields.prop('disabled', false);
-            //this.select_fields.show();
-        }else if (arr_fields.length==1){
-            //this.select_fields.hide();
-            this.select_fields.prop('disabled', false); //true);
-        }
-
-        window.hWin.HEURIST4.ui.createSelector(this.select_fields.get(0), arr_fields);
-        this.select_fields.prop("selectedIndex",0);//.val('');
+        //fill field selector
+        if(this.select_fields)
+        this._off( this.select_fields, 'change');
+        this._on( this.select_fields, { change: this._onSelectFieldtype });
+        this.select_fields.prop('disabled', false);
+        
+        window.hWin.HEURIST4.ui.createSelector(this.select_fields.get(0), arr_options);
+        
+        //var sel = window.hWin.HEURIST4.ui.initHSelect(this.select_fields, false);
+        //sel.hSelect( "widget" ).css('font-size','0.9em');
+        
+        this.select_fields.prop("selectedIndex",0);
+        //this._on( $(this.select_fields.get(0)), { change: this._onSelectFieldtype });
         this._onSelectFieldtype();
 
     },
 
-
+    //
+    //
+    //
     _findField: function(dt_ID){
-
-        var i, len = this._arr_fields.length;
-        for (i=0;i<len;i++){
-            var arr_field = this._arr_fields[i];
-            if(arr_field.key == dt_ID){
-                return arr_field;
-            }
-        }
-        return null;
+        return this._arr_fields[dt_ID];
     },
 
     //
@@ -470,35 +400,36 @@ $.widget( "heurist.ruleBuilder", {
         var dt_ID_key = this.select_fields.val(); //event?event.target.value:'',
         is_not_relation = true,
         is_not_selected = true; //field is not defined/selected
-        if(dt_ID_key!='') {
+        if(dt_ID_key!='' && dt_ID_key!=0) {
+            
+            var arr_field = this._findField(dt_ID_key);
 
-            var i, len = this._arr_fields.length;
-            for (i=0;i<len;i++){
-                var arr_field = this._arr_fields[i];
-                if(arr_field.key == dt_ID_key){
-                    if(arr_field.terms){
-                        is_not_relation = false;
-                        //this.label_3.show();
-                        this.select_reltype.show();
-                        this.select_reltype.prop('disabled', false);
-                        window.hWin.HEURIST4.ui.createTermSelect(this.select_reltype.get(0),
-                                    {vocab_id:arr_field.terms, topOptions:'Any relationship type'});
-                    }
-                    //reduced list of constraints
-                    window.hWin.HEURIST4.ui.createRectypeSelect(this.select_target_rectype.get(0), arr_field.rectypes, null, true); //arr_field.rectypes.length>1?'any':null);
-                    if(arr_field.rectypes.length!=1){
-                        window.hWin.HEURIST4.ui.addoption(this.select_target_rectype.get(0), '', 'Any record (entity) type');
-                        this.select_target_rectype.val(0);
-                        this.select_target_rectype.prop('disabled', false);
-                    }else{
-                        //this.select_target_rectype.prop('disabled', true);
-                        this.select_target_rectype.prop('selectedIndex',0);
-                    }
-                    //this._arr_rectypes_subset = arr_field.rectypes;
-                    is_not_selected = false;
-                    break;
+            if(arr_field){
+                if(arr_field.terms){
+                    is_not_relation = false;
+                    //this.label_3.show();
+                    this.select_reltype.show();
+                    this.select_reltype.prop('disabled', false);
+                    var sel = window.hWin.HEURIST4.ui.createTermSelect(this.select_reltype.get(0),
+                                {vocab_id:arr_field.terms, topOptions:'Any relationship type'});
+                    sel.hSelect( "widget" ).css('font-size','0.9em');
+                    this.select_reltype = sel;
+
                 }
+                //reduced list of constraints
+                window.hWin.HEURIST4.ui.createRectypeSelect(this.select_target_rectype.get(0), arr_field.rectypes, null, true); //arr_field.rectypes.length>1?'any':null);
+                if(arr_field.rectypes.length!=1){
+                    window.hWin.HEURIST4.ui.addoption(this.select_target_rectype.get(0), '', 'Any record (entity) type');
+                    this.select_target_rectype.val(0);
+                    this.select_target_rectype.prop('disabled', false);
+                }else{
+                    //this.select_target_rectype.prop('disabled', true);
+                    this.select_target_rectype.prop('selectedIndex',0);
+                }
+                //this._arr_rectypes_subset = arr_field.rectypes;
+                is_not_selected = false;
             }
+
             if(is_not_relation){
                 //this.label_3.hide();
                 this.select_reltype.show();
@@ -519,68 +450,7 @@ $.widget( "heurist.ruleBuilder", {
             //this._arr_rectypes_subset = this._arr_rectypes;
         }
 
-        /*if(this.select_target_rectype.find("option").length>2){
-        this.label_4.show();
-        this.select_target_rectype.show();
-        }else{
-        this.label_4.hide();
-        this.select_target_rectype.hide();
-        }*/
-
-        //this._generateQuery();
     },
-
-
-    // TODO: remove big block of debug or old code
-    //
-    // compose search query
-    //
-    /*
-    _generateQuery: function(){
-
-    this.options.query = '';
-    //query is possible if there is at least one record pointer or relmarker field
-    if(this._arr_fields.length>0) {
-
-    var rt_target = '';
-
-    if(!window.hWin.HEURIST4.util.isempty(this.select_target_rectype.val())){
-    rt_target = this.select_target_rectype.val();
-    }else{
-    var opts = this.select_target_rectype.find("option");
-    if(opts.length==2){
-    rt_target = $(opts[1]).attr('value');
-    }
-    }
-    if(!window.hWin.HEURIST4.util.isempty(rt_target)) rt_target = 't:'+rt_target+' ';
-
-    var rt_source = this.select_source_rectype.val();
-
-    var dt_ID = this.select_fields.val();
-
-    if(!window.hWin.HEURIST4.util.isempty(dt_ID)){ //particular field is selected
-
-    var fld = this._findField(dt_ID);
-
-    if(this.select_reltype.is(":visible")){
-
-    var rel_type = this.select_reltype.val();
-    if(!window.hWin.HEURIST4.util.isempty(rel_type)) rel_type = '-'+rel_type;
-
-    this.options.query = rt_target + 'related'+(fld && fld.isreverse?'_to:':'from:')+rt_source+rel_type;
-    }else{
-    this.options.query = rt_target + 'linked'+(fld && fld.isreverse?'_to:':'from:')+rt_source+'-'+dt_ID;
-    }
-
-    }else{ //field is not selected - search for all relations and links
-    this.options.query = rt_target + 'links:'+rt_source+'-'+this._has_relation+this._has_pointers+this._has_relation+this._has_rev_pointers;
-    }
-
-    }
-
-    this._refresh();
-    },
-    */
 
     _getTargetRt: function(){
         var rt_target = '';
@@ -713,6 +583,9 @@ $.widget( "heurist.ruleBuilder", {
                 }
                 
                 this.select_reltype.val(rel_type);
+console.log(rel_type);                
+                if(this.select_reltype.hSelect("instance"))
+                        this.select_reltype.hSelect('refresh');
                 this.select_target_rectype.val(rt_target);
                 this.additional_filter.val(filter);
 

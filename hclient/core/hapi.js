@@ -723,7 +723,7 @@ prof =Profile
                         window.hWin.HEURIST4.terms = response.data.terms;
                         window.hWin.HEURIST4.detailtypes = response.data.detailtypes;
                         
-                        window.hWin.HEURIST4.dbs.baseFieldType = window.hWin.HEURIST4.detailtypes.lookups;
+                        $Db.baseFieldType = window.hWin.HEURIST4.detailtypes.lookups;
                         
                         if (is_message==true) {
                             $dlg = window.hWin.HEURIST4.msg.showMsgDlg('Database structure definitions in browser memory have been refreshed.<br>'+

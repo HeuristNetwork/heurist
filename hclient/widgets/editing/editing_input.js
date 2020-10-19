@@ -69,7 +69,7 @@ $.widget( "heurist.editing_input", {
         if(this.options.dtFields==null && this.options.dtID>0 && this.options.rectypeID>0 &&
             this.options.rectypes && this.options.rectypes.typedefs && this.options.rectypes.typedefs[this.options.rectypeID])
         {
-
+            // HEUIRST4.rectypes
             this.options.dtFields = this.options.rectypes.typedefs[this.options.rectypeID].dtFields[this.options.dtID];
         }
 
@@ -408,9 +408,10 @@ $.widget( "heurist.editing_input", {
 
     rst_DisplayWidth - width in characters
 
-    rst_PtrFilteredIDs
-    rst_FilteredJsonTermIDTree      @todo rename to rst_FieldConfig (over dty_JsonConfig)
-    rst_TermIDTreeNonSelectableIDs
+    rst_PtrFilteredIDs (over dty_PtrTargetRectypeIDs)
+    rst_FilteredJsonTermIDTree  (over dty_JsonTermIDTree)     
+    
+    rst_TermIDTreeNonSelectableIDs   
     dty_TermIDTreeNonSelectableIDs
     *
     *
@@ -1116,7 +1117,8 @@ console.log('close edit terms - recreate selector');
                             
                             var opts = {
                                 height:280, width:750, 
-                                title: 'Create relationship between records ( Field: "'+window.hWin.HEURIST4.detailtypes.names[that.options.dtID]+'" )',
+                                title: 'Create relationship between records ( Field: "'
+                                    +$Db.dty(that.options.dtID, 'dty_Name')+'" )',
                                 relmarker_dty_ID: that.options.dtID,
                                 onClose: __onCloseAddLink 
                             };
@@ -1162,9 +1164,7 @@ console.log('close edit terms - recreate selector');
                             else ptrset = [];
                         }
                         
-                        var allTerms = this.f('rst_FilteredJsonTermIDTree');        
-                        var headerTerms = this.f('rst_TermIDTreeNonSelectableIDs') || this.f('dty_TermIDTreeNonSelectableIDs');
-                        //var terms = window.hWin.HEURIST4.dbs.getPlainTermsList(this.detailType, allTerms, headerTerms, null);
+                        var vocab_id = this.f('rst_FilteredJsonTermIDTree');        
 
                         var ph_gif = window.hWin.HAPI4.baseURL + 'hclient/assets/16x16.gif';
                         var headers = relations.headers;
@@ -1179,7 +1179,7 @@ console.log('close edit terms - recreate selector');
                             if(direct[k]['trmID']>0){ //relation   
                             
                                 
-                                if(window.hWin.HEURIST4.dbs.isTermInList(this.detailType, allTerms, headerTerms, direct[k]['trmID']))
+                                if($Db.trm_InVocab(vocab_id, direct[k]['trmID']))
                                 { //it satisfies to allowed relationship types
 
                                         //verify that target rectype is satisfy to constraints and trmID allowed
@@ -1227,7 +1227,7 @@ console.log('close edit terms - recreate selector');
                             //direct[k]['dtID']==this.options.dtID && 
                             if(reverse[k]['trmID']>0){ //relation   
                                 
-                                if(window.hWin.HEURIST4.dbs.isTermInList(this.detailType, allTerms, headerTerms, reverse[k]['trmID']))
+                                if($Db.trm_InVocab(vocab_id, reverse[k]['trmID']))
                                 { //it satisfies to allowed relationship types
                                 
                                         //verify that target rectype is satisfy to constraints and trmID allowed

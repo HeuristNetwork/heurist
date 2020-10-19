@@ -1467,7 +1467,9 @@
                             }
 
                             if($is_get_relation_records && 
-                            (strpos($params3['q'],"related_to")>0 || strpos($params3['q'],"relatedfrom")>0) ){ //find relationship records (recType=1)
+                            (strpos($params3['q'],"related")>0 || 
+                             strpos($params3['q'],"related_to")>0 || strpos($params3['q'],"relatedfrom")>0) )
+                            { //find relationship records (recType=1)
 
                                 //create query to search related records
                                 if (strcasecmp(@$params3['w'],'B') == 0  ||  strcasecmp(@$params3['w'], 'bookmark') == 0) {
@@ -1484,7 +1486,7 @@
                                          $fld2 = "rl_TargetID";
                                 }
                                 
-                                $ids_party1 = $params3['topids'];
+                                $ids_party1 = $params3['topids'];  //source ids (from top query)
                                 $ids_party2 = $is_ids_only?$response['data']['records'] :array_keys($response['data']['records']);
                                 
                                 if(is_array($ids_party2) && count($ids_party2)>0)
@@ -1492,8 +1494,10 @@
 
                                 
                                 $where = "WHERE (TOPBIBLIO.rec_ID in (select rl_RelationID from recLinks "
-                                    ."where (rl_RelationID is not null) and $fld1 in ("
-                                    .$ids_party1.") and $fld2 in (".implode(",", $ids_party2).")))";
+                                    ."where (rl_RelationID is not null) and ".
+                                    "(($fld1 in (".$ids_party1.") and $fld2 in (".implode(",", $ids_party2).")) OR ".
+                                    " ($fld2 in (".$ids_party1.") and $fld1 in (".implode(",", $ids_party2)."))) ".
+                                    "))";
 
                                 $params2 = $params3;
                                 unset($params2['topids']);

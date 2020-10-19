@@ -74,8 +74,7 @@ console.log(record);
 //Accessing list of values for a vocabulary
 //In this case list of all Parisian keywords (vocab 6953) to allow decoding of the IDs and choice from eg. a dropdown
 
-    var terms = window.hWin.HEURIST4.dbs.getPlainTermsList('enum',6953);
-    
+//var terms = $Db.trm_TreeData(6953, 'select');
 //console.log('TERMS');            
 //console.log(terms); 
 

@@ -417,11 +417,9 @@ function output_CSV($system, $data, $params){
                 
                     $vals = array();
                     
-                    //if(window.hWin.HEURIST4.dbs.isTermInList(this.detailType, allTerms, headerTerms, direct[k]['trmID']))
-                
                     foreach($related_recs['direct'] as $relation){
                         $target_rt = $related_recs['headers'][$relation->targetID][1];
-                        if( $constr_rt_id==$target_rt && $relation->trmID>0){ //contrained rt and allowed relation type
+                        if( $constr_rt_id==$target_rt && $relation->trmID>0){ //constrained rt and allowed relation type
                             
                             $all_terms = $defRecTypes['typedefs'][$rty_ID]['dtFields'][$dt_id][$idx_term_tree];
                             $nonsel_terms = $defRecTypes['typedefs'][$rty_ID]['dtFields'][$dt_id][$idx_term_nosel];
@@ -1843,7 +1841,6 @@ function _composeGephiLinks(&$records, &$links, &$links_cnt, $direction){
             if(in_array($source, $records) && in_array($target, $records)){
                 
                     if($dtID > 0) {
-                        //type = window.hWin.HEURIST4.detailtypes.typedefs[dtID].commonFields[1];
                         $relationName = $defDetailtypes['typedefs'][$dtID]['commonFields'][$idx_dname];
                         $relationID = $dtID;
                     }else if($trmID > 0) {

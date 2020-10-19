@@ -148,7 +148,7 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
         for (var rty in rectype_Ids){
             if(rty>=0){
                 rty = rectype_Ids[rty];
-                opt = new Option(window.hWin.HEURIST4.rectypes.pluralNames[rty], rty);
+                opt = new Option($Db.rty(rty,'rty_Plural'), rty);
                 if(hasSelection){
                     opt.className = 'depth1';
                     $(opt).attr('depth', 1);
@@ -188,7 +188,7 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
                 if(rty>=0){
                     rty = rectype_Ids[rty];
                     //need unique value - otherwise jquery selectmenu fails to recognize
-                    opt = new Option(window.hWin.HEURIST4.rectypes.pluralNames[rty], 's'+rty); 
+                    opt = new Option($Db.rty(rty,'rty_Plural'), 's'+rty); 
                     $(opt).attr('data-select', 1);
                     if(hasSelection){
                         $(opt).attr('depth', 1);
@@ -232,25 +232,21 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
     // 
     _fillSelectFieldTypes: function (party, recRecTypeID, oppositeRecTypeID) {
         
-        var fi_name = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex['rst_DisplayName'], 
-            fi_constraints = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex['rst_PtrFilteredIDs'], 
-            fi_type = window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex['dty_Type'],
-            
-            fi_req_type =  window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex['rst_RequirementType'],
-            fi_term =  window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex['rst_FilteredJsonTermIDTree'],
-            fi_term_dis =  window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex['rst_TermIDTreeNonSelectableIDs'],
-            hasSomeLinks = false;
-
         this.element.find('#'+party+'_field').empty();
         
         //var $fieldset = $('#target_field').empty(); //@todo clear target selection only in case constraints were changed
             
-        if(window.hWin.HEURIST4.rectypes.typedefs[recRecTypeID]) {   
-        // get structures for both record types and filter out link and relation maker fields
-        for (dty in window.hWin.HEURIST4.rectypes.typedefs[recRecTypeID].dtFields) {
+        var details = $Db.rst_idx(recRecTypeID);
             
-            var field_type = window.hWin.HEURIST4.detailtypes.typedefs[dty].commonFields[fi_type];
-            var req_type  = window.hWin.HEURIST4.rectypes.typedefs[recRecTypeID].dtFields[dty][fi_req_type];
+        if(details)
+        {   
+            
+        // get structures for both record types and filter out link and relation maker fields
+        for (dty in details) {
+            
+            var field_type = $Db.dty(dty, 'dty_Type');
+            
+            var req_type  = $Db.rst_idx(recRecTypeID, dty, 'rst_RequirementType');
             
             if ((!(field_type=='resource' || field_type=='relmarker')) || req_type=='forbidden') {
                  continue;
@@ -265,11 +261,9 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
                 }
             }
             
-            var details = window.hWin.HEURIST4.rectypes.typedefs[recRecTypeID].dtFields[dty];
-
             //get name, contraints
-            var dtyName = details[fi_name];
-            var dtyPtrConstraints = details[fi_constraints];
+            var dtyName = $Db.rst_idx(recRecTypeID, dty, 'rst_DisplayName');
+            var dtyPtrConstraints = $Db.dty(dty, 'dty_PtrTargetRectypeIDs');
             var recTypeIds = null;
             if(!window.hWin.HEURIST4.util.isempty(dtyPtrConstraints)){
                 recTypeIds = dtyPtrConstraints.split(',');
@@ -280,8 +274,6 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
             if(recTypeIds==null || 
                window.hWin.HEURIST4.util.isempty(oppositeRecTypeID) || 
                recTypeIds.indexOf(oppositeRecTypeID)>=0 ){
-                
-                hasSomeLinks = true; //reset flag
                 
                 var isAlready = false;
                 
@@ -302,10 +294,6 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
     
     
                 if(field_type=='relmarker'){
-                    
-                    var terms = details[fi_term],
-                        terms_dis = details[fi_term_dis],
-                        currvalue = null;
                     
                     this._createInputElement_Relation( party, recRecTypeID, dty ); 
                     
@@ -419,7 +407,6 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
         dtFields[fi['rst_PtrFilteredIDs']] = rt_constraints;    
         dtFields[fi['rst_DisplayName']] = '';//input_label;
         dtFields[fi['rst_RequirementType']] = 'optional';
-        dtFields[fi['rst_RequirementType']] = 'optional';
         dtFields[fi['rst_MaxValues']] = 1;
         
         var that = this;
@@ -500,7 +487,6 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
         }
 
         dtFields[fi['rst_DisplayName']] = '';//input_label;
-        dtFields[fi['rst_RequirementType']] = 'optional';
         dtFields[fi['rst_RequirementType']] = 'optional';
         dtFields[fi['rst_MaxValues']] = 1;
         //dtFields[fi['rst_DisplayWidth']] = 50; //@todo set 50 for freetext and resource

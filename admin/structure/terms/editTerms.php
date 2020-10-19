@@ -100,6 +100,7 @@ require_once(dirname(__FILE__)."/../../../hclient/framecontent/initPageMin.php")
     <body class="popup" style="overflow:hidden;">
 
         <script type="text/javascript" src="editTerms.js"></script>
+        <script type="text/javascript" src="editTerms_util.js"></script>
 
         <div id="mainDiv" class="ent_wrapper" style="min-width:850px;overflow:hidden;border: thin solid black;"> <!-- style="top:0px"-->
             <div class="ent_content_full" style="overflow:hidden;width:350;top:0;border-right: thin solid black;">

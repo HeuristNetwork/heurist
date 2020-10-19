@@ -35,14 +35,7 @@ getColorFromTermValue - Returns hex color by label or code for term by id
     trm_getVocabs - get all vocabularies OR for given domain
     trm_getAllVocabs - get all vocab where term presents directly or by reference
     trm_RemoveLinks - remove all entries of term from trm_Links
-    
 
-
-getChildrenTerms - returns entire terms tree or only part of it for selected termID
-
-getPlainTermsList - see crosstabs, search_faceted  {id:trm_ID, text:trm_Label}
-
-isTermInList - check that given selectedTermID is among allowed termIDTree (except headerTermIDsList)
 
 
 RECTYPES
@@ -53,8 +46,6 @@ getLinkedRecordTypesReverse
 
 hasFields - returns true if rectype has a field in its structure
 rstField - Returns rectype header or details field values
-
-findByConceptCode
 
 */
 
@@ -67,6 +58,8 @@ if (!window.hWin.HEURIST4.dbs)
 {
 
 window.hWin.HEURIST4.dbs = {
+    
+    baseFieldType: {},
 
     //
     // return vocabulary for given term - real vocabulary (not by reference)
@@ -147,102 +140,6 @@ window.hWin.HEURIST4.dbs = {
         return termCode;
     },
 
-    // !!!!!!!!!!!!!!!!!!!! 
-    // 
-    // see crosstabs  {id:trm_ID, text:trm_Label}
-    //
-    getPlainTermsList: function(datatype, termIDTree, headerTermIDsList, selectedTermID) {
-        
-        var selObj = window.hWin.HEURIST4.ui.createTermSelectExt2(null,
-            {datatype:datatype, termIDTree:termIDTree, headerTermIDsList:headerTermIDsList,
-             defaultTermID:null, topOptions:null, needArray:false, useHtmlSelect:true});
-        
-
-        var reslist = [];
-
-        if(selObj){
-            selObj = selObj[0];
-            for (var i=0; i<selObj.length; i++){
-                if(!selObj.options[i].disabled){
-                    reslist.push({id: parseInt(selObj.options[i].value), text:selObj.options[i].text});
-                }
-            }
-        }
-        return reslist;
-    },
-
-    //  !!!!!!!!!!!!!!!!!!!!!!!!!!
-    // check that given selectedTermID is among allowed termIDTree (except headerTermIDsList)
-    //
-    isTermInList: function(datatype, termIDTree, headerTermIDsList, selectedTermID) {
-        
-        //var selObj = window.hWin.HEURIST4.ui.createTermSelectExt(null, datatype, termIDTree, headerTermIDsList);
-
-        var selObj = window.hWin.HEURIST4.ui.createTermSelectExt2(null,
-            {datatype:datatype, termIDTree:termIDTree, headerTermIDsList:headerTermIDsList,
-             defaultTermID:null, topOptions:null, needArray:false, useHtmlSelect:true});
-        
-        if(selObj){
-            selObj = selObj[0];
-            for (var i=0; i<selObj.length; i++){
-                if(!selObj.options[i].disabled){
-                    if(selObj.options[i].value==selectedTermID){
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
-    },
-    
-    //  !!!!!!!!
-    // return term by selectedTermID and its children as well as comma-separated list of non-disabled ancestors
-    // it uses createTermSelectExt to get the entire tree
-    // used in search_faceted.js  
-    //
-    getChildrenTerms: function(datatype, termIDTree, headerTermIDsList, selectedTermID) {
-
-        var termtree = window.hWin.HEURIST4.ui.createTermSelectExt(null, datatype, termIDTree, headerTermIDsList, 
-                                                                        null, null, true);
-        /*
-        function __setParents(parent, terms){
-
-        for (var i=0; i<terms.length; i++)
-        {
-        if(!terms[i].parents){
-        terms[i].parents = [];
-        }else{
-        terms[i].parents = terms[i].parents.concat(parent.parents);
-        }
-        terms[i].parents.unshift(parent);
-
-        __setParents(terms[i], terms[i].children);
-        }
-        }
-        */
-        function __findTerm(termId, parent, terms)
-        {
-            for (var i=0; i<terms.length; i++){
-
-                if(terms[i].id==termId){
-                    return terms[i];
-                }else{
-                    var res = __findTerm(termId, terms[i], terms[i].children);
-                    if(res!=null){
-                        return res;
-                    }
-                }
-            }
-            return null; //not found in this level
-        }
-
-        var root = {id:null, text:window.hWin.HR('all'), children:termtree};
-
-        //__setParents(root, termtree);
-
-        return window.hWin.HEURIST4.util.isnull(selectedTermID)?root:__findTerm(selectedTermID, root, termtree);
-    },
-    
     //========================================================================
     /*
      
@@ -335,8 +232,7 @@ window.hWin.HEURIST4.dbs = {
                 var $rt_conceptcode = rectypes['typedefs'][$recTypeId]['commonFields'][idx_ccode];
 
                 $res['conceptCode'] = $rt_conceptcode;
-                $res['rtyID_local'] = window.hWin.HEURIST4.dbs.findByConceptCode($rt_conceptcode, 
-                                window.hWin.HEURIST4.rectypes.typedefs, idx_ccode);
+                $res['rtyID_local'] = $Db.getLocalID('rty', $rt_conceptcode);
                                 
                 //$res['title'] = $res['title']+" <span style='font-size:0.6em'>(" + $rt_conceptcode
                 //            +','+$res['rtyID_local']+ ")</span>";   
@@ -751,8 +647,7 @@ window.hWin.HEURIST4.dbs = {
             var idx_ccode = window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex.dty_ConceptID;
             
             $res['conceptCode'] = $dt_conceptcode;
-            $res['dtyID_local'] = window.hWin.HEURIST4.dbs.findByConceptCode($dt_conceptcode, 
-                        window.hWin.HEURIST4.detailtypes.typedefs, idx_ccode);
+            $res['dtyID_local'] = $Db.getLocalID('dty', $dt_conceptcode);
             
             //$res['title'] = $res['title']+" <span style='font-size:0.6em'>(" + $dt_conceptcode
             //                +','+$res['dtyID_local']+ ")</span>";   
@@ -844,55 +739,6 @@ window.hWin.HEURIST4.dbs = {
         return res;    
         
     },    
-
-
-    //
-    // find by concept code in local definitions
-    //
-    // entities - rectypes, detailtypes, terms
-    //
-    // return local id or zero if not found
-    //
-    findByConceptCode: function(concept_code, entities, idx_ccode){
-
-        var res = [];
-        var sall = false;
-        
-        var findID = 0;
-        
-        if(typeof concept_code === 'String' && concept_code.indexOf('-')>0){
-            var codes = concept_code.split('-');
-            if(codes.length==2 && parseInt(codes[0])==0){
-                   findID = codes[1];
-            }
-        }else if(parseInt(concept_code)>0){
-            findID = concept_code;    
-        }
-        
-        if(findID>0 && entities[findID]){
-            return findID; 
-        }
-
-        for (var localID in entities) 
-        if(localID>0){
-            var def = entities[localID];
-            var isOK = false;
-            if(def['commonFields']){
-                isOK = def['commonFields'][idx_ccode] == concept_code;
-            }else{
-                isOK = def[idx_ccode] == concept_code;
-            }
-            
-            if(isOK){
-                if(sall){
-                    res.push(localID);
-                }else{
-                    return localID;
-                }
-            }
-        }
-        return (sall)?res:0;
-    },
 
     //
     // returns array of record types that are resources for given record type
@@ -1201,12 +1047,29 @@ window.hWin.HEURIST4.dbs = {
                 if(!(rst_ID>0)){
                     return null;
                 }else if(fieldName){
-                    return recset.fld(rst_ID, fieldName);    
+                    
+                    //for backward capability
+                    var dfname;
+                    if(fieldName=='rst_FilteredJsonTermIDTree') dfname='dty_JsonTermIDTree'
+                    else if(fieldName=='rst_PtrFilteredIDs') dfname='dty_PtrTargetRectypeIDs'
+                    else if(fieldName=='dty_TermIDTreeNonSelectableIDs' ||
+                            fieldName=='dty_FieldSetRectypeID' || 
+                            fieldName=='dty_Type')
+                    {
+                        dfname=fieldName; 
+                    } 
+                    
+                    if(dfname){
+                        return $Db.dty(dty_ID, dfname);
+                    }else{
+                        return recset.fld(rst_ID, fieldName);        
+                    }
+                    
                 }else{
                     return recset.getRecord(rst_ID); //json for paticular detail
                 }
             }else{
-                return details[rty_ID]; //array of rst_ID
+                return details[rty_ID]; //array of dty_ID:rst_ID
             }
             
         }else{
@@ -1218,12 +1081,90 @@ window.hWin.HEURIST4.dbs = {
     },
     
     //
+    // find by concept code in local definitions
+    //
+    // entities - prefix for rectypes, detailtypes, terms - rty, dty, trm
+    //
+    // return local id or zero if not found
+    //
+    getLocalID: function(entity, concept_code){
+
+        var findID = 0;
+        var codes = null;
+        
+        if(typeof concept_code == 'string' && concept_code.indexOf('-')>0)
+        {
+            codes = concept_code.split('-');
+            if(codes.length==2 && 
+                (parseInt(codes[0])==0 || codes[0]==window.hWin.HAPI4.sysinfo['db_registeredid']) )
+            {
+                findID = codes[1];
+            }
+        }else if(parseInt(concept_code)>0){
+            findID = concept_code;    
+        }
+        
+        if(findID>0 && $Db[entity](findID)){
+            return findID; 
+        }
+        
+        if(codes && codes.length==2){
+        
+            var f_dbid = entity+'_OriginatingDBID';
+            var f_id = entity+'_IDInOriginatingDB';
+            
+            var recset = $Db[entity]();
+            recset.each2( function(id, record){
+                if(record[f_dbid]==codes[0] && record[f_id]==codes[1]){
+                    findID = id;
+                    return false;
+                }
+            });
+            
+        }
+        
+        return findID;
+    },
+    
+    //
+    // get concept code by local id
+    //
+    getConceptID: function(entity, local_id){
+        
+        var rec = $Db[entity](local_id);
+        if(rec!=null){
+            var dbid = rec[entity+'_OriginatingDBID'];
+            var id = rec[entity+'_IDInOriginatingDB'];
+            if(parseInt(dbid)>0 && parseInt(id)>0){
+                return dbid+'-'+id;
+            }else if( window.hWin.HAPI4.sysinfo['db_registeredid']>0 ){
+                return window.hWin.HAPI4.sysinfo['db_registeredid']+'-'+local_id;
+            }else{
+                return '0000-'.local_id;
+            }
+        }else{
+            return '';
+        }
+    
+    },
+
+    //
+    //
+    //
+    trm_InVocab: function(vocab_id, term_id){
+        
+        var all_terms = $Db.trm_TreeData(vocab_id, 'set');
+        
+        return (window.hWin.HEURIST4.util.findArrayIndex(term_id, all_terms)>=0);
+    },
+    
+    //
     // Returns hierarchy for given vocabulary as a flat array, recordset or tree data
     // (it uses trm_Links)
     // vocab_id - id or "relation"
     // mode - 0, flat - returns recordset, 
     //        1, tree - returns treedata for fancytree
-    //        2, select - return array of options for selector (with depth and is_vocab)
+    //        2, select - return array of options for selector {key: title: depth: is_vocab}
     //        3, set  - array of ids 
     //        4, labels - flat array of labels in lower case 
     //
@@ -1246,6 +1187,7 @@ window.hWin.HEURIST4.dbs = {
 
         function __addChilds(recID, lvl_parents, include_vocab){
         
+            //recID = parseInt(recID);
             var node = {title: recset.fld(recID, 'trm_Label'), key: recID};
             
             if(include_vocab && lvl_parents==0){
@@ -1279,7 +1221,8 @@ window.hWin.HEURIST4.dbs = {
                         recID = children[i];
                         trm_ids.push({title: recset.fld(recID, 'trm_Label'), 
                                       code: recset.fld(recID, 'trm_Code'),
-                                      key: recID, depth:lvl_parents});
+                                      key: recID, 
+                                      depth: lvl_parents});
                         __addChilds(recID, lvl_parents+1);
                     }
 
@@ -1453,7 +1396,7 @@ window.hWin.HEURIST4.dbs = {
                     } 
                     
                     if(dfname){
-                        return window.hWin.HEURIST4.dbs.dtyField(dty_ID, dfname);
+                        return $Db.dty(dty_ID, dfname);
 /*                        
                         var detailtypes = window.hWin.HEURIST4.detailtypes;
                         var dfi = detailtypes.typedefs.fieldNamesToIndex;
@@ -1566,40 +1509,6 @@ window.hWin.HEURIST4.dbs = {
                 }
             })
         
-    },
-    
-    //
-    //
-    //
-    dtyField: function( dty_ID, fieldName, newValue ){
-
-        var detailtypes = window.hWin.HEURIST4.detailtypes;
-                        
-        if (!(dty_ID>0 && detailtypes.typedefs[dty_ID])) return null;
-        
-        var dfi = detailtypes.typedefs.fieldNamesToIndex;
-        
-        if(fieldName){
-            if(dfi[fieldName]>=0){
-
-                if( !window.hWin.HEURIST4.util.isempty(newValue) ){
-                    detailtypes.typedefs[dty_ID].commonFields[ dfi[fieldName] ] = newValue;
-                }
-                    
-                return detailtypes.typedefs[dty_ID].commonFields[ dfi[fieldName] ];
-            }else{
-                return null;
-            }
-            
-        }else{
-            
-                var res = {};
-                for(var i=0; i<detailtypes.typedefs.commonFieldNames.length; i++){
-                    fieldName = detailtypes.typedefs.commonFieldNames[i];
-                    res[fieldName] = detailtypes.typedefs[dty_ID].commonFields[ dfi[fieldName] ];
-                }
-                return res;            
-        }
     },
     
     //

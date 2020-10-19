@@ -28,10 +28,10 @@ $.widget( "heurist.searchDefDetailTypes", $.heurist.searchEntity, {
         this.input_search_type = this.element.find('#input_search_type');   //field type
         var vals = [{key:'any',title:'any type'}];
         
-        for (var key in window.hWin.HEURIST4.dbs.baseFieldType)
-        if(!window.hWin.HEURIST4.util.isempty(window.hWin.HEURIST4.dbs.baseFieldType[key])){
+        for (var key in $Db.baseFieldType)
+        if(!window.hWin.HEURIST4.util.isempty($Db.baseFieldType[key])){
             if(key!='calculated')
-                vals.push({key:key,title:window.hWin.HEURIST4.dbs.baseFieldType[key]});
+                vals.push({key:key,title:$Db.baseFieldType[key]});
         }
 
         window.hWin.HEURIST4.ui.createSelector(this.input_search_type[0], vals);

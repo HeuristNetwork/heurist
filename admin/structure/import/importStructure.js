@@ -1151,24 +1151,21 @@ $.widget( "heurist.importStructure", {
             var idx_rst_Type  = dbs.rectypes.typedefs.dtFieldNamesToIndex.dty_Type;
             var idx_rst_ccode = dbs.rectypes.typedefs.dtFieldNamesToIndex.dty_ConceptID;
 
-            var idx_dty_ConceptID = window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex.dty_ConceptID;
-
             var dty;
             for (dty in rts.dtFields) {
 
                 //var det = dbs.detailtypes.typedefs[dty].commonFields;
                 var rst_fld = rts.dtFields[dty];
 
-                //find in local defintions by concpt code - if found - it is already imported
-                var local_id = window.hWin.HEURIST4.dbs.findByConceptCode(rst_fld[idx_rst_ccode], 
-                    window.hWin.HEURIST4.detailtypes.typedefs, idx_dty_ConceptID);
+                //find in local defintions by concept code - if found - it is already imported
+                var local_id = $Db.getLocalID( 'dty', rst_fld[idx_rst_ccode]);  
 
                 info += "<tr"+ (local_id>0? ' style="background-color:#CCCCCC;"' : "") +
                 "</td><td style='padding-left:20px;'>" + (local_id>0 == 1? "yes" : "NEW") +
                 "<td style='padding-left:10px; font-weight:bold'>" + rst_fld[idx_rst_Name] +
                 "</td><td style='padding-left:10px;'>" + 
                 ((dbs.detailtypes)?dbs.detailtypes.names[dty]:'') +
-                "</td><td style='padding-left:10px;'>" + window.hWin.HEURIST4.detailtypes.lookups[rst_fld[idx_rst_Type]] +
+                "</td><td style='padding-left:10px;'>" + $Db.baseFieldType[rst_fld[idx_rst_Type]] +
                 "</td></tr>";
             }//for
             info += "</table></div>";    

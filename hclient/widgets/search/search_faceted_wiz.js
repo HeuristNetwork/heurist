@@ -1315,10 +1315,6 @@ $.widget( "heurist.search_faceted_wiz", {
             var listdiv = $(this.step3).find("#facets_list");
             listdiv.empty();
 
-            var dispname_idx = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex['rst_DisplayName'];
-            var allterms_idx = window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex['dty_JsonTermIDTree'];
-            var disterms_idx = window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex['dty_TermIDTreeNonSelectableIDs'];
-
             len = facets.length;
             k = 0;
             while(k<facets.length){
@@ -1362,42 +1358,44 @@ $.widget( "heurist.search_faceted_wiz", {
                             
                         if(linktype=='lt' || linktype=='rt'){
                             
-                            if(!window.hWin.HEURIST4.rectypes.typedefs[ rtid ].dtFields[dtid]){
+                            var sFieldName = $Db.rst_idx(rtid, dtid, 'rst_DisplayName');
+                            
+                            if(window.hWin.HEURIST4.util.isempty(sFieldName)){
                                 //field was removed - remove facet
                                 removeFacet = true;
                                 break;
                             }
                             
-                            harchy.push(' . '+window.hWin.HEURIST4.rectypes.typedefs[rtid].dtFields[dtid][dispname_idx]+' &gt ');
-                            harchy_fields.push(window.hWin.HEURIST4.rectypes.typedefs[rtid].dtFields[dtid][dispname_idx]);
+                            harchy.push(' . '+sFieldName+' &gt ');
+                            harchy_fields.push(sFieldName);
                         }else{
                             var from_rtid = codes[j+2];
+
+                            var sFieldName = $Db.rst_idx(from_rtid, dtid, 'rst_DisplayName');
                             
-                            if(!window.hWin.HEURIST4.rectypes.typedefs[ from_rtid ].dtFields[dtid]){
+                            if(window.hWin.HEURIST4.util.isempty(sFieldName)){
                                 //field was removed - remove facet
                                 removeFacet = true;
                                 break;
                             }
                             
-                            harchy.push(' &lt '+
-                            (window.hWin.HEURIST4.rectypes.typedefs[from_rtid]
-                                ?window.hWin.HEURIST4.rectypes.typedefs[from_rtid].dtFields[dtid][dispname_idx]+' . '
-                                :'') );
+                            harchy.push(' &lt '+sFieldName+' . ');
                         }
                         
                         }//dtid>0
                         
                     }else{
+
+                        var sFieldName = $Db.rst_idx(rtid, dtid, 'rst_DisplayName');
                         
-                        if(!window.hWin.HEURIST4.rectypes.typedefs[ rtid ].dtFields[dtid]){
+                        if(window.hWin.HEURIST4.util.isempty(sFieldName)){
                             //field was removed - remove facet
                             removeFacet = true;
                             break;
                         }
                         
-                        //harchy.push(window.hWin.HEURIST4.detailtypes.names[ dtid ]);    
-                        harchy.push(' . '+window.hWin.HEURIST4.rectypes.typedefs[rtid].dtFields[dtid][dispname_idx]);
-                        harchy_fields.push(window.hWin.HEURIST4.rectypes.typedefs[rtid].dtFields[dtid][dispname_idx]);
+                        harchy.push(' . '+sFieldName);
+                        harchy_fields.push(sFieldName);
                     }
                     j = j+2;
                 }//while codes
@@ -1407,17 +1405,6 @@ $.widget( "heurist.search_faceted_wiz", {
                     continue;
                 }
                 
-                
-                /*
-                var j = 0;
-                while (j<codes.length){
-                    if(j % 2 ==0){
-                        harchy.push(window.hWin.HEURIST4.rectypes.names[codes[j]]);
-                    }else{
-                        harchy.push(window.hWin.HEURIST4.detailtypes.names[codes[j]]);    
-                    }
-                    j++;
-                }*/  
                 
                 var idd = facets[k]['var'];
                 
@@ -1506,9 +1493,8 @@ $.widget( "heurist.search_faceted_wiz", {
                     //for text field default is search for others slider/dropdown
                     if(facets[k].type=='enum' || facets[k].type=='relationtype'){
                         
-                        var allTerms = window.hWin.HEURIST4.detailtypes.typedefs[dtid].commonFields[allterms_idx];
-                        var disTerms = window.hWin.HEURIST4.detailtypes.typedefs[dtid].commonFields[disterms_idx];
-                        var list = window.hWin.HEURIST4.dbs.getPlainTermsList(facets[k].type, allTerms, disTerms);
+                        var vocab_id = $Db.dty(dtid, 'dty_JsonTermIDTree');    
+                        var list = $Db.trm_TreeData(vocab_id, 'set');
                         
                         if(list.length<5){
                             facets[k].isfacet = 2; //wrap 

@@ -299,7 +299,7 @@ if(isset($_POST['data'])) {
             }else if(type == "enum") {
                 var enumID = record.d[index];
                 if(enumID) {
-                    return window.hWin.HEURIST4.terms.termsByDomainLookup.enum[enumID][0];
+                    return $Db.trm(enumID, 'trm_Label');
                 }
 
             }else if(type == "termlist") { //???

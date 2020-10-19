@@ -473,8 +473,6 @@ function output_CSV($system, $data, $params){
                 
                     $vals = array();
                     
-                    //if(window.hWin.HEURIST4.dbs.isTermInList(this.detailType, allTerms, headerTerms, direct[k]['trmID']))
-                
                     foreach($related_recs['direct'] as $relation){
                         $target_rt = $related_recs['headers'][$relation->targetID][1];
                         if( $constr_rt_id==$target_rt && $relation->trmID>0){ //contrained rt and allowed relation type

@@ -408,11 +408,8 @@ $.widget( "heurist.embedDialog", {
         window.hWin.HEURIST4.ui.addoption(selScope, '', 'select...');
         //window.hWin.HEURIST4.ui.addoption(selScope, 0, 'Create new layout');
         
-        var idx_ccode = window.hWin.HEURIST4.terms.fieldNamesToIndex.trm_ConceptID;
-        
-        var local_trmID = window.hWin.HEURIST4.dbs.findByConceptCode( '2-6254', 
-                                window.hWin.HEURIST4.terms.termsByDomainLookup.enum, idx_ccode );
-        
+        //page type
+        var local_trmID = $Db.getLocalID('trm', '2-6254');
         var that = this;
         var query = {t:this.RT_CMS_MENU};
         query['f:'+this.DT_CMS_PAGETYPE] = local_trmID;

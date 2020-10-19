@@ -793,7 +793,6 @@ private static function _composeGephiLinks(&$records, &$links, &$links_cnt, $dir
             if(in_array($source, $records) && in_array($target, $records)){
 
                 if($dtID > 0) {
-                    //type = window.hWin.HEURIST4.detailtypes.typedefs[dtID].commonFields[1];
                     $relationName = self::$defDetailtypes['typedefs'][$dtID]['commonFields'][$idx_dname];
                     $relationID = $dtID;
                 }else if($trmID > 0) {

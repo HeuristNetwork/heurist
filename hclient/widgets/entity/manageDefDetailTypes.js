@@ -219,6 +219,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
     // 
     // get recordset from HEURIST4.detailtypes - NOT USED
     //
+/*    
     _getRecordsetFromStructure: function(){
         
         var rdata = { 
@@ -228,7 +229,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             records:{},
             order:[] };
 
-        var detailtypes = window.hWin.HEURIST4.detailtypes;
+        var detailtypes = window.hWin.HEURIST4.detailtypes;//get recordset from HEURIST4.detailtypes - NOT USED
 
         rdata.fields = window.hWin.HEURIST4.util.cloneJSON(detailtypes.typedefs.commonFieldNames);
         rdata.fields.unshift('dty_ID');
@@ -247,6 +248,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
 
         return new hRecordSet(rdata);
     },
+*/    
 
 
     visible_fields: ['dtyid','edit','name','type','description','show','usedin','status'], //'ccode','group',       
@@ -369,7 +371,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                 case 'name':  html += fld2('dty_Name','120px'); break;
                 case 'type':  
                 
-                    html += fld2('', '60px', window.hWin.HEURIST4.dbs.baseFieldType[recordset.fld(record,'dty_Type')]); 
+                    html += fld2('', '60px', $Db.baseFieldType[recordset.fld(record,'dty_Type')]); 
                     break;
                 case 'description':  
                     html += fld2('dty_HelpText',null,null,
@@ -480,16 +482,6 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             this._triggerRefresh('dty');
             
             //this.updateGroupCount(this.deleted_from_group_ID, -1);
-            
-/*        
-            //backward capability - remove later
-            var detailtypes = window.hWin.HEURIST4.detailtypes;
-            if(recID>0 && detailtypes.typedefs[recID]){
-                    delete detailtypes.names[recID];
-                    delete detailtypes.rectypeUsage[recID];
-                    delete detailtypes.typedefs[recID];
-            }
-*/            
     },
     
 
@@ -532,14 +524,14 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                     $(el).empty();
                     el.disabled = false;
                     
-                    window.hWin.HEURIST4.ui.addoption(el, _dty_Type,  window.hWin.HEURIST4.dbs.baseFieldType[_dty_Type]);
+                    window.hWin.HEURIST4.ui.addoption(el, _dty_Type,  $Db.baseFieldType[_dty_Type]);
 
                     if(_dty_Type=='float' || _dty_Type=='date'){
-                        window.hWin.HEURIST4.ui.addoption(el, 'freetext',  window.hWin.HEURIST4.dbs.baseFieldType['freetext']);
+                        window.hWin.HEURIST4.ui.addoption(el, 'freetext',  $Db.baseFieldType['freetext']);
                     }else if(_dty_Type=='freetext'){
-                        window.hWin.HEURIST4.ui.addoption(el, 'blocktext',  window.hWin.HEURIST4.dbs.baseFieldType['blocktext']);
+                        window.hWin.HEURIST4.ui.addoption(el, 'blocktext',  $Db.baseFieldType['blocktext']);
                     }else if(_dty_Type=='blocktext'){
-                        window.hWin.HEURIST4.ui.addoption(el, 'freetext',  window.hWin.HEURIST4.dbs.baseFieldType['freetext']);
+                        window.hWin.HEURIST4.ui.addoption(el, 'freetext',  $Db.baseFieldType['freetext']);
                     }else{
                         el.disabled = true;
                     }
@@ -609,9 +601,9 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                                         {
 
                                             window.hWin.HEURIST4.msg.showMsgDlg("If you change the type to '"
-                                                + window.hWin.HEURIST4.dbs.baseFieldType[context] 
+                                                + $Db.baseFieldType[context] 
                                                 + "' you will lose all your settings for type '"   //vocabulary 
-                                                + window.hWin.HEURIST4.dbs.baseFieldType[dt_type]+
+                                                + $Db.baseFieldType[dt_type]+
                                                 "'.\n\nAre you sure?",                                            
                                                 function(){   
                                                     that._onDataTypeChange(context);                                                   
@@ -669,7 +661,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
            ele.editing_input('setValue', dt_type);
            */
            if(this.set_detail_type_btn){
-               this.set_detail_type_btn.button({label:window.hWin.HEURIST4.dbs.baseFieldType[dt_type]});
+               this.set_detail_type_btn.button({label:$Db.baseFieldType[dt_type]});
                var elements = this._editing.getInputs('dty_Type');               
                $(elements[0]).val( dt_type );
                
@@ -785,7 +777,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
 
                     is_added = true;
                     ele.attr('dty_ID',dty_ID)
-                    .text(field_name+' ['+ window.hWin.HEURIST4.dbs.baseFieldType[field_type] +']')
+                    .text(field_name+' ['+ $Db.baseFieldType[field_type] +']')
                     .click( function(event){
                         window.hWin.HEURIST4.util.stopEvent(event);
 

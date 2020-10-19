@@ -388,8 +388,7 @@ console.log(data);
                 
                 if(this.options.import_structure){
                     var concept_code =  rectype[ idx_ccode ];
-                    var local_rtyID = window.hWin.HEURIST4.dbs.findByConceptCode( concept_code, 
-                                                            window.hWin.HEURIST4.rectypes.typedefs, idx_ccode );
+                    var local_rtyID = $Db.getLocalID( 'rty', concept_code );
                     rectype.push( local_rtyID );
                     hasRtToImport = hasRtToImport || !(local_rtyID>0);
                 }

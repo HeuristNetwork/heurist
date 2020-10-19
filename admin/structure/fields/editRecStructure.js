@@ -3764,7 +3764,7 @@ function recreateTermsPreviewSelector(rst_ID, datatype, allTerms, disabledTerms,
                 //remove old combobox
             
             //el_sel = Hul.createTermSelectExt(allTerms, disabledTerms, datatype, _defvalue, isdefselector);
-            el_sel = window.hWin.HEURIST4.ui.createTermSelectExt2(null,
+            el_sel = createTermSelectExt2(null,
                     {datatype:datatype, termIDTree:allTerms, headerTermIDsList:disabledTerms,
                      defaultTermID:_defvalue, 
                      topOptions:isdefselector?[{key:'',title:'<blank value>'}]:null,

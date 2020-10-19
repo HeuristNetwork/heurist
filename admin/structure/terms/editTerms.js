@@ -1672,7 +1672,7 @@ function EditTerms() {
         //disabledTerms = Hul.expandJsonStructure(disabledTerms);
         //el_sel = Hul.createTermSelect(allTerms, disabledTerms, _currentDomain, null);
         
-        $input = window.hWin.HEURIST4.ui.createTermSelectExt2(el_sel,
+        $input = createTermSelectExt2(el_sel,
                 {datatype:_currentDomain, termIDTree:allTerms, headerTermIDsList:disabledTerms,
                     defaultTermID:null, topOptions:false, supressTermCode:true, useHtmlSelect:false});
         

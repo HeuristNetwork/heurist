@@ -26,9 +26,6 @@ addoption - helper function to add option to select element
 createSelector - create SELECT element (if selObj is null) and fill with given options
 
 
-OLD createTermSelectExt   - create/fill SELECT for terms or returns JSON array 
-OLD createTermSelectExt2  - the same but parameters are passed as options object
-
 createVocabularySelect - creatres selector with vocabularies only (top level terms)
 createTermSelect
 
@@ -241,13 +238,18 @@ window.hWin.HEURIST4.ui = {
                                 grp.label =  title;
                                 selObj.appendChild(grp);
                             }else{
-                                window.hWin.HEURIST4.ui.addoption(selObj, key, title, disabled);
+                                var opt = window.hWin.HEURIST4.ui.addoption(selObj, key, title, disabled);
+                                if(topOptions[idx].group>0){
+                                    $(opt).attr('group', topOptions[idx].group);
+                                }
                             }
 
                         }
                     }
                 }
             }
+            
+            
         }else  if(false && !$.isEmptyObject(topOptions) && Object.keys(topOptions).length>0 ) {
            
                 for (var key in topOptions)
@@ -263,286 +265,6 @@ window.hWin.HEURIST4.ui = {
 
         return selObj;
     },    
-    
-
-    /**
-    * create/fill SELECT for terms or returns JSON array 
-    *
-    * datatype enum|relation
-    * termIDTree - json string or object (tree) OR number - in this case this vocabulary ID, if not defined all terms are taken from window.hWin.HEURIST4.terms.treesByDomain
-    * headerTermIDsList - json string or array (disabled terms)
-    * defaultTermID - term to be selected
-    * topOptions - text or array for top most item(s)
-    * needArray  return array tree if terms (instead of select element)
-    *
-    */
-    createTermSelectExt: function(selObj, datatype, termIDTree, headerTermIDsList, defaultTermID, topOptions, needArray) {
-        return window.hWin.HEURIST4.ui.createTermSelectExt2(selObj,
-            {datatype:datatype, termIDTree:termIDTree, headerTermIDsList:headerTermIDsList,
-             defaultTermID:defaultTermID, topOptions:topOptions, needArray:needArray, useHtmlSelect:false});
-    },
-
-    createTermSelectExt2: function(selObj, options) {
-
-        var datatype =  options.datatype,
-            termIDTree =  options.termIDTree,  //all terms
-            headerTermIDsList =  options.headerTermIDsList,  //non selectable
-            defaultTermID =  options.defaultTermID,
-            topOptions =  options.topOptions,
-            needArray  =  (options.needArray===true),
-            supressTermCode = options.supressTermCode,
-            useHtmlSelect  = (options.useHtmlSelect===true),
-            useIds  = (options.useIds===true),
-            vocabsOnly  = (options.vocabsOnly===true);
-
-
-        if(needArray){
-
-        }else{
-            selObj = window.hWin.HEURIST4.ui.createSelector(selObj, topOptions);
-        }
-
-        if(datatype=="relation" || datatype === "relmarker" || datatype === "relationtype"){
-            datatype = "relation";
-        }else{
-            datatype = "enum";
-        }
-
-        var terms = window.hWin.HEURIST4.terms;
-        if(!(datatype=="enum" || datatype=="relation") || !terms ){
-            return needArray ?[] :selObj;
-        }
-
-        var termLookup = terms.termsByDomainLookup[datatype];
-
-        //prepare header
-        //
-        var temp;
-        try{
-           temp = ( window.hWin.HEURIST4.util.isArray(headerTermIDsList)   //instanceof(Array)
-            ? headerTermIDsList
-            : (( typeof(headerTermIDsList) === "string" && !window.hWin.HEURIST4.util.isempty(headerTermIDsList) )
-                ? $.parseJSON(headerTermIDsList)  //headerTermIDsList.split(",")
-                : [] ));
-        }catch(ex2){
-           temp = [];
-        }
-                
-
-        var headerTerms = {}; //non selectable
-        for (var id in temp) {
-            headerTerms[temp[id]] = temp[id];
-        }
-
-        //
-        //
-        var isNotFirefox = (navigator.userAgent.indexOf('Firefox')<0);
-
-        function createSubTreeOptions(optgroup, parents, termSubTree, termLookupInner, defaultTermID) 
-        {
-            var termID;
-            var localLookup = termLookupInner;
-            var termName,
-            termCode, hasImage,
-            arrterm = [],
-            reslist2 = [];
-
-            for(termID in termSubTree) { // For every term in 'term'
-                termName = "";
-                termCode = "";
-
-                if(localLookup[termID]){
-                    termName = localLookup[termID][terms.fieldNamesToIndex['trm_Label']];
-                    termCode = localLookup[termID][terms.fieldNamesToIndex['trm_Code']];
-                    hasImage = localLookup[termID][terms.fieldNamesToIndex['trm_HasImage']];
-                    if(supressTermCode || window.hWin.HEURIST4.util.isempty(termCode)){
-                        termCode = '';
-                    }else{
-                        termCode = " [code "+termCode+"]";
-                    }
-                }
-
-                if(window.hWin.HEURIST4.util.isempty(termName)) continue;
-
-                arrterm.push([termID, termName, termCode, hasImage]);
-            }
-
-            //sort by name
-            arrterm.sort(function (a,b){
-                return a[1].toUpperCase()<b[1].toUpperCase()?-1:1;
-            });
-
-
-
-            var i=0, cnt= arrterm.length;
-            for(;i<cnt;i++) { // For every term in 'term'
-
-                termID = arrterm[i][0];
-                termName = arrterm[i][1];
-                termCode = arrterm[i][2];
-                hasImage = arrterm[i][3];
-                var termParents = '';
-                var origName = arrterm[i][1];
-                
-                var depth = parents.length;
-
-                /* not used anymore - replaced with jquery selecmenu
-                if(isNotFirefox && (depth>1 || (optgroup==null && depth>0) )){
-                    //for non mozilla add manual indent
-                    var a = new Array( ((depth<7)?depth:7)*2 );
-                    termName = a.join('. ') + termName;       
-                }*/
-                if(depth>0){
-                    termParents = parents.join('.');
-                }
-                
-
-                var isDisabled = (headerTerms[termID]? true:false);
-                var hasChildren = ( typeof termSubTree[termID] == "object" && Object.keys(termSubTree[termID]).length>0 );
-                var isHeader   = ((headerTerms[termID]? true:false) && hasChildren);
-                var new_optgroup;
-
-                //in FF optgroup is allowed on first level only - otherwise it is invisible
-
-                if(isHeader && depth==0) { // header term behaves like an option group
-                    //opt.className +=  ' termHeader';
-
-                    if(selObj){
-
-                        new_optgroup = document.createElement("optgroup");
-                        new_optgroup.label = termName;
-                        new_optgroup.depth = 0;
-
-                        if(optgroup==null){
-                            selObj.appendChild(new_optgroup);
-                        }else{
-                            optgroup.appendChild(new_optgroup);
-                        }
-                    }
-
-                }else{
-
-                    if(selObj){
-
-                        var opt = new Option(termName+termCode, termID);
-                        opt.className = "depth" + (depth<7)?depth:7;
-                        //opt.depth = depth;
-                        opt.disabled = isDisabled;
-                        $(opt).attr('depth', depth)
-                              .attr('term-img', hasImage?1:0);
-                        if(useIds && termID>0){
-                            $(opt).attr('entity-id', termID);
-                        }
-                        
-                        
-                        if(termParents!=''){
-                            $(opt).attr('parents', termParents);
-                            $(opt).attr('term-orig', origName);  
-                            $(opt).attr('term-view', termName+termCode);
-                        } 
-
-                        if (termID == defaultTermID ||
-                            termName == defaultTermID) {
-                            opt.selected = true;
-                        }
-
-                        if(optgroup==null){
-                            selObj.appendChild(opt);
-                        }else{
-                            optgroup.appendChild(opt);
-                        }
-                        new_optgroup = optgroup;
-                    }
-                }
-
-                if(!vocabsOnly){
-                
-                    var children = [];
-                    if(hasChildren){
-                        var parents2 = parents.slice();
-                        parents2.push(termName);      //depth+1
-                        children = createSubTreeOptions( new_optgroup, parents2, termSubTree[termID], localLookup, defaultTermID);
-                    }
-                    var k=0, cnt2 = children.length, termssearch=[];
-                    for(;k<cnt2;k++){
-                        /*if(!children[k].disabled || children[k].children.length>0){
-                        termssearch.push(children[k].id);
-                        }*/
-                        termssearch = termssearch.concat( children[k].termssearch );
-                    }
-                    if(!isDisabled){ //} || children.length>0){
-                        termssearch.push(termID); //add itself
-                    }
-
-                    reslist2.push({id:termID, text:termName, depth:depth, disabled:isDisabled, children:children, termssearch:termssearch });
-                    var parent = reslist2[reslist2.length-1];
-                    for(k=0;k<cnt2;k++){
-                        parent.children[k].parent = parent;
-                    }
-                    
-                }
-            } //for
-            
-            return reslist2;
-        }//end internal function
-
-        //
-        //
-        //
-        var toparray = [];
-        if(vocabsOnly){
-            toparray = [0]; //Object.keys(terms.treesByDomain[datatype]);
-        }else if(window.hWin.HEURIST4.util.isArray(termIDTree)){
-            toparray = termIDTree;
-        }else{
-            toparray = [ termIDTree ]; //vocabulary
-        }
-
-        var m, lenn = toparray.length;
-        var reslist_final = [];
-
-        for(m=0;m<lenn;m++){
-
-            var termTree = toparray[m];
-            
-            if(!window.hWin.HEURIST4.util.isempty(termTree)){
-
-                //
-                //prepare tree
-                //
-                if(window.hWin.HEURIST4.util.isNumber(termTree)){
-                    //this is vocabulary id - show list of all terms for this vocab
-                    var tree = terms.treesByDomain[datatype];
-                    termTree = (termTree>0)?tree[termTree]:tree;
-                }else{
-                    try{
-                        termTree = (typeof termTree == "string") ? $.parseJSON(termTree) : null;
-                        if(termTree==null){
-                            termTree = terms.treesByDomain[datatype];
-                        }
-                    }catch(ex2){
-                    }
-                }
-
-                var reslist = createSubTreeOptions(null, [], termTree, termLookup, defaultTermID);
-                if(!selObj){
-                    reslist_final = reslist_final.concat( reslist);
-                }
-            
-            }
-        }
-
-        if(selObj){
-            if (!defaultTermID) selObj.selectedIndex = 0;
-            
-            //apply select menu
-            selObj = window.hWin.HEURIST4.ui.initHSelect(selObj, useHtmlSelect);
-            
-            return selObj;
-        }else{
-            return reslist_final;
-        }
-    },
 
     
     //
@@ -559,7 +281,7 @@ window.hWin.HEURIST4.ui = {
         //create selector 
         selObj = window.hWin.HEURIST4.ui.createSelector(selObj, topOptions);
             
-        var data = $Db.trm_TreeData(vocab_id, 2);                
+        var data = $Db.trm_TreeData(vocab_id, 'select');                
         var termCode;
         
         //add optgroups and options
@@ -1012,7 +734,7 @@ window.hWin.HEURIST4.ui = {
         }
         
         var dtyID, details;
-        
+     
         //show fields for specified set of record types
         if(window.hWin.HEURIST4.util.isArrayNotEmpty(rtyIDs) && rtyIDs.length>1){
             //get fields for specified array of record types
@@ -1023,31 +745,29 @@ window.hWin.HEURIST4.ui = {
             var rtys = {};
             var i,j,recID,rty,rtyName,dty,dtyName,fieldName,opt;
             
-            var fi_name = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex['rst_DisplayName'], 
-                fi_type = window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex['dty_Type'];
-            
-
             //for all rectypes find all fields as Detail names sorted
             for (i in rtyIDs) {
                 rty = rtyIDs[i];
-                rtyName = window.hWin.HEURIST4.rectypes.names[rty];
+                rtyName = $Db.rty(rty, 'rty_Name');
                 
-                for (dty in window.hWin.HEURIST4.rectypes.typedefs[rty].dtFields) {
+                var dtFields = $Db.rst_idx(rty);
+                
+                for (dty in dtFields) {
                     
-                  var field_type = window.hWin.HEURIST4.detailtypes.typedefs[dty].commonFields[fi_type];
+                  var field_type = $Db.dty(dty, 'dty_Type');
                   if(allowedlist!=null && 
                      allowedlist.indexOf(field_type)<0){
                       continue; //not allowed - skip
                   }  
                   
-                  dtyName = window.hWin.HEURIST4.detailtypes.names[dty];
+                  dtyName = $Db.dty(dty, 'dty_Name');
                   if (!dtys[dtyName]){
                     dtys[dtyName] = [];
                     dtyNameToID[dtyName] = dty;
                     dtyNameToRty[dty] = rty; //not used
                     dtyNames.push(dtyName);
                   }
-                  fieldName = rtyName + "." + window.hWin.HEURIST4.rectypes.typedefs[rty].dtFields[dty][fi_name];
+                  fieldName = rtyName + "." + $Db.rst_idx(rty, dty, 'rst_DisplayName');
                   dtys[dtyName].push(fieldName);
                 }
             }//for rectypes
@@ -1099,35 +819,29 @@ window.hWin.HEURIST4.ui = {
         }else 
         //details for the only recordtype
         if((window.hWin.HEURIST4.util.isArrayNotEmpty(rtyIDs) && rtyIDs.length==1) || Number(rtyIDs)>0){
-            //structure not defined
+            
             var rectype = Number((window.hWin.HEURIST4.util.isArray(rtyIDs))?rtyIDs[0]:rtyIDs);
             
-            if(!(window.hWin.HEURIST4.rectypes && window.hWin.HEURIST4.rectypes.typedefs)) return selObj;
-            var rectypes = window.hWin.HEURIST4.rectypes.typedefs[rectype];
-
-            if(!rectypes) return selObj;
-            details = rectypes.dtFields;
-
-            var fi = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex['rst_DisplayName'],
-            fit = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex['dty_Type'],
-            fir = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex['rst_RequirementType'];
-
-            var rst_fi = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex;
-
+            details = $Db.rst_idx(rectype);
+            if(!details) return selObj; //structure not defined
+                
             var arrterm = [];
+            rectype = ''+rectype;
             
             var child_rectypes = [];
             if(show_parent_rt){
                 var DT_PARENT_ENTITY  = window.hWin.HAPI4.sysinfo['dbconst']['DT_PARENT_ENTITY'];
                 //get all child rectypes
-                for (rty in window.hWin.HEURIST4.rectypes.typedefs) {
-                    for (dty in window.hWin.HEURIST4.rectypes.typedefs[rty].dtFields) {
-                        var dtValue = window.hWin.HEURIST4.rectypes.typedefs[rty].dtFields[dty];
-                        if(dtValue[rst_fi['dty_Type']]=='resource' && dtValue[rst_fi['rst_CreateChildIfRecPtr']]==1){
-                            var constraint = dtValue[rst_fi['rst_PtrFilteredIDs']];
-                            if(constraint.split(',').indexOf((''+rectype))>=0){
+                
+                var recset = $Db.rst_idx();
+                recset.each2(function(i,record){
+                    
+                    if(record['rst_CreateChildIfRecPtr']==1){
+                        var fieldtype = $Db.dty(record['rst_DetailTypeID'], 'dty_Type');
+                        var constraint = $Db.dty(record['rst_DetailTypeID'], 'dty_PtrTargetRectypeIDs');
+                        if(fieldtype=='resource' && constraint && constraint.split(',').indexOf(rectype)>=0){
                             
-                                var name = 'Parent record ('+window.hWin.HEURIST4.rectypes.names[rty]+')';
+                                var name = 'Parent record ('+$Db.rty(record['rst_RecTypeID'], 'rty_Name')+')';
                                 
                                 if(showDetailType){
                                     name = name + ' [resource]';
@@ -1135,35 +849,37 @@ window.hWin.HEURIST4.ui = {
 
                                 arrterm.push([DT_PARENT_ENTITY, name, false]);    
                                 
-                                break;
-                            }
+                                return false;
                         }
                     }
-                }
+                });
             }
-                        
 
             for (dtyID in details){
                 if(dtyID){
-                    
-                    if(details[dtyID][fir]=="forbidden") continue;
 
-                    if(allowedlist==null || allowedlist.indexOf(details[dtyID][fit])>=0)
+                    var field_reqtype = $Db.rst_idx(rectype, dty, 'rst_RequirementType');
+                    
+                    if(field_reqtype=='forbidden') continue;
+                    
+                    var field_type = $Db.dty(dtyID, 'dty_Type');
+
+                    if(allowedlist==null || allowedlist.indexOf(field_type)>=0)
                     {
                         
-                        var name = details[dtyID][fi];
+                        var name = $Db.rst_idx(rectype, dtyID, 'rst_DisplayName');
                         
                         if(showDetailType){
-                            name = name + ' ['+window.hWin.HEURIST4.detailtypes.lookups[ details[dtyID][fit] ]+']';
+                            name = name + ' ['+$Db.baseFieldType[ field_type ]+']';
                         }
 
                         if(!window.hWin.HEURIST4.util.isnull(name)){
-                                arrterm.push([dtyID, name, (details[dtyID][fir]=="required") ]);    
+                                arrterm.push([dtyID, name, (field_reqtype=="required") ]);    
                         }
                     }
-                    if(addLatLongForGeo && details[dtyID][fit]=="geo"){
-                        arrterm.push([ dtyID+'_long', details[dtyID][fi]+' [longitude]', false ]);
-                        arrterm.push([ dtyID+'_lat', details[dtyID][fi]+' [latitude]', false ]);
+                    if(addLatLongForGeo && field_type=="geo"){
+                        arrterm.push([ dtyID+'_long', name+' [longitude]', false ]);
+                        arrterm.push([ dtyID+'_lat', name+' [latitude]', false ]);
                     } 
                 }
             }
@@ -1201,37 +917,33 @@ window.hWin.HEURIST4.ui = {
         // for all fields
         else{ //show all detail types
 
-            if(!window.hWin.HEURIST4.detailtypes) return selObj;
-
-            var detailtypes = window.hWin.HEURIST4.detailtypes;
-            var fit = detailtypes.typedefs.fieldNamesToIndex['dty_Type'];
-
-
-            for (index in detailtypes.groups){
-                if (index == "groupIDToIndex" ||
-                    detailtypes.groups[index].showTypes.length < 1) {   //ignore empty group
-                    continue;
-                }
-
+            $Db.dtg().each2(function(groupID, group){
+            
                 var arrterm = [];
-
-                for (var dtIDIndex in detailtypes.groups[index].showTypes)
+                
+                $Db.dty().each2(function(detailID, field)
                 {
-                    var detailID = detailtypes.groups[index].showTypes[dtIDIndex];
-                    if(allowedlist==null || allowedlist.indexOf(detailtypes.typedefs[detailID].commonFields[fit])>=0)
+                    if(field['dty_DetailTypeGroupID']==groupID && 
+                      (allowedlist==null || allowedlist.indexOf(field['dty_Type'])>=0))
                     {
-                        var name = detailtypes.names[detailID];
-
-                        if(!window.hWin.HEURIST4.util.isnull(name)){
-                            arrterm.push([detailID, name]);
-                        }
+                        arrterm.push([detailID, field['dty_Name']]);
                     }
-                }
+                });
+
 
                 if(arrterm.length>0){
-                    var grp = document.createElement("optgroup");
-                    grp.label = detailtypes.groups[index].name;
-                    selObj.appendChild(grp);
+                    
+                    //add header    
+                    if(useHtmlSelect){
+                        var grp = document.createElement("optgroup");
+                        grp.label = group['dtg_Name'];
+                        selObj.appendChild(grp);
+                    }else{
+                        var opt = window.hWin.HEURIST4.ui.addoption(selObj, 0, group['dtg_Name']);
+                        $(opt).attr('disabled', 'disabled');
+                        $(opt).attr('group', 1);
+                    }
+
                     //sort by name
                     arrterm.sort(function(a, b) {
                             var nameA = a[1].toUpperCase(); // ignore upper and lowercase
@@ -1245,7 +957,6 @@ window.hWin.HEURIST4.ui = {
                             // names must be equal
                             return 0;
                     });
-
                     
                     //add to select
                     var i=0, cnt= arrterm.length;
@@ -1257,10 +968,12 @@ window.hWin.HEURIST4.ui = {
                         }
                     }
                 }
-
-            }
+                
+            });
 
         }
+
+        
         
         if(options && options['bottom_options']){
             window.hWin.HEURIST4.ui.fillSelector(selObj, options['bottom_options']);
@@ -1423,7 +1136,7 @@ window.hWin.HEURIST4.ui = {
                     offset: null
                 },*/
                 change: function( event, data ) {
- //console.log('set '+data.item.value);   
+ console.log('set '+data.item.value);   
                         selObj.val(data.item.value);//change value for underlaying html select
                         selObj.trigger('change');
                 },
@@ -2952,8 +2665,8 @@ window.hWin.HEURIST4.ui = {
       }
   },
   
-  //
-  // edit base field definition
+  // @todo remove
+  // edit base field definition (see saveStructureLib.php)
   //
   editBaseFieldDefinition: function(dty_ID, callback){
   

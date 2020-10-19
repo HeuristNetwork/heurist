@@ -1247,7 +1247,7 @@ $.widget( "heurist.search", {
                     {useIcons: false, useCounts:true, useGroups:true, useIds: (exp_level<2), 
                         topOptions:window.hWin.HR('Any record type'), useHtmlSelect:false});
 
-        var allowed = Object.keys(window.hWin.HEURIST4.dbs.baseFieldType);
+        var allowed = Object.keys($Db.baseFieldType);
         allowed.splice(allowed.indexOf("separator"),1);
         allowed.splice(allowed.indexOf("geo"),1);
         allowed.splice(allowed.indexOf("relmarker"),1);
@@ -1492,7 +1492,7 @@ $.widget( "heurist.search", {
             var isEnum = false;//this.search_assistant.find(".fld_enum").is(':visible');
             
             if(fld){
-                var detailtypes = window.hWin.HEURIST4.detailtypes.typedefs;
+
                 var detailType = '';
 
                 if(Number(fld)>0){

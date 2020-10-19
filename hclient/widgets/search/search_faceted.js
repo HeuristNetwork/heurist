@@ -1508,8 +1508,8 @@ $.widget( "heurist.search_faceted", {
                 var vocabulary_id = null;
                 if(field['type']=='enum' && field['groupby']=='firstlevel'){
                     
-                    var detailtypes = window.hWin.HEURIST4.detailtypes.typedefs;
-                    vocabulary_id = detailtypes[field['id']]['commonFields'][detailtypes['fieldNamesToIndex']['dty_JsonTermIDTree']];
+                    vocabulary_id = $Db.dty(field['id'], 'dty_JsonTermIDTree');    
+
                     //it does work for vocabularies only!
                     if(isNaN(Number(vocabulary_id)) || !(vocabulary_id>0)){
                             vocabulary_id = null;
@@ -1612,9 +1612,6 @@ $.widget( "heurist.search_faceted", {
                         this.cached_counts.push(response);
                     }
                     
-                    var allTerms = window.hWin.HEURIST4.terms;
-                    var detailtypes = window.hWin.HEURIST4.detailtypes.typedefs;
-                    
                     var facet_index = parseInt(response.facet_index); 
 
                     var field = this.options.params.facets[facet_index];
@@ -1641,7 +1638,7 @@ $.widget( "heurist.search_faceted", {
                             field.history = field.history.slice(0, field.selectedvalue.step);
                         }else{
                             field.history = [];
-                            field.history.push({text:window.hWin.HR('all'), value:null});
+                            field.history.push({title:window.hWin.HR('all'), value:null});
                         }
                         field.history.push(field.selectedvalue);
                     }
@@ -1681,22 +1678,20 @@ $.widget( "heurist.search_faceted", {
                     
                     if(field['type']=='enum' && field['groupby']!='firstlevel'){
                         
+                        //enumeration
                         var dtID = field['id'];  
+                        var vocab_id = $Db.dty(dtID, 'dty_JsonTermIDTree');    
                                               
-if(!detailtypes[dtID]){
+if(!(vocab_id>0)){
     console.log('Field '+dtID+' not found!!!!');
     console.log(field);
     //search next facet
     this._recalculateFacets( facet_index );
     return;
 }
-                        //enumeration
-                        var allTerms = detailtypes[dtID]['commonFields'][detailtypes['fieldNamesToIndex']['dty_JsonTermIDTree']],
-                        disabledTerms = detailtypes[dtID]['commonFields'][detailtypes['fieldNamesToIndex']['dty_TermIDTreeNonSelectableIDs']];
-                        
-                        var term = window.hWin.HEURIST4.dbs.getChildrenTerms('enum', allTerms, disabledTerms, null ); //get entire tree
-                        
-                        //field.selectedvalue = {text:label, value:value, step:step};                    
+                        var term = $Db.trm_TreeData(vocab_id, 'tree');                     
+                        term = {key: null, title: "all", children: term};
+                        //field.selectedvalue = {title:label, value:value, step:step};                    
                         
                         //
                         // verify that term is in response - take count from response
@@ -1704,10 +1699,10 @@ if(!detailtypes[dtID]){
                         function __checkTerm(term){
                                 var j;
                                 for (j=0; j<response.data.length; j++){
-                                    if(response.data[j][0] == term.id){
-                                        return {text:term.text, 
-                                             value:term.id, count:parseInt(response.data[j][1])};
-                                        //var f_link = that._createFacetLink(facet_index, {text:term.text, value:term.id, count:response.data[j][1]} );
+                                    if(response.data[j][0] == term.key){
+                                        return {title:term.title, 
+                                             value:term.key, count:parseInt(response.data[j][1])};
+                                        //var f_link = that._createFacetLink(facet_index, {title:term.title, value:term.key, count:response.data[j][1]} );
                                         //return $("<div>").css({"display":"block","padding":"0 5px"}).append(f_link).appendTo($container);
                                     }
                                 }
@@ -1716,7 +1711,7 @@ if(!detailtypes[dtID]){
                         
                         var terms_drawn = 0; //it counts all terms as plain list 
                         
-                        //{id:null, text:window.hWin.HR('all'), children:termtree}
+                        //{key:null, title:window.hWin.HR('all'), children:termtree}
                         //draw terms and all its parents    
                         //2 - inline list, 3 - column list
                         function __drawTerm(term, level, $container, field){
@@ -1728,7 +1723,7 @@ if(!detailtypes[dtID]){
                                             var display_mode = (field['isfacet']==that._FT_COLUMN)?'block':'inline-block';
                                             f_link = that._createFacetLink( facet_index, 
                                                 term,
-                                                //{text:term.text, value:term.value, count:term.count}, 
+                                                //{title:term.title, value:term.value, count:term.count}, 
                                                 display_mode );
                                             
                                             terms_drawn++;  //global
@@ -1745,7 +1740,7 @@ if(!detailtypes[dtID]){
                                             
                                         }else{
                                         //SELECTOR/DROPDOWN
-                                            that._createOption( facet_index, level, {text:term.text, value:term.value, count:term.count} ).appendTo($container);
+                                            that._createOption( facet_index, level, {title:term.title, value:term.value, count:term.count} ).appendTo($container);
                                         }
                                 }
                                 if(term.children){
@@ -1796,12 +1791,12 @@ if(!detailtypes[dtID]){
                                 if(res_count>0){ 
                                     
                                     if(term.termssearch){
-                                        if(term.termssearch.indexOf(term.id)<0){
-                                            term.termssearch.push(term.id);
+                                        if(term.termssearch.indexOf(term.key)<0){
+                                            term.termssearch.push(term.key);
                                         }
                                         term_value = term.termssearch; //.join(",");
                                     }else{
-                                        term_value = term.id;
+                                        term_value = term.key;
                                     }
                                     if(!window.hWin.HEURIST4.util.isempty(term_value) || 
                                         !window.hWin.HEURIST4.util.isnull(field.selectedvalue)){                               
@@ -1827,8 +1822,8 @@ if(!detailtypes[dtID]){
                                         //search for this term and all its children
                                         
                                         if(res_count>0){
-                                            term.children.unshift({text:'unspecified', count:headerData.count, value:'='+headerData.value});
-                                            term.value = term.termssearch?term.termssearch:term.id;
+                                            term.children.unshift({title:'unspecified', count:headerData.count, value:'='+headerData.value});
+                                            term.value = term.termssearch?term.termssearch:term.key;
                                             term.count = res_count + headerData.count;  
                                         } else {
                                             term.value = '='+headerData.value;
@@ -1841,7 +1836,7 @@ if(!detailtypes[dtID]){
                                         //term.value_0 = null;
                                         //term.count_0 = 0;
                                         if(res_count>0){
-                                            term.value = term.termssearch?term.termssearch:term.id;
+                                            term.value = term.termssearch?term.termssearch:term.key;
                                             term.count = res_count;
                                         }else{
                                             term.value = null;
@@ -1897,7 +1892,7 @@ if(!detailtypes[dtID]){
                                 var $sel = $('<select>').css({"font-size": "0.6em !important", "width":"180px"});
                                 $sel.appendTo( $("<div>").css({"display":"block","padding":"0 5px"}).appendTo($facet_values) );
                                 
-                                that._createOption( facet_index, 0, {text:window.hWin.HR('select...'), value:null, count:0} ).appendTo($sel);
+                                that._createOption( facet_index, 0, {title:window.hWin.HR('select...'), value:null, count:0} ).appendTo($sel);
                                 __drawTerm(term, 0, $sel, field);
                                 
                                 if(field.selectedvalue && field.selectedvalue.value){
@@ -1916,41 +1911,6 @@ if(!detailtypes[dtID]){
                         //draw
                             
                         
-                       /*sort by term label
-                       response.data.sort(function (a,b){ 
-                            var _term_a = allTerms['termsByDomainLookup']['enum'][ a[0] ];
-                            var _term_b = allTerms['termsByDomainLookup']['enum'][ b[0] ];
-                            var label_a = (_term_a)?_term_a[0]:('term#'+a);
-                            var label_b = (_term_b)?_term_b[0]:('term#'+b);
-                            return label_a<label_b?-1:1; 
-                       });*/
-                        
-                       /* 
-
-                        var terms_usage = response.data; //0-id, 1-cnt
-                        var terms_cnt = {};
-
-                        for (j=0; j<response.data.length; j++){
-                            //var termid = terms_usage[j].shift();
-                            //terms_cnt[terms_usage[j][0]] = terms_usage[j][1];
-                            
-                            var cterm = response.data[j];
-                            var _term = allTerms['termsByDomainLookup']['enum'][ cterm[0] ];
-                            var label = (_term)?_term[0]:('term#'+cterm[0]);
-                            
-                            //$("<div>").css({"display":"inline-block","min-width":"90px","padding":"0 3px"})
-                            //        .html( label + ' ('+ cterm[1] +') ' ).appendTo($facet_values);
-                            
-                            var f_link = this._createFacetLink(facet_index, {text:label, value:cterm[2], count:cterm[1]});
-                                    
-                            $("<div>").css({"display":"inline-block","padding":"0 3px"}).append(f_link).appendTo($facet_values);
-                            if(i>50){
-                                 $("<div>").css({"display":"inline-block","padding":"0 3px"}).html('more '+(response.data.length-i)+' results').appendTo($facet_values);
-                                 break;       
-                            }
-                        }
-                        */
-                        
                         
                         
                         /*
@@ -1967,7 +1927,7 @@ if(!detailtypes[dtID]){
                                 }
                             }
                             if(cnt>0){
-                                var f_link = this._createTermLink(facet_index, {id:cterm.id, text:cterm.text, query:cterm.termssearch.join(","), count:cnt});
+                                var f_link = this._createTermLink(facet_index, {id:cterm.id, title:cterm.title, query:cterm.termssearch.join(","), count:cnt});
                                 $("<div>").css({"display":"inline-block","min-width":"90px","padding":"0 3px"}).append(f_link).appendTo($facet_values);
                             }
                         }
@@ -1983,7 +1943,7 @@ if(!detailtypes[dtID]){
                             if(facet_index>=0){
                                 var rtID = cterm[0];
                                 var f_link = this._createFacetLink(facet_index, 
-                                    {text:window.hWin.HEURIST4.rectypes.names[rtID], query:rtID, count:cterm[1]}, 'inline-block');
+                                    {title:$Db.rty(rtID,'rty_Name'), query:rtID, count:cterm[1]}, 'inline-block');
                                 $("<div>").css({"display":"inline-block","padding":"0 3px"})
                                   .addClass('facet-item')
                                   .append(f_link).appendTo($facet_values);
@@ -2001,7 +1961,7 @@ if(!detailtypes[dtID]){
                         var cterm = response.data[0];
                         
                         if(window.hWin.HEURIST4.util.isArrayNotEmpty(field.history)){
-                                    var f_link = this._createFacetLink(facet_index, {test:'',value:null,step:0}, 'inline-block');
+                                    var f_link = this._createFacetLink(facet_index, {title:'', value:null, step:0}, 'inline-block');
                                     $('<span>').css({'display':'inline-block','vertical-align':'middle','margin-left':'-15px'})
                                         .append(f_link).appendTo($facet_values);
                         }
@@ -2183,7 +2143,7 @@ if(!detailtypes[dtID]){
                                     value = '';
                                     field.selectedvalue = null;
                                 }else{
-                                    field.selectedvalue = {text:'???', value:value, step:1};                    
+                                    field.selectedvalue = {title:'???', value:value, step:1};                    
                                 }
                                 
                                 that.doSearch();
@@ -2217,7 +2177,7 @@ if(!detailtypes[dtID]){
                                 && !window.hWin.HEURIST4.util.isnull(field['selectedvalue'])){
                         
                         var cterm = field.selectedvalue;
-                        var f_link = this._createFacetLink(facet_index, {text:cterm.text, value:cterm.value, count:'reset'}, 'block');
+                        var f_link = this._createFacetLink(facet_index, {title:cterm.title, value:cterm.value, count:'reset'}, 'block');
                         
                         var ditem = $("<div>").css({'display':'block',"padding":"0 3px"})
                                                 .addClass('facet-item')
@@ -2236,7 +2196,7 @@ if(!detailtypes[dtID]){
                                 
                                 var $span = $('<span>').css('display','block'); //was inline
                                 if(k==len-1){ //last one
-                                    $span.text(cvalue.text).appendTo($facet_values);
+                                    $span.text(cvalue.title).appendTo($facet_values);
                                     //$span.append($('<br>'));
                                 }else{
                                     var f_link = this._createFacetLink(facet_index, cvalue, 'inline-block');
@@ -2262,7 +2222,7 @@ if(!detailtypes[dtID]){
                                 cterm[0] = $Db.getTermValue(cterm[0], false);    
                             }
 
-                            var f_link = this._createFacetLink(facet_index, {text:cterm[0], value:cterm[2], count:cterm[1]}, display_mode);
+                            var f_link = this._createFacetLink(facet_index, {title:cterm[0], value:cterm[2], count:cterm[1]}, display_mode);
                             
                             //@todo draw first level for groupby firs tchar always inline
                             var step_level = (field['groupby']=='firstchar' && field['selectedvalue'])
@@ -2312,7 +2272,7 @@ if(!detailtypes[dtID]){
         if(!hist) hist = [];
         var step = hist.length+1;
         
-        var lbl = cterm.text; //(new Array( indent + 1 ).join( " . " )) + 
+        var lbl = cterm.title; //(new Array( indent + 1 ).join( " . " )) + 
         if(cterm.count>0){
             lbl =  lbl + " ("+cterm.count+")";
         } 
@@ -2341,7 +2301,7 @@ if(!detailtypes[dtID]){
                     value = '';
                     field.selectedvalue = null;
                 }else{
-                    field.selectedvalue = {text:label, value:value, step:step};                    
+                    field.selectedvalue = {title:label, value:value, step:step};                    
                 }
                 
                 if(prevvalue!=value){
@@ -2349,7 +2309,7 @@ if(!detailtypes[dtID]){
                 }
     }
 
-    // cterm - {text, value, count}
+    // cterm - {title, value, count}
     ,_createFacetLink : function(facet_index, cterm, display_mode){
 
         var field = this.options.params.facets[facet_index];
@@ -2363,7 +2323,7 @@ if(!detailtypes[dtID]){
         
         var f_link = $("<a>",{href:'#', facet_index:facet_index, 
                         facet_value: (cterm.count=='reset')?'':cterm.value, 
-                        facet_label: cterm.text, 
+                        facet_label: cterm.title, 
                         step:step})
                     .addClass("facet_link")
         
@@ -2374,7 +2334,7 @@ if(!detailtypes[dtID]){
             f_link_content = $("<span>").addClass("ui-icon ui-icon-arrowreturnthick-1-w")
                 .css({'font-size':'0.9em','height':'10px','margin-left':'-15px'});    
         }else{
-            f_link_content = $("<span>").text(cterm.text);
+            f_link_content = $("<span>").text(cterm.title);
             
             if(display_mode=='block'){         
 
@@ -2386,7 +2346,7 @@ if(!detailtypes[dtID]){
                 }
             
             
-                f_link_content.attr('title', cterm.text);
+                f_link_content.attr('title', cterm.title);
             }
             
             if(!window.hWin.HEURIST4.util.isempty(currval)){
@@ -2444,7 +2404,7 @@ if(!detailtypes[dtID]){
                     value = '';
                     field.selectedvalue = null;
                 }else{
-                    field.selectedvalue = {text:label, value:value, step:step};                    
+                    field.selectedvalue = {title:label, value:value, step:step};                    
                 }
                 
                 

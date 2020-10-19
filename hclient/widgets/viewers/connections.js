@@ -326,7 +326,7 @@ $.widget( "heurist.connections", {
                     var trmID = relations[i].trmID;
                     var relationName = "Floating relationship";
                     if(dtID > 0) {
-                        //type = window.hWin.HEURIST4.detailtypes.typedefs[dtID].commonFields[1];
+
                         relationName = $Db.trm(dtID,'dtyName');
                     }else if(trmID > 0) {
                         relationName = $Db.trm(trmID,'trm_Label');

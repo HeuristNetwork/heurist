@@ -392,22 +392,17 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
         }else if(fields3[name].type=="enum" || fields3[name].type=="relationtype"){
 
-            var fi = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex;
-            var details = window.hWin.HEURIST4.rectypes.typedefs[_selectedRtyID].dtFields[fields3[name].field];
-            var detailtype = fields3[name].type; //details[fi['dty_Type']];
-
-            var allTerms = details[fi['rst_FilteredJsonTermIDTree']];
-            var headerTerms = details[fi['dty_TermIDTreeNonSelectableIDs']];
-            var termlist = window.hWin.HEURIST4.dbs.getPlainTermsList(detailtype, allTerms, headerTerms);
-
-            fields3[name].values = termlist;
+            var vocab_id = $Db.dty(fields3[name].field, 'dty_JsonTermIDTree');    
+            var termlist = $Db.trm_TreeData(vocab_id, 'select'); //{key: code: title:}
 
             var mcnt = (count>0)?Math.min(termlist.length, count):termlist.length;
+            fields3[name].values = [];
             fields3[name].intervals = [];
 
             var i;
             for (i=0; i<mcnt; i++){
-                fields3[name].intervals.push( {name:termlist[i].text, description:termlist[i].text, values:[ termlist[i].id ] });
+                fields3[name].values.push({text:termlist[i].title, id:termlist[i].key});
+                fields3[name].intervals.push( {name:termlist[i].title, description:termlist[i].title, values:[ termlist[i].key ] });
             }
 
 

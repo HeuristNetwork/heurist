@@ -153,7 +153,7 @@ $.widget( "heurist.queryBuilderItem", {
 
         if(this.options.token=='f'){
             
-            var allowed = Object.keys(window.hWin.HEURIST4.detailtypes.lookups);
+            var allowed = Object.keys($Db.baseFieldType);
             allowed.splice(allowed.indexOf("separator"),1);
             allowed.splice(allowed.indexOf("relmarker"),1);
             allowed.splice(allowed.indexOf("resource"),1);
