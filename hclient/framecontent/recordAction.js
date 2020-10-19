@@ -254,7 +254,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             var allowed = Object.keys($Db.baseFieldType);
             allowed.splice(allowed.indexOf("separator"),1);
             allowed.splice(allowed.indexOf("relmarker"),1);
-            allowed.splice(allowed.indexOf("geo"),1);
+            //allowed.splice(allowed.indexOf("geo"),1);
             allowed.splice(allowed.indexOf("file"),1);
             
             if(action_type=='extract_pdf'){
@@ -343,6 +343,20 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                     break;
                 }
             }
+        }
+   
+console.log( $Db.dty(dtID, 'dty_Type') );        
+        if($Db.dty(dtID, 'dty_Type')=='geo'){
+            
+            $('#cb_remove_all').prop('checked',true).addClass('ui-state-disabled');;
+            $('#cb_replace_all').prop('checked',true).addClass('ui-state-disabled');;
+            $('#fld-1').hide();
+           //window.hWin.HEURIST4.util.setDisabled($('#cb_replace_all'), true);
+           if(action_type=='delete_detail') return;
+        }else{
+            $('#cb_remove_all').removeClass('ui-state-disabled');;
+            $('#cb_replace_all').removeClass('ui-state-disabled');;
+            //window.hWin.HEURIST4.util.setDisabled($('#cb_replace_all'), false);
         }
 
         //window.hWin.HEURIST4.util.cloneObj(

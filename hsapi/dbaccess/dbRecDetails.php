@@ -401,6 +401,13 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
                         .implode(',', $this->rtyIDs).')';
         $rtyLimits = mysql__select_assoc2($mysqli, $query);
 
+        if(@$this->data['geo']==null){
+            $basetype = mysql__select_value($mysqli, 'select dty_Type from defDetailTypes where dty_ID = '.$dtyID);
+            if($basetype=='geo'){
+                $this->data['geo'] = $this->data['val'];
+            }
+        }
+        
         $now = date('Y-m-d H:i:s');
         $dtl = Array('dtl_DetailTypeID'  => $dtyID,
                      'dtl_Modified'  => $now);
@@ -409,7 +416,18 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
                      
         $baseTag = "~add field $dtyName $now"; //name of tag assigned to modified records
         
-        if(@$this->data['val']!=null){
+        if(@$this->data['geo']!=null){
+            
+            list($geoType, $geoValue) = prepareGeoValue($mysqli, $this->data['geo']);
+            if($geoType===false){
+                $this->system->addError(HEURIST_INVALID_REQUEST, $geoValue);
+                return false;
+            }
+            $dtl['dtl_Value'] = $geoType;
+            $dtl['dtl_Geo'] = $geoValue;
+            //$dtl['dtl_Geo'] = array("ST_GeomFromText(\"" . $this->data['geo'] . "\")");  
+            
+        }else if(@$this->data['val']!=null){
             
             $this->initPutifier();
             if(!in_array($dtyID, $this->not_purify)){
@@ -424,9 +442,7 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
             }
             
         }
-        if(@$this->data['geo']!=null){
-            $dtl['dtl_Geo'] = array("ST_GeomFromText(\"" . $this->data['geo'] . "\")");  
-        }
+        
         if(@$this->data['ulfID']>0){
             $dtl['dtl_UploadedFileID'] = $this->data['ulfID'];
         }
@@ -607,12 +623,12 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
         $partialReplace = false;
         
         if(@$this->data['sVal']==null){    //value to be replaced
-            //all except geo and file
+            //all except file type
             //$searchClause = '1=1';
             $replace_all_occurences = true;   //search value not defined replace all
 
             //??? why we need it if $dtyID is defined
-            $types = mysql__select_list2($mysqli, 'select dty_ID from defDetailTypes where dty_Type = "file" OR dty_Type = "geo"');
+            $types = mysql__select_list2($mysqli, 'select dty_ID from defDetailTypes where dty_Type = "file"'); // OR dty_Type = "geo"
             $searchClause = 'dtl_DetailTypeID NOT IN ('.implode(',',$types).')';
             
         }else{
@@ -650,6 +666,14 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
                      'rec_Modified'  => $now);
                      
         $baseTag = "~replace field $dtyName $now";
+        
+        if($basetype=='geo'){
+            list($geoType, $geoValue) = prepareGeoValue($mysqli, $this->data['rVal']);
+            if($geoType===false){
+                $this->system->addError(HEURIST_INVALID_REQUEST, $geoValue);
+                return false;
+            }
+        }
         
         foreach ($this->recIDs as $recID) {
             //get matching detail value for record if there is one
@@ -692,7 +716,7 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
              
                     $dtl['dtl_ID'] = $dtlID;  //detail type id
                     
-                    if(($basetype=='freetext' || $basetype='blocktext')
+                    if(($basetype=='freetext' || $basetype=='blocktext')
                         && !in_array($dtyID, $this->not_purify)){
                             
                             $s = trim($newVal);
@@ -700,6 +724,11 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
                             
                             //$s = $this->purifier->purify( $newVal );                                
                             //$dtl['dtl_Value'] = htmlspecialchars_decode( $dtl['dtl_Value'] );
+                    }else if($basetype=='geo'){
+                        
+                        $dtl['dtl_Value'] = $geoType;        
+                        $dtl['dtl_Geo'] = $geoValue;             
+                        
                     }else{
                         $dtl['dtl_Value'] = $newVal;        
                     }
@@ -787,6 +816,10 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
                 $searchClause = ($isDeleteAll) 
                             ? '1'
                             : "dtl_Value = \"".$mysqli->real_escape_string($this->data['sVal'])."\"";
+                break;
+            case "geo":
+                $searchClause = '1';
+                $isDeleteAll = true;
                 break;
             default:
                 $this->system->addError(HEURIST_INVALID_REQUEST, "$basetype fields are not supported by deletion service");

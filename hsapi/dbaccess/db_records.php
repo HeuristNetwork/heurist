@@ -1730,29 +1730,15 @@
                     case "geo":
                     
                         //note geoType can be not defined - detect it fron dtl_Geo
-                        $geoType = trim(substr($dtl_Value, 0, 2));
-                        if($geoType=='p'||$geoType=='l'||$geoType=='pl'||$geoType=='c'||$geoType=='r'||$geoType=='m'){
-                            $dtl_Geo = trim(substr($dtl_Value, 2));
+                        list($dtl_Value, $dtl_Geo) = prepareGeoValue($mysqli, $dtl_Value);
+                        if($dtl_Value===false){
+                            $err_msg = $geoValue; 
+                            $isValid = false;
                         }else{
-                            $dtl_Geo = trim($dtl_Value);
-                            if(strpos($dtl_Geo, 'GEOMETRYCOLLECTION')!==false || strpos($dtl_Geo, 'MULTI')!==false){
-                                $geoType = "m";
-                            }else if(strpos($dtl_Geo,'POINT')!==false){
-                                $geoType = "p";
-                            }else if(strpos($dtl_Geo,'LINESTRING')!==false){
-                                $geoType = "l";
-                            }else if(strpos($dtl_Geo,'POLYGON')!==false){ //MULTIPOLYGON
-                                $geoType = "pl";
-                            }
+                            $isValid = true;    
                         }
+                        
 
-                        $res = mysql__select_value($mysqli, "select ST_asWKT(ST_GeomFromText('".addslashes($dtl_Geo)."'))");
-                        if($res){
-                            $dtl_Value = $geoType;
-                            $isValid = true;
-                        }else{
-                            $err_msg = 'Geo WKT value '.substr(htmlspecialchars($dtl_Geo),0,15).'... is not valid';
-                        }
                         /*
                         $res = $mysqli->query("select ST_asWKT(ST_GeomFromText('".addslashes($dtl_Geo)."'))");
                         if ($res){
@@ -1861,6 +1847,37 @@
 
     } //END prepareDetails
 
+
+    //
+    //
+    //
+    function prepareGeoValue($mysqli, $dtl_Value){                        
+
+        $geoType = trim(substr($dtl_Value, 0, 2));
+        if($geoType=='p'||$geoType=='l'||$geoType=='pl'||$geoType=='c'||$geoType=='r'||$geoType=='m'){
+            $geoValue = trim(substr($dtl_Value, 2));
+        }else{
+            $geoValue = trim($dtl_Value);
+            if(strpos($geoValue, 'GEOMETRYCOLLECTION')!==false || strpos($geoValue, 'MULTI')!==false){
+                $geoType = "m";
+            }else if(strpos($geoValue,'POINT')!==false){
+                $geoType = "p";
+            }else if(strpos($geoValue,'LINESTRING')!==false){
+                $geoType = "l";
+            }else if(strpos($geoValue,'POLYGON')!==false){ //MULTIPOLYGON
+                $geoType = "pl";
+            }
+        }
+
+        $res = mysql__select_value($mysqli, "select ST_asWKT(ST_GeomFromText('".addslashes($geoValue)."'))");
+        if($res){
+            return array($geoType, $geoValue);
+
+        }else{
+            return array(false, 'Geo WKT value '.substr(htmlspecialchars($geoValue),0,15).'... is not valid');
+        }
+
+    }    
     //
     //
     //

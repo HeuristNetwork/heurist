@@ -669,7 +669,7 @@ function hRecordAddLink() {
     function addLinks(){
 
 
-        /*       recIDs - list of records IDS to be processed
+        /*      recIDs - list of records IDS to be processed
         *       rtyID  - filter by record type
         *       dtyID  - detail field to be added
         *       for addition: val: | geo: | ulfID: - value to be added

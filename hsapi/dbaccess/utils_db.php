@@ -534,12 +534,22 @@
                     }
                 }
                 $query = $query.$fieldname.', ';
-                $query2 = $query2.'?, ';
+                
+                if($fieldname=='dtl_Geo'){
+                    $query2 = $query2.'ST_GeomFromText(?), ';
+                }else{
+                    $query2 = $query2.'?, ';    
+                }
+                
             }else{
                 if($fieldname==$primary_field){ //ignore primary field for update
                     continue;
                 }
-                $query = $query.$fieldname.'=?, ';
+                if($fieldname=='dtl_Geo'){
+                    $query = $query.$fieldname.'=ST_GeomFromText(?), ';
+                }else{
+                    $query = $query.$fieldname.'=?, ';
+                }
             }
 
             $dtype = ((substr($fieldname, -2) === 'ID' || substr($fieldname, -2) === 'Id')?'i':'s');
