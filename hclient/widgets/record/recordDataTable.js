@@ -63,6 +63,7 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
             //divLoadSettingsName: this.element
             divSaveSettings: this.element.find('#divSaveSettings'),  //element
             allowRenameDelete: true,
+            buttons: {rename:false, remove:'delete'}, //hide rename button
             saveOnExit: true  //auto save on exit
 
         });

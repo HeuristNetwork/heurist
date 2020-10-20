@@ -36,10 +36,12 @@ $.widget( "heurist.configEntity", {
         divSaveSettings: null,  //element
         allowRenameDelete: false,
         renameAction: null, //
+        buttons: null, //{rename: , remove: } if false hidden, if empty - icons only
 
         saveOnExit: false,  //auto save on exit
         
-        useHTMLselect: false
+        useHTMLselect: false,
+        //createNewFromSelect: false
     },
     
     sel_saved_settings: null,
@@ -64,8 +66,10 @@ $.widget( "heurist.configEntity", {
             +(this.options.loadSettingLabel?this.options.loadSettingLabel:'Saved settings:')+'</label></div>'
             +'<select class="sel_saved_settings text ui-widget-content ui-corner-all" style="width:20em;max-width:30em"></select>&nbsp;&nbsp;'
             + ((this.options.allowRenameDelete)?
-            ('<span class="ui-icon ui-icon-pencil" style="font-size:smaller;cursor:pointer"></span>'
-            +'<span class="ui-icon ui-icon-delete" style="font-size:smaller;cursor:pointer"></span>'):'') )
+            ('<span class="btn-action btn-rename"></span>'
+            +'<span class="btn-action btn-remove"></span>'):'') )
+            //('<span class="ui-icon ui-icon-pencil" style="font-size:smaller;cursor:pointer"></span>'
+            //+'<span class="ui-icon ui-icon-delete" style="font-size:smaller;cursor:pointer"></span>'):'') )
         .appendTo(this.element);
 
         this.sel_saved_settings = this.element.find('.sel_saved_settings');
@@ -79,69 +83,88 @@ $.widget( "heurist.configEntity", {
         // rename
         //         
         if(this.options.allowRenameDelete){
-            this._on(this.element.find('span.ui-icon-pencil'), {click:function(){
+            
+            if(!this.options.buttons) this.options.buttons = {rename:'', remove:''};
+            
+            var ele = this.element.find('span.btn-rename');
+            if(this.options.buttons['rename']!==false){
+                
+                var showLabel = !window.hWin.HEURIST4.util.isempty(this.options.buttons['rename']);
+                ele = ele.button({icon:showLabel?null:'ui-icon-pencil', 
+                        label:this.options.buttons['rename'],
+                        showLabel:showLabel}).css('font-size','smaller');
+                    
+                this._on(ele, {click:function(){
        
                 if($.isFunction(this.options.renameAction)){
                     
-                    this.options.renameAction.call();
+                    that.options.renameAction.call();
                     
                 }else{
-                
-                var fileName = this.sel_saved_settings.val();
-                if(fileName!=''){
+                    //default rename action
+                    if(fileName!=''){
 
-                    var entity_ID = this.options.entityID; 
-                    if(fileName.indexOf('/')>0){
-                        fileName = fileName.split('/');
-                        entity_ID = fileName[0];
-                        fileName = fileName[1];
-                    }
-                    
-                    //show prompt
-                    window.hWin.HEURIST4.msg.showPrompt('Enter new name: ',
-                        function(value){
+                        var entity_ID = that.options.entityID; 
+                        if(fileName.indexOf('/')>0){
+                            fileName = fileName.split('/');
+                            entity_ID = fileName[0];
+                            fileName = fileName[1];
+                        }
+                        
+                        //show prompt
+                        window.hWin.HEURIST4.msg.showPrompt('Enter new name: ',
+                            function(value){
 
-                            var request = {
-                                'a'          : 'files',
-                                'operation'  : 'rename',
-                                'entity'     : that.options.entityName,
-                                'folder'     : that.options.configName,    
-                                'rec_ID'     : entity_ID,
-                                'fileOld'    : fileName,    
-                                'file'       : value+'.cfg'
-                            };
+                                var request = {
+                                    'a'          : 'files',
+                                    'operation'  : 'rename',
+                                    'entity'     : that.options.entityName,
+                                    'folder'     : that.options.configName,    
+                                    'rec_ID'     : entity_ID,
+                                    'fileOld'    : fileName,    
+                                    'file'       : value+'.cfg'
+                                };
 
-                            window.hWin.HAPI4.EntityMgr.doRequest(request, 
-                                function(response){
-                                    if(response.status == window.hWin.ResponseStatus.OK){
+                                window.hWin.HAPI4.EntityMgr.doRequest(request, 
+                                    function(response){
+                                        if(response.status == window.hWin.ResponseStatus.OK){
 
-                                        var filename = response.data;
-                                        var ele = that.sel_saved_settings.find('option:selected')
-                                        ele.attr('value',entity_ID+'/'+filename)
-                                          .text( filename.substring(0,filename.indexOf('.cfg')) )
-                                        
-                                        if(that.sel_saved_settings.hSelect("instance")!=undefined){
-                                            that.sel_saved_settings.hSelect('refresh'); 
+                                            var filename = response.data;
+                                            var ele = that.sel_saved_settings.find('option:selected')
+                                            ele.attr('value',entity_ID+'/'+filename)
+                                              .text( filename.substring(0,filename.indexOf('.cfg')) )
+                                            
+                                            if(that.sel_saved_settings.hSelect("instance")!=undefined){
+                                                that.sel_saved_settings.hSelect('refresh'); 
+                                            }
+
+                                            window.hWin.HEURIST4.msg.showMsgFlash('Settings are renamed');
+
+                                        }else{
+                                            window.hWin.HEURIST4.msg.showMsgErr(response);
                                         }
-
-                                        window.hWin.HEURIST4.msg.showMsgFlash('Settings are renamed');
-
-                                    }else{
-                                        window.hWin.HEURIST4.msg.showMsgErr(response);
-                                    }
-                            });      
+                                });      
 
 
-                        }, 'Rename settings');                
-                }
-                }
-            }});        
+                            }, 'Rename settings');                
+                    }
+                    }
+                }});        
+            }
+            
 
             //
             // delete
-            //         
-            this._on(this.element.find('span.ui-icon-delete'), {click:function(){
-                var fileName = this.sel_saved_settings.val();
+            //        
+            ele = this.element.find('span.btn-remove');
+            if(this.options.buttons['remove']!==false){
+                var showLabel = !window.hWin.HEURIST4.util.isempty(this.options.buttons['remove']);
+                ele = ele.button({icon:showLabel?null:'ui-icon-delete', 
+                        label:this.options.buttons['remove'],
+                        showLabel:showLabel}).css({'font-size':'smaller','margin-left':10});
+                
+                this._on(ele, {click:function(){
+                var fileName = that.sel_saved_settings.val();
                 if(fileName!=''){
 
 
@@ -151,7 +174,7 @@ $.widget( "heurist.configEntity", {
                         {'Yes, delete' :function(){ 
                             
                             
-                            var entity_ID = this.options.entityID; 
+                            var entity_ID = that.options.entityID; 
                             if(fileName.indexOf('/')>0){
                                 fileName = fileName.split('/');
                                 entity_ID = fileName[0];
@@ -174,6 +197,7 @@ $.widget( "heurist.configEntity", {
                                         if(that.sel_saved_settings.hSelect("instance")!=undefined){
                                             that.sel_saved_settings.hSelect('refresh'); 
                                         }
+                                        that.element.find('.btn-action').hide();
                                         window.hWin.HEURIST4.msg.showMsgFlash('Settings are removed');
                                     }else{
                                         window.hWin.HEURIST4.msg.showMsgErr(response);
@@ -186,8 +210,9 @@ $.widget( "heurist.configEntity", {
                                 $__dlg.dialog( "close" );
                         }}, {title:'Delete settings'});
 
-                }
-            }});        
+                    }
+                }});    
+            }    
         }
 
         //
@@ -217,6 +242,16 @@ $.widget( "heurist.configEntity", {
         this._on(this.sel_saved_settings, {change: function(){
 
             var fileName = this.sel_saved_settings.val();
+            if(fileName=='new'){
+                this.options.renameAction.call(this, true);
+                this.sel_saved_settings[0].selectedIndex = 0;
+                if(this.sel_saved_settings.hSelect("instance")!=undefined){
+                    this.sel_saved_settings.hSelect('refresh'); 
+                }
+                this.element.find('.btn-action').hide();
+                return;
+            }
+            
             var entity_ID = this.options.entityID; 
             if(fileName.indexOf('/')>0){
                 fileName = fileName.split('/');
@@ -225,8 +260,10 @@ $.widget( "heurist.configEntity", {
             }
             
             if(fileName.trim()==''){
+                this.element.find('.btn-action').hide();
                 return;
             }
+            this.element.find('.btn-action').show();
 
             var request = {
                 'a'          : 'files',
@@ -397,6 +434,9 @@ $.widget( "heurist.configEntity", {
                 if(response.status == window.hWin.ResponseStatus.OK){
                     var ele = that.sel_saved_settings.empty();
                     window.hWin.HEURIST4.ui.addoption(ele[0], '', 'select...');
+                    if($.isFunction(that.options.renameAction)){
+                        window.hWin.HEURIST4.ui.addoption(ele[0], 'new', 'Create new field list');    
+                    }
                     ele[0].selectedIndex = 0;
                     
                     var recset = new hRecordSet(response.data);

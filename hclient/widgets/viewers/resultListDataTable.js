@@ -61,7 +61,7 @@ $.widget( "heurist.resultListDataTable", {
         
         //table table-striped table-bordered - for bootstrap.css
         var classes = window.hWin.HEURIST4.util.isempty(this.options.dataTableParams['classes'])
-                            ?'display compact nowrap'
+                            ?'display compact nowrap cell-border'
                             :this.options.dataTableParams['classes'];
 
         //this.div_content.css({'padding-top':'5px'}); //,'overflow-y': 'auto'
@@ -224,7 +224,7 @@ that._dout('myOnShowEvent');
                         if(this.options.show_counter){
                             dom = dom + 'i';
                         }                   
-                        dom = dom + 'p'; 
+                        dom = dom + 'p'; //pagination
                         
                         if(this.options.show_export_buttons){
                             dom = dom + 'B'; 
@@ -321,9 +321,16 @@ this._dout('reload datatable '+this.options.serverSide);
                     this.div_content.find('.dataTables_length').css('padding','5 0 0 10');
                     var lele = this.div_content.find('.dataTables_filter').css('padding','5 10 0 0');
                     this.div_content.find('.dataTables_info').css({'padding-left':'10px','padding-right':'10px'});
-                    this.div_content.find('.dataTables_scrollBody').css('width','100%');
+                    //this.div_content.find('.dataTables_scroll').css({'padding-bottom':'10px'});
+                    this.div_content.find('.dataTables_scrollBody').css({'width':'100%'});
                     this.div_content.find('.dataTables_wrapper').css('padding','0 8px');
-                    this.div_content.find('.dataTable').css('font-size','inherit');
+                    this.div_content.find('.dataTable').css({'font-size':'inherit','width':'100%'});
+                    
+                    this.div_content.find('.dataTables_info').css('padding-top','11px');
+                    this.div_content.find('.dataTables_paginate').css('padding-top','7px');
+                    this.div_content.find('.paginate_button').css('padding','2px');
+                    this.div_content.find('.dt-buttons').css('padding-top','7px');
+                    this.div_content.find('.dt-button').css('padding','2px');
                     this.selConfigs = null;
                     
         //adjust column widths
@@ -357,7 +364,7 @@ console.log(idx+'  '+width+'  '+that.options.dataTableParams['columns'][idx]['vi
                     
           if(this.options.show_rt_filter || this.options.show_column_config){
 
-                var sel_container = this.div_content.find('div.selectors').css({float:'left',padding:'5px 10px','min-width':'200px'});
+                var sel_container = this.div_content.find('div.selectors').css({float:'left',padding:'15px 10px','min-width':'200px'});
           
                 if(this.options.show_rt_filter){
                     
@@ -410,8 +417,9 @@ console.log(idx+'  '+width+'  '+that.options.dataTableParams['columns'][idx]['vi
 
                             divSaveSettings: null,
                             allowRenameDelete: true,
-                            renameAction: function(){ //overwrite default behaviour - open popup
-                                    that._openColumnDefinition();
+                            buttons: {rename:'edit', remove:'delete'},
+                            renameAction: function(is_new){ //overwrite default behaviour - open configuration popup
+                                    that._openColumnDefinition( is_new );
                             }
                         });
                         
@@ -489,13 +497,13 @@ console.log(idx+'  '+width+'  '+that.options.dataTableParams['columns'][idx]['vi
     //
     // open column configuration dialog
     //
-    _openColumnDefinition: function(){
+    _openColumnDefinition: function( is_new ){
         
         var that = this;
     
         var opts = {
             currentRecordset: this.options.recordset,
-            initial_cfg: that.options.initial_cfg,
+            initial_cfg: is_new?null:that.options.initial_cfg,
             onClose: function(context){
                 if(context){
                     that._onApplyColumnDefinition(context);
