@@ -95,7 +95,7 @@ $.widget( "heurist.manageDefFileExtToMimetype", $.heurist.manageEntity, {
         var recTitle = '<span style="display:inline-block;width:4em">'+fld('fxm_Extension') + '</span>  ' 
                         + fld('fxm_FiletypeName'); //fld2('fxm_MimeType');
         
-        var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" style="height:1.3em">';
+        var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'">'; // style="height:1.3em"
         if(this.options.select_mode=='select_multi'){
             html = html + '<div class="recordSelector"><input type="checkbox" /></div><div class="recordTitle">';
         }else{

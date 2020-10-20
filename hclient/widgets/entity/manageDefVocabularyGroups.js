@@ -147,15 +147,16 @@ $.widget( "heurist.manageDefVocabularyGroups", $.heurist.manageEntity, {
         
         var recID   = recordset.fld(record, 'vcg_ID');
         
-        var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" style="height:1.3em">';
+        var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'">'; // style="height:1.3em"
         if(this.options.select_mode=='select_multi'){
             html = html + '<div class="recordSelector"><input type="checkbox" /></div>';//<div class="recordTitle">';
         }else{
             //html = html + '<div>';
         }
         
-        html = html + '<div class="item truncate" style="display:table-cell;min-width:170px;max-width:170px;font-weight:bold;font-size:14px">'
-                +window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, 'vcg_Name'))+'</div>'; 
+        html = html + '<div class="item truncate" '
+                + 'style="display:table-cell;min-width:170px;max-width:170px;font-weight:bold;font-size:14px">'
+                + window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, 'vcg_Name'))+'</div>'; 
         
         if(this.options.edit_mode=='popup'){
             html = html

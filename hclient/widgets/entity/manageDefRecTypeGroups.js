@@ -164,7 +164,7 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
         
         var recID   = recordset.fld(record, 'rtg_ID');
         
-        var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'" style="height:1.3em">';
+        var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID+'">'; // style="height:1.3em"
         if(this.options.select_mode=='select_multi'){
             html = html + '<div class="recordSelector"><input type="checkbox" /></div>';//<div class="recordTitle">';
         }else{

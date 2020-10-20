@@ -2111,7 +2111,7 @@ console.log('No active tree node!!!!')
             //find seprator field type ID that is not yet added to this record strucuture
             var that = this;
             var ft_separator_id =  null;
-            var ft_separator_group =  $Db.dtg().getOrders()[0]; //add to first group
+            var ft_separator_group =  $Db.dtg().getOrder()[0]; //add to first group
             var recDetTypes = window.hWin.HEURIST4.rectypes.typedefs[rty_ID].dtFields;
 
             var k = 1;
