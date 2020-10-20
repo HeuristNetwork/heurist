@@ -1389,7 +1389,7 @@ window.hWin.HEURIST4.ui = {
         var $help_button = $(options.button);
 
         if(options.no_init!==true){ //do not init button    ui-icon-circle-b-info  carat-2-e
-            $help_button.button({icons: { primary: "ui-icon-circle-help" }, label:'Show context help', text:false});
+            $help_button.button({icons:{primary:"ui-icon-circle-help"}, label:'Show context help', text:false});
         }
         
         var is_popup = false;
@@ -1403,6 +1403,7 @@ window.hWin.HEURIST4.ui = {
         function __closeHelpDiv($helper_div){
             oEffect.complete =  function(){ options.container.children('.ent_content_full').css({right:1}); };
             $helper_div.hide(oEffect);
+            $help_button.button({icons:{primary:"ui-icon-circle-help"}});
         }
         //ui-menu6
         
@@ -1498,9 +1499,8 @@ window.hWin.HEURIST4.ui = {
                             
                             if($helper_div.is(':visible')){
                                 __closeHelpDiv($helper_div);         
-                                $help_button.button({icons: { primary: "ui-icon-circle-help" }});
                             }else{
-                                $help_button.button({icons: { primary: "ui-icon-carat-2-e" }});
+                                $help_button.button({icons:{primary:"ui-icon-carat-2-e"}});
                                 //find('.ent_wrapper')
                                 $helper_div.load(options.url, function(response, status, xhr){
 

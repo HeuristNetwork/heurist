@@ -50,19 +50,13 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         var is_h6style = window.hWin.HAPI4.sysinfo['layout']=='H6Default';
         
         if(format=='kml'){
-            $('#divKmlIntro').show();
             $('.format-csv').hide();
             $('#lblUploadFile').text('Upload new file (KML)');
             
         }else{
             $('.format-csv').show();
-            $('#divKmlIntro').hide();
         }
         
-        if(is_h6style){
-            $('#divKmlIntro').hide();
-            $('#divCsvIntro').hide();
-        }
         
         //init STEP 1  - upload
         
@@ -4290,6 +4284,18 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
     */
     function _showStep(page){
         currentStep = page;
+
+        if(page>1){
+            var container = $(window.hWin.document).find('.ui-menu6-container.ui-heurist-import');
+            if(container.find('.ui-helper-popup').is(':visible')){
+                container.find('.ui-helper-popup').hide();    
+                //container.find('.ui-helper-popup-button').button({icons:{primary:"ui-icon-circle-help"}});
+                container.find('.ui-helper-popup-button').find('.ui-button-icon')
+                    .removeClass('ui-icon-carat-2-e').addClass('ui-icon-circle-help');
+                container.find('.ent_content_full').css({right:1});
+            }
+        }
+        
         
         $("div[id^='divStep']").hide();
         $("#divStep"+(page>2?3:page)).show();
@@ -4302,7 +4308,6 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             $('#divFieldMapping2').hide();
         }
 
-        
         if(page==1){
             $("#selImportId").val('');  //clear selection
             //if(session_selector && session_selector.hSelect('instance')) session_selector.hSelect("refresh");

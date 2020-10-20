@@ -142,30 +142,6 @@ if(!$format) $format='csv';
     </div>
 -->    
         
-        <div id="divCsvIntro" style="padding:0 20 20 20;min-width:1210" class="format-csv">
-        
-            <p style="margin:0">
-Importing all but the simplest spreadsheet is a complex business. It is important to clean up the data as much as possible in advance, so that there is one row per entry and columns contain a single element of data (which may include repeated values, normally separated by pipe symbols | ). Split concatenated values into separate columns; place notes about data items in a separate column - don't append to the data value; coded columns should use a consistent set of codes. In addition to your spreadsheet program, you may find OpenRefine (<a href="http://openrefine.org" target="_blank">http://openrefine.org</a>) a useful tool for checking and correcting coded columns, splitting fields, georeferencing, finding URL references and so forth.
-            </p><br>
-            <p style="margin:0">
-We strongly suggest editing the structure of the database to add any fields and terms that you will require for the import, before attempting to load the data. If you start trying to load data without the appropriate fields in place you will find it frustrating having to exit the process repeatedly to add fields.
-            </p><br>
-            <p style="margin:0">
-If you have missing data for Required fields, you may find it convenient to set those fields to Optional before importing, then set them back to Required, then use Database > Verify Structure and Data to get a list of the records which need correcting. Alternatively you will need to add some dummy value to the data, such as 'Missing', and search for this value after import.            
-            </p>        
-        
-        </div>      
-
-        <div id="divKmlIntro" style="padding:0 20 20 20;min-width:1210;display:none">
-<h4>This function imports a KML file into a set of map-enabled Heurist records</h4><br><br>
-<p>Each spatial object in the KML file generates a Heurist record which also stores attached attributes.  You may select the type of record to be created in a following step.</p>
-<br><br>
-<p>A KML file can also be mapped directly by uploading it as a file attached to a record or storing it as a KML snippet in a text field within a record - use the KML record type for this purpose (standard in all databases). However, plotting KML in this way does not allow any additional information to be attached to the spatial objects, all you get is a single monolithic map layer.<p>
-<br><br>
-<p><a href="<?php echo HEURIST_BASE_URL;?>context_help/kml_import.html">More info</a></p>
-        </div>      
-        
-    
         <h2 class="ui-heurist-title" style="display:inline-block;padding:5px;width:250px;text-align:right;" id="lblUploadFile">
             Upload new file (CSV/TSV)
         </h2>
