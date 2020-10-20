@@ -858,13 +858,15 @@ class AndLimb {
             case 'linkedfrom':
             case 'linkto':
                 return new LinkedFromParentPredicate($this, $pred_val);
-            case 'relatedfrom':
-                return new RelatedFromParentPredicate($this, $pred_val);
             case 'linked_to':
             case 'linkedto':
                 return new LinkedToParentPredicate($this, $pred_val);
+            case 'relatedfrom':
+                return new RelatedFromParentPredicate($this, $pred_val);
             case 'related_to':
                 return new RelatedToParentPredicate($this, $pred_val);
+            case 'related':
+                return new RelatedPredicate($this, $pred_val);
             case 'links':
                 return new AllLinksPredicate($this, $pred_val);
 /* 2016-02-29
@@ -2610,6 +2612,76 @@ class RelatedToParentPredicate extends Predicate {
         return $select;
     }
 }
+
+//
+// search relations in both directions - for rules
+//
+class RelatedPredicate extends Predicate {
+    function makeSQL() {
+        global $mysqli;
+        
+        $select_relto = null;
+        $related_rty_ID = null;
+        
+        $inverseTermId = 0;
+        $relation_type_ID = 0;
+        //if value is specified we search linked from specific source type and field
+        if($this->value){
+            $vals = explode('-', $this->value);
+            if(count($vals)>1){
+                $related_rty_ID = $vals[0];
+                $relation_type_ID = $vals[1];
+                
+                //there is relationship term - need to find inverse value
+                if($relation_type_ID>0){
+                    $res = $mysqli->query("select trm_InverseTermId from defTerms where trm_ID = $relation_type_ID");
+                    if($res){
+                        $inverseTermId = $res->fetch_row();
+                        $inverseTermId = @$inverseTermId[0];
+                    }
+                }
+            }else{
+                $related_rty_ID = $vals[0];
+            }
+        }
+        
+        if(!($related_rty_ID>0)) return false;
+
+        //NEW  ---------------------------
+        $add_from  = 'recLinks rl ';
+        $add_where = '(rd.rec_RecTypeID='.$related_rty_ID.') and ';
+        if($relation_type_ID>0){
+            $add_where = $add_where.'(';
+            if($inverseTermId>0){
+                $add_where = $add_where.'(rl.rl_RelationTypeID='.$inverseTermId.') OR ';    
+            }
+            $add_where = $add_where.'(rl.rl_RelationTypeID='.$relation_type_ID.'))';
+        }else{
+            $add_where = $add_where.' (rl.rl_RelationID is not null)';    
+        }
+
+        $pquery = &$this->getQuery();
+        if ($pquery->parentquery){
+
+            $query = $pquery->parentquery;
+            //$query =  'select dtl_Value '.$query["from"].", recDetails WHERE ".$query["where"].$query["sort"].$query["limit"].$query["offset"];
+
+            $query["from"] = str_replace('TOPBIBLIO', 'rd', $query["from"]);
+            $query["where"] = str_replace('TOPBKMK', 'MAINBKMK', $query["where"]);
+            $query["where"] = str_replace('TOPBIBLIO', 'rd', $query["where"]);
+            $query["from"] = str_replace('TOPBKMK', 'MAINBKMK', $query["from"]);
+            
+            $select = '(TOPBIBLIO.rec_ID in (select rl.rl_SourceID '.$query["from"].',recLinks rl '
+                      .' WHERE '.$query["where"].' and '.$add_where.' and (rl.rl_TargetID=rd.rec_ID))) OR '
+                      .'(TOPBIBLIO.rec_ID in (select rl.rl_TargetID '.$query["from"].',recLinks rl '
+                      .' WHERE '.$query["where"].' and '.$add_where.' and (rl.rl_SourceID=rd.rec_ID)))';
+        }
+        
+        
+        return $select;
+    }
+}
+
 
 
 /**

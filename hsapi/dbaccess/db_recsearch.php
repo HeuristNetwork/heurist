@@ -1418,7 +1418,18 @@
                         //$params3['detail'] = 'ids';  //no need in details for preliminary results  ???????
                     }
 
-//DEBUg error_log(print_r($params3,true));                    
+//t:54 related_to:10 =>   {"t":"54","related":"10"}     
+if(strpos($params3['q'],'related_to')>0){
+    
+    $params3['q'] = str_replace('related_to','related',$params3['q']);
+    
+}else if(strpos($params3['q'],'relatedfrom')>0){
+
+    $params3['q'] = str_replace('relatedfrom','related',$params3['q']);
+}
+                    
+//DEBUg 
+error_log(print_r($params3,true));                    
                     
                     $response = recordSearch($system, $params3);
 
@@ -2142,7 +2153,9 @@ $loop_cnt++;
 
     }
 
-    //backward capability - remove as soon as old uploadFileOrDefineURL get rid of use
+    //
+    // backward capability - remove as soon as old uploadFileOrDefineURL get rid of use
+    //
     function fileParseParameters($params){
         $res = array();
         if($params){
