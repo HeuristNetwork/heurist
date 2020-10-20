@@ -900,6 +900,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
             ele.show();
             ele.editing_input('fset', 'rst_RequirementType', 'required');
+            ele.find('.header').removeClass('recommended').addClass('required');
             
         }else{
             
@@ -1062,6 +1063,17 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
       
         }
         return btns;  
+    },
+    
+    onEditFormChange: function(changed_element){
+        
+       this._super(changed_element);
+       
+       if(this._toolbar && this.options.edit_mode=='editonly'){
+           var isChanged = this._editing.isModified();
+           this._toolbar.find('#btnEditAll').css('visibility', isChanged?'hidden':'visible');
+       }
+        
     },
     
     //

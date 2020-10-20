@@ -19,7 +19,7 @@
                     "dtFields":{
                         "dty_Type":"enum",
                         "rst_DisplayName":"Group:",
-                        "rst_DisplayHelpText": "Vocabulary group", 
+                        "rst_DisplayHelpText": "The vocabulary group to which this vocabulary should be assigned", 
                         "rst_FieldConfig": {"entity":"defVocabularyGroups"},
                         "rst_RequirementType":"recommended"
                     }
