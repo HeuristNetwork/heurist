@@ -147,7 +147,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     +'style="width:272px;background:none !important;display:none;padding-top:2px;'
                     +'font-size:10px;font-weight:normal;cursor:pointer">'
                    +'<div style="line-height:18px">&nbsp;</div>' 
-                   +'<span data-action="edit" style="background:lightblue;padding:3px;display:inline-block;width:42px;">'
+                   +'<span data-action="edit" style="background:lightblue;padding:3px;display:inline-block;width:52px;">'
                         +'<span class="ui-icon ui-icon-pencil" title="Edit" style="font-size:9px;font-weight:normal"/>Edit</span>'           
                         
                    +'<span class="edit_rts_sel" style="background:lightblue;padding:4px" title="Requirement type">'
@@ -167,9 +167,9 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                    +'<span class="edit_rts_btn" style="top:24px;left:130px;position:absolute;background:lightblue;display:none">'
                    +'Cancel</span>'
                            
-                   +'<br><span data-action="field" style="background:lightcyan;padding:4px;display:inline-block;width: 40px;">'
+                   +'<br><span data-action="field" style="background:lightcyan;padding:4px;display:inline-block;width: 50px;">'
                         +'<span class="ui-icon ui-icon-plus" title="Add a new field to this record type" style="font-size:9px;font-weight:normal"/>Field</span>'
-                   +'<br><span data-action="block" title="Add a new group/separator" style="background:lightgreen;padding:4px;display:inline-block;width: 40px;"><span style="font-size:11px">&nbsp;+&nbsp;&nbsp;</span>Block</span>'               
+                   +'<br><span data-action="block" title="Add a new group/separator" style="background:lightgreen;padding:4px;display:inline-block;width: 50px;"><span style="font-size:11px">&nbsp;+&nbsp;&nbsp;</span>Block</span>'               
                     +'</div>').appendTo(this.element);
                     
             
@@ -338,10 +338,10 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 var rst_fields = window.hWin.HEURIST4.rectypes.typedefs[that._currentEditRecTypeID].dtFields[dtId];
                 var dt_type = rst_fields[fi['dty_Type']];
                 if(dt_type=='separator'){
-                    that.rts_actions_menu.width(43);
+                    that.rts_actions_menu.width(53); //43
                     that.rts_actions_menu.find('.edit_rts_sel').hide();
                 }else{
-                    that.rts_actions_menu.width(280); //272
+                    that.rts_actions_menu.width(380); //280
                     that.rts_actions_menu.find('.edit_rts_sel').show();
                     that.rts_actions_menu.find('.s_reqtype').val(rst_fields[fi['rst_RequirementType']])
                     var v = rst_fields[fi['rst_MaxValues']];
