@@ -100,7 +100,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
         
         //divLoadSettingsName: this.element
         divSaveSettings: $('#divSaveSettings'),  //element
-        allowRenameDelete: true,
+        showButtons: true,
         useHTMLselect: true          
       });
       

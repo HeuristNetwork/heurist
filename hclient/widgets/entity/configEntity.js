@@ -34,9 +34,9 @@ $.widget( "heurist.configEntity", {
         
         //divLoadSettingsName: this.element
         divSaveSettings: null,  //element
-        allowRenameDelete: false,
-        renameAction: null, //
-        buttons: null, //{rename: , remove: } if false hidden, if empty - icons only
+        showButtons: false,
+        openEditAction: null, //
+        buttons: null, //{rename:, openedit:, remove: } if false hidden, if empty - icons only
 
         saveOnExit: false,  //auto save on exit
         
@@ -65,9 +65,10 @@ $.widget( "heurist.configEntity", {
         $('<div class="header" style="padding: 0 16px 0 16px;"><label for="sel_saved_settings">'
             +(this.options.loadSettingLabel?this.options.loadSettingLabel:'Saved settings:')+'</label></div>'
             +'<select class="sel_saved_settings text ui-widget-content ui-corner-all" style="width:20em;max-width:30em"></select>&nbsp;&nbsp;'
-            + ((this.options.allowRenameDelete)?
-            ('<span class="btn-action btn-rename"></span>'
-            +'<span class="btn-action btn-remove"></span>'):'') )
+            + ((this.options.showButtons)?
+            ('<span class="btn-action-div"><span class="btn-action btn-rename"/>'
+            +'<span class="btn-action btn-openedit"/>'
+            +'<span class="btn-action btn-remove"/></div>'):'') )
             //('<span class="ui-icon ui-icon-pencil" style="font-size:smaller;cursor:pointer"></span>'
             //+'<span class="ui-icon ui-icon-delete" style="font-size:smaller;cursor:pointer"></span>'):'') )
         .appendTo(this.element);
@@ -82,26 +83,25 @@ $.widget( "heurist.configEntity", {
         //
         // rename
         //         
-        if(this.options.allowRenameDelete){
+        if(this.options.showButtons){
             
-            if(!this.options.buttons) this.options.buttons = {rename:'', remove:''};
+            this.element.find('.btn-action-div').hide();
+            this.element.find('.btn-action').css({'font-size':'smaller'}).hide();
             
-            var ele = this.element.find('span.btn-rename');
+            if(!this.options.buttons) this.options.buttons = {rename:'', openedit:false, remove:''};
+            
+            var ele = this.element.find('.btn-rename');
             if(this.options.buttons['rename']!==false){
                 
                 var showLabel = !window.hWin.HEURIST4.util.isempty(this.options.buttons['rename']);
                 ele = ele.button({icon:showLabel?null:'ui-icon-pencil', 
                         label:this.options.buttons['rename'],
-                        showLabel:showLabel}).css('font-size','smaller');
+                        showLabel:showLabel}).show();
                     
                 this._on(ele, {click:function(){
        
-                if($.isFunction(this.options.renameAction)){
-                    
-                    that.options.renameAction.call();
-                    
-                }else{
                     //default rename action
+                    var fileName = this.sel_saved_settings.val();
                     if(fileName!=''){
 
                         var entity_ID = that.options.entityID; 
@@ -148,20 +148,35 @@ $.widget( "heurist.configEntity", {
 
                             }, 'Rename settings');                
                     }
-                    }
+                    
                 }});        
             }
             
-
+            //
+            //
+            //
+            ele = this.element.find('.btn-openedit');
+            if(this.options.buttons['openedit']!==false && $.isFunction(this.options.openEditAction)){
+                
+                var showLabel = !window.hWin.HEURIST4.util.isempty(this.options.buttons['openedit']);
+                ele = ele.button({icon:null, //showLabel?null:'ui-icon-pencil', 
+                        label:this.options.buttons['openedit'],
+                        showLabel:showLabel}).css({'margin-left':10}).show();
+                
+                        this._on(ele, { click: this.options.openEditAction });
+            }else{
+                //this.element.find('.btn-action').css({padding:10});
+            }
+            
             //
             // delete
             //        
-            ele = this.element.find('span.btn-remove');
+            ele = this.element.find('.btn-remove');
             if(this.options.buttons['remove']!==false){
                 var showLabel = !window.hWin.HEURIST4.util.isempty(this.options.buttons['remove']);
                 ele = ele.button({icon:showLabel?null:'ui-icon-delete', 
                         label:this.options.buttons['remove'],
-                        showLabel:showLabel}).css({'font-size':'smaller','margin-left':10});
+                        showLabel:showLabel}).css({'margin-left':10}).show();
                 
                 this._on(ele, {click:function(){
                 var fileName = that.sel_saved_settings.val();
@@ -197,7 +212,7 @@ $.widget( "heurist.configEntity", {
                                         if(that.sel_saved_settings.hSelect("instance")!=undefined){
                                             that.sel_saved_settings.hSelect('refresh'); 
                                         }
-                                        that.element.find('.btn-action').hide();
+                                        that.element.find('.btn-action-div').hide();
                                         window.hWin.HEURIST4.msg.showMsgFlash('Settings are removed');
                                     }else{
                                         window.hWin.HEURIST4.msg.showMsgErr(response);
@@ -243,12 +258,12 @@ $.widget( "heurist.configEntity", {
 
             var fileName = this.sel_saved_settings.val();
             if(fileName=='new'){
-                this.options.renameAction.call(this, true);
+                this.options.openEditAction.call(this, true);
                 this.sel_saved_settings[0].selectedIndex = 0;
                 if(this.sel_saved_settings.hSelect("instance")!=undefined){
                     this.sel_saved_settings.hSelect('refresh'); 
                 }
-                this.element.find('.btn-action').hide();
+                this.element.find('.btn-action-div').hide();
                 return;
             }
             
@@ -260,10 +275,10 @@ $.widget( "heurist.configEntity", {
             }
             
             if(fileName.trim()==''){
-                this.element.find('.btn-action').hide();
+                this.element.find('.btn-action-div').hide();
                 return;
             }
-            this.element.find('.btn-action').show();
+            this.element.find('.btn-action-div').show();
 
             var request = {
                 'a'          : 'files',
@@ -339,7 +354,7 @@ $.widget( "heurist.configEntity", {
 
         if(fileName.trim()==''){
             if(this.options.saveOnExit){
-                fileName = window.hWin.HEURIST4.rectypes.names[entity_ID] + ' temporary';
+                fileName = 'Temporary list for '+window.hWin.HEURIST4.rectypes.names[entity_ID];
             }else{
                 window.hWin.HEURIST4.msg.showMsgFlash('Name not defined');
                 return;
@@ -434,7 +449,7 @@ $.widget( "heurist.configEntity", {
                 if(response.status == window.hWin.ResponseStatus.OK){
                     var ele = that.sel_saved_settings.empty();
                     window.hWin.HEURIST4.ui.addoption(ele[0], '', 'select...');
-                    if($.isFunction(that.options.renameAction)){
+                    if($.isFunction(that.options.openEditAction)){
                         window.hWin.HEURIST4.ui.addoption(ele[0], 'new', 'Create new field list');    
                     }
                     ele[0].selectedIndex = 0;
@@ -456,6 +471,7 @@ $.widget( "heurist.configEntity", {
                                                     filename);
                             if(initial_value==entity_id){
                                 $(opt).attr('selected',true);
+                                that.element.find('.btn-action-div').show();
                                 if(that.inpt_save_setting_name){
                                     that.inpt_save_setting_name.val(filename);
                                 }

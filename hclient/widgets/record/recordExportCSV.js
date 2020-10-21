@@ -74,7 +74,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
 
             //divLoadSettingsName: this.element
             divSaveSettings: this.element.find('#divSaveSettings'),  //element
-            allowRenameDelete: true
+            showButtons: true
 
         });
 

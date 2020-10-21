@@ -416,9 +416,9 @@ console.log(idx+'  '+width+'  '+that.options.dataTableParams['columns'][idx]['vi
                             }, 
 
                             divSaveSettings: null,
-                            allowRenameDelete: true,
-                            buttons: {rename:'edit', remove:'delete'},
-                            renameAction: function(is_new){ //overwrite default behaviour - open configuration popup
+                            showButtons: true,
+                            buttons: {rename:'save as', openedit:'edit', remove:'delete'},
+                            openEditAction: function(is_new){ //overwrite default behaviour - open configuration popup
                                     that._openColumnDefinition( is_new );
                             }
                         });
@@ -503,7 +503,7 @@ console.log(idx+'  '+width+'  '+that.options.dataTableParams['columns'][idx]['vi
     
         var opts = {
             currentRecordset: this.options.recordset,
-            initial_cfg: is_new?null:that.options.initial_cfg,
+            initial_cfg: (is_new===true)?null:that.options.initial_cfg,
             onClose: function(context){
                 if(context){
                     that._onApplyColumnDefinition(context);
