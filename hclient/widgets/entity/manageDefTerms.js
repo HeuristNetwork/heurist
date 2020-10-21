@@ -902,6 +902,12 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             ele.editing_input('fset', 'rst_RequirementType', 'required');
             ele.find('.header').removeClass('recommended').addClass('required');
             
+            
+            if(this.options.suggested_name){
+                this._editing.setFieldValueByName('trm_Label', this.options.suggested_name, false);
+                this.options.suggested_name = null;
+            }
+            
         }else{
             
             var dlg = this._getEditDialog(true);

@@ -951,6 +951,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             if(is_add_vocab){
                   rg_options['title'] = 'Add new vocabulary';
                   rg_options['auxilary'] = 'vocabulary';
+                  rg_options['suggested_name'] = dt_name+' vocab';
             }else if(vocab_id>0){
                   //rg_options['title'] = 'Add term to vocabulary "'+$Db.trm(vocab_id,'trm_Label')+'"';
                   rg_options['trm_VocabularyID'] = vocab_id;

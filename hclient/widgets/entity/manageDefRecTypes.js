@@ -983,6 +983,18 @@ console.log(data);
         }
         
     },   
+    
+    onEditFormChange: function(changed_element){
+        
+       this._super(changed_element);
+       
+       if(changed_element!==true && this._editing.isModified() && changed_element.options.dtID=='rty_Name'){
+            var val = this._editing.getValue('rty_Name');
+            var ele = this._editing.getInputs('rty_Plural');
+            $(ele[0]).val(val+'s');
+            //this._editing.setFieldValueByName('rty_Plural', val+'s', false);
+       }
+    },    
         
     //
     // show warning
