@@ -800,7 +800,7 @@ $.widget( "heurist.manageEntity", {
     },
     
     //
-    //
+    // dlg_instance if true it returns dialog widget else .ui-dialog element (or editForm parent)
     //
     _getEditDialog: function(dlg_instance){
             if(this.options.edit_mode=='popup' && this._edit_dialog){
@@ -815,7 +815,50 @@ $.widget( "heurist.manageEntity", {
             }
             return null;
     },
+
+    _dialogresizeTimeout: 0,
+    //
+    //
+    //
+    _adjustEditDialogHeight: function(){
+        
+        var $dlg = this._getEditDialog(true);
+        
+        if(this._dialogresizeTimeout==0){
+            if($dlg!=null){
+                //init timeout
+                var that = this;
+                this._dialogresizeTimeout = setInterval(function(){that._adjustEditDialogHeight()}, 500);
+            }else{
+                return; //nothing to do 
+            }
+        }else{
+            if($dlg==null || !$dlg.is(':visible')){
+                clearTimeout(this._dialogresizeTimeout);
+                this._dialogresizeTimeout = 0;   
+                return; //dialog is closed
+            }
+        }
+        //execute resize
+        var dh = $dlg.dialog('option', 'height');
+        //calculate content height
+        var sh = 0;
+        this.editForm.children().each(function(i,ele){
+            if($(ele).is('fieldset') || $(ele).hasClass('ui-accordion')){
+                sh = sh + $(ele).height();
+            }
+        });
+        
+        if(sh+120!=dh){
+            $dlg.dialog('option','height', sh+120);
+        }
+        
+            
+    },
     
+    //
+    //
+    //
     _getEditDialogButtons: function(){
 
         var that = this;        

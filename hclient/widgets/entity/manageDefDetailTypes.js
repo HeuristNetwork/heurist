@@ -648,7 +648,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
 
         }
 
-
+        this._adjustEditDialogHeight();
     },    
     
     //

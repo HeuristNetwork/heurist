@@ -973,6 +973,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         //this.editForm.find('.heurist-helper1').removeClass('heurist-helper1').addClass('heurist-helper3');
         window.hWin.HEURIST4.ui.switchHintState2(ishelp_on, this.editForm, '.heurist-helper1');
         
+        this._adjustEditDialogHeight();
+        
     },   
 
     
