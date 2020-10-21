@@ -45,6 +45,9 @@ $.widget( "heurist.manageSysDatabases", $.heurist.manageEntity, {
         
         if(this.searchForm && this.searchForm.length>0){
             this.searchForm.searchSysDatabases(this.options);   
+            if(this.options.subtitle){
+                this.recordList.css('top',80);
+            }
         }
         
         this.recordList.resultList('option','rendererHeader',
@@ -119,7 +122,7 @@ $.widget( "heurist.manageSysDatabases", $.heurist.manageEntity, {
         this._on( this.searchForm, {
                 "searchsysdatabasesonfilter": this.filterRecordList
                 });
-        
+                
         return true;
     },    
     

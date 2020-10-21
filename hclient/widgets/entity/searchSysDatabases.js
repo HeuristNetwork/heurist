@@ -33,6 +33,14 @@ $.widget( "heurist.searchSysDatabases", $.heurist.searchEntity, {
         this._on(this.input_search,  { keyup:this.startSearch });
         
         this.input_search.focus();         
+        
+        
+        if(this.options.subtitle){
+            var ele = this.element.find('.sub-title');
+            if(ele.length>0){
+                ele.html('<h3>'+this.options.subtitle+'</h3>');
+            }
+        }
     },  
 
     //

@@ -24,9 +24,16 @@ $.widget( "heurist.searchSysGroups", $.heurist.searchEntity, {
         this._super();
         
         var that = this;
+
+        if(this.options.subtitle){
+            var ele = this.element.find('.sub-title');
+            if(ele.length>0){
+                ele.html('<h3>'+this.options.subtitle+'</h3>');
+            }
+        }
         
         this.btn_add_record = this.element.find('#btn_add_record');
-
+        
         if(this.options.edit_mode=='none'){
             this.btn_add_record.hide();
         }else{

@@ -104,6 +104,9 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
         if(this.options.edit_mode=='inline'){            
             iheight = iheight + 6;
         }
+        if(this.options.subtitle){
+            iheight = iheight + 1.5;
+        }
         this.searchForm.css({'height':iheight+'em',padding:'10px','min-width': '580px'});
         this.recordList.css({'top':iheight+0.4+'em'});
         //init viewer 
