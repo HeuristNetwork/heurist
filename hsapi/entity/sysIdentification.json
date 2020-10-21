@@ -44,7 +44,7 @@
                         "dty_Type":"freetext",
                         "rst_DisplayName": "Database format version",
                         "rst_DisplayHelpText": "", 
-                        "rst_Display":"readonly",
+                        "rst_Display":"hidden",
                         "dty_Role":"virtual"
                     }
                 },
@@ -57,6 +57,16 @@
                         "rst_DisplayName": "Display name",
                         "rst_DisplayHelpText": "(more informative than database name at top of page)",
                         "rst_RequirementType":"required"
+                    }
+                },
+                {
+                    "dtID": "sys_Thumb",
+                    "dtFields":{
+                        "dty_Type":"file",
+                        "rst_DisplayName":"Database picture:",
+                        "rst_DisplayHelpText": "Image to represent this database. Click to browse, Drag and Drop or Ctrl+V to paste an image", 
+                        "rst_FieldConfig":{"entity":"sysIdentification", "accept":".png,.jpg,.gif", "size":200},
+                        "dty_Role":"virtual"
                     }
                 },
                 {
@@ -88,18 +98,54 @@
                         "rst_DisplayName": "Description of the database/content up to 1Kb",
                         "rst_DisplayHelpText": "(may reference a URL)"
                     }
+                }
+        ]},
+        {
+        "groupHeader": "Synchronisation and Indexing",
+        "groupTitleVisible": true,
+        "groupType": "group",
+            "children":[
+                {
+                    "dtID": "sys_SyncDefsWithDB",
+                    "dtFields":{
+                        "dty_Type":"freetext",
+                        "dty_Size":1000,
+                        "rst_DisplayWidth":100,
+                        "rst_DisplayName": "Zotero web library key(s) and IDs for synchronisation",
+                        "rst_DisplayHelpText": "enter as Title,UserID,GroupID,Key (comma separated). Separate different libraries with a pipe symbol (|)<br />eg. My library,1958388,,YjUxZzcgq1fhCd9YyxgzzVNX | XYZ project,,274864,DuFHBTyVYVhuIhttUotyqBSjb<br /> Enter the UserID for a personal library (https://www.zotero.org/settings/keys)<br />or the Group ID for a group library (https://www.zotero.org/groups, Group Settings, ID is in URL).<br /> Use blank ( ,, ) for the ID which is not required. <br />Access key can be obtained at https://www.zotero.org/settings/keys <a href=\"context_help/zotero.html\" target=\"_blank\">Help on obtaining IDs and key</a>"
+                    }
                 },
                 {
-                    "dtID": "sys_Thumb",
+                    "dtID": "sys_MediaExtensions",
                     "dtFields":{
-                        "dty_Type":"file",
-                        "rst_DisplayName":"Database picture:",
-                        "rst_DisplayHelpText": "Image to represent this database. Click to browse, Drag and Drop or Ctrl+V to paste an image", 
-                        "rst_FieldConfig":{"entity":"sysIdentification", "accept":".png,.jpg,.gif", "size":200},
-                        "dty_Role":"virtual"
+                        "dty_Type":"freetext",
+                        "dty_Size":1024,
+                        "rst_DisplayWidth":100,
+                        "rst_DisplayName": "File extensions to index (FieldHelper function creates records + metadata)",
+                        "rst_DisplayHelpText": "comma separated list"
+                    }
+                },
+                {
+                    "dtID": "sys_MediaFolders",
+                    "dtFields":{
+                        "dty_Type":"folder",
+                        "dty_Size":10000,
+                        "rst_DisplayWidth":100,
+                        "rst_DisplayName": "Path(s) which contain files to be indexed as multimedia records for Picasa/FieldHelper compatibility",
+                        "rst_DisplayHelpText": "They are relative to database directory for additional directory(ies). Subdirectories are also indexed. A fieldhelper.xml file is written in each (sub)directory."
+                    }
+                },
+                {
+                    "dtID": "sys_UGrpsDatabase",
+                    "dtFields":{
+                        "dty_Type":"freetext",
+                        "dty_Size":63,
+                        "rst_DisplayWidth":100,
+                        "rst_DisplayName": "Common credentials databases",
+                        "rst_DisplayHelpText": "Comma-delimited list of databases which share user credentials (synched on user addition). Databases must mutually specify one-another"
                     }
                 }
-        ]},    
+        ]},
         {
         "groupHeader": "Behaviour",
         "groupTitleVisible": true,
@@ -231,53 +277,7 @@
                         "rst_DisplayHelpText": "comma separated, shared list, additional addresses can be added in personal profile, other addresses are ignored"
                     }
                 }
-        ]},    
-        {
-        "groupHeader": "Synchronisation and Indexing",
-        "groupTitleVisible": true,
-        "groupType": "group",
-            "children":[
-                {
-                    "dtID": "sys_SyncDefsWithDB",
-                    "dtFields":{
-                        "dty_Type":"freetext",
-                        "dty_Size":1000,
-                        "rst_DisplayWidth":100,
-                        "rst_DisplayName": "Zotero web library key(s) and IDs for synchronisation",
-                        "rst_DisplayHelpText": "enter as Title,UserID,GroupID,Key (comma separated). Separate different libraries with a pipe symbol (|)<br />eg. My library,1958388,,YjUxZzcgq1fhCd9YyxgzzVNX | XYZ project,,274864,DuFHBTyVYVhuIhttUotyqBSjb<br /> Enter the UserID for a personal library (https://www.zotero.org/settings/keys)<br />or the Group ID for a group library (https://www.zotero.org/groups, Group Settings, ID is in URL).<br /> Use blank ( ,, ) for the ID which is not required. <br />Access key can be obtained at https://www.zotero.org/settings/keys <a href=\"context_help/zotero.html\" target=\"_blank\">Help on obtaining IDs and key</a>"
-                    }
-                },
-                {
-                    "dtID": "sys_MediaExtensions",
-                    "dtFields":{
-                        "dty_Type":"freetext",
-                        "dty_Size":1024,
-                        "rst_DisplayWidth":100,
-                        "rst_DisplayName": "File extensions to index (FieldHelper function creates records + metadata)",
-                        "rst_DisplayHelpText": "comma separated list"
-                    }
-                },
-                {
-                    "dtID": "sys_MediaFolders",
-                    "dtFields":{
-                        "dty_Type":"folder",
-                        "dty_Size":10000,
-                        "rst_DisplayWidth":100,
-                        "rst_DisplayName": "Path(s) which contain files to be indexed as multimedia records for Picasa/FieldHelper compatibility",
-                        "rst_DisplayHelpText": "They are relative to database directory for additional directory(ies). Subdirectories are also indexed. A fieldhelper.xml file is written in each (sub)directory."
-                    }
-                },
-                {
-                    "dtID": "sys_UGrpsDatabase",
-                    "dtFields":{
-                        "dty_Type":"freetext",
-                        "dty_Size":63,
-                        "rst_DisplayWidth":100,
-                        "rst_DisplayName": "Common credentials databases",
-                        "rst_DisplayHelpText": "Comma-delimited list of databases which share user credentials (synched on user addition). Databases must mutually specify one-another"
-                    }
-                }
-        ]}
+        ]}    
                 
                 
      ]

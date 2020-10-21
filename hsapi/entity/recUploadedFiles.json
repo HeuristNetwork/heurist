@@ -10,7 +10,7 @@
         
         "entityTitle": "File/reference",
         "entityTitlePlural": "Files/references",
-        "empty_remark": "Please use the search field above to locate relevant file (partial string match on title)",
+        "empty_remark": "No files found",
 
         "sel_actions": [{"key":"edit", "title":"Edit File"},
                         {"key":"delete", "title":"Remove File"}],
