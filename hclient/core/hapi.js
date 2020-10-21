@@ -308,46 +308,46 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             */
             , verify_credentials: function(callback, requiredLevel, password_protected, password_entered){
 
-                if(!window.hWin.HEURIST4.util.isempty(password_protected)){
-                    
-
-                        if(window.hWin.HAPI4.sysinfo['pwd_'+password_protected]){ //password defined
-                        
-                            window.hWin.HEURIST4.msg.showPrompt('Enter password: ',
-                                function(password_entered){
-                                    
-                                    window.hWin.HAPI4.SystemMgr.action_password({action:password_protected, password:password_entered},
-                                        function(response){
-                                            if(response.status == window.hWin.ResponseStatus.OK && response.data=='ok'){
-                                                window.hWin.HAPI4.SystemMgr.verify_credentials(callback, requiredLevel, null, password_entered);                                        ;
-                                            }else{
-                                                window.hWin.HEURIST4.msg.showMsgFlash('Wrong password');
-                                            }
-                                        }
-                                    );
-                                    
-                                },
-                            'This action is password-protected', {password:true});
-                        
-                        }else{
-                            window.hWin.HEURIST4.msg.showMsgDlg('This action is not allowed unless a challenge password is set - please consult system administrator');
-                        }
-                        return false;
-                    
-                }                
-                
-                
                 requiredLevel = Number(requiredLevel);
                 if(requiredLevel<0){ //no verification required - everyone access
-                    callback(password_entered); 
-                    return; 
+                
+                    if(window.hWin.HEURIST4.util.isempty(password_protected)){
+                            //no password protection
+                            callback(password_entered);
+                            return; 
+                    }else{
+                            if(window.hWin.HAPI4.sysinfo['pwd_'+password_protected]){ //password defined
+                            
+                                window.hWin.HEURIST4.msg.showPrompt('Enter password: ',
+                                    function(password_entered){
+                                        
+                                        window.hWin.HAPI4.SystemMgr.action_password({action:password_protected, password:password_entered},
+                                            function(response){
+                                                if(response.status == window.hWin.ResponseStatus.OK && response.data=='ok'){
+                                                    callback(password_entered); 
+                        //window.hWin.HAPI4.SystemMgr.verify_credentials(callback, requiredLevel, null,password_entered);
+                                                }else{
+                                                    window.hWin.HEURIST4.msg.showMsgFlash('Wrong password');
+                                                }
+                                            }
+                                        );
+                                        
+                                    },
+                                {title:'This action is password-protected',yes:'OK',no:'Cancel'}, {password:true});
+                            
+                            }else{
+                                window.hWin.HEURIST4.msg.showMsgDlg('This action is not allowed unless a challenge password is set - please consult system administrator');
+                            }
+                            return;
+                    }                
                 }
                 
                 //verify locally
                 function __verify( is_expired ){
                     
                         if(window.hWin.HAPI4.has_access(requiredLevel)){ 
-                              callback( password_entered );  
+                            window.hWin.HAPI4.SystemMgr.verify_credentials(callback, -1, password_protected, password_entered);
+                            //callback( password_entered );  
                         }else{
                             var response = {};
                             response.sysmsg = 0;

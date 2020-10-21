@@ -394,7 +394,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                 
                 var item = $(item).is('li')?$(item):$(item).parent();
                 
-                if(lvl_user>=0){
+                if(lvl_user>=0){  //2 database owner, 1 - memeber of Database admin
                     //@todo lvl_user=1 is_admin
                     is_visible = (lvl_exp!=3) && window.hWin.HAPI4.has_access(lvl_user);
                     var elink = $(item).find('a');
@@ -1458,7 +1458,8 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         if(!entity_dialog_options) entity_dialog_options = {};
         
         var options = $.extend(entity_dialog_options, {
-            title: 'Step 1. Select database with users to be imported',
+            subtitle: 'Step 1. Select database with users to be imported',
+            title: 'Import users', 
             select_mode: 'select_single',
             pagesize: 300,
             edit_mode: 'none',
@@ -1469,7 +1470,8 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                         var selected_database = data.selection[0].substr(4);
                         
                         var options2 = $.extend(entity_dialog_options, {
-                            title: 'Step 2. Select users in '+selected_database+' to be imported',
+                            subtitle: 'Step 2. Select users in '+selected_database+' to be imported',
+                            title: 'Import users', 
                             database: selected_database,
                             select_mode: 'select_multi',
                             edit_mode: 'none',
@@ -1478,7 +1480,8 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                                     var selected_users = data.selection;
 
                                     var options3 = $.extend(entity_dialog_options, {
-                                        title: 'Step 3. Allocate imported users to work groups',
+                                        subtitle: 'Step 3. Allocate imported users to work groups',
+                                        title: 'Import users', 
                                         select_mode: 'select_roles',
                                         selectbutton_label: 'Allocate roles',
                                         sort_type_int: 'recent',
