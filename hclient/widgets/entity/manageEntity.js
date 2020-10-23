@@ -840,6 +840,7 @@ $.widget( "heurist.manageEntity", {
             }
         }
         //execute resize
+        var wh = window.hWin.innerHeight;
         var dh = $dlg.dialog('option', 'height');
         //calculate content height
         var sh = 0;
@@ -849,8 +850,23 @@ $.widget( "heurist.manageEntity", {
             }
         });
         
-        if(sh+120!=dh){
-            $dlg.dialog('option','height', sh+120);
+        sh = sh+120
+        
+        if(sh!=dh && (dh<wh || sh<wh)){
+            
+            var is_oversize = sh>wh;
+            
+            if(is_oversize){
+               sh = wh;  
+            }
+            
+            $dlg.dialog('option','height', sh);
+            
+            var ele = $dlg.parents('.ui-dialog');
+            if(is_oversize || ele.offset().top+sh>wh){
+                ele.css({top:is_oversize?0:(wh-sh)});
+            }
+
         }
         
             
