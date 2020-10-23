@@ -271,9 +271,14 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
             this.element.find('#parententity_helper').css({'display':'table-row'});
         }
         
+        var limit = 100000;
+        var needall = 1
+        
         if(this.element.find('#cb_modified').is(':checked')){
             qstr = qstr + ' sortby:-m after:"1 week ago"';
             qobj.push({"sortby":"-m"}); // after:\"1 week ago\"
+            limit = 100;
+            needall = 0;
         }else{
             qstr = 'sortby:t';
             qobj.push({"sortby":"t"}); //sort by record title
@@ -298,8 +303,8 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
                 //q: qstr, 
                 q: qobj,
                 w: domain,
-                limit: 100000,
-                needall: 1,
+                limit: limit,
+                needall: needall,
                 detail: 'ids',
                 id: window.hWin.HEURIST4.util.random()}
             //source: this.element.attr('id') };
