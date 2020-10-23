@@ -228,7 +228,7 @@ class DbDefTerms extends DbEntityBase
         //create tree array $record['trm_ParentTermID']
         if(count($this->records)>0){
             
-            if($this->records[0]['trm_VocabularyGroupID']>0){
+            if(@$this->records[0]['trm_VocabularyGroupID']>0){
                 return $this->save();
             }
                         
