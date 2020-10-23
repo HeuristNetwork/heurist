@@ -54,7 +54,7 @@ $.widget( "heurist.mainMenu", {
 
         this.div_logo = $( "<div>")
         .addClass('logo')   //width was 198
-        .css({'width':'150px', 'float':'left', 'margin-top':'6px'}) //'height':'56px', 
+        .css({'width':'150px', 'float':'left', 'margin':'6px 10px'}) //'height':'56px', 
         .appendTo( this.element );
 
         if(window.hWin.HAPI4.get_prefs('layout_theme')!='heurist'){
@@ -64,7 +64,9 @@ $.widget( "heurist.mainMenu", {
         //validate server side version  - compare version of code in server where main index database and this server version
         var res = window.hWin.HEURIST4.util.versionCompare(window.hWin.HAPI4.sysinfo.version_new, window.hWin.HAPI4.sysinfo['version']);   
         var sUpdate = '';
+        var mr = 45;
         if(res==-2){ // -2=newer code on server
+            mr = 55;
             sUpdate = '&nbsp;<span class="ui-icon ui-icon-alert" style="width:16px;display:inline-block;vertical-align: middle;cursor:pointer">';
         }
 
@@ -72,7 +74,8 @@ $.widget( "heurist.mainMenu", {
             .html('<span>v'+window.hWin.HAPI4.sysinfo.version+sUpdate+'</span>')
             .appendTo( this.div_logo );
         if(this.options.is_h6style){
-            this.div_version.css({'font-size':'0.5em', color:'#DAD0E4', 'text-align':'right', 'padding-top':'12px', 'margin-right':'-35px'});
+            this.div_version.css({'font-size':'0.5em', color:'#DAD0E4', 'text-align':'right', 
+                'padding-top':'12px', 'margin-right':'-'+mr+'px'});
                 
         }else{
             this.div_version.css({'font-size':'0.6em', 'text-align':'center', 'margin-left': '85px', 'padding-top':'12px', 
@@ -717,10 +720,15 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                 container = dialog_options['container'];
             }else if(action_container){
                 var section = action_container;
+                //activate specified menu and container
                 $('.ui-menu6').mainMenu6('switchContainer', section, true);
                 container = $('.ui-menu6 > .ui-menu6-container.ui-heurist-'+section);
                 container.removeClass('ui-suppress-border-and-shadow');
                 menu_container = $('.ui-menu6 > .ui-menu6-section.ui-heurist-'+section); //need for publish/cms
+                //highlight required item in menu
+                menu_container.find('li').removeClass('ui-state-active');
+                menu_container.find('li[data-action="'+action+'"]').addClass('ui-state-active');
+                
             }
             var pos = null;
             if(dialog_options && dialog_options['position']){
