@@ -1044,29 +1044,32 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                     }
                 };
                 
-                btns.push(
-                 {text:window.hWin.HR('Edit All'),
-                    id:'btnEditAll',
-                    css:{'float':'left',margin:'.5em .4em .5em 0'},  
-                    click: function() { 
-                        var rg_options = {
-                            height:800, width:1300,
-                            onInitFinished: function(){
-                                var that2 = this;
-                                setTimeout(function(){
-                                    that2.vocabularies_div.manageDefTerms('selectVocabulary', that.options.trm_VocabularyID);
-                                },500);
-                            },
-                            onClose: that.options.onClose
-                        };
-                        that.options.onClose = null;
-                        that._currentEditID=null; 
-                        that.closeDialog(true);
-                        // $dlg.dialog('close');
-                        //that._saveEditAndClose(); 
-                        window.hWin.HEURIST4.ui.showEntityDialog('defTerms', rg_options);
-                    }}                
-                );
+                if( window.hWin.HAPI4.is_admin() ){
+                
+                    btns.push(
+                     {text:window.hWin.HR('Edit All'),
+                        id:'btnEditAll',
+                        css:{'float':'left',margin:'.5em .4em .5em 0'},  
+                        click: function() { 
+                            var rg_options = {
+                                height:800, width:1300,
+                                onInitFinished: function(){
+                                    var that2 = this;
+                                    setTimeout(function(){
+                                        that2.vocabularies_div.manageDefTerms('selectVocabulary', that.options.trm_VocabularyID);
+                                    },500);
+                                },
+                                onClose: that.options.onClose
+                            };
+                            that.options.onClose = null;
+                            that._currentEditID=null; 
+                            that.closeDialog(true);
+                            // $dlg.dialog('close');
+                            //that._saveEditAndClose(); 
+                            window.hWin.HEURIST4.ui.showEntityDialog('defTerms', rg_options);
+                        }}                
+                    );
+                }
             }
       
         }
@@ -1869,11 +1872,27 @@ console.log('NODE activated');
       
        var fields = this._super();  
        if(fields!==null){
+           var is_already_exists = false;
            var vocab_id = fields['trm_ParentTermID'];
            if(vocab_id>0){
-                vocab_id = $Db.getTermVocab(vocab_id);    
-                all_labels = $Db.trm_TreeData(vocab_id, 'labels');
-                if(all_labels.indexOf(fields['trm_Label'].toLowerCase())>=0){
+                vocab_id = $Db.getTermVocab(vocab_id);   
+                var trm_id = fields['trm_ID'];
+                var lbl = fields['trm_Label'].toLowerCase();
+                
+                if(trm_id<0){ //new one
+                    var all_labels = $Db.trm_TreeData(vocab_id, 'labels');
+                    is_already_exists = (all_labels.indexOf(lbl)>=0);
+                }else{ //existed one
+                    var all_labels = $Db.trm_TreeData(vocab_id, 'select');
+                    for(var i=0; i<all_labels.length; i++){
+                        if(all_labels[i].title.toLowerCase()==lbl && all_labels[i].key!=trm_id){
+                            is_already_exists = true;
+                            break;
+                        }
+                    }
+                }
+                    
+                if(is_already_exists){    
                     window.hWin.HEURIST4.msg.showMsgFlash('Term with label "'
                         +fields['trm_Label']+'" already exists in vocabulary',1500);
                     return null;
