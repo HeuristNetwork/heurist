@@ -318,7 +318,12 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                     }else{
                             if(window.hWin.HAPI4.sysinfo['pwd_'+password_protected]){ //password defined
                             
-                                window.hWin.HEURIST4.msg.showPrompt('Enter password: ',
+                            //
+                                window.hWin.HEURIST4.msg.showPrompt(
+                                '<div style="padding:20px 0px">'
+                                +'Only the owner of the database or an administrator supplying<br>'
+                                +' the override password can carry out this action.'
+                                +'</div><span style="display: inline-block;padding: 10px 0px;>Enter password:&nbsp;</span>',
                                     function(password_entered){
                                         
                                         window.hWin.HAPI4.SystemMgr.action_password({action:password_protected, password:password_entered},
@@ -368,7 +373,13 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                                response.message = ''; 
                             }
                             
-                            window.hWin.HEURIST4.msg.showMsgErr(response, true);
+                            if(response.message){
+                                window.hWin.HEURIST4.msg.showMsgFlash(response.message, 2000);    
+                            }else{
+                                //login expired
+                                window.hWin.HEURIST4.msg.showMsgErr(response, true);  
+                            }
+                            
                         }
                 }
                 
@@ -1569,7 +1580,7 @@ prof =Profile
         },
 
         /**
-        * Returns IF currentUser satisfies to required level
+        * Returns TRUE if currentUser satisfies to required level
         *
         * @param requiredLevel 
         * NaN or <1 - (DEFAULT) is logged in
@@ -1582,7 +1593,7 @@ prof =Profile
             requiredLevel = Number(requiredLevel);
             
             if(isNaN(requiredLevel) || requiredLevel<1){
-                return (that.currentUser && that.currentUser['ugr_ID']>0); 
+                return (that.currentUser && that.currentUser['ugr_ID']>0); //just logged in
             }
             
             return (requiredLevel==that.currentUser['ugr_ID'] ||   //iself 
