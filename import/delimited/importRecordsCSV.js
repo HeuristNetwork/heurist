@@ -3935,8 +3935,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         
         if(!(trm_ParentTermID>0)){
             //detect vocabulary, if selection of terms add to special vocabulary  "Auto-added terms"
-        
-            var terms = $Db.trm(dt_id, 'dty_JsonTermIDTree');
+                                        
+            var terms = $Db.dty(dt_id, 'dty_JsonTermIDTree');
 
             if(window.hWin.HEURIST4.util.isNumber(terms) && terms>0){ //this is vocabulary
                 trm_ParentTermID = Number(terms);
