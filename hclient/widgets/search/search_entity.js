@@ -406,7 +406,7 @@ $.widget( "heurist.search_entity", {
             
             var select_rectype = opts['select_name'];
             
-            opts.useIds = (exp_level<2);
+            opts.useIds = true;//(exp_level<2);
             
             opts.useHtmlSelect = (select_rectype=='usage_select' && that.options.use_combined_select);
             
