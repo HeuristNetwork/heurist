@@ -83,7 +83,8 @@ $.widget( "heurist.search_quick", $.heurist.recordAction, {
         //.css({position:'absolute', zIndex:9999, 'right':4, top:4, width:18, height:18})
         .css('float', 'right')
         .button({
-            label: window.hWin.HR("Go"), showLabel:true
+            icon: 'ui-icon-filter',
+            label: window.hWin.HR("Filter"), showLabel:true
         })
         .addClass(this.options.button_class);
         
@@ -92,12 +93,29 @@ $.widget( "heurist.search_quick", $.heurist.recordAction, {
                 this.doAction();
             }
         });
+        
+        
+        this.search_get_query = $( "<button>")
+        .appendTo( dv )
+        .css({'float':'right',margin:'4px 10px'})
+        .button({
+            label: window.hWin.HR("get filter string"), showLabel:true
+        });
+        
+        this._on( this.search_get_query, {
+            click: function(event){
+                this.getQueryString();
+            }
+        });
+        
+        
+        
 
         //find all labels and apply localization
         $dlg.find('label').each(function(){
             $(this).html(window.hWin.HR($(this).html()));
         });
-
+        
         $dlg.find(".fld_enum").hide();
         
 /* BAX
@@ -210,7 +228,10 @@ $.widget( "heurist.search_quick", $.heurist.recordAction, {
             }
         });
         
-        $dlg.find(".sa_spatial_clear").button();
+        $dlg.find(".sa_spatial_clear").button({
+            icon: 'ui-icon-undo',
+            showLabel:false
+        });
         that._on( $dlg.find(".sa_spatial_clear"), {
             click: function(event){
                 $dlg.find(".sa_spatial_val").val('');
@@ -293,7 +314,8 @@ $.widget( "heurist.search_quick", $.heurist.recordAction, {
                         select_sortby[0], //$dlg.find(".sa_sortby").get(0)
                         rectype, allowed, topOptions,
                             {initial_indent:1, useHtmlSelect:false});
-                            
+                
+                select_sortby.css({margin:'4px 0px'});            
                             
                 that._on( select_fieldtype, {
                     change: __onFieldTypeChange
@@ -309,7 +331,7 @@ $.widget( "heurist.search_quick", $.heurist.recordAction, {
                 $dlg.find(".sa_negate").prop("checked",'');
                 $dlg.find(".sa_negate2").prop("checked",'');
                 
-                $dlg.find(".fld_contain").show();
+                $dlg.find(".fld_contain").css({'display':'inline-block'});
                 $dlg.find(".fld_enum").hide();
                 $dlg.find(".fld_coord").hide();
                 this.calcShowSimpleSearch();
@@ -326,7 +348,7 @@ $.widget( "heurist.search_quick", $.heurist.recordAction, {
 
                     $dlg.find(".fld_contain").hide();
                     $dlg.find(".fld_enum").hide();
-                    $dlg.find(".fld_coord").show();
+                    $dlg.find(".fld_coord").css({'display':'inline-block'});
                     
                 }else{
                     var dtID = Number(event.target.value);
@@ -340,7 +362,7 @@ $.widget( "heurist.search_quick", $.heurist.recordAction, {
                     }
                     if(detailType=='enum'  || detailType=='relationtype'){
                         $dlg.find(".fld_contain").hide();
-                        $dlg.find(".fld_enum").show();
+                        $dlg.find(".fld_enum").css({'display':'inline-block'});
 
                         var select_terms = $dlg.find(".sa_termvalue");
                         
@@ -354,7 +376,7 @@ $.widget( "heurist.search_quick", $.heurist.recordAction, {
                         } );
                                                                                                  
                     } else {
-                        $dlg.find(".fld_contain").show();
+                        $dlg.find(".fld_contain").css({'display':'inline-block'});
                         $dlg.find(".fld_enum").hide();
                     }
                     
@@ -467,6 +489,16 @@ $.widget( "heurist.search_quick", $.heurist.recordAction, {
         window.hWin.HAPI4.removeEventListener(this, window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE);        
         
         //this.div_entity_btns.remove();
+    },
+    
+    getQueryString: function(){
+        
+        this.calcShowSimpleSearch();
+        
+        var req = {q:this.options.is_json_query ?this.current_query_json :this.current_query};
+        
+        window.hWin.HEURIST4.util.hQueryCopyPopup(req, {my:'middle bottom', at:'middle top', of:this.search_get_query});
+
     },
 
     //

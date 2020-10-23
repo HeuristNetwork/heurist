@@ -597,6 +597,58 @@ window.hWin.HEURIST4.util = {
     },
     
     //
+    //
+    //
+    hQueryCopyPopup: function(request, pos_element){
+        
+        var res = window.hWin.HEURIST4.util.hQueryStringify(request);
+        
+        var buttons = {};
+        buttons[window.hWin.HR('Copy')]  = function() {
+            
+            var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();            
+            var target = $dlg.find('#dlg-prompt-value')[0];
+            target.focus();
+            target.setSelectionRange(0, target.value.length);
+            var succeed;
+            try {
+                succeed = document.execCommand("copy");
+                
+                $dlg.dialog( "close" );
+            } catch(e) {
+                succeed = false;
+                alert('Not supported by browser');
+            }                            
+            
+        }; 
+        buttons[window.hWin.HR('Close')]  = function() {
+            var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();            
+            $dlg.dialog( "close" );
+        };
+        
+        var opts = {width:450, buttons:buttons}
+        if(pos_element){
+            if(pos_element.my){
+                opts.my = pos_element.my;
+                opts.at = pos_element.at;
+                opts.of = pos_element.of;
+            }else{
+                opts.my = 'left top';
+                opts.at = 'right bottom';
+                opts.of = pos_element
+            }
+        }        
+        
+        window.hWin.HEURIST4.msg.showPrompt(
+            '<label>Edit and copy the string and paste into the Mappable Query filter field</label>'
+            + '<textarea id="dlg-prompt-value" class="text ui-corner-all" '
+            + ' style="min-width: 200px; margin-left:0.2em;margin-top:10px;" rows="3" cols="70">'
+            + res
+            +'</textarea>',null,'Copy query string', opts);
+        
+    },
+    
+    //
     // Extract parameter from given URL or from current window.location.search
     //
     getUrlParameter: function getUrlParameter(name, query){

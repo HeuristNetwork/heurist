@@ -578,42 +578,9 @@ function hSvsEdit(args) {
                         if($dlg.find('#svs_UGrpID')=='bookmark'){
                             req['w'] = 'b';
                         }     
-                        
-                        var res = Hul.hQueryStringify(req);
-                        
-                        var buttons = {};
-                        buttons[window.hWin.HR('Copy')]  = function() {
-                            
-                            var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();            
-                            var target = $dlg.find('#dlg-prompt-value')[0];
-                            target.focus();
-                            target.setSelectionRange(0, target.value.length);
-                            var succeed;
-                            try {
-                                succeed = document.execCommand("copy");
-                                
-                                $dlg.dialog( "close" );
-                            } catch(e) {
-                                succeed = false;
-                                alert('Not supported by browser');
-                            }                            
-                            
-                        }; 
-                        buttons[window.hWin.HR('Close')]  = function() {
-                            var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();            
-                            $dlg.dialog( "close" );
-                        };
-                        
-                        //var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
-                        window.hWin.HEURIST4.msg.showPrompt(
-                        '<label>Edit and copy the string and paste into the Mappable Query filter field</label>'
-                        + '<textarea id="dlg-prompt-value" class="text ui-corner-all" '
-                        + ' style="min-width: 200px; margin-left:0.2em" rows="4" cols="50">'
-                        +res
-                        +'</textarea>',null,null,
-                        {width:450, buttons:buttons,
-                            my:'center bottom', at:'center bottom', of: $dlg}
-                        );
+
+                        window.hWin.HEURIST4.util.hQueryCopyPopup(req, 
+                            {my:'center bottom', at:'center bottom', of: $dlg});
                     }
                 }
                 

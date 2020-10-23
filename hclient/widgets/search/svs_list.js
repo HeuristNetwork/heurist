@@ -2316,55 +2316,8 @@ $.widget( "heurist.svs_list", {
             prms.rules = crules==null?'':crules; //JSON.stringify(crules);
             
             prms.db = window.hWin.HAPI4.database;
-            var res = Hul.hQueryStringify(prms); //json to string
-        
-            /*
-            var req = {q:filter, rules:$dlg.find('#svs_Rules').val()
-                                    , db:window.hWin.HAPI4.database};
             
-            if($dlg.find('#svs_RulesOnly').is(':checked')){
-                req['rulesonly'] = 1;
-            }     
-            if($dlg.find('#svs_UGrpID')=='bookmark'){
-                req['w'] = 'b';
-            }     
-            
-            var res = Hul.hQueryStringify(req);
-            */
-            
-            var buttons = {};
-            buttons[window.hWin.HR('Copy')]  = function() {
-                
-                var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();            
-                var target = $dlg.find('#dlg-prompt-value')[0];
-                target.focus();
-                target.setSelectionRange(0, target.value.length);
-                var succeed;
-                try {
-                    succeed = document.execCommand("copy");
-                    
-                    $dlg.dialog( "close" );
-                } catch(e) {
-                    succeed = false;
-                    alert('Not supported by browser');
-                }                            
-                
-            }; 
-            buttons[window.hWin.HR('Close')]  = function() {
-                var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();            
-                $dlg.dialog( "close" );
-            };
-            
-            //var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();
-            window.hWin.HEURIST4.msg.showPrompt(
-            '<label>Edit and copy the string and paste into the Mappable Query filter field</label>'
-            + '<textarea id="dlg-prompt-value" class="text ui-corner-all" '
-            + ' style="min-width: 200px; margin-left:0.2em" rows="4" cols="50">'
-            +res
-            +'</textarea>',null,null,
-            {width:450, buttons:buttons,
-                my:'left top', at:'right bottom', of: pos_element}
-            );
+            window.hWin.HEURIST4.util.hQueryCopyPopup(prms, pos_element);
         }
     },
 

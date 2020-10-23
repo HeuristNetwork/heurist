@@ -702,15 +702,15 @@ $.widget( "heurist.mainMenu6", {
                             that._explorer_menu_locked = is_locked; 
                     }  });    
 
-                explore_top = position ?position.top :menu_item.position().top;
-                explore_height = 268+36;
+                explore_top = position ?position.top :menu_item.offset().top -200;
+                explore_height = 215;//268+36;
                 explore_left = position ?position.left :that._widthMenu+1; //201;
                 if(explore_top+explore_height>that.element.innerHeight()){
                     explore_top = that.element.innerHeight() - explore_height;
                 }
 
 
-                that.menues['explore'].css({width:'400px',overflow:'hidden'});
+                that.menues['explore'].css({width:'700px',overflow:'hidden'});
 
 
             }
@@ -1067,8 +1067,8 @@ console.log('prvent colapse');
             var li = $(e.target);
             if(!li.is('li')) li = li.parents('li');
             
-            this.menues[section].find('li').removeClass('ui-state-active');
-            li.addClass('ui-state-active');
+            //this.menues[section].find('li').removeClass('ui-state-active');
+            //li.addClass('ui-state-active');
             
             
             if(section=='design'){    

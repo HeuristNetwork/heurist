@@ -23,42 +23,40 @@
     <div>
         <div class="header_narrow" style="width:100px"><label>Record type</label></div>
         <select class="text ui-widget-content ui-corner-all sa_rectype" 
-                style="min-width:220px" tabindex="-1"></select>
+                style="min-width:420px;max-width:500px" tabindex="-1"></select>&nbsp;&nbsp;
     </div>
     <div>
         <div class="header_narrow"><label>Field</label></div>
-        <select class="text ui-widget-content ui-corner-all sa_fieldtype" style="min-width:220px"></select>
-    </div>
-    <div class="fld_coord" style="display:none">
-        <div class="header_narrow"><label>More than</label></div>
-        <input type="text" id="sa_coord1" class="text ui-widget-content ui-corner-all sa_coord1" style="max-width:110px" />
-        <label>&nbsp;&nbsp;Less than</label>
-        <input type="text" id="sa_coord2"  class="text ui-widget-content ui-corner-all sa_coord2" style="max-width:110px"/>
-    </div>
-    <div class="fld_contain">
-        <div class="header_narrow"><label>Contains</label></div>
-        <input type="text" class="text ui-widget-content ui-corner-all sa_fieldvalue" />
-        <label><input type="checkbox" class="sa_negate" id="sa_negate" style="vertical-align: -3px;margin-left:2em" />Negate</label>
-    </div>
-    <div class="fld_enum">
-        <div class="header_narrow"><label>Is</label></div>
-        <select class="text ui-widget-content ui-corner-all sa_termvalue" style="min-width:220px;max-width: 220px"></select>
-        <label><input type="checkbox" class="sa_negate2" id="sa_negate2" style="vertical-align: -3px;margin-left:2em" />Negate</label>
+        <select class="text ui-widget-content ui-corner-all sa_fieldtype" style="min-width:220px;display:inline-block"></select>
+        &nbsp;&nbsp;
+        <div class="fld_coord" style="display:none">
+            <div class="header_narrow" style="display:inline-block"><label>More than</label></div>
+            <input type="text" id="sa_coord1" class="text ui-widget-content ui-corner-all sa_coord1" style="max-width:110px" />
+            <label>&nbsp;&nbsp;Less than</label>
+            <input type="text" id="sa_coord2"  class="text ui-widget-content ui-corner-all sa_coord2" style="max-width:110px"/>
+        </div>
+        <div class="fld_contain">
+            <div class="header_narrow" style="display:inline-block"><label>Contains</label></div>
+            <input type="text" class="text ui-widget-content ui-corner-all sa_fieldvalue" />
+            <label><input type="checkbox" class="sa_negate" id="sa_negate" style="vertical-align: -3px;margin-left:2em" />negate</label>
+        </div>
+        <div class="fld_enum">
+            <div class="header_narrow" style="display:inline-block"><label>Is</label></div>
+            <select class="text ui-widget-content ui-corner-all sa_termvalue" style="min-width:220px;max-width: 220px"></select>
+            <label><input type="checkbox" class="sa_negate2" id="sa_negate2" style="vertical-align: -3px;margin-left:2em" />negate</label>
+        </div>
     </div>
     <div>
         <div class="header_narrow"><label>Sort by</label></div>
-        <select class="text ui-widget-content ui-corner-all sa_sortby" style="min-width:220px"></select>
-    </div>
-    <div>
-        <div class="header_narrow"><label>Sort direction</label></div>
-        <select class="text ui-widget-content ui-corner-all sa_sortasc" style="min-width:220px">
+        <select class="text ui-widget-content ui-corner-all sa_sortby" style="min-width:220px;margin:4px 0px;"></select>&nbsp;&nbsp;
+        <select class="text ui-widget-content ui-corner-all sa_sortasc" style="min-width:220px;margin:0;">
             <option value="0">Ascending (A..Z, 1..9)</option>
             <option value="1">Descending (Z..A, 9..1)</option>
         </select>
     </div>
     <div>
         <div class="header_narrow"><label>Spatial search</label></div>
-        <button class="sa_spatial" style="min-width:170px;max-width:170px;margin-right:10px" title="Click this button to set and apply spatial search limits">Draw rectangle/polygon</button>
+        <button class="sa_spatial" style="min-width:170px;max-width:170px;margin-right:10px" title="Click this button to set and apply spatial search limits">Draw on map</button>
         <button class="sa_spatial_clear" style="min-width:40px;max-width: 40px">reset</button>
         <input type="hidden" class="sa_spatial_val" />
     </div>
