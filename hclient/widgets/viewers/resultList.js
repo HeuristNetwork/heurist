@@ -2512,7 +2512,11 @@ $.widget( "heurist.resultList", {
     //
     //    
     , refreshPage: function(){
+        var keep_selection = this.getSelected(true);
         this._renderPage(this.current_page);
+        if(keep_selection && keep_selection.length>0){
+            //this.setSelected(keep_selection);
+        }
     }
 
     //
@@ -2552,8 +2556,8 @@ $.widget( "heurist.resultList", {
             idx = pageno*this.options.pagesize;
             len = Math.min(recordset.length(), idx+this.options.pagesize)
             pagesize = this.options.pagesize;
+            
         }
-        
         
         this.clearAllRecordDivs(null);
 

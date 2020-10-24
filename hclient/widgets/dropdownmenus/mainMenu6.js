@@ -949,7 +949,10 @@ $.widget( "heurist.mainMenu6", {
                 
                 var is_explore = ($(e.target).hasClass('ui-heurist-explore') 
                     || $(e.target).hasClass('record-addition')
-                    || $(e.target).parents('.ui-heurist-explore').length>0);
+                    || $(e.target).parents('.ui-heurist-explore').length>0
+                    || $(e.target).hasClass('record-addition')
+                    || $(e.target).parents('.record-addition').length>0
+                        );
                 
                 if( is_explore ){
                     clearTimeout(this._myTimeoutId); //prevent collapse of main menu
@@ -1113,7 +1116,7 @@ console.log('prvent colapse');
                             clearTimeout(this._myTimeoutId3); this._myTimeoutId3 = 0; //clear timeout on show section menu
                           
                             this._myTimeoutId6 = setTimeout(function(){
-
+console.log('hide explore record ADD');
                                         that.menues['explore'].hide();
                                         that.menues_explore_gap.hide();
                                         //that._closeSectionMenu('explore');

@@ -76,7 +76,9 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                     that.refreshRecordList();
                     //that._loadData();
                 }else
-                if(data && data.type == 'vcg' && that.options.auxilary=='vocabulary'){
+                if(data && ((data.type == 'vcg' && that.options.auxilary=='vocabulary') 
+                            || (data.type == 'vocabulary' && that.options.auxilary=='term')
+                          )  ){
                     that._filterByVocabulary();
                     //that._loadData();
                 }
@@ -132,6 +134,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         
         if(this.options.select_mode=='manager'){
 
+            this.searchForm.css({padding:0});
+                
             if(this.options.auxilary=='vocabulary'){
                 //vocabulary groups
                 
@@ -148,13 +152,11 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
                 this._toolbar = this.searchForm;
                 
-                $('<div>'
-                    +'<h3 style="display:inline-block;margin: 0 10px 0 0; vertical-align: middle;">Vocabularies</h3>'
-                    //+'<div id="btn_add_record" style="display:inline-block"></div>'
-                  +'</div>'
-                  +'<div id="div_group_information" style="padding-top: 13px;width:100%;min-height:3em;clear:both"></div>')
+                $('<div id="div_group_information" '
++'style="vertical-align: middle;width: 100%;min-height: 32px; border-bottom: 1px solid gray; clear: both;"></div>'
+                   +'<div class="action-buttons" style="height:40px;background:white;padding:10px 8px;">'
+                   +'<h4 style="display:inline-block;margin: 0 10px 0 0; vertical-align: middle;">Vocabularies</h4></div>')
                 .appendTo(this.searchForm);
-                
                             
                 var btn_array = [
                           
@@ -170,14 +172,14 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                     ];
                     
                 //add, import buttons
-                var c1 = this.searchForm.find('div:first');
+                var c1 = this.searchForm.find('div.action-buttons');
                 for(var idx in btn_array){
                         this._defineActionButton2(btn_array[idx], c1);
                 }
                     
                             
                 
-                this.searchForm.css({'padding-top':this.options.isFrontUI?'8px':'4px', height:80});
+                this.searchForm.css({'padding-top':this.options.isFrontUI?'6px':'4px', height:80});
                 this.recordList.css({ top:80});
                 
                 
@@ -321,22 +323,33 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 this._toolbar = this.searchForm;
                 
                 //padding:'6px'
-                this.searchForm.css({'min-width': '470px', 'padding-top':this.options.isFrontUI?'8px':'4px', height:80})
+                this.searchForm.css({'min-width': '470px', 'padding-top':this.options.isFrontUI?'6px':'4px', height:80})
                             .empty();                                     
                 this.recordList.css({'min-width': '315px', top:80});
                 this.searchForm.parent().css({'overflow-x':'auto'});
                 
-                $('<div>'
+                $('<div style="vertical-align: middle;width: 100%;min-height: 32px; border-bottom: 1px solid gray; clear: both;">'
++'<div id="div_group_information" style="margin-right:150px;">A</div>'
++'<div style="position:absolute;right:10px;top:8px;"><label>Find: </label>'
+                +'<input type="text" style="width:6em" class="find-term text ui-widget-content ui-corner-all"/></div>'
++'</div>'
++'<div class="action-buttons" style="height:40px;background:white;padding:10px 8px;">'
++'<h4 style="display:inline-block;margin: 0 10px 0 0; vertical-align: middle;">Terms</h4>'
++'<div style="min-width:70px;text-align:right;float:right" id="btn_container"></div></div>')
+                .appendTo(this.searchForm);
+                
+                
+                /*$('<div>'
                     +'<h3 style="display:inline-block;margin: 0 10px 0 0; vertical-align: middle;">Terms</h3>'
                   +'</div>'
                   +'<div style="display:table;width:100%;">'
                   +'<div id="div_group_information" style="padding-top:13px;min-height:3em;max-width:350px;display:table-cell;"></div>'
                   +'<div style="min-width:70px;text-align:right;display:table-cell;" id="btn_container"></div>'
                   +'</div>')
-                .appendTo(this.searchForm);
+                .appendTo(this.searchForm);*/
                 
                 //add, import buttons
-                var c1 = this.searchForm.find('div:first');
+                var c1 = this.searchForm.find('div.action-buttons');
                 for(var idx in btn_array){
                         this._defineActionButton2(btn_array[idx], c1);
                 }
@@ -346,11 +359,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                     .appendTo(c1);
                 
                 //add input search
-                var c1 = $('<div style="float:right"><label>Find: </label>'
-                +'<input type="text" style="width:6em" class="text ui-widget-content ui-corner-all"/></div>')
-                .appendTo(c1);
-                
-                this._on(c1.find('input'), {
+                this._on(this.searchForm.find('.find-term'), {
                     //keypress: window.hWin.HEURIST4.ui.preventChars,
                     keyup: this._onFindTerms }); //keyup
                 
@@ -663,7 +672,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         
         if(!this.getRecordSet()) return;
 
-        var sGroupTitle = '<h4 style="margin:0">';
+        var sGroupTitle = '<h3 style="margin:0;padding:0 8px" class="truncate">';
         if(this.options.auxilary=='vocabulary'){
             //filter by group
             
@@ -673,7 +682,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 this.filterRecordList(null, {'trm_VocabularyGroupID':vcg_id, 'sort:trm_Label':1});
                 
                 sGroupTitle += (window.hWin.HEURIST4.util.htmlEscape($Db.vcg(vcg_id,'vcg_Name'))
-                                        +'</h4><div class="heurist-helper3 truncate" style="font-size:0.7em">'
+                                        +'</h3><div class="heurist-helper3 truncate" style="font-size:0.7em;padding:0 8px;">'
                                         + window.hWin.HEURIST4.util.htmlEscape($Db.vcg(vcg_id,'vcg_Description'))
                                         +'</div>');
                 
@@ -692,7 +701,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 }                    
                 
             }else{
-                sGroupTitle += '</h4>';
+                sGroupTitle += '</h3>';
             }
             
             
@@ -719,7 +728,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 }
 
                 sGroupTitle += ($Db.trm(vocab_id,'trm_Label')
-                    +'</h4><div class="heurist-helper3 truncate" style="font-size:0.7em;">'
+                    +'</h3><div class="heurist-helper3 truncate" style="font-size:0.7em;padding:0 8px">'
                     +$Db.trm(vocab_id,'trm_Description')+'&nbsp;</div>');
 
             }else{
@@ -1141,7 +1150,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                     t_idx[parent_id].push(recID);
                 }
             }
-            this._filterByVocabulary();
+            //this._filterByVocabulary();
             //this._loadData();
             //expand formlet
             if(this.options.auxilary=='term'){
@@ -1151,8 +1160,13 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 },1000);
             }
             
+        /*}else if(this.options.auxilary=='vocabulary' && recID>0){
+            //highlight in list 
+            this.recordList.resultList('setSelected', [recID]);
+        }else{*/
         }
-        this._triggerRefresh(this.options.auxilary);
+        
+        this._triggerRefresh(this.options.auxilary);    
         
     },
     
@@ -1667,7 +1681,6 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                         activate: function(event, data){
                             // A node was activated: display its details
                             //_onNodeClick(data);
-console.log('NODE activated');
                         },
                     })
                     .css({'font-weight':'normal !important'});

@@ -1287,8 +1287,9 @@ $.widget( "heurist.manageEntity", {
     },
     
     refreshRecordList: function(){
-        if(this.recordList && this.recordList.resultList('instance'))
+        if(this.recordList && this.recordList.resultList('instance')){
             this.recordList.resultList('refreshPage');  
+        }
     },
 
     //

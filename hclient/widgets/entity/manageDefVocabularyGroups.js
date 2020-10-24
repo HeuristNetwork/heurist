@@ -111,9 +111,15 @@ $.widget( "heurist.manageDefVocabularyGroups", $.heurist.manageEntity, {
             this.searchForm.css({'padding-top': this.options.isFrontUI?'8px':'4px'}).empty();
             //this._defineActionButton2(btn_array[1], this.searchForm);
             
-            $('<h3 style="display:inline-block;margin: 0 10px 0 0; vertical-align: middle;">Vocabulary Groups</h3>')
-                .appendTo( this.searchForm );
-            this._defineActionButton2(btn_array[0], this.searchForm);
+            $('<h3 style="margin:0;padding:0 8px;vertical-align: middle;width:100%;min-height: 32px; border-bottom: 1px solid gray; clear: both;">Vocabularies editor</h3>'
+                +'<div class="action-buttons" style="height:40px;background:white;padding:10px 8px;">'
+                +'<h4 style="display:inline-block;margin: 0 10px 0 0; vertical-align: middle;">Groups</h4></div>')
+            .appendTo( this.searchForm );
+            
+            this.searchForm.css({padding:'6px 0 0 0'});
+            this.recordList.css({ top:80});
+            
+            this._defineActionButton2(btn_array[0], this.searchForm.find('.action-buttons'));
         
         this._loadData();
          
