@@ -1073,13 +1073,13 @@ $.widget( "heurist.svs_list", {
 
         var sWidth = '60%';
         var sInfo = '';
-        if(this.options.container_width>250){
-            sWidth = this.options.container_width - 120;
+        if(this.options.container_width>199){
+            sWidth = this.options.container_width - 100;
             sInfo = '<span style="font-size:0.8em;font-weight:normal;vertical-align:top;line-height: 1.8em;"> ('
             + ((sIcon=='user')?'private':'workgroup')
             + ')</span>';
         }else if(this.options.container_width>0){
-            sWidth = this.options.container_width - 52;
+            sWidth = this.options.container_width - 55;
         }
         
         var $header = $('<h3 class="hasmenu2" grpid="'+domain

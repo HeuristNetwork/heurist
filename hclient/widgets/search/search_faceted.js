@@ -202,7 +202,7 @@ $.widget( "heurist.search_faceted", {
             if(this.options.is_h6style && !this.options.is_publication){
                 
                 this.div_title = $('<div class="ui-heurist-header truncate" '
-                    +'style="position:relative;width:211px;padding:10px;font-size: 0.9em;">')
+                    +'style="position:relative;width:180px;padding:10px;font-size: 0.9em;">')
                     .appendTo( this.div_header );
                 
             }else{
@@ -1043,8 +1043,10 @@ $.widget( "heurist.search_faceted", {
                     
                     //since it takes default width from field definitions
                     //force width for direct input and selectors to 150px 
-                    inpt.find('input').removeClass('text').css({'width':'150px','min-width':'150px'});
-                    inpt.find('select').removeClass('text').css({'width':'150px','min-width':'150px'});
+                    var w = that.element.width();
+                    if(!(w>0) || w<200) w = 200;
+                    inpt.find('input').removeClass('text').css({'width':(w-80)+'px','min-width':(w-80)+'px'});
+                    inpt.find('select').removeClass('text').css({'width':(w-30)+'px','min-width': (w-30)+'px'});
                     
                     var btn_add = $( "<button>",{title:'To clear previous search click the RESET button'})
                     .addClass("smallbutton")
@@ -1889,7 +1891,9 @@ if(!(vocab_id>0)){
                                 
                         }else{
                             //as dropdown
-                                var $sel = $('<select>').css({"font-size": "0.6em !important", "width":"180px"});
+                            var w = that.element.width();
+                            if(!(w>0) || w<200) w = 200;
+                            var $sel = $('<select>').css({"font-size": "0.6em !important", "width":(w-30)+'px' });
                                 $sel.appendTo( $("<div>").css({"display":"block","padding":"0 5px"}).appendTo($facet_values) );
                                 
                                 that._createOption( facet_index, 0, {title:window.hWin.HR('select...'), value:null, count:0} ).appendTo($sel);
