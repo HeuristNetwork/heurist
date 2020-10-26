@@ -53,6 +53,10 @@ private static function initialize($fields_correspondence=null)
     self::$system  = $system;
     self::$mysqli = $system->get_mysqli();
     self::$initialized = true;
+    
+    if(!defined('HEURIST_DBID')){
+        define('HEURIST_DBID', $system->get_system('sys_dbRegisteredID'));
+    }    
 }
 
 /**
