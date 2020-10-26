@@ -52,6 +52,7 @@ $s_max_size = round($max_size/1024/1024).' MBytes';
         <script src="../../external/jquery-file-upload/js/jquery.fileupload.js"></script>
         
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/detectHeurist.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/core/utils_dbs.js"></script>
 
         <!-- CSS -->
         <?php include dirname(__FILE__).'/../../hclient/framecontent/initPageCss.php'; ?>

@@ -53,6 +53,10 @@ private static function initialize($fields_correspondence=null)
     self::$system  = $system;
     self::$mysqli = $system->get_mysqli();
     self::$initialized = true;
+    
+    if(!defined('HEURIST_DBID')){
+        define('HEURIST_DBID', $system->get_system('sys_dbRegisteredID'));
+    }
 }
 
 /**
@@ -732,7 +736,7 @@ EOD;
                     if(@$records_corr_alphanum[$rec_id_an]){ //aplhanum->random int
                         $record_src['rec_ID'] = $records_corr_alphanum[$rec_id_an];
                     }else{
-                        $rand_id = random_int(900000000,999999999);
+                        $rand_id = rand(900000000,999999999); //random_int
                         $records_corr_alphanum[$rec_id_an] = $rand_id;
                         $record_src['rec_ID'] = $rand_id; 
                     }
@@ -968,7 +972,7 @@ EOD;
                                if(@$records_corr_alphanum[$value]){
                                    $value = $records_corr_alphanum[$value];
                                }else{
-                                   $rand_id = random_int(900000000,999999999);
+                                   $rand_id = rand(900000000,999999999); //was random_int
                                    $records_corr_alphanum[$value] = $rand_id;
                                    $value = $rand_id; 
                                }
