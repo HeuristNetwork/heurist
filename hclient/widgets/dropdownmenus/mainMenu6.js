@@ -793,7 +793,6 @@ $.widget( "heurist.mainMenu6", {
     //    
     _switch_SvsList: function( mode ){
         
-console.log('!!!!');        
         if(!this.svs_list && this.menues['explore'].find('#svs_list').length>0){
             this.svs_list = this._init_SvsList(this.menues['explore'].find('#svs_list'));
         }
@@ -855,14 +854,18 @@ console.log('!!!!');
     //
     _closeExploreMenuPopup: function(){
       
-        this.menues_explore_popup.hide();  
+        if(this.menues_explore_popup){
             
-        //attempt for non modal 
-        this.divMainMenu.find('li.menu-explore > .menu-text').css('text-decoration', 'none');
-        this.menues['explore'].find('li.menu-explore > .menu-text').css('text-decoration', 'none');
-        
-        this._current_explore_action = null;
-        this.closeSavedSearch();
+            this.menues_explore_popup.hide();  
+                
+            //attempt for non modal 
+            this.divMainMenu.find('li.menu-explore > .menu-text').css('text-decoration', 'none');
+            this.menues['explore'].find('li.menu-explore > .menu-text').css('text-decoration', 'none');
+            
+            this._current_explore_action = null;
+            this.closeSavedSearch();
+            
+        }
     },
     
     //
