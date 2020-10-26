@@ -602,6 +602,8 @@ $.widget( "heurist.search_faceted_wiz", {
 
         if(this.step>=0) this.step_panels[this.step].css({'display':'none'});
         this.step_panels[newstep].css({'display':'block','overflow':'hidden'});
+        
+        var btns = this.element.parent().find('.ui-dialog-buttonset');
 
         if(this.step==2 && newstep==3){
             
@@ -610,26 +612,27 @@ $.widget( "heurist.search_faceted_wiz", {
             this.facetPreview_reccount = 0; //first time it always refresh preview
             this._refresh_FacetsPreview();
             //this._refresh_FacetsPreviewReal();
-            $("#btnNext").button({icon:'ui-icon-check', label:window.hWin.HR('Save')});
+            btns.find("#btnNext").button({icon:'ui-icon-check', label:window.hWin.HR('Save')});
         }
 
         if(newstep==0 && this.options.svsID>0 && 
-            this.options.params.rectypes && this.options.params.rectypes[0]==this.originalRectypeID){
-            $("#btnSave").css({'visibility':'visible','margin-left':'20px'});//show();
+            this.options.params.rectypes && this.options.params.rectypes[0]==this.originalRectypeID)
+        {
+            btns.find("#btnSave").css({'visibility':'visible','margin-left':'20px'});//show();
         }else{
-            $("#btnSave").css('visibility','hidden');//$("#btnSave").hide();
+            btns.find("#btnSave").css('visibility','hidden');//$("#btnSave").hide();
         }
         
         
         if(newstep==0){
             var that = this;
             setTimeout(function(){that.step0.find('#svs_Name').focus();},500);
-            $("#btnBack").hide();
+            btns.find("#btnBack").hide();
             
         }else{
             this.adjustDimension()
 
-            $("#btnBack").show();
+            btns.find("#btnBack").show();
         }
 
         this.step = newstep;

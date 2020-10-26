@@ -1428,8 +1428,7 @@ if(strpos($params3['q'],'related_to')>0){
     $params3['q'] = str_replace('relatedfrom','related',$params3['q']);
 }
                     
-//DEBUg 
-error_log(print_r($params3,true));                    
+//DEBUg error_log(print_r($params3,true));                    
                     
                     $response = recordSearch($system, $params3);
 

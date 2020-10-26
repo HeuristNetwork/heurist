@@ -1,3 +1,7 @@
+// [{"t":"3"},{"all":[{"title":"Milano"},{"title":"Note"}]}]
+// [{"t":"3"},{"any":[{"f:title":"Milano"},{"f:title":"Note"}]}]
+// [{"t":"3"},{"any":[{"title":"Milano"},{"title":"Note"}]}]
+//
 /**
 *  Apply faceted search
 * TODO: Check that this is what it does and that it is not jsut an old version
@@ -666,7 +670,12 @@ $.widget( "heurist.search_faceted", {
     //
     ,doReset: function(){
 
-        $(this.document).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCHSTART, [ {reset:true, search_realm:this.options.search_realm, primary_rt:9999} ]);  //global app event to clear views
+        $(this.document).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCHSTART, [ 
+            {reset:true, 
+             search_realm:this.options.search_realm, 
+             primary_rt:9999, 
+             ispreview: this.options.ispreview
+            } ]);  //global app event to clear views
         
         var facets = this.options.params.facets;
 
@@ -1038,14 +1047,14 @@ $.widget( "heurist.search_faceted", {
                                 that.doSearch();
                         }});//"doSearch"});                   
                     
-                    inpt.find('.input-cell > .input-div').css({'display':'inline-block'}); // !important
+                    inpt.find('.input-cell > .input-div').css({'display':'inline-block',padding:0}); // !important
                     inpt.find('.input-cell').css('display','block');
                     
                     //since it takes default width from field definitions
                     //force width for direct input and selectors to 150px 
                     var w = that.element.width();
                     if(!(w>0) || w<200) w = 200;
-                    inpt.find('input').removeClass('text').css({'width':(w-80)+'px','min-width':(w-80)+'px'});
+                    inpt.find('input').removeClass('text').css({'width':(w-65)+'px','max-width':(w-65)+'px'});
                     inpt.find('select').removeClass('text').css({'width':(w-30)+'px','min-width': (w-30)+'px'});
                     
                     var btn_add = $( "<button>",{title:'To clear previous search click the RESET button'})
@@ -1197,7 +1206,40 @@ $.widget( "heurist.search_faceted", {
                                 if(facets[facet_index]['isfacet']==that._FT_INPUT){  //this is direct input
                                      var sel = $(_inputs[val]).editing_input('getValues');
                                      if(sel && sel.length>0){
-                                         facets[facet_index].selectedvalue = {value:sel[0]};
+                                         var val = sel[0];
+                                         var search_all_words = false;
+
+                                         if(val.length>2 && val[0]=='"' && val[val.length-1]=='"'){
+                                            val = val.substring(1,val.length-1);
+                                         }else if(!window.hWin.HEURIST4.util.isempty(val) && val.indexOf(' ')>0){
+                                            search_all_words = true;
+                                         }
+                                         
+                                         facets[facet_index].selectedvalue = {value:val};
+
+                                         //search for ANY word
+                                         if(search_all_words){
+                                             var values = val.split(' ');
+                                             var predicates = [];
+                                             for (var i=0; i<values.length; i++){
+                                                 var pre = {};
+                                                 if(window.hWin.HEURIST4.util.isempty(values[i])
+                                                    || values[i].toLowerCase() == 'or' 
+                                                    || values[i].toLowerCase() == 'and'){
+                                                     
+                                                 }else{
+                                                     pre[key] = values[i];
+                                                     predicates.push(pre);
+                                                 }
+                                             }
+                                             if(predicates.length>1){
+                                                 q.push({"any":predicates});
+                                                 isbranch_empty = false;
+                                                 delete predicate[key];
+                                                 continue;
+                                             }
+                                         }
+                                         
                                      }else{
                                          facets[facet_index].selectedvalue = null;
                                      }
@@ -1255,10 +1297,10 @@ $.widget( "heurist.search_faceted", {
     //
     //
     //
-    ,doSearch : function(){
+    ,doSearch: function(){
 
 //console.log('dosearchj');
-//console.log( this.options.params.q );
+console.log( this.options.params.q );
 
             var query = window.hWin.HEURIST4.util.cloneJSON( this.options.params.q ); //clone 
             var isform_empty = this._fillQueryWithValues(query);
@@ -1322,6 +1364,7 @@ $.widget( "heurist.search_faceted", {
                             viewmode: this.options.params.ui_viewmode,
                             //to keep info what is primary record type in final recordset
                             primary_rt: this.options.params.rectypes[0],
+                            ispreview: this.options.ispreview,
                             search_realm: this.options.search_realm
                             }; //, facets: facets
                             

@@ -191,7 +191,8 @@ $.widget( "heurist.resultList", {
                         {selection:null, source:that.element.attr('id'), search_realm:that.options.search_realm} );
                         
                     if(that.options.show_search_form){
-                        if(data.primary_rt){
+                        if (data.primary_rt && !data.ispreview)
+                        {
                             //this is faceted search - hide input search form
                             that.div_search_form.hide();
                         }else{
