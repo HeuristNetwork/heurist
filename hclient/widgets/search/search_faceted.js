@@ -1,7 +1,3 @@
-// [{"t":"3"},{"all":[{"title":"Milano"},{"title":"Note"}]}]
-// [{"t":"3"},{"any":[{"f:title":"Milano"},{"f:title":"Note"}]}]
-// [{"t":"3"},{"any":[{"title":"Milano"},{"title":"Note"}]}]
-//
 /**
 *  Apply faceted search
 * TODO: Check that this is what it does and that it is not jsut an old version

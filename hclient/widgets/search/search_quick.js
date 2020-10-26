@@ -282,11 +282,11 @@ $.widget( "heurist.search_quick", $.heurist.recordAction, {
 
                 var rectype = (event)?Number(event.target.value):0;
                 
-                var topOptions2 = 'Any field type';
+                //var topOptions2 = 'All fields';
+                var topOptions2 = [{key:'',title:window.hWin.HR('All fields')},{key:'title',title:'Recor title (constructed)'}];
                 var bottomOptions = null;
 
                 if(!(rectype>0)){
-                    //topOptions2 = [{key:'',title:window.hWin.HR('Any field type')}];
                     bottomOptions = [{key:'latitude',title:window.hWin.HR('geo: Latitude')},
                                      {key:'longitude',title:window.hWin.HR('geo: Longitude')}]; 
                 }
@@ -433,9 +433,11 @@ $.widget( "heurist.search_quick", $.heurist.recordAction, {
                 if(Number(fld)>0){
                     var detailType = $Db.dty(fld,'dty_Type');
                     isEnum = (detailType=='enum'  || detailType=='relationtype');
+                    fld = "f:"+fld+":";
+                }else{
+                    fld = fld+":";
                 }
-                
-                fld = "f:"+fld+":";  
+                  
             } 
             
             if(isEnum){
