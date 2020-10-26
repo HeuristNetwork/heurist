@@ -664,6 +664,7 @@ class HPredicate {
     //@todo - remove?
     var $negate = false;
     var $exact = false;
+    var $fulltext = false;
     var $case_sensitive = false;
     var $lessthan = false;
     var $greaterthan = false;
@@ -969,8 +970,11 @@ class HPredicate {
             
             $res = "NOT exists (select dtl_ID from recDetails ".$p." where r".$this->qlevel.".rec_ID=".$p."dtl_RecID AND "
             .$p.' dtl_DetailTypeID';
-            if($several_ids){
-                $res = $res.' IN ('.implode(',',$several_ids).'))';    
+            if($several_ids && count($several_ids)>0){
+                $res = $res.(count($several_ids)>1
+                        ?' IN ('.implode(',',$several_ids).')'
+                        :'='.$several_ids[0])
+                        .')';    
             }else{
                 $res = $res.'='.$this->field_id.')';
             }
@@ -980,13 +984,16 @@ class HPredicate {
             $res = "(select count(dtl_ID) from recDetails ".$p." where r".$this->qlevel.".rec_ID=".$p."dtl_RecID AND "
             .$p.'dtl_DetailTypeID';
         
-            if($several_ids){
-                $res = $res.' IN ('.implode(',',$several_ids).'))';    
+            if($several_ids && count($several_ids)>0){
+                $res = $res.(count($several_ids)>1
+                        ?' IN ('.implode(',',$several_ids).')'
+                        :'='.$several_ids[0])
+                        .')';    
             }else{
                 $res = $res.'='.$this->field_id.')';
             }
             
-            $res = $res.$val;
+            $res = $res.$val; //$val is number of occurences
             
         }else{
             
@@ -1005,17 +1012,39 @@ class HPredicate {
             }
 
             //old $res = $p."dtl_DetailTypeID=".$this->field_id." AND ".$p."dtl_Value ".$val;
-
-            $res = "exists (select dtl_ID from recDetails ".$p." where r".$this->qlevel.".rec_ID=".$p."dtl_RecID AND "
-            .$p.'dtl_DetailTypeID';
+            if($this->fulltext){
+                $res = 'select dtl_RecID from recDetails where dtl_DetailTypeID';
+            }else{
+                $res = "exists (select dtl_ID from recDetails ".$p." where r".$this->qlevel.".rec_ID=".$p."dtl_RecID AND "
+                .$p.'dtl_DetailTypeID';
+            }
             
-            if($several_ids){
-                $res = $res.' IN ('.implode(',',$several_ids).')';    
+            if($several_ids && count($several_ids)>0){
+                $res = $res.(count($several_ids)>1
+                        ?' IN ('.implode(',',$several_ids).')'
+                        :'='.$several_ids[0]);
+                        
             }else{
                 $res = $res.'='.$this->field_id;
             }
             
-            $res = $res.' AND '.$field_name.$val.')';
+            if($this->fulltext){
+                //execute fulltext search query
+                $res = $res.' AND MATCH(dtl_Value) '.$val;
+                $list_ids = mysql__select_list2($mysqli, $res);
+                
+                if($list_ids && count($list_ids)>0){
+                    $res = 'r'.$this->qlevel.'.rec_ID'
+                        .(count($list_ids)>1
+                            ?' IN ('.implode(',',$list_ids).')'
+                            :'='.$list_ids[0]);
+                }else{
+                    $res = '(1=0)'; //nothing found    
+                }
+                
+            }else{
+                $res = $res.' AND '.$field_name.$val.')';    
+            }
 
         }
 
@@ -1038,6 +1067,7 @@ class HPredicate {
         $val_enum = $this->getFieldValue();
         
         $this->field_type = 'freetext';
+        $val_wo_prefixes = $this->value;
         $this->value = $keep_val;
         $val = $this->getFieldValue();
         if(!$val) return null;
@@ -1051,15 +1081,41 @@ class HPredicate {
             $field_name2 = 'replace('.$field_name2.", \"'\", \"\") ";                   
         }
         
+        if($this->fulltext){
+                //execute fulltext search query
+                $res = 'select dtl_RecID from recDetails '
+                . ' left join defDetailTypes on dtl_DetailTypeID=dty_ID '
+                . ' left join Records link on dtl_Value=link.rec_ID '
+                .' where if(dty_Type != "resource", '
+                    .' if(dty_Type="enum", dtl_Value'.$val_enum 
+                       .', MATCH(dtl_Value) '.$val
+                       .'), '.$field_name2.' LIKE "%'.$val_wo_prefixes.'%")'; 
+                
+                $list_ids = mysql__select_list2($mysqli, $res);
+                
+                if($list_ids && count($list_ids)>0){
+                    $res = 'r'.$this->qlevel.'.rec_ID'
+                        .(count($list_ids)>1
+                            ?' IN ('.implode(',',$list_ids).')'
+                            :'='.$list_ids[0]);
+                }else{
+                    $res = '(1=0)'; //nothing found    
+                }
+                
+            
+            
+        }else{
 
-        $res = 'exists (select dtl_ID from recDetails '.$p
-        . ' left join defDetailTypes on dtl_DetailTypeID=dty_ID '
-        . ' left join Records link on '.$p.'dtl_Value=link.rec_ID '
-        .' where r'.$this->qlevel.'.rec_ID='.$p.'dtl_RecID '
-        .'  and if(dty_Type != "resource", '
-                .' if(dty_Type="enum", '.$p.'dtl_Value'.$val_enum 
-                   .', '.$field_name1.$val
-                   .'), '.$field_name2.$val.'))';   //'LIKE "%'.$mysqli->real_escape_string($this->value).'%"))';
+            $res = 'exists (select dtl_ID from recDetails '.$p
+            . ' left join defDetailTypes on dtl_DetailTypeID=dty_ID '
+            . ' left join Records link on '.$p.'dtl_Value=link.rec_ID '
+            .' where r'.$this->qlevel.'.rec_ID='.$p.'dtl_RecID '
+            .'  and if(dty_Type != "resource", '
+                    .' if(dty_Type="enum", '.$p.'dtl_Value'.$val_enum 
+                       .', '.$field_name1.$val
+                       .'), '.$field_name2.$val.'))';   //'LIKE "%'.$mysqli->real_escape_string($this->value).'%"))';
+                   
+        }
 
         return array("where"=>$res);
     }
@@ -1569,6 +1625,9 @@ class HPredicate {
             }else if(strpos($this->value, '=')===0){
                 $this->exact = true;
                 $this->value = substr($this->value, 1);
+            }else if(strpos($this->value, '@')===0){
+                $this->fulltext = true;
+                $this->value = substr($this->value, 1);
             }else if(strpos($this->value, '<')===0){
                 $this->lessthan = true;
                 $this->value = substr($this->value, 1);
@@ -1683,7 +1742,11 @@ class HPredicate {
                     }else{
                         $res = $between."'".$mysqli->real_escape_string($vals[0])."' and '".$mysqli->real_escape_string($vals[1])."'";
                     }
-
+                
+                }else if($this->fulltext){
+                    
+                    $res = " AGAINST ('".$mysqli->real_escape_string($this->value)."')";
+                    
                 }else{
 
                     if($eq=='=' && !$this->exact){

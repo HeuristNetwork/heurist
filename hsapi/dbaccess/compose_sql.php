@@ -680,7 +680,7 @@ class OrLimb {
 
 class AndLimb {
     var $negate;
-    var $exact, $lessthan, $greaterthan;
+    var $exact, $lessthan, $greaterthan, $fulltext;
     var $pred;
 
     var $parent;
@@ -832,9 +832,16 @@ class AndLimb {
                     if (($colon_pos = strpos($raw_pred_val, '='))) $this->exact = true;
                     else if (($colon_pos = strpos($raw_pred_val, '<'))) $this->lessthan = true;
                         else if (($colon_pos = strpos($raw_pred_val, '>'))) $this->greaterthan = true;
+                            //else if (($colon_pos = strpos($raw_pred_val, '@'))) $this->fulltext = true;
                 }
                 if ($colon_pos === FALSE){
                     $value = $this->cleanQuotedValue($raw_pred_val);
+                    
+                    if (($colon_pos = strpos($value, '@'))===0) $this->fulltext = true;
+                    if($colon_pos===0){
+                        $value = substr($value,1);
+                    }                    
+                    
                     return new AnyPredicate($this, $value);
                 } else if ($colon_pos == 0){
                     $value = $this->cleanQuotedValue($raw_pred_val);
@@ -848,7 +855,8 @@ class AndLimb {
                     if (($colon_pos = strpos($value, '='))===0) $this->exact = true;
                     else if (($colon_pos = strpos($value, '<'))===0) $this->lessthan = true;
                         else if (($colon_pos = strpos($value, '>'))===0) $this->greaterthan = true;
-                            if($colon_pos===0){
+                            else if (($colon_pos = strpos($value, '@'))===0) $this->fulltext = true;
+                    if($colon_pos===0){
                         $value = substr($value,1);
                     }
                     
@@ -1320,23 +1328,23 @@ class UserPredicate extends Predicate {
 
         $not = ($this->parent->negate)? 'not ' : '';
         if (is_numeric($this->value)) {
-            return $not . 'exists (select * from usrBookmarks bkmk where bkmk.bkm_recID=TOPBIBLIO.rec_ID '
-            . ' and bkmk.bkm_UGrpID = ' . intval($this->value) . ')';
+            return '('.$not . 'exists (select * from usrBookmarks bkmk where bkmk.bkm_recID=TOPBIBLIO.rec_ID '
+            . ' and bkmk.bkm_UGrpID = ' . intval($this->value) . '))';
         }
         else if (preg_match('/^\d+(?:,\d*)+$/', $this->value)) {
-            return $not . 'exists (select * from usrBookmarks bkmk where bkmk.bkm_recID=TOPBIBLIO.rec_ID '
-            . ' and bkmk.bkm_UGrpID in (' . $this->value . '))';
+            return '('.$not . 'exists (select * from usrBookmarks bkmk where bkmk.bkm_recID=TOPBIBLIO.rec_ID '
+            . ' and bkmk.bkm_UGrpID in (' . $this->value . ')))';
         }
         else if (preg_match('/^(\D+)\s+(\D+)$/', $this->value,$matches)){    // saw MODIFIED: 16/11/2010 since Realname field was removed.
-            return $not . 'exists (select * from usrBookmarks bkmk, sysUGrps usr '
+            return '('.$not . 'exists (select * from usrBookmarks bkmk, sysUGrps usr '
             . ' where bkmk.bkm_recID=TOPBIBLIO.rec_ID and bkmk.bkm_UGrpID = usr.ugr_ID '
             . ' and (usr.ugr_FirstName = "' . $mysqli->real_escape_string($matches[1])
-            . '" and usr.ugr_LastName = "' . $mysqli->real_escape_string($matches[2]) . '"))';
+            . '" and usr.ugr_LastName = "' . $mysqli->real_escape_string($matches[2]) . '")))';
         }
         else {
-            return $not . 'exists (select * from usrBookmarks bkmk, sysUGrps usr '
+            return '('.$not . 'exists (select * from usrBookmarks bkmk, sysUGrps usr '
             . ' where bkmk.bkm_recID=TOPBIBLIO.rec_ID and bkmk.bkm_UGrpID = usr.ugr_ID '
-            . ' and usr.ugr_Name = "' . $mysqli->real_escape_string($this->value) . '")';
+            . ' and usr.ugr_Name = "' . $mysqli->real_escape_string($this->value) . '"))';
         }
     }
 }
@@ -1385,8 +1393,32 @@ class AnyPredicate extends Predicate {
     function makeSQL() {
         global $mysqli;
 
-        
         $val = $mysqli->real_escape_string($this->value);
+        
+        if($this->parent->fulltext){
+               
+               $res = 'select dtl_RecID from recDetails '
+                . ' left join defDetailTypes on dtl_DetailTypeID=dty_ID '
+                . ' left join Records link on dtl_Value=link.rec_ID '
+                .' where if(dty_Type="resource", '
+                    .'link.rec_Title like "%'.$val.'%", '
+                    .' MATCH(dtl_Value) AGAINST("'.$val.'"))';
+
+                $list_ids = mysql__select_list2($mysqli, $res);
+                
+                if($list_ids && count($list_ids)>0){
+                    $res = '(TOPBIBLIO.rec_ID'
+                        .(count($list_ids)>1
+                            ?' IN ('.implode(',',$list_ids).')'
+                            :'='.$list_ids[0]).') OR ';
+                }else{
+                    $res = ''; //nothing found    
+                }
+                
+                return '('.$res.' (TOPBIBLIO.rec_Title like "%'.$val.'%"))';
+                
+        }        
+        
         
         $not = ($this->parent->negate)? 'not ' : '';
         return $not . ' (exists (select rd.dtl_ID from recDetails rd '
@@ -1545,12 +1577,12 @@ class FieldPredicate extends Predicate {
 
                 if($isrelmarker_0){
 
-                    $resq = $not . 'exists (select rel0.rrc_TargetRecID, rel0.rrc_SourceRecID from recRelationshipsCache rel0 '.$relation_second_level
+                    $resq = '('.$not . 'exists (select rel0.rrc_TargetRecID, rel0.rrc_SourceRecID from recRelationshipsCache rel0 '.$relation_second_level
                     .$nest_joins
                     .' where ((rel0.rrc_TargetRecID=TOPBIBLIO.rec_ID and rel0.rrc_SourceRecID=link0.rec_ID)'
                     .' or (rel0.rrc_SourceRecID=TOPBIBLIO.rec_ID and rel0.rrc_TargetRecID=link0.rec_ID)) '
                     .$relation_second_level_where
-                    .$field_value.')';
+                    .$field_value.'))';
 
 
                 }else{
@@ -1563,9 +1595,9 @@ class FieldPredicate extends Predicate {
                         $rd_type_clause = " and rd.dtl_DetailTypeID in (select rdt.dty_ID from defDetailTypes rdt where rdt.dty_Name ".$rd_type_clause." limit 1)";
                     }
 
-                    $resq = $not . 'exists (select rd.dtl_ID from recDetails rd '.$relation_second_level
+                    $resq = '('.$not . 'exists (select rd.dtl_ID from recDetails rd '.$relation_second_level
                     .$nest_joins
-                    . ' where rd.dtl_RecID=TOPBIBLIO.rec_ID ' . $relation_second_level_where . $field_value . $rd_type_clause.')';
+                    . ' where rd.dtl_RecID=TOPBIBLIO.rec_ID ' . $relation_second_level_where . $field_value . $rd_type_clause.'))';
                 }
 
             }else{  //working copy!!!!
@@ -1615,9 +1647,9 @@ class FieldPredicate extends Predicate {
                     $rd_type_clause = " and rd.dtl_DetailTypeID in (select rdt.dty_ID from defDetailTypes rdt where rdt.dty_Name ".$rd_type_clause." limit 1)";
                 }
 
-                $resq = $not . 'exists (select rd.dtl_ID from recDetails rd '
+                $resq = '('.$not . 'exists (select rd.dtl_ID from recDetails rd '
                 .$nest_joins
-                . ' where rd.dtl_RecID=TOPBIBLIO.rec_ID '.$field_value . $rd_type_clause.')';
+                . ' where rd.dtl_RecID=TOPBIBLIO.rec_ID '.$field_value . $rd_type_clause.'))';
 
             }
 
@@ -1661,26 +1693,26 @@ class FieldPredicate extends Predicate {
         $timestamp = $isin?false:true; //$this->isDateTime();
 
         if($this->field_type_value=='resource'){ //field type is found - search for specific detailtype
-            return $not . 'exists (select rd.dtl_ID from recDetails rd '
+            return '('.$not . 'exists (select rd.dtl_ID from recDetails rd '
             . ' left join Records link on rd.dtl_Value=link.rec_ID '
             . ' where rd.dtl_RecID=TOPBIBLIO.rec_ID and rd.dtl_DetailTypeID=' . intval($this->field_type).' and ' 
-            . ($isnumericvalue ? 'rd.dtl_Value ':' link.rec_Title ').$match_pred . ')';
+            . ($isnumericvalue ? 'rd.dtl_Value ':' link.rec_Title ').$match_pred . '))';
             
         }else if($this->field_type_value=='enum' || $this->field_type_value=='relationtype'){ 
             
-            return $not . 'exists (select rd.dtl_ID from recDetails rd '
+            return '('.$not . 'exists (select rd.dtl_ID from recDetails rd '
             //. (($isnumericvalue || $isin)?'':'left join defTerms trm on trm.trm_Label '. $match_pred )
             . ' where rd.dtl_RecID=TOPBIBLIO.rec_ID '
             . ' and rd.dtl_DetailTypeID=' . intval($this->field_type)
-            . ' and rd.dtl_Value '.$match_pred. ')';
+            . ' and rd.dtl_Value '.$match_pred. '))';
 
         }else if($this->field_type_value=='date'){ 
 
-            $res = $not . 'exists (select rd.dtl_ID from recDetails rd '
+            $res = '('.$not . 'exists (select rd.dtl_ID from recDetails rd '
             . ' where rd.dtl_RecID=TOPBIBLIO.rec_ID '
             . ' and rd.dtl_DetailTypeID=' . intval($this->field_type);
             if(trim($this->value)==''){
-                $res = $res. " and rd.dtl_Value !='' )";
+                $res = $res. " and rd.dtl_Value !='' ))";
             }else{
                 
                 if ($timestamp) {
@@ -1689,7 +1721,7 @@ class FieldPredicate extends Predicate {
                     $date_match_pred = $match_pred;
                 }
                 
-                $res = $res. ' and getTemporalDateString(rd.dtl_Value) ' . $date_match_pred. ')';
+                $res = $res. ' and getTemporalDateString(rd.dtl_Value) ' . $date_match_pred. '))';
             }
             return $res;
             
@@ -1699,19 +1731,38 @@ class FieldPredicate extends Predicate {
                 $fieldname = 'rd.dtl_UploadedFileID';
                 
                 if(!($isnumericvalue || $isin)){
-                    return $not . 'exists (select rd.dtl_ID from recDetails rd, recUploadedFiles rf '
+                    return '('.$not . 'exists (select rd.dtl_ID from recDetails rd, recUploadedFiles rf '
                     . ' where rd.dtl_RecID=TOPBIBLIO.rec_ID and rf.ulf_ID=rd.dtl_UploadedFileID'
                     . ' and rd.dtl_DetailTypeID=' . intval($this->field_type)
                     . ' and (rf.ulf_OrigFileName ' . $match_pred. ' or rf.ulf_MimeExt '. $match_pred.'))';
                 }
+            }else if($this->parent->fulltext){
+                
+                $res = 'select dtl_RecID from recDetails where '
+                .' dtl_DetailTypeID='.intval($this->field_type)
+                .' AND MATCH(dtl_Value) AGAINST("'.$mysqli->real_escape_string($this->value).'")';
+                
+                $list_ids = mysql__select_list2($mysqli, $res);
+                
+                if($list_ids && count($list_ids)>0){
+                    $res = '(TOPBIBLIO.rec_ID'
+                        .(count($list_ids)>1
+                            ?' IN ('.implode(',',$list_ids).')'
+                            :'='.$list_ids[0]).')';
+                }else{
+                    $res = '(1=0)'; //nothing found    
+                }
+                
+                return $res;
+                
             }else{
                 $fieldname = 'rd.dtl_Value';
             }    
     
-            return $not . 'exists (select rd.dtl_ID from recDetails rd '
+            return '('.$not . 'exists (select rd.dtl_ID from recDetails rd '
                 . ' where rd.dtl_RecID=TOPBIBLIO.rec_ID '
                 . ' and rd.dtl_DetailTypeID=' . intval($this->field_type)
-                . ' and ' . $fieldname . ' ' . $match_pred. ')';
+                . ' and ' . $fieldname . ' ' . $match_pred. '))';
             
             
         }else{
@@ -1727,16 +1778,39 @@ class FieldPredicate extends Predicate {
                 }
             }
             
+            if($this->parent->fulltext){
+            
+                
+                $res = 'select dtl_RecID from recDetails '
+                . ' left join defDetailTypes on dtl_DetailTypeID=dty_ID '
+                . ' left join Records link on dtl_Value=link.rec_ID '
+                .' where if(dty_Type="resource", '
+                    .'link.rec_Title ' . $match_pred . ', '
+                    .' MATCH(dtl_Value) AGAINST("'.$mysqli->real_escape_string($this->value).'"))';
+                
+                $list_ids = mysql__select_list2($mysqli, $res);
+                
+                if($list_ids && count($list_ids)>0){
+                    $res = 'TOPBIBLIO.rec_ID'
+                        .(count($list_ids)>1
+                            ?' IN ('.implode(',',$list_ids).')'
+                            :'='.$list_ids[0]);
+                }else{
+                    $res = '(1=0)'; //nothing found    
+                }             
+                
+                return $res;
+            }
             
         
-                if ($timestamp) {
-                    $date_match_pred = $this->makeDateClause();
-                }else{
-                    $date_match_pred = $match_pred;
-                }
+            if ($timestamp) {
+                $date_match_pred = $this->makeDateClause();
+            }else{
+                $date_match_pred = $match_pred;
+            }
             
 
-            return $not . 'exists (select rd.dtl_ID from recDetails rd '
+            return '('.$not . 'exists (select rd.dtl_ID from recDetails rd '
             . 'left join defDetailTypes rdt on rdt.dty_ID=rd.dtl_DetailTypeID '
             . 'left join Records link on rd.dtl_Value=link.rec_ID '
 //. (($isnumericvalue || $isin)?'':'left join defTerms trm on trm.trm_Label '. $match_pred ). " "
@@ -1749,7 +1823,7 @@ class FieldPredicate extends Predicate {
                 //.'str_to_date(getTemporalDateString(rd.dtl_Value), "%Y-%m-%d %H:%i:%s") ' . $date_match_pred . ', '
                 .'rd.dtl_Value ' . $match_pred . ')'
                 : 'rd.dtl_Value ' . $match_pred ) . ')'
-            . $rd_type_clause . ')';
+            . $rd_type_clause . '))';
         }
 
     }
@@ -1979,10 +2053,10 @@ class TagPredicate extends Predicate {
         $not = ($this->parent->negate)? 'not ' : '';
         if ($pquery->search_domain == BOOKMARK) {
             if (is_numeric(join('', $this->value))) {    // if all tag specs are numeric then don't need a join
-                return $not . 'exists (select * from usrRecTagLinks where rtl_RecID=bkm_RecID and rtl_TagID in ('.join(',', $this->value).'))';
+                return '('.$not . 'exists (select * from usrRecTagLinks where rtl_RecID=bkm_RecID and rtl_TagID in ('.join(',', $this->value).')))';
             } else if (! $this->wg_value) {
                 // this runs faster (like TEN TIMES FASTER) - think it's to do with the join
-                $query=$not . 'exists (select * from usrRecTagLinks kwi left join usrTags kwd on kwi.rtl_TagID=kwd.tag_ID '
+                $query='('.$not . 'exists (select * from usrRecTagLinks kwi left join usrTags kwd on kwi.rtl_TagID=kwd.tag_ID '
                 . 'where kwi.rtl_RecID=TOPBIBLIO.rec_ID and (';
                 $first_value = true;
                 foreach ($this->value as $value) {
@@ -1996,9 +2070,9 @@ class TagPredicate extends Predicate {
                     }
                     $first_value = false;
                 }
-                $query .=              ') and kwd.tag_UGrpID='.$pquery->currUserID.') ';
+                $query .= ') and kwd.tag_UGrpID='.$pquery->currUserID.')) ';
             } else {
-                $query=$not . 'exists (select * from sysUGrps, usrRecTagLinks kwi left join usrTags kwd on kwi.rtl_TagID=kwd.tag_ID '
+                $query='('.$not . 'exists (select * from sysUGrps, usrRecTagLinks kwi left join usrTags kwd on kwi.rtl_TagID=kwd.tag_ID '
                 . 'where ugr_ID=tag_UGrpID and kwi.rtl_RecID=TOPBIBLIO.rec_ID and (';
                 for ($i=0; $i < count($this->value); ++$i) {
                     if ($i > 0) $query .= 'or ';
@@ -2016,11 +2090,11 @@ class TagPredicate extends Predicate {
                             : 'kwd.tag_Text like "'.$mysqli->real_escape_string($value).'%" ');
                     }
                 }
-                $query .= ')) ';
+                $query .= '))) ';
             }
         } else {
             if (! $this->wg_value) {
-                $query = $not . 'exists (select * from usrRecTagLinks kwi left join usrTags kwd on kwi.rtl_TagID=kwd.tag_ID '
+                $query = '('.$not . 'exists (select * from usrRecTagLinks kwi left join usrTags kwd on kwi.rtl_TagID=kwd.tag_ID '
                 . 'where kwi.rtl_RecID=TOPBIBLIO.rec_ID and (';
                 $first_value = true;
                 foreach ($this->value as $value) {
@@ -2033,9 +2107,9 @@ class TagPredicate extends Predicate {
                     }
                     $first_value = false;
                 }
-                $query .= ')) ';
+                $query .= '))) ';
             } else {
-                $query = $not . 'exists (select * from usrRecTagLinks kwi left join usrTags kwd on kwi.rtl_TagID=kwd.tag_ID left join sysUGrps on ugr_ID=tag_UGrpID '
+                $query = '('.$not . 'exists (select * from usrRecTagLinks kwi left join usrTags kwd on kwi.rtl_TagID=kwd.tag_ID left join sysUGrps on ugr_ID=tag_UGrpID '
                 . 'where kwi.rtl_RecID=TOPBIBLIO.rec_ID and (';
                 for ($i=0; $i < count($this->value); ++$i) {
                     if ($i > 0) $query .= 'or ';
@@ -2059,7 +2133,7 @@ class TagPredicate extends Predicate {
                         }
                     }
                 }
-                $query .= ')) ';
+                $query .= '))) ';
             }
         }
 
@@ -2756,14 +2830,14 @@ class LinkToPredicate extends Predicate {
             if(count($ids)>1){
                 return '(1=0)';
             }else{
-                return 'exists (select * from defDetailTypes, recDetails bd '
+                return '(exists (select * from defDetailTypes, recDetails bd '
                 . 'where bd.dtl_RecID=TOPBIBLIO.rec_ID and dty_ID=dtl_DetailTypeID and dty_Type="resource" '
-                . '  and bd.dtl_Value in (' . join(',', $ids) . '))';
+                . '  and bd.dtl_Value in (' . join(',', $ids) . ')))';
             }
         }
         else {
-            return 'exists (select * from defDetailTypes, recDetails bd '
-            . 'where bd.dtl_RecID=TOPBIBLIO.rec_ID and dty_ID=dtl_DetailTypeID and dty_Type="resource")';
+            return '(exists (select * from defDetailTypes, recDetails bd '
+            . 'where bd.dtl_RecID=TOPBIBLIO.rec_ID and dty_ID=dtl_DetailTypeID and dty_Type="resource"))';
         }
     }
 }
@@ -2780,14 +2854,14 @@ class LinkedToPredicate extends Predicate {
             if(count($ids)>1){
                 return '(1=0)';
             }else{
-                return 'exists (select * from defDetailTypes, recDetails bd '
+                return '(exists (select * from defDetailTypes, recDetails bd '
                 . 'where bd.dtl_RecID in (' . implode(',', $ids) .') and dty_ID=dtl_DetailTypeID and dty_Type="resource" '
-                . '  and bd.dtl_Value=TOPBIBLIO.rec_ID)';
+                . '  and bd.dtl_Value=TOPBIBLIO.rec_ID))';
             }
         }
         else {
-            return 'exists (select * from defDetailTypes, recDetails bd '
-            . 'where bd.dtl_Value=TOPBIBLIO.rec_ID and dty_ID=dtl_DetailTypeID and dty_Type="resource")';
+            return '(exists (select * from defDetailTypes, recDetails bd '
+            . 'where bd.dtl_Value=TOPBIBLIO.rec_ID and dty_ID=dtl_DetailTypeID and dty_Type="resource"))';
         }
     }
 }
@@ -2798,8 +2872,8 @@ class RelatedToPredicate extends Predicate {
         if ($this->value) {
             $ids = prepareIds($this->value);
             $ids = "(" . implode(",",$ids) . ")";
-            return "exists (select * from recRelationshipsCache where (rrc_TargetRecID=TOPBIBLIO.rec_ID and rrc_SourceRecID in $ids)
-            or (rrc_SourceRecID=TOPBIBLIO.rec_ID and rrc_TargetRecID in $ids))";
+            return "(exists (select * from recRelationshipsCache where (rrc_TargetRecID=TOPBIBLIO.rec_ID and rrc_SourceRecID in $ids)
+            or (rrc_SourceRecID=TOPBIBLIO.rec_ID and rrc_TargetRecID in $ids)))";
         }
         else {
             /* just want something that has a relation */
@@ -2962,9 +3036,9 @@ class WorkgroupPredicate extends Predicate {
 class SpatialPredicate extends Predicate {
     
     function makeSQL() {
-        return "exists (select dtl_ID from recDetails bd
+        return "(exists (select dtl_ID from recDetails bd
             where bd.dtl_RecID=TOPBIBLIO.rec_ID and bd.dtl_Geo is not null
-            and ST_Contains(ST_GeomFromText('".$this->value."'), bd.dtl_Geo) limit 1)";  //MBRContains
+            and ST_Contains(ST_GeomFromText('".$this->value."'), bd.dtl_Geo) limit 1))";  //MBRContains
     }
 }
 
@@ -2981,23 +3055,23 @@ class LatitudePredicate extends Predicate {
                 
         if ($op!='' && $op[0] == '<') {
             // see if the northernmost point of the bounding box lies south of the given latitude
-            return "exists (select * from recDetails bd
+            return "(exists (select * from recDetails bd
             where bd.dtl_RecID=TOPBIBLIO.rec_ID and bd.dtl_Geo is not null
-            and ST_Y( ST_PointN( ST_ExteriorRing( ST_Envelope(bd.dtl_Geo) ), 4 ) ) $op " . floatval($this->value) . " limit 1)";
+            and ST_Y( ST_PointN( ST_ExteriorRing( ST_Envelope(bd.dtl_Geo) ), 4 ) ) $op " . floatval($this->value) . " limit 1))";
         }
         else if ($op!='' && $op[0] == '>') {
             // see if the SOUTHERNmost point of the bounding box lies north of the given latitude
-            return "exists (select * from recDetails bd
+            return "(exists (select * from recDetails bd
             where bd.dtl_RecID=TOPBIBLIO.rec_ID and bd.dtl_Geo is not null
-            and ST_Y( ST_StartPoint( ST_ExteriorRing( ST_Envelope(bd.dtl_Geo) ) ) ) $op " . floatval($this->value) . " limit 1)";
+            and ST_Y( ST_StartPoint( ST_ExteriorRing( ST_Envelope(bd.dtl_Geo) ) ) ) $op " . floatval($this->value) . " limit 1))";
 
         }
         else if ($this->parent->exact) {
             $op = $this->parent->negate? "!=" : "=";
             // see if there is a Point with this exact latitude
-            return "exists (select * from recDetails bd
+            return "(exists (select * from recDetails bd
             where bd.dtl_RecID=TOPBIBLIO.rec_ID and bd.dtl_Geo is not null and bd.dtl_Value = 'p'
-            and ST_Y(bd.dtl_Geo) $op " . floatval($this->value) . " limit 1)";
+            and ST_Y(bd.dtl_Geo) $op " . floatval($this->value) . " limit 1))";
         }
         else {
             //Envelope - Bounding rect
@@ -3012,9 +3086,9 @@ class LatitudePredicate extends Predicate {
                         and ST_Y( ST_PointN( ST_ExteriorRing( ST_Envelope(bd.dtl_Geo) ), 4 ) )";
             }
             
-            return "exists (select * from recDetails bd
+            return "(exists (select * from recDetails bd
             where bd.dtl_RecID=TOPBIBLIO.rec_ID and bd.dtl_Geo is not null
-            and ".$match_pred." limit 1)";
+            and ".$match_pred." limit 1))";
         }
     }
 }
@@ -3031,23 +3105,23 @@ class LongitudePredicate extends Predicate {
 
         if ($op!='' && $op[0] == '<') {
             // see if the westernmost point of the bounding box lies east of the given longitude
-            return "exists (select * from recDetails bd
+            return "(exists (select * from recDetails bd
             where bd.dtl_RecID=TOPBIBLIO.rec_ID and bd.dtl_Geo is not null
-            and ST_X( ST_PointN( ST_ExteriorRing( ST_Envelope(bd.dtl_Geo) ), 4 ) ) $op " . floatval($this->value) . " limit 1)";
+            and ST_X( ST_PointN( ST_ExteriorRing( ST_Envelope(bd.dtl_Geo) ), 4 ) ) $op " . floatval($this->value) . " limit 1))";
         }
         else if ($op!='' && $op[0] == '>') {
             // see if the EASTERNmost point of the bounding box lies west of the given longitude
-            return "exists (select * from recDetails bd
+            return "(exists (select * from recDetails bd
             where bd.dtl_RecID=TOPBIBLIO.rec_ID and bd.dtl_Geo is not null
-            and ST_X( ST_StartPoint( ST_ExteriorRing( ST_Envelope(bd.dtl_Geo) ) ) ) $op " . floatval($this->value) . " limit 1)";
+            and ST_X( ST_StartPoint( ST_ExteriorRing( ST_Envelope(bd.dtl_Geo) ) ) ) $op " . floatval($this->value) . " limit 1))";
 
         }
         else if ($this->parent->exact) {
             $op = $this->parent->negate? "!=" : "=";
             // see if there is a Point with this exact longitude
-            return "exists (select * from recDetails bd
+            return "(exists (select * from recDetails bd
             where bd.dtl_RecID=TOPBIBLIO.rec_ID and bd.dtl_Geo is not null and bd.dtl_Value = 'p'
-            and ST_X(bd.dtl_Geo) $op " . floatval($this->value) . " limit 1)";
+            and ST_X(bd.dtl_Geo) $op " . floatval($this->value) . " limit 1))";
         }
         else {
             
@@ -3060,9 +3134,9 @@ class LongitudePredicate extends Predicate {
                         and ST_X( PointN( ST_ExteriorRing( ST_Envelope(bd.dtl_Geo) ), 2 ) )";
             }
             
-            return "exists (select * from recDetails bd
+            return "(exists (select * from recDetails bd
             where bd.dtl_RecID=TOPBIBLIO.rec_ID and bd.dtl_Geo is not null
-            and ".$match_pred." limit 1)";
+            and ".$match_pred." limit 1))";
         }
     }
 }
