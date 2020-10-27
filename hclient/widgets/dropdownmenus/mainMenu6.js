@@ -597,7 +597,7 @@ $.widget( "heurist.mainMenu6", {
         explore_height = 'auto',
         explore_left = that.divMainMenu.width()+4; //204; this._widthMenu
         
-        if(menu_item.parents('.ui-heurist-quicklinks').length==0 && this._active_section=='explore'){
+        if(menu_item && menu_item.parents('.ui-heurist-quicklinks').length==0 && this._active_section=='explore'){
             explore_left = 302;
         }else{
             explore_left = (that.divMainMenu.width()>91)?(this._widthMenu+4):95; 
@@ -645,7 +645,7 @@ $.widget( "heurist.mainMenu6", {
                     }  });    
 
                 explore_top = position ?position.top :menu_item.offset().top -200;
-                explore_height = 215;//268+36;
+                explore_height = 255;//268+36;
                 if(position){
                     explore_left = position.left;
                 }
