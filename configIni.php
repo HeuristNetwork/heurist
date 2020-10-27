@@ -125,8 +125,6 @@ $version = "6.0.1"; // sets current program version number, determined by Heuris
 $dbHost = "";
 $dbAdminUsername = "";
 $dbAdminPassword = "";
-$dbReadonlyUsername = "";
-$dbReadonlyPassword = "";
 //$serverName = "null";
 $dbPrefix = "";
 

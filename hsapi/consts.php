@@ -99,7 +99,7 @@ if ($dbHost) {
 }
 /*  @todo - redirect to system config error page
 
-if (!($dbAdminUsername && $dbAdminPassword && $dbReadonlyUsername && $dbReadonlyPassword)) { //if these are not specified then we can't do anything
+if (!($dbAdminUsername && $dbAdminPassword)) { //if these are not specified then we can't do anything
 returnErrorMsgPage(1, "MySql user account/password not specified. Set in configIni.php");
 }
 if(preg_match('/[^a-z_\-0-9]/i', $dbAdminPassword)){

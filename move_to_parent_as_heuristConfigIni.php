@@ -38,12 +38,6 @@ if (!@$serverName) $serverName = null; // override default taken from request he
 if (!@$dbAdminUsername) $dbAdminUsername = "";  // required
 if (!@$dbAdminPassword) $dbAdminPassword = ""; // required
 
-// MySQL user with readonly access on this database server. For example, if there is a user account
-// MySQL passwords may not contain special characters - if generating random password generate as alphanumeric
-if (!@$dbReadonlyUsername) $dbReadonlyUsername = ""; // required, can re-use root or have special user
-if (!@$dbReadonlyPassword) $dbReadonlyPassword = ""; //required
-
-
 // [folders]
 
 // REQUIRED: defines URL of Heurist filestore (contains files associated with databases)
