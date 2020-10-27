@@ -404,7 +404,8 @@ public static function importDefintions($filename, $session_id){
                     'session_id'=>$session_id,
                     'defType'=>'rectype', 
                     'databaseID'=>@$data['heurist']['database']['id'], 
-                    'definitionID'=>array_keys($imp_rectypes) )))
+                    'definitionID'=>array_keys($imp_rectypes),
+                    'rectypes'=>$imp_rectypes )))
         {
             $res = $importDef->doImport();
         }
@@ -643,7 +644,8 @@ EOD;
             //Finds all defintions to be imported
             $res2 = $importDef->doPrepare(  array('defType'=>'rectype', 
                         'databaseID'=>@$data['heurist']['database']['id'], 
-                        'definitionID'=>array_keys($imp_rectypes) ));
+                        'definitionID'=>array_keys($imp_rectypes),
+                        'rectypes'=>$imp_rectypes ));
                         
             if(!$res2){
                 $err = self::$system->getError();

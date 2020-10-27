@@ -207,7 +207,8 @@ $time_debug = microtime(true);
         
         //find source id by conceptcodes or verify local_ids     
         $def_ids = array();
-        $wrong_id = 0;
+        $wrong_id = null;
+        $missed_name = null;
 
         $this->sourceTerms = new DbsTerms(null, $this->source_defs['terms']);
         if($entityTypeToBeImported=='term'){
@@ -217,7 +218,7 @@ $time_debug = microtime(true);
                     if($rt!=null){
                         $def_ids[] = $local_id;
                     }else{
-                        $wrong_id = $local_id;
+                        $wrong_id = 'id#'.$local_id;
                         break;
                     }
                 }
@@ -225,15 +226,25 @@ $time_debug = microtime(true);
                 $def_ids[] = $this->sourceTerms->findTermByConceptCode($cCode); 
             }
         }else{
+            
             if(count($local_ids)>0){
-                foreach($local_ids as $local_id){
-                    if($this->_checkLocalCode($entityTypeToBeImported, $this->source_defs, $local_id)>0){
-                        $def_ids[] = $local_id;
-                    }else{
-                        $wrong_id = $local_id;
+                foreach($local_ids as $local_id){ //$local_id either id in source db or concept code
+
+                     if($entityTypeToBeImported=='rt' || $entityTypeToBeImported=='rectypes' || $entityTypeToBeImported=='rectype'){
+                        $missed_name = @$data['rectypes'][$local_id]['name'];
+                     }
+                        
+                     $found_local_id = $this->_getLocalCode($entityTypeToBeImported, $this->source_defs, $local_id);
+                     if($found_local_id){
+                         $def_ids[] = $found_local_id;  
+                     }else{
+                        $wrong_id = 'id#'.$local_id;
+                        if($missed_name){
+                            $wrong_id = $wrong_id.' "'.$missed_name.'"';
+                        }
                         break;
-                    }
-                }
+                     } 
+                }       
                 
             }else{
                 //get local id in source db by concept code
@@ -242,7 +253,7 @@ $time_debug = microtime(true);
         }
         
         if (count($def_ids)==0 || $wrong_id>0) { //definition not found in source database
-            $smsg = ($wrong_id>0) ?'id#'.$wrong_id :'concept code '.$cCode;
+            $smsg = ($wrong_id!=null) ?$wrong_id :'concept code '.$cCode;
             $this->system->addError(HEURIST_ERROR, 'Unable to get '.$entityTypeToBeImported. ' definition with '.$smsg.' in database #'.$db_reg_id);
             return false; //see $system->getError
         }
@@ -934,7 +945,7 @@ $mysqli->commit();
     }
 
     //    
-    // get local code by concept code or verifies that element with give code/localid exists
+    // get local code by concept code or verifies that element with given code/localid exists
     // 
     public static function getLocalCode($defType, $database_defs, $conceptCode, $sall=false){
         $res = array();
