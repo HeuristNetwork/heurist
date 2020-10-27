@@ -163,7 +163,7 @@ private static function hmlToJson($filename){
     {
             foreach($xml_recs->children() as $xml_rec){
                 $rectype = $xml_rec->type->attributes();
-                $rectype_id = ''.$rectype['id'];
+                $rectype_id = ''.$rectype['id']; //may be not defined
                 
                 $record = array(
                     'rec_ID'=>''.$xml_rec->id,
@@ -180,6 +180,7 @@ private static function hmlToJson($filename){
                 );
                 
                 //fill rectype array - it will be required to find missed rectypes
+                //if id is not defined we take concept code
                 $rt_idx = ($rectype_id>0)?$rectype_id: ''.$rectype['conceptID'];
                 if(!@$rectypes[$rt_idx]){
                     $rectypes[$rt_idx] = array(
@@ -392,7 +393,8 @@ public static function importDefintions($filename, $session_id){
                     'session_id'=>$session_id,
                     'defType'=>'rectype', 
                     'databaseID'=>@$data['heurist']['database']['id'], 
-                    'definitionID'=>array_keys($imp_rectypes) )))
+                    'definitionID'=>array_keys($imp_rectypes),
+                    'rectypes'=>$imp_rectypes )))
         {
             $res = $importDef->doImport();
         }
@@ -631,7 +633,8 @@ EOD;
             //Finds all defintions to be imported
             $res2 = $importDef->doPrepare(  array('defType'=>'rectype', 
                         'databaseID'=>@$data['heurist']['database']['id'], 
-                        'definitionID'=>array_keys($imp_rectypes) ));
+                        'definitionID'=>array_keys($imp_rectypes),
+                        'rectypes'=>$imp_rectypes ));
                         
             if(!$res2){
                 $err = self::$system->getError();
