@@ -66,6 +66,8 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
 
         if(this.options.isFrontUI){
             
+            window.hWin.HEURIST4.msg.bringCoverallToFront(this.element, {'background-color':'#fff', opacity:1});   
+        
             //add fields group editor
             this.element.addClass('ui-suppress-border-and-shadow');
             
@@ -189,6 +191,8 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                 });
                 
         }else{
+            window.hWin.HEURIST4.msg.sendCoverallToBack();
+            
             this._on( this.searchForm, {
                     "searchdefdetailtypesonresult": this.updateRecordList,
                     "searchdefdetailtypesonadd": function() { this.addEditRecord(-1); }
@@ -648,6 +652,18 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
 
         }
 
+        this.getUiPreferences();
+        var ishelp_on = (this.usrPreferences['help_on']==true || this.usrPreferences['help_on']=='true');
+        ele = $('<div style="position:absolute;right:6px;top:4px;"><label><input type="checkbox" '
+                        +(ishelp_on?'checked':'')+'/>explanations</label></div>').prependTo(this.editForm);
+        this._on( ele.find('input'), {change: function( event){
+            var ishelp_on = $(event.target).is(':checked');
+            this.usrPreferences['help_on'] = ishelp_on;
+            window.hWin.HEURIST4.ui.switchHintState2(ishelp_on, this.editForm, '.heurist-helper1');
+        }});
+        
+        window.hWin.HEURIST4.ui.switchHintState2(ishelp_on, this.editForm, '.heurist-helper1');
+        
         this._adjustEditDialogHeight();
     },    
     
@@ -1387,6 +1403,25 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                     }
                 )
         });
-    }                                    
+    },                                    
+    
+    //
+    //
+    getUiPreferences:function(){
+        this.usrPreferences = window.hWin.HAPI4.get_prefs_def('prefs_'+this._entityName, {
+            help_on: true
+        });
+        
+        return this.usrPreferences;
+    },
+    
+    //    
+    saveUiPreferences:function(){
+//console.log('save prefs '+'prefs_'+this._entityName);        
+        window.hWin.HAPI4.save_pref('prefs_'+this._entityName, this.usrPreferences);
+   
+        return true;
+    },
+    
 
 });

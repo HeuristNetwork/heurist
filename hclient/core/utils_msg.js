@@ -1004,10 +1004,12 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
     },
     
     //curtain
-    bringCoverallToFront: function(ele) {
+    bringCoverallToFront: function(ele, styles) {
         if (!  window.hWin.HEURIST4.msg.coverall ) {
             window.hWin.HEURIST4.msg.coverall = 
                 $('<div>').addClass('coverall-div').css('zIndex',60000); //9999999999
+        }else{
+            window.hWin.HEURIST4.msg.coverall.detach();
         }
         
         if(ele){
@@ -1015,6 +1017,11 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         }else{
             if($('body').find('.coverall-div').length==0) window.hWin.HEURIST4.msg.coverall.appendTo('body');
         }
+        
+        if(!styles){
+            styles = {'background-color': "#000", opacity: '0.6'};
+        }
+        window.hWin.HEURIST4.msg.coverall.css( styles );
         
         $(window.hWin.HEURIST4.msg.coverall).show();
     },    

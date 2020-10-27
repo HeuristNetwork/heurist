@@ -120,7 +120,7 @@ console.log(data);
             this._initEditorOnly();
             return;
         }
-
+        
         this.searchForm.css({padding:'6px', 'min-width': '660px'});
         this.recordList.css({'min-width': '660px'});
         this.searchForm.parent().css({'overflow-x':'auto'});
@@ -132,6 +132,8 @@ console.log(data);
             
             
             if(this.options.isFrontUI){
+                
+                window.hWin.HEURIST4.msg.bringCoverallToFront(this.element, {'background-color':'#fff', opacity:1});   
                 
                 //add record type group editor
                 this.element.addClass('ui-suppress-border-and-shadow');
@@ -982,6 +984,19 @@ console.log(data);
 
         }
         
+        
+        var ishelp_on = (this.usrPreferences['help_on']==true || this.usrPreferences['help_on']=='true');
+        ele = $('<div style="position:absolute;right:6px;top:4px;"><label><input type="checkbox" '
+                        +(ishelp_on?'checked':'')+'/>explanations</label></div>').prependTo(this.editForm);
+        this._on( ele.find('input'), {change: function( event){
+            var ishelp_on = $(event.target).is(':checked');
+            this.usrPreferences['help_on'] = ishelp_on;
+            window.hWin.HEURIST4.ui.switchHintState2(ishelp_on, this.editForm, '.heurist-helper1');
+        }});
+        
+        window.hWin.HEURIST4.ui.switchHintState2(ishelp_on, this.editForm, '.heurist-helper1');
+        
+        this._adjustEditDialogHeight();
     },   
     
     onEditFormChange: function(changed_element){

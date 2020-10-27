@@ -1829,12 +1829,13 @@ div.coverall-div, div.coverall-div-bare
 div.coverall-div {
     background-color: #000;
     opacity: 0.6;
-    filter: progid:DXImageTransform.Microsoft.Alpha(opacity=60);
+    /*filter: progid:DXImageTransform.Microsoft.Alpha(opacity=60);*/
     background-image: url(hclient/assets/loading-animation-white.gif);
     background-repeat: no-repeat;
     background-position: center;     
     cursor:wait;
 }
+    
 /* classes taken from expernation design*/
 .badge {
     display: inline-block;

@@ -422,7 +422,9 @@ $.widget( "heurist.resultList", {
         
         if(this.options.is_h6style){
 
-            $('<div class="result-list-header ui-heurist-header" style="font-size:1em;text-align:left;padding-left:12px;position:relative"/>')
+            $('<div class="result-list-header ui-widget-content" ' //was ui-heurist-heade
+            + 'style="font-size:1em;text-align:left;padding-left:12px;position:relative;'
+            + 'font-weight: bold;letter-spacing: 0.26px;padding:10px;"/>')
                 .appendTo( this.div_header );
         }else{
         
@@ -604,7 +606,8 @@ $.widget( "heurist.resultList", {
                         btn_visible_newrecord: false,
                         search_button_label: 'Filter',
                         btn_entity_filter: false})
-                    .css({display:'block','max-height':'50px',padding:'10px 0px 20px 4px',width:'100%'})
+                    .css({display:'block','max-height':'55px','height':'55px',
+                            padding:'15px 10px 0px 4px','border-bottom':'1px solid gray'}) //,width:'100%'
                     .appendTo(this.div_header);
         
         }

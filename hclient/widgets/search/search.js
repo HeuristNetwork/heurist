@@ -69,7 +69,7 @@ $.widget( "heurist.search", {
             //this is CMS publication - take bg from parent
             this.element.addClass('ui-widget-content').css({'background':'none','border':'none'});
         }else if(!this.options.is_h6style){
-            this.element.css({height:'100%',height:'100%','font-size':'0.8em'});
+            this.element.css({height:'100%','font-size':'0.8em'});
             this.element.addClass('ui-widget-content');
         }else {
             this.options.button_class = '';
@@ -216,7 +216,7 @@ $.widget( "heurist.search", {
         }else{
             
             if(this.options.is_h6style){
-                this.div_search_input.css({'width':'70%','max-width':'470px','min-width':'300px',height:'30px'});  
+                this.div_search_input.css({'width':'85%','min-width':'300px',height:'30px'}); //'max-width':'470px',  
                 this.input_search.css({'width':'100%'});  
             }else{
                 this.div_search.css({'display':'table-row',height:'30px'});
@@ -228,7 +228,7 @@ $.widget( "heurist.search", {
         if(!this._is_publication && this.options.is_h6style){
             var div_search_help_links = $('<div>')
                 //.css({position: 'absolute', top:'auto', 'font-size':'10px'})
-                .css({position: 'absolute',top:' 76px','font-size':'10px'})
+                .css({position: 'absolute',top:'82px','font-size':'10px'})
                 .appendTo(this.div_search_input);
 
             var link = $('<span title="Show syntax and examples of the Heurist query/filter language">'
@@ -421,11 +421,11 @@ $.widget( "heurist.search", {
         .css({'width':'40px','vertical-align': '-4px'})  //'padding':'0 1.0em',
         .appendTo(this.div_buttons);*/
 
-        if(!this.options.is_h6style){
+        if(true || !this.options.is_h6style){
             var linkGear = $('<a>',{href:'#', 
-                title:window.hWin.HR('Build a filter expression using a form-driven approach (simple and advanced options)')})
+                title:window.hWin.HR('Build a filter expression using a form-driven approach')})
                 .css({'padding-right':'1.5em','display':'inline-block','margin-left':'-27px','opacity':'0.5','margin-top': '0.6em', width:'20px'})
-                .addClass('ui-icon ui-icon-filter-form') //was ui-icon-gear
+                .addClass('ui-icon ui-icon-magnify-explore') //was ui-icon-gear was ui-icon-filter-form
                 .appendTo(this.div_buttons);
             this._on( linkGear, {  click: this.showSearchAssistant });
         }
@@ -1058,6 +1058,17 @@ $.widget( "heurist.search", {
             //ignore dbl click
             return;
         }
+        
+        if(this.options.is_h6style){
+            var widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('mainMenu6');
+            if(widget){
+                    widget.mainMenu6('show_ExploreMenu', null, 'search_quick', this.element.offset());
+                    return;
+            }
+        }
+        
+        
+        
                 
         var that = this;
 
