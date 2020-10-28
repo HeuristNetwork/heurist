@@ -77,8 +77,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                     //that._loadData();
                 }else
                 if(data && ((data.type == 'vcg' && that.options.auxilary=='vocabulary') 
-                            || (data.type == 'vocabulary' && that.options.auxilary=='term')
-                          )  ){
+                            || ((data.type == 'vocabulary'||data.type == 'term') && that.options.auxilary=='term')
+                           )){
                     that._filterByVocabulary();
                     //that._loadData();
                 }
@@ -501,7 +501,22 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 
                 window.hWin.HEURIST4.ui.showEntityDialog('defTerms', rg_options);
                 
-            }
+                this._on( this.recordList, {        
+                        "resultlistondblclick": function(event, selected_recs){
+                                    this.selectedRecords(selected_recs); //assign
+                                    
+                                    if(window.hWin.HEURIST4.util.isRecordSet(selected_recs)){
+                                        var recs = selected_recs.getOrder();
+                                        if(recs && recs.length>0){
+                                            var recID = recs[recs.length-1];
+                                            this._onActionListener(event, {action:'edit-inline',recID:recID}); 
+                                        }
+                                    }
+                                }
+                        });
+                
+                
+            }//aux=term
 
             
         }
