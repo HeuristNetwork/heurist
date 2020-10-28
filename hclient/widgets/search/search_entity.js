@@ -179,28 +179,14 @@ $.widget( "heurist.search_entity", {
         //-----------------------
 
         //global listeners
-        /*
-        $(window.hWin.document).on(
-            window.hWin.HAPI4.Event.ON_CREDENTIALS+' '
-                +window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE, function(e, data) {
-                    
-            if(e.type == window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE){
-                //@todo update btn_select_owner label
-            }
-            if(!data || data.origin!='search'){
-                that._refresh();
-            }
-        });*/
-        /*
-        $(window.hWin.document).on(
-            window.hWin.HAPI4.Event.ON_REC_UPDATE
-            + ' ' + window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, 
-            function(e, data) { 
-                if(!data || data.type=='rty'){
-                    that._recreateRectypeSelectors();
-                }
+/*        
+        window.hWin.HAPI4.addEventListener(this, window.hWin.HAPI4.Event.ON_REC_UPDATE, 
+            function(data) { 
+console.log('ON_REC_UPDATE');
+console.log(data);
+                that._recreateRectypeSelectors();
             });
-        */
+*/        
             
         window.hWin.HAPI4.addEventListener(this, window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, 
             function(data) { 
@@ -210,6 +196,14 @@ $.widget( "heurist.search_entity", {
             });
             
             
+        // Refreshing
+        this.element.on("myOnShowEvent", function(event){
+console.log('myOnShowEvent '+$Db.needUpdateRtyCount);
+            if( $Db.needUpdateRtyCount ){
+                $Db.needUpdateRtyCount = false;
+                that._recreateRectypeSelectors2();
+            }
+        });
             
         //this.div_search.find('.div-table-cell').css('vertical-align','top');
 
@@ -446,18 +440,19 @@ $.widget( "heurist.search_entity", {
         }
         
     },      
-/*        
+        
     //with counts
     _recreateRectypeSelectors2: function(){
     
         var that = this;
         
-        window.hWin.HEURIST4.rectypes.counts_update = (new Date()).getTime();
+        //window.hWin.HEURIST4.rectypes.counts_update = (new Date()).getTime();
                     
         var request = {
                 'a'       : 'counts',
                 'entity'  : 'defRecTypes',
                 'mode'    : 'record_count',
+                //'rty_ID'  :
                 'ugr_ID'  : window.hWin.HAPI4.user_id()
                 };
                              
@@ -465,14 +460,26 @@ $.widget( "heurist.search_entity", {
             function(response){
 
                 if(response.status == window.hWin.ResponseStatus.OK){
-    
+                    
+                    $Db.rty().each(function(rty_ID,rec){
+                        var cnt = response.data[rty_ID]
+                        if(!(cnt>0)) cnt = 0;
+                        $Db.rty(rty_ID, 'rty_RecCount', cnt);
+                    });
+                    /*
+                    $.each( response.data, function(rty_ID,cnt){
+                        $Db.rty(rty_ID, 'rty_RecCount', cnt);    
+                    })
+                    */
+                    
+                    that._recreateRectypeSelectors();
+                    /*    
                     window.hWin.HEURIST4.rectypes.counts = response.data;
                     
                     //selector to filter by entity
                     if(that.options.use_combined_select || that.options.by_usage){
                             that._recreateSelectRectypeFilter(that.usage_select_options);
                     }
-                        
                     //buttons - filter by entity
                     if(that.options.by_favorites){
                         that._redraw_buttons_by_entity(true);
@@ -480,15 +487,14 @@ $.widget( "heurist.search_entity", {
                         
                         that._recreateSelectRectypeFilter(that.config_select_options);
                     }
+                    */
         
                 }else{
                     window.hWin.HEURIST4.msg.showMsgErr(response);
-                    window.hWin.HEURIST4.rectypes.counts_update = 0;
+                    //window.hWin.HEURIST4.rectypes.counts_update = 0;
                 }
         });
     },
-*/        
-
 
     //
     // opens selector on correct position
@@ -562,8 +568,8 @@ $.widget( "heurist.search_entity", {
     // revert other modifications here
     ,_destroy: function() {
 
-        //$(window.hWin.document).off(window.hWin.HAPI4.Event.ON_REC_UPDATE+ ' ' + window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE);
         window.hWin.HAPI4.removeEventListener(this, window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE);        
+        //window.hWin.HAPI4.removeEventListener(this, window.hWin.HAPI4.Event.ON_REC_UPDATE);        
         
         this.div_entity_btns.find('.entity-filter-button').remove();
 

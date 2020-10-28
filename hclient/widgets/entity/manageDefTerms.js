@@ -86,14 +86,6 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             
         });
         
-/*        
-        $(this.document).on(
-            window.hWin.HAPI4.Event.ON_REC_UPDATE
-            + ' ' + window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, 
-            function(e, data) { 
-            });
-*/        
-        
     },
     
     _destroy: function() {
@@ -103,11 +95,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         }
         
        window.hWin.HAPI4.removeEventListener(this, window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE);     
-/*        
-       $(window.hWin.document).off(
-            window.hWin.HAPI4.Event.ON_REC_UPDATE
-            + ' ' + window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE);
-*/            
+
        if(this.recordTree) this.recordTree.remove();
         
        this._super(); 

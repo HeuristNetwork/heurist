@@ -2693,7 +2693,7 @@ $.widget( "heurist.resultList", {
         function ___ontooltip(){
                 var ele = $( this );
                 var s = ele.attr('title');
-                return window.hWin.HEURIST4.util.isempty(s)?'AAAA':s;
+                return window.hWin.HEURIST4.util.isempty(s)?'':s;
         }
         
         this.div_content.find('div.recordTitle').tooltip({content: ___ontooltip}); //title may have html format - use jquery tooltip

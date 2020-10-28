@@ -39,6 +39,7 @@
     require_once (dirname(__FILE__).'/db_structure.php');
     require_once (dirname(__FILE__).'/db_recsearch.php');
     require_once(dirname(__FILE__).'/../entity/dbRecUploadedFiles.php');
+    require_once(dirname(__FILE__).'/../entity/DbDefRecTypes.php');
     require_once (dirname(__FILE__).'/../utilities/titleMask.php');
     require_once (dirname(__FILE__).'/../../records/index/elasticSearch.php');
     require_once (dirname(__FILE__).'/../../vendor/ezyang/htmlpurifier/library/HTMLPurifier.auto.php');
@@ -562,7 +563,7 @@
         }
 
         $newTitle = recordUpdateTitle($system, $recID, $rectype, @$record['Title']);
-    
+        $rty_counts = null;
         
         if(!$is_insert && !$modeImport){
             $mysqli->query('set @suppress_update_trigger=1');
@@ -604,15 +605,20 @@
                     $res = recordUpdateTitle($system, $linkRecID, $masks[$linkRecTypeID], null);
                 }
             }
-            $mysqli->query('set @suppress_update_trigger=NULL');
+           $mysqli->query('set @suppress_update_trigger=NULL');
+           
         }//update flagtemporary and title for related,linked records
+
+        //calculate counts
+        //$rty = new DbDefRecTypes($system,array('mode'=>'record_count', 'rty_ID'=>array(1, $rectype)));
+        //$rty_counts = $rty->counts();
         
         if($use_transaction){
             $mysqli->commit();
             if($keep_autocommit===true) $mysqli->autocommit(TRUE);
         }
 
-        return array("status"=>HEURIST_OK, "data"=> $recID, 'rec_Title'=>$newTitle);
+        return array("status"=>HEURIST_OK, "data"=> $recID, 'rec_Title'=>$newTitle); //, 'counts'=>$rty_counts
         /*
         $response = array("status"=>HEURIST_OK,
         "data"=> array(

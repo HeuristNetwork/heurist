@@ -60,6 +60,8 @@ if (!window.hWin.HEURIST4.dbs)
 window.hWin.HEURIST4.dbs = {
     
     baseFieldType: {},
+    
+    needUpdateRtyCount: false,
 
     //
     // return vocabulary for given term - real vocabulary (not by reference)
@@ -977,11 +979,11 @@ window.hWin.HEURIST4.dbs = {
     
     
     getset: function(entityName, rec_ID, fieldName, newValue){
-        if(newValue){
+        if(typeof newValue == 'undefined'){
+            return $Db.get(entityName, rec_ID, fieldName);        
+        }else{
             $Db.set(entityName, rec_ID, fieldName, newValue);        
             return null;
-        }else{
-            return $Db.get(entityName, rec_ID, fieldName);        
         }
     },
     

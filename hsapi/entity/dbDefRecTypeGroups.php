@@ -154,7 +154,7 @@ class DbDefRecTypeGroups extends DbEntityBase
         if(!$this->system->is_admin() && (count($this->recordIDs)>0 || count($this->records)>0)){ //there are records to update/delete
             
             $this->system->addError(HEURIST_REQUEST_DENIED, 
-                    'AAAA You are not admin and can\'t edit record type groups. Insufficient rights for this operation');
+                    'You are not admin and can\'t edit record type groups. Insufficient rights for this operation');
                 return false;
         }
         

@@ -548,6 +548,12 @@ class DbEntityBase
     //
     //
     private function _readConfig(){
+        
+        if(is_array($this->config)){ //config may be predefined as part of code
+            $this->fields = array();
+            $this->_readFields($this->config['fields']);
+            return;
+        }
 
         //$entity_file = dirname(__FILE__)."/".@$this->data['entity'].'.json';
         $entity_file = HEURIST_DIR.'hsapi/entity/'.lcfirst(@$this->data['entity']).'.json';

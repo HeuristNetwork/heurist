@@ -86,7 +86,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         
         var that = this;
         
-        //ON_REC_UPDATE
+        //
         if(!this.options.import_structure){        
             window.hWin.HAPI4.addEventListener(this, window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, 
                 function(data) { 

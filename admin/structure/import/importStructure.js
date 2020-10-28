@@ -579,7 +579,7 @@ $.widget( "heurist.importStructure", {
             renderer: function( recordset, record ){
 
             var recTitle = window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, 'rec_Title'));
-            return '<div class="recordDiv" style="padding-left:3em">AAAA'+recTitle+'</div>';
+            return '<div class="recordDiv" style="padding-left:3em">'+recTitle+'</div>';
             },
             rendererGroupHeader: function(grp_val, grp_keep_status){
 
