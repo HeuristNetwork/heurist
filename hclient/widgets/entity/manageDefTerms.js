@@ -920,7 +920,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 this.options.suggested_name = null;
             }
             
-        }else{
+        }else
+        {
             
             var dlg = this._getEditDialog(true);
             if(dlg && dlg.dialog('instance')){
@@ -965,6 +966,20 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         }else{
             ele.hide();
         }
+        
+        //on ENTER save
+        this._on( this.editForm.find('input.text,textarea.text'), { keypress: function(e){        
+                var code = (e.keyCode ? e.keyCode : e.which);
+                if (code == 13) {
+                    window.hWin.HEURIST4.util.stopEvent(e);
+                    e.preventDefault();
+                    this._saveEditAndClose();
+                }
+        }});
+        
+        //btnRecSave
+        //defaultBeforeClose
+        
         
         var ishelp_on = (this.usrPreferences['help_on']==true || this.usrPreferences['help_on']=='true');
         ele = $('<div style="position:absolute;right:6px;top:4px;"><label><input type="checkbox" '
@@ -1118,6 +1133,15 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 var that = this;
                 setTimeout(function(){that._editing.setFocus();},1500);
             }
+            return;
+        }else if(this.it_was_insert && this.options.auxilary=='term' && this.options.edit_mode=='popup'){
+            //reload edit page
+            window.hWin.HEURIST4.msg.showMsgFlash('Term '+window.hWin.HR('has been saved'));
+            this._currentEditID = -1;
+            this._initEditForm_step3(this._currentEditID); //reload 
+            var that = this;
+            setTimeout(function(){that._editing.setFocus();},1500);
+            this.refreshRecordList();
             return;
         }
         

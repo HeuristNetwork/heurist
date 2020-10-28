@@ -931,7 +931,6 @@ $.widget( "heurist.editing_input", {
                          trm_VocabularyID: vocab_id,
                          onClose: function(){
                              
-console.log('close edit terms - recreate selector');                             
                              //recreate selector
                             $.each(that.inputs, function(index, input){ 
                                 input = $(input);
