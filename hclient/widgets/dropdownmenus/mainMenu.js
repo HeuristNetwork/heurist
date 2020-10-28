@@ -280,15 +280,6 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
             that._refresh();
         });
 
-        /*
-        $(window.hWin.document).on(window.hWin.HAPI4.Event.ON_REC_UPDATE,
-        function(e, data) {
-            that._getCountWebSiteRecords();
-        });
-        that._getCountWebSiteRecords();
-        */
-        
-
         this._refresh();
 
     }, //end _create
@@ -488,7 +479,6 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
 
         $(window.hWin.document).off(window.hWin.HAPI4.Event.ON_REC_SEARCHSTART);
         $(window.hWin.document).off(window.hWin.HAPI4.Event.ON_CREDENTIALS+' '+window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE);
-        //$(window.hWin.document).off(window.hWin.HAPI4.Event.ON_REC_UPDATE);
         
         this.div_logo.remove();
         this.divMainMenu.remove();
@@ -1728,10 +1718,11 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
             
         
         var cms_record_id = window.hWin.HEURIST4.util.getUrlParameter('cms', window.hWin.location.search);
-        if(cms_record_id>0){
+        var cmd = window.hWin.HEURIST4.util.getUrlParameter('cmd', window.hWin.location.search);
+        if(cms_record_id>0 || !window.hWin.HEURIST4.util.isempty(cmd)){
+            //ignore initial search of some menu command is called from url or need to open cms editor
             
             //this.menuActionById('menu-cms-edit', {record_id:cms_record_id});
-
             //window.hWin.HEURIST4.ui.showEditCMSDialog( cms_record_id );    
 
         }else 
