@@ -33,6 +33,7 @@ $.widget( "heurist.mainMenu6", {
     
     menues:{}, //section menu - div with menu actions
     containers:{}, //operation containers (next to section menu)
+    introductions:{}, //context help containers
     
     _myTimeoutId: 0,  //delay on collapse main menu (_expandMainMenuPanel/_collapseMainMenuPanel)
 
@@ -99,6 +100,7 @@ $.widget( "heurist.mainMenu6", {
                 //init all menues
                 $.each(that.sections, function(i, section){
                     that._loadSectionMenu(section);
+                    that._initIntroductory(section);
                 });
                 
                 //explore menu in main(left) menu
@@ -132,24 +134,13 @@ $.widget( "heurist.mainMenu6", {
                 });
 
                 
-                if(window.hWin.HAPI4.sysinfo['db_total_records']<1){
+                //if(window.hWin.HAPI4.sysinfo['db_total_records']<1){
+                if(window.hWin.HEURIST4.util.getUrlParameter('welcome', window.hWin.location.search)){
                     //open explore by default, or "design" if db is empty
                     that._active_section = 'explore';
-                    
-                    that.containers['design']
-                        .position({my:'center',at:'center',of:that.element})
-                        //.css({top:that.element.height()/2-250,left:that.element.width()/2-250,width:500,height:500})
-                        .css({width:500,height:400})
-                        .load(window.hWin.HAPI4.baseURL+'hclient/widgets/dropdownmenus/welcome.html',
-                            function(){
-                               var url = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database;
-                               $('.bookmark-url').html('<a href="'+url+'">'+url+'</a>');
-                               $('.template-url').attr('href', window.hWin.HAPI4.baseURL
-                                                +'documentation_and_templates/db_design_template.rtf');
-                            });
-                    that.switchContainer( 'design', true );
+                    that.switchContainer( 'design' );
                 }else{
-                    that.switchContainer( 'explore' );    
+                    that.switchContainer( 'explore' );
                 }
                 
 
@@ -213,10 +204,15 @@ $.widget( "heurist.mainMenu6", {
         $(window.hWin.document).on(window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE
                 +' '+window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE
                 +' '+window.hWin.HAPI4.Event.ON_REC_SEARCHSTART
-                +' '+window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH, 
+                +' '+window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH
+                +' '+window.hWin.HAPI4.Event.ON_CUSTOM_EVENT, 
             function(e, data) {
-              
-                if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCHSTART){
+                
+                if(e.type == window.hWin.HAPI4.Event.ON_CUSTOM_EVENT){
+                    if(data && data.userWorkSetUpdated){
+                            that._refreshSubsetSign();
+                    }
+                }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCHSTART){
                     
                     //not need to check realm since this widget the only per instance
                     //if(data && that.options.search_realm && that.options.search_realm!=data.search_realm) return;
@@ -247,6 +243,8 @@ $.widget( "heurist.mainMenu6", {
                         that._updateSaveFilterButton(0);
                     } 
                     
+                    that._refreshSubsetSign();                    
+                    
                 }else if(e.type == window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE){
                     if(data && data.origin=='recordAdd'){
                         that._updateDefaultAddRectype( data.preferences );
@@ -270,7 +268,7 @@ $.widget( "heurist.mainMenu6", {
     //
     _updateSaveFilterButton: function( mode ){
         
-        var btn = this.divMainMenu.find('.menu-explore[data-action="svsAdd"]');
+        var btn = this.divMainMenu.find('.menu-explore[data-action-popup="svsAdd"]');
         
         if(mode==0){ //disabled
            
@@ -316,11 +314,11 @@ $.widget( "heurist.mainMenu6", {
       var prefs = (preferences)?preferences:window.hWin.HAPI4.get_prefs('record-add-defaults');
       if($.isArray(prefs) && prefs.length>0){
             var rty_ID = prefs[0];
-            //var ele = this.divMainMenu.find('.menu-explore[data-action="recordAdd"]');
+            //var ele = this.divMainMenu.find('.menu-explore[data-action-popup="recordAdd"]');
             
-            /*var ele = [this.menues['import'].find('li[data-action="recordAdd"]'),   
-                       this.menues['explore'].find('li[data-action="recordAdd"]')];*/
-            var ele = this.element.find('li[data-action="recordAdd"]')
+            /*var ele = [this.menues['import'].find('li[data-action-popup="recordAdd"]'),   
+                       this.menues['explore'].find('li[data-action-popup="recordAdd"]')];*/
+            var ele = this.element.find('li[data-action-popup="recordAdd"]')
             
             if(ele.length>0){
 
@@ -345,7 +343,7 @@ $.widget( "heurist.mainMenu6", {
       }
       
       var bm_on = (window.hWin.HAPI4.get_prefs('bookmarks_on')=='1');
-      var ele = this.divMainMenu.find('.menu-explore[data-action="svs_list"][data-id="bookmark"]')
+      var ele = this.divMainMenu.find('.menu-explore[data-action-popup="svs_list"][data-id="bookmark"]')
       if(bm_on) ele.show();
       else ele.hide();
       
@@ -409,7 +407,7 @@ $.widget( "heurist.mainMenu6", {
             that.divMainMenu.find('.menu-text').hide();
             that.divMainMenu.find('ul').css({'padding-right':'30px'});
             that.divMainMenu.find('.menu-explore').css({padding:'6px 2px 6px 30px'});
-            //that.divMainMenu.find('.menu-explore[data-action="recordAdd"]').css({padding:'0px 2px 6px 30px'});
+            //that.divMainMenu.find('.menu-explore[data-action-popup="recordAdd"]').css({padding:'0px 2px 6px 30px'});
             that.divMainMenu.find('.ui-heurist-quicklinks').css({'text-align':'center'});
             that.divMainMenu.find('.section-head').css({'padding-left':'0px'});
             
@@ -456,7 +454,7 @@ $.widget( "heurist.mainMenu6", {
                     that.divMainMenu.find('.menu-text').css({'display':'inline-block'}); //show('fade',300);
                     that.divMainMenu.css({bottom:'4px',height:'auto'});
                     that.divMainMenu.find('.menu-explore').css({padding:'6px 2px 6px 16px'});
-                    //that.divMainMenu.find('.menu-explore[data-action="recordAdd"]').css({padding:'0px 2px 6px 16px'});
+                    //that.divMainMenu.find('.menu-explore[data-action-popup="recordAdd"]').css({padding:'0px 2px 6px 16px'});
                     //that.divMainMenu.css({'box-shadow':'rgba(0, 0, 0, 0.5) 5px 0px 0px'});
                     
                     //change parent for cont? 
@@ -541,7 +539,7 @@ $.widget( "heurist.mainMenu6", {
             ele = $(e.target).is('li')?$(e.target):$(e.target).parents('li');
             if(ele){
                 ele.find('.menu-text').css('text-decoration','underline');
-                hasAction = ele.attr('data-action');
+                hasAction = ele.attr('data-action-popup');
             }
         }
 
@@ -566,7 +564,7 @@ $.widget( "heurist.mainMenu6", {
         
         if(!action_name){
             menu_item = $(e.target).is('li')?$(e.target):$(e.target).parents('li');
-            action_name = menu_item.attr('data-action');
+            action_name = menu_item.attr('data-action-popup');
         }
         
         if(this._current_explore_action==action_name) return;
@@ -603,7 +601,8 @@ $.widget( "heurist.mainMenu6", {
         explore_height = 'auto',
         explore_left = that.divMainMenu.width()+4; //204; this._widthMenu
         
-        if(menu_item && menu_item.parents('.ui-heurist-quicklinks').length==0 && this._active_section=='explore'){
+        if(menu_item && menu_item.parents('.ui-heurist-quicklinks').length==0 && 
+                (this._active_section=='explore' || this._active_section=='import')){
             explore_left = 302;
         }else{
             explore_left = (that.divMainMenu.width()>91)?(this._widthMenu+4):95; 
@@ -807,11 +806,11 @@ $.widget( "heurist.mainMenu6", {
         }
         
         if(mode==1){
-            
+            //show in leftside main menu
             if(!this.svs_list.parent().hasClass('ui-heurist-quicklinks')){
                     //show in left main menu
                     this.svs_list.detach().appendTo(this.divMainMenu.find('.ui-heurist-quicklinks'));
-                    //this.svs_list.css({'top':160}); //, 'font-size':'0.8em'});
+                    this.svs_list.css({'top':190}); //, 'font-size':'0.8em'});
                     this.svs_list.svs_list('option','container_width',170);
                     this.svs_list.svs_list('option','hide_header', true);
                     this._on(this.svs_list,{mouseenter: this._resetCloseTimers});//_expandMainMenuPanel});
@@ -822,7 +821,7 @@ $.widget( "heurist.mainMenu6", {
             if(!this.svs_list.parent().hasClass('ui-menu6-section')){
                 
                 this.svs_list.detach().appendTo(this.menues['explore']);
-                //this.svs_list.css({'top':250}); //, 'font-size':'1em'}).show();
+                this.svs_list.css({'top':230}); //, 'font-size':'1em'}).show();
                 this.svs_list.svs_list('option','container_width',200);
                 this.svs_list.svs_list('option','hide_header', true);
                 this._off(this.svs_list,'mouseenter');
@@ -958,7 +957,7 @@ $.widget( "heurist.mainMenu6", {
                     //clearTimeout(this._myTimeoutId2); this._myTimeoutId2 = 0; //prevent collapse of section menu popup
                 },
                 mouseleave: function(e){
-                    if(this._active_section=='explore'){
+                    if(this._active_section=='explore' || this._active_section=='import'){
                         this._mouseout_SectionMenu(e);       
                     }else{
                         this._collapseMainMenuPanel()    
@@ -1026,6 +1025,8 @@ $.widget( "heurist.mainMenu6", {
             //init 
             this._switch_SvsList( 0 );
             //this.svs_list = this._init_SvsList(this.menues['explore'].find('#svs_list'));  
+            
+            this._initSectionMenu( 'explore' );
     },
 
     //
@@ -1070,14 +1071,7 @@ $.widget( "heurist.mainMenu6", {
                     
         this.menues[section].find('.ui-icon-circle-b-help').css({cursor:'pointer'});
         this._on(this.menues[section].find('.ui-icon-circle-b-help'),
-            {click:function(e){
-                this.containers[section].empty();
-                this.containers[section]
-                    .load(window.hWin.HAPI4.baseURL+'context_help/menu_'+section+'.html #content')
-                    .css({left:'304px',right: '4px',top:'2px',bottom:'4px',width:'auto',height:'auto'})
-                    .show();
-            }}
-        );
+            {click: this._loadIntroductoryGuide});
         
         //execute menu on click           
         this._on(this.menues[section].find('li[data-action]'),{click:function(e){
@@ -1117,11 +1111,12 @@ $.widget( "heurist.mainMenu6", {
         
                 this._updateDefaultAddRectype();
                 
-                //special behavior for recordAdd
-                var ele = this.menues['import'].find('li[data-action="recordAdd"]');
+                //special behavior for 
+                var ele = this.menues['import'].find('li[data-action-popup="recordAdd"]');
                 var that = this;
                 this._on(ele,{
                      mouseenter: function(e){
+//console.log('mouse endter recodADD');
                         this._resetCloseTimers();
                         this.show_ExploreMenu(e);
                      },
@@ -1129,9 +1124,10 @@ $.widget( "heurist.mainMenu6", {
                             clearTimeout(this._myTimeoutId3); this._myTimeoutId3 = 0; //clear timeout on show section menu
                           
                             this._myTimeoutId2 = setTimeout(function(){  //was 6
-console.log('hide explore record ADD');
-                                        that.menues['explore'].hide();
-                                        that.menues_explore_gap.hide();
+//console.log('hide explore record ADD');
+                                        that._closeExploreMenuPopup();
+                                        //that.menues['explore'].hide();
+                                        //that.menues_explore_gap.hide();
                                         //that._closeSectionMenu('explore');
                                     },  this._delayOnCollapse_ExploreMenu); 
                      }
@@ -1175,6 +1171,9 @@ console.log('hide explore record ADD');
     //
     switchContainer: function( section, force_show ){
 
+        //hide all intros
+        $.each(this.introductions, function(i, item){$(item).hide();});
+        
         var that = this;
         if(that._active_section!=section ){
 
@@ -1196,13 +1195,15 @@ console.log('hide explore record ADD');
 
             if(force_show || (that.containers[section] && !that.containers[section].is(':empty'))){
                 that.containers[section].show();    
+            }else{
+                that.introductions[section].show();    
             }
             
             //change main background
             this.element.addClass('ui-heurist-'+section+'-fade');    
             this.menues_explore_gap.addClass('ui-heurist-'+section+'-fade');
             
-        }else if(force_show){
+        }else if(force_show || section=='explore'){
             that.containers[section].show();    
         }else{
             return;
@@ -1211,7 +1212,6 @@ console.log('hide explore record ADD');
         if(section == 'explore') {
             if(that.containers[section].hasClass('ui-layout-container'))
                  that.containers[section].layout().resizeAll();
-            
             that._switch_SvsList( 0 );
         }
 
@@ -1343,7 +1343,125 @@ console.log('hide explore record ADD');
                                 
         $('<div>').css({top:38}).addClass('ent_wrapper').appendTo(this.helper_div);  
         //this.containers[this._active_section]
-    }
+    },
+    
+    //
+    //
+    //
+    _refreshSubsetSign: function(){
+        
+            var container = this.menues['explore'].find('li[data-action="menu-subset-set"]');
+            var ele = container.find('span.subset-info');
+            if(window.hWin.HAPI4.sysinfo.db_workset_count>0){
+                if(ele.length==0){
+                    ele = $('<span class="subset-info"><span '
++'style="display:inline-block;font-style:italic;font-size:smaller;color:lightgray;padding-left:22px"></span>'
++'<span class="ui-icon ui-icon-arrowrefresh-1-w clear_subset" style="font-size:0.7em;" title="Click to revert to whole database">'+
+'</span></span>')
+                        .appendTo(container);
+                        
+                    this._on(ele.find('span.clear_subset').css('cursor','pointer'),
+                        {click: function(e){
+                            window.hWin.HEURIST4.util.stopEvent(e);
+                            var widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('resultList');
+                            if(widget){
+                                widget.resultList('callResultListMenu', 'menu-subset-clear'); //call method
+                            }
+                        }});
+                
+                }
+                ele.find('span:first').text('Current subset n = '+window.hWin.HAPI4.sysinfo.db_workset_count);
+                ele.show();
+                
+            }else if(ele.length>0){
+                ele.hide();
+            }
+    },
+
+    //
+    //
+    //
+    _initIntroductory: function( section ){
+        
+        if(!this.introductions[section]){
+            
+            var sname;
+            if(section=='input'){
+                snmae = 'Populate';
+            }else{
+                sname = section[0].toUpperCase()+section.substr(1);
+            }
+            
+            this.introductions[section] = $('<div><div class="gs-box" style="margin:10px;max-width:500px;height:100px;cursor:pointer">'
+        +'<div style="display:inline-block"><img width="110" height="60" alt="" src="'
+            +window.hWin.HAPI4.baseURL+'hclient/assets/v6/gs_'+section+'.png"></div>'
+            
+        +'<span class="ui-heurist-title header" style="display: inline-block; font-weight: normal;padding-left:20px">'
+            +'<span class="ui-icon ui-icon-help"/>&nbsp;Introductory guide</span>'            
+            
+        +'<div class="ui-heurist-title" style="font-size: large !important;width: 80px;padding-top: 6px;">'+sname+'</div>'
+        +'</div></div>')            
+                .addClass('ui-menu6-container ui-heurist-'+section)
+                .css({'background':'none'})
+                .appendTo( this.element );
+                
+            this._on(this.introductions[section].find('.gs-box'),{click:this._loadIntroductoryGuide});    
+                
+            if(section=='design' && window.hWin.HEURIST4.util.getUrlParameter('welcome', window.hWin.location.search))
+            {
+                
+                var ele = $('<div class="gs-box" style="margin:10px;width:500px;height:400px;">')
+                    .appendTo(this.introductions[section]);
+                ele.load(window.hWin.HAPI4.baseURL+'hclient/widgets/dropdownmenus/welcome.html',
+                        function(){
+                           var url = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database;
+                           $('.bookmark-url').html('<a href="'+url+'">'+url+'</a>');
+                           $('.template-url').attr('href', window.hWin.HAPI4.baseURL
+                                            +'documentation_and_templates/db_design_template.rtf');
+                        });
+            }
+            
+            
+        }
+    },
+    
+    //
+    //
+    //
+    _loadIntroductoryGuide: function(e){
+        
+        var section = this._active_section;
+        
+        this._off(this.introductions[section].find('.gs-box'),'click');
+                
+        var that = this;
+        this.introductions[section]
+                .load(window.hWin.HAPI4.baseURL+'intro/getting_started.html div.gs-box.ui-heurist-'+section,
+                function(){
+                    //init images and video
+                    that.introductions[section].find('img').each(function(i,img){
+                        img = $(img);
+                        img.attr('src',window.hWin.HAPI4.baseURL+'hclient/assets/v6/'+img.attr('data-src'));
+                    });
+                    
+                    that.introductions[section].find('.gs-box')
+                        .css({position:'absolute', left:10, right:10, top:10, 'min-width':700, margin:0}) //,'padding-left':20
+                        .show();
+                    that.introductions[section].find('.gs-box > div:first').css('margin','23px 0');
+                    that.introductions[section].find('.gs-box .ui-heurist-title.header')
+                        .css({position:'absolute', left:160, top:40, right:400, 'max-width':'540px'});
+                        
+                    $('<div class="gs-box">')
+                        .css({position:'absolute', left:10, right:10, top:180, bottom:10, 'min-width':400, overflow: 'auto'})
+                        .load(window.hWin.HAPI4.baseURL+'context_help/menu_'+section+'.html #content')
+                        .appendTo( that.introductions[section] );
+                })
+                .css({left:'304px',right: '4px',top:'2px',bottom:'4px',width:'auto',height:'auto'})  //,'z-index':104
+                .show();
+                    
+        this.containers[section].hide();
+        
+    }    
     
     
 });

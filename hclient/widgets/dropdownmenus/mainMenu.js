@@ -1008,11 +1008,18 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         }else
         if(action == 'menu-extract-pdf'){
             
-            
             //this menu should not be in main menu. IJ request
             var app = window.hWin.HAPI4.LayoutMgr.appGetWidgetById('heurist_resultList');
             if(app && app.widget){
                 $(app.widget).resultList('callResultListMenu', 'menu-selected-extract-pdf'); //call method
+            }
+            
+        }else 
+        if(action == 'menu-subset-set'){
+            
+            var widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('resultList');
+            if(widget){
+                widget.resultList('callResultListMenu', 'menu-subset-set'); //call method
             }
             
         }else 
