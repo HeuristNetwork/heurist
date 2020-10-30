@@ -39,7 +39,7 @@
     require_once (dirname(__FILE__).'/db_structure.php');
     require_once (dirname(__FILE__).'/db_recsearch.php');
     require_once(dirname(__FILE__).'/../entity/dbRecUploadedFiles.php');
-    require_once(dirname(__FILE__).'/../entity/DbDefRecTypes.php');
+    require_once(dirname(__FILE__).'/../entity/dbDefRecTypes.php');
     require_once (dirname(__FILE__).'/../utilities/titleMask.php');
     require_once (dirname(__FILE__).'/../../records/index/elasticSearch.php');
     require_once (dirname(__FILE__).'/../../vendor/ezyang/htmlpurifier/library/HTMLPurifier.auto.php');
