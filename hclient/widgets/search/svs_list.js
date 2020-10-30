@@ -813,7 +813,6 @@ $.widget( "heurist.svs_list", {
             //var s = '<span style="position:absolute;right:10px;top:10px;font-size:0.6em;">';    
          
             if(window.hWin.HAPI4.sysinfo.db_workset_count>0){
-                
                 $('<span style="padding:.4em 1em 0.3em;background:white;color:red;vertical-align:sub;font-size: 11px;font-weight: bold;"'
                   +' title="'+window.hWin.HAPI4.sysinfo.db_workset_count+' records"'
                   +'>SUBSET ACTIVE n='+window.hWin.HAPI4.sysinfo.db_workset_count+'</span>')

@@ -259,7 +259,7 @@ if(is_bool($res) && !$res){
 }else{
     $response = array('status'=>HEURIST_OK, 
                 'newdbname'=>$database_name, 
-                'newdblink'=> HEURIST_BASE_URL.'?db='.$database_name,
+                'newdblink'=> HEURIST_BASE_URL.'?db='.$database_name.'&welcome=1',
                 'newusername'=>$user_record['ugr_Name'],
                 'warnings'=>$warnings);
 }

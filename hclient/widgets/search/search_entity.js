@@ -198,7 +198,6 @@ console.log(data);
             
         // Refreshing
         this.element.on("myOnShowEvent", function(event){
-console.log('myOnShowEvent '+$Db.needUpdateRtyCount);
             if( $Db.needUpdateRtyCount ){
                 $Db.needUpdateRtyCount = false;
                 that._recreateRectypeSelectors2();
