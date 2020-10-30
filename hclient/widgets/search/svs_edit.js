@@ -595,7 +595,7 @@ function hSvsEdit(args) {
                 
                 $dlg.dialog({
                     autoOpen: false,
-                    height: is_short?360:600,
+                    height: is_short?360:520,
                     width: 650,                                                                                               
                     modal: is_modal, //!is_h6style
                     resizable: false,
@@ -646,7 +646,7 @@ function hSvsEdit(args) {
             
             edit_dialog.dialog("option",'title', window.hWin.HR(isRules?'Edit RuleSet':'Edit saved filter criteria'));
 
-            edit_dialog.dialog("option",'height', is_short?360:600 );
+            edit_dialog.dialog("option",'height', is_short?360:520 );
             if(is_short){
                 edit_dialog.find('.hide-if-short').hide();
             }else{

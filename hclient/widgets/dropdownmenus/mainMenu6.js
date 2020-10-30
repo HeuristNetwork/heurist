@@ -416,17 +416,16 @@ $.widget( "heurist.mainMenu6", {
 
             if(that.divMainMenu.width()>91)
                 that.divMainMenu.stop().effect('size',  { to: { width: 91 } }, is_instant===true?10:300, function(){
-                    //that.divMainMenu.find('.menu-text').hide();
                     that.divMainMenu.css({bottom:'4px',height:'auto'});
                     that._closeExploreMenuPopup();
-                    //console.log(' _collapsed');                
-                    //that.divMainMenu.css({'box-shadow':null});
                 });
 
             if (that.menues[that._active_section]) 
             {
                 that.menues[that._active_section].css({left:96});
             }   
+            
+            that._switch_SvsList( 0 );
                 
         }, is_instant===true?10:this._delayOnCollapseMainMenu); //800
     },
@@ -436,7 +435,7 @@ $.widget( "heurist.mainMenu6", {
     //
     _expandMainMenuPanel: function(e) {
 //console.log(' _expandMainMenuPanel ' );
-        if(this._is_prevent_expand_mainmenu || this._active_section=='explore') return;
+        if(this._is_prevent_expand_mainmenu) return; // || this._active_section=='explore'
 
         clearTimeout(this._myTimeoutId); //terminate collapse
         this._myTimeoutId = 0;
@@ -649,11 +648,20 @@ $.widget( "heurist.mainMenu6", {
                             that._explorer_menu_locked = is_locked; 
                     }  });    
 
-                explore_top = position ?position.top :menu_item.offset().top-140;
+                explore_top = 0;
                 explore_height = 255;//268+36;
                 if(position){
+                    explore_top = position.top;
                     explore_left = position.left;
+                }else{
+                    var widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('resultList');
+                    if(widget){
+                        explore_top = widget.position().top + 100;
+                    }else{
+                        explore_top = menu_item.offset().top;
+                    }
                 }
+       
                 
                 if(explore_top+explore_height>that.element.innerHeight()){
                     explore_top = that.element.innerHeight() - explore_height;
@@ -679,6 +687,16 @@ $.widget( "heurist.mainMenu6", {
             }
             else if(action_name=='svsAdd'){
                 that._closeExploreMenuPopup();
+                /*
+                var widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('resultList');
+                if(widget){
+                        explore_top = widget.position().top + 100;
+                        if(explore_top+600>that.element.innerHeight()){
+                            explore_top = '2px';
+                        }
+                }else{
+                        explore_top = 2;
+                }*/
                 that.addSavedSearch( false, explore_left );
                 return;
             }
@@ -1295,7 +1313,7 @@ $.widget( "heurist.mainMenu6", {
         var that = this;
 
         var $dlg = this.edit_svs_dialog.showSavedFilterEditDialog( 'saved', null, null, this.currentSearch , false, 
-            { my: 'left top', at: 'left+'+left_position+'px top', of:this.divMainMenu},
+            { my: 'left top', at: 'left+'+left_position+'px top+100px', of:this.divMainMenu},
             function(){
                 window.hWin.HAPI4.currentUser.usr_SavedSearch = null;
                 window.hWin.HAPI4.currentUser.ugr_SvsTreeData = null;

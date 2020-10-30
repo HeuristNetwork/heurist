@@ -1062,7 +1062,8 @@ $.widget( "heurist.search", {
         if(this.options.is_h6style){
             var widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('mainMenu6');
             if(widget){
-                    widget.mainMenu6('show_ExploreMenu', null, 'search_quick', this.element.offset());
+                    var pos = this.element.offset();
+                    widget.mainMenu6('show_ExploreMenu', null, 'search_quick', {top:pos.top+10, left:pos.left});
                     return;
             }
         }
