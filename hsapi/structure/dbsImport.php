@@ -393,7 +393,7 @@ $time_debug = microtime(true);
 $time_debug2 = $time_debug;
         
         // I. Add Terms (whole vocabulary)
-        $stub = array();
+        $stub = array();//stub for $all_terms_in_vocab
         if(! ($this->_importVocabulary(null, "enum", $stub) && 
               $this->_importVocabulary(null, "relation", $stub)) ){
 
@@ -1170,6 +1170,7 @@ $mysqli->commit();
      
      $term_id - term to be imported, if not defined use $this->imp_terms to import all missing vocabs
      $domain - enum or relation
+     $all_terms_in_vocab - target: all terms by vocabulary (plain array)
      $children - array of term ids (source)
      $parent_id - parent term id (target)
      $same_level_labels - labels and codes on the same level to disambiguate
@@ -1191,8 +1192,7 @@ $mysqli->commit();
                                 ?@$this->source_defs['terms']['trm_Links'][$term_id]   //new structure with terms by reference
                                 :@$this->source_defs['terms']['treesByDomain'][$domain][$term_id];
 
-                $all_terms_in_vocab = $this->targetTerms->treeData($term_id,3);
-                                
+                $all_terms_in_vocab = array(); //reset
                 $res = $this->_importVocabulary($term_id, $domain, $all_terms_in_vocab, $children, null, null);                  
                 if(!$res) return false;
             }
@@ -1221,6 +1221,7 @@ $mysqli->commit();
                 //this term aready exists in target - add it as reference to this vocabulary
                 if($parent_id>0){
                     
+                    //this is not vocabulary
                     if(!in_array($new_term_id, $all_terms_in_vocab)){
                         //add as reference
                         $res = addTermReference($parent_id, $new_term_id, $this->system->get_mysqli()); //see saveStructureLib
@@ -1233,6 +1234,9 @@ $mysqli->commit();
                             return false;
                         }
                     }
+                }else{
+                    //find vocabuary in target and all its terms
+                    $all_terms_in_vocab = $this->targetTerms->treeData($new_term_id, 3);
                 }
                                 
                 $new_term_id = -$new_term_id;
