@@ -187,7 +187,7 @@ $.widget( "heurist.recordDataTable", $.heurist.recordAction, {
                 }
                 parentcode = parent_rtid+':'+parent_dtid;
                 
-                var fieldtitle = $Db.rst_idx(parent_rtid, parent_dtid, 'rst_DisplayName');
+                var fieldtitle = $Db.rst(parent_rtid, parent_dtid, 'rst_DisplayName');
                 
                 this._addSelectedColumn(parentcode, fieldtitle);    
                 

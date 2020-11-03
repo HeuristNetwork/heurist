@@ -712,7 +712,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                 var section = action_container;
                 //activate specified menu and container
                 $('.ui-menu6').mainMenu6('switchContainer', section, true);
-                container = $('.ui-menu6 > .ui-menu6-container.ui-heurist-'+section);
+                container = $('.ui-menu6 > .ui-menu6-widgets.ui-heurist-'+section);
                 container.removeClass('ui-suppress-border-and-shadow');
                 menu_container = $('.ui-menu6 > .ui-menu6-section.ui-heurist-'+section); //need for publish/cms
                 //highlight required item in menu
@@ -898,6 +898,8 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
 
         }else if(action == "menu-structure-rectypes"){
 
+            window.hWin.HEURIST4.defRecTypes_calls = 0;
+            
             window.hWin.HEURIST4.ui.showEntityDialog('defRecTypes', entity_dialog_options);
                                     
         }else if(action == "menu-structure-fieldtypes"){
@@ -1558,7 +1560,6 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         }
         
         if(this.cms_home_records_count==1){ 
-//window.hWin.HEURIST4.rectypes.counts && window.hWin.HEURIST4.rectypes.counts[RT_CMS_HOME]==1
 
             if(is_view_mode){
                 

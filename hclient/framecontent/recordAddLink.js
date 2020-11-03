@@ -162,7 +162,7 @@ function hRecordAddLink() {
         for (var rty in rectype_Ids){
             if(rty>=0){
                 rty = rectype_Ids[rty];
-                opt = new Option(window.hWin.HEURIST4.rectypes.pluralNames[rty], rty);
+                opt = new Option($Db.rty(rty, 'rty_Plural'), rty);
                 if(hasSelection){
                     opt.className = 'depth1';
                     new_optgroup.appendChild(opt);    
@@ -194,7 +194,7 @@ function hRecordAddLink() {
             for (var rty in rectype_Ids){
                 if(rty>=0){
                     rty = rectype_Ids[rty];
-                    opt = new Option(window.hWin.HEURIST4.rectypes.pluralNames[rty], rty);
+                    opt = new Option($Db.rty(rty, 'rty_Plural'), rty);
                     if(hasSelection){
                         opt.className = 'depth1';
                         new_optgroup.appendChild(opt);    
@@ -231,27 +231,26 @@ function hRecordAddLink() {
 
         $('#'+party+'_field').empty();
         
-        var dtFields = $Db.rst_idx(rty);
-        for (var dty in dtFields) {
+        var dtFields = $Db.rst(rty);
+        dtFields.each2(function(dty, dtField){
+        
             
             var field_type = $Db.dty(dty, 'dty_Type');
             
             if(!(field_type=='resource' || field_type=='relmarker')){
-                 continue;
+                 return true; //continue;
             }
             if(relmarker_dty_ID>0){  //detail id is defined in URL
             
                 if( relmarker_dty_ID==dty && (party=='source') ){  //&& (source_ID>0 || target_ID>0)
                     
                 }else{
-                    continue;
+                    return true;//continue;
                 }
             }
             
-            var details = window.hWin.HEURIST4.rectypes.typedefs[recRecTypeID].dtFields[dty];
-
             //get name, contraints
-            var dtyName = $Db.rst_idx(recRecTypeID, dty, 'rst_DisplayName');
+            var dtyName = dtField('rst_DisplayName');
             var dtyPtrConstraints = $Db.dty(dty, 'dty_PtrTargetRectypeIDs');
             var recTypeIds = null;
             if(!window.hWin.HEURIST4.util.isempty(dtyPtrConstraints)){
@@ -317,9 +316,9 @@ function hRecordAddLink() {
             
             
             if( relmarker_dty_ID>0 && (party=='source' && source_ID>0) ){            
-                break;
+                return false; //break
             }
-        }//for fields
+        });//for fields
         
         if(relmarker_dty_ID>0){
             //hide radio - since it is the only one field in list
@@ -354,9 +353,9 @@ function hRecordAddLink() {
                 }
 
                 _createInputElement_forSource(relmarker_dty_ID);
-            }*/
+            }
         }//if rectype defined
-
+        */
     }   
     
     //
@@ -389,8 +388,6 @@ function hRecordAddLink() {
         var $fieldset = $('#div_'+party+'2').empty();
         
         var dtID = 0;
-        var typedefs = window.hWin.HEURIST4.rectypes.typedefs;
-        var fi = typedefs.dtFieldNamesToIndex;
         var dtFields = [];
         
         /*if(typedefs[rectypeID].dtFields[dtID]){
@@ -398,30 +395,28 @@ function hRecordAddLink() {
         }else{*/
         
         //get first resource field and reset constraints
-        for(rtid in typedefs){
-            if(typedefs[rtid]){
-                for(dtid in typedefs[rtid].dtFields){
-                    if(typedefs[rtid].dtFields[dtid][fi['dty_Type']]=='resource'){
-                        dtFields = window.hWin.HEURIST4.util.cloneJSON(typedefs[rtid].dtFields[dtid]);
-                        dtID = dtid;
-                        break;
-                    }
-                }        
-            }
+        var all_structs = $Db.rst_idx2();
+        for (var rtid in all_structs){
+            var recset = all_structs[rtid];
+            recset.each2(function(dty_ID, record){
+                if($Db.dty(dty_ID, 'dty_Type')=='resource'){
+                    dtFields = window.hWin.HEURIST4.util.cloneJSON(record);                
+                    dtID = dty_ID;
+                    return false;    
+                }
+            });
         }
-        dtFields[fi['rst_PtrFilteredIDs']] = rt_constraints;    
-        dtFields[fi['rst_DisplayName']] = '';//input_label;
-        dtFields[fi['rst_RequirementType']] = 'optional';
-        dtFields[fi['rst_RequirementType']] = 'optional';
-        dtFields[fi['rst_MaxValues']] = 1;
+        dtFields['rst_PtrFilteredIDs'] = rt_constraints;    
+        dtFields['rst_DisplayName'] = '';//input_label;
+        dtFields['rst_RequirementType'] = 'optional';
+        dtFields['rst_MaxValues'] = 1;
         
         var that = this;
 
         var ed_options = {
             recID: -1,
             dtID: dtID,
-            //rectypeID: rectypeID,
-            rectypes: window.hWin.HEURIST4.rectypes,
+
             values: '',// init_value
             readonly: false,
 
@@ -470,32 +465,28 @@ function hRecordAddLink() {
         
         //_createInputElement_step2(rectypeID, dtID, $fieldset);
         
-        
-        var typedefs = window.hWin.HEURIST4.rectypes.typedefs;
-        var fi = typedefs.dtFieldNamesToIndex;
         var dtFields = [];
         
-        if(typedefs[rectypeID].dtFields[dtID]){
-            dtFields = window.hWin.HEURIST4.util.cloneJSON(typedefs[rectypeID].dtFields[dtID]);
+        if( $Db.rst(rectypeID, dtID) ){
+            dtFields = window.hWin.HEURIST4.util.cloneJSON( $Db.rst(rectypeID, dtID) );
         }else{
             //get first resource field and reset constraints
-            for(rtid in typedefs){
-                if(typedefs[rtid]){
-                    for(dtid in typedefs[rtid].dtFields){
-                        if(typedefs[rtid].dtFields[dtid][fi['dty_Type']]=='resource'){
-                            dtFields = window.hWin.HEURIST4.util.cloneJSON(typedefs[rtid].dtFields[dtid]);
-                            break;
-                        }
-                    }        
-                }
+            var all_structs = $Db.rst_idx2();
+            for (var rtid in all_structs){
+                var recset = all_structs[rtid];
+                recset.each2(function(dty_ID, record){
+                    if($Db.dty(dty_ID, 'dty_Type')=='resource'){
+                        dtFields = window.hWin.HEURIST4.util.cloneJSON(record);                
+                        return false;    
+                    }
+                });
             }
-            dtFields[fi['rst_PtrFilteredIDs']] = '';    
+            dtFields['rst_PtrFilteredIDs'] = '';    
         }
 
-        dtFields[fi['rst_DisplayName']] = '';//input_label;
-        dtFields[fi['rst_RequirementType']] = 'optional';
-        dtFields[fi['rst_RequirementType']] = 'optional';
-        dtFields[fi['rst_MaxValues']] = 1;
+        dtFields['rst_DisplayName'] = '';//input_label;
+        dtFields['rst_RequirementType'] = 'optional';
+        dtFields['rst_MaxValues'] = 1;
         //dtFields[fi['rst_DisplayWidth']] = 50; //@todo set 50 for freetext and resource
         //dtFields[fi['rst_DisplayWidth']] = 50;
         
@@ -506,8 +497,7 @@ function hRecordAddLink() {
         var ed_options = {
             recID: -1,
             dtID: dtID,
-            //rectypeID: rectypeID,
-            rectypes: window.hWin.HEURIST4.rectypes,
+
             values: '',// init_value
             readonly: false,
 
@@ -534,28 +524,24 @@ function hRecordAddLink() {
     // create input element for relation selecor
     //
     function _createInputElement_Relation( party, rectypeID, dtID ){ 
-//AAA
+
         if(window.hWin.HEURIST4.util.isempty(dtID)) return;
     
         var $field = $('#rt_'+party+'_sel_'+dtID).empty();
 
         
-        var typedefs = window.hWin.HEURIST4.rectypes.typedefs;
-        var fi = typedefs.dtFieldNamesToIndex;
-        var dtFields =  window.hWin.HEURIST4.util.cloneJSON(typedefs[rectypeID].dtFields[dtID]);
+        var dtFields = window.hWin.HEURIST4.util.cloneJSON($Db.rst(rectypeID, dtID));
 
-        dtFields[fi['rst_DisplayName']] = 'Relationship type:';//input_label;
-        dtFields[fi['rst_RequirementType']] = 'optional';
-        dtFields[fi['rst_RequirementType']] = 'optional';
-        dtFields[fi['rst_MaxValues']] = 1;
+        dtFields['rst_DisplayName'] = 'Relationship type:';//input_label;
+        dtFields['rst_RequirementType'] = 'optional';
+        dtFields['rst_MaxValues'] = 1;
         
         var that = this;
 
         var ed_options = {
             recID: -1,
             dtID: dtID,
-            //rectypeID: rectypeID,
-            rectypes: window.hWin.HEURIST4.rectypes,
+
             values: '',// init_value
             readonly: false,
 
@@ -619,9 +605,9 @@ function hRecordAddLink() {
                 }
                 
 
-                rec_titles.push('<b>'+window.hWin.HEURIST4.rectypes.names[recRecTypeID]+'</b>');
+                rec_titles.push('<b>'+$Db.rty(recRecTypeID, 'rty_Name')+'</b>');
                 $('#'+party+'_title').text(rec_title);
-                $('#'+party+'_rectype').text(window.hWin.HEURIST4.rectypes.names[recRecTypeID]);
+                $('#'+party+'_rectype').text($Db.rty(recRecTypeID, 'rty_Name'));
                 $('#'+party+'_rectype_img').addClass('rt-icon').css('background-image', 'url("'+top.HAPI4.iconBaseURL+recRecTypeID+'")');
                 
                 //find fields

@@ -1025,14 +1025,14 @@ $.widget( "heurist.importStructure", {
                     if( window.hWin.HEURIST4.util.isArrayNotEmpty(response.report.added) ){
                         report = 'Added: ';
                         for(idx in response.report.added){
-                            report += (window.hWin.HEURIST4.rectypes.names[response.report.added[idx]]+', ');    
+                            report += ($Db.rty(response.report.added[idx],'rty_Name')+', ');    
                         }
                         report = report.substr(0,report.length-2)+'<br>';
                     }
                     if( window.hWin.HEURIST4.util.isArrayNotEmpty(response.report.updated) ){
                         report += '<br>Updated: ';
                         for(idx in response.report.updated){
-                            report += (window.hWin.HEURIST4.rectypes.names[response.report.updated[idx]]+', ');    
+                            report += ($Db.rty(response.report.updated[idx],'rty_Name')+', ');    
                         }
                         report = report.substr(0,report.length-2);
                     }

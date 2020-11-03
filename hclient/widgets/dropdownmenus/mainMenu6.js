@@ -957,7 +957,7 @@ $.widget( "heurist.mainMenu6", {
             .appendTo( this.element );
             
         this.containers[section] = $('<div>')
-            .addClass('ui-menu6-container ui-heurist-'+section)
+            .addClass('ui-menu6-widgets ui-menu6-container ui-heurist-'+section) //ui-menu6-widgets to distinguish with introduction
             .appendTo( this.element );
             
             
@@ -1209,7 +1209,9 @@ $.widget( "heurist.mainMenu6", {
             that._active_section = section;
 
             //show menu and section 
-            that.menues[section].css('z-index',101).show();
+            if(that.menues[section]){
+                that.menues[section].css('z-index',101).show();    
+            }
 
             if(force_show || (that.containers[section] && !that.containers[section].is(':empty'))){
                 that.containers[section].show();    

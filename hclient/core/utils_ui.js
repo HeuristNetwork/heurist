@@ -750,26 +750,29 @@ window.hWin.HEURIST4.ui = {
                 rty = rtyIDs[i];
                 rtyName = $Db.rty(rty, 'rty_Name');
                 
-                var dtFields = $Db.rst_idx(rty);
+                var dtFields = $Db.rst(rty);
                 
-                for (dty in dtFields) {
+                dtFields.each2(function(dty, detail){
                     
-                  var field_type = $Db.dty(dty, 'dty_Type');
-                  if(allowedlist!=null && 
-                     allowedlist.indexOf(field_type)<0){
-                      continue; //not allowed - skip
-                  }  
-                  
-                  dtyName = $Db.dty(dty, 'dty_Name');
-                  if (!dtys[dtyName]){
-                    dtys[dtyName] = [];
-                    dtyNameToID[dtyName] = dty;
-                    dtyNameToRty[dty] = rty; //not used
-                    dtyNames.push(dtyName);
-                  }
-                  fieldName = rtyName + "." + $Db.rst_idx(rty, dty, 'rst_DisplayName');
-                  dtys[dtyName].push(fieldName);
-                }
+                      var field_type = $Db.dty(dty, 'dty_Type');
+                      if(allowedlist!=null && 
+                         allowedlist.indexOf(field_type)<0){
+                         //not allowed - skip
+                         
+                      }else{  
+                      
+                          dtyName = $Db.dty(dty, 'dty_Name');
+                          if (!dtys[dtyName]){
+                            dtys[dtyName] = [];
+                            dtyNameToID[dtyName] = dty;
+                            dtyNameToRty[dty] = rty; //not used
+                            dtyNames.push(dtyName);
+                          }
+                          fieldName = rtyName + "." + detail['rst_DisplayName'];
+                          dtys[dtyName].push(fieldName);
+                      }
+                });
+                
             }//for rectypes
             
             //fill select
@@ -822,7 +825,7 @@ window.hWin.HEURIST4.ui = {
             
             var rectype = Number((window.hWin.HEURIST4.util.isArray(rtyIDs))?rtyIDs[0]:rtyIDs);
             
-            details = $Db.rst_idx(rectype);
+            details = $Db.rst(rectype);
             if(!details) return selObj; //structure not defined
                 
             var arrterm = [];
@@ -832,42 +835,45 @@ window.hWin.HEURIST4.ui = {
             if(show_parent_rt){
                 var DT_PARENT_ENTITY  = window.hWin.HAPI4.sysinfo['dbconst']['DT_PARENT_ENTITY'];
                 //get all child rectypes
-                
-                var recset = $Db.rst_idx();
-                recset.each2(function(i,record){
+                var all_structs = $Db.rst_idx2();
+                for (var rty_ID in all_structs){
+                    var recset = all_structs[rty_ID];
+                    recset.each2(function(dty_ID, record){
                     
-                    if(record['rst_CreateChildIfRecPtr']==1){
-                        var fieldtype = $Db.dty(record['rst_DetailTypeID'], 'dty_Type');
-                        var constraint = $Db.dty(record['rst_DetailTypeID'], 'dty_PtrTargetRectypeIDs');
-                        if(fieldtype=='resource' && constraint && constraint.split(',').indexOf(rectype)>=0){
-                            
-                                var name = 'Parent record ('+$Db.rty(record['rst_RecTypeID'], 'rty_Name')+')';
+                        if(record['rst_CreateChildIfRecPtr']==1){
+                            var fieldtype = $Db.dty(dty_ID, 'dty_Type');
+                            var constraint = $Db.dty(dty_ID, 'dty_PtrTargetRectypeIDs');
+                            if(fieldtype=='resource' && constraint && constraint.split(',').indexOf(rectype)>=0){
                                 
-                                if(showDetailType){
-                                    name = name + ' [resource]';
-                                }
+                                    var name = 'Parent record ('+$Db.rty(record['rst_RecTypeID'], 'rty_Name')+')';
+                                    
+                                    if(showDetailType){
+                                        name = name + ' [resource]';
+                                    }
 
-                                arrterm.push([DT_PARENT_ENTITY, name, false]);    
-                                
-                                return false;
+                                    arrterm.push([DT_PARENT_ENTITY, name, false]);    
+                                    
+                                    return false;
+                            }
                         }
-                    }
-                });
+                    });
+                    if(arrterm.length>0) break;
+                }
             }
 
-            for (dtyID in details){
+            details.each2(function(dtyID, detail){
                 if(dtyID){
 
-                    var field_reqtype = $Db.rst_idx(rectype, dty, 'rst_RequirementType');
+                    var field_reqtype = detail['rst_RequirementType'];
                     
-                    if(field_reqtype=='forbidden') continue;
+                    if(field_reqtype=='forbidden') return true; //continue;
                     
                     var field_type = $Db.dty(dtyID, 'dty_Type');
 
                     if(allowedlist==null || allowedlist.indexOf(field_type)>=0)
                     {
                         
-                        var name = $Db.rst_idx(rectype, dtyID, 'rst_DisplayName');
+                        var name = detail['rst_DisplayName'];
                         
                         if(showDetailType){
                             name = name + ' ['+$Db.baseFieldType[ field_type ]+']';
@@ -882,7 +888,7 @@ window.hWin.HEURIST4.ui = {
                         arrterm.push([ dtyID+'_lat', name+' [latitude]', false ]);
                     } 
                 }
-            }
+            });
 
             //sort by name
             arrterm.sort(function(a, b) {
@@ -1136,7 +1142,7 @@ window.hWin.HEURIST4.ui = {
                     offset: null
                 },*/
                 change: function( event, data ) {
- console.log('set '+data.item.value);   
+ 
                         selObj.val(data.item.value);//change value for underlaying html select
                         selObj.trigger('change');
                 },
@@ -2253,6 +2259,11 @@ window.hWin.HEURIST4.ui = {
                 }
                 $(options.container).empty();
                 $(options.container).show();
+                
+                if(!$(options.container).attr('id')){
+                    $(options.container).uniqueId()
+                }
+                
                 manage_dlg = $(options.container)[widgetName]( options );
             }
             

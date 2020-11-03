@@ -117,8 +117,8 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             opt = new Option("All records", "All");
             selScope.appendChild(opt);
             inititally_selected = 'All';
-        }else if(init_scope_type>0 && window.hWin.HEURIST4.rectypes.pluralNames[init_scope_type]){
-            opt = new Option(window.hWin.HEURIST4.rectypes.pluralNames[init_scope_type], init_scope_type);
+        }else if(init_scope_type>0 && $Db.rty(init_scope_type, 'rty_Plural')){
+            opt = new Option($Db.rty(init_scope_type, 'rty_Plural'), init_scope_type);
             selScope.appendChild(opt);
             inititally_selected = init_scope_type;
         }else{
@@ -143,7 +143,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                 for (var rty in rectype_Ids){
                     if(rty>=0){
                         rty = rectype_Ids[rty];
-                        opt = new Option('only: '+window.hWin.HEURIST4.rectypes.pluralNames[rty], rty);
+                        opt = new Option('only: '+$Db.rty(rty, 'rty_Plural'), rty);
                         selScope.appendChild(opt);
                     }
                 }
@@ -338,14 +338,14 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                 rtyIDs = allSelectedRectypes;
             }
             for (i in rtyIDs){
-                if(window.hWin.HEURIST4.rectypes.typedefs[rtyIDs[i]].dtFields[dtID]){
+                if($Db.rst(rtyIDs[i], dtID)){
                     rectypeID = rtyIDs[i];
                     break;
                 }
             }
         }
    
-console.log( $Db.dty(dtID, 'dty_Type') );        
+        
         if($Db.dty(dtID, 'dty_Type')=='geo'){
             
             $('#cb_remove_all').prop('checked',true).addClass('ui-state-disabled');;
@@ -359,14 +359,13 @@ console.log( $Db.dty(dtID, 'dty_Type') );
             //window.hWin.HEURIST4.util.setDisabled($('#cb_replace_all'), false);
         }
 
-        //window.hWin.HEURIST4.util.cloneObj(
-        var dtFields = window.hWin.HEURIST4.util.cloneJSON(window.hWin.HEURIST4.rectypes.typedefs[rectypeID].dtFields[dtID]);
-        var fi = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex;
+        
+        var dtFields = window.hWin.HEURIST4.util.cloneJSON($Db.rst(rectypeID, dtID));
 
-        dtFields[fi['rst_DisplayName']] = input_label;
-        dtFields[fi['rst_RequirementType']] = 'optional';
-        dtFields[fi['rst_MaxValues']] = 1;
-        dtFields[fi['rst_DisplayWidth']] = 50; //@todo set 50 for freetext and resource
+        dtFields['rst_DisplayName'] = input_label;
+        dtFields['rst_RequirementType'] = 'optional';
+        dtFields['rst_MaxValues'] = 1;
+        dtFields['rst_DisplayWidth'] = 50; //@todo set 50 for freetext and resource
         //dtFields[fi['rst_DisplayWidth']] = 50;
         
         if(window.hWin.HEURIST4.util.isnull(init_value)) init_value = '';
@@ -374,8 +373,7 @@ console.log( $Db.dty(dtID, 'dty_Type') );
         var ed_options = {
             recID: -1,
             dtID: dtID,
-            //rectypeID: rectypeID,
-            rectypes: window.hWin.HEURIST4.rectypes,
+
             values: init_value,
             readonly: false,
 
@@ -504,9 +502,9 @@ console.log( $Db.dty(dtID, 'dty_Type') );
           
             window.hWin.HEURIST4.msg.showMsgDlg(
                 'You are about to convert '
-                + (request['rtyID']>0 ?('"'+window.hWin.HEURIST4.rectypes.names[request['rtyID']]+'"'):request['recIDs'].length)
+                + (request['rtyID']>0 ?('"' + $Db.rty(request['rtyID'], 'rty_Name') +'"'):request['recIDs'].length)
                 +' records from their original record (entity) type into "'
-                + window.hWin.HEURIST4.rectypes.names[rtyID] 
+                + $Db.rty(rtyID, 'rty_Name')
                 + '" records.  This can result in invalid data for these records.<br><br>Are you sure?',
                 function(){_startAction_continue(request);},
                  {title:'Warning',yes:'Proceed',no:'Cancel'});

@@ -236,33 +236,34 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
         
         //var $fieldset = $('#target_field').empty(); //@todo clear target selection only in case constraints were changed
             
-        var details = $Db.rst_idx(recRecTypeID);
+        var details = $Db.rst(recRecTypeID);
             
         if(details)
         {   
             
+            var that = this;
         // get structures for both record types and filter out link and relation maker fields
-        for (dty in details) {
+        details.each2(function(dty, detail) {
             
             var field_type = $Db.dty(dty, 'dty_Type');
             
-            var req_type  = $Db.rst_idx(recRecTypeID, dty, 'rst_RequirementType');
+            var req_type  = detail['rst_RequirementType'];
             
             if ((!(field_type=='resource' || field_type=='relmarker')) || req_type=='forbidden') {
-                 continue;
+                 return true;//continue
             }
             
-            if(this.options.relmarker_dty_ID>0){  //detail id is defined in options
+            if(that.options.relmarker_dty_ID>0){  //detail id is defined in options
             
-                if( this.options.relmarker_dty_ID==dty && (party=='source') ){  //&& (source_ID>0 || target_ID>0)
+                if( that.options.relmarker_dty_ID==dty && (party=='source') ){  //&& (source_ID>0 || target_ID>0)
                     
                 }else{
-                    continue;
+                    return true;//continue
                 }
             }
             
             //get name, contraints
-            var dtyName = $Db.rst_idx(recRecTypeID, dty, 'rst_DisplayName');
+            var dtyName = detail['rst_DisplayName'];
             var dtyPtrConstraints = $Db.dty(dty, 'dty_PtrTargetRectypeIDs');
             var recTypeIds = null;
             if(!window.hWin.HEURIST4.util.isempty(dtyPtrConstraints)){
@@ -290,30 +291,30 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
     + dtyName+'</label>&nbsp;'
     + '<div style="display:inline-block;vertical-align:-webkit-baseline-middle;padding-left:20px">'
     + '<div id="rt_'+party+'_sel_'+dty+'" style="display:table-row;line-height:21px"></div></div>'
-    +'<div>').appendTo(this.element.find('#'+party+'_field'));
+    +'<div>').appendTo(that.element.find('#'+party+'_field'));
     
     
                 if(field_type=='relmarker'){
                     
-                    this._createInputElement_Relation( party, recRecTypeID, dty ); 
+                    that._createInputElement_Relation( party, recRecTypeID, dty ); 
                     
                 }else{
-                    //this.element.find('#rt_'+party+'_sel_'+dty).hide();   //hide relation type selector
+                    //that.element.find('#rt_'+party+'_sel_'+dty).hide();   //hide relation type selector
                 }
             }
 
-            if(party=='source' && window.hWin.HEURIST4.util.isempty(this.options.target_ID)){
-                    this._on(this.element.find('#cbsource_cb_'+dty),{change:this._createInputElement});
+            if(party=='source' && window.hWin.HEURIST4.util.isempty(that.options.target_ID)){
+                    that._on(that.element.find('#cbsource_cb_'+dty),{change:that._createInputElement});
             }else{
                     //enable add link button
-                    this._on(this.element.find('#cb'+party+'_cb_'+dty),{change:this._enableActionButton});
+                    that._on(that.element.find('#cb'+party+'_cb_'+dty),{change:that._enableActionButton});
             }
             
             
-            if( this.options.relmarker_dty_ID>0 && (party=='source' && this.options.source_ID>0) ){            
-                break;
+            if( that.options.relmarker_dty_ID>0 && (party=='source' && that.options.source_ID>0) ){            
+                return false;
             }
-        }//for fields
+        });//for fields
         
         if(this.options.relmarker_dty_ID>0){
             //hide radio and field name - since it is the only one field in list
@@ -527,29 +528,26 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
     // create input element for relation selecor
     //
     _createInputElement_Relation: function ( party, rectypeID, dtID ){ 
-//AAA
+
         if(window.hWin.HEURIST4.util.isempty(dtID)) return;
     
         var $field = this.element.find('#rt_'+party+'_sel_'+dtID).empty();
 
         
-        var typedefs = window.hWin.HEURIST4.rectypes.typedefs;
-        var fi = typedefs.dtFieldNamesToIndex;
-        var dtFields =  window.hWin.HEURIST4.util.cloneJSON(typedefs[rectypeID].dtFields[dtID]);
+        var dtFields =  window.hWin.HEURIST4.util.cloneJSON($Db.rst(rectypeID, dtID));
 
-        dtFields[fi['rst_DisplayName']] = 'Relationship type:';//input_label;
-        dtFields[fi['rst_RequirementType']] = 'optional';
-        dtFields[fi['rst_RequirementType']] = 'optional';
-        dtFields[fi['rst_MaxValues']] = 1;
-        dtFields[fi['rst_DisplayWidth']] = '25ex';
+        dtFields['rst_DisplayName'] = 'Relationship type:';//input_label;
+        dtFields['rst_RequirementType'] = 'optional';
+        dtFields['rst_RequirementType'] = 'optional';
+        dtFields['rst_MaxValues'] = 1;
+        dtFields['rst_DisplayWidth'] = '25ex';
         
         var that = this;
 
         var ed_options = {
             recID: -1,
             dtID: dtID,
-            //rectypeID: rectypeID,
-            rectypes: window.hWin.HEURIST4.rectypes,
+
             values: '',// init_value
             readonly: false,
 

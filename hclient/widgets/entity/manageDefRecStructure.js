@@ -18,7 +18,6 @@
 */
 
 $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
-
     
 //specific options
 //   rty_ID: 
@@ -33,7 +32,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
     _dragIsAllowed: true,
 
     _menuTimeoutId: -1,
-    _isFlat: true, //IJ rejects tree rt structure 
+
     _stillNeedUpdateForRecID: 0,
     usrPreferences:{
         treepanel_closed: true,          
@@ -64,7 +63,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         
         this.options.layout_mode = 'short';
         this.options.use_cache = true;
-        this.options.use_structure = true;
+        this.options.use_structure = false;
         
         //this.options.select_return_mode = 'recordset';
         this.options.edit_height = 640;
@@ -223,27 +222,26 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
         
         if(this.options.use_cache){ //init list only once
 
-            if(this.options.use_structure){  //take fata from HEURIST4 
-                //take recordset from HEURIST.rectypes format     
+            if(this.options.use_structure){  //take fata from $Db
+                //take recordset from HEURIST4.rectypes format     
                 this._cachedRecordset = this._getRecordsetFromStructure();
-                this.recordList.resultList('updateResultSet', this._cachedRecordset);
-                
-                //this.selectRecordInRecordset();
-            
-                //var treeData = this._cachedRecordset.getTreeViewData('trm_Label','trm_ParentTermID');
-                this._initTreeView();
-                this._showRecordEditorPreview( true );
                 
             }else{
-                //usual way from server - NOT USED  
-                // @todo use doRequest to filter by this.options.rty_ID
+                
+                //via entity data
+                this._cachedRecordset = $Db.rst(this.options.rty_ID);
+                /*from server
                 var that = this;
                 window.hWin.HAPI4.EntityMgr.getEntityData(this.options.entity.entityName, false,
                     function(response){
                         that._cachedRecordset = response;
                         that.recordList.resultList('updateResultSet', response);
                     });
+                */    
             }
+            this.recordList.resultList('updateResultSet', this._cachedRecordset);
+            this._initTreeView();
+            this._showRecordEditorPreview( true );
         }    
         
         if(this.options.external_toolbar){
@@ -286,7 +284,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             records:{},
             order:[] };
 
-        var rectypes = window.hWin.HEURIST4.rectypes;
+        var rectypes = window.hWin.HEURIST4.rectypes; //_getRecordsetFromStructure
 
         rdata.fields = window.hWin.HEURIST4.util.cloneJSON(rectypes.typedefs.dtFieldNames);
         //add fields to top
@@ -365,9 +363,7 @@ dty_TermIDTreeNonSelectableIDs
             var groupIdx = -1;
             var seps = [];
 
-            if(this._isFlat){
-
-                recset.each(function(dty_ID, record){
+            recset.each(function(dty_ID, record){
                     
                         var isSep = (recset.fld(record, 'dty_Type')=='separator');
                         var title = recset.fld(record,'rst_DisplayName');
@@ -385,34 +381,8 @@ dty_TermIDTreeNonSelectableIDs
                     node['data'] = {header:isSep, type:'group'};
                     treeData.push( node );
 
-                });
+                    });
                 
-            }else{
-
-                recset.each(function(dty_ID, record){
-                    
-                    var node = {title: recset.fld(record,'rst_DisplayName'), key: dty_ID};
-                    
-                    if(recset.fld(record, 'dty_Type')=='separator'){
-                        
-                        node['key'] = 9000000+seps.length;
-                        //debug node['title'] = node['key']+' '+node['title'];
-                        node['folder'] = true;
-                        node['data'] = {help:recset.fld(record,'rst_DisplayHelpText'), type:'group'};
-                        node['children'] = [];
-                        groupIdx = treeData.length;
-                        treeData.push( node );
-                        seps.push(dty_ID);
-                        
-                    }else{
-                        if(groupIdx<0){
-                            treeData.push( node );    
-                        }else{
-                            treeData[groupIdx]['children'].push(node);
-                        }
-                    }
-                });
-            }
         }
         
         //init treeview
@@ -484,7 +454,7 @@ dty_TermIDTreeNonSelectableIDs
                     return that._dragIsAllowed;
                 },
                 dragEnter: function(node, data) {
-                    return (!this._isFlat && node.folder) ?true :["before", "after"];
+                    return (node.folder) ?true :["before", "after"];
                 },
                 dragDrop: function(node, data) {
                     
@@ -517,79 +487,7 @@ dty_TermIDTreeNonSelectableIDs
 */
             this._treeview = this.element.find('.treeView').addClass('tree-rts')
                                 .fancytree(fancytree_options); //was recordList
-            if(this._isFlat){         
-                this.__updateActionIcons(500);
-            }else{
-            setTimeout(function(){
-                    var tree = that._treeview.fancytree('getTree');
-                    //add missed fields
-                    //if some fields were added in old ui they are missed in tree data - need to add them manually
-                    recset.each(function(dty_ID, record){
-                        if(recset.fld(record,'dty_Type')!='separator')
-                        {
-                            var node = tree.getNodeByKey(String(dty_ID));
-                            if(!node){
-                                node = {title: recset.fld(record,'rst_DisplayName'), key: dty_ID};
-                                tree.getRootNode().addNode(node);
-                            }
-                        }
-                    });
-                    
-                    //add fake records to keep group header data (id>9M)
-                    tree.visit(function(node){
-                        if(node.folder){
-                            node.setExpanded(true);//since v2.3 tree.expandAll();
-
-                            var record = {
-                                rst_ID: node.key, 
-                                rst_RecTypeID: that.options.rty_ID, 
-                                rst_DetailTypeID: node.key,
-                                rst_DisplayName: node.title, 
-                                rst_DisplayHelpText: (node.data && node.data.help)?node.data.help:'',
-                                rst_SeparatorType: (node.data && node.data.type)?node.data.type:'group',
-                                dty_Type: 'separator'
-                            };
-                            recset.addRecord(node.key, record);
-                            that._fakeSepIdsCounter = Math.max(that._fakeSepIdsCounter, node.key);
-                        }else{
-                            var dty_ID = node.key;
-                            var record = recset.getById(dty_ID);
-                            if(record){
-                                var req = recset.fld(record,'rst_RequirementType');
-                                var title = recset.fld(record,'rst_DisplayName')
-                                    +'<span style="font-size:smaller">  ('
-                                    +$Db.baseFieldType[recset.fld(record,'dty_Type')]
-                                    +')</span>';
-                                node.extraClasses = req;
-                                $(node.li).addClass(req);
-                                node.setTitle(title);
-                            }else{
-                                //field has been removed
-                                node.remove();
-                            }
-                            //node.toggleClass( req, true );
-                        }
-                    }); //visit
-                    
-                    var treeData = tree.toDict(false);
-                    that._cleanTreeStructure(treeData);
-                    //add/update new service separator that will keep rt structure
-                    recset.addRecord(that.DT_ENTITY_STRUCTURE,{
-                        rst_ID: that.DT_ENTITY_STRUCTURE, 
-                        rst_RecTypeID: that.options.rty_ID, 
-                        rst_DetailTypeID: that.DT_ENTITY_STRUCTURE,
-                        rst_DisplayName: 'Record type structure', 
-                        rst_DisplayHelpText: '',
-                        dty_Type: 'separator',
-                        rst_RequirementType: 'forbidden',  //it will not be visible
-                        rst_DefaultValue: JSON.stringify(treeData)}); 
-                        
-                    that.recordList.resultList('updateResultSet', recset);
-                    
-                    that.__updateActionIcons();
-                }, 500);  
-            }
-
+            this.__updateActionIcons(500);
 
     },
     
@@ -766,10 +664,8 @@ dty_TermIDTreeNonSelectableIDs
 
                         that._saveEditAndClose(fields, function( recID, fields ){
                             
-                            //update only rectype of maxval field
+                            //update only rectype or maxval field
                             that._cachedRecordset.setFldById(recID, fieldName, newVal);
-                            window.hWin.HEURIST4.rectypes.typedefs[that.options.rty_ID].dtFields[recID]
-                                [window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex[fieldName]] = newVal;
                             
                             that._showRecordEditorPreview();
                             
@@ -1000,10 +896,11 @@ dty_TermIDTreeNonSelectableIDs
     //
     showBaseFieldEditor: function( arg1, arg2, allow_proceed ){
         
+        var that = this;
         
         if(allow_proceed!==true){
             this._allowActionIfModified( function(){ 
-                this.showBaseFieldEditor( arg1, arg2, true );                            
+                that.showBaseFieldEditor( arg1, arg2, true );                            
             } );
             return;
         }
@@ -1058,10 +955,7 @@ dty_TermIDTreeNonSelectableIDs
         }else{
             popup_options['onClose'] = function(){
                 //update recordset
-                var fields = window.hWin.HEURIST4.dbs.rstField(that.options.rty_ID, dtyID);
-                that._cachedRecordset.setRecord(dtyID, fields);
-//console.log(fields);
-//console.log($Db.rst_idx(that.options.rty_ID, dtyID));
+                //that._cachedRecordset.setRecord(dtyID, fields);
 
                 //reload formlet after edit
                 that._initEditForm_step3( dtyID );
@@ -1077,12 +971,26 @@ dty_TermIDTreeNonSelectableIDs
         window.hWin.HEURIST4.ui.showEntityDialog('defDetailTypes', popup_options);
     },
     
+    _initEditForm_step3: function( recID ){
+        
+            if(recID>0){
+                var basefield = $Db.dty(recID);
+                if(basefield){
+                    this._cachedRecordset.setFldById(recID, 'dty_Type', basefield['dty_Type']);
+                    this._cachedRecordset.setFldById(recID, 'rst_FilteredJsonTermIDTree', basefield['dty_JsonTermIDTree']);
+                    this._cachedRecordset.setFldById(recID, 'rst_PtrFilteredIDs', basefield['dty_PtrTargetRectypeIDs']);
+                }
+            }
+                            
+            this._super( recID );
+    },
+    
     //
     // add field to structure
     //
     addNewFieldToStructure: function(dty_ID, after_dty_ID, rst_fields){
         
-        if(this._cachedRecordset.getById(dty_ID) ){ //window.hWin.HEURIST4.rectypes.typedefs[this.options.rty_ID].dtFields[dty_ID]){
+        if(this._cachedRecordset.getById(dty_ID) ){
             window.hWin.HEURIST4.msg.showMsgFlash('Such field already exists in structure');
             return;
         }
@@ -1132,7 +1040,7 @@ dty_TermIDTreeNonSelectableIDs
                 'a'          : 'search',
                 'entity'     : that.options.entity.entityName,
                 'request_id' : window.hWin.HEURIST4.util.random(),
-                'details'    : 'structure',
+                'details'    : 'list', //'structure',
                 'rst_RecTypeID': that.options.rty_ID,
                 'rst_DetailTypeID':dty_ID
                 };
@@ -1152,7 +1060,7 @@ dty_TermIDTreeNonSelectableIDs
                     if(after_dty_ID>0){
                         parentnode = tree.getNodeByKey(after_dty_ID);
                     }else{
-                       parentnode = tree.getActiveNode();
+                        parentnode = tree.getActiveNode();
                     }
                     if(!parentnode){
 console.log('No active tree node!!!!')                      
@@ -1200,7 +1108,7 @@ console.log('No active tree node!!!!')
 
             var that = this.previewEditor;
             var that2 = this;
-           
+            
             if(!this.previewEditor.manageRecords('instance')){ //OLD VERSION
                 // record editor not defined - create new one
                 // this is old option when record editor is slave to rts editor
@@ -1764,10 +1672,6 @@ console.log('No active tree node!!!!')
     //
     _saveRtStructureTree: function(){
         
-        if(this._isFlat){
-
-            var fi_order = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex.rst_DisplayOrder;
-
             var recset = this._cachedRecordset;
             var tree = this._treeview.fancytree("getTree");
             var order = 0;
@@ -1776,9 +1680,11 @@ console.log('No active tree node!!!!')
             var orders = [];
             tree.visit(function(node){
             
+                
+                
                 var dty_ID = node.key;
                 recset.setFldById(dty_ID, 'rst_DisplayOrder', order);
-                window.hWin.HEURIST4.rectypes.typedefs[that.options.rty_ID].dtFields[dty_ID][fi_order] = order;
+                
                 dtyIDs.push( dty_ID );
                 orders.push( order );
                 order++;
@@ -1802,13 +1708,7 @@ console.log('No active tree node!!!!')
                         window.hWin.HEURIST4.msg.showMsgErr(response);      
                     }
                 });
-            
         
-            
-        }else{
-            var fields = {rst_ID: this.DT_ENTITY_STRUCTURE};
-            this._saveEditAndClose(fields, 'close');
-        }
     },
     
     //
@@ -1877,52 +1777,7 @@ console.log('No active tree node!!!!')
             var dt_type = fields['dty_Type'];
             
             //save structure (tree) in DT_ENTITY_STRUCTURE field - EXPERIMENTAL - NOT USED
-            if( !this._isFlat &&  (dt_type=='separator' || recID==this.DT_ENTITY_STRUCTURE) )
-            {
-                //NOT USED ANYMORE - since we always use flat structure
-                var recset = this.getRecordSet();
-                
-                if(recID!=this.DT_ENTITY_STRUCTURE){
-                    // 1. update content of data field in treeview for this separator
-                    if(treeview){
-                        var node = treeview.getNodeByKey( String(recID) );
-                        if(node){
-                            
-                            var isSep = (fields['dty_Type']=='separator');
-                            var title = fields['rst_DisplayName'];
-                            var req = fields['rst_RequirementType'];
-                            if(!isSep){
-                                title =  '<span style="padding-left:10px">' + title 
-                                        + '</span><span style="font-size:smaller">  ('
-                                        +$Db.baseFieldType[fields['dty_Type']]
-                                        +')</span>';
-                            }
-                            if(req=='forbidden'){
-                                title =  title + '<span style="font-size:smaller;text-transform:none;"> (hidden)</span>';
-                            }
-                            
-                            node.setTitle( title ); 
-                            node.extraClass = isSep?'separator2':req;
-                            node.data = {help:fields['rst_DisplayHelpText'], type:fields['rst_SeparatorType']};   
-                        } 
-                    }
-                    // 2. update fake separator in recordset 
-                    recset.setRecord(recID, fields);
-                }
-                
-                // 3. get treeview.toDict and put it in ExtDescription of field 2-57 ("Header 1") 
-                /*treeview.visit(function(node){
-                        if(!node.folder){
-                            node.data = {}; //remove garbage fancytree may put here
-                        }});*/
-                var treeData = treeview.toDict(false);
-                this._cleanTreeStructure(treeData);
-                recset.setFldById(this.DT_ENTITY_STRUCTURE, 'rst_DefaultValue', JSON.stringify(treeData));
-                
-                // 5. save DT_ENTITY_STRUCTURE in database (not fake separator field)
-                fields = recset.getRecord(this.DT_ENTITY_STRUCTURE);
-                
-            }else if(dt_type=='enum' || dt_type=='relmarker' || dt_type=='relationtype'){
+            if(dt_type=='enum' || dt_type=='relmarker' || dt_type=='relationtype'){
                 fields['rst_DefaultValue'] = fields['rst_TermPreview'];
             }else if(dt_type=='enum'){
                 fields['rst_DefaultValue'] = fields['rst_DefaultValue_resource'];
@@ -2003,9 +1858,6 @@ console.log('No active tree node!!!!')
         //recordset was updated in manageEntity._saveEditAndClose so we pass null
         this.refreshRecset_Definition_TreeNodeItem(recID, null);    
         
-//console.log('_afterSaveEventHandler: refresh tree and recordList');           
-
-        
         this._dragIsAllowed = true;
     },
     
@@ -2015,56 +1867,41 @@ console.log('No active tree node!!!!')
     refreshRecset_Definition_TreeNodeItem: function( recID, fieldvalues ){
       
             //1. update recordset if fieldvalues are set
-            var recset = this.getRecordSet()
+            var recset = this.getRecordSet();
             if(fieldvalues!=null){
                 recset.setRecord(recID, fieldvalues);  
             }
 
             var record = recset.getById(recID);
-      
-            //2. update db definitions HEURIST4.rectype
-            var isNewField = false;
-            var rectypes = window.hWin.HEURIST4.rectypes;
-            if(this.options.rty_ID>0 && rectypes.typedefs[this.options.rty_ID]){
-                var fi = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex;
-                var fields = rectypes.typedefs[this.options.rty_ID].dtFields[recID];
-                
-                if(!fields){
-                    //new entry in rectypes structure
-                    fields = [];
-                    var len = Object.keys(fi).length;
-                    //fill with empty placeholders
-                    for(var i=0; i<len; i++) fields.push('');
-                    rectypes.typedefs[this.options.rty_ID].dtFields[recID] = fields;
-                    isNewField = true;
-                }
-                //assign values from recordset
-                for(var fname in fi)
-                if(fname){
-                    fields[fi[fname]] = (recset.fld(record, fname));
-                }
-            }
             
+            if(fieldvalues==null){
+                fieldvalues = recset.getRecord(recID);
+            }
+
+            //2. update $Db
+//console.log($Db.rst(this.options.rty_ID, recID));           
+      
             //3. refresh treeview
-            if(this._isFlat || recID!==this.DT_ENTITY_STRUCTURE){
+            if(recID!==this.DT_ENTITY_STRUCTURE){
                 var tree = this._treeview.fancytree("getTree");
                 if(tree){
                     var node = tree.getNodeByKey( recID );
                     if(node) {
-                        var isSep = recset.fld(record,'dty_Type')=='separator';
-                        var title = recset.fld(record, 'rst_DisplayName');
-                        var req = recset.fld(record,'rst_RequirementType');
+                        var sType = $Db.dty(recID,'dty_Type');
+                        var isSep = (sType=='separator');
+                        var title = fieldvalues['rst_DisplayName'];
+                        var req = fieldvalues['rst_RequirementType'];
                         if(!isSep){
                             title =  '<span style="padding-left:10px">' + title 
                                         + '</span><span style="font-size:smaller;">  ('
-                                    +$Db.baseFieldType[recset.fld(record,'dty_Type')]
+                                    +$Db.baseFieldType[sType]
                                     +')</span>';
                         }
                         if(req=='forbidden'){
                             title =  title + '<span style="font-size:smaller;text-transform:none;"> (hidden)</span>';
                         }
                         node.setTitle( title );   
-                        if(this._isFlat || !node.folder){
+                        if(!node.folder){
                             
                             node.extraClasses = isSep?'separator2':req;
                             $(node.li).addClass( isSep?'separator2':req );
@@ -2092,8 +1929,6 @@ console.log('No active tree node!!!!')
             return;
         }
         
-        if(this._isFlat){
-            
             if(after_dtid>0){
                 this._lockDefaultEdit = true;
                 var tree = this._treeview.fancytree("getTree");
@@ -2112,13 +1947,14 @@ console.log('No active tree node!!!!')
             var that = this;
             var ft_separator_id =  null;
             var ft_separator_group =  $Db.dtg().getOrder()[0]; //add to first group
-            var recDetTypes = window.hWin.HEURIST4.rectypes.typedefs[rty_ID].dtFields;
+            
+            var all_fields_ids = $Db.rst(rty_ID).getIds();
 
             var k = 1;
             $Db.dty().each(function(dty_ID, rec){
                if($Db.dty(dty_ID,'dty_Type')=='separator'){
                    k++;
-                   if(window.hWin.HEURIST4.util.isnull(recDetTypes[dty_ID])){
+                   if(all_fields_ids.indexOf(dty_ID)<0){
                        ft_separator_group = $Db.dty(dty_ID,'dty_DetailTypeGroupID');
                        ft_separator_id = dty_ID; //not used yet
                        return false;
@@ -2159,33 +1995,8 @@ console.log('No active tree node!!!!')
 
                     });
             }  
-        }else{
         
-            var tree = this._treeview.fancytree("getTree");
-            var node = tree.getActiveNode();
-            if(!node) return;
-       
-            //add to recordset        
-            this._fakeSepIdsCounter++;    
-            var recset = this._cachedRecordset;
-            var record = {
-                rst_ID: this._fakeSepIdsCounter, 
-                rst_RecTypeID: this.options.rty_ID, 
-                rst_DetailTypeID: this._fakeSepIdsCounter,
-                rst_DisplayName: 'New header', 
-                rst_DisplayHelpText: '',
-                rst_SeparatorType: 'group',
-                dty_Type: 'separator'
-            };
-            recset.addRecord(this._fakeSepIdsCounter, record);
-            
-            //add to treeview
-            var newnode = {key:this._fakeSepIdsCounter, folder:true, title:'New header', data:{type:'group'}};
-            node = node.addNode(newnode, 'after');
-            node.setActive(); //start edit
-            
-        }
-     
+        
     },
 
     //  -----------------------------------------------------
@@ -2239,19 +2050,13 @@ console.log('No active tree node!!!!')
                     parent.addChildren(children, node);
                 }
             }else{
-                var rectypes = window.hWin.HEURIST4.rectypes;
-                if(this.options.rty_ID>0 && rectypes.typedefs[this.options.rty_ID]){
-                    delete rectypes.typedefs[this.options.rty_ID].dtFields[recID];
-                }
+
             }
             node.remove();
         }
         
-        if(!this._isFlat){
-            this._saveRtStructureTree();    
-        }else{
-            this._showRecordEditorPreview();  
-        }
+        this._showRecordEditorPreview();  
+        
     },
     
     //
@@ -2325,8 +2130,7 @@ console.log('No active tree node!!!!')
                             }           
 
 
-                            var fi = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex;
-                            var sName = window.hWin.HEURIST4.rectypes.typedefs[rty_ID].dtFields[dty_ID][fi.rst_DisplayName];
+                            var sName = $Db.rst(rty_ID, dty_ID, 'rst_DisplayName');
 
                             sMsg = '<h3>Conversion of records to child records</h3><br><b>Pointer field:'+ sName +'</b><br><br>'
                             +'<div>'+response.data['passed']+' record pointer values were found for this field</div>'
@@ -2362,11 +2166,7 @@ console.log('No active tree node!!!!')
 
                             window.hWin.HEURIST4.msg.showMsgDlg(sMsg);
 
-                            //ed_input.setValue(1, false);
-                            //$(ed_input).prop('checked', true);
-                            window.hWin.HEURIST4.rectypes.typedefs[rty_ID].dtFields[dty_ID][fi.rst_CreateChildIfRecPtr] = 1;
-                            //save from UI to HEURIST - it is saved on server side in add_reverse_pointer_for_child
-                            //editStructure.doExpliciteCollapse(dty_ID, true);
+                            $Db.rst(rty_ID, dty_ID, 'rst_CreateChildIfRecPtr', 1);
 
                         }else{
                             ed_input.setValue(0, true);

@@ -88,11 +88,13 @@ function hRecordSet(initdata) {
                 _isMapEnabled = response.mapenabled;
                 //@todo - merging
             }else{
-                records = {};
+                    
                 if(response.order){
                     order = $.isArray(response.order)?response.order:[response.order];    
+                    records = response.records?response.records:{};   
                 }else{
-                    order = response.records;    
+                    order = response.records;  //ids only   
+                    records = {};
                 }
                 if(response.rectypes) rectypes = response.rectypes;
                 _isMapEnabled = false;
@@ -1414,7 +1416,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
             var _records = {};
             //find all records
             
-            if($.isEmptyObject(fields)) return null;
+            if($.isEmptyObject(records)) return null;
             
             var recID;
             if(Object.keys(records).length<rec_ids.length){
@@ -1919,14 +1921,35 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
             }
         },
 
+        /*
+        // add new record and returns new record id
+        //
+        addRecord3:function(record){
+            
+            var recID = order[order.length-1];
+            while (true){
+                recID++;
+                if(records[recID]==null) break;
+            }  
+            
+            this.addRecord2(recID, record);
+            
+            return recID;
+        },*/
+        
         //
         // add/replace record with given ID
         //    
         addRecord:function(recID, record){
             var idx = window.hWin.HEURIST4.util.findArrayIndex(recID, order);
             if(idx<0){ //add new
-                records[recID] = [];
-                if(fields.length>0)records[recID][fields.length-1] = undefined;
+                
+                if(fields && fields.length>0){
+                    records[recID] = [];
+                    records[recID][fields.length-1] = undefined;    
+                }else{
+                    records[recID] = {};
+                }
                 order.push(recID);
                 total_count = total_count+1;
             }

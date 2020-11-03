@@ -41,6 +41,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
     //                                                  
     //    
     _init: function() {
+
         
         this.options.innerTitle = false;
         

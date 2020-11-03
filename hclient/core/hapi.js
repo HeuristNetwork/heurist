@@ -1250,19 +1250,22 @@ prof =Profile
                 var rst_direct = {};     //linked TO rectypes
                 
                 var recset = entity_data['defRecStructure'];
-                recset.each(function(rst_ID, record){
+                recset.each2(function(rst_ID, record){
                     
                     //rstfield = recset.getRecord(rst_ID)
-                    var rty_ID = recset.fld(record,'rst_RecTypeID');
-                    var dty_ID = recset.fld(record,'rst_DetailTypeID');
+                    var rty_ID = record['rst_RecTypeID'];
+                    var dty_ID = record['rst_DetailTypeID'];
                     
                     if(!rst_index[rty_ID]) rst_index[rty_ID] = {};
-                    if(!rst_index[rty_ID][dty_ID]) rst_index[rty_ID][dty_ID] = rst_ID;
+                    if(!rst_index[rty_ID][dty_ID]){
+                        record['rst_ID'] = dty_ID;
+                        rst_index[rty_ID][dty_ID] = record;  
+                    } 
 
                     //links
                     var dty_Type = $Db.dty(dty_ID, 'dty_Type');
                     if((dty_Type=='resource' || dty_Type=='relmarker') 
-                        && recset.fld(record,'rst_RequirementType')!='forbidden')
+                        && record['rst_RequirementType']!='forbidden')
                     {
                         var ptr = $Db.dty(dty_ID, 'dty_PtrTargetRectypeIDs');
                         if(ptr){
@@ -1289,9 +1292,17 @@ prof =Profile
                            }
                         }
                     }
-                    
-                        
                 });
+                
+                for(var rty_ID in rst_index){
+                    var _order = Object.keys(rst_index[rty_ID]);
+                    rst_index[rty_ID] = new hRecordSet({
+                        entityName: 'defRecStructure',
+                        count: _order.length,
+                        records: rst_index[rty_ID],
+                        order: _order
+                    });    
+                }
                 
                 entity_data['rst_Index'] = rst_index;
                 entity_data['rst_Links'] = {direct:rst_direct, reverse:rst_reverse, refs:rst_references };
@@ -1507,7 +1518,7 @@ prof =Profile
                 window.hWin.HEURIST4.ui.onInactiveReset( true );
             }
             
-            if(window.hWin.HEURIST4.rectypes) window.hWin.HEURIST4.rectypes.counts = null;
+            $Db.needUpdateRtyCount = true;
         },
         
         currentUserRemoveGroup: function(groupID, isfinal){

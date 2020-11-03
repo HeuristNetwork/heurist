@@ -60,7 +60,6 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             this.options.use_structure = false
         }
         
-//console.log(this.options);        
         
         if(!this.options.layout_mode) this.options.layout_mode = 'short';
         
@@ -90,7 +89,6 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         if(!this.options.import_structure){        
             window.hWin.HAPI4.addEventListener(this, window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, 
                 function(data) { 
-console.log(data);                    
                     if(!data || 
                        (data.source != that.uuid && data.type == 'rty'))
                     {
@@ -796,13 +794,6 @@ console.log(data);
                     //window.hWin.HEURIST4.msg.bringCoverallToFront(this.recordList);
                     var newVal = (action=='show_in_list')?1:0;
                     this._saveEditAndClose({rty_ID:recID, rty_ShowInLists:newVal });
-                    /*
-                        function(){
-                            window.hWin.HEURIST4.msg.sendCoverallToBack();
-                            window.hWin.HEURIST4.dbs.rtyField(recID, 'rty_ShowInLists', newVal);
-                            that.recordList.resultList('refreshPage');  
-                        });
-                    */    
                     
                 }else if(action=='duplicate'){
                     
@@ -812,13 +803,13 @@ console.log(data);
                     //show selectmenu with list of fields
                     if(this.fieldSelectorLast!=recID){
                         this.fieldSelectorLast   = recID;
-                        var details = $Db.rst_idx(recID); //get all fields for given rectype
+                        var details = $Db.rst(recID); //get all fields for given rectype
                         if(!details) return;
                         var options = [];
-                        for(var dty_ID in details){
+                        details.each2(function(dty_ID, detail){
                             if($Db.dty(dty_ID,'dty_Type')!='separator')
-                                options.push({key:dty_ID, title:$Db.rst(details[dty_ID],'rst_DisplayName')});
-                        }
+                                options.push({key:dty_ID, title:detail['rst_DisplayName']});
+                        });
                         
                         if(!this.fieldSelector){
                             this.fieldSelectorOrig = document.createElement("select");    
@@ -1039,7 +1030,6 @@ console.log(data);
     //overwritten     NOT USED
     _recordListGetFullData:function(arr_ids, pageno, callback){
 
-console.log('_recordListGetFullData')        
         var request = {
                 'a'          : 'search',
                 'entity'     : this.options.entity.entityName,
@@ -1299,13 +1289,6 @@ console.log('_recordListGetFullData')
                         that._triggerRefresh('rtg');
                     }
                 )
-                /*            
-                //change groups
-                var id = params.rty_ID;
-                var rtg = params.rty_RecTypeGroupID
-                var new_id = window.hWin.HEURIST4.dbs.rtyField(id,'rty_RecTypeGroupID', rtg);
-                window.hWin.HEURIST4.dbs.rtgRefresh(); //refresh groups counts after change group
-                */            
         });
     }                                    
 

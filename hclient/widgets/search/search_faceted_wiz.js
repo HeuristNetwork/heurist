@@ -1361,7 +1361,7 @@ $.widget( "heurist.search_faceted_wiz", {
                             
                         if(linktype=='lt' || linktype=='rt'){
                             
-                            var sFieldName = $Db.rst_idx(rtid, dtid, 'rst_DisplayName');
+                            var sFieldName = $Db.rst(rtid, dtid, 'rst_DisplayName');
                             
                             if(window.hWin.HEURIST4.util.isempty(sFieldName)){
                                 //field was removed - remove facet
@@ -1374,7 +1374,7 @@ $.widget( "heurist.search_faceted_wiz", {
                         }else{
                             var from_rtid = codes[j+2];
 
-                            var sFieldName = $Db.rst_idx(from_rtid, dtid, 'rst_DisplayName');
+                            var sFieldName = $Db.rst(from_rtid, dtid, 'rst_DisplayName');
                             
                             if(window.hWin.HEURIST4.util.isempty(sFieldName)){
                                 //field was removed - remove facet
@@ -1389,7 +1389,7 @@ $.widget( "heurist.search_faceted_wiz", {
                         
                     }else{
 
-                        var sFieldName = $Db.rst_idx(rtid, dtid, 'rst_DisplayName');
+                        var sFieldName = $Db.rst(rtid, dtid, 'rst_DisplayName');
                         
                         if(window.hWin.HEURIST4.util.isempty(sFieldName)){
                             //field was removed - remove facet

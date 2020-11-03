@@ -261,9 +261,12 @@ $.widget( "heurist.ruleBuilder", {
         var arr_reverse = {};
         var arr_rectypes = []; //all targets
         
-        $Db.rst_idx().each2(function(rstID, record){
+        var all_structs = $Db.rst_idx2();
+        for (rty_ID in all_structs){
+            var recset = all_structs[rty_ID];
+            recset.each2(function(dty_ID, record){
             
-            dtyID = record['rst_DetailTypeID'];
+            //dtyID = record['rst_DetailTypeID'];
             var fieldtype = $Db.dty(dtyID, 'dty_Type');
             
             if(fieldtype=='resource' || fieldtype=='relmarker'){
@@ -323,7 +326,7 @@ $.widget( "heurist.ruleBuilder", {
             }
         });
 
-
+        }
         this._arr_rectypes = $.unique(arr_rectypes);
         
         //make list of options for selector

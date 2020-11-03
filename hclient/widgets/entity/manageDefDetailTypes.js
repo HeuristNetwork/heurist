@@ -1215,6 +1215,8 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                 return;    
                     
         }
+        
+        $Db.dty().setRecord(recID, fieldvalues); 
 
         //update local definitions
         this._super( recID, fieldvalues );

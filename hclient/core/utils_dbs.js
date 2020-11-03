@@ -940,7 +940,7 @@ window.hWin.HEURIST4.dbs = {
     
     $Db = window.hWin.HEURIST4.dbs
     
-    rty,dty,rts,rtg,dtg,trm = dbdef(entityName,....)  access hEntityMgr.entity_data[entityName]
+    rty,dty,rst,rtg,dtg,trm = dbdef(entityName,....)  access hEntityMgr.entity_data[entityName]
     
     set(entityName, id, field, newvalue)    
         id - localcode or concept code. For rst this are 2 params rtyID, dtyID
@@ -964,7 +964,7 @@ window.hWin.HEURIST4.dbs = {
     rty: function(rec_ID, fieldName, newValue){
         return $Db.getset('defRecTypes', rec_ID, fieldName, newValue);        
     },
-    
+
     dty: function(rec_ID, fieldName, newValue){
         return $Db.getset('defDetailTypes', rec_ID, fieldName, newValue);        
     },
@@ -972,9 +972,32 @@ window.hWin.HEURIST4.dbs = {
     trm: function(rec_ID, fieldName, newValue){
         return $Db.getset('defTerms', rec_ID, fieldName, newValue);        
     },
-
-    rst: function(rec_ID, fieldName, newValue){
-        return $Db.getset('defRecStructure', rec_ID, fieldName, newValue);        
+    
+    rst_idx2: function(){
+        return window.hWin.HAPI4.EntityMgr.getEntityData2('rst_Index');
+    },
+    
+    rst: function(rec_ID, dty_ID, fieldName, newValue){
+        
+        //for backward capability
+        var dfname = null;
+        if(fieldName) dfname = $Db.rst_to_dtyField( fieldName );
+        if(dfname){
+            return $Db.dty(dty_ID, dfname);
+        }else{
+            
+            var rectype_structure = window.hWin.HAPI4.EntityMgr.getEntityData2('rst_Index');
+            
+            if(rectype_structure && rectype_structure[rec_ID]){
+                if(dty_ID>0){
+                    return $Db.getset(rectype_structure[rec_ID], dty_ID, fieldName, newValue);                
+                }else{
+                    return rectype_structure[rec_ID];            
+                }
+            }
+        }
+        return null
+        
     },
     
     
@@ -994,7 +1017,8 @@ window.hWin.HEURIST4.dbs = {
     //    
     get: function (entityName, rec_ID, fieldName){
         //it is assumed that db definitions ara always exists on client side
-        var recset = window.hWin.HAPI4.EntityMgr.getEntityData(entityName); 
+        var recset =  window.hWin.HEURIST4.util.isRecordSet(entityName)?entityName
+                        :window.hWin.HAPI4.EntityMgr.getEntityData(entityName); 
         
         if(rec_ID>0){
             
@@ -1011,13 +1035,15 @@ window.hWin.HEURIST4.dbs = {
     },
 
     //
-    // assign value of field and entire record
+    // assign value of field OR entire record
     //
     set: function (entityName, rec_ID, fieldName, newValue){
 
         if(rec_ID>0){
         
-            var recset = window.hWin.HAPI4.EntityMgr.getEntityData(entityName); 
+            var recset =  window.hWin.HEURIST4.util.isRecordSet(entityName)
+                            ?entityName
+                            :window.hWin.HAPI4.EntityMgr.getEntityData(entityName); 
             
             if(fieldName){
                 recset.setFldById(rec_ID, fieldName, newValue);
@@ -1027,7 +1053,51 @@ window.hWin.HEURIST4.dbs = {
             
         }
     },
-
+    
+    //
+    // Some fields in rectype structure are taken from basefield (dty) directly
+    //
+    rst_to_dtyField: function(fieldName)
+    {
+        var dfname = null;
+        if(fieldName=='rst_FilteredJsonTermIDTree') dfname='dty_JsonTermIDTree'
+        else if(fieldName=='rst_PtrFilteredIDs') dfname='dty_PtrTargetRectypeIDs'
+        //else if(fieldName=='rst_TermIDTreeNonSelectableIDs') dfname='dty_TermIDTreeNonSelectableIDs' //not used anymore
+        else if( //fieldName=='dty_TermIDTreeNonSelectableIDs' || fieldName=='dty_FieldSetRectypeID' || 
+                fieldName=='dty_Type')
+        {
+            dfname = fieldName; 
+        } 
+        
+        return null;
+    },
+    
+/*    
+    //
+    //
+    //
+    rst_set: function(rty_ID, dty_ID, fieldName, value){
+        
+        var dfname = $Db.rst_to_dtyField( fieldName );
+        
+        if(dfname){
+            $Db.dty( dty_ID, dfname, value );
+        }else{
+        
+            var recset = window.hWin.HAPI4.EntityMgr.getEntityData('defRecStructure');
+            var details = window.hWin.HAPI4.EntityMgr.getEntityData2('rst_Index'); 
+            if(details[rty_ID]){
+                var rst_ID = details[rty_ID][dty_ID];    
+                if(rst_ID>0){
+                    recset.setFldById(rst_ID, fieldName, newValue);
+                }else{
+                    //add new basefield
+                    rst_ID = recset.addRecord3({fieldName: newValue});
+                    details[rty_ID][dty_ID] = rst_ID;
+                }
+            }
+        }
+    },
     //  
     // special behavior for defRecStructure
     // it returns value for given field or entire recstrucure field
@@ -1051,16 +1121,7 @@ window.hWin.HEURIST4.dbs = {
                 }else if(fieldName){
                     
                     //for backward capability
-                    var dfname;
-                    if(fieldName=='rst_FilteredJsonTermIDTree') dfname='dty_JsonTermIDTree'
-                    else if(fieldName=='rst_PtrFilteredIDs') dfname='dty_PtrTargetRectypeIDs'
-                    else if(fieldName=='dty_TermIDTreeNonSelectableIDs' ||
-                            fieldName=='dty_FieldSetRectypeID' || 
-                            fieldName=='dty_Type')
-                    {
-                        dfname=fieldName; 
-                    } 
-                    
+                    var dfname = $Db.rst_to_dtyField( fieldName );
                     if(dfname){
                         return $Db.dty(dty_ID, dfname);
                     }else{
@@ -1081,7 +1142,7 @@ window.hWin.HEURIST4.dbs = {
         
         //return $Db.getset('defRecStructure', rec_ID, fieldName, newValue);        
     },
-    
+*/    
     //
     // find by concept code in local definitions
     //
@@ -1372,115 +1433,6 @@ window.hWin.HEURIST4.dbs = {
 
 
     */
-    rstField: function( rty_ID, dty_ID, fieldName ){
-        
-        var rectypes = window.hWin.HEURIST4.rectypes;
-        
-        if (!(rty_ID>0 && rectypes.typedefs[rty_ID])) return null;
-
-        
-        if (dty_ID>0 && rectypes.typedefs[rty_ID].dtFields[dty_ID]){
-            //returns rt structure or value for particular field
-            
-            if(fieldName){ //value for particular field
-                var rfi = rectypes.typedefs.dtFieldNamesToIndex;
-                
-                if(rfi[fieldName]>=0){
-                    
-                    var dfname = null;
-                    if(fieldName=='rst_FilteredJsonTermIDTree') dfname='dty_JsonTermIDTree'
-                    else if(fieldName=='rst_PtrFilteredIDs') dfname='dty_PtrTargetRectypeIDs'
-                    else if(fieldName=='dty_TermIDTreeNonSelectableIDs' ||
-                            fieldName=='dty_FieldSetRectypeID' || 
-                            fieldName=='dty_Type')
-                    {
-                        dfname=fieldName; 
-                    } 
-                    
-                    if(dfname){
-                        return $Db.dty(dty_ID, dfname);
-/*                        
-                        var detailtypes = window.hWin.HEURIST4.detailtypes;
-                        var dfi = detailtypes.typedefs.fieldNamesToIndex;
-                        return detailtypes.typedefs[dty_ID].commonFields[ dfi[dfname] ];    
-*/                        
-                    }else{
-                        return rectypes.typedefs[rty_ID].dtFields[dty_ID][ rfi[fieldName] ];
-                    }
-                    
-                }else{
-                    return null;
-                }
-            }else{ //field not defined - returns rt structure as json
-            
-                var res = {};
-                for(var i=0; i<rectypes.typedefs.dtFieldNames.length; i++){
-                    fieldName = rectypes.typedefs.dtFieldNames[i];
-                    res[fieldName] = window.hWin.HEURIST4.dbs.rstField(rty_ID, dty_ID, fieldName);
-                }
-                
-                return res;                
-            }
-        }else{
-            //returns all fields
-            
-            var res = {};
-
-            var dtFields = rectypes.typedefs[rty_ID].dtFields;
-            //var dty_IDs = Object.keys(fields);
-
-            for (dty_ID in dtFields)
-            {
-                if(dty_ID>0){
-                   res[dty_ID] = window.hWin.HEURIST4.dbs.rstField(rty_ID, dty_ID, null);
-                }
-            }
-            
-            return res;
-        }
-        
-        
-        
-        var rfi = rectypes.typedefs.dtFieldNamesToIndex;
-        //var rfields = window.hWin.HEURIST4.rectypes.typedefs[rty_ID].dtFields[dty_ID];
-        //var rh_fields = window.hWin.HEURIST4.rectypes.typedefs[rty_ID].commonFields;
-
-        
-        
-    },
-    
-    //
-    // get rty value
-    //
-    rtyField: function( rty_ID, fieldName, newValue ){
-
-        var rectypes = window.hWin.HEURIST4.rectypes;
-        
-        if (!(rty_ID>0 && rectypes.typedefs[rty_ID])) return null;
-        
-        var rfi = rectypes.typedefs.commonNamesToIndex;
-        
-        if(fieldName){
-            if(rfi[fieldName]>=0){
-                if( !window.hWin.HEURIST4.util.isempty(newValue) ){
-                    rectypes.typedefs[rty_ID].commonFields[ rfi[fieldName] ] = newValue;
-                }
-                
-                return rectypes.typedefs[rty_ID].commonFields[ rfi[fieldName] ];
-            }else{
-                return null;
-            }
-            
-        }else{
-            //return all fields for given rectype
-            var res = {};
-            for(var i=0; i<rectypes.typedefs[rty_ID].commonFieldNames.length; i++){
-                fieldName = rectypes.typedefs[rty_ID].commonFieldNames[i];
-                res[fieldName] = rectypes.typedefs[rty_ID].commonFields[ rfi[fieldName] ];
-            }
-            return res;            
-        }
-    },
     
     //
     // refresh record type in HEURIST4.rectypes

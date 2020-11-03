@@ -88,7 +88,7 @@ class DbDefRecStructure extends DbEntityBase
             $this->data['details'] = 'rst_ID,rst_RecTypeID,rst_DetailTypeID,rst_DisplayName'
             .',if(rst_DisplayHelpText is not null and (dty_Type=\'separator\' OR CHAR_LENGTH(rst_DisplayHelpText)>0),rst_DisplayHelpText,dty_HelpText) as rst_DisplayHelpText'
             .',rst_RequirementType, rst_DisplayOrder, rst_DisplayWidth, rst_DisplayHeight, rst_DefaultValue, rst_MaxValues'
-            .',rst_CreateChildIfRecPtr, rst_PointerMode, rst_PointerBrowseFilter';
+            .',rst_CreateChildIfRecPtr, rst_PointerMode, rst_PointerBrowseFilter, rst_NonOwnerVisibility, rst_Status';
             //dty_Type, rst_FilteredJsonTermIDTree/dty_JsonTermIDTree, rst_PtrFilteredIDs/dty_PtrTargetRectypeIDs 
         
         }else if(@$this->data['details']=='full'){

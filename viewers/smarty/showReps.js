@@ -1156,7 +1156,7 @@ function ShowReps() {
                         term.dtype = $Db.dty(dtid, 'dty_Type');
 
                         if(window.hWin.HEURIST4.rectypes.typedefs[rectype_id] && window.hWin.HEURIST4.rectypes.typedefs[rectype_id].dtFields[dtid]){
-                            var maxval = $Db.rst_idx(rectype_id, dtid, 'rst_MaxValues');
+                            var maxval = $Db.rst(rectype_id, dtid, 'rst_MaxValues');
                             is_single = (Number(maxval)===1);
                         }
                     }else if (term.this_id=="Relationship") {

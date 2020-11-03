@@ -977,7 +977,7 @@ $.widget( "heurist.search_faceted", {
                                 recID: -1,
                                 rectypeID: rtid,
                                 dtID: field['id'],
-                                rectypes: window.hWin.HEURIST4.rectypes,
+                                
                                 values: [''],
                                 readonly: false,
                                 title:  (that.options.params.title_hierarchy?harchy:'')
@@ -2489,7 +2489,7 @@ if(!(vocab_id>0)){
             recID: -1,
             rectypeID: rtid,
             dtID: field['id'],
-            rectypes: window.hWin.HEURIST4.rectypes,
+            
             values: [''],
             readonly: false,
             title:  "<span style='font-weight:bold'>" + field['title'] + "</span>",

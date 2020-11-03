@@ -1299,7 +1299,7 @@ $.widget( "heurist.manageEntity", {
     filterRecordList: function(event, request){
         
         window.hWin.HEURIST4.msg.sendCoverallToBack();
-console.log('visibile!!!!!');        
+
         var subset = null;
         if(this.options.use_cache && this._cachedRecordset){
             subset = this._cachedRecordset.getSubSetByRequest(request, this.options.entity.fields);

@@ -24,12 +24,10 @@ $.widget( "heurist.editing_input", {
     options: {
         varid:null,  //id to create imput id, otherwise it is combination of index and detailtype id
         recID: null,  //record id for current record - required for relation marker and file
-        recordset:null, //reference to parent recordset
+        recordset:null, //reference to parent recordset 
         editing:null, //reference to parent editing form
 
-        //field desription is taken from window.hWin.HEURIST4.rectypes
-        rectypes: null,  // reference to window.hWin.HEURIST4.rectypes - defRecStructure
-        rectypeID: null, //field description is taken either from rectypes[rectypeID] or from dtFields
+        rectypeID: null, //only for recDetail to get field description from $Db.rst
         dtID: null,      // field type id (for recDetails) or field name (for other Entities)
 
         //  it is either from window.hWin.HEURIST4.rectype.typedefs.dtFields - retrieved with help rectypeID and dtID
@@ -65,12 +63,10 @@ $.widget( "heurist.editing_input", {
     // the constructor
     _create: function() {
 
-        //field description is taken either from rectypes[rectypeID] or from dtFields
-        if(this.options.dtFields==null && this.options.dtID>0 && this.options.rectypeID>0 &&
-            this.options.rectypes && this.options.rectypes.typedefs && this.options.rectypes.typedefs[this.options.rectypeID])
+        //for recDetails field description can be taken from $Db.rst
+        if(this.options.dtFields==null && this.options.dtID>0 && this.options.rectypeID>0) //only for recDetails
         {
-            // HEUIRST4.rectypes
-            this.options.dtFields = this.options.rectypes.typedefs[this.options.rectypeID].dtFields[this.options.dtID];
+            this.options.dtFields = window.hWin.HEURIST4.util.cloneJSON($Db.rst(this.options.rectypeID, this.options.dtID));
         }
 
         if(this.options.dtFields==null){ //field description is not defined
@@ -78,10 +74,9 @@ $.widget( "heurist.editing_input", {
         }
         this.detailType = this.options.detailtype ?this.options.detailtype :this.f('dty_Type');
         
-        if((!(this.options.rectypeID>0)) && this.options.recordset){
-            this.options.rectypeID = this.options.recordset.fld(this.options.recordset.getFirstRecord(), 'rec_RecTypeID');
+        if((!(this.options.rectypeID>0)) && this.options.recordset){ //detect rectype for (heurist data) Records/recDetails
+            this.options.rectypeID = this.options.recordset.fld(this.options.recID, 'rec_RecTypeID'); //this.options.recordset.getFirstRecord()
         }
-
         
         //custom classes to manipulate visibility and styles in editing space separated
         this.customClasses = this.f('rst_Class'); 
@@ -396,8 +391,9 @@ $.widget( "heurist.editing_input", {
     /**
     * get value for given record type structure field
     *
-    * dtFields - either from rectypes.typedefs and index is taken from dtFieldNamesToIndex
-    *          - or it is object with following list of properties
+    * dtFields - json with parameters that describes this input field
+    *            for recDetails it is taken from $Db.rst for other entities from config files in hsapi/entities
+    * 
     dty_Type,
     rst_DisplayName,  //label
     rst_DisplayHelpText  (over dty_HelpText)           //hint
@@ -420,9 +416,9 @@ $.widget( "heurist.editing_input", {
     f: function(fieldname){
 
         var val = this.options['dtFields'][fieldname]; //try get by name
-        if(window.hWin.HEURIST4.util.isnull(val) && this.options.rectypes){ //try get by index
-            var fi = this.options.rectypes.typedefs.dtFieldNamesToIndex;
-            if(fi) val = this.options['dtFields'][fi[fieldname]];
+        
+        if(window.hWin.HEURIST4.util.isnull(val) && this.options.dtID>0 && this.options.rectypeID>0){ //try get from $Db
+            val = $Db.rst(this.options.rectypeID, this.options.dtID, fieldname);
         }
         
         if(window.hWin.HEURIST4.util.isempty(val)){ //some default values
@@ -443,23 +439,13 @@ $.widget( "heurist.editing_input", {
         }
         
 
-        /*}else{
-        var rfrs = this.options.rectypes.typedefs[this.options.rectypeID].dtFields[this.options.dtID];
-        var fi = this.options.rectypes.typedefs.dtFieldNamesToIndex;
-        return rfrs[fi[fieldname]];
-        }*/
     },
     
+    //
+    // assign parameter by fieldname
+    //
     fset: function(fieldname, value){
-
-        if(this.options['dtFields'][fieldname] || !this.options.rectypes){
-            this.options['dtFields'][fieldname] = value;
-        }
-        if(this.options.rectypes){ //try get by index
-            var fi = this.options.rectypes.typedefs.dtFieldNamesToIndex;
-            if(fi) this.options['dtFields'][fi[fieldname]] = value;
-        }
-        
+        this.options['dtFields'][fieldname] = value;
     },
 
     //
@@ -976,7 +962,7 @@ $.widget( "heurist.editing_input", {
                     
 
                 }else{
-                    
+                    //NOT USED ANYMORE
                     var url = window.hWin.HAPI4.baseURL 
                         + 'admin/structure/terms/selectTerms.html?mode=editrecord&db='
                         + window.hWin.HAPI4.database
@@ -1353,8 +1339,9 @@ $.widget( "heurist.editing_input", {
             }            
             var rts = [];
             for (var k=0; k<ptrset.length; k++) {
-                if(window.hWin.HEURIST4.rectypes.names[ptrset[k]]){
-                    rts.push(window.hWin.HEURIST4.rectypes.names[ptrset[k]]);
+                var sname = $Db.rty(ptrset[k],'rty_Name');
+                if(!window.hWin.HEURIST4.util.isempty(sname)){
+                    rts.push(sname);
                 }
             }
             rts = (rts.length>0)?rts.join(', '):'record';
@@ -3431,8 +3418,7 @@ console.log('onpaste');
     //
     validate: function(){
 
-        if (this.options.dtFields.rst_Display=='hidden' ||
-        this.options.dtFields.rst_Display=='readonly') return true;
+        if (this.f('rst_Display')=='hidden' || this.f('rst_Display')=='readonly') return true;
         
         var req_type = this.f('rst_RequirementType');
         var max_length = this.f('dty_Size');

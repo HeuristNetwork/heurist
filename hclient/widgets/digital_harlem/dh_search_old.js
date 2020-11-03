@@ -349,7 +349,7 @@ $.widget( "heurist.dh_search", {
                         recID: -1,
                         rectypeID: field['rtid'],
                         dtID: field['id'],
-                        rectypes: window.hWin.HEURIST4.rectypes,
+                        
                         values: '',
                         readonly: false,
                         title: field['title'],

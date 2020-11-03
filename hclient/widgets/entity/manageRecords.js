@@ -209,16 +209,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                                         that.options.rts_editor.manageDefRecStructure(
                                             'refreshRecset_Definition_TreeNodeItem', dtId, fields);
                                         
-                                        var rst_fields = window.hWin.HEURIST4.rectypes.typedefs[that._currentEditRecTypeID].dtFields[dtId];
-                                        /*
-                                        var fi = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex;
-                                        rst_fields[fi['rst_MaxValues']] = fields['rst_MaxValues'];
-                                        rst_fields[fi['rst_DisplayWidth']] = fields['rst_DisplayWidth'];
-                                        rst_fields[fi['rst_RequirementType']] = fields['rst_RequirementType'];
-                                        */
-                                        
                                         //recreate edit field
-                                        var dtFields = that._prepareFieldForEditor( rst_fields );
+                                        var dtFields = that._prepareFieldForEditor( null, that._currentEditRecTypeID, dtId );
                                         var inpt = that._editing.getFieldByName(dtId);
                                         inpt.editing_input('option', {dtFields:dtFields, recreate:true} );
                                         that._createRtsEditButton(dtId, $(that.element).find('div[data-dtid="'+dtId+'"]') );
@@ -319,7 +311,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         
         var that = this;
                       
-        var rst_fields = window.hWin.HEURIST4.rectypes.typedefs[that._currentEditRecTypeID].dtFields[dtId];
+        var rst_fields = $Db.rst(that._currentEditRecTypeID, dtId);
         if(rst_fields){
 
             var is_folder = false;      
@@ -334,24 +326,25 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 var el = $(event.target);
 
                 var dtId = el.parents('div[data-dtid]').attr('data-dtid');
-                var fi = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex;
-                var rst_fields = window.hWin.HEURIST4.rectypes.typedefs[that._currentEditRecTypeID].dtFields[dtId];
-                var dt_type = rst_fields[fi['dty_Type']];
+
+                var rst_fields = $Db.rst(that._currentEditRecTypeID, dtId);
+                
+                var dt_type = $Db.rst(that._currentEditRecTypeID, dtId, 'dty_Type');
                 if(dt_type=='separator'){
                     that.rts_actions_menu.width(53); //43
                     that.rts_actions_menu.find('.edit_rts_sel').hide();
                 }else{
                     that.rts_actions_menu.width(380); //280
                     that.rts_actions_menu.find('.edit_rts_sel').show();
-                    that.rts_actions_menu.find('.s_reqtype').val(rst_fields[fi['rst_RequirementType']])
-                    var v = rst_fields[fi['rst_MaxValues']];
+                    that.rts_actions_menu.find('.s_reqtype').val(rst_fields['rst_RequirementType'])
+                    var v = rst_fields['rst_MaxValues'];
                     that.rts_actions_menu.find('.s_repeat').val(v!=null && v>=0?v:0);
                     if(dt_type=='freetext' || dt_type=='blocktext' || dt_type=='float'){
                         that.rts_actions_menu.find('.s_width').show();
                     }else{
                         that.rts_actions_menu.find('.s_width').hide()    
                     }
-                    v = Number(rst_fields[fi['rst_DisplayWidth']]);
+                    v = Number(rst_fields['rst_DisplayWidth']);
                     if(isNaN(v) || window.hWin.HEURIST4.util.isempty(v)) v=100;
                     //v = (v!=null && v>0)?(v==5?v :(Math.floor(v/10)*10)):100;
                     var prev_v = 5;
@@ -365,7 +358,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     if(prev_v<v) v = prev_v;
                     
                     that.rts_actions_menu.find('.s_width').val(v);
-                    //console.log(rst_fields[fi['rst_DisplayWidth']]+'  '+rst_fields[fi['rst_MaxValues']]);                                
+                    //console.log(rst_fields['rst_DisplayWidth']+'  '+rst_fields['rst_MaxValues']);                                
                 }
 
                 that.rts_actions_menu.find('.edit_rts_btn').hide();
@@ -1073,7 +1066,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
 +'<h3 class="truncate rectypeHeader" style="float:left;max-width:400px;margin:0 8px 0 0;">'
                 + '<img src="'+ph_gif+'" class="rt-icon" style="vertical-align:top;margin-right: 10px;background-image:url(\''
                 + window.hWin.HAPI4.iconBaseURL+recRecTypeID+'\');"/>'
-                + window.hWin.HEURIST4.rectypes.names[recRecTypeID]+'</h3>'
+                + $Db.rty(recRecTypeID, 'rty_Name')+'</h3>'
 +'<select class="rectypeSelect ui-corner-all ui-widget-content" '
 +'style="display:none;z-index: 20;position: absolute;border: 1px solid gray;'  //background:white;
 +'top: 5.7em;" size="20"></select><div class="btn-modify non-owner-disable"/></div>'
@@ -1180,7 +1173,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                                               selHd.html(
                         '<img src="'+ph_gif+'"  class="rt-icon" style="vertical-align:top;margin-right: 10px;background-image:url(\''
                         + window.hWin.HAPI4.iconBaseURL+selRt.val()+'\');"/>'
-                        + window.hWin.HEURIST4.rectypes.names[selRt.val()]                                      
+                        + $Db.rty(selRt.val(), 'rty_Name')                                      
                                               );
                                                                                       
                                         },
@@ -1819,8 +1812,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     editRecordTypeTitle: function(){
         
         var rty_ID = this._currentEditRecTypeID;
-        var typedef = window.hWin.HEURIST4.rectypes.typedefs[rty_ID];
-        var maskvalue = typedef.commonFields[ window.hWin.HEURIST4.rectypes.typedefs.commonNamesToIndex.rty_TitleMask ];
+        var maskvalue = $Db.rty(rty_ID, 'rty_TitleMask')
 
         var sURL = window.hWin.HAPI4.baseURL +
             "admin/structure/rectypes/editRectypeTitle.html?rectypeID="+rty_ID
@@ -1875,28 +1867,6 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             };
         window.hWin.HEURIST4.ui.showEntityDialog('defRecTypes', popup_options);
         
-        
-/* v3 editor        
-        var sURL = window.hWin.HAPI4.baseURL 
-                    + "admin/structure/rectypes/editRectype.html?supress=1&db="
-                    + window.hWin.HAPI4.database +"&rectypeID="+rty_ID;
-            
-        window.hWin.HEURIST4.msg.showDialog(sURL, {    
-                "no-resize": true,
-                title: 'Edit Record Type Attributes',
-                height: 800,
-                width: 800,
-                callback: function(context) {
-                    if(!Hul.isnull(context) && context.result){
-                         //refresh the local heurist
-                        window.hWin.HEURIST4.rectypes = context.rectypes;
-                        window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE); 
-                    }
-                    //refresh icon, title, mask
-                    that._initEditForm_step3(that._currentEditID);
-                }
-        });
-*/        
     },
     
     //
@@ -2196,7 +2166,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     },
     
     //
-    // apparently it should be moved to ui?
+    // apparently it should be moved to dbs?
     //
     __findParentRecordTypes: function(childRecordType){
 
@@ -2204,18 +2174,22 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         
         childRecordType = ''+childRecordType; //must be strig otherwise indexOf fails
         
-        var recset = $Db.rst_idx();
-        recset.each2(function(i,record){
-            
-            if(record['rst_CreateChildIfRecPtr']==1){
-                var fieldtype = $Db.dty(record['rst_DetailTypeID'], 'dty_Type');
-                var constraint = $Db.dty(record['rst_DetailTypeID'], 'dty_PtrTargetRectypeIDs');
-                if(fieldtype=='resource' && constraint && constraint.split(',').indexOf((childRecordType))>=0){
-                        parentRecordTypes.push(record['rst_RecTypeID']);
-                        //return false;
+        var all_structs = $Db.rst_idx2();
+        for (var rty_ID in all_structs){
+            var recset = all_structs[rty_ID];
+            recset.each2(function(dty_ID, record){
+                
+                if(record['rst_CreateChildIfRecPtr']==1){
+                    var fieldtype = $Db.dty(dty_ID, 'dty_Type');
+                    var constraint = $Db.dty(dty_ID, 'dty_PtrTargetRectypeIDs');
+                    if(fieldtype=='resource' && constraint && constraint.split(',').indexOf((childRecordType))>=0){
+                            if(parentRecordTypes.indexOf(record['rst_RecTypeID'])<0)  
+                                    parentRecordTypes.push(record['rst_RecTypeID']);
+                            //return false;
+                    }
                 }
-            }
-        });
+            });
+        }
         
         
         return parentRecordTypes;
@@ -2226,130 +2200,81 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     //
     _getFakeRectypeField: function(detailTypeID, order){
         
-        var dt = null;
-        if(window.hWin.HEURIST4.detailtypes.typedefs[detailTypeID]){
-            dt = window.hWin.HEURIST4.detailtypes.typedefs[detailTypeID]['commonFields'];
-        }
+        var dt = $Db.dty(detailTypeID);
         
-        var fieldIndexMap = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex;
-        var dtyFieldNamesIndexMap = window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex;
-           
         //init array 
-        var ffr = [];
-        var l = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNames.length;
-        var i;
-        for (i=0; i<l; i++){ffr.push("");}
+        var ffr = {};
             
-        ffr[fieldIndexMap['rst_DisplayName']] = dt?dt[dtyFieldNamesIndexMap['dty_Name']]:'Fake field';
-        ffr[fieldIndexMap['dty_FieldSetRectypeID']] = dt?dt[dtyFieldNamesIndexMap['dty_FieldSetRectypeID']] : 0;
-        ffr[fieldIndexMap['dty_TermIDTreeNonSelectableIDs']] = (dt?dt[dtyFieldNamesIndexMap['dty_TermIDTreeNonSelectableIDs']]:"");
-        ffr[fieldIndexMap['rst_TermIDTreeNonSelectableIDs']] = (dt?dt[dtyFieldNamesIndexMap['dty_TermIDTreeNonSelectableIDs']]:"");
-        ffr[fieldIndexMap['rst_MaxValues']] = 1;
-        ffr[fieldIndexMap['rst_MinValues']] = 0;
-        ffr[fieldIndexMap['rst_CalcFunctionID']] = null; //!!!!
-        ffr[fieldIndexMap['rst_DefaultValue']] = null;
-        ffr[fieldIndexMap['rst_DisplayDetailTypeGroupID']] = (dt?dt[dtyFieldNamesIndexMap['dty_DetailTypeGroupID']]:"");  //!!!
-        ffr[fieldIndexMap['rst_DisplayExtendedDescription']] = (dt?dt[dtyFieldNamesIndexMap['dty_ExtendedDescription']]:"");
-        ffr[fieldIndexMap['rst_DisplayHelpText']] = (dt?dt[dtyFieldNamesIndexMap['dty_HelpText']]:"");
-        ffr[fieldIndexMap['rst_DisplayOrder']] = (order>0)?order:999;
-        ffr[fieldIndexMap['rst_DisplayWidth']] = 50;
-        ffr[fieldIndexMap['rst_FilteredJsonTermIDTree']] = (dt?dt[dtyFieldNamesIndexMap['dty_JsonTermIDTree']]:"");
-        ffr[fieldIndexMap['rst_LocallyModified']] = 0;
-        ffr[fieldIndexMap['rst_Modified']] = 0;
-        ffr[fieldIndexMap['rst_NonOwnerVisibility']] = (dt?dt[dtyFieldNamesIndexMap['dty_NonOwnerVisibility']]:"viewable");
-        ffr[fieldIndexMap['rst_OrderForThumbnailGeneration']] = 0;
-        ffr[fieldIndexMap['rst_OriginatingDBID']] = 0;
-        ffr[fieldIndexMap['rst_PtrFilteredIDs']] = (dt?dt[dtyFieldNamesIndexMap['dty_PtrTargetRectypeIDs']]:"");
-        ffr[fieldIndexMap['rst_CreateChildIfRecPtr']] = 0;
-        ffr[fieldIndexMap['rst_RecordMatchOrder']] = 0; //!!!!
-        ffr[fieldIndexMap['rst_RequirementType']] = 'optional';
-        ffr[fieldIndexMap['rst_Status']] = (dt?dt[dtyFieldNamesIndexMap['dty_Status']]:"open");
-        ffr[fieldIndexMap['dty_Type']] = (dt?dt[dtyFieldNamesIndexMap['dty_Type']]:"freetext");
+        ffr['rst_DisplayName'] = dt?dt['dty_Name']:'Fake field';
+        ffr['dty_FieldSetRectypeID'] = dt?dt['dty_FieldSetRectypeID'] : 0;
+        ffr['rst_FilteredJsonTermIDTree'] = (dt?dt['dty_JsonTermIDTree']:"");
+        //ffr['rst_TermIDTreeNonSelectableIDs'] = (dt?dt['dty_TermIDTreeNonSelectableIDs']:"");
+        ffr['rst_MaxValues'] = 1;
+        ffr['rst_MinValues'] = 0;
+        //ffr['rst_CalcFunctionID'] = null; //!!!!
+        ffr['rst_DefaultValue'] = null;
+        //ffr['rst_DisplayDetailTypeGroupID'] = (dt?dt['dty_DetailTypeGroupID']:"");  //!!!
+        ffr['rst_DisplayExtendedDescription'] = (dt?dt['dty_ExtendedDescription']:"");
+        ffr['rst_DisplayHelpText'] = (dt?dt['dty_HelpText']:"");
+        ffr['rst_DisplayOrder'] = (order>0)?order:999;
+        ffr['rst_DisplayWidth'] = 50;
+        ffr['rst_LocallyModified'] = 0;
+        ffr['rst_Modified'] = 0;
+        ffr['rst_NonOwnerVisibility'] = (dt?dt['dty_NonOwnerVisibility']:"viewable");
+        ffr['rst_OrderForThumbnailGeneration'] = 0;
+        ffr['rst_OriginatingDBID'] = 0;
+        ffr['rst_PtrFilteredIDs'] = (dt?dt['dty_PtrTargetRectypeIDs']:"");
+        ffr['rst_CreateChildIfRecPtr'] = 0;
+        //ffr['rst_RecordMatchOrder'] = 0; //!!!!
+        ffr['rst_RequirementType'] = 'optional';
+        ffr['rst_Status'] = (dt?dt['dty_Status']:"open");
+        ffr['dty_Type'] = (dt?dt['dty_Type']:"freetext");
         
         ffr['dt_ID'] = detailTypeID;
         
         return ffr;
     },
-    
                
     //
-    //
+    // 
     //     
-    _prepareFieldForEditor: function (rfr){                    
+    _prepareFieldForEditor: function (rfr, rty_ID, dty_ID){                    
 
-            var fieldNames = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNames;
-            var fi_type = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex.dty_Type;
-            var fi_maxval = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex.rst_MaxValues;
+            if(!rfr){
+                rfr = $Db.rst(rty_ID, dty_ID);
+            }else{
+                dty_ID = rfr['dt_ID'];
+            }
+        
+            var ffr = window.hWin.HEURIST4.util.cloneJSON(rfr);
+
+            var dt = $Db.dty(dty_ID);
+
+            //ffr['rst_DisplayExtendedDescription'] = (dt?dt['dty_ExtendedDescription']:"");
             
-            var idx, dtFields = {};
+            ffr['dt_ID'] = dty_ID;
             
-            for(idx in rfr){
-                if(idx>=0){
-                    dtFields[fieldNames[idx]] = rfr[idx];
-                    
-                    if(idx==fi_type){
-                        if(dtFields[fieldNames[idx]]=='file'){
-                            dtFields['rst_FieldConfig'] = {"entity":"records", "accept":".png,.jpg,.gif", "size":200};
-                        }
-                    }else if(idx==fi_maxval){
-                        if(window.hWin.HEURIST4.util.isnull(dtFields[fieldNames[idx]])){
-                            dtFields[fieldNames[idx]] = 0;
-                        }
-                    }
+            if(dt){
+                if(window.hWin.HEURIST4.util.isempty(ffr['dty_Type'])){
+                    ffr['dty_Type'] = dt['dty_Type'];
                 }
-            }//for
-            
-            return dtFields;
-    },                        
-    
-    //
-    // IJ rejects tree structure
-    //
-    _createFieldsForEditing: function( treeData ){
-        
-        var fields = [];
-        
-        if($.isArray(treeData)){
-            
-            for(var i=0; i<treeData.length; i++){
-                
-                var node = treeData[i];
-                            
-                if(node.folder){
-                    //add new group
-                    // "title":"Primary information!","data":{"help":"","type":"group"}
-                    
-                    var dtGroup = {
-                        dtID: node.key,
-                        groupHeader: node.title,
-                        groupHelpText: (node.data && node.data.help)?node.data.help:'',
-                        groupTitleVisible: true,
-                        groupType:  (node.data && node.data.type)?node.data.type:'group', //accordion, tabs, group
-                        groupStyle: {},
-                        children: this._createFieldsForEditing( node.children )
-                    };
-                    
-                    fields.push( dtGroup );
-                    
-                }else if(node.key>0){
-                    
-                    var rectypeID = this._getField('rec_RecTypeID');
-                    var dt_ID = node.key;
-
-                    var rectypes = window.hWin.HEURIST4.rectypes;
-                    var rfrs = rectypes.typedefs[rectypeID].dtFields;
-
-                    fields.push({ dtID: dt_ID, dtFields:this._prepareFieldForEditor(rfrs[dt_ID]) });
-                    
-                }else if(node['dt_ID']>0){
-
-                    fields.push({ dtID: node['dt_ID'], dtFields:this._prepareFieldForEditor(node) }  );            
+                if(window.hWin.HEURIST4.util.isempty(ffr['rst_PtrFilteredIDs'])){
+                    ffr['rst_PtrFilteredIDs'] = dt['dty_PtrTargetRectypeIDs'];
                 }
-                
-            }//for
-        }
-        return fields;
-        
+                if(window.hWin.HEURIST4.util.isempty(ffr['rst_FilteredJsonTermIDTree'])){
+                    ffr['rst_FilteredJsonTermIDTree'] = dt['dty_JsonTermIDTree'];
+                }
+                if(window.hWin.HEURIST4.util.isempty(ffr['rst_MaxValues'])){
+                    ffr['rst_MaxValues'] = 0;
+                }
+                if(ffr['dty_Type']=='file'){
+                    ffr['rst_FieldConfig'] = {"entity":"records", "accept":".png,.jpg,.gif", "size":200};
+                }
+            }else{
+                //console.log(dty_ID+' basefield not fefined');
+            }
+            
+            return ffr;         
     },
     
     //
@@ -2381,51 +2306,31 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             }
             
             var rectypeID = that._getField('rec_RecTypeID');
-            var rectypes = window.hWin.HEURIST4.rectypes;
-            var rfrs = rectypes.typedefs[rectypeID].dtFields;
             
             //pass structure and record details
             that._currentEditID = that._getField('rec_ID');;
             that._currentEditRecTypeID = rectypeID;
+
+            //find all parent rectypes
+            var parentRtys = this.__findParentRecordTypes(rectypeID);
             
             if(that._isInsert && (!allowCreateIndependentChildRecord) &&!(that.options.parententity>0)){
                 //special verification - prevent unparented records
                 //IMHO it should be optional
                 // 1. if rectype is set as target for one of Parent/child pointer fields 
                 // 2 and options.parententity show warning and prevent addition
-                var fi_is_parent_child = rectypes.typedefs.dtFieldNamesToIndex.rst_CreateChildIfRecPtr;
-                var fi_type = rectypes.typedefs.dtFieldNamesToIndex.dty_Type;
-                var fi_ptr = rectypes.typedefs.dtFieldNamesToIndex.rst_PtrFilteredIDs;
-                
-                var parentRtys = [];
-                
-                for (var rtyID in rectypes.typedefs)
-                if(rtyID>0){
-                    for (var dtyID in rectypes.typedefs[rtyID].dtFields){
-                        if(rectypes.typedefs[rtyID].dtFields[dtyID][fi_type]=='resource' && 
-                           rectypes.typedefs[rtyID].dtFields[dtyID][fi_is_parent_child]=='1' && 
-                           rectypes.typedefs[rtyID].dtFields[dtyID][fi_ptr]){
-                              
-                    if(window.hWin.HEURIST4.util.findArrayIndex(rectypeID, rectypes.typedefs[rtyID].dtFields[dtyID][fi_ptr].split(','))>=0)
-                    {
-                        if(parentRtys.indexOf(rtyID)<0) parentRtys.push(rtyID);
-                    }
-
-                        }//if
-                    }//for
-                }
-                
                 if(parentRtys.length>0){
                     
                     var names = [];
                     $(parentRtys).each(function(i,id){
-                        names.push(rectypes.names[id]);
+                        names.push($Db.rty(id, 'rty_Name'));
                     });
                     
                     
                     var $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
-rectypes.names[rectypeID] + ' is defined as a child of <b>'+names
-+'</b>.<br><br>To avoid creation of orphan records, you should only create '+rectypes.names[rectypeID]+' records from within a '+rectypes.names[rtyID]+' record'
+$Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', ')
++'</b>.<br><br>To avoid creation of orphan records, you should only create '+$Db.rty(rectypeID, 'rty_Name')
++' records from within a parent  record'
 +'<br><br>If you understand the implications and still wish to create an independent, non-child record,<br> check this box <input type="checkbox"> '
 +' then click [Create independent record]',
 
@@ -2479,31 +2384,16 @@ rectypes.names[rectypeID] + ' is defined as a child of <b>'+names
                 
                 
             }
+    
             
-/*
-            var dialog_title = this.options['edit_title'];
-            if(!dialog_title){
-                 
-                 dialog_title = window.hWin.HR(
-                                    that.options.edit_structure?'Modify structure for '
-                                      :(that._isInsert ?'Add':'Edit')) + ' '
-                                    + window.hWin.HEURIST4.rectypes.names[rectypeID];                         
-                                    
-            }
- 
-            if(this.options.edit_mode=='popup' && this._edit_dialog){
-                that._edit_dialog.dialog('option','title', dialog_title); 
-            }else if(this.options.edit_mode=='editonly' && this._as_dialog){
-                that._as_dialog.dialog('option','title', dialog_title); 
-            }
-*/    
+            // fields consists of 
+            // 1. fields from record header rec_ID, rec_RecTypeID etc
+            // 2. fields from $Db.rst - basefields
+            // 3. non - standard fields that are taken from record
             
        
-            //@todo ? - move it inside editing
-            //convert structure - 
+            //prepare db structure from $Db.rst for editing
             var fields = window.hWin.HEURIST4.util.cloneJSON(that.options.entity.fields); //retuns record header field rec_XXXX
-            var fieldNames = rectypes.typedefs.dtFieldNames;
-            var fi = rectypes.typedefs.dtFieldNamesToIndex;
             var dt_ID;
 
             /*
@@ -2522,44 +2412,21 @@ rectypes.names[rectypeID] + ' is defined as a child of <b>'+names
             }
             */
             
-            var fi_type = fi['dty_Type'],
-                fi_name = fi['rst_DisplayName'],
-                fi_order = fi['rst_DisplayOrder'],
-                fi_defval = fi['rst_DefaultValue'], //keep UI structure for DT_ENTITY_STRUCTURE
-                fi_help =  fi['rst_DisplayHelpText'],
-                fi_reqtype =  fi['rst_RequirementType'],
-                fi_ptrs = fi['rst_PtrFilteredIDs'],
-                fi_maxval = fi['rst_MaxValues']; //need for proper repeat
-
-
-            //THERE ARE 2 ways of grouping 
-            // 1) NEW: UI is stored in  DT_ENTITY_STRUCTURE (former header field)
-            // 2) OLD: structure is plain is defined by "separator" fields
-            var treeData = false;
-            var DT_ENTITY_STRUCTURE  = Number(window.hWin.HAPI4.sysinfo['dbconst']['DT_ENTITY_STRUCTURE']); 
-            if(false && DT_ENTITY_STRUCTURE>0 && rfrs[DT_ENTITY_STRUCTURE]){ //IJ rejects tree structure
-                treeData = window.hWin.HEURIST4.util.isJSON(rfrs[DT_ENTITY_STRUCTURE][fi_defval]);    
-            }
-            //DEBUG 
-            //treeData = false;
-            
-            
             // fields - json for editing that describes edit form
-            // fields_ids - fields in rt structure
+            // fields_ids - fields in rt structure (standard fields)
             // s_fields - sorted 
-            // field_in_recset - all fields in record
-            // treeData
+            // field_in_recset - all fields in record 
             
-            var s_fields = []; //sorted fields including hidden fields from record header 
-            var fields_ids = [];
-            for(dt_ID in rfrs){ //in rt structure
-                if(dt_ID>0){
-                    rfrs[dt_ID]['dt_ID'] = dt_ID;
-                    s_fields.push(rfrs[dt_ID]);
+            var rst_details = $Db.rst(rectypeID)  //array of dty_ID:rst_ID
+            var s_fields = [];  //sorted fields including hidden fields from record header 
+            var fields_ids = []; //fields in structure
+
+            rst_details.each2(function(dt_ID, rfr){
+                    rfr['dt_ID'] = dt_ID;
+                    s_fields.push(rfr) //array of json
                     fields_ids.push(Number(dt_ID));  //fields in structure
-                }
-            }
-            
+            });
+
             //----------------
             
             //add non-standard fields that are not in structure
@@ -2567,12 +2434,12 @@ rectypes.names[rectypeID] + ' is defined as a child of <b>'+names
 
             //add special 2-247 field "Parent Entity"
             //verify that current record type is a child for pointer fields with rst_CreateChildIfRecPtr=1
-            var parentsIds = that.__findParentRecordTypes(rectypeID);
+            
             
             var DT_PARENT_ENTITY  = Number(window.hWin.HAPI4.sysinfo['dbconst']['DT_PARENT_ENTITY']);
             if( window.hWin.HEURIST4.util.findArrayIndex(DT_PARENT_ENTITY, field_in_recset)<0 && 
                     this.options.parententity>0)    //parent record id is set already (case: this is addition of new child from search record dialog)
-                    //|| (parentsIds.length>0 && that._isInsert) ))   //current rectype is referenced as a child and this is ADDITION
+                    //|| (parentRtys.length>0 && that._isInsert) ))   //current rectype is referenced as a child and this is ADDITION
             {
                     field_in_recset.push(DT_PARENT_ENTITY);
             }
@@ -2582,7 +2449,7 @@ rectypes.names[rectypeID] + ' is defined as a child of <b>'+names
             //they are extremely confusing for the uninitiated (and even for those in the know); 
             //you can't control them easily b/c they are set in another record type; 
             $is_enabled_inward_relationship_fields = false;
-
+/*
             if($is_enabled_inward_relationship_fields){
             
                 var addhead = 0;
@@ -2638,42 +2505,41 @@ rectypes.names[rectypeID] + ' is defined as a child of <b>'+names
                     }
                 }
             }
-            
-            //Add fields that are in record set but not in structure - NON STANDARD FIELDS
+*/            
+            // Add fields that are in record set (field_in_recset) 
+            // but not in structure (fields_ids) - NON STANDARD FIELDS
             addhead = 0;
             for(var k=0; k<field_in_recset.length; k++){
                 //field in recset is not in structure
-                if( window.hWin.HEURIST4.util.findArrayIndex(field_in_recset[k],fields_ids)<0){ 
+                if( window.hWin.HEURIST4.util.findArrayIndex(field_in_recset[k],fields_ids)<0)
+                { 
                     if(field_in_recset[k]==DT_PARENT_ENTITY){
 
                         var rfr = that._getFakeRectypeField(DT_PARENT_ENTITY);
-                        rfr[fi_name] = 'Child record of';
-                        rfr[fi_order] = -1;//top most
+                        rfr['rst_DisplayName'] = 'Child record of';
+                        rfr['rst_DisplayOrder'] = -1;//top most
                         if(this.options.parententity>0){
-                            rfr[fi_defval] = this.options.parententity;  //parent Record ID
-                            rfr[fieldNames.length] = 'readonly';
+                            rfr['rst_DefaultValue'] = this.options.parententity;  //parent Record ID
+                            rfr['rst_Display'] = 'readonly';
                         }
-                        if(parentsIds.length>0){
-                           rfr[fi_reqtype] = 'required';
-                           rfr[fi_ptrs] = parentsIds; //constrained to parent record types
+                        
+                        if(parentRtys.length>0){
+                           rfr['rst_RequirementType'] = 'required';
+                           rfr['rst_PtrFilteredIDs'] = parentRtys; //constrained to parent record types overrides dty_PtrTargetRectypeIDs
                            
-                           //if the only value readonly as well
+                           //readonly - if the only value 
                            if(!that._isInsert){
                                 record = that._currentEditRecordset.getById(that._currentEditID);
                                 var values = that._currentEditRecordset.values(record, DT_PARENT_ENTITY);
                                 if(values && values.length==1){
-                                    rfr[fieldNames.length] = 'readonly';   
+                                    rfr['rst_Display'] = 'readonly';   
                                 }
                            }  
                         }else{
-                            rfr[fi_reqtype] = 'optional';
+                            rfr['rst_RequirementType'] = 'optional';
                         }
                         
-                        fieldNames.push('rst_Display');
                         s_fields.push(rfr);
-                        
-                        //add as first 
-                        if(treeData) treeData[treeData.length-1].children.unshift(rfr);
                         
                     }else{
                         //fields that are not in rectype structure
@@ -2681,85 +2547,67 @@ rectypes.names[rectypeID] + ' is defined as a child of <b>'+names
                         if(addhead==0){                    
                             //fake header
                             var rfr = that._getFakeRectypeField(9999999);
-                            rfr[fi_name] = 'Non-standard fields for this record type';
-                            rfr[fi_type] = 'separator';
-                            rfr[fi_order] = 1100;
+                            rfr['rst_DisplayName'] = 'Non-standard fields for this record type';
+                            rfr['dty_Type'] = 'separator';
+                            rfr['rst_DisplayOrder'] = 1100;
                             s_fields.push(rfr);
-                            
-                            if(treeData!==false){
-                                treeData.push(
-                                    {title:'Non-standard fields for this record type',
-                                        data:{type:'accordion'},children:[]});
-                            
-                            }
                         }
                         addhead++;
                         
                         var rfr = that._getFakeRectypeField(field_in_recset[k], 1100+addhead);
                         s_fields.push(rfr);
                         
-                        if(treeData) treeData[treeData.length-1].children.push(rfr);
                     }
                 }
             }//for   
             
-            if(treeData!==false){
-                //create UI from treeData that is stored in DT_ENTITY_STRUCTURE
-                var fields_detail = that._createFieldsForEditing(treeData);
-                fields = fields.concat(fields_detail);
+
+            //create UI from rfr 
+            
+            //sort by order
+            s_fields.sort(function(a,b){ return a['rst_DisplayOrder']<b['rst_DisplayOrder']?-1:1});
+            
+            var group_fields = null;
+            
+            for(var k=0; k<s_fields.length; k++){
                 
-            }else{
-                //create UI from rfr 
+                var dtFields = that._prepareFieldForEditor( s_fields[k] );
                 
-                //sort by order
-                s_fields.sort(function(a,b){ return a[fi_order]<b[fi_order]?-1:1});
-                
-                var group_fields = null;
-                
-                for(var k=0; k<s_fields.length; k++){
-                    
-                    rfr = s_fields[k];
-                    
-                    if(rfr[fi_type]=='separator'){
-                        if(group_fields!=null){
-                            fields[fields.length-1].children = group_fields;
-                        }
-                        
-                        var dtGroup = {
-                            dtID: rfr['dt_ID'],
-                            groupHeader: rfr[fi_name],
-                            groupHelpText: rfr[fi_help],
-                            groupHidden: false,
-                            groupTitleVisible: (rfr[fi_reqtype]!=='forbidden'),
-                            groupType: (rfr[fi_defval]=='group'||
-                                        rfr[fi_defval]=='tabs'||
-                                        rfr[fi_defval]=='tabs_new'||
-                                        rfr[fi_defval]=='accordion'||
-                                        rfr[fi_defval]=='expanded')?rfr[fi_defval]:'group',
-                            groupStyle: {},
-                            children:[]
-                        };
-                        fields.push(dtGroup);
-                        group_fields = [];
-                    }else{
-                        
-                        var dtFields = that._prepareFieldForEditor( rfr );
-                        
-                        if(group_fields!=null){
-                            group_fields.push({"dtID": rfr['dt_ID'], "dtFields":dtFields});
-                        }else{
-                            fields.push({"dtID": rfr['dt_ID'], "dtFields":dtFields});
-                        }
+                if(dtFields['dty_Type']=='separator'){
+                    if(group_fields!=null){
+                        fields[fields.length-1].children = group_fields;
                     }
-                }//for s_fields
-                //add children to last group
-                if(group_fields!=null){
-                    fields[fields.length-1].children = group_fields;
+                    
+                    var dtGroup = {
+                        dtID: dtFields['dt_ID'],
+                        groupHeader: dtFields['rst_DisplayName'],
+                        groupHelpText: dtFields['rst_DisplayHelpText'],
+                        groupHidden: false,
+                        groupTitleVisible: (dtFields['rst_RequirementType']!=='forbidden'),
+                        groupType: (dtFields['rst_DefaultValue']=='group'||
+                                    dtFields['rst_DefaultValue']=='tabs'||
+                                    dtFields['rst_DefaultValue']=='tabs_new'||
+                                    dtFields['rst_DefaultValue']=='accordion'||
+                                    dtFields['rst_DefaultValue']=='expanded')?dtFields['rst_DefaultValue']:'group',
+                        groupStyle: {},
+                        children:[]
+                    };
+                    fields.push(dtGroup);
+                    group_fields = [];
+                }else{
+                    
+                    if(group_fields!=null){
+                        group_fields.push({"dtID": dtFields['dt_ID'], "dtFields":dtFields});
+                    }else{
+                        fields.push({"dtID": dtFields['dt_ID'], "dtFields":dtFields});
+                    }
                 }
+            }//for s_fields
+            //add children to last group
+            if(group_fields!=null){
+                fields[fields.length-1].children = group_fields;
+            }
                 
-            }//if
-            
-            
             that._editing.initEditForm(fields, that._currentEditRecordset, that._isInsert);
             
             that._afterInitEditForm();
@@ -2775,9 +2623,8 @@ rectypes.names[rectypeID] + ' is defined as a child of <b>'+names
             
             
             //show rec_URL 
-            var fi_url = rectypes.typedefs.commonNamesToIndex['rty_ShowURLOnEditForm'];
             var ele = that._editing.getFieldByName('rec_URL');
-            var hasURLfield = (rectypes.typedefs[rectypeID].commonFields[fi_url]=='1');
+            var hasURLfield = ($Db.rty(rectypeID, 'rty_ShowURLOnEditForm')=='1');
             if(hasURLfield){
                 ele.show();
             }
@@ -2908,7 +2755,7 @@ rectypes.names[rectypeID] + ' is defined as a child of <b>'+names
         }else{
             window.hWin.HEURIST4.msg.showMsgErr(response);
         }
-    },                                                      
+    },  //_initEditForm_step4                                                    
     
     
     //  -----------------------------------------------------
@@ -2932,16 +2779,13 @@ rectypes.names[rectypeID] + ' is defined as a child of <b>'+names
                     fields = null;
                 }
                 
-                var det_rfr = window.hWin.HEURIST4.detailtypes.typedefs;
-                var fieldIndexMap = window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex;
-                
                 //verify max lengtn in 64kB per value
                 for (var dtyID in fields){
                     if(parseInt(dtyID)>0){
-                        if(det_rfr[dtyID]){
-                            var dt = det_rfr[dtyID].commonFields[fieldIndexMap['dty_Type']];
-                            if(dt=='geo' || dt=='file') continue;
-                        }
+                        
+                        var dt = $Db.dty(dtyID, 'dty_Type');
+                        if(dt=='geo' || dt=='file') continue;
+                        
                         
                         var values = fields[dtyID];
                         if(!$.isArray(values)) values = [values];
