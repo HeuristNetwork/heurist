@@ -199,10 +199,10 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
             $(opt).attr('disabled','disabled').attr('visiblity','hidden').css({display:'none'});
         
             for (var rty in rectype_Ids){
-                if(rty>=0 && window.hWin.HEURIST4.rectypes.pluralNames[rectype_Ids[rty]]){
+                if(rty>=0 && $Db.rty(rectype_Ids[rty],'rty_Plural') ){
                     rty = rectype_Ids[rty];
                     window.hWin.HEURIST4.ui.addoption(selScope,rty,
-                            'only: '+window.hWin.HEURIST4.rectypes.pluralNames[rty]);
+                            'only: '+$Db.rty(rty,'rty_Plural'));
                 }
             }
         }
@@ -281,6 +281,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
             
             var url = window.hWin.HAPI4.baseURL + 'hsapi/controller/record_output.php'
             
+            //posting via form allows send large list of ids
             this.element.find('#postdata').val( JSON.stringify(request) );
             this.element.find('#postform').attr('action', url);
             this.element.find('#postform').submit();

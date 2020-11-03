@@ -190,7 +190,7 @@ $.widget( "heurist.recordTemplate", $.heurist.recordAction, {
         
         this._super();
         
-        $('#sel_record_type').text( window.hWin.HEURIST4.rectypes.names[this.options.recordType] );
+        $('#sel_record_type').text( $Db.rty(this.options.recordType,'rty_Name') );
         
         this._loadRecordTypesTreeView();
         

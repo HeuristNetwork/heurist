@@ -264,7 +264,7 @@ $.widget( "heurist.ruleBuilder", {
         var all_structs = $Db.rst_idx2();
         for (rty_ID in all_structs){
             var recset = all_structs[rty_ID];
-            recset.each2(function(dty_ID, record){
+            recset.each2(function(dtyID, record){
             
             //dtyID = record['rst_DetailTypeID'];
             var fieldtype = $Db.dty(dtyID, 'dty_Type');

@@ -1,4 +1,4 @@
-    /**
+/**
 * mainMenu.js : Top Main Menu panel
 *
 * @package     Heurist academic knowledge management system
@@ -752,6 +752,22 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                                                  
         }
         
+        // for publish export actions    
+        function __prepareExportOpts(){
+            if(popup_dialog_options.container){
+               popup_dialog_options.need_reload = true; 
+               popup_dialog_options.onClose = function() { 
+                   popup_dialog_options.container.hide() 
+               };
+               
+               popup_dialog_options.menu_container.find('ul').show();
+               popup_dialog_options.menu_container.find('ul.for_web_site').hide();
+               popup_dialog_options.menu_container.find('ul.for_web_page').hide();
+            }
+            return that.isResultSetEmpty();
+        }
+        
+        
         //  -1 no verification
         //  0 logged (DEFAULT)
         //  groupid  - admin of group  
@@ -949,19 +965,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         }else 
         if(action == "menu-export-csv"){
             
-            if(popup_dialog_options.container){
-               popup_dialog_options.need_reload = true; 
-               popup_dialog_options.onClose = function() { 
-                   popup_dialog_options.container.hide() 
-               };
-               
-               popup_dialog_options.menu_container.find('ul').show();
-               popup_dialog_options.menu_container.find('ul.for_web_site').hide();
-               popup_dialog_options.menu_container.find('ul.for_web_page').hide();
-            }
-            
-            if(that.isResultSetEmpty()) return;
-            
+            if(__prepareExportOpts()) return;
             window.hWin.HEURIST4.ui.showRecordActionDialog('recordExportCSV', popup_dialog_options);
 
         }else 
@@ -971,21 +975,44 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         
         }else 
         if(action == "menu-export-hml-resultset"){
-                                that._exportRecords({format:'hml', multifile:false});
+            
+            if(__prepareExportOpts()) return;
+            popup_dialog_options.format = 'xml';
+            window.hWin.HEURIST4.ui.showRecordActionDialog('recordExport', popup_dialog_options);
+                //that._exportRecords({format:'hml', multifile:false});
         }else 
         if(action == "menu-export-hml-multifile"){
                                 that._exportRecords({format:'hml', multifile:true});
         }else if(action == "menu-export-json"){ 
-                                that._exportRecords({format:'json'});
+            
+            if(__prepareExportOpts()) return;
+            popup_dialog_options.format = 'json';
+            window.hWin.HEURIST4.ui.showRecordActionDialog('recordExport', popup_dialog_options);
+            
+                //that._exportRecords({format:'json'});
             
         }else if(action == "menu-export-geojson"){ 
-                                that._exportRecords({format:'geojson'});
             
-        }else if(action == "menu-export-gephi"){ 
-                                that._exportRecords({format:'gephi'});
+            if(__prepareExportOpts()) return;
+            popup_dialog_options.format = 'geojson';
+            window.hWin.HEURIST4.ui.showRecordActionDialog('recordExport', popup_dialog_options);
+            //that._exportRecords({format:'geojson'});
+            
+        }else if(action == "menu-export-gephi"){    
+            
+            if(__prepareExportOpts()) return;
+            popup_dialog_options.format = 'geojson';
+            window.hWin.HEURIST4.ui.showRecordActionDialog('recordExport', popup_dialog_options);
+        
+            //that._exportRecords({format:'gephi'});
         }else 
         if(action == "menu-export-kml"){
-                                that._exportKML(true, true);            
+            
+            if(__prepareExportOpts()) return;
+            popup_dialog_options.format = 'kml';
+            window.hWin.HEURIST4.ui.showRecordActionDialog('recordExport', popup_dialog_options);
+            
+            //that._exportKML(true, true);            
         }else 
         if(action == "menu-import-add-record"){
             

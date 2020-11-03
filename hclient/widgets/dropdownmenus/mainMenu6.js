@@ -521,7 +521,7 @@ $.widget( "heurist.mainMenu6", {
         if( this._isExplorerMenu_locked() ) return;
         this._explorer_menu_locked = false;
         
-        this._expandMainMenuPanel();
+        //this._expandMainMenuPanel();
 
         clearTimeout(this._myTimeoutId3); this._myTimeoutId3 = 0;
         this._resetCloseTimers();

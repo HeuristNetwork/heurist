@@ -107,6 +107,11 @@ require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_recsearch.php');
 require_once(dirname(__FILE__).'/../../hsapi/dbaccess/conceptCode.php');
 
 
+if(@$_REQUEST['postdata']){
+    //all parameters can be sent as json array in postdata 
+    $_REQUEST = json_decode($_REQUEST['postdata'], true);
+}
+
 if(@$_REQUEST['rectype_templates']){ // output manifest + files ??
     $rectype_templates = $_REQUEST['rectype_templates']; //flag to produce rectype templates instead of real records
 }else{

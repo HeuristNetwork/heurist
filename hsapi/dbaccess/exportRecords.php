@@ -796,7 +796,7 @@ private static function _composeGephiLinks(&$records, &$links, &$links_cnt, $dir
                     $relationName = self::$defDetailtypes['typedefs'][$dtID]['commonFields'][$idx_dname];
                     $relationID = $dtID;
                 }else if($trmID > 0) {
-                    $relationName = $defTerms->getTermLabel($trmID, true);
+                    $relationName = self::$defTerms->getTermLabel($trmID, true);
                     $relationID = $trmID;
                 }
 
