@@ -752,22 +752,6 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                                                  
         }
         
-        // for publish export actions    
-        function __prepareExportOpts(){
-            if(popup_dialog_options.container){
-               popup_dialog_options.need_reload = true; 
-               popup_dialog_options.onClose = function() { 
-                   popup_dialog_options.container.hide() 
-               };
-               
-               popup_dialog_options.menu_container.find('ul').show();
-               popup_dialog_options.menu_container.find('ul.for_web_site').hide();
-               popup_dialog_options.menu_container.find('ul.for_web_page').hide();
-            }
-            return that.isResultSetEmpty();
-        }
-        
-        
         //  -1 no verification
         //  0 logged (DEFAULT)
         //  groupid  - admin of group  
@@ -963,56 +947,46 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                 window.hWin.HAPI4.SystemMgr.get_defs_all( true, window.hWin.document);
                                                 
         }else 
-        if(action == "menu-export-csv"){
-            
-            if(__prepareExportOpts()) return;
-            window.hWin.HEURIST4.ui.showRecordActionDialog('recordExportCSV', popup_dialog_options);
-
-        }else 
         if(action == "menu-records-archive"){
             
             window.hWin.HEURIST4.ui.showRecordActionDialog('recordArchive');
         
         }else 
+        if(action == "menu-export-csv"){
+            
+            popup_dialog_options.format = 'csv';
+            that._exportRecords(popup_dialog_options);
+
+        }else 
         if(action == "menu-export-hml-resultset"){
             
-            if(__prepareExportOpts()) return;
             popup_dialog_options.format = 'xml';
-            window.hWin.HEURIST4.ui.showRecordActionDialog('recordExport', popup_dialog_options);
-                //that._exportRecords({format:'hml', multifile:false});
+            that._exportRecords(popup_dialog_options);
+            
         }else 
         if(action == "menu-export-hml-multifile"){
-                                that._exportRecords({format:'hml', multifile:true});
+            //that._exportRecords({format:'hml', multifile:true});
         }else if(action == "menu-export-json"){ 
             
-            if(__prepareExportOpts()) return;
             popup_dialog_options.format = 'json';
-            window.hWin.HEURIST4.ui.showRecordActionDialog('recordExport', popup_dialog_options);
-            
-                //that._exportRecords({format:'json'});
+            that._exportRecords(popup_dialog_options);
             
         }else if(action == "menu-export-geojson"){ 
             
-            if(__prepareExportOpts()) return;
             popup_dialog_options.format = 'geojson';
-            window.hWin.HEURIST4.ui.showRecordActionDialog('recordExport', popup_dialog_options);
-            //that._exportRecords({format:'geojson'});
+            that._exportRecords(popup_dialog_options);
             
         }else if(action == "menu-export-gephi"){    
             
-            if(__prepareExportOpts()) return;
-            popup_dialog_options.format = 'geojson';
-            window.hWin.HEURIST4.ui.showRecordActionDialog('recordExport', popup_dialog_options);
-        
-            //that._exportRecords({format:'gephi'});
+            popup_dialog_options.format = 'gephi';
+            that._exportRecords(popup_dialog_options);
+            
         }else 
         if(action == "menu-export-kml"){
             
-            if(__prepareExportOpts()) return;
             popup_dialog_options.format = 'kml';
-            window.hWin.HEURIST4.ui.showRecordActionDialog('recordExport', popup_dialog_options);
+            that._exportRecords(popup_dialog_options);
             
-            //that._exportKML(true, true);            
         }else 
         if(action == "menu-import-add-record"){
             
@@ -1128,12 +1102,13 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                 href = window.hWin.HAPI4.baseURL + href + (href.indexOf('?')>=0?'&':'?') + 'db=' + window.hWin.HAPI4.database;        
             }
             
-            if(!window.hWin.HEURIST4.util.isempty(entered_password)){
-                 href =  href + '&pwd=' + entered_password;
-            }
-
-            if(that.options.is_h6style){
-                 href =  href + '&ll=H6Default&t='+((new Date()).getTime());
+            if(href.indexOf(window.hWin.HAPI4.baseURL) == 0){
+                if(!window.hWin.HEURIST4.util.isempty(entered_password)){
+                     href =  href + '&pwd=' + entered_password;
+                }
+                if(that.options.is_h6style){
+                     href =  href + '&ll=H6Default&t='+((new Date()).getTime());
+                }
             }
             
             if(!window.hWin.HEURIST4.util.isempty(target)){
@@ -1888,8 +1863,26 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
     //
     // opts: {format, isAll, includeRelated, multifile, save_as_file}
     //
-    _exportRecords: function(opts){ // isAll = resultset, false = current selection only
-
+    _exportRecords: function(popup_dialog_options){ // isAll = resultset, false = current selection only
+    
+    
+        // for publish export actions    
+        if(popup_dialog_options.container){
+           popup_dialog_options.need_reload = true; 
+           popup_dialog_options.onClose = function() { 
+               popup_dialog_options.container.hide() 
+           };
+           
+           popup_dialog_options.menu_container.find('ul').show();
+           popup_dialog_options.menu_container.find('ul.for_web_site').hide();
+           popup_dialog_options.menu_container.find('ul.for_web_page').hide();
+        }
+        if(this.isResultSetEmpty()) return false;
+    
+        var action = 'recordExport'+(popup_dialog_options.format=='csv'?'CSV':'');
+        window.hWin.HEURIST4.ui.showRecordActionDialog(action, popup_dialog_options);
+    
+/*
         var that = this;
     
         var q = "",
@@ -1906,13 +1899,6 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                 
                 q = window.hWin.HEURIST4.util.composeHeuristQuery2(window.hWin.HEURIST4.current_query_request, true);
                 
-                /*
-                q = encodeURIComponent(window.hWin.HEURIST4.current_query_request.q);
-                if(!window.hWin.HEURIST4.util.isempty(window.hWin.HEURIST4.current_query_request.rules)){
-                    q = q + '&rules=' + encodeURIComponent(window.hWin.HEURIST4.current_query_request.rules);
-                }
-                */
-                        
                 isEntireDb = (window.hWin.HAPI4.currentRecordset && 
                     window.hWin.HAPI4.currentRecordset.length()==window.hWin.HAPI4.sysinfo.db_total_records);
                     
@@ -1965,29 +1951,6 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                 }
                 
             }
-            /*
-            else{
-                if ((opts.format === 'hml' || opts.format === 'json') && !opts.confirmNotFollowPointers) {
-                    window.hWin.HEURIST4.msg.showMsgDlg(
-                        '<p><span style="color:red">WARNING:</span> by allowing the export of records without following pointers, ' +
-                        'you will lose any data which is referenced by pointer fields in the exported records. ' +
-                        'This may be acceptable for simple lists eg. of places or person names, ' +
-                        'but you need to understand the nature of the exported records to be sure that you are not ' +
-                        'losing essential data.</p>' +
-                        '<p>Exporting and importing a CSV file will give you more control on what fields are exported.</p>' +
-                        '<p>Are you sure?</p>', function(){
-                            opts.confirmNotFollowPointers = true;
-                            _exportRecords(opts);
-                        }, {
-                            yes: 'Proceed',
-                            no: 'Cancel'
-                        });
-                    return;
-                }
-                params =  'depth='+(opts.includeRelated?1:0);
-            }
-            */
-            
             params =  params + (opts.linksMode?('&linkmode='+opts.linksMode):'');  
             
             if(opts.format=='hml'){
@@ -2013,22 +1976,17 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
             var url = window.hWin.HAPI4.baseURL + script + 
             q + 
             "&a=1"+
-            /*(layoutString ? "&" + layoutString : "") +
-            (selFilter ? "&" + selFilter : "") +
-            (rtFilter ? "&" + rtFilter : "") +
-            (relFilter ? "&" + relFilter : "") +
-            (ptrFilter ? "&" + ptrFilter : "") +*/
             "&db=" + window.hWin.HAPI4.database
             +'&'+params;
 
             window.open(url, '_blank');
         }
-
+*/
         return false;
     }
      
     //
-    //
+    // NOY USED anymore
     //
     , _exportKML: function(isAll, save_as_file){
 
