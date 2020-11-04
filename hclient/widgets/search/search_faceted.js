@@ -1050,7 +1050,7 @@ $.widget( "heurist.search_faceted", {
                     //force width for direct input and selectors to 150px 
                     var w = that.element.width();
                     if(!(w>0) || w<200) w = 200;
-                    inpt.find('input').removeClass('text').css({'width':(w-65)+'px','max-width':(w-65)+'px'});
+                    inpt.find('input').removeClass('text').css({'width':(w-65)+'px','max-width':(w-65)+'px','min-width':'auto'});
                     inpt.find('select').removeClass('text').css({'width':(w-30)+'px','min-width': (w-30)+'px'});
                     
                     var btn_add = $( "<button>",{title:'To clear previous search click the RESET button'})

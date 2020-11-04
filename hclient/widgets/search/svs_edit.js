@@ -352,7 +352,7 @@ function hSvsEdit(args) {
 
         if (mode == 'faceted'){
 
-            var facet_params = {};
+            var facet_params = null;
             if(svsID>0){
                 var svs = window.hWin.HAPI4.currentUser.usr_SavedSearch[svsID];
                 if(svs){
@@ -365,8 +365,14 @@ function hSvsEdit(args) {
                     }
                 }
             }
-
-            _showSearchFacetedWizard( {svsID:svsID, domain:groupID, params:facet_params, position: position, onsave: callback_method });
+            
+            var opts = {svsID:svsID, domain:groupID, 
+                        position: position, onsave: callback_method, 
+                        is_h6style:is_h6style, is_modal:is_modal, menu_locked:menu_locked };
+                        
+            if(!facet_params) opts.params = facet_params;
+            _showSearchFacetedWizard( opts );
+                        
             //function(event, request){   that._updateAfterSave(request, 'faceted');
 
         }else if (mode == 'rules' && window.hWin.HEURIST4.util.isnull(svsID)){ //it happens for new rules only
@@ -606,7 +612,7 @@ function hSvsEdit(args) {
                         {text:window.hWin.HR('Get filter + rules as string'), 
                             click: __getFilterString, css:{'margin-right':'60px'} },
                         {text:window.hWin.HR('Save'), 
-                            id:'btnSave',
+                            id:'btnSave2',
                             class:'ui-button-action', 
                             click: __doSave, css:{'margin-right':'10px'}},
                         {text:window.hWin.HR('Cancel'), click: function() {

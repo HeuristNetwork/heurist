@@ -216,9 +216,10 @@ $.widget( "heurist.mainMenu6", {
                     
                     //not need to check realm since this widget the only per instance
                     //if(data && that.options.search_realm && that.options.search_realm!=data.search_realm) return;
+                    if(data && (data.ispreview || data.increment)) return;
                     
                     that.reset_svs_edit = true;
-                    if(data && !data.increment && !data.reset){
+                    if(data && !data.reset){
                         //keep current search for "Save Filter"
                         that.currentSearch = window.hWin.HEURIST4.util.cloneJSON(data);
                         that._updateSaveFilterButton(1);
@@ -233,6 +234,8 @@ $.widget( "heurist.mainMenu6", {
                     }
                     
                 }else if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH){
+
+                    if(data && data.request && (data.request.ispreview || data.request.increment)) return;
                     
                     //if(data && that.options.search_realm && that.options.search_realm!=data.search_realm) return;
                     that.coverAll.hide();
@@ -550,7 +553,7 @@ $.widget( "heurist.mainMenu6", {
                                         that._closeExploreMenuPopup();
                                     },  this._delayOnCollapse_ExploreMenu); //600
         }
-    
+                   
         
     },
         
@@ -621,6 +624,9 @@ $.widget( "heurist.mainMenu6", {
                 //attempt for non modal 
 //console.log('close in show_ExploreMenu');                
                 that.closeSavedSearch();
+            }
+            if(action_name!='svsAddFaceted'){
+                that.closeFacetedWizard();
             }
         
             if(action_name=='search_entity'){
@@ -697,7 +703,12 @@ $.widget( "heurist.mainMenu6", {
                 }else{
                         explore_top = 2;
                 }*/
-                that.addSavedSearch( false, explore_left );
+                that.addSavedSearch( 'saved', false, explore_left );
+                return;
+            }
+            else if(action_name=='svsAddFaceted'){
+                that._closeExploreMenuPopup();
+                that.addSavedSearch( 'faceted', false, explore_left );
                 return;
             }
             else if(action_name=='svs_list'){
@@ -828,7 +839,7 @@ $.widget( "heurist.mainMenu6", {
             if(!this.svs_list.parent().hasClass('ui-heurist-quicklinks')){
                     //show in left main menu
                     this.svs_list.detach().appendTo(this.divMainMenu.find('.ui-heurist-quicklinks'));
-                    this.svs_list.css({'top':190}); //, 'font-size':'0.8em'});
+                    this.svs_list.css({'top':215}); //, 'font-size':'0.8em'});
                     this.svs_list.svs_list('option','container_width',170);
                     this.svs_list.svs_list('option','hide_header', true);
                     this._on(this.svs_list,{mouseenter: this._resetCloseTimers});//_expandMainMenuPanel});
@@ -839,7 +850,7 @@ $.widget( "heurist.mainMenu6", {
             if(!this.svs_list.parent().hasClass('ui-menu6-section')){
                 
                 this.svs_list.detach().appendTo(this.menues['explore']);
-                this.svs_list.css({'top':230}); //, 'font-size':'1em'}).show();
+                this.svs_list.css({'top':250}); //, 'font-size':'1em'}).show();
                 this.svs_list.svs_list('option','container_width',200);
                 this.svs_list.svs_list('option','hide_header', true);
                 this._off(this.svs_list,'mouseenter');
@@ -887,6 +898,7 @@ $.widget( "heurist.mainMenu6", {
             
             this._current_explore_action = null;
             this.closeSavedSearch();
+            this.closeFacetedWizard();
             
         }
     },
@@ -1290,14 +1302,22 @@ $.widget( "heurist.mainMenu6", {
     //
     //
     closeSavedSearch: function(){
-        if(this.edit_svs_dialog)
+        if(this.edit_svs_dialog){
             this.edit_svs_dialog.closeEditDialog();
+        }
+    },
+    closeFacetedWizard: function(){
+        var faceted_search_wiz = $('#heurist-search-faceted-dialog');
+        if(faceted_search_wiz && faceted_search_wiz.length>0){
+            faceted_search_wiz.dialog('close');
+        }
     },
         
     //
     // define new saved filter/search
+    // mode - saved or faceted
     //
-    addSavedSearch: function( is_modal, left_position){
+    addSavedSearch: function( mode, is_modal, left_position ){
 
         if(this.edit_svs_dialog==null){
             this.edit_svs_dialog = new hSvsEdit();    
@@ -1309,28 +1329,38 @@ $.widget( "heurist.mainMenu6", {
                 left_position = 302;
             }
         }
+        var top_position = this.divMainMenu.position().top;
+        if(mode=='saved'){
+            top_position = top_position + 100;
+        }
+            
         
         is_modal = (is_modal!==false);
         
         var that = this;
 
-        var $dlg = this.edit_svs_dialog.showSavedFilterEditDialog( 'saved', null, null, this.currentSearch , false, 
-            { my: 'left top', at: 'left+'+left_position+'px top+100px', of:this.divMainMenu},
+        var $dlg = this.edit_svs_dialog.showSavedFilterEditDialog( mode, null, null, this.currentSearch , false, 
+            { my: 'left top', at: 'left+'+left_position+'px top+'+top_position+'px', of:this.divMainMenu},
             function(){
                 window.hWin.HAPI4.currentUser.usr_SavedSearch = null;
                 window.hWin.HAPI4.currentUser.ugr_SvsTreeData = null;
                 that.svs_list.svs_list('option','hide_header',true);//to trigger refresh
-            }, is_modal, true,                                                                                                         
+            }, 
+            is_modal, 
+            true, //is_h6style                                                                                                         
             function(is_locked, is_mouseleave){  //menu_locked
                 if(is_mouseleave){
-                    that._collapseMainMenuPanel()
+                    that._myTimeoutId2 = setTimeout(function(){
+                            that._closeExploreMenuPopup();
+                            that._collapseMainMenuPanel();
+                    }, 1000); //thar._delayOnCollapse_ExploreMenu);
                 }else{
                     that._resetCloseTimers();    
                     that._explorer_menu_locked = is_locked; 
                 }
             },
             that.reset_svs_edit
-        );
+        );  
         
         /*
         setTimeout(function(){

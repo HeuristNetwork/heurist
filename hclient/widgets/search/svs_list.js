@@ -2213,7 +2213,8 @@ $.widget( "heurist.svs_list", {
             
             //this.edit_dialog.callback_method  = callback;
             this.edit_dialog.showSavedFilterEditDialog( mode, groupID, svsID, squery, is_short, 
-                this.options.is_h6style?{ my: "left top", at: "right+4 top", of: this.element}:null, callback );
+                this.options.is_h6style?{ my: "left top", at: "right+4 top", of: this.element}:null, callback, 
+                true, this.options.is_h6style );
 
         }else{
             $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/search/svs_edit.js',
