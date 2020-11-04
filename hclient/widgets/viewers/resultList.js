@@ -1172,15 +1172,14 @@ $.widget( "heurist.resultList", {
             .css('padding','1em')
             .load(window.hWin.HAPI4.baseURL+'hclient/widgets/viewers/resultListEmptyMsg.html',
                 function(){
-                    $emptyres.find('.acc').accordion({collapsible:true,heightStyle:'content'});
+                    $emptyres.find('.acc')
+                    .accordion({collapsible:true,heightStyle:'content',
+                            activate: function( event, ui ) {
+                                $emptyres.find('.acc > h3')
+                                    .removeClass('ui-state-active');
+                            }});
                     $emptyres.find('p').css({'padding-top':'10px'});
                     
-                    $emptyres.find('.acc > h3').css({
-                        background: 'none',
-                        border: 'none',
-                        'font-size': 'larger',
-                        'font-weight': 'bold'
-                    });
                     $emptyres.find('.acc > div').css({
                         background: 'none', border: 'none'});    
                         
@@ -1227,9 +1226,17 @@ $.widget( "heurist.resultList", {
                     
                     }
                     
+                    $emptyres.find('.acc > h3')
+                        .removeClass('ui-state-active')
+                        .addClass('ui-widget-no-background')
+                        .css({
+                                border: 'none',
+                                'font-size': 'larger',
+                                'font-weight': 'bold'
+                            });
                 }
             ).appendTo(this.div_content);
-        
+
         }        
     },
     
