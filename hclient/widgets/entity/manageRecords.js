@@ -143,7 +143,54 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         
         //create field actions for rts editor
         if(true || this.options.rts_editor){ //height:17px;background:#95A7B7 !important;
-            this.rts_actions_menu = $('<div class="rts-editor-actions" '
+            this.rts_actions_menu = 
+            $('<div class="rts-editor-actions" '
+                    +'style="width:110px;background:lightblue;display:none;padding-top:2px;'
+                    +'font-size:10px;font-weight:normal;cursor:pointer">'
+                   //+'<div style="line-height:18px">&nbsp;</div>' 
+                   +'<div data-action="edit" style="background:lightblue;padding:2px 4px;width:102px;">'
+                        +'<span class="ui-icon ui-icon-pencil" title="Edit" style="font-size:9px;font-weight:normal"/>Edit</div>'           
+                   +'<div data-action="field" style="background:lightcyan;padding:2px 4px;display:block;width: 102px;">'
+                        +'<span class="ui-icon ui-icon-arrowreturn-1-e" title="Add a new field to this record type" '
+                        +'style="transform: rotate(90deg);font-size:9px;font-weight:normal"/>Insert field</div>'
+                   +'<div data-action="block" title="Add a new group/separator" style="background:lightgreen;padding:2px 4px;width:102px;">'    +'<span class="ui-icon ui-icon-arrowreturn-1-e" '
+                       +'style="transform: rotate(90deg);font-size:9px;font-weight:normal"></span>Insert tab/devider</div>'               
+                        
+                   +'<div class="edit_rts_sel" style="padding:2px 4px;width: 102px;" title="Requirement type">'
+                        +'<select class="edit_rts s_reqtype"><option>required</option><option>recommended</option><option>optional</option>'
+                        +'<option value="forbidden">hidden</option></select></div>' 
+                                  
+                   +'<div class="edit_rts_sel" style="padding:2px 4px;width: 102px;" title="Repeatability">'
+                        +'<select class="edit_rts s_repeat"><option value="1">single</option><option value="0">repeatable</option>'
+                        +'<option value="2">limited 2</option><option value="3">limited 3</option>'
+                        +'<option value="5">limited 5</option><option value="10">limited 10</option></select></div>'           
+                        
+                   +'<div class="edit_rts_sel s_width" style="padding:2px 4px;width: 102px;" title="Width of field">Width: '
+                        +'<select class="edit_rts s_width" style="display:none">'
+                        +'<option>5</option><option>10</option><option>20</option><option>30</option>'
+                        +'<option>40</option><option>50</option><option>60</option><option>80</option><option>100</option>'
+                        +'<option>120</option></select></div>'
+
+                   +'<span class="edit_rts_btn" style="top:24px;left:80px;position:absolute;background:lightblue;display:none" '
+                   +' data-apply="1" title="Save changes for field properties">Apply</span>'
+                   +'<span class="edit_rts_btn" style="top:24px;left:130px;position:absolute;background:lightblue;display:none">'
+                   +'Cancel</span>'
+                           
+                    +'</div>')
+                    .appendTo(this.element);
+            
+            
+            window.hWin.HEURIST4.ui.initHSelect(this.rts_actions_menu.find('select.s_reqtype'),
+                                            false, {'max-width':'100px','font-size':'0.9em', padding:0});
+            window.hWin.HEURIST4.ui.initHSelect(this.rts_actions_menu.find('select.s_repeat'),
+                                            false, {'max-width':'100px','font-size':'0.9em', padding:0});
+            var ele = window.hWin.HEURIST4.ui.initHSelect(this.rts_actions_menu.find('select.s_width'),
+                                            false, {'max-width':'60px','font-size':'0.9em', padding:0});
+            
+            
+            
+/* pre 2020-11-04 version                    
+            $('<div class="rts-editor-actions" '
                     +'style="width:272px;background:none !important;display:none;padding-top:2px;'
                     +'font-size:10px;font-weight:normal;cursor:pointer">'
                    +'<div style="line-height:18px">&nbsp;</div>' 
@@ -170,13 +217,15 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                    +'<br><span data-action="field" style="background:lightcyan;padding:4px;display:inline-block;width: 50px;">'
                         +'<span class="ui-icon ui-icon-plus" title="Add a new field to this record type" style="font-size:9px;font-weight:normal"/>Field</span>'
                    +'<br><span data-action="block" title="Add a new group/separator" style="background:lightgreen;padding:4px;display:inline-block;width: 50px;"><span style="font-size:11px">&nbsp;+&nbsp;&nbsp;</span>Block</span>'               
-                    +'</div>').appendTo(this.element);
+                    +'</div>')
+*/                    
                     
             
             //save/cancel rts buttons
             this.edit_rts_apply = this.rts_actions_menu.find('.edit_rts_btn').button();
             this._on( this.edit_rts_apply, {
                 click: function(e){
+                    
                     if($(e.target).attr('data-apply')){
 
                             var dtId = this.rts_actions_menu.attr('data-did');
@@ -184,10 +233,10 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                             var fields = {
                                 rst_RecTypeID: this._currentEditRecTypeID,
                                 rst_DetailTypeID: dtId,
-                                rst_MaxValues: this.rts_actions_menu.find('.s_repeat').val(), 
-                                rst_DisplayWidth: this.rts_actions_menu.find('.s_width').val(), 
-                                rst_RequirementType: this.rts_actions_menu.find('.s_reqtype').val()};
-                        
+                                rst_MaxValues: this.rts_actions_menu.find('select.s_repeat').val(), 
+                                rst_DisplayWidth: this.rts_actions_menu.find('select.s_width').val(), 
+                                rst_RequirementType: this.rts_actions_menu.find('select.s_reqtype').val()};
+
                             var request = {
                                 'a'          : 'save',
                                 'entity'     : 'defRecStructure',
@@ -248,11 +297,18 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 mouseover : function(){ clearTimeout(this._menuTimeoutId); },
                 mouseleave : function(){ 
                     if(this._rts_selector_flag || this._rts_changed_flag) return;
-                    this.rts_actions_menu.hide(); 
+                    if($('.ui-selectmenu-menu.ui-selectmenu-open').length>0) return; //do not hide if dropdown is opened
+
+                    that._menuTimeoutId = setTimeout(function() {that.rts_actions_menu.hide(); }, 800);         
                 },
                 click: function(event){
+            
+                        var trg = $(event.target);                     
+                        if(trg.parents('.ui-selectmenu-button').length>0) return;
+                    
                         if(this._rts_selector_flag || this._rts_changed_flag) return;
                         var dt_id = this.rts_actions_menu.attr('data-did');
+                        
                         this.rts_actions_menu.hide();
                         
                         var ele = $(event.target);
@@ -329,26 +385,26 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
 
                 var rst_fields = $Db.rst(that._currentEditRecTypeID, dtId);
                 
-                var dt_type = $Db.rst(that._currentEditRecTypeID, dtId, 'dty_Type');
+                var dt_type = $Db.dty(dtId, 'dty_Type');
                 if(dt_type=='separator'){
-                    that.rts_actions_menu.width(53); //43
+                    that.rts_actions_menu.width(110); //43
                     that.rts_actions_menu.find('.edit_rts_sel').hide();
                 }else{
-                    that.rts_actions_menu.width(380); //280
+                    that.rts_actions_menu.width(110); //280
                     that.rts_actions_menu.find('.edit_rts_sel').show();
-                    that.rts_actions_menu.find('.s_reqtype').val(rst_fields['rst_RequirementType'])
+                    that.rts_actions_menu.find('select.s_reqtype').val(rst_fields['rst_RequirementType']).hSelect('refresh');
                     var v = rst_fields['rst_MaxValues'];
-                    that.rts_actions_menu.find('.s_repeat').val(v!=null && v>=0?v:0);
+                    that.rts_actions_menu.find('select.s_repeat').val(v!=null && v>=0?v:0).hSelect('refresh');
                     if(dt_type=='freetext' || dt_type=='blocktext' || dt_type=='float'){
-                        that.rts_actions_menu.find('.s_width').show();
+                        that.rts_actions_menu.find('div.s_width').show();
                     }else{
-                        that.rts_actions_menu.find('.s_width').hide()    
+                        that.rts_actions_menu.find('div.s_width').hide()    
                     }
                     v = Number(rst_fields['rst_DisplayWidth']);
                     if(isNaN(v) || window.hWin.HEURIST4.util.isempty(v)) v=100;
                     //v = (v!=null && v>0)?(v==5?v :(Math.floor(v/10)*10)):100;
                     var prev_v = 5;
-                    that.rts_actions_menu.find('.s_width > option').each(function(i,item){
+                    that.rts_actions_menu.find('select.s_width > option').each(function(i,item){
                         if(Number($(item).val())>v){
                             v = prev_v;
                             return false;
@@ -357,7 +413,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     });
                     if(prev_v<v) v = prev_v;
                     
-                    that.rts_actions_menu.find('.s_width').val(v);
+                    that.rts_actions_menu.find('select.s_width').val(v).hSelect('refresh');
                     //console.log(rst_fields['rst_DisplayWidth']+'  '+rst_fields['rst_MaxValues']);                                
                 }
 
@@ -366,7 +422,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 that.rts_actions_menu
                 .attr('data-did', el.parents('div[data-dtid]').attr('data-dtid'))
                 .show()
-                .position({ my:'left top', at:'left top', of: el});
+                .position({ my:'left top', at:'left+20 top', of: el});
                 /*
                 .css({position:'absolute'
                 ,left:that.editForm.parent().position().left + el.position().left

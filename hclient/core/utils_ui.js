@@ -1082,7 +1082,7 @@ window.hWin.HEURIST4.ui = {
     //
     //
     //
-    initHSelect: function(selObj, useHtmlSelect){            
+    initHSelect: function(selObj, useHtmlSelect, apply_style){            
 
         //var isNotFirefox = (navigator.userAgent.indexOf('Firefox')<0);
         ////depth>1 || (optgroup==null && depth>0
@@ -1182,8 +1182,13 @@ window.hWin.HEURIST4.ui = {
             menuwidget.css( {'padding':0,'background':'#F4F2F4','zIndex':9999999 });
             menuwidget.addClass('heurist-selectmenu overflow').css({'max-height':'300px','font-size':'12px'});
             
-            menu.hSelect( "widget" ).css({'padding':0, 'font-size':'1.1em', //'background':'#FFF',
-                width:(dwidth?dwidth:'auto'),'min-width':dminwidth }); //,'min-width':'16em''#F4F2F4'
+            if(apply_style){
+                menu.hSelect( "widget" ).css(apply_style);    
+                menu.hSelect( "menuWidget" ).css(apply_style);
+            }else{
+                menu.hSelect( "widget" ).css({'padding':0, 'font-size':'1.1em', //'background':'#FFF',
+                    width:(dwidth?dwidth:'auto'),'min-width':dminwidth }); //,'min-width':'16em''#F4F2F4'
+            }
                 
         }
         return selObj;
