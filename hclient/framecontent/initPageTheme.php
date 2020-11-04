@@ -504,7 +504,7 @@ span.fancytree-node:hover{
 }
 <?php } ?>
 
-.ui-widget-no-background{
+.ui-widget-no-background, .ui-accordion-header, .ui-accordion-header.ui-accordion-header-active{
     background:none !important;
     background-color: none !important;
     border: none !important;

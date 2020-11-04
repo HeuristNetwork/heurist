@@ -1175,8 +1175,7 @@ $.widget( "heurist.resultList", {
                     $emptyres.find('.acc')
                     .accordion({collapsible:true,heightStyle:'content',
                             activate: function( event, ui ) {
-                                $emptyres.find('.acc > h3')
-                                    .removeClass('ui-state-active');
+                                //$emptyres.find('.acc > h3').removeClass('ui-state-active');
                             }});
                     $emptyres.find('p').css({'padding-top':'10px'});
                     
@@ -1227,8 +1226,8 @@ $.widget( "heurist.resultList", {
                     }
                     
                     $emptyres.find('.acc > h3')
-                        .removeClass('ui-state-active')
-                        .addClass('ui-widget-no-background')
+                        //.removeClass('ui-state-active')
+                        //.addClass('ui-widget-no-background')
                         .css({
                                 border: 'none',
                                 'font-size': 'larger',
