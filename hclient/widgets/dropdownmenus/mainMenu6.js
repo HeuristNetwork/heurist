@@ -501,7 +501,8 @@ $.widget( "heurist.mainMenu6", {
         if(e){
             
             this._myTimeoutId2 = setTimeout(function(){
-                                        that._closeExploreMenuPopup();
+                                            that._closeExploreMenuPopup();
+                                            that._collapseMainMenuPanel();                                        
                                     },  this._delayOnCollapse_ExploreMenu);
         }else{
             __closeAllsectionMenu();
@@ -649,9 +650,11 @@ $.widget( "heurist.mainMenu6", {
                     //initialization
                     this.search_quick = cont.search_quick({
                         onClose: function() { that.switchContainer('explore'); },
-                        menu_locked: function(is_locked){ 
-                            that._resetCloseTimers();
-                            that._explorer_menu_locked = is_locked; 
+                        menu_locked: function(is_locked, is_mouseleave){ 
+                            if(!is_mouseleave){
+                                that._resetCloseTimers();    
+                                that._explorer_menu_locked = is_locked; 
+                            }
                     }  });    
 
                 explore_top = 0;
@@ -684,9 +687,11 @@ $.widget( "heurist.mainMenu6", {
                     //initialization
                     cont.search_advanced({
                         onClose: function() {that.switchContainer('explore'); },
-                        menu_locked: function(is_locked){ 
-                            that._resetCloseTimers();
-                            that._explorer_menu_locked = is_locked; 
+                        menu_locked: function(is_locked, is_mouseleave){ 
+                            if(!is_mouseleave){
+                                that._resetCloseTimers();
+                                that._explorer_menu_locked = is_locked; 
+                            }
                     }  });    
 
                 that.menues_explore_popup.css({width:'606px', overflow:'hidden'});
@@ -738,9 +743,11 @@ $.widget( "heurist.mainMenu6", {
                             that.coverAll.hide();
                         },
                         mouseover: function() { that._resetCloseTimers()},
-                        menu_locked: function(is_locked){ 
-                            that._resetCloseTimers();
-                            that._explorer_menu_locked = is_locked; 
+                        menu_locked: function(is_locked, is_mouseleave){ 
+                            if(!is_mouseleave){
+                                that._resetCloseTimers();
+                                that._explorer_menu_locked = is_locked; 
+                            }
                     }  });  
                 }else{
                     cont.recordAdd('doExpand', expandRecordAddSetting);                        
@@ -805,9 +812,11 @@ $.widget( "heurist.mainMenu6", {
                             } 
                         },
                         //show all groups! allowed_UGrpID:group_ID,
-                        menu_locked: function(is_locked){ 
-                            that._resetCloseTimers();
-                            that._explorer_menu_locked = is_locked; 
+                        menu_locked: function(is_locked, is_mouseleave){ 
+                            if(!is_mouseleave){
+                                that._resetCloseTimers();
+                                that._explorer_menu_locked = is_locked; 
+                            }
                         }                            
                         //mouseover: function() { that._resetCloseTimers()},
                     });

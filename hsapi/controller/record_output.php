@@ -149,7 +149,7 @@
             $dt_key = 'datatable'.$params['datatable'];
             
             if(@$params['q']==null){
-                //restore ids from session
+                //restore query by id from session
                 $search_params['q'] = $system->user_GetPreference($dt_key);
                 
                 if($search_params['q']==null){
