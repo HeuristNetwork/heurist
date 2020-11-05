@@ -334,7 +334,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                                 '<div style="padding:20px 0px">'
                                 +'Only the owner of the database or an administrator supplying<br>'
                                 +' the override password can carry out this action.'
-                                +'</div><span style="display: inline-block;padding: 10px 0px;>Enter password:&nbsp;</span>',
+                                +'</div><span style="display: inline-block;padding: 10px 0px;">Enter password:&nbsp;</span>',
                                     function(password_entered){
                                         
                                         window.hWin.HAPI4.SystemMgr.action_password({action:password_protected, password:password_entered},
