@@ -3112,6 +3112,10 @@ console.log('onpaste');
                 if(window.hWin.HEURIST4.util.isempty(name)){
                     sMsg = 'The term code '+value+' recorded for this field is not recognised. Please select a term from the dropdown.';
                 }else{
+                    var opt = window.hWin.HEURIST4.ui.addoption($input[0], value, '!!! '+name); 
+                    $(opt).attr('ui-state-error',1);
+                    $input.val(value);
+                    $input.hSelect('refresh');
                     sMsg = 'The term "'+name+'" (code '+value+') is not valid for this field. '
                     +'Please select from dropdown or modify field definition to include this term';
                 }
@@ -3219,7 +3223,7 @@ console.log('onpaste');
         if(values.length>1 && !repeatable){
             this.showErrorMsg('Repeated value for a single value field - please correct');
         }else{
-            this.showErrorMsg(null);
+            //this.showErrorMsg(null);
         }
         
         this._setAutoWidth();            

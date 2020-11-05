@@ -2732,6 +2732,10 @@ $.widget( "heurist.hSelect", $.ui.selectmenu, {
     if( $(item.element).hasClass('required')) {
         wrapper.addClass('required');  
     }
+    if(item.element.attr( 'ui-state-error' )){
+        wrapper.addClass('ui-state-error');
+    }
+    
     
     var rt_checkbox = item.element.attr( "rt-checkbox" );
     if(rt_checkbox>=0){
