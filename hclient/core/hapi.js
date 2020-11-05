@@ -199,7 +199,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
     
     function _triggerRecordUpdateEvent(response, callback){
         if(response && response.status == window.hWin.ResponseStatus.OK){
-            $Db.needUpdateRtyCount = true;
+            if($Db) $Db.needUpdateRtyCount = true;
             //window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_REC_UPDATE); //after save record     
         }
         if($.isFunction(callback)){
@@ -1518,7 +1518,7 @@ prof =Profile
                 window.hWin.HEURIST4.ui.onInactiveReset( true );
             }
             
-            $Db.needUpdateRtyCount = true;
+            if($Db) $Db.needUpdateRtyCount = true;
         },
         
         currentUserRemoveGroup: function(groupID, isfinal){
