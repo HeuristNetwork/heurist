@@ -360,6 +360,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 
                 this.rbMergeOnDnD = this.searchForm.find('#rbDnD_merge');
                 
+                this._dropped = false;
+                
                 this.options.recordList = {
                     empty_remark: 'No terms in selected vocabulary. Add or import new ones',
                     show_toolbar: false,
@@ -401,6 +403,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                         that.recordList.find('.rt_draggable > .item').draggable({ // 
                                     revert: true,
                                     helper: function(){ 
+                                        that._dropped = false;
                                         return $('<div class="rt_draggable ui-drag-drop" recid="'+
                                             $(this).parent().attr('recid')
                                         +'" style="width:300;padding:4px;text-align:center;font-size:0.8em;background:#EDF5FF"'
@@ -423,6 +426,9 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                                                 ?$(event.target)
                                                 :$(event.target).parents('.recordDiv');
                                                 
+                                    that._dropped = true;
+                                    window.hWin.HEURIST4.util.stopEvent(event);
+                                                
                                     var trm_ID = $(ui.draggable).parent().attr('recid');
                                     var trm_ParentTermID = trg.attr('recid');
                                     if(trm_ID!=trm_ParentTermID && trm_ID>0 && trm_ParentTermID>0){
@@ -442,6 +448,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                                 scope: 'vocab_change',
                                 hoverClass: 'ui-drag-drop',
                                 drop: function( event, ui ){
+
+                                    if (that._dropped) return;
                                   
                                     var trm_ID = $(ui.draggable).parent().attr('recid');
                                     var trm_ParentTermID = that.options.trm_VocabularyID;
