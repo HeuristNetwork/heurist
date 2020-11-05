@@ -97,7 +97,7 @@ $.widget( "heurist.resultListDataTable", {
                 
                 if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH){ 
 
-    that._dout('search finised');                
+    that._dout('search finished');                
     
                     that._current_query = data.query;
                     that.options.recordset = data.recordset; //hRecordSet
@@ -264,6 +264,20 @@ that._dout('myOnShowEvent');
                                 cols[i]['render'] = eval(fooName);//function(data,type){ [fooName](data,type); }
                             }else{
                                 cols[i]['render'] = null;
+                            }
+                        }else{
+                            var ids = cols[i]['data'].split('.');
+                            if(ids && ids.length>0){
+                                var dt = ids[ids.length-1];    
+                                if($Db.dty(dt,'dty_Type')=='enum'){
+                                    cols[i]['render'] = function(data,type){
+                                        if (type === 'display') {
+                                            return (data>0)?$Db.trm(data,'trm_Label'):data;
+                                        }else{
+                                            return data;
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
