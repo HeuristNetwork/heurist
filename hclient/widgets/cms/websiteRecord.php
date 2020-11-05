@@ -657,6 +657,8 @@ function onHapiInit(success){
             return;
     }
     
+    window.hWin.HAPI4.EntityMgr.refreshEntityData('all');
+        
     window.hWin.HAPI4.SystemMgr.get_defs({rectypes:'all', terms:'all', detailtypes:'all', mode:2}, function(response){
         
 //console.log('DBG execution time "get_defs" '+response.exec_time);                            
@@ -669,6 +671,8 @@ _time_debug = new Date().getTime() / 1000;
             window.hWin.HEURIST4.rectypes = response.data.rectypes;
             window.hWin.HEURIST4.terms = response.data.terms;
             window.hWin.HEURIST4.detailtypes = response.data.detailtypes;
+            
+            $Db.baseFieldType = window.hWin.HEURIST4.detailtypes.lookups;
         }else{
             var sMsg = 'Cannot obtain database definitions (get_defs function). This is probably due to a network timeout. However, if the problem persists please report to Heurist developers as it could indicate corruption of the database.';                            
             
