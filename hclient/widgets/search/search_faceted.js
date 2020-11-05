@@ -1296,7 +1296,7 @@ $.widget( "heurist.search_faceted", {
     ,doSearch: function(){
 
 //console.log('dosearchj');
-console.log( this.options.params.q );
+//console.log( this.options.params.q );
 
             var query = window.hWin.HEURIST4.util.cloneJSON( this.options.params.q ); //clone 
             var isform_empty = this._fillQueryWithValues(query);

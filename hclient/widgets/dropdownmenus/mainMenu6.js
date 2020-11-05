@@ -1338,18 +1338,13 @@ $.widget( "heurist.mainMenu6", {
                 left_position = 302;
             }
         }
-        var top_position = this.divMainMenu.position().top;
-        if(mode=='saved'){
-            top_position = top_position + 100;
-        }
-            
-        
+
         is_modal = (is_modal!==false);
         
         var that = this;
 
         var $dlg = this.edit_svs_dialog.showSavedFilterEditDialog( mode, null, null, this.currentSearch , false, 
-            { my: 'left top', at: 'left+'+left_position+'px top+'+top_position+'px', of:this.divMainMenu},
+            { my: 'left+'+left_position+' top+120', at: 'left top', of:this.divMainMenu},
             function(){
                 window.hWin.HAPI4.currentUser.usr_SavedSearch = null;
                 window.hWin.HAPI4.currentUser.ugr_SvsTreeData = null;

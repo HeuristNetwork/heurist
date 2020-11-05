@@ -599,6 +599,7 @@ function hSvsEdit(args) {
                     }
                 });
                 
+                
                 $dlg.dialog({
                     autoOpen: false,
                     height: is_short?360:520,
@@ -664,7 +665,7 @@ function hSvsEdit(args) {
             }
             edit_dialog.dialog( 'option', 'modal', is_modal );   
             
-            edit_dialog.dialog("open");
+            edit_dialog.dialog( 'open' );
         }
         
         return edit_dialog;
