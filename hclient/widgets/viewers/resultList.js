@@ -42,6 +42,7 @@ $.widget( "heurist.resultList", {
         show_search_form: false,
         show_menu: false,       //@todo ? - replace to action_select and action_buttons
         support_collection: false,
+        support_reorder: false,  // show separate reorder button
         show_savefilter: false,
         show_counter: true,
         show_viewmode: true,
@@ -116,6 +117,8 @@ $.widget( "heurist.resultList", {
     _startupInfo:null,
 
     _init_completed:false,
+    
+    _expandAllDivs: false,
     
     _grp_keep_status:{}, //expanded groups
     
@@ -559,20 +562,32 @@ $.widget( "heurist.resultList", {
             });
         }
 
-        var rnd = window.hWin.HEURIST4.util.random();
+        //------------------
+        this.reorder_button = $( '<button>' )
+                .button({icon: "ui-icon-signal", showLabel:false, label:window.hWin.HR('reorder')})
+                .css({'font-size':'1em','float':'right','margin':'2px '+right_padding+'px'})
+                .hide()
+                .appendTo( this.div_toolbar );
+        this.reorder_button.find('span.ui-icon').css({'transform':'rotate(90deg)'});
+                
+        this._on(this.reorder_button, {click: this.setOrderAndSaveAsFilter});
 
+        //------------------
         this.view_mode_selector = $( "<div>" )
         //.css({'position':'absolute','right':right_padding+'px'})
         .css({'float':'right','padding':'2px '+right_padding+'px'})
-        .html('<button id="cb1_'+rnd+'" value="list" class="btnset_radio"/>'
-            +'<button  id="cb2_'+rnd+'" value="icons" class="btnset_radio"/>'
-            +'<button  id="cb3_'+rnd+'" value="thumbs" class="btnset_radio"/>'
-            +'<button  id="cb4_'+rnd+'" value="thumbs3" class="btnset_radio"/>'
+        .html('<button value="list" class="btnset_radio"/>'
+            +'<button value="icons" class="btnset_radio"/>'
+            +'<button value="icons_expanded" class="btnset_radio"/>'
+            +'<button value="thumbs" class="btnset_radio"/>'
+            +'<button value="thumbs3" class="btnset_radio"/>'
         )
         .appendTo( this.div_toolbar );
         
         this.view_mode_selector.find('button[value="list"]').button({icon: "ui-icon-menu", showLabel:false, label:window.hWin.HR('list')}).css('font-size','1em');
         this.view_mode_selector.find('button[value="icons"]').button({icon: "ui-icon-list", showLabel:false, label:window.hWin.HR('icons')}).css('font-size','1em'); //ui-icon-view-icons-b
+        this.view_mode_selector.find('button[value="icons_expanded"]').button({icon: "ui-icon-template", showLabel:false, label:window.hWin.HR('icons exanaded')}).css('font-size','1em'); //ui-icon-newspaper
+        
         this.view_mode_selector.find('button[value="thumbs"]').button({icon: "ui-icon-view-icons", showLabel:false, label:window.hWin.HR('thumbs')}).css('font-size','1em');
         this.view_mode_selector.find('button[value="thumbs3"]').button({icon: "ui-icon-stop", showLabel:false, label:window.hWin.HR('thumbs3')}).css('font-size','1em');
         this.view_mode_selector.controlgroup();
@@ -852,6 +867,11 @@ $.widget( "heurist.resultList", {
         }else{
             this.view_mode_selector.hide();
         }
+        if(this.options.support_reorder==true && window.hWin.HAPI4.has_access()){
+            this.reorder_button.show();
+        }else{
+            this.reorder_button.hide();
+        }
         
 
         if(this.options.show_counter){
@@ -900,6 +920,7 @@ $.widget( "heurist.resultList", {
         } 
         if(this.div_actions) this.div_actions.remove();
         if(this.div_search_form) this.div_search_form.remove();
+        this.reorder_button.remove();
         this.div_toolbar.remove();
         this.div_content.remove();
         this.div_coverall.remove();
@@ -934,26 +955,32 @@ $.widget( "heurist.resultList", {
     applyViewMode: function(newmode, forceapply){
 
         
-        var allowed = ['list','icons','thumbs','thumbs3','horizontal','icons_list'];
+        var allowed = ['list','icons','thumbs','thumbs3','horizontal','icons_list','icons_expanded'];
 
         if(window.hWin.HEURIST4.util.isempty(newmode) || allowed.indexOf(newmode)<0) {
             newmode = window.hWin.HAPI4.get_prefs('rec_list_viewmode_'+this.options.entityName);
         }
-        //TEMP 
-        //if(newmode=='thumbs3') newmode = 'horizontal';
+        if(window.hWin.HEURIST4.util.isempty(newmode)){
+            newmode = 'list'; //default
+        }
+        if(newmode=='icons_expanded') {
+            newmode = 'icons';    
+            this._expandAllDivs = true;
+            forceapply = true;
+        }else{
+            forceapply = this._expandAllDivs;
+            this._expandAllDivs = false;
+        }
+
 
         if(!this.div_content.hasClass(newmode) || forceapply===true){
             
             this.closeExpandedDivs();
+            this.options.view_mode = newmode;
             
-            //var $allrecs = this.div_content.find('.recordDiv');
+            /*
             if(newmode){
-
-                //var oldmode = this.options.view_mode;
                 this.options.view_mode = newmode;
-                //save viewmode is session
-                //moved to change event window.hWin.HAPI4.save_pref('rec_list_viewmode', newmode);
-
             }else{
                 //load saved value
                 if(!this.options.view_mode){
@@ -964,6 +991,8 @@ $.widget( "heurist.resultList", {
                 }
                 newmode = this.options.view_mode;
             }
+            */
+            
             this.div_content.removeClass('list icons thumbs thumbs3 horizontal icons_list');
             this.div_content.addClass(newmode);
             
@@ -996,6 +1025,10 @@ $.widget( "heurist.resultList", {
                     this.div_content.css({'display':'table','width':'100%'});
                 }else{
                     this.div_content.css({'display':'block'});
+                    
+                    if(this._expandAllDivs){
+                        this.expandDetailsInlineALL();   
+                    }
                 }
                     
             
@@ -1007,7 +1040,7 @@ $.widget( "heurist.resultList", {
         //show hide table header
         if($.isFunction(this.options.rendererHeader)){
             
-            var header_html = (newmode=='list')?this.options.rendererHeader():'';
+            var header_html = (this.options.view_mode=='list')?this.options.rendererHeader():'';
             
             //create div for table header
             if( window.hWin.HEURIST4.util.isnull(this.div_content_header )){
@@ -1030,6 +1063,9 @@ $.widget( "heurist.resultList", {
                 //.removeClass(this.options.is_h6style?'':'ui-heurist-btn-header1')
                 .removeClass('ui-heurist-btn-header1')
                 .css({'border':'none'});
+            if(this._expandAllDivs) newmode='icons_expanded';
+          
+               
             var btn =   this.view_mode_selector.find('button[value="'+newmode+'"]');
             
             if(this.options.header_class==null) btn.addClass('ui-heurist-btn-header1')                
@@ -1670,6 +1706,7 @@ $.widget( "heurist.resultList", {
           }
     },
     
+    
     //
     // close expanded recordDivs
     //
@@ -2001,6 +2038,21 @@ $.widget( "heurist.resultList", {
         this.triggerSelection();
     },
     
+    
+    //
+    // expand ALL recordDivs
+    //
+    expandDetailsInlineALL: function(){
+        
+        var that = this;
+    
+        $allrecs = this.div_content.find('.recordDiv');
+        $allrecs.each(function(idx, item){
+            that.expandDetailsInline($(item).attr('recid'));
+        });
+        
+    },
+    
     //
     //
     //
@@ -2009,12 +2061,15 @@ $.widget( "heurist.resultList", {
         var $rdiv = this.div_content.find('div[recid='+recID+']');
         if($rdiv.length==0) return;
         
+        
+        var that = this;
+        
             var exp_div = this.div_content.find('.record-expand-info');
             var is_already_opened = (exp_div.attr('data-recid')==$rdiv.attr('recid'));
             
             if(!is_already_opened){
                 //close other expanded recordDivs
-                this.closeExpandedDivs();
+                if(!this._expandAllDivs) this.closeExpandedDivs();
                 
                 /*
                 var tmp_parent = $('<div class="list tmp_parent">').insertBefore($rdiv);
@@ -2025,7 +2080,7 @@ $.widget( "heurist.resultList", {
                 //expand selected recordDiv and draw record details inline
                 if($.isFunction(this.options.rendererExpandDetails)){
                     this.options.rendererExpandDetails.call(this, this._currentRecordset, $rdiv.attr('recid'));
-                    //this.options.rendererExpandDetails(selected_rec_ID, ele, function(){ ele.removeClass('loading'); });
+                    //this.options.rendererExpandDetails(recID, ele, function(){ ele.removeClass('loading'); });
                 }else {
                     
                     //expand header
@@ -2048,7 +2103,7 @@ $.widget( "heurist.resultList", {
                     if ( typeof this.options.rendererExpandDetails === 'string' && this.options.rendererExpandDetails.substr(-4)=='.tpl' ){
 
                         infoURL = window.hWin.HAPI4.baseURL + 'viewers/smarty/showReps.php?publish=1&debug=0&q=ids:'
-                        + selected_rec_ID
+                        + recID 
                         + '&db='+window.hWin.HAPI4.database+'&template='
                         + encodeURIComponent(this.options.rendererExpandDetails);
 
@@ -2059,7 +2114,7 @@ $.widget( "heurist.resultList", {
                         
                     }else{
                         infoURL = window.hWin.HAPI4.baseURL + 'viewers/record/renderRecordData.php?recID='
-                        +selected_rec_ID
+                        +recID
                         +'&db='+window.hWin.HAPI4.database;
                         
                         $('<iframe>').appendTo(ele).addClass('loading').attr('src', infoURL).on('load',function(){ 
@@ -2916,6 +2971,11 @@ $.widget( "heurist.resultList", {
         
         if(this.div_content_header){
             this._adjustHeadersPos();
+        }
+        
+        
+        if(this._expandAllDivs){
+            this.expandDetailsInlineALL();   
         }
         
     },

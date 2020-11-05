@@ -979,7 +979,7 @@ window.hWin.HEURIST4.dbs = {
     
     rst: function(rec_ID, dty_ID, fieldName, newValue){
         
-        //for backward capability
+        //fieldnames for backward capability
         var dfname = null;
         if(fieldName) dfname = $Db.rst_to_dtyField( fieldName );
         if(dfname){

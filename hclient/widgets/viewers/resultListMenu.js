@@ -225,7 +225,7 @@ console.log(menu.find('.ui-menu-item').css('padding'));
         if(this.options.is_h6style){
             //link.css({'padding-right': '22px !important'});
             if(name=='Reorder'){
-                $('<span class="ui-icon ui-icon-bars">').appendTo(link);  //caret-1-s
+                $('<span class="ui-icon ui-icon-signal">').css({'transform':'rotate(90deg)'}).appendTo(link);  //caret-1-s
             }else{
                 $('<span class="ui-icon ui-icon-carat-d">').appendTo(link);  //caret-1-s
             }
