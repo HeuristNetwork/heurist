@@ -565,7 +565,7 @@ $.widget( "heurist.resultList", {
         //------------------
         this.reorder_button = $( '<button>' )
                 .button({icon: "ui-icon-signal", showLabel:false, label:window.hWin.HR('reorder')})
-                .css({'font-size':'1em','float':'right','margin':'2px '+right_padding+'px'})
+                .css({'font-size':'0.93em','float':'right','margin':'2px '+right_padding+'px'})
                 .hide()
                 .appendTo( this.div_toolbar );
         this.reorder_button.find('span.ui-icon').css({'transform':'rotate(90deg)'});
@@ -2059,35 +2059,31 @@ $.widget( "heurist.resultList", {
     expandDetailsInline: function(recID){
         
         var $rdiv = this.div_content.find('div[recid='+recID+']');
-        if($rdiv.length==0) return;
+        if($rdiv.length==0) return; //no such recod in current page
         
         
         var that = this;
         
-            var exp_div = this.div_content.find('.record-expand-info');
-            var is_already_opened = (exp_div.attr('data-recid')==$rdiv.attr('recid'));
+            var exp_div = this.div_content.find('.record-expand-info[data-recid='+recID+']');
+            var is_already_opened = (exp_div.length>0);
             
             if(!is_already_opened){
                 //close other expanded recordDivs
                 if(!this._expandAllDivs) this.closeExpandedDivs();
                 
-                /*
-                var tmp_parent = $('<div class="list tmp_parent">').insertBefore($rdiv);
-                $rdiv.appendTo( tmp_parent );
-                $rdiv.css({'height':'auto','width':'auto'});
-                */
-            
+           
                 //expand selected recordDiv and draw record details inline
                 if($.isFunction(this.options.rendererExpandDetails)){
-                    this.options.rendererExpandDetails.call(this, this._currentRecordset, $rdiv.attr('recid'));
+                    this.options.rendererExpandDetails.call(this, this._currentRecordset, recID);
                     //this.options.rendererExpandDetails(recID, ele, function(){ ele.removeClass('loading'); });
                 }else {
                     
-                    //expand header
+                    //add new record-expand-info 
                     var ele = $('<div>')
-                        .attr('data-recid', $rdiv.attr('recid'))
-                        .css({'width':'100%','max-height':'400px','overflow':'hidden','padding-top':'5px','height':'25px'})
+                        .attr('data-recid', recID)
+                        .css({'width':'100%','max-height':'600px','overflow':'hidden','padding-top':'5px','height':'25px'})
                         .addClass('record-expand-info');
+                        
                     if(this.options.view_mode=='list'){
                         ele.appendTo($rdiv);
                     }else{
@@ -2100,6 +2096,7 @@ $.widget( "heurist.resultList", {
                     
                     var infoURL;
                     
+                    //content is smarty report
                     if ( typeof this.options.rendererExpandDetails === 'string' && this.options.rendererExpandDetails.substr(-4)=='.tpl' ){
 
                         infoURL = window.hWin.HAPI4.baseURL + 'viewers/smarty/showReps.php?publish=1&debug=0&q=ids:'
@@ -2108,27 +2105,43 @@ $.widget( "heurist.resultList", {
                         + encodeURIComponent(this.options.rendererExpandDetails);
 
                         ele.addClass('loading').css({'overflow-y':'auto'}).load(infoURL, function(){ 
-                            var ele2 = that.div_content.find('.record-expand-info');
-                            var h = Math.min(ele2[0].scrollHeight+10, 400);
-                            ele2.removeClass('loading').animate({height:h},300);});
-                        
+                            var ele2 = $(this);
+                            //var ele2 = that.div_content.find('.record-expand-info[data-recid='+recID+']');
+                            var h = Math.min(ele2[0].scrollHeight+10, 600);
+                            if(that._expandAllDivs){
+                                ele2.removeClass('loading').height(h);    
+                            }else{
+                                ele2.removeClass('loading').animate({height:h},300);
+                            }
+                        });   
                     }else{
+                    //content is record view 
                         infoURL = window.hWin.HAPI4.baseURL + 'viewers/record/renderRecordData.php?recID='
                         +recID
                         +'&db='+window.hWin.HAPI4.database;
                         
-                        $('<iframe>').appendTo(ele).addClass('loading').attr('src', infoURL).on('load',function(){ 
-                            var ele2 = that.div_content.find('.record-expand-info');
+                        $('<iframe>').attr('data-recid',recID)
+                            .appendTo(ele)
+                            .addClass('loading')
+                            .attr('src', infoURL).on('load',function()
+                            { 
+                                var _recID = $(this).attr('data-recid');
+                                var ele2 = that.div_content.find('.record-expand-info[data-recid='+_recID+']');
+                            //var ele2 = 
                             var h = 400;
 
                             try{
                                 h = $(this.contentWindow.document).height();
-                                h = Math.min(h+10, 400);
+                                //h = $(this.contentWindow.document.documentElement).height();//.scrollHeight;
+                                h = Math.min(h+10, 600);
                             }catch(e){
                                 console.log(e);
                             }
-                            
-                            ele2.removeClass('loading').animate({height:h},300);
+                            if(that._expandAllDivs){
+                                ele2.removeClass('loading').height(h);    
+                            }else{
+                                ele2.removeClass('loading').animate({height:h},300);    
+                            }
                         });
                         
                     }  
