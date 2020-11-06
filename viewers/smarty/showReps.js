@@ -299,8 +299,6 @@ function ShowReps() {
 
             _showProgress( session_id );
             
-            //request['DBGSESSID']='425944380594800002;d=1,p=0,c=07';
-            
             window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, function(response){
                 _hideProgress();
                 if(response.status==window.hWin.ResponseStatus.UNKNOWN_ERROR){
@@ -870,7 +868,6 @@ function ShowReps() {
 
             request['replevel'] = replevel;
             request['template_body'] = template_body;
-            ///request['DBGSESSID']='425944380594800002;d=1,p=0,c=07';
             
             infoMessageBox.setBody("<img src='../../common/images/loading-animation-black.gif'>");
             infoMessageBox.show();

@@ -1589,7 +1589,6 @@ $.widget( "heurist.search_faceted", {
                                      needcount: needcount,         
                                      qname:this.options.query_name,
                                      request_id:this._request_id,
-                                     //DBGSESSID:'425944380594800002;d=1,p=0,c=07', 
                                      source:this.element.attr('id') }; //, facets: facets
 
                 if(this.options.ispreview){

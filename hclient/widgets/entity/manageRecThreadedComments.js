@@ -64,8 +64,6 @@ $.widget( "heurist.manageRecThreadedComments", $.heurist.manageEntity, {
                     request['details']    = 'full';
                     request['request_id'] = window.hWin.HEURIST4.util.random();
                     
-                    //request['DBGSESSID'] = '423997564615200001;d=1,p=0,c=0';
-
                     var that = this;                                                
                     
                     window.hWin.HAPI4.EntityMgr.doRequest(request, 

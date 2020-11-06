@@ -197,8 +197,6 @@ $.widget( "heurist.searchDefDetailTypes", $.heurist.searchEntity, {
                 //we may search users in any database
                 request['db']     = this.options.database;
 
-                //request['DBGSESSID'] = '423997564615200001;d=1,p=0,c=0';
-
                 var that = this;                                                
            
                 window.hWin.HAPI4.EntityMgr.doRequest(request, 

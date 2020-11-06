@@ -1541,8 +1541,6 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 request['request_id'] = window.hWin.HEURIST4.util.random();
                 request['rtl_RecID']  = this._currentEditID;
                 
-                //request['DBGSESSID'] = '423997564615200001;d=1,p=0,c=0';
-
                 var that = this;                                                
                 
                 //at first we have to search tags that are already assigned to current record

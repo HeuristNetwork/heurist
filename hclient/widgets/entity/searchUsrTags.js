@@ -87,34 +87,7 @@ $.widget( "heurist.searchUsrTags", $.heurist.searchEntity, {
 
             //if we use cache                
             this._trigger( "onfilter", null, request);
-            
-            /*
-            if(false && $.isEmptyObject(request)){
-                this._trigger( "onresult", null, {recordset:new hRecordSet()} );
-            }else{
-                this._trigger( "onstart" );
-        
-                request['a']          = 'search'; //action
-                request['entity']     = this.options.entity.entityName;
-                request['details']    = 'list';
-                request['request_id'] = window.hWin.HEURIST4.util.random();
-                
-                //request['DBGSESSID'] = '423997564615200001;d=1,p=0,c=0';
-
-                var that = this;                                                
-                
-                window.hWin.HAPI4.EntityMgr.doRequest(request, 
-                    function(response){
-                        if(response.status == window.hWin.ResponseStatus.OK){
-                            that._trigger( "onresult", null, 
-                                {recordset:new hRecordSet(response.data), request:request} );
-                        }else{
-                            window.hWin.HEURIST4.msg.showMsgErr(response);
-                        }
-                    });
-                    
-            }  
-            */          
+      
     },
 
 });

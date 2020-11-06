@@ -860,7 +860,6 @@ $.widget( "heurist.editing_input", {
                     request['trm_ID'] = all_term_ids;
                     request['withimages'] = 1;
                     
-                    //request['DBGSESSID'] = '423997564615200001;d=1,p=0,c=0';
                     var that = this;   
                                                                  
                     //select term by image
@@ -2309,7 +2308,6 @@ $.widget( "heurist.editing_input", {
                 {name:'maxsize', value:this.configMode.size},
                 {name:'registerAtOnce', value:this.configMode.registerAtOnce},
                 {name:'recID', value:that.options.recID}, //need to verify permissions
-                //{name:'DBGSESSID', value:'425944380594800002;d=1,p=0,c=07'},
                 {name:'newfilename', value:newfilename }], //unique temp name
     //acceptFileTypes: /(\.|\/)(gif|jpe?g|png)$/i
     //autoUpload: true,

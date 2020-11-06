@@ -511,24 +511,6 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
         
     },
 
-    //
-    //
-    /*
-    _recordListGetFullData:function(arr_ids, pageno, callback){
-        
-        var request = {
-                'a'          : 'search',
-                'entity'     : this._entityName,
-                'details'    : 'list',
-                'page_no'    : pageno,
-                'ulf_ID'     : arr_ids
-                //'DBGSESSID'  : '423997564615200001;d=1,p=0,c=0'
-        };
-        
-        window.hWin.HAPI4.EntityMgr.doRequest(request, callback);
-    }
-    */  
-
     addEditRecord: function(recID){
 
         if(recID<0){
