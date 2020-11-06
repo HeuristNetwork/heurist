@@ -387,6 +387,8 @@ $.widget( "heurist.svs_list", {
     // save current treeview layout
     //
     _saveTreeData: function( groupToSave, treeData, callback ){
+        
+        if(!window.hWin.HAPI4.has_access()) return;
 
         var isPersonal = (groupToSave=="all" || groupToSave=="bookmark" || groupToSave=="entity");
 
@@ -481,17 +483,35 @@ $.widget( "heurist.svs_list", {
         if(!$.isFunction($('body').fancytree)){        //jquery.fancytree-all.min.js
             $.getScript(window.hWin.HAPI4.baseURL+'external/jquery.fancytree/jquery.fancytree-all.min.js', function(){ that._updateAccordeon(); } );
             return;
-        }else if(!islogged){
+        }else if(!(islogged || window.hWin.HAPI4.currentUser.ugr_SvsTreeData)){
 
-            window.hWin.HAPI4.currentUser.ugr_SvsTreeData = this.__default_TreeData();
-
+            //window.hWin.HAPI4.currentUser.ugr_SvsTreeData = this.__default_TreeData();
+            window.hWin.HAPI4.SystemMgr.ssearch_get( {UGrpID: this.options.allowed_UGrpID},
+                    function(response){
+                        if(response.status == window.hWin.ResponseStatus.OK){
+                            if(response.data.order && response.data.svs){
+                                that.loaded_saved_searches = response.data.svs; //svs_id=>array()
+                            }else{
+                                that.loaded_saved_searches = response.data; //svs_id=>array()
+                            }
+                            window.hWin.HAPI4.currentUser.usr_SavedSearch = that.loaded_saved_searches
+                            
+                            that.getFiltersTreeData(that.options.allowed_UGrpID, function(data){
+                                window.hWin.HAPI4.currentUser.ugr_SvsTreeData = data; 
+                                that._updateAccordeon();
+                            });
+                        }
+                    });
+            
+            return;
+            
         }else if(!$.ui.fancytree._extensions["dnd"]){
             //    $.getScript(window.hWin.HAPI4.baseURL+'external/jquery.fancytree/src/jquery.fancytree.dnd.js', function(){ that._updateAccordeon(); } );
             alert('drag-n-drop extension for tree not loaded')
             return;
         }else if(!window.hWin.HAPI4.currentUser.ugr_SvsTreeData){ //not loaded yet - load from sysUgrGrps.ugr_NavigationTree
-        
-            this.getFiltersTreeData( function(data){
+
+            this.getFiltersTreeData( null, function(data){
                 window.hWin.HAPI4.currentUser.ugr_SvsTreeData = data; 
                 that._updateAccordeon();
             })
@@ -549,7 +569,7 @@ $.widget( "heurist.svs_list", {
         }
 //console.log(this.options.container_width+'  t='+this.search_tree.width()+'  e='+this.element.width());
         
-        if(islogged || this.isPublished){
+        if(true || islogged || this.isPublished){
 
             /*
             if(!this.options.is_h6style)
@@ -578,9 +598,11 @@ $.widget( "heurist.svs_list", {
                 
             }
                 
-            var groups = window.hWin.HAPI4.currentUser.ugr_Groups;
+            var groups = window.hWin.HAPI4.currentUser.ugr_SvsTreeData;
+            //var groups = window.hWin.HAPI4.currentUser.ugr_Groups; //all user groups
             for (var groupID in groups)
             if(groupID>0){
+                    //tree
                     if(this.options.searchTreeMode==1 && this.options.allowed_UGrpID.length>0 ) //show only allowed groups
                     {
                         if(window.hWin.HEURIST4.util.findArrayIndex(groupID, this.options.allowed_UGrpID)<0){
@@ -610,7 +632,7 @@ $.widget( "heurist.svs_list", {
                             }
                         );                            
                     }
-            }
+            }//for
             
         }else{
             ($('<div>')
@@ -821,7 +843,6 @@ $.widget( "heurist.svs_list", {
         }
     },
     
-
     //
     //
     //
@@ -2337,11 +2358,17 @@ $.widget( "heurist.svs_list", {
     //
     //
     //    
-    getFiltersTreeData: function( callback ){
+    getFiltersTreeData: function( allowed_groups, callback ){
         
             var that = this;
+            
+            var request = {};
+            
+            if(allowed_groups && allowed_groups.length>0){
+                request = {UGrpID:allowed_groups};
+            }
         
-            window.hWin.HAPI4.SystemMgr.ssearch_gettree( {}, function(response){
+            window.hWin.HAPI4.SystemMgr.ssearch_gettree( request, function(response){
                 
                 var resTreeData = null
 

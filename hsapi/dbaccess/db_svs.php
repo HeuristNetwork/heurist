@@ -355,7 +355,7 @@
 
         $system->addError(HEURIST_INVALID_REQUEST, 'No data provided to update tree on server side.'
         .' This may be due to a network outage or minor database corruption. It means the changes you have just made may not have been'
-        . 'written into the database - please reload the page and check to see if they have been saved, try again, and '
+        .' written into the database - please reload the page and check to see if they have been saved, try again, and '
         . CONTACT_HEURIST_TEAM.' if the problem persists');
         return false;
     }
@@ -368,16 +368,22 @@
         $mysqli = $system->get_mysqli();
 
         $ugrID = $system->get_user_id();
-        //load personal treeviews - rules, my filters (all) and bookmarks
-        $groups = $system->get_user_group_ids();
+
+        if($grpID!=null){
+            $groups = prepareIds($grpID, true);        
+        }else{
+            //load personal treeviews - rules, my filters (all) and bookmarks
+            $groups = $system->get_user_group_ids();
+        }
 
         // 5 - websearch
-        if(@$grpID>0 && ($system->is_member($grpID) || $grpID==5) ){ // array_search($grpID, $groups)){
-            $where = ' = '.$grpID;
-        }else if(is_array($groups)){
+        //if(@$grpID>0 && ($system->is_member($grpID) || $grpID==5) ){
+        if(is_array($groups) && count($groups)==1){
+            $where = ' = '.$groups[0];
+        }else if(is_array($groups) && count($groups)>1){
             $where =  ' in ('.implode(',',$groups).')';
         }else {
-            $where = ' = '.$ugrID;
+            $where = ' = '.$ugrID; //only personal
         }
 
         $ret = array();
