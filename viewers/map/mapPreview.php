@@ -53,6 +53,7 @@ if($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'){
 <script type="text/javascript" src="<?php echo PDIR;?>viewers/map/mapManager.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>viewers/map/mapDocument.js"></script>
 <script type="text/javascript" src="<?php echo PDIR;?>viewers/map/mapLayer2.js"></script>
+<script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/profile/profile_login.js"></script>
 
 <script type="text/javascript">
 
@@ -92,7 +93,7 @@ console.log('beforeunload MAPPEVIEW');
         layout_params['legend'] = 'basemaps';//',mapdocs';
         layout_params['published'] = 1;//'1';
         
-        initial_layers = window.hWin.HEURIST4.util.getUrlParameter('ids', location.search);
+        //initial_layers = window.hWin.HEURIST4.util.getUrlParameter('ids', location.search);
         target_database = window.hWin.HEURIST4.util.getUrlParameter('target_db', location.search);
         
 
@@ -109,11 +110,11 @@ console.log('beforeunload MAPPEVIEW');
         }});
         
     }
-    
+/*    
     function onFirstInit(){
         onMapInit();
     }
-    
+*/    
     //
     // called from showDialog
     //
@@ -135,7 +136,7 @@ console.log('beforeunload MAPPEVIEW');
     //
     //           
     function onMapInit(){
-        
+
         if(!target_database){
             window.hWin.HEURIST4.msg.showMsgErr('Target database not defined. '
                 +'It is not possiblle to perform this operation');
@@ -229,6 +230,12 @@ console.log('beforeunload MAPPEVIEW');
         
             if(!window.hWin.HEURIST4.msg.checkLength($('#mapspace_name'),'','Define name of map',3,120)){
                 return;
+            }
+            
+            if(target_database==window.hWin.HAPI4.database && !window.hWin.HAPI4.has_access()){
+                showLoginDialog(false, function(){_exportMapSpace();});
+                //window.hWin.HAPI4.SystemMgr.verify_credentials(function(){_exportMapSpace();}, 0);
+                return;                
             }
 
             //get all layers and datasources of document
@@ -385,7 +392,9 @@ console.log('beforeunload MAPPEVIEW');
                 return;
             }//same database
             
-
+            
+            //databasese are different: maps and clearinghouse  - not in use anymore
+            
             //$('#divStep2').hide();
             var session_id = Math.round((new Date()).getTime()/1000);  //for progress
         

@@ -1492,6 +1492,8 @@ prof =Profile
         */
         setCurrentUser: function(user){
             
+            var isChanged = (that.currentUser != user);
+            
             if(user){
                 that.currentUser = user;
             }else{
@@ -1518,7 +1520,7 @@ prof =Profile
                 window.hWin.HEURIST4.ui.onInactiveReset( true );
             }
             
-            if($Db) $Db.needUpdateRtyCount = true;
+            if(window.hWin.HEURIST4.dbs && isChanged) window.hWin.HEURIST4.dbs.needUpdateRtyCount = true;
         },
         
         currentUserRemoveGroup: function(groupID, isfinal){
