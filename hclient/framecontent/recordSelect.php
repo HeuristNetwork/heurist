@@ -1,9 +1,9 @@
 <?php
 
     /**
-    * Search and select record. It uses manageRecords
+    * Search and select record. It uses manageRecords.   NOT IN USE
     * 
-    * It is combination of generic record search by title (maybe it should be separated into widget) abd resultList widget
+    * It is combination of generic record search by title (maybe it should be separated into widget) and resultList widget
     *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org

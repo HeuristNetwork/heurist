@@ -781,15 +781,6 @@ function _addNewLinkField(source_ID, target_ID){
                 
                 _linkTwoRecords(source_ID, target_ID);
                 return;
-                /*
-                url = url + "hclient/framecontent/recordAddLink.php?&db="
-                    + window.hWin.HAPI4.database
-                    + '&source_ID='+source_ID;
-                    
-               dlg_title = 'Add new link or create a relationship between records'; 
-               dim.w = 750;
-               dim.h = 380;
-               */
             }
                    
             if(target_ID>0){

@@ -1,7 +1,7 @@
 <?php
 
     /**
-    * Query Builder Dialog
+    * Query Builder Dialog   - EXPEREMENTAL
     *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org

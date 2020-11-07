@@ -1115,23 +1115,6 @@ $.widget( "heurist.editing_input", {
                            }     
                         
                             window.hWin.HEURIST4.ui.showRecordActionDialog('recordAddLink', opts);
-                            
-                           /*
-                            var url = window.hWin.HAPI4.baseURL 
-                                +'hclient/framecontent/recordAddLink.php?db='+window.hWin.HAPI4.database
-                                +'&dty_ID=' + that.options.dtID;
-                           
-                           if(isInwardRelation){
-                              url +=  '&source_RecTypes='+that.f('rst_PtrFilteredIDs')+'&target_ID=' + that.options.recID;
-                           }else{
-                              url +=  '&source_ID=' + that.options.recID;
-                           }     
-                            
-                            window.hWin.HEURIST4.msg.showDialog(url, {height:280, width:750,
-                                title: window.hWin.HR('Add relationship'),
-                                class:'ui-heurist-bg-light',
-                                callback: __onCloseAddLink );
-                            */    
                     };
                     
                     
