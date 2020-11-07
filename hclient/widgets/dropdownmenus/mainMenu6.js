@@ -787,7 +787,7 @@ $.widget( "heurist.mainMenu6", {
                         hide_header: true,
                         container_width: 200,
                         onClose: function(noptions) { 
-                            that.switchContainer('explore'); 
+                            //!!! that.switchContainer('explore'); 
 
                             if(noptions==null){
                                 //close faceted search
@@ -859,7 +859,7 @@ $.widget( "heurist.mainMenu6", {
             if(!this.svs_list.parent().hasClass('ui-menu6-section')){
                 
                 this.svs_list.detach().appendTo(this.menues['explore']);
-                this.svs_list.css({'top':250}); //, 'font-size':'1em'}).show();
+                this.svs_list.css({'top':219}); //, 'font-size':'1em'}).show();
                 this.svs_list.svs_list('option','container_width',200);
                 this.svs_list.svs_list('option','hide_header', true);
                 this._off(this.svs_list,'mouseenter');
@@ -961,6 +961,9 @@ $.widget( "heurist.mainMenu6", {
     _openSectionMenu: function(e){
         
         var section = this._getSectionName(e);
+        if(section=='explore' && this._active_section==section){
+            this._onCloseSearchFaceted();
+        }
         this.switchContainer( section );
         
         this._collapseMainMenuPanel(true, 200);
@@ -1440,8 +1443,8 @@ $.widget( "heurist.mainMenu6", {
         if(!this.introductions[section]){
             
             var sname;
-            if(section=='input'){
-                snmae = 'Populate';
+            if(section=='import'){
+                sname = 'Populate';
             }else{
                 sname = section[0].toUpperCase()+section.substr(1);
             }
