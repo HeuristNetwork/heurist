@@ -54,7 +54,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         if(this.options.import_structure){ //for example https://heuristplus.sydney.edu.au/heurist/?db=Heurist_Reference_Set
             if(this.options.select_mode=='manager') this.options.select_mode='select_single';
             this.options.use_cache = true;
-            this.options.use_structure = true; //use HEURIST4.rectypes    
+            this.options.use_structure = true; //use HEURIST4.rectypes for import structures    
         }else{
             this.options.use_cache = true;
             this.options.use_structure = false
@@ -292,6 +292,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                     });                    
                     
                 }else{
+                    /*
                     if(!window.hWin.HEURIST4.rectypes.counts){
                         window.hWin.HAPI4.EntityMgr.doRequest({a:'counts',entity:'defRecTypes',
                                         mode: 'record_count',ugr_ID: window.hWin.HAPI4.user_id()}, 
@@ -305,7 +306,8 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                                 
                             });
                             return;
-                    }
+                    }*/
+                    this._loadData();
                     
                     //take recordset from LOCAL HEURIST.rectypes format     
                     this._cachedRecordset = this.getRecordsetFromStructure();
@@ -611,7 +613,6 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                     html += __action_btn('filter','ui-icon-search','Click to launch search for '+fld('rty_Name'));
                     break;
                 case 'count': 
-                    //var cnt = ((window.hWin.HEURIST4.rectypes.counts[recID]>0)?window.hWin.HEURIST4.rectypes.counts[recID]:' ');
                     html += fld2('rty_RecCount','40px',null,'text-align:right'); break;
                 case 'group': 
                     html += __action_btn('group','ui-icon-carat-d','Change group');
@@ -877,12 +878,14 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             this.updateGroupCount(this.deleted_from_group_ID, -1);
             
             //backward capability - remove later        
-            var rectypes = window.hWin.HEURIST4.rectypes;
+            /*
+            var rectypes = window.hWin.HEURIST4.rectypes;   //REMARKED
             if(recID>0 && rectypes.typedefs[recID]){
                     delete rectypes.names[recID];
                     delete rectypes.pluralNames[recID];
                     delete rectypes.typedefs[recID];
             }
+            */
            
     },
     
@@ -1254,7 +1257,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                         var rty_ID = Number(response.data.id);
                         if(rty_ID>0){   
                             //refresh the local heurist
-                            window.hWin.HEURIST4.rectypes = response.data.rectypes; //@todo remove
+                            //window.hWin.HEURIST4.rectypes = response.data.rectypes; //REMARKED
                             
                             window.hWin.HAPI4.EntityMgr.refreshEntityData('rty,rst',function(){
                                  window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE);

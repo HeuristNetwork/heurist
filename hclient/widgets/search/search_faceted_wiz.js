@@ -631,7 +631,7 @@ $.widget( "heurist.search_faceted_wiz", {
                         val = val[0].split(',');
                         if(svs_name.val()==''){
                             var names = [];
-                            $.each(val,function(i,item){ names.push(window.hWin.HEURIST4.rectypes.names[item]) });
+                            $.each(val,function(i,item){ names.push( $Db.rty(item,'rty_Name') ) });
                             svs_name.val( names.join(', ') );
                         }
                         svs_name.focus();
@@ -1384,16 +1384,16 @@ $.widget( "heurist.search_faceted_wiz", {
                         rtid = rtid.split(',')[0];
                     }
                     
-                    if(!window.hWin.HEURIST4.rectypes.typedefs[ rtid ]){
+                    if($Db.rty(rtid)==null){
                         //record type was removed - remove facet
                         removeFacet = true;
                         break;
                     }
                     
-                    harchy.push('<b>'+window.hWin.HEURIST4.rectypes.names[ rtid ]+'</b>');
+                    harchy.push('<b>'+$Db.rty(rtid,'rty_Name')+'</b>');
                     
                     if(j==0 && dtid=='title'){
-                       harchy_fields.push('Constructed record title'); //was rectype name window.hWin.HEURIST4.rectypes.names[ rtid ]);  
+                       harchy_fields.push('Constructed record title');
                     }else
                     if(dtid=='modified'){
                        harchy_fields.push("Modified"); 

@@ -1246,7 +1246,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
         //
         // returns record as JSON object
         //
-        getRecord:function(recID){
+        getRecord: function(recID){
             var record = this.getById(recID);
             if(record){
                 return _getAllFields(record);

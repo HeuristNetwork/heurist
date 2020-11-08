@@ -387,43 +387,26 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
         this.element.find('#div_'+party+'1').hide();
         var $fieldset = this.element.find('#div_'+party+'2').empty();
         
-        var dtID = 0;
-        var typedefs = window.hWin.HEURIST4.rectypes.typedefs;
-        var fi = typedefs.dtFieldNamesToIndex;
-        var dtFields = [];
-        
-        
-        //get first resource field and reset constraints
-        for(rtid in typedefs){
-            if(typedefs[rtid]){
-                for(dtid in typedefs[rtid].dtFields){
-                    if(typedefs[rtid].dtFields[dtid][fi['dty_Type']]=='resource'){
-                        dtFields = window.hWin.HEURIST4.util.cloneJSON(typedefs[rtid].dtFields[dtid]);
-                        dtID = dtid;
-                        break;
-                    }
-                }        
-            }
-        }
-        dtFields[fi['rst_PtrFilteredIDs']] = rt_constraints;    
-        dtFields[fi['rst_DisplayName']] = '';//input_label;
-        dtFields[fi['rst_RequirementType']] = 'optional';
-        dtFields[fi['rst_MaxValues']] = 1;
+        dtFields = {};
+        dtFields['dt_ID'] = 9999999;    
+        dtFields['rst_PtrFilteredIDs'] = rt_constraints;    
+        dtFields['rst_DisplayName'] = '';//input_label;
+        dtFields['rst_RequirementType'] = 'optional';
+        dtFields['rst_MaxValues'] = 1;
+        dtFields['dty_Type'] = 'resource';
         
         var that = this;
 
         var ed_options = {
             recID: -1,
-            dtID: dtID,
+            dtID: 9999999,
             //rectypeID: rectypeID,
-            rectypes: window.hWin.HEURIST4.rectypes,
             values: '',// init_value
             readonly: false,
 
             showclear_button: false,
             suppress_prompts: true,
             show_header: false,
-            detailtype: 'resource',  //overwrite detail type from db (for example freetext instead of memo)
             dtFields:dtFields,
             
             change: function(){
@@ -462,53 +445,31 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
 
         
         var rectypeID = this.source_RecTypeID; //selectRecordScope.val(); 
-        
+        //typedefs[rectypeID].dtFields[dtID
         //_createInputElement_step2(rectypeID, dtID, $fieldset);
         
+        var ptr_constraints = (dtID>0)?$Db.dty(dtID, 'dty_PtrTargetRectypeIDs'):'';
         
-        var typedefs = window.hWin.HEURIST4.rectypes.typedefs;
-        var fi = typedefs.dtFieldNamesToIndex;
-        var dtFields = [];
-        
-        if(typedefs[rectypeID].dtFields[dtID]){
-            dtFields = window.hWin.HEURIST4.util.cloneJSON(typedefs[rectypeID].dtFields[dtID]);
-        }else{
-            //get first resource field and reset constraints
-            for(rtid in typedefs){
-                if(typedefs[rtid]){
-                    for(dtid in typedefs[rtid].dtFields){
-                        if(typedefs[rtid].dtFields[dtid][fi['dty_Type']]=='resource'){
-                            dtFields = window.hWin.HEURIST4.util.cloneJSON(typedefs[rtid].dtFields[dtid]);
-                            break;
-                        }
-                    }        
-                }
-            }
-            dtFields[fi['rst_PtrFilteredIDs']] = '';    
-        }
-
-        dtFields[fi['rst_DisplayName']] = '';//input_label;
-        dtFields[fi['rst_RequirementType']] = 'optional';
-        dtFields[fi['rst_MaxValues']] = 1;
-        //dtFields[fi['rst_DisplayWidth']] = 50; //@todo set 50 for freetext and resource
-        //dtFields[fi['rst_DisplayWidth']] = 50;
-        
-        //if(window.hWin.HEURIST4.util.isnull(init_value)) init_value = '';
+        dtFields = {};
+        dtFields['dt_ID'] = 9999999;    
+        dtFields['rst_PtrFilteredIDs'] = ptr_constraints;
+        dtFields['rst_DisplayName'] = '';
+        dtFields['rst_RequirementType'] = 'optional';
+        dtFields['rst_MaxValues'] = 1;
+        dtFields['dty_Type'] = 'resource';
         
         var that = this;
 
         var ed_options = {
             recID: -1,
-            dtID: dtID,
+            dtID: 9999999,
             //rectypeID: rectypeID,
-            rectypes: window.hWin.HEURIST4.rectypes,
             values: '',// init_value
             readonly: false,
 
             showclear_button: false,
             suppress_prompts: true,
             show_header: false,
-            detailtype: 'resource',  //overwrite detail type from db (for example freetext instead of memo)
             dtFields:dtFields,
             
             change: function(){
@@ -533,14 +494,18 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
     
         var $field = this.element.find('#rt_'+party+'_sel_'+dtID).empty();
 
+        var dt = $Db.dty(dtID);
         
-        var dtFields =  window.hWin.HEURIST4.util.cloneJSON($Db.rst(rectypeID, dtID));
-
+        //var dtFields =  window.hWin.HEURIST4.util.cloneJSON($Db.rst(rectypeID, dtID));
+        var dtFields = {};
         dtFields['rst_DisplayName'] = 'Relationship type:';//input_label;
-        dtFields['rst_RequirementType'] = 'optional';
         dtFields['rst_RequirementType'] = 'optional';
         dtFields['rst_MaxValues'] = 1;
         dtFields['rst_DisplayWidth'] = '25ex';
+        dtFields['dty_Type'] = 'relationtype';
+        dtFields['rst_PtrFilteredIDs'] = '';//dt['dty_PtrTargetRectypeIDs'];
+        dtFields['rst_FilteredJsonTermIDTree'] = dt['dty_JsonTermIDTree'];
+        dtFields['dtID'] = dtID;
         
         var that = this;
 
@@ -556,7 +521,7 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
             suppress_prompts: true,
             useHtmlSelect:false, 
             //show_header: false,
-            detailtype: 'relationtype',  //overwrite detail type from db (for example freetext instead of memo)
+            //detailtype: 'relationtype',  //overwrite detail type from db (for example freetext instead of memo)
             dtFields:dtFields,
             
             change: function(){
@@ -613,9 +578,9 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
                 }
                 
 
-                rec_titles.push('<b>'+window.hWin.HEURIST4.rectypes.names[recRecTypeID]+'</b>');
+                rec_titles.push('<b>'+$Db.rty(recRecTypeID,'rty_Name')+'</b>');
                 $('#'+party+'_title').text(rec_title);
-                $('#'+party+'_rectype').text(window.hWin.HEURIST4.rectypes.names[recRecTypeID]);
+                $('#'+party+'_rectype').text($Db.rty(recRecTypeID,'rty_Name'));
                 $('#'+party+'_rectype_img').css('background-image', 'url("'+top.HAPI4.iconBaseURL+recRecTypeID+'")');
                 
                 //find fields

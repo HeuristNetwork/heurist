@@ -368,7 +368,7 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
         */
         this.recordList.resultList('option','show_toolbar', !newmode);
         
-        if(this.options.isViewMode !== newmode){
+        if(this.options.isViewMode !== newmode && this.searchForm.searchSysDashboard('instance')){
             this.options.isViewMode = newmode;
             this.searchForm.searchSysDashboard('option','isViewMode',newmode);
             this.startSearch();

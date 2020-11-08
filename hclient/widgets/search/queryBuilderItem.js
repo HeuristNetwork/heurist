@@ -231,8 +231,6 @@ $.widget( "heurist.queryBuilderItem", {
            var ed_options = {
                         recID: -1,
                         //dtID: dtID,
-                        //rectypeID: rectypeID,
-                        //rectypes: window.hWin.HEURIST4.rectypes,
                         values: '',
                         readonly: false,
                         showclear_button: true,

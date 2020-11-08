@@ -196,7 +196,7 @@ $.widget( "heurist.dh_maps", {
 
             $rdiv = $rdiv.parents('.recordDiv')
             var rectypeID = $rdiv.attr('rectype');
-            var title = window.hWin.HEURIST4.rectypes.names[rectypeID] + ' [' + rectypeID + ']';
+            var title = $Db.rty(rectypeID,'rty_Name') + ' [' + rectypeID + ']';
             $rdiv.attr('title', title);
         }
     },

@@ -272,7 +272,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
     },            
     
     //
-    // get recordset from HEURIST4.rectypes
+    // get recordset from HEURIST4.rectypes - NOT USED
     //
     _getRecordsetFromStructure: function(){
         
@@ -365,13 +365,14 @@ dty_TermIDTreeNonSelectableIDs
 
             recset.each(function(dty_ID, record){
                     
-                        var isSep = (recset.fld(record, 'dty_Type')=='separator');
+                        var sType = $Db.dty(dty_ID, 'dty_Type');
+                        var isSep = (sType=='separator');
                         var title = recset.fld(record,'rst_DisplayName');
                         var req = recset.fld(record,'rst_RequirementType');
                         if(!isSep ){
                             title = '<span style="padding-left:10px">' + title 
                                     +'</span>';
-//<span style="font-size:smaller">  ('+$Db.baseFieldType[recset.fld(record,'dty_Type')]+')</span>
+//'<span style="font-size:smaller;"> ('+$Db.baseFieldType[sType]+')</span>';
                         }
                         if(req=='forbidden'){
                             title =  title + '<span style="font-size:smaller;text-transform:none;"> (hidden)</span>';
@@ -737,7 +738,7 @@ dty_TermIDTreeNonSelectableIDs
         
         var recTitle = fld2('rst_ID','4em')
                 + fld2('rst_DisplayName','14em')
-                + ' ('+$Db.baseFieldType[fld('dty_Type')]+')';
+                + ' ('+$Db.baseFieldType[$Db.dty(recID, 'dty_Type')]+')';
 
         var html = '<div class="recordDiv" id="rd'+recID+'" recid="'+recID
                     +'" style="height:'+(is_narrow?'1.3':'2.5')+'em">'
@@ -1735,9 +1736,8 @@ console.log('No active tree node!!!!')
         
         if(type!='separator'){
             title =  '<span style="padding-left:10px;">' + title 
-                    + '</span><span style="font-size:smaller;">  ('
-                    +$Db.baseFieldType[type]
-                    +')</span>';
+                    + '</span>';
+//'<span style="font-size:smaller;"> ('+$Db.baseFieldType[type]+')</span>';
         }
         if(req=='forbidden'){
             title =  title + '<span style="font-size:smaller;text-transform:none;"> (hidden)</span>';
@@ -1774,7 +1774,9 @@ console.log('No active tree node!!!!')
 
             var treeview = this._treeview.fancytree("getTree");
             var recID = fields['rst_ID'];
-            var dt_type = fields['dty_Type'];
+            var dt_type = $Db.dty(fields['rst_DetailTypeID'], 'dty_Type');
+            
+//console.log('SAVE '+fields['rst_DetailTypeID']+'  '+dt_type);
             
             //save structure (tree) in DT_ENTITY_STRUCTURE field - EXPERIMENTAL - NOT USED
             if(dt_type=='enum' || dt_type=='relmarker' || dt_type=='relationtype'){
@@ -1786,6 +1788,9 @@ console.log('No active tree node!!!!')
                 fields['rst_RequirementType'] = fields['rst_SeparatorRequirementType'];
             }else if(dt_type=='freetext' || dt_type=='integer' || dt_type=='float'){                
                 //fields['rst_DefaultValue'] = fields['rst_DefaultValue_inc'];
+            }
+            if(window.hWin.HEURIST4.util.isempty(fields['rst_DisplayOrder'])){
+                fields['rst_DisplayOrder'] = '0';
             }
             
             
@@ -1893,9 +1898,8 @@ console.log('No active tree node!!!!')
                         var req = fieldvalues['rst_RequirementType'];
                         if(!isSep){
                             title =  '<span style="padding-left:10px">' + title 
-                                        + '</span><span style="font-size:smaller;">  ('
-                                    +$Db.baseFieldType[sType]
-                                    +')</span>';
+                                        + '</span>';
+//'<span style="font-size:smaller;"> ('+$Db.baseFieldType[sType]+')</span>';
                         }
                         if(req=='forbidden'){
                             title =  title + '<span style="font-size:smaller;text-transform:none;"> (hidden)</span>';

@@ -943,7 +943,7 @@ $.widget( "heurist.search_faceted", {
           var j = 0;
           var harchy = [];
           while (j<codes.length){
-               harchy.push(window.hWin.HEURIST4.rectypes.names[codes[j]]);
+               harchy.push($Db.rty(codes[j],'rty_Name'));
                j = j + 2;
           }
           

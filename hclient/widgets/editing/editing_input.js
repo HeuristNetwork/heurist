@@ -1316,8 +1316,12 @@ $.widget( "heurist.editing_input", {
             
             var ptrset = that.f('rst_PtrFilteredIDs');
             if(!$.isArray(ptrset)){
-                if(ptrset) ptrset = ptrset.split(',')
-                else ptrset = [];
+                if(window.hWin.HEURIST4.util.isempty(ptrset)){
+                    ptrset = [];
+                }else if(window.hWin.HEURIST4.util.isNumber(ptrset)){
+                    ptrset = [ptrset];
+                }else
+                    ptrset = ptrset.split(',')
             }            
             var rts = [];
             for (var k=0; k<ptrset.length; k++) {

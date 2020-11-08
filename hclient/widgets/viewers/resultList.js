@@ -1247,10 +1247,11 @@ $.widget( "heurist.resultList", {
                                       rt = q[1];
                                   }
                             }
-                            if(rt>0 && window.hWin.HEURIST4.rectypes.names[rt]){
-                                $('<span style="padding: 0 10px;font-weight:bold">('+window.hWin.HEURIST4.rectypes.pluralNames[rt]+')</span>')
+                            if(rt>0 && $Db.rty(rt,'rty_Name')){
+                                $('<span style="padding: 0 10px;font-weight:bold">('
+                                        +$Db.rty(rt,'rty_Plural')+')</span>')
                                     .appendTo($emptyres.find('.not-found2'));
-                                $('<div>').button({label:'Add '+window.hWin.HEURIST4.rectypes.names[rt], icon:'ui-icon-plusthick'})
+                                $('<div>').button({label:'Add '+$Db.rty(rt,'rty_Name'), icon:'ui-icon-plusthick'})
                                     .click(function(){
                                         window.hWin.HEURIST4.ui.openRecordEdit(-1, null, 
                                             {new_record_params:{RecTypeID:rt}});                                        
@@ -1594,7 +1595,7 @@ $.widget( "heurist.resultList", {
 
             $rdiv = $rdiv.parents('.recordDiv')
             var rectypeID = $rdiv.attr('rectype');
-            var title = window.hWin.HEURIST4.rectypes.names[rectypeID] + ' [' + rectypeID + ']';
+            var title = $Db.rty(rectypeID,'rty_Name') + ' [' + rectypeID + ']';
             $rdiv.attr('title', title);
         }
     },

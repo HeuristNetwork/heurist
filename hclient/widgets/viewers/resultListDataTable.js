@@ -393,10 +393,10 @@ console.log(idx+'  '+width+'  '+that.options.dataTableParams['columns'][idx]['vi
                         $(opt).attr('disabled','disabled').attr('visiblity','hidden').css({display:'none'});
                     
                         for (var rty in rectype_Ids){
-                            if(rty>=0 && window.hWin.HEURIST4.rectypes.pluralNames[rectype_Ids[rty]]){
-                                rty = rectype_Ids[rty];
+                            rty = rectype_Ids[rty];
+                            if(rty>0 && $Db.rty(rty,'rty_Plural') ){
                                 window.hWin.HEURIST4.ui.addoption(selScope[0],rty,
-                                        window.hWin.HEURIST4.rectypes.pluralNames[rty]); //'only: '+
+                                        $Db.rty(rty,'rty_Plural') ); //'only: '+
                             }
                         }
                         window.hWin.HEURIST4.ui.addoption(selScope[0],'', 'Any record type');

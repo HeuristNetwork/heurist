@@ -765,9 +765,9 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
 
                             
             //list of fields that are already in record type
-            var aUsage = {};
-            if(rty_ID>0 && window.hWin.HEURIST4.rectypes.typedefs[rty_ID]){
-                aUsage = window.hWin.HEURIST4.rectypes.typedefs[rty_ID].dtFields;     //!!!!!!
+            var aUsage = $Db.rst(rty_ID); //return rectype
+            if(!window.hWin.HEURIST4.util.isRecordSet(aUsage)){
+                aUsage = null;
             }
             
             var entered = input_name.val().toLowerCase();
@@ -780,7 +780,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
 
                 if( $Db.dty(dty_ID, 'dty_ShowInLists')!='0'
                     && field_type!='separator'
-                    && !aUsage[dty_ID]
+                    && (!aUsage || !aUsage.getById(dty_ID))
                     && (field_name.toLowerCase().indexOf( entered )>=0) )
                 {
 

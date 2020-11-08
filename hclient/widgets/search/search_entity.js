@@ -225,18 +225,22 @@ console.log(data);
                 this.selected_rty_ids = [];
                 
                 if(true){
+                   
                     //get 5 from first group
-                    var rectypes = window.hWin.HEURIST4.rectypes.groups[0].allTypes;
-                    for(var m=0; m<rectypes.length && m<5; m++){
-                        this.selected_rty_ids.push(rectypes[m]);
-                    }
+                    var that = this;
+                    var rtgID = $Db.rtg().getOrder()[0];
+                    $Db.rty().each2(function(rtyID,rectype){
+                        if(rectype['rty_RecTypeGroupID']==rtgID){
+                            that.selected_rty_ids.push(rtyID);
+                            if(that.selected_rty_ids.length>4) return false;
+                        }
+                    });
                 }else{
                     //get 5 top most used rectypes
                     var sorted = [];
-                    for(var rty_ID in window.hWin.HEURIST4.rectypes.counts)
-                    if(rty_ID>0){
-                        sorted.push({'id':rty_ID, 'cnt':window.hWin.HEURIST4.rectypes.counts[rty_ID]});
-                    }
+                    $Db.rty().each2(function(rtyID,rectype){
+                        sorted.push({ 'id':rty_ID, 'cnt':rectype['rty_RecCount']});
+                    });
                     sorted.sort(function(a,b){
                          return Number(a['cnt'])<Number(b['cnt'])?1:-1;
                     });
@@ -445,8 +449,6 @@ console.log(data);
     
         var that = this;
         
-        //window.hWin.HEURIST4.rectypes.counts_update = (new Date()).getTime();
-                    
         var request = {
                 'a'       : 'counts',
                 'entity'  : 'defRecTypes',
@@ -472,25 +474,9 @@ console.log(data);
                     */
                     
                     that._recreateRectypeSelectors();
-                    /*    
-                    window.hWin.HEURIST4.rectypes.counts = response.data;
-                    
-                    //selector to filter by entity
-                    if(that.options.use_combined_select || that.options.by_usage){
-                            that._recreateSelectRectypeFilter(that.usage_select_options);
-                    }
-                    //buttons - filter by entity
-                    if(that.options.by_favorites){
-                        that._redraw_buttons_by_entity(true);
-                        that.config_select_options.marked = that.selected_rty_ids;
-                        
-                        that._recreateSelectRectypeFilter(that.config_select_options);
-                    }
-                    */
         
                 }else{
                     window.hWin.HEURIST4.msg.showMsgErr(response);
-                    //window.hWin.HEURIST4.rectypes.counts_update = 0;
                 }
         });
     },

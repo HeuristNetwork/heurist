@@ -172,7 +172,6 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
             recID: -1,
             dtID: input_id, //'group_selector',
             //rectypeID: rectypeID,
-            //rectypes: window.hWin.HEURIST4.rectypes,
             values: [init_value],
             readonly: false,
             showclear_button: true,

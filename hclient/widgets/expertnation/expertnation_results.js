@@ -348,7 +348,7 @@ $.widget( "heurist.expertnation_results", $.heurist.resultList, {
                     
                 }//for persons only
                 else{
-                    sinfo.push('Showing '+window.hWin.HEURIST4.rectypes.names[primary_rt]);    
+                    sinfo.push('Showing '+ $Db.rty(primary_rt,'rty_Name') );    
                 }
                 
                 if(!window.hWin.HEURIST4.util.isempty(add_filter)){
@@ -364,7 +364,7 @@ $.widget( "heurist.expertnation_results", $.heurist.resultList, {
             
             }//has values
             else{
-                var s = window.hWin.HEURIST4.rectypes.names[primary_rt];
+                var s = $Db.rty(primary_rt,'rty_Name');
                 s = (s=='Person')?'people':s;
                 sinfo.push('Showing list of all '+s+' (no filters).');
             }

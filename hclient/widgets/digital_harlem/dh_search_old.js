@@ -583,7 +583,7 @@ $.widget( "heurist.dh_search", {
                         if(facet_index>=0){
                             var rtID = cterm[0];
                             var f_link = that._createFacetLink(facet_index,
-                                {text:window.hWin.HEURIST4.rectypes.names[rtID], query:rtID, count:cterm[1]});
+                                {text:$Db.rty(rtID,'rty_Name'), query:rtID, count:cterm[1]});
                             $("<div>").css({"display":"inline-block","padding":"0 3px"}).append(f_link).appendTo($facet_values);
                         }
                     }

@@ -237,8 +237,8 @@ function CrosstabsAnalysis(_query, _query_domain) {
         $container.empty();
         fields3[name] = {field:0, fieldname:'', type:'', values:[], intervals:[], allownulls:false};
 
-        if (!(window.hWin.HEURIST4.rectypes.typedefs[_selectedRtyID] &&
-            window.hWin.HEURIST4.rectypes.typedefs[_selectedRtyID].dtFields[detailid]))
+        //not found
+        if ($Db.rst(_selectedRtyID, detailid)==null)
         {
             $container.hide();
             if($.isFunction(callback)) callback.call();
@@ -246,10 +246,8 @@ function CrosstabsAnalysis(_query, _query_domain) {
         }
 
         //get detail type
-        var fi = window.hWin.HEURIST4.rectypes.typedefs.dtFieldNamesToIndex;
-        var details = window.hWin.HEURIST4.rectypes.typedefs[_selectedRtyID].dtFields[detailid];
-        var detailtype = details[fi['dty_Type']];
-        var detailname = details[fi['rst_DisplayName']];
+        var detailtype = $Db.dty(detailid,'dty_Type');
+        var detailname = $Db.rst(_selectedRtyID, detailid, 'rst_DisplayName');
 
 
         fields3[name] = {field:detailid, fieldname:detailname, type:detailtype, values:[], intervals:[]}

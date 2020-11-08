@@ -82,7 +82,7 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
             for(var idx=0; idx<rt_list.length; idx++){
                 
                 var rectypeID = rt_list[idx];
-                var name = window.hWin.HEURIST4.rectypes.names[rectypeID];
+                var name = $Db.rty(rectypeID,'rty_Name');
                 if(!name) continue;
                 
                 $('<button>')
@@ -206,7 +206,7 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
         }else{
             if(this.options.parentselect>0){
                 var ele = this.element.find('#row_parententity_helper3').css({'display':'table-row'});
-                ele.find('span').text( window.hWin.HEURIST4.rectypes.names[this.options.parentselect] );
+                ele.find('span').text( $Db.rty(this.options.parentselect,'rty_Name') );
             }
             //start search
             if(this.selectRectype.val()>0){

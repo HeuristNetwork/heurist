@@ -154,7 +154,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         +'<span class="ui-icon ui-icon-arrowreturn-1-e" title="Add a new field to this record type" '
                         +'style="transform: rotate(90deg);font-size:9px;font-weight:normal"/>Insert field</div>'
                    +'<div data-action="block" title="Add a new group/separator" style="background:lightgreen;padding:2px 4px;width:102px;">'    +'<span class="ui-icon ui-icon-arrowreturn-1-e" '
-                       +'style="transform: rotate(90deg);font-size:9px;font-weight:normal"></span>Insert tab/devider</div>'               
+                       +'style="transform: rotate(90deg);font-size:9px;font-weight:normal"></span>Insert tab/divider</div>'               
                         
                    +'<div class="edit_rts_sel" style="padding:2px 4px;width: 102px;" title="Requirement type">'
                         +'<select class="edit_rts s_reqtype"><option>required</option><option>recommended</option><option>optional</option>'

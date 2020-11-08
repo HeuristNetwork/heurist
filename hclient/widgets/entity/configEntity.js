@@ -354,7 +354,7 @@ $.widget( "heurist.configEntity", {
 
         if(fileName.trim()==''){
             if(this.options.saveOnExit){
-                fileName = 'Temporary list for '+window.hWin.HEURIST4.rectypes.names[entity_ID];
+                fileName = 'Temporary list for '+$Db.rty(entity_ID,'rty_Name');
             }else{
                 window.hWin.HEURIST4.msg.showMsgFlash('Name not defined');
                 return;

@@ -712,7 +712,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 var fieldname = sequence[i].field;
                 var hierarchy = sequence[i].hierarchy;
 
-                var title = window.hWin.HEURIST4.rectypes.names[recTypeID];
+                var title = $Db.rty(recTypeID, 'rty_Name');
                 
                 var counts = _getInsertUpdateCounts( i );
                 if(!(counts[2]==0 && counts[0]>0)){ //not completely matching
@@ -738,7 +738,6 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
 
                 if($.isArray(fields) && fields.length>0){
                     
-                    var idx_title = window.hWin.HEURIST4.rectypes['typedefs']['dtFieldNamesToIndex']['rst_DisplayName'];
                     var j, prev_rt = fields[fields.length-1];
                     
                     for(j=fields.length-1;j>=0;j--){
@@ -747,9 +746,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                                var field_id = field.substr(0,k);
                                var rt_id = field.substr(k+1);
                                
-                               var recStruc = window.hWin.HEURIST4.rectypes['typedefs'][prev_rt]['dtFields'];
-                               var field_title = recStruc[field_id][idx_title];
-                               var rt_title = window.hWin.HEURIST4.rectypes.names[rt_id];                               
+                               var field_title = $Db.rst(prev_rt, field_id, 'rst_DisplayName');
+                               var rt_title = $Db.rty(rt_id,'rty_Name');
                                prev_rt = rt_id;
                                
                                 sid_fields =  sid_fields + ((j<fields.length-2)?'<br class="hid_temp">':'')   // class="hid_temp"
@@ -841,8 +839,6 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
 
         var fields = rtOrder['fields'], levels = rtOrder['levels'];
         
-        var idx_reqtype = window.hWin.HEURIST4.rectypes['typedefs']['dtFieldNamesToIndex']['rst_RequirementType'];
-        
         var i, j, new_selected=[];
 
         for (i=0;i<selected_fields.length;i++){ //loop all selected
@@ -857,7 +853,6 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
              if(field['depend'] && field['depend'].length>0){
                 
                 var rt_id = field['rt_id']; 
-                var recStruc = window.hWin.HEURIST4.rectypes['typedefs'][rt_id]['dtFields'];    
                 var ft_ids = [];
                
                 //todo! if any of required field keys are checked do not include
@@ -866,7 +861,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 for (j=0;j<field['depend'].length;j++){ 
                     var f_key = field['depend'][j];
                     var ft_id = _getFt_ID(f_key);
-                    if(recStruc[ft_id][idx_reqtype]=='required' 
+                    if($Db.rst(rt_id, ft_id, 'rst_RequirementType')=='required' 
                         && levels[selected_fields[i]]<levels[f_key]) {
                         //&& ft_ids.indexOf(ft_id)<0){
                         
@@ -932,9 +927,6 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 treeElement.empty();
                 
                 var depList = $('<div id="dep_list">').appendTo(treeElement);
-                
-                var idx_reqtype = window.hWin.HEURIST4.rectypes['typedefs']['dtFieldNamesToIndex']['rst_RequirementType'];
-                var idx_title = window.hWin.HEURIST4.rectypes['typedefs']['dtFieldNamesToIndex']['rst_DisplayName'];
                 
                 var isfirst_dep = true;
                 var top_offset = 0; //padding for label
@@ -1017,8 +1009,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                                         var field_id = _getFt_ID(field_key)
                                         var parent_field_key = hierarchy[1];
                                         var parent_rt = _getRt_ID(parent_field_key);
-                                        var recStruc = window.hWin.HEURIST4.rectypes['typedefs'][parent_rt]['dtFields'];
-                                        is_required = (recStruc[field_id][idx_reqtype]=='required');
+
+                                        is_required = ($Db.rst(parent_rt, field_id, 'rst_RequirementType')=='required');
                                     }
                                     
                                     sRectypeItem = sRectypeItem + '<div style="display:inline-block">'
@@ -1059,9 +1051,9 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                                     var rt_field = rtOrder['fields'][rt_field_key];
 
                                     var field_id = _getFt_ID(rt_field_key);
-                                    var recStruc = window.hWin.HEURIST4.rectypes['typedefs'][field['rt_id']]['dtFields'];
-                                    var field_title = recStruc[field_id][idx_title];
-                                    var is_required = (recStruc[field_id][idx_reqtype]=='required');
+
+                                    var field_title = $Db.rst(field['rt_id'], field_id, 'rst_DisplayName');
+                                    var is_required = ($Db.rst(field['rt_id'], field_id, 'rst_RequirementType')=='required');
                                     
                                     sid_fields =  
                                     '<div style="display:inline-block;">'
@@ -1148,9 +1140,9 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                             rt_added.push(parent_rt+'.'+rt_field_key);
 
                             var field_id = _getFt_ID(rt_field_key);
-                            var recStruc = window.hWin.HEURIST4.rectypes['typedefs'][field['rt_id']]['dtFields'];
-                            var field_title = recStruc[field_id][idx_title];
-                            var is_required = (recStruc[field_id][idx_reqtype]=='required');
+
+                            var field_title = $Db.rst(field['rt_id'], field_id, 'rst_DisplayName');
+                            var is_required = ($Db.rst(field['rt_id'], field_id, 'rst_RequirementType')=='required');
                             
                             var sid_fields =  
                             '<div style="padding-left:'+(depth*2+1)+'em;display:inline-block;">'
@@ -1436,7 +1428,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
     //
     function _fillDependencyList(rectypeTree, rtOrder, depth, parent_field_key){
 
-         var rectypes = window.hWin.HEURIST4.rectypes;
+
          var i, j, k, recTypeID, parent_rectype_id = '';
          
          if(depth==0){
@@ -1449,7 +1441,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 rtOrder['fields'][parent_field_key] = {
                                     title:  window.hWin.HEURIST4.util.trim_IanGt(rectypeTree.title),
                                     rt_id:  rectypeTree.key,
-                                    rt_title: rectypes.names[rectypeTree.key],
+                                    rt_title: $Db.rty(rectypeTree.key,'rty_Name'),
                                     id_field: _getColumnNameForPresetIndex(parent_rectype_id),
                                     depend:[]
                                 }                
@@ -1523,7 +1515,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                                     title:  field_title,
                                     parent_rt_id: parent_rectype_id,
                                     rt_id:  recTypeID,
-                                    rt_title: rectypes.names[recTypeID],
+                                    rt_title: $Db.rty(recTypeID,'rty_Name'),
                                     id_field:  id_fieldname,
                                     required: field['required'],
                                     depth: depth,
@@ -1599,7 +1591,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
     function _getColumnNameForPresetIndex(recTypeID, sname){
         
         var k, 
-          sname = (sname ?sname :window.hWin.HEURIST4.rectypes.names[recTypeID]) +' H-ID'; // this is default name for index field 
+          sname = (sname ?sname :$Db.rty(recTypeID,'rty_Name')) +' H-ID'; // this is default name for index field 
                                                                               // to be added into import table
         var rts = Object.keys(imp_session['indexes']);
         for(k=0; k<rts.length; k++){
@@ -1644,8 +1636,6 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             }
         }
             
-        var recStruc = window.hWin.HEURIST4.rectypes;    
-        
         var idx_id_fieldname = _getFieldIndexForIdentifier(currentSeqIndex);
         
         if (idx_id_fieldname<0) { //id field is not created
@@ -2589,7 +2579,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             if($('#sa_match0').is(':checked')){ // normal matching
                 
                  shelp = 'Please select one or more columns on which to match <b>'
-                 + window.hWin.HEURIST4.rectypes.names[rtyID]
+                 + $Db.rty(rtyID,'rty_Name')
     + '</b> in the incoming data against records already in the database.'
     + '<br>Note: do not use columns containing multiple values for matching, as this will generate multiple records per input line.'
     + '<br>To force creation of all new records, select columns and map to a field which will never match<br><br>';
@@ -2622,7 +2612,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                      }
                      /*old version of message
                        shelp = shelp + 'It appears that you already have <b>'
-                            + window.hWin.HEURIST4.rectypes.names[rtyID]
+                            + $Db.rty(rtyID,'rty_Name')
                             + '</b>. '+counts[1]+' rows in import table that match for '
                             + (counts[0]!=counts[1]?counts[0]:'')+' existing records';
                       if(counts[2]>0){
@@ -2633,7 +2623,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 }else{
                 
                     shelp = shelp + 'It does not match any <b>'
-                            +window.hWin.HEURIST4.rectypes.names[rtyID]+'</b> record, hence '
+                            +$Db.rty(rtyID,'rty_Name')+'</b> record, hence '
                                 +(key_idx>=0 && imp_session['uniqcnt'][key_idx]>0
                                         ?imp_session['uniqcnt'][key_idx]:imp_session['reccount'])
                                 +' records will be added.';
@@ -2644,7 +2634,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
 
                 shelp = 'By choosing not to match the incoming data, you will create '
                     +imp_session['reccount']+' new <b>'
-                    +window.hWin.HEURIST4.rectypes.names[rtyID]+'</b> records - that is one record for every row in import file?<br><br>';
+                    +$Db.rty(rtyID,'rty_Name')+'</b> records - that is one record for every row in import file?<br><br>';
 
                 if(key_idx>=0){
                     shelp = shelp + ' The identification field "'+imp_session['columns'][key_idx]+'" will be filled with new record IDs.' 
@@ -2952,7 +2942,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         var key_idx = _getFieldIndexForIdentifier(currentSeqIndex); 
         if(!(key_idx>=0)){
             window.hWin.HEURIST4.msg.showMsgErr('You must select a record identifier column for <b>'
-                + window.hWin.HEURIST4.rectypes.names[ rtyID ]
+                + $Db.rty(rtyID,'rty_Name')
                 +'</b> in the first section below. This is used to identify the records to be created/updated');
             return;
         }
@@ -2977,7 +2967,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             window.hWin.HEURIST4.msg.showMsgErr(
                 'You have not mapped any columns in the incoming data to fields in the record, '
                 +'so the records created would be empty. Please select the fields which should '
-                +'be imported into "'+window.hWin.HEURIST4.rectypes.names[rtyID]+'" records.');
+                +'be imported into "'+$Db.rty(rtyID,'rty_Name')+'" records.');
 
             return;
         }
@@ -3002,7 +2992,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
  
         if(insertFieldsNotYetSet){
             window.hWin.HEURIST4.msg.showMsgDlg(
-                'You have not selected any additional fields to insert into the "'+window.hWin.HEURIST4.rectypes.names[rtyID]
+                'You have not selected any additional fields to insert into the "'+$Db.rty(rtyID,'rty_Name')
                 +'" records to be created (n = '+counts[2]+'). This may result in placeholder records containing incomplete data. '
                 +'Are you sure?', 
                 __doPrepareStart, {title:'Warning',yes:'Proceed',no:'Cancel'});
@@ -3169,7 +3159,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             window.hWin.HEURIST4.msg.showMsgErr(
 'You have not mapped any columns in the incoming data to fields in the record, '
 +'so the records created would be empty. Please select the fields which should '
-+'be imported into "'+window.hWin.HEURIST4.rectypes.names[rtyID]+'" records.');
++'be imported into "'+$Db.rty(rtyID,'rty_Name')+'" records.');
             return;
         }
         
@@ -3256,7 +3246,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                         msg = msg +'</td></tr></table>';
                         
                         window.hWin.HEURIST4.msg.showMsgDlg(msg, null, 
-                                'Import of '+window.hWin.HEURIST4.rectypes.names[rtyID]+' complete.');
+                                'Import of '+$Db.rty(rtyID,'rty_Name')+' complete.');
                         
                         //if everything is added - skip to next step
                         var counts = _getInsertUpdateCounts( currentSeqIndex );
@@ -3325,8 +3315,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 
                 var idx_id_fieldname = rts[k].substr(6); //'field_'
                 if(idx_id_fieldname>imp_session['columns'].length){
-                    var recTypeID = imp_session['indexes'][rts[k]];
-                    var sname = window.hWin.HEURIST4.rectypes.names[recTypeID] +' H-ID';
+                    var rtyID = imp_session['indexes'][rts[k]];
+                    var sname = $Db.rty(rtyID,'rty_Name') +' H-ID';
                     header_flds.push(sname);
                 }
             }
@@ -3659,14 +3649,6 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
 
                     //all this code only for small asterics
                     var rtyID = imp_session['sequence'][currentSeqIndex]['rectype'];
-                    var recStruc = null;
-                    var idx_reqtype;
-                    
-                    if(rtyID){
-                        recStruc = window.hWin.HEURIST4.rectypes['typedefs'][rtyID]['dtFields'];
-                        idx_reqtype = window.hWin.HEURIST4.rectypes['typedefs']['dtFieldNamesToIndex']['rst_RequirementType'];
-                    }
-
 
     /*
         //find distinct terms values
@@ -3750,11 +3732,10 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                         
                         var dt_id2 = (dt_id>0) ?dt_id :dt_id.substr(0,dt_id.indexOf('_'));
                         
-                        if(!recStruc || !recStruc[dt_id2]){
+                        if($Db.rst(rtyID, dt_id2)==null){
                             console.log('ERROR: field '+dt_id2+' not found for '+rtyID);
-                            console.log(recStruc);                            
                         }else
-                        if(recStruc[dt_id2][idx_reqtype] == "required"){
+                        if($Db.rst(rtyID, dt_id2, 'rst_RequirementType') == "required"){
                             colname = colname + "*";
                         }
                         
@@ -4236,7 +4217,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 
                
                 var shelp = 'Now select the columns which you wish to import into fields in the <b>'
-                + (window.hWin.HEURIST4.rectypes.names[rtyID]?window.hWin.HEURIST4.rectypes.names[rtyID]:'')
+                + ($Db.rty(rtyID,'rty_Name')?$Db.rty(rtyID,'rty_Name'):'')
                 + '</b>  records which are '
                 + (to_be_inserted>0 ?'created ':'')
                 + (both_insert_and_update?' or ':'')
