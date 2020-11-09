@@ -1359,7 +1359,7 @@ prof =Profile
 
 //console.log('getEntityData '+entityName);
                     var det = 'list';
-                    if(response.data.entityName=='defRecStructure'){
+                    if(entityName=='defRecStructure'){
                         det = 'full';   
                     }
 
