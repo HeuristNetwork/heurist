@@ -88,7 +88,7 @@
                         "rst_DisplayHelpText": "Detailed description of the record type, providing an explanation of its content. A good description here is important for future documentation of the database." 
                     }
                 },
-                 {
+                {
                     "dtID": "rty_TitleMask",
                     "dtFields":{
                         "dty_Type":"freetext",
@@ -96,9 +96,22 @@
                         "rst_DisplayWidth":60,
                         "rst_DisplayName": "Title mask",
                         "rst_DisplayHelpText": "The title mask is a string into which data field values are inserted to create a constructed title for each record, e.g. [Title], pp. [Start_Page]-[End_Page] renders a title such as \"Alice in Wonderland, pp. 37-39\". The constructed title is displayed in search results and other lists. [ ] encloses a field name. To insert [ or ], use [[ or ]]",
-                        "rst_RequirementType":"required"
+                        "rst_RequirementType":"required",
+                        "dty_Role":"virtual"
                     }
-                },               
+                }, 
+                {
+                    "dtID": "rty_CanonicalTitleMask",
+                    "dtFields":{
+                        "dty_Type":"freetext",
+                        "dty_Size":5000,
+                        "rst_DisplayWidth":60,
+                        "rst_DisplayName": "Title mask in codes",
+                        "rst_RequirementType":"optional",
+                        "rst_Display":"hidden",
+                        "dty_Role":"virtual"
+                    }
+                }, 
                 {
                     "dtID": "rty_ReferenceURL",
                     "dtFields":{

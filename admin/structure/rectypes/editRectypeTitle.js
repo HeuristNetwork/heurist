@@ -568,9 +568,10 @@ function EditRectypeTitle() {
             var newvalue = document.getElementById('rty_TitleMask').value;
             if(newvalue != window.hWin.HEURIST4.util.getUrlParameter('mask', location.search)){
                 
-                var typedef = window.hWin.HEURIST4.rectypes.typedefs[_rectypeID];
+                //var typedef = window.hWin.HEURIST4.rectypes.typedefs[_rectypeID];
+                //typedef.commonFields[ window.hWin.HEURIST4.rectypes.typedefs.commonNamesToIndex.rty_TitleMask ] = newvalue;
                 
-                typedef.commonFields[ window.hWin.HEURIST4.rectypes.typedefs.commonNamesToIndex.rty_TitleMask ] = newvalue;
+                window.hWin.HEURIST4.dbs.rty(_rectypeID, 'rty_TitleMask', newvalue);
                 
                 var _defs = {};
                 _defs[_rectypeID] = [{common:[newvalue],dtFields:[]}];

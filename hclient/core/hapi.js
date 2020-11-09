@@ -1358,12 +1358,20 @@ prof =Profile
                 if($.isEmptyObject(entity_data[entityName]) || force_reload==true){
 
 //console.log('getEntityData '+entityName);
+                    var det = 'list';
+                    if(response.data.entityName=='defRecStructure'){
+                        det = 'full';   
+                    }
 
-                    _callserver('entityScrud', {a:'search', 'entity':entityName, 'details':'list'},
+                    _callserver('entityScrud', {a:'search', 'entity':entityName, 'details':det},
                        function(response){
                             if(response.status == window.hWin.ResponseStatus.OK){
                                 
                                 entity_data[response.data.entityName] = new hRecordSet(response.data);    
+                                
+                                if(response.data.entityName=='defRecStructure'){
+                                    window.hWin.HAPI4.EntityMgr.createRstIndex();
+                                }                                
                                 
                                 if($.isFunction(callback)){
                                         callback(entity_data[response.data.entityName]);  

@@ -42,72 +42,98 @@ class DbDefRecTypes extends DbEntityBase
     public function search(){
 
         if(parent::search()===false){
-              return false;   
+            return false;   
         }        
+
+        $calculatedFields = null;
         
         $needCount = false; //find usage by records
         $needCheck = false;
-        
+
         //compose WHERE 
         $where = array();
         $from_table = array($this->config['tableName']);
-        
+
         $pred = $this->searchMgr->getPredicate('rty_ID');
         if($pred!=null) array_push($where, $pred);
 
         $pred = $this->searchMgr->getPredicate('rty_Name');
         if($pred!=null) array_push($where, $pred);
-        
+
         //find rectype belong to group
         $pred = $this->searchMgr->getPredicate('rty_RecTypeGroupID');
         if($pred!=null) array_push($where, $pred);
-        
+
         if(@$this->data['details']==null) $this->data['details'] = 'full';
-        
+
         //compose SELECT it depends on param 'details' ------------------------
         if(@$this->data['details']=='id'){
-        
+
             $this->data['details'] = 'rty_ID';
-            
+
         }else if(@$this->data['details']=='name'){
 
             $this->data['details'] = 'rty_ID,rty_Name';
 
         }else if(@$this->data['details']=='count'){
-            
+
             $this->data['details'] = 'rty_ID,rty_Name';
             $needCount = true;
-            
+
         }else if(@$this->data['details']=='list'){
-            
+
             $this->data['details'] = 'rty_ID,rty_Name,rty_Description,rty_ShowInLists,rty_Status,rty_RecTypeGroupID';
             //$needCount = true;  //need count only for all groups
-            
+
         }else if(@$this->data['details']=='full'){
 
             $this->data['details'] = 'rty_ID,rty_Name,rty_OrderInGroup,rty_Description,rty_TitleMask,rty_Plural,'
             .'rty_Status,rty_OriginatingDBID,rty_IDInOriginatingDB,rty_ShowInLists,rty_RecTypeGroupID,rty_ReferenceURL,'
             .'rty_ShowURLOnEditForm,rty_ShowDescriptionOnEditForm,rty_Modified';
-            
+
             $needCount = true;
+
+
+            $calculatedFields = function ($fields, $row=null) {
+
+                if($row==null){
+                    array_push($fields, 'rty_CanonicalTitleMask');
+                    return $fields;   
+                }else{
+
+                    $idx = array_search('rty_TitleMask', $fields);
+                    if($idx!==false){
+                        $fileid = $row[$idx]; 
+                        
+                        $mask_concept_codes = $row[$idx];
+                        array_push($row, $mask_concept_codes); //keep
+                        $row[$idx] = TitleMask::execute($mask_concept_codes, $row[0], 2, null, _ERR_REP_SILENT);
+                    }else{
+                        array_push($row, '');
+                    }
+
+                    return $row;
+                }
+            };
+
             
         }else{
             $needCheck = true;
         }
-        
+
         if(!is_array($this->data['details'])){ //specific list of fields
             $this->data['details'] = explode(',', $this->data['details']);
         }
-        
+
         //validate names of fields
         if($needCheck && !$this->_validateFieldsForSearch()){
             return false;
         }
-        
+
         //----- order by ------------
         //compose ORDER BY
         $order = array();
-        
+
         $value = @$this->data['sort:rty_Modified'];
         if($value!=null){
             array_push($order, 'rty_Modified '.($value>0?'ASC':'DESC'));
@@ -122,14 +148,14 @@ class DbDefRecTypes extends DbEntityBase
                 }
             }
         }  
-         
+
         if($needCount){ //find count of records by rectype
-        
+
             $query2 = 'SELECT count(r0.rec_ID) from Records r0 ';
             $where2 = ' WHERE (r0.rec_RecTypeID=rty_ID) ';
-                
+
             $usr_ID = $this->system->get_user_id();
-                
+
             if(($usr_ID>0) || ($usr_ID===0)){
                 $conds = $this->_getRecordOwnerConditions($usr_ID);
                 $query2 = $query2 . $conds[0];
@@ -139,31 +165,29 @@ class DbDefRecTypes extends DbEntityBase
             }
 
             array_push($this->data['details'], '('.$query2.$where2.') as rty_RecCount');
-                
+
         }
-        
+
         $is_ids_only = (count($this->data['details'])==1);
-            
+
         //compose query
         $query = 'SELECT SQL_CALC_FOUND_ROWS  '.implode(',', $this->data['details'])
         .' FROM '.implode(',', $from_table);
 
-         if(count($where)>0){
+        if(count($where)>0){
             $query = $query.' WHERE '.implode(' AND ',$where);
-         }
-         if(count($order)>0){
+        }
+        if(count($order)>0){
             $query = $query.' ORDER BY '.implode(',',$order);
-         }
-         
-         $query = $query.$this->searchMgr->getLimit().$this->searchMgr->getOffset();
+        }
 
-        $calculatedFields = null;
-        
+        $query = $query.$this->searchMgr->getLimit().$this->searchMgr->getOffset();
+
         $result = $this->searchMgr->execute($query, $is_ids_only, $this->config['entityName'], $calculatedFields);
-        
+
         return $result;
     }
-    
+
     //
     //
     //

@@ -1145,13 +1145,20 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                             function(response){
                                 if(response.status == window.hWin.ResponseStatus.OK){
                                     
-                                    //show edit structure popup
+                                    //refresh local defs and show edit structure popup
+                                    window.hWin.HAPI4.EntityMgr.getEntityData('defRecStructure', true,
+                                    function(){
+                                        that._onActionListener(null, {recID:recID, action:'editstr'} );
+                                    });
+
+                                    /*
                                     window.hWin.HEURIST4.dbs.rtyRefresh(recID, 
                                     function(){
                                         that._onActionListener(null, {recID:recID, action:'editstr'} );
                                         var rtg_ID = $Db.rty(recID,'rty_RecTypeGroupID');
                                         that.updateGroupCount(rtg_ID, 1);
                                     });
+                                    */
                                     
                                 }else{
                                     window.hWin.HEURIST4.msg.showMsgErr(response);      

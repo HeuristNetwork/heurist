@@ -1385,7 +1385,8 @@ window.hWin.HEURIST4.dbs = {
     
     //
     // refresh record type in HEURIST4.rectypes
-    //
+    // was in use after creation of new recordtype
+/* NOT USED ANYMORE    
     rtyRefresh: function( rty_ID, callback ){
         
             if(!(rty_ID>0)) rty_ID = 'all';
@@ -1413,7 +1414,7 @@ window.hWin.HEURIST4.dbs = {
             })
         
     },
-    
+*/    
     //
     //
     //
