@@ -33,6 +33,7 @@ define('PDIR','../../');  //need for proper path to js and css
 require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
 require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_structure.php');
 require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_records.php');
+require_once(dirname(__FILE__).'/../../hsapi/structure/dbsTerms.php');
 
 $mysqli = $system->get_mysqli();
 
@@ -404,8 +405,7 @@ You can edit the record type structure by clicking on the name in the list below
                 <?php 
                 foreach ($rtysWithInvalidRectypeConstraint as $row) {
                     ?>
-                    <div class="msgline"><b><a href="#" onclick='{ onEditRtStructure(<?= $row['rst_RecTypeID'] ?>); return false}'><?= $row['rst_DisplayName'] ?></a></b> field (code <?= $row['dty_ID'] ?>) in record type <?= $row['rty_Name'] ?>  has invalid
-                        <?= ($row['dty_ID']=='resource'?'record ID ':'term ID ').$row['rst_DefaultValue'] ?>
+                    <div class="msgline"><b><a href="#" onclick='{ onEditRtStructure(<?= $row['rst_RecTypeID'] ?>); return false}'><?= $row['rst_DisplayName'] ?></a></b> field (code <?= $row['dty_ID'] ?>) in record type <?= $row['rty_Name'] ?>  has invalid default value (<?= ($row['dty_ID']=='resource'?'record ID ':'term ID ').$row['rst_DefaultValue'] ?>)
                     </div>
                     <?php
                 }//for
@@ -1102,6 +1102,12 @@ onclick="{var ids=get_selected_by_name('recCB5'); if(ids){document.getElementByI
             $is_first = true;
             while ($row = $res->fetch_assoc()){ 
                 //verify value
+/*DEBUG                
+                $res = VerifyValue::getAllowedTerms($row['dty_JsonTermIDTree'], null, $row['dty_ID']);
+print ("<br> >>>>".$row['dtl_Value']);                
+print ('<br>'.implode(',',$res).'<br>');                
+print ('<br>'.in_array($row['dtl_Value'], $res));                
+*/
                 if(  !in_array($row['dtl_ID'], $dtl_ids) &&  //already non existant
                 trim($row['dtl_Value'])!="" &&
                 !VerifyValue::isValidTerm($row['dty_JsonTermIDTree'], $row['dty_TermIDTreeNonSelectableIDs'], $row['dtl_Value'], $row['dty_ID'] ))

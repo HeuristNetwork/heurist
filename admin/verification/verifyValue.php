@@ -1,5 +1,5 @@
 <?php
-//@TODO wrap to class
+//@TODO wrap to class - use DbsTerms class
 
 /**
 * verifyValue.php - library of functions to verify values - pointers and terms to conform to
@@ -24,6 +24,12 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
+//getAllowedTerms
+//isValidTerm
+//isValidTermLabel
+//isValidTermCode
+//isValidPointer
+
 class VerifyValue {
 
      /**
@@ -40,7 +46,8 @@ class VerifyValue {
     private static $dtyIDDefs_labels = array();  //with hierarchy
     private static $dtyIDDefs_labels_plain = array(); //without hierarchy
     private static $dtyIDDefs_codes = array();
-    private static $terms = array();
+    private static $terms = null;
+    private static $dbs_terms = null;
 
     private static function initialize()
     {
@@ -84,7 +91,27 @@ public static function getAllowedTerms($defs, $defs_nonsel, $dtyID){
     if($dtyID==null || !@self::$dtyIDDefs[$dtyID]){ //detail type ID is not defined or terms are already found
     
         self::$system->defineConstant('DT_RELATION_TYPE');
-
+        
+        if ( $dtyID == DT_RELATION_TYPE) {
+            $parent_id = 'relation';
+        }else if(is_array($defs) && count($defs)==1){
+            $parent_id = $defs[0];
+        }else{
+            $parent_id = $defs;
+        }
+        if($parent_id==null || $parent_id==''){
+            $allowed_terms = 'all';
+        }else{
+            if(self::$terms==null){
+               self::$terms = dbs_GetTerms(self::$system); 
+               self::$dbs_terms = new DbsTerms(self::$system, self::$terms);
+            }  
+            $allowed_terms = self::$dbs_terms->treeData($parent_id, 3);
+        }
+        
+        self::$dtyIDDefs[$dtyID] = $allowed_terms;
+        
+/*
         if ( $dtyID == DT_RELATION_TYPE) {
             //get all root terms (vocabs)
             $allowed_terms = getTermListAll(self::$mysqli, 'relation'); //from db_structure
@@ -119,6 +146,7 @@ public static function getAllowedTerms($defs, $defs_nonsel, $dtyID){
 
             }
         }
+*/        
     }else{
         //take from store 
         $allowed_terms = self::$dtyIDDefs[$dtyID];
@@ -137,7 +165,7 @@ public static function getAllowedTerms($defs, $defs_nonsel, $dtyID){
 public static function isValidTerm($defs, $defs_nonsel, $id, $dtyID){
 
     $allowed_terms = self::getAllowedTerms($defs, $defs_nonsel, $dtyID);
-
+    
     return $allowed_terms && ($allowed_terms === "all" || in_array($id, $allowed_terms));
 }
 

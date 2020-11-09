@@ -26,6 +26,7 @@
     *  getTermLabel
     *  getTermCode
     *  getTerm
+    *  getVocabs - for specified domain
     *  getSiblings
     *  treeData($parent_id, $mode) - returns tree of flat array of children ids
     *  addNewTerm
@@ -34,7 +35,6 @@
     *  getTopMostTermParent
     *  doDisambiguateTerms
     *  getSameLevelLabelsAndCodes
-    *  getAllowedTermsForField
     */
     
 class DbsTerms
@@ -208,6 +208,13 @@ class DbsTerms
         }
         return $term;
     }
+    
+    //
+    // get all vocabularies OR for given domain
+    //
+    public function getVocabs($domain){
+        return array_keys(@$this->data['treesByDomain'][$domain]);
+    }
 
     //
     // NOT USED
@@ -243,28 +250,37 @@ class DbsTerms
             $res = array();    
         }
         
-        $children = @$this->data['trm_Links'][$parent_id];
-        
-        if(is_array($children) && count($children)>0){
-
-            foreach($children as $trm_ID){
-
-                if($mode==1){ //tree
-                    $res[$parent_id][$trm_ID] = array(); 
-                }else if($mode==3){
-                    array_push($res, $trm_ID);
-                }else{
-                    array_push($res, strtolower($this->getTermLabel($trm_ID)));
-                }
-                
+        if($parent_id=='relation'){
+            //find all vocabulary with domain "relation"
+            $vocab_ids = $this->getVocabs('relation');
+            foreach($vocab_ids as $trm_ID){
                 $res2 = $this->treeData($trm_ID, $mode);
-                if(count($res2)>0){
-                    if($mode==1){ 
-                        //tree
-                        $res[$trm_ID] = $res2;
-                    }else{ 
-                        //flat array
-                        $res = array_merge($res,$res2);
+                $res = array_merge($res,$res2);
+            }
+        }else{
+        
+            $children = @$this->data['trm_Links'][$parent_id];
+            if(is_array($children) && count($children)>0){
+
+                foreach($children as $trm_ID){
+
+                    if($mode==1){ //tree
+                        $res[$parent_id][$trm_ID] = array(); 
+                    }else if($mode==3){
+                        array_push($res, $trm_ID);
+                    }else{
+                        array_push($res, strtolower($this->getTermLabel($trm_ID)));
+                    }
+                    
+                    $res2 = $this->treeData($trm_ID, $mode);
+                    if(count($res2)>0){
+                        if($mode==1){ 
+                            //tree
+                            $res[$trm_ID] = $res2;
+                        }else{ 
+                            //flat array
+                            $res = array_merge($res,$res2);
+                        }
                     }
                 }
             }
