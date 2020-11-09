@@ -3531,6 +3531,8 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
         //show-hide help text below fields - it overrides comptency level
         window.hWin.HEURIST4.ui.switchHintState2(ishelp_on, $(this.element));
         
+        this._afterInitEditForm_restoreGroupStatus();
+        
         //
         //
         //        

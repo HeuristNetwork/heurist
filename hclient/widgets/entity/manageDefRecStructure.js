@@ -369,8 +369,11 @@ dty_TermIDTreeNonSelectableIDs
                         var isSep = (sType=='separator');
                         var title = recset.fld(record,'rst_DisplayName');
                         var req = recset.fld(record,'rst_RequirementType');
-                        if(!isSep ){
-                            title = '<span style="padding-left:10px">' + title 
+                        if(isSep ){
+                            title = '<span data-dtid="'+dty_ID+'">' + title 
+                                    +'</span>';
+                        }else{
+                            title = '<span data-dtid="'+dty_ID+'" style="padding-left:10px">' + title 
                                     +'</span>';
 //'<span style="font-size:smaller;"> ('+$Db.baseFieldType[sType]+')</span>';
                         }
@@ -589,6 +592,7 @@ dty_TermIDTreeNonSelectableIDs
                        }
                        var ele = node.find('.svs-contextmenu3'); //$(event.target).children('.svs-contextmenu3');
                        ele.hide();//css('visibility','hidden');
+                       that.previewEditor.find('div[data-dtid]').removeClass('ui-state-active');
                }               
                
                $(item).hover(
@@ -601,6 +605,13 @@ dty_TermIDTreeNonSelectableIDs
                        }
                        var ele = $(node).find('.svs-contextmenu3');
                        ele.css('display','inline-block');//.css('visibility','visible');
+                       
+                       //highlight in preview
+                       var dty_ID = $(node).find('span[data-dtid]').attr('data-dtid');
+                       that.previewEditor.find('div[data-dtid]').removeClass('ui-state-active');
+                       if(dty_ID>0)
+                       that.previewEditor.find('div[data-dtid="'+dty_ID+'"]').addClass('ui-state-active');
+                       
                    }
                );               
                $(item).mouseleave(
@@ -1732,9 +1743,12 @@ console.log('No active tree node!!!!')
         }
     },
     
+    //-not used
     _composeTreeItem: function(title, type, req){
         
-        if(type!='separator'){
+        if(type=='separator'){
+            title = '<span data-dtid="'+dty_ID+'">' + title +'</span>';
+        }else{
             title =  '<span style="padding-left:10px;">' + title 
                     + '</span>';
 //'<span style="font-size:smaller;"> ('+$Db.baseFieldType[type]+')</span>';
@@ -1896,8 +1910,10 @@ console.log('No active tree node!!!!')
                         var isSep = (sType=='separator');
                         var title = fieldvalues['rst_DisplayName'];
                         var req = fieldvalues['rst_RequirementType'];
-                        if(!isSep){
-                            title =  '<span style="padding-left:10px">' + title 
+                        if(isSep){
+                            title = '<span data-dtid="'+recID+'">' + title +'</span>';
+                        }else{
+                            title =  '<span  data-dtid="'+recID+'" style="padding-left:10px">' + title 
                                         + '</span>';
 //'<span style="font-size:smaller;"> ('+$Db.baseFieldType[sType]+')</span>';
                         }
@@ -2059,7 +2075,7 @@ console.log('No active tree node!!!!')
             node.remove();
         }
         
-        this._showRecordEditorPreview();  
+        this._showRecordEditorPreview(); //redraw 
         
     },
     

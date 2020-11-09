@@ -1659,6 +1659,9 @@ this._time_debug = fin_time;
     //
     _initEditForm_step2: function(recID){
     
+        this._keepPos = 0; 
+        this._keepTabsStatus = {};            
+        
         if(!(recID==null || this.options.edit_mode=='none')){
         
         var isOpenAready = false;
@@ -1767,9 +1770,19 @@ this._time_debug = fin_time;
     reloadEditForm: function( hard_reload ){
         //this._initEditForm_step3(this._currentEditID);
             
-        var keepPos = 0;            
+        this._keepPos = 0; 
+        this._keepTabsStatus = {};            
         if(this._editing){
-            keepPos = this.editForm.scrollTop();
+            this._keepPos = this.editForm.scrollTop();
+            
+            //keepTabsStatus
+            var that = this;
+            this.editForm.find('div[data-group-dtid]').each(function(i,ele){
+                ele = $(ele);
+                that._keepTabsStatus[ ele.attr('data-group-dtid') ] = ele.tabs('instance')
+                    ? ele.tabs('instance').options.active //ele.tabs('option','active')
+                    : ele.accordion('option','active');
+            });
         }
         
         if(hard_reload===true){
@@ -1778,8 +1791,7 @@ this._time_debug = fin_time;
         }else{
             this._initEditForm_step4(null);
         }
-       
-        this.editForm.scrollTop(keepPos);
+        
     },
 
     //
@@ -1906,6 +1918,28 @@ this._time_debug = fin_time;
         
         //old way window.hWin.HEURIST4.ui.switchHintState('prefs_'+this._entityName, this.element, false);
         window.hWin.HEURIST4.ui.applyCompetencyLevel(-1, this.editForm); 
+        
+        this._afterInitEditForm_restoreGroupStatus();
+    },
+    
+    //
+    //restore status for accordions and tabs
+    //
+    _afterInitEditForm_restoreGroupStatus: function(){
+        for (var dtID in this._keepTabsStatus) if(dtID>0) {
+            var ele = this.editForm.find('div[data-group-dtid="'+dtID+'"]');
+            if(ele.length>0){
+                if(ele.tabs('instance')){
+                    ele.tabs('option','active',this._keepTabsStatus[dtID]);
+                }else if(ele.accordion('instance')){
+                    ele.accordion('option','active',this._keepTabsStatus[dtID]);
+                }
+            }   
+        }
+        if(this._keepPos>0){
+console.log('scroll '+this._keepPos);            
+            this.editForm.scrollTop(this._keepPos);  
+        } 
     },
 
     //

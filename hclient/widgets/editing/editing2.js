@@ -227,9 +227,14 @@ function hEditing(_options) {
                             //header(tabs)
                             groupEle = $('<div>').appendTo(groupContainer);
                             groupTabHeader = $('<ul>').appendTo(groupEle);
+                            
                         }else{
                             groupEle = null;
                         }
+                        if(groupEle && fields[idx].dtID>0){
+                                groupEle.attr('data-group-dtid', fields[idx].dtID);
+                        }
+                        
                         tab_index = 0;
                     }
                     
