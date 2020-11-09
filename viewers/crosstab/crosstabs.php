@@ -46,7 +46,7 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPage.php');
 
         <script type="text/javascript" src="crosstabs.js"></script>
 
-        <div style="margin:0px auto; padding: 0.5em;">
+        <div style="margin:0px auto; padding: 0.5em; height: 100%;overflow: auto;">
 
             <div id="qform" class="disign-content" style="width:100%;">
                 <div style="position: absolute;top:20px;left:450px;width:200px"><img src="crosstabs_image.png"/></div>

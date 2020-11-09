@@ -1064,7 +1064,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
         }
 
 
-        var currow_val, row_interval_idx;
+        var currow_val=-1, row_interval_idx;
 
         //create output array, calculate totals
         for (idx in records){
@@ -1395,10 +1395,10 @@ function CrosstabsAnalysis(_query, _query_domain) {
     }
 
     function fitToInterval(type, values, val){
-        val = parseFloat(val);
         if(type=="enum" || type=="resource" || type=="relationtype"){
             return (values.indexOf(val)>=0);
         }else{
+            val = parseFloat(val);
             return (val>=values[0] && val<=values[1]);
         }
     }
