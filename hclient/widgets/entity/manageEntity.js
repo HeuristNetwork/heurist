@@ -877,9 +877,10 @@ $.widget( "heurist.manageEntity", {
 
         var that = this;        
         var btn_array = [
-                 {text:window.hWin.HR((this.options.edit_mode=='popup' || that.options.isdialog)?'Close':'Drop Changes'), 
+                 {text:window.hWin.HR((this.options.edit_mode=='popup' || this.options.isdialog)?'Close':'Drop Changes'), 
                     id:'btnRecCancel',
-                    css:{'visibility':(this.options.edit_mode=='popup'?'visible':'hidden')
+                    css:{'visibility':(this.options.edit_mode=='popup' || 
+                                (that.options.edit_mode=='editonly' && that.options.isdialog) ?'visible':'hidden')
                         ,'float':'right',margin:'.5em .4em .5em 0'}, 
                     click: function() { 
                         if(that.options.edit_mode=='popup') {
@@ -1365,9 +1366,14 @@ $.widget( "heurist.manageEntity", {
             
             window.hWin.HEURIST4.msg.showMsgFlash(this.options.entity.entityTitle+' '+window.hWin.HR('has been saved'));
             if(this.options.edit_mode=='popup'){
-                
+                                                      
                 this._currentEditID = null;
                 this.editFormPopup.dialog('close');
+                
+            }else if (this.options.edit_mode=='editonly' && this.options.isdialog){
+                
+                this._currentEditID = null;
+                this._getEditDialog(true).dialog('close'); //_as_dialog
                 
             }else if(this.options.edit_mode=='inline'){
                     //reload
@@ -1566,7 +1572,8 @@ this._time_debug = fin_time;
         var ele = this._toolbar;
         if(ele){
             var btn = ele.find('#btnRecCancel');
-            if(this.options.edit_mode!='popup' && !btn.hasClass('alwaysvisible')) { //for popup and editonly always visible
+            if( this.options.edit_mode!='popup' && !(this.options.edit_mode=='editonly' && this.options.isdialog)
+                 && !btn.hasClass('alwaysvisible')) { //for popup and editonly always visible
                     btn.css('visibility', mode);
             }
             ele.find('#btnRecSave').css('visibility', mode);

@@ -1110,6 +1110,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                     
         }
         
+        $Db.rty().setRecord(recID, fieldvalues);
         this._super( recID, fieldvalues );
         
         if(this.it_was_insert){

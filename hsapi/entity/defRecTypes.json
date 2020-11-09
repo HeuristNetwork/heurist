@@ -21,7 +21,7 @@
                         "dty_Type":"integer",
                         "dty_Role":"primary",
                         "rst_DisplayName": "ID:",
-                        "rst_Display":"readonly"
+                        "rst_Display":"readonly"  
                     }
                 },
                 {
