@@ -16,22 +16,147 @@
 </head>
 <body>
     <div id="content" style="padding:10px">
+        
+        <p>
+<b>Explore</b> is the workhorse function that allows you to make use of the data recorded in a database*
+The core function of <b>Explore</b> is filtering the database to isolate a subset of the database to which some sort of listing, analysis, visualisation or export will be applied (filter also acts as a simple search to locate information to look through eg. a reference, web bookmark or images). This workflow, from filter through results list or subset to reading, visualization, analysis and output, is represented in the left-to-right flow across the Explore screen – filter building and saved filters on the left, results listing in the middle, and various visualisations and outputs on the right. 
+        </p>
+        <p>
+<i>* If you don't yet have any data in this  database you are first going to need Design and Populate</i>
+        </p>
+
+        
+        <div style="min-height:250px">
+        <img src="context_help/assets/explore-menu.png" style="float:left;min-width: 210px;padding:15px;"/>
+        <div>
         <h3>Explore menu</h3>
         <p>
-            Explore menu context help. Explore menu context help. Explore menu context help. Explore menu context help. Explore menu context help. Explore menu context help. Explore menu context help. Explore menu context help. Explore menu context help. Explore menu context help. Explore menu context help. Explore menu context help. Explore menu context help. Explore menu context help. 
+This is the starting point for all information retrieval.
+<ul>
+<li><b>Entities</b> - a list of filters for specific entity types (Favourites or most used)</li> 
+<li><b>Filter builder</b> - a form which hides the complexity of writing filter strings</li> 
+<li><b>Facets builder</b> - a wizard to build sophisticated multi-level facet filters and rule sets</li> 
+<li><b>Save filter</b> - saves the current filter into the tree of saved filters for reuse</li> 
+<li><b>Set as subset</b> – restrict further actions to the current subset</li> 
+</ul>        
         </p>
-        <h3>More content to be provided</h3>
+        </div>
+        </div>
+
+
+        <div style="min-height:120px">
+        <img src="context_help/assets/explore-filter-builder.png" width="190" style="float:left;min-width: 210px;padding:15px;"/>
+        <div>
+        <h3>Filter builder</h3>
         <p>
-Heurist is an online database designed for digital research objects including bibliographic records,[1] web bookmarks, historical events, document annotations, images, contemporary stories and other data which is rich in text and classification data, and often heterogeneous.[2] Heurist was originally designed by Ian Johnson (from 2005) and developed by the (now disbanded) Arts eResearch unit (AeR) at the University of Sydney. It continues to be developed within the Faculty of Arts. It was released as Open Source software in May 2013 (version 3.1.0), originally on Google Code, later moved to GitHub, and a free web service for low-demand academic databases is available at https://heuristplus.sydney.edu.au/ - other free services are listed in the project web site (http://HeuristNetwork.org).
+The Filter builder provides an easy way of building queries of moderate complexity. Simple searches, such as a partial string match on title, can be entered directly in the filter fields or constructed with the Filter builder.         
+<img src="context_help/assets/explore-search.png" style="padding:15px;"/> 
+        </p>
+        </div>
+        </div>
+        
+        
+        <div style="min-height:350px">
+        <img src="context_help/assets/explore-filter-list.png" style="float:left;min-width: 210px;padding:15px;"/>
+        <div>
+        <h3>Saved filters</h3>
+        <p>
+Heurist allows the saving of filter criteria which become entries in a tree of saved filters, visible below the menu entries in the Explore menu. 
         </p>
         <p>
-Heurist was developed to overcome two problems identified as common to researchers in the Humanities (and others):
+These saved filters can be simply a predefined filter which generates a given subset of the database for a specific purpose (eg. sets of things you need regularly or a list to be displayed in a website), or they can be facet filters (which will be familiar from online shopping sites) which provide a guided pathway allowing interactive exploration of the database through the display of subsets according to the selections made. 
         </p>
         <p>
-the technical expertise required to set up rich heterogeneous databases with relationships between entities, and to publish data selectively to the web
-the fragmentation of research data across many separate incompatible databases
-It aims to tackle the first issue by providing a web service supporting the on-demand creation and configuration of new databases through a web interface. It aims to tackle the second issue by allowing the storage and interlinking of a wide variety of research data, notes, annotations and digital attachments in a single shared database, while providing individual ‘views’ on this data and workgroup-owned and private areas for research in progress.[3][4]
+Saved filters (simple or facet) can also be created directly from the list of saved filters by clicking on the   icon or right-clicking on the list. The dropdown menu also allows the creation of folders within the list, editing and deletion, and other functions. Filters can be moved by drag and drop.
         </p>
+        <p>
+Note also that saved filters are organized by workgroup, to allow database managers to create different sets of filters for different groups of users – for example the filters needed by volunteer data collectors or filters to be displayed on a CMS website (a Website Filters workgroup is defined by default). 
+        </p>
+        </div>
+        </div>
+
+        <div style="min-height:350px">
+        <img src="context_help/assets/explore-filter-facets.png" style="float:left;min-width: 210px;padding:15px;"/>
+        <div>
+        <h3>Facet filters and rule sets</h3>
+        <p>
+Heurist has a very sophisticated system for building facet filters (on-the-fly searches) and rules. 
+The facets builder is not restricted to building facets on the attributes (fields) of a single selected entity type. It can drill down into the connections between entity types to allow selection on the attributes of related records at several levels removed. The choices are made from a treeview of attributes which can be expanded to view the attributes of connected entity types.
+        </p>
+        <p>
+The facet builder can also apply rules to traverse the network of connections to find entities which are connected to the results of a facet filter. Rulesets can be created and used independently.
+        </p>
+        <p>
+These queries – built on the fly - allow a range of sophisticated instant analyses, without programming, along the lines of “select all the organisations which have published books written by female authors who have degrees from a University located in London”. 
+        </p>
+        <p>
+Facet filters can be embedded into websites generated by the Heurist CMS.
+        </p>
+        </div>
+        </div>        
+
+        <div style="min-height:350px">
+        <img src="context_help/assets/explore-view-record.png" style="float:left;min-width: 210px;padding:15px;"/>
+        <div>
+        <h3>Record view</h3>
+        <p>
+Ipsum dolor...        
+        </p>
+        </div>
+        </div>
+
+        <div style="min-height:350px">
+        <img src="context_help/assets/explore-view-list.png" style="float:left;min-width: 210px;padding:15px;"/>
+        <div>
+        <h3>List view</h3>
+        <p>
+Ipsum dolor...        
+        </p>
+        </div>
+        </div>
+        
+        <div style="min-height:350px">
+        <img src="context_help/assets/explore-view-map.png" style="float:left;min-width: 210px;padding:15px;"/>
+        <div>
+        <h3>Map and timeline</h3>
+        <p>
+Ipsum dolor...        
+        </p>
+        </div>
+        </div>
+
+        <div style="min-height:350px">
+        <img src="context_help/assets/explore-reports.png" style="float:left;min-width: 210px;padding:15px;"/>
+        <div>
+        <h3>Custom report</h3>
+        <p>
+Ipsum dolor...        
+        </p>
+        </div>
+        </div>
+        
+        <div style="min-height:350px">
+        <img src="context_help/assets/explore-view-net.png" style="float:left;width:190px;min-width: 210px;padding:15px;"/>
+        <div>
+        <h3>Network view</h3>
+        <p>
+Ipsum dolor...        
+        </p>
+        </div>
+        </div>
+        
+
+        <div style="min-height:350px">
+        <img src="context_help/assets/explore-view-crosstabs.png" style="float:left;min-width: 210px;padding:15px;"/>
+        <div>
+        <h3>Crosstabulation</h3>
+        <p>
+Ipsum dolor...        
+        </p>
+        </div>
+        </div>
+        
+        
     </div>
 </body>
 </html>
