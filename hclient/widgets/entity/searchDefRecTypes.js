@@ -105,35 +105,47 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
         this.element.find('#div_search_group').hide();
         
         if( this.options.simpleSearch){
-            this.element.find('#div_search_group').hide();
             this.element.find('#input_sort_type_div').hide();
         }else{
-            /*
-            this.reloadGroupSelector();
+            if(smode=='select_multi'){
+                
+                this.element.find('#btn_ui_config').hide();
+                this.element.find('#div_show_all_groups').hide();
+                this.element.find('#div_group_information').hide();
+                this.element.find('#input_sort_type').parent().hide();
+                this.input_search.parent().show();
+                
+                this.element.find('#btn_ui_config').parent().css({'float':'none'});
+                this.element.find('#inner_title').parent().css({'float':'none',position:'absolute',top:'40px'});
+                
+                this.element.find('#inner_title')
+                    .css('font-size','smaller')
+                    .text('Not finding the record type you require?');
+                this.btn_add_record
+                    .button({label: 'Define new record type'});
+                
+                this.element.find('#div_search_group').show();
+                this.input_search_group = this.element.find('#input_search_group');   //rectype group
+
+                window.hWin.HEURIST4.ui.createRectypeGroupSelect(this.input_search_group[0], 
+                            [{key:'any',title:'all groups'}]);
+                this._on(this.input_search_group,  { change:this.startSearch });
         
-            //@todo - possible to remove
-            if( this.options.rtg_ID>0 ){
-                this.input_search_group.parent().hide();
-                this.input_search_group.val(this.options.rtg_ID);
-            }else if( this.options.rtg_ID<0 ){  //addition of recctype to group
-                //find any rt not in given group
-                //exclude this group from selector
-                this.input_search_group.find('option[value="'+Math.abs(this.options.rtg_ID)+'"]').remove();
+                
             }else{
-                this.btn_find_record.hide();
-            }
-            */
-                 
+                
+                this.btn_ui_config = this.element.find('#btn_ui_config')
+                        //.css({'width':'6em'})
+                        .button({label: window.hWin.HR("Configure UI"), showLabel:false, 
+                                icon:"ui-icon-gear", iconPosition:'end'});
+                if(this.btn_ui_config){
+                    this._on( this.btn_ui_config, {
+                            click: this.configureUI });
+                }
             
-            this.btn_ui_config = this.element.find('#btn_ui_config')
-                    //.css({'width':'6em'})
-                    .button({label: window.hWin.HR("Configure UI"), showLabel:false, 
-                            icon:"ui-icon-gear", iconPosition:'end'});
-            if(this.btn_ui_config){
-                this._on( this.btn_ui_config, {
-                        click: this.configureUI });
+                
             }
-            
+
         }
        
         if($.isFunction(this.options.onInitCompleted)){
@@ -244,6 +256,11 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
 
 
     },
+    
+    reloadGroupSelector: function(){
+        
+    },
+
 
 /*    
     // NOT USED
@@ -383,33 +400,35 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
                         request['rty_ID_local'] = '=0';
                 }
                 
+            }else if(this.options.select_mode=='select_multi'){
+                    if(this.input_search_group.val()>0){
+                        request['rty_RecTypeGroupID'] = this.input_search_group.val();
+                        this.options.rtg_ID = request['rty_RecTypeGroupID'];
+                    }else{
+                        this.options.rtg_ID = null;
+                    }
+                    
             }else{
             
-            if( this.options.rtg_ID<0 ){
-                //not in given group
-                request['not:rty_RecTypeGroupID'] = Math.abs(this.options.rtg_ID);
-            }
-        
-            var sGroupTitle = '<h4 style="margin:0">';
-            if(!this.element.find('#chb_show_all_groups').is(':checked') && this.options.rtg_ID>0){
-                this.input_search.parent().hide();
+                if( this.options.rtg_ID<0 ){
+                    //not in given group
+                    request['not:rty_RecTypeGroupID'] = Math.abs(this.options.rtg_ID);
+                }
+            
+                var sGroupTitle = '<h4 style="margin:0">';
+                if(!this.element.find('#chb_show_all_groups').is(':checked') && this.options.rtg_ID>0){
+                    this.input_search.parent().hide();
 
-                request['rty_RecTypeGroupID'] = this.options.rtg_ID;
-                sGroupTitle += ($Db.rtg(this.options.rtg_ID,'rtg_Name')
-                                    +'</h5><div class="heurist-helper3 truncate" style="font-size:0.7em">'
-                                    +$Db.rtg(this.options.rtg_ID,'rtg_Description')+'</div>');
-            }else{
-                this.input_search.parent().show();
-                sGroupTitle += 'All Groups</h4><div class="heurist-helper3" style="font-size:0.7em">All record type groups</div>';
-            }
-            this.element.find('#div_group_information').html(sGroupTitle);
+                    request['rty_RecTypeGroupID'] = this.options.rtg_ID;
+                    sGroupTitle += ($Db.rtg(this.options.rtg_ID,'rtg_Name')
+                                        +'</h5><div class="heurist-helper3 truncate" style="font-size:0.7em">'
+                                        +$Db.rtg(this.options.rtg_ID,'rtg_Description')+'</div>');
+                }else{
+                    this.input_search.parent().show();
+                    sGroupTitle += 'All Groups</h4><div class="heurist-helper3" style="font-size:0.7em">All record type groups</div>';
+                }
+                this.element.find('#div_group_information').html(sGroupTitle);
         
-/*            
-            if(this.input_search_group.val()>0){
-                request['rty_RecTypeGroupID'] = this.input_search_group.val();
-                this.options.rtg_ID = request['rty_RecTypeGroupID'];
-            }
-*/            
             }
             
             this.input_sort_type = this.element.find('#input_sort_type');

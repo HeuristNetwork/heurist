@@ -1629,7 +1629,7 @@ prof =Profile
                 };
             }
             if(window.hWin.HEURIST4.util.isempty(name)){
-                return that.currentUser['ugr_Preferences'];
+                return that.currentUser['ugr_Preferences']; //returns all preferences
             }else{
                 var res = that.currentUser['ugr_Preferences'][name];
 
@@ -1660,6 +1660,7 @@ prof =Profile
         // limit - to save limited list of ids - for example: last selected tags
         //
         save_pref: function(name, value, limit){
+
                 //window.hWin.HAPI4.SystemMgr.save_prefs({'map_viewpoints': map_viewpoints});
 
                 if($.isArray(value) && limit>0) {

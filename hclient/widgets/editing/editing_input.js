@@ -1509,6 +1509,25 @@ $.widget( "heurist.editing_input", {
                 
                 var sels = that.newvalues[$input.attr('id')];//$(event.target).attr('id')];
                 
+                var rg_options = {
+                    select_mode: 'select_multi',
+                    edit_mode: 'popup',
+                    isdialog: true,
+                    width: 440,
+                    selection_on_init:sels?sels.split(','):[],
+                    onselect:function(event, data){
+                        
+                        if(data && data.selection){
+                            var newsel = data.selection;
+                            that._findAndAssignTitle($input, newsel);
+                            that.newvalues[$input.attr('id')] = newsel.join(',');
+                            that.onChange();
+                        }
+                    }
+                }
+                
+                window.hWin.HEURIST4.ui.showEntityDialog('defRecTypes', rg_options);
+/*                
                 var sURL =  window.hWin.HAPI4.baseURL + "admin/structure/rectypes/selectRectype.html?type=" 
                         + that.detailType  + "&dtID=" + that.options.recID +"&ids=" 
                         + sels
@@ -1532,6 +1551,7 @@ $.widget( "heurist.editing_input", {
                         that.onChange();
                     }
                 });
+*/                
             }
             
             //replace input with div
@@ -2684,6 +2704,7 @@ console.log('onpaste');
                 that.input_img.find('img').prop('src', res.url);
                 that.newvalues[$(that.inputs[0]).attr('id')] = res.path;  //$input
                 that.onChange(); 
+                
                 
                 //HARDCODED!!!! sync icon or thumb to defRecTypes
                 if(res.path.indexOf('setup/iconLibrary/')>0){

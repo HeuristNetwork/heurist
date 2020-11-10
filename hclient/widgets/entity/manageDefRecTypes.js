@@ -40,7 +40,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
 //rtyid,'ccode','addrec','filter','count','group','icon','edit','editstr','name','description','show','duplicate','fields','status'        
         fields:['count','icon','editstr','name','description','show','duplicate','fields','status'] 
         },
-    
+        
     //
     //                                                  
     //    
@@ -75,11 +75,16 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             //this.options.height = 640;
         }else
         //for selection mode set some options
-        if(this.options.select_mode!='manager'){
+        if(this.options.select_mode!='manager' && this.options.select_mode!='select_multi'){
             this.options.width = (isNaN(this.options.width) || this.options.width<750)?750:this.options.width;                    
             //this.options.edit_mode = 'none'
         }
         
+        if(this.options.select_mode=='select_multi'){
+        //    this.options.width = 440;
+        }
+            
+            
         this._super();
         
         
@@ -122,6 +127,8 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         this.searchForm.css({padding:'6px', 'min-width': '660px'});
         this.recordList.css({'min-width': '660px'});
         this.searchForm.parent().css({'overflow-x':'auto'});
+
+        this.options.ui_params = window.hWin.HEURIST4.util.cloneJSON( this.getUiPreferences() );
         
         //init viewer 
         var that = this;
@@ -165,26 +172,29 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                                     //delay: 200
                                 });   
                     }});
+                    
+        }else if(this.options.select_mode=='select_multi'){
+            this.recordList.resultList({ 
+                    show_toolbar: true,
+                    view_mode:'list',
+                    show_viewmode: false,
+                    list_mode_is_table: true});
+                   
+            this.searchForm.css({padding:'6px', 'min-width': '420px'});
+            this.recordList.css({'min-width': '420px'});
+                   
+         
+            this.options.ui_params.width = 440;
+            this.options.ui_params.fields = ['icon','name','fields'];
         }
-        
+                    
+
         //may overwrite resultList behaviour
         if(this.options.recordList){
             this.recordList.resultList( this.options.recordList );
         }
 
-        /* to remove
-        this.searchFormList = $('<div class="ent_content_full searchForm-list" style="display:none;width:170px"/>')
-                    .insertAfter(this.recordList);
-        if(this.searchFormList.length>0){
-            this.options.searchFormList =  this.searchFormList;
-        }
-        */
-        
-        this.options.ui_params = this.getUiPreferences();
 
-//console.log( 'initControls  ' + (new Date().getTime() / 1000 - this._time_debug));
-//this._time_debug = new Date().getTime() / 1000;
-        
         this.options.onInitCompleted =  function(){
 
 //console.log( 'onInitCompleted  ' + (new Date().getTime() / 1000 - that._time_debug));
@@ -223,8 +233,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                 that._loadData( true );
             }
 
-            that.changeUI(event, that.options.ui_params);    
-            
+            that.changeUI(null, that.options.ui_params);    
         }
         
         this.searchForm.searchDefRecTypes(this.options);
@@ -581,7 +590,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
 
         var html = '';
         
-        var fields = this.usrPreferences.fields;
+        var fields = this.options.ui_params.fields;// usrPreferences.fields;
 //console.log(fields);
         //fields = ['rtyid','ccode','addrec','filter','count','group','icon','edit','editstr','name','description','show','duplicate','fields','status'];        
         
@@ -593,6 +602,8 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                     +     '<span class="ui-button-icon-primary ui-icon '+icon+'" style="color:'+color+'"></span>'
                     + '</div></div>'            
         }
+        
+        var title_width = (this.options.select_mode=='select_multi')?'315px':'120px';
 
         var grayed = '';
         var i = 0;
@@ -626,7 +637,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                 case 'editstr': 
                     html += __action_btn('editstr','ui-icon-pencil','Click to edit structure');
                     break;
-                case 'name':  html += fld2('rty_Name','120px'); break;
+                case 'name':  html += fld2('rty_Name',title_width); break;
                 case 'description':  
                     html += fld2('rty_Description',null,null,
                         'min-width:320px;max-width:320px;width:50%;font-style:italic;font-size:smaller'); break;
@@ -1206,15 +1217,12 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
     //
     getUiPreferences:function(){
         this.usrPreferences = window.hWin.HAPI4.get_prefs_def('prefs_'+this._entityName, this.defaultPrefs);
-        /*if(this.usrPreferences.width<600) this.usrPreferences.width=600;
-        if(this.usrPreferences.height<300) this.usrPreferences.height=300;
-        if (this.usrPreferences.width>this.defaultPrefs.width) this.usrPreferences.width=this.defaultPrefs.width;
-        if (this.usrPreferences.height>this.defaultPrefs.height) this.usrPreferences.height=this.defaultPrefs.height;*/
         return this.usrPreferences;
     },
     
     saveUiPreferences:function(new_params){
-        
+
+        if(this.options.select_mode=='select_multi') return true;
         if(new_params){
             var params = this.getUiPreferences();
             
