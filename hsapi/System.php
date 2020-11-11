@@ -1133,31 +1133,41 @@ error_log(print_r($_REQUEST, true));
             }
         }
         
-        $is_https = (@$_SERVER['HTTPS']!=null && $_SERVER['HTTPS']!='');
-        session_name('heurist-sessionid');
-        //session_set_cookie_params ( 0, '/', '', $is_https);
-        session_cache_limiter('none');
+        //if(session_id() == '' || !isset($_SESSION)) {
+        if (session_status() != PHP_SESSION_ACTIVE) {
+            
+            $is_https = (@$_SERVER['HTTPS']!=null && $_SERVER['HTTPS']!='');
+            session_name('heurist-sessionid');
+            //session_set_cookie_params ( 0, '/', '', $is_https);
+            session_cache_limiter('none');
+            
+            if (@$_COOKIE['heurist-sessionid']) { //get session id from cookes 
+                session_id($_COOKIE['heurist-sessionid']);
+                @session_start();
+                
+            } else {   //session does not exist - create new one and save on cookies
+                @session_start();
+                //$session_id = session_id();
+                //setcookie('heurist-sessionid', $session_id, 0, '/', '', $is_https ); //create new session - REM
+            }
+        }
         
-        if (@$_COOKIE['heurist-sessionid']) { //get session id from cookes 
-            session_id($_COOKIE['heurist-sessionid']);
-            @session_start();
-
+        if (session_status() == PHP_SESSION_ACTIVE) {
+            
             if (@$_SESSION[$this->dbname_full]['keepalive']) {
                 //update cookie - to keep it alive for next 30 days
                 $time = time() + 30*24*60*60;
                 $session_id = $_COOKIE['heurist-sessionid'];
-                $cres = setcookie('heurist-sessionid', $session_id, $time, '/', '', $is_https ); //start_my_session
-if($cres==false){                    
-    error_log('CANNOT UPDATE COOKIE '.$session_id.'   '.$this->dbname_full);                
-}
+                $cres = setcookie('heurist-sessionid', $session_id, $time, '/', '', $is_https );
+                if($cres==false){                    
+                    error_log('CANNOT UPDATE COOKIE '.$session_id.'   '.$this->dbname_full);                
+                }
             }
-            
-            
-        } else {   //session does not exist - create new one and save on cookies
-            @session_start();
-            //$session_id = session_id();
-            //setcookie('heurist-sessionid', $session_id, 0, '/', '', $is_https ); //create new session - REM
+                
+        }else{
+            return false;
         }
+        
         
 //        @session_start();
 
