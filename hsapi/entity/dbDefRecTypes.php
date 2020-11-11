@@ -333,6 +333,10 @@ class DbDefRecTypes extends DbEntityBase
             if(@$this->records[$idx]['rty_IDInOriginatingDB']==''){
                 $this->records[$idx]['rty_IDInOriginatingDB'] = 0;
             }
+            if(@$this->records[$idx]['rty_NonOwnerVisibility']==''){
+                $this->records[$idx]['rty_NonOwnerVisibility'] = 'viewable';
+            }
+            
             $this->records[$idx]['rty_Modified'] = date('Y-m-d H:i:s'); //reset
             
             $this->records[$idx]['is_new'] = (!(@$this->records[$idx]['rty_ID']>0));
@@ -359,6 +363,7 @@ class DbDefRecTypes extends DbEntityBase
                 $rty_ID = @$record['rty_ID'];
                 if($rty_ID>0 && in_array($rty_ID, $ret)){
                     
+                    $query = null;
                     if($record['is_new']){
                         //1. if new add default set of fields TODO!
                         /*if($isAddDefaultSetOfFields){
@@ -378,7 +383,10 @@ class DbDefRecTypes extends DbEntityBase
                         $query = 'UPDATE defRecTypes SET rty_LocallyModified=IF(rty_OriginatingDBID>0,1,0)'
                                 . ' WHERE rty_ID = '.$rty_ID;
                     }
-                    mysql__exec_param_query($mysqli, $query, null);
+                    if($query!=null){
+                        mysql__exec_param_query($mysqli, $query, null);    
+                    }
+                    
                         
                     //3. update titlemask - from names to ids
                     $mask = @$record['rty_TitleMask'];

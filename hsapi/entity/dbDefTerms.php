@@ -501,7 +501,11 @@ class DbDefTerms extends DbEntityBase
                 
                     foreach($trm_IDs as $trm_ID){
                     
-                        if(@$this->data['new_ParentTermID']>0){
+                        if(@$this->data['new_ParentTermID']>0)
+                        {   
+                            //do not add child terms as reference if parent is already added as reference
+                            //'SELECT trm_ID FROM defTerms WHERE trm_ParentTermID='.$trm_ID
+                            
                             $res = mysql__select_value($mysqli, 
                             'SELECT trl_TermID FROM defTermsLinks WHERE trl_ParentID='
                                 .$this->data['new_ParentTermID']
@@ -519,6 +523,21 @@ class DbDefTerms extends DbEntityBase
                             }
                         }
                         if(@$this->data['old_ParentTermID']>0){
+                            
+                                //can not delete reference if this is real parent
+                                if(!(@$this->data['new_ParentTermID']>0))
+                                {   
+                                    $parent_id = mysql__select_value($mysqli, 
+                                    'SELECT trm_ParentTermID FROM defTerms where trm_ID='.$trm_ID);
+                                    if(parent_id == $this->data['old_ParentTermID']){
+                                        $this->system->addError(HEURIST_ERROR, 
+                                        'Term can not be orphaned', $mysqli->error);
+                                        $ret =false;
+                                        break;
+                                    }
+                                }
+                            
+                            
                                 $ret = $mysqli->query(
                                     'delete from defTermsLinks where trl_ParentID='
                                     .$this->data['old_ParentTermID'].' AND trl_TermID='.$trm_ID);

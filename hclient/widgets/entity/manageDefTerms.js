@@ -77,7 +77,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                     that.refreshRecordList();
                     //that._loadData();
                 }else
-                if(data && ((data.type == 'vcg' && that.options.auxilary=='vocabulary') 
+                if(data && (((data.type == 'vcg'||data.type == 'vocabulary') && that.options.auxilary=='vocabulary') 
                             || ((data.type == 'vocabulary'||data.type == 'term') && that.options.auxilary=='term')
                            )){
                     that._filterByVocabulary();
@@ -1563,11 +1563,21 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 var vocab_id = $Db.getTermVocab(recID);
                 var isRef = (this.options.trm_VocabularyID!=vocab_id);
                 if(isRef){
+                    
+                    var t_idx = window.hWin.HAPI4.EntityMgr.getEntityData('trm_Links'); 
+                    var k = window.hWin.HEURIST4.util.findArrayIndex(recID, t_idx[this.options.trm_VocabularyID]);
+                    if(k<0){
+                        window.hWin.HEURIST4.msg.showMsgDlg('This term is added as reference via its parent. '
+                        +'You can remove this reference along with it parents only');
+                        return;
+                    }
+                    
                     window.hWin.HEURIST4.msg.showMsgDlg(
                         'You are going to remove the term reference. Actual term retains. Proceed?', 
                         function(){ 
                             //find parent 
-                            var parent_id = $Db.trm(recID, 'trm_ParentTermID');
+                            var parent_id = that.options.trm_VocabularyID;
+
                             if(parent_id>0){
                                 that.setTermReferences(null, recID, parent_id);
                             }
@@ -1736,6 +1746,11 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
     setTermReferences: function(new_vocab_id, term_IDs, old_vocab_id){
         
             if(new_vocab_id>0){
+                //@todo!!!!!!
+                // exclude all second level terms in case if their direct parent 
+                // presents in this list or already belongs to vocab
+                
+                
                 //addition - check that selected terms are already in this vocabulary
                 var trm_ids = $Db.trm_TreeData(new_vocab_id, 'set');
                 for(var i=0; i<term_IDs.length; i++){
@@ -1745,6 +1760,11 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                         return;
                     }
                 }
+            }
+            if(old_vocab_id>0){
+                //
+                
+                
             }
       
             var request = {
@@ -1780,6 +1800,9 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         
     },
     
+    //
+    //
+    //
     changeParentInIndex: function(new_parent_id, term_ID, old_parent_id){
 
             var t_idx = window.hWin.HAPI4.EntityMgr.getEntityData('trm_Links'); 

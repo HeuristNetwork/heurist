@@ -313,15 +313,27 @@ class DbsTerms
         return $lvl_src;
     }
 
-    
-    
+    //
+    //
+    //    
+    public function isTermLinked($parent_id, $term_id){
+
+        if(@$this->data['trm_Links'][$parent_id]){
+            return in_array($term_id, $this->data['trm_Links'][$parent_id] );
+        }
+        return false;
+    }
+        
     //
     //
     //
     public function addNewTermRef($parent_id, $new_term_id){
         
         if(@$this->data['trm_Links'][$parent_id]){
-            $this->data['trm_Links'][$parent_id][] = $new_term_id;
+            
+            if( !in_array($new_term_id, $this->data['trm_Links'][$parent_id] )){
+                $this->data['trm_Links'][$parent_id][] = $new_term_id;
+            }
         }else{
             $this->data['trm_Links'][$parent_id] = array($new_term_id);
         }

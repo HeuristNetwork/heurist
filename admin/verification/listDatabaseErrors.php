@@ -315,9 +315,9 @@ $rtysWithInvalidRectypeConstraint = @$lists["rt_defvalues"];
 
             <?php
             
-            if (count(@$dtysWithInvalidTerms)>0 || 
-                count(@$dtysWithInvalidNonSelectableTerms)>0 || 
-                count(@$dtysWithInvalidRectypeConstraint)>0){
+            if ( ($dtysWithInvalidTerms && is_array($dtysWithInvalidTerms) && count($dtysWithInvalidTerms)>0) || 
+($dtysWithInvalidNonSelectableTerms && is_array($dtysWithInvalidNonSelectableTerms) && count($dtysWithInvalidNonSelectableTerms)>0) || 
+($dtysWithInvalidRectypeConstraint && is_array($dtysWithInvalidRectypeConstraint) && count($dtysWithInvalidRectypeConstraint)>0)){
                 ?>
                 <script>
                     function repairFieldTypes(){
@@ -394,7 +394,7 @@ $rtysWithInvalidRectypeConstraint = @$lists["rt_defvalues"];
                 print '<br/><h3 class="res-valid">OK: All field type definitions are valid</h3>';
             }
 
-            if(count(@$rtysWithInvalidRectypeConstraint)>0){
+            if($rtysWithInvalidRectypeConstraint && is_array($rtysWithInvalidRectypeConstraint) && count($rtysWithInvalidRectypeConstraint)>0){
             ?>
                 <br/><p><br/></p><h3>Warning: Wrong field default values for record type structures</h3><br/>&nbsp;<br/>
 

@@ -348,6 +348,8 @@ function createRectypes($commonNames, $rt, $isAddDefaultSetOfFields, $convertTit
                     $titleMask = $val;
                 }else if ($colName == "rty_Name"){
                     $rty_Name = $val;
+                }else if ($colName == "rty_NonOwnerVisibility" && $val==''){
+                    $val = 'viewable';
                 }
 
                 if($query!="") {

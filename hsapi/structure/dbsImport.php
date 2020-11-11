@@ -1217,21 +1217,33 @@ $mysqli->commit();
             //find term by concept code among local terms
             $new_term_id = $this->targetTerms->findTermByConceptCode($term_import[$idx_ccode], $domain);
 
+/*            
+if($term_id==11 || $term_id==518 || $term_id==497){
+    error_log('!!!!');
+}
+*/
+            
             if($new_term_id){
                 //this term aready exists in target - add it as reference to this vocabulary
-                if($parent_id>0){
+                if($parent_id>0){ //this is not vocabulary
                     
-                    //this is not vocabulary
+                    //check that this term is already in vocab
                     if(!in_array($new_term_id, $all_terms_in_vocab)){
-                        //add as reference
-                        $res = addTermReference($parent_id, $new_term_id, $this->system->get_mysqli()); //see saveStructureLib
-                        if($res!==false){
+                        
+                        //for second level references: term may refer to real parent
+                        if($this->targetTerms->isTermLinked($parent_id, $new_term_id)){
                             array_push($all_terms_in_vocab, $new_term_id);
-                            $this->targetTerms->addNewTermRef($parent_id, $new_term_id); //add in memory
-                            
                         }else{
-                            //$this->system->addError(HEURIST_ERROR, "Can't add reference ".$term_id.' to '.$parent_id);
-                            return false;
+                            //add as reference
+                            $res = addTermReference($parent_id, $new_term_id, $this->system->get_mysqli()); //see saveStructureLib
+                            if($res!==false){
+                                array_push($all_terms_in_vocab, $new_term_id);
+                                $this->targetTerms->addNewTermRef($parent_id, $new_term_id); //add in memory
+                                
+                            }else{
+                                //$this->system->addError(HEURIST_ERROR, "Can't add reference ".$term_id.' to '.$parent_id);
+                                return false;
+                            }
                         }
                     }
                 }else{
@@ -1248,7 +1260,7 @@ $mysqli->commit();
                 $term_import[$idx_inverseid] = @$this->terms_correspondence[$term_import[$idx_inverseid]]; //@todo - after all terms addition?
                 
                 //get level - all terms of the same level - to search same name and codes
-                
+                //1317-3790 Org type selection
                 //verify that code and label is unique for the same vocabulary in target(local) db
                 if($parent_id==null){
                     //for vocabularies
