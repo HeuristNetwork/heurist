@@ -1529,7 +1529,9 @@ function outputDetail($dt, $value, $rt, $depth = 0, $outputStub) {
             if($rectype_templates){
                 makeTag('detail', $attrs, $value);
             }else{
+                openTag('detail', $attrs);
                 outputDateDetail($attrs, $value);
+                closeTag('detail');
             }
         } else {
             openTag('detail', $attrs);
