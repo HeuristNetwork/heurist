@@ -203,3 +203,8 @@ body.popup {
     box-shadow: 0px 1px 3px #00000033;
     border-radius: 4px;
 }
+
+/* narrow scroll for saved filters list */
+div.svs-list-container::-webkit-scrollbar {
+    width: 6px;
+}

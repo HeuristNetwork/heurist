@@ -125,7 +125,9 @@ $.widget( "heurist.svs_list", {
         
             //this.search_tree.css({top:'36px',bottom:'0px', width:'100%', 'padding-top':'6px', position:'absolute','font-size':'0.9em'});
             
-            this.accordeon = $( "<div>" ).css({'top':36, 'bottom':0, 'width':'100%','position': 'absolute', 'overflow':'auto','font-size':'0.9em'})
+            this.accordeon = $( "<div>" )
+                .addClass('svs-list-container')
+                .css({'top':36, 'bottom':0, 'width':'100%','position': 'absolute', 'overflow':'auto','font-size':'0.9em'})
                         .appendTo( this.search_tree );
                         
                         

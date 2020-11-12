@@ -1357,6 +1357,10 @@ console.log('No active tree node!!!!')
         //fill init values of virtual fields
         //add lister for dty_Type field to show hide these fields
         //var elements = this._editing.getInputs('dty_Type');
+        var edit_ele = this._editing.getFieldByName('rst_PtrFilteredIDs');
+        if(edit_ele){
+            edit_ele.editing_input('option','showclear_button',false);
+        }
         edit_ele = this._editing.getFieldByName('dty_Type');
         if(edit_ele){
             edit_ele.editing_input('option','showclear_button',false);
@@ -1364,6 +1368,7 @@ console.log('No active tree node!!!!')
             window.hWin.HEURIST4.util.setDisabled(ele, true);
             this._onDetailTypeChange();
         }
+        
         
         
         //add show explanation checkbox
@@ -1387,7 +1392,7 @@ console.log('No active tree node!!!!')
         if(dt_type=='separator'){
             
             var sep_type;
-            if(false && window.hWin.HAPI4.database.indexOf('Casey')>=0){
+            if(false){  //HARDCODE for Casey databases  && window.hWin.HAPI4.database.indexOf('Casey')>=0
                 sep_type = 'group';
                 edit_ele = this._editing.getFieldByName('rst_SeparatorType');
                 edit_ele.hide();
@@ -1609,6 +1614,15 @@ console.log('No active tree node!!!!')
     _recreateResourceSelector: function(){
         
         var ptrIds = this._editing.getValue('rst_PtrFilteredIDs')[0];
+        
+        //disable
+        var edit_ele = this._editing.getFieldByName('rst_PtrFilteredIDs');
+        if(edit_ele){
+            //edit_ele.editing_input('option','showclear_button',false);
+            var ele = this._editing.getInputs('rst_PtrFilteredIDs')
+            window.hWin.HEURIST4.util.setDisabled(ele, true);
+        }
+        
         
         var defval = this._editing.getValue('rst_DefaultValue')[0];
         if(!window.hWin.HEURIST4.util.isempty(ptrIds) && defval){

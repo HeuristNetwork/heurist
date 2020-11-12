@@ -796,7 +796,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                 }else if(action=='group'){
                     
                 }else if(action=='editstr'){
-                
+                    //edit structure (it opens fake record and switches to edit structure mode)
                     var new_record_params = {RecTypeID: recID};
                     window.hWin.HEURIST4.ui.openRecordEdit(-1, null, 
                         {new_record_params:new_record_params, edit_structure:true});

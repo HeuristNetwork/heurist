@@ -142,11 +142,12 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
             that._onRecordScopeChange();
         });
         
+        return this._super();
+        
         this._onRecordScopeChange();
         //if(this.options.scope_types=='none'){
         //    this._onRecordScopeChange();    
         //}
-        return this._super();
         
     },
 

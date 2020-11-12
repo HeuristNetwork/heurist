@@ -681,6 +681,11 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
 //
 function _editRecStructure(rty_ID) {
 
+    //edit structure (it opens fake record and switches to edit structure mode)
+    window.hWin.HEURIST4.ui.openRecordEdit(-1, null, 
+                        {new_record_params:{RecTypeID: rty_ID}, edit_structure:true});
+    
+/*    
     var URL = window.hWin.HAPI4.baseURL + "admin/structure/fields/editRecStructure.html?db="
             +  window.hWin.HAPI4.database+ '&rty_ID='+rty_ID;
 
@@ -696,6 +701,7 @@ function _editRecStructure(rty_ID) {
             closeCallback: function(){ },
             callback: function(context) { }
     });
+*/    
 }
 
 /** Repositions all overlays */

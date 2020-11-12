@@ -160,6 +160,9 @@ $rtysWithInvalidRectypeConstraint = @$lists["rt_defvalues"];
             
             function onEditRtStructure(rty_ID){
 
+                window.hWin.HEURIST4.ui.openRecordEdit(-1, null, 
+                        {new_record_params:{RecTypeID: rty_ID}, edit_structure:true});
+                /*
                 var url = window.hWin.HAPI4.baseURL + 'admin/structure/fields/editRecStructure.html?db='
                     + window.hWin.HAPI4.database
                     + '&rty_ID='+rty_ID;
@@ -174,7 +177,7 @@ $rtysWithInvalidRectypeConstraint = @$lists["rt_defvalues"];
                     callback: function(context){
                     }
                 });        
-                
+                */
             }
 
 
