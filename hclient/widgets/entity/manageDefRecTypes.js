@@ -590,7 +590,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
 
         var html = '';
         
-        var fields = this.options.ui_params.fields;// usrPreferences.fields;
+        var fields = this.options.ui_params?this.options.ui_params.fields:['rtyid'];
 //console.log(fields);
         //fields = ['rtyid','ccode','addrec','filter','count','group','icon','edit','editstr','name','description','show','duplicate','fields','status'];        
         
