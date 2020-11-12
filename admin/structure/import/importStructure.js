@@ -636,7 +636,7 @@ $.widget( "heurist.importStructure", {
             this._selectedRtyID = rtyID;
 
             //generate treedata from rectype structure
-            var treedata = window.hWin.HEURIST4.dbs.createRectypeStructureTree( window.hWin.HEURIST4.remote, 6, rtyID, ['all'] );
+            var treedata = createRectypeStructureTree( window.hWin.HEURIST4.remote, 6, rtyID, ['all'] );
 
             treedata[0].expanded = true; //first expanded
 
@@ -663,7 +663,7 @@ $.widget( "heurist.importStructure", {
                     var parentcode = node.data.code; 
                     var rectypes = node.data.rt_ids;
 
-                    var res = window.hWin.HEURIST4.dbs.createRectypeStructureTree( window.hWin.HEURIST4.remote, 
+                    var res = createRectypeStructureTree( window.hWin.HEURIST4.remote, 
                         6, rectypes, ['all'], parentcode );
                     if(res.length>1){
                         data.result = res;
@@ -1177,7 +1177,7 @@ $.widget( "heurist.importStructure", {
         // + window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, 'rty_Description'))+'</div>'
 
         //find all dependent record types on first level
-        var linked_rts = window.hWin.HEURIST4.dbs.getLinkedRecordTypes(recID, dbs);
+        var linked_rts = getLinkedRecordTypes(recID, dbs);
         //console.log(linked_rts);        
         var name_rts = [];
         for(var i=0;i<linked_rts.length;i++){
@@ -1207,3 +1207,724 @@ $.widget( "heurist.importStructure", {
     },
 
 });
+
+    /*
+     
+      returns rectype structure as treeview data
+      there is similar method on server side - however on client side it is faster
+      used for treeview in import structure, faceted search wizard
+      todo - use it in smarty editor and title mask editor
+     
+      fieldtypes - 
+            array of fieldtypes, and 'all', 'header', 'header_ext'
+            header - all+header fields
+      $mode 
+         4 - find reverse links and relations   
+         5 - for lazy treeview with reverse links (faceted search wiz)
+         6 - for lazy tree without reverse (import structure, export csv)
+       returns:
+         
+       children:[{key: field#, type: fieldtype, title:'', code , name, conceptCode, dtyID_local, children:[]},... ]
+     
+    */
+function createRectypeStructureTree( db_structure, $mode, rectypeids, fieldtypes, parentcode ) {
+        
+        var DT_PARENT_ENTITY  = window.hWin.HAPI4.sysinfo['dbconst']['DT_PARENT_ENTITY'];
+        
+        if(db_structure==null){
+            db_structure = window.hWin.HEURIST4;
+        }
+        
+        //clone rectypes - since it can be modified (added parent resource fields)
+        var dbs_Rectypes = window.hWin.HEURIST4.util.cloneJSON( db_structure.rectypes );
+        
+    //-------------------- internal functions    
+        
+    function __getRecordTypeTree($recTypeId, $recursion_depth, $mode, $fieldtypes, $pointer_fields){
+            
+            var rectypes = dbs_Rectypes; //db_structure.rectypes;
+            var $res = {};
+            var $children = [];
+            var headerFields = [];
+            
+            //add default fields
+            if($recursion_depth==0 && $fieldtypes.length>0){    
+                 //include record header fields
+                var all_header_fields = $fieldtypes.indexOf('header_ext')>=0;
+                if($fieldtypes.indexOf('header')>=0){
+                    $fieldtypes.push('title');
+                    $fieldtypes.push('modified');
+                }                 
+                
+                if(all_header_fields || $fieldtypes.indexOf('ID')>=0 || $fieldtypes.indexOf('rec_ID')>=0){
+                    $children.push({key:'rec_ID', type:'integer',
+                        title:"ID  <span style='font-size:0.7em'>(integer)</span>", 
+                        code:($recTypeId+':id'), name:'Record ID'});
+                }
+
+                if(all_header_fields || $fieldtypes.indexOf('title')>=0 || $fieldtypes.indexOf('rec_Title')>=0){
+                    $children.push({key:'rec_Title', type:'freetext',
+                        title:"RecTitle <span style='font-size:0.7em'>(Constructed text)</span>", 
+                        code:($recTypeId+':title'), name:'Record title'});
+                }
+                if(all_header_fields || $fieldtypes.indexOf('modified')>=0 || $fieldtypes.indexOf('rec_Modified')>=0){
+                    $children.push({key:'rec_Modified', type:'date',
+                        title:"Modified  <span style='font-size:0.7em'>(Date)</span>", 
+                        code:($recTypeId+':modified'), name:'Record modified'});
+                }
+                    
+                //array_push($children, array('key'=>'recURL',      'type'=>'freetext',  'title'=>'URL', 'code'=>$recTypeId.":url"));
+                //array_push($children, array('key'=>'recWootText', 'type'=>'blocktext', 'title'=>'WootText', 'code'=>$recTypeId.":woot"));
+                
+                if(all_header_fields || $fieldtypes.indexOf('url')>=0 || $fieldtypes.indexOf('rec_URL')>=0){
+                    $children.push({key:'rec_URL', type:'freetext',
+                        title:"URL  <span style='font-size:0.7em'>(freetext)</span>", 
+                        code:($recTypeId+':url'), name:'Record URL'});
+                }
+                if(all_header_fields || $fieldtypes.indexOf('tags')>=0 || $fieldtypes.indexOf('rec_Tags')>=0){
+                    $children.push({key:'rec_Tags', type:'freetext',
+                        title:"Tags  <span style='font-size:0.7em'>(freetext)</span>", 
+                        code:($recTypeId+':tags'), name:'Record Tags'});
+                }
+                
+            }
+
+            if($recTypeId>0 && rectypes['typedefs'][$recTypeId]){
+
+                $res['key'] = $recTypeId;
+                $res['title'] = rectypes['names'][$recTypeId];
+                $res['type'] = 'rectype';
+                
+                var idx_ccode = window.hWin.HEURIST4.rectypes.typedefs.commonNamesToIndex.rty_ConceptID;
+                var $rt_conceptcode = rectypes['typedefs'][$recTypeId]['commonFields'][idx_ccode];
+
+                $res['conceptCode'] = $rt_conceptcode;
+                $res['rtyID_local'] = $Db.getLocalID('rty', $rt_conceptcode);
+                                
+                //$res['title'] = $res['title']+" <span style='font-size:0.6em'>(" + $rt_conceptcode
+                //            +','+$res['rtyID_local']+ ")</span>";   
+                                
+                                                                                                                  
+                if(($mode<5 || $recursion_depth==0)){
+                    //
+                    if($fieldtypes.indexOf('parent_link')>=0 && !rectypes['typedefs'][$recTypeId]['dtFields'][DT_PARENT_ENTITY]){
+                        //find all parent record types that refers to this record type
+                        var $parent_Rts = getLinkedRecordTypesReverse($recTypeId, db_structure, true);
+                        
+                        //$dtKey = DT_PARENT_ENTITY;
+                        $rst_fi = rectypes['typedefs']['dtFieldNamesToIndex'];
+                        
+                        //create fake rectype structure field
+                        $ffr = {};
+                        $ffr[$rst_fi['rst_DisplayName']] = 'Parent entity';//'Record Parent ('.$rtStructs['names'][$parent_Rt].')';
+                        $ffr[$rst_fi['rst_PtrFilteredIDs']] = Object.keys($parent_Rts).join(',');
+                        $ffr[$rst_fi['dty_Type']] = 'resource';
+                        $ffr[$rst_fi['rst_DisplayHelpText']] = 'Reverse pointer to parent record';
+                        $ffr[$rst_fi['rst_RequirementType']] = 'optional';
+                              
+                        rectypes['typedefs'][$recTypeId]['dtFields'][DT_PARENT_ENTITY] = $ffr;
+                    }
+
+                    var $details = rectypes['typedefs'][$recTypeId]['dtFields'];
+
+                    
+                    var $children_links = [];
+                    var $new_pointer_fields = [];
+
+                    for (var $dtID in $details) {
+                        
+                        var $dtValue = $details[$dtID];
+                        
+                        //@TODO forbidden for import????
+                        if($dtValue[rectypes['typedefs']['dtFieldNamesToIndex']['rst_RequirementType']]=='forbidden') continue;
+
+                        $dt_type = $dtValue[rectypes['typedefs']['dtFieldNamesToIndex']['dty_Type']];
+                        if($dt_type=='resource' || $dt_type=='relmarker'){
+                                $new_pointer_fields.push( $dtID );
+                        }
+                        
+                        $res_dt = __getDetailSection($recTypeId, $dtID, $recursion_depth, $mode, 
+                                                                $fieldtypes, null, $new_pointer_fields);
+                        if($res_dt){
+                            
+                            if($res_dt['type']=='resource' || $res_dt['type']=='relmarker'){
+                                $children_links.push($res_dt);
+                            }else{
+                                $children.push($res_dt);
+                            }
+                            /*
+                            if(is_array($res_dt) && count($res_dt)==1){
+                            $res["f".$dtID] = $res_dt[0];    
+                            }else{
+                            //multi-constrained pointers or simple variable
+                            $res["f".$dtID] = $res_dt;
+                            }
+                            */
+                        }
+                    }//for details
+                    
+                    //sort bt rst_DisplayOrder
+                    $children.sort(function(a,b){
+                        return (a['display_order']<b['display_order'])?-1:1;
+                    });
+                    
+                    
+                    //add resource and relation at the end of result array
+                    $children = $children.concat($children_links);
+                    
+                    //find all reverse links and relations
+                    if( ($mode==4 && $recursion_depth<2) || ($mode==5 && $recursion_depth==0) ){
+                        $reverse_rectypes = __getReverseLinkedRecordTypes($recTypeId);
+                        
+                        for (var $rtID in $reverse_rectypes) {
+                            
+                            var $dtID = $reverse_rectypes[$rtID];
+                            
+                            //$dtValue =  $dbs_rtStructs['typedefs'][$rtID]['dtFields'][$dtID];
+                            if( $pointer_fields==null || 
+                                ($.isArray($pointer_fields) && 
+                                window.hWin.HEURIST4.util.findArrayIndex($dtID, $pointer_fields)<0) )
+                            {  // to avoid recursion
+                                $res_dt = __getDetailSection($rtID, $dtID, $recursion_depth, $mode, $fieldtypes, $recTypeId, null);
+                 
+                                if($res_dt){
+                                    $children.push( $res_dt );
+                                }
+                            }
+                        }
+                    }
+                }
+                if($mode==3 && $recursion_depth==0){
+                    $children.push(__getRecordTypeTree('Relationship', $recursion_depth+1, $mode, $fieldtypes, null));
+                }   
+
+            }else if($recTypeId=="Relationship") {
+
+                $res['title'] = "Relationship";
+                $res['type'] = "relationship";
+
+                //add specific Relationship fields
+                $children.push({key:'recRelationType', title:'RelationType'});
+                $children.push({key:'recRelationNotes', title:'RelationNotes'});
+                $children.push({key:'recRelationStartDate', title:'RelationStartDate'});
+                $children.push({key:'recRelationEndDate', title:'RelationEndDate'});
+            }else if($mode==5 || $mode==6){
+                $res['title'] = 'Any record type';
+                $res['type'] = 'rectype';
+                
+                if($mode==5 && $recursion_depth==0 && $recTypeId && $recTypeId.indexOf(',')>0){ //for faceted search
+                    $res['key'] = $recTypeId;
+                    $res['type'] = 'rectype';
+                    
+                    var recTypes = $recTypeId.split(',');
+                    
+                    $res['title'] = rectypes.names[recTypes[0]];
+                    
+                    var  $details = window.hWin.HEURIST4.util.cloneJSON(rectypes['typedefs'][recTypes[0]]['dtFields']); 
+
+                    //if there are several rectypes - find common fields only
+                    //IJ wants show all fields of fist record type
+                    /*  2020-04-25
+                    var names = [];
+                    $.each(recTypes, function(i, rtid){ 
+                        names.push(rectypes.names[rtid]) 
+                        if(i>0){
+                            var fields = rectypes['typedefs'][rtid]['dtFields'];
+                            var dtIds = Object.keys($details);
+                            for (var k=0; k<dtIds.length; k++){
+                                if(!fields[dtIds[k]]){
+                                    //it does not exist 
+                                    $details[dtIds[k]] = null;
+                                    delete $details[dtIds[k]];
+                                }
+                            }
+                        }
+                    });
+                    $res['title'] = names.join(', ');
+                    */
+                    
+                    var $children_links = [];
+                    var $new_pointer_fields = [];
+
+                    for (var $dtID in $details) {
+                        
+                        var $dtValue = $details[$dtID];
+                        
+                        if($dtValue[rectypes['typedefs']['dtFieldNamesToIndex']['rst_RequirementType']]=='forbidden') continue;
+
+                        $dt_type = $dtValue[rectypes['typedefs']['dtFieldNamesToIndex']['dty_Type']];
+                        if($dt_type=='resource' || $dt_type=='relmarker'){
+                                $new_pointer_fields.push( $dtID );
+                        }
+                        
+                        $res_dt = __getDetailSection(recTypes[0], $dtID, $recursion_depth, $mode, 
+                                                                $fieldtypes, null, $new_pointer_fields);
+                        if($res_dt){
+                            
+                            var codes = $res_dt['code'].split(':');
+                            codes[0] = $recTypeId;
+                            $res_dt['code'] = codes.join(':');
+                            
+                            if($res_dt['type']=='resource' || $res_dt['type']=='relmarker'){
+                                $children_links.push($res_dt);
+                            }else{
+                                $children.push($res_dt);
+                            }
+                        }
+                    }//for details
+                    
+                    //sort bt rst_DisplayOrder
+                    $children.sort(function(a,b){
+                        return (a['display_order']<b['display_order'])?-1:1;
+                    });
+                    
+                    //add resource and relation at the end of result array
+                    $children = $children.concat($children_links);                    
+                    
+                }
+                
+            }
+
+            
+            if($mode<5 || $recursion_depth==0){
+                $res['children'] = $children;
+            }
+
+            return $res;
+            
+        } //__getRecordTypeTree
+        
+    //
+    // returns array of record types that are linked to given record type
+    //
+    function __getReverseLinkedRecordTypes($rt_ID){
+        
+        var $dbs_rtStructs = dbs_Rectypes; //db_structure.rectypes;
+        //find all reverse links (pointers and relation that point to selected rt_ID)
+        var $alldetails = $dbs_rtStructs['typedefs'];
+        var $fi_type = $alldetails['dtFieldNamesToIndex']['dty_Type'];
+        var $fi_rectypes = $alldetails['dtFieldNamesToIndex']['rst_PtrFilteredIDs'];
+        
+        var $arr_rectypes = {};
+        
+        for (var $recTypeId in $alldetails) {
+        
+            if($recTypeId>0 && $recTypeId!=$rt_ID){ //not itself
+            
+                var $details = $alldetails[$recTypeId];
+                
+                $details = $dbs_rtStructs['typedefs'][$recTypeId]['dtFields'];
+                if(!$details) continue;
+                
+                for (var $dtID in $details) {
+                    
+                    var $dtValue = $details[$dtID];
+            
+                    if(($dtValue[$fi_type]=='resource' || $dtValue[$fi_type]=='relmarker')){
+
+                            //find constraints
+                            var $constraints = $dtValue[$fi_rectypes];
+                            if(!window.hWin.HEURIST4.util.isempty($constraints)){
+                                $constraints = $constraints.split(",");
+                                //verify that selected record type is in this constaint
+                                if($constraints.length>0 && 
+                                    window.hWin.HEURIST4.util.findArrayIndex($rt_ID, $constraints)>=0 &&
+                                    !$arr_rectypes[$recTypeId] )
+                                {
+                                    $arr_rectypes[$recTypeId] = $dtID;
+                                }
+                            }
+                    }
+                }
+            }
+        }
+        
+        return  $arr_rectypes;
+        
+    }
+
+    /*
+    $dtID   - detail type ID
+    $dtValue - record type structure definition
+    returns display name  or if enum array
+    $mode - 3 all, 4, 5 for treeview (5 lazy) , 6 - for import csv(dependencies)
+    */
+    function __getDetailSection($recTypeId, $dtID, $recursion_depth, $mode, $fieldtypes, $reverseRecTypeId, $pointer_fields){
+
+        var $dbs_rtStructs = dbs_Rectypes; //db_structure.rectypes;
+        var $dbs_lookups   = window.hWin.HEURIST4.detailtypes.lookups;
+
+        $res = null;
+
+        var $rtNames = $dbs_rtStructs['names']; //???need
+        var $rst_fi = $dbs_rtStructs['typedefs']['dtFieldNamesToIndex'];
+
+        var $dtValue = $dbs_rtStructs['typedefs'][$recTypeId]['dtFields'][$dtID];
+
+        var $detailType = $dtValue[$rst_fi['dty_Type']];
+        var $dt_label   = $dtValue[$rst_fi['rst_DisplayName']];
+        var $dt_title   = $dtValue[$rst_fi['rst_DisplayName']];
+        var $dt_tooltip = $dtValue[$rst_fi['rst_DisplayHelpText']]; //help text
+        var $dt_conceptcode   = $dtValue[$rst_fi['dty_ConceptID']];
+        var $dt_display_order = $dtValue[$rst_fi['rst_DisplayOrder']];
+
+        var $pref = "";
+        //$dt_maxvalues = $dtValue[$rst_fi['rst_MaxValues']]; //repeatable
+        //$issingle = (is_numeric($dt_maxvalues) && intval($dt_maxvalues)==1)?"true":"false";
+        
+        if (($mode==3) || $fieldtypes.indexOf('all')>=0 
+            || window.hWin.HEURIST4.util.findArrayIndex($detailType, $fieldtypes)>=0) //$fieldtypes - allowed types
+        {
+
+        var $res = null;
+            
+        switch ($detailType) {
+            case 'separator':
+                return null;
+            case 'enum':
+
+                $res = {};
+                if($mode==3){
+                    /* todo ????
+                    $res['children'] = []
+                        array("text"=>"internalid"),
+                        array("text"=>"code"),
+                        array("text"=>"term"),
+                        array("text"=>"conceptid"));
+                    */    
+                }
+                break;
+
+            case 'resource': // link to another record type
+            case 'relmarker':
+            
+                var $max_depth = 2;
+                if ($mode==4) //$mode==6 || 
+                   $max_depth = 3;
+                else if ($mode==5 || $mode==6) //make it 1 for lazy load
+                   $max_depth = 1; 
+                                                                
+                if($recursion_depth<$max_depth){
+                    
+                    if($reverseRecTypeId!=null){
+                            var $res = __getRecordTypeTree($recTypeId, $recursion_depth+1, $mode, $fieldtypes, $pointer_fields);
+                            if($res){
+                                $res['rt_ids'] = $recTypeId; //list of rectype - constraint
+                                //$res['reverse'] = "yes";
+                                $pref = ($detailType=="resource")?"lf":"rf";
+                                //before 2017-06-20 $dt_title = " <span style='font-style:italic'>" . $rtNames[$recTypeId] ."  ". $dt_title . "</span>";
+
+                                $dt_title = "<span>&lt;&lt; <span style='font-weight:bold'>" 
+                                        + $rtNames[$recTypeId] + "</span> . " + $dt_title + '</span>';
+                                
+                                if($mode==5 || $mode==6){
+                                    $res['lazy'] = true;
+                                }
+                                $res['isreverse'] = 1;
+                            }
+                    }else{
+
+                            var $pref = ($detailType=="resource")?"lt":"rt";
+
+                            var $pointerRecTypeId = $dtValue[$rst_fi['rst_PtrFilteredIDs']];
+                            if(window.hWin.HEURIST4.util.isnull($pointerRecTypeId)) $pointerRecTypeId = '';
+                            var $is_required      = ($dtValue[$rst_fi['rst_RequirementType']]=='required');
+                            var $rectype_ids = $pointerRecTypeId.split(",");
+                             
+                            if($mode==4 || $mode==5 || $mode==6){
+                                $dt_title = " <span style='font-style:italic'>" + $dt_title + "</span>";
+                            }
+                            
+                            if($pointerRecTypeId=="" || $rectype_ids.length==0){ //unconstrainded
+                                                    //
+                                $res = __getRecordTypeTree( null, $recursion_depth+1, $mode, $fieldtypes, $pointer_fields);
+                                //$res['constraint'] = 0;
+
+                            }else{ //constrained pointer
+
+                                $res = {};
+
+                                if($rectype_ids.length>1){
+                                    $res['rt_ids'] = $pointerRecTypeId; //list of rectype - constraint
+                                    $res['constraint'] = $rectype_ids.length;
+                                    if($mode<5) $res['children'] = array();
+                                }
+                                if($mode==5 || $mode==6){
+                                    $res['rt_ids'] = $pointerRecTypeId;
+                                    $res['lazy'] = true;
+                                }else{
+                                
+                                    for (var k in $rectype_ids){
+                                        var $rtID = $rectype_ids[k];
+                                        $rt_res = __getRecordTypeTree($rtID, $recursion_depth+1, $mode, $fieldtypes, $pointer_fields);
+                                        if($rectype_ids.length==1){//exact one rectype constraint
+                                            //avoid redundant level in tree
+                                            $res = $rt_res;
+                                            $res['constraint'] = 1;
+                                            $res['rt_ids'] = $pointerRecTypeId; //list of rectype - constraint
+                                        }else if($rt_res!=null){
+                                            $res['children'].push($rt_res);
+                                            $res['constraint'] = $rt_res.length;
+                                        }
+                                    }
+                                
+                                }
+                            
+                            }
+                            $res['required'] = $is_required;
+
+                    }
+                }
+
+                break;
+
+            default:
+                    $res = {};
+        }//end switch
+        }
+
+        if($res!=null){
+
+            if(window.hWin.HEURIST4.util.isnull($res['code'])){
+              $res['code'] = (($reverseRecTypeId!=null)?$reverseRecTypeId:$recTypeId)+":"+$pref+$dtID;  //(($reverseRecTypeId!=null)?$reverseRecTypeId:$recTypeId)  
+            } 
+            $res['key'] = "f:"+$dtID;
+            if($mode==4 || $mode==5 || $mode==6){
+                    
+                var $stype = ($detailType=='resource' || $detailType=='relmarker')?"":$dbs_lookups[$detailType];
+                if($reverseRecTypeId!=null){
+                    //before 2017-06-20  $stype = $stype."linked from";
+                    $res['isreverse'] = 1;
+                }
+                if($stype!=''){
+                    $stype = " <span style='font-size:0.7em'>(" + $stype + ")</span>";   
+                }
+                
+                $res['title'] = $dt_title + $stype;
+                //$res['code'] = 
+            }else{
+                $res['title'] = $dt_title;    
+            }
+            $res['type'] = $detailType;
+            $res['name'] = $dt_label;
+            
+            $res['display_order'] = $dt_display_order;
+            
+            
+            var idx_ccode = window.hWin.HEURIST4.detailtypes.typedefs.fieldNamesToIndex.dty_ConceptID;
+            
+            $res['conceptCode'] = $dt_conceptcode;
+            $res['dtyID_local'] = $Db.getLocalID('dty', $dt_conceptcode);
+            
+            //$res['title'] = $res['title']+" <span style='font-size:0.6em'>(" + $dt_conceptcode
+            //                +','+$res['dtyID_local']+ ")</span>";   
+        }            
+        return $res;
+    }
+    
+    //
+    // add parent code to children
+    //
+    function __assignCodes($def){
+        
+        for(var $idx in $def['children']){
+            $det = $def['children'][$idx];
+            if(!window.hWin.HEURIST4.util.isnull($def['code'])){
+
+                if(!window.hWin.HEURIST4.util.isnull($det['code'])){
+                    $def['children'][$idx]['code'] = $def['code'] + ":" + $det['code']; 
+                }else{
+                    $def['children'][$idx]['code'] = $def['code'];    
+                }
+            }
+            //debug $def['children'][$idx]['title'] = $def['children'][$idx]['code'].$det['title']; 
+                 
+            if($.isArray($det['children'])){
+                   $def['children'][$idx] = __assignCodes($def['children'][$idx]);
+            }
+        }
+        return $def;
+    }
+    //========================= end internal 
+        
+        if(fieldtypes==null){
+            fieldtypes = ['integer','date','freetext','year','float','enum','resource','relmarker'];
+        }else if(!$.isArray(fieldtypes) && fieldtypes!='all'){
+            fieldtypes = fieldtypes.split(',');
+        }
+        
+        var rtypes = db_structure.rectypes['names'];
+        var res = [];
+
+        if($mode==5){
+            
+            var def = __getRecordTypeTree(rectypeids, 0, $mode, fieldtypes, null);
+
+            if(def!==null) {
+                if(parentcode!=null){
+                    if(def['code']){
+                        def['code'] = parentcode+':'+def['code'];
+                    }else{
+                        def['code'] = parentcode;
+                    }
+                }
+                if($.isArray(def['children'])){
+                    def = __assignCodes(def);
+                    res.push( def );
+                }                    
+            }
+        
+        } else {
+        
+            rectypeids = (!$.isArray(rectypeids)?rectypeids.split(','):rectypeids);    
+            
+            
+            //create hierarchy tree 
+            for (var k=0; k<rectypeids.length; k++) {
+                var rectypeID = rectypeids[k];
+                var def = __getRecordTypeTree(rectypeID, 0, $mode, fieldtypes, null);
+                
+                    if(def!==null) {
+                        if(parentcode!=null){
+                            if(def['code']){
+                                def['code'] = parentcode+':'+def['code'];
+                            }else{
+                                def['code'] = parentcode;
+                            }
+                        }
+                        //debug $def['title'] = @$def['code'].$def['title'];   
+                        //asign codes
+                        if($.isArray(def['children'])){
+                            def = __assignCodes(def);
+                            res.push( def );
+                        }                    
+                    }
+            }
+            
+        }
+
+        return res;    
+        
+    }    
+    
+    //
+    // returns array of record types that are resources for given record type
+    // need_separate - returns separate array for linked and related 
+    //
+function getLinkedRecordTypes($rt_ID, db_structure, need_separate){
+        
+        if(!db_structure){
+            db_structure = window.hWin.HEURIST4;
+        }
+        
+        var $dbs_rtStructs = db_structure.rectypes;
+        //find all DIREreverse links (pointers and relation that point to selected rt_ID)
+        var $alldetails = $dbs_rtStructs['typedefs'];
+        var $fi_type = $alldetails['dtFieldNamesToIndex']['dty_Type'];
+        var $fi_rectypes = $alldetails['dtFieldNamesToIndex']['rst_PtrFilteredIDs'];
+        
+        var $arr_rectypes = [];
+        var res = {'linkedto':[],'relatedto':[]};
+        
+        var $details = $dbs_rtStructs['typedefs'][$rt_ID]['dtFields'];
+        if($details) {
+            for (var $dtID in $details) {
+                
+                var $dtValue = $details[$dtID];
+        
+                if(($dtValue[$fi_type]=='resource' || $dtValue[$fi_type]=='relmarker')){
+
+                        //find constraints
+                        var $constraints = $dtValue[$fi_rectypes];
+                        if(!window.hWin.HEURIST4.util.isempty($constraints)){
+                            $constraints = $constraints.split(",");
+                            //verify record type exists
+                            if($constraints.length>0){
+                                for (var i=0; i<$constraints.length; i++) {
+                                    var $recTypeId = $constraints[i];
+                                    if( !$arr_rectypes[$recTypeId] && 
+                                        $dbs_rtStructs['typedefs'][$recTypeId]){
+                                            
+                                            $arr_rectypes.push( $recTypeId );
+                                            
+                                            if(need_separate){
+                                                var t1 = ($dtValue[$fi_type]=='resource')?'linkedto':'relatedto';
+                                                res[t1].push( $recTypeId );
+                                            }
+                                    }
+                                }                            
+                            } 
+                        }
+                }
+            }
+        }
+        
+        return  need_separate ?res :$arr_rectypes;
+        
+}
+    
+    //
+    // returns array of record types that points to given record type
+    // rt_id => field id
+    //
+function getLinkedRecordTypesReverse($rt_ID, db_structure, parent_child_only){
+        
+        if(!db_structure){
+            db_structure = window.hWin.HEURIST4;
+        }
+        
+        if(parent_child_only!==true) parent_child_only = false;
+        
+        var $dbs_rtStructs = db_structure.rectypes;
+        //find all DIREreverse links (pointers and relation that point to selected rt_ID)
+        var $alldetails = $dbs_rtStructs['typedefs'];
+        var $fi_type = $alldetails['dtFieldNamesToIndex']['dty_Type'];
+        var $fi_rectypes = $alldetails['dtFieldNamesToIndex']['rst_PtrFilteredIDs'];
+        var $fi_req_type = $alldetails['dtFieldNamesToIndex']['rst_RequirementType'];
+        var $fi_parent_child_flag = $alldetails['dtFieldNamesToIndex']['rst_CreateChildIfRecPtr'];
+        
+        var $arr_rectypes = {};
+        
+        for (var $recTypeId in $alldetails) {
+        
+            if($recTypeId>0 && $recTypeId!=$rt_ID){ //not itself
+            
+                var $details = $alldetails[$recTypeId];
+                
+                $details = $dbs_rtStructs['typedefs'][$recTypeId]['dtFields'];
+                if(!$details) continue;
+                
+                for (var $dtID in $details) {
+                    
+                    var $dtValue = $details[$dtID];
+                    
+                    if($dtValue[$fi_req_type]=='forbidden') continue;
+                    
+                    if ((parent_child_only && $dtValue[$fi_type]=='resource' && $dtValue[$fi_parent_child_flag]==1)
+                        ||
+                       (!parent_child_only && ($dtValue[$fi_type]=='resource' || $dtValue[$fi_type]=='relmarker')))
+                    {
+                            //find constraints
+                            var $constraints = $dtValue[$fi_rectypes];  //rst_PtrFilteredIDs
+                            $constraints = $constraints.split(",");
+                            //verify that selected record type is in this constaint
+                            if($constraints.length>0 && 
+                                window.hWin.HEURIST4.util.findArrayIndex($rt_ID, $constraints)>=0 &&
+                                !$arr_rectypes[$recTypeId] )
+                            {
+                                $arr_rectypes[$recTypeId] = $dtID;
+                            }
+                    }
+                    
+                    
+                }
+            }
+        }
+        
+        return  $arr_rectypes;
+        
+}
+
+
+
+

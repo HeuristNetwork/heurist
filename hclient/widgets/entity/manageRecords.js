@@ -2220,7 +2220,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     },
     
     //
-    // apparently it should be moved to dbs?
+    // apparently it should be moved to dbs?  - @TODO replace with $Db.rst_links
     //
     __findParentRecordTypes: function(childRecordType){
 

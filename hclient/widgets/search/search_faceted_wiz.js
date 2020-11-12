@@ -1043,6 +1043,7 @@ $.widget( "heurist.search_faceted_wiz", {
                                 treedata = response.data.rectypes;
                             }
 */
+//console.log(treedata);
                             treedata[0].expanded = true; //first expanded
                             
                             if(!treediv.is(':empty')){

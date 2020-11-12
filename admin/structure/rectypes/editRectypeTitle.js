@@ -83,6 +83,7 @@ function EditRectypeTitle() {
 
     function _onGenerateVars(context){
 
+
 //console.log(context);
         
         if(!Hul.isnull(context))
