@@ -2375,7 +2375,7 @@ window.hWin.HEURIST4.ui = {
             options = {record_id:options};
         }
         
-        editCMS(  options );
+        editCMS(  options ); //see editCMS.js
     },
     
     //

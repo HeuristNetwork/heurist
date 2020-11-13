@@ -1062,7 +1062,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
             window.hWin.HEURIST4.ui.showEntityDialog('sysUsers', entity_dialog_options);
         }else 
         if(action == "menu-profile-preferences"){
-            that._editPreferences();
+            that._editPreferences( popup_dialog_options );
         }else
         if(action == "menu-profile-import"){  //for admin only
             that._importUsers( entity_dialog_options );
@@ -1203,15 +1203,20 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
     /**
     * Open Edit Preferences dialog (@todo: ? move into separate file?)
     */
-    _editPreferences: function()
+    _editPreferences: function( popup_options )
     {
         var that = this;
+        
+        if(!popup_options) popup_options = {};
 
-        var $dlg = $("#heurist-dialog").addClass('ui-heurist-bg-light');
+        var $dlg = (popup_options.container)
+                        ?popup_options.container
+                        :$("#heurist-dialog").addClass('ui-heurist-bg-light');
         $dlg.empty();
 
         $dlg.load(window.hWin.HAPI4.baseURL+"hclient/widgets/profile/profile_preferences.html?t="+(new Date().time), function(){
 
+            
             //find all labels and apply localization
             $dlg.find('label').each(function(){
                 $(this).html(window.hWin.HR($(this).html()));
@@ -1399,7 +1404,11 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                             window.hWin.HAPI4.currentUser['ugr_Preferences'][this.id] = $(this).val();
                             });*/
 
-                            $dlg.dialog( "close" );
+                            if(popup_options.container){    
+                                popup_options.container.hide();
+                            }else{
+                                $dlg.dialog( "close" );
+                            }
 
                             if(ask_reload){
                                 window.hWin.HEURIST4.msg.showMsgFlash('Reloading page to apply new settings', 2000);
@@ -1431,32 +1440,45 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                                         + window.hWin.HAPI4.database);
                                 }
                                 
+                                window.hWin.HEURIST4.msg.showMsgFlash('Preferences are saved');
                             }
 
                         }else{
-                            var message = $dlg.find('.messages');
-                            message.addClass( "ui-state-highlight" );
-                            message.text(response.message);
+                            window.hWin.HEURIST4.msg.showMsgErr(response);      
                         }
                     }
                 );
             }
+            
+            
+            if(popup_options.container){
+                
+                $dlg.find('.ui-heurist-header').html('Personal preferences (for this database)');
+                
+                $dlg.find('.ui-dialog-buttonpane').show();
+                $dlg.find('.btn-ok').button().on({click:__doSave});
+                $dlg.find('.btn-cancel').button().on({click:function(){
+                        popup_options.container.hide();
+                }});
+                
+            }else{
 
-            $dlg.dialog({
-                autoOpen: true,
-                height: 'auto', //600,
-                width: 'auto', //800,
-                modal: true,
-                resizable: false,
-                draggable: true,
-                title: window.hWin.HR("Preferences"),
-                buttons: [
-                    {text:window.hWin.HR('Save'), click: __doSave},
-                    {text:window.hWin.HR('Cancel'), click: function() {
-                        $( this ).dialog( "close" );
-                    }}
-                ]
-            })
+                $dlg.dialog({
+                    autoOpen: true,
+                    height: 'auto', //600,
+                    width: 'auto', //800,
+                    modal: true,
+                    resizable: false,
+                    draggable: true,
+                    title: window.hWin.HR("Preferences"),
+                    buttons: [
+                        {text:window.hWin.HR('Save'), click: __doSave},
+                        {text:window.hWin.HR('Cancel'), click: function() {
+                            $( this ).dialog( "close" );
+                        }}
+                    ]
+                });
+            }
         });
 
     } //end _editPreferences
