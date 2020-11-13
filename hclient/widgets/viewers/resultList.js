@@ -78,7 +78,8 @@ $.widget( "heurist.resultList", {
         
         sortable: false, //allows drag and sort entries
         onSortStop: null,
-        draggable: null, //callback function to init dragable
+        draggable: null, // callback function to init dragable - it is called after 
+                         // finish render and assign draggable widget for all record divs
         droppable: null, //callback function to init dropable (see refreshPage)
 
         //event
@@ -3094,12 +3095,17 @@ $.widget( "heurist.resultList", {
         if(this.div_header){
             var container = this.div_header.find('div.result-list-header');
             container.find('span').remove();
-            var s = '<span style="position:absolute;right:10px;top:10px;font-size:0.6em;">';    
+            
+            var s = '<span class="subset-sign" style="position:absolute;left:10px;top:10px;font-size:0.6em;">';    
             if(window.hWin.HAPI4.sysinfo.db_workset_count>0){
-                if(this.options.show_menu){
+                
+                if(this.options.show_menu){ 
+                    if(false){ // IJ 2020-11-13 set subset is allowed from main menu only
                   s = s+'<span class="set_subset" '
                       +'title="Make the current filter the active subset to which all subsequent actions are applied">Set</span>'
-                      +'&nbsp;&nbsp;'
+                      +'&nbsp;&nbsp;';
+                      }
+                  s = s
                       +'<span class="ui-icon ui-icon-arrowrefresh-1-w clear_subset" style="font-size:1em;" title="Click to revert to whole database"></span>&nbsp;';
                 }    
                 
@@ -3108,10 +3114,20 @@ $.widget( "heurist.resultList", {
                 +' title="'+window.hWin.HAPI4.sysinfo.db_workset_count+' records"'
                 +'>SUBSET ACTIVE n='+window.hWin.HAPI4.sysinfo.db_workset_count+'</span></span>')
                     .appendTo(container);
-            }else if(this.options.show_menu) {
-                $(s+'<span class="set_subset" '
-                +'title="Make the current filter the active subset to which all subsequent actions are applied">Set subset</span></span>')
-                .appendTo(container);
+                    
+                var w = container.find('span.subset-sign').width()+20;
+
+                container.css('padding','10px 10px 10px '+w+'px');            
+                    
+            }else if(this.options.show_menu) { 
+            
+                container.css('padding','10px');            
+            
+                if(false){ // IJ 2020-11-13 set subset is allowed from main menu only
+                    $(s+'<span class="set_subset" '
+                    +'title="Make the current filter the active subset to which all subsequent actions are applied">Set subset</span></span>')
+                    .appendTo(container);
+                }
             }
             if(this.options.show_menu){
                 this._on(container.find('span.set_subset').button(),
