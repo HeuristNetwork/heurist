@@ -178,7 +178,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                     pagesize:99999,
                     view_mode: 'list',
                     
-                    draggable: function(){
+                    draggable: function(){ //function is called after finish render and assign draggable widget for all record divs
                         
                         that.recordList.find('.rt_draggable > .item').draggable({ // 
                                     revert: true,
@@ -411,7 +411,16 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                                     },
                                     zIndex:100,
                                     appendTo:'body',
-                                    scope: 'vocab_change'
+                                    scope: 'vocab_change',
+                                    
+                                    drag: function(event,ui){
+                                        //var trg = $(event.target);trg.hasClass('ui-droppable')
+                                        if($('.ui-droppable.ui-drag-drop').is(':visible')){
+                                            $(ui.helper).css("cursor", 'grab');
+                                        }else{
+                                            $(ui.helper).css("cursor", 'not-allowed');
+                                        }
+                                    }
                                 });   
                     },
                     droppable: function(){
@@ -419,7 +428,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                         that.recordList.find('.recordDiv')  //change parent for term (within vocab tree) OR merge
                             .droppable({
                                 scope: 'vocab_change',
-                                hoverClass: 'ui-drag-drop',
+                                hoverClass: 'ui-drag-drop', //highlight
                                 drop: function( event, ui ){
 
                                     var trg = $(event.target).hasClass('recordDiv')
