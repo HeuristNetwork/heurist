@@ -88,7 +88,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                         //+'<button style="vertical-align:top;margin-top:4px;" class="closeRtsEditor"/>'
                         +'<span style="position:absolute; right:4px;width:32px;top:26px;height:32px;font-size:32px;cursor:pointer" class="closeTreePanel ui-icon ui-icon-carat-2-w"/>'
                     +'</div>'
-                    +'<div class="treeView" style="margin-left:-27px;"/>' //treeview
+                    +'<div class="treeView" style="margin-left:-27px;margin-right:-10px;"/>' //treeview
                     +'<div class="editForm editFormRtStructure" style="top:0px;display:none">EDITOR</div>'
                     +'<div class="recordList" style="display:none"/>'
                 +'</div>';

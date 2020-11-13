@@ -214,7 +214,9 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
     // start/refresh search
     //
     startSearch: function(){
-        this.searchForm.searchSysDashboard('startSearch');
+        if(this.searchForm.searchSysDashboard('instance')){
+            this.searchForm.searchSysDashboard('startSearch');
+        }
     },
         
     //

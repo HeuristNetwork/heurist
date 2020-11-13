@@ -322,6 +322,7 @@ input.text, select.text {
 .separator2{
     text-transform: uppercase;
     font-weight:bold;
+    background: #ECF1FB !important;
 }
 
 .separator {

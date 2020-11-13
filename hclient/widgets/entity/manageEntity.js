@@ -1093,12 +1093,14 @@ $.widget( "heurist.manageEntity", {
     closeDialog: function(is_force){
         if(this.options.isdialog){
             
-            if(is_force===true){ //disable warning
-                this._as_dialog.dialog('option','beforeClose',null);
+            if(this._as_dialog.dialog('instance')){
+                if(is_force===true){ //disable warning
+                    this._as_dialog.dialog('option','beforeClose',null);
+                }
+                
+                this._as_dialog.dialog("close");
             }
-            
-            this._as_dialog.dialog("close");
-            //this.element.dialog('close');
+
         }else if(this.element.hasClass('ui-menu6-container')){
             this.element.hide();
         }
@@ -1980,7 +1982,7 @@ console.log('scroll '+this._keepPos);
     _triggerRefresh: function( type, recID ){
 //console.log($(this.document).find('body').text().trim().substring(1,20));        
 //$(this.document).trigger(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, { source:this.uuid, type:type, recID: recID });
-        
+//console.log('refresh '+type+'  '+recID);                
         window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, 
             { source:this.uuid, type:type, recID: recID });    
            

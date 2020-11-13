@@ -821,7 +821,7 @@ window.hWin.HEURIST4.dbs = {
     // Returns
     // direct:   rty_ID:[{all:[],dty_ID:[rty_ID,rty_ID,....],  }]
     // reverse:
-    // reverse_parent:
+    // parents:  {child_rty_ID:[parents rtyIDs,...],....}
     // rel_direct:
     // rel_reverse:
     //
@@ -915,6 +915,21 @@ window.hWin.HEURIST4.dbs = {
             rel_direct: rst_rel_direct
         };
         
+    },
+
+    //
+    //
+    //     
+    rst_usage: function(dty_ID){
+       
+        var usage = [];
+        var all_structs = $Db.rst_idx2();
+        for (var rty_ID in all_structs){
+            if(all_structs[rty_ID].getById(dty_ID)){
+                usage.push(rty_ID);
+            }
+        }
+        return usage;
     },
     
     

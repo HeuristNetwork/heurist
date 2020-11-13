@@ -23,6 +23,10 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
     _entityName:'defDetailTypes',
     fields_list_div: null,  //suggestion list
     set_detail_type_btn: null,
+
+    fieldSelectorLast:null,
+    fieldSelectorOrig: null,
+    fieldSelector: null,
     
     //
     //
@@ -390,7 +394,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                     }
                     break;
                 case 'usedin': 
-                    html += __action_btn('fields','ui-icon-circle-b-info','Used in rectypes');
+                    html += __action_btn('usedin','ui-icon-circle-b-info','Used in rectypes');
                     break;
                 case 'status': 
                     
@@ -418,14 +422,49 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
     _onActionListener:function(event, action){
         
         
+        if(action && action.action=='delete'){
+            
+            var usage = $Db.rst_usage(action.recID);
+            if(usage && usage.length>0)
+            {            
+
+                var sList = '';
+                for(var i=0; i<usage.length; i++){
+                    sList += ('<a href="#" data-rty_ID="'+usage[i]+'">'+$Db.rty(usage[i],'rty_Name')+'</a><br>');
+                }
+                
+                var sUsage = '<div><b>Warning</b><br/><br/><b>'+$Db.dty(action.recID,'dty_Name')
+                        +'</b> is used in the following record types:<br/>'
+                        +sList
+                        +'<br/><br/>'
+                        +'You have to either delete the field from the record type, '
+                        +'or delete the record type (it may not be possible or desirable to delete the record type)</div>';
+
+                $dlg = window.hWin.HEURIST4.msg.showMsgDlg(sUsage, null, {title:'Warning'});        
+                
+                this._on($dlg.find('a[data-rty_ID]'),{click:function(e){
+                    //edit structure
+                    window.hWin.HEURIST4.ui.openRecordEdit(-1, null, 
+                        {new_record_params:{RecTypeID: $(e.target).attr('data-dty_ID')}, edit_structure:true});
+                    
+                    return false;                    
+                }});
+                
+                return;
+            }
+        }
+        
+        
         var isResolved = this._super(event, action);
 
         if(!isResolved){
             
             var recID = 0;
+            var target = null;
 
             if(action && action.action){
                 recID =  action.recID;
+                target = action.target;
                 action = action.action;
             }
             if(recID>0){
@@ -441,6 +480,48 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                     this._saveEditAndClose({dty_ID:recID, dty_ShowInLists:newVal });
                     
                 }else if(action=='usedin'){
+                    
+                    //show selectmenu with list of recordtypes where this field is used
+                    if(this.fieldSelectorLast!=recID){
+                        
+                        this.fieldSelectorLast   = recID;
+                        var usage = $Db.rst_usage(recID);
+                        if(usage && usage.length>0){
+                            var options = [];
+                            for(var i=0; i<usage.length; i++){
+                                var rty_ID = usage[i];
+                                options.push({key:rty_ID, title:$Db.rty(rty_ID, 'rty_Name')});
+                            }   
+                        }
+
+                        if(!this.fieldSelector){
+                            this.fieldSelectorOrig = document.createElement("select");    
+                            window.hWin.HEURIST4.ui.fillSelector(this.fieldSelectorOrig, options);
+                            this.fieldSelector = window.hWin.HEURIST4.ui.initHSelect(this.fieldSelectorOrig, false);
+                            
+                            var menu = this.fieldSelector.hSelect( "menuWidget" );
+                            menu.css({'max-height':'350px'});                        
+                                this.fieldSelector.hSelect({change: function(event, data){
+
+                                    //edit structure     
+                                    var new_record_params = {RecTypeID: data.item.value};
+                                    window.hWin.HEURIST4.ui.openRecordEdit(-1, null, 
+                                        {new_record_params:new_record_params, edit_structure:true});
+    
+                            }});
+                            
+                        }else{
+                            $(this.fieldSelectorOrig).empty();
+                            window.hWin.HEURIST4.ui.fillSelector(this.fieldSelectorOrig, options);
+                            this.fieldSelector.hSelect('refresh');
+                        }
+                    }
+                    this.fieldSelector.hSelect('open');
+                    this.fieldSelector.val(-1);
+                    this.fieldSelector.hSelect('menuWidget')
+                        .position({my: "left top", at: "left+10 bottom-4", of: $(target)});
+                    
+                    this.fieldSelector.hSelect('hideOnMouseLeave', $(target));                    
                     
                 }
                 
@@ -1220,17 +1301,19 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
 
         //update local definitions
         this._super( recID, fieldvalues );
+
+        this._triggerRefresh('dty');    
         
         if(this.options.edit_mode == 'editonly'){
             this.closeDialog(true); //force to avoid warning
         }else if(this.it_was_insert){
             this.searchForm.searchDefDetailTypes('startSearch');
-            this._triggerRefresh('dty');
+            //this._triggerRefresh('dty');
             
             //var dtg_ID = $Db.dty(recID,'dty_DetailTypeGroupID');
             //this.updateGroupCount(dtg_ID, 1);
         }else{
-            this._triggerRefresh('dty');    
+            //this._triggerRefresh('dty');    
         }        
         
         

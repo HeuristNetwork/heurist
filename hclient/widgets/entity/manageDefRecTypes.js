@@ -32,6 +32,8 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
     fieldSelectorOrig:null,
     
     is_new_icons: true,
+    
+    rst_links: null, //reference to links data $Db.rst_links
 
     usrPreferences:{},
     defaultPrefs:{
@@ -92,12 +94,15 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         
         //
         if(!this.options.import_structure){        
+            this.rst_links = $Db.rst_links();
+        
             window.hWin.HAPI4.addEventListener(this, window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, 
                 function(data) { 
-                    if(!data || 
-                       (data.source != that.uuid && data.type == 'rty'))
+                    if(!data || (data.source != that.uuid && data.type == 'rty'))
                     {
-                        that._loadData();
+                        that._loadData();    
+                    }else if(data && (data.type == 'dty' || data.type == 'rst')){
+                        that.rst_links = $Db.rst_links();
                     }
                 });
         }
@@ -665,8 +670,9 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                         if(recordset.fld(record,'rty_RecCount')>0){
                             html += __action_btn('','ui-icon-trash-b','To allow deletion, use Explore > Entities to find and delete all records.');    
                         }else{
-                            var links = window.hWin.HAPI4.EntityMgr.getEntityData('rst_Links')
-                            var is_referenced = (links['refs'] && links['refs'][recID]);
+                            //var links = window.hWin.HAPI4.EntityMgr.getEntityData('rst_Links')
+                            //var is_referenced = (links['refs'] && links['refs'][recID]);
+                            var is_referenced = (this.rst_links.reverse[recID] || this.rst_links.rel_reverse[recID]); 
                             if(is_referenced){
                                 html += __action_btn('delete','ui-icon-trash-b','This record type is referenced. Click to show references');    
                             }else{
@@ -734,12 +740,18 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
 
         if(action && action.action=='delete'){
             
-            var links = window.hWin.HAPI4.EntityMgr.getEntityData('rst_Links')
-            if(links['refs'] && links['refs'][action.recID]){
-                var res = links['refs'][action.recID];
+            //var links = window.hWin.HAPI4.EntityMgr.getEntityData('rst_Links')
+            if(this.rst_links.reverse[action.recID] || this.rst_links.rel_reverse[action.recID])
+            {            
+                
+                var res = [];
+                if(this.rst_links.reverse[action.recID])
+                    res = res.concat(Object.keys(this.rst_links.reverse[action.recID]));
+                if(this.rst_links.rel_reverse[action.recID])
+                    res = res.concat(Object.keys(this.rst_links.rel_reverse[action.recID]));
                 var sList = '';
-                for(var i=0; i<res.length; i++){
-                    sList += ('<a href="#" data-dty_ID="'+res[i]+'">'+$Db.dty(res[i],'dty_Name')+'</a>');
+                for(var i=0; i<res.length; i++) if(res[i]!='all' && res[i]>0){
+                    sList += ('<a href="#" data-dty_ID="'+res[i]+'">'+$Db.dty(res[i],'dty_Name')+'</a><br>');
                 }
                 
                 $dlg = window.hWin.HEURIST4.msg.showMsgDlg(

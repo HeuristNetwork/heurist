@@ -1262,7 +1262,7 @@ prof =Profile
                         rst_index[rty_ID][dty_ID] = record;  
                     } 
 
-                    //links
+                    /*links
                     var dty_Type = $Db.dty(dty_ID, 'dty_Type');
                     if((dty_Type=='resource' || dty_Type=='relmarker') 
                         && record['rst_RequirementType']!='forbidden')
@@ -1291,9 +1291,10 @@ prof =Profile
                                }
                            }
                         }
-                    }
+                    }*/
                 });
                 
+                //create separate recordset for every rectype
                 for(var rty_ID in rst_index){
                     var _order = Object.keys(rst_index[rty_ID]);
                     rst_index[rty_ID] = new hRecordSet({
@@ -1305,7 +1306,9 @@ prof =Profile
                 }
                 
                 entity_data['rst_Index'] = rst_index;
-                entity_data['rst_Links'] = {direct:rst_direct, reverse:rst_reverse, refs:rst_references };
+                
+                // see $Db.rst_links
+                //entity_data['rst_Links'] = {direct:rst_direct, reverse:rst_reverse, refs:rst_references };
             },
 
             

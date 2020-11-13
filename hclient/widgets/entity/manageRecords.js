@@ -2224,8 +2224,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     //
     __findParentRecordTypes: function(childRecordType){
 
-        var parentRecordTypes = []; //result
-        
+        var parentRecordTypes = $Db.rst_links().parents[childRecordType];
+        /*
         childRecordType = ''+childRecordType; //must be strig otherwise indexOf fails
         
         var all_structs = $Db.rst_idx2();
@@ -2244,8 +2244,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 }
             });
         }
-        
-        
+        */
         return parentRecordTypes;
     },
     
