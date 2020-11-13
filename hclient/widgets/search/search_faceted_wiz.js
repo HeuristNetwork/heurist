@@ -776,6 +776,15 @@ $.widget( "heurist.search_faceted_wiz", {
                 var svs = window.hWin.HAPI4.currentUser.usr_SavedSearch[svsID];
                 svs_id.val(svsID);
                 svs_name.val(svs[0]);
+                
+                if(svsID>0){
+                    this.options.params = window.hWin.HEURIST4.util.isJSON(svs[1]);
+                    if(!this.options.params){
+                        window.hWin.HEURIST4.msg.showMsgDlg(window.hWin.HR('Cannot initialise edit for faceted search due to corrupted parameters. Please remove and re-create this search.'), null, "Error");
+                        return;
+                    }
+                }
+                
                 svs_rules.val( this.options.params.rules?this.options.params.rules:'' );
                 svs_filter.val( this.options.params.sup_filter?this.options.params.sup_filter:'' ).trigger('keyup');
 
@@ -784,11 +793,6 @@ $.widget( "heurist.search_faceted_wiz", {
                 $dlg.find('#svs_RulesOnly1').prop('checked', (this.options.params.rulesonly!=2));
                 $dlg.find('#svs_RulesOnly2').prop('checked', (this.options.params.rulesonly==2));
 
-                this.options.params = window.hWin.HEURIST4.util.isJSON(svs[1]);
-                if(!this.options.params){
-                    window.hWin.HEURIST4.msg.showMsgDlg(window.hWin.HR('Cannot initialise edit for faceted search due to corrupted parameters. Please remove and re-create this search.'), null, "Error");
-                    return;
-                }
 
                 this.options.domain = this.options.params.domain;
 
