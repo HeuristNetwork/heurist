@@ -415,7 +415,7 @@ $.widget( "heurist.mainMenu6", {
             that.divMainMenu.find('.section-head').css({'padding-left':'0px'});
             
             that.divMainMenu.find('#svs_list').hide();
-            that.divMainMenu.find('#filter_by_groups').show();
+            //that.divMainMenu.find('#filter_by_groups').show(); IJ 2020-11-23 always show in explore menu only
 
             if(that.divMainMenu.width()>91)
                 that.divMainMenu.stop().effect('size',  { to: { width: 91 } }, is_instant===true?10:300, function(){
@@ -843,12 +843,14 @@ $.widget( "heurist.mainMenu6", {
             return;
         }
         
+        mode = 0; //IJ 2020-11-13 always show in explore menu only
+        
         if(mode==1){
             //show in leftside main menu
             if(!this.svs_list.parent().hasClass('ui-heurist-quicklinks')){
                     //show in left main menu
                     this.svs_list.detach().appendTo(this.divMainMenu.find('.ui-heurist-quicklinks'));
-                    this.svs_list.css({'top':215}); //, 'font-size':'0.8em'});
+                    this.svs_list.css({'top':215, 'border-top':'none'}); //, 'font-size':'0.8em'});
                     this.svs_list.svs_list('option','container_width',170);
                     this.svs_list.svs_list('option','hide_header', true);
                     this._on(this.svs_list,{mouseenter: this._resetCloseTimers});//_expandMainMenuPanel});
@@ -859,7 +861,7 @@ $.widget( "heurist.mainMenu6", {
             if(!this.svs_list.parent().hasClass('ui-menu6-section')){
                 
                 this.svs_list.detach().appendTo(this.menues['explore']);
-                this.svs_list.css({'top':221}); //, 'font-size':'1em'}).show();
+                this.svs_list.css({'top':220, 'border-top':'3px #305586 solid'}); //, 'font-size':'1em'}).show();
                 this.svs_list.svs_list('option','container_width',200);
                 this.svs_list.svs_list('option','hide_header', true);
                 this._off(this.svs_list,'mouseenter');
@@ -1267,6 +1269,9 @@ $.widget( "heurist.mainMenu6", {
     //
     _createListOfGroups: function(){
         
+        //IJ 2020-11-13 always show in explore menu only
+        return;
+        
         var bm_on = (window.hWin.HAPI4.get_prefs('bookmarks_on')=='1');
         
         
@@ -1408,12 +1413,13 @@ $.widget( "heurist.mainMenu6", {
     _refreshSubsetSign: function(){
         
             var container = this.menues['explore'].find('li[data-action="menu-subset-set"]');
+            container.removeClass('fancytree-node');
             var ele = container.find('span.subset-info');
             if(window.hWin.HAPI4.sysinfo.db_workset_count>0){
                 if(ele.length==0){
                     ele = $('<span class="subset-info"><span '
-+'style="display:inline-block;font-style:italic;font-size:smaller;color:lightgray;padding-left:22px"></span>'
-+'<span class="ui-icon ui-icon-arrowrefresh-1-w clear_subset" style="font-size:0.7em;" title="Click to revert to whole database">'+
++'style="display:inline-block;color:red;font-size:smaller;padding-left:22px"></span>' //font-style:italic ;color:lightgray
++'<span class="ui-icon ui-icon-arrowrefresh-1-w clear_subset" style="font-size:0.7em;color:black;" title="Click to revert to whole database">'+
 '</span></span>')
                         .appendTo(container);
                         
@@ -1427,7 +1433,7 @@ $.widget( "heurist.mainMenu6", {
                         }});
                 
                 }
-                ele.find('span:first').text('Current subset n = '+window.hWin.HAPI4.sysinfo.db_workset_count);
+                ele.find('span:first').html('Current subset n&nbsp;&nbsp;=&nbsp;&nbsp;'+window.hWin.HAPI4.sysinfo.db_workset_count);
                 ele.show();
                 
             }else if(ele.length>0){
