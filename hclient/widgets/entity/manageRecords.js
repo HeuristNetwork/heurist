@@ -2372,7 +2372,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 //IMHO it should be optional
                 // 1. if rectype is set as target for one of Parent/child pointer fields 
                 // 2 and options.parententity show warning and prevent addition
-                if(parentRtys.length>0){
+                if(parentRtys && parentRtys.length>0){
                     
                     var names = [];
                     $(parentRtys).each(function(i,id){

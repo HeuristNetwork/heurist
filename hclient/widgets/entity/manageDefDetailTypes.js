@@ -80,12 +80,27 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             this.fieldtype_groups = $('<div data-container="ABBBBBB">').addClass('ui-dialog-heurist')
                 .css({position: 'absolute',top: 0, bottom: 0, left: 0, width:220, overflow: 'hidden'})
                 .appendTo(this.element);
+                
+                
+            if(this.options.select_mode=='manager'){ //adjust table widths
+                var that = this;
+                window.hWin.HAPI4.addEventListener(this, window.hWin.HAPI4.Event.ON_WINDOW_RESIZE, 
+                    function(){
+                        if(that.recordList && that.recordList.resultList('instance')){
+                            that.recordList.resultList('applyViewMode','list', true);
+                            that.recordList.resultList('refreshPage');
+                        }
+                    });
+            }    
+                
 
         }        
     
     },
         
     _destroy: function() {
+
+        window.hWin.HAPI4.removeEventListener(this, window.hWin.HAPI4.Event.ON_WINDOW_RESIZE);        
         
         if(this.fields_list_div){
             this.fields_list_div.remove();
@@ -266,11 +281,18 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
     //
     _recordListHeaderRenderer: function(){
 
+        var max_width = this.recordList.find('.div-result-list-content').width() - 23;
+        var used_width = 0;
+        
         function fld2(col_width, value, style){
             
             if(!style) style = '';
             if(!window.hWin.HEURIST4.util.isempty(col_width)){
-                style += (';width:'+col_width);
+                
+                col_width = col_width - 1;
+                used_width = used_width + col_width + 4;
+                style += (';width:'+col_width+'px'); 
+                
             }
             if(style!='') style = 'style=";'+style+'"'; //border-left:1px solid gray;
             
@@ -287,36 +309,45 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         var i = 0;
         for (;i<fields.length;i++){
            switch ( fields[i] ) {
-                case 'dtyid': html += fld2('20px','ID','text-align:right'); break;
+                case 'dtyid': html += fld2(30,'ID','text-align:right'); break;
                 case 'ccode': 
-                    html += fld2('80px','Code','text-align:center');     
+                    html += fld2(80,'Code','text-align:center');     
                     break;
                 case 'group': 
-                    html += fld2('30px','Group','text-align:center');
+                    html += fld2(30,'Group','text-align:center');
                     break;
                 case 'edit':  
-                    html += fld2('30px','Edit','text-align:center');
+                    html += fld2(30,'Edit','text-align:center');
                     break;
                 case 'name':  
-                    html += fld2('120px','Name','text-align:left');
+                    html += '$$NAME$$';  //html += fld2('120px','Name','text-align:left');
                     break;
                 case 'type': 
-                    html += fld2('60px','Type','text-align:left');
+                    html += fld2(80,'Type','text-align:left');
                     break;
                 case 'description':  
-                    html += fld2(null,'Description',''); break;
+                    html += '$$DESC$$'; //html += fld2(null,'Description',''); 
+                    break;
                 case 'show': 
-                    html += fld2('30px','Show','text-align:center');
+                    html += fld2(30,'Show','text-align:center');
                     break;
                 case 'usedin': 
-                    html += fld2('30px','Fields','text-align:center');
+                    html += fld2(30,'Fields','text-align:center');
                     break;
                 case 'status': 
-                    html += fld2('30px','Status','text-align:center');
+                    html += fld2(30,'Status','text-align:center');
                     break;
             }   
         }
         
+        var w_desc = max_width-used_width-160;
+        if(w_desc<30) w_desc = 30;
+//console.log(max_width+'  '+'  '+used_width+'  '+w_desc);            
+        html = html.replace('$$DESC$$',fld2(w_desc, 'Description', 'text-align:left'));
+
+        var name_width = max_width - used_width;
+//console.log('  =>'+name_width);        
+        html = html.replace('$$NAME$$',fld2(name_width, 'Name', 'text-align:left'))
         
         return html;
     },
@@ -333,9 +364,10 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         function fld2(fldname, col_width, value, style){
             
             if(!style) style = '';
-            if(!window.hWin.HEURIST4.util.isempty(col_width)){
-                style += (';max-width: '+col_width+';width:'+col_width);
+            if(col_width>0){
+                style += (';max-width:'+col_width+'px;min-width:'+col_width+'px');
             }
+
             if(style!='') style = 'style=";'+style+'"';  //padding:0px 4px
             
             if(!value){
@@ -351,24 +383,34 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         var fields = this.visible_fields; //this.usrPreferences.fields;
         
         function __action_btn(action,icon,title){
-            return '<div class="item" style="width:30px;text-align:center;"><div title="'+title+'" '
+            return '<div class="item" style="min-width:30px;max-width:30px;text-align:center;"><div title="'+title+'" '
                     +'class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" '
                     +'role="button" aria-disabled="false" data-key="'+action+'" style="height:18px;">'
                     +     '<span class="ui-button-icon-primary ui-icon '+icon+'"></span>'
                     + '</div></div>'            
         }
+        
+        var max_width = this.recordList.find('.div-result-list-content').width() 
+                            - ((this.options.select_mode=='select_multi') ?40:33);
+        var used_width = 244;
+
+        var w_desc = max_width - used_width - 160;
+        if(w_desc<30) w_desc = 30;
+        var name_width = max_width - used_width - w_desc;
+        
+        
 
         var grayed = '';
         var i = 0;
         for (;i<fields.length;i++){
             
             switch ( fields[i] ) {
-                case 'dtyid': html += fld2('dty_ID','20px',null,'text-align:right'); break;
+                case 'dtyid': html += fld2('dty_ID',30,null,'text-align:right'); break;
                 case 'ccode': 
                     var c1 = recordset.fld(record,'dty_OriginatingDBID');
                     var c2 = recordset.fld(record,'dty_IDInOriginatingDB');
                     c1 = (c1>0 && c2>0)?(c1+'-'+c2):' ';
-                    html += fld2('','80px', c1,'text-align:center');     
+                    html += fld2('',80, c1,'text-align:center');     
                     break;
                 case 'group': 
                     html += __action_btn('group','ui-icon-carat-d','Change group');
@@ -376,14 +418,14 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                 case 'edit':  
                     html += __action_btn('edit','ui-icon-pencil','Click to edit base field');
                     break;
-                case 'name':  html += fld2('dty_Name','120px'); break;
+                case 'name':  html += fld2('dty_Name',name_width); break;
                 case 'type':  
                 
-                    html += fld2('', '60px', $Db.baseFieldType[recordset.fld(record,'dty_Type')]); 
+                    html += fld2('', 80, $Db.baseFieldType[recordset.fld(record,'dty_Type')], 'font-size:smaller'); 
                     break;
                 case 'description':  
                     html += fld2('dty_HelpText',null,null,
-                        'min-width:320px;max-width:320px;width:50%;font-style:italic;font-size:smaller'); break;
+                        'min-width:'+w_desc+'px;max-width:'+w_desc+'px;font-style:italic;font-size:smaller'); break;
                 case 'show': 
                 
                     if(recordset.fld(record, 'dty_ShowInLists')==1){

@@ -73,13 +73,23 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
         if(!window.hWin.HR){
             window.hWin.HR = that.setLocale('en');
         }
-    
 
         if(typeof hLayout !== 'undefined' && $.isFunction(hLayout)){
             that.LayoutMgr = new hLayout();
         }
         if(typeof hSearchMinimal !== 'undefined' && $.isFunction(hSearchMinimal)){
             that.SearchMgr = new hSearchMinimal();
+        }
+        
+        if(!window.onresize){
+            that._delayOnResize = 0;
+            function __trigger(){
+                window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_WINDOW_RESIZE);
+            };
+            window.onresize = function(){
+                if(that._delayOnResize) clearTimeout(that._delayOnResize);
+                that._delayOnResize = setTimeout(__trigger,500);
+            }
         }
 
 
@@ -1491,6 +1501,7 @@ prof =Profile
             ON_REC_SELECT: "ON_REC_SELECT",
             ON_REC_COLLECT: "ON_REC_COLLECT",
             ON_LAYOUT_RESIZE: "ON_LAYOUT_RESIZE",
+            ON_WINDOW_RESIZE: "ON_WINDOW_RESIZE",
             ON_SYSTEM_INITED: "ON_SYSTEM_INITED",
             ON_STRUCTURE_CHANGE: 'ON_STRUCTURE_CHANGE',
             ON_PREFERENCES_CHANGE: 'ON_PREFERENCES_CHANGE',

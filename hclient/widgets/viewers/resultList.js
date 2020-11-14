@@ -833,18 +833,20 @@ $.widget( "heurist.resultList", {
                     .position({my:'left bottom', at:'left top', of:this.div_content});
                     
             //adjust columns width in header with columns width in div_content
-            var header_columns = this.div_content_header.find('.item');
-            var cols = this.div_content.find('.recordDiv:first').find('.item');
-            var tot = 0;
-            cols.each(function(i, col_item){
-                if(i>0 & i<header_columns.length){ //skip recordSelector
-                    $(header_columns[i-1]).width( $(col_item).width() );    
-                    tot = tot + $(col_item).width() + 4;
+            if(!this.options.list_mode_is_table){
+                var header_columns = this.div_content_header.find('.item');
+                var cols = this.div_content.find('.recordDiv:first').find('.item');
+                var tot = 0;
+                cols.each(function(i, col_item){
+                    if(i>0 & i<header_columns.length){ //skip recordSelector
+                        $(header_columns[i-1]).width( $(col_item).width() );    
+                        tot = tot + $(col_item).width() + 4;
+                    }
+                });
+                //adjust last column
+                if(header_columns.length>0){
+                    $(header_columns[header_columns.length-1]).width( this.div_content_header.width()-tot-20 );    
                 }
-            });
-            //adjust last column
-            if(header_columns.length>0){
-                $(header_columns[header_columns.length-1]).width( this.div_content_header.width()-tot-20 );    
             }
             
             top = top + this.div_content_header.height();
@@ -1046,7 +1048,11 @@ $.widget( "heurist.resultList", {
             //create div for table header
             if( window.hWin.HEURIST4.util.isnull(this.div_content_header )){
                     this.div_content_header = $('<div>').addClass('table_header')
-                    .insertBefore(this.div_content);
+                        .insertBefore(this.div_content);
+                    if(this.options.list_mode_is_table){
+                        this.div_content_header.css('font-size', '10px');
+                    }
+                        
             }
             if(window.hWin.HEURIST4.util.isempty(header_html)){
                 this.div_content_header.hide();
@@ -1127,6 +1133,11 @@ $.widget( "heurist.resultList", {
     updateResultSet: function( recordset, request ){
 
         this.loadanimation(false);
+        
+        if(this.options.list_mode_is_table){
+            this.applyViewMode('list',true); //redraw header
+        }
+        
         this.clearAllRecordDivs(null);
         this._renderPagesNavigator();
         this._renderRecordsIncrementally(recordset);
@@ -2592,6 +2603,7 @@ $.widget( "heurist.resultList", {
     //
     //    
     , refreshPage: function(){
+        
         var keep_selection = this.getSelected(true);
         this._renderPage(this.current_page);
         if(keep_selection && keep_selection.length>0){
