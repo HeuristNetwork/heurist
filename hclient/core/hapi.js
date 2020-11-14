@@ -88,7 +88,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             };
             window.onresize = function(){
                 if(that._delayOnResize) clearTimeout(that._delayOnResize);
-                that._delayOnResize = setTimeout(__trigger,500);
+                that._delayOnResize = setTimeout(__trigger,1000);
             }
         }
 

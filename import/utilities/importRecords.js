@@ -325,7 +325,7 @@ function hImportRecords(_max_upload_size) {
                 tsv = tsv + 'detailtype\t'+(dtyID.indexOf('-')?'':dtyID)
                 +'\t'+detailtype['code']+'\t'
                 +detailtype['name']+'\t'+target_id;
-            }
+            }//for
 
         $('#div_tsv').text(tsv);
         $('.tsv_download').click(function(event){

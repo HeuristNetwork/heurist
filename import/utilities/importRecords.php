@@ -132,7 +132,7 @@ if the source and target do not have the same structure </p>
            <div id="div_tsv" style="display:none"></div>
            
            <!-- list of missing definitions -->
-           <div id="div_RectypeToBeImported" style="max-height: 128px;overflow-y: auto;">
+           <div id="div_RectypeToBeImported" style="max-width:740px;max-height: 128px;overflow-y: auto;">
            </div>     
 
            <!-- source broken: import blocked -->
