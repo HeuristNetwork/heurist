@@ -40,12 +40,13 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         width:(window.hWin?window.hWin.innerWidth:window.innerWidth)*0.95,
         height:(window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95,
 //rtyid,'ccode','addrec','filter','count','group','icon','edit','editstr','name','description','show','duplicate','fields','status'        
-        fields:['count','icon','editstr','name','description','show','duplicate','fields','status'] 
+        fields:['icon','edit','fields','editstr','name','count','filter','addrec','description','show','duplicate','status','rtyid','ccode'] 
         },
-    fields_width: {rtyid:20,ccode:80,addrec:30,filter:30,count:40,group:30,icon:40,edit:30,editstr:30,
-                name:120,description:30,show:30,duplicate:30,fields:30,status:30},
-    fields_name:{rtyid:'ID',ccode:'Code',addrec:'Add',filter:'Filter',count:'Count',group:'Group',icon:'Icon',edit:'Attr',editstr:'Edit',
-                 name:'Name',description:'Description',show:'Show',duplicate:'Dup',fields:'Info',status:'Del'},
+    fields_width: {rtyid:30,ccode:80,addrec:34,filter:34,count:40,group:34,icon:40,edit:34,editstr:34,
+                name:150,description:34,show:34,duplicate:34,fields:34,status:34},
+    //fields_name:{rtyid:'ID',ccode:'Code',addrec:'Add',filter:'Filter',count:'Count',group:'Group',icon:'Icon',edit:'Attr',editstr:'Edit',
+    //             name:'Name',description:'Description',show:'Show',duplicate:'Dup',fields:'Info',status:'Del'},
+        
         
     //
     //                                                  
@@ -483,7 +484,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         var max_width = this.recordList.find('.div-result-list-content').width() - 33;
         var used_width = 0;
         
-        function fld2(col_width, value, style){
+        function fld2(col_width, value, hint, style){
             
             if(!style) style = '';
             if(col_width>0){
@@ -496,58 +497,61 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             if(!value){
                 value = '';
             }
-            return '<div class="item truncate" '+style+'>'+window.hWin.HEURIST4.util.htmlEscape(value)+'</div>';
+            return '<div class="item truncate" title="'
+                        +hint+'" '+style+'>'
+                        +window.hWin.HEURIST4.util.htmlEscape(value)
+                    +'</div>';
         }
         
         var html = '';
         if (!(this.usrPreferences && this.usrPreferences.fields)) return '';
         var fields = this.usrPreferences.fields;
-        
+
         var i = 0;
         for (;i<fields.length;i++){
             switch ( fields[i] ) {
-                case 'rtyid': html += fld2(20,'ID','text-align:right'); break;
+                case 'rtyid': html += fld2(30,'ID','Local ID','text-align:center'); break;
                 case 'ccode': 
-                    html += fld2(80,'Code','text-align:center');     
+                    html += fld2(80,'ConceptID','Concept code','text-align:center');     
                     break;
                 case 'addrec': 
-                    html += fld2(30,'Add','text-align:center');
+                    html += fld2(34,'Add','Add record,text-align:center');
                     break;
                 case 'filter':
-                    html += fld2(30,'Filter','text-align:center');
+                    html += fld2(34,'Filter','Filter records','text-align:center');
                     break;
                 case 'count': 
-                    html += fld2(40,'Count','text-align:center');
+                    html += fld2(40,'Count','Count','text-align:center');
                     break;
                 case 'group': 
-                    html += fld2(30,'Group','text-align:center');
+                    html += fld2(34,'Group','','text-align:center');
                     break;
                 case 'icon': 
-                    html += fld2(40,'Icon','text-align:center');
+                    html += fld2(40,'Icon','','text-align:center');
                     break;
                 case 'edit':  
-                    html += fld2(30,'Attr','text-align:center;'); //font-size:12px
+                    html += fld2(34,'Attribs','Edit attributes','text-align:center;'); //font-size:12px
                     break;
                 case 'editstr': 
-                    html += fld2(30,'Edit','text-align:center');
+                    html += fld2(34,'Fields','Edit fields','text-align:center');
                     break;
                 case 'name':  
-                    html += '$$NAME$$';//fld2(120,'Name','text-align:left');
+                    html += '$$NAME$$';//fld2(150,'Name','text-align:left');
                     break;
                 case 'description':  
                     html += '$$DESC$$'; //fld2(null,'Description',''); 
                     break;
                 case 'show': 
-                    html += fld2(30,'Show','text-align:center;'); //font-size:12px
+                    html += fld2(34,'Show','Show','text-align:center;'); //font-size:12px
                     break;
                 case 'duplicate': 
-                    html += fld2(30,'Dup','text-align:center;'); //font-size:12px
+                    html += fld2(34,'Dup','Duplicate','text-align:center;'); //font-size:12px
                     break;
                 case 'fields': 
-                    html += fld2(30,'Info','text-align:center;'); //font-size:12px
+                    html += fld2(34,'Fld list','List fields','text-align:center;'); //font-size:12px
                     break;
                 case 'status': 
-                    html += fld2(30,'Del','text-align:center;'); //font-size:12px
+                    html += fld2(34,'Del','Delete / protected','text-align:center;'); //font-size:12px
                     break;
             }   
         }
@@ -556,14 +560,14 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         // otherwise this is Name
         var w_desc = 0, i_desc = fields.indexOf('description');
         if(i_desc>=0){
-            w_desc = max_width-used_width-120;
+            w_desc = max_width-used_width-150;
             if(w_desc<30) w_desc = 30;
 //console.log(max_width+'  '+'  '+used_width+'  '+w_desc);            
-            html = html.replace('$$DESC$$',fld2(w_desc, 'Description', 'text-align:left'))
+            html = html.replace('$$DESC$$',fld2(w_desc, 'Description', 'Description', 'text-align:left'))
         }
         var name_width = max_width - used_width;
 //console.log('  =>'+name_width);        
-        html = html.replace('$$NAME$$',fld2(name_width, 'Name', 'text-align:left'))
+        html = html.replace('$$NAME$$',fld2(name_width, 'Name', 'Name', 'text-align:left'))
         
         return html;
         
@@ -656,7 +660,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         
         function __action_btn(action,icon,title,color){
             if(!color) color = '#555555';            
-            return '<div class="item" style="min-width:30px;max-width:30px;text-align:center;"><div title="'+title+'" '
+            return '<div class="item" style="min-width:34px;max-width:34px;text-align:center;"><div title="'+title+'" '
                     +'class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" '
                     +'role="button" aria-disabled="false" data-key="'+action+'" style="height:18px;">'
                     +     '<span class="ui-button-icon-primary ui-icon '+icon+'" style="color:'+color+'"></span>'
@@ -674,7 +678,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             }
             
             switch ( fields[i] ) {
-                case 'rtyid': html += fld2('rty_ID',20,null,'text-align:right'); break;
+                case 'rtyid': html += fld2('rty_ID',30,null,'text-align:center'); break;
                 case 'ccode': 
                     var c1 = recordset.fld(record,'rty_OriginatingDBID');
                     var c2 = recordset.fld(record,'rty_IDInOriginatingDB');
@@ -688,7 +692,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                     html += __action_btn('filter','ui-icon-search','Click to launch search for '+fld('rty_Name'));
                     break;
                 case 'count': 
-                    html += fld2('rty_RecCount',40,null,'text-align:right'); break;
+                    html += fld2('rty_RecCount',40,null,'text-align:center  '); break;
                 case 'group': 
                     html += __action_btn('group','ui-icon-carat-d','Change group');
                     break;                         
@@ -749,11 +753,11 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         //if Description presents it takes all possible width
         // otherwise this is Name
         var max_width = this.recordList.find('.div-result-list-content').width() 
-                - ((this.options.select_mode=='select_multi') ?40:33);
+                - ((this.options.select_mode=='select_multi') ?40:27);
 
         var w_desc = 0, i_desc = fields.indexOf('description');
         if(i_desc>=0){
-            w_desc = max_width-used_width-120;
+            w_desc = max_width-used_width-150;
             if(w_desc<30) w_desc = 30;
             
             html = html.replace('$$DESC$$', fld2('rty_Description',null,null,
@@ -761,11 +765,11 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         }
         
         var name_width = max_width - used_width - w_desc;
-//console.log((max_width+38)+'  '+max_width+'  '+'  '+used_width+'  '+w_desc+'  =>'+name_width);        
+//console.log('  '+max_width+'  '+'  '+used_width+'  '+w_desc+'  =>'+name_width);        
         
         html = html.replace('$$NAME$$',fld2('rty_Name', name_width, null,'text-align:left'))
 //padding:0.4em 0px;
-        html = '<div class="recordDiv rt_draggable" recid="'+recID+'" style="display:table-row;height:28px;'+grayed+'">'
+        html = '<div class="recordDiv rt_draggable" recid="'+recID+'" style="display:table-row;height:28px;padding:0.4em 0px;'+grayed+'">'
                     + '<div class="recordSelector item"><input type="checkbox" /></div>'
                     + html+'</div>';
         

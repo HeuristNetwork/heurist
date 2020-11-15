@@ -309,7 +309,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         var i = 0;
         for (;i<fields.length;i++){
            switch ( fields[i] ) {
-                case 'dtyid': html += fld2(30,'ID','text-align:right'); break;
+                case 'dtyid': html += fld2(30,'ID','text-align:center'); break;
                 case 'ccode': 
                     html += fld2(80,'Code','text-align:center');     
                     break;
@@ -320,10 +320,10 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                     html += fld2(30,'Edit','text-align:center');
                     break;
                 case 'name':  
-                    html += '$$NAME$$';  //html += fld2('120px','Name','text-align:left');
+                    html += '$$NAME$$';  //html += fld2('150px','Name','text-align:left');
                     break;
                 case 'type': 
-                    html += fld2(80,'Type','text-align:left');
+                    html += fld2(80,'Type','text-align:center');
                     break;
                 case 'description':  
                     html += '$$DESC$$'; //html += fld2(null,'Description',''); 
@@ -340,7 +340,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             }   
         }
         
-        var w_desc = max_width-used_width-160;
+        var w_desc = max_width-used_width-190;
         if(w_desc<30) w_desc = 30;
 //console.log(max_width+'  '+'  '+used_width+'  '+w_desc);            
         html = html.replace('$$DESC$$',fld2(w_desc, 'Description', 'text-align:left'));
