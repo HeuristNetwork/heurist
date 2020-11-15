@@ -37,8 +37,8 @@ class DbRecDetails
     *       rtyID  - filter by record type
     *       dtyID  - detail field to be added
     *       for addition: val: | geo: | ulfID: - value to be added
-    *       for edit sVal - search value (if missed - replace all occurences),  rVal - replace value
-    *       for delete: sVal  
+    *       for edit sVal - search value (if missed - replace all occurences),  rVal - replace value,  subs= 1 | 0
+    *       for delete: sVal, subs= 1 | 0   
     *       tag  = 0|1  - add system tag to mark processed records
     */    
     private $data;  
@@ -636,8 +636,13 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
             switch ($basetype) {
                 case "freetext":
                 case "blocktext":
-                    $searchClause = "dtl_Value like \"%".$mysqli->real_escape_string(@$this->data['sVal'])."%\"";
-                    $partialReplace = true;
+                    if(@$this->data['subs']==1){
+                        $searchClause = "dtl_Value like \"%".$mysqli->real_escape_string(@$this->data['sVal'])."%\"";
+                        $partialReplace = true;
+                    }else{
+                        $searchClause = "dtl_Value = \"".$mysqli->real_escape_string(@$this->data['sVal'])."\"";
+                    }
+                    
                     break;
                 case "enum":
                 case "relationtype":
@@ -732,7 +737,6 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
                     }else{
                         $dtl['dtl_Value'] = $newVal;        
                     }
-                    
                     $ret = mysql__insertupdate($mysqli, 'recDetails', 'dtl', $dtl);    
             
                     if (!is_numeric($ret)) {
@@ -807,6 +811,15 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
         switch ($basetype) {
             case "freetext":
             case "blocktext":
+                if($isDeleteAll){
+                    $searchClause = '1';
+                }else if(@$this->data['subs']==1){
+                    $unconditionally = true;
+                    $searchClause = "dtl_Value like \"%".$mysqli->real_escape_string($this->data['sVal'])."%\"";
+                }else {
+                    $searchClause = "dtl_Value = \"".$mysqli->real_escape_string($this->data['sVal'])."\"";
+                }
+                break;
             case "enum":
             case "relationtype":
             case "float":
@@ -841,13 +854,19 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
         $dtl = Array('dtl_Modified'  => $now);
         $rec_update = Array('rec_ID'  => 'to-be-filled',
                      'rec_Modified'  => $now);
-                     
-        $baseTag = "~delete field $dtyName $now";
+
+        if(@$this->data['subs']==1){                     
+            $baseTag = "~replace field $dtyName $now";
+        }else{
+            $baseTag = "~delete field $dtyName $now";
+        }
         
         foreach ($this->recIDs as $recID) {
             //get matching detail value for record if there is one
-            $valuesToBeDeleted = mysql__select_list($mysqli, "recDetails", "dtl_ID", 
-                        "dtl_RecID = $recID and dtl_DetailTypeID = $dtyID and $searchClause");
+            $query = "SELECT dtl_ID, dtl_Value FROM recDetails WHERE dtl_RecID = $recID and dtl_DetailTypeID = $dtyID and $searchClause";
+            $valuesToBeDeleted = mysql__select_assoc2($mysqli, $query);
+            
+//$valuesToBeDeleted = mysql__select_list($mysqli, "recDetails", "dtl_ID", "dtl_RecID = $recID and dtl_DetailTypeID = $dtyID and $searchClause");
             
             if($valuesToBeDeleted==null && $mysqli->error){
                 $sqlErrors[$recID] = $mysqli->error;
@@ -880,9 +899,43 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
                 }
             }
             
-            //delete the details
-            $sql = 'delete from recDetails where dtl_ID in ('.implode(',',$valuesToBeDeleted).')';
-            if ($mysqli->query($sql) === TRUE) {
+            if(@$this->data['subs']==1){                    
+                //this is not real delete - this is replacement of value part with empty string
+                $now = date('Y-m-d H:i:s');
+                $dtl = Array('dtl_Modified'  => $now);
+                    
+                
+                foreach ($valuesToBeDeleted as $dtlID => $dtlVal) {
+                
+                    $newVal = preg_replace("/".$this->data['sVal']."/",'',$dtlVal);
+                    
+                    if(trim($newVal)==''){
+                        $sql = 'delete from recDetails where dtl_ID = '.$dtlID;
+                        if ($mysqli->query($sql) === TRUE) {
+                            $sqlErrors[$recID] = $mysqli->error;
+                        }
+                        
+                    }else{
+                        $dtl['dtl_ID'] = $dtlID;  
+                        $dtl['dtl_Value'] = $newVal;        
+                                            
+                        $ret = mysql__insertupdate($mysqli, 'recDetails', 'dtl', $dtl);    
+                
+                        if (!is_numeric($ret)) {
+                            $sqlErrors[$recID] = $ret;
+                            continue;
+                        }
+                    }
+                }                
+                
+                $sql = true;
+                
+            }else{
+                //delete the details
+                $sql = 'delete from recDetails where dtl_ID in ('.implode(',',array_keys($valuesToBeDeleted)).')';
+            }
+            
+            if ($sql===TRUE || $mysqli->query($sql) === TRUE) {
                array_push($processedRecIDs, $recID);
                //update record edit date
                $rec_update['rec_ID'] = $recID;

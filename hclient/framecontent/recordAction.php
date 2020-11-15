@@ -168,7 +168,7 @@ if(!in_array($action_type, $allowed_actions)){
             
         </fieldset>
 
-        <div id="div_widget" style="padding: 0.2em; width: 100%;">
+        <div id="div_widget" style="padding-left: 16px; width: 100%;">
             <fieldset>
             </fieldset>
         </div>

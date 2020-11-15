@@ -281,33 +281,60 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
         }else if(action_type=='replace_detail'){                              
             
             $('<div style="padding: 0.2em; width: 100%;" class="input">'
-                +'<span></span><div class="header" style="padding-left: 16px;">'
+                +'<div class="header">'  // style="padding-left: 16px;"
                 +'<label for="cb_replace_all">Replace all values</label></div>'
-                +'<input id="cb_replace_all" type="checkbox" class="text ui-widget-content ui-corner-all" style="margin:0 0 4px 0">'
+                +'<input id="cb_replace_all" type="checkbox" class="text ui-widget-content ui-corner-all" style="margin:0 0 10px 24px">'
                 +'</div>').change(function(){
-                                                            
-                    if($(event.target).is(':checked')){
-                        $('#fld-1').hide();    
+
+
+                    if ($(this).is(':checked')){
+                        $('#cb_whole_value').parent().hide();   
+                        $('#fld-1').hide();
                     }else{
+                        $('#cb_whole_value').parent().show();
                         $('#fld-1').show();    
                     }
-                    
+                                                            
                 }).appendTo($fieldset);
+                
+            $('<div style="padding: 0.2em; width: 100%;" class="input">'
+                +'<div class="header">'  // style="padding-left: 16px;"
+                +'<label for="cb_whole_value">Replace substring</label></div>'
+                +'<input id="cb_whole_value" type="checkbox" class="text ui-widget-content ui-corner-all" style="margin:0 0 10px 24px">'
+                +'</div>').appendTo($fieldset);
+                
             
             _createInputElement('fld-1', window.hWin.HR('Value to find'));
             _createInputElement('fld-2', window.hWin.HR('Replace with'));
+            
         }else if(action_type=='delete_detail'){
 
             $('<div style="padding: 0.2em; width: 100%;" class="input">'
-                +'<div class="header" style="padding-left: 16px;">'
+                +'<div class="header">'  // style="padding-left: 16px;"
                 +'<label for="cb_remove_all">Remove all occurrences</label></div>'
-                +'<input id="cb_remove_all" type="checkbox" class="text ui-widget-content ui-corner-all">'
+                +'<input id="cb_remove_all" type="checkbox" class="text ui-widget-content ui-corner-all" style="margin:0 0 10px 24px">'
                 +'</div>').appendTo($fieldset);
 
+            $('<div style="padding: 0.2em; width: 100%;" class="input">'
+                +'<div class="header">'  // style="padding-left: 16px;"
+                +'<label for="cb_whole_value">Remove substring</label></div>'
+                +'<input id="cb_whole_value" type="checkbox" class="text ui-widget-content ui-corner-all" style="margin:0 0 10px 24px">'
+                +'</div>').appendTo($fieldset);
+            
+                
             _createInputElement('fld-1', window.hWin.HR('Remove value matching'));
 
-            $('#cb_remove_all').change(function(){ $(this).is(':checked')?$('#fld-1').hide():$('#fld-1').show();  });
-            $('.editint-inout-repeat-button').hide();
+            
+            $('#cb_remove_all').change(function(){ 
+                    if ($(this).is(':checked')){
+                        $('#cb_whole_value').parent().hide();   
+                        $('#fld-1').hide();
+                    }else{
+                        $('#cb_whole_value').parent().show();
+                        $('#fld-1').show();    
+                    }
+            });
+            //$('.editint-inout-repeat-button').hide();
             
         }else if(action_type=='merge_delete_detail'){ //@todo
             _createInputElement('fld-1', window.hWin.HR('Value to remove'), init_field_value);
@@ -347,7 +374,8 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
         }
    
 //console.log( $Db.dty(dtID, 'dty_Type') );        
-        if($Db.dty(dtID, 'dty_Type')=='geo'){
+        var field_type = $Db.dty(dtID, 'dty_Type');
+        if(field_type=='geo'){
             
             $('#cb_remove_all').prop('checked',true).addClass('ui-state-disabled');;
             $('#cb_replace_all').prop('checked',true).addClass('ui-state-disabled');;
@@ -359,6 +387,13 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             $('#cb_replace_all').removeClass('ui-state-disabled');;
             //window.hWin.HEURIST4.util.setDisabled($('#cb_replace_all'), false);
         }
+        
+        if(field_type=='freetext' || field_type=='blocktext'){
+            $('#cb_whole_value').parent().show();
+        }else{
+            $('#cb_whole_value').parent().hide();
+        }
+        
 
         //window.hWin.HEURIST4.util.cloneObj(
         var dtFields = $Db.rst(rectypeID, dtID);
@@ -457,6 +492,10 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                         alert('Define value to search');
                         return;
                     }
+                    
+                    if($('#cb_whole_value').is(':checked')){
+                        request['subs'] = 1;
+                    }
                 }
                 request['rVal'] = getFieldValue('fld-2');
                 if(window.hWin.HEURIST4.util.isempty(request['rVal'])){
@@ -472,6 +511,9 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                     if(window.hWin.HEURIST4.util.isempty(request['sVal'])){
                         alert('Define value to delete');
                         return;
+                    }
+                    if($('#cb_whole_value').is(':checked')){
+                        request['subs'] = 1;
                     }
                 }
             }else if(action_type=='extract_pdf'){
