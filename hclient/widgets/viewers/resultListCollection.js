@@ -322,8 +322,12 @@ $.widget( "heurist.resultListCollection", {
         if(_collection && _collection.length>0){
             this.recordList.resultList('updateResultSet', new hRecordSet(_collection));
             this.recordList.show();
+            $('#mywidget_3249').css('top',175); //hardcode for tlcmap
+            
         }else{
             this.recordList.hide();
+            
+            $('#mywidget_3249').css('top',85); //hardcode for tlcmap
         }
                 
     },

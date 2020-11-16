@@ -183,7 +183,6 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
                                                     //reload
                                                     that.searchForm.searchSysUsers('startSearch');
                                                     
-console.log('ON_CRED???');                                                    
                                                     if(data.selection.indexOf(window.hWin.HAPI4.currentUser['ugr_ID'])>=0){
                                                         window.hWin.HAPI4.currentUser['ugr_Groups'][ugl_GroupID] = 'member';
                                                         $(window.hWin.document).trigger(window.hWin.HAPI4.Event.ON_CREDENTIALS); 
@@ -488,7 +487,7 @@ console.log('ON_CRED???');
             ele.find('#btnRecRemove').hide();
         }
         
-        if(!window.hWin.HAPI4.is_admin()){
+        if(!window.hWin.HAPI4.is_admin() || window.hWin.HAPI4.currentUser['ugr_ID']==this._currentEditID){
             var input_ele = this._editing.getFieldByName('ugr_Enabled');
             input_ele.hide();
             //input_ele.editing_input('f', 'rst_Display', 'hidden');

@@ -249,7 +249,9 @@ $website_title = __getValue($rec, DT_NAME);
 $image_icon = __getFile($rec, DT_THUMBNAIL, (array_key_exists('embed', $_REQUEST)?PDIR:HEURIST_BASE_URL).'favicon.ico');
 $image_logo = __getFile($rec, DT_FILE_RESOURCE, null); 
 $image_altlogo = null;
+$image_altlogo_url = null;
 if(defined('DT_CMS_ALTLOGO')) $image_altlogo = __getFile($rec, DT_CMS_ALTLOGO, null); 
+if(defined('DT_CMS_ALTLOGO_URL')) $image_altlogo_url = __getValue($rec, DT_CMS_ALTLOGO_URL); 
 $image_banner = null;
 if(defined('DT_CMS_BANNER')) $image_banner = __getFile($rec, DT_CMS_BANNER, null); 
 
@@ -721,11 +723,13 @@ $website_title -> #main-title>h2
   
   if($('#main-logo-alt').length>0){
   <?php if($image_altlogo){ ?>
-      $('#main-logo-alt').css({'background-size':'contain',
+      var ele = $('#main-logo-alt').css({'background-size':'contain',
                 'background-position': 'top',
                 'background-repeat': 'no-repeat',
                 'background-image':'url(\'<?php print $image_altlogo;?>\')'}).show();
-  <?php }else{ ?>
+  <?php if($image_altlogo_url){ ?>
+        ele.css('cursor','pointer').on({click:function(){window.open("<?php print $image_altlogo_url;?>",'_blank')}});
+  <?php }}else{ ?>
       $('#main-logo-alt').hide();
   <?php } ?>
   }
@@ -968,13 +972,13 @@ if ($page_template!=null && substr($page_template,-4,4)=='.tpl') {
     $is_page_footer_fixed = ($page_footer_type != ConceptCode::getTermLocalID('2-531'));
     if($page_footer==null){
         $page_footer = '';
-        $h = 48;
+        $page_footer_height = 48;
     }else{
-        $h = 80;
+        $page_footer_height = 80;
     }
     
     $page_footer = '<div id="page-footer" class="ent_footer"' //.($is_page_footer_fixed?'ent_footer':'').'"'  
-            .' style="height:'.$h.'px;border-top:2px solid rgb(112,146,190);background:lightgray;">'
+            .' style="height:'.$page_footer_height.'px;border-top:2px solid rgb(112,146,190);background:lightgray;">'
             .'<div class="page-footer-content" style="float:left">'
             .$page_footer.'</div>'
             
@@ -1001,11 +1005,11 @@ if ($page_template!=null && substr($page_template,-4,4)=='.tpl') {
         <div id="main-pagetitle" class="ui-heurist-bg-light" style="display:none">loading...</div>       
     </div>
     <div class="ent_content_full ui-heurist-bg-light"  id="main-content-container"
-            style="top:<?php echo ($show_pagetitle?'190px':'152px').($is_page_footer_fixed?';bottom:80px':''); ?>;padding: 5px;">
+            style="top:<?php echo ($show_pagetitle?'190px':'152px').($is_page_footer_fixed?';bottom:'.$page_footer_height.'px':''); ?>;padding: 5px;">
         <div id="main-content" data-homepageid="<?php print $rec_id;?>" 
             <?php print ($open_page_on_init>0)?'data-initid="'.$open_page_on_init.'"':''; ?> 
             data-viewonly="<?php print ($hasAccess)?0:1;?>" 
-            style="<?php echo (!$is_page_footer_fixed?'padding-bottom:80px;position:relative':'');?>">
+            style="<?php echo (!$is_page_footer_fixed?'padding-bottom:'.$page_footer_height.'px;position:relative':'');?>">
 <?php
             if(!$is_page_footer_fixed) print $page_footer;
 ?>        

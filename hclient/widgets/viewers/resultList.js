@@ -2080,7 +2080,9 @@ $.widget( "heurist.resultList", {
             var exp_div = this.div_content.find('.record-expand-info[data-recid='+recID+']');
             var is_already_opened = (exp_div.length>0);
             
-            if(!is_already_opened){
+            if(is_already_opened){
+                if(!this._expandAllDivs) this.closeExpandedDivs();
+            }else{
                 //close other expanded recordDivs
                 if(!this._expandAllDivs) this.closeExpandedDivs();
                 
@@ -2094,14 +2096,15 @@ $.widget( "heurist.resultList", {
                     //add new record-expand-info 
                     var ele = $('<div>')
                         .attr('data-recid', recID)
-                        .css({'width':'100%','max-height':'600px','overflow':'hidden','padding-top':'5px','height':'25px'})
+                        .css({'overflow':'hidden','padding-top':'5px','height':'25px'}) //'max-height':'600px','width':'100%',
                         .addClass('record-expand-info');
                         
                     if(this.options.view_mode=='list'){
                         ele.appendTo($rdiv);
                     }else{
-                        ele.css({'box-shadow':'0px 3px 8px #666','margin':'8px',
-                                 'width':'97%', padding:'5px',
+                        ele.css({'box-shadow':'0px 3px 8px #666','margin':'6px',
+                                 //'width':'97%',
+                                  padding:'5px',
                                  'border-radius': '3px 3px 3px 3px',
                                  'border':'2px solid #62A7F8'}).insertAfter($rdiv);
                     }
@@ -2120,7 +2123,8 @@ $.widget( "heurist.resultList", {
                         ele.addClass('loading').css({'overflow-y':'auto'}).load(infoURL, function(){ 
                             var ele2 = $(this);
                             //var ele2 = that.div_content.find('.record-expand-info[data-recid='+recID+']');
-                            var h = Math.min(ele2[0].scrollHeight+10, 600);
+                            var h = ele2[0].scrollHeight+10;
+                            //h = Math.min(h+10, 600);
                             if(that._expandAllDivs){
                                 ele2.removeClass('loading').height(h);    
                             }else{
@@ -2145,8 +2149,6 @@ $.widget( "heurist.resultList", {
 
                             try{
                                 h = $(this.contentWindow.document).height();
-                                //h = $(this.contentWindow.document.documentElement).height();//.scrollHeight;
-                                h = Math.min(h+10, 600);
                             }catch(e){
                                 console.log(e);
                             }
