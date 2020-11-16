@@ -756,11 +756,11 @@ window.hWin.HEURIST4.dbs = {
     // returns true if rectype has a field in its structure
     // fieldtype - base field type
     //
-    hasFields: function( $rt_ID, fieldtype, db_structure ){
+    hasFields: function( rty_ID, fieldtype, db_structure ){
         
         var is_exist = false;
         
-        $Db.rst(rty_ID).each2(function(dty_ID, record){
+        $Db.rst(rty_ID).each(function(dty_ID, record){
             if($Db.dty(dty_ID,'dty_Type')==fieldtype){
                 is_exist = true;
                 return false;
