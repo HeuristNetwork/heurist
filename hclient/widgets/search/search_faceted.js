@@ -173,6 +173,9 @@ $.widget( "heurist.search_faceted", {
     
     _terminateFacetCalculation: false, //stop flag
 
+    _date_range_dialog: null,
+    _date_range_dialog_instance: null,
+    
     // the widget's constructor
     _create: function() {
         
@@ -267,10 +270,11 @@ $.widget( "heurist.search_faceted", {
         if(this.options.is_h6style && !this.options.is_publication){
             this.facets_list_container.css({left:0,right:0,'font-size':'0.9em'});    
         }else{
-            this.facets_list_container.css({left:'1em',right:'0.5em'});    
+            this.facets_list_container.css({left:0,right:0});     //{left:'1em',right:'0.5em'}
         }
 
         this.facets_list = $( "<div>" )
+        .addClass('svs-list-container')
         .css({"overflow-y":"auto","overflow-x":"hidden","height":"100%"}) //"font-size":"0.9em",
         .appendTo( this.facets_list_container );
 
@@ -793,7 +797,8 @@ $.widget( "heurist.search_faceted", {
                             +'<span class="ui-button-icon ui-icon ui-icon-arrowreturnthick-1-w"></span>'
                             +'<span class="ui-button-text"> </span></button>'                    
                     +'</div>'    
-                    +'</div>').css({'border-bottom': '1px solid lightgray','margin-bottom':'25px', 'padding-bottom':'5px'}).appendTo($fieldset);
+                    +'</div>').css({'border-bottom': '1px solid lightgray','margin-right':'10px',
+                                    'margin-bottom':'25px', 'padding-bottom':'5px'}).appendTo($fieldset);
                     
            var btn_reset2 = $( "<button>", {title:window.hWin.HR("Clear all fields / Reset all the filters to their initial states") })
            .css({float:'right','margin-top':'10px','margin-right':'2px'})
@@ -1671,7 +1676,7 @@ $.widget( "heurist.search_faceted", {
                     if( $facet_values.length < 1 ){
                         var dd = $input_div.find('.input-cell');
                         //'width':'inherit',
-                        $facet_values = $('<div>').addClass('facets').css({'padding':'4px 0 10px 10px'}).appendTo( $(dd[0]) );
+                        $facet_values = $('<div>').addClass('facets').css({'padding':'4px 0px 10px 5px'}).appendTo( $(dd[0]) );
                     }
                     $facet_values.css('background','none');
                     
@@ -2010,7 +2015,7 @@ if(!(vocab_id>0)){
                         
                         if(window.hWin.HEURIST4.util.isArrayNotEmpty(field.history)){
                                     var f_link = this._createFacetLink(facet_index, {title:'', value:null, step:0}, 'inline-block');
-                                    $('<span>').css({'display':'inline-block','vertical-align':'middle','margin-left':'-15px'})
+                                    $('<span>').css({'display':'inline-block','vertical-align':'middle','margin-left':'0px'}) //-15px
                                         .append(f_link).appendTo($facet_values);
                         }
                         var sl_count = (cterm && cterm.length==3)?cterm[2]:0;
@@ -2138,29 +2143,27 @@ if(!(vocab_id>0)){
                                         cnt = arguments[2];
                                     }
                                     if(field['type']=="date"){
-                                        try{
-                                           var tDate = new TDate((new Date(min)).toISOString());
-                                           min = tDate.toString(date_format);
-                                           //min = (new Date(min)).format(date_format);
-                                           //min = moment(min).format(date_format);
-                                        }catch(err) {
-                                           min = ""; 
-                                        }
-                                        try{
-                                           var tDate = new TDate((new Date(max)).toISOString());
-                                           max = tDate.toString(date_format);
-                                            //max = (new Date(max)).format(date_format);
-                                            //max = moment(max).format(date_format);
-                                        }catch(err) {
-                                            max = ""; 
-                                        }
+                                        min = __dateToString(min);
+                                        max = __dateToString(max);
                                     }else{
                                         min = __roundNumericLabel(min);
                                         max = __roundNumericLabel(max);
                                     }
-                                    $( "#facet_range"+facet_index )
+                                    that.element.find( "#facet_range"+facet_index )
                                         .text( min + " - " + max ); //+ ((cnt>0)?" ("+cnt+")":"") );
                                 }
+                            }
+                            
+                            function __dateToString(val){
+                                try{
+                                   var tDate = new TDate((new Date(val)).toISOString());
+                                   val = tDate.toString(date_format);
+                                   //val = (new Date(val)).format(date_format);
+                                   //val = moment(val).format(date_format);
+                                }catch(err) {
+                                   val = ""; 
+                                }
+                                return val;
                             }
                             
                             //preapre value to be sent to server and start search
@@ -2168,7 +2171,7 @@ if(!(vocab_id>0)){
 
                                 var min = ui.values[ 0 ];
                                 var max = ui.values[ 1 ];
-
+                                
                                 var field = that.options.params.facets[facet_index];
                                 
                                 if(min<field.mmin0) {
@@ -2180,8 +2183,16 @@ if(!(vocab_id>0)){
                                     slider.slider( "values", 1, max);
                                 }
 
+                                __onSlideStartSearch(min, max);
+                            }
+                            
+                            //
+                            function __onSlideStartSearch( min, max ){
+                                
+                                var field = that.options.params.facets[facet_index];
+                                
                                 if(field['type']=="date"){
-                                    min = (new Date(min)).toISOString(); 
+                                    min = (new Date(min)).toISOString(); //__dateToString(min);// 
                                     max = (new Date(max)).toISOString(); 
                                 }
 
@@ -2196,15 +2207,110 @@ if(!(vocab_id>0)){
                                 
                                 that.doSearch();
                             }
+                            
+                            function __onDateRangeDialogClose() {
+                                        var ele = that._date_range_dialog.find('#date-start');
+                                        var startDate = ele.val();
+                                        ele = that._date_range_dialog.find('#date-end');
+                                        var endDate = ele.val();
+                                        __onSlideStartSearch(startDate, endDate);
+                                    
+                                        if(that._date_range_dialog_instance && 
+                                           that._date_range_dialog_instance.dialog('instance')){
+                                           that._date_range_dialog_instance.dialog( 'close' );
+                                        }
+                            }
+                            
+                            function __showDateRangeDialog(){
+                                
+                                if(!that._date_range_dialog){
+                                    that._date_range_dialog = $('<div>'
++'<div><span style="display:inline-block;width:60px;text-align:right;">Date start: </span>'
++'<input id="date-start" class="text ui-widget-content ui-corner-all" autocomplete="disabled" autocorrect="off" autocapitalize="none" spellcheck="false" style="width: 20ex;"></div><br>'
++'<div><span style="display:inline-block;width:60px;text-align:right;">Date end: </span>'
++'<input id="date-end" class="text ui-widget-content ui-corner-all" autocomplete="disabled" autocorrect="off" autocapitalize="none" spellcheck="false" style="width: 20ex;"></div></div>')
+                                    .hide()
+                                    .appendTo(this.element);
+                                    
+                                    var $datepicker1 = that._date_range_dialog.find('#date-start').datepicker({
+                                        showOn: 'button',
+                                        showButtonPanel: true,
+                                        changeMonth: true,
+                                        changeYear: true,
+                                        dateFormat: 'yy-mm-dd',
+                                        beforeShow: function(){
+                                            var cv = that._date_range_dialog.find('#date-start').val();
+                                            
+                                            if(cv!=''){
+                                                if(cv.indexOf('-')<0){
+                                                    $datepicker1.datepicker( "option", "defaultDate", cv+'-01-01'); 
+                                                }else{
+                                                    $datepicker1.datepicker( "option", "defaultDate", cv); 
+                                                }
+                                            }
+                                        }
+                                    });
+
+                                    var $datepicker2 = that._date_range_dialog.find('#date-end').datepicker({
+                                        showOn: 'button',
+                                        showButtonPanel: true,
+                                        changeMonth: true,
+                                        changeYear: true,
+                                        dateFormat: 'yy-mm-dd',
+                                        beforeShow: function(){
+                                            var cv = that._date_range_dialog.find('#date-end').val();
+                                            
+                                            if(cv!=''){
+                                                if(cv.indexOf('-')<0){
+                                                    $datepicker2.datepicker( "option", "defaultDate", cv+'-01-01'); 
+                                                }else{
+                                                    $datepicker2.datepicker( "option", "defaultDate", cv); 
+                                                }
+                                            }
+                                        }
+                                    });
+                                    
+                                    that._date_range_dialog.find('.ui-datepicker-trigger').addClass('ui-icon ui-icon-calendar');
+                                }
+                                
+                                that._date_range_dialog.find('#date-start').val(__dateToString(mmin));
+                                that._date_range_dialog.find('#date-end').val(__dateToString(mmax));
+                                
+                                var buttons = {};
+                                buttons[window.hWin.HR('Apply')]  = __onDateRangeDialogClose;
+                                
+                                //window.hWin.HEURIST4.msg.showMsgDlg('Define data range <>',
+                                that._date_range_dialog_instance = window.hWin.HEURIST4.msg.showElementAsDialog(
+                                {
+                                   element: that._date_range_dialog[0], 
+                                   close: function(){
+                                        //var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();      
+                                   },
+                                   buttons: buttons,
+                                   title:'Define data range',
+                                   resizable: false,
+                                   width:230,
+                                   height:140
+                                   //position:{my:  at:  of:} 
+                                });
+                            }
                         
                             var flbl = $("<div>",{id:"facet_range"+facet_index})
                                         .css({'padding-bottom':'1em'})
                                         .appendTo($facet_values);
-                            var slider = $("<div>",{facet_index:facet_index})
+                                        
+                            if(field['type']=="date"){
+                                flbl.css({cursor:'pointer'});
+                                that._on(flbl,{click: __showDateRangeDialog});
+                            }
+                                
+//console.log(mmin, delta, field.mmin0);                                
+                                        
+                            var slider = $("<div>", {facet_index:facet_index})
                                 .slider({
                                       range: true,
-                                      min: mmin - delta,
-                                      max: mmax + delta,
+                                      min: (mmin-delta<field.mmin0)?field.mmin0:(mmin-delta),  //field.mmin0
+                                      max: (mmax+delta>field.mmax0)?field.mmax0:(mmax+delta),
                                       values: [ mmin, mmax ],
                                       slide: __updateSliderLabel,
                                       stop: __onSlideStop,
