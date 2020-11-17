@@ -255,7 +255,7 @@ if(defined('DT_CMS_ALTLOGO_URL')) $image_altlogo_url = __getValue($rec, DT_CMS_A
 $image_banner = null;
 if(defined('DT_CMS_BANNER')) $image_banner = __getFile($rec, DT_CMS_BANNER, null); 
 
-$image_logo = $image_logo?'<img style="max-height:80px" src="'.$image_logo.'">'
+$image_logo = $image_logo?'<img style="max-height:80px;max-width:270px;" src="'.$image_logo.'">'
             :('<div style="text-align:center;display:block;width:250px;padding: 20px 10px;background:white;">'
             .'<h2 style="color:red;margin:4px">Logo</h2><div style="color:black">Set this as Website header/layout</div></div>');
 
@@ -922,7 +922,7 @@ if ($page_template!=null && substr($page_template,-4,4)=='.tpl') {
         print $page_header;        
     } else if(false){  //OLD FLOAT VERSION
 ?>                        
-        <div id="main-logo" class="mceNonEditable" style="float:left;min-height:80px;"></div>
+        <div id="main-logo" class="mceNonEditable" style="float:left;min-height:80px;max-width:280px"></div>
         
         <div id="main-logo-alt" class="mceNonEditable" style="float:right;min-height: 73px;min-width: 130px;margin: 7px 4px 0 0;"></div>
         
