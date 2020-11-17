@@ -1,6 +1,7 @@
 [{
     "rty_ID": "3-1009",
     "service": "tlcmap",
+    "database": "osmak_2,TLCMap_Clearinghouse",
     "label": "Lookup in AGHP",
     "dialog": "recordLookup",
     "fields":{ 

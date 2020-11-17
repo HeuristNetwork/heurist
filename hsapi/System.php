@@ -226,16 +226,20 @@ error_log(print_r($_REQUEST, true));
                
                foreach($config as $idx=>$cfg){
                    
-                   $rty_ID = ConceptCode::getRecTypeLocalID($cfg['rty_ID']);
-                   if($rty_ID>0){
-                       
-                        $cfg['rty_ID'] = $rty_ID;
-                       
-                        foreach($cfg['fields'] as $field=>$code){
-                            $cfg['fields'][$field] = ConceptCode::getDetailTypeLocalID($code);
-                        }
-                       
-                        $config_res[] = $cfg;
+                   $allowed_dbs = @$cfg['database'];
+                   if($allowed_dbs==null || $allowed_dbs=="*" || in_array(HEURIST_DBNAME,explode(',',$allowed_dbs))){
+                   
+                       $rty_ID = ConceptCode::getRecTypeLocalID($cfg['rty_ID']);
+                       if($rty_ID>0){
+                           
+                            $cfg['rty_ID'] = $rty_ID;
+                           
+                            foreach($cfg['fields'] as $field=>$code){
+                                $cfg['fields'][$field] = ConceptCode::getDetailTypeLocalID($code);
+                            }
+                           
+                            $config_res[] = $cfg;
+                       }
                    }
                }
            }
