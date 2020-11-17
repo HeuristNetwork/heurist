@@ -1546,6 +1546,7 @@ $.widget( "heurist.mapping", {
             
             //'#00b0f0' - lighy blue
             def_style = {iconType:'rectype', color:'#ff0000', fillColor:'#ff0000', weight:3, opacity:1, 
+                    dashArray: '',
                     fillOpacity:0.2, iconSize:18, stroke:true, fill:true};
         }
         
@@ -1562,6 +1563,10 @@ $.widget( "heurist.mapping", {
         style.fill = window.hWin.HEURIST4.util.istrue(style.fill);
         style.stroke = window.hWin.HEURIST4.util.isnull(style.stroke)?def_style.stroke :style.stroke;
         style.stroke = window.hWin.HEURIST4.util.istrue(style.stroke);
+
+        if(style.stroke){
+            style.dashArray = window.hWin.HEURIST4.util.isnull(style.dashArray)?def_style.dashArray:style.dashArray;
+        }
         
         if(!style.iconFont && def_style.iconFont){
             style.iconFont = def_style.iconFont;
@@ -2030,6 +2035,8 @@ $.widget( "heurist.mapping", {
         this.options.map_rollover = __parseval(params['map_rollover']);
         this.options.default_style = window.hWin.HEURIST4.util.isJSON(params['style']);
 
+console.log(params['style']);        
+        
         //special case - till thematic map is not developed - for custom style
         /* expremental 
         this.isHamburgIslamicImpire = (params['search_realm']=='hie_places');

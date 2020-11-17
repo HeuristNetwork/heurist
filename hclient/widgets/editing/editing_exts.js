@@ -209,6 +209,12 @@ function editSymbology(current_value, mode_edit, callback){
                 "rst_DisplayName": "Stroke width:",
                 "rst_DisplayHelpText": "Stroke width in pixels"
         }},
+        {"dtID": "dashArray",
+            "dtFields":{
+                "dty_Type":"freetext",
+                "rst_DisplayName": "Dash array:",
+                "rst_DisplayHelpText": "A string that defines the stroke <a href='https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/stroke-dasharray' target=_blank> dash pattern</a>."
+        }},
         {"dtID": "opacity",
             "dtFields":{
                 "dty_Type":"float",
