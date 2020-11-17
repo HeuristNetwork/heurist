@@ -613,6 +613,8 @@ $.widget( "heurist.mainMenu6", {
         if(menu_item && menu_item.parents('.ui-heurist-quicklinks').length==0 && 
                 (this._active_section=='explore' || this._active_section=='import')){
             explore_left = 302;
+        }else if(menu_item && menu_item.parents('.ui-heurist-quicklinks').length==1){
+            explore_left = this._widthMenu+4;
         }else{
             explore_left = (that.divMainMenu.width()>91)?(this._widthMenu+4):95; 
         }
