@@ -125,20 +125,21 @@ window.hWin.HEURIST4.dbs = {
     //
     getColorFromTermValue: function(termID){
 
-        var term = $Db.trm(termID);
-        
         var termName, termCode='';
 
-        if(term){
+        if(termID>0){
+            var term = $Db.trm(termID);
+            if(term){
 
-            termName = term['trm_Label'];
-            termCode = term['trm_Code'];
-            if(window.hWin.HEURIST4.util.isempty(termCode)){
-                var cnames = window.hWin.HEURIST4.ui.getColorArr('names');
-                var idx = window.hWin.HEURIST4.util.findArrayIndex(termName.toLowerCase(),cnames);
-                if(idx>=0){
-                    cnames = window.hWin.HEURIST4.ui.getColorArr('hexs');
-                    termCode = '#'+cnames[idx]; 
+                termName = term['trm_Label'];
+                termCode = term['trm_Code'];
+                if(window.hWin.HEURIST4.util.isempty(termCode)){
+                    var cnames = window.hWin.HEURIST4.ui.getColorArr('names');
+                    var idx = window.hWin.HEURIST4.util.findArrayIndex(termName.toLowerCase(),cnames);
+                    if(idx>=0){
+                        cnames = window.hWin.HEURIST4.ui.getColorArr('hexs');
+                        termCode = '#'+cnames[idx]; 
+                    }
                 }
             }
         }

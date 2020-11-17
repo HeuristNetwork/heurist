@@ -269,7 +269,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
     }
     
     //
-    // crete editing_input element for selected field type
+    // create editing_input element for selected field type
     //
     function _createInputElements(){
 

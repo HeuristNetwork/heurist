@@ -254,6 +254,11 @@ fieldset > div > .header{
     width:150px;
     min-width:150px;
 }
+fieldset.narrow > div > .header{
+    width:60px;
+    min-width:60px;
+}
+
 fieldset > div > .input-cell{
     display:table-cell;
     min-width:120px;
@@ -1974,6 +1979,12 @@ a.bare {
     color: black;
     text-decoration: none;
 }
+a.link2 {
+    color: blue;
+    text-decoration: underline;
+}
+
+
 body.popup {
     padding: 10px;
     background-color:white;

@@ -1868,13 +1868,15 @@ $.widget( "heurist.editing_input", {
                             
                             that.newvalues[$input.attr('id')] = value; 
                             
-                            var isTemporalValue = value && value.search(/\|VER/) != -1; 
-                            if(isTemporalValue) {
-                                window.hWin.HEURIST4.ui.setValueAndWidth($input, temporalToHumanReadableString(value));    
-                                
-                                $input.addClass('Temporal').removeClass('text').attr('readonly','readonly');
-                            }else{
-                                $input.removeClass('Temporal').addClass('text').removeAttr("readonly").css('width','20ex');
+                            if(that.options.dtID>0){
+                                var isTemporalValue = value && value.search(/\|VER/) != -1; 
+                                if(isTemporalValue) {
+                                    window.hWin.HEURIST4.ui.setValueAndWidth($input, temporalToHumanReadableString(value));    
+                                    
+                                    $input.addClass('Temporal').removeClass('text').attr('readonly','readonly');
+                                }else{
+                                    $input.removeClass('Temporal').addClass('text').removeAttr("readonly").css('width','20ex');
+                                }
                             }
                             
                             that.onChange();
@@ -2031,7 +2033,8 @@ $.widget( "heurist.editing_input", {
                    
                 }//temporal allowed
                 else{
-                    this.newvalues[$input.attr('id')] = value;  //for this type assign value at init          
+                    $input.change(__onDateChange);
+                    //this.newvalues[$input.attr('id')] = value;  //for this type assign value at init          
                 }
                 
                 $input.val(value);    

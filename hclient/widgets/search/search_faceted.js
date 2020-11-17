@@ -2150,7 +2150,8 @@ if(!(vocab_id>0)){
                                         max = __roundNumericLabel(max);
                                     }
                                     that.element.find( "#facet_range"+facet_index )
-                                        .text( min + " - " + max ); //+ ((cnt>0)?" ("+cnt+")":"") );
+                                        .html('<a href="#" class="link2">'+min
+                                            +'</a> - <a href="#" class="link2">'+max+'</a>' ); //+ ((cnt>0)?" ("+cnt+")":"") );
                                 }
                             }
                             
@@ -2192,8 +2193,12 @@ if(!(vocab_id>0)){
                                 var field = that.options.params.facets[facet_index];
                                 
                                 if(field['type']=="date"){
-                                    min = (new Date(min)).toISOString(); //__dateToString(min);// 
-                                    max = (new Date(max)).toISOString(); 
+                                    try{
+                                        min = (new Date(min)).toISOString(); //__dateToString(min);// 
+                                        max = (new Date(max)).toISOString(); 
+                                    }catch(err) {
+                                       window.hWin.HEURIST4.msg.showMsgFlash('Unrecognized date format');
+                                    }
                                 }
 
                                 var value = (min==max)?min :min + '<>' + max; //search in between
@@ -2209,72 +2214,59 @@ if(!(vocab_id>0)){
                             }
                             
                             function __onDateRangeDialogClose() {
-                                        var ele = that._date_range_dialog.find('#date-start');
-                                        var startDate = ele.val();
-                                        ele = that._date_range_dialog.find('#date-end');
-                                        var endDate = ele.val();
-                                        __onSlideStartSearch(startDate, endDate);
-                                    
-                                        if(that._date_range_dialog_instance && 
-                                           that._date_range_dialog_instance.dialog('instance')){
-                                           that._date_range_dialog_instance.dialog( 'close' );
-                                        }
+                                        
+                                var startDate = that._date_range_dialog.find('#date-start').editing_input('getValues')[0];
+                                var endDate = that._date_range_dialog.find('#date-end').editing_input('getValues')[0];
+                                
+                                __onSlideStartSearch(startDate, endDate);
+                            
+                                if(that._date_range_dialog_instance && 
+                                   that._date_range_dialog_instance.dialog('instance')){
+                                   that._date_range_dialog_instance.dialog( 'close' );
+                                }
                             }
                             
-                            function __showDateRangeDialog(){
+                            function __showDateRangeDialog(event){
                                 
                                 if(!that._date_range_dialog){
-                                    that._date_range_dialog = $('<div>'
-+'<div><span style="display:inline-block;width:60px;text-align:right;">Date start: </span>'
-+'<input id="date-start" class="text ui-widget-content ui-corner-all" autocomplete="disabled" autocorrect="off" autocapitalize="none" spellcheck="false" style="width: 20ex;"></div><br>'
-+'<div><span style="display:inline-block;width:60px;text-align:right;">Date end: </span>'
-+'<input id="date-end" class="text ui-widget-content ui-corner-all" autocomplete="disabled" autocorrect="off" autocapitalize="none" spellcheck="false" style="width: 20ex;"></div></div>')
+                                    
+                                    that._date_range_dialog = $(
+                                    '<div><div style="padding:10px 0 5px 35px;" id="date-range"></div>'                      
+                                    +'<fieldset class="narrow"><div id="date-start"/>'
+                                    +'<div id="date-end"/>'
+                                    +'</fieldset></div>')
                                     .hide()
                                     .appendTo(this.element);
                                     
-                                    var $datepicker1 = that._date_range_dialog.find('#date-start').datepicker({
-                                        showOn: 'button',
-                                        showButtonPanel: true,
-                                        changeMonth: true,
-                                        changeYear: true,
-                                        dateFormat: 'yy-mm-dd',
-                                        beforeShow: function(){
-                                            var cv = that._date_range_dialog.find('#date-start').val();
-                                            
-                                            if(cv!=''){
-                                                if(cv.indexOf('-')<0){
-                                                    $datepicker1.datepicker( "option", "defaultDate", cv+'-01-01'); 
-                                                }else{
-                                                    $datepicker1.datepicker( "option", "defaultDate", cv); 
-                                                }
-                                            }
-                                        }
-                                    });
-
-                                    var $datepicker2 = that._date_range_dialog.find('#date-end').datepicker({
-                                        showOn: 'button',
-                                        showButtonPanel: true,
-                                        changeMonth: true,
-                                        changeYear: true,
-                                        dateFormat: 'yy-mm-dd',
-                                        beforeShow: function(){
-                                            var cv = that._date_range_dialog.find('#date-end').val();
-                                            
-                                            if(cv!=''){
-                                                if(cv.indexOf('-')<0){
-                                                    $datepicker2.datepicker( "option", "defaultDate", cv+'-01-01'); 
-                                                }else{
-                                                    $datepicker2.datepicker( "option", "defaultDate", cv); 
-                                                }
-                                            }
-                                        }
-                                    });
+                                    var dtFields = {};
+                                    dtFields['rst_DisplayName'] = 'Date start';
+                                    dtFields['rst_RequirementType'] = 'optional';
+                                    dtFields['rst_MaxValues'] = 1;
+                                    dtFields['rst_DisplayWidth'] = 20; 
+                                    dtFields['dty_Type'] = 'date';
                                     
-                                    that._date_range_dialog.find('.ui-datepicker-trigger').addClass('ui-icon ui-icon-calendar');
+                                    var ed_options = {
+                                        recID: -1,
+                                        dtID: 'dStart',
+                                        //readonly: false,
+                                        showclear_button: false,
+                                        dtFields:dtFields
+                                    };
+
+                                    that._date_range_dialog.find('#date-start').editing_input(ed_options);
+                                    
+                                    dtFields['rst_DisplayName'] = 'Date end';
+                                    ed_options['dtID'] = 'dEnd';
+                                    that._date_range_dialog.find('#date-end').editing_input(ed_options);
+                                    
+                                    that._date_range_dialog.find('.editint-inout-repeat-button').hide();
+                                 
                                 }
                                 
-                                that._date_range_dialog.find('#date-start').val(__dateToString(mmin));
-                                that._date_range_dialog.find('#date-end').val(__dateToString(mmax));
+                                that._date_range_dialog.find('#date-start').editing_input('setValue', __dateToString(mmin));
+                                that._date_range_dialog.find('#date-end').editing_input('setValue', __dateToString(mmax));
+                                that._date_range_dialog.find('#date-range')
+                                    .text('Range '+__dateToString(field.mmin0)+' - '+__dateToString(field.mmax0));
                                 
                                 var buttons = {};
                                 buttons[window.hWin.HR('Apply')]  = __onDateRangeDialogClose;
@@ -2287,16 +2279,16 @@ if(!(vocab_id>0)){
                                         //var $dlg = window.hWin.HEURIST4.msg.getMsgDlg();      
                                    },
                                    buttons: buttons,
-                                   title:'Define data range',
+                                   title:'Define selection range',
                                    resizable: false,
-                                   width:230,
-                                   height:140
-                                   //position:{my:  at:  of:} 
+                                   width:280,
+                                   height:190,
+                                   position:{my:'bottom left',at:'top left',of:$(event.target)} 
                                 });
                             }
                         
                             var flbl = $("<div>",{id:"facet_range"+facet_index})
-                                        .css({'padding-bottom':'1em'})
+                                        .css({display: 'inline-block', padding: '0 0 1em 1em'})
                                         .appendTo($facet_values);
                                         
                             if(field['type']=="date"){
