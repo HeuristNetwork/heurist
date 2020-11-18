@@ -898,17 +898,21 @@ $.widget( "heurist.search_faceted", {
                         :window.hWin.HR('Search everything');
                         
                         
+           var w = that.element.width();
+           if(!(w>0) || w<200) w = 200;
+           w = {'width':(w-65)+'px','max-width':(w-65)+'px','min-width':'auto'};
            
            var ele = $("<div>").html(
            '<div class="header" title="" style="vertical-align: top; display: block; width: 100%; padding: 5px;">'
                 +'<h4 style="display:inline-block;margin:0;">'+lbl+'</h4></div>'
                 +'<div style=" padding:5px 0 20px 21px;display: block;">'
-                    +'<div class="input-div" style="display: inline-block;">'
+                    +'<div class="input-div" style="display: inline-block;padding:0px">'
                     +'<input class="ui-widget-content ui-corner-all" autocomplete="disabled" autocorrect="off" autocapitalize="none" spellcheck="false" style="width: 150px;">'
                     +'</div><button title="To clear previous search click the RESET button" class="smallbutton ui-button ui-corner-all ui-widget ui-button-icon-only">'
                         +'<span class="ui-button-icon ui-icon ui-icon-search"></span><span class="ui-button-icon-space"> </span></button>'
                     +'</div>').css({'border-bottom': '1px solid lightgray','margin-bottom':'10px'}).appendTo($fieldset);
-                        
+           
+           ele.find('input').css(w);             
                         
            /*ele.find(".start-search") class="input-cell"
                         .button({icons: {primary: "ui-icon-search"}, text:false})
@@ -1062,7 +1066,7 @@ $.widget( "heurist.search_faceted", {
                     var w = that.element.width();
                     if(!(w>0) || w<200) w = 200;
                     inpt.find('input').removeClass('text').css({'width':(w-65)+'px','max-width':(w-65)+'px','min-width':'auto'});
-                    inpt.find('select').removeClass('text').css({'width':(w-30)+'px','min-width': (w-30)+'px'});
+                    inpt.find('select').removeClass('text').css({'width':(w-45)+'px','min-width': (w-45)+'px'}); // was 30
                     
                     var btn_add = $( "<button>",{title:'To clear previous search click the RESET button'})
                     .addClass("smallbutton")
@@ -1676,7 +1680,8 @@ $.widget( "heurist.search_faceted", {
                     if( $facet_values.length < 1 ){
                         var dd = $input_div.find('.input-cell');
                         //'width':'inherit',
-                        $facet_values = $('<div>').addClass('facets').css({'padding':'4px 0px 10px 5px'}).appendTo( $(dd[0]) );
+                        $facet_values = $('<div>').addClass('facets').appendTo( $(dd[0]) );
+                        //AAA strange padding .css({'padding':'4px 0px 10px 5px'})
                     }
                     $facet_values.css('background','none');
                     
@@ -1942,8 +1947,8 @@ if(!(vocab_id>0)){
                             //as dropdown
                             var w = that.element.width();
                             if(!(w>0) || w<200) w = 200;
-                            var $sel = $('<select>').css({"font-size": "0.6em !important", "width":(w-30)+'px' });
-                                $sel.appendTo( $("<div>").css({"display":"block","padding":"0 5px"}).appendTo($facet_values) );
+                            var $sel = $('<select>').css({"font-size": "0.6em !important", "width":(w-45)+'px' }); // was 30
+                                $sel.appendTo( $("<div>").css({"display":"inline-block","padding":"0 5px"}).appendTo($facet_values) );
                                 
                                 that._createOption( facet_index, 0, {title:window.hWin.HR('select...'), value:null, count:0} ).appendTo($sel);
                                 __drawTerm(term, 0, $sel, field);
@@ -2008,7 +2013,8 @@ if(!(vocab_id>0)){
                         || field['type']=="date" || field['type']=="year") && field['isfacet']==this._FT_SELECT)
                     {  //add slider
                     
-                        $facet_values.parent().css({'display':'block','padding-left':'1em','padding-right':'2em'});
+                        $facet_values.parent().css({'display':'block'});
+                        //AAA strange padding ,'padding-left':'1em','padding-right':'2em'
                         //'width':'90%', $facet_values.css({'width':'100%','padding':'1em'});
 
                         var cterm = response.data[0];
@@ -2151,7 +2157,9 @@ if(!(vocab_id>0)){
                                     }
                                     that.element.find( "#facet_range"+facet_index )
                                         .html('<a href="#" class="link2">'+min
-                                            +'</a> - <a href="#" class="link2">'+max+'</a>' ); //+ ((cnt>0)?" ("+cnt+")":"") );
+                                            +'</a> - <a href="#" class="link2">'+max+'</a>' 
+                                            + ((cnt>0)?
+                                            '<span class="badge" style="float: right;">'+cnt+'</span>':''));
                                 }
                             }
                             
@@ -2287,8 +2295,9 @@ if(!(vocab_id>0)){
                                 });
                             }
                         
+                            var w = that.element.width();
                             var flbl = $("<div>",{id:"facet_range"+facet_index})
-                                        .css({display: 'inline-block', padding: '0 0 1em 1em'})
+                                        .css({display: 'inline-block', 'padding-bottom': '1em', width:(w-50)})
                                         .appendTo($facet_values);
                                         
                             if(field['type']=="date"){
@@ -2297,8 +2306,20 @@ if(!(vocab_id>0)){
                             }
                                 
 //console.log(mmin, delta, field.mmin0);                                
+//console.log('recreate slider  '+facet_index);
+
+                            var ele2 = $('<div><span class="ui-icon ui-icon-triangle-1-w-stop" '
+                                +'style="cursor:pointer;font-size:smaller;float:left;color:gray"/>'
+                            +'<div style="height:0.4em;margin:2px 0px 0px 2px;float:left;width:'+(w-52)+'px"/>'
+                            +'<span class="ui-icon ui-icon-triangle-1-e-stop" '
+                                +'style="cursor:pointer;font-size:smaller;float:left;color:gray"/></div>'
+                            ).appendTo($facet_values);
                                         
-                            var slider = $("<div>", {facet_index:facet_index})
+                            //$("<div>", {facet_index:facet_index})
+                            // .css({'height':'0.4em',margin:'1px 15px'})
+                            //.appendTo($facet_values);
+                            var slider = ele2.find('div')
+                                .attr('facet_index',facet_index)
                                 .slider({
                                       range: true,
                                       min: (mmin-delta<field.mmin0)?field.mmin0:(mmin-delta),  //field.mmin0
@@ -2309,9 +2330,16 @@ if(!(vocab_id>0)){
                                       create: function(){
                                           $(this).find('.ui-slider-handle').css({width:'4px',background:'black'});
                                       }
-                                    })
-                                .css('height','0.4em')
-                            .appendTo($facet_values);
+                                    });
+                            
+                            that._on( ele2.find('span.ui-icon-triangle-1-w-stop'),
+                                 {click: function(){
+                                     __onSlideStartSearch(field.mmin0, mmax);
+                                 }});
+                            that._on( ele2.find('span.ui-icon-triangle-1-e-stop'),
+                                 {click: function(){
+                                     __onSlideStartSearch(mmin, field.mmax0);
+                                 }});
 
                             //show initial values
                             __updateSliderLabel(mmin, mmax, sl_count);
@@ -2478,7 +2506,7 @@ if(!(vocab_id>0)){
         
         if(window.hWin.HEURIST4.util.isempty(cterm.value)){
             f_link_content = $("<span>").addClass("ui-icon ui-icon-arrowreturnthick-1-w")
-                .css({'font-size':'0.9em','height':'10px','margin-left':'-15px'});    
+                .css({'font-size':'0.9em','height':'10px'}); //AAA ,'margin-left':'-15px'    
         }else{
             f_link_content = $("<span>").text(cterm.title);
             
