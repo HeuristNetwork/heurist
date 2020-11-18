@@ -778,32 +778,52 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         var sPad = '';
         var sRef = '';
         var sHint = '';
+        var sLabel = window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, 'trm_Label'));
+        var sDesc = window.hWin.HEURIST4.util.htmlEscape($Db.trm(recID, 'trm_Description'));
+        var recTitle = '';
+        
         if(this.options.auxilary=='vocabulary'){
             sBold = 'font-weight:bold;';
             if(recordset.fld(record, 'trm_Domain')=='relation'){
                 sWidth = '167';
             }
             sWidth = 'max-width:'+sWidth+'px;min-width:'+sWidth+'px;';
+            
+            recTitle = '<div class="item truncate" style="'+sWidth+sBold+'">'
+                    + sLabel+'</div>';
+            
         }else{
-            sWidth = 'display:inline-block;padding-top:4px;width:20%;';
             var lvl = (recordset.fld(record, 'trm_Parents').split(',').length);
+            sWidth = 'display:inline-block;padding-top:4px;';  //'max-width:'+((lvl>2)?'25':'30')+'%;';
             sPad = 'padding-left:'+(lvl*20);
+
+            var sCode = $Db.trm(recID, 'trm_Code');
+            var sURI = $Db.trm(recID, 'trm_SemanticReferenceURL');
+            
+            sHint = 'title="'+sLabel+'<br>'
+                + (sDesc?('<p><i>'+sDesc+'</i></p>'):'')
+                + (sCode?('<p>Code: '+sCode+'</p>'):'')
+                + (sURI?('<p>URI: '+sURI+'</p>'):'');
             
             var vocab_id = $Db.getTermVocab(recID); //real vocab
             if(this.options.trm_VocabularyID!=vocab_id){
                 
-                var sHint = 'title="This is a reference to a term defined in the '
+                sHint = sHint +     
+                '<p style=&quot;color:blue&quot;>This is a reference to a term defined in the '
                 +window.hWin.HEURIST4.util.htmlEscape($Db.vcg($Db.trm(vocab_id,'trm_VocabularyGroupID'), 'vcg_Name'))+'.'
                 +window.hWin.HEURIST4.util.htmlEscape($Db.trm(vocab_id, 'trm_Label'))+' vocabulary. '
-                +'The term can only be edited in that vocabulary."';
+                +'The term can only be edited in that vocabulary.</p>';
                 
                 sRef = '<span style="color:blue;font-size:smaller;">(ref)</span>';
             }
+            sHint = sHint + '"';
+            
+            recTitle = '<div class="item label_term rolloverTooltip"'
+                    +' style="'+sWidth+sBold+sPad+'" '+sHint+'>'
+                    + sLabel+'</div>'+sRef;
+            
         }
         
-        var recTitle = '<div class="item truncate" style="'+sWidth+sBold+sPad+'" '+sHint+'>'
-            //+recID+'  '
-            +window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, 'trm_Label'))+sRef+'</div>';
 
         var html;
         
@@ -827,7 +847,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                     +'</div>';
             
         }else{
-
+            
             var recThumb = window.hWin.HAPI4.getImageUrl(this._entityName, recID, 'thumb');
             
             var html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'
@@ -835,8 +855,13 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                                     
             html = '<div class="recordDiv rt_draggable" recid="'+recID+'">'
                         + '<div class="recordSelector" style="display:inline-block;"><input type="checkbox" /></div>'
-                        + html_thumb + recTitle
-                        + '<div class="rec_action_link2" style="padding-left:4px;width:10%">';
+                        + html_thumb + recTitle;
+                      
+            html = html + '<div class="truncate description_term">'  //item truncate 
+                + sDesc
+                + '</div>';
+
+            html = html + '<div class="rec_action_link2" style="padding-left:4px;width:55px">';
                         
             if(this.options.select_mode=='manager'){
                 if(sRef){
@@ -859,8 +884,6 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 }
             }
             html = html 
-                + '</div><div class="truncate description_term">'  //item truncate 
-                + window.hWin.HEURIST4.util.htmlEscape($Db.trm(recID, 'trm_Description'))
                 + '</div></div>';
         }
         

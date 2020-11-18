@@ -1099,6 +1099,8 @@ $.widget( "heurist.resultList", {
         if(this.div_content){
             var eles = this.div_content.find('div.recordTitle');
             if(eles.length>0) eles.tooltip('destroy');
+            eles = this.div_content.find('div.rolloverTooltip');
+            if(eles.length>0) eles.tooltip('destroy');
             
             var $allrecs = this.div_content.find('.recordDiv');
             this._off( $allrecs, "click");
@@ -2787,6 +2789,7 @@ $.widget( "heurist.resultList", {
         }
         
         this.div_content.find('div.recordTitle').tooltip({content: ___ontooltip}); //title may have html format - use jquery tooltip
+        this.div_content.find('div.rolloverTooltip').tooltip({content: ___ontooltip}); //use jquery tooltip
 
         if(this.options.select_mode!='select_multi'){
             this.div_content.find('.recordSelector').hide();
