@@ -83,6 +83,32 @@ $.widget( "heurist.manageSysIdentification", $.heurist.manageEntity, {
             ele.fileupload('option','pasteZone', this.editForm); //this._as_dialog);
         }
         
+        //add lookup services config
+        var ele = this._editing.getFieldByName('sys_ExternalReferenceLookups');  
+        ele = ele.find('.input-div');
+        ele.find('input.ui-widget-content').hide();
+        
+        this.btn_config_lookups = $('<button>')
+            .button({label:'Configure lookup services'})
+            .css('min-width', '200px');
+        this.btn_config_lookups.appendTo(ele);
+        
+        var that = this;
+        
+        this._on( this.btn_config_lookups, {    
+            'click': function(event){
+                
+                var cfg_value = this._editing.getValue('sys_ExternalReferenceLookups')[0];
+
+                window.hWin.HEURIST4.ui.showRecordActionDialog('recordLookupCfg',
+                    {service_config: cfg_value,
+                    onClose: function(context){
+                        that._editing.setFieldValueByName2('sys_ExternalReferenceLookups',JSON.stringify(context),true);
+                    }}
+                );
+            }});
+
+        
     },
     
     _afterSaveEventHandler: function( recID, fields ){

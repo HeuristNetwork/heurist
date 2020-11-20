@@ -3240,30 +3240,32 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             var notfound = true;
             var lookup_div = this.element.find('.btn-lookup-values');
             lookup_div.empty();
-            var service_config = window.hWin.HAPI4.sysinfo['service_config'];
-            if(window.hWin.HEURIST4.util.isArrayNotEmpty(service_config)){
+            var service_config = window.hWin.HEURIST4.util.isJSON(window.hWin.HAPI4.sysinfo['service_config']);//sys_ExternalReferenceLookups
+            
+console.log(service_config);            
+            if(service_config!==false){
                 
+                window.hWin.HAPI4.sysinfo['service_config'] = service_config;
                 
-                for(var i=0;i<service_config.length; i++){
-                    var cfg = service_config[i];    
-                    
-                    if(cfg.database && cfg.database!=window.hWin.HAPI4.database) continue;
+                for(var srvname in service_config)
+                {
+                    var cfg = service_config[srvname];    
                     
                     if(cfg.rty_ID == this._currentEditRecTypeID){   //@todo many services
                         notfound = false;            
                         
                         var btn = $('<div>')
                             .button({label:cfg.label?cfg.label:('Lookup '+cfg.service) })
-                            .attr('data-cfg', i).css({'font-size': 'larger', // 'padding-right':'4px',
+                            .attr('data-cfg', srvname).css({'font-size': 'larger', // 'padding-right':'4px',
                                 border: '1px solid', 'font-weight': 'bold'})
                             .appendTo(lookup_div);
                         
                         this._on(btn, {click:
                             function(event){ 
                                 
-                                var idx = $(event.target).attr('data-cfg');
+                                var srvname = $(event.target).attr('data-cfg');
                                 
-                                var cfg = window.hWin.HAPI4.sysinfo['service_config'][idx];
+                                var cfg = window.hWin.HAPI4.sysinfo['service_config'][srvname];
                                 
                             window.hWin.HEURIST4.ui.showRecordActionDialog(cfg.dialog, //'recordLookup'
                                 { mapping: cfg, 
@@ -3272,7 +3274,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                                   onClose:function(recset){
                                     if(recset){
                                         
-                                        if((typeof recset.isA == "function") && recset.isA('hRecordSet')){
+                                        if( window.hWin.HEURIST4.util.isRecordSet(recset) ){
                                         
                                             var rec = recset.getFirstRecord();
                                             // loop all fields in selected values

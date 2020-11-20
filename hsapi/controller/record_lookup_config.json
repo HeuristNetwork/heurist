@@ -1,8 +1,8 @@
 [{
-    "rty_ID": "3-1009",
     "service": "tlcmap",
-    "database": "osmak_2,TLCMap_Clearinghouse",
+    "rty_ID": "3-1009",
     "label": "Lookup in AGHP",
+    "description": "Search for Australian Gazetteer of historic places",
     "dialog": "recordLookup",
     "fields":{ 
       "properties.placename": "2-1",  
@@ -14,9 +14,35 @@
     }    
 },
 {
+    "service": "postalCodeSearch",
+    "rty_ID": "",
+    "label": "Postal Codes (GeoNames)",
+    "description": "Returns a list of postal codes and places for the placename/postalcode query.",
+    "dialog": "recordLookupGN_postalCode",
+    "fields": { 
+        "postalcode":"",
+        "lng":"",    
+        "lat":"",    
+        "countryCode":"",    
+        "adminCode1":"",    
+        "adminName1":"",    
+        "adminCode2":"",    
+        "adminName2":"",    
+        "adminCode3":"",    
+        "adminName3":"",    
+        "placeName":""
+    }
+},
+{
+    "service": "MPCE",
     "rty_ID": "1268-53",
-    "database":"mpce_1",
-    "label": "Lookup MPCE",
+    "label": "Lookup MPCE (not implemented)",
     "dialog": "recordLookupMPCE",
-    "fields": { }
+    "description": "Lookup for rectype 1268-53",
+    "fields": {
+        "field1":"",
+        "field2":"",
+        "field3":"",
+        "field4":""
+    }
 }]

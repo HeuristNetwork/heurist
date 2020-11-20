@@ -135,8 +135,8 @@ function hEditing(_options) {
         if(_recstructure) recstructure = _recstructure;
                 
         var recID = '';
-        if(recdata!=null){
-            if($.isFunction(recdata['isA']) && recdata.isA('hRecordSet')){ //for edit mode
+        if(window.hWin.HEURIST4.util.isRecordSet(recdata)){
+            //for edit mode
                 record = recdata.getFirstRecord();
                 //get record ID
                 var idx;
@@ -146,7 +146,6 @@ function hEditing(_options) {
                         break;
                    }
                 }
-            }
         }
         
         
@@ -680,8 +679,9 @@ function hEditing(_options) {
             return _getFieldByName(fieldName);
         },
 
-        //
+        // 
         // is_changed == false do not set flag as modified
+        // editing element will be recreated!
         //
         setFieldValueByName:function(fieldName, value, is_changed){
             var ele = _getFieldByName(fieldName);
@@ -692,6 +692,26 @@ function hEditing(_options) {
                     ele.editing_input('onChange');
                     //_onChange();
                 }
+            }
+        },
+        
+        //
+        // is_changed == false do not set flag as modified
+        // editing element will NOT be recreated!
+        // value assigned to the first input element only
+        //
+        setFieldValueByName2:function(fieldName, value, is_changed){
+        
+            var ele = _getFieldByName(fieldName);
+            if(ele && ele.editing_input('instance')){
+                
+                    var elements = ele.editing_input('getInputs') //_getInputs(fieldName);               
+                    $(elements[0]).val( value );
+                            
+                    if(is_changed!==false){
+                        ele.editing_input('isChanged', true);    
+                        ele.editing_input('onChange');
+                    }
             }
         },
         

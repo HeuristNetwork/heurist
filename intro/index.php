@@ -20,7 +20,7 @@
 
 require_once(dirname(__FILE__)."/../hsapi/System.php");
 
-define('PDIR','../');
+if (!defined('PDIR')) define('PDIR','../');
 
 // init main system class
 //$system = new System();

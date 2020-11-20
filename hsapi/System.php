@@ -227,10 +227,10 @@ error_log(print_r($_REQUEST, true));
                foreach($config as $idx=>$cfg){
                    
                    $allowed_dbs = @$cfg['database'];
-                   if($allowed_dbs==null || $allowed_dbs=="*" || in_array(HEURIST_DBNAME,explode(',',$allowed_dbs))){
+                   if(true){ //$allowed_dbs==null || $allowed_dbs=="*" || in_array(HEURIST_DBNAME,explode(',',$allowed_dbs))){
                    
                        $rty_ID = ConceptCode::getRecTypeLocalID($cfg['rty_ID']);
-                       if($rty_ID>0){
+                       if(true || $rty_ID>0){
                            
                             $cfg['rty_ID'] = $rty_ID;
                            
@@ -918,7 +918,8 @@ error_log(print_r($_REQUEST, true));
                     "db_usergroups"=> user_getAllWorkgroups($this->mysqli), //all groups- to fast retrieve group name
                     "baseURL"=>HEURIST_BASE_URL,
                     "dbconst"=>$this->getLocalConstants( $include_reccount_and_dashboard_count ), //some record and detail types constants with local values specific for current db
-                    "service_config"=>$this->getWebServiceConfigs(), //get 3d part web service mappings
+                    "service_config"=>$this->get_system('sys_ExternalReferenceLookups'), //get 3d part web service mappings
+                    "services_list"=>$this->getWebServiceConfigs(), //get list of all implemented lookup services
                     "dbrecent"=>$dbrecent,  //!!!!!!! need to store in preferences
                     'max_post_size'=>get_php_bytes('post_max_size'),
                     'max_file_size'=>get_php_bytes('upload_max_filesize'),

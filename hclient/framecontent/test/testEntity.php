@@ -64,6 +64,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/manageSysBugreport.js"></script>
 
         <script type="text/javascript" src="<?php echo PDIR;?>admin/structure/import/importStructure.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/record/recordLookupCfg.js"></script>
         
         <script type="text/javascript" src="<?php echo PDIR;?>external/js/evol.colorpicker.js" charset="utf-8"></script>
         <link href="<?php echo PDIR;?>external/js/evol.colorpicker.css" rel="stylesheet" type="text/css">
@@ -139,8 +140,13 @@ require_once(dirname(__FILE__)."/../initPage.php");
                         $('#inputdiv').find('.ui-datepicker-trigger').hide();
                 
                 //open at once 
-                testEntity(true);
+                testLookuService();
+                //testEntity(true);
                 //testEditSymbology();
+            }
+            
+            function testLookuService(){
+                 window.hWin.HEURIST4.ui.showRecordActionDialog('recordLookupCfg');
             }
 
             function testImportStruc(){
@@ -499,6 +505,9 @@ print $targetPath.'<br>';
                     <button onclick="testEntity(false)">show on this page</button>
                     <button onclick="testTags()">embedded select tags</button>
                     <button onclick="testImportStruc()">Import structure</button>
+
+                    <button onclick="testLookuService()">Lookup service config</button>
+
                     
                     <!-- button onclick="testEditSymbology()">Edit symbology</button -->
                 </div>
