@@ -455,21 +455,22 @@ div.recordDiv.public  > .action-button-container{
 }
 
 .recordDiv > .description_term{
-    float: right;
-    width: 200px;
+    position: absolute;
+    top: 6px;
+    left: 355px;
+    right: 2px;
     font-size: smaller;
     font-style: italic;
     padding-top: 4px;
 }
 
 .thumbs .recordDiv > .label_term{
+    width:130px;
     max-width: 130px;
-    padding: 0 !important;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
 }
 .thumbs .recordDiv > .description_term{
+    top: 22px;
+    left: 2px;
     width:130px;
     max-width: 130px;
     font-size: smaller;
@@ -569,6 +570,9 @@ div.recordDiv:hover > .rec_action_link2{
 div.recordDiv > .rec_action_link2{
     visibility:hidden;
     display: inline-block;
+}
+.list div.recordDiv > .rec_action_link2{
+    left:355px;
 }
 .thumbs div.recordDiv > .rec_action_link2{
     position:absolute;

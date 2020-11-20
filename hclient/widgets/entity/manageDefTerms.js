@@ -781,6 +781,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         var sLabel = window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, 'trm_Label'));
         var sDesc = window.hWin.HEURIST4.util.htmlEscape($Db.trm(recID, 'trm_Description'));
         var recTitle = '';
+        var html;
+        
         
         if(this.options.auxilary=='vocabulary'){
             sBold = 'font-weight:bold;';
@@ -791,11 +793,30 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             
             recTitle = '<div class="item truncate" style="'+sWidth+sBold+'">'
                     + sLabel+'</div>';
-            
+
+            html = '<div class="recordDiv rt_draggable" style="padding-right:0" recid="'+recID+'">'
+                    + '<div class="recordSelector item"><input type="checkbox" /></div>'
+                    + recTitle 
+                    
+                    +((recordset.fld(record, 'trm_Domain')=='enum')
+                      ?'':'<div style="display: table-cell;font-size:smaller" class="item">(relation)</div>')
+                    
+                    + this._defineActionButton({key:'edit',label:'Edit Vocabulary', 
+                        title:'', icon:'ui-icon-pencil',class:'rec_actions_button'}, 
+                        null,'icon_text') 
+                    + this._defineActionButton({key:'delete',label:'Remove Vocabulary', 
+                        title:'', icon:'ui-icon-delete',class:'rec_actions_button'},
+                        null,'icon_text')
+                    + '<div class="selection_pointer" style="display:table-cell">'
+                        +'<span class="ui-icon ui-icon-carat-r"></span></div>'
+                    +'</div>';
+
         }else{
             var lvl = (recordset.fld(record, 'trm_Parents').split(',').length);
-            sWidth = 'display:inline-block;padding-top:4px;';  //'max-width:'+((lvl>2)?'25':'30')+'%;';
-            sPad = 'padding-left:'+(lvl*20);
+            sWidth = 'display:inline-block;padding-top:4px;max-width:320px;'; //+((lvl>2)?'25':'30')+'%;';
+            //sPad = 'padding-left:'+(lvl*20);
+            
+            sPad = '<span>'+('&nbsp;'.repeat(lvl*4))+'</span>';
 
             var sCode = $Db.trm(recID, 'trm_Code');
             var sURI = $Db.trm(recID, 'trm_SemanticReferenceURL');
@@ -815,38 +836,17 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 +'The term can only be edited in that vocabulary.</p>';
                 
                 sRef = '<span style="color:blue;font-size:smaller;">(ref)</span>';
+                
+                //sWidth = sWidth + '45%;';
+            }else{
+                //sWidth = sWidth + '49%;';
             }
             sHint = sHint + '"';
             
-            recTitle = '<div class="item label_term rolloverTooltip"'
-                    +' style="'+sWidth+sBold+sPad+'" '+sHint+'>'
-                    + sLabel+'</div>'+sRef;
+            recTitle = '<div class="item truncate label_term rolloverTooltip"'
+                    +' style="'+sWidth+sBold+'" '+sHint+'>'
+                    + sPad+sLabel+'</div>'+sRef;
             
-        }
-        
-
-        var html;
-        
-        if(this.options.auxilary=='vocabulary'){
-            
-            html = '<div class="recordDiv rt_draggable" style="padding-right:0" recid="'+recID+'">'
-                    + '<div class="recordSelector item"><input type="checkbox" /></div>'
-                    + recTitle 
-                    
-                    +((recordset.fld(record, 'trm_Domain')=='enum')
-                      ?'':'<div style="display: table-cell;font-size:smaller" class="item">(relation)</div>')
-                    
-                    + this._defineActionButton({key:'edit',label:'Edit Vocabulary', 
-                        title:'', icon:'ui-icon-pencil',class:'rec_actions_button'}, 
-                        null,'icon_text') 
-                    + this._defineActionButton({key:'delete',label:'Remove Vocabulary', 
-                        title:'', icon:'ui-icon-delete',class:'rec_actions_button'},
-                        null,'icon_text')
-                    + '<div class="selection_pointer" style="display:table-cell">'
-                        +'<span class="ui-icon ui-icon-carat-r"></span></div>'
-                    +'</div>';
-            
-        }else{
             
             var recThumb = window.hWin.HAPI4.getImageUrl(this._entityName, recID, 'thumb');
             
@@ -861,9 +861,11 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 + sDesc
                 + '</div>';
 
-            html = html + '<div class="rec_action_link2" style="padding-left:4px;width:55px">';
-                        
             if(this.options.select_mode=='manager'){
+                
+                html = html + '<div class="rec_action_link2" style="position:absolute;'
+                            +'top: 5px;padding: 4px;width:'+(sRef?16:48)+'px;height:10px;background:lightgray;">';
+                        
                 if(sRef){
                     html = html 
                             + this._defineActionButton({key:'delete',label:'Remove Reference', 
@@ -882,9 +884,10 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                                 title:'', icon:'ui-icon-plus',class:'rec_actions_button'},
                                 null,'icon_text');
                 }
+                html = html + '</div>';
             }
             html = html 
-                + '</div></div>';
+                + '</div>';
         }
         
         return html;

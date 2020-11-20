@@ -428,11 +428,10 @@ class DbDefTerms extends DbEntityBase
                             :'')
                         .') '.$sWhere );
                         
-            }
-                    
-            if($res>0 && $res!=@$this->records[$idx]['trm_ID']){
-                $this->system->addError(HEURIST_ACTION_BLOCKED, $s2.' cannot be saved. '.$s3);
-                return false;
+                if($res>0 && $res!=@$this->records[$idx]['trm_ID']){
+                    $this->system->addError(HEURIST_ACTION_BLOCKED, $s2.' cannot be saved. '.$s3);
+                    return false;
+                }
             }
 
             $this->records[$idx]['trm_Modified'] = date('Y-m-d H:i:s'); //reset
