@@ -330,11 +330,13 @@ class DbDefRecTypes extends DbEntityBase
             if(@$this->records[$idx]['rty_LocallyModified']==null){
                 $this->records[$idx]['rty_LocallyModified'] = 0; //default value for new
             }
-            if(@$this->records[$idx]['rty_IDInOriginatingDB']==''){
-                $this->records[$idx]['rty_IDInOriginatingDB'] = 0;
-            }
-            if(@$this->records[$idx]['rty_NonOwnerVisibility']==''){
-                $this->records[$idx]['rty_NonOwnerVisibility'] = 'viewable';
+            if(!(@$this->records[$idx]['rty_ID']>0)){
+                if(@$this->records[$idx]['rty_IDInOriginatingDB']==''){
+                    $this->records[$idx]['rty_IDInOriginatingDB'] = 0;
+                }
+                if(@$this->records[$idx]['rty_NonOwnerVisibility']==''){
+                    $this->records[$idx]['rty_NonOwnerVisibility'] = 'viewable';
+                }
             }
             
             $this->records[$idx]['rty_Modified'] = date('Y-m-d H:i:s'); //reset
