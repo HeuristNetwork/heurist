@@ -1853,3 +1853,22 @@ function temporalToHumanReadableString(inputStr) {
     }
     return str;
 }
+
+function temporalSimplifyDate(sdate) {
+    
+    if(sdate){
+        var s = sdate;
+        if(s.indexOf("-00-00")>0){
+            s = s.replace("-00-00","-01-01");
+        }
+        if(s.indexOf("00:00:00")>0){
+            s = s.replace("-01-01 00:00:00"," ");
+            s = s.replace("00:00:00"," ");
+        }
+        s = s.trim();
+                                
+        return s;
+    }else{
+        return sdate;
+    }
+}

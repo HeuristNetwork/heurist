@@ -248,6 +248,7 @@ function removeLeadingYearZeroes($value, $is_greg_or_julian=true, $is_strict_iso
 			}*/
             $res = ''.abs($date['year']);
             
+            //year must be four digit
             if($is_strict_iso && abs($date['year'])<10000){
                $res = str_pad($res,4,'0',STR_PAD_LEFT);
             }

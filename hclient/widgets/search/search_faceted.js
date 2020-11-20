@@ -2026,7 +2026,7 @@ if(!(vocab_id>0)){
                         }
                         var sl_count = (cterm && cterm.length==3)?cterm[2]:0;
                         
-                        if(field.selectedvalue){
+                        if(field.selectedvalue){ //currently selected value - some range was already set
                                 if($.isNumeric(field.selectedvalue.value) ||  field.selectedvalue.value.indexOf('<>')<0  ){
                                     cterm = [field.selectedvalue.value, field.selectedvalue.value];
                                 }else{
@@ -2037,10 +2037,13 @@ if(!(vocab_id>0)){
                         var mmin  = cterm[0];
                         var mmax  = cterm[1];
                         var daymsec = 86400000; //24*60*60*1000;   1day
+                 
+console.log(cterm[0]+'   '+cterm[1]);
                         
                         if(!(window.hWin.HEURIST4.util.isempty(mmin) || window.hWin.HEURIST4.util.isempty(mmax))){
                             
                             if(field['type']=="date"){
+                                
                                 if(mmin.indexOf("-00-00")>0){
                                     mmin = mmin.replace("-00-00","-01-01");
                                 }
@@ -2095,13 +2098,22 @@ if(!(vocab_id>0)){
                             .css({'font-style':'italic', 'padding-left':'10px'})
                             .appendTo($facet_values); 
                             
+                        }else if(!field.selectedvalue && cterm[0]==cterm[1]){ //range was not set and initial
+                            
+                            //show the only date without slider
+                            s = temporalSimplifyDate(_cterm[0]);
+                            
+                            $("<span>").html(s 
+                                    + ((sl_count>0) ?'<span class="badge" style="float: right;">'+sl_count+'</span>':''))
+                                   .appendTo($facet_values); 
+                            
                         }else{
                             
                             if(isNaN(field.mmin0) || isNaN(field.mmax0)){
+                                //on first request set limits
                                 field.mmin0 = mmin;
                                 field.mmax0 = mmax;
                             }
-                            
                             
                             function __roundNumericLabel(val) {
                                 var prefix = '';
@@ -2202,14 +2214,20 @@ if(!(vocab_id>0)){
                                 
                                 if(field['type']=="date"){
                                     try{
-                                        min = (new Date(min)).toISOString(); //__dateToString(min);// 
-                                        max = (new Date(max)).toISOString(); 
+                                        //year must be four digit
+                                        min = (new TDate(min)).toString();
+                                        max = (new TDate(max)).toString(); 
+                                        
+                                        //min = (new Date(min)).toISOString();
+                                        //max = (new Date(max)).toISOString(); 
                                     }catch(err) {
                                        window.hWin.HEURIST4.msg.showMsgFlash('Unrecognized date format');
                                     }
                                 }
 
                                 var value = (min==max)?min :min + '<>' + max; //search in between
+                                
+console.log('start search  '+value);                                
                                 
                                 if(window.hWin.HEURIST4.util.isempty(value)){
                                     value = '';
@@ -2271,8 +2289,10 @@ if(!(vocab_id>0)){
                                  
                                 }
                                 
-                                that._date_range_dialog.find('#date-start').editing_input('setValue', __dateToString(mmin));
-                                that._date_range_dialog.find('#date-end').editing_input('setValue', __dateToString(mmax));
+                                that._date_range_dialog.find('#date-start').editing_input('setValue', 
+                                        temporalSimplifyDate(cterm[0])); //__dateToString(mmin)
+                                that._date_range_dialog.find('#date-end').editing_input('setValue', 
+                                        temporalSimplifyDate(cterm[1]));
                                 that._date_range_dialog.find('#date-range')
                                     .text('Range '+__dateToString(field.mmin0)+' - '+__dateToString(field.mmax0));
                                 

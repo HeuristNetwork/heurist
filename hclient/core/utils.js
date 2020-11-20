@@ -1275,7 +1275,6 @@ window.hWin.HEURIST4.util = {
                 +':'+(''+date.getMinutes()).padStart(2, "0")
                 +':'+(''+date.getSeconds()).padStart(2, "0");
     }
-
 }//end util
 
 //-------------------------------------------------------------
