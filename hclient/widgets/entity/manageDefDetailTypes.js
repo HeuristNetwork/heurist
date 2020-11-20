@@ -720,7 +720,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                                 height: dim.h,
                                 width: dim.w,
                                 callback: function(context) {
-                                    if(context!="" && context!=undefined) {
+                                    if(!window.hWin.HEURIST4.util.isempty(context)) {
 
                                         var changeToNewType = true;
                                         if(((dt_type==="resource") || (dt_type==="relmarker") || 

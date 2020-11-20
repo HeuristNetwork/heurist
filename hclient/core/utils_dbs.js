@@ -21,14 +21,16 @@
 Selectors:
 
 TERMS
-getTermById
 
 getInverseTermById
 
 getTermValue - returns label and code for term by id
 
-getColorFromTermValue - Returns hex color by label or code for term by id
+getTermByCode - returns term by code in given vocab
 
+trm_InVocab
+
+getColorFromTermValue - Returns hex color by label or code for term by id
 
     trm_TreeData  - returns hierarchy for given vocabulary as a flat array, recordset or tree data
     trm_HasChildren - is given term has children
@@ -1168,6 +1170,21 @@ window.hWin.HEURIST4.dbs = {
     
     },
 
+    //
+    //
+    //
+    getTermByCode: function(vocab_id, code){
+
+        var _terms = $Db.trm_TreeData(vocab_id, 'set');
+        
+        for(var i=0; i<_terms.length; i++){
+            if($Db.trm(_terms[i],'trm_Code')==code){
+                return _terms[i];
+            }
+        }
+        return null;
+    },
+    
     //
     // returns true if term belongs to vocabulary (including by reference)
     //
