@@ -582,6 +582,9 @@ div.recordDiv > .rec_action_link2{
 div.expanded.recordDiv > .rec_action_link2{
     display: none;   
 }
+.rec_action_link2 > .rec_actions_button{
+    padding: 5px 2px;
+}
 
 
 

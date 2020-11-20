@@ -196,7 +196,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                     draggable: function(){
                         
                         that.recordList.find('.rt_draggable > .item').draggable({ // 
-                                    revert: true,
+                                    revert: 'invalid',
                                     helper: function(){ 
                                         return $('<div class="rt_draggable ui-drag-drop" recid="'+
                                             $(this).parent().attr('recid')
@@ -1396,11 +1396,13 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         this._saveEditAndClose( params ,
             function(){
                 window.hWin.HEURIST4.msg.sendCoverallToBack();
+                that.searchForm.searchDefRecTypes('startSearch');
+                /*
                 window.hWin.HAPI4.EntityMgr.refreshEntityData('rtg',
                     function(){
                         that._triggerRefresh('rtg');
                     }
-                )
+                )*/
         });
     }                                    
 

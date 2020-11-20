@@ -88,12 +88,12 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
                     that._onActionListener(null, 'save-order');
                     //that._toolbar.find('#btnApplyOrder').show();
                 },
-                droppable: function(){
+                droppable: function(){   //change group for record type
                     
                     that.recordList.find('.recordDiv')  //.recordDiv, ,.recordDiv>.item
                         .droppable({
                             //accept: '.rt_draggable',
-                            scope: 'rtg_change',
+                            scope: 'rtg_change',  
                             hoverClass: 'ui-drag-drop',
                             drop: function( event, ui ){
 
@@ -101,14 +101,15 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
                                             ?$(event.target)
                                             :$(event.target).parents('.recordDiv');
                                             
-                    var rty_ID = $(ui.draggable).parent().attr('recid');
-                    var rtg_ID = trg.attr('recid');
-                    
-                            if(rty_ID>0 && rtg_ID>0 && that.options.reference_rt_manger){
-                                    
-                                    that.options.reference_rt_manger
-                                        .manageDefRecTypes('changeRectypeGroup',{rty_ID:rty_ID, rty_RecTypeGroupID:rtg_ID });
-                            }
+                                var rty_ID = $(ui.draggable).parent().attr('recid');
+                                var rtg_ID = trg.attr('recid');
+                                
+                                if(rty_ID>0 && rtg_ID>0 && that.options.reference_rt_manger){
+                                        
+                                        that.options.reference_rt_manger
+                                            .manageDefRecTypes('changeRectypeGroup',
+                                                {rty_ID:rty_ID, rty_RecTypeGroupID:rtg_ID });
+                                }
                         }});
                 }
         });

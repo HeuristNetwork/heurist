@@ -109,6 +109,10 @@ $.widget( "heurist.mainMenu6", {
                     mouseenter: that._expandMainMenuPanel,
                     mouseleave: that._collapseMainMenuPanel,
                 });
+                that._on(that.divMainMenu.children('.ui-heurist-quicklinks'),{
+                    mouseleave: that._collapseMainMenuPanel,
+                });
+                
                 /* for saved filters 
                 that._on(that.element.find('span.section-head').parent(), {
                     mouseenter: that._expandMainMenuPanel,

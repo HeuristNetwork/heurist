@@ -42,6 +42,13 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
     //    
     _init: function() {
 
+        if(this.options.isFrontUI &&
+            this.options.select_mode=='manager' && this.options.auxilary!='vocabulary'){
+            //window.hWin.HEURIST4.msg.bringCoverallToFront(this.element, {});                   
+            $('<div>').addClass('coverall-div').css({'zIndex':60000, 
+                    'background-color':'#fff', opacity:1}).appendTo(this.element);
+        }
+        
         
         this.options.innerTitle = false;
         
@@ -67,7 +74,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         
         var that = this;
         
-        
+
         window.hWin.HAPI4.addEventListener(this, window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, 
         function(data) { 
             
@@ -181,7 +188,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                     draggable: function(){ //function is called after finish render and assign draggable widget for all record divs
                         
                         that.recordList.find('.rt_draggable > .item').draggable({ // 
-                                    revert: true,
+                                    revert: 'invalid',
                                     helper: function(){ 
                                         return $('<div class="rt_draggable ui-drag-drop" recid="'+
                                             $(this).parent().attr('recid')
@@ -266,7 +273,6 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             }
             else{ //terms ------------------------------------------
                 
-        
                 //add vocab group and vocabs panels
                 this.element.addClass('ui-suppress-border-and-shadow');
                 
@@ -401,7 +407,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                     draggable: function(){
                         
                         that.recordList.find('.rt_draggable > .item').draggable({ // 
-                                    revert: true,
+                                    revert: 'invalid',
                                     helper: function(){ 
                                         that._dropped = false;
                                         return $('<div class="rt_draggable ui-drag-drop" recid="'+
@@ -760,6 +766,12 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 sGroupTitle += '</h4>';
             }
             
+            if(this.options.isFrontUI){
+                var ele = this.element.find('.coverall-div');
+                if(ele.length>0) ele.remove();
+                //var that = this;
+                //setTimeout(function(){that.element.find('.coverall-div').remove();},1000);
+            }
         }
         this.searchForm.find('#div_group_information').html(sGroupTitle);
 
@@ -864,7 +876,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             if(this.options.select_mode=='manager'){
                 
                 html = html + '<div class="rec_action_link2" style="position:absolute;'
-                            +'top: 5px;padding: 4px;width:'+(sRef?16:48)+'px;height:10px;background:lightgray;">';
+                            +'top: 5px;width:'+(sRef?20:62)+'px;height:20px;background:lightgray;">';
                         
                 if(sRef){
                     html = html 
