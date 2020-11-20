@@ -672,9 +672,10 @@ CREATE TABLE sysIdentification (
   sys_SetPublicToPendingOnEdit tinyint(1) unsigned NOT NULL default '0' COMMENT '0=immediate publish when ''public'' record edited, 1 = reset to ''pending''',
   sys_ConstraintDefaultBehavior enum('locktypetotype','unconstrainedbydefault','allownullwildcards') NOT NULL default 'locktypetotype' COMMENT 'Determines default behaviour when no detail types are specified',
   sys_AllowRegistration tinyint(1) unsigned NOT NULL default '0' COMMENT 'If set, people can apply for registration through web-based form',
-  sys_MediaFolders varchar(10000) default NULL COMMENT 'Additional comma-sep directories which can contain files indexed in database',
+  sys_MediaFolders TEXT default NULL COMMENT 'Additional comma-sep directories which can contain files indexed in database',
   sys_MediaExtensions varchar(1024) default 'jpg,jpeg,jfif,png,gif,tif,tiff,wmv,doc,docx,xls,xlsx,txt,rtf,xml,xsl,xslt,mpg,mpeg,mov,mp3,mp4,qt,wmd,avi,kml,sid,ecw,mp3,mid,midi,evo,csv,tab,wav,cda,wmz,wms,aif,aiff' COMMENT 'The file extensions to be harvested from the MediaFolders directories',
   sys_TreatAsPlaceRefForMapping VARCHAR(1000) DEFAULT '' COMMENT 'Comma delimited list of additional rectypes (local codes) to be considered as Places',
+  sys_ExternalReferenceLookups TEXT default NULL COMMENT "Record type-function-field specifications for lookup to external reference sources such as GeoNames",  
   PRIMARY KEY  (sys_ID)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COMMENT='Identification/version for this Heurist database (single rec)';
 

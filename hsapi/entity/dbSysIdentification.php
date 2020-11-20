@@ -105,8 +105,17 @@ class DbSysIdentification extends DbEntityBase
     public function save(){
 
 
+        //add new field into sysIdentification
+        $sysValues = $this->system->get_system();
+        if(!array_key_exists('sys_ExternalReferenceLookups', $sysValues))
+        {
+            $query = "ALTER TABLE `sysIdentification` ADD COLUMN `sys_ExternalReferenceLookups` TEXT default NULL COMMENT 'Record type-function-field specifications for lookup to external reference sources such as GeoNames'";
+            $mysqli = $this->system->get_mysqli();
+            $res = $mysqli->query($query);
+        }
+        
+        
         $ret = parent::save();
-
        
         if($ret!==false){
             //copy temporary file

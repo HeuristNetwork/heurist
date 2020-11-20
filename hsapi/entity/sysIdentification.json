@@ -210,6 +210,14 @@
                         "rst_DisplayHelpText": "Comma delimited list of additional record types (local codes) to be considered as Places", 
                         "rst_FieldConfig": {"entity":"defRecTypes", "csv":true}
                     }
+                },
+                {
+                    "dtID": "sys_ExternalReferenceLookups",
+                    "dtFields":{
+                        "dty_Type":"freetext",
+                        "rst_DisplayName": "External reference lookups",
+                        "rst_DisplayHelpText": "Record type-function-field specifications for lookup to external reference sources such as GeoNames"
+                    }
                 }
         ]},    
         {
