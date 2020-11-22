@@ -380,7 +380,7 @@ CREATE TABLE defTerms (
   trm_Code varchar(100) default NULL COMMENT 'Optional code eg. alphanumeric code which may be required for import or export',
   trm_SemanticReferenceURL VARCHAR( 250 ) NULL COMMENT 'The URI to a semantic definition or web page describing the term',
   trm_IllustrationURL VARCHAR( 250 ) NULL COMMENT 'The URL to a picture or other resource illustrating the term. If blank, look for trm_ID.jpg/gif/png in term_images directory',  
-  trm_VocabularyGroupID smallint(5) unsigned NULL default '1' COMMENT 'Vocabulary group to which this term belongs, if a top level term (vocabulary)',
+  trm_VocabularyGroupID smallint(5) unsigned NULL default '0' COMMENT 'Vocabulary group to which this term belongs, if a top level term (vocabulary)',
   PRIMARY KEY  (trm_ID),
   KEY trm_ParentTermIDKey (trm_ParentTermID),
   KEY trm_InverseTermIDKey (trm_InverseTermId)

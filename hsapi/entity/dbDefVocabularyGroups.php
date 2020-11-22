@@ -123,7 +123,9 @@ class DbDefVocabularyGroups extends DbEntityBase
             return false;
         }        
         
-        $query = 'select count(trm_ID) from defTerms where `trm_VocabularyGroupID` in ('.implode(',', $this->recordIDs).')';
+        $query = 'select count(trm_ID) from defTerms where `trm_VocabularyGroupID` in ('
+                                .implode(',', $this->recordIDs)
+                                .')  and NOT (trm_ParentTermID>0)';
         $ret = mysql__select_value($this->system->get_mysqli(), $query);
         
         if($ret>0){

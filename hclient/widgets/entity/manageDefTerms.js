@@ -42,12 +42,6 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
     //    
     _init: function() {
 
-        if(this.options.isFrontUI &&
-            this.options.select_mode=='manager' && this.options.auxilary!='vocabulary'){
-            //window.hWin.HEURIST4.msg.bringCoverallToFront(this.element, {});                   
-            $('<div>').addClass('coverall-div').css({'zIndex':60000, 
-                    'background-color':'#fff', opacity:1}).appendTo(this.element);
-        }
         
         
         this.options.innerTitle = false;
@@ -61,6 +55,15 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         if(this.options.edit_mode=='editonly'){
             this.options.select_mode = 'manager';
             this.options.layout_mode = 'editonly';
+        }else{
+            
+            if(this.options.isFrontUI &&
+                this.options.select_mode=='manager' && this.options.auxilary!='vocabulary'){
+                //window.hWin.HEURIST4.msg.bringCoverallToFront(this.element, {});                   
+                $('<div>').addClass('coverall-div').css({'zIndex':60000, 
+                        'background-color':'#fff', opacity:1}).appendTo(this.element);
+            }
+            
         }
         /*
         if(this.options.auxilary=='vocabulary'){
