@@ -95,6 +95,9 @@ $.widget( "heurist.importStructure", {
             sTop = '38px';
         }
         
+        this._selectedDB = null;
+        this._init_local_rty_once = true;
+        
         //init layout
         layout = layout + 
         '<div class="ent_wrapper" style="top:'+sTop+'">' //;min-width:1000px
@@ -434,6 +437,8 @@ $.widget( "heurist.importStructure", {
             request['sort:rec_URL'] = -1;
         }
 
+        this._selectedDB = null;
+        
         this.filterRecordList_dbs(request);
     },
 
@@ -563,7 +568,7 @@ $.widget( "heurist.importStructure", {
             this._init_local_rty_once = false;
 
             window.hWin.HEURIST4.ui.createRectypeSelect(this.select_rty_list_target[0],null,null,true);
-
+            this.showRecTypeTree();
             /*
             //load list of locat rtys        
             window.hWin.HEURIST4.ui.showEntityDialog('defRecTypes', {                
@@ -603,6 +608,8 @@ $.widget( "heurist.importStructure", {
             });
             */
         }
+        
+
     },
 
     _backToDatabases: function(){
