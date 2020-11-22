@@ -62,10 +62,11 @@ of the codebase and rename it to index.html
 
 // *** DO NOT CHANGE VERSION NUMBER, THIS IS SET BY THE HEURIST DEVELOPMENT TEAM ***
 
-$version = "6.0.5"; // sets current program version number, determined by Heurist development lead
+$version = "6.0.6"; // sets current program version number, determined by Heurist development lead
 
 // dates below are the date of release of the given version, and list changes since last release
 
+// h6.0.6 21 Nov 2020 
 // h6.0.5 16 Nov 2020 
 // h6.0.3 10 Nov 2020 
 // h6.0.2 01 Nov 2020 
