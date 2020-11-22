@@ -326,11 +326,9 @@ class DbDefRecTypes extends DbEntityBase
                 return false;
             }
 
-            
-            if(@$this->records[$idx]['rty_LocallyModified']==null){
-                $this->records[$idx]['rty_LocallyModified'] = 0; //default value for new
-            }
             if(!(@$this->records[$idx]['rty_ID']>0)){
+                $this->records[$idx]['rty_LocallyModified'] = 0; //default value for new
+                
                 if(@$this->records[$idx]['rty_IDInOriginatingDB']==''){
                     $this->records[$idx]['rty_IDInOriginatingDB'] = 0;
                 }

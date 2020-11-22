@@ -250,9 +250,10 @@ class DbDefDetailTypes extends DbEntityBase
             
             //$query = $query.", dty_LocallyModified=IF(dty_OriginatingDBID>0,1,0)"
             if(@$this->records[$idx]['dty_LocallyModified']==null){
-                $this->records[$idx]['dty_LocallyModified'] = 0; //default value for new
             }
             if(!(@$this->records[$idx]['dty_ID']>0)){
+                $this->records[$idx]['dty_LocallyModified'] = 0; //default value for new
+                
                 if(@$this->records[$idx]['dty_IDInOriginatingDB']==''){
                     $this->records[$idx]['dty_IDInOriginatingDB'] = 0;
                 }
