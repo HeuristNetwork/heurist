@@ -194,8 +194,10 @@ $time_debug = microtime(true);
             if(!@$this->source_defs['terms']['groups'] || 
                 !(@$this->source_defs['terms']['fieldNamesToIndex']['trm_VocabularyGroupID']>0)){
                 
-                $this->system->addError(HEURIST_ERROR, 'Database registration URL '.$database_url.' returns old version of database definitions. '
-                .'Either database is not upgraded or URL refers to old version of code');
+                    
+                $this->system->addError(HEURIST_ERROR, 'Database registration URL '.$database_url.' returns old version '
+                .'(DB version xxxx, you are using version yyyy) of database definitions. '
+                .'Please ask the system administrator (<email address*>) to upgrade the system.');
                 return false;
             }
         }
@@ -830,13 +832,28 @@ $mysqli->commit();
             return false;
         }
         
+        $message = '<p>Unable to contact the selected source database (ID # '.$database_id
+            .'). This might indicate one of the following:</p>' 
+            .'<ol><li>the database is no longer online;</li>'
+            .'<li>the registration in the Heurist master index is missing or points to the wrong URL '
+            .$remote_url
+            .'<br>(check registration in Heurist Master Index);</li>'
+            .((strpos($remote_url, HEURIST_SERVER_URL)===0)
+                ?'<li>a sql server error in contacting the database;</li>'
+                :'<li>a proxy error in contacting the database;</li>')
+            .'<li>network timeout.</li></ol> '
+            .'<p>If you cannot determine the problem, please '.CONTACT_HEURIST_TEAM.' with the URL to the target database</p>';
+        
+        
         if(strpos($remote_url, HEURIST_SERVER_URL)===0){ //same server
 
           $defs = array();  
           
           $system2 = new System();
-          $system2->init($remote_dbname, true, false); //init without paths and consts
-          
+          if(!$system2->init($remote_dbname, true, false)){ //init without paths and consts
+            $this->system->addError(HEURIST_ERROR, $message);
+            return false;          
+          }
           
           if(!$only_terms){
             $defs['rectypes'] = dbs_GetRectypeStructures($system2, null, 2 );
@@ -855,15 +872,7 @@ $mysqli->commit();
            $defs = loadRemoteURLContent($remoteURL);            
            $defs = json_decode(gzdecode($defs), true);
            if (!$defs || @$defs['status']!=HEURIST_OK) {
-                $this->system->addError(HEURIST_ERROR,
-'<p>Unable to contact the selected source database (ID # '.$database_id.'). This might indicate one of the following:</p> '
-.'<ol><li>the database is no longer online;</li>'
-.'<li>the registration in the Heurist master index is missing or points to the wrong URL '
-.$database_url
-.'<br>(check registration of the database using Database > Register);</li>'
-.'<li>a proxy error in contacting the database;</li><li>network timeout.</li></ol> '
-.'<p>If you cannot determine the problem, please '.CONTACT_HEURIST_TEAM.' with the URL to the target database</p>');
-//, and to the source database if the XML was generated from a Heurist source;
+                $this->system->addError(HEURIST_ERROR, $message);
                 return false;
            }
            $defs = $defs['data'];
@@ -1393,7 +1402,7 @@ if($term_id==11 || $term_id==518 || $term_id==497){
                 }
             }
 
-            if($isNotFound){
+            if($isNotFound){ //add new one
                 
                 $src_group['vcg_ID'] = -1;
                 $new_grp_id = mysql__insertupdate($mysqli,'defVocabularyGroups','vcg',$src_group);

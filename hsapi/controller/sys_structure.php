@@ -33,6 +33,7 @@
     
     $response = array();
     $is_remote = false;
+    $remoteURL = null;
     
     //get list of registered database and master index db on the same server
     if(@$_REQUEST['remote']){
@@ -57,9 +58,16 @@
                 $data = loadRemoteURLContent($remoteURL);            
             
                 if($data==false){
-                    //$system->addError(HEURIST_ERROR,  );
-                    $data = array("status"=>HEURIST_ERROR, "message"=>'Cannot access database structure for database '
-                                            .$match[1].' on '.$splittedURL[0], "sysmsg"=>null);
+                    
+$message = '<p>Unable to contact the selected source database. This might indicate one of the following:</p> '
+.'<ol><li>the database is no longer online;</li>'
+.'<li>the registration in the Heurist master index is missing or points to the wrong URL '
+.$_REQUEST['remote'].';</li>'
+.'<li>a proxy error in contacting the database;</li><li>network timeout.</li></ol> '
+.'<p>If you cannot determine the problem, please '.CONTACT_HEURIST_TEAM.' with the URL to the target database</p>';
+                    
+//'Cannot access database structure for database '.$match[1].' on '.$splittedURL[0]                    
+                    $data = array("status"=>HEURIST_ERROR, "message"=>$message, "sysmsg"=>null);
                     $data = json_encode($data); 
                 }else{
                     header('Content-Encoding: gzip');
@@ -80,7 +88,20 @@
     if( ! $system->init(@$_REQUEST['db']) ){
 
         //get error and response
-        $response = $system->getError();
+        if($remoteURL==null){
+            $response = $system->getError(); //errors['message']
+        }else{
+            $message = '<p>Unable to contact the selected source database. This might indicate one of the following:</p>' 
+    .'<ol><li>the database is no longer online;</li>'
+    .'<li>the registration in the Heurist master index is missing or points to the wrong URL '
+    .$remoteURL
+    .'<br>(check registration in Heurist Master Index);</li>'
+    .'<li>a sql server error in contacting the database;</li><li>network timeout.</li></ol> '
+    .'<p>If you cannot determine the problem, please '.CONTACT_HEURIST_TEAM.' with the URL to the target database</p>';
+            
+            $response = array("status"=>HEURIST_ERROR, "message"=>$message, "sysmsg"=>null);
+        }
+        
         
     }else{
         
