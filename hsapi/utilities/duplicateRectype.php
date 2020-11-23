@@ -62,12 +62,14 @@ if( $system->init(@$_REQUEST['db']) ){
         $res = $mysqli->query($query);
         $new_rt_id = $mysqli->insert_id;
     
-        if(HEURIST_DBID>0){
-            $query= 'UPDATE defRecTypes SET rty_OriginatingDBID='.HEURIST_DBID
+        $dbID = HEURIST_DBID;
+        if(!($dbID>0)) $dbID = 0;
+        
+        $query= 'UPDATE defRecTypes SET rty_OriginatingDBID='.$dbID
                     .', rty_NameInOriginatingDB=rty_Name'
                     .', rty_IDInOriginatingDB='.$new_rt_id.' WHERE rty_ID='.$new_rt_id;
-            $res = $mysqli->query($query);
-        }
+        $res = $mysqli->query($query);
+        
 
         $query= "INSERT INTO defRecStructure (rst_RecTypeID,rst_DetailTypeID, rst_DisplayName, rst_DisplayHelpText, rst_DisplayExtendedDescription,
         rst_DisplayOrder, rst_DisplayWidth, rst_DisplayHeight, rst_DefaultValue,

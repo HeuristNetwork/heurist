@@ -2473,12 +2473,14 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             var rst_details = $Db.rst(rectypeID)  //array of dty_ID:rst_ID
             var s_fields = [];  //sorted fields including hidden fields from record header 
             var fields_ids = []; //fields in structure
-
-            rst_details.each2(function(dt_ID, rfr){
-                    rfr['dt_ID'] = dt_ID;
-                    s_fields.push(rfr) //array of json
-                    fields_ids.push(Number(dt_ID));  //fields in structure
-            });
+            
+            if(window.hWin.HEURIST4.util.isRecordSet(rst_details)){
+                rst_details.each2(function(dt_ID, rfr){
+                        rfr['dt_ID'] = dt_ID;
+                        s_fields.push(rfr) //array of json
+                        fields_ids.push(Number(dt_ID));  //fields in structure
+                });
+            }
 
             //----------------
             

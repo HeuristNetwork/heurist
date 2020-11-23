@@ -384,13 +384,14 @@ function createRectypes($commonNames, $rt, $isAddDefaultSetOfFields, $convertTit
         } else {
             $rtyID = $mysqli->insert_id;
 
-            if($system->get_system('sys_dbRegisteredID')>0){
-                $query= 'UPDATE defRecTypes SET rty_OriginatingDBID='.$system->get_system('sys_dbRegisteredID')
+            $dbID = $system->get_system('sys_dbRegisteredID');
+            if(!($dbID>0)) $dbID = 0;
+            
+            $query= 'UPDATE defRecTypes SET rty_OriginatingDBID='.$dbID
                 .', rty_NameInOriginatingDB=rty_Name'
                 .', rty_IDInOriginatingDB='.$rtyID
-                .' WHERE (NOT rty_OriginatingDBID>0) AND rty_ID='.$rtyID;
-                $res = $mysqli->query($query);
-            }
+                .' WHERE (NOT rty_OriginatingDBID>0 OR rty_OriginatingDBID IS NULL) AND rty_ID='.$rtyID;
+            $mysqli->query($query);
 
             $ret = -$rtyID;
             if($isAddDefaultSetOfFields){
@@ -1242,6 +1243,18 @@ function createDetailTypes($commonNames, $dt) {
             $ret = "Error inserting data into defDetailTypes table: ".$rows;
         } else {
             $dtyID = $mysqli->insert_id;
+            
+            $dbID = $system->get_system('sys_dbRegisteredID');
+            if(!($dbID>0)) $dbID = 0;
+            
+            $query= 'UPDATE defDetailTypes SET dty_OriginatingDBID='.$dbID
+                                .', dty_NameInOriginatingDB=dty_Name'
+                                .', dty_IDInOriginatingDB='.$dtyID
+                                .' WHERE (NOT dty_OriginatingDBID>0 OR dty_OriginatingDBID IS NULL) AND dty_ID='.$dtyID;
+            $mysqli->query($query);
+            
+            
+            
             $ret = -$dtyID;
         }
 
@@ -1536,6 +1549,15 @@ function updateTerms( $colNames, $trmID, $values, $ext_db) {
             } else {
                 if($isInsert){
                     $trmID = $ext_db->insert_id;  // new id
+                    
+                    $dbID = $system->get_system('sys_dbRegisteredID');
+                    if(!($dbID>0)) $dbID = 0;
+                    
+                    $query= 'UPDATE defTerms SET trm_OriginatingDBID='.$dbID
+                                .', trm_NameInOriginatingDB=trm_Label'
+                                .', trm_IDInOriginatingDB='.$trmID
+                                .' WHERE (NOT trm_OriginatingDBID>0 OR trm_OriginatingDBID IS NULL) AND trm_ID='.$trmID;
+                    $ext_db->query($query);
                 }
 
                 if($inverse_termid!=null){

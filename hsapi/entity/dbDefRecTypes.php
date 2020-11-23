@@ -357,6 +357,8 @@ class DbDefRecTypes extends DbEntityBase
         if($ret!==false){
             
             $dbID = $this->system->get_system('sys_dbRegisteredID');
+            if(!($dbID>0)) $dbID = 0;
+            
             $mysqli = $this->system->get_mysqli();
             
             foreach($this->records as $idx=>$record){
@@ -372,20 +374,16 @@ class DbDefRecTypes extends DbEntityBase
                         }*/
                         
                         //2. set dbid or update modified locally
-                        if($dbID>0){
-                            $query= 'UPDATE defRecTypes SET rty_OriginatingDBID='.$dbID
+                        $query= 'UPDATE defRecTypes SET rty_OriginatingDBID='.$dbID
                                 .', rty_NameInOriginatingDB=rty_Name'
                                 .', rty_IDInOriginatingDB='.$rty_ID
-                                .' WHERE (NOT rty_OriginatingDBID>0) AND rty_ID='.$rty_ID;
-                                $res = $mysqli->query($query);
-                        }            
+                                .' WHERE (NOT rty_OriginatingDBID>0 OR rty_OriginatingDBID IS NULL) AND rty_ID='.$rty_ID;
+                                   
                     }else{
                         $query = 'UPDATE defRecTypes SET rty_LocallyModified=IF(rty_OriginatingDBID>0,1,0)'
                                 . ' WHERE rty_ID = '.$rty_ID;
                     }
-                    if($query!=null){
-                        mysql__exec_param_query($mysqli, $query, null);    
-                    }
+                    $res = $mysqli->query($query);
                     
                         
                     //3. update titlemask - from names to ids

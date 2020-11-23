@@ -248,9 +248,7 @@ class DbDefDetailTypes extends DbEntityBase
                 return false;
             }
             
-            //$query = $query.", dty_LocallyModified=IF(dty_OriginatingDBID>0,1,0)"
-            if(@$this->records[$idx]['dty_LocallyModified']==null){
-            }
+
             if(!(@$this->records[$idx]['dty_ID']>0)){
                 $this->records[$idx]['dty_LocallyModified'] = 0; //default value for new
                 
@@ -267,5 +265,41 @@ class DbDefDetailTypes extends DbEntityBase
         return $ret;
         
     }     
+    
+    public function save(){
+
+        $ret = parent::save();
+       
+        if($ret!==false){
+            
+            $dbID = $this->system->get_system('sys_dbRegisteredID');
+            if(!($dbID>0)) $dbID = 0;
+
+            $mysqli = $this->system->get_mysqli();
+            
+            foreach($this->records as $idx=>$record){
+                $dty_ID = @$record['dty_ID'];
+                if($dty_ID>0 && in_array($dty_ID, $ret)){
+                    
+                    $query = null;
+                    //set dbid or update modified locally
+                    if($record['is_new']){
+                        
+                        $query= 'UPDATE defDetailTypes SET dty_OriginatingDBID='.$dbID
+                                .', dty_NameInOriginatingDB=dty_Name'
+                                .', dty_IDInOriginatingDB='.$dty_ID
+                                .' WHERE (NOT dty_OriginatingDBID>0 OR dty_OriginatingDBID IS NULL) AND dty_ID='.$dty_ID;
+                                   
+                    }else{
+                        $query = 'UPDATE defDetailTypes SET dty_LocallyModified=IF(dty_OriginatingDBID>0,1,0)'
+                                . ' WHERE dty_ID = '.$dty_ID;
+                    }
+                    $res = $mysqli->query($query);
+                }
+            }
+        }
+        return $ret;
+    }
+    
 }
 ?>

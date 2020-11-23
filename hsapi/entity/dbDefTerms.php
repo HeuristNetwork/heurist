@@ -456,10 +456,30 @@ class DbDefTerms extends DbEntityBase
         //treat thumbnail image
         if($ret!==false){
             
-            foreach($this->records as $record){
-                if(in_array(@$record['trm_ID'], $ret)){
-                    $thumb_file_name = @$record['trm_Thumb'];
+            $dbID = $this->system->get_system('sys_dbRegisteredID');
+            if(!($dbID>0)) $dbID = 0;
             
+            foreach($this->records as $record){
+                $trm_ID = @$record['trm_ID'];
+                if(trm_ID>0 && in_array(trm_ID, $ret)){
+                    
+                    $query = null;
+                    //set dbid or update modified locally
+                    if($record['is_new']){
+                        
+                        $query= 'UPDATE defTerms SET trm_OriginatingDBID='.$dbID
+                                .', trm_NameInOriginatingDB=trm_Label'
+                                .', trm_IDInOriginatingDB='.$trm_ID
+                                .' WHERE (NOT trm_OriginatingDBID>0 OR trm_OriginatingDBID IS NULL) AND trm_ID='.$trm_ID;
+                                   
+                    }else{
+                        $query = 'UPDATE defTerms SET trm_LocallyModified=IF(trm_OriginatingDBID>0,1,0)'
+                                . ' WHERE trm_ID = '.$trm_ID;
+                    }
+                    $res = $mysqli->query($query);
+                    
+                    
+                    $thumb_file_name = @$record['trm_Thumb'];
                     //rename it to recID.png
                     if($thumb_file_name){
                         parent::renameEntityImage($thumb_file_name, $record['trm_ID']);
