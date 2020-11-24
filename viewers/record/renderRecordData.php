@@ -972,7 +972,7 @@ function print_public_details($bib) {
                     $row = mysql__select_row($mysqli, 
                         'select cast(getTemporalDateString(dtl_Value) as DATETIME), dtl_Value '
                         .'from recDetails where dtl_DetailTypeID in ('
-                        .DT_DATE.','.DT_START_DATE.') and dtl_RecID='.$rec_id );
+                        .DT_DATE.','.$startDT.') and dtl_RecID='.$rec_id );
                         
                     if($row){
                         if($row[0]==null){//year
