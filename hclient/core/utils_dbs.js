@@ -891,14 +891,14 @@ window.hWin.HEURIST4.dbs = {
                                 //all rectypes that refer TO rty_ID
                                 if(reverse[target_rty].all.indexOf(rty_ID)<0){
                                     reverse[target_rty].all.push(rty_ID);        
-                                    
-                                    if(is_parent){
-                                        if(!rst_reverse_parent[target_rty]) rst_reverse_parent[target_rty] = [];
-                                        if(rst_reverse_parent[target_rty].indexOf(rty_ID)<0){
-                                                rst_reverse_parent[target_rty].push(rty_ID);
-                                        }
+                                }    
+                                if(is_parent){
+                                    if(!rst_reverse_parent[target_rty]) rst_reverse_parent[target_rty] = [];
+                                    if(rst_reverse_parent[target_rty].indexOf(rty_ID)<0){
+                                            rst_reverse_parent[target_rty].push(rty_ID);
                                     }
                                 }
+                                
                                 if(!reverse[target_rty][dty_ID]) reverse[target_rty][dty_ID] = [];
                                 reverse[target_rty][dty_ID].push(rty_ID)
 
