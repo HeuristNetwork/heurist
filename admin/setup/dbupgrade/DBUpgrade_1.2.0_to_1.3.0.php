@@ -141,6 +141,15 @@ $query = "CREATE TABLE defVocabularyGroups (
             $report[] = 'sysIdentification: sys_TreatAsPlaceRefForMapping already exists';
         }
     
+        $query = "SHOW COLUMNS FROM `sysIdentification` LIKE 'sys_ExternalReferenceLookups'";
+        if(!hasColumn($mysqli, $query)){ //column not defined
+            $query = "ALTER TABLE `sysIdentification` ADD COLUMN `sys_ExternalReferenceLookups` TEXT default NULL COMMENT 'Record type-function-field specifications for lookup to external reference sources such as GeoNames'";
+            $res = $mysqli->query($query);
+            $report[] = 'sysIdentification: sys_ExternalReferenceLookups added';
+        }else{
+            $report[] = 'sysIdentification: sys_ExternalReferenceLookups already exists';
+        }
+    
     
         //verify that required column exists in sysUGrps
         $query = "SHOW COLUMNS FROM `sysUGrps` LIKE 'ugr_NavigationTree'";
