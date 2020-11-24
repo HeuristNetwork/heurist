@@ -502,6 +502,7 @@ $dtFieldNames = $def_rts['dtFieldNames'];
 $idx_name        = $def_rts['commonNamesToIndex']['rty_Name'];
 $idx_origin_dbid = $def_rts['commonNamesToIndex']['rty_OriginatingDBID'];
 $idx_origin_id   = $def_rts['commonNamesToIndex']['rty_IDInOriginatingDB'];
+$idx_origin_name  = $def_rts['commonNamesToIndex']['rty_NameInOriginatingDB'];
 $idx_ccode       = $def_rts['commonNamesToIndex']['rty_ConceptID'];
 $idx_titlemask   = $def_rts['commonNamesToIndex']['rty_TitleMask'];
 $idx_titlemask_canonical = $def_rts['commonNamesToIndex']['rty_CanonicalTitleMask'];
@@ -534,6 +535,10 @@ foreach ($this->imp_recordtypes as $rtyID){
                 $def_rectype[$idx_origin_id] = $codes[1];
             }
         }
+        if(!$def_rectype[$idx_origin_name]){
+            $def_rectype[$idx_origin_name] = $def_rectype[$idx_name];
+        }
+        
 
         $res = createRectypes($columnNames, array("0"=>array("common"=>$def_rectype)), false, false, null);
     //if(_DBG) error_log('rt '.$rtyID);
@@ -625,7 +630,9 @@ $idx_terms_disabled = $def_dts['fieldNamesToIndex']['dty_TermIDTreeNonSelectable
 $idx_constraints    = $def_dts['fieldNamesToIndex']['dty_PtrTargetRectypeIDs'];
 $idx_origin_dbid = $def_dts['fieldNamesToIndex']['dty_OriginatingDBID'];
 $idx_origin_id   = $def_dts['fieldNamesToIndex']['dty_IDInOriginatingDB'];
+$idx_origin_name   = $def_dts['fieldNamesToIndex']['dty_NameInOriginatingDB'];
 $idx_ccode       = $def_dts['fieldNamesToIndex']['dty_ConceptID'];
+
 
 foreach ($this->imp_fieldtypes as $ftId){
 
@@ -655,6 +662,9 @@ foreach ($this->imp_fieldtypes as $ftId){
             $def_field[$idx_origin_dbid] = $codes[0];
             $def_field[$idx_origin_id] = $codes[1];
         }
+    }
+    if(!$def_field[$idx_origin_name]){
+        $def_field[$idx_origin_name] = $def_field[$idx_name];
     }
     
     array_shift($def_field); //remove dty_ID
@@ -1219,13 +1229,15 @@ $mysqli->commit();
             $idx_code  = intval($terms['fieldNamesToIndex']["trm_Code"]);
             $idx_origin_dbid  = intval($terms['fieldNamesToIndex']["trm_OriginatingDBID"]);
             $idx_origin_id  = intval($terms['fieldNamesToIndex']["trm_IDInOriginatingDB"]);
+            $idx_origin_name   = $terms['fieldNamesToIndex']['trm_NameInOriginatingDB'];
+            
             $idx_vocab_group_id  = intval($terms['fieldNamesToIndex']["trm_VocabularyGroupID"]);
 
             $term_import = $terms['termsByDomainLookup'][$domain][$term_id];
 
             //find term by concept code among local terms
             $new_term_id = $this->targetTerms->findTermByConceptCode($term_import[$idx_ccode], $domain);
-
+            
 /*            
 if($term_id==11 || $term_id==518 || $term_id==497){
     error_log('!!!!');
@@ -1294,6 +1306,9 @@ if($term_id==11 || $term_id==518 || $term_id==497){
                         $term_import[$idx_origin_dbid] = $codes[0];
                         $term_import[$idx_origin_id] = $codes[1];
                     }
+                }
+                if(!$term_import[$idx_origin_name]){
+                    $term_import[$idx_origin_name] = $term_import[$idx_label];
                 }
 
                 $res = updateTerms($columnNames, null, $term_import, $this->system->get_mysqli()); //see saveStructureLib

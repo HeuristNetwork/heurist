@@ -1207,7 +1207,7 @@ function deleteDettypeGroup($dtgID) {
 **/
 
 function createDetailTypes($commonNames, $dt) {
-    global $mysqli, $dtyColumnNames;
+    global $system, $mysqli, $dtyColumnNames;
 
     $ret = null;
 

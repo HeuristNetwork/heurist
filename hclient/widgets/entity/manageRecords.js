@@ -2578,7 +2578,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                             rfr['rst_Display'] = 'readonly';
                         }
                         
-                        if(parentRtys.length>0){
+                        if(parentRtys && parentRtys.length>0){
                            rfr['rst_RequirementType'] = 'required';
                            rfr['rst_PtrFilteredIDs'] = parentRtys; //constrained to parent record types overrides dty_PtrTargetRectypeIDs
                            

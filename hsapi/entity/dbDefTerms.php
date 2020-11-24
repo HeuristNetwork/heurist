@@ -459,9 +459,11 @@ class DbDefTerms extends DbEntityBase
             $dbID = $this->system->get_system('sys_dbRegisteredID');
             if(!($dbID>0)) $dbID = 0;
             
+            $mysqli = $this->system->get_mysqli();
+            
             foreach($this->records as $record){
                 $trm_ID = @$record['trm_ID'];
-                if(trm_ID>0 && in_array(trm_ID, $ret)){
+                if($trm_ID>0 && in_array($trm_ID, $ret)){
                     
                     $query = null;
                     //set dbid or update modified locally

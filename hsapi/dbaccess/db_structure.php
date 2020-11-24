@@ -1049,7 +1049,7 @@ function dbs_GetRectypeConstraint($system) {
             //                    "trm_NameInOriginatingDB",
             "trm_IDInOriginatingDB", "trm_AddedByImport", "trm_IsLocalExtension", "trm_Domain", "trm_OntID", "trm_ChildCount", 
             "trm_ParentTermID", "trm_Depth", "trm_Modified", "trm_LocallyModified", "trm_Code", 
-            "trm_SemanticReferenceURL", "trm_VocabularyGroupID", "trm_ConceptID");
+            "trm_SemanticReferenceURL", "trm_VocabularyGroupID", "trm_NameInOriginatingDB", "trm_ConceptID");
     }
 
     //
@@ -1301,7 +1301,7 @@ function dbs_GetRectypeConstraint($system) {
         return array("dty_ID", "dty_Name", "dty_Documentation", "dty_Type", "dty_HelpText", "dty_ExtendedDescription", "dty_Status",
             "dty_OriginatingDBID", "dty_IDInOriginatingDB", "dty_DetailTypeGroupID", "dty_OrderInGroup", "dty_JsonTermIDTree",
             "dty_TermIDTreeNonSelectableIDs", "dty_PtrTargetRectypeIDs", "dty_FieldSetRectypeID", "dty_ShowInLists",
-            "dty_NonOwnerVisibility", "dty_Modified", "dty_LocallyModified", "dty_EntryMask", "dty_ConceptID");
+            "dty_NonOwnerVisibility", "dty_Modified", "dty_LocallyModified", "dty_EntryMask", "dty_NameInOriginatingDB", "dty_ConceptID");
     }
     /**
     * get map for internal storage base datatype names to Human readable interface names.
