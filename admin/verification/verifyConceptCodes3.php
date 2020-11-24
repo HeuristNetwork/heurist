@@ -56,10 +56,14 @@ $mysqli = $system->get_mysqli();
                 $databases[] = $row[0];
         }
     }
+  
+    $need_Details = @$_REQUEST['nodty']!=1;
+    $need_Terms = @$_REQUEST['noterms']!=1;
+  
     
     foreach ($databases as $idx=>$db_name){
 
-        $query = 'SELECT sys_dbRegisteredID from sysIdentification';
+        $query = 'SELECT sys_dbRegisteredID from '.$db_name.'.sysIdentification';
         $ver = mysql__select_value($mysqli, $query);
         if(!($ver>0)) continue;
 
@@ -71,7 +75,8 @@ $mysqli = $system->get_mysqli();
         //RECORD TYPES
         
         $query = 'SELECT rty_ID, rty_Name, rty_NameInOriginatingDB, rty_OriginatingDBID, rty_IDInOriginatingDB FROM '
-            .$db_name.'.defRecTypes WHERE  (NOT (rty_OriginatingDBID>0)) OR (NOT (rty_IDInOriginatingDB>0))';
+            .$db_name.".defRecTypes WHERE (rty_OriginatingDBID='' OR rty_OriginatingDBID=0 OR rty_OriginatingDBID IS NULL "
+            ."OR rty_IDInOriginatingDB='' OR rty_IDInOriginatingDB=0 OR rty_IDInOriginatingDB IS NULL)";
         
         $res = $mysqli->query($query);
         if (!$res) {  print $query.'  '.$mysqli->error;  return; }
@@ -82,6 +87,7 @@ $mysqli = $system->get_mysqli();
         }
 
         //FIELD TYPES
+        if($need_Details){
         $query = 'SELECT dty_ID, dty_Name, dty_NameInOriginatingDB, dty_OriginatingDBID, dty_IDInOriginatingDB FROM '
             .$db_name.'.defDetailTypes WHERE  (NOT (dty_OriginatingDBID>0)) AND (NOT (dty_IDInOriginatingDB>0)) ';
         
@@ -92,9 +98,10 @@ $mysqli = $system->get_mysqli();
                $is_found = true;
                array_push($det_types, $row);
         }
+        }
         
         //TERMS
-        if(@$_REQUEST['noterms']!=1){
+        if($need_Terms){
             $query = 'SELECT trm_ID, trm_Label, trm_NameInOriginatingDB, trm_OriginatingDBID, trm_IDInOriginatingDB FROM '
                 .$db_name.'.defTerms WHERE  (NOT (trm_OriginatingDBID>0)) AND (NOT (trm_IDInOriginatingDB>0)) ';
                 
@@ -109,6 +116,9 @@ $mysqli = $system->get_mysqli();
         
         if($is_found){
             print '<h4 style="margin:0;padding-top:20px">'.substr($db_name,4).'</h4><table style="font-size:12px">';    
+            
+            print '<tr><td>Internal code</td><td>Name in this DB</td><td>Name in origin DB</td><td>xxx_OriginDBID</td><td>xxx_IDinOriginDB</td></tr>';            
+            
             if(count($rec_types)>0){
                 print '<tr><td colspan=5><i>Record types</i></td></tr>';
                 foreach($rec_types as $row){

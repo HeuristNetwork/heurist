@@ -38,7 +38,7 @@ if( $system->verifyActionPassword($_REQUEST['pwd'], $passwordForServerFunctions)
 
 ?>            
 <div style="font-family:Arial,Helvetica;font-size:12px">
-            <p>This list shows record and base field types with missed IDinOriginatingDB fields</p>
+            <p>Record and base field types with missing xxx_OriginatingDBID or xxx_IDinOriginatingDB fields</p>
 <?php            
 
 
@@ -57,12 +57,15 @@ $mysqli = $system->get_mysqli();
         }
     }
     
+    $need_Details = true;
+    $need_Terms = false;
+    
     foreach ($databases as $idx=>$db_name){
 
-        $query = 'SELECT sys_dbSubVersion from sysIdentification';
+        $query = 'SELECT sys_dbSubVersion from '.$db_name.'.sysIdentification';
         $ver = mysql__select_value($mysqli, $query);
         
-        if($ver<3) continue;
+        //if($ver<3) continue;
 
         
         $rec_types = array();
@@ -83,9 +86,13 @@ $mysqli = $system->get_mysqli();
                array_push($rec_types, $row);
         }
 
+        if($need_Details){
+        
         //FIELD TYPES
         $query = 'SELECT dty_ID, dty_Name, dty_NameInOriginatingDB, dty_OriginatingDBID, dty_IDInOriginatingDB FROM '
-            .$db_name.'.defDetailTypes WHERE  dty_OriginatingDBID>0 AND (NOT (dty_IDInOriginatingDB>0)) ';
+            .$db_name.'.defDetailTypes WHERE  dty_OriginatingDBID>0 AND '
+            ."(dty_IDInOriginatingDB='' OR dty_IDInOriginatingDB=0 OR dty_IDInOriginatingDB IS NULL)";
+            //'(NOT (dty_IDInOriginatingDB>0)) ';
         
         $res = $mysqli->query($query);
         if (!$res) {  print $query.'  '.$mysqli->error;  return; }
@@ -93,7 +100,15 @@ $mysqli = $system->get_mysqli();
         while (($row = $res->fetch_row())) {
                $is_found = true;
                array_push($det_types, $row);
+   /*
+               $query = 'update '.$db_name.'.defDetailTypes set dty_OriginatingDBID=2,'
+.'dty_NameInOriginatingDB="Related Person(s)", dty_IDInOriginatingDB = 235 '
+.' where dty_Name like "Related Person%" AND dty_ID ='.$row[0];
+               $mysqli->query($query);*/
         }
+        
+        }
+        if($need_Terms){
         
         //TERMS
         $query = 'SELECT trm_ID, trm_Label, trm_NameInOriginatingDB, trm_OriginatingDBID, trm_IDInOriginatingDB FROM '
@@ -107,8 +122,13 @@ $mysqli = $system->get_mysqli();
                array_push($terms, $row);
         }
         
+        }
+        
         if($is_found){
             print '<h4 style="margin:0;padding-top:20px">'.substr($db_name,4).'</h4><table style="font-size:12px">';    
+            
+            print '<tr><td>Internal code</td><td>Name in this DB</td><td>Name in origin DB</td><td>xxx_OriginDBID</td><td>xxx_IDinOriginDB</td></tr>';            
+            
             if(count($rec_types)>0){
                 print '<tr><td colspan=5><i>Record types</i></td></tr>';
                 foreach($rec_types as $row){
