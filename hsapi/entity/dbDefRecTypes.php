@@ -312,18 +312,20 @@ class DbDefRecTypes extends DbEntityBase
         $ret = parent::prepareRecords();
 
         //@todo captcha validation for registration
+        $mysqli = $this->system->get_mysqli();
         
         //add specific field values
         foreach($this->records as $idx=>$record){
 
             //validate duplication
-            $mysqli = $this->system->get_mysqli();
-            $res = mysql__select_value($mysqli,
-                    "SELECT rty_ID FROM defRecTypes  WHERE rty_Name='"
-                    .$mysqli->real_escape_string( $this->records[$idx]['rty_Name'])."'");
-            if($res>0 && $res!=@$this->records[$idx]['rty_ID']){
-                $this->system->addError(HEURIST_ACTION_BLOCKED, 'Record type cannot be saved. The provided name already exists');
-                return false;
+            if(@$this->records[$idx]['rty_Name']){
+                $res = mysql__select_value($mysqli,
+                        "SELECT rty_ID FROM defRecTypes  WHERE rty_Name='"
+                        .$mysqli->real_escape_string( $this->records[$idx]['rty_Name'])."'");
+                if($res>0 && $res!=@$this->records[$idx]['rty_ID']){
+                    $this->system->addError(HEURIST_ACTION_BLOCKED, 'Record type cannot be saved. The provided name already exists');
+                    return false;
+                }
             }
 
             if(!(@$this->records[$idx]['rty_ID']>0)){
@@ -334,6 +336,19 @@ class DbDefRecTypes extends DbEntityBase
                 }
                 if(@$this->records[$idx]['rty_NonOwnerVisibility']==''){
                     $this->records[$idx]['rty_NonOwnerVisibility'] = 'viewable';
+                }
+            }else{
+                
+                if (array_key_exists('rty_IDInOriginatingDB',$this->records[$idx]) 
+                     && $this->records[$idx]['rty_IDInOriginatingDB']==''){ 
+                         
+                    $this->records[$idx]['rty_IDInOriginatingDB'] = null;
+                    unset($this->records[$idx]['rty_IDInOriginatingDB']);
+                }
+                
+                if(array_key_exists('rty_LocallyModified',$this->records[$idx])){ 
+                    $this->records[$idx]['rty_LocallyModified'] = null;
+                    unset($this->records[$idx]['rty_LocallyModified']);
                 }
             }
             

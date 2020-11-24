@@ -235,25 +235,38 @@ class DbDefDetailTypes extends DbEntityBase
     
         $ret = parent::prepareRecords();
 
+        $mysqli = $this->system->get_mysqli();
         //add specific field values
         foreach($this->records as $idx=>$record){
 
             //validate duplication
-            $mysqli = $this->system->get_mysqli();
-            $res = mysql__select_value($mysqli,
-                    "SELECT dty_ID FROM ".$this->config['tableName']."  WHERE dty_Name='"
-                    .$mysqli->real_escape_string( $this->records[$idx]['dty_Name'])."'");
-            if($res>0 && $res!=@$this->records[$idx]['dty_ID']){
-                $this->system->addError(HEURIST_ACTION_BLOCKED, 'Field type cannot be saved. The provided name already exists');
-                return false;
+            if(@$this->records[$idx]['dty_Name']){
+                $res = mysql__select_value($mysqli,
+                        "SELECT dty_ID FROM ".$this->config['tableName']."  WHERE dty_Name='"
+                        .$mysqli->real_escape_string( $this->records[$idx]['dty_Name'])."'");
+                if($res>0 && $res!=@$this->records[$idx]['dty_ID']){
+                    $this->system->addError(HEURIST_ACTION_BLOCKED, 'Field type cannot be saved. The provided name already exists');
+                    return false;
+                }
             }
-            
 
             if(!(@$this->records[$idx]['dty_ID']>0)){
                 $this->records[$idx]['dty_LocallyModified'] = 0; //default value for new
                 
                 if(@$this->records[$idx]['dty_IDInOriginatingDB']==''){
                     $this->records[$idx]['dty_IDInOriginatingDB'] = 0;
+                }
+            }else{
+//error_log(print_r($this->records[$idx], true));                
+                if (array_key_exists('dty_IDInOriginatingDB',$this->records[$idx]) 
+                     && $this->records[$idx]['dty_IDInOriginatingDB']==''){ 
+                         
+                    $this->records[$idx]['dty_IDInOriginatingDB'] = null;
+                    unset($this->records[$idx]['dty_IDInOriginatingDB']);
+                }
+                if(array_key_exists('dty_LocallyModified',$this->records[$idx])){ 
+                    $this->records[$idx]['dty_LocallyModified'] = null;
+                    unset($this->records[$idx]['dty_LocallyModified']);
                 }
             }
 
