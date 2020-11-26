@@ -49,6 +49,7 @@ $mysqli  = $system->get_mysqli();
 $templateddb = @$_REQUEST['templatedb'];
 $isCloneTemplate = ($templateddb!=null);
 $sErrorMsg = null;
+$sHasNewDefsWarning = false;
 
 if($isCloneTemplate){ //template db must be registered with id less than 21
 
@@ -68,6 +69,22 @@ if($isCloneTemplate){ //template db must be registered with id less than 21
     }
 }else{
     $templateddb = null;
+    
+    //check for new definitions
+    $rty = mysql__select_value($mysqli, 'SELECT count(*) FROM defRecTypes '
+        ." WHERE (rty_OriginatingDBID = '0') OR (rty_OriginatingDBID IS NULL)");
+    $dty = mysql__select_value($mysqli, 'SELECT count(*) FROM defDetailTypes '
+        ." WHERE (dty_OriginatingDBID = '0') OR (dty_OriginatingDBID IS NULL)");
+    $trm = mysql__select_value($mysqli, 'SELECT count(*) FROM defTerms '
+        ." WHERE (trm_OriginatingDBID = '0') OR (trm_OriginatingDBID IS NULL)");
+    
+    if($rty>0 || $dty>0 || $trm>0){
+        $s = array();
+        if($rty>0) $s[] = $rty.' record types';
+        if($dty>0) $s[] = $dty.' base fields';
+        if($trm>0) $s[] = $trm.' vocabularies or terms';
+        $sHasNewDefsWarning = implode(', ',$s);
+    }
 }
 
 
@@ -75,32 +92,38 @@ if($isCloneTemplate){ //template db must be registered with id less than 21
 
 //verify that name of database is unique
 if(@$_REQUEST['mode']=='2'){
-    
-    $targetdbname = $_REQUEST['targetdbname'];
 
-    // Avoid illegal chars in db name
-    $hasInvalid = preg_match('[\W]', $targetdbname);
-    if ($hasInvalid) {
-            $sErrorMsg = "<p><hr><p>&nbsp;<p>Requested database copy name: <b>$targetdbname</b>".
-            "<p>Sorry, only letters, numbers and underscores (_) are allowed in the database name";
+    if($sHasNewDefsWarning &&
+    $system->verifyActionPassword(@$_REQUEST['pwd'], $passwordForServerFunctions) ){
 
-            $_REQUEST['mode'] = 0;
-            $_REQUEST['targetdbname'] = null;
-            unset($_REQUEST['targetdbname']);
-    } // rejecting illegal characters in db name
-    else{
-        list($targetdbname, $dbname) = mysql__get_names( $targetdbname );
-        
-        $dblist = mysql__select_list2($mysqli, 'show databases');
-        if (array_search(strtolower($targetdbname), array_map('strtolower', $dblist)) !== false ){
-            $sErrorMsg = "<div class='ui-state-error'>Warning: database '".$targetdbname
+        $sErrorMsg = '<div class="ui-state-error">'
+                    .$system->getError()['message'].'<br/></div>';
+    }else{
+
+        $targetdbname = $_REQUEST['targetdbname'];
+
+        // Avoid illegal chars in db name
+        $hasInvalid = preg_match('[\W]', $targetdbname);
+        if ($hasInvalid) {
+            $sErrorMsg = "<p><hr></p><p>&nbsp;</p><p>Requested database copy name: <b>$targetdbname</b></p>".
+            "<p>Sorry, only letters, numbers and underscores (_) are allowed in the database name</p>";
+        } // rejecting illegal characters in db name
+        else{
+            list($targetdbname, $dbname) = mysql__get_names( $targetdbname );
+
+            $dblist = mysql__select_list2($mysqli, 'show databases');
+            if (array_search(strtolower($targetdbname), array_map('strtolower', $dblist)) !== false ){
+                $sErrorMsg = "<div class='ui-state-error'>Warning: database '".$targetdbname
                 ."' already exists. Please choose a different name<br/></div>";
-            $_REQUEST['mode'] = 0;
-            $_REQUEST['targetdbname'] = null;
-            unset($_REQUEST['targetdbname']);
-        }else{
-            ob_start();
+            }else{
+                ob_start();
+            }
         }
+    }
+    if($sErrorMsg){
+        $_REQUEST['mode'] = 0;
+        $_REQUEST['targetdbname'] = null;
+        unset($_REQUEST['targetdbname']);
     }
 }
 ?>
@@ -228,51 +251,65 @@ if(@$_REQUEST['mode']=='2'){
     print "</div></body></html>";
 }else{
 ?>
-            <div id="mainform">
+    <div id="mainform">
+        <form name='selectdb' action='cloneDB.php' method='get' onsubmit="{return onSubmit(event);}">
 
-                <?php if(!$isCloneTemplate) { ?>
+        <?php if(!$isCloneTemplate) { ?>
 
-                <p>
-                    This function simply copies the current database <b> <?=HEURIST_DBNAME?> </b> to a new one with no changes. <br />
-                    The new database is identical to the old in all respects including users, access and attachments <br />
-                    (beware of making many copies of databases containing many large files, as all uploaded files are copied).<br />
-                    The target database is unregistered with the Heurist central index even if the source database is registered.
-                </p>
+            <p>
+                This function simply copies the current database <b> <?=HEURIST_DBNAME?> </b> to a new one with no changes. <br />
+                The new database is identical to the old in all respects including users, access and attachments <br />
+                (beware of making many copies of databases containing many large files, as all uploaded files are copied).<br />
+                The target database is unregistered with the Heurist central index even if the source database is registered.
+            </p>
 
-                <?php
-                }
-                if($sErrorMsg){
-                    echo $sErrorMsg;
-                }
-                
-                // ---- SPECIFY THE TARGET DATABASE (first pass) -------------------------------------------------------------------
+            <?php
+            if($sHasNewDefsWarning){
+            ?>                        
+                <p>     
+                    This database contains new definitions: <?php print $sHasNewDefsWarning; ?> which are local to the database.<br>
+                    Before they can be cloned they must be attributed a unique global ID known as a Concept Code.<br>
+                    This is done by registering the database. Please use Design > Setup > Register before cloning.<br><br>                 
+                </p>         
+                    <hr>
+                <p style="font-size:smaller;padding:10px 0px">     
+                    Sysadmin bypass (testing only: do not register cloned database): <input name="pwd" type="password"/>
+                </p>         
 
-                    ?>
-                    <div class="separator_row" style="margin:20px 0;"></div>
-                    <form name='selectdb' action='cloneDB.php' method='get' onsubmit="{return onSubmit(event);}">
-                        <input name='mode' value='2' type='hidden'> <!-- calls the form to select mappings, step 2 -->
-                        <input name='db' value='<?=HEURIST_DBNAME?>' type='hidden'>
-                        <?php
-                        if($isCloneTemplate){
-                            print '<input name="templatedb" value="'.$_REQUEST['templatedb'].'" type="hidden">';
-                        }
-                        ?>
-                        <p>The database will be created with the prefix <b><?=HEURIST_DB_PREFIX?></b>
-                            (all databases created by this installation of the software will have the same prefix).</p>
-                        <p>
-                            <label>No data (copy structure definitions only):&nbsp<input type='checkbox' name='nodata' value="1"/></label>
-                        </p>
-                        <h3 class="ui-heurist-title">Enter a name for the cloned database:</h3>
-                        <div style="margin-left: 40px;">
-                            <input type='text' name='targetdbname' id='targetdbname' size="40" onkeypress="{onKeyPress(event)}"/>
-                            <input type='submit' id='submitBtn' 
-                                value='Clone "<?=($isCloneTemplate)?$_REQUEST['templatedb']:HEURIST_DBNAME?>"'
-                                class="ui-button-action"/>
-                        </div>
+        <?php        
+            }
+        }
+        if($sErrorMsg){
+            echo $sErrorMsg;
+        }
 
-                    </form>
-                </div>
-            </div>
+        // ---- SPECIFY THE TARGET DATABASE (first pass) -------------------------------------------------------------------
+
+        ?>
+        <div class="separator_row" style="margin:20px 0;"></div>
+        <input name='mode' value='2' type='hidden'> <!-- calls the form to select mappings, step 2 -->
+        <input name='db' value='<?=HEURIST_DBNAME?>' type='hidden'>
+        <?php
+        if($isCloneTemplate){
+            print '<input name="templatedb" value="'.$_REQUEST['templatedb'].'" type="hidden">';
+        }
+        ?>
+        <p>The database will be created with the prefix <b><?=HEURIST_DB_PREFIX?></b>
+            (all databases created by this installation of the software will have the same prefix).</p>
+        <p>
+            <label>No data (copy structure definitions only):&nbsp<input type='checkbox' name='nodata' value="1"/></label>
+        </p>
+        <h3 class="ui-heurist-title">Enter a name for the cloned database:</h3>
+        <div style="margin-left: 40px;">
+            <input type='text' name='targetdbname' id='targetdbname' size="40" onkeypress="{onKeyPress(event)}"/>
+            <input type='submit' id='submitBtn' 
+                value='Clone "<?=($isCloneTemplate)?$_REQUEST['templatedb']:HEURIST_DBNAME?>"'
+                class="ui-button-action"/>
+        </div>
+
+    </div>
+    </form>
+</div>
         </body>
     </html>
     <?php
