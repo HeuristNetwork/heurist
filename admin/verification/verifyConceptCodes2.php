@@ -29,16 +29,17 @@ define('PDIR','../../');  //need for proper path to js and css
 
 require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
 
-/*
+
 if( $system->verifyActionPassword($_REQUEST['pwd'], $passwordForServerFunctions) ){
     print $response = $system->getError()['message'];
     exit();
 }
-*/
+
 
 ?>            
 <div style="font-family:Arial,Helvetica;font-size:12px">
             <p>Record and base field types with missing xxx_OriginatingDBID or xxx_IDinOriginatingDB fields</p>
+
 <?php            
 
 

@@ -1075,6 +1075,9 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         }else 
         if(action == "menu-help-tipofday"){
             showTipOfTheDay(false);
+            
+        }else if(action == "menu-admin-server"){
+            that._showAdminServer({entered_password:entered_password});
         }else
         if(!window.hWin.HEURIST4.util.isempty(href) && href!='#'){
             
@@ -1198,6 +1201,91 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         }
     },
     
+    //
+    //
+    //
+    _showAdminServer: function( popup_options ){
+        
+        var that = this;
+        
+        if(!popup_options) popup_options = {};
+
+        var $dlg = (popup_options.container)
+                        ?popup_options.container
+                        :$("#heurist-dialog").addClass('ui-heurist-bg-light');
+        $dlg.empty();
+
+        $dlg.load(window.hWin.HAPI4.baseURL+"hclient/widgets/admin/manage_server.html?t="+(new Date().time), function(){
+           
+            
+            $dlg.find('li').css({padding:'10px 0px'});
+            
+            $.each($dlg.find('a'), function(i,item){
+                
+                var href = $(item).attr('href');
+                
+                if(!(href.indexOf('http://')==0 || href.indexOf('https://')==0)){
+                    href = window.hWin.HAPI4.baseURL + href;// + (href.indexOf('?')>=0?'&':'?') + 'db=' + window.hWin.HAPI4.database;        
+                }
+                
+                popup_options.entered_password = '1234567';
+                /*
+                if(!window.hWin.HEURIST4.util.isempty(popup_options.entered_password)){
+                         href =  href + '&pwd=' + popup_options.entered_password;
+                }
+                */
+                $(item).attr('href', href);
+console.log(href);                                    
+            });
+
+            that._on($dlg.find('a'),{click:function(event){
+                    var surl = $(event.target).attr('href');
+                    
+                    
+                    if(popup_options.entered_password){
+                        $('#mainForm').find('input[name="pwd"]').val(popup_options.entered_password);   
+                    }
+                    $('#mainForm').find('input[name="db"]').val(window.hWin.HAPI4.database);
+                    $('#mainForm').attr('action',surl);
+                    $('#mainForm').submit();
+console.log(surl);                    
+                    //window.open( surl, '_blank'); 
+                    window.hWin.HEURIST4.util.stopEvent(event);   
+                    return false;
+                }});
+                
+                
+                if(popup_options.container){
+                    
+                    $dlg.find('.ui-heurist-header').html(window.hWin.HR('Server manager'));
+                    
+                    $dlg.find('.ui-dialog-buttonpane').show();
+                    $dlg.find('.btn-cancel').button().on({click:function(){
+                            popup_options.container.hide();
+                    }});
+                    
+                }else{
+
+                    $dlg.dialog({
+                        autoOpen: true,
+                        height: 400,
+                        width: 600,
+                        modal: true,
+                        resizable: false,
+                        draggable: true,
+                        title: window.hWin.HR("Server manager"),
+                        buttons: [
+                            {text:window.hWin.HR('Close'), click: function() {
+                                $( this ).dialog( "close" );
+                            }}
+                        ]
+                    });
+                }
+            
+            
+        });
+
+    },
 
 
     /**

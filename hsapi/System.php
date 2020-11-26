@@ -1656,7 +1656,7 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
     }
 
     //
-    // return true is password is wrong
+    // return true if password is wrong
     //
     public function verifyActionPassword($password_entered, $password_to_compare, $min_length=6)   
     {
