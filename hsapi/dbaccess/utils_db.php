@@ -67,7 +67,10 @@
         }
 
         try{
-            $mysqli = new mysqli($dbHost, $dbUsername, $dbPassword);
+            $mysqli = mysqli_init();
+            $mysqli -> options(MYSQLI_OPT_LOCAL_INFILE, 1);
+            $mysqli -> real_connect($dbHost, $dbUsername, $dbPassword);
+            //$mysqli = new mysqli($dbHost, $dbUsername, $dbPassword);
         } catch (Exception $e)  {
             //return array(HEURIST_SYSTEM_FATAL, "Could not connect to database server, MySQL error: " . mysqli_connect_error());
         }
