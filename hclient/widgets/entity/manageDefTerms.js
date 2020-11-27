@@ -839,7 +839,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             sHint = 'title="'+sLabel+'<br>'
                 + (sDesc?('<p><i>'+sDesc+'</i></p>'):'')
                 + (sCode?('<p>Code: '+sCode+'</p>'):'')
-                + (sURI?('<p>URI: '+sURI+'</p>'):'');
+                + (sURI?('<p>URI: '+sURI+'</p>'):'')
+                + '<p>ID: '+recID+' ('+$Db.getConceptID('trm',recID)+')</p>';
             
             var vocab_id = $Db.getTermVocab(recID); //real vocab
             if(this.options.trm_VocabularyID!=vocab_id){
@@ -1019,11 +1020,12 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         if(isVocab) ele.show();
         
         ele = this._editing.getFieldByName('trm_ID');
-        if(this._currentEditID>0 && this._getField('trm_OriginatingDBID')>0){
-            $('<span>&nbsp;&nbsp;('+this._getField('trm_OriginatingDBID')+'-'+this._getField('trm_IDInOriginatingDB')+')</span>')   
-            .appendTo( ele.find('.input-div') );
+        if(this._currentEditID>0){
+            ele.find('div.input-div').html(this._currentEditID+'&nbsp;&nbsp;( '
+                                    +$Db.getConceptID('trm',this._currentEditID)+' )');
+//$('<span>&nbsp;&nbsp;('+this._getField('trm_OriginatingDBID')+'-'+this._getField('trm_IDInOriginatingDB')+')</span>') 
         }else{
-            ele.hide();
+            ele.hide();   
         }
         
         //on ENTER save

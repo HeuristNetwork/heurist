@@ -266,15 +266,6 @@
                         "rst_FieldConfig":["1","0"]
                     }
                 },
-                {
-                    "dtID": "dty_Usage",
-                    "dtFields":{
-                        "rst_DisplayName": "Used in record types:",
-                        "rst_Display":"readonly",
-                        "dty_Type":"integer",
-                        "dty_Role":"virtual"
-                    }
-                },
                 {  "dtID": "dty_LocallyModified",
                     "dtFields":{
                         "dty_Type":"integer",

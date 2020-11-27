@@ -1287,7 +1287,7 @@ console.log('No active tree node!!!!')
             
         //----------
         // hint with base field details
-        var baseFieldDetails = "ID: "+this._currentEditID;        
+        var baseFieldDetails = 'ID: '+this._currentEditID+'   Code: '+$Db.getConceptID('dty',this._currentEditID);        
         var dt_fields = $Db.dty(this._currentEditID);
         if(dt_fields){
             var s = dt_fields['dty_HelpText'];

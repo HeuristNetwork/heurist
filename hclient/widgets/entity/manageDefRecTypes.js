@@ -1031,6 +1031,12 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             ele.hide();
             
         }else{
+            
+            var ele = this._editing.getFieldByName('rty_ID');
+            ele.find('div.input-div').html(this._currentEditID+'&nbsp;&nbsp;<span style="font-weight:normal">Code: </span>'
+                                    +$Db.getConceptID('rty',this._currentEditID));
+            
+            
             //hide after edit init btnRecRemove for status locked 
             if(false){ //@todo
                 var ele = this._toolbar;

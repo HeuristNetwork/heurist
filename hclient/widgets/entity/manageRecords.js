@@ -3373,6 +3373,7 @@ console.log(service_config);
             +'Modify record structure for</span>'
             +'<h3 style="display:inline-block;max-width:900;vertical-align:middle;margin:0">'
             +$Db.rty(this._currentEditRecTypeID,'rty_Name')
+            +'&nbsp;&nbsp;( ID: '+this._currentEditRecTypeID+'  Code: '+$Db.getConceptID('rty',this._currentEditRecTypeID)+' )'
             +'</h3>';
             
         }else{

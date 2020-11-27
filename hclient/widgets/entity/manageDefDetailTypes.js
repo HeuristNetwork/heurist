@@ -274,7 +274,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
 */    
 
 
-    visible_fields: ['dtyid','edit','name','type','description','show','usedin','status'], //'ccode','group',       
+    visible_fields: ['dtyid','ccode','edit','name','type','description','show','usedin','status'], //'ccode','group',       
     //----------------------
     //
     //
@@ -390,11 +390,12 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                     + '</div></div>'            
         }
         
+        
         var max_width = this.recordList.find('.div-result-list-content').width() 
                             - ((this.options.select_mode=='select_multi') ?40:33);
-        var used_width = 244;
+        var used_width = 330;//244;
 
-        var w_desc = max_width - used_width - 160;
+        var w_desc = max_width - used_width - 190;
         if(w_desc<30) w_desc = 30;
         var name_width = max_width - used_width - w_desc;
         
@@ -584,7 +585,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         }else{
             this.deleted_from_group_ID = 0;
             
-            var usage = $Db.dty(this._currentEditID,'dty_Usage');
+            var usage = $Db.rst_usage(this._currentEditID);
             if(usage && usage.length>0){ 
                 window.hWin.HEURIST4.msg.showMsgFlash('Field in use in '+usage.length+' record types. Can\'t remove it');  
                 return;                
@@ -635,8 +636,13 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             this._editing.setFieldValueByName('dty_DetailTypeGroupID', dty_DetailTypeGroupID);
             //var ele = this._editing.getFieldByName('dty_DetailTypeGroupID');
             //ele.editing_input('setValue', dty_DetailTypeGroupID, true);
+        }else{
+            
+            var ele = this._editing.getFieldByName('dty_ID');
+            ele.find('div.input-div').html(this._currentEditID+'&nbsp;&nbsp;<span style="font-weight:normal">Code: </span>'
+                                    +$Db.getConceptID('dty',this._currentEditID));
         }
-        
+
         //fill init values of virtual fields
         //add lister for dty_Type field to show hide these fields
         var elements = this._editing.getInputs('dty_Type');
