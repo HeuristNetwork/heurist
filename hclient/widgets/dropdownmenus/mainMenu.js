@@ -1228,14 +1228,14 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                     href = window.hWin.HAPI4.baseURL + href;// + (href.indexOf('?')>=0?'&':'?') + 'db=' + window.hWin.HAPI4.database;        
                 }
                 
-                popup_options.entered_password = '1234567';
+                //popup_options.entered_password = '1234567';
                 /*
                 if(!window.hWin.HEURIST4.util.isempty(popup_options.entered_password)){
                          href =  href + '&pwd=' + popup_options.entered_password;
                 }
                 */
                 $(item).attr('href', href);
-console.log(href);                                    
+
             });
 
             that._on($dlg.find('a'),{click:function(event){
@@ -1248,7 +1248,7 @@ console.log(href);
                     $('#mainForm').find('input[name="db"]').val(window.hWin.HAPI4.database);
                     $('#mainForm').attr('action',surl);
                     $('#mainForm').submit();
-console.log(surl);                    
+
                     //window.open( surl, '_blank'); 
                     window.hWin.HEURIST4.util.stopEvent(event);   
                     return false;
