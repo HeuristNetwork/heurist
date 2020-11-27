@@ -897,14 +897,14 @@ $.widget( "heurist.editing_input", {
                 .appendTo( $inputdiv );
                 //.button({icons:{primary: 'ui-icon-gear'},text:false});
                 
+                var vocab_id = Number(allTerms);
+                
                 //
                 // open add term popup
                 //
                 this._on( $btn_termedit, { click: function(){
                     
                 if(this.is_disabled) return;
-                
-                var vocab_id = Number(allTerms);
                 
                 //add new term to specified vocabulary
                 var rg_options = {
@@ -995,6 +995,41 @@ $.widget( "heurist.editing_input", {
                 
                 
                 }} ); //end btn onclick
+            
+
+                if(window.hWin.HAPI4.is_admin()){            
+                    
+                    var $btn_termedit2 = $( '<span>', {title: 'Edit term tree'})
+                    .addClass('smallicon ui-icon ui-icon-structure btn_add_term')
+                    .css({'margin-top':'2px',cursor:'pointer'})
+                    .appendTo( $inputdiv );
+                    
+                    this._on( $btn_termedit2,{ click:
+                        function(){
+                            var rg_options = {
+                                height:800, width:1300,
+                                onInitFinished: function(){
+                                    var that2 = this;
+                                    setTimeout(function(){
+                                        that2.vocabularies_div.manageDefTerms('selectVocabulary', vocab_id);
+                                    },500);
+                                },
+                                onClose: function(){
+                                    $.each(that.inputs, function(index, input){ 
+                                        input = $(input);
+                                        input.css('width','auto');
+                                        input = that._recreateSelector(input, true);
+                                        input.change( __onTermChange );
+                                    });
+                                    __showHideSelByImage();                                    
+                                }
+                            };
+                            window.hWin.HEURIST4.ui.showEntityDialog('defTerms', rg_options);
+                        }
+                    });
+                
+                }
+            
             
             }//allow edit terms only for true defTerms enum
             
