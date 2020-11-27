@@ -1597,11 +1597,56 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         }else if(action=='delete'){
             
             if(this.options.auxilary=='vocabulary'){
+
+
+               var refs = [];               
+               $Db.dty().each2(function(dty_ID, record){
+                    
+                        var dty_Type = record['dty_Type'];
+                        if((dty_Type=='enum' || dty_Type=='relmarker') && 
+                            (recID == record['dty_JsonTermIDTree'])) 
+                        {
+                            refs.push( dty_ID );        
+                        }
+               });
+               
+               if(refs.length>0){
+
+                   var sList = '';
+                   for(var i=0; i<refs.length; i++) if(refs[i]>0){
+                       sList += ('<a href="#" data-dty_ID="'+refs[i]+'">'+$Db.dty(refs[i],'dty_Name')+'</a><br>');
+                   }
+
+                   $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
+                       '<p>Vocabulary <b>'+$Db.trm(recID,'trm_Label')+'</b> is referenced by the following fields:</p>'
+                       + sList
+                       +'<p>Please remove these fields altogether, or click the links above <br>to modify base field (will affect all record types which use it).</p>'
+                       , null, {title:'Warning'});        
+
+                   this._on($dlg.find('a[data-dty_ID]'),{click:function(e){
+
+                       var rg_options = {
+                           isdialog: true, 
+                           edit_mode: 'editonly',
+                           select_mode: 'manager',
+                           rec_ID: $(e.target).attr('data-dty_ID'),
+                           onSelect:function(res){
+                           }
+                       };
+                       window.hWin.HEURIST4.ui.showEntityDialog('defDetailTypes', rg_options);
+                       return false;                    
+                   }});
+
+                   return;
+
+
+               }
+               
                //check for children 
                if($Db.trm_HasChildren(recID)){
                     window.hWin.HEURIST4.msg.showMsgFlash('Vocabulary has children. Remove them first');                
                     return true;   
-               }
+               }               
                 
             }else{
 

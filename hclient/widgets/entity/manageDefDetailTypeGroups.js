@@ -44,7 +44,9 @@ $.widget( "heurist.manageDefDetailTypeGroups", $.heurist.manageEntity, {
             this.recordList.parent().css('width','100%');
         }
 
-        if(!this.options.isFrontUI){
+        if(this.options.isFrontUI){
+            this.recordList.css('top','80px');  
+        }else{
             this.recordList.css('top',0);  
         }        
         
@@ -117,16 +119,16 @@ $.widget( "heurist.manageDefDetailTypeGroups", $.heurist.manageEntity, {
             //specify add new/save order buttons above record list
             var btn_array = [
                 {showText:true, icons:{primary:'ui-icon-plus'},text:window.hWin.HR('Add'),
-                      css:{'margin-right':'0.5em','float':'right',padding:'2px'}, id:'btnAddButton',
+                      css:{'margin':'5px','float':'left',padding:'3px'}, id:'btnAddButton',
                       click: function() { that._onActionListener(null, 'add'); }},
 
                 {text:window.hWin.HR('Save'),
-                      css:{'margin-right':'0.5em','float':'right',display:'none'}, id:'btnApplyOrder',
+                      css:{'margin-right':'0.5em','float':'left',display:'none'}, id:'btnApplyOrder',
                       click: function() { that._onActionListener(null, 'save-order'); }}];
 
             this._toolbar = this.searchForm;
             this.searchForm.css({'padding-top': '8px'}).empty();
-            $('<h4>Base Fields Groups</h4>').css({'margin':4, float:'left'}).appendTo(this.searchForm);
+            $('<h4>Base Fields Groups</h4>').css({'margin':5}).appendTo(this.searchForm);
             this._defineActionButton2(btn_array[0], this.searchForm);
             this._defineActionButton2(btn_array[1], this.searchForm);
             
@@ -168,13 +170,13 @@ $.widget( "heurist.manageDefDetailTypeGroups", $.heurist.manageEntity, {
         }
         
         html = html + 
-            '<div class="item truncate" style="font-weight:bold;display:table-cell;width:150;max-width:150">'
+            '<div class="item truncate" style="font-weight:bold;display:table-cell;width:150;max-width:150;padding:6px;">'
             +window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, 'dtg_Name'))+'</div>';
         
         if(this.options.edit_mode=='popup'){
             html = html
             + this._defineActionButton({key:'edit',label:'Edit', title:'', icon:'ui-icon-pencil', class:'rec_actions_button'},
-                    null,'icon_text');
+                    null,'icon_text','padding-top:9px');
         }
 
         var cnt = 0;//recordset.fld(record, 'dtg_FieldCount');

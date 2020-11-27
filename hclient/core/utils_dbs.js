@@ -820,6 +820,7 @@ window.hWin.HEURIST4.dbs = {
         return window.hWin.HAPI4.EntityMgr.getEntityData2('rst_Index');
     },
     
+    // BASED on rectype structure
     //
     // Returns
     // direct:   rty_ID:[{all:[],dty_ID:[rty_ID,rty_ID,....],  }]
@@ -921,7 +922,36 @@ window.hWin.HEURIST4.dbs = {
     },
 
     //
+    // returns links by basefield - disregard usage of field
     //
+    rst_links_base: function(){
+        
+        var links = {};
+        
+        $Db.dty().each2(function(dty_ID, record){
+            
+                var dty_Type = record['dty_Type'];
+                if(dty_Type=='resource' || dty_Type=='relmarker') 
+                {
+                    is_parent = false;
+                    
+                    var ptr = record['dty_PtrTargetRectypeIDs'];
+                    if(ptr) ptr = ptr.split(',');
+                    if(ptr && ptr.length>0){
+                        for(var i=0; i<ptr.length; i++){
+                            if(!links[ptr[i]]) links[ptr[i]] = [];
+                            
+                            links[ptr[i]].push(dty_ID);       
+                        }
+                    }
+                }
+        });
+
+        return links;
+    },    
+    
+    //
+    // returns usage (list of rty_ID) for given field
     //     
     rst_usage: function(dty_ID){
        

@@ -161,13 +161,13 @@ $.widget( "heurist.manageDefVocabularyGroups", $.heurist.manageEntity, {
         }
         
         html = html + '<div class="item truncate" '
-                + 'style="display:table-cell;min-width:170px;max-width:170px;font-weight:bold;font-size:14px">'
+                + 'style="display:table-cell;min-width:170px;max-width:170px;font-weight:bold;font-size:14px;padding:6px">'
                 + window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, 'vcg_Name'))+'</div>'; 
         
         if(this.options.edit_mode=='popup'){
             html = html
             + this._defineActionButton({key:'edit',label:'Edit', title:'', icon:'ui-icon-pencil', class:'rec_actions_button'}, 
-                            null,'icon_text');
+                            null,'icon_text','padding-top:10px');
         }
         
         html = html 

@@ -873,7 +873,7 @@ $.widget( "heurist.mainMenu6", {
             if(!this.svs_list.parent().hasClass('ui-menu6-section')){
                 
                 this.svs_list.detach().appendTo(this.menues['explore']);
-                this.svs_list.css({'top':220, 'border-top':'3px #305586 solid'}); //, 'font-size':'1em'}).show();
+                this.svs_list.css({'top':255, 'border-top':'3px #305586 solid'}); //, 'font-size':'1em'}).show();
                 this.svs_list.svs_list('option','container_width',200);
                 this.svs_list.svs_list('option','hide_header', true);
                 this._off(this.svs_list,'mouseenter');

@@ -128,7 +128,7 @@
                         "dty_Type":"boolean",
                         "rst_DisplayName": "Show record URL on edit form:",
                         "rst_DisplayHelpText": "Display URL at top of edit form for this record type. This is a special URL used to hyperlink search results. It is distinct from any URL fields in the record, which are not affected. Use only where a majority of records of this type have one, and only one, principle URL eg. for web sites/internet bookmarks.",
-                        "rst_DefaultValue": "1",
+                        "rst_DefaultValue": "0",
                         "rst_FieldConfig":["1","0"]
                     }
                 },

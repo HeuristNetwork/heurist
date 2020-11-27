@@ -100,6 +100,7 @@ $.widget( "heurist.search_faceted_wiz", {
     isversion:2,
     is_edit_continuing: false,
     _lock_mouseleave: false,
+    _save_in_porgress: false,
     //params:
     // domain
     // rectype_as_facets
@@ -1890,7 +1891,9 @@ $.widget( "heurist.search_faceted_wiz", {
             svs_ugrid = window.hWin.HAPI4.currentUser.ugr_ID;
         }
         
-        if(prevent_real_save===true) return;
+        if(prevent_real_save===true || this._save_in_porgress===true) return;
+        this._save_in_porgress = true;
+        //window.hWin.HEURIST4.util.setDisabled(this.element.parent().find('.ui-dialog-buttonset').find("#btnSave"), true);
 
         var request = {svs_Name: svs_name.val(),
             svs_Query: JSON.stringify(this.options.params),   //$.toJSON
@@ -1907,6 +1910,7 @@ $.widget( "heurist.search_faceted_wiz", {
         //
         window.hWin.HAPI4.SystemMgr.ssearch_save(request,
             function(response){
+                that._save_in_porgress = false;
                 if(response.status == window.hWin.ResponseStatus.OK){
 
                     var svsID = response.data;

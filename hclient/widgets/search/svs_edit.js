@@ -24,6 +24,7 @@ function hSvsEdit(args) {
     _version   = "0.4",
     edit_dialog = null,
     keep_values = {'svs_Name':'','svs_Query':'','svs_UGrpID':'','svs_Rules':'','svs_RulesOnly':false,'svs_Notes':'','svs_ViewMode':''},
+    _save_in_porgress = false,
     callback_method;
 
     /**
@@ -495,6 +496,10 @@ function hSvsEdit(args) {
                     }
 
                     if(bValid){
+                        
+                        if(_save_in_porgress===true) return;
+                        _save_in_porgress = true;
+                        
 
                         /*if(window.hWin.HEURIST4.util.isempty(svs_query.val()) && !window.hWin.HEURIST4.util.isempty(svs_rules.val())){   //PURE RuleSet
                             domain = 'rules';
@@ -534,6 +539,7 @@ function hSvsEdit(args) {
                         //
                         window.hWin.HAPI4.SystemMgr.ssearch_save(request,
                             function(response){
+                                _save_in_porgress = false;
                                 if(response.status == window.hWin.ResponseStatus.OK){
 
                                     var svsID = response.data;

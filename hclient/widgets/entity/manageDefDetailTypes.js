@@ -70,6 +70,8 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
 
         if(this.options.isFrontUI){
             
+            this.searchForm.css({padding:'10px 5px 0 10px'});
+            
             window.hWin.HEURIST4.msg.bringCoverallToFront(this.element, {'background-color':'#fff', opacity:1});   
         
             //add fields group editor
@@ -525,7 +527,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                 }else if(action=='usedin'){
                     
                     //show selectmenu with list of recordtypes where this field is used
-                    if(this.fieldSelectorLast!=recID){
+                    if(Math.abs(this.fieldSelectorLast)!=recID){
                         
                         this.fieldSelectorLast   = recID;
                         var usage = $Db.rst_usage(recID);
@@ -535,6 +537,10 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                                 var rty_ID = usage[i];
                                 options.push({key:rty_ID, title:$Db.rty(rty_ID, 'rty_Name')});
                             }   
+                        }else{
+                            this.fieldSelectorLast = -this.fieldSelectorLast;
+                            window.hWin.HEURIST4.msg.showMsgFlash('Field is not in use',1000);
+                            return;
                         }
 
                         if(!this.fieldSelector){
@@ -559,12 +565,14 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                             this.fieldSelector.hSelect('refresh');
                         }
                     }
-                    this.fieldSelector.hSelect('open');
-                    this.fieldSelector.val(-1);
-                    this.fieldSelector.hSelect('menuWidget')
-                        .position({my: "left top", at: "left+10 bottom-4", of: $(target)});
-                    
-                    this.fieldSelector.hSelect('hideOnMouseLeave', $(target));                    
+                    if(this.fieldSelectorLast>0){
+                        this.fieldSelector.hSelect('open');
+                        this.fieldSelector.val(-1);
+                        this.fieldSelector.hSelect('menuWidget')
+                            .position({my: "left top", at: "left+10 bottom-4", of: $(target)});
+                        
+                        this.fieldSelector.hSelect('hideOnMouseLeave', $(target));                    
+                    }
                     
                 }
                 

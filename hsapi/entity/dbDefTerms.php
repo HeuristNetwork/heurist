@@ -682,7 +682,7 @@ class DbDefTerms extends DbEntityBase
             //find possible entries in defDetailTypes dty_JsonTermIDTree
             $query = 'SELECT dty_ID FROM defDetailTypes WHERE '
                 .'(dty_JsonTermIDTree='.$trm_ID.') '
-                .'AND (dty_Type=\'enum\' or dty_Type=\'relationtype\')';
+                .'AND (dty_Type=\'enum\' or dty_Type=\'relmarker\')';
             $ret['detailtypes'] = mysql__select_list2($mysqli, $query);
             
             //TODO: need to check inverseid or it will error by foreign key constraint?
@@ -693,7 +693,7 @@ class DbDefTerms extends DbEntityBase
 
             $query = "SELECT count(distinct dtl_RecID) FROM recDetails, defDetailTypes "
             ."WHERE (dty_ID = dtl_DetailTypeID ) AND "
-            ."(dty_Type='enum' or dty_Type='relationtype') AND "
+            ."(dty_Type='enum' or dty_Type='relationtype') AND "  // or dty_Type='relmarker'
             ."(dtl_Value=$trm_ID)";
             $ret['reccount'] = mysql__select_value($mysqli, $query);
 

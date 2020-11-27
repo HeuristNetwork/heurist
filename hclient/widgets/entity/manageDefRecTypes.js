@@ -99,7 +99,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         
         //
         if(!this.options.import_structure){        
-            this.rst_links = $Db.rst_links();
+            this.rst_links = $Db.rst_links_base();
         
             window.hWin.HAPI4.addEventListener(this, window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, 
                 function(data) { 
@@ -107,7 +107,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                     {
                         that._loadData();    
                     }else if(data && (data.type == 'dty' || data.type == 'rst')){
-                        that.rst_links = $Db.rst_links();
+                        that.rst_links = $Db.rst_links_base();
                     }
                 });
                 
@@ -175,6 +175,8 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             
             
             if(this.options.isFrontUI){
+                
+                this.searchForm.css({padding:'10px 5px 0 10px'});
                 
                 window.hWin.HEURIST4.msg.bringCoverallToFront(this.element, {'background-color':'#fff', opacity:1});   
                 
@@ -737,7 +739,8 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                         }else{
                             //var links = window.hWin.HAPI4.EntityMgr.getEntityData('rst_Links')
                             //var is_referenced = (links['refs'] && links['refs'][recID]);
-                            var is_referenced = (this.rst_links.reverse[recID] || this.rst_links.rel_reverse[recID]); 
+                            var is_referenced = !window.hWin.HEURIST4.util.isnull(this.rst_links[recID]);
+                                        //(this.rst_links.reverse[recID] || this.rst_links.rel_reverse[recID]); 
                             if(is_referenced){
                                 html += __action_btn('delete','ui-icon-trash-b','This record type is referenced. Click to show references');    
                             }else{
@@ -824,22 +827,24 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
 
         if(action && action.action=='delete'){
             
-            //var links = window.hWin.HAPI4.EntityMgr.getEntityData('rst_Links')
-            if(this.rst_links.reverse[action.recID] || this.rst_links.rel_reverse[action.recID])
+            //if(this.rst_links.reverse[action.recID] || this.rst_links.rel_reverse[action.recID])
+            if(!window.hWin.HEURIST4.util.isnull(this.rst_links[action.recID]))
             {            
                 
-                var res = [];
+                var res = this.rst_links[action.recID];
+                /*
                 if(this.rst_links.reverse[action.recID])
                     res = res.concat(Object.keys(this.rst_links.reverse[action.recID]));
                 if(this.rst_links.rel_reverse[action.recID])
                     res = res.concat(Object.keys(this.rst_links.rel_reverse[action.recID]));
+                */    
                 var sList = '';
                 for(var i=0; i<res.length; i++) if(res[i]!='all' && res[i]>0){
                     sList += ('<a href="#" data-dty_ID="'+res[i]+'">'+$Db.dty(res[i],'dty_Name')+'</a><br>');
                 }
                 
                 $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
-                '<p><b>'+$Db.rty(action.recID,'rty_Name')+'</b> is referenced by the following fields:</p>'
+                '<p>Record type <b>'+$Db.rty(action.recID,'rty_Name')+'</b> is referenced by the following fields:</p>'
                 + sList
                 +'<p>Please remove these fields altogether, or click the links above <br>to modify base field (will affect all record types which use it).</p>'
                 , null, {title:'Warning'});        

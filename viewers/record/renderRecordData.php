@@ -841,7 +841,7 @@ function print_personal_details($bkmk) {
 // prints recDetails
 //
 function print_public_details($bib) {
-    global $system, $terms, $is_map_popup, $without_header, $is_production, $ACCESSABLE_OWNER_IDS, $relRT;
+    global $system, $terms, $is_map_popup, $without_header, $is_production, $ACCESSABLE_OWNER_IDS, $relRT, $startDT;
     
     $has_thumbs = false;
     
