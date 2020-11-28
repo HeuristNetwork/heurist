@@ -143,6 +143,8 @@ require_once(dirname(__FILE__)."/../initPage.php");
                 testLookuService();
                 //testEntity(true);
                 //testEditSymbology();
+                
+                //test console.log('>>>'+$Db.isTermByReference(6302, 528));
             }
             
             function testLookuService(){

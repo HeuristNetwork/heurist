@@ -28,7 +28,9 @@ getTermValue - returns label and code for term by id
 
 getTermByCode - returns term by code in given vocab
 
-trm_InVocab
+getTermVocab - returns vocabulary for given term - real vocabulary (not by reference)
+
+trm_InVocab - returns true if term belongs to vocabulary (including by reference)
 
 getColorFromTermValue - Returns hex color by label or code for term by id
 
@@ -84,6 +86,46 @@ window.hWin.HEURIST4.dbs = {
         }while (trm_ParentTermID>0);
         
         return trm_ID;        
+    },
+
+    //
+    // return false if given term belongs to vocabulary, otherwise returns level of reference
+    // 0 - first level - parent is either vocab or "real" terms
+    // 1 or more - parent is term by reference also.
+    //
+    isTermByReference: function(vocab_id, trm_ID){
+        
+        var real_vocab_id = $Db.getTermVocab(trm_ID);
+        
+        if(real_vocab_id==vocab_id){
+            return false; //this is not reference
+        }
+        
+        var t_idx = window.hWin.HAPI4.EntityMgr.getEntityData('trm_Links'); 
+
+        function __checkParents(recID, lvl){
+            
+            var children = t_idx[recID]; //array of children ids trm_Links (including references)    
+            if(children){
+                var k = window.hWin.HEURIST4.util.findArrayIndex(trm_ID, children);
+                
+                if(k>=0){
+                    return lvl;
+                }
+                
+                for(k=0;k<children.length;k++){
+                    
+                    var real_parent_id = $Db.trm(children[k], 'trm_ParentTermID');
+                    var lvl2 = lvl + (lvl>0 || (real_parent_id>0 && real_parent_id!=recID))?1:0;
+                    
+                    var res = __checkParents(children[k], lvl2);
+                    if(res!==false) return res;
+                }
+            }
+            return false;
+        }    
+        
+        return __checkParents(vocab_id, 0);
     },
     
     //
@@ -1264,7 +1306,7 @@ window.hWin.HEURIST4.dbs = {
                                 key: recID, depth:lvl_parents});
             }
 
-            var children = t_idx[recID]; //array of children ids trm_Links
+            var children = t_idx[recID]; //array of children ids trm_Links (including references)
             
             if(children && children.length>0){
 

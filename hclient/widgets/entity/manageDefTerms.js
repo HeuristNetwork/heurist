@@ -842,8 +842,11 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 + (sURI?('<p>URI: '+sURI+'</p>'):'')
                 + '<p>ID: '+recID+' ('+$Db.getConceptID('trm',recID)+')</p>';
             
-            var vocab_id = $Db.getTermVocab(recID); //real vocab
-            if(this.options.trm_VocabularyID!=vocab_id){
+            var ref_lvl = $Db.isTermByReference(this.options.trm_VocabularyID, recID);
+            
+            if(ref_lvl!==false)
+            {
+                var vocab_id = $Db.getTermVocab(recID); //real vocab
                 
                 sHint = sHint +     
                 '<p style=&quot;color:blue&quot;>This is a reference to a term defined in the '
@@ -868,8 +871,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             
             var html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'
                                     +recThumb+'&quot;);opacity:1"></div>';
-                                    
-            html = '<div class="recordDiv rt_draggable" recid="'+recID+'">'
+           
+            html = '<div class="recordDiv'+(!(ref_lvl>0)?' rt_draggable':'')+'" recid="'+recID+'">'
                         + '<div class="recordSelector" style="display:inline-block;"><input type="checkbox" /></div>'
                         + html_thumb + recTitle;
                       
@@ -877,18 +880,18 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 + sDesc
                 + '</div>';
 
-            if(this.options.select_mode=='manager'){
+            if(this.options.select_mode=='manager' && !(ref_lvl>0)){ //
                 
                 html = html + '<div class="rec_action_link2" style="position:absolute;'
                             +'top: 5px;width:'+(sRef?20:62)+'px;height:20px;background:lightgray;">';
                         
-                if(sRef){
+                if(ref_lvl===0){
                     html = html 
                             + this._defineActionButton({key:'delete',label:'Remove Reference', 
                                 title:'', icon:'ui-icon-delete',class:'rec_actions_button'},
                                 null,'icon_text')
                     
-                }else{
+                }else if(ref_lvl===false){
                     html = html 
                             + this._defineActionButton({key:'edit-inline',label:'Edit Term', 
                                 title:'', icon:'ui-icon-pencil',class:'rec_actions_button'},
@@ -899,6 +902,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                             + this._defineActionButton({key:'add-child',label:'Add child', 
                                 title:'', icon:'ui-icon-plus',class:'rec_actions_button'},
                                 null,'icon_text');
+                }else{
+                    html = html + ref_lvl;
                 }
                 html = html + '</div>';
             }
@@ -1132,8 +1137,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                     }
                 };
                 
-                if( window.hWin.HAPI4.is_admin() ){
-                
+                if( window.hWin.HAPI4.is_admin() && false ){ //2020-11-28 hide this button at all
+/*                
                     btns.push(
                      {text:window.hWin.HR('Edit All'),
                         id:'btnEditAll',
@@ -1157,6 +1162,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                             window.hWin.HEURIST4.ui.showEntityDialog('defTerms', rg_options);
                         }}                
                     );
+*/                    
                 }
             }
       
@@ -1644,8 +1650,17 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                
                //check for children 
                if($Db.trm_HasChildren(recID)){
-                    window.hWin.HEURIST4.msg.showMsgFlash('Vocabulary has children. Remove them first');                
-                    return true;   
+                    //window.hWin.HEURIST4.msg.showMsgFlash('Vocabulary has children. Remove them first');                
+                    //return true;   
+                    
+                    window.hWin.HEURIST4.msg.showMsgDlg(
+                        'Vocabulary <b>'+$Db.trm(recID, 'trm_Label')+'</b>  has children. '
+                        +'If they are not used vocabulary and all its terms will be removed.'
+                        +'Otherwise operation will be blocked.'
+                        +'<br>Delete vocabulary and all its terms. Proceed?',
+                        function(){ that._currentEditID = recID; that._deleteAndClose(true) }, 
+                        {title:'Info',yes:'Proceed',no:'Cancel'});        
+                    return false;                    
                }               
                 
             }else{
@@ -1655,43 +1670,13 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                     window.hWin.HEURIST4.msg.showMsgFlash('Term has children. Remove them first');                
                     return true;   
                }
+               
             
-                //check for reference    
-                var vocab_id = $Db.getTermVocab(recID);
-                var isRef = (this.options.trm_VocabularyID!=vocab_id);
-                if(isRef){
-                    
-                    var t_idx = window.hWin.HAPI4.EntityMgr.getEntityData('trm_Links'); 
-                    var k = window.hWin.HEURIST4.util.findArrayIndex(recID, t_idx[this.options.trm_VocabularyID]);
-                    if(k<0){
-                        window.hWin.HEURIST4.msg.showMsgDlg('This term is added as reference via its parent. '
-                        +'You can remove this reference along with it parents only');
-                        return;
-                    }
-                    
-                    window.hWin.HEURIST4.msg.showMsgDlg(
-                        'You are going to remove the term reference. Actual term retains. Proceed?', 
-                        function(){ 
-                            //find parent 
-                            var parent_id = that.options.trm_VocabularyID;
-
-                            if(parent_id>0){
-                                that.setTermReferences(null, recID, parent_id);
-                            }
-                                
-/*                            
-                            var parents = $Db.trm(recID, 'trm_Parents');
-                            if(parents){
-                                parents = parents.split(',');
-                                parent_id = parents[0];
-                                //remove from trm_Links
-                                that.setTermReferences(null,recID,parent_id);
-                            }
-*/                                
-                        }, 
-                        {title:'Info',yes:'Proceed',no:'Cancel'});        
-                    return true;
-                }else{
+               //check for reference    
+               var ref_lvl = $Db.isTermByReference(this.options.trm_VocabularyID, recID);
+               
+               if(ref_lvl===false){//this term is not reference
+                   
                     //check usage as reference
                     var v_ids = $Db.trm_getAllVocabs(recID);
                     if(v_ids.length>1){
@@ -1706,7 +1691,41 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                         {title:'Info',yes:'Proceed',no:'Cancel'});        
                         return true;
                     }
-                }
+                   
+               }else if(ref_lvl>0){
+                   
+                        window.hWin.HEURIST4.msg.showMsgDlg('This term is added as reference via its parent. '
+                        +'You can remove this reference along with it parents only');
+                        return;
+                   
+               }else{
+                   
+                    window.hWin.HEURIST4.msg.showMsgDlg(
+                        'You are going to remove the term reference. Actual term retains. Proceed?', 
+                        function(){ 
+                            //find parent 
+                            var parent_id = that.options.trm_VocabularyID;
+
+                            if(parent_id>0){
+                                that.setTermReferences(null, recID, parent_id);
+                            }
+                        }, 
+                        {title:'Info',yes:'Proceed',no:'Cancel'});        
+                    return true;
+                   
+               }
+
+               /* 
+                var vocab_id = $Db.getTermVocab(recID);
+                var isRef = (this.options.trm_VocabularyID!=vocab_id); //real vocab is different - this is reference
+                if(isRef){
+                    //if parent in this vocabulary is reference also
+                    var t_idx = window.hWin.HAPI4.EntityMgr.getEntityData('trm_Links'); 
+                    var k = window.hWin.HEURIST4.util.findArrayIndex(recID, t_idx[this.options.trm_VocabularyID]);
+                    if(k<0){ //this is not first level reference
+                    }
+               */     
+                    
             
             }
             

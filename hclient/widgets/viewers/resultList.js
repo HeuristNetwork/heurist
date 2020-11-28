@@ -1098,9 +1098,9 @@ $.widget( "heurist.resultList", {
 
         if(this.div_content){
             var eles = this.div_content.find('div.recordTitle');
-            if(eles.length>0) eles.tooltip('destroy');
+            $.each(eles,function(i,e){if($(e).tooltip('instance')) $(e).tooltip('destroy');});
             eles = this.div_content.find('div.rolloverTooltip');
-            if(eles.length>0) eles.tooltip('destroy');
+            $.each(eles,function(i,e){if($(e).tooltip('instance')) $(e).tooltip('destroy');});
             
             var $allrecs = this.div_content.find('.recordDiv');
             this._off( $allrecs, "click");

@@ -892,7 +892,7 @@ $.widget( "heurist.editing_input", {
 
                     
                 var $btn_termedit = $( '<span>', {title: 'Add new term to this list'})
-                .addClass('smallicon ui-icon ui-icon-gear btn_add_term')
+                .addClass('smallicon ui-icon ui-icon-circle-b-plus btn_add_term')
                 .css({'margin-top':'2px',cursor:'pointer'})
                 .appendTo( $inputdiv );
                 //.button({icons:{primary: 'ui-icon-gear'},text:false});
@@ -961,7 +961,7 @@ $.widget( "heurist.editing_input", {
                     
 
                 }else{
-                    //NOT USED ANYMORE
+                    /*NOT USED ANYMORE
                     var url = window.hWin.HAPI4.baseURL 
                         + 'admin/structure/terms/selectTerms.html?mode=editrecord&db='
                         + window.hWin.HAPI4.database
@@ -988,8 +988,7 @@ $.widget( "heurist.editing_input", {
                             }
                         }
                     });
-
-
+                    */
                 }                
                 
                 
@@ -1000,7 +999,7 @@ $.widget( "heurist.editing_input", {
                 if(window.hWin.HAPI4.is_admin()){            
                     
                     var $btn_termedit2 = $( '<span>', {title: 'Edit term tree'})
-                    .addClass('smallicon ui-icon ui-icon-structure btn_add_term')
+                    .addClass('smallicon ui-icon ui-icon-gear btn_add_term')
                     .css({'margin-top':'2px',cursor:'pointer'})
                     .appendTo( $inputdiv );
                     
