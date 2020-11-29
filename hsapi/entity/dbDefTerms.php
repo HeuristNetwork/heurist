@@ -582,10 +582,12 @@ class DbDefTerms extends DbEntityBase
                 $retain_id = $this->data['retain_id'];
                 
                 //check usage
-                $ret = $this->isTermInUse($merge_id, true, false);
+                $ret = $this->isTermInUse($merge_id, true, false); //check in records, do not check in defs
                 if(is_array($ret)){
                     $this->system->addError(HEURIST_ACTION_BLOCKED,
                             'Cannot merge '.$merge_id.'. This term has references', $ret);
+                    $ret = false; 
+                }else if($ret===0){
                     $ret = false; 
                 }
                     
@@ -689,17 +691,55 @@ class DbDefTerms extends DbEntityBase
         }
 
         //find usage in recDetails
-        if($indetails){
+        if($indetails && count($ret['detailtypes'])==0){
+            
+            //find all children terms (except terms by reference)
+            $children = getTermChildren($trm_ID, $this->system, false);
+            $children[] = $trm_ID; 
+            if(count($children)>1){
+                $s = 'in ('.implode(',',$children).')';
+            }else{
+                $s = '= '.$trm_ID;
+            }
 
-            $query = "SELECT count(distinct dtl_RecID) FROM recDetails, defDetailTypes "
+            $query = "SELECT SQL_CALC_FOUND_ROWS DISTINCT dtl_RecID FROM recDetails, defDetailTypes "
             ."WHERE (dty_ID = dtl_DetailTypeID ) AND "
             ."(dty_Type='enum' or dty_Type='relationtype') AND "  // or dty_Type='relmarker'
-            ."(dtl_Value=$trm_ID)";
-            $ret['reccount'] = mysql__select_value($mysqli, $query);
+            .'(dtl_Value '.$s.')';
+            //$ret['reccount'] = mysql__select_value($mysqli, $query);
 
+            $total_count_rows = 0;
+            $records = array();
+            $res = $mysqli->query($query);
+            if ($res){
+                $fres = $mysqli->query('select found_rows()');
+                if ($fres)     {
+                    $total_count_rows = $fres->fetch_row();
+                    $total_count_rows = $total_count_rows[0];
+                    $fres->close();
+                    
+                    if($total_count_rows>0 && ($total_count_rows<10000 || $total_count_rows*10<get_php_bytes('memory_limit'))){
+                
+                        $records = array();
+                        while ($row = $res->fetch_row())  {
+                                array_push($records, (int)$row[0]);
+                        }
+                    }
+                }
+                $res->close();
+           }
+           if($mysqli->error){
+                $system->addError(HEURIST_DB_ERROR, 
+                            'Search query error (retrieving number of records)', $mysqli->error);
+                return 0;
+           }else{
+               $ret['reccount'] = $total_count_rows;
+               $ret['records'] = $records;
+           }
         }
 
-        if($ret['children']>0 || count($ret['detailtypes'])>0 || $ret['reccount']){
+        //$ret['children']>0 || 
+        if(count($ret['detailtypes'])>0 || $ret['reccount']>0){
             return $ret;    
         }else{
             return false;
@@ -708,7 +748,9 @@ class DbDefTerms extends DbEntityBase
         
     }
 
-
+    //
+    //
+    //
     protected function _validatePermission()
     {
         if(@$this->data['a'] == 'delete'){
@@ -718,13 +760,18 @@ class DbDefTerms extends DbEntityBase
             }
             
             foreach($this->recordIDs as $trm_ID){
-                $ret = $this->isTermInUse($trm_ID, true, true); 
-                if($ret!==false){
+                $ret = $this->isTermInUse($trm_ID, true, true); //check both records and defs 
+                if(is_array($ret)){
                     $this->system->addError(HEURIST_ACTION_BLOCKED,
-                            'Cannot delete '.$trm_ID.'. This term has references'); //$ret
+                            'Cannot delete '.$trm_ID.'. This term has references', $ret); //$ret
+                    return false; 
+                }else if($ret===0){
                     return false; 
                 }
             }
+            
+            //$this->system->addError(HEURIST_ACTION_BLOCKED, 'Temp debug block');
+            //return false;
         }
         return true;
     }
