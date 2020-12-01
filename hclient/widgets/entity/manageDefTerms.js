@@ -866,7 +866,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             
             recTitle = '<div class="item truncate label_term rolloverTooltip"'
                     +' style="'+sWidth+sBold+'" '+sHint+'>'
-                    + $Db.trm(recID, 'trm_Parents')+'  '+recID+' '+sPad+sLabel+'</div>'+sRef;
+                    +sPad+sLabel+'</div>'+sRef; // $Db.trm(recID, 'trm_Parents')+'  '+recID+' '+
             
             
             var recThumb = window.hWin.HAPI4.getImageUrl(this._entityName, recID, 'thumb');
