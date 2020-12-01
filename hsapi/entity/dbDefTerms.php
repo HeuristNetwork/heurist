@@ -530,7 +530,7 @@ class DbDefTerms extends DbEntityBase
                             $res = mysql__select_value($mysqli, 
                             'SELECT trl_TermID FROM defTermsLinks WHERE trl_ParentID='
                                 .$this->data['new_ParentTermID']
-                                .' AND trl_TermID='.$trm_ID);
+                                .' AND trl_TermID='.$trm_ID);   //to avoid duplication
                             if(!($res>0)){
                                 $ret = $mysqli->query(
                                     'insert into defTermsLinks (trl_ParentID,trl_TermID)'
@@ -550,7 +550,7 @@ class DbDefTerms extends DbEntityBase
                                 {   
                                     $parent_id = mysql__select_value($mysqli, 
                                     'SELECT trm_ParentTermID FROM defTerms where trm_ID='.$trm_ID);
-                                    if(parent_id == $this->data['old_ParentTermID']){
+                                    if($parent_id == $this->data['old_ParentTermID']){
                                         $this->system->addError(HEURIST_ERROR, 
                                         'Term can not be orphaned', $mysqli->error);
                                         $ret =false;
@@ -582,13 +582,15 @@ class DbDefTerms extends DbEntityBase
                 $retain_id = $this->data['retain_id'];
                 
                 //check usage
-                $ret = $this->isTermInUse($merge_id, true, false); //check in records, do not check in defs
+                $ret = $this->isTermInUse($merge_id, true, false); //check detailtypes, do not check in records
                 if(is_array($ret)){
                     $this->system->addError(HEURIST_ACTION_BLOCKED,
                             'Cannot merge '.$merge_id.'. This term has references', $ret);
                     $ret = false; 
-                }else if($ret===0){
+                }else if($ret===0){ //sql error
                     $ret = false; 
+                }else{
+                    $ret = true;
                 }
                     
                 if($ret){

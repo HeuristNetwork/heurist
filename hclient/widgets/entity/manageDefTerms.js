@@ -376,6 +376,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                     show_toolbar: false,
                     view_mode: 'list',
                     pagesize: 999999,
+                    /*
                     recordview_onselect:'inline',
                     expandDetailsOnClick: false,
                     rendererExpandDetails: function(recordset, trm_id){
@@ -406,7 +407,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                         }else{
                             that.addEditRecord(trm_id);
                         }
-                    },
+                        
+                    },*/
                     draggable: function(){
                         
                         that.recordList.find('.rt_draggable > .item').draggable({ // 
@@ -636,7 +638,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
     },*/
     
     //
-    //
+    // DISABLE 2020-12-01
     //
     _showEditorInline: function(container, recID){
         
@@ -864,7 +866,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             
             recTitle = '<div class="item truncate label_term rolloverTooltip"'
                     +' style="'+sWidth+sBold+'" '+sHint+'>'
-                    + sPad+sLabel+'</div>'+sRef;
+                    + $Db.trm(recID, 'trm_Parents')+'  '+recID+' '+sPad+sLabel+'</div>'+sRef;
             
             
             var recThumb = window.hWin.HAPI4.getImageUrl(this._entityName, recID, 'thumb');
@@ -893,7 +895,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                     
                 }else if(ref_lvl===false){
                     html = html 
-                            + this._defineActionButton({key:'edit-inline',label:'Edit Term', 
+                            + this._defineActionButton({key:'edit',label:'Edit Term',  //was  edit-inline
                                 title:'', icon:'ui-icon-pencil',class:'rec_actions_button'},
                                 null,'icon_text') 
                             + this._defineActionButton({key:'delete',label:'Remove Term', 
@@ -998,9 +1000,6 @@ if(window.hWin.HEURIST4.util.isArrayNotEmpty(res.records)){
     //
     //
     _afterDeleteEvenHandler: function(recID){
-
-        //var old_parent_id = $Db.trm(recID, 'trm_ParentTermID');
-        //this.changeParentInIndex(null, recID, old_parent_id);
 
         this._super(recID); 
         
@@ -1307,7 +1306,11 @@ if(window.hWin.HEURIST4.util.isArrayNotEmpty(res.records)){
                 if(parent_id>0){
                     var t_idx = window.hWin.HAPI4.EntityMgr.getEntityData('trm_Links'); 
                     if(!t_idx[parent_id]) t_idx[parent_id] = []; 
-                    t_idx[parent_id].push(recID);
+
+                    //to avoid duplication                    
+                    if(window.hWin.HEURIST4.util.findArrayIndex(recID, t_idx[parent_id])<0){
+                        t_idx[parent_id].push(recID);    
+                    }
                 }
             }
             //this._filterByVocabulary();
@@ -1514,7 +1517,7 @@ if(window.hWin.HEURIST4.util.isArrayNotEmpty(res.records)){
             }
             
             if(old_parent_id<0){
-    console.log('Error !!! Parent not found for '+trm_ID);
+console.log('Error !!! Parent not found for '+trm_ID);
                 return;
             }
             
@@ -1552,7 +1555,7 @@ if(window.hWin.HEURIST4.util.isArrayNotEmpty(res.records)){
                     return;
                 }
 
-                var vocab_id = $Db.getTermVocab(new_parent_id);
+                var vocab_id = $Db.getTermVocab(new_parent_id); //get real vocab
                 if(this.options.trm_VocabularyID!=vocab_id){
                     window.hWin.HEURIST4.msg.showMsgFlash( 'Reference can\'t have children' ); 
                     return;
@@ -1746,29 +1749,20 @@ if(window.hWin.HEURIST4.util.isArrayNotEmpty(res.records)){
                         'You are going to remove the term reference. Actual term retains. Proceed?', 
                         function(){ 
                             //find parent 
-                            var parent_id = that.options.trm_VocabularyID;
-
-                            if(parent_id>0){
-                                //just removing entry in trm links
-                                that.setTermReferences(null, recID, parent_id);
+                            var parents = $Db.trm(recID, 'trm_Parents');
+                            if(parents){
+                                parents = parents.split(',');
+                                var parent_id = parents[parents.length-1]; 
+                                if(parent_id>0){
+                                    //removing entry in trm links
+                                    that.setTermReferences(null, recID, parent_id);
+                                }
                             }
                         }, 
                         {title:'Info',yes:'Proceed',no:'Cancel'});        
                     return true;
                    
                }
-
-               /* 
-                var vocab_id = $Db.getTermVocab(recID);
-                var isRef = (this.options.trm_VocabularyID!=vocab_id); //real vocab is different - this is reference
-                if(isRef){
-                    //if parent in this vocabulary is reference also
-                    var t_idx = window.hWin.HAPI4.EntityMgr.getEntityData('trm_Links'); 
-                    var k = window.hWin.HEURIST4.util.findArrayIndex(recID, t_idx[this.options.trm_VocabularyID]);
-                    if(k<0){ //this is not first level reference
-                    }
-               */     
-                    
             
             }
             
@@ -1901,24 +1895,47 @@ if(window.hWin.HEURIST4.util.isArrayNotEmpty(res.records)){
     },
     
     //
-    // add/remove terms to vocabulary by reference
+    // add/remove terms reference links 
+    // it call server side and then update client side by changeParentInIndex
     //
     setTermReferences: function(new_vocab_id, term_IDs, old_vocab_id){
         
             if(new_vocab_id>0){
-                //@todo!!!!!!
-                // exclude all second level terms in case if their direct parent 
-                // presents in this list or already belongs to vocab
+
+                var trm_ids = $Db.trm_TreeData(new_vocab_id, 'set'); //all terms in target vocab
                 
-                
-                //addition - check that selected terms are already in this vocabulary
-                var trm_ids = $Db.trm_TreeData(new_vocab_id, 'set');
+                var all_children = [];
+                var is_exists = 0;
                 for(var i=0; i<term_IDs.length; i++){
                     if(window.hWin.HEURIST4.util.findArrayIndex(term_IDs[i], trm_ids)>=0){
-                        window.hWin.HEURIST4.msg.showMsgErr('Term "'+$Db.trm(term_IDs[i],'trm_Label')
-                            +'" is already in vocabulary "'+$Db.trm(new_vocab_id,'trm_Label')+'"'); 
-                        return;
+                        is_exists = term_IDs[i];
+                        break;
                     }
+                    var children = $Db.trm_TreeData(term_IDs[i], 'set');
+                    for(var j=0; j<children.length; j++){
+                        if(window.hWin.HEURIST4.util.findArrayIndex(children[j], trm_ids)>=0){
+                            is_exists = children[j];
+                            break;
+                        }
+                        if(all_children.indexOf(children[j])<0) all_children.push(children[j]);
+                    }
+                }
+                
+                //some of selected terms are already in this vocabulary
+                if(is_exists>0){
+                    window.hWin.HEURIST4.msg.showMsgErr('Term <b>'+$Db.trm(is_exists,'trm_Label')
+                                +'</b> is already in vocabulary <b>'+$Db.trm(new_vocab_id,'trm_Label')+'</b>'); 
+                    return;
+                }
+                
+                //exclude all child terms - they will be added via their parent
+                var i=0;
+                while(i<term_IDs.length){
+                    if(all_children.indexOf(term_IDs[i])<0){
+                        i++;
+                    }else{
+                        term_IDs.splice(i,1);
+                    } 
                 }
             }
             if(old_vocab_id>0){
@@ -1947,7 +1964,6 @@ if(window.hWin.HEURIST4.util.isArrayNotEmpty(res.records)){
                         
                     if(response.status == window.hWin.ResponseStatus.OK){
                         
-                        //window.hWin.HAPI4.EntityMgr.setEntityData('trm_Links', response.data); 
                         that.changeParentInIndex(new_vocab_id, term_IDs, old_vocab_id);
 
                         that.it_was_insert = true;
@@ -1961,7 +1977,7 @@ if(window.hWin.HEURIST4.util.isArrayNotEmpty(res.records)){
     },
     
     //
-    //
+    // change links in trm_Links (after server action)
     //
     changeParentInIndex: function(new_parent_id, term_ID, old_parent_id){
 
@@ -1969,8 +1985,15 @@ if(window.hWin.HEURIST4.util.isArrayNotEmpty(res.records)){
             if(new_parent_id>0){
                 if(!t_idx[new_parent_id]) t_idx[new_parent_id] = []; 
                 if($.isArray(term_ID)){
-                    t_idx[new_parent_id] = t_idx[new_parent_id].concat( term_ID );
-                }else{
+                    //t_idx[new_parent_id] = t_idx[new_parent_id].concat( term_ID );
+                    
+                    for(var i=0; i<term_ID.length; i++)
+                    if(window.hWin.HEURIST4.util.findArrayIndex(term_ID[i], t_idx[new_parent_id])<0){
+                        t_idx[new_parent_id].push( term_ID[i] );    
+                    }
+                    
+                }else if(window.hWin.HEURIST4.util.findArrayIndex(term_ID, t_idx[new_parent_id])<0)
+                {
                     t_idx[new_parent_id].push(term_ID);
                 }
                     

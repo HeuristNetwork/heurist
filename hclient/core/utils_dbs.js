@@ -1271,7 +1271,7 @@ window.hWin.HEURIST4.dbs = {
     // Returns hierarchy for given vocabulary as a flat array, recordset or tree data
     // (it uses trm_Links)
     // vocab_id - id or "relation"
-    // mode - 0, flat - returns recordset, 
+    // mode - 0, flat - returns recordset with defined trm_Parents 
     //        1, tree - returns treedata for fancytree
     //        2, select - return array of options for selector {key: title: depth: is_vocab}
     //        3, set  - array of ids 

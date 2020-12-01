@@ -459,6 +459,5 @@ class DbsTerms
         return $term_value;
     }
 
-    
 }  
 ?>
