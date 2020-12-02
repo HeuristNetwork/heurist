@@ -51,8 +51,6 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
     _init: function() {
         
         //special header field stores UI structure
-        this.DT_ENTITY_STRUCTURE = window.hWin.HAPI4.sysinfo['dbconst']['DT_ENTITY_STRUCTURE'];
-        
         if(!(this.options.rec_ID_sample>0)) {
             this.options.rec_ID_sample = -1; //record id that will be loaded in preview
         }
@@ -339,13 +337,6 @@ dty_TermIDTreeNonSelectableIDs
         //if such treeview data is missed creates new one based on header/separators and rst_DisplayOrder
 
         var treeData = false;
-        /* IJ rejects tree rt structure 
-        var record = recset.getById(this.DT_ENTITY_STRUCTURE);
-        if(record){
-            treeData = window.hWin.HEURIST4.util.isJSON(recset.fld(record, 'rst_DefaultValue'));    
-        }
-        //debug reset treeData = false;
-        */
 
         //if such treeview data is missed creates new one based on header/separators and rst_DisplayOrder
         if(!treeData){
@@ -1064,7 +1055,7 @@ dty_TermIDTreeNonSelectableIDs
                     var recset = hRecordSet(response.data);
                     fields = recset.getRecord( response.data.order[0] ); //get as JSON
                     fields['rst_ID'] = recID;
-                    
+
                     that._cachedRecordset.setRecord(recID, fields);
                     
                     var tree = that._treeview.fancytree("getTree");
@@ -1694,7 +1685,7 @@ console.log('No active tree node!!!!')
 
     
     //
-    // trigger save DT_ENTITY_STRUCTURE or update rst_DisplayOrder for flat version
+    // trigger to update rst_DisplayOrder
     //
     _saveRtStructureTree: function(){
         
@@ -1806,7 +1797,6 @@ console.log('No active tree node!!!!')
             
 //console.log('SAVE '+fields['rst_DetailTypeID']+'  '+dt_type);
             
-            //save structure (tree) in DT_ENTITY_STRUCTURE field - EXPERIMENTAL - NOT USED
             if(dt_type=='enum' || dt_type=='relmarker' || dt_type=='relationtype'){
                 fields['rst_DefaultValue'] = fields['rst_TermPreview'];
             }else if(dt_type=='enum'){
@@ -1915,9 +1905,8 @@ console.log('No active tree node!!!!')
 //console.log($Db.rst(this.options.rty_ID, recID));           
       
             //3. refresh treeview
-            if(recID!==this.DT_ENTITY_STRUCTURE){
-                var tree = this._treeview.fancytree("getTree");
-                if(tree){
+            var tree = this._treeview.fancytree("getTree");
+            if(tree){
                     var node = tree.getNodeByKey( recID );
                     if(node) {
                         var sType = $Db.dty(recID,'dty_Type');
@@ -1944,7 +1933,6 @@ console.log('No active tree node!!!!')
                         $(node.li).find('.svs-contextmenu3').css('visibility','hidden');
                         
                     }
-                }
             }        
         
     },
@@ -1996,7 +1984,7 @@ console.log('No active tree node!!!!')
                    
                } 
             });
-                        
+            
             if(!window.hWin.HEURIST4.util.isnull(ft_separator_id)){
                 this.addNewFieldToStructure( ft_separator_id, after_dtid );
             }else{ //"not used" separator field type not found - create new one

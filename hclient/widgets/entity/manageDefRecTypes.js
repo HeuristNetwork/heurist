@@ -772,7 +772,8 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         
         html = html.replace('$$NAME$$',fld2('rty_Name', name_width, null,'text-align:left'))
 //padding:0.4em 0px;
-        html = '<div class="recordDiv rt_draggable" recid="'+recID+'" style="display:table-row;height:28px;padding:0.4em 0px;'+grayed+'">'
+        html = '<div class="recordDiv rt_draggable white-borderless" recid="'
+            +recID+'" style="display:table-row;height:28px;padding:0.4em 0px;'+grayed+'">'
                     + '<div class="recordSelector item"><input type="checkbox" /></div>'
                     + html+'</div>';
         

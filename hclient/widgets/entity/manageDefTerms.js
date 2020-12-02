@@ -186,6 +186,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                     empty_remark: 'No vocabularies in this group',
                     show_toolbar: false,
                     pagesize:99999,
+                    recordDivEvenClass:'', //suppress highlight for even lines
                     view_mode: 'list',
                     
                     draggable: function(){ //function is called after finish render and assign draggable widget for all record divs
@@ -376,7 +377,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                     show_toolbar: false,
                     view_mode: 'list',
                     pagesize: 999999,
-                    /*
+                    recordDivEvenClass:'', //suppress highlight for even lines
+                    /*  INLINE EDITOR disabled 2020-12-01            
                     recordview_onselect:'inline',
                     expandDetailsOnClick: false,
                     rendererExpandDetails: function(recordset, trm_id){
@@ -411,7 +413,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                     },*/
                     draggable: function(){
                         
-                        that.recordList.find('.rt_draggable > .item').draggable({ // 
+                        that.recordList.find('.rt_draggable > .item').draggable({ //    
                                     revert: 'invalid',
                                     helper: function(){ 
                                         that._dropped = false;
@@ -420,8 +422,9 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                                         +'" style="width:300;padding:4px;text-align:center;font-size:0.8em;background:#EDF5FF"'
                                         +'>Drag and drop to vocabulary item to change it</div>'); 
                                     },
-                                    zIndex:100,
+                                    zIndex:99999,
                                     appendTo:'body',
+                                    //containment: that.recordList.find('.div-result-list-content'),
                                     scope: 'vocab_change',
                                     
                                     drag: function(event,ui){
@@ -538,7 +541,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                                         var recs = selected_recs.getOrder();
                                         if(recs && recs.length>0){
                                             var recID = recs[recs.length-1];
-                                            this._onActionListener(event, {action:'edit-inline',recID:recID}); 
+                                            this._onActionListener(event, {action:'edit',recID:recID}); 
+                                            //edit-inline disabled 2020-12-01            
                                         }
                                     }
                                 }
@@ -797,7 +801,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         var sHint = '';
         var sLabel = window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, 'trm_Label'));
         var sDesc = window.hWin.HEURIST4.util.htmlEscape($Db.trm(recID, 'trm_Description'));
-        var recTitle = '';
+        var recTitle = '', sFontSize='';
         var html;
         
         
@@ -811,7 +815,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             recTitle = '<div class="item truncate" style="'+sWidth+sBold+'">'
                     + sLabel+'</div>';
 
-            html = '<div class="recordDiv rt_draggable" style="padding-right:0" recid="'+recID+'">'
+            html = '<div class="recordDiv rt_draggable white-borderless" style="padding-right:0" recid="'+recID+'">'
                     + '<div class="recordSelector item"><input type="checkbox" /></div>'
                     + recTitle 
                     
@@ -833,7 +837,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             sWidth = 'display:inline-block;padding-top:4px;max-width:320px;'; //+((lvl>2)?'25':'30')+'%;';
             //sPad = 'padding-left:'+(lvl*20);
             
-            sPad = '<span>'+('&nbsp;'.repeat(lvl*4))+'</span>';
+            sPad = '<span style="font-size:'+(1+lvl * 0.1)+'em">'+('&nbsp;'.repeat(lvl*4))+'</span>';
+            sFontSize = 'font-size:'+(1.1 - lvl * 0.1)+'em;';
 
             var sCode = $Db.trm(recID, 'trm_Code');
             var sURI = $Db.trm(recID, 'trm_SemanticReferenceURL');
@@ -865,7 +870,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             sHint = sHint + '"';
             
             recTitle = '<div class="item truncate label_term rolloverTooltip"'
-                    +' style="'+sWidth+sBold+'" '+sHint+'>'
+                    +' style="'+sFontSize+sWidth+sBold+'" '+sHint+'>'
                     +sPad+sLabel+'</div>'+sRef; // $Db.trm(recID, 'trm_Parents')+'  '+recID+' '+
             
             
@@ -874,7 +879,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             var html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'
                                     +recThumb+'&quot;);opacity:1"></div>';
            
-            html = '<div class="recordDiv'+(!(ref_lvl>0)?' rt_draggable':'')+'" recid="'+recID+'">'
+            html = '<div class="recordDiv white-borderless'+(!(ref_lvl>0)?' rt_draggable':'')+'" recid="'+recID+'">'
                         + '<div class="recordSelector" style="display:inline-block;"><input type="checkbox" /></div>'
                         + html_thumb + recTitle;
                       
@@ -895,7 +900,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                     
                 }else if(ref_lvl===false){
                     html = html 
-                            + this._defineActionButton({key:'edit',label:'Edit Term',  //was  edit-inline
+                            + this._defineActionButton({key:'edit',label:'Edit Term',  //was  edit-inline disabled 2020-12-01            
                                 title:'', icon:'ui-icon-pencil',class:'rec_actions_button'},
                                 null,'icon_text') 
                             + this._defineActionButton({key:'delete',label:'Remove Term', 
@@ -1254,25 +1259,34 @@ if(window.hWin.HEURIST4.util.isArrayNotEmpty(res.records)){
         if(this.options.edit_mode=='editonly'){
             if(!this.options.container){ //for popup
 
-                var isVocab = !($Db.trm(recID,'trm_ParentTermID')>0);
+                var keepParent = $Db.trm(recID,'trm_ParentTermID');
+                var isVocab = !(keepParent>0);
                 var sName = (isVocab)?'Vocabulary':'Term';
                 if(isVocab){
                     this.options.trm_VocabularyID = recID;    
+                }else{
+                    this.options.trm_ParentTermID = keepParent; //it was reset to -1 in afterInitEditForm
                 }
-                window.hWin.HEURIST4.msg.showMsgFlash(sName+' '+window.hWin.HR('has been saved'));
+
+                window.hWin.HEURIST4.msg.showMsgFlash(sName+' '+window.hWin.HR('has been saved'),300);
                 this._currentEditID = -1;
                 this._initEditForm_step3(this._currentEditID); //reload 
+                
                 var that = this;
-                setTimeout(function(){that._editing.setFocus();},1500);
+                setTimeout(function(){that._editing.setFocus();},1000);
             }
             return;
         }else if(this.it_was_insert && this.options.auxilary=='term' && this.options.edit_mode=='popup'){
+
+            this.options.trm_ParentTermID = $Db.trm(recID,'trm_ParentTermID'); //it was reset to -1 in afterInitEditForm
+
             //reload edit page
-            window.hWin.HEURIST4.msg.showMsgFlash('Term '+window.hWin.HR('has been saved'));
+            window.hWin.HEURIST4.msg.showMsgFlash('Added',300);
+            //this.options.trm_ParentTermID = recID;
             this._currentEditID = -1;
             this._initEditForm_step3(this._currentEditID); //reload 
             var that = this;
-            setTimeout(function(){that._editing.setFocus();},1500);
+            setTimeout(function(){that._editing.setFocus();},1000);
             this.refreshRecordList();
             return;
         }
@@ -1315,14 +1329,15 @@ if(window.hWin.HEURIST4.util.isArrayNotEmpty(res.records)){
             }
             //this._filterByVocabulary();
             //this._loadData();
-            //expand formlet
+/* INLINE EDITOR disabled 2020-12-01            
+            //expand formlet after addition
             if(this.options.auxilary=='term'){
                 var that = this;
                 setTimeout(function(){
                    that.recordList.resultList('expandDetailsInline',recID); 
                 },1000);
             }
-            
+*/            
         /*}else if(this.options.auxilary=='vocabulary' && recID>0){
             //highlight in list 
             this.recordList.resultList('setSelected', [recID]);
@@ -1626,7 +1641,7 @@ console.log('Error !!! Parent not found for '+trm_ID);
                     window.hWin.HEURIST4.msg.showMsgFlash('Vocabulary is not defined');                
                     return true;        
             }
-            ///this.options.trm_VocabularyGroupID = recID;
+            //this.options.trm_VocabularyGroupID = recID;
             this.addEditRecord(-1);        
             return true;
         }else if(action=='add-child'){

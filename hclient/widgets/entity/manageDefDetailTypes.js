@@ -453,7 +453,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             }    
         }
 
-        html = '<div class="recordDiv rt_draggable" recid="'+recID+'" style="display:table-row;height:28px;'+grayed+'">'
+        html = '<div class="recordDiv rt_draggable white-borderless" recid="'+recID+'" style="display:table-row;height:28px;'+grayed+'">'
                     + '<div class="recordSelector item"><input type="checkbox" /></div>'
                     + html+'</div>';
 

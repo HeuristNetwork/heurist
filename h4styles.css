@@ -424,6 +424,11 @@ div.recordDiv.selected .selection_pointer{
     visibility: visible;
 }
 
+div.recordDiv.white-borderless{
+    background: white;
+    border: none;
+}
+
 div.groupHeader:hover > .action-button-container{
     display:table-cell;
 }
