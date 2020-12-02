@@ -1,21 +1,31 @@
 [{
-    "rty_ID": "3-1009",
-    "service": "tlcmap",
-    "label": "Lookup in AGHP",
-    "dialog": "recordLookup",
-    "fields":{ 
-      "properties.placename": "2-1",  
-      "geometry": "2-28",
-      "properties.anps id": "2-581",
-      "properties.state": "2-234",
-      "properties.LGA": "2-2",
-      "properties.description": "2-3"
-    }    
+  "rty_ID": "3-1009",
+  "service": "tlcmap",
+  "label": "Lookup in AGHP",
+  "dialog": "recordLookup",
+  "fields":{
+    "properties.placename": "2-1",
+    "geometry": "2-28",
+    "properties.anps id": "2-581",
+    "properties.state": "2-234",
+    "properties.LGA": "2-2",
+    "properties.description": "2-3"
+  }
 },
-{
+  {
     "rty_ID": "1268-53",
     "database":"MPCE_Mapping_Print_Charting_Enlightenment",
     "label": "Lookup MPCE",
     "dialog": "recordLookupMPCE",
     "fields": { }
-}]
+  },
+  {
+    "rty_ID": "94",
+    "database": "Libraries_Readers_Culture_18C_Atlantic",
+    "label": "Lookup ESTC",
+    "dialog": "recordLookupLRC18C",
+    "fields": {
+      "properties.edition": "1028"
+    }
+  }
+]
