@@ -67,7 +67,8 @@ $.widget( "heurist.resultList", {
         rendererHeader: null,   // renderer function to draw header for list view-mode (for content)
         rendererGroupHeader: null,   // renderer function for group header (see groupByField)
         
-        recordDivClass: '', //additional class that modifies recordDiv appearance (see for example "public" in h4styles.css)
+        recordDivClass: '', // additional class that modifies recordDiv appearance (see for example "public" in h4styles.css) 
+                            // it is used if renderer is null
         recordDivEvenClass:null,  //additional class for even entries recordDiv
         
         // smarty template or url (or todo function) to draw inline record details when recordview_onselect='inline'. (LINE view mode only)
@@ -1618,7 +1619,7 @@ $.widget( "heurist.resultList", {
     //
     //
     //
-    setMultiSelction: function(ids){
+    setMultiSelection: function(ids){
          this._currentMultiSelection = ids;
     },
     //

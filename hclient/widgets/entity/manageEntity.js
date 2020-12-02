@@ -1270,19 +1270,20 @@ $.widget( "heurist.manageEntity", {
             }
             
             if(this.recordList.resultList('instance')){ //for editonly recordList is not inited
+
+                //
+                // define selection
+                //
+                if(this.options.selection_on_init && this.options['select_mode']=='select_multi'){
+                    this.recordList.resultList('setMultiSelection', this.options.selection_on_init);
+                    //this.selectedRecords( this.options.selection_on_init );
+                    this.options.selection_on_init = null;
+                }
             
                 if(this.options.list_mode=='default'){
                     this.recordList.resultList('updateResultSet', data.recordset, data.request);
                 }
                 
-                //
-                // restore selection
-                //
-                if(this.options.selection_on_init && this.options['select_mode']=='select_multi'){
-                    this.recordList.resultList('setMultiSelction', this.options.selection_on_init);
-                    //this.selectedRecords( this.options.selection_on_init );
-                    this.options.selection_on_init = null;
-                }
             }
         }
     },
@@ -1307,7 +1308,7 @@ $.widget( "heurist.manageEntity", {
                 this.recordList.resultList('updateResultSet', subset, request);   
             }
             if(this.options.selection_on_init && this.options['select_mode']=='select_multi'){
-                this.recordList.resultList('setMultiSelction', this.options.selection_on_init);
+                this.recordList.resultList('setMultiSelection', this.options.selection_on_init);
                 this.options.selection_on_init = null;
             }
         }
