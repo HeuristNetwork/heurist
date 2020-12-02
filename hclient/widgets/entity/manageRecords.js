@@ -2665,6 +2665,8 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 
             that._editing.initEditForm(fields, that._currentEditRecordset, that._isInsert);
             
+            that._editing.editStructureFlag(this.options.edit_structure===true);
+            
             that._afterInitEditForm();
 
             if(this._keepYPos>0){
@@ -3244,7 +3246,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             lookup_div.empty();
             var service_config = window.hWin.HEURIST4.util.isJSON(window.hWin.HAPI4.sysinfo['service_config']);//sys_ExternalReferenceLookups
             
-console.log(service_config);            
+//console.log(service_config);            
             if(service_config!==false){
                 
                 window.hWin.HAPI4.sysinfo['service_config'] = service_config;

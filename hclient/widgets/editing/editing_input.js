@@ -1115,6 +1115,9 @@ $.widget( "heurist.editing_input", {
                     var __show_addlink_dialog = function(){
                             if(that.is_disabled) return;
                             
+                            if(that.options.editing && (that.options.editing.editStructureFlag()===true)){
+                                window.hWin.HEURIST4.msg.showMsgFlash('This feature is disabled in edit structure mode');                     return;
+                            }
                             
                             function __onCloseAddLink(context){
                                     

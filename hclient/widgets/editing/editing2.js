@@ -30,7 +30,8 @@ function hEditing(_options) {
          wasModified = 0, //0 not modified (on init), 1 was modified, 2 - finalized(not modified)
          onChangeCallBack=null,
          entityConfig = null,
-         options = {};
+         options = {},
+         _editStructureMode = false;
 
     /**
     * Initialization
@@ -773,9 +774,15 @@ function hEditing(_options) {
         
         setFocus: function(){
             _setFocus();
+        },
+        
+        editStructureFlag: function(value){
+            if(value===true || value===false){
+                _editStructureMode = value;      
+            }else{
+                return _editStructureMode;
+            }
         }
-        
-        
         
     }
 
