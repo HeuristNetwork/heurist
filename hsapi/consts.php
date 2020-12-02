@@ -300,7 +300,6 @@ $dtDefines = array('DT_NAME' => array(2, 1),
     'DT_DETAIL_TYPE' => array(2, 54),
     'DT_COMMAND' => array(2, 55),
     'DT_COLOUR' => array(2, 56),
-    'DT_ENTITY_STRUCTURE' => array(2, 57), //former header field
     'DT_DRAWING' => array(2, 59),
     'DT_COUNTER' => array(2, 60),
     //xslt not used
