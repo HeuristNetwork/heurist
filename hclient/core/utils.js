@@ -1090,7 +1090,7 @@ window.hWin.HEURIST4.util = {
     },
     
     //
-    //
+    // returns 1 same version,  -1 v1 < v2,  02 v1 > v2
     //
      versionCompare: function(v1, v2, options) {
          // determines if the version in the cache (v1) is older than the version in configIni.php (v2)
@@ -1121,14 +1121,14 @@ window.hWin.HEURIST4.util = {
 
         for (var i = 0; i < v1parts.length; ++i) {
             if (v2parts.length == i) {
-                return 1; // versions are the saame
+                return 1; // versions are the same
             }
 
             if (v1parts[i] == v2parts[i]) {
                 continue; // sub elements are the same, continue compare
             }
             else if (v1parts[i] > v2parts[i]) {
-                return -2; // cached version is newer, we will still need to clear cache and reload
+                return -2; // v1>v2 - cached version is newer, we will still need to clear cache and reload
             }
             else {
                 return -1; // cached version is older, we will need to clear cache and reload
