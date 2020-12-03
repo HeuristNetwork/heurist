@@ -179,7 +179,7 @@ $time_debug = microtime(true);
         if (!$this->source_defs) {
             return false; //see $system->getError
         }
-
+        
 if(_DBG) error_log('get src defs '.(microtime(true)-$time_debug));        
 $time_debug = microtime(true);        
         
@@ -805,32 +805,53 @@ $mysqli->commit();
         if(strpos($database_url, 'http://heurist.sydney.edu.au/')===0){
             $remote_url = HEURIST_MAIN_SERVER.'/';
         }
-
-
+        
         if(!$remote_dbname || !$remote_url){
             $this->system->addError(HEURIST_ERROR, 
                 "Heurist Master Index returns incorrect data for registered database # ".$database_id.
                 " The page may contain an invalid database reference");
             return false;
         }
+
+
+/*        
+        if(strpos($remote_url, HEURIST_SERVER_URL)===0){ //same domain
         
+              $system2 = new System();
+              $system2->init($remote_dbname, true, false); //init without paths and consts
+
+              $db_version = $this->get_system('sys_dbVersion').'.'
+                                        .$this->get_system('sys_dbSubVersion');
+        
+        }else{
+           $remoteURL = $remote_url.'hsapi/controller/usr_info.php?action=sysinfo&db='.$remote_dbname;
+           $sysinfo = loadRemoteURLContent($remoteURL);            
+           $sysinfo = json_decode($defs, true);
+           if (!$sysinfo || @$sysinfo['status']!=HEURIST_OK) {
+                $this->system->addError(HEURIST_ERROR, $msg_unable_connect);
+                return false;
+           }
+           $db_version = $sysinfo['data']['sysinfo']['db_version'];
+        }
+*/        
         if(strpos($remote_url, HEURIST_SERVER_URL)===0){ //same domain
 
-          $defs = array();  
-          
-          $system2 = new System();
-          $system2->init($remote_dbname, true, false); //init without paths and consts
-          
-          
-          if(!$only_terms){
-            $defs['rectypes'] = dbs_GetRectypeStructures($system2, null, 2 );
-            $defs['detailtypes'] = dbs_GetDetailTypes($system2, null, 2 );
-          }
-          $defs["terms"] = dbs_GetTerms($system2);
-          
+              $defs = array();  
+              
+              $system2 = new System();
+              $system2->init($remote_dbname, true, false); //init without paths and consts
+
+              if(!$only_terms){
+                $defs['rectypes'] = dbs_GetRectypeStructures($system2, null, 2 );
+                $defs['detailtypes'] = dbs_GetDetailTypes($system2, null, 2 );
+              }
+              $defs["terms"] = dbs_GetTerms($system2);
+              
+              $db_version = $this->get_system('sys_dbVersion').'.'
+                                        .$this->get_system('sys_dbSubVersion');
+              
         }else{
-        //2b. if remote server - call sys_strcture.php with loadRemoteURLContentWithRange
-        
+           //2b. if remote server - call sys_strcture.php with loadRemoteURLContentWithRange
            $remoteURL = $remote_url.'hsapi/controller/sys_structure.php?mode=2&terms=all&db='.$remote_dbname;
            if(!$only_terms){
                 $remoteURL = $remoteURL.'&rectypes=all&detailtypes=all';
@@ -839,24 +860,44 @@ $mysqli->commit();
            $defs = loadRemoteURLContent($remoteURL);            
            $defs = json_decode(gzdecode($defs), true);
            if (!$defs || @$defs['status']!=HEURIST_OK) {
-                $this->system->addError(HEURIST_ERROR,
+
+               $msg_unable_connect = 
 '<p>Unable to contact the selected source database (ID # '.$database_id.'). This might indicate one of the following:</p> '
 .'<ol><li>the database is no longer online;</li>'
 .'<li>the registration in the Heurist master index is missing or points to the wrong URL '
 .$database_url
 .'<br>(check registration of the database using Database > Register);</li>'
 .'<li>a proxy error in contacting the database;</li><li>network timeout.</li></ol> '
-.'<p>If you cannot determine the problem, please '.CONTACT_HEURIST_TEAM.' with the URL to the target database</p>');
-//, and to the source database if the XML was generated from a Heurist source;
+.'<p>If you cannot determine the problem, please '.CONTACT_HEURIST_TEAM.' with the URL to the target database</p>';               
+               
+                $this->system->addError(HEURIST_ERROR, $msg_unable_connect);
                 return false;
            }
+           $db_version = $defs['data']['db_version'];
            $defs = $defs['data'];
+
         }
+        
         if (!($defs['terms']  &&  ($only_terms || ($defs['rectypes'] && $defs['detailtypes'])))) {
             $this->system->addError(HEURIST_ERROR, "Structure definitions read from source database # $database_id are invalid. Please "
                 .CONTACT_HEURIST_TEAM);
             return false;
         }
+        
+        //check version capability
+        if($db_version){
+            $db_ver = explode('.',$db_version);
+            
+            if($db_ver[0]==1 && $db_ver[1]>2){
+                $this->system->addError(HEURIST_ERROR, 
+                    '<p>This template has been upgraded to Heurist version 6. You are running version 5. '
+                    .'Due to new capabilities in the version 6 database, version 5 cannot import structure from version 6.</p>'
+    .'<p>Version 6 is due for release in first quarter 2021. Please contact the Heurist team if you would like advance '
+    .'access to the new version.</p>');
+                    return false;
+            }
+        }
+        
         
         $this->sourceIconURL = $remote_url.'hsapi/dbaccess/rt_icon.php?db='.$remote_dbname.'&id=';
         $this->source_db_name = $remote_dbname;

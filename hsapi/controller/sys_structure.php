@@ -158,7 +158,11 @@ ini_set('max_execution_time', 0);
                     }
     */
             }else{
-                    $response = array("status"=>HEURIST_OK, "data"=> $data );
+                
+                $data["db_version"] =  $system->get_system('sys_dbVersion').'.'
+                                        .$system->get_system('sys_dbSubVersion');
+                
+                $response = array("status"=>HEURIST_OK, "data"=> $data );
             }   
         
         }

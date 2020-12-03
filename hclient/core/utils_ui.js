@@ -701,10 +701,18 @@ window.hWin.HEURIST4.ui = {
         var toparray = [];
         if(vocabsOnly){
             toparray = [0]; //Object.keys(terms.treesByDomain[datatype]);
-        }else if(window.hWin.HEURIST4.util.isArray(termIDTree)){
-            toparray = termIDTree;
-        }else{
-            toparray = [ termIDTree ]; //vocabulary
+        }else {
+            
+            if(window.hWin.HEURIST4.util.isArray(termIDTree)){
+                toparray = termIDTree;
+            }else{
+                /*
+                if(window.hWin.HEURIST4.terms.trm_VocabWithRefs && window.hWin.HEURIST4.terms.trm_VocabWithRefs[termIDTree])
+                {
+                    termIDTree = window.hWin.HEURIST4.terms.trm_VocabWithRefs[termIDTree]
+                }*/
+                toparray = [ termIDTree ]; //vocabulary
+            }            
         }
 
         var m, lenn = toparray.length;

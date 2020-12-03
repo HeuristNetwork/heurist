@@ -102,7 +102,7 @@
         //allowed actions for guest
         $quest_allowed = array('login','reset_password','svs_savetree','svs_gettree','usr_save','svs_get');
         
-        if ($action=="sysinfo") { //it call once on hapi.init on client side - so it always need to reload sysinfo
+        if ($action=="sysinfo") { //it calls once on hapi.init on client side - so it always need to reload sysinfo
 
             $res = $system->getCurrentUserAndSysInfo();
             
