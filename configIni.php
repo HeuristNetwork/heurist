@@ -62,12 +62,13 @@ of the codebase and rename it to index.html
 
 // *** DO NOT CHANGE VERSION NUMBER, THIS IS SET BY THE HEURIST DEVELOPMENT TEAM ***
 
-$version = "5.2.14"; // sets current program version number, determined by Heurist development lead
+$version = "5.2.15"; // sets current program version number, determined by Heurist development lead
 
 // dates below are the date of release of the given version, and list changes since last release
 
 // dates below are the date of release of the given version, and list changes since last release
 
+// 5.2.15 3 Dec 2020 Mostly development of H6 occurring in /h6-dev branch, some minor fixes in this branch, recent disabling of individual terms selection in field definition b/c system changed in h6
 // h5.2.14 5 Oct 2020 Mostly work on H6 (not included in thsi version), various improvements to website functions, string search on record poitner selection, fixes to digitiser (broken maps & save)
 // h5.2.13 25 Aug 2020 Improve speed on record view, fix problems with loading xml and with web site functions, new USyd server, Initial development of H6 interface in h6dev branch  
 // h5.2.12 03 Aug 2020 Initial work on version 6 interface, new menu strucutre, design, import, explore, admin mostly working.

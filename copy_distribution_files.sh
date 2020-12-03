@@ -74,6 +74,7 @@ cp -r import /var/www/html/HEURIST/heurist-build/$1
 cp -r installers  /var/www/html/HEURIST/heurist-build/$1
 cp -r records  /var/www/html/HEURIST/heurist-build/$1
 cp -r redirects /var/www/html/HEURIST/heurist-build/$1
+cp -r startup /var/www/html/HEURIST/heurist-build/$1
 cp -r viewers /var/www/html/HEURIST/heurist-build/$1
 
 echo
