@@ -52,6 +52,8 @@ $mysqli = $system->get_mysqli();
     if (!$res) {  print $query.'  '.$mysqli->error;  return; }
     $databases = array();
     while (($row = $res->fetch_row())) {
+        if( strpos($row[0], 'hdb_DEF19')===0 || strpos($row[0], 'hdb_def19')===0) continue;
+        
         if( strpos($row[0], 'hdb_')===0 ){
             //if($row[0]>'hdb_Masterclass_Cookbook')
                 $databases[] = $row[0];
@@ -77,7 +79,8 @@ $mysqli = $system->get_mysqli();
         //RECORD TYPES
         
         $query = 'SELECT rty_ID, rty_Name, rty_NameInOriginatingDB, rty_OriginatingDBID, rty_IDInOriginatingDB FROM '
-            .$db_name.'.defRecTypes WHERE  rty_OriginatingDBID>0 AND (NOT (rty_IDInOriginatingDB>0))';
+            .$db_name.'.defRecTypes WHERE  rty_OriginatingDBID>0 AND '
+            ."(rty_OriginatingDBID='' OR rty_OriginatingDBID=0 OR rty_OriginatingDBID IS NULL)";
         
         $res = $mysqli->query($query);
         if (!$res) {  print $query.'  '.$mysqli->error;  return; }

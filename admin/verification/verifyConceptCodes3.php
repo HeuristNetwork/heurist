@@ -130,7 +130,7 @@ if($mysqli->error){print $query.'  '.$mysqli->error; break;}
         }
         
         
-/*        
+/*      set Ids for registered databases  
         if($is_found){
         
             $query = 'UPDATE '.$db_name.'.defRecTypes set rty_IDInOriginatingDB = rty_ID, rty_NameInOriginatingDB = rty_Name, rty_OriginatingDBID='.$ver

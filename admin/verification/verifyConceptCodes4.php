@@ -60,6 +60,7 @@ $mysqli = $system->get_mysqli();
 
       
     $db2_with_links = array();
+    $db2_with_terms = array();
     $db3_with_terms = array();
     
     foreach ($databases as $idx=>$db_name){
@@ -75,37 +76,66 @@ $mysqli = $system->get_mysqli();
                 array_push($db2_with_links,$db_name);    
             }
                     
-        }else{
+        }
             
-            $query = 'select count(*) from '.$db_name.'.defDetailTypes where dty_Type="enum" and (NOT dty_JsonTermIDTree>0)';
+            $query = 'select count(*) from '.$db_name.'.defDetailTypes where '
+            .'(dty_Type="enum" OR dty_Type="relmarker") and (NOT dty_JsonTermIDTree>0)'; // OR dty_Type="relationtype"
             $value = mysql__select_value($mysqli, $query);
             if($value>0){
+
+                $query = 'select dty_ID, dty_JsonTermIDTree from '.$db_name.'.defDetailTypes where '
+                .'(dty_Type="enum" OR dty_Type="relmarker") and (NOT dty_JsonTermIDTree>0)'; // OR dty_Type="relationtype"
+                $value = mysql__select_all($mysqli, $query);
                 
+                if($ver<3){
+                    $db2_with_terms[$db_name] = $value;
+                }else{
+                    $db3_with_terms[$db_name] = $value;
+                }
+
+                /* datetime of creation for defTermsLinks
                 $query = "SELECT create_time FROM INFORMATION_SCHEMA. TABLES WHERE table_schema = '"
                         .$db_name."' AND table_name = 'defTermsLinks'";
                 $dt = mysql__select_value($mysqli, $query);
-                
                 $db3_with_terms[$db_name] = array($dt,$value);
+                */
             }
             
+/*            
             $query = "SHOW COLUMNS FROM ".$db_name.".sysIdentification LIKE 'sys_ExternalReferenceLookups'";
             if(!hasColumn($mysqli, $query)){ //column not defined
                 $query = "ALTER TABLE ".$db_name.".sysIdentification ADD COLUMN `sys_ExternalReferenceLookups` TEXT default NULL COMMENT 'Record type-function-field specifications for lookup to external reference sources such as GeoNames'";
                 $res = $mysqli->query($query);
                 print $db_name.': sys_ExternalReferenceLookups added<br>';
             }
+*/            
             
-            
-        }
+        
     }//while  databases
     print '<p>v2 with defTermLinks</p>';
     print print_r($db2_with_links, true);
+
+
+    print '<hr><p>v2 with individual term selection</p>';
+
+    foreach ($db2_with_terms as $db_name=>$value){
+        print $db_name.'<br>';
+        print print_r($value, true).'<br>';
+    }
+
     
-    print '<p>v3 with individual term selection</p>';
+    print '<hr><p>v3 with individual term selection</p>';
+
+    foreach ($db3_with_terms as $db_name=>$value){
+        print $db_name.'<br>';
+        print print_r($value, true).'<br>';
+    }
+    
+/*    
     foreach ($db3_with_terms as $db_name=>$dt){
         print $db_name.'  '.$dt[1].'   '.$dt[0].'<br>';
     }
-    
+*/    
     
     print '[end report]</div>';
     
