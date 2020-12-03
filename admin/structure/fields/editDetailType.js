@@ -490,12 +490,16 @@ function DetailTypeEditor() {
         var res = window.hWin.HEURIST4.util.versionCompare('1.2.0', 
                             window.hWin.HAPI4.sysinfo.db_version);
         if(res==-1){  //1 the same, -1 v1<v2, -2 v1>v2
-            window.hWin.HEURIST4.msg.showMsgDlg('Your current version of database is '
+            window.hWin.HEURIST4.msg.showMsgDlg(
+            'Your current version of database is '
                     +window.hWin.HAPI4.sysinfo.db_version
-                    +'. The individual selection of terms is disabled in this version. '
-                    +'Please use the latest version of Heurist to create custom vocabularies with term references.');
-            returnl
+                    +'. The individual selection of terms is disabled in this version '
+                    +'and has been replaced by an improved function in Heurist version 6, '
+                    +'due for release first quarter 2021. Please contact the Heurist team if '
+                    +'you would like advance access to the new version.');
+            return;
         }
+        
         
         var type = document.getElementById("dty_Type").value;
         var allTerms = document.getElementById("dty_JsonTermIDTree").value;
