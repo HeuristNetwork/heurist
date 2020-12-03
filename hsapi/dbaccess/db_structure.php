@@ -535,7 +535,6 @@ function dbs_GetRectypeConstraint($system) {
                 'enum' => __getTermTree($system, "enum", "exact"));
 
 
-                
         //see dbDefTerms->getTermLinks
         $query = 'SELECT trl_ParentID, trl_TermID FROM defTermsLinks ORDER BY trl_ParentID';
         $res = $mysqli->query($query);
@@ -551,6 +550,7 @@ function dbs_GetRectypeConstraint($system) {
             }
             $res->close();
             $terms['trm_Links'] = $matches;
+            
         }
                 
         //get vocabulary groups 

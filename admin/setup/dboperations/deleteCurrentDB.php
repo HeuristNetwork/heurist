@@ -136,8 +136,8 @@ $('#btnDelete').on({click:function(){
                             width:700,
                             height:180,
                             close: function(){
-                                //redirects to intro page - list of all databases
-                                window.hWin.document.location = window.hWin.HAPI4.baseURL; //intro page
+                                //redirects to startup page - list of all databases
+                                window.hWin.document.location = window.hWin.HAPI4.baseURL; //startup page
                             }
                        }
                     );                

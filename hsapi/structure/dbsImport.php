@@ -169,7 +169,7 @@ $time_debug2 = $time_debug;
         // 1. get database url by database id
         $database_url = $this->_getDatabaseURL($db_reg_id);
         
-        //TEMPORARY SOLUTION
+        //TEMPORARY SOLUTION - to use the lastest code
         if(strpos($database_url,'https://heuristplus.sydney.edu.au/heurist/')===0){
             $database_url = str_replace('/heurist/','/h6-ao/',$database_url);
         }
@@ -188,20 +188,19 @@ $time_debug = microtime(true);
         if (!$this->source_defs) {
             return false; //see $system->getError
         }
-        
+
+/* We require at least version 1.2 for database defintion */
         if(@$this->source_defs['terms']){
-            
             if(!@$this->source_defs['terms']['groups'] || 
                 !(@$this->source_defs['terms']['fieldNamesToIndex']['trm_VocabularyGroupID']>0)){
-                
                     
                 $this->system->addError(HEURIST_ERROR, 'Database registration URL '.$database_url.' returns old version '
-                .'(DB version xxxx, you are using version yyyy) of database definitions. '
+                .'(DB version 1.2, you are using version 1.3) of database definitions. '
                 .'Please ask the system administrator (<email address*>) to upgrade the system.');
                 return false;
             }
         }
-        
+       
 
 if(_DBG) error_log('get src defs '.(microtime(true)-$time_debug));        
 $time_debug = microtime(true);        
@@ -211,6 +210,8 @@ $time_debug = microtime(true);
         $def_ids = array();
         $wrong_id = null;
         $missed_name = null;
+        
+        $this->_createTrmLinks();
 
         $this->sourceTerms = new DbsTerms(null, $this->source_defs['terms']);
         if($entityTypeToBeImported=='term'){
@@ -1204,7 +1205,6 @@ $mysqli->commit();
             //fills $this->vcg_correspondence
             $this->_importVocabularyGroups($this->imp_terms[$domain]);
             
-            
             //top level import vocabularies
             foreach($this->imp_terms[$domain] as $term_id){
                 $children = @$this->source_defs['terms']['trm_Links']
@@ -1364,14 +1364,31 @@ if($term_id==11 || $term_id==518 || $term_id==497){
     
     //
     // check vocabulry group by name and import if missed
+    // for older databases all imported vocab will be placed to group "Import"
     //   
     private function _importVocabularyGroups($src_vocab_ids){
 
         $columnNames = array("vcg_Name","vcg_Domain","vcg_Order","vcg_Description");
         $idx_vcg_grp = $this->source_defs['terms']['fieldNamesToIndex']['trm_VocabularyGroupID'];
         $idx_parent = $this->source_defs['terms']['fieldNamesToIndex']['trm_ParentTermID'];
-        
+
         $mysqli = $this->system->get_mysqli();
+        
+        $is_old_db_version = false;
+        if(!($idx_vcg_grp>0) || @$this->source_defs['terms']['groups']==null){
+            //old version of source - add new field and set all groups to "Import"
+            $is_old_db_version = true;
+            
+            if(!($idx_vcg_grp>0)){
+                $this->source_defs['terms']['commonFieldNames'].push('trm_VocabularyGroupID');
+                $idx_vcg_grp = count($this->source_defs['terms']['commonFieldNames'])-1;
+                $this->source_defs['terms']['fieldNamesToIndex']['trm_VocabularyGroupID'] = $idx_vcg_grp;
+            }
+            
+            $this->source_defs['terms']['groups'] = array(11=>
+                array('vcg_ID'=>"11", 'vcg_Name'=>"Import", vcg_Domain=>"enum", 
+                vcg_Order=>"007", vcg_Description=>"Imported vocabularies"));
+        }
         
         foreach($src_vocab_ids as $term_id){
             
@@ -1380,6 +1397,10 @@ if($term_id==11 || $term_id==518 || $term_id==497){
             $parent_id = @$rt[$idx_parent];
             if($parent_id>0) continue; //this is not vocabulary
             
+            if($is_old_db_version){
+                $rt[$idx_vcg_grp] = 11;
+            }
+
             $grp_id = @$rt[$idx_vcg_grp];
 
             if(!$grp_id){
@@ -1660,6 +1681,100 @@ if($term_id==11 || $term_id==518 || $term_id==497){
         }
         return $resp;    
     }    
+
+    //
+    //
+    //
+    private function __tree_to_links($tree, &$links){
+        
+        foreach($tree as $parent=>$children){
+           $links[$parent] = array_keys($children);
+           $this->__tree_to_links($children, $links); 
+        }
+
+    }
+    
+    //
+    // create trm_Links if it is missed for old version of source
+    //
+    private function _createTrmLinks(){
+    
+        if(@$this->source_defs['terms']['trm_Links']) return;
+        
+        //links for individual selections        
+        //loop for details
+        $det = $this->source_defs['detailtypes']['typedefs'];
+        $idx_type = $det['fieldNamesToIndex']['dty_Type'];
+        $idx_tree = $det['fieldNamesToIndex']['dty_JsonTermIDTree'];
+        
+        $ids1 = array_keys($this->source_defs['terms']['termsByDomainLookup']['enum']);
+        $ids2 = array_keys($this->source_defs['terms']['termsByDomainLookup']['relation']);
+        
+        $max_id = 999999;//max($ids1[count($ids1)-1], $ids2[count($ids2)-1]);
+        //max(max(),
+        //            max(array_keys($this->source_defs['terms']['termsByDomainLookup']['relation'])));
+        
+        foreach($det as $dty_ID=>$detail){
+            
+            if($dty_ID>0){
+                $dty_Type = $detail['commonFields'][$idx_type];
+                $dty_Tree = $detail['commonFields'][$idx_tree];
+                
+                if ($dty_Type=="enum" || $dty_Type=="relmarker"){
+                    if($dty_Tree && is_numeric($dty_Tree)){
+                        continue;
+                    }
+
+                    $domain = $dty_Type=='enum'?'enum':'relation';
+                    $name = $detail['commonFields'][1].' - selection';
+                    $vocab_id = $max_id+1;
+                    $max_id = $max_id+1;
+                    
+                    $vocab = array($name,0,'','open',0,0,$vocab_id,0,$domain);
+                    $vocab[17] = 7;
+    /*                
+    0: "trm_Label"
+    1: "trm_InverseTermID"
+    2: "trm_Description"
+    3: "trm_Status"
+    4: "trm_OriginatingDBID"
+    5: "trm_IDInOriginatingDB"
+    6: "trm_AddedByImport"
+    7: "trm_IsLocalExtension"
+    8: "trm_Domain"
+    9: "trm_OntID"
+    10: "trm_ChildCount"
+    11: "trm_ParentTermID"
+    12: "trm_Depth"
+    13: "trm_Modified"
+    14: "trm_LocallyModified"
+    15: "trm_Code"
+    16: "trm_SemanticReferenceURL"
+    17: "trm_VocabularyGroupID"
+    18: "trm_NameInOriginatingDB"
+    19: "trm_ConceptID"
+    20: "trm_HasImage"                
+    */                
+                    $this->source_defs['terms']['termsByDomainLookup'][$domain][$vocab_id] = $vocab;
+                    $this->source_defs['terms']['treesByDomain'][$domain][$vocab_id] = json_decode($dty_Tree, true);   
+                    $this->source_defs['detailtypes']['typedefs'][$dty_ID]['commonFields'][$idx_tree] = $vocab_id;
+                        
+                }
+            }
+        }//for details
+
+        
+        $links = array();
+
+        $tree = $this->source_defs['terms']['treesByDomain']['enum'];
+        $this->__tree_to_links($tree, $links);
+        
+        $tree = $this->source_defs['terms']['treesByDomain']['relation'];
+        $this->__tree_to_links($tree, $links);
+
+        $this->source_defs['terms']['trm_Links'] = $links;
+    }
+    
     
 }
 ?>

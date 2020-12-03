@@ -418,7 +418,7 @@ function fillTermsLinks( $mysqli ){
                 }
             
                 if($is_first){
-    $report[] = 'Create vocabularies with references for "custom selections terms"';
+                    $report[] = 'Create vocabularies with references for "custom selections terms"';
                     $is_first = false;
                 }    
                 
@@ -433,8 +433,8 @@ function fillTermsLinks( $mysqli ){
                 $report[] = $row[3].'  '.$name;   
                 
                 //{"11":{"518":{},"519":{}},"94":{},"95":{},"3260":{"3115":{"3100":{}}}}
+
                 $terms = json_decode(@$row[1], true);
-                
                 if($terms){
                     
                     //add new vocabulary

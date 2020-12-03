@@ -84,7 +84,7 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
 
 /*    
     screens/steps
-    1. setup intro page - get list of databases (_getDatabases), init controls/search db dropdown (_initControls)
+    1. setup startup page - get list of databases (_getDatabases), init controls/search db dropdown (_initControls)
     2. user registration form - init controls (_showRegistration), validate input data (_validateRegistration)
     3. define db name - create new database (_doCreateDatabase)
     4. wait screen  - in progress

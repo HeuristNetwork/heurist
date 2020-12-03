@@ -1511,7 +1511,7 @@ $.widget( "heurist.mainMenu6", {
                 
         var that = this;
         this.introductions[section]
-                .load(window.hWin.HAPI4.baseURL+'intro/getting_started.html div.gs-box.ui-heurist-'+section,
+                .load(window.hWin.HAPI4.baseURL+'startup/getting_started.html div.gs-box.ui-heurist-'+section,
                 function(){
                     //init images and video
                     that.introductions[section].find('img').each(function(i,img){
