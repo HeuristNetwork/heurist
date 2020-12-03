@@ -40,7 +40,7 @@ if( @$_REQUEST['recID'] || @$_REQUEST['recid'] || array_key_exists('website', $_
         
         //embed - when heurist is run on page on non-heurist server
         if(array_key_exists('embed', $_REQUEST)){
-            define('PDIR','https://heuristplus.sydney.edu.au/h5-ao/');
+            define('PDIR','https://heuristplus.sydney.edu.au/h6-ao/');
         }else{
             define('PDIR','');    
         }
