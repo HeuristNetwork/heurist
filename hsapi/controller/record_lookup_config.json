@@ -4,14 +4,14 @@
     "label": "Lookup in AGHP",
     "description": "Search for Australian Gazetteer of historic places",
     "dialog": "recordLookup",
-    "fields":{ 
-      "properties.placename": "2-1",  
+    "fields":{
+      "properties.placename": "2-1",
       "geometry": "2-28",
       "properties.anps id": "2-581",
       "properties.state": "2-234",
       "properties.LGA": "2-2",
       "properties.description": "2-3"
-    }    
+    }
 },
 {
     "service": "postalCodeSearch",
@@ -19,7 +19,7 @@
     "label": "Postal Codes (GeoNames)",
     "description": "Returns a list of postal codes and places for the placename/postalcode query.",
     "dialog": "recordLookupGN_postalCode",
-    "fields": { 
+    "fields": {
         "postalcode":"",
         "lng":"",    
         "lat":"",    
@@ -45,4 +45,15 @@
         "field3":"",
         "field4":""
     }
-}]
+},
+  {
+    "service": "ESTC",
+    "rty_ID": "94",
+    "label": "Lookup ESTC",
+    "description": "",
+    "dialog": "recordLookupLRC18C",
+    "fields": {
+      "properties.edition": "1028"
+    }
+  }
+]

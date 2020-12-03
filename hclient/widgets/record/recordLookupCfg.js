@@ -366,7 +366,7 @@ $.widget( "heurist.recordLookupCfg", {
                 var dty_ID = dty_ID>0 ?$Db.getLocalID('dty', dty_ID) :'';
                 
                 window.hWin.HEURIST4.ui.createRectypeDetailSelect(ele, rty_ID, 
-                    ['freetext','blocktext','enum','date','geo','float','year','integer',], '...', 
+                    ['freetext','blocktext','enum','date','geo','float','year','integer','resource'], '...', 
                     {show_latlong:true, show_dt_name:true, selected_value:dty_ID} );
             });
         }else{
