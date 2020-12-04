@@ -212,7 +212,6 @@ error_log(print_r($_REQUEST, true));
         //read service_mapping.json from setting folder
         $config_res = null;
         
-        //$config_file = HEURIST_SETTING_DIR.'service_mapping.json';
         $config_file = dirname(__FILE__).'/controller/record_lookup_config.json';
         
         if(file_exists($config_file)){
