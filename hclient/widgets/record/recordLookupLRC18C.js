@@ -329,12 +329,19 @@ $.widget("heurist.recordLookupLRC18C", $.heurist.recordAction, {
     _getTermThatExists: function(type, term) {
         that = this;
         termID = "";
-        keysDict = {"prefix": 7124, "suffix": 7128, "agentType": 6901, "bookFormat": 6891, "religion": 6907}
-        var current_terms = window.hWin.HEURIST4.ui.getPlainTermsList('enum', keysDict[type]);
+        keysDict = {"prefix": 7124, "suffix": 7128, "agentType": 6901, "bookFormat": 6891, "religion": 6907};
+        
+        //get all terms for given vocabulary
+        //var current_terms = window.hWin.HEURIST4.ui.getPlainTermsList('enum', keysDict[type]);
+        
+        var current_terms = $Db.trm_TreeData(keysDict[type], 'select');
+        
+        term = String(term).toLowerCase();
+        
         for (i = 0; i < current_terms.length; i++) {
-            if (current_terms[i].text == String(term)) {
-                termID = current_terms[i].id
-                return current_terms[i].id
+            if (current_terms[i].title.toLowerCase() == term) {
+                termID = current_terms[i].key
+                return current_terms[i].key
             }
         }
         return null;
