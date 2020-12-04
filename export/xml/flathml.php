@@ -228,12 +228,12 @@ function makeTag($name, $attributes = null, $textContent = null, $close = true, 
             $tag.= ' ' . xmlspecialchars($attr) . '="' . xmlspecialchars($value) . '"';
         }
     }
-    if ($close && !$textContent) {
+    if ($close && ($textContent==null || $textContent=='')) {
         $tag.= '/>';
     } else {
         $tag.= '>';
     }
-    if ($textContent) {
+    if (!($textContent==null || $textContent=='')) {
         if ($encodeContent) {
             $tag.= xmlspecialchars($textContent);
         } else {

@@ -2395,7 +2395,7 @@ $loop_cnt++;
                         break;
                 }
 
-                if ($detailValue) {
+                if ($detailValue!=null && $detailValue!='') {
                     $details[$rd["dtl_DetailTypeID"]][$rd["dtl_ID"]] = $detailValue;
                 }
             }
