@@ -844,7 +844,7 @@ $.widget("heurist.recordLookupLRC18C", $.heurist.recordAction, {
             dataType: 'text',
 
             error: function (error) {
-                window.hWin.HEURIST4.msg.showMsgErr(error);
+                window.hWin.HEURIST4.msg.showMsgErr('Query '+query_string+' produced and error output. Server responds '+error);
             },
             success: function (response) {
                 workDetailsXML = $.parseXML(String(response));
@@ -961,47 +961,98 @@ $.widget("heurist.recordLookupLRC18C", $.heurist.recordAction, {
         estc_no = "";
         vol_count = "";
         vol_parts = "";
+        
+        if(true){ //use json format and fulltext search
+        
+            var query = {"t":"30"}; //search for Books
+            
+            if (this.element.find('#edition_name').val() != '') {
+                query['f:1'] = '@'+this.element.find('#edition_name').val();
+            }
+            if (this.element.find('#edition_date').val() != '') {
+                query['f:9'] = this.element.find('#edition_date').val();
+            }
+            if (this.element.find('#edition_author').val() != '') {
+                //Standardised agent name  - 250
+                query['linkedto:15'] = {"t":"10", "f:250":this.element.find('#edition_author').val()};
+            }
+            if (this.element.find('#edition_work').val() != '') {
+                query['linkedto:284'] = {"t":"","f:272":this.element.find('#edition_work').val()};
+                //Helsinki work ID - 272
+                //Project Record ID - 271
+            }
+            if (this.element.find('#edition_place').val() != '') {
+                query['linkedto:259'] = {"t":"12", "title":this.element.find('#edition_place').val()};
+            }
+            if (this.element.find('#vol_count').val() != '') {
+                query['f:137'] = '='+this.element.find('#vol_count').val();
 
-        if (this.element.find('#edition_name').val() != '') {
-            edition_name = ' f:1: ' + '"' + this.element.find('#edition_name').val() + '"'
-        }
-        if (this.element.find('#edition_date').val() != '') {
-            edition_date = ' f:9: ' + '"' + this.element.find('#edition_date').val() + '"'
-        }
-        if (this.element.find('#edition_author').val() != '') {
-            edition_author = ' f:15: ' + '"' + this.element.find('#edition_author').val() + '"'
-        }
-        if (this.element.find('#edition_work').val() != '') {
-            edition_work = ' f:284: ' + '"' + this.element.find('#edition_work').val() + '"'
-        }
-        if (this.element.find('#edition_place').val() != '') {
-            edition_place = ' f:259: ' + '"' + this.element.find('#edition_place').val() + '"'
-        }
-        if (this.element.find('#vol_count').val() != '') {
-            vol_count = ' f:137: ' + '"' + this.element.find('#vol_count').val() + '"'
+            }
+            if (this.element.find('#vol_parts').val() != '') {
+                query['f:290'] = '='+this.element.find('#vol_parts').val();
+            }
+            if (this.element.find('#select_bf').val()>0) {
+                query['f:256'] = this.element.find('#select_bf').val();  //enum
+            }
+            if (this.element.find('#estc_no').val() != '') {
+                query['f:254'] = '@'+this.element.find('#estc_no').val();
+            }
+/*
+            selectedBF = this.element.find('#select_bf option:selected').text()
+            if (selectedBF != null && selectedBF != '' && selectedBF != "Select Book Format") {
+                book_format = 'all: ' + selectedBF
+            } else {
+                book_format = ""
+            }
+            query_string = 't:30 ' + edition_name + edition_date + edition_author + edition_work + edition_place + book_format + estc_no + vol_count + vol_parts;
+*/            
+            query_string = query; 
+            
+        }else{
+            
+            if (this.element.find('#edition_name').val() != '') {
+                edition_name = ' f:1: ' + '"' + this.element.find('#edition_name').val() + '"'
+            }
+            if (this.element.find('#edition_date').val() != '') {
+                edition_date = ' f:9: ' + '"' + this.element.find('#edition_date').val() + '"'
+            }
+            if (this.element.find('#edition_author').val() != '') {
+                edition_author = ' f:15: ' + '"' + this.element.find('#edition_author').val() + '"'
+            }
+            if (this.element.find('#edition_work').val() != '') {
+                edition_work = ' f:284: ' + '"' + this.element.find('#edition_work').val() + '"'
+            }
+            if (this.element.find('#edition_place').val() != '') {
+                edition_place = ' f:259: ' + '"' + this.element.find('#edition_place').val() + '"'
+            }
+            if (this.element.find('#vol_count').val() != '') {
+                vol_count = ' f:137: ' + '"' + this.element.find('#vol_count').val() + '"'
 
-        }
-        if (this.element.find('#vol_parts').val() != '') {
-            vol_parts = ' f:290: ' + '"' + this.element.find('#vol_parts').val() + '"'
+            }
+            if (this.element.find('#vol_parts').val() != '') {
+                vol_parts = ' f:290: ' + '"' + this.element.find('#vol_parts').val() + '"'
+            }
 
+            selectedBF = this.element.find('#select_bf option:selected').text()
+            if (selectedBF != null && selectedBF != '' && selectedBF != "Select Book Format") {
+                book_format = 'all: ' + selectedBF
+            } else {
+                book_format = ""
+            }
+            if (this.element.find('#estc_no').val() != '') {
+                estc_no = ' f:254: ' + '"' + this.element.find('#estc_no').val() + '"'
+            }
+            query_string = 't:30 ' + edition_name + edition_date + edition_author + edition_work + edition_place + book_format + estc_no + vol_count + vol_parts;
+        
         }
-        selectedBF = this.element.find('#select_bf option:selected').text()
-        if (selectedBF != null && selectedBF != '' && selectedBF != "Select Book Format") {
-            book_format = 'all: ' + selectedBF
-        } else {
-            book_format = ""
-        }
-        if (this.element.find('#estc_no').val() != '') {
-            estc_no = ' f:254: ' + '"' + this.element.find('#estc_no').val() + '"'
-        }
-        query_string = 't:30 ' + edition_name + edition_date + edition_author + edition_work + edition_place + book_format + estc_no + vol_count + vol_parts;
+
 
         console.log("Query String is")
         console.log(query_string);
 
         window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent());
 
-        var query_request = {db: 'ESTC_Helsinki_Bibliographic_Metadata', q: 't:30 ' + query_string};
+        var query_request = {db: 'ESTC_Helsinki_Bibliographic_Metadata', q:query_string};
         var that = this;
         query_request['detail'] = 'details';
         window.hWin.HAPI4.RecordMgr.search(query_request,
