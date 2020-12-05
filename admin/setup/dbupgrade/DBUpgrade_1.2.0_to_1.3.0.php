@@ -20,7 +20,8 @@ function updateDatabseTo_v3($system, $dbname=null){
         }
     
         $report = array();
-    
+        
+        
         //create new tables
         $value = mysql__select_value($mysqli, "SHOW TABLES LIKE 'usrRecPermissions'");
         if($value==null || $value==""){        
@@ -398,6 +399,10 @@ function fillTermsLinks( $mysqli ){
   
     $report = array();
     
+            $query = 'SELECT sys_dbRegisteredID from sysIdentification';
+            $db_regid = mysql__select_value($mysqli, $query);
+    
+    
             $mysqli->query('INSERT INTO defTermsLinks (trl_ParentID, trl_TermID) '
             .'SELECT trm_ParentTermID, trm_ID FROM defTerms WHERE trm_ParentTermID>0');
     
@@ -407,7 +412,7 @@ function fillTermsLinks( $mysqli ){
             $is_first = true;
             
             //converts custom-selected term tree to vocab with references
-            $query = 'SELECT dty_Name,dty_JsonTermIDTree, dty_TermIDTreeNonSelectableIDs, dty_ID, dty_Type FROM '
+            $query = 'SELECT dty_Name,dty_JsonTermIDTree, dty_TermIDTreeNonSelectableIDs, dty_ID, dty_Type, dty_OriginatingDBID, dty_IDInOriginatingDB FROM '
                      .'defDetailTypes WHERE  dty_Type="enum" or dty_Type="relmarker"';
         
             $res = $mysqli->query($query);
@@ -437,11 +442,34 @@ function fillTermsLinks( $mysqli ){
                 $terms = json_decode(@$row[1], true);
                 if($terms){
                     
-                    //add new vocabulary
-                    $vocab_id = mysql__insertupdate($mysqli, 'defTerms', 'trm', array(
+                    $values = array(
                                 'trm_Label'=>$name,
                                 'trm_Domain'=>$domain,
-                                'trm_VocabularyGroupID'=>$vocab_group));
+                                'trm_VocabularyGroupID'=>$vocab_group);
+                    
+                    $id_orig_db = 0;
+                    if($row[5]==3){
+                        if($row[6]==1079) $id_orig = 6255;
+                        else if($row[6]==1080) $id_orig = 6256;
+                        else if($row[6]==1087) $id_orig = 6257;
+                        else if($row[6]==1088) $id_orig = 6258;
+                        if($id_orig>0){
+                            $values['trm_OriginatingDBID'] = 2;
+                            $values['trm_IDInOriginatingDB'] = $id_orig;  
+                        } 
+                    }
+                    
+                    //add new vocabulary
+                    $vocab_id = mysql__insertupdate($mysqli, 'defTerms', 'trm', $values);
+                    
+                    if($db_regid>0 && $id_orig_db==0){
+                        $values = array();
+                        $values['trm_ID'] = $vocab_id;
+                        $values['trm_OriginatingDBID'] = $db_regid;
+                        $values['trm_IDInOriginatingDB'] = $vocab_id;  
+                        mysql__insertupdate($mysqli, 'defTerms', 'trm', $values);
+                    }
+                                
                         
                     //parent->term_id
                     $terms_links = _prepare_terms($vocab_id, $terms);

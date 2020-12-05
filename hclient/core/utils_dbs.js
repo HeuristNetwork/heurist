@@ -1051,7 +1051,7 @@ window.hWin.HEURIST4.dbs = {
         var recset =  window.hWin.HEURIST4.util.isRecordSet(entityName)?entityName
                         :window.hWin.HAPI4.EntityMgr.getEntityData(entityName); 
         
-        if(rec_ID>0){
+        if(recset && rec_ID>0){
             
             if(fieldName){
                 return recset.fld(rec_ID, fieldName);
