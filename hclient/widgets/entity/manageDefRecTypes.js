@@ -207,7 +207,8 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                                     },
                                     zIndex:100,
                                     appendTo:'body',
-                                    scope: 'rtg_change'
+                                    scope: 'rtg_change',
+                                    containment: 'window'
                                     //containment: that.element,
                                     //delay: 200
                                 });   

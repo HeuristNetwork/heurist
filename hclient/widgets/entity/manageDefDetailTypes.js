@@ -151,8 +151,8 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                                     },
                                     zIndex:100,
                                     appendTo:'body',
+                                    containment: 'window',
                                     scope: 'dtg_change'
-                                    //containment: that.element,
                                     //delay: 200
                                 });   
                     }

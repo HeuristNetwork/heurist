@@ -36,6 +36,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
    
     _entityName:'defTerms',
     fields_list_div: null,  //term search result
+    scrollInterval:0,
     
     //
     //                                                  
@@ -201,6 +202,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                                     },
                                     zIndex:100,
                                     appendTo:'body',
+                                    containment: 'window',
                                     scope: 'vcg_change'
                                 });   
                     },
@@ -424,7 +426,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                                     },
                                     zIndex:99999,
                                     appendTo:'body',
-                                    //containment: that.recordList.find('.div-result-list-content'),
+                                    containment: 'window',
                                     scope: 'vocab_change',
                                     
                                     drag: function(event,ui){
@@ -434,6 +436,20 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                                         }else{
                                             $(ui.helper).css("cursor", 'not-allowed');
                                         }
+
+var ele = that.recordList.find('.div-result-list-content');
+var bot = ele.offset().top+ele.height();
+if(that.scrollInterval>0) clearInterval(that.scrollInterval);
+that.scrollInterval = 0;
+
+if(ui.offset.top>bot-20){
+//    console.log(bot);
+//    console.log(ui.position.top+'  '+ui.position.left);
+    that.scrollInterval = setInterval(function(){ ele[0].scrollTop += 20}, 50); 
+}else if(ui.offset.top<ele.offset().top+20){
+    that.scrollInterval = setInterval(function(){ ele[0].scrollTop -= 20}, 50); 
+}
+                                        
                                     }
                                 });   
                     },
