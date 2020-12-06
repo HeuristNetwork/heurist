@@ -76,7 +76,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             this.options.select_mode = 'manager';
             this.options.layout_mode = 'editonly';
             
-        }else if(this.options.external_preview){
+        }else if(this.options.external_preview){ 
             
             this.options.layout_mode = 
                 '<div class="treeview_with_header" style="background:white">'
@@ -92,6 +92,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                 +'</div>';
             
         }else {
+            
             this.options.layout_mode =                 
                 '<div style="display:none">'
                     +'<div class="ent_header searchForm"/>'     
@@ -101,7 +102,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                 +'<div class="main-layout ent_wrapper">'
                         
                         +'<div class="ui-layout-west">'
-                                +'<div class="treeview_with_header" style="background:white">'
+                                +'<div class="treeview_with_header" style="background:blue">'
                                     +'<div style="padding:10px 20px 4px 10px;border-bottom:1px solid lightgray">' //instruction and close button
                                         +'<span style="font-style:italic;display:inline-block">Drag to reposition<br>'
                                         +'Select or <span class="ui-icon ui-icon-gear" style="font-size: small;"/> to modify</span>&nbsp;&nbsp;&nbsp;'

@@ -1038,19 +1038,30 @@ $.widget( "heurist.manageEntity", {
         
         var that = this;
         if(that._editing && that._editing.isModified() && that._currentEditID!=null){
+            
+            var sMsg,sBtnSave,sBtnCancel;
+            
             if(this.options.edit_structure){
-                that._currentEditID=null; that.closeDialog();
-                return true;
+                //2020-12-06 that._currentEditID=null; that.closeDialog();
+                //2020-12-06 return true;
+                sMsg = 'Click "Save data" to save the data entered, "Drop data changes" to abandon modifications.'
+                +'<br>Structure changes are saved automatically - they are not affecvted by your choice.';
+                sBtnSave = 'Save data';
+                sBtnCancel = 'Drop data changes';
+            }else{
+                sMsg = 'You have made changes to the data. Click "Save" otherwise all changes will be lost.';
+                sBtnSave = 'Save';
+                sBtnCancel = 'Ignore and close';
             }
             
             var $dlg, buttons = {};
-            buttons['Save'] = function(){ that._saveEditAndClose(null, 'close'); $dlg.dialog('close'); }; 
-            buttons['Ignore and close'] = function(){ that._currentEditID=null; that.closeDialog(); $dlg.dialog('close'); };
+            buttons[sBtnSave] = function(){ that._saveEditAndClose(null, 'close'); $dlg.dialog('close'); }; 
+            buttons[sBtnCancel] = function(){ that._currentEditID=null; that.closeDialog(); $dlg.dialog('close'); };
             
             $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
-                    'You have made changes to the data. Click "Save" otherwise all changes will be lost.',
+                    sMsg,
                     buttons,
-                    {title:'Confirm',yes:'Save',no:'Ignore and close'});
+                    {title:'Confirm',yes:sBtnSave,no:sBtnCancel});
             return false;   
         }
         if($.isFunction(that.saveUiPreferences))that.saveUiPreferences();
@@ -1408,9 +1419,7 @@ $.widget( "heurist.manageEntity", {
                 return;   
             }
             
-            if(this.options.edit_structure){
-               return;
-            }            
+            //2020-12-06 if(this.options.edit_structure){ return; }            
         
             if(!fields){
                 fields = this._getValidatedValues(); 

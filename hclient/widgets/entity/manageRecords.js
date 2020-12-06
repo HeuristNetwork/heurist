@@ -349,7 +349,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     //
     saveQuickWithoutValidation: function( _callback ){
       
-        if(!this.options.edit_structure && this._editing.isModified()){
+        if(this._editing.isModified()){ //2020-12-06 !this.options.edit_structure &&   
             var fields = this._editing.getValues(false);
             fields['no_validation'] = 1; //do not validate required fields
             this._saveEditAndClose( fields, _callback);           
@@ -658,10 +658,14 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                               ];    
                 }else if(this.options.edit_structure==true){
 
-                        btns = [ {text:window.hWin.HR('Close'), 
+                        btns = [ 
+                            {text:window.hWin.HR('Save'), id:'btnRecSaveAndClose',
+                              css:{'margin-left':'0.5em'},
+                              click: function() { that._saveEditAndClose( null, 'close' ); }},
+                            {text:window.hWin.HR('Close'), 
                               click: function() { 
-                                  that.closeEditDialog( true ); //withot save
-                              }}];
+                                  that.closeEditDialog();
+                            }}];
                     
                 }else{
                 
@@ -913,6 +917,17 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     applyDefaultStyles: true,
                     //togglerContent_open:    '&nbsp;',
                     //togglerContent_closed:  '&nbsp;',
+                    north:{
+                        size: 60,
+                        maxHeight:60,
+                        minHeight:60,
+                        initHidden:!this.options.edit_structure,
+                        contentSelector: '.editStructureHeader', 
+                        spacing_open: 3,
+                        slidable:false,
+                        resizable:false,
+                        closable:false
+                    },
                     west:{
                         size: this.usrPreferences.structure_width,
                         maxWidth:800,
@@ -923,7 +938,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         //togglerAlign_closed:'top',
                         togglerAlign_closed:16,   //top position   
                         togglerLength_closed:80,  //height of toggler button
-                        initHidden: !this.options.edit_structure,
+                        initHidden: !this.options.edit_structure,   //show structure list at once 
                         initClosed: !this.options.edit_structure && (this.usrPreferences.structure_closed!=0),
                         slidable:false,  //otherwise it will be over center and autoclose
                         contentSelector: '.editStructure',   
@@ -983,6 +998,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 
                 if(this.options.edit_structure){
                     
+                    this.editFormPopup.layout().show("north");
                     this.editFormPopup.layout().hide("east");  
                     /*this.editFormPopup.layout().open("west");  
                     var tog = this.editFormPopup.find('.ui-layout-toggler-east');
@@ -1892,7 +1908,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         var that = this;
         var rty_ID = this._currentEditRecTypeID;
         
-        if(!this.options.edit_structure && this._editing.isModified()){
+        if(this._editing.isModified()){  //2020-12-06 !this.options.edit_structure && 
             
                 var sMsg = "Click YES to save changes and modify the record type attributes";
                 window.hWin.HEURIST4.msg.showMsgDlg(sMsg, function(){
@@ -2040,7 +2056,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         }
 
         var record_stub = {};
-        if(that.options.edit_structure){ //returns fake record to edit structure only
+        if(false && that.options.edit_structure){ //2020-12-06  returns fake record to edit structure only
             record_stub = {"status":"ok","is_insert":true,
                         "data":{"entityName":"Records","count":"1","reccount":1,
                         "fields":["rec_ID","rec_URL","rec_RecTypeID","rec_Title",
@@ -2061,7 +2077,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             this._editing.initEditForm(null, null); //clear and hide
         }else if(recID>0){ //edit existing record  - load complete information - full file info, relations, permissions
         
-            if(that.options.edit_structure){
+            if(false && that.options.edit_structure){ //2020-12-06
                 
                 that._initEditForm_step4(record_stub);
                 
@@ -2125,7 +2141,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 }
                 
 
-                if(that.options.edit_structure){ //returns fake record to edit structure only
+                if(false && that.options.edit_structure){ //2020-12-06 returns fake record to edit structure only
 /*
                         var response = {"status":"ok","data":{"queryid":null,"pageno":null,"entityName":"Records","count":"1","offset":0,"reccount":1,"tmcount":0,
                         "fields":["rec_ID","rec_URL","rec_RecTypeID","rec_Title","rec_OwnerUGrpID","rec_NonOwnerVisibility","rec_Modified","bkm_PwdReminder","rec_Added","rec_AddedByUGrpID","rec_ScratchPad","bkm_Rating","rec_ThumbnailURL",
@@ -2150,6 +2166,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                                 if(response.status == window.hWin.ResponseStatus.OK){
                                     response.is_insert=true; 
                                     that._initEditForm_step3(response.data, true); //it returns new record id only
+                                    if(that.options.edit_structure) that.editRecordType(true); //2020-12-06 added
                                 } else{
                                     window.hWin.HEURIST4.msg.showMsgErr(response);
                                 }
@@ -2161,6 +2178,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                                 if(response.status == window.hWin.ResponseStatus.OK){
                                     response.is_insert=true; 
                                     that._initEditForm_step4(response); //it returns full record data
+                                    if(that.options.edit_structure) that.editRecordType(true); //2020-12-06 added
                                 }else{
                                     that.closeDialog();
                                     window.hWin.HEURIST4.msg.showMsgErr(response);
@@ -3211,11 +3229,24 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 
                 var btn = this.element.find('.btn-edit-rt2');        
                 if(this.options.edit_structure){
+                    
+                    var cont = this.element.find('.editStructureHeader').css({overflow:'hidden'});
 
                     btn.button({icon:'ui-icon-pencil',label:'Edit attributes<br>(name, icon ...)'})
                             .css(btn_css)
                             .width(150).show()
                             .click(function(){that.editRecordTypeAttributes(true);});
+
+                    var btn2 = btn.clone().css({'float':'left','margin':'2px 20px',background:'#DAD0E4'})
+                                .click(function(){that.editRecordTypeAttributes(true);})
+                                .appendTo(cont);    
+                    btn2.find('.ui-button-icon')
+                            .css({'font-size':'25px','float':'left',width:'25px',height:'25px','margin-top':'0px'});
+                
+                    $('<span>').addClass('heurist-helper3').css({'float':'left','margin': '10px'}).html(
+                        'This is an empty record. Test data entry as you develop the structure. '
+                        +'<br>If you want to retain the data entered, hit [Save data], otherwise [Close]')  
+                            .appendTo(cont);      
                 
                     this.element.find('.btn-edit-rt').hide();
                 }else{
