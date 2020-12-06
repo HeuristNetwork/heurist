@@ -40,7 +40,8 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         width:(window.hWin?window.hWin.innerWidth:window.innerWidth)*0.95,
         height:(window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95,
 //rtyid,'ccode','addrec','filter','count','group','icon','edit','editstr','name','description','show','duplicate','fields','status'        
-        fields:['icon','edit','fields','editstr','name','count','filter','addrec','description','show','duplicate','status','rtyid','ccode'] 
+        fields:['icon','fields','editstr','name','count','filter','addrec','description','show','duplicate','status','rtyid','ccode'] 
+        //'edit',
         },
     fields_width: {rtyid:30,ccode:80,addrec:34,filter:34,count:40,group:34,icon:40,edit:34,editstr:34,
                 name:150,description:34,show:34,duplicate:34,fields:34,status:34},
@@ -536,7 +537,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                     html += fld2(34,'Attribs','Edit attributes','text-align:center;'); //font-size:12px
                     break;
                 case 'editstr': 
-                    html += fld2(34,'Fields','Edit fields','text-align:center');
+                    html += fld2(34,'Fields','Edit','text-align:center');
                     break;
                 case 'name':  
                     html += '$$NAME$$';//fld2(150,'Name','text-align:left');

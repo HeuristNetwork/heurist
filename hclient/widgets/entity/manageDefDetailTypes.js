@@ -833,9 +833,12 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
            for(var idx in depended_fields){
                $(depended_fields[idx]).show();
            }
-           if(dt_type=='enum' || dt_type=='relationtype' || dt_type=='relmarker'){
+           if(dt_type=='enum' || dt_type=='relmarker'){
                 var ele = this._editing.getFieldByName('dty_Mode_enum');  
                 this._activateEnumControls(ele);
+           }else if(dt_type=='relationtype'){
+                var ele = this._editing.getFieldByName('dty_Mode_enum');  
+                this._activateRelationTypeControls(ele);
            }
            if(this.options.newFieldForRtyID>0){
                 depended_fields = this._editing.getFieldByClass('newFieldForRtyID');
@@ -974,6 +977,36 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
       }
 
     },
+
+    //
+    //
+    //
+    _activateRelationTypeControls: function( ele ){
+
+            ele.find('.header').text('Relation types:');
+        
+            var ele = ele.find('.input-div');
+            //remove old content
+            ele.empty();
+            
+            if(ele.find('#enumVocabulary').length>0) return; //already inited
+    
+            this.enum_container = ele;
+            
+            $('<div style="line-height:2ex;padding-top:4px">'
+                        +'<div id="enumVocabulary" style="display:inline-block;">' //padding-left:4px;
+                            +'<select id="selPreview"></select>'
+                            +'<div style="padding:5px 3px">'
+                                +'<a href="#" id="show_terms_1" style="padding-left:10px">edit terms tree</a>'
+                            +'</div>'
+                        +'</div>'
+                +'</div>').appendTo(this.enum_container);
+                
+            
+            this._on(this.enum_container.find('#show_terms_1'),{click: this._showOtherTerms}); //manage defTerms
+            this._recreateTermsPreviewSelector();
+            
+    },
     
     //
     //
@@ -1006,7 +1039,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                         +'</div>'
                 +'</div>').appendTo(this.enum_container);
             
-            }else{     //@todo remove
+            }else{     //@todo remove   Individidual selection
             
                 $('<div style="line-height:2ex;padding-top:4px">'
                         +'<label style="text-align:left;line-height:19px;vertical-align:top">'
@@ -1205,14 +1238,16 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
     //
     // Opens defTerms manager
     //
-    _showOtherTerms:function(event){
+    _showOtherTerms: function(event){
 
         var term_type = this._editing.getValue('dty_Type')[0];
-        if(term_type!="enum"){
-            term_type="relation";
-        }
-        var vocab_id =  this.enum_container.find("#selVocab").val();
 
+        var vocab_id = (term_type=='relationtype')
+                            ?this.enum_container.find("#selPreview").val()
+                            :this.enum_container.find("#selVocab").val();
+
+        vocab_id = $Db.getTermVocab(vocab_id)
+                            
         var that = this;
         window.hWin.HEURIST4.ui.showEntityDialog('defTerms', 
                 {isdialog: true, 
@@ -1220,7 +1255,12 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                  selection_on_init: vocab_id,  //selected vocabulary  
                  width: 1200, height:700,
                  onClose: function(){
-                     that._recreateTermsVocabSelector();
+                     if(term_type=='relationtype'){
+                        that._recreateTermsPreviewSelector(); 
+                     }else{
+                        that._recreateTermsVocabSelector();    
+                     }
+                     
                  }
         });
               
@@ -1260,6 +1300,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         var allTerms = newval>0?newval:this._editing.getValue('dty_JsonTermIDTree')[0];
         
         var term_type = this._editing.getValue('dty_Type')[0];
+        
         if(term_type!="enum"){
             term_type="relation";
         }
@@ -1306,26 +1347,23 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         
         //preview_sel.empty();
         //this.enum_container.find('#termsPreview2').empty();
+        
+        var term_type = this._editing.getValue('dty_Type')[0];
+        if(term_type=='relationtype'){
+            allTerms = 'relation';
+        }
 
         if(!window.hWin.HEURIST4.util.isempty(allTerms)) {
             
-            var disTerms = this._editing.getValue('dty_TermIDTreeNonSelectableIDs')[0];  //@todo remove - is not used anymore
-            
-            var term_type = this._editing.getValue('dty_Type')[0];
-            if(term_type!="enum"){
-                term_type="relation";
-            }
+            //var disTerms = this._editing.getValue('dty_TermIDTreeNonSelectableIDs')[0];  //@todo remove - is not used anymore
 
             //append to first preview
-            var new_selector = preview_sel.find('#selPreview');
+            var new_selector = this.enum_container.find('#selPreview');
             
             new_selector = window.hWin.HEURIST4.ui.createTermSelect(new_selector[0],
                     {vocab_id:allTerms, topOptions:false, supressTermCode:true});
 
             preview_sel.css({'display':'inline-block'});
-            
-            //new_selector.css({'backgroundColor':'#cccccc','min-width':'120px','max-width':'120px','margin':'0px 4px'})
-            //        .change(function(event){event.target.selectedIndex=0;}).show();
             
         }else{
             preview_sel.hide();
@@ -1486,7 +1524,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         if(fieldvalues!=null){
             
             var dt_type = fieldvalues['dty_Type'];
-            if(dt_type=='enum' || dt_type=='relationtype' || dt_type=='relmarker'){
+            if(dt_type=='enum' || dt_type=='relmarker'){
 
                 if(!fieldvalues['dty_JsonTermIDTree']){
 

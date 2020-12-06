@@ -1563,8 +1563,11 @@ console.log('No active tree node!!!!')
         
         var allTerms = this._editing.getValue('rst_FilteredJsonTermIDTree')[0];
         var disTerms = null;
-        var term_type = 'enum';
+        var term_type = this._editing.getValue('dty_Type')[0];//'enum', 'relmarker' or 'relationtype'
         var defval = '';
+        if(term_type=='relationtype'){
+            allTerms = 'relation';
+        }
 
         //remove old content
         //var edit_ele = this._editing.getFieldByName('rst_TermPreview');
@@ -1585,7 +1588,7 @@ console.log('No active tree node!!!!')
             this._editing.setFieldValueByName('rst_DefaultValue', '', false);
         }
         var ele = this._editing.getFieldByName('rst_TermPreview');
-        ele.editing_input('fset','dty_Type',(term_type!='relation')?'enum':'relationtype');
+        //ele.editing_input('fset','dty_Type',(term_type!='relation')?'enum':'relationtype');
         ele.editing_input('fset','rst_FilteredJsonTermIDTree', allTerms);
         ele.editing_input('fset','rst_TermIDTreeNonSelectableIDs', disTerms);
         this._editing.setFieldValueByName('rst_TermPreview', defval, false); //recreates
