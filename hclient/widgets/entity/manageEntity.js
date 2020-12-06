@@ -240,9 +240,15 @@ $.widget( "heurist.manageEntity", {
         if(this.options.innerTitle){ 
             
             fele.children(0).css('top', '38px'); //down manager div to 38
-            this._innerTitle = $('<div>').addClass('ui-heurist-header')
-            .html('<span class="title">'+this.options['title']+'</span>')
-            .insertBefore($(fele.children()[0])); //insert before first wrapper
+            
+            if(this.options.innerTitle===true){
+                this._innerTitle = $('<div>').addClass('ui-heurist-header')
+                .html('<span class="title">'+this.options['title']+'</span>')
+                .insertBefore($(fele.children()[0])); //insert before first wrapper
+            }else{
+                $(this.options.innerTitle).css({'max-height':'38px'}).insertBefore($(fele.children()[0]));
+            }
+            
         }
             
         if(!this.options.isdialog){

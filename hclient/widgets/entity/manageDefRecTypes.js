@@ -537,7 +537,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                     html += fld2(34,'Attribs','Edit attributes','text-align:center;'); //font-size:12px
                     break;
                 case 'editstr': 
-                    html += fld2(34,'Fields','Edit','text-align:center');
+                    html += fld2(34,'Edit','Edit','text-align:center');
                     break;
                 case 'name':  
                     html += '$$NAME$$';//fld2(150,'Name','text-align:left');

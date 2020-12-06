@@ -1251,8 +1251,13 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         var that = this;
         window.hWin.HEURIST4.ui.showEntityDialog('defTerms', 
                 {isdialog: true, 
-                 innerTitle: false,
+                 
                  selection_on_init: vocab_id,  //selected vocabulary  
+                 innerTitle: false,
+                 innerCommonHeader: $('<div>modifying field :<b>'
+                        +(this._currentEditID>0?$Db.dty(this._currentEditID,'dty_Name'):'New field')
+                        +'</b> dropdown is populated from <b>'+$Db.trm(vocab_id,'trm_Label')+'</b> vocabulary</div>'),
+                 
                  width: 1200, height:700,
                  onClose: function(){
                      if(term_type=='relationtype'){

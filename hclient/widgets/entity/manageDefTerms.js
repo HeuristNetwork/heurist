@@ -288,7 +288,13 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                     .css({position: 'absolute',top: 0, bottom: 0, left: 0, width:536, overflow: 'hidden'}) //280
                     .uniqueId()
                     .appendTo(this.element);
-                
+
+                if(this.options.innerCommonHeader){
+                    $(this.options.innerCommonHeader).css({position:'absolute',height:'38px',left:0,right:0,top:0,
+                        'text-align': 'center',background: 'white','line-height': '38px'}).appendTo(this.element);
+                    this.main_element.css('top','38px');
+                    this.vocabularies_div.css('top','38px');
+                }
                 //show particular terms for vocabulary 
                 var btn_array = [
                           

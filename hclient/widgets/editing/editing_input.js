@@ -1007,6 +1007,11 @@ $.widget( "heurist.editing_input", {
                         function(){
                             var rg_options = {
                                 height:800, width:1300,
+                                selection_on_init: allTerms,
+                                innerTitle: false,
+                                innerCommonHeader: $('<div>'
+                                    +(that.options.dtID>0?('modifying field :<b>'+$Db.dty(that.options.dtID,'dty_Name')+'</b>'):'')
+                                    +' dropdown is populated from <b>'+$Db.trm(allTerms,'trm_Label')+'</b> vocabulary</div>'),
                                 onInitFinished: function(){
                                     var that2 = this;
                                     setTimeout(function(){
