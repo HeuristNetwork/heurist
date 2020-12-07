@@ -280,9 +280,10 @@ error_log($e->getCode().' ('.$e->getErrorType().'): '.$e->getMessage());
                 
             }
     }else{
-        $system->error_exit_api('Record '
+        $system->error_exit_api('Shapefile dataset (record id:'
             .$params['recID']
-            .' does not have fields where stored reference to shp or zip file',
+            .') does not have a valid reference to a shp or zip file.<br> '
+            .'Please ask record owner to correct the metadata.',
             HEURIST_NOT_FOUND); 
     }
     
