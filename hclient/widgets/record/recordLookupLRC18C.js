@@ -538,7 +538,7 @@ $.widget("heurist.recordLookupLRC18C", $.heurist.recordAction, {
                     religion_id = ""
 
                     // Add prefix term and get its term ID
-                    if (prefixTermId == null && authorDict['249'] != "" && authorDict['249'] != undefined) {
+                    if (prefixTermId == null && author_details['249'] != "" && author_details['249'] != undefined) {
                         that._addTermThatDoesNotExist("prefix", author_details[249], author_id, author_rec_data)
                     }
                     // Add suffix term and get its term ID
@@ -837,7 +837,6 @@ $.widget("heurist.recordLookupLRC18C", $.heurist.recordAction, {
         workID = "";
         query_string = 't:56 f:1:"' + work_title + '"'
         urlToCheckWorkinLibraries = that._getQueryURL(query_string, "libraries")
-
         $.ajax({
             url: urlToCheckWorkinLibraries,
             async: false,
@@ -872,7 +871,8 @@ $.widget("heurist.recordLookupLRC18C", $.heurist.recordAction, {
         createAuthor = false;
         query_string = 'ids%3A' + estc_edition_id
         urlToGetEditionDetails = that._getQueryURL(query_string, "ESTC")
-
+        console.log("URL TO GET EDITION DETAILS")
+        console.log(urlToGetEditionDetails)
         return $.ajax({
             url: urlToGetEditionDetails,
             async: false,
