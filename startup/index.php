@@ -801,7 +801,7 @@ a{
 
             <!-- SCREEN#4 In progress --> 
             <div class="center-box screen4">
-                <h1>Database is creating</h1>
+                <h1>Database is being creating</h1>
                 
                 <div style="text-align: center;padding: 60px 0;">
                     <span class="ui-icon ui-icon-loading-status-circle rotate" style="height: 300px;width: 300px;font-size: 800%;color: rgb(79, 129, 189);"></span>
@@ -821,11 +821,11 @@ a{
                     </div>
                     
                     <div style="padding:5px 0px">
-                        <label style="text-align:right;min-width:180px;display:inline-block">Your new database address:</label>
+                        <label style="text-align:right;min-width:180px;display:inline-block">URL:</label>
                         <span style="font-weight:bold" id="newdblink"></span>
                     </div>
                     
-                    <div style="font-weight:bold;padding:5px 0px 20px 183px">
+                    <div style="padding:5px 0px 20px 183px">
                         We suggest bookmarking this address for future access
                     </div>
                     
