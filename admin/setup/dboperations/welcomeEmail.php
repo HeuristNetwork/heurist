@@ -72,6 +72,7 @@ function sendEmail_NewDatabase($user_record, $database_name, $source_database){
     $email->Subject   = (($source_database!=null)?'CloneDB: ':'NewDB: ')
                     .'Getting up to speed with your Heurist database ('.$database_name.')';
     $email->Body      = $message;
+    $email->AddAddress( $user_record['ugr_eMail'] );        
     $email->AddAddress( HEURIST_MAIL_TO_ADMIN ); //         
     $email->addAttachment(dirname(__FILE__).'/Heurist Welcome attachment.pdf');
    
