@@ -2277,6 +2277,7 @@ $.widget( "heurist.mapping", {
     //
                 
     onLayerStatus: function( layer_ID, status ){
+
         if($.isFunction(this.options.onlayerstatus)){
             this.options.onlayerstatus.call(this, layer_ID, status);
         }
