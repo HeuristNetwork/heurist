@@ -2038,7 +2038,7 @@ if(!(vocab_id>0)){
                         var mmax  = cterm[1];
                         var daymsec = 86400000; //24*60*60*1000;   1day
                  
-console.log(cterm[0]+'   '+cterm[1]);
+//console.log(cterm[0]+'   '+cterm[1]);
                         
                         if(!(window.hWin.HEURIST4.util.isempty(mmin) || window.hWin.HEURIST4.util.isempty(mmax))){
                             
@@ -2101,7 +2101,7 @@ console.log(cterm[0]+'   '+cterm[1]);
                         }else if(!field.selectedvalue && cterm[0]==cterm[1]){ //range was not set and initial
                             
                             //show the only date without slider
-                            s = temporalSimplifyDate(_cterm[0]);
+                            s = temporalSimplifyDate(cterm[0]);
                             
                             $("<span>").html(s 
                                     + ((sl_count>0) ?'<span class="badge" style="float: right;">'+sl_count+'</span>':''))
