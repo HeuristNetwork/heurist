@@ -176,7 +176,7 @@ $.widget("heurist.recordLookupLRC18C", $.heurist.recordAction, {
     _XMLParse: function (editionXML) {// Concept IDS for editions incoming from ESTC database
         editionConceptID = "3-102";
         placeConceptID = "3-1009";
-        workConceptID = "0000-49";
+        workConceptID = "0-49";
         authorConceptID = "2-10";
 
         estc_edition_dict = {};
