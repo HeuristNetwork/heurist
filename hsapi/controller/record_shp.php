@@ -280,10 +280,10 @@ error_log($e->getCode().' ('.$e->getErrorType().'): '.$e->getMessage());
                 
             }
     }else{
-        $system->error_exit_api('Shapefile dataset (record id:'
-            .$params['recID']
-            .') does not have a valid reference to a shp or zip file.<br> '
-            .'Please ask record owner to correct the metadata.',
+        $system->error_exit_api(
+'Cannot process shp file. Please ask the owner of the layer data source record (id:'
+.$params['recID']
+.') to check that the file exists, is readable and has not been corrupted.',
             HEURIST_NOT_FOUND); 
     }
     

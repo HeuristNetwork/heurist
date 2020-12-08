@@ -1538,7 +1538,7 @@ window.hWin.HEURIST4.ui = {
                                         
                                         //_innerTitle.find('span').text( options.title );
                                         $helper_div.show( 'slide', {direction:'right'}, 500 );                        
-                                        options.container.children('.ent_content_full').css({right:424});
+                                        options.container.children('.ent_content_full').css({right:480});
                                     
                                         setTimeout(function(){
                                                 $helper_div.find('#content').scrollTop(1);
