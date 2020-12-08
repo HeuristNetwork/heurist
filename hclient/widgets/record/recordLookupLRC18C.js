@@ -174,10 +174,16 @@ $.widget("heurist.recordLookupLRC18C", $.heurist.recordAction, {
     /* Parse the output XML for a user selected Edition */
     /* Build estc_edition, author_dict, work_dict and ids_n_title of edition dict */
     _XMLParse: function (editionXML) {// Concept IDS for editions incoming from ESTC database
+        // placeConceptID = "3-1009";
+        placeConceptID = $Db.getConceptID('rty', 12)
+        // authorConceptID = "2-10";
+        authorConceptID = $Db.getConceptID('rty', 10)
+
+
+        // Use 1322 on Intersect QA server as database registered ID for ESTC database is 1322 as opposed to 1321 on
+        // Sydney Heurist Server
+        workConceptID = '1321'+'-'+'49'
         editionConceptID = "3-102";
-        placeConceptID = "3-1009";
-        workConceptID = "0-49";
-        authorConceptID = "2-10";
 
         estc_edition_dict = {};
         author_dict = {};
@@ -883,7 +889,6 @@ $.widget("heurist.recordLookupLRC18C", $.heurist.recordAction, {
             },
             success: function (editionXML) {
                 getEditionDetails = false;
-
                 try {
                     // Parse the output ESTC edition XML
                     editionXML = jQuery.parseXML(String(editionXML));
@@ -1043,7 +1048,6 @@ $.widget("heurist.recordLookupLRC18C", $.heurist.recordAction, {
                 estc_no = ' f:254: ' + '"' + this.element.find('#estc_no').val() + '"'
             }
             query_string = 't:30 ' + edition_name + edition_date + edition_author + edition_work + edition_place + book_format + estc_no + vol_count + vol_parts;
-        
         }
 
 
