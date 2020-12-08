@@ -45,6 +45,8 @@ class DbsImport {
             
     private $source_defs = null;
     private $target_defs = null;
+    private $target_new_groups = null;
+    
 
     private $targetTerms = null;
     private $sourceTerms = null; //ref to DbsTerms
@@ -395,6 +397,8 @@ if(_DBG) error_log('Preparation '.(microtime(true)-$time_debug2));
 $time_debug = microtime(true);
 $time_debug2 = $time_debug;
         
+        $this->target_new_groups = array();
+        
         // I. Add Terms (whole vocabulary)
         $stub = array();//stub for $all_terms_in_vocab
         if(! ($this->_importVocabulary(null, "enum", $stub) && 
@@ -404,6 +408,18 @@ $time_debug2 = $time_debug;
             $mysqli->close();
             return false;                
         }
+        //remove new empty vocabulary groups 
+        if(count($this->target_new_groups)>0){
+            $to_remove = mysql__select_list2($mysqli,
+'select vcg_ID, count(trm_ID) as cnt from defVocabularyGroups left join defTerms on vcg_ID=trm_VocabularyGroupID '
+.'where vcg_ID in ('.implode(',',$this->target_new_groups).') group by vcg_ID having cnt=0');
+            if($to_remove && count($to_remove)>0){
+                $query = 'DELETE FROM defVocabularyGroups WHERE vcg_ID in ('.implode(',',$to_remove).')';
+                $mysqli->query($query);
+            }
+        }
+        
+        
         
 if(_DBG) error_log('Terms '.(microtime(true)-$time_debug));        
 $time_debug = microtime(true);        
@@ -1431,7 +1447,7 @@ if($term_id==11 || $term_id==518 || $term_id==497){
             //get name and try to find in target by name
             $isNotFound = true;
             foreach ($this->target_defs['terms']['groups'] as $id=>$group){
-                if(is_numeric($id) && trim($group['vcg_Name'])== trim($grp_name)){
+                if(is_numeric($id) && strtolower(trim($group['vcg_Name']))==strtolower(trim($grp_name))){
                     $this->vcg_correspondence[$grp_id] = $id;
                     $isNotFound = false;
                     break;
@@ -1447,6 +1463,7 @@ if($term_id==11 || $term_id==518 || $term_id==497){
                     $this->vcg_correspondence[$grp_id] = $new_grp_id;
                     $src_group['vcg_ID'] = $new_grp_id;
                     $this->target_defs['terms']['groups'][$new_grp_id] = $src_group;
+                    array_push($this->target_new_groups, $new_grp_id);
                 }else{
                     $this->error_exit2("Can't add vocabulary group '".$grp_name."'. ".@$res['error']);
                     return false;
