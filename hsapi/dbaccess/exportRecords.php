@@ -455,7 +455,7 @@ XML;
                    }
                    
                    if( (defined('RT_TLCMAP_DATASET') && $rty_ID==RT_TLCMAP_DATASET) || 
-                       (defined('RT_MAP_LAYER') && $$rty_ID==RT_MAP_LAYER) ){
+                       (defined('RT_MAP_LAYER') && $rty_ID==RT_MAP_LAYER) ){
                         array_push($layers_record_ids, $recID);    
                    }
                    

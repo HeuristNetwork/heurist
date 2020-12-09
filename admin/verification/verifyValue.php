@@ -102,7 +102,7 @@ public static function getAllowedTerms($defs, $defs_nonsel, $dtyID){
         if($parent_id==null || $parent_id==''){
             $allowed_terms = 'all';
         }else{
-            if(self::$terms==null){
+            if(self::$terms == null){
                self::$terms = dbs_GetTerms(self::$system); 
                self::$dbs_terms = new DbsTerms(self::$system, self::$terms);
             }  
@@ -188,7 +188,10 @@ public static function isValidTermLabel($defs, $defs_nonsel, $label, $dtyID, $is
         $withHierarchy = true;//(strpos($label,'.')>0); 
     
         self::initialize();
-        if(self::$terms==null)  self::$terms = dbs_GetTerms(self::$system);
+        if(self::$terms==null){
+            self::$terms = dbs_GetTerms(self::$system);   
+            self::$dbs_terms = new DbsTerms(self::$system, self::$terms);
+        }
         $allowed_terms = self::getAllowedTerms($defs, $defs_nonsel, $dtyID);
         
         $allowed_labels = array();
@@ -262,7 +265,10 @@ public static function isValidTermCode($defs, $defs_nonsel, $code, $dtyID){
     if($dtyID==null || !@self::$dtyIDDefs_codes[$dtyID]){
     
         self::initialize();
-        if(self::$terms==null)  self::$terms = dbs_GetTerms(self::$system);
+        if(self::$terms==null){
+            self::$terms = dbs_GetTerms(self::$system);   
+            self::$dbs_terms = new DbsTerms(self::$system, self::$terms);
+        }
         $allowed_terms = self::getAllowedTerms($defs, $defs_nonsel, $dtyID);
         
         $allowed_codes = array();

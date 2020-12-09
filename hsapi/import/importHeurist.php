@@ -791,7 +791,7 @@ EOD;
                     continue;
                 }
                 if($dty_ID==DT_PARENT_ENTITY){ //ignore
-                    contunue;
+                    continue;
                 }
                 
                 

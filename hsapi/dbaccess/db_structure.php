@@ -543,38 +543,43 @@ function dbs_GetRectypeConstraint($system) {
                 'relation' => __getTermTree($system, "relation", "exact"), 
                 'enum' => __getTermTree($system, "enum", "exact"));
 
-
-        //see dbDefTerms->getTermLinks
-        $query = 'SELECT trl_ParentID, trl_TermID FROM defTermsLinks ORDER BY trl_ParentID';
-        $res = $mysqli->query($query);
-        $matches = array();
-        if ($res){
-            while ($row = $res->fetch_row()){
-                    
-                if(@$matches[$row[0]]){
-                    $matches[$row[0]][] = $row[1];
-                }else{
-                    $matches[$row[0]] = array($row[1]);
-                }
-            }
-            $res->close();
-            $terms['trm_Links'] = $matches;
-            
-        }
-                
-        //get vocabulary groups 
         $vcgGroups = array();//'groupIDToIndex' => array());
-        $query = 'SELECT vcg_ID, vcg_Name, vcg_Domain, vcg_Order, vcg_Description FROM defVocabularyGroups';
-        $res = $mysqli->query($query);
-        if($res){
-            while ($row = $res->fetch_assoc()) {
-                $vcgGroups[$row['vcg_ID']] = $row;
-                //groupIDToIndex['groupIDToIndex'][$row["vcg_ID"]] = $index++;
-            }                
-            $res->close();
-        }else{
-            error_log('DATABASE: '.$system->dbname().'. Error retrieving vocabulary groups '.$mysqli->error);
-        }
+                
+        //see dbDefTerms->getTermLinks
+        $dbVer = $system->get_system('sys_dbVersion');
+        $dbVerSub = $system->get_system('sys_dbSubVersion');
+        if($dbVer==1 && $dbVerSub>2){
+            $query = 'SELECT trl_ParentID, trl_TermID FROM defTermsLinks ORDER BY trl_ParentID';
+            $res = $mysqli->query($query);
+            $matches = array();
+            if ($res){
+                while ($row = $res->fetch_row()){
+                        
+                    if(@$matches[$row[0]]){
+                        $matches[$row[0]][] = $row[1];
+                    }else{
+                        $matches[$row[0]] = array($row[1]);
+                    }
+                }
+                $res->close();
+                $terms['trm_Links'] = $matches;
+                
+            }
+                    
+            //get vocabulary groups 
+        
+            $query = 'SELECT vcg_ID, vcg_Name, vcg_Domain, vcg_Order, vcg_Description FROM defVocabularyGroups';
+            $res = $mysqli->query($query);
+            if($res){
+                while ($row = $res->fetch_assoc()) {
+                    $vcgGroups[$row['vcg_ID']] = $row;
+                    //groupIDToIndex['groupIDToIndex'][$row["vcg_ID"]] = $index++;
+                }                
+                $res->close();
+            }else{
+                error_log('DATABASE: '.$system->dbname().'. Error retrieving vocabulary groups '.$mysqli->error);
+            }
+        }//$dbVer==1 && $dbVerSub>2
         $terms['groups'] = $vcgGroups;
         
         //terms by reference
