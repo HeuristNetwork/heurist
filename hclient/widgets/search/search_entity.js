@@ -34,7 +34,7 @@ $.widget( "heurist.search_entity", {
         search_realm: null
     },
 
-    selected_rty_ids:[], // favorites
+    selected_rty_ids:[], //
 
     combined_select: null, // if use_combined_select  usage>,config>,list of favorites
     
@@ -221,10 +221,9 @@ console.log(data);
             //get selected from preferences
             this.selected_rty_ids = window.hWin.HAPI4.get_prefs_def('entity_filter_btns','');
             
-            //if preferences are not set - selct first 5 rectypes from first group
             if(window.hWin.HEURIST4.util.isempty(this.selected_rty_ids)){
                 this.selected_rty_ids = [];
-/*  2020-12-08                
+                
                 if(true){
                    
                     //get 5 from first group
@@ -249,7 +248,6 @@ console.log(data);
                         this.selected_rty_ids.push(sorted[idx]['id']);    
                     }
                 }
-*/                
             }else{
                 this.selected_rty_ids = this.selected_rty_ids.split(',');    
             }

@@ -437,7 +437,7 @@ function hMapLayer2( _options ) {
                 layer_ID = _recordset.fld(options.rec_layer, 'rec_ID');
             }
             if(layer_ID>0){
-                options.mapwidget.mapping('onLayerStatus', layer_ID, status);
+                options.mapwidget.mapping('option','onLayerStatus', layer_ID, status);
             }
         }
     }

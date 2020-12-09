@@ -320,18 +320,15 @@ $.widget( "heurist.resultList", {
                             that.setSelected(null);
                         }else{
                             if(data.map_layer_status){  //visible hidden loading error
+                                
                                 if(data.selection && data.selection.length==1){
                                     
                                     var rdiv = that.div_content.find('.recordDiv[recid="'+data.selection[0]+'"]');
                                     if(rdiv.length>0)
                                     {
-                                        var btn_a = rdiv.find('.rec_expand_on_map > .ui-icon');
-                                        btn_a.removeClass('ui-icon-loading-status-lines rotate ui-icon-check-on ui-icon-check-off ui-icon-alert');
-                                        
+                                        rdiv.find('.rec_expand_on_map > .ui-icon').removeClass('rotate');
                                         if(data.map_layer_status=='visible'){
                                             s = 'Hide data';
-                                        
-                                            btn_a.addClass('ui-icon-check-on');
                                             
                                             //zoom to loaded data
                                             $(that.document).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT, 
@@ -341,12 +338,11 @@ $.widget( "heurist.resultList", {
                                             
                                         }else if(data.map_layer_status=='loading'){
                                             s = 'loading';
-                                            btn_a.addClass('ui-icon-loading-status-lines rotate');
+                                            rdiv.find('.rec_expand_on_map > .ui-icon').addClass('rotate');
                                         }else if(data.map_layer_status=='error'){
                                             s = 'Error';
-                                            btn_a.addClass('ui-icon-alert');
+                                            rdiv.find('.rec_expand_on_map > .ui-icon').removeClass('ui-icon-globe').addClass('ui-icon-alert');
                                         }else{
-                                            btn_a.addClass('ui-icon-check-off');
                                             s = 'Show data';
                                         }
                                         
@@ -1406,7 +1402,7 @@ $.widget( "heurist.resultList", {
         var rectypeID = fld('rec_RecTypeID');
         var bkm_ID = fld('bkm_ID');
         var recTitle = fld('rec_Title'); 
-        var recTitle_strip_all = window.hWin.HEURIST4.util.htmlEscape(recTitle);//window.hWin.HEURIST4.util.stripTags(
+        var recTitle_strip_all = window.hWin.HEURIST4.util.stripTags(recTitle);
         var recTitle_strip1 = window.hWin.HEURIST4.util.stripTags(recTitle,'u, i, b, strong');
         var recTitle_strip2 = window.hWin.HEURIST4.util.stripTags(recTitle,'a, u, i, b, strong');
         var recIcon = fld('rec_Icon');
@@ -1561,14 +1557,14 @@ $.widget( "heurist.resultList", {
         + '</div>'
             :'')
 
-        + ( ( //rectypeID==window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_LAYER'] ||
+        + ((rectypeID==window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_LAYER'] ||
             rectypeID==window.hWin.HAPI4.sysinfo['dbconst']['RT_TLCMAP_DATASET'])
             ?
         '<div title="Click to show/hide on map" '
         + 'class="rec_expand_on_map action-button ui-button ui-widget ui-state-default ui-corner-all'+btn_icon_only+'" '
         + 'role="button" aria-disabled="false">'
         + '<span class="ui-button-text">Show data</span>'
-        + '<span class="ui-button-icon-primary ui-icon ui-icon-check-off"/>'
+        + '<span class="ui-button-icon-primary ui-icon ui-icon-globe"/>'
         + '</div>'
         +'<div title="Download dataset" '
         + 'class="rec_download action-button ui-button ui-widget ui-state-default ui-corner-all'+btn_icon_only+'" '
@@ -1859,7 +1855,7 @@ $.widget( "heurist.resultList", {
                 if(this._currentRecordset){
                     
                     var btn = $target.hasClass('rec_expand_on_map')?$target:$target.parents('.rec_expand_on_map');
-                    if(btn.attr('data-loaded')=='loading' || btn.attr('data-loaded')=='error') return; 
+                    if(btn.attr('data-loaded')=='loading') return; 
                     
                     /*
                     if(btn.attr('data-loaded')!='visible'){
@@ -1874,8 +1870,7 @@ $.widget( "heurist.resultList", {
                         //var record = this._currentRecordset.getById(selected_rec_ID);
                         $(this.document).trigger(window.hWin.HAPI4.Event.ON_REC_SELECT, 
                         {selection:[selected_rec_ID], 
-                            map_layer_action: 'trigger_visibility', 
-                            new_visiblity: (btn.attr('data-loaded')!='visible'), //visible hidden
+                            map_layer_action: 'trigger_visibility',  //dataset_visibility: true, 
                             source:this.element.attr('id'), search_realm:this.options.search_realm} );
                     
                     

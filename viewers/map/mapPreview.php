@@ -90,7 +90,7 @@ console.log('beforeunload MAPPEVIEW');
         layout_params['nocluster'] = '1'
     
         layout_params['controls'] = 'legend';//',bookmark,geocoder,draw';
-        layout_params['legend'] = '-basemaps,tempmap';//',mapdocs';
+        layout_params['legend'] = 'basemaps';//',mapdocs';
         layout_params['published'] = 1;//'1';
         
         //initial_layers = window.hWin.HEURIST4.util.getUrlParameter('ids', location.search);

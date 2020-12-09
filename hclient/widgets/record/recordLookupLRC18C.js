@@ -174,10 +174,16 @@ $.widget("heurist.recordLookupLRC18C", $.heurist.recordAction, {
     /* Parse the output XML for a user selected Edition */
     /* Build estc_edition, author_dict, work_dict and ids_n_title of edition dict */
     _XMLParse: function (editionXML) {// Concept IDS for editions incoming from ESTC database
+        // placeConceptID = "3-1009";
+        placeConceptID = $Db.getConceptID('rty', 12)
+        // authorConceptID = "2-10";
+        authorConceptID = $Db.getConceptID('rty', 10)
+
+
+        // Use 1322 on Intersect QA server as database registered ID for ESTC database is 1322 as opposed to 1321 on
+        // Sydney Heurist Server
+        workConceptID = '1321'+'-'+'49'
         editionConceptID = "3-102";
-        placeConceptID = "3-1009";
-        workConceptID = "0000-49";
-        authorConceptID = "2-10";
 
         estc_edition_dict = {};
         author_dict = {};
@@ -538,7 +544,7 @@ $.widget("heurist.recordLookupLRC18C", $.heurist.recordAction, {
                     religion_id = ""
 
                     // Add prefix term and get its term ID
-                    if (prefixTermId == null && authorDict['249'] != "" && authorDict['249'] != undefined) {
+                    if (prefixTermId == null && author_details['249'] != "" && author_details['249'] != undefined) {
                         that._addTermThatDoesNotExist("prefix", author_details[249], author_id, author_rec_data)
                     }
                     // Add suffix term and get its term ID
@@ -837,7 +843,6 @@ $.widget("heurist.recordLookupLRC18C", $.heurist.recordAction, {
         workID = "";
         query_string = 't:56 f:1:"' + work_title + '"'
         urlToCheckWorkinLibraries = that._getQueryURL(query_string, "libraries")
-
         $.ajax({
             url: urlToCheckWorkinLibraries,
             async: false,
@@ -872,7 +877,8 @@ $.widget("heurist.recordLookupLRC18C", $.heurist.recordAction, {
         createAuthor = false;
         query_string = 'ids%3A' + estc_edition_id
         urlToGetEditionDetails = that._getQueryURL(query_string, "ESTC")
-
+        console.log("URL TO GET EDITION DETAILS")
+        console.log(urlToGetEditionDetails)
         return $.ajax({
             url: urlToGetEditionDetails,
             async: false,
@@ -883,7 +889,6 @@ $.widget("heurist.recordLookupLRC18C", $.heurist.recordAction, {
             },
             success: function (editionXML) {
                 getEditionDetails = false;
-
                 try {
                     // Parse the output ESTC edition XML
                     editionXML = jQuery.parseXML(String(editionXML));
@@ -1043,7 +1048,6 @@ $.widget("heurist.recordLookupLRC18C", $.heurist.recordAction, {
                 estc_no = ' f:254: ' + '"' + this.element.find('#estc_no').val() + '"'
             }
             query_string = 't:30 ' + edition_name + edition_date + edition_author + edition_work + edition_place + book_format + estc_no + vol_count + vol_parts;
-        
         }
 
 
