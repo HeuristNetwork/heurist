@@ -42,6 +42,8 @@ class DbsImport {
     private $imp_terms;  //ids of source vocabularies to be imported
     private $terms_correspondence;
     private $vcg_correspondence; //vocab group src->target ids
+
+    private $source_db_reg_id = 0;
             
     private $source_defs = null;
     private $target_defs = null;
@@ -165,6 +167,8 @@ $time_debug2 = $time_debug;
             $this->system->addError(HEURIST_ERROR, "Neither concept code nor local id is defined");
             return false;
         }
+        
+        $this->source_db_reg_id = $db_reg_id;
 
         // 1. get database url by database id
         $database_url = $this->_getDatabaseURL($db_reg_id);
@@ -346,7 +350,7 @@ $time_debug = microtime(true);
 
                         //Get vocabulary for all terms used
                         $dt_Type = $def_dts[$ftId]['commonFields'][$idx_type];
-                        if($dt_Type == "enum" || $dt_Type == "relmarker" || $dt_Type == "relationtype"){
+                        if($dt_Type == "enum" || $dt_Type == "relmarker"){ 
                             //get topmost vocabulary
                             $this->_getTopMostVocabulary($def_dts[$ftId]['commonFields'][$idx_terms], $dt_Type);
                         }
@@ -529,11 +533,16 @@ foreach ($this->imp_recordtypes as $rtyID){
         $def_rectype[$idx_titlemask] = $def_rectype[$idx_titlemask_canonical];
 
         //fill original ids if missed
-        if($def_rectype[$idx_ccode] && (!$def_rectype[$idx_origin_dbid] || !$def_rectype[$idx_origin_id])){
-            $codes = explode("-",$def_rectype[$idx_ccode]);
-            if($codes && count($codes)==2){
-                $def_rectype[$idx_origin_dbid] = $codes[0];
-                $def_rectype[$idx_origin_id] = $codes[1];
+        if(!$def_rectype[$idx_origin_dbid] || !$def_rectype[$idx_origin_id]){
+            if($def_rectype[$idx_ccode]){
+                $codes = explode("-",$def_rectype[$idx_ccode]);
+                if($codes && count($codes)==2){
+                    $def_rectype[$idx_origin_dbid] = $codes[0];
+                    $def_rectype[$idx_origin_id] = $codes[1];
+                }
+            }else{
+                $def_rectype[$idx_origin_dbid] = $this->source_db_reg_id;
+                $def_rectype[$idx_origin_id] = $rtyID;
             }
         }
         if(!$def_rectype[$idx_origin_name]){
@@ -657,13 +666,20 @@ foreach ($this->imp_fieldtypes as $ftId){
     }
 
     //fill original ids if missed
-    if($def_field[$idx_ccode] && (!$def_field[$idx_origin_dbid] || !$def_field[$idx_origin_id])){
-        $codes = explode("-",$def_field[$idx_ccode]);
-        if($codes && count($codes)==2){
-            $def_field[$idx_origin_dbid] = $codes[0];
-            $def_field[$idx_origin_id] = $codes[1];
+    if(!$def_field[$idx_origin_dbid] || !$def_field[$idx_origin_id]){
+        if($def_field[$idx_ccode]){
+            $codes = explode("-",$def_field[$idx_ccode]);
+            if($codes && count($codes)==2){
+                $def_field[$idx_origin_dbid] = $codes[0];
+                $def_field[$idx_origin_id] = $codes[1];
+            }
+        }else{
+                $def_field[$idx_origin_dbid] = $this->source_db_reg_id;
+                $def_field[$idx_origin_id] = $ftId;
         }
     }
+    
+    
     if(!$def_field[$idx_origin_name]){
         $def_field[$idx_origin_name] = $def_field[$idx_name];
     }
@@ -1235,6 +1251,16 @@ $mysqli->commit();
 
             $term_import = $terms['termsByDomainLookup'][$domain][$term_id]; //6256 returns wrong!!
 
+            if(!$term_import[$idx_ccode]){
+                if($term_import[$idx_origin_dbid]>0 && $term_import[$idx_origin_id]>0){
+                    
+                }else if($term_id<999999){
+                    $term_import[$idx_origin_dbid] = $this->source_db_reg_id;
+                    $term_import[$idx_origin_id] = $term_id;
+                }                
+                $term_import[$idx_ccode] = $term_import[$idx_origin_dbid].'-'.$term_import[$idx_origin_id];
+            }
+            
             //find term by concept code among local terms
             $new_term_id = $this->targetTerms->findTermByConceptCode($term_import[$idx_ccode], $domain);
             
@@ -1290,7 +1316,13 @@ if($term_id==11 || $term_id==518 || $term_id==497){
                     $term_import[$idx_label] = $this->targetTerms->doDisambiguateTerms($term_import[$idx_label],
                                                             null, $domain, $idx_label);
                     
-                    $term_import[$idx_vocab_group_id] = $this->vcg_correspondence[$term_import[$idx_vocab_group_id]];                                                            
+                    if($this->vcg_correspondence[$term_import[$idx_vocab_group_id]]>0){
+                        $term_import[$idx_vocab_group_id] = $this->vcg_correspondence[$term_import[$idx_vocab_group_id]];
+                    }else{
+                        //be default place into 1
+                        $term_import[$idx_vocab_group_id] = 1;
+                    }
+                                                                                    
                                                             
                 }else{
                     $term_import[$idx_code] = $this->targetTerms->doDisambiguateTerms2($term_import[$idx_code], $same_level_labels['code']);
@@ -1300,11 +1332,16 @@ if($term_id==11 || $term_id==518 || $term_id==497){
                 }
                 
                 //fill original ids (concept codes) if missed
-                if($term_import[$idx_ccode] && (!$term_import[$idx_origin_dbid] || !$term_import[$idx_origin_id])){
-                    $codes = explode("-",$term_import[$idx_ccode]);
-                    if($codes && count($codes)==2){
-                        $term_import[$idx_origin_dbid] = $codes[0];
-                        $term_import[$idx_origin_id] = $codes[1];
+                if(!$term_import[$idx_origin_dbid] || !$term_import[$idx_origin_id]){
+                    if($term_import[$idx_ccode]){
+                        $codes = explode("-",$term_import[$idx_ccode]);
+                        if($codes && count($codes)==2){
+                            $term_import[$idx_origin_dbid] = $codes[0];
+                            $term_import[$idx_origin_id] = $codes[1];
+                        }
+                    }else{
+                        $term_import[$idx_origin_dbid] = $this->source_db_reg_id;
+                        $term_import[$idx_origin_id] = $term_id;
                     }
                 }
                 if(!$term_import[$idx_origin_name]){
@@ -1314,7 +1351,7 @@ if($term_id==11 || $term_id==518 || $term_id==497){
                 $res = updateTerms($columnNames, null, $term_import, $this->system->get_mysqli()); //see saveStructureLib
                 if(is_numeric($res)){
                     $new_term_id = $res;
-//!!!!! change concept code to local if db_id=0                    
+
                     $this->targetTerms->addNewTerm($new_term_id, $term_import); //add in memory
                     
                     array_push($all_terms_in_vocab, $new_term_id);
@@ -1749,8 +1786,8 @@ if($term_id==11 || $term_id==518 || $term_id==497){
                     }else{
                         $orig_db_id = 0;
                         $vocab_id = $max_id+1;
-                        $max_id = $max_id+1;
                     }
+                    $max_id = $max_id+1;
                     
                     $vocab = array($name, '0', '', 'open', $orig_db_id, $vocab_id, '0', '0', 
                             $domain, '0', '0', '0', '0', '2012-06-04 08:18:57', 
@@ -1783,10 +1820,10 @@ if($term_id==11 || $term_id==518 || $term_id==497){
     19: "trm_ConceptID"
     20: "trm_HasImage"                
     */                
-                    $this->source_defs['terms']['termsByDomainLookup'][$domain][$vocab_id] = $vocab;  //ERROR !!!!! assigned as ID
-                    $this->source_defs['terms']['treesByDomain'][$domain][$vocab_id] = json_decode($dty_Tree, true);   
-                    $this->source_defs['detailtypes']['typedefs'][$dty_ID]['commonFields'][$idx_tree] = $vocab_id;
-                        
+                    $this->source_defs['terms']['termsByDomainLookup'][$domain][$max_id] = $vocab;  //ERROR !!!!! assigned as ID
+                    $this->source_defs['terms']['treesByDomain'][$domain][$max_id] = json_decode($dty_Tree, true);   
+                    $this->source_defs['detailtypes']['typedefs'][$dty_ID]['commonFields'][$idx_tree] = $max_id;
+                    
                 }
             }
         }//for details
