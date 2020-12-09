@@ -1277,7 +1277,7 @@ window.hWin.HEURIST4.dbs = {
     //        3, set  - array of ids 
     //        4, labels - flat array of labels in lower case 
     //
-    trm_TreeData: function(vocab_id, mode){
+    trm_TreeData: function(vocab_id, mode, without_refs){
         
         var recset = window.hWin.HAPI4.EntityMgr.getEntityData('defTerms');
         //parent:[children]
@@ -1309,6 +1309,15 @@ window.hWin.HEURIST4.dbs = {
             var children = t_idx[recID]; //array of children ids trm_Links (including references)
             
             if(children && children.length>0){
+                
+                if(without_refs===true){
+                    //remove terms by reference
+                    var real_children = [];
+                    $.each(children, function(i,id){
+                        if(recset.fld(id,'trm_ParentTermID')==recID) real_children.push(id);
+                    });
+                    children = real_children;
+                }
 
                 //sort children by name
                 children.sort(function(a,b){

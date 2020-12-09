@@ -582,16 +582,17 @@ class DbDefTerms extends DbEntityBase
                 $retain_id = $this->data['retain_id'];
                 
                 //check usage
-                $ret = $this->isTermInUse($merge_id, true, false); //check detailtypes, do not check in records
+                $ret = $this->isTermNotInUse($merge_id, true, false); //check detailtypes, do not check in records
                 if(is_array($ret)){
                     $this->system->addError(HEURIST_ACTION_BLOCKED,
                             'Cannot merge '.$merge_id.'. This term has references', $ret);
                     $ret = false; 
-                }else if($ret===0){ //sql error
+                }
+                /*if($ret===false){ //sql error
                     $ret = false; 
                 }else{
                     $ret = true;
-                }
+                }*/
                     
                 if($ret){
                     //1. change parent id for all children terms
@@ -668,9 +669,11 @@ class DbDefTerms extends DbEntityBase
     }
     
     //
-    // returns list of fields (where vocabulary is in use) and number of records
+    // returns array - list of fields (where vocabulary is in use) and number of records
+    // false - mysql error
+    // true - term and its children are not in use
     //
-    private function isTermInUse($trm_ID, $infield, $indetails){
+    private function isTermNotInUse($trm_ID, $infield, $indetails){
 
         $mysqli = $this->system->get_mysqli();        
         
@@ -696,7 +699,7 @@ class DbDefTerms extends DbEntityBase
         if($indetails && count($ret['detailtypes'])==0){
             
             //find all children terms (except terms by reference)
-            $children = getTermChildren($trm_ID, $this->system, false);
+            $children = getTermChildren($trm_ID, $this->system, false); //see db_structure
             $children[] = $trm_ID; 
             if(count($children)>1){
                 $s = 'in ('.implode(',',$children).')';
@@ -733,7 +736,7 @@ class DbDefTerms extends DbEntityBase
            if($mysqli->error){
                 $system->addError(HEURIST_DB_ERROR, 
                             'Search query error (retrieving number of records)', $mysqli->error);
-                return 0;
+                return false;
            }else{
                $ret['reccount'] = $total_count_rows;
                $ret['records'] = $records;
@@ -744,7 +747,7 @@ class DbDefTerms extends DbEntityBase
         if(count($ret['detailtypes'])>0 || $ret['reccount']>0){
             return $ret;    
         }else{
-            return false;
+            return true;
         }
         
         
@@ -761,16 +764,22 @@ class DbDefTerms extends DbEntityBase
                 $this->recordIDs = prepareIds($this->data[$this->primaryField]);
             }
             
+            $children = array();
+            
             foreach($this->recordIDs as $trm_ID){
-                $ret = $this->isTermInUse($trm_ID, true, true); //check both records and defs 
+                $ret = $this->isTermNotInUse($trm_ID, true, true); //check both records and defs 
                 if(is_array($ret)){
                     $this->system->addError(HEURIST_ACTION_BLOCKED,
                             'Cannot delete '.$trm_ID.'. This term has references', $ret); //$ret
                     return false; 
-                }else if($ret===0){
+                }else if($ret===false){
                     return false; 
                 }
+                
+                $children2 = getTermChildren($trm_ID, $this->system, false); //see db_structure
+                $children = array_merge($children, $children2);
             }
+            $this->recordIDs = array_merge($this->recordIDs, $children);
             
             //$this->system->addError(HEURIST_ACTION_BLOCKED, 'Temp debug block');
             //return false;

@@ -1030,9 +1030,24 @@ if(window.hWin.HEURIST4.util.isArrayNotEmpty(res.records)){
 
         this._super(recID); 
         
+        var it_was_vocab = !($Db.trm(recID, 'trm_ParentTermID')>0);
+
+        //get all children
+        var all_ids = $Db.trm_TreeData(recID, 'set', true);
+        
         //remove defs on client side
         $Db.trm_RemoveLinks(recID);
         $Db.trm().removeRecord(recID);  //from record set
+        
+        $.each(all_ids, function(i,id){
+            $Db.trm_RemoveLinks(id);
+            $Db.trm().removeRecord(id);  //from record set
+        });
+        
+        if(it_was_vocab){ 
+            this.options.trm_VocabularyID = -1;
+            this._filterByVocabulary();
+        }
     },
     
     
