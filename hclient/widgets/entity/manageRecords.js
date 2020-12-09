@@ -3213,7 +3213,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                     +'<span class="btn-edit-rt-template btns-admin-only">Template</span>'
                     +'<span class="btn-bugreport">Bug report</span>'
                 +'</div>'
-                +'<div class="btn-lookup-values" style="padding-top:20px;padding-left: 0px;">'
+                +'<div class="btn-lookup-values" style="padding-top:10px;padding-left: 24px;">'
                     //+'<span style="font-size:larger" title="Lookup external service">Lookup value</span>'
                 +'</div>'
                 
@@ -3355,7 +3355,6 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             if(notfound){
                 lookup_div.hide();    
             }else{
-                lookup_div.prepend($('<label style="font-size: larger">Lookup external services&nbsp;</label>'));
                 lookup_div.show();    
             }
             

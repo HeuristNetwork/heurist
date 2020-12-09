@@ -174,7 +174,7 @@ console.log(re);
                         }else if(data.map_layer_action == 'trigger_visibility'){
                             
                             var sel =  window.hWin.HAPI4.getSelection(data.selection, true);
-                        
+                            
                             // data.selection is dataset id - show/hide visibility of dataset
                             // new_visiblity - true, false to show/hide entire layer or array of ids to filter out on map
                             that._setLayersVisibility( sel, data.mapdoc_id, data.new_visiblity );
@@ -367,6 +367,7 @@ console.log(re);
                     }
                 //}else if(this.options.selection){
                 }
+                
                 if(!this.map_inited){
                     //assign listener
                
@@ -530,6 +531,7 @@ console.log(re);
                 */ 
 
                 //zoom to visible elements only
+//console.log( new_visiblity );                
                 this.zoomToSelection( new_visiblity );
             }
             
