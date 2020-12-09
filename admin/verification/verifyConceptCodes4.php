@@ -69,7 +69,14 @@ $mysqli = $system->get_mysqli();
         $ver = mysql__select_value($mysqli, $query);
         
         if($ver<3){
+            /* databases without trm_VocabularyGroupID
+            $query = "SHOW COLUMNS FROM '.$db_name.'defTerms LIKE 'trm_VocabularyGroupID'";
+            if(!hasColumn($mysqli, $query)){
+                print $db_name.'<br>';
+            }
+            */
             continue;
+                    
             
             //is defTermLinks exist
             $value = mysql__select_value($mysqli, 'SHOW TABLES FROM '.$db_name." LIKE 'defTermsLinks'");
@@ -77,8 +84,9 @@ $mysqli = $system->get_mysqli();
             if(!$not_exist){
                 array_push($db2_with_links,$db_name);    
             }
-                    
+            
         }else{
+            
             
             $query = 'select count(*) from '.$db_name.'.defDetailTypes where '
             .'(dty_Type="relationtype") and (NOT dty_JsonTermIDTree>0)'; 
@@ -121,10 +129,10 @@ Show labels 3-1088  ( 2-6258 )  3-5084, 3-5085, 3-5086
         */        
         //from fields to vocabs to terms - assign proper ccodes
         print "<br><br>".$db_name.'<br>';
-        verifySpatialVocab('Show legend on startup','3-1079','2-6255');
-        verifySpatialVocab('Suppress timeline','3-1080','2-6256');
-        verifySpatialVocab('Hide layer outside zoom range','3-1087','2-6257');
-        verifySpatialVocab('Show labels','3-1088','2-6258');
+        //verifySpatialVocab('Show legend on startup','3-1079','2-6255');
+        //verifySpatialVocab('Suppress timeline','3-1080','2-6256');
+        //verifySpatialVocab('Hide layer outside zoom range','3-1087','2-6257');
+        //verifySpatialVocab('Show labels','3-1088','2-6258');
             
             
 /*            

@@ -192,7 +192,7 @@ $time_debug = microtime(true);
         }
 
 /* We require at least version 1.2 for database defintion */
-        if(@$this->source_defs['terms']){
+        if(false && @$this->source_defs['terms']){
             if(!@$this->source_defs['terms']['groups'] || 
                 !(@$this->source_defs['terms']['fieldNamesToIndex']['trm_VocabularyGroupID']>0)){
                     
@@ -213,7 +213,7 @@ $time_debug = microtime(true);
         $wrong_id = null;
         $missed_name = null;
         
-        $this->_createTrmLinks();
+        $this->_createTrmLinks(); //create virtual trm_Links if source db is 1.2
 
         $this->sourceTerms = new DbsTerms(null, $this->source_defs['terms']);
         if($entityTypeToBeImported=='term'){
@@ -1223,7 +1223,7 @@ $mysqli->commit();
             
             //top level import vocabularies
             foreach($this->imp_terms[$domain] as $term_id){
-                $children = @$this->source_defs['terms']['trm_Links']
+                $children = @$this->source_defs['terms']['trm_Links'] && @$this->source_defs['terms']['trm_Links'][$term_id]
                                 ?@$this->source_defs['terms']['trm_Links'][$term_id]   //new structure with terms by reference
                                 :@$this->source_defs['terms']['treesByDomain'][$domain][$term_id];
 
@@ -1249,7 +1249,7 @@ $mysqli->commit();
             
             $idx_vocab_group_id  = intval($terms['fieldNamesToIndex']["trm_VocabularyGroupID"]);
 
-            $term_import = $terms['termsByDomainLookup'][$domain][$term_id];
+            $term_import = $terms['termsByDomainLookup'][$domain][$term_id]; //6256 returns wrong!!
 
             //find term by concept code among local terms
             $new_term_id = $this->targetTerms->findTermByConceptCode($term_import[$idx_ccode], $domain);
@@ -1330,7 +1330,7 @@ if($term_id==11 || $term_id==518 || $term_id==497){
                 $res = updateTerms($columnNames, null, $term_import, $this->system->get_mysqli()); //see saveStructureLib
                 if(is_numeric($res)){
                     $new_term_id = $res;
-                    
+//!!!!! change concept code to local if db_id=0                    
                     $this->targetTerms->addNewTerm($new_term_id, $term_import); //add in memory
                     
                     array_push($all_terms_in_vocab, $new_term_id);
@@ -1700,7 +1700,7 @@ if($term_id==11 || $term_id==518 || $term_id==497){
     }    
 
     //
-    //
+    // helper function
     //
     private function __tree_to_links($tree, &$links){
         
@@ -1712,7 +1712,7 @@ if($term_id==11 || $term_id==518 || $term_id==497){
     }
     
     //
-    // create trm_Links if it is missed for old version of source
+    // create virtual trm_Links if it is missed for old version of source
     //
     private function _createTrmLinks(){
     
@@ -1723,6 +1723,7 @@ if($term_id==11 || $term_id==518 || $term_id==497){
         $det = $this->source_defs['detailtypes']['typedefs'];
         $idx_type = $det['fieldNamesToIndex']['dty_Type'];
         $idx_tree = $det['fieldNamesToIndex']['dty_JsonTermIDTree'];
+        $idx_ccode = $det['fieldNamesToIndex']['dty_ConceptID'];
         
         $ids1 = array_keys($this->source_defs['terms']['termsByDomainLookup']['enum']);
         $ids2 = array_keys($this->source_defs['terms']['termsByDomainLookup']['relation']);
@@ -1742,13 +1743,37 @@ if($term_id==11 || $term_id==518 || $term_id==497){
                         continue;
                     }
 
+                    $dty_cCode = $detail['commonFields'][$idx_ccode];
+                    
+                    if($dty_cCode=='3-1079'){
+                        $vocab_id = 6255;
+                    }else if($dty_cCode=='3-1080'){
+                        $vocab_id = 6256; 
+                    }else if($dty_cCode=='3-1087'){
+                        $vocab_id = 6257;
+                    }else if($dty_cCode=='3-1088'){
+                        $vocab_id = 6258;
+                    }else{
+                        $vocab_id = 0;
+                    }
+                    
+                    //add virtaul vocabulary for individual selections
                     $domain = $dty_Type=='enum'?'enum':'relation';
                     $name = $detail['commonFields'][1].' - selection';
-                    $vocab_id = $max_id+1;
-                    $max_id = $max_id+1;
                     
-                    $vocab = array($name,0,'','open',0,0,$vocab_id,0,$domain);
-                    $vocab[17] = 7;
+                    if($vocab_id>0){
+                        $orig_db_id = 2;
+                    }else{
+                        $orig_db_id = 0;
+                        $vocab_id = $max_id+1;
+                        $max_id = $max_id+1;
+                    }
+                    
+                    $vocab = array($name, '0', '', 'open', $orig_db_id, $vocab_id, '0', '0', 
+                            $domain, '0', '0', '0', '0', '2012-06-04 08:18:57', 
+                            '0', '', '', '1', //group #1 by default
+                            $name, $orig_db_id.'-'.$vocab_id, false);
+                    
     /*                
     0: "trm_Label"
     1: "trm_InverseTermID"
@@ -1758,21 +1783,24 @@ if($term_id==11 || $term_id==518 || $term_id==497){
     5: "trm_IDInOriginatingDB"
     6: "trm_AddedByImport"
     7: "trm_IsLocalExtension"
+
     8: "trm_Domain"
     9: "trm_OntID"
     10: "trm_ChildCount"
     11: "trm_ParentTermID"
     12: "trm_Depth"
     13: "trm_Modified"
+    
     14: "trm_LocallyModified"
     15: "trm_Code"
     16: "trm_SemanticReferenceURL"
     17: "trm_VocabularyGroupID"
+    
     18: "trm_NameInOriginatingDB"
     19: "trm_ConceptID"
     20: "trm_HasImage"                
     */                
-                    $this->source_defs['terms']['termsByDomainLookup'][$domain][$vocab_id] = $vocab;
+                    $this->source_defs['terms']['termsByDomainLookup'][$domain][$vocab_id] = $vocab;  //ERROR !!!!! assigned as ID
                     $this->source_defs['terms']['treesByDomain'][$domain][$vocab_id] = json_decode($dty_Tree, true);   
                     $this->source_defs['detailtypes']['typedefs'][$dty_ID]['commonFields'][$idx_tree] = $vocab_id;
                         

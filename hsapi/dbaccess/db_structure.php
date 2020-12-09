@@ -485,6 +485,7 @@ function dbs_GetRectypeConstraint($system) {
 
         $mysqli = $system->get_mysqli();
         $dbID = $system->get_system('sys_dbRegisteredID');
+        
 
         /* ARTEM
         $cacheKey = DATABASE . ":dbs_GetTerms";
@@ -496,6 +497,14 @@ function dbs_GetRectypeConstraint($system) {
         }*/
         $query = "select " . join(",", __getTermColNames());
         $query = preg_replace("/trm_ConceptID/", "", $query);
+        
+        //in case database v1.2 there is not field trm_VocabularyGroupID
+        $dbVer = $system->get_system('sys_dbVersion');
+        $dbVerSub = $system->get_system('sys_dbSubVersion');
+        if($dbVer==1 && $dbVerSub<3){
+            $query = preg_replace("/trm_VocabularyGroupID/", "1 as trm_VocabularyGroupID", $query);
+        }
+        
         if ($dbID) { //if(trm_OriginatingDBID,concat(cast(trm_OriginatingDBID as char(5)),'-',cast(trm_IDInOriginatingDB as char(5))),'null') as trm_ConceptID
             $query.= " if(trm_OriginatingDBID, concat(cast(trm_OriginatingDBID as char(5)),'-',cast(trm_IDInOriginatingDB as char(5))), concat('$dbID-',cast(trm_ID as char(5)))) as trm_ConceptID";
         } else {
