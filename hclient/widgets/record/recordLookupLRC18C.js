@@ -997,7 +997,7 @@ $.widget("heurist.recordLookupLRC18C", $.heurist.recordAction, {
                 query['f:290'] = '='+this.element.find('#vol_parts').val();
             }
             if (this.element.find('#select_bf').val()>0) {
-                query['f:256'] = this.element.find('#select_bf').val();  //enum
+                query['all'] = this.element.find('#select_bf option:selected').text();  //enum
             }
             if (this.element.find('#estc_no').val() != '') {
                 query['f:254'] = '@'+this.element.find('#estc_no').val();
@@ -1010,7 +1010,7 @@ $.widget("heurist.recordLookupLRC18C", $.heurist.recordAction, {
                 book_format = ""
             }
             query_string = 't:30 ' + edition_name + edition_date + edition_author + edition_work + edition_place + book_format + estc_no + vol_count + vol_parts;
-*/            
+*/
             query_string = query; 
             
         }else{
