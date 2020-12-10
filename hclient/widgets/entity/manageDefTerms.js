@@ -34,16 +34,18 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
     */
     
    
-    _entityName:'defTerms',
+    _entityName: 'defTerms',
     fields_list_div: null,  //term search result
-    scrollInterval:0,
+    scrollInterval: 0,
     
     //
     //                                                  
     //    
     _init: function() {
 
-        
+        if(!window.hWin.HEURIST4.ui.collapsed_terms){
+            window.hWin.HEURIST4.ui.collapsed_terms = [];
+        }
         
         this.options.innerTitle = false;
         
@@ -443,18 +445,18 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                                             $(ui.helper).css("cursor", 'not-allowed');
                                         }
 
-var ele = that.recordList.find('.div-result-list-content');
-var bot = ele.offset().top+ele.height();
-if(that.scrollInterval>0) clearInterval(that.scrollInterval);
-that.scrollInterval = 0;
+                                        var ele = that.recordList.find('.div-result-list-content');
+                                        var bot = ele.offset().top+ele.height();
+                                        if(that.scrollInterval>0) clearInterval(that.scrollInterval);
+                                        that.scrollInterval = 0;
 
-if(ui.offset.top>bot-20){
-//    console.log(bot);
-//    console.log(ui.position.top+'  '+ui.position.left);
-    that.scrollInterval = setInterval(function(){ ele[0].scrollTop += 20}, 50); 
-}else if(ui.offset.top<ele.offset().top+20){
-    that.scrollInterval = setInterval(function(){ ele[0].scrollTop -= 20}, 50); 
-}
+                                        if(ui.offset.top>bot-20){
+                                        //    console.log(bot);
+                                        //    console.log(ui.position.top+'  '+ui.position.left);
+                                            that.scrollInterval = setInterval(function(){ ele[0].scrollTop += 20}, 50); 
+                                        }else if(ui.offset.top<ele.offset().top+20){
+                                            that.scrollInterval = setInterval(function(){ ele[0].scrollTop -= 20}, 50); 
+                                        }
                                         
                                     }
                                 });   
@@ -505,6 +507,31 @@ if(ui.offset.top>bot-20){
                                     }
                                 }});
                             
+                       
+                        //collapses 
+                        if(window.hWin.HEURIST4.ui.collapsed_terms.length>0){
+                            $.each(that.recordList.find('.recordDiv'),
+                                function(i,pitem){
+                                    pitem = $(pitem);
+                                    var recID =pitem.attr('recID');
+                                    if(window.hWin.HEURIST4.ui.collapsed_terms.indexOf(recID)>=0){
+                                   
+                                        pitem.find('span.ui-icon-triangle-1-s') 
+                                            .removeClass('ui-icon-triangle-1-s')
+                                            .addClass('ui-icon-triangle-1-e');
+                                        
+                                        $.each(that.recordList.find('div.recordDiv[data-parent]'),
+                                            function(i,item){
+                                                item = $(item);
+                                                if(item.attr('data-parent').indexOf(';'+recID+';')>=0){
+                                                        item.hide();
+                                                }
+                                            });
+                                    }
+                                }
+                            );    
+                            
+                        }
                         
                     }
                     
@@ -855,7 +882,15 @@ if(ui.offset.top>bot-20){
                     +'</div>';
 
         }else{
-            var lvl = (recordset.fld(record, 'trm_Parents').split(',').length);
+            var parents = recordset.fld(record, 'trm_Parents').split(',');
+            var lvl = (parents.length);
+            
+            if(lvl>0){
+                parents = ' data-parent=";'+parents.join(';')+';"';
+            }else{
+                parents = '';
+            }
+            
             sWidth = 'display:inline-block;padding-top:4px;max-width:320px;'; //+((lvl>2)?'25':'30')+'%;';
             //sPad = 'padding-left:'+(lvl*20);
             
@@ -893,26 +928,35 @@ if(ui.offset.top>bot-20){
             
             recTitle = '<div class="item truncate label_term rolloverTooltip"'
                     +' style="'+sFontSize+sWidth+sBold+'" '+sHint+'>'
-                    +sPad+sLabel+'</div>'+sRef; // $Db.trm(recID, 'trm_Parents')+'  '+recID+' '+
-            
+                    +sLabel+'</div>'+sRef; // $Db.trm(recID, 'trm_Parents')+'  '+recID+' '+
+                    //+sPad            
             
             var recThumb = window.hWin.HAPI4.getImageUrl(this._entityName, recID, 'thumb');
             
             var html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'
                                     +recThumb+'&quot;);opacity:1"></div>';
+                                    
+            var exp_btn_style = 'width:20px;display:inline-block;vertical-align:bottom;margin-left:'+(lvl==1?0:(lvl+1))+'em;';
            
-            html = '<div class="recordDiv white-borderless'+(!(ref_lvl>0)?' rt_draggable':'')+'" recid="'+recID+'">'
+            html = '<div class="recordDiv white-borderless'+(!(ref_lvl>0)?' rt_draggable':'')+'" recid="'+recID+'"'+parents+'>'
+                        + ($Db.trm_HasChildren(recID)
+                                ?this._defineActionButton(
+                                    {key:'expand',label:'Show/hide children',            
+                                        title:'', icon:'ui-icon-triangle-1-s',class:null},
+                                        null,'icon_text',exp_btn_style)
+                                :'<div style="'+exp_btn_style+'">&nbsp;</div>') 
                         + '<div class="recordSelector" style="display:inline-block;"><input type="checkbox" /></div>'
                         + html_thumb + recTitle;
-                      
+                
+/* 2020-12-10                      
             html = html + '<div class="truncate description_term">'  //item truncate 
                 + sDesc
                 + '</div>';
-
+*/
             if(this.options.select_mode=='manager' && !(ref_lvl>0)){ //
                 
-                html = html + '<div class="rec_action_link2" style="position:absolute;'
-                            +'top: 5px;width:'+(sRef?20:62)+'px;height:20px;background:lightgray;">';
+                html = html + '<div class="rec_action_link2" style="margin-left:1em;'
+                            +'width:'+(sRef?20:62)+'px;height:20px;background:lightgray;display:inline-block;vertical-align:middle;">';
                         
                 if(ref_lvl===0){
                     html = html 
@@ -1825,6 +1869,36 @@ console.log('Error !!! Parent not found for '+trm_ID);
         }
         //this.options.trm_VocabularyGroupID = -1;
 
+        else if(action=='expand'){
+            
+            var is_collapsed = window.hWin.HEURIST4.ui.collapsed_terms.indexOf(recID)>=0;
+        
+            $.each(this.recordList.find('div.recordDiv[data-parent]'),
+                function(i,item){
+                    item = $(item);
+                    if(item.attr('data-parent').indexOf(';'+recID+';')>=0){
+                        //if(item.is(':visible')){
+                        if(is_collapsed){
+                            item.show();
+                        }else{
+                            item.hide();
+                        }
+                    }
+                });
+
+            is_collapsed =!is_collapsed;
+            
+            var ele = this.recordList.find('div.recordDiv[recID='+recID+']')
+                        .find('span.ui-icon-triangle-1-'+(is_collapsed?'s':'e'));
+            if(is_collapsed){
+                window.hWin.HEURIST4.ui.collapsed_terms.push(recID);
+                ele.removeClass('ui-icon-triangle-1-s').addClass('ui-icon-triangle-1-e');
+            }else{
+                window.hWin.HEURIST4.ui.collapsed_terms.splice(window.hWin.HEURIST4.ui.collapsed_terms.indexOf(recID), 1);
+                ele.removeClass('ui-icon-triangle-1-e').addClass('ui-icon-triangle-1-s');
+            }
+        }
+        
         var is_resolved = this._super(event, keep_action);
 
         if(!is_resolved){

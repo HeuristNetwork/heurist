@@ -1397,11 +1397,11 @@ window.hWin.HEURIST4.dbs = {
     },
     
     //
-    // is given term has children
+    // is given term has children (including references)
     //
     trm_HasChildren: function(trm_id){
         var t_idx = window.hWin.HAPI4.EntityMgr.getEntityData('trm_Links'); 
-        var children = t_idx[recID];
+        var children = t_idx[trm_id];
         return (children && children.length>0);
     },
 
