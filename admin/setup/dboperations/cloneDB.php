@@ -266,6 +266,10 @@ if(@$_REQUEST['mode']=='2'){
             <?php
             if($sHasNewDefsWarning){
             ?>                        
+
+                <p style="color:red">
+                    Because this database contains new structural elements, you must register it before you can clone it.
+                </p>
                 <p>     
                     This database contains new definitions: <?php print $sHasNewDefsWarning; ?> which are local to the database.<br>
                     Before they can be cloned they must be attributed a unique global ID known as a Concept Code.<br>
