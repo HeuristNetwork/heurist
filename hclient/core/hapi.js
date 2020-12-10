@@ -1407,7 +1407,7 @@ prof =Profile
             },
             
             //
-            // direct access
+            // direct access (without check and request to server)
             //
             getEntityData2: function(entityName){
                 return entity_data[entityName];     

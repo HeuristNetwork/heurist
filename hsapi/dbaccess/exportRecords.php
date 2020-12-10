@@ -71,7 +71,7 @@ public static function setSession($system){
 //
 // $data - recordSearch response
 //
-// $parmas 
+// $params: 
 //    format - json|geojson|xml|gephi
 //    linkmode = direct, direct_links, none, all
 //    defs  0|1  include database definitions

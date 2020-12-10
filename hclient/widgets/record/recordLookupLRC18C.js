@@ -113,6 +113,24 @@ $.widget("heurist.recordLookupLRC18C", $.heurist.recordAction, {
             }
         );
 */
+        var request = {db:'ESTC_Helsinki_Bibliographic_Metadata', a:'search', 'entity':'defTerms', 
+                    'details':'list', 'trm_ParentTermID':5430};
+
+        var selBf = this.element.find('#select_bf').empty();
+        window.hWin.HEURIST4.ui.addoption(selBf[0], 0, 'select...'); //first option
+
+        window.hWin.HAPI4.EntityMgr.doRequest(request, 
+            function(response){
+                if(response.status == window.hWin.ResponseStatus.OK){
+                    var recordset = new hRecordSet(response.data);
+                    
+                    recordset.each2(function(trm_ID, term){
+                         window.hWin.HEURIST4.ui.addoption(selBf[0], trm_ID, term['trm_Label']);
+                    });
+                }
+        });
+
+        /* artem remarked it
         var selBf = window.hWin.HEURIST4.ui.createTermSelect(this.element.find('#select_bf')[0],
             {
                 vocab_id: 6891,
@@ -121,6 +139,7 @@ $.widget("heurist.recordLookupLRC18C", $.heurist.recordAction, {
                 useHtmlSelect: false
             }
         );
+        */
         
         //by default action button is disabled
         window.hWin.HEURIST4.util.setDisabled(this.element.parents('.ui-dialog').find('#btnDoAction'), false);
@@ -997,7 +1016,8 @@ $.widget("heurist.recordLookupLRC18C", $.heurist.recordAction, {
                 query['f:290'] = '='+this.element.find('#vol_parts').val();
             }
             if (this.element.find('#select_bf').val()>0) {
-                query['all'] = this.element.find('#select_bf option:selected').text();  //enum
+                query['f:256'] = this.element.find('#select_bf').val();
+                //query['all'] = this.element.find('#select_bf option:selected').text();  //enum
             }
             if (this.element.find('#estc_no').val() != '') {
                 query['f:254'] = '@'+this.element.find('#estc_no').val();
