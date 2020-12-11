@@ -49,10 +49,9 @@ $mysqli  = $system->get_mysqli();
 $templateddb = @$_REQUEST['templatedb'];
 $isCloneTemplate = ($templateddb!=null);
 $sErrorMsg = null;
+$ERROR_REDIR = PDIR.'hclient/framecontent/infoPage.php';
 
 if($isCloneTemplate){ //template db must be registered with id less than 21
-
-    $ERROR_REDIR = PDIR.'hclient/framecontent/infoPage.php';
 
     if(mysql__usedatabase($mysqli, $templateddb)!==true){
         $system->addError(HEURIST_ERROR, "Sorry, could not connect to the database $templateddb. Operation is possible when database to be cloned is on the same server");
@@ -66,7 +65,25 @@ if($isCloneTemplate){ //template db must be registered with id less than 21
         include $ERROR_REDIR;
         exit();
     }
+    
+    $dbVer = $system->get_system('sys_dbVersion');
+    $dbVerSub = $system->get_system('sys_dbSubVersion');
+    if($dbVer==1 && $dbVerSub>2){
+        $system->addError(HEURIST_ERROR, "Sorry, the database $templateddb you are trying to clone has been converted to version 6 format. In order to clone this database you will need to use version 6. Please contact support at heuristnetwork dot org for instructions");
+        include $ERROR_REDIR;
+        exit();
+    }
+    
 }else{
+    
+    $dbVer = $system->get_system('sys_dbVersion');
+    $dbVerSub = $system->get_system('sys_dbSubVersion');
+    if($dbVer==1 && $dbVerSub>2){
+        $system->addError(HEURIST_ERROR, "The database you are trying to clone has been converted to version 6 format. In order to clone this database you will need to use version 6. Please contact support at heuristnetwork dot org for instructions");
+        include $ERROR_REDIR;
+        exit();
+    }
+    
     $templateddb = null;
 }
 
@@ -226,7 +243,8 @@ if(@$_REQUEST['mode']=='2'){
 ?>
             <div id="mainform">
 
-                <?php if(!$isCloneTemplate) { ?>
+                <?php if(!$isCloneTemplate) { 
+                ?>
 
                 <p>
                     This function simply copies the current database <b> <?=HEURIST_DBNAME?> </b> to a new one with no changes. <br />
