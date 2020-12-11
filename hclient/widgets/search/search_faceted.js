@@ -2013,6 +2013,8 @@ if(!(vocab_id>0)){
                         || field['type']=="date" || field['type']=="year") && field['isfacet']==this._FT_SELECT)
                     {  //add slider
                     
+                        $input_div.find('.input-cell').css('padding-bottom','20px');
+                    
                         $facet_values.parent().css({'display':'block'});
                         //AAA strange padding ,'padding-left':'1em','padding-right':'2em'
                         //'width':'90%', $facet_values.css({'width':'100%','padding':'1em'});
@@ -2038,7 +2040,7 @@ if(!(vocab_id>0)){
                         var mmax  = cterm[1];
                         var daymsec = 86400000; //24*60*60*1000;   1day
                  
-console.log(cterm[0]+'   '+cterm[1]);
+//console.log(cterm[0]+'   '+cterm[1]);
                         
                         if(!(window.hWin.HEURIST4.util.isempty(mmin) || window.hWin.HEURIST4.util.isempty(mmax))){
                             
@@ -2215,8 +2217,14 @@ console.log(cterm[0]+'   '+cterm[1]);
                                 if(field['type']=="date"){
                                     try{
                                         //year must be four digit
-                                        min = (new TDate(min)).toString();
-                                        max = (new TDate(max)).toString(); 
+                                        //min = (new TDate(min)).toString();
+                                        //max = (new TDate(max)).toString(); 
+                                        
+                                        var tDate = new TDate((new Date(min)).toISOString());
+                                        min = tDate.toString();
+                                        
+                                            tDate = new TDate((new Date(max)).toISOString());
+                                        max = tDate.toString();
                                         
                                         //min = (new Date(min)).toISOString();
                                         //max = (new Date(max)).toISOString(); 
@@ -2227,7 +2235,7 @@ console.log(cterm[0]+'   '+cterm[1]);
 
                                 var value = (min==max)?min :min + '<>' + max; //search in between
                                 
-console.log('start search  '+value);                                
+//console.log('start search  '+value);                                
                                 
                                 if(window.hWin.HEURIST4.util.isempty(value)){
                                     value = '';
@@ -2317,7 +2325,7 @@ console.log('start search  '+value);
                         
                             var w = that.element.width();
                             var flbl = $("<div>",{id:"facet_range"+facet_index})
-                                        .css({display: 'inline-block', 'padding-bottom': '1em', width:(w-50)})
+                                        .css({display: 'inline-block', 'padding': '0 0 1em 16px', width:(w-40)})
                                         .appendTo($facet_values);
                                         
                             if(field['type']=="date"){
@@ -2330,7 +2338,7 @@ console.log('start search  '+value);
 
                             var ele2 = $('<div><span class="ui-icon ui-icon-triangle-1-w-stop" '
                                 +'style="cursor:pointer;font-size:smaller;float:left;color:gray"/>'
-                            +'<div style="height:0.4em;margin:2px 0px 0px 2px;float:left;width:'+(w-52)+'px"/>'
+                            +'<div style="height:0.4em;margin:2px 0px 0px 2px;float:left;width:'+(w-62)+'px"/>'
                             +'<span class="ui-icon ui-icon-triangle-1-e-stop" '
                                 +'style="cursor:pointer;font-size:smaller;float:left;color:gray"/></div>'
                             ).appendTo($facet_values);
@@ -2351,7 +2359,7 @@ console.log('start search  '+value);
                                           $(this).find('.ui-slider-handle').css({width:'4px',background:'black'});
                                       }
                                     });
-                            
+                                    
                             that._on( ele2.find('span.ui-icon-triangle-1-w-stop'),
                                  {click: function(){
                                      __onSlideStartSearch(field.mmin0, mmax);
@@ -2361,6 +2369,15 @@ console.log('start search  '+value);
                                      __onSlideStartSearch(mmin, field.mmax0);
                                  }});
 
+                                 
+                            if(mmin==field.mmin0){
+                                ele2.find('span.ui-icon-triangle-1-w-stop').css('visibility','hidden');
+                            }                                    
+                            if(mmax==field.mmax0){
+                                ele2.find('span.ui-icon-triangle-1-e-stop').css('visibility','hidden');
+                            }                                    
+                            
+                                 
                             //show initial values
                             __updateSliderLabel(mmin, mmax, sl_count);
                             
