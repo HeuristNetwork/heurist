@@ -5,7 +5,7 @@ $flds = "`trm_ID`, `trm_Label`, `trm_InverseTermId`,
             `trm_OriginatingDBID`,`trm_NameInOriginatingDB`,`trm_IDInOriginatingDB`,
             `trm_AddedByImport`,`trm_IsLocalExtension`, `trm_Domain`, `trm_OntID`,
             `trm_ChildCount`, `trm_ParentTermID`, `trm_Depth`,`trm_Modified`, `trm_LocallyModified`, `trm_Code`,
-            `trm_SemanticReferenceURL`, `trm_IllustrationURL`, `trm_VocabularyGroupID` ";
+            `trm_SemanticReferenceURL`, `trm_IllustrationURL`"; //, `trm_VocabularyGroupID` 
             // 20/1/14: Order aligned with order in database tables since 2012 to resolve problems of order incompatibility 
             // between versions. Also updating delivery/expectation order in all VS2 versions of H3 (h3, h3-alpha, h3-beta)
             
