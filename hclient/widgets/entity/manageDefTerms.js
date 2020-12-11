@@ -936,7 +936,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             var html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'
                                     +recThumb+'&quot;);opacity:1"></div>';
                                     
-            var exp_btn_style = 'width:20px;display:inline-block;vertical-align:bottom;margin-left:'+(lvl==1?0:(lvl+1))+'em;';
+            sPad = lvl==1?0:(lvl==2?(lvl-0.5):lvl);                                                                         
+            var exp_btn_style = 'width:20px;display:inline-block;vertical-align:bottom;margin-left:'+sPad+'em;';
            
             html = '<div class="recordDiv white-borderless'+(!(ref_lvl>0)?' rt_draggable':'')+'" recid="'+recID+'"'+parents+'>'
                         + ($Db.trm_HasChildren(recID)
