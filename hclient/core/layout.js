@@ -1458,7 +1458,7 @@ console.log('Cardinal layout widget does not have proper options');
         //
         // get layout properties from attributes of elements and init free layout
         //
-        appInitFromContainer: function( document, containerid, supp_options ){
+        appInitFromContainer: function( document, containerid, supp_options, onInitComplete ){
             
             _containerid = containerid;
             _is_container_layout = true;
@@ -1476,6 +1476,11 @@ console.log('Cardinal layout widget does not have proper options');
             
             if(layout){
                 _appInitAll(layout, $container); 
+            }else{
+                if($.isFunction(onInitComplete)){
+                        onInitComplete.call();
+                }
+                console.log('appInitFromContainer: layout not defined');
             }
             //
             _defineMediaSource($container); 

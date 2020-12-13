@@ -489,6 +489,12 @@ _time_debug = new Date().getTime() / 1000;
 
         var topmenu = $('#main-menu');
         topmenu.attr('data-heurist-app-id','heurist_Navigation');
+
+        function __onInitComplete(not_empty_page){
+            //load given page or home page content
+            <?php if($isEmptyHomePage) echo 'if(not_empty_page){ home_page_record_id=not_empty_page;}'; ?>
+            loadPageContent(init_page_record_id>0 ?init_page_record_id :home_page_record_id);
+        }
                
         window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, "#main-header",
             {heurist_Navigation:{
@@ -497,13 +503,10 @@ _time_debug = new Date().getTime() / 1000;
                     orientation: 'horizontal',
                     toplevel_css: {background:'none'}, //bg_color 'rgba(112,146,190,0.7)'
                     aftermenuselect: afterPageLoad,
-                    onInitComplete: function(not_empty_page){
-                        //load given page or home page content
-                        <?php if($isEmptyHomePage) echo 'if(not_empty_page){ home_page_record_id=not_empty_page;}'; ?>
-                        
-                        loadPageContent(init_page_record_id>0 ?init_page_record_id :home_page_record_id);
-                    }
-            }} );
+                    onInitComplete: __onInitComplete
+            }},
+            __onInitComplete
+            );
             
         $('#main-menu').show();
         
