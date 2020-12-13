@@ -1,11 +1,4 @@
 /**
-* Class to search and select record 
-* It can be converted to widget later?
-* 
-* @param rectype_set - allowed record types for search, otherwise all rectypes will be used
-* @returns {Object}
-* @see editing_input.js
-* 
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
 * @copyright   (C) 2005-2020 University of Sydney

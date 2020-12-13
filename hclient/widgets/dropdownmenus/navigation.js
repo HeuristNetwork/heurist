@@ -24,10 +24,11 @@ $.widget( "heurist.navigation", {
        menu_recIDs:[],  //top level menu records
        orientation: 'horizontal', //vertical or treeview
        target: 'inline', // or popup 
-       use_next_level: false,  //if top level consists of the single entry use next level of menues
+       use_next_level: true,  //if top level consists of the single entry use next level of menues
        onmenuselect: null,   //for cms edit mode it performs special behavior
        aftermenuselect: null,
        toplevel_css:null,  //css for top level items
+       expand_levels:0,  //expand levels for treeview
        onInitComplete: null
     },
 
@@ -194,8 +195,8 @@ $.widget( "heurist.navigation", {
                         $res['page_id'] = page_id;
                         $res['page_showtitle'] = showTitle?1:0;
                         $res['page_target'] = (that.options.target=='popup')?'popup':pageTarget;
-                        $res['expanded'] = true;
-
+                        $res['expanded'] = (that.options.expand_levels>1 || lvl<=that.options.expand_levels); 
+                                            //&& menuitems.length==1);
                         resitems.push($res);
 
                     }else{
@@ -258,9 +259,15 @@ $.widget( "heurist.navigation", {
                 s.push(ids_recurred[i]+' '
                     +resdata.fld(resdata.getById(ids_recurred[i]), DT_NAME));
             }
-            window.hWin.HEURIST4.msg.showMsgDlg('Some menu items are recurred.<p>'
+            window.hWin.HEURIST4.msg.showMsgDlg('Some menu items are recursive references to a menu containing themselves. Such a structure is not permissible for obvious reasons.<p>'
             +(s.join('<br>'))
             +'</p>Ask website author to fix this issue');
+            +'<p>How to fix:<ul><li>Open in record editor</li>'
+            +'<li>Find parent menu(s) in "Linked From" section</li>'
+            +'<li>Open parent menu record and remove link to this record</li></ul>');
+            /*window.hWin.HEURIST4.msg.showMsgDlg('Some menu items are recurred.<p>'
+            +(s.join('<br>'))
+            +'</p>Ask website author to fix this issue');*/            
         }
         
         //
@@ -287,9 +294,10 @@ $.widget( "heurist.navigation", {
                         //indent for submenu
                         var ele = $(ui.item).children('ul.ui-menu');
                         if(ele.length>0){
-                            setTimeout(function() { ele.css({top:'0px',  left:'200px'}); }, 500);      
+                            setTimeout(function() { ele.css({top:'0px',  left:'200px'}); }, 300);      
                         }
                    }else {
+                        //show below
                         var ele = $(ui.item).children('ul.ui-menu');
                         if(ele.length>0){
                             setTimeout(function() { ele.css({top:'29px',  left:'0px'}); }, 500);      
@@ -318,6 +326,8 @@ $.widget( "heurist.navigation", {
                 return false;
             };
 
+            opts['icons'] = {submenu: "ui-icon-carat-1-e" }; 
+            
             //init jquery menu widget
             this.divMainMenuItems.menu( opts );
 
@@ -346,6 +356,10 @@ $.widget( "heurist.navigation", {
                 this.divMainMenuItems.children('li.ui-menu-item').children('a').css(this.options.toplevel_css);
             }
 
+            if(this.options.orientation=='horizontal'){
+                this.divMainMenuItems.children('li.ui-menu-item').children('a').find('span.ui-menu-icon').hide();
+            }
+                        
             //
             // if onmenuselect function define it is used for action
             // otherwise it loads content to page_target (#main-content by default)

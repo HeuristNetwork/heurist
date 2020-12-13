@@ -220,7 +220,7 @@ $time_debug = microtime(true);
         $this->sourceTerms = new DbsTerms(null, $this->source_defs['terms']);
         if($entityTypeToBeImported=='term'){
             if(count($local_ids)>0){
-                foreach($local_ids as $local_id){
+                foreach($local_ids as $local_id){ 
                     $rt = $this->sourceTerms->getTerm($local_id);        
                     if($rt!=null){
                         $def_ids[] = $local_id;

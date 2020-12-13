@@ -274,10 +274,18 @@
         <input name="menu_recIDs" type="hidden" value=""/>
         <div id="menu_recIDs" style="display:table-row"></div>
     </div>
+    <div  class="heurist_Navigation" id="expandLevels">
+        <div class="header"><label>On loading:</label></div>
+        <label><input name="expand_levels" type="radio" value="0" checked/>Show first level only</label>
+        <label><input name="expand_levels" type="radio" value="1"/>Open second level</label>
+        <label><input name="expand_levels" type="radio" value="2"/>Open all levels</label>
+    </div>
+<!--        
     <div  class="heurist_Navigation">
         <div class="header" style="width:165px;"><label>If root has only one menu item,<br>display items from next level</label></div>
         <input name="use_next_level" type="checkbox"/>
     </div>
+-->    
     <div class="heurist_Navigation">
         <div class="header"><label>Open:</label></div>
         <select name="target" class="text ui-widget-content ui-corner-all" title="" style="width:400px">

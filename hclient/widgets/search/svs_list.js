@@ -372,14 +372,8 @@ $.widget( "heurist.svs_list", {
             return;
         }
         
-        // show saved searches as a list of buttons
-        if(this.options.buttons_mode){
-
-            this._updateAccordeon();
-            return;
-
-        }else if(!window.hWin.HAPI4.has_access()){
-            window.hWin.HAPI4.currentUser.ugr_Groups = {};
+        if(!window.hWin.HAPI4.has_access()){
+             window.hWin.HAPI4.currentUser.ugr_Groups = {}; //'{'5':'member'}; //was {}
         }
         this._updateAccordeon();
 
@@ -390,9 +384,9 @@ $.widget( "heurist.svs_list", {
     //
     _saveTreeData: function( groupToSave, treeData, callback ){
         
-        if(!window.hWin.HAPI4.has_access()) return;
+        if(this.isPublished || !window.hWin.HAPI4.has_access()) return; //do not save for not logged and publish mode
 
-        var isPersonal = (groupToSave=="all" || groupToSave=="bookmark" || groupToSave=="entity");
+        var isPersonal = (groupToSave=="all" || groupToSave=="bookmark");
 
         if(!treeData){
             treeData = {};
@@ -429,7 +423,7 @@ $.widget( "heurist.svs_list", {
     },
 
     //
-    // redraw accordeon - list of workgroups, all, bookmarked, entity
+    // redraw accordeon - list of workgroups, all, bookmarked
     //
     _updateAccordeon: function(){
 
@@ -458,12 +452,11 @@ $.widget( "heurist.svs_list", {
             +'<span class="ui-icon ui-icon-box" style="color:orange;display:inline-block; vertical-align: bottom; font-size:1em"></span>'
             +'&nbsp;Faceted search</div>'
 
-
             +'<div title="'+this._HINT_WITHRULES+'">'
             +'<span class="ui-icon ui-icon-plus" style="color:orange;display:inline-block; vertical-align: bottom; font-size:0.8em;width:0.7em;"></span>'
             +'<span class="ui-icon ui-icon-shuffle" style="color:orange;display:inline-block; vertical-align: bottom; font-size:1em;width:0.9em;"></span>'
             +'&nbsp;Search with rules</div>'
-
+            
             +'<div title="'+this._HINT_RULESET+'">'
             +'<span class="ui-icon ui-icon-shuffle" style="color:orange;display:inline-block; vertical-align: bottom; font-size:1em"></span>'
             +'&nbsp;RuleSet</div>';
@@ -1080,7 +1073,7 @@ $.widget( "heurist.svs_list", {
         
         var sColor='', sIcon;
 
-        if(domain=='all' || domain=='bookmark' || domain=='entity'){
+        if(domain=='all' || domain=='bookmark'){
             sIcon = 'user';
         }else if(domain=='dbs' || domain==1){
             sIcon = 'database';
@@ -1361,7 +1354,7 @@ $.widget( "heurist.svs_list", {
                             
                             var newGroupID = node.tree.options.groupID;
                             var oldGroupID = mod_node.tree.options.groupID;
-                            var newGroupID_for_db = (newGroupID=='all' || newGroupID=='bookmark'|| newGroupID=='entity')
+                            var newGroupID_for_db = (newGroupID=='all' || newGroupID=='bookmark')
                                         ? window.hWin.HAPI4.currentUser.ugr_ID :newGroupID; 
 
 //console.log('move '+mod_node.key+'  '+mod_node.title+' from '+oldGroupID
@@ -2553,7 +2546,7 @@ console.log(err)
     //
     // for default tree data
     // create list of saved searches for given user/group
-    // domain - all or bookmark or entity
+    // domain - all or bookmark
     //
     __define_SVSlist: function(ugr_ID, domain){
 
@@ -2562,28 +2555,18 @@ console.log(err)
         var res = [];
 
         //add predefined searches
-        if(ugr_ID == window.hWin.HAPI4.currentUser.ugr_ID){  //if current user domain may be all or bookmark or entity
-
-            if(domain=='entity'){
-                //push rectypes with top most record count
-                //@todo
-                res.push( { title:'Places', folder:false, url:'?q=t:12'} );
-                
-            }else{
+        if(ugr_ID == window.hWin.HAPI4.currentUser.ugr_ID){  //if current user domain may be all or bookmark
         
-                domain = (domain=='b' || domain=='bookmark')?'bookmark':'all';
+                var domain = (domain=='b' || domain=='bookmark')?'bookmark':'all';
 
                 var s_all = "?w="+domain+"&q=sortby:-m after:\"1 week ago\"&label=Recent changes";
                 var s_recent = "?w="+domain+"&q=sortby:-m&label=All records";
 
                 res.push( { title: window.hWin.HR('Recent changes'), folder:false, url: s_all}  );
                 res.push( { title: window.hWin.HR('All (date order)'), folder:false, url: s_recent}  );
-            }
         }
 
         //_NAME = 0, _QUERY = 1, _GRPID = 2
-
-
 
         for (var svsID in ssearches)
         {

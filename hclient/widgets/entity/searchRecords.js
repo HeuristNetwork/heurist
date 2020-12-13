@@ -1,5 +1,5 @@
 /**
-* Search header for DefTerms manager
+* Search header
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -245,10 +245,30 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
         }   
 
         //by title        
-        if(this.input_search.val()!=''){
-            qstr = qstr + ' title:'+this.input_search.val();
-            qobj.push({"title":this.input_search.val()});
-        }
+        if(this.input_search.val().trim()!=''){
+            var is_whole_phrase = true;
+            var s = this.input_search.val().trim();
+            if(s.length>4 && s[0]=='"' && s[s.length-1]=='"'){
+                s = s.substring(1,s.length-2);
+                is_whole_phrase = true;
+            }else{
+                s = s.split(' ');
+                is_whole_phrase = !(s.length>1);
+            }    
+                
+            if(is_whole_phrase){
+                s = this.input_search.val().trim()
+                qstr = qstr + ' title:'+s;
+                qobj.push({"title":s});
+            }else{        
+                for(var i=0;i<s.length;i++)
+                if(s[i]!=''){
+                    qobj.push({"title":s[i]});    
+                    qstr = qstr + ' title:'+s[i];
+                }
+            }
+        
+        }        
 
         //by ids of recently selected
         if(this.element.find('#cb_selected').is(':checked')){

@@ -48,6 +48,7 @@ require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_recsearch.php');
 require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_users.php');
 require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_rel_details_temp.php');
 
+define('ALLOWED_TAGS', '<i><b><u><em><strong><sup><sub><small><br>');
 
 $noclutter = array_key_exists('noclutter', $_REQUEST);
 $is_map_popup = array_key_exists('mapPopup', $_REQUEST) && ($_REQUEST['mapPopup']==1);
@@ -486,7 +487,7 @@ if ($bkm_ID>0 || $rec_id>0) {
 .'oncontextmenu="return false;" onclick="$(\'div[data-recid]\').hide();$(\'div[data-recid='.$id.']\').show();'
 .'$(\'.gm-style-iw\').find(\'div:first\').scrollTop(0)">'
 //.'$(event.traget).parents(\'.gm-style-iw\').children()[0].scrollTop()">'
-.strip_tags($bibInfo['rec_Title'],'<i><b><u>').'</a></div></div>';  //htmlspecialchars
+.strip_tags($bibInfo['rec_Title'],ALLOWED_TAGS).'</a></div></div>';  //htmlspecialchars
                    
                     $cnt++;
                 }
@@ -959,12 +960,12 @@ function print_public_details($bib) {
                         $bd['val'] = '<a target="_new" href="'.HEURIST_BASE_URL.'viewers/record/renderRecordData.php?db='
                             .HEURIST_DBNAME.'&recID='.$rec_id.(defined('use_alt_db')? '&alt' : '')
                             .'" onclick="return link_open(this);">'
-                            .strip_tags($rec_title,'<i><b><u>').'</a>';
+                            .strip_tags($rec_title,ALLOWED_TAGS).'</a>';
                         
                     }else{
                         
                         $bd['val'] = '<a href="#" oncontextmenu="return false;" onclick="return no_access_message(this);">'
-                            .strip_tags($rec_title,'<i><b><u>').'</a>';
+                            .strip_tags($rec_title,ALLOWED_TAGS).'</a>';
                         
                     }
 
@@ -1386,9 +1387,9 @@ function print_relation_details($bib) {
                     print '<img class="rft" style="vertical-align: top;background-image:url('.HEURIST_ICON_URL.$bd['RelatedRecID']['rec_RecTypeID'].'.png)" title="'.$rectypesStructure['names'][$bd['RelatedRecID']['rec_RecTypeID']].'" src="'.HEURIST_BASE_URL.'common/images/16x16.gif">&nbsp;';
                 }
                 print '<a target=_new href="'.HEURIST_BASE_URL.'viewers/record/renderRecordData.php?db='.HEURIST_DBNAME.'&recID='.$bd['RelatedRecID']['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'
-                        .strip_tags($bd['RelatedRecID']['rec_Title'],'<i><b><u>').'</a>';
+                        .strip_tags($bd['RelatedRecID']['rec_Title'],ALLOWED_TAGS).'</a>';
             } else {
-                print strip_tags($bd['rec_Title'],'<a><i><b><u>');
+                print strip_tags($bd['rec_Title'],ALLOWED_TAGS);
             }
             print '&nbsp;&nbsp;';
             if (@$bd['StartDate']) print htmlspecialchars(temporalToHumanReadableString($bd['StartDate']));
@@ -1425,9 +1426,9 @@ function print_relation_details($bib) {
                     print '<img class="rft" style="background-image:url('.HEURIST_ICON_URL.$bd['RelatedRecID']['rec_RecTypeID'].'.png)" title="'.$rectypesStructure['names'][$bd['RelatedRecID']['rec_RecTypeID']].'" src="'.HEURIST_BASE_URL.'common/images/16x16.gif">&nbsp;';
                 }
                 print '<a target=_new href="'.HEURIST_BASE_URL.'viewers/record/renderRecordData.php?db='.HEURIST_DBNAME.'&recID='.$bd['RelatedRecID']['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'
-                    .strip_tags($bd['RelatedRecID']['rec_Title'],'<i><b><u>').'</a>';
+                    .strip_tags($bd['RelatedRecID']['rec_Title'],ALLOWED_TAGS).'</a>';
             } else {
-                print strip_tags($bd['Title'],'<i><b><u>');
+                print strip_tags($bd['Title'],ALLOWED_TAGS);
             }
             print '&nbsp;&nbsp;';
             if (@$bd['StartDate']) print htmlspecialchars($bd['StartDate']);
@@ -1504,7 +1505,7 @@ function print_linked_details($bib, $link_cnt)
                         
                 print '<div style="display: table-cell;vertical-align:top;'
                 .($is_map_popup?'max-width:250px;':'').'" class="truncate"><a target=_new href="'.HEURIST_BASE_URL.'viewers/record/renderRecordData.php?db='.HEURIST_DBNAME.'&recID='.$row['rec_ID'].(defined('use_alt_db')? '&alt' : '').'" onclick="return link_open(this);">'
-                    .strip_tags($row['rec_Title'],'<i><b><u>').'</a></div>';
+                    .strip_tags($row['rec_Title'],ALLOWED_TAGS).'</a></div>';
                 
             print '</div>';
         }
@@ -1539,7 +1540,7 @@ function print_text_details($bib) {
 
 function output_chunker($val) {
     // chunk up the value so that it will be able to line-break if necessary
-    //$val = htmlspecialchars($val);
+    //$val = htmlspecialchars($val);    The tags listed are the tags allowed.
     $val = strip_tags($val,'<a><u><i><b><strong><h1><h2><h3><h4><p><ul><li>');
     return $val;
     /* it adds word breaker incorrectly, so Arabic words are displayed incorrecly

@@ -227,8 +227,16 @@ window.hWin.HEURIST4.msg.showMsgDlg(
         
         $empty_mark = (trim($content)=='')?' date-empty="1"':'';
         
-        print '<h2 class="webpageheading" '.$empty_mark.'>'.__getValue($rec, DT_NAME).'</h2>'
+        $term_ID = mysql__select_value($mysqli, 
+                'select trm_ID from defTerms where trm_OriginatingDBID=2 and trm_IDInOriginatingDB=6254');
+
+        $isWebPage = ($rec['rec_RecTypeID']==RT_CMS_MENU && __getValue($rec, DT_CMS_PAGETYPE)==$term_ID);
+        if($isWebPage){
+            print $content;
+        }else{
+            print '<h2 class="webpageheading" '.$empty_mark.'>'.__getValue($rec, DT_NAME).'</h2>'
                             .$content;
+        }        
     }
     exit();
 }
@@ -537,7 +545,7 @@ function loadPageContent(pageid){
                   function(){
                       
                       var pagetitle = $(page_target.children()[0]);
-                      pagetitle.remove();
+                      if(pagetitle.is('h2.webpageheading')) pagetitle.remove()
                       $('#main-pagetitle').empty();
                       window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, '#main-content' );
                       window.hWin.HEURIST4.msg.sendCoverallToBack();
@@ -945,7 +953,7 @@ if ($page_template!=null && substr($page_template,-4,4)=='.tpl') {
             </div>    
         </div>
         
-        <div id="main-menu" class="mceNonEditable" style="float:left;width:100%;min-height:40px;padding-top:16px;color:black;font-size:1.1em;" data-heurist-app-id="heurist_Navigation" data-generated="1">
+        <div id="main-menu" class="mceNonEditable" style="position: absolute;top: 88px;width:100%;min-height:40px;padding-top:16px;color:black;font-size:1.1em;" data-heurist-app-id="heurist_Navigation" data-generated="1">
             <div class="widget-design-header" style="padding: 10px;"><img style="vertical-align: middle;"
              height="22" /> <strong>navigation</strong><a class="edit" style="padding: 0 10px;" title="Click to edit" href="#">edit</a>  <a class="remove" href="#">remove</a> height:50px width:100%</div>
             <span class="widget-options" style="font-style: italic; display: none;">{"menu_recIDs":"<?php print $rec_id;?>","use_next_level":true,"orientation":"horizontal","init_at_once":true}</span>

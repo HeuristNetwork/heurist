@@ -704,12 +704,37 @@ $.widget( "heurist.editing_input", {
                         .insertBefore($input);
                     $input.hide();
                     
-                    $btn_edit_switcher.text('edit html as text')
-                    this._on( $btn_edit_switcher, { click: function(){
-                        $btn_edit_switcher.hide();
-                        $input.show();
-                    }});
+                    $btn_edit_switcher.text('edit source');
                     
+                    var $btn_edit_switcher2 = $( '<span>edit wyswyg</span>', {title: 'Show rich text editor'})
+                        .addClass('smallbutton')
+                        .css({'line-height': '20px','vertical-align':'top',cursor:'pointer','text-decoration':'underline'})
+                        .insertAfter( $btn_edit_switcher );
+                    var $label_edit_switcher = $('<span>Advanced users:</span>')
+                        .css({'line-height': '20px','vertical-align':'top'}).addClass('smallbutton')
+                        .insertBefore( $btn_edit_switcher );
+                    
+                    this._on( $btn_edit_switcher, { click: function(){
+                        //$btn_edit_switcher.hide();
+                        //$input.show();
+                        $btn_edit_switcher2.hide();
+                        $label_edit_switcher.hide();
+                        var eid = '#'+$input.attr('id')+'_editor';                    
+                        if($input.is(':visible')){
+                            __showEditor(true); //show tinymce editor
+                        }else{
+                            $btn_edit_switcher.text('wyswyg');
+                            $input.show();
+                            tinymce.remove(eid);
+                            $(eid).hide();
+                        }                        
+                    }});
+                    this._on( $btn_edit_switcher2, { click: function(){
+                        $btn_edit_switcher2.hide();
+                        $label_edit_switcher.hide();
+                        __showEditor(true); //show tinymce editor
+                    }});
+
                     
                     var $cms_dialog = window.hWin.HEURIST4.msg.getPopupDlg();
                     if($cms_dialog.find('.main_cms').length>0){ 

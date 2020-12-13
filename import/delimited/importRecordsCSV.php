@@ -532,11 +532,11 @@ if(!$format) $format='csv';
                 You are now ready to update the database. This step applies the changes you have prepared and is not (easily) reversible.
             </div>
 
-            <input type="radio" checked name="sa_upd" id="sa_upd21" value="21" class="text">&nbsp;
-            <label for="sa_upd21">Load new values, replacing all existing values for these records/fields</label><br>
-            
-            <input type="radio" name="sa_upd" id="sa_upd0" value="0" class="text">&nbsp;
+            <input type="radio" checked name="sa_upd" id="sa_upd0" value="0" class="text">&nbsp;
             <label for="sa_upd0">Add new values without deletion of existing values (duplicates are ignored)</label><br>
+            
+            <input type="radio"  name="sa_upd" id="sa_upd21" value="21" class="text">&nbsp;
+            <label for="sa_upd21">Load new values, replacing all existing values for these records/fields</label><br>            
             
             <a href="#" style="margin: 0.3em;line-height: 17px;text-decoration:none"
             onclick="{$('#divImport3').show();$('#divImport3_marker').removeClass('ui-icon-triangle-1-e').addClass('ui-icon-triangle-1-s');}">

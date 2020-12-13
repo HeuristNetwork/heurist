@@ -318,29 +318,31 @@ console.log('foter:'+footer_content_raw);
                 {
                         //first child is webpage title
                         var pagetitle = $(main_content.children()[0]);
-                        if(pageid==home_pageid){
-                            pagetitle.empty();
-                        }        
-                        if(is_show_pagetitle){
-                            main_header.find('#main-pagetitle').empty().show();
-                        }
-                        //move title to header
-                        pagetitle.addClass("webpageheading");
-                        pagetitle.detach().appendTo(main_header.find('#main-pagetitle'));
-                        
-                        if(pagetitle.attr('date-empty')==1){
-                            pagetitle.attr('date-empty',0);
-                            
+                        if(pagetitle.is('h2')){
                             if(pageid==home_pageid){
-                                window.hWin.HEURIST4.msg.showMsgFlash('Home page is empty. First menu item will be loaded');
-                            }else{
-                                window.hWin.HEURIST4.msg.showMsgDlg(
-                                    'This menu item does not have associated page content.'
-                                    +'<br>It will not be selectable in the website. '
-                                    +'<br>We recommend this for parent menus.',null,null,
-                                    {my:'left top', at:'left+200 top+100', of:$('#main-content-container')});    
+                                pagetitle.empty();
+                            }        
+                            if(is_show_pagetitle){
+                                main_header.find('#main-pagetitle').empty().show();
                             }
-                            
+                            //move title to header
+                            pagetitle.addClass("webpageheading");
+                            pagetitle.detach().appendTo(main_header.find('#main-pagetitle'));
+                        
+                            if(pagetitle.attr('date-empty')==1){
+                                pagetitle.attr('date-empty',0);
+                                
+                                if(pageid==home_pageid){
+                                    window.hWin.HEURIST4.msg.showMsgFlash('Home page is empty. First menu item will be loaded');
+                                }else{
+                                    window.hWin.HEURIST4.msg.showMsgDlg(
+                                        'This menu item does not have associated page content.'
+                                        +'<br>It will not be selectable in the website. '
+                                        +'<br>We recommend this for parent menus.',null,null,
+                                        {my:'left top', at:'left+200 top+100', of:$('#main-content-container')});    
+                                }
+                                
+                            }
                         }
                         
                         //assign content to editor
@@ -1266,6 +1268,12 @@ console.log('foter:'+footer_content_raw);
                            
                            var is_horiz = ($(e.target).val()=='horizontal');
 
+                           if($(e.target).val()=='treeview'){
+                               $dlg.find('#expandLevels').show();
+                           }else{
+                               $dlg.find('#expandLevels').hide();
+                           }
+                           
                            var vals = $dlg.find('#widgetCss').val().split(';');
                            for (var i=0; i<vals.length; i++){
                                var vs = vals[i].split(':');
