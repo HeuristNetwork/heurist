@@ -173,32 +173,32 @@ $.widget( "heurist.search", {
 
 
         this.input_search = $( "<textarea>" )
-        .css({'margin-right':'0.2em', 'height':'41px', 
+        .css({//'margin-right':'0.2em', 
+            'height':'41px', 
             'max-height':'70px', 'resize':'none', 
             'padding':'0.4em',
             'min-height':'41px', 'line-height': '14px', 
-            'min-width':'10em', 'width':'100%', 'padding-right':'18px' })  //was width:sz_input, 'max-width':sz_input,  
+            'min-width':'10em', 'width':'100%', 'padding-right':'28px' })  //was width:sz_input, 'max-width':sz_input,  
         .addClass("text ui-widget-content ui-corner-all")
         .appendTo(  this.div_search_input );
         
-        
+          
         //promt to be shown when input has complex search expression (json search)
         this.input_search_prompt2 = $( "<span>" )
         .html('<span style="font-size:1em">'+window.hWin.HR("filter")
                 +'</span>&nbsp;&nbsp;<span class="ui-icon ui-icon-eye" style="font-size:1.8em;width: 1.7em;margin-top:1px"/>')
-        .css({ height:'20px', 'padding':'3px', 'margin':'2px', 'position':'relative'})
+        .css({ height:'20px', 'padding':'3px', 'margin':'2px', 'position':'relative', 'text-align':'left'})
         .appendTo( this.div_search_input );
         this._on( this.input_search_prompt2, {click: function(){
                 this.input_search_prompt2.hide();
                 this._setFocus();
         }} );
         
-        
         if(this._is_publication || this.options.is_h6style){
             this.input_search.css({'height':'30px','min-height':'30px','padding':'2px 18px 2px 2px', 'width':'400'});
             this.input_search_prompt2.addClass('ui-widget-content').css({border:'none',top:'-30px'});
         }else{
-            this.input_search_prompt2.css({'background':'#F4F2F4',top:'-40px'});
+            this.input_search_prompt2.css({top:'-40px'}); //'background':'#F4F2F4',
         }
         
         // AAAA
@@ -222,6 +222,7 @@ $.widget( "heurist.search", {
                 this.div_search.css({'display':'table-row',height:'30px'});
             }
         }
+        setTimeout(function(){that.input_search_prompt2.width(that.input_search.width()-10)},300);
             
         
         //help link
@@ -406,7 +407,7 @@ $.widget( "heurist.search", {
         
 
         this.div_buttons = $('<div>')
-            .addClass('div-table-cell logged-in-only')
+            .addClass('div-table-cell')
             .css({'text-align': 'center',width:'2px'}) // , 'width':'50px'
             .insertBefore( this.div_search_as_guest );
         
@@ -873,7 +874,7 @@ $.widget( "heurist.search", {
                             }else{
                                 that.input_search_prompt2.css({
                                     display:'block',
-                                    width:(that.input_search.width()-30),
+                                    width:(that.div_search_input.width()-10), 
                                     height:(that.input_search.height()-3)});
                             }
                             
@@ -1066,6 +1067,49 @@ $.widget( "heurist.search", {
                     widget.mainMenu6('show_ExploreMenu', null, 'search_quick', {top:pos.top+10, left:pos.left});
                     return;
             }
+        }else{
+/* todo
+                var cont = this.element.find('#search_quick');
+                
+                if(cont.length==0){
+                    cont = $('<div id="search_quick" class="explore-widgets">').appendTo(this.element);
+                }else if( cont.is(':visible')){ // already visisble
+                    return;
+                }
+            
+                if(!cont.search_quick('instance'))
+                    //initialization
+                    this.search_quick = cont.search_quick({
+                        onClose: function() { that.switchContainer('explore'); },
+                        menu_locked: function(is_locked, is_mouseleave){ 
+                            if(!is_mouseleave){
+                                that._resetCloseTimers();    
+                                that._explorer_menu_locked = is_locked; 
+                            }
+                    }  });    
+
+                explore_top = 0;
+                explore_height = 255;//268+36;
+                if(position){
+                    explore_top = position.top;
+                    explore_left = position.left;
+                }else{
+                    var widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('resultList');
+                    if(widget){
+                        explore_top = widget.position().top + 100;
+                    }else{
+                        explore_top = menu_item.offset().top;
+                    }
+                }
+       
+                
+                if(explore_top+explore_height>that.element.innerHeight()){
+                    explore_top = that.element.innerHeight() - explore_height;
+                }
+
+
+                that.menues_explore_popup.css({width:'700px',overflow:'hidden'});            
+*/            
         }
         
         
@@ -1076,7 +1120,7 @@ $.widget( "heurist.search", {
         if(!this.search_assistant){ //not loadaed yet
         
             //load template
-            this.search_assistant = $( "<div>" );
+            this.search_assistant = $( "<div>" ).css({'padding-top':30,overflow:'hidden'});
             
             this.search_assistant.addClass('text ui-corner-all ui-widget-content ui-heurist-bg-light heurist-quick-search')  // menu-or-popup
                 //.css({position:'absolute', zIndex:9999})
@@ -1106,7 +1150,7 @@ $.widget( "heurist.search", {
             this.search_assistant_popup = window.hWin.HEURIST4.msg.showElementAsDialog({
                 element: this.search_assistant[0],
                 //opener: 
-                width:420, height:270,
+                width:500, height:340,
                 modal: false,
                 resizable: false,
                 borderless: true,
@@ -1557,7 +1601,7 @@ $.widget( "heurist.search", {
         }else{
             this.input_search_prompt2.css({
                 display:'block',
-                width:(this.input_search.width()-30),
+                width:(this.div_search_input.width()-10), 
                 height:(this.input_search.height()-3)});
         }
 

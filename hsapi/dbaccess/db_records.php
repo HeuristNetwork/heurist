@@ -1274,7 +1274,7 @@
             
         }
         if(!$current_owner_groups) $current_owner_groups = array();
-        array_unshift($current_owner_groups, $record["rec_OwnerUGrpID"]);
+        array_unshift($current_owner_groups, $record["rec_OwnerUGrpID"]); //add to begin of array
         
         if(count($current_owner_groups)==1 && !($current_owner_groups[0]>=0)){  
             //rare case when current record has wrong value
