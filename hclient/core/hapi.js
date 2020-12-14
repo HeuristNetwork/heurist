@@ -328,10 +328,21 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             *  for internal actions use client side methods of hapi.is_admin, is_member, has_access
             */
             , verify_credentials: function(callback, requiredLevel, password_protected, password_entered){
+                
+                var requiredMembership = 0;
+                
+                if(typeof requiredLevel==='string' && requiredLevel.indexOf(';')>0){
+                    
+                    requiredLevel = requiredLevel.split(';');
+                    requiredMembership = requiredLevel[1];
+                    requiredLevel = requiredLevel[0];
+                    if(requiredLevel<0) requiredLevel = 0;
+                }
 
                 requiredLevel = Number(requiredLevel);
                 if(requiredLevel<0){ //no verification required - everyone access
                 
+                    //however need to check password protection
                     if(window.hWin.HEURIST4.util.isempty(password_protected)){
                             //no password protection
                             callback(password_entered);
@@ -371,16 +382,27 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 //verify locally
                 function __verify( is_expired ){
                     
-                        if(window.hWin.HAPI4.has_access(requiredLevel)){ 
+                        if( (requiredMembership==0 || window.hWin.HAPI4.is_member(requiredMembership))
+                            && 
+                             window.hWin.HAPI4.has_access(requiredLevel))
+                        { 
+                            //verification is accepted now check for password protection
                             window.hWin.HAPI4.SystemMgr.verify_credentials(callback, -1, password_protected, password_entered);
-                            //callback( password_entered );  
                         }else{
                             var response = {};
                             response.sysmsg = 0;
                             response.status = window.hWin.ResponseStatus.REQUEST_DENIED;
                             response.message = 'To perform this operation you have to be logged in';
                             
-                            if(requiredLevel==window.hWin.HAPI4.sysinfo.db_managers_groupid){
+                            if(requiredMembership>0){
+                               var sGrpName = '';
+                               if( window.hWin.HAPI4.sysinfo.db_usergroups 
+                                    && window.hWin.HAPI4.sysinfo.db_usergroups[requiredMembership]){
+                                    sGrpName = ' "'+window.hWin.HAPI4.sysinfo.db_usergroups[requiredMembership]+'"';
+                               } 
+                               response.message += ' as member of group #'+requiredMembership+sGrpName;
+                               
+                            }else if(requiredLevel==window.hWin.HAPI4.sysinfo.db_managers_groupid){
                                response.message += ' as database administrator';// of group "Database Managers"' 
                             }else if(requiredLevel==2){
                                response.message += ' as database onwer';

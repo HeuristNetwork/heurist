@@ -694,6 +694,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         var action = item.attr('id');
         var action_log = item.attr('data-logaction');
         var action_level = item.attr('data-user-admin-status');
+        var action_member_level = item.attr('data-user-member-status');
         var action_passworded = item.attr('data-pwd');
         var action_container = item.attr('data-container');
         
@@ -758,6 +759,10 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         //  1 - db admin (admin of group #1)
         //  2 - db owner
         var requiredLevel = (action_level==-1 || action_level>=0) ?action_level :0;
+        
+        if(action_member_level>0){
+            requiredLevel = requiredLevel + ';' + action_member_level;  
+        } 
         
         window.hWin.HAPI4.SystemMgr.verify_credentials(
             function( entered_password ){
