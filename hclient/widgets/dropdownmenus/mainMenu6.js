@@ -716,8 +716,12 @@ $.widget( "heurist.mainMenu6", {
 
                 that._init_SvsList(cont);                
                 
-                that.menues_explore_popup.css({bottom:'4px',width:'200px','overflow-y':'auto','overflow-x':'hidden'});
+                if(position){
+                    explore_top = position.top;
+                    explore_left = position.left;
+                }
                 
+                that.menues_explore_popup.css({bottom:'4px',width:'200px','overflow-y':'auto','overflow-x':'hidden'});
             }
             else if(action_name=='svsAdd'){
                 that._closeExploreMenuPopup();

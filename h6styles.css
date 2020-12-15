@@ -109,6 +109,12 @@ body.popup {
     background-size: contain;
 }
 .ui-icon-filter { 
+    background-image: url(hclient/assets/filter_icon.png) !important; 
+    width: 18;
+    height: 18;
+    background-size: contain;
+}
+.ui-icon-filter-black { 
     background-image: url(hclient/assets/v6/filter-000000.png) !important; 
     width: 18;
     height: 18;

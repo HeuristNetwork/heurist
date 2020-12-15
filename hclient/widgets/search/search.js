@@ -187,15 +187,15 @@ $.widget( "heurist.search", {
         this.input_search_prompt2 = $( "<span>" )
         .html('<span style="font-size:1em">'+window.hWin.HR("filter")
                 +'</span>&nbsp;&nbsp;<span class="ui-icon ui-icon-eye" style="font-size:1.8em;width: 1.7em;margin-top:1px"/>')
-        .css({ height:'20px', 'padding':'3px', 'margin':'2px', 'position':'relative', 'text-align':'left'})
+        .css({ height:'20px', 'padding':'3px', 'margin':'2px', 'position':'relative', 'text-align':'left', display:'block'})
         .appendTo( this.div_search_input );
         this._on( this.input_search_prompt2, {click: function(){
-                this.input_search_prompt2.hide();
+                this.input_search_prompt2.css({visibility:'hidden'});//hide();
                 this._setFocus();
         }} );
         
         if(this._is_publication || this.options.is_h6style){
-            this.input_search.css({'height':'30px','min-height':'30px','padding':'2px 18px 2px 2px', 'width':'400'});
+            this.input_search.css({'height':'30px','min-height':'30px','padding':'2px 18px 2px 2px'}); //, 'width':'400'
             this.input_search_prompt2.addClass('ui-widget-content').css({border:'none',top:'-30px'});
         }else{
             this.input_search_prompt2.css({top:'-40px'}); //'background':'#F4F2F4',
@@ -203,7 +203,7 @@ $.widget( "heurist.search", {
         
         // AAAA
         this._on( this.input_search, {
-            click: function(){ this.input_search_prompt2.hide(); }, 
+            click: function(){ this.input_search_prompt2.css({visibility:'hidden'}); },  //hide()
             keyup: this._showhide_input_prompt, 
             change: this._showhide_input_prompt
             });
@@ -222,10 +222,8 @@ $.widget( "heurist.search", {
                 this.div_search.css({'display':'table-row',height:'30px'});
             }
         }
-        setTimeout(function(){that.input_search_prompt2.width(that.input_search.width()-10)},300);
-            
         
-        //help link
+        //help link and quick access of saved filters
         if(!this._is_publication && this.options.is_h6style){
             var div_search_help_links = $('<div>')
                 //.css({position: 'absolute', top:'auto', 'font-size':'10px'})
@@ -241,7 +239,23 @@ $.widget( "heurist.search", {
             this._on( link, {  click: function(){
                 window.open('context_help/advanced_search.html','_blank');
             } });
+            
+            this.btn_saved_filters = $('<button>')
+                .button({label:'Saved filters',icon:'ui-icon-carat-1-s',iconPosition: 'end'})
+                .css({float:'right','font-size':'9px',padding:'0px 2px','margin-top':'-27px'})
+                .appendTo(this.div_search_input);
+            this.btn_saved_filters.find('span.ui-icon').css({'font-size':'inherit',height:'11px'});
+            
+            this._on(this.btn_saved_filters, {click: function(){
+                    var widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('mainMenu6');
+                    if(widget){
+                         var ele = this.btn_saved_filters;
+                         widget.mainMenu6('show_ExploreMenu', null, 'search_filters', 
+                            {top:ele.position().top-10 , left:ele.offset().left });
+                    }            
+            }});
         } 
+        
        
         var menu_h = window.hWin.HEURIST4.util.em(1); //get current font size in em
 
@@ -688,7 +702,7 @@ $.widget( "heurist.search", {
     _showhide_input_prompt:function() {
                 if(this.input_search.val()==''){
                     this.input_search_prompt.show();    
-                    this.input_search_prompt2.hide();    
+                    this.input_search_prompt2.css({'visibility':'hidden'});//hide();    
                 }else{
                     this.input_search_prompt.hide();     
                 }
@@ -869,15 +883,7 @@ $.widget( "heurist.search", {
                             that._refresh();
                         }
                         if( true || window.hWin.HEURIST4.util.isJSON(data.q) || qs.length>100 ){
-                            if(that.options.is_h6style){
-                                that.input_search_prompt2.css('display','block');    
-                            }else{
-                                that.input_search_prompt2.css({
-                                    display:'block',
-                                    width:(that.div_search_input.width()-10), 
-                                    height:(that.input_search.height()-3)});
-                            }
-                            
+                            that.input_search_prompt2.css({'visibility':'visible'}); //{display:'block'}
                         }
                     }
                 }
@@ -1597,11 +1603,10 @@ $.widget( "heurist.search", {
         this.input_search.change();
         
         if(this.options.is_h6style){
-            this.input_search_prompt2.css('display','block');    
+            this.input_search_prompt2.css({visibility:'visible'});    
         }else{
             this.input_search_prompt2.css({
-                display:'block',
-                width:(this.div_search_input.width()-10), 
+                visibility:'visible',
                 height:(this.input_search.height()-3)});
         }
 
