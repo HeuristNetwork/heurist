@@ -283,7 +283,7 @@ $.widget( "heurist.search_quick", $.heurist.recordAction, {
                 var rectype = (event)?Number(event.target.value):0;
                 
                 //var topOptions2 = 'All fields';
-                var topOptions2 = [{key:'',title:window.hWin.HR('All fields')},{key:'title',title:'Recor title (constructed)'}];
+                var topOptions2 = [{key:'',title:window.hWin.HR('All fields')},{key:'title',title:'Record title (constructed)'}];
                 var bottomOptions = null;
 
                 if(!(rectype>0)){
@@ -519,6 +519,27 @@ $.widget( "heurist.search_quick", $.heurist.recordAction, {
             window.hWin.HAPI4.SearchMgr.doSearch( this, request );
         
         this.closeDialog();
+    },
+    
+    outerHeight: function(callback){
+        
+        var fs = this.element.children('fieldset');
+        var eles = fs.children();
+        if(!fs.is(':visible') || eles.length==0){
+            var that = this;
+            setTimeout(function(){that.outerHeight(callback)},500);
+            return 246;
+        }
+        var h = fs.outerHeight();
+        if(h<20){
+            $.each(eles,function(i,ele){ h = h + $(ele).outerHeight();});
+        }
+        
+        h = h + this.element.children('div.ui-heurist-header').outerHeight();
+        
+        callback.call(this, h);
+
+        return h;
     }
 
     
