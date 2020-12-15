@@ -114,7 +114,8 @@ $.widget( "heurist.svs_list", {
         if(this.options.is_h6style){
             this.element.css({'overflow':'hidden'});
             //add title 
-            this.div_header =  $('<div class="ui-heurist-header" style="top:0px;">Saved filters <span style="font-style:italic;font-size:x-small">by workgroups</span></div>')
+            this.div_header =  $('<div class="ui-heurist-header" style="top:0px;">Saved filters</div>') 
+            // <span style="font-style:italic;font-size:x-small">by workgroups</span>
                 .hide()
                 .appendTo(this.element);
                 

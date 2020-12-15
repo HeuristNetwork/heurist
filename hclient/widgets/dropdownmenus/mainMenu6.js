@@ -352,6 +352,7 @@ $.widget( "heurist.mainMenu6", {
             }
       }
       
+      //show/hide bookmarks section in saved filters list
       var bm_on = (window.hWin.HAPI4.get_prefs('bookmarks_on')=='1');
       var ele = this.divMainMenu.find('.menu-explore[data-action-popup="svs_list"][data-id="bookmark"]')
       if(bm_on) ele.show();
@@ -670,7 +671,13 @@ $.widget( "heurist.mainMenu6", {
                     }  });    
 
                 explore_top = 0;
-                explore_height = 255;//268+36;
+//                explore_height = 275;
+                explore_height = this.search_quick.search_quick('outerHeight', function(properHeight){
+                    explore_height = properHeight; 
+                    that.menues_explore_popup.css({height: properHeight});
+                });
+
+
                 if(position){
                     explore_top = position.top;
                     explore_left = position.left;
@@ -688,10 +695,7 @@ $.widget( "heurist.mainMenu6", {
                     explore_top = that.element.innerHeight() - explore_height;
                 }
 
-
                 that.menues_explore_popup.css({width:'700px',overflow:'hidden'});
-
-
             }
             else if(action_name=='search_advanced'){
                 
@@ -707,6 +711,13 @@ $.widget( "heurist.mainMenu6", {
                     }  });    
 
                 that.menues_explore_popup.css({width:'606px', overflow:'hidden'});
+            }
+            else if(action_name=='search_filters'){
+
+                that._init_SvsList(cont);                
+                
+                that.menues_explore_popup.css({bottom:'4px',width:'200px','overflow-y':'auto','overflow-x':'hidden'});
+                
             }
             else if(action_name=='svsAdd'){
                 that._closeExploreMenuPopup();
@@ -727,18 +738,6 @@ $.widget( "heurist.mainMenu6", {
                 that._closeExploreMenuPopup();
                 that.addSavedSearch( 'faceted', false, explore_left );
                 return;
-            }
-            else if(action_name=='svs_list'){
-/*                
-                //show in menu section
-                that.menues_explore_popup.css({bottom:'4px',width:'300px',overflow:'auto'});
-                //cont.width(300);
-                that.svs_list.detach().appendTo(cont);
-                that.svs_list.css({'top':0, 'font-size':'1em'}).show();
-                that.svs_list.svs_list('option','container_width',300);
-                that.svs_list.svs_list('option','hide_header', false);
-                that._off(that.svs_list,'mouseenter');
-*/
             }
             else if(action_name=='recordAdd'){
 
@@ -764,9 +763,14 @@ $.widget( "heurist.mainMenu6", {
                 }else{
                     cont.recordAdd('doExpand', expandRecordAddSetting);                        
                 }
+                if(expandRecordAddSetting) explore_height = 430;
 
             }//endif
             
+            
+            if(explore_left+that.menues_explore_popup.outerWidth() > that.element.innerWidth()){
+                explore_left = that.element.innerWidth() - that.menues_explore_popup.outerWidth();
+            }
             that.menues_explore_popup.css({left:explore_left, top:explore_top, height:explore_height});
             
             //show menu section
@@ -796,7 +800,7 @@ $.widget( "heurist.mainMenu6", {
                     
                     cont.svs_list({
                         is_h6style: true,
-                        hide_header: true,
+                        hide_header: false,
                         container_width: 200,
                         onClose: function(noptions) { 
                             //!!! that.switchContainer('explore'); 
@@ -847,6 +851,8 @@ $.widget( "heurist.mainMenu6", {
     // mode = 0 - in menues['explore'],  1 in ui-heurist-quicklinks
     //    
     _switch_SvsList: function( mode ){
+        
+        return;//2020-12-15
         
         if(!this.svs_list && this.menues['explore'].find('#svs_list').length>0){
             this.svs_list = this._init_SvsList(this.menues['explore'].find('#svs_list'));
