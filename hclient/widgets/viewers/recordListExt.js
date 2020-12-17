@@ -194,7 +194,7 @@ this._dout('update dataset '+request.q);
     
     _dout: function(msg){
         return;
-        if(this.options.url  && this.options.url.indexOf('renderRecordData')>0){
+        if(this.options.url  && this.options.url.indexOf('visual')>0){ //renderRecordData smarty
             console.log(msg);
         }
     },

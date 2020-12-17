@@ -660,8 +660,9 @@ console.log(menu.find('.ui-menu-item').css('padding'));
     //
     collectionRender: function(_collection) {
         
-        this.menu_Collected_link.html( window.hWin.HR('Collected') + 
-                (_collection && _collection.length>0?':'+_collection.length:''));
+        this.menu_Collected_link.html( window.hWin.HR('Collected')
+                + (_collection && _collection.length>0?':'+_collection.length:'') 
+                + '<span class="ui-icon ui-icon-carat-d" style="right: 2px; left: unset;">');
     },
 
     //-------------------------------------- RELATION, MERGE -------------------------------
