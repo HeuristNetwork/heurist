@@ -712,16 +712,16 @@ $.widget( "heurist.mainMenu6", {
 
                 that.menues_explore_popup.css({width:'606px', overflow:'hidden'});
             }
-            else if(action_name=='search_filters'){
+            else if(action_name=='search_filters' || action_name=='search_rules'){ //list of saved filters
 
-                that._init_SvsList(cont);                
+                that._init_SvsList(cont, (action_name=='search_rules')?2:1);                
                 
                 if(position){
                     explore_top = position.top;
                     explore_left = position.left;
                 }
                 
-                that.menues_explore_popup.css({bottom:'4px',width:'200px','overflow-y':'auto','overflow-x':'hidden'});
+                that.menues_explore_popup.css({bottom:'4px',width:'300px','overflow-y':'auto','overflow-x':'hidden'});
             }
             else if(action_name=='svsAdd'){
                 that._closeExploreMenuPopup();
@@ -735,7 +735,15 @@ $.widget( "heurist.mainMenu6", {
                 }else{
                         explore_top = 2;
                 }*/
-                that.addSavedSearch( 'saved', false, explore_left );
+                
+                if(position){
+                    explore_top = position.top;
+                    explore_left = position.left;
+                }else{
+                    explore_top = 0;
+                }
+                
+                that.addSavedSearch( 'saved', false, explore_left, explore_top );
                 return;
             }
             else if(action_name=='svsAddFaceted'){
@@ -749,6 +757,12 @@ $.widget( "heurist.mainMenu6", {
                     .css({bottom:'4px',width:'300px',overflow:'hidden'})
                     .removeClass('ui-heurist-explore').addClass('ui-heurist-import record-addition');
 
+                if(position){
+                    expandRecordAddSetting = true;
+                    explore_top = position.top;
+                    explore_left = position.left;
+                }
+                    
                 if(!cont.recordAdd('instance')){
                     cont.recordAdd({
                         is_h6style: true,
@@ -795,9 +809,9 @@ $.widget( "heurist.mainMenu6", {
     },    
     
     //
+    // mode - filter mode - 0 all , 1 - filters only, 2 rules only
     //
-    //
-    _init_SvsList: function(cont, group_ID){
+    _init_SvsList: function(cont, mode){  //, group_ID
         
                 if(!cont.svs_list('instance')){
                     var that = this;
@@ -805,7 +819,8 @@ $.widget( "heurist.mainMenu6", {
                     cont.svs_list({
                         is_h6style: true,
                         hide_header: false,
-                        container_width: 200,
+                        container_width: 300,
+                        filter_by_type: mode,
                         onClose: function(noptions) { 
                             //!!! that.switchContainer('explore'); 
 
@@ -845,6 +860,7 @@ $.widget( "heurist.mainMenu6", {
                     
                 }else{
                     //cont.svs_list('option', 'allowed_UGrpID', group_ID);                        
+                    cont.svs_list('option', 'filter_by_type', mode);
                 }
                 
                 return cont;        
@@ -859,7 +875,7 @@ $.widget( "heurist.mainMenu6", {
         return;//2020-12-15
         
         if(!this.svs_list && this.menues['explore'].find('#svs_list').length>0){
-            this.svs_list = this._init_SvsList(this.menues['explore'].find('#svs_list'));
+            this.svs_list = this._init_SvsList(this.menues['explore'].find('#svs_list'),1);
         }
         if(!this.svs_list){
             return;
@@ -898,7 +914,7 @@ $.widget( "heurist.mainMenu6", {
     //    
     getSvsList: function(){
         if(!this.svs_list){
-           this.svs_list = this._init_SvsList(this.menues['explore'].find('#svs_list'));  
+           this.svs_list = this._init_SvsList(this.menues['explore'].find('#svs_list'),0);  
         }
         return this.svs_list; 
     },
@@ -1356,7 +1372,7 @@ $.widget( "heurist.mainMenu6", {
     // define new saved filter/search
     // mode - saved or faceted
     //
-    addSavedSearch: function( mode, is_modal, left_position ){
+    addSavedSearch: function( mode, is_modal, left_position, top_position ){
 
         if(this.edit_svs_dialog==null){
             this.edit_svs_dialog = new hSvsEdit();    
@@ -1368,13 +1384,16 @@ $.widget( "heurist.mainMenu6", {
                 left_position = 302;
             }
         }
+        if(!(top_position>0)){
+            top_position = 140;
+        }
 
         is_modal = (is_modal!==false);
         
         var that = this;
 
         var $dlg = this.edit_svs_dialog.showSavedFilterEditDialog( mode, null, null, this.currentSearch , false, 
-            { my: 'left+'+left_position+' top+120', at: 'left top', of:this.divMainMenu},
+            { my: 'left+'+left_position+' top+'+top_position, at: 'left top', of:this.divMainMenu},
             function(){
                 window.hWin.HAPI4.currentUser.usr_SavedSearch = null;
                 window.hWin.HAPI4.currentUser.ugr_SvsTreeData = null;

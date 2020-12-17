@@ -40,7 +40,9 @@ $.widget( "heurist.svs_list", {
         
         menu_locked: null,
         hide_header: false,  //todo rename - inline main menu
-        container_width:0
+        container_width:0,
+        
+        filter_by_type: 1  //0 all, 1 filters only, 2 rules only
     },
 
     isPublished: false,
@@ -334,6 +336,12 @@ $.widget( "heurist.svs_list", {
             this.search_faceted.search_faceted('option', 'onclose', value);
         }else if(key=='allowed_UGrpID' || key=='hide_header'){
             this._refresh();
+        }else if(key=='filter_by_type'){
+            this.div_header.text(value=='2'?'Rules':'Saved filters');
+            var that = this;            
+            $(this.treeviews, function(groupID, tree){
+                that._applyTreeViewFilter(groupID, value);            
+            });
         }
     },
 
@@ -1271,6 +1279,8 @@ $.widget( "heurist.svs_list", {
                             $span.find("> span.fancytree-title").html(node.title+' '+s);
                         }
                         $span.attr('title', s_hint2)
+                        $span.attr('filter_type', prms.type);
+                        
                     }
 
                     //<span class="fa-ui-accordion-header-icon ui-icon ui-icon-triangle-1-s"></span>
@@ -1413,8 +1423,22 @@ $.widget( "heurist.svs_list", {
                     }
                 }
             };
-            fancytree_options['filter'] = { mode: "hide" };
 
+            fancytree_options['filter'] = 
+                  {
+                    //autoApply: true,   // Re-apply last filter if lazy data is loaded
+                    autoExpand: false, // Expand all branches that contain matches while filtered
+                    counter: false,     // Show a badge with number of matching child nodes near parent icons
+                    fuzzy: false,      // Match single characters in order, e.g. 'fb' will match 'FooBar'
+                    hideExpandedCounter: true,  // Hide counter badge if parent is expanded
+                    hideExpanders: false,       // Hide expanders if all child nodes are hidden by filter
+                    //highlight: true,   // Highlight matches by wrapping inside <mark> tags
+                    leavesOnly: true, // Match end nodes only
+                    nodata: true,      // Display a 'no data' status node if result is empty
+                    mode: 'hide'       // dimm Grayout unmatched nodes (pass "hide" to remove unmatched node instead)
+                  };
+            
+            
             tree.fancytree(fancytree_options)
             //.css({'height':'100%','width':'100%'})
             .on("nodeCommand", function (event, data){
@@ -1832,14 +1856,42 @@ $.widget( "heurist.svs_list", {
 
         this.treeviews[groupID] = tree.fancytree("getTree");
 
-        
         if(this.options.is_h6style){
+            this._applyTreeViewFilter(groupID);
             res.css({'background':'transparent','overflow':'hidden',border:'none'});
         }
         
         
         return res;
 
+    },
+    
+    //
+    //
+    //
+    _applyTreeViewFilter: function(groupID, value){
+        if(this.options.is_h6style){
+            
+            this.treeviews[groupID].clearFilter();
+            if(!(value>=0)) value = this.options.filter_by_type;
+            
+            if(value!=0){
+                    
+                this.treeviews[groupID].filterNodes(function(node){
+                    var res = true;
+                    if(value==2){ //rules only
+                        res = ($(node.span).attr('filter_type')==2);    
+                    }else{
+                        res = ($(node.span).attr('filter_type')!=2);
+                    }
+                    if(!res){
+                        $(node.span).parent('li').hide();
+                    }
+                    return res;
+                }, {mode:'hide'});// //highlight:false,
+                
+            }
+        }  
     },
 
     //
@@ -2181,8 +2233,6 @@ $.widget( "heurist.svs_list", {
                     isPrivate = false;
                 }
 
-//console.log('!!!!! '+currGroupId+'  new '+groupID);
-                
                 if( currGroupId != groupID){
                     //remove from old group
                     node.remove();

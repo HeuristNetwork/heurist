@@ -1359,6 +1359,13 @@ span.fancytree-checkbox{
     width:26;
 }
 
+.fancytree-ext-filter .fancytree-node.fancytree-match .fancytree-title{
+    /*color: silver !important;*/
+    font-weight: normal !important;
+}
+
+
+
 .tree-map{
     padding:0;
 }
