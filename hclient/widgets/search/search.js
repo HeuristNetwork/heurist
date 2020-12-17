@@ -239,23 +239,8 @@ $.widget( "heurist.search", {
             this._on( link, {  click: function(){
                 window.open('context_help/advanced_search.html','_blank');
             } });
+        }
             
-            this.btn_saved_filters = $('<button>')
-                .button({label:'Saved filters',icon:'ui-icon-carat-1-s',iconPosition: 'end'})
-                .css({float:'right','font-size':'9px',padding:'0px 2px','margin-top':'-27px'})
-                .appendTo(this.div_search_input);
-            this.btn_saved_filters.find('span.ui-icon').css({'font-size':'inherit',height:'11px'});
-            
-            this._on(this.btn_saved_filters, {click: function(){
-                    var widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('mainMenu6');
-                    if(widget){
-                         var ele = this.btn_saved_filters;
-                         widget.mainMenu6('show_ExploreMenu', null, 'search_filters', 
-                            {top:ele.position().top-10 , left:ele.offset().left });
-                    }            
-            }});
-        } 
-        
        
         var menu_h = window.hWin.HEURIST4.util.em(1); //get current font size in em
 
@@ -286,29 +271,56 @@ $.widget( "heurist.search", {
             $this.data('y', $this.outerHeight());
         }) // this.input_search.mouseup
         
+        //
+        // quick filter builder buttons
+        //
+        this.div_buttons = $('<div>')
+            .addClass('div-table-cell')
+            .css({'text-align': 'center',width:'2px'}) // , 'width':'50px'
+            .appendTo( this.div_search );
+        if(true || !this.options.is_h6style){  //button to open quick filter builder
+            var linkGear = $('<a>',{href:'#', 
+                title:window.hWin.HR('Build a filter expression using a form-driven approach')})
+                .css({'padding-right':'1.5em','display':'inline-block','margin-left':'-27px','opacity':'0.5','margin-top': '0.6em', width:'20px'})
+                .addClass('ui-icon ui-icon-magnify-explore') //was ui-icon-gear was ui-icon-filter-form
+                .appendTo(this.div_buttons);
+            this._on( linkGear, {  click: this.showSearchAssistant });
+        }
+        //
+        // save filter
+        //         
+        if(!this._is_publication && this.options.is_h6style){
+            this.btn_save_filter = $('<button>')
+                .button({showLabel:'false',icon:'ui-icon-filter-plus',title:'Save filter'})
+                .css({padding: '0px 2px', 'margin-top': '6px', height: '19px', 'margin-left': '-12px'})
+                .appendTo(this.div_buttons);
+            this.btn_save_filter.find('span.ui-icon').css({'font-size':'inherit',height:'11px'});
+            
+            this._on(this.btn_save_filter, {click: function(){
+                    var widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('mainMenu6');
+                    if(widget){
+                         var ele = this.btn_saved_filters;
+//console.log(ele.offset().top+'  '+ele.position().top);
+            
+                         widget.mainMenu6('show_ExploreMenu', null, 'svsAdd', 
+                            {top:ele.offset().top , left:ele.offset().left-300 });
+                    }            
+            }});
+        } 
+        
 
         //
         // search/filter buttons - may be Search or Bookmarks according to settings and whether logged in
         //
-        this.div_search_as_guest = $('<div>') //.css({'min-width':'14em'})
-        .addClass('div-table-cell logged-out-only')
-        .appendTo( this.div_search );
-
-        this.btn_search_as_guest = $( "<button>")
-        .appendTo( this.div_search_as_guest )
-        .css({'min-height':'30px','min-width':'80px'})
-        .addClass(this.options.button_class)
-        .button({label: window.hWin.HR(this.options.search_button_label), iconPosition: 'end', icon:"ui-icon-search"});
-
         this.div_search_as_user = $('<div>') //.css({'min-width':'18em','padding-right': '10px'})
-        .addClass('div-table-cell logged-in-only')
+        .addClass('div-table-cell')  // logged-in-only
         .appendTo( this.div_search );
 
         this.btn_search_as_user = $( "<button>", {
             label: window.hWin.HR(this.options.search_button_label), 
             title: "Apply the filter/search in the search field and display results in the central panel below"
         })
-        .css({'min-height':'30px','min-width':'80px'})
+        .css({'min-height':'30px','min-width':'90px'})
         .appendTo( this.div_search_as_user )
         .addClass(this.options.button_class+' ui-button-action')
         .button({showLabel:true, icon:this._is_publication?'ui-icon-search':'ui-icon-filter'});
@@ -364,8 +376,30 @@ $.widget( "heurist.search", {
             }
         });
 
-        
-        
+        //
+        // show saved filters tree
+        //         
+        if(!this._is_publication && this.options.is_h6style){
+            this.btn_saved_filters = $('<button>')
+                .button({label:'Saved filters',icon:'ui-icon-carat-1-s',iconPosition: 'end'})
+                .css({float:'right','font-size':'9px','margin-top':'2px','min-width':'90px'})
+                //.css({float:'right','font-size':'9px',padding:'0px 2px','margin-top':'-27px'})
+                .appendTo(this.div_search_as_user);
+            this.btn_saved_filters.find('span.ui-icon').css({'font-size':'inherit',height:'11px'});
+            
+            this._on(this.btn_saved_filters, {click: function(){
+                    var widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('mainMenu6');
+                    if(widget){
+                         var ele = this.btn_saved_filters;
+                         widget.mainMenu6('show_ExploreMenu', null, 'search_filters', 
+                            {top:ele.position().top+18 , left:ele.offset().left });
+                    }            
+            }});
+        } 
+
+        //
+        //
+        //        
         if(this.options.btn_visible_save){
             
             // Save search popup button
@@ -420,43 +454,12 @@ $.widget( "heurist.search", {
         }    
         
 
-        this.div_buttons = $('<div>')
-            .addClass('div-table-cell')
-            .css({'text-align': 'center',width:'2px'}) // , 'width':'50px'
-            .insertBefore( this.div_search_as_guest );
-        
-        /* according to new design 2016-10-05 - outdated
-
-        // Quick search builder dropdown form
-        var link = $('<button>')
-        .button({icon: 'ui-icon-arrowthick-1-s', showLabel:false,
-            label:'Dropdown form for building a simple filter expression',
-            title:window.hWin.HR('Build a filter expression using a form-driven approach (simple and advanced options)')})
-        .addClass(this.options.button_class)
-        .css({'width':'40px','vertical-align': '-4px'})  //'padding':'0 1.0em',
-        .appendTo(this.div_buttons);*/
-
-        if(true || !this.options.is_h6style){
-            var linkGear = $('<a>',{href:'#', 
-                title:window.hWin.HR('Build a filter expression using a form-driven approach')})
-                .css({'padding-right':'1.5em','display':'inline-block','margin-left':'-27px','opacity':'0.5','margin-top': '0.6em', width:'20px'})
-                .addClass('ui-icon ui-icon-magnify-explore') //was ui-icon-gear was ui-icon-filter-form
-                .appendTo(this.div_buttons);
-            this._on( linkGear, {  click: this.showSearchAssistant });
-        }
-        
         /* rotate icon with given interval
         setInterval( function(){ linkGear.addClass('rotate'); 
                     setTimeout( function(){ linkGear.removeClass('rotate'); }, 1000 ) }, 5000 );
         */            
 
         this.search_assistant = null;
-
-        // Info button - moved after search buttons
-        this.div_buttons = $('<div>')
-        .addClass('div-table-cell')
-        .css({'text-align': 'center'}) // ,     ,'width': '20px'
-        .appendTo( this.div_search ); //.insertBefore( this.div_search_as_guest );
 
         // Add record button
         if(this.options.btn_visible_newrecord){
@@ -609,14 +612,6 @@ $.widget( "heurist.search", {
                 //that.option("search_domain", "a");
                 that._doSearch(true);}
         });
-
-        this._on( this.btn_search_as_guest, {
-            click: function(){
-                that.option("search_domain", "a");
-                that._doSearch(true);
-            }
-        });
-        
 /* AAAA */        
         this._on( this.input_search, {
             keypress: function(e){
@@ -1625,7 +1620,7 @@ $.widget( "heurist.search", {
 
         // remove generated elements
         //this.btn_search_allonly.remove();  // bookamrks search off
-        this.btn_search_as_guest.remove(); // bookamrks search on
+        if(this.btn_saved_filters) this.btn_saved_filters.remove();
         this.btn_search_as_user.remove();  // bookamrks search on
         this.btn_search_domain.remove();
         if(this.search_assistant){
@@ -1641,7 +1636,6 @@ $.widget( "heurist.search", {
         this.input_search_prompt.remove();
 
         this.div_search_as_user.remove();
-        this.div_search_as_guest.remove();
 
         if(this.div_paginator) this.div_paginator.remove();
         

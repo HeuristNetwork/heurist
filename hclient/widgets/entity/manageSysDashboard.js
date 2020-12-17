@@ -590,6 +590,14 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
                     //temporal fix (error in coreDefinition.txt)
                     if(command=='menu-export-csv' && dsh_ID==10){
                         command = 'menu-import-csv';
+                    }else if(command=='menu-import-add-record'){
+                        
+                        var widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('mainMenu6');
+                        if(widget){
+                             var ele = this.element.find('div.recordDiv[recid='+dsh_ID+']');
+                             widget.mainMenu6('show_ExploreMenu', null, 'recordAdd', {top:0, left:ele.offset().left });
+                             return;
+                        }
                     }
 
                     var widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('mainMenu');
