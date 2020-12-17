@@ -62,14 +62,12 @@ of the codebase and rename it to index.html
 
 // *** DO NOT CHANGE VERSION NUMBER, THIS IS SET BY THE HEURIST DEVELOPMENT TEAM ***
 
-$version = "6.0.6"; // sets current program version number, determined by Heurist development lead
+$version = "6.1.0"; // sets current program version number, determined by Heurist development lead
 
 // dates below are the date of release of the given version, and list changes since last release
 
-// h6.0.6 21 Nov 2020 
-// h6.0.5 16 Nov 2020 
-// h6.0.3 10 Nov 2020 
-// h6.0.2 01 Nov 2020 
+// h6.1.0 16 Dec 2020 Alpah release of version 6 to 'inner circle' 
+// h6.0.6 21 Nov 2020 h6.0.5 16 Nov 2020 // h6.0.3 10 Nov 2020 h6.0.2 01 Nov 2020 
 // h6.0.1 22 Oct 2020 H6 interface, new db definition managers
 // h5.2.13 25 Aug 2020 Improve speed on record view, fix problems with loading xml and with web site fucntions, new USyd server, Initial development of H6 interface in h6dev branch  
 // h5.2.11 12 July 2020 Sort pointer field alphabetically, table view and data table widget
