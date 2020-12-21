@@ -12,7 +12,7 @@
 # @author      Ian Johnson     <ian.johnson@sydney.edu.au>
 # @author      Artem Osmakov     <osmakov@gmail.com>
 # @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-# @version     5.0
+# @version     6.0
 
 # Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
 # with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
@@ -47,6 +47,12 @@ echo "Heurist distribution builder - run from /var/www/html/HEURIST/hx-xx progra
 
 # no effect if already exists
 mkdir /var/www/html/HEURIST/heurist-build
+
+# added Ian J. 19 Dec 2020: update record type icons and icon library from Heurist_Core_Configuration database.
+# This ensures that when new record types are added to the core definitions text file (generated from this database)
+# that you will not have a record type without an icon
+cp /heur-filestore/Heurist_Core_Definitions/rectype-icons/*.* admin/setup/rectype-icons
+cp /heur-filestore/Heurist_Core_Definitions/rectype-icons/thumb/*.* admin/setup/rectype-icons/thumb
 
 echo
 echo removing existing heurist-build/$1
