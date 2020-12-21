@@ -43,18 +43,34 @@ if($pwdok || !$system->verifyActionPassword(@$_REQUEST['pwd'], $passwordForDatab
         if($isSystemInited){
 
             $allow_deletion = false;
-            $user = user_getById($system->get_mysqli(), $system->get_user_id()); //user in db
+            $user = user_getById($system->get_mysqli(), $system->get_user_id()); //user in current db
             
+            //find the same user in database to be deleted
+            list($dbname_full, $dbname ) = mysql__get_names( $_REQUEST['database'] );
+            //find user by email
+            $usr = user_getByField($system->get_mysqli(), 'ugr_eMail', $user['ugr_eMail'], $dbname_full);
+            if(@$usr['ugr_ID']==2){ //database owner
+                $allow_deletion = true;
+            }else{
+                //allowed if user is database admnistrator
+                $groups = user_getWorkgroups($system->get_mysqli(), $usr['ugr_ID'], false, $dbname_full);
+                $allow_deletion = (@$groups[1]=='admin');
+            }
+            
+            
+/* before 2020-12-21 only system administrator or db            
             if (defined('HEURIST_MAIL_TO_ADMIN') && (@$user['ugr_eMail']==HEURIST_MAIL_TO_ADMIN)){ //system admin
                 
                 $allow_deletion = true;
             }else{
                 list($dbname_full, $dbname ) = mysql__get_names( $_REQUEST['database'] );
+                //find user by email
                 $usr = user_getByField($system->get_mysqli(), 'ugr_eMail', $user['ugr_eMail'], $dbname_full);
-                if(@$usr['ugr_ID']==2){
+                if(@$usr['ugr_ID']==2){ //database owner
                     $allow_deletion = true;   
                 }
             }
+*/
 
             
             if($allow_deletion)
@@ -69,7 +85,7 @@ if($pwdok || !$system->verifyActionPassword(@$_REQUEST['pwd'], $passwordForDatab
                 $res = DbUtils::databaseDrop(false, $_REQUEST['database'], $create_arc );    
             }else{
                 $system->addError(HEURIST_REQUEST_DENIED, 
-                    'You must be logged in as a system administrator or database owner to delete database',1);
+                    'You must be logged in as a database administrator or owner to delete database',1);
             }
         }
     }else{

@@ -183,7 +183,7 @@
     * @param mixed $ugr_ID
     * @param mixed $isfull  - if false returns only id and role, otherwise additional fields: name and description
     */
-    function user_getWorkgroups($mysqli, $ugr_ID, $isfull=false){
+    function user_getWorkgroups($mysqli, $ugr_ID, $isfull=false, $database=null){
 
         $result = array();
 
@@ -192,7 +192,9 @@
 
             $query = 'select ugl_GroupID, ugl_Role '
             .($isfull?', ugr_Name, ugr_Description ':'')
-            .' from sysUsrGrpLinks left join sysUGrps grp on grp.ugr_ID=ugl_GroupID where '
+            .' from '.($database!=null?('`'.$database.'`.'):'').'sysUsrGrpLinks '
+            .' left join '.($database!=null?('`'.$database.'`.'):'').'sysUGrps grp '
+            .' on grp.ugr_ID=ugl_GroupID where '
             .' ugl_UserID='.$ugr_ID
             .' and grp.ugr_Type != "user" order by ugl_GroupID';
 
