@@ -959,11 +959,19 @@ $mysqli->commit();
             $conceptCode = $iscc ?$source_id :@$defs[$source_id]['commonFields'][$idx_ccode];
             
         }else if($defType=='enum' || $defType=='relationtype'){
-            $defs = $this->source_defs['terms']['termsByDomainLookup'][($defType=='enum'?'enum':'relation')];
             
-            $fieldName = 'trm_ConceptID';
-            $idx_ccode = intval($this->source_defs['terms']['fieldNamesToIndex'][$fieldName]);
-            $conceptCode = $iscc ?$source_id :@$defs[$source_id][$idx_ccode];
+            //$defs = $this->source_defs['terms']['termsByDomainLookup'][($defType=='enum'?'enum':'relation')];
+            
+            if($iscc){
+                 $conceptCode = $source_id;   
+            }else{
+                 $fieldName = 'trm_ConceptID';
+                 $idx_ccode = intval($this->source_defs['terms']['fieldNamesToIndex'][$fieldName]);
+                 $term = $this->sourceTerms->getTerm($term_id, $defType);
+                 
+                 $conceptCode = @$term[$idx_ccode];
+            }
+            //$conceptCode = $iscc ?$source_id :@$defs[$source_id][$idx_ccode];
             
         }
         
@@ -985,6 +993,7 @@ $mysqli->commit();
     // 
     public static function getLocalCode($defType, $database_defs, $conceptCode, $sall=false){
         $res = array();
+        $defs2 = null;
         
         if($defType=='rectype' || $defType=='rt' || $defType == 'rectypes'){
             $defType = 'rectypes';
@@ -1002,10 +1011,13 @@ $mysqli->commit();
             
         }else if($defType=='enum' || $defType=='relationtype'){
             
-            $defs = $database_defs['terms']['termsByDomainLookup'][($defType=='enum'?'enum':'relation')];
+//            $defs = $database_defs['terms']['termsByDomainLookup'][($defType=='enum'?'enum':'relation')];
 
             $fieldName = 'trm_ConceptID';
             $idx_ccode = intval($database_defs['terms']['fieldNamesToIndex'][$fieldName]);
+            
+            $defs = $database_defs['terms']['termsByDomainLookup']['enum'];
+            $defs2 = $database_defs['terms']['termsByDomainLookup']['relation'];
             
         }
         
@@ -1050,6 +1062,14 @@ $mysqli->commit();
                     
                 }
             }
+            if($defs2){
+                foreach ($defs2 as $id => $def) {
+                    if(is_numeric($id) && $def[$idx_ccode]==$conceptCode){
+                        return $id;
+                    }
+                }
+            }
+            
         }
         
         return ($sall)?$res:null;
@@ -1249,7 +1269,9 @@ $mysqli->commit();
             
             $idx_vocab_group_id  = intval($terms['fieldNamesToIndex']["trm_VocabularyGroupID"]);
 
-            $term_import = $terms['termsByDomainLookup'][$domain][$term_id]; //6256 returns wrong!!
+            //search both domains
+            $term_import = $this->sourceTerms->getTerm($term_id, $domain);
+            //$term_import = $terms['termsByDomainLookup'][$domain][$term_id]; //6256 returns wrong!!
 
             if(!$term_import[$idx_ccode]){
                 if($term_import[$idx_origin_dbid]>0 && $term_import[$idx_origin_id]>0){

@@ -67,7 +67,6 @@ class DbsTerms
         $this->data = $data; 
     }
     
-    
     //
     //
     //

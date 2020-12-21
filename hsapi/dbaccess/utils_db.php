@@ -588,7 +588,6 @@
 
         return $result;
     }
-
     //
     // returns true ot mysql error
     //

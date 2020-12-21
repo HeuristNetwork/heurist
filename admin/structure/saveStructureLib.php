@@ -1472,6 +1472,8 @@ function updateTerms( $colNames, $trmID, $values, $ext_db) {
                     $inverse_termid = $val;   //set null value, otherwise we get mysql error
                 }else if($colName=="trm_Status"){
                     if($val=="") $val="open";
+                }else if($colName=="trm_NameInOriginatingDB"){
+                    $val = $val?substr($val,0,63):'';
                 }
 
                 if($isInsert){
@@ -1554,7 +1556,7 @@ function updateTerms( $colNames, $trmID, $values, $ext_db) {
                     if(!($dbID>0)) $dbID = 0;
                     
                     $query= 'UPDATE defTerms SET trm_OriginatingDBID='.$dbID
-                                .', trm_NameInOriginatingDB=trm_Label'
+                                .', trm_NameInOriginatingDB=SUBSTR(trm_Label,0,63)'
                                 .', trm_IDInOriginatingDB='.$trmID
                                 .' WHERE (NOT trm_OriginatingDBID>0 OR trm_OriginatingDBID IS NULL) AND trm_ID='.$trmID;
                     $ext_db->query($query);
