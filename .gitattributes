@@ -51,17 +51,17 @@
 *.pdf binary
 
 # source code
-*.php text
-*.css text
+*.php diff=astextplain
+*.css diff=astextplain
 *.sass text
 *.scss text
 *.less text
 *.styl text
-*.js text
+*.js diff=astextplain
 *.coffee text
 *.json text
-*.htm text
-*.html text
+*.htm diff=astextplain
+*.html diff=astextplain
 *.xml text
 *.svg text
 *.txt text
@@ -71,8 +71,8 @@
 *.rb text
 *.py text
 *.scm text
-*.sql text
-*.sh text
+*.sql diff=astextplain
+*.sh diff=astextplain
 *.bat text
 
 # templates
