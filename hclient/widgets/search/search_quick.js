@@ -68,8 +68,16 @@ $.widget( "heurist.search_quick", $.heurist.recordAction, {
             //add title 
             $dlg.css({top:'36px',position:'absolute',width: 'auto', margin: '0px','font-size':'0.9em'});
             
-            $('<div class="ui-heurist-header" style="top:0px;">Filter builder</div>')
+            var _innerTitle = $('<div class="ui-heurist-header" style="top:0px;padding-left:10px;text-align:left">Filter builder</div>')
                 .insertBefore($dlg);
+                
+            $('<button>').button({icon:'ui-icon-closethick',showLabel:false, label:'Close'}) 
+                     .css({'position':'absolute', 'right':'4px', 'top':'6px', height:20, width:20})
+                     .appendTo(_innerTitle)
+                     .on({click:function(){
+                         that.closeDialog();
+                     }});
+                
         }else{
              $dlg.addClass('ui-heurist-header1');
         }

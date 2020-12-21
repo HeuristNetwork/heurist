@@ -662,7 +662,11 @@ $.widget( "heurist.mainMenu6", {
                 if(!cont.search_quick('instance'))
                     //initialization
                     this.search_quick = cont.search_quick({
-                        onClose: function() { that.switchContainer('explore'); },
+                        onClose: function() { 
+console.log('ON CLOSE');                            
+                                that._closeExploreMenuPopup();
+                                //that.switchContainer('explore'); 
+                        },
                         menu_locked: function(is_locked, is_mouseleave){ 
                             if(!is_mouseleave){
                                 that._resetCloseTimers();    
