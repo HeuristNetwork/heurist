@@ -1196,7 +1196,7 @@ $.widget( "heurist.svs_list", {
         ?window.hWin.HAPI4.currentUser.ugr_SvsTreeData[groupID].children 
         :[];
 
-        var tree = $("<div>").addClass('hasmenu').css('padding-bottom','0em');
+        var tree = $("<div>").attr('tree-group', groupID).addClass('hasmenu').css('padding-bottom','0em');
         
         var fancytree_options =
         {
@@ -1779,45 +1779,7 @@ $.widget( "heurist.svs_list", {
                 res = container;
             }
             
-            $.each( tree.find('span.fancytree-node'), function( idx, item ){
-
-                var ele = $(item); //.find('span.fancytree-node');
-                ele.css({display: 'block', width:'99%'});         
-
-                ele.find('.fancytree-title')
-                    .css({display: 'inline-block', width:container_width>0?(container_width-30):'80%'})
-                    .addClass('truncate');
-                //'80%'
-
-                $('<div class="svs-contextmenu2 ui-icon ui-icon-menu"></div>')
-                .click(function(event){ tree.contextmenu("open", $(event.target) ); window.hWin.HEURIST4.util.stopEvent(event); return false;})
-                .appendTo(ele);
-
-                if($(item).find('span.fancytree-folder').length==0)
-                {
-                    $(item).addClass('leaves');
-
-                    $(item).mouseenter(
-                        function(event){
-                            var ele = $(item).find('.svs-contextmenu2');
-                            ele.css('display','inline-block');
-                            //ele.show();
-                    }).mouseleave(
-                        function(event){
-                            var ele = $(item).find('.svs-contextmenu2');
-                            ele.hide();
-                    });
-                    /*
-                    $(item).hover(
-                    function(event){
-                    $(event.target).find('.svs-contextmenu2').css('display','inline-block');
-                    },
-                    function(event){
-                    $(event.target).find('.svs-contextmenu2').hide();
-                    });*/
-                }
-            });
-            
+            this._activateMenuAndTruncate(tree, container_width);
 
         }
         else{
@@ -1864,6 +1826,57 @@ $.widget( "heurist.svs_list", {
         
         return res;
 
+    },
+    
+            
+    //
+    //
+    //
+    _activateMenuAndTruncate: function(tree, container_width)
+    {            
+            if(!(container_width>0)) container_width = this.options.container_width;
+        
+        
+            $.each( tree.find('span.fancytree-node'), function( idx, item ){
+
+                var ele = $(item); //.find('span.fancytree-node');
+                ele.css({display: 'block', width:'99%'});         
+
+                ele.find('.fancytree-title')
+                    .css({display: 'inline-block', width:container_width>0?(container_width-30):'80%'})
+                    .addClass('truncate');
+                //'80%'
+
+                if(ele.find('.svs-contextmenu2').length==0){
+                    $('<div class="svs-contextmenu2 ui-icon ui-icon-menu"></div>')
+                    .click(function(event){ tree.contextmenu("open", $(event.target) ); window.hWin.HEURIST4.util.stopEvent(event); return false;})
+                    .appendTo(ele);
+                }
+
+                if($(item).find('span.fancytree-folder').length==0)
+                {
+                    $(item).addClass('leaves');
+
+                    $(item).mouseenter(
+                        function(event){
+                            var ele = $(item).find('.svs-contextmenu2');
+                            ele.css('display','inline-block');
+                            //ele.show();
+                    }).mouseleave(
+                        function(event){
+                            var ele = $(item).find('.svs-contextmenu2');
+                            ele.hide();
+                    });
+                    /*
+                    $(item).hover(
+                    function(event){
+                    $(event.target).find('.svs-contextmenu2').css('display','inline-block');
+                    },
+                    function(event){
+                    $(event.target).find('.svs-contextmenu2').hide();
+                    });*/
+                }
+            });
     },
     
     //
@@ -2205,6 +2218,9 @@ $.widget( "heurist.svs_list", {
         }
 
         var callback = function(event, response) {
+            
+            var svs_ID = 0;
+            
             if(response.isNewSavedFilter){     //new saved search
 
                 //update tree after addition - add new search to root
@@ -2223,6 +2239,8 @@ $.widget( "heurist.svs_list", {
 
                 that._saveTreeData( groupID );
                 $("#addlink"+groupID).css('display', 'none');
+                
+                svs_ID = response.new_svs_ID;
 
             }else if(node){ //edit is called from this widget only - otherwise we have to implement search node by svsID
                 //if group is changed move node to another tree
@@ -2258,8 +2276,21 @@ $.widget( "heurist.svs_list", {
                 }
 
                 that._saveTreeData( groupID );
-            
+                
+                svs_ID = response.svs_ID;
+                
             }
+            
+            if(groupID && svs_ID>0){
+                var tree = that.element.find('div[tree-group='+groupID+']');
+                if(tree.length>0){
+                    that._activateMenuAndTruncate(tree);
+                }
+            }
+                
+            
+            
+            
         };
 
 
