@@ -1664,7 +1664,7 @@ $.widget( "heurist.svs_list", {
                     {title: "New", cmd: "addSearch", uiIcon: "ui-icon-plus" }, //<kbd>[Ctrl+N]</kbd>
                     {title: "New Faceted", cmd: "addSearch2", uiIcon: "ui-icon-box" },
                     {title: "New RuleSet", cmd: "addSearch3", uiIcon: "ui-icon-shuffle" },
-                    {title: "Duplicate", cmd: "copy", uiIcon: "ui-icon-copy" }, 
+                    {title: "Dupe", cmd: "copy", uiIcon: "ui-icon-copy" }, 
                     {title: "Edit", cmd: "rename", uiIcon: "ui-icon-pencil" }, // <kbd>[F2]</kbd>
                     {title: "----"},
                     //{title: "Copy to clipboard", cmd: "copycb", uiIcon: "ui-icon-copy" }, 

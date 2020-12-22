@@ -38,7 +38,12 @@ $.widget( "heurist.search_quick", $.heurist.recordAction, {
     
     current_query:null,
     current_query_json:null,
+
+    _suprress_change: true,
     
+    //
+    //
+    //
     _init: function(){
         
         this.element.css('overflow','hidden');
@@ -202,9 +207,7 @@ $.widget( "heurist.search_quick", $.heurist.recordAction, {
         that._on( $dlg.find(".sa_spatial"), {    //opens digitizer
             click: function(event){
                 
-                if($.isFunction(this.options.menu_locked)){
-                    this.options.menu_locked.call( this, true );
-                }
+                this._lockPopup(true)
                 
                 //open map digitizer - returns WKT rectangle 
                 var rect_wkt = $dlg.find(".sa_spatial_val").val();
@@ -220,9 +223,7 @@ $.widget( "heurist.search_quick", $.heurist.recordAction, {
                     title: window.hWin.HR('Heurist spatial search'),
                     class:'ui-heurist-bg-light',
                     afterclose: function(){
-                        if($.isFunction(that.options.menu_locked)){
-                            that.options.menu_locked.call( this, false );
-                        }
+                        that._lockPopup(false)
                     },
                     callback: function(location){
                         
@@ -260,10 +261,19 @@ $.widget( "heurist.search_quick", $.heurist.recordAction, {
         return true;
     },
     
+    _lockPopup: function( is_locked ){
+        
+        if($.isFunction(this.options.menu_locked)){
+            this.options.menu_locked.call( this, is_locked );
+        }
+    },
+    
     //
     //
     //
     _recreateSelectors: function(){
+        
+        this._suprress_change = true;
         
         var that = this;
         var $dlg = this.element.children('fieldset');
@@ -351,7 +361,7 @@ $.widget( "heurist.search_quick", $.heurist.recordAction, {
         //change compare option according to selected field type
         // enum, geocoord, others
         function __onFieldTypeChange(event){
-
+            
                 if(event.target.value=='longitude' || event.target.value=='latitude'){
 
                     $dlg.find(".fld_contain").hide();
@@ -397,10 +407,15 @@ $.widget( "heurist.search_quick", $.heurist.recordAction, {
             
         that._on( select_fieldtype, {
             change: __onFieldTypeChange
-        });                        
+        });        
+        that._on( sortasc, {
+            change: that.calcShowSimpleSearch
+        });        
                         
                         
         select_rectype.trigger('change'); 
+        
+        this._suprress_change = false;
     },
     
     //
@@ -408,6 +423,8 @@ $.widget( "heurist.search_quick", $.heurist.recordAction, {
     //
     calcShowSimpleSearch: function(){
       
+        if(!this._suprress_change) this._lockPopup('delay');
+        
         var $dlg = this.element.children('fieldset');
         
         var q = $dlg.find(".sa_rectype").val(); if(q) q = "t:"+q;
@@ -549,7 +566,5 @@ $.widget( "heurist.search_quick", $.heurist.recordAction, {
 
         return h;
     }
-
     
-
 });

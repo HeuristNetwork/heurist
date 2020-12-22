@@ -180,7 +180,10 @@ $.widget( "heurist.mainMenu6", {
                 
                 //forcefully hide coverAll on click
                 that._on(that.coverAll, {
-                    click: function(){that._collapseMainMenuPanel(true);}
+                    click: function(){
+                            that._closeExploreMenuPopup();
+                            that._collapseMainMenuPanel(true);
+                    }
                 });
                 
                 that._on($(document),{mouseleave: that._resetCloseTimers });
@@ -376,14 +379,15 @@ $.widget( "heurist.mainMenu6", {
                 +' '+window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH);
     },
     
-    //
-    //
+    // 
+    // returns true if explore menu popup should remain open (even on mouse out)
     //
     _isExplorerMenu_locked: function(){
         
-        var isSvsEditVisible = ( this.edit_svs_dialog && this.edit_svs_dialog.isModified() );
+        //var isSvsEditVisible = ( this.edit_svs_dialog && this.edit_svs_dialog.isModified() );
         //isSvsEditVisible = false;
-//console.log('>>>'+isSvsEditVisible);        
+        //console.log('>>>'+isSvsEditVisible);        
+        
         return (this._explorer_menu_locked    //isSvsEditVisible || 
                 || this.element.find('.ui-selectmenu-open').length>0
                 || $('.list_div').is(':visible')      //tag selector dropdown      
@@ -659,20 +663,26 @@ $.widget( "heurist.mainMenu6", {
             }
             else if(action_name=='search_quick'){
 
-                if(!cont.search_quick('instance'))
+                if(!cont.search_quick('instance')){
                     //initialization
                     this.search_quick = cont.search_quick({
                         onClose: function() { 
-console.log('ON CLOSE');                            
+                            
                                 that._closeExploreMenuPopup();
                                 //that.switchContainer('explore'); 
                         },
                         menu_locked: function(is_locked, is_mouseleave){ 
                             if(!is_mouseleave){
                                 that._resetCloseTimers();    
-                                that._explorer_menu_locked = is_locked; 
+                                if(is_locked=='delay'){
+                                    that.coverAll.show();
+                                    that._delayOnCollapse_ExploreMenu = 2000;        
+                                }else{
+                                    that._explorer_menu_locked = is_locked;     
+                                }
                             }
                     }  });    
+                }
 
                 explore_top = 0;
 //                explore_height = 275;
@@ -847,6 +857,9 @@ console.log('ON CLOSE');
                                     //not created yet
                                     that.search_faceted.search_faceted( noptions );
                                 }
+                                
+                                that._closeExploreMenuPopup();
+                                that._collapseMainMenuPanel(true);
 
                             } 
                         },
@@ -954,6 +967,11 @@ console.log('ON CLOSE');
             this.closeFacetedWizard();
             
         }
+        // restore default values
+        this._explorer_menu_locked = false;
+        this._delayOnCollapse_ExploreMenu = 600;
+        this.coverAll.hide();
+
     },
     
     //
@@ -1395,25 +1413,49 @@ console.log('ON CLOSE');
         is_modal = (is_modal!==false);
         
         var that = this;
+        
+        //find all saved searches for current user
+        if(!window.hWin.HAPI4.currentUser.usr_SavedSearch){  
+            window.hWin.HAPI4.SystemMgr.ssearch_get( null,
+                function(response){
+                    if(response.status == window.hWin.ResponseStatus.OK){
+                        window.hWin.HAPI4.currentUser.usr_SavedSearch = response.data;
+                    }
+            });
+        }
 
         var $dlg = this.edit_svs_dialog.showSavedFilterEditDialog( mode, null, null, this.currentSearch , false, 
             { my: 'left+'+left_position+' top+'+top_position, at: 'left top', of:this.divMainMenu},
-            function(){
+            function(){  //after save - trigger refresh of saved filter tree
                 window.hWin.HAPI4.currentUser.usr_SavedSearch = null;
                 window.hWin.HAPI4.currentUser.ugr_SvsTreeData = null;
-                that.svs_list.svs_list('option','hide_header',true);//to trigger refresh
+                if(that.svs_list){ 
+                    that.svs_list.svs_list('option','hide_header',true);//to trigger refresh
+                }
             }, 
             is_modal, 
             true, //is_h6style                                                                                                         
             function(is_locked, is_mouseleave){  //menu_locked
                 if(is_mouseleave){
+                    that._resetCloseTimers();
+                    if(that._explorer_menu_locked) return;
                     that._myTimeoutId2 = setTimeout(function(){
                             that._closeExploreMenuPopup();
                             that._collapseMainMenuPanel();
-                    }, 1000); //thar._delayOnCollapse_ExploreMenu);
+                    }, that._delayOnCollapse_ExploreMenu);
+                }else if(is_locked=='close'){
+                    that.coverAll.hide();                 
+                    //that._resetCloseTimers();
+                    //that._closeExploreMenuPopup();
+                    //that._collapseMainMenuPanel();
                 }else{
                     that._resetCloseTimers();    
-                    that._explorer_menu_locked = is_locked; 
+                    if(is_locked=='delay'){
+                        that.coverAll.show();
+                        that._delayOnCollapse_ExploreMenu = 2000;        
+                    }else{
+                        that._explorer_menu_locked = is_locked;     
+                    }
                 }
             },
             that.reset_svs_edit

@@ -375,13 +375,15 @@ $.widget( "heurist.search_faceted_wiz", {
             this.element.parent().addClass('ui-heurist-explore');
             this.adjustDimension();
         }
+        
         if($.isFunction(this.options.menu_locked)){
+            
             this._on(this.element.parent('.ui-dialog'), {
-                        mouseover:function(){ this.options.menu_locked.call( this, false, false );},
+                        mouseover:function(){ this.options.menu_locked.call( this, false, false );},  //just prevent close
                         mouseleave: function(e){ 
-                            if(!(this.step>0))
-                                this.options.menu_locked.call( this, false, true ) 
+                            this.options.menu_locked.call( this, false, true ); //close after delay
                         }}); //that.closeEditDialog();
+            
         }else{
             
             this._off(this.element.parent('.ui-dialog'), 'mouseover mouseleave');
@@ -598,13 +600,18 @@ $.widget( "heurist.search_faceted_wiz", {
 
             this._showStep(newstep);
 
+            if($.isFunction(this.options.menu_locked)){
+                if(newstep>0)
+                    this.options.menu_locked.call( this, 'delay');
+            }
+            
             //if(newstep==3)               //skip step - define ranges
             //this.navigateWizard(1);
-
         }
 
         
         window.hWin.HEURIST4.ui.applyCompetencyLevel(-1, $dlg); 
+        
     }
 
     //
