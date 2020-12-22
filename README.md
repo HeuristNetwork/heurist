@@ -5,12 +5,14 @@ Core development repository, Vsn 6 (2021 - ), Vsn 5 (2018 - 2020), Vsn 4 (2014-2
 
 Heurist is a mature web-based data management infrastructure that is specifically tailored to the needs of Humanities researchers. Heurist allows researchers to design, create, manage, analyse and publish their own richly-structured database(s) through a simple web interface, without the need for programmers or consultants. A complete application can be built in as little as half a day and complex databases in under a week. Database structure can be modified incrementally on live databases allowing them to evolve with project needs. The project runs free services for researchers which free them from the need to manage servers, backups and upgrades.
 
-Standard interface
-------------------
+![Main Interface Vsn 6](/documentation_and_templates/assets/main interface v6.jpg "Main Interface Vsn 6")
+_Main Vsn 6 interface_
 
 Advanced features include foreign keys and relationships seen and modified by the user as intuitive pointer fields, multi-level facet searches and network expansion rules built via a wizard, interactive maps and timelines, built-in CMS websites which embed saved searches, media and widgets from the database interface to publish searches linked to result lists, maps etc. A central index allows Heurist databases to import structural elements from any registered database to promote sharing of data models. Right-to-left scripts and Asian characters are fully supported. There is provision to translate the interface and for cross-database searching although we have not had the resources to do this.
 
-Research database workflow
+![Model and Build](/documentation_and_templates/assets/model and build.jpg "Model and Build")
+_Research database workflow_
+
 Heurist has been developed at the University of Sydney since 2005, based on years of prior work, and is used by dozens of projects, particularly in Australia, France, Germany and the USA. These projects span the fields of history, archaeology, art history, geography, and literature. A selection of projects can be found here.
 Heurist is in active development; version 6 will be released in first quarter 2021. Version 6 represents a complete redesign of the menu system and overall appearance in collaboration with a professional UX designer (Brant Trim, Serata Digital, Canberra) but is fully backward compatible with databases developed in version 5.
 We transferred the help system from help builder software to a Heurist database in Nov 2020, which now generates the Heurist Help System (also accessible within Heurist). This is now being updated to reflect version 6 (work-in-progress). 
@@ -20,11 +22,18 @@ Example websites
 
 Heurist has a built-in capability to generate data-driven interactive websites. The CMS website pages are stored and edited directly in the database and can render media, searches, maps etc. using the data.
 
-Website using standard built-in functions (2019)
 
-Beyond1914.sydney.edu.au (2013)
+![Website using standard functions (2013)](/documentation_and_templates/assets/CBAP website.jpg "Website using standard functions (2013)")
+_https://heuristplus.sydney.edu.au/h6-alpha/?db=CBAP_Uncovering_Pacific_Pasts&website&id=1137_
 
-DigitalHarlem.org (2013)
+
+![Beyond 1914 website (2013)](/documentation_and_templates/assets/Beyond 1914 website.jpg "Beyond 1914 website (2013)")
+_Beyond1914.sydney.edu.au (2013)_
+
+
+![Digital Harlem website (2013)](/documentation_and_templates/assets/Digital Harlem website.jpg "Digital Harlem website (2013)")
+_DigitalHarlem.org (2013)_
+
 
 Contributing
 ------------
