@@ -3,6 +3,8 @@ HEURIST
 
 Core development repository, Vsn 6 (2021 - ), Vsn 5 (2018 - 2020), Vsn 4 (2014-2017) 
 
+**See below the intro for information on code, licensing, installating, contributing and issue tracking**
+
 Heurist is a mature web-based data management infrastructure that is specifically tailored to the needs of Humanities researchers. Heurist allows researchers to design, create, manage, analyse and publish their own richly-structured database(s) through a simple web interface, without the need for programmers or consultants. A complete application can be built in as little as half a day and complex databases in under a week. Database structure can be modified incrementally on live databases allowing them to evolve with project needs. The project runs free services for researchers which free them from the need to manage servers, backups and upgrades.
 
 ![Main Interface Vsn 6](/documentation_and_templates/assets/main%20interface%20v6.jpg "Main Interface Vsn 6")
