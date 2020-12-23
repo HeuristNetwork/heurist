@@ -152,11 +152,12 @@ $rec_id = recordSearchReplacement($mysqli, $rec_id, 0);
 //$rec = mysql__select_row_assoc($mysqli, 
 //        'select rec_Title, rec_NonOwnerVisibility, rec_OwnerUGrpID from Records where rec_ID='.$rec_id);
 $rec = recordSearchByID($system, $rec_id, true);
-        
+
+$home_page_on_init = $rec_id;        
 
 if($rec==null){
     //header('Location: '.ERROR_REDIR.'&msg='.rawurlencode('Record #'.$rec_id.' not found'));
-    $message = 'Record #'.$rec_id.' not found';
+    $message = 'Record #'.$home_page_on_init.' not found';
     include ERROR_REDIR;
     exit();
 }
@@ -364,7 +365,7 @@ if (($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1')
 <script>
     var _time_debug = new Date().getTime() / 1000;
     var page_first_not_empty = 0;
-    var home_page_record_id=<?php echo $rec_id; ?>;
+    var home_page_record_id=<?php echo $home_page_on_init; ?>;
     var init_page_record_id=<?php echo $open_page_on_init; ?>;
     var is_embed =<?php echo array_key_exists('embed', $_REQUEST)?'true':'false'; ?>;
 </script>
@@ -500,8 +501,10 @@ _time_debug = new Date().getTime() / 1000;
 
         function __onInitComplete(not_empty_page){
             //load given page or home page content
-            <?php if($isEmptyHomePage) echo 'if(not_empty_page){ home_page_record_id=not_empty_page;}'; ?>
-            loadPageContent(init_page_record_id>0 ?init_page_record_id :home_page_record_id);
+            var load_initially = home_page_record_id;
+            <?php if($isEmptyHomePage) echo 'if(not_empty_page){ load_initially=not_empty_page;}'; ?>
+            
+            loadPageContent(init_page_record_id>0 ?init_page_record_id :load_initially);
         }
                
         window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, "#main-header",
@@ -625,7 +628,6 @@ function afterPageLoad(document, pageid){
     if(!is_embed){    
         var s = location.pathname;
         while (s.substring(0, 2) === '//') s = s.substring(1);
-
         window.history.pushState("object or string", "Title", s+'?db='
         +window.hWin.HAPI4.database+'&website&id='+home_page_record_id+(pageid!=home_page_record_id?'&pageid='+pageid:''));
     }
