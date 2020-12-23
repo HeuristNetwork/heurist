@@ -439,9 +439,11 @@ span.fancytree-node:hover{
 {
     background:<?php uout('explore_active', '#AFBFDA');?> !important;
 }
+/*
 .ui-heurist-explore .fancytree-node:hover{
     border: 1px dotted blue !important;
 }
+*/
 
 
 /* SECTION SCHEME: IMPORT */
