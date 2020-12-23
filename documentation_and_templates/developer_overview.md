@@ -2,6 +2,8 @@
 
 This guide describes some most important components in the Heurist code base. Developers may use this document as a map if they want to contribute to Heurist.
 
+By Yang Li, Systemik Solutions. July 2020
+
 ## hclient
 
 This folder contains most of the Heurist UI components, which include UI HTML code, UI assets, client-side functions etc.
