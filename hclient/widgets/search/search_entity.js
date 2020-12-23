@@ -30,8 +30,9 @@ $.widget( "heurist.search_entity", {
         by_favorites: true,  // show buttons: filter by entity (show selected (favorires) entities)
         by_usage: true, // show dropdown entity filter (by usage)
         
-        mouseover: null, //callback to prevent close h6 menu NOT USED
-        search_realm: null
+        search_realm: null,
+        
+        menu_locked: null ////callback to prevent close in h6
     },
 
     selected_rty_ids:[], //
@@ -167,10 +168,12 @@ $.widget( "heurist.search_entity", {
                     this._redraw_buttons_by_entity();
                 },
                 onselect: function __onSelectRectypeFilter(event, data){
+                               /* 
                                var selval = data.item.value;
                                if(selval>0){
                                    that._doSearch(selval);
                                }
+                               */
                                return false;
                            }};            
         
@@ -413,7 +416,14 @@ console.log(data);
             if(this[select_rectype].hSelect("instance")!=undefined){
                 var menu = this[select_rectype].hSelect( "menuWidget" );
                 menu.css({'max-height':'450px'});                        
-                this[select_rectype].hSelect({change: opts.onselect});
+                this[select_rectype].hSelect({
+                        change: opts.onselect,
+                        close: function(){
+                                if($.isFunction(that.options.menu_locked)){
+                                    that.options.menu_locked.call( that, false ); //unlock
+                                }
+                        }
+                });
                 this[select_rectype].hSelect('hideOnMouseLeave', opts.ancor);
             }
             
@@ -487,14 +497,15 @@ console.log(data);
     _openSelectRectypeFilter: function( opts ){
         
                 var select_rectype = opts['select_name'];
-        
+       
+//console.log(opts);        
                 var that = this;
                 function __openSelect(){
                     
                     that[select_rectype].hSelect('open');
                     that[select_rectype].val(-1);
                     that[select_rectype].hSelect('menuWidget')
-                        .position({my: "left top", at: "left+10 bottom-4", of: opts['ancor']});
+                        .position({my: "left top", at: "left top", of: opts['ancor']}); //left+10 bottom-4
             
                     var menu = $(that[select_rectype].hSelect('menuWidget'));
                     var ele = $(menu[0]);
@@ -521,6 +532,10 @@ console.log(data);
                 }
                 
                 if(this[select_rectype]){
+                    
+                    if($.isFunction(this.options.menu_locked)){
+                        this.options.menu_locked.call( this, true); //lock
+                    }
                     __openSelect();
                 }
 
