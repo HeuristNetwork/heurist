@@ -164,7 +164,7 @@ $.widget( "heurist.search_faceted_wiz", {
             modal: this.options.is_modal,
 
             resizable: true, //!is_h6style,
-            draggable: !this.options.is_h6style,
+            draggable: this.options.is_modal, //!this.options.is_h6style,
             //position: this.options.position,
             
             title: window.hWin.HR("Define Faceted Search"),
@@ -324,10 +324,18 @@ $.widget( "heurist.search_faceted_wiz", {
     //
     , adjustDimension: function(){
 
+        var width = this._dialog.dialog( 'option', 'width');
         if(this.step==3){
-            var width = this._dialog.dialog( 'option', 'width');
-            if(width<990) this._dialog.dialog( 'option', 'width', 990);
+            minw = 990;
+        }else if(this.step==0){
+            
+            var $dlg = this.step0.find("#facets_options");
+            minw = $dlg.find( ".optional_fields" ).accordion('option','active')==0?800:650;
+        }else{
+            minw = 650;
         }
+        if(width<minw) this._dialog.dialog( 'option', 'width', minw);
+        
 
         var dh =  this._dialog.dialog('option', 'height');
         var ch =   this._dialog[0].scrollHeight+85; 
@@ -352,6 +360,7 @@ $.widget( "heurist.search_faceted_wiz", {
         this.current_tree_rectype_ids = null;
         
         this.element.dialog( 'option', 'modal', this.options.is_modal);
+        this.element.dialog( 'option', 'draggable', this.options.is_modal);
         
         if(this.options.position!=null){
             this._dialog.dialog( 'option', 'position', this.options.position );   
@@ -425,7 +434,9 @@ $.widget( "heurist.search_faceted_wiz", {
                     $dlg.load(window.hWin.HAPI4.baseURL+"hclient/widgets/search/search_faceted_wiz.html?t=19", function(){
                         that._initStep0_options();
                         
-                        $dlg.find( ".optional_fields" ).accordion({collapsible:true, active:false});
+                        $dlg.find( ".optional_fields" ).accordion({collapsible:true, active:false, activate:function(){
+                            that.adjustDimension();
+                        }});
                         $dlg.find( ".optional_fields > fieldset" ).css({'background':'none'});
 
                         /* it works however it produces a large gap below
@@ -680,14 +691,14 @@ $.widget( "heurist.search_faceted_wiz", {
         
         this.step = newstep;
         
+        this.adjustDimension();
+        
         if(newstep==0){
             var that = this;
             setTimeout(function(){that.step0.find('#svs_Name').focus();},500);
             btns.find("#btnBack").hide();
             
         }else{
-            this.adjustDimension()
-
             btns.find("#btnBack").show();
         }
 
@@ -1002,9 +1013,21 @@ $.widget( "heurist.search_faceted_wiz", {
         if(!Hul.isnull(ele_rules)){
             url = url + '&rules=' + encodeURIComponent(ele_rules.val());
         }
+        
+        if(this.options.menu_locked && $.isFunction(this.options.menu_locked)){
+            this.options.menu_locked.call( this, true, false); //lock
+        }
+        
 
         window.hWin.HEURIST4.msg.showDialog(url, { is_h6style:this.options.is_h6style, 
-                    closeOnEscape:true, width:1200, height:600, title:'Ruleset Editor', callback:
+                    closeOnEscape:true, width:1200, height:600, 
+                    title:'Ruleset Editor', 
+                    close:function(){
+                            if(this.options.menu_locked && $.isFunction(this.options.menu_locked)){
+                                this.options.menu_locked.call( this, false, false); //unlock
+                            }
+                    },
+                    callback:
             function(res){
                 if(!Hul.isempty(res)) {
                     ele_rules.val( JSON.stringify(res.rules) ); //assign new rules
