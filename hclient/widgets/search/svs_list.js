@@ -413,6 +413,7 @@ $.widget( "heurist.svs_list", {
             }
         }
 
+        var that = this;
         var request = { data:JSON.stringify(treeData) };
         window.hWin.HAPI4.SystemMgr.ssearch_savetree( request, function(response){
 
@@ -421,6 +422,8 @@ $.widget( "heurist.svs_list", {
                 window.hWin.HAPI4.currentUser.ugr_SvsTreeData[groupToSave] = treeData[groupToSave];
                 
                 window.hWin.HAPI4.currentUser.ugr_SvsTreeData[groupToSave].modified = response.data;
+                
+                that._activateMenuAndTruncate( groupToSave );
                 
                 if($.isFunction(callback)) callback.call(this);
                 
@@ -1207,26 +1210,29 @@ $.widget( "heurist.svs_list", {
             quicksearch: true,
             selectMode: 1, //1:single, 2:multi, 3:multi-hier (default: 2)
 
+            //
             renderNode: function(event, data) {
                 // Optionally tweak data.node.span
                 var node = data.node;
                 if(true || node.data.cstrender){
                     var $span = $(node.span);
                     var s = '', s1='';
+
                     if(node.folder){
                         //
-                        s1 = '<span class="ui-icon-folder-open ui-icon" style="color:orange;top: 3px;"></span>&nbsp;';
-                        $span.find("> span.fancytree-title").html(s1 +
-                            '<div style="display:inline-block;vertical-align:top;">'+node.title+'</div>');  //padding:2 0 0 3;
-                        //vertical-align:top;  font-weight:normal !important
+                        if($span.find('span.ui-icon-folder-open').length==0){
+                            s1 = '<span class="ui-icon-folder-open ui-icon" style="display:inline-block;color:orange;top: 3px;"></span>';
+                            $(s1).insertBefore($span.find("> span.fancytree-title"));
+                        }
+                        //.html(s1 +
+                        //    '<div style="display:inline-block;vertical-align:top;">'+node.title+'</div>');  //padding:2 0 0 3;
 
-                        //$span.find("> span.fancytree-icon").addClass("ui-icon-folder-open ui-icon").css('display','inline-block');
-                        //s = '<img src="'+window.hWin.HAPI4.baseURL+'hclient/assets/16x16.gif'+'" title="faceted" style="background-image: url(&quot;'+window.hWin.HAPI4.baseURL+'hclient/assets/fa-cubes.png&quot;);">';
                     }else{
 
                         var s_hint = '';  //NOT USED this hint shows explanatory text about mode of search:faceted,with rules,rules only
                         var s_hint2 = ''; //this hint shows notes and RAW text of query,rules
 
+                        var svs = window.hWin.HAPI4.currentUser.usr_SavedSearch[node.key];
                         
                         var squery = '';
                         if(node.data.url){
@@ -1235,7 +1241,6 @@ $.widget( "heurist.svs_list", {
                         }else{
                             s_hint2 = node.key+':'+node.title;
                             if(window.hWin.HAPI4.currentUser.usr_SavedSearch[node.key]){
-                                var svs = window.hWin.HAPI4.currentUser.usr_SavedSearch[node.key];
                                 squery = svs[_QUERY];
                                 /*if(!node.data.isfaceted){
                                     var qsearch = svs[_QUERY];
@@ -1271,12 +1276,10 @@ $.widget( "heurist.svs_list", {
                         }
 
                         if(s==''){
-                            $span.find("> span.fancytree-title").text(node.title);
+                            //$span.find("> span.fancytree-title").text(node.title);
                         }else{
-                            //'<span style="display:inline-block;">'+node.title+ '</span>'
-                            //'<div style="display:inline-block;">'+node.title+'</div>'
-                            //
-                            $span.find("> span.fancytree-title").html(node.title+' '+s);
+                            node.title = svs[_NAME] + '  ' + s;
+                            $span.find("> span.fancytree-title").html(node.title);
                         }
                         $span.attr('title', s_hint2)
                         $span.attr('filter_type', prms.type);
@@ -1413,7 +1416,7 @@ $.widget( "heurist.svs_list", {
                 }
             };
             fancytree_options['edit'] = {
-                save:function(event, data){
+                save:function(event, data){ //after edit end
                     if(''!=data.input.val()){
                         var new_name = data.input.val();
                         that._avoidConflictForGroup(groupID, function(){
@@ -1779,7 +1782,7 @@ $.widget( "heurist.svs_list", {
                 res = container;
             }
             
-            this._activateMenuAndTruncate(tree, container_width);
+            this._activateMenuAndTruncate(null, tree, container_width);
 
         }
         else{
@@ -1832,18 +1835,24 @@ $.widget( "heurist.svs_list", {
     //
     //
     //
-    _activateMenuAndTruncate: function(tree, container_width)
+    _activateMenuAndTruncate: function(groupID, tree, container_width)
     {            
             if(!(container_width>0)) container_width = this.options.container_width;
-        
+            
+            if(groupID!=null){
+                tree = this.element.find('div[tree-group='+groupID+']');
+            }
+            if(!tree || tree.length==0) return;
         
             $.each( tree.find('span.fancytree-node'), function( idx, item ){
 
                 var ele = $(item); //.find('span.fancytree-node');
                 ele.css({display: 'block', width:'99%'});         
+                
+                var is_folder = ele.hasClass('fancytree-folder');
 
                 ele.find('.fancytree-title')
-                    .css({display: 'inline-block', width:container_width>0?(container_width-30):'80%'})
+                    .css({display: 'inline-block', width:container_width>0?(container_width-(is_folder?52:30)):'80%'})
                     .addClass('truncate');
                 //'80%'
 
@@ -1853,20 +1862,28 @@ $.widget( "heurist.svs_list", {
                     .appendTo(ele);
                 }
 
-                if($(item).find('span.fancytree-folder').length==0)
+                if(is_folder){
+                    
+                    if(ele.find('span.ui-icon-folder-open').length==0){
+                        var s1 = '<span class="ui-icon-folder-open ui-icon" style="display:inline-block;color:orange;top: 3px;"></span>';
+                        $(s1).insertBefore(ele.find("> span.fancytree-title"));
+                    }
+                    
+                }else
                 {
                     $(item).addClass('leaves');
-
-                    $(item).mouseenter(
-                        function(event){
-                            var ele = $(item).find('.svs-contextmenu2');
-                            ele.css('display','inline-block');
-                            //ele.show();
-                    }).mouseleave(
-                        function(event){
-                            var ele = $(item).find('.svs-contextmenu2');
-                            ele.hide();
-                    });
+                }
+                
+                $(item).mouseenter(
+                    function(event){
+                        var ele = $(item).find('.svs-contextmenu2');
+                        ele.css('display','inline-block');
+                        //ele.show();
+                }).mouseleave(
+                    function(event){
+                        var ele = $(item).find('.svs-contextmenu2');
+                        ele.hide();
+                });
                     /*
                     $(item).hover(
                     function(event){
@@ -1875,7 +1892,7 @@ $.widget( "heurist.svs_list", {
                     function(event){
                     $(event.target).find('.svs-contextmenu2').hide();
                     });*/
-                }
+                
             });
     },
     
@@ -2227,7 +2244,7 @@ $.widget( "heurist.svs_list", {
                 if(Hul.isnull(node)){
                     groupID = response.svs_UGrpID
                     if(groupID == window.hWin.HAPI4.currentUser.ugr_ID){
-                        groupID = response.domain; //all or bookmarks
+                        groupID = response.domain?response.domain:'all'; //all or bookmarks
                     }
                     var tree = that.treeviews[groupID];
                     node = tree.rootNode;
@@ -2246,7 +2263,7 @@ $.widget( "heurist.svs_list", {
                 //if group is changed move node to another tree
                 groupID = response.svs_UGrpID
                 if(groupID == window.hWin.HAPI4.currentUser.ugr_ID){
-                    groupID = response.domain; //all or bookmarks
+                    groupID = response.domain?response.domain:'all'; //all or bookmarks
                 }else{
                     isPrivate = false;
                 }
@@ -2282,10 +2299,7 @@ $.widget( "heurist.svs_list", {
             }
             
             if(groupID && svs_ID>0){
-                var tree = that.element.find('div[tree-group='+groupID+']');
-                if(tree.length>0){
-                    that._activateMenuAndTruncate(tree);
-                }
+                that._activateMenuAndTruncate(groupID);
             }
                 
             
@@ -2311,8 +2325,10 @@ $.widget( "heurist.svs_list", {
             
             //this.edit_dialog.callback_method  = callback;
             this.edit_dialog.showSavedFilterEditDialog( mode, groupID, svsID, squery, is_short, 
-                this.options.is_h6style?{ my: "left top", at: "right+4 top", of: this.element}:null, callback, 
-                true, this.options.is_h6style );
+                this.options.is_h6style?{ my: "left top", at: "left top", of: this.element}:null, 
+                callback, 
+                true,  //modal
+                this.options.is_h6style );
 
         }else{
             $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/search/svs_edit.js',

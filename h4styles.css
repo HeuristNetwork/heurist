@@ -1359,8 +1359,10 @@ span.fancytree-checkbox{
     width:26;
 }
 
+.fancytree-ext-filter{
+    color: black !important;
+}
 .fancytree-ext-filter .fancytree-node.fancytree-match .fancytree-title{
-    /*color: silver !important;*/
     font-weight: normal !important;
 }
 
