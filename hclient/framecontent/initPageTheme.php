@@ -415,14 +415,9 @@ span.fancytree-node:hover{
 .ui-heurist-explore .ui-heurist-title{color:<?php uout('explore_title_color', '#4477B9');?>} 
 .ui-heurist-explore .ui-widget-content,
 .ui-heurist-explore .ui-selectmenu-button{
-    background:<?php uout('explore_title_color', '#D4DBEA');?>
+    background:<?php uout('explore_fade_bg', '#D4DBEA');?>
 }
 /* button within menu section */
-.ui-heurist-import .ui-heurist-btn-header1{    
-    background:none !important;
-    border:1px solid <?php uout('import_bg', '#307D96')?> !important;
-    color:<?php uout('import_bg', '#307D96')?> !important;
-}
 .ui-heurist-explore .ui-heurist-btn-header1{    
     background:none !important;
     border:1px solid <?php uout('explore_bg', '#4477B9')?> !important;
@@ -432,7 +427,6 @@ span.fancytree-node:hover{
     background: none;
     color:<?php uout('explore_bg', '#4477B9')?> !important;
 }
-
 .ui-heurist-explore .ui-state-active, 
 .ui-heurist-explore .fancytree-active,
 .ui-heurist-explore .fancytree-node:hover
@@ -444,20 +438,35 @@ span.fancytree-node:hover{
     border: 1px dotted blue !important;
 }
 */
-
-
 /* SECTION SCHEME: IMPORT */
-.ui-heurist-import.ui-heurist-header, .ui-heurist-import .ui-heurist-header{
-    background:<?php uout('import_bg', '#307D96');?> 0% 0% no-repeat padding-box;
+.ui-heurist-import.ui-heurist-header, .ui-heurist-import .ui-heurist-header,
+.ui-heurist-import .ui-dialog-titlebar,
+.ui-heurist-import .ui-dialog-buttonpane
+{
+    background:<?php uout('import_bg', '#307D96');?> !important;
+    color: white;    
+}
+.ui-heurist-import-fade{background:<?php uout('import_fade_bg', '#e3f0f0');?> !important;}
+.ui-heurist-import .ui-heurist-title{color:<?php uout('import_title_color', '#307D96');?>}
+.ui-heurist-import .ui-widget-content,
+.ui-heurist-import .ui-selectmenu-button{
+    background:<?php uout('import_fade_bg', '#e3f0f0');?>
+}
+
+/* button within menu section */
+.ui-heurist-import .ui-heurist-btn-header1{    
+    background:none !important;
+    border:1px solid <?php uout('import_bg', '#307D96')?> !important;
+    color:<?php uout('import_bg', '#307D96')?> !important;
+}
+.ui-heurist-import .ui-button-icon-only{
+    background: none;
+    color:<?php uout('import_bg', '#307D96')?> !important;
 }
 .ui-menu6 .ui-menu6-container.ui-heurist-import, .ui-heurist-import .ui-helper-popup{
     border-width: 2px !important;
     border-color:<?php uout('import_bg', '#307D96');?> !important; 
 } 
-.ui-heurist-import-fade{background:<?php uout('import_fade_bg', '#9BB8C2');?> 0% 0% no-repeat padding-box;}
-.ui-heurist-import .ui-heurist-title{
-    color:<?php uout('import_title_color', '#307D96');?>
-}
 .ui-heurist-import .ui-state-active, 
 .ui-heurist-import .fancytree-active,
 .ui-heurist-import .fancytree-node:hover

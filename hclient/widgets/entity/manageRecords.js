@@ -3441,7 +3441,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             if(this.options.edit_structure){
                 this._as_dialog.parent().addClass('ui-heurist-design');
             }else{
-                this._as_dialog.parent().addClass('ui-heurist-explore');
+                this._as_dialog.parent().addClass('ui-heurist-import'); //was explore
             }
             
 
@@ -3454,7 +3454,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             if(this.editHeader) this.editHeader.hide();
         }else{
             
-            this.element.addClass('ui-heurist-explore');
+            this.element.addClass('ui-heurist-import'); //explore
             this.editHeader.addClass('ui-heurist-header');
             //remove previous
             this.editHeader.find('.edit-record-title').remove();
