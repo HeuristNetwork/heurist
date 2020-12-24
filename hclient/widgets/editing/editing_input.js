@@ -849,7 +849,6 @@ $.widget( "heurist.editing_input", {
 
                 var isVocabulary = !isNaN(Number(allTerms)); 
 
-
                 var $btn_termsel = $( '<span>', {title: 'Select Term By Picture'})
                 .addClass('smallicon ui-icon ui-icon-image')
                 .css({'margin-top': '2px'})
@@ -916,14 +915,53 @@ $.widget( "heurist.editing_input", {
                 }});
 
                     
-                var $btn_termedit = $( '<span>', {title: 'Add new term to this list'})
-                .addClass('smallicon ui-icon ui-icon-circle-b-plus btn_add_term')
-                .css({'margin-top':'2px',cursor:'pointer'})
-                .appendTo( $inputdiv );
-                //.button({icons:{primary: 'ui-icon-gear'},text:false});
                 
                 var vocab_id = Number(allTerms);
+
+                if(window.hWin.HAPI4.is_admin()){            
+                    
+                    var $btn_termedit2 = $( '<span>', {title: 'Edit term tree'})
+                    .addClass('smallicon ui-icon ui-icon-gear btn_add_term')
+                    .css({'margin-top':'2px',cursor:'pointer'})
+                    .appendTo( $inputdiv );
+                    
+                    this._on( $btn_termedit2,{ click:
+                        function(){
+                            var rg_options = {
+                                height:800, width:1300,
+                                selection_on_init: allTerms,
+                                innerTitle: false,
+                                innerCommonHeader: $('<div>'
+                                    +(that.options.dtID>0?('modifying field :<b>'+$Db.dty(that.options.dtID,'dty_Name')+'</b>'):'')
+                                    +' dropdown is populated from <b>'+$Db.trm(allTerms,'trm_Label')+'</b> vocabulary</div>'),
+                                onInitFinished: function(){
+                                    var that2 = this;
+                                    setTimeout(function(){
+                                        that2.vocabularies_div.manageDefTerms('selectVocabulary', vocab_id);
+                                    },500);
+                                },
+                                onClose: function(){
+                                    $.each(that.inputs, function(index, input){ 
+                                        input = $(input);
+                                        input.css('width','auto');
+                                        input = that._recreateSelector(input, true);
+                                        input.change( __onTermChange );
+                                    });
+                                    __showHideSelByImage();                                    
+                                }
+                            };
+                            window.hWin.HEURIST4.ui.showEntityDialog('defTerms', rg_options);
+                        }
+                    });
                 
+                }
+            
+                
+                var $btn_termedit = $( '<span>', {title: 'Add new term to this list'})
+                .addClass('smallicon ui-icon ui-icon-plus btn_add_term')
+                .css({'margin-top':'2px',cursor:'pointer','font-size':'11px'})
+                .appendTo( $inputdiv );
+
                 //
                 // open add term popup
                 //
@@ -1019,46 +1057,7 @@ $.widget( "heurist.editing_input", {
                 
                 
                 }} ); //end btn onclick
-            
 
-                if(window.hWin.HAPI4.is_admin()){            
-                    
-                    var $btn_termedit2 = $( '<span>', {title: 'Edit term tree'})
-                    .addClass('smallicon ui-icon ui-icon-gear btn_add_term')
-                    .css({'margin-top':'2px',cursor:'pointer'})
-                    .appendTo( $inputdiv );
-                    
-                    this._on( $btn_termedit2,{ click:
-                        function(){
-                            var rg_options = {
-                                height:800, width:1300,
-                                selection_on_init: allTerms,
-                                innerTitle: false,
-                                innerCommonHeader: $('<div>'
-                                    +(that.options.dtID>0?('modifying field :<b>'+$Db.dty(that.options.dtID,'dty_Name')+'</b>'):'')
-                                    +' dropdown is populated from <b>'+$Db.trm(allTerms,'trm_Label')+'</b> vocabulary</div>'),
-                                onInitFinished: function(){
-                                    var that2 = this;
-                                    setTimeout(function(){
-                                        that2.vocabularies_div.manageDefTerms('selectVocabulary', vocab_id);
-                                    },500);
-                                },
-                                onClose: function(){
-                                    $.each(that.inputs, function(index, input){ 
-                                        input = $(input);
-                                        input.css('width','auto');
-                                        input = that._recreateSelector(input, true);
-                                        input.change( __onTermChange );
-                                    });
-                                    __showHideSelByImage();                                    
-                                }
-                            };
-                            window.hWin.HEURIST4.ui.showEntityDialog('defTerms', rg_options);
-                        }
-                    });
-                
-                }
-            
             
             }//allow edit terms only for true defTerms enum
             
