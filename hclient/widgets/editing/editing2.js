@@ -275,8 +275,6 @@ function hEditing(_options) {
 
                         $(newFieldContainer).appendTo(groupEle);
 
-                        $(newFieldContainer).append('<div style="min-height:20px">&nbsp;</div>');
-
                         newFieldContainer.addClass(options.className);
 
                     }else{
@@ -291,9 +289,17 @@ function hEditing(_options) {
                     }
 
                     if(headerHelpText!=''){
-                         var div_prompt = $('<div>').text(headerHelpText).css('padding-left','14px')
+                         var div_prompt = $('<div>').text(headerHelpText)
                             .addClass('heurist-helper1')
                             .appendTo(newFieldContainer);
+                         if(currGroupType == 'tabs'){
+                            div_prompt.css({padding:'5px 0 0 5px'});
+                         }else{
+                            div_prompt.css({'padding-left':'14px'});
+                         }
+                    }
+                    if(currGroupType == 'tabs'){ //some space on the top
+                        $(newFieldContainer).append('<div style="min-height:10px">&nbsp;</div>');
                     }
                         
                     __createGroup(fields[idx].children, groupContainer, newFieldContainer);
