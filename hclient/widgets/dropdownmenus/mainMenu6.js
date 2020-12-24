@@ -88,6 +88,7 @@ $.widget( "heurist.mainMenu6", {
             .appendTo( this.element );
         //91 200    
         this.divMainMenu = $('<div>')
+        .addClass('mainMenu6')
         .css({position:'absolute',width:'91px',top:'2px',left:'0px',bottom:'4px',
                 cursor:'pointer','z-index':104})
         .appendTo( this.element )
@@ -162,6 +163,7 @@ $.widget( "heurist.mainMenu6", {
                     mouseleave: function(e){
                         if($(e.target).parent('#filter_by_groups').length==0){
                             clearTimeout(this._myTimeoutId3); this._myTimeoutId3 = 0; //clear timeout on show section menu
+                            this._resetCloseTimers();//reset
                             this._myTimeoutId2 = setTimeout(function(){
                                         that._closeExploreMenuPopup();
                                     },  this._delayOnCollapse_ExploreMenu); //600
@@ -172,6 +174,7 @@ $.widget( "heurist.mainMenu6", {
                     mouseenter: that._mousein_ExploreMenu,
                     mouseleave: function(e){
                             clearTimeout(this._myTimeoutId3); this._myTimeoutId3 = 0; //clear timeout on show section menu
+                            this._resetCloseTimers();//reset
                             this._myTimeoutId2 = setTimeout(function(){
                                         that._closeExploreMenuPopup();
                                     },  this._delayOnCollapse_ExploreMenu); //600
@@ -186,7 +189,8 @@ $.widget( "heurist.mainMenu6", {
                     }
                 });
                 
-                that._on($(document),{mouseleave: that._resetCloseTimers });
+                //keep main menu open on document mouse leave
+                //that._on($(document),{mouseleave: that._resetCloseTimers });
                 
                 
                 var cms_record_id = window.hWin.HEURIST4.util.getUrlParameter('cms', window.hWin.location.search);
@@ -343,8 +347,9 @@ $.widget( "heurist.mainMenu6", {
                     this._on(ele, {click: function(e){
                         var ele = $(e.target).is('li')?$(e.target):$(e.target).parents('li');
                         var rty_ID = ele.attr('data-id');
-                        this.coverAll.hide();
-                        window.hWin.HEURIST4.ui.openRecordEdit(-1, null,{new_record_params:{RecTypeID:rty_ID}});
+
+                        this._collapseMainMenuPanel(true); 
+                        setTimeout('window.hWin.HEURIST4.ui.openRecordEdit(-1, null,{new_record_params:{RecTypeID:'+rty_ID+'}})',200);
                     }});
                 }else{
                     ele.find('.menu-text').text('Add record');
@@ -511,7 +516,7 @@ $.widget( "heurist.mainMenu6", {
         }        
         
         if(e){
-            
+            this._resetCloseTimers();//reset
             this._myTimeoutId2 = setTimeout(function(){
                                             that._closeExploreMenuPopup();
                                             that._collapseMainMenuPanel();                                        
@@ -1124,6 +1129,7 @@ $.widget( "heurist.mainMenu6", {
                 mouseenter: this._mousein_ExploreMenu,
                 mouseleave: function(e){
                         clearTimeout(this._myTimeoutId3); this._myTimeoutId3 = 0; //clear timeout on show section menu
+                        this._resetCloseTimers();//reset
                         this._myTimeoutId2 = setTimeout(function(){
                                     that._closeExploreMenuPopup();
                                 },  this._delayOnCollapse_ExploreMenu); //600
@@ -1231,7 +1237,7 @@ $.widget( "heurist.mainMenu6", {
                      },
                      mouseleave: function(e){
                             clearTimeout(this._myTimeoutId3); this._myTimeoutId3 = 0; //clear timeout on show section menu
-                          
+                            this._resetCloseTimers();//reset
                             this._myTimeoutId2 = setTimeout(function(){  //was 6
 //console.log('hide explore record ADD');
                                         that._closeExploreMenuPopup();
