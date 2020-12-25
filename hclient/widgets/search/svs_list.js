@@ -86,9 +86,17 @@ $.widget( "heurist.svs_list", {
              window.hWin.HEURIST4.util.isArrayNotEmpty(this.options.allowed_svsIDs)
             || (this.options.searchTreeMode>=0));
             
+            
         if( this.isPublished ){
             if(!(this.options.searchTreeMode>=0)) this.options.searchTreeMode = 0;
             this.options.buttons_mode = (this.options.searchTreeMode==0);
+            
+            if(this.options.searchTreeMode==2 
+                && !window.hWin.HAPI4.has_access()
+                && !window.hWin.HEURIST4.util.isArrayNotEmpty(this.options.allowed_UGrpID)){
+                
+                    this.options.allowed_UGrpID = [4]; //web searches
+            }
         }
             
         if(window.hWin.HAPI4.has_access() && this.options.buttons_mode){
@@ -381,8 +389,25 @@ $.widget( "heurist.svs_list", {
             return;
         }
         
-        if(!window.hWin.HAPI4.has_access()){
-             window.hWin.HAPI4.currentUser.ugr_Groups = {}; //'{'5':'member'}; //was {}
+        if(!window.hWin.HAPI4.currentUser.ugr_Groups){
+            window.hWin.HAPI4.currentUser.ugr_Groups = {}
+        }
+        
+        if(this.isPublished){
+            //add all groups 
+            if(window.hWin.HEURIST4.util.isArrayNotEmpty(this.options.allowed_UGrpID)){
+                
+                for (var i=0; i<this.options.allowed_UGrpID.length; i++){
+                    if(!window.hWin.HAPI4.currentUser.ugr_Groups[this.options.allowed_UGrpID[i]]){
+                        window.hWin.HAPI4.currentUser.ugr_Groups[this.options.allowed_UGrpID[i]] = 'member';
+                    }    
+                }
+                
+            }else if($.isEmptyObject(window.hWin.HAPI4.currentUser.ugr_Groups)){ //   !window.hWin.HAPI4.currentUser.ugr_Groups[4]
+                //in published mode "Website searches" is always visible
+                window.hWin.HAPI4.currentUser.ugr_Groups[4] = 'member';
+            }
+                
         }
         this._updateAccordeon();
 
@@ -490,7 +515,7 @@ $.widget( "heurist.svs_list", {
         if(!$.isFunction($('body').fancytree)){        //jquery.fancytree-all.min.js
             $.getScript(window.hWin.HAPI4.baseURL+'external/jquery.fancytree/jquery.fancytree-all.min.js', function(){ that._updateAccordeon(); } );
             return;
-        }else if(!(islogged || window.hWin.HAPI4.currentUser.ugr_SvsTreeData)){
+        }else if( (!islogged || this.isPublished) && !window.hWin.HAPI4.currentUser.ugr_SvsTreeData){ //!(islogged || window.hWin.HAPI4.currentUser.ugr_SvsTreeData)){
 
             //window.hWin.HAPI4.currentUser.ugr_SvsTreeData = this.__default_TreeData();
             window.hWin.HAPI4.SystemMgr.ssearch_get( {UGrpID: this.options.allowed_UGrpID},
@@ -651,12 +676,15 @@ $.widget( "heurist.svs_list", {
         }
 
         //init list of accordions
-        var keep_status = window.hWin.HAPI4.get_prefs('svs_list_status');
-        if(keep_status){
-            keep_status = window.hWin.HEURIST4.util.isJSON(keep_status);   
-        }
-        if(!keep_status) {
-            keep_status = { 1:true, 'all':true };
+        var keep_status = {};
+        if(!this.isPublished){
+            keep_status = window.hWin.HAPI4.get_prefs('svs_list_status');
+            if(keep_status){
+                keep_status = window.hWin.HEURIST4.util.isJSON(keep_status);   
+            }
+            if(!keep_status) {
+                keep_status = { 1:true, 'all':true }; //expanded by default
+            }
         }
         
 
@@ -668,19 +696,21 @@ $.widget( "heurist.svs_list", {
             
             
             cdiv.accordion({
-                active: ( ( keep_status && keep_status[ groupid ] )?0:false),
+                active: ( (that.isPublished || ( keep_status && keep_status[ groupid ] ))?0:false),
                 header: "> h3",
                 heightStyle: "content",
                 collapsible: true,
                 activate: function(event, ui) {
-                    //save status of accordions - expandad/collapsed
-                    if(ui.newHeader.length>0 && ui.oldHeader.length<1){ //activated
-                        keep_status[ ui.newHeader.attr('grpid') ] = true;
-                    }else{ //collapsed
-                        keep_status[ ui.oldHeader.attr('grpid') ] = false;
+                    if(!that.isPublished){
+                        //save status of accordions - expandad/collapsed
+                        if(ui.newHeader.length>0 && ui.oldHeader.length<1){ //activated
+                            keep_status[ ui.newHeader.attr('grpid') ] = true;
+                        }else{ //collapsed
+                            keep_status[ ui.oldHeader.attr('grpid') ] = false;
+                        }
+                        //save
+                        window.hWin.HAPI4.save_pref('svs_list_status', JSON.stringify(keep_status));
                     }
-                    //save
-                    window.hWin.HAPI4.save_pref('svs_list_status', JSON.stringify(keep_status));
                     //replace all ui-icon-triangle-1-s to se
                     cdivs.find('.ui-icon-triangle-1-e').removeClass('ui-icon-triangle-1-se');
                     cdivs.find('.ui-icon-triangle-1-s').removeClass('ui-icon-triangle-1-s').addClass('ui-icon-triangle-1-se');
@@ -2508,20 +2538,12 @@ console.log(err)
                 bookmark:{ title: window.hWin.HR('My Bookmarks'), folder: true, expanded: true, 
                         children: this.__define_SVSlist(window.hWin.HAPI4.currentUser.ugr_ID, 'bookmark') }
             };
+            /*
             if(window.hWin.HAPI4.is_admin()){
                 treeData['guests'] = { title: window.hWin.HR('Searches for guests'), 
                     folder: true, expanded: false, children: this.__define_SVSlist(0) };
             }
-            
-            var groups = window.hWin.HAPI4.currentUser.ugr_Groups;
-            for (var groupID in groups)
-            {
-                if(groupID>0){
-                    var name = window.hWin.HAPI4.sysinfo.db_usergroups[groupID];
-                    treeData[groupID] = {title: name, folder: true, expanded: false, 
-                        children: this.__define_SVSlist(groupID) };
-                }
-            }
+            */
             
         }else{
             treeData = {
@@ -2530,6 +2552,16 @@ console.log(err)
             };
         }
 
+        var groups = window.hWin.HAPI4.currentUser.ugr_Groups;
+        for (var groupID in groups)
+        {
+            if(groupID>0){
+                var name = window.hWin.HAPI4.sysinfo.db_usergroups[groupID];
+                treeData[groupID] = {title: name, folder: true, expanded: false, 
+                    children: this.__define_SVSlist(groupID) };
+            }
+        }
+            
 
         return treeData;
        
@@ -2653,7 +2685,7 @@ console.log(err)
         var res = [];
 
         //add predefined searches
-        if(ugr_ID == window.hWin.HAPI4.currentUser.ugr_ID){  //if current user domain may be all or bookmark
+        if(ugr_ID == window.hWin.HAPI4.currentUser.ugr_ID){  //if current user - it adds 2 special searches: all or bookmark
         
                 var domain = (domain=='b' || domain=='bookmark')?'bookmark':'all';
 
