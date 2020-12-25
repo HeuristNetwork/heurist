@@ -461,7 +461,7 @@ span.fancytree-node:hover{
 }
 .ui-heurist-import .ui-button-icon-only{
     background: none;
-    color:<?php uout('import_bg', '#307D96')?> !important;
+    color:<?php uout('import_bg', '#e3f0f0')?> !important;
 }
 .ui-menu6 .ui-menu6-container.ui-heurist-import, .ui-heurist-import .ui-helper-popup{
     border-width: 2px !important;
