@@ -663,6 +663,10 @@ function hSvsEdit(args) {
                         if(!isRules && menu_locked && $.isFunction(menu_locked)){
                                 menu_locked.call( this, 'close'); //is_locked, is_mouseleave    
                         }
+                    },
+                    show: {
+                        effect: 'fade',
+                        duration: 500
                     }
                 });
                 

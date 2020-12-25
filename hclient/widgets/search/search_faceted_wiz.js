@@ -199,7 +199,11 @@ $.widget( "heurist.search_faceted_wiz", {
                         that._doSaveSearch()
                         //that.navigateWizard(1);
                 }},
-            ]
+            ],
+            show: {
+                effect: 'fade',
+                duration: 500
+            }
         });
         this.element.parent().addClass('ui-dialog-heurist');
 

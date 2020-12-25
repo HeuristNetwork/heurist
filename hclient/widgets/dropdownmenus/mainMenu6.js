@@ -45,8 +45,8 @@ $.widget( "heurist.mainMenu6", {
     _delayOnCollapseMainMenu: 800,
     _delayOnCollapse_ExploreMenu: 600,
     
-    _delayOnShow_ExploreMenu: 250, //5 500,
-    _delayOnShow_AddRecordMenu: 250, //10 1000,
+    _delayOnShow_ExploreMenu: 500, //5 500,
+    _delayOnShow_AddRecordMenu: 500, //10 1000,
     
     _widthMenu: 170, //left menu
     
@@ -65,7 +65,7 @@ $.widget( "heurist.mainMenu6", {
     
     coverAll: null,
     
-    menues_explore_popup: null,
+    menues_explore_popup: null,  //popup next to explore menu (filters)
     menues_explore_gap: null,
     search_faceted: null,
     edit_svs_dialog: null,
@@ -89,7 +89,7 @@ $.widget( "heurist.mainMenu6", {
         //91 200    
         this.divMainMenu = $('<div>')
         .addClass('mainMenu6')
-        .css({position:'absolute',width:'91px',top:'2px',left:'0px',bottom:'4px',
+        .css({position:'absolute',width:'91px',top:'2px',left:'0px',bottom:'4px', //91
                 cursor:'pointer','z-index':104})
         .appendTo( this.element )
         .load(
@@ -104,7 +104,7 @@ $.widget( "heurist.mainMenu6", {
                     that._initIntroductory(section);
                 });
                 
-                //explore menu in main(left) menu
+                //explore menu in main(left) menu  -  quicklinks
                 that._on(that.divMainMenu.children('.ui-heurist-quicklinks').find('li.menu-explore'),
                 {
                     mouseenter: that._expandMainMenuPanel,
@@ -152,7 +152,7 @@ $.widget( "heurist.mainMenu6", {
                 }
                 
 
-                //init menu itemms in ui-heurist-quicklinks
+                //init menu items in ui-heurist-quicklinks
                 that._createListOfGroups(); //add list of groups for saved filters
                 
                 that.divMainMenu.find('.menu-text').hide();
@@ -163,7 +163,7 @@ $.widget( "heurist.mainMenu6", {
                     mouseleave: function(e){
                         if($(e.target).parent('#filter_by_groups').length==0){
                             clearTimeout(this._myTimeoutId3); this._myTimeoutId3 = 0; //clear timeout on show section menu
-                            this._resetCloseTimers();//reset
+                            //this._resetCloseTimers();//reset
                             this._myTimeoutId2 = setTimeout(function(){
                                         that._closeExploreMenuPopup();
                                     },  this._delayOnCollapse_ExploreMenu); //600
@@ -174,7 +174,7 @@ $.widget( "heurist.mainMenu6", {
                     mouseenter: that._mousein_ExploreMenu,
                     mouseleave: function(e){
                             clearTimeout(this._myTimeoutId3); this._myTimeoutId3 = 0; //clear timeout on show section menu
-                            this._resetCloseTimers();//reset
+                            //this._resetCloseTimers();//reset
                             this._myTimeoutId2 = setTimeout(function(){
                                         that._closeExploreMenuPopup();
                                     },  this._delayOnCollapse_ExploreMenu); //600
@@ -405,6 +405,7 @@ $.widget( "heurist.mainMenu6", {
     //    
     _collapseMainMenuPanel: function(is_instant, is_forcefully) {
 
+//console.log('_collapseMainMenuPanel');        
         var that = this;
         if(is_forcefully>0){
             this._is_prevent_expand_mainmenu = true;
@@ -435,7 +436,7 @@ $.widget( "heurist.mainMenu6", {
             //that.divMainMenu.find('#filter_by_groups').show(); IJ 2020-11-23 always show in explore menu only
 
             if(that.divMainMenu.width()>91)
-                that.divMainMenu.stop().effect('size',  { to: { width: 91 } }, is_instant===true?10:300, function(){
+                that.divMainMenu.stop().effect('size',  { to: { width: 91 } }, is_instant===true?10:300, function(){ //91
                     that.divMainMenu.css({bottom:'4px',height:'auto'});
                     that._closeExploreMenuPopup();
                 });
@@ -465,7 +466,7 @@ $.widget( "heurist.mainMenu6", {
         
         var that = this;
         this._mouseout_SectionMenu();
-        this.divMainMenu.stop().effect('size',  { to: { width: that._widthMenu } }, 300,
+        this.divMainMenu.stop().effect('size',  { to: { width: that._widthMenu } }, 300, //300
                 function(){
                     that.divMainMenu.find('ul').css({'padding-right':'0px'});
                     that.divMainMenu.find('.ui-heurist-quicklinks').css({'text-align':'left'});
@@ -493,7 +494,7 @@ $.widget( "heurist.mainMenu6", {
     // leave explore popup
     //    
     _mouseout_SectionMenu: function(e) {
-        
+
         if( this._isExplorerMenu_locked() ) return;
         
         var that = this;
@@ -531,11 +532,11 @@ $.widget( "heurist.mainMenu6", {
     //
     _resetCloseTimers: function(){
 
-        clearTimeout(this._myTimeoutId2); this._myTimeoutId2 = 0; //delay on collapse main menu
-        clearTimeout(this._myTimeoutId); this._myTimeoutId = 0; //delay on close section menu
+        clearTimeout(this._myTimeoutId2); this._myTimeoutId2 = 0; //delay on close explore popup menu
+        clearTimeout(this._myTimeoutId); this._myTimeoutId = 0; //delay on collapse main menu (_expandMainMenuPanel/_collapseMainMenuPanel)
     },
     //
-    // expand main menu and show explore menu popup
+    // show explore menu popup (show_ExploreMenu) next to mainMenu6_explore or mainMany quick links
     //
     _mousein_ExploreMenu: function(e) {
 
@@ -545,7 +546,11 @@ $.widget( "heurist.mainMenu6", {
         //this._expandMainMenuPanel();
 
         clearTimeout(this._myTimeoutId3); this._myTimeoutId3 = 0;
+        
         this._resetCloseTimers();
+        if(e && $(e.target).parents('.ui-heurist-quicklinks').length==0){
+            this._collapseMainMenuPanel(true); //close instantly 
+        }
         
         this.divMainMenu.find('li.menu-explore').css('background','none');  
 //23-12        this.divMainMenu.find('li.menu-explore > .menu-text').css('text-decoration', 'none');
@@ -598,7 +603,7 @@ $.widget( "heurist.mainMenu6", {
             
         if(action_name == 'recordAdd'){
             if(menu_item && menu_item.attr('data-id')>0){
-                delay = this._delayOnShow_AddRecordMenu; //1000;
+                delay = this._delayOnShow_AddRecordMenu;
             }
         }else{
             this.menues_explore_popup
@@ -614,6 +619,7 @@ $.widget( "heurist.mainMenu6", {
         var cont = this.menues_explore_popup.find('#'+action_name);
         
         if(cont.length==0){
+            //create new one
             cont = $('<div id="'+action_name+'" class="explore-widgets">').appendTo(this.menues_explore_popup);
         }else if( cont.is(':visible')){ // && action_name!='svs_list'
             return;
@@ -639,12 +645,11 @@ $.widget( "heurist.mainMenu6", {
 
             that._current_explore_action = action_name;
             
-//console.log('show_ExploreMenu '+action_name);            
+            //stop show animation and hide others
+            that.menues_explore_popup.find('.explore-widgets').finish().hide();
             
-            that.menues_explore_popup.find('.explore-widgets').hide(); //hide others
             if(action_name!='svsAdd'){
                 //attempt for non modal 
-//console.log('close in show_ExploreMenu');                
                 that.closeSavedSearch();
             }
             if(action_name!='svsAddFaceted'){
@@ -818,7 +823,8 @@ $.widget( "heurist.mainMenu6", {
             //show menu section
             that.menues_explore_popup.css({'z-index':103}).show(); 
             
-            cont.show('fade',{},delay>=500?500:10); //show current widget in menu section
+            cont.show('fade',{},delay+200); //delay>=500?500:10); //show current widget in menu section
+            //cont.effect( 'fadeIn', options, 500, callback );
             
             /*  BBBB
             if(action_name!='recordAdd' && action_name!='search_quick' 
@@ -1120,7 +1126,7 @@ $.widget( "heurist.mainMenu6", {
     },
     
     //
-    //
+    // special behaviour form mainMenu6_explore
     //
     _initSectionMenuExlore: function(){
         
@@ -1129,7 +1135,7 @@ $.widget( "heurist.mainMenu6", {
                 mouseenter: this._mousein_ExploreMenu,
                 mouseleave: function(e){
                         clearTimeout(this._myTimeoutId3); this._myTimeoutId3 = 0; //clear timeout on show section menu
-                        this._resetCloseTimers();//reset
+                        //this._resetCloseTimers();//reset
                         this._myTimeoutId2 = setTimeout(function(){
                                     that._closeExploreMenuPopup();
                                 },  this._delayOnCollapse_ExploreMenu); //600
