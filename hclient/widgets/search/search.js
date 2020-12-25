@@ -183,11 +183,13 @@ $.widget( "heurist.search", {
         .appendTo(  this.div_search_input );
         
           
+        var isNotFirefox = (navigator.userAgent.indexOf('Firefox')<0);
+            
         //promt to be shown when input has complex search expression (json search)
         this.input_search_prompt2 = $( "<span>" )
         .html('<span style="font-size:1em">'+window.hWin.HR("filter")
                 +'</span>&nbsp;&nbsp;<span class="ui-icon ui-icon-eye" style="font-size:1.8em;width: 1.7em;margin-top:1px"/>')
-        .css({ height:'20px', 'padding':'3px', 'margin':'2px', 'position':'relative', 'text-align':'left', display:'block'})
+        .css({ height:isNotFirefox?20:24, 'padding':'3px', 'margin':'2px', 'position':'relative', 'text-align':'left', display:'block'})
         .appendTo( this.div_search_input );
         this._on( this.input_search_prompt2, {click: function(){
                 this.input_search_prompt2.css({visibility:'hidden'});//hide();
@@ -291,9 +293,9 @@ $.widget( "heurist.search", {
         //         
         if(!this._is_publication && this.options.is_h6style){
             this.btn_save_filter = $('<button>')
-                .button({showLabel:'false',icon:'ui-icon-filter-plus',title:'Save filter'})
-                .css({padding: '0px 2px', 'margin-top': '6px', height: '19px', 'margin-left': '-12px'})
-                .appendTo(this.div_buttons);
+                .button({icon:'ui-icon-filter-plus',label:'Save filter',iconPosition:'end'})
+                .css({float:'right', padding: '0px 2px', 'margin-top': '-28px', height: '19px','font-size':'9px'})  //, 'margin-left': '-12px'
+                .appendTo(this.div_search_input);
             this.btn_save_filter.find('span.ui-icon').css({'font-size':'inherit',height:'11px'});
             
             this._on(this.btn_save_filter, {click: function(){
@@ -382,7 +384,7 @@ $.widget( "heurist.search", {
         if(!this._is_publication && this.options.is_h6style){
             this.btn_saved_filters = $('<button>')
                 .button({label:'Saved filters',icon:'ui-icon-carat-1-s',iconPosition: 'end'})
-                .css({float:'right','font-size':'9px','margin-top':'2px','min-width':'90px'})
+                .css({'font-size':'9px','margin-top':'2px','min-width':'90px',height: '19px'})
                 //.css({float:'right','font-size':'9px',padding:'0px 2px','margin-top':'-27px'})
                 .appendTo(this.div_search_as_user);
             this.btn_saved_filters.find('span.ui-icon').css({'font-size':'inherit',height:'11px'});

@@ -623,7 +623,7 @@ $.widget( "heurist.resultList", {
                         btn_visible_newrecord: false,
                         search_button_label: 'Filter',
                         btn_entity_filter: false})
-                    .css({display:'block','max-height':'55px','height':'55px',
+                    .css({  //display:'block','max-height':'55px','height':'55px',
                             padding:'15px 10px 0px 4px','border-bottom':'1px solid gray'}) //,width:'100%'
                     .appendTo(this.div_header);
         
