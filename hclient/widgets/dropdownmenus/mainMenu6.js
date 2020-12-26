@@ -340,7 +340,7 @@ $.widget( "heurist.mainMenu6", {
             if(ele.length>0){
 
                 if(rty_ID>0 && $Db.rty(rty_ID,'rty_Name')){
-                    ele.find('.menu-text').css('margin-left',0).html('Add&nbsp;&nbsp; [<i>'
+                    ele.find('.menu-text').css('margin-left',0).html('New&nbsp;&nbsp; [<i>'
                             +window.hWin.HEURIST4.util.htmlEscape($Db.rty(rty_ID,'rty_Name'))+'</i>]');
                     ele.attr('data-id', rty_ID);
                     this._off(ele, 'click');
@@ -352,7 +352,7 @@ $.widget( "heurist.mainMenu6", {
                         setTimeout('window.hWin.HEURIST4.ui.openRecordEdit(-1, null,{new_record_params:{RecTypeID:'+rty_ID+'}})',200);
                     }});
                 }else{
-                    ele.find('.menu-text').text('Add record');
+                    ele.find('.menu-text').text('New record');
                     ele.attr('data-id','');
                     this._off(ele, 'click');
                 }
@@ -1175,7 +1175,7 @@ $.widget( "heurist.mainMenu6", {
                         .appendTo(item);
                         
                         if(action_id=='menu-import-get-template'){
-                            item.css({'font-size':'10px', padding:'0 0 0 20px'})
+                            item.css({'font-size':'10px', padding:'0 0 0 8px','margin-top':'-2px'})
                         }else{
                             item.css({'font-size':'smaller', padding:'6px'})    
                         }
