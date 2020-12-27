@@ -80,7 +80,9 @@
                 <div>
                     <h3>Base fields</h3>
                     <p>
-                        F8ields 
+                        Base fields are fields which can bre reused in man different record types. They are available when adding fields to a record type; the base field type, name, help text, vocabulary and target record types (where applicable) are automatically aplied to the field in the record type, but name, help text, requirement and repeatability may be overidden with customisd versions for the specific record type. A new base field is created automatically if one creates a field from scratch rather than using an existing base field.
+                        </p><p>
+                        One will not normally need to edit base fields directly, but this menu item allows direct access when required, for example if one wishes to change the default name or description.
                     </p>
                 </div>
             </div>        
@@ -90,7 +92,9 @@
                 <div>
                     <h3>Browse templates</h3>
                     <p>
-                        Ipsum dolor...        
+                        Heurist has a sophisticated system to allow databases to import strucutre selectively from any registered database (databases are registered with Design > Setup > Register). This is a powerful way of sharing modeling work and promoting standardisation by encouragement rather than obligation. 
+                        </p><p>
+                        The function browses and seelcts a registered database, opens up a list of any record types not currently in the target database, displays the fields within a record type if required (base fields already in the target are shown in grey), and can then download the record type along with all connected record types, fields, vocabularies and terms required to create a coherent data structure.
                     </p>
                 </div>
             </div>
@@ -100,7 +104,9 @@
                 <div>
                     <h3>Visualise</h3>
                     <p>
-                        Ipsum dolor...        
+                        The relationships between record (entity) types in teh database can be visualised in teh form of a spider diagram. The diagram also shows the number of records for each node (size of circular shaded area around node) and the number of connections (thickness of connecting lines). The connectiosn include record poitner fields and relationmship markers, but not untyped relationships created on their own (the use of such relationships is not recommended).
+                        </p><p>
+                        As a diagram of all record types would be far too complex, the record types to be represented are selected from a dropdown list. Gravity can be switched on to create a self-organising diagram, then switched off to allow dragging of nodes to clarify the diagram. Links can also be built between record types by dragging the link icon. 
                     </p>
                 </div>
             </div>
@@ -110,7 +116,9 @@
                 <div>
                     <h3>My Preferences</h3>
                     <p>
-                        Ipsum dolor...        
+                        Personal preferences for this database can be set in thge Preferences dialogue. These include startup search, number of records to display per page, the use of clustering on maps and complexity of the map controls. Personal preferences are specific to each database.
+                        </p><p>
+                        The Preeferences dialogie also provides a bookmarklet which can be dragged to the browser toolbar and used to grab infromation from a web page and create a web bookmark record in the database. At this time the information which can be grabbed from secure https pages is limited to URL and title, but highlighted text will also be grabbed from non-secure http pages.
                     </p>
                 </div>
             </div>
@@ -120,7 +128,7 @@
                 <div>
                     <h3>Properties</h3>
                     <p>
-                        Ipsum dolor...        
+                        General pbehavioural parameters of the database can be set through tghe Properties function. This allows metadata for the database including a description, rights and a representative icon to display in lists, configuration of connections to Zotero libraries and mail servers, configuration of lookups to external reference sources, file types to be indexed and specific behaviours relating to place records, user registration and others.
                     </p>
                 </div>
             </div>
@@ -130,18 +138,22 @@
                 <div>
                     <h3>Register</h3>
                     <p>
-                        Ipsum dolor...        
+                        Register the database with the central Heurist index database. This has several functions: it allows elements of the structure of the database to be imported into a new database promoting re-use and standarisation; it allows XML files exported from any registered database to be imported into any other database by reference to the structure of the source database.
+                        </p><p>
+                        Last but not least, it attributes a unique ID to the database and thence a unique ID (known as a 'concept code') to every record type, field, vocabulary and term which has been defined within the database. This is particularly useful in defining special behaviours which can operate across databases, in linking data across databases, and in providing a PID redirection system which can reference any element of any database.
                     </p>
                 </div>
             </div>
 
             <div style="min-height:350px">
                 <img src="context_help/assets/shortcuts-bar.png" style="float:left;width:190px;padding:0px 15px;"/>
-                <div>
+                 <div>
                     <h3>Shortcuts bar</h3>
                     <p>
-                        Ipsum dolor...        
+                        The shortcuts bar appears (optionally) below the page header bar, and can be used to provide quick access to frequently used functions. The dialogue allows addition of functions from a list of common functions, with a user-defined label and icon, and allows the bar to be displ;atyed or hidden (hidden by default for new databases). The bar can also be modified from the gearwheel icon on the left of the bar itself.
                     </p>
+                    <img src="context_help/assets/shortcuts-bar-example.png" style="float:left;width:425px;padding:0px 15px;"/>
+               
                 </div>
             </div>
 
@@ -150,7 +162,7 @@
                 <div>
                     <h3>Download > Structure (XML)</h3>
                     <p>
-                        Ipsum dolor...        
+                        The complete structure of the database is downloaded in well documented XML. Record types, fields, vocabularies and terms are identified both by theiur names and by their concept codes. It is recommended to first register the dataBVASE (Design > Setup > Register), as this means that the concept codes are universally unique and will be carried with the structural elemetns wherever the datra is imported, even if re-exported and imported futher down the chain.
                     </p>
                 </div>
             </div>
@@ -161,7 +173,7 @@
                 <div>
                     <h3>Download > Structure (Text)</h3>
                     <p>
-                        Ipsum dolor...        
+                        This is a specialised legacy format based on SQL insert statements, used for transferring structure between databases. It is unlikely to be useful beyond this application.         
                     </p>
                 </div>
             </div>
