@@ -508,8 +508,8 @@ div.recordDiv  .action-button {
     color: gray;
 }
 
-div.recordDiv > .action-button-container,
-div.recordDiv .rec_actions
+div.recordDiv > .action-button-container
+/*div.recordDiv .rec_actions*/
 {
     position: absolute;
     top: 4px;
