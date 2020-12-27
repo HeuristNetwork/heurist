@@ -18,38 +18,36 @@
         <div id="content" style="padding:10px">
 
             <p>
-                The <b>Publish</b> menu delivers easily edited CMS websites embedded directly within the database, as well as individual web pages which can be embedded in other sites. It also provides an archiving fucntion which enables the download of a complete, documented copy of the data in the database in open format, and export functions (also available directly in Explore). 
+                The <b>Populate</b> menu gets data into the database. You can enter individual records via a form, upload data files such as a CSV file from a spreadsheet or an XML file from another database, synchronise with the Zotero bibliographic system, and upload and index media such as a collection of images.
             </p>
 
-            <div style="min-height:375px">
-                <img src="context_help/assets/publish-menu.png" style="float:left;width:190px;padding:0px 25px 0 15px"/>
+            <div style="min-height:250px">
+                <img src="context_help/assets/populate-menu.png" style="float:left;width:190px;padding:0px 25px 0 15px"/>
                 <div>
-                    <h3>Publish menu</h3>
+                    <h3>Populate menu</h3>
                     <p>
-                        Functions for managing CMS websites, webpages, export and archiving.
+                        Functions for adding and importing data.
                         <ul>
-                            <li><b>Website</b></li>
+                            <li><b>Add</b></li>
                             <ul>
-                                <li><b>Create</b> - sets up a new CMS website. A database can have multiple websites for different audiences</li> 
-                                <li><b>Edit</b> - edit an existing CMS website stored in the database</li> 
-                                <li><b>View</b> - view an existing CMS website in a separate window - use to check results and to obtain the URL</li>
-                                <li><b>Standalone web page</b> - create or edit a CMS-generated web page for embedding in a third-party website</li>
-                            </ul>
-
-                            <li><b>Export</b></li>
-                            <ul>
-                                <li><b>CSV</b> – comma or tab-separated file with a selection of fields, potentially from multiple connected record types</li> 
-                                <li><b>XML</b> – comprehensively documented XML which can be imported automatically into any Heurist database</li> 
-                                <li><b>JSON</b> – a native javascript format which also be used for transferring data between databases</li> 
-                                <li><b>GeoJSON</b> – a javascript format for exporting spatial objects to GIS</li> 
-                                <li><b>KML</b> - an XML format for exporting spatial objects and attributes to GIS</li>
-                                <li><b>GEPHI</b> - exports GEFX files of node and edge data for use in GEPHI network analysis software</li>
-                            </ul>
-
-                            <li><b>Safeguard</b></li>
-                            <ul>
-                                <li><b>Archive package</b> - a fully internally documented archive package of all the data in the database</li>
+                                <li><b>New record</b> - opens a data entry form to enter data for a new record</li>
                             </ul> 
+
+                            <li><b>Upload Files</b></li>
+                            <ul>
+                                <li><b>Delimited text / CSV</b> - CSV upload wizard, splits complex CSVs into component record types</li> 
+                                <li><b>Zotero bibliography sync.</b> - synchronise records with one or more Zotero databases</li> 
+                                <li><b>Heurist XML/JSON</b> - import XML or JSON exported from another database, Heurist or other</li>
+                                <li><b>Download template (XML)</b> – get a template for formatting data for import by the above</li> 
+                                <li><b>KML</b> – import spatial data, creating a new record for each spatial object</li> 
+                            </ul>
+
+                            <li><b>Media Files</b></li>
+                            <ul> 
+                                <li><b>Upload media files</b> – uploads individual files or directories, maintaining structure</li> 
+                                <li><b>Index media files</b> – creates a Media File record from any files uploaded to the database</li> 
+                            </ul>
+
                         </ul>        
                     </p>
                 </div>
@@ -59,7 +57,7 @@
             <div style="min-height:375px">
                 <img src="context_help/assets/placeholder.png" style="float:left;width:190px;padding:0px 15px;"/>
                 <div>
-                    <h3>Create</h3>
+                    <h3>New record</h3>
                     <p>
                         ipsum dolor ...      
                     </p>
@@ -70,7 +68,7 @@
             <div style="min-height:375px">
                 <img src="context_help/assets/placeholder.png" style="float:left;width:190px;padding:0px 15px;"/>
                 <div>
-                    <h3>Edit</h3>
+                    <h3>Delimited text / CSV</h3>
                     <p>
                         ipsum dolor ... 
                     </p>
@@ -89,7 +87,7 @@
             <div style="min-height:375px">
                 <img src="context_help/assets/placeholder.png" style="float:left;width:190px;max-height:350px;padding:0px 15px;"/>
                 <div>
-                    <h3>View</h3>
+                    <h3>Zotero bibliography</h3>
                     <p>
                         ipsum dolor ...
                     </p>
@@ -99,7 +97,7 @@
             <div style="min-height:350px">
                 <img src="context_help/assets/placeholder.png" style="float:left;width:190px;padding:0px 15px;"/>
                 <div>
-                    <h3>Standalone web page</h3>
+                    <h3>Heurist XML/JSON</h3>
                     <p>
                         Ipsum dolor...        
                     </p>
@@ -109,7 +107,7 @@
             <div style="min-height:350px">
                 <img src="context_help/assets/placeholder.png" style="float:left;width:190px;padding:0px 15px;"/>
                 <div>
-                    <h3>CSV</h3>
+                    <h3>Download templates (XML)</h3>
                     <p>
                         Ipsum dolor...        
                     </p>
@@ -119,7 +117,7 @@
             <div style="min-height:350px">
                 <img src="context_help/assets/placeholder.png" style="float:left;width:190px;padding:0px 15px;"/>
                 <div>
-                    <h3>XML</h3>
+                    <h3>KML</h3>
                     <p>
                         Ipsum dolor...        
                     </p>
@@ -129,7 +127,7 @@
             <div style="min-height:350px">
                 <img src="context_help/assets/placeholder.png" style="float:left;width:190px;padding:0px 15px;"/>
                 <div>
-                    <h3>JSON</h3>
+                    <h3>Upload media files</h3>
                     <p>
                         Ipsum dolor...        
                     </p>
@@ -139,32 +137,13 @@
             <div style="min-height:350px">
                 <img src="context_help/assets/placeholder.png" style="float:left;width:190px;padding:0px 15px;"/>
                 <div>
-                    <h3>GeoJSon and KML</h3>
+                    <h3>Index media files</h3>
                     <p>
                         Ipsum dolor...        
                     </p>
                 </div>
             </div>
 
-            <div style="min-height:350px">
-                <img src="context_help/assets/placeholder.png" style="float:left;width:190px;padding:0px 15px;"/>
-                <div>
-                    <h3>GEPHI</h3>
-                    <p>
-                        Ipsum dolor...        
-                    </p>
-                </div>
-            </div>
-
-            <div style="min-height:350px">
-                <img src="context_help/assets/placeholder.png" style="float:left;width:190px;padding:0px 15px;"/>
-                <div>
-                    <h3>Archive Package</h3>
-                    <p>
-                        Ipsum dolor...        
-                    </p>
-                </div>
-            </div>
 
         </div>
     </body>
