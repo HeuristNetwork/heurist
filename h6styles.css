@@ -199,7 +199,7 @@ body.popup {
 }
 
 .ui-heurist-admin .banner,
-.ui-heurist-import .banner{
+.ui-heurist-populate .banner{
     display: none;
     visibility: hidden;
 }

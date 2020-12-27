@@ -439,37 +439,37 @@ span.fancytree-node:hover{
 }
 */
 /* SECTION SCHEME: IMPORT */
-.ui-heurist-import.ui-heurist-header, .ui-heurist-import .ui-heurist-header,
-.ui-heurist-import .ui-dialog-titlebar,
-.ui-heurist-import .ui-dialog-buttonpane
+.ui-heurist-populate.ui-heurist-header, .ui-heurist-populate .ui-heurist-header,
+.ui-heurist-populate .ui-dialog-titlebar,
+.ui-heurist-populate .ui-dialog-buttonpane
 {
     background:<?php uout('import_bg', '#307D96');?> !important;
     color: white;    
 }
-.ui-heurist-import-fade{background:<?php uout('import_fade_bg', '#e3f0f0');?> !important;}
-.ui-heurist-import .ui-heurist-title{color:<?php uout('import_title_color', '#307D96');?>}
-.ui-heurist-import .ui-widget-content,
-.ui-heurist-import .ui-selectmenu-button{
+.ui-heurist-populate-fade{background:<?php uout('import_fade_bg', '#e3f0f0');?> !important;}
+.ui-heurist-populate .ui-heurist-title{color:<?php uout('import_title_color', '#307D96');?>}
+.ui-heurist-populate .ui-widget-content,
+.ui-heurist-populate .ui-selectmenu-button{
     background:<?php uout('import_fade_bg', '#e3f0f0');?>
 }
 
 /* button within menu section */
-.ui-heurist-import .ui-heurist-btn-header1{    
+.ui-heurist-populate .ui-heurist-btn-header1{    
     background:none !important;
     border:1px solid <?php uout('import_bg', '#307D96')?> !important;
     color:<?php uout('import_bg', '#307D96')?> !important;
 }
-.ui-heurist-import .ui-button-icon-only{
+.ui-heurist-populate .ui-button-icon-only{
     background: none;
     color:<?php uout('import_bg', '#e3f0f0')?> !important;
 }
-.ui-menu6 .ui-menu6-container.ui-heurist-import, .ui-heurist-import .ui-helper-popup{
+.ui-menu6 .ui-menu6-container.ui-heurist-populate, .ui-heurist-populate .ui-helper-popup{
     border-width: 2px !important;
     border-color:<?php uout('import_bg', '#307D96');?> !important; 
 } 
-.ui-heurist-import .ui-state-active, 
-.ui-heurist-import .fancytree-active,
-.ui-heurist-import .fancytree-node:hover
+.ui-heurist-populate .ui-state-active, 
+.ui-heurist-populate .fancytree-active,
+.ui-heurist-populate .fancytree-node:hover
 {
         background:<?php uout('import_active', '#86CDE8');?> !important;
 }

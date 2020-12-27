@@ -4267,7 +4267,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         currentStep = page;
 
         if(page>1){
-            var container = $(window.hWin.document).find('.ui-menu6-container.ui-heurist-import');
+            var container = $(window.hWin.document).find('.ui-menu6-container.ui-heurist-populate');
             if(container.find('.ui-helper-popup').is(':visible')){
                 container.find('.ui-helper-popup').hide();    
                 //container.find('.ui-helper-popup-button').button({icons:{primary:"ui-icon-circle-help"}});

@@ -28,8 +28,7 @@ $.widget( "heurist.mainMenu6", {
     options: {
     },
     
-    sections: ['design','import','explore','publish','admin'],
-    //sections: ['admin','design','import','publish','explore'],
+    sections: ['design','populate','explore','publish','admin'],
     
     menues:{}, //section menu - div with menu actions
     containers:{}, //operation containers (next to section menu)
@@ -333,8 +332,6 @@ $.widget( "heurist.mainMenu6", {
             var rty_ID = prefs[0];
             //var ele = this.divMainMenu.find('.menu-explore[data-action-popup="recordAdd"]');
             
-            /*var ele = [this.menues['import'].find('li[data-action-popup="recordAdd"]'),   
-                       this.menues['explore'].find('li[data-action-popup="recordAdd"]')];*/
             var ele = this.element.find('li[data-action-popup="recordAdd"]')
             
             if(ele.length>0){
@@ -607,7 +604,7 @@ $.widget( "heurist.mainMenu6", {
             }
         }else{
             this.menues_explore_popup
-                    .removeClass('ui-heurist-import record-addition').addClass('ui-heurist-explore');
+                    .removeClass('ui-heurist-populate record-addition').addClass('ui-heurist-explore');
 
             if(action_name=='recordAddSettings'){
                 action_name = 'recordAdd';
@@ -630,7 +627,7 @@ $.widget( "heurist.mainMenu6", {
         explore_left = that.divMainMenu.width()+4; //204; this._widthMenu
         
         if(menu_item && menu_item.parents('.ui-heurist-quicklinks').length==0 && 
-                (this._active_section=='explore' || this._active_section=='import')){
+                (this._active_section=='explore' || this._active_section=='populate')){
             explore_left = 302;
         }else if(menu_item && menu_item.parents('.ui-heurist-quicklinks').length==1){
             explore_left = this._widthMenu+4;
@@ -784,7 +781,7 @@ $.widget( "heurist.mainMenu6", {
 
                 that.menues_explore_popup
                     .css({bottom:'4px',width:'300px',overflow:'hidden'})
-                    .removeClass('ui-heurist-explore').addClass('ui-heurist-import record-addition');
+                    .removeClass('ui-heurist-explore').addClass('ui-heurist-populate record-addition');
 
                 if(position){
                     expandRecordAddSetting = true;
@@ -1077,7 +1074,7 @@ $.widget( "heurist.mainMenu6", {
                     //clearTimeout(this._myTimeoutId2); this._myTimeoutId2 = 0; //prevent collapse of section menu popup
                 },
                 mouseleave: function(e){
-                    if(this._active_section=='explore' || this._active_section=='import'){
+                    if(this._active_section=='explore' || this._active_section=='populate'){
                         this._mouseout_SectionMenu(e);       
                     }else{
                         this._collapseMainMenuPanel()    
@@ -1228,12 +1225,12 @@ $.widget( "heurist.mainMenu6", {
                 if(btn.length>0) btn.click();
                 
             }});
-        }else  if (section=='import'){ //DEBUG - open record types 
+        }else  if (section=='populate'){ //DEBUG - open record types 
         
                 this._updateDefaultAddRectype();
                 
                 //special behavior for 
-                var ele = this.menues['import'].find('li[data-action-popup="recordAdd"]');
+                var ele = this.menues['populate'].find('li[data-action-popup="recordAdd"]');
                 var that = this;
                 this._on(ele,{
                      mouseenter: function(e){
@@ -1553,7 +1550,7 @@ $.widget( "heurist.mainMenu6", {
         if(!this.introductions[section]){
             
             var sname;
-            if(section=='import'){
+            if(section=='populate'){
                 sname = 'Populate';
             }else{
                 sname = section[0].toUpperCase()+section.substr(1);

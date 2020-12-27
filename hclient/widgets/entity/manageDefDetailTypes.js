@@ -490,7 +490,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                 this._on($dlg.find('a[data-rty_ID]'),{click:function(e){
                     //edit structure
                     window.hWin.HEURIST4.ui.openRecordEdit(-1, null, 
-                        {new_record_params:{RecTypeID: $(e.target).attr('data-dty_ID')}, edit_structure:true});
+                        {new_record_params:{RecTypeID: $(e.target).attr('data-rty_ID')}, edit_structure:true});
                     
                     return false;                    
                 }});

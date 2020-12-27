@@ -83,7 +83,7 @@ $s_max_size = round($max_size/1024/1024).' MBytes';
     </head>
 
 
-    <body class="popup ui-heurist-import" style="margin:0 !important; color:black;">
+    <body class="popup ui-heurist-populate" style="margin:0 !important; color:black;">
 
         <div class="banner">
             <h2>Import XML or JSON</h2>

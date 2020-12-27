@@ -86,7 +86,7 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
     </head>
 
 
-    <body class="popup ui-heurist-import" style="margin:0 !important; color:black;"">
+    <body class="popup ui-heurist-populate" style="margin:0 !important; color:black;"">
 
         <div class="banner">
             <h2>FILE MANAGEMENT</h2>
