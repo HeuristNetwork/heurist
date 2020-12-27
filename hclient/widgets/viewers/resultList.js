@@ -25,7 +25,7 @@ $.widget( "heurist.resultList", {
     // default options
     options: {
         is_h6style: false,
-        view_mode: null, // list|icons|thumbs|preview(thumbs3)|horizontal
+        view_mode: null, // 'list','icons','thumbs','thumbs3','horizontal','icons_list','icons_expanded' 
         list_mode_is_table: false,
 
         select_mode:null,//none, manager, select_single, select_multi
@@ -580,7 +580,7 @@ $.widget( "heurist.resultList", {
         .css({'float':'right','padding':'2px '+right_padding+'px'})
         .html('<button value="list" class="btnset_radio"/>'
             +'<button value="icons" class="btnset_radio"/>'
-            +'<button value="icons_expanded" class="btnset_radio"/>'
+            +(this.options.entityName=='records'?'<button value="icons_expanded" class="btnset_radio"/>':'')
             +'<button value="thumbs" class="btnset_radio"/>'
             +'<button value="thumbs3" class="btnset_radio"/>'
         )
@@ -964,7 +964,9 @@ $.widget( "heurist.resultList", {
         if(window.hWin.HEURIST4.util.isempty(newmode) || allowed.indexOf(newmode)<0) {
             newmode = window.hWin.HAPI4.get_prefs('rec_list_viewmode_'+this.options.entityName);
         }
-        if(window.hWin.HEURIST4.util.isempty(newmode)){
+
+        if(window.hWin.HEURIST4.util.isempty(newmode) 
+            || (newmode=='icons_expanded' && this.options.entityName!='records')){
             newmode = 'list'; //default
         }
         if(newmode=='icons_expanded') {
