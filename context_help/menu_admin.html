@@ -21,14 +21,15 @@
                 The <b>Admin</b> menu provides methods for creating, opening and deleting databases, managing users and worgroups, and utilities for verifying and correcting databases. A passworded section allows the manager of a Heurist server to carry out verification operations across all databases on the server.
             </p>
 
-            <div style="min-height:375px">
+            <div style="min-height:575px">
                 <img src="context_help/assets/admin-menu.png" style="float:left;width:190px;padding:0px 25px 0 15px"/>
-                <div>
+                <div style="display: inline-block;">
                     <h3>Admin menu</h3>
                     <p>
                         Functions for managing CMS websites, webpages, export and archiving.
+                    </p>
                         <ul>
-                            <li><b>Database</b></li>
+                            <li><b>Database</b>
                             <ul>
                                 <li><b>Open</b> - browse databases on the server and select a database to open</li> 
                                 <li><b>New</b> - create a new database with a default set of useful structure and optional test data</li> 
@@ -36,28 +37,28 @@
                                 <li><b>Delete database</b> - delete the entire database</li>
                                 <li><b>Delete content</b> - delete all data records in the database but leave the users, workgroups and structure intact</li>
                             </ul>
-
-                            <li><b>Manage Users</b></li>
+                            </li>
+                            <li><b>Manage Users</b>
                             <ul>
                                 <li><b>Workgroups</b> – create and edit workgroups, add users to workgroups and assign roles</li> 
                                 <li><b>Users</b> – create new users and edit existing user information</li> 
                                 <li><b>Import user</b> – import user credentials from another database on the same server</li> 
                             </ul>
-
-                            <li><b>Utilities</b></li>
+                            </li>
+                            <li><b>Utilities</b>
                             <ul>
                                 <li><b>Verify integrity</b> - run a range of checks, report errors and allow ficing of errors</li>
                                 <li><b>Manage files</b> – view and edit metadata and delete files (images, documents etc.) uploaded to the database</li> 
                                 <li><b>Rebuild record titles</b> - rebuild the constructed titles used to represent records in lists of results</li>
                                 <li><b>Find duplicate records</b> - find records with similar constructed titles and allow merging as required</li>
                             </ul> 
-
-                            <li><b>Server manager</b></li>
+                            </li>
+                            <li><b>Server manager</b>
                             <ul>
                                 <li><b>Manage databases</b> - functions to help the system adminstrator manage databases on the server. Requires special password.</li>
                             </ul> 
+                            </li>
                         </ul>        
-                    </p>
                 </div>
             </div>
 
@@ -82,9 +83,11 @@
                     <h3>New</h3>
                     <p>
                         Creates a new database, owned by you, populating it with a set of frequently used and key record types, fields and vocabularies. Some record types and fields are protected against deletion as they are required by the system eg. for mapping or bibliography synchronisation, but msot mayu be freely modified or deleted. 
-                    </p><p>
+                    </p>
+                    <p>
                         It is important to choose a short but informative name, since there may be thousands of databases on the server. Avoid using "test" in your database name, the word adds nothing, your database is a test until it is not a test ...  
-                    </p><p>
+                    </p>
+                    <p>
                         You will be able to define who, apart from yourself, has access to the database.
                     </p>
                 </div>
