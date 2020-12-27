@@ -112,6 +112,12 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                     }
                 });
                 
+            window.hWin.HAPI4.addEventListener(this, window.hWin.HAPI4.Event.ON_REC_UPDATE,
+                function(data) { 
+                    $Db.get_record_counts(function(){
+                        that._loadData();
+                    });                                
+                });
                 
             if(this.options.isFrontUI && this.options.select_mode!='select_multi'){ //adjust table widths
 
@@ -145,6 +151,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         
        window.hWin.HAPI4.removeEventListener(this, window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE);        
        window.hWin.HAPI4.removeEventListener(this, window.hWin.HAPI4.Event.ON_WINDOW_RESIZE);        
+       window.hWin.HAPI4.removeEventListener(this, window.hWin.HAPI4.Event.ON_REC_UPDATE);        
         
        this._super(); 
     },
@@ -369,6 +376,13 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                 }
             }
             else{
+
+                if( is_first && $Db.needUpdateRtyCount>0 ){
+                    $Db.get_record_counts(function(){
+                        that._loadData(true);
+                    });                                
+                    return;
+                }
                 
                 //usual via entity
                 //shorter
@@ -888,8 +902,19 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                 var that = this;
  
                 if(action=='addrec'){
+                    
                     var new_record_params = {RecTypeID: recID};
-                    window.hWin.HEURIST4.ui.openRecordEdit(-1, null, {new_record_params:new_record_params});
+                    window.hWin.HEURIST4.ui.openRecordEdit(-1, null, 
+                        {new_record_params:new_record_params,
+                        onClose:function(){
+                            /*   
+                            if($Db && $Db.needUpdateRtyCount){
+                                $Db.get_record_counts(function(){
+                                    that._triggerRefresh('rty');
+                                });                                
+                            }
+                            */
+                        }});
                     
                 }else if(action=='filter'){
                     

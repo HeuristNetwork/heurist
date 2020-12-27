@@ -201,10 +201,16 @@ console.log(data);
             
         // Refreshing
         this.element.on("myOnShowEvent", function(event){
-            if( $Db.needUpdateRtyCount ){
-                $Db.needUpdateRtyCount = false;
-                that._recreateRectypeSelectors2();
+            if( $Db.needUpdateRtyCount==0 ){
+                $Db.needUpdateRtyCount = -1;    
+                that._recreateRectypeSelectors();
+            }else if( $Db.needUpdateRtyCount>0 ){
+                $Db.needUpdateRtyCount = -1;    
+                $Db.get_record_counts(function(){
+                    that._recreateRectypeSelectors();
+                });
             }
+            
         });
             
         //this.div_search.find('.div-table-cell').css('vertical-align','top');
@@ -454,43 +460,6 @@ console.log(data);
         
     },      
         
-    //with counts
-    _recreateRectypeSelectors2: function(){
-    
-        var that = this;
-        
-        var request = {
-                'a'       : 'counts',
-                'entity'  : 'defRecTypes',
-                'mode'    : 'record_count',
-                //'rty_ID'  :
-                'ugr_ID'  : window.hWin.HAPI4.user_id()
-                };
-                             
-        window.hWin.HAPI4.EntityMgr.doRequest(request, 
-            function(response){
-
-                if(response.status == window.hWin.ResponseStatus.OK){
-                    
-                    $Db.rty().each(function(rty_ID,rec){
-                        var cnt = response.data[rty_ID]
-                        if(!(cnt>0)) cnt = 0;
-                        $Db.rty(rty_ID, 'rty_RecCount', cnt);
-                    });
-                    /*
-                    $.each( response.data, function(rty_ID,cnt){
-                        $Db.rty(rty_ID, 'rty_RecCount', cnt);    
-                    })
-                    */
-                    
-                    that._recreateRectypeSelectors();
-        
-                }else{
-                    window.hWin.HEURIST4.msg.showMsgErr(response);
-                }
-        });
-    },
-
     //
     // opens selector on correct position
     //

@@ -69,7 +69,7 @@ window.hWin.HEURIST4.dbs = {
     
     baseFieldType: {},
     
-    needUpdateRtyCount: false,
+    needUpdateRtyCount: -1,
 
     //
     // return vocabulary for given term - real vocabulary (not by reference)
@@ -1518,8 +1518,45 @@ window.hWin.HEURIST4.dbs = {
         }else{
             if($.isFunction(callback)) callback.call();
         }
-    }
+    },
     
+    //
+    // returns record count by types
+    //
+    get_record_counts: function( callback )
+    {
+    
+        $Db.needUpdateRtyCount = 0; 
+        
+        var request = {
+                'a'       : 'counts',
+                'entity'  : 'defRecTypes',
+                'mode'    : 'record_count',
+                //'rty_ID'  :
+                'ugr_ID'  : window.hWin.HAPI4.user_id()
+                };
+                             
+        window.hWin.HAPI4.EntityMgr.doRequest(request, 
+            function(response){
+
+                if(response.status == window.hWin.ResponseStatus.OK){
+                    
+                    $Db.rty().each(function(rty_ID,rec){
+                        var cnt = response.data[rty_ID]
+                        if(!(cnt>0)) cnt = 0;
+                        $Db.rty(rty_ID, 'rty_RecCount', cnt);
+                    });
+                    
+                    if($.isFunction(callback)){
+                        callback.call();
+                    }
+        
+                }else{
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                }
+        });
+        
+    }
 
 }//end dbs
 
