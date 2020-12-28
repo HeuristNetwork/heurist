@@ -502,7 +502,7 @@ div.recordDiv.public  > .action-button-container{
     vertical-align:middle;
 }
 
-div.recordDiv  .action-button {
+div.recordDiv .action-button {
     height: 16px;
     width: 16px;
     color: gray;
@@ -584,9 +584,12 @@ div.recordDiv > .rec_action_link2{
     right:2;
     top:6;
 }
+
+/*
 div.expanded.recordDiv > .rec_action_link2{
     display: none;   
 }
+*/
 .rec_action_link2 > .rec_actions_button{
     padding: 5px 2px;
 }
@@ -852,6 +855,47 @@ div.div-result-list-content.icons_list{
     width:144px;   -2px */
     margin:4px;
 }
+.icons div.recordDiv.expanded{
+    height:auto;
+    border:none;
+    box-shadow:none;
+    background:none;
+}
+.icons div.recordDiv.expanded:hover{
+    z-index:10;
+    -moz-box-shadow:none;
+    -webkit-box-shadow:none;
+    box-shadow:none;
+    height:auto;
+    margin: 6px;
+}
+
+.icons div.recordDiv.expanded .action-button-container{
+    left:2px;
+    width:60px;
+}
+.icons div.recordDiv.expanded .action-button{
+    width: 58px;
+    padding: 0;
+    margin: 2px;
+}
+.icons div.recordDiv.expanded .action-button .ui-button-text{
+    position: absolute;
+    left:2px;
+    right:18px;
+    top: 3px;
+    display:block;
+}
+.icons div.recordDiv.expanded .action-button .ui-button-icon-primary{
+    top: 3px;
+    right:2px;   
+    position: absolute;
+}
+
+.icons div.recordDiv.expanded .recTypeThumb {
+    display: none;
+}
+
 
 .icons .recordDiv .recTypeThumb {
     /*

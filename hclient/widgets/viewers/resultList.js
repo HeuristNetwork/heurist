@@ -25,7 +25,7 @@ $.widget( "heurist.resultList", {
     // default options
     options: {
         is_h6style: false,
-        view_mode: null, // 'list','icons','thumbs','thumbs3','horizontal','icons_list','icons_expanded' 
+        view_mode: null, // 'list','icons','thumbs','thumbs3','horizontal','icons_list','record_content' 
         list_mode_is_table: false,
 
         select_mode:null,//none, manager, select_single, select_multi
@@ -580,18 +580,27 @@ $.widget( "heurist.resultList", {
         .css({'float':'right','padding':'2px '+right_padding+'px'})
         .html('<button value="list" class="btnset_radio"/>'
             +'<button value="icons" class="btnset_radio"/>'
-            +(this.options.entityName=='records'?'<button value="icons_expanded" class="btnset_radio"/>':'')
+            +(this.options.entityName=='records'?'<button value="record_content" class="btnset_radio"/>':'')
             +'<button value="thumbs" class="btnset_radio"/>'
             +'<button value="thumbs3" class="btnset_radio"/>'
         )
         .appendTo( this.div_toolbar );
         
-        this.view_mode_selector.find('button[value="list"]').button({icon: "ui-icon-menu", showLabel:false, label:window.hWin.HR('list')}).css('font-size','1em');
-        this.view_mode_selector.find('button[value="icons"]').button({icon: "ui-icon-list", showLabel:false, label:window.hWin.HR('icons')}).css('font-size','1em'); //ui-icon-view-icons-b
-        this.view_mode_selector.find('button[value="icons_expanded"]').button({icon: "ui-icon-template", showLabel:false, label:window.hWin.HR('icons exanaded')}).css('font-size','1em'); //ui-icon-newspaper
-        
-        this.view_mode_selector.find('button[value="thumbs"]').button({icon: "ui-icon-view-icons", showLabel:false, label:window.hWin.HR('thumbs')}).css('font-size','1em');
-        this.view_mode_selector.find('button[value="thumbs3"]').button({icon: "ui-icon-stop", showLabel:false, label:window.hWin.HR('thumbs3')}).css('font-size','1em');
+        this.view_mode_selector.find('button[value="list"]')
+            .button({icon: "ui-icon-menu", showLabel:false, label:window.hWin.HR('Single lines')})
+            .css('font-size','1em');
+        this.view_mode_selector.find('button[value="icons"]')
+            .button({icon: "ui-icon-list", showLabel:false, label:window.hWin.HR('Single lines with icon')})
+            .css('font-size','1em'); //ui-icon-view-icons-b
+        this.view_mode_selector.find('button[value="record_content"]')
+            .button({icon: "ui-icon-template", showLabel:false, label:window.hWin.HR('Record contents')})
+            .css('font-size','1em'); //ui-icon-newspaper
+        this.view_mode_selector.find('button[value="thumbs"]')
+            .button({icon: "ui-icon-view-icons", showLabel:false, label:window.hWin.HR('Small images')})
+            .css('font-size','1em');
+        this.view_mode_selector.find('button[value="thumbs3"]')
+            .button({icon: "ui-icon-stop", showLabel:false, label:window.hWin.HR('Large image')})
+            .css('font-size','1em');
         this.view_mode_selector.controlgroup();
         
         this._on( this.view_mode_selector.find('button'), {
@@ -959,17 +968,19 @@ $.widget( "heurist.resultList", {
     applyViewMode: function(newmode, forceapply){
 
         
-        var allowed = ['list','icons','thumbs','thumbs3','horizontal','icons_list','icons_expanded'];
+        var allowed = ['list','icons','thumbs','thumbs3','horizontal','icons_list','record_content'];
+        
+        if(newmode=='icons_expanded') newmode=='record_content'; //backward capability 
 
         if(window.hWin.HEURIST4.util.isempty(newmode) || allowed.indexOf(newmode)<0) {
             newmode = window.hWin.HAPI4.get_prefs('rec_list_viewmode_'+this.options.entityName);
         }
 
         if(window.hWin.HEURIST4.util.isempty(newmode) 
-            || (newmode=='icons_expanded' && this.options.entityName!='records')){
+            || (newmode=='record_content' && this.options.entityName!='records')){
             newmode = 'list'; //default
         }
-        if(newmode=='icons_expanded') {
+        if(newmode=='record_content') {
             newmode = 'icons';    
             this._expandAllDivs = true;
             forceapply = true;
@@ -1073,7 +1084,7 @@ $.widget( "heurist.resultList", {
                 //.removeClass(this.options.is_h6style?'':'ui-heurist-btn-header1')
                 .removeClass('ui-heurist-btn-header1')
                 .css({'border':'none'});
-            if(this._expandAllDivs) newmode='icons_expanded';
+            if(this._expandAllDivs) newmode='record_content';
           
                
             var btn =   this.view_mode_selector.find('button[value="'+newmode+'"]');
@@ -1518,13 +1529,14 @@ $.widget( "heurist.resultList", {
         + 'class="rec_edit_link action-button logged-in-only ui-button ui-widget ui-state-default ui-corner-all'+btn_icon_only+'" '
         + 'role="button" aria-disabled="false" data-key="edit">'
         + '<span class="ui-button-text">Edit</span>'
-        + '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"/>'
+        + '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span>'
         + '</div>'
 
         + '<div title="Click to edit record (opens in new tab)" '
         + ' class="rec_edit_link_ext action-button logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only"'
         + ' role="button" aria-disabled="false" data-key="edit_ext">'
-        + '<span class="ui-button-icon-primary ui-icon ui-icon-newwin"/><span class="ui-button-text"/>'
+        + '<span class="ui-button-text">New tab</span>'
+        + '<span class="ui-button-icon-primary ui-icon ui-icon-newwin"/>'
         + '</div>'  // Replace ui-icon-pencil with ui-icon-extlink and swap position when this is finished 
         
         /* Ian removed 5/2/2020. TODO: Need to replace with Select, Preview and Download buttons */
@@ -1741,10 +1753,17 @@ $.widget( "heurist.resultList", {
             rdiv2.css({'height':'','width':''}).insertBefore(tmp_parent);
             tmp_parent.remove();
             */
+            var rdivs = this.div_content.find('.recordDiv');
             if(this.options.view_mode=='thumbs'){
-                this.div_content.find('.recordDiv').css({height:'154px', width:'128px'});
+                rdivs.css({height:'154px', width:'128px'});
             }
-            this.div_content.find('.recordDiv').removeClass('expanded');
+            rdivs.removeClass('expanded').show();
+                                        
+
+            $.each(rdivs, function(i,rdiv){ 
+                $(rdiv).children().not('.recTypeThumb').show();
+                $(rdiv).find('.action-button').addClass('ui-button-icon-only');
+            });
             
             this.div_content.scrollTop(spos);
         }
@@ -2111,7 +2130,19 @@ $.widget( "heurist.resultList", {
                                  //'width':'97%',
                                   padding:'5px',
                                  'border-radius': '3px 3px 3px 3px',
-                                 'border':'2px solid #62A7F8'}).insertAfter($rdiv);
+                                 'border':'2px solid #62A7F8'});
+                                 
+                        if(this.options.view_mode=='icons' && this._expandAllDivs){
+
+                            $rdiv.addClass('expanded');
+                            $rdiv.children().not('.recTypeThumb').hide();
+                            $rdiv.find('.action-button-container').show()
+                            $rdiv.find('.action-button').removeClass('ui-button-icon-only');
+                            ele.css({'margin':'0px 0px 0px 80px'}).appendTo($rdiv);
+                        }else{
+                            ele.insertAfter($rdiv);
+                        }
+                                 
                     }
                         
                     
