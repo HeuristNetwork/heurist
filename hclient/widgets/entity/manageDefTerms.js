@@ -1030,8 +1030,9 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                                 var is_vocab = !($Db.trm(recID, 'trm_ParentTermID')>0);
                                 
                                 
-var sMsg = '<p>'+(res.children==0?'Term':('Terms in '+is_vocab?'Vocabulary':'Branch')) + ' <b>'+$Db.trm(recID, 'trm_Label') 
-+ '</b> ' + (res.children==0?'is':'are') +  ' in use by '+res.reccount+' record'+(res.reccount>1?(s):'')+' in the database.</p>'
+var sMsg = '<p>'+(res.children==0?'Term':('Terms in '+is_vocab?'Vocabulary':'Branch')) 
+    + ' <b>'+$Db.trm(recID, 'trm_Label') + '</b> ' 
+    + (res.children==0?'is':'are') +  ' in use by '+res.reccount+' record'+(res.reccount>1?'s':'')+' in the database.</p>'
 
 +'<p>Before you can delete the '
 +(res.children==0?'term':(is_vocab?'vocabulary':'branch')+' and its child terms')
