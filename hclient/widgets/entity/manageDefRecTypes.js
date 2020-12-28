@@ -114,6 +114,10 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                 
             window.hWin.HAPI4.addEventListener(this, window.hWin.HAPI4.Event.ON_REC_UPDATE,
                 function(data) { 
+
+                    //console.log('ON_REC_UPDATE '+that.element.is(':visible'));                    
+                    
+                    if(that.element.is(':visible'))
                     $Db.get_record_counts(function(){
                         that._loadData();
                     });                                
@@ -376,7 +380,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                 }
             }
             else{
-
+//console.log('_loadData '+$Db.needUpdateRtyCount);
                 if( is_first && $Db.needUpdateRtyCount>0 ){
                     $Db.get_record_counts(function(){
                         that._loadData(true);
