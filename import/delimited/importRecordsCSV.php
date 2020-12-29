@@ -142,35 +142,36 @@ if(!$format) $format='csv';
     </div>
 -->    
         
-        <h2 class="ui-heurist-title" style="display:inline-block;padding:5px;width:250px;text-align:right;" id="lblUploadFile">
+        <h2 class="ui-heurist-title" style="display:inline-block;padding:5px;width:120px;text-align:right;" id="lblUploadFile">
             Upload new file (CSV/TSV)
         </h2>
             <input type="file" id="uploadFile" style="display:none">
-            <div id="btnUploadFile" title="Browse for CSV/TSV file that contains your data to be imported into Heurist database">
+            <div id="btnUploadFile" style="vertical-align:10;"
+                title="Browse for CSV/TSV file that contains your data to be imported into Heurist database">
                 Upload File</div>
             <br>
-            <span class="heurist-helper2 format-csv" style="padding-left:263px">
+            <span class="heurist-helper2 format-csv" style="padding-left:134px">
                The first line must have field names with correct number of fields.
             </span><br>
-            <span class="heurist-helper2 format-csv" style="padding-left:263px">Maximum size <?php echo $s_max_size?> - contact Heurist team if you need </span><br>
-            <span class="heurist-helper2 format-csv" style="padding-left:263px">to upload a larger file</span>
+            <span class="heurist-helper2 format-csv" style="padding-left:134px">Maximum size <?php echo $s_max_size?> - contact Heurist team if you need </span><br>
+            <span class="heurist-helper2 format-csv" style="padding-left:134px">to upload a larger file</span>
 
         <h2 style="padding:10 0 10 120">OR</h2>
         
-        <h2 class="ui-heurist-title" style="display:inline-block;padding:5px;width:250px;text-align:right;">
+        <h2 class="ui-heurist-title" style="display:inline-block;padding:5px;width:120px;text-align:right;">
             Select previously uploaded file
         </h2>
-            <select id="selImportId" class="text ui-widget-content ui-corner-all" style="width:auto"></select>
-            <br><span style="padding-left:256px;line-height:21px">
+            <select id="selImportId" class="text ui-widget-content ui-corner-all" style="vertical-align:10;width:auto"></select>
+            <br><span style="padding-left:134px;line-height:21px">
             <a href="#" id="btnClearAllSessions"
                 title="All uploaded files will be removed from the sytem. Start this action if you sure that you do not need any import data anymore"
                             style="margin-left: 10px;">Clear all files</a>        
             </span>
         <h2 style="padding:10 0 10 120"  class="format-csv">OR</h2>
-        <h2 class="ui-heurist-title format-csv" style="display:inline-block;padding:5px;width:250px;text-align:right;">
+        <h2 class="ui-heurist-title format-csv" style="display:inline-block;padding:5px;width:120px;text-align:right;">
             Paste delimited data below
         </h2>
-        <div id="btnUploadData"  class="format-csv"
+        <div id="btnUploadData"   style="vertical-align:10;" class="format-csv"
             title="Upload content of text area below to server side and use it as source for CSV/TSV import operation">Upload Data</div>
         <br><br>
         <textarea id="sourceContent" style="min-height:300px;width:90%;resize:none;" class="format-csv"></textarea>

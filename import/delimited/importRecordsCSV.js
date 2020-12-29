@@ -246,8 +246,9 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                                 _loadSession();    
                            }
                         });
+                        $('#selImportId-button').css('vertical-align',4); 
                     });
-                        
+                
         
                         
         //init STEP 3 - matching and import
@@ -4273,7 +4274,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 //container.find('.ui-helper-popup-button').button({icons:{primary:"ui-icon-circle-help"}});
                 container.find('.ui-helper-popup-button').find('.ui-button-icon')
                     .removeClass('ui-icon-carat-2-e').addClass('ui-icon-circle-help');
-                container.find('.ent_content_full').css({right:1});
+                container.find('.ent_content_full').css({right:1,width:'auto'});
             }
         }
         

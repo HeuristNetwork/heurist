@@ -1127,7 +1127,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                 var size_type = item.attr('data-size');
                 var dlg_title = item.attr('data-header');
                 if(!dlg_title) dlg_title = item.text();
-                var dlg_help = item.attr('data-help');
+                var dlg_help = item.attr('data-help'); //name of context file from context_help folder
 
                 var size_w = item.attr('data-dialog-width');
                 var size_h = item.attr('data-dialog-height');

@@ -1412,7 +1412,7 @@ window.hWin.HEURIST4.ui = {
         var oEffect = {effect:'slide',direction:'right',duration:500};
         
         function __closeHelpDiv($helper_div){
-            oEffect.complete =  function(){ options.container.children('.ent_content_full').css({right:1}); };
+            oEffect.complete =  function(){ options.container.children('.ent_content_full').css({right:1, width:'auto'}); };
             $helper_div.hide(oEffect);
             $help_button.button({icons:{primary:"ui-icon-circle-help"}});
         }
@@ -1435,6 +1435,7 @@ window.hWin.HEURIST4.ui = {
                                             hide: oEffect
                                          });                 
                             }else{
+                                $helper_div.css('width','30%');
                                 /*
                                 _innerTitle = $('<div>').addClass('ui-heurist-header').appendTo($helper_div);  
                                 
@@ -1538,7 +1539,7 @@ window.hWin.HEURIST4.ui = {
                                         
                                         //_innerTitle.find('span').text( options.title );
                                         $helper_div.show( 'slide', {direction:'right'}, 500 );                        
-                                        options.container.children('.ent_content_full').css({right:424});
+                                        options.container.children('.ent_content_full').css({width:'70%'}); //right:424
                                     
                                         setTimeout(function(){
                                                 $helper_div.find('#content').scrollTop(1);
