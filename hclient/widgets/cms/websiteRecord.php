@@ -1012,7 +1012,7 @@ if ($page_template!=null && substr($page_template,-4,4)=='.tpl') {
     
     if(!$edit_Available && $system->is_member(2)){
         print '<a href="'.HEURIST_BASE_URL.'?db='.$system->dbname().'&cms='.$rec_id.'" id="btn_editor" target="_blank" '
-        .'style="position:absolute;right:10px; top:5px;" class="cms-button">Edit website</a>';
+        .'style="position:absolute;right:10px; top:5px;" class="cms-button">Heurist interface</a>';
     }
     ?>  
         <div id="main-pagetitle" class="ui-heurist-bg-light" style="display:none">loading...</div>       
