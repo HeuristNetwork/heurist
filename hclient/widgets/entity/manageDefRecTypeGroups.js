@@ -216,6 +216,12 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
                 this._selectAndClose();
         }else{
                 this._super( recID, fieldvalues );
+                if(this.it_was_insert){
+                    this._onActionListener(null, 'save-order');
+                    
+                    this.selectRecordInRecordset(); //select first
+                }
+                
         }
     
         this._triggerRefresh('rtg');    
@@ -227,7 +233,9 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
     //
     _afterDeleteEvenHandler: function( recID ){
         this._super( recID );
-        this._triggerRefresh('rtg');    
+        this._triggerRefresh('rtg');   
+        //select first
+        this.selectRecordInRecordset();
     },
     
     //

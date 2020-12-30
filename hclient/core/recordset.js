@@ -1495,6 +1495,8 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                             || dataTypes[fieldName]=='integer'
                             || dataTypes[fieldName]=='enum')
                         {
+                            request[fieldName] = String(request[fieldName]);
+                            
                             request[fieldName] = request[fieldName].toLowerCase();
                             
                             if(request[fieldName].substring(0,2)=='!='){
@@ -1940,7 +1942,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
         //
         // add/replace record with given ID
         //    
-        addRecord:function(recID, record){
+        addRecord:function(recID, record, add_to_begin){
             var idx = window.hWin.HEURIST4.util.findArrayIndex(recID, order);
             if(idx<0){ //add new
                 
@@ -1950,7 +1952,12 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                 }else{
                     records[recID] = {};
                 }
-                order.push(recID);
+                if(add_to_begin===true){
+                    order.unshift(recID);
+                }else{
+                    order.push(recID);    
+                }
+                
                 total_count = total_count+1;
             }
             return this.setRecord(recID, record);

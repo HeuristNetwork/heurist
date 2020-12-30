@@ -709,9 +709,8 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                         };
                         $dlg.dialog(opts);
                         
-                        if(options.is_h6style){
-                                $dlg.addClass('ui-heurist-bg-light');
-                                $dlg.parent().addClass('ui-dialog-heurist ui-heurist-explore');
+                        if(options.is_h6style)
+                        {
                                 if(options.container){
 
                                     $dlg.dialog( 'option', 'position', 
@@ -745,6 +744,20 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                                     }
                                 }
                         }
+                        
+                        //$dlg.addClass('ui-heurist-bg-light');
+                        //$dlg.parent().addClass('ui-dialog-heurist ui-heurist-explore');
+                        
+                        if($dlg.attr('data-palette'))
+                            $dlg.parent().removeClass($dlg.attr('data-palette'));
+                        if(options.default_palette_class){
+                            $dlg.attr('data-palette', options.default_palette_class);
+                            $dlg.parent().addClass(options.default_palette_class);
+                        }else{
+                            $dlg.attr('data-palette', null);
+                        }
+                        
+                        
                         
                         
                         if(options.noClose){
@@ -1177,7 +1190,6 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
         
         if($dlg.attr('data-palette'))
             $dlg.parent().removeClass($dlg.attr('data-palette'));
-        
         if(ext_options.default_palette_class){
             $dlg.attr('data-palette', ext_options.default_palette_class);
             $dlg.parent().addClass(ext_options.default_palette_class);

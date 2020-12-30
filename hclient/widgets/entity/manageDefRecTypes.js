@@ -267,20 +267,22 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                      onSelect:function(res){
 
                          if(window.hWin.HEURIST4.util.isRecordSet(res)){
-                             
-                            if(!that.getRecordSet()){
-                                that._loadData( true );
-                            }
-                             
+
                             res = res.getIds();                     
                             if(res && res.length>0){
                                 that.options.rtg_ID = res[0];
-                                that.searchForm.searchDefRecTypes('option','rtg_ID', res[0])
-                            }else{
-                                //that.options.rtg_ID = -1;
+                                that.searchForm.searchDefRecTypes('option','rtg_ID', that.options.rtg_ID);
                             }
+                             
+                            if(!that.getRecordSet()){
+                                that._loadData( true ); //not yet loaded
+                            }
+                            
+                            
+                            
                          }
-                     }
+                     },
+                     add_to_begin: true
                 };
                 window.hWin.HEURIST4.ui.showEntityDialog('defRecTypeGroups', rg_options);
             }else{
@@ -388,13 +390,17 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                     });                                
                     return;
                 }
-                
+
                 //usual via entity
                 //shorter
                 this.updateRecordList(null, {recordset:$Db.rty()});
-                if(is_first!==true && this.searchForm.searchDefRecTypes('instance')){
+                if(this.searchForm.searchDefRecTypes('instance')){ //is_first!==true && 
+
+                    this.searchForm.searchDefRecTypes('option','rtg_ID', this.options.rtg_ID);                    
                     this.searchForm.searchDefRecTypes('startSearch');    
                 }
+                                
+
                 
                 /*
                 //longer but safer - since it reloads data if it is missed locally
@@ -1024,16 +1030,9 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             
             this.updateGroupCount(this.deleted_from_group_ID, -1);
             
-            //backward capability - remove later        
-            /*
-            var rectypes = window.hWin.HEURIST4.rectypes;   //REMARKED
-            if(recID>0 && rectypes.typedefs[recID]){
-                    delete rectypes.names[recID];
-                    delete rectypes.pluralNames[recID];
-                    delete rectypes.typedefs[recID];
-            }
-            */
-           
+            //select first
+            this.selectRecordInRecordset();
+            
     },
     
     //-----
@@ -1118,7 +1117,8 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                                 that._editing.setModified(true); //restore flag after autosave
                                 that.onEditFormChange();
                             }
-                        }
+                        },
+                        default_palette_class: this.options.default_palette_class
                     });
 
                 }} );
@@ -1258,10 +1258,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                 //{fields:{}, order:[recID], records:[fieldvalues]});
                 this._selection.addRecord(recID, fieldvalues);
                 this._selectAndClose();
-                
-                
                 return;    
-                    
         }
         
         $Db.rty().setRecord(recID, fieldvalues);
@@ -1321,7 +1318,8 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                     },
                     callback:function(context){
                         that._selected_fields = context;
-                    } 
+                    },
+                    default_palette_class: this.options.default_palette_class 
             });
             
         }else{
@@ -1345,7 +1343,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
     //
     //
     updateGroupCount:function(rtg_ID,  delta){
-    
+    /*
         if(rtg_ID>0){
             var cnt = parseInt($Db.rtg(rtg_ID,'rtg_RtCount'));
             var cnt = (isNaN(cnt)?0:cnt)+delta;
@@ -1353,6 +1351,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             $Db.rtg(rtg_ID,'rtg_RtCount',cnt);
             this._triggerRefresh('rtg');
         }
+    */
     },    
     
     //

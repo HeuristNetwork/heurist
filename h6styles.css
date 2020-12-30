@@ -23,6 +23,7 @@ body {
 }
 body.popup {
     font-size: 13px;
+    background: none;
 }
 
 .logo {

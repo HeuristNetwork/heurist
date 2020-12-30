@@ -128,6 +128,8 @@ $.widget( "heurist.manageEntity", {
         no_bottom_button_bar: false,
         btn_array: null,   //bottom bar buttons
         
+        add_to_begin: false,
+        
         default_palette_class: null
     },
     
@@ -1266,7 +1268,8 @@ $.widget( "heurist.manageEntity", {
         }else{
             recset = this.getRecordSet();
         }
-        
+    
+        //select first    
         if(!rec_ID && recset && recset.length()>0){
             rec_ID = recset.getOrder()[0];
         }
@@ -1480,7 +1483,8 @@ this._time_debug = fin_time;
                             
                             //update record in cache
                             if(that.options.use_cache && that._cachedRecordset){
-                                that._cachedRecordset.addRecord(recID, fields); //add or update record in cache
+                                //add or update record in cache
+                                that._cachedRecordset.addRecord(recID, fields, that.options.add_to_begin); 
                             }else{
                                 //add/update record in recordset in _afterSaveEventHandler depends on entity
                             }
