@@ -29,6 +29,8 @@ $.widget( "heurist.manageUsrBookmarks", $.heurist.manageEntity, {
     
     _init: function() {
         
+        this.options.default_palette_class = 'ui-heurist-admin';
+        
         this.options.edit_mode = 'editonly';
         this.options.select_mode = 'manager';
         this.options.layout_mode = 'editonly';

@@ -55,6 +55,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
     _init: function() {
         
 //this._time_debug = new Date().getTime() / 1000;
+        this.options.default_palette_class = 'ui-heurist-design';
         
         this.options.innerTitle = false;
         
@@ -868,7 +869,8 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                 '<p>Record type <b>'+$Db.rty(action.recID,'rty_Name')+'</b> is referenced by the following fields:</p>'
                 + sList
                 +'<p>Please remove these fields altogether, or click the links above <br>to modify base field (will affect all record types which use it).</p>'
-                , null, {title:'Warning'});        
+                , null, {title:'Warning'},
+                {default_palette_class:this.options.default_palette_class});        
                 
                 this._on($dlg.find('a[data-dty_ID]'),{click:function(e){
                     
@@ -1007,7 +1009,8 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             var that = this;
             window.hWin.HEURIST4.msg.showMsgDlg(
                 'Are you sure you wish to delete this record type? Proceed?', function(){ that._deleteAndClose(true) }, 
-                {title:'Warning',yes:'Proceed',no:'Cancel'});        
+                {title:'Warning',yes:'Proceed',no:'Cancel'},
+                {default_palette_class:this.options.default_palette_class});        
         }
     },
     
@@ -1173,7 +1176,8 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                     , function(){
                         that.addEditRecord(recID, true); 
                         //that._super(recID); 
-                    }, {title:'Confirm',yes:'Continue',no:'Cancel'});
+                    }, {title:'Confirm',yes:'Continue',no:'Cancel'},
+                    {default_palette_class:this.options.default_palette_class});
         
         }else{
                this._super(recID); 
@@ -1425,7 +1429,8 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                 
                 window.hWin.HEURIST4.util.sendRequest(baseurl, { rtyID:rectypeID }, null, _editAfterDuplicate);
 
-        }, {title:'Confirm',yes:'Continue',no:'Cancel'});
+        }, {title:'Confirm',yes:'Continue',no:'Cancel'},
+        {default_palette_class:this.options.default_palette_class});
     },
 
 

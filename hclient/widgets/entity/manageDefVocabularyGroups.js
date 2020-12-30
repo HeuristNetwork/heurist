@@ -26,6 +26,8 @@ $.widget( "heurist.manageDefVocabularyGroups", $.heurist.manageEntity, {
     
     _init: function() {
 
+        this.options.default_palette_class = 'ui-heurist-design';
+
         this.options.innerTitle = false;
         
         if(!this.options.layout_mode) this.options.layout_mode = 'short';
@@ -227,7 +229,8 @@ $.widget( "heurist.manageDefVocabularyGroups", $.heurist.manageEntity, {
             var that = this;
             window.hWin.HEURIST4.msg.showMsgDlg(
                 'Are you sure you wish to delete this vocabulary group? Proceed?', function(){ that._deleteAndClose(true) }, 
-                {title:'Warning',yes:'Proceed',no:'Cancel'});        
+                {title:'Warning',yes:'Proceed',no:'Cancel'},
+                {default_palette_class:this.options.default_palette_class});        
         }
     },
     

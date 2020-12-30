@@ -1477,7 +1477,7 @@ window.hWin.HEURIST4.ui = {
                                     
                                     if(status=='error'){
                                         
-                                        window.hWin.HEURIST4.msg.showMsgFlash('Sorry context help is not found');
+                                        window.hWin.HEURIST4.msg.showMsgFlash('Sorry context help is not found',500);
                                         
                                     }else{
 

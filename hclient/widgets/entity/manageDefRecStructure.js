@@ -802,7 +802,8 @@ dty_TermIDTreeNonSelectableIDs
                 'Are you sure you wish to delete field "'
                 + window.hWin.HEURIST4.util.htmlEscape(this._cachedRecordset.fld(rst_ID, 'rst_DisplayName'))
                 +'"?', function(){ that._deleteAndClose(true) }, 
-                {title:'Warning',yes:'Proceed',no:'Cancel'});        
+                {title:'Warning',yes:'Proceed',no:'Cancel'},
+                {default_palette_class:this.options.default_palette_class});        
         }
         
     },
@@ -1447,7 +1448,8 @@ console.log('No active tree node!!!!')
                             $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
                                 'You have made changes to the data. Click "Save" otherwise all changes will be lost.',
                                 buttons,
-                                {title:'Confirm',yes:'Save',no:'Ignore and close'});
+                                {title:'Confirm',yes:'Save',no:'Ignore and close'},
+                                {default_palette_class:this.options.default_palette_class});
                         }else{
                             that._closeFormlet();
                         }
@@ -2119,7 +2121,8 @@ console.log('No active tree node!!!!')
                     that.onEditFormChange();
                     $dlg.dialog('close'); },
                 'Cancel':function(){ ed_input.setValue(1, true); $dlg.dialog('close'); } },
-                {title:'Warning'});    
+                {title:'Warning'},
+                {default_palette_class:this.options.default_palette_class});    
 
         }else{
             $dlg = window.hWin.HEURIST4.msg.showMsgDlg(

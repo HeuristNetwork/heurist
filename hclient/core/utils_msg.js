@@ -1035,7 +1035,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
     // MAIN method
     // buttons - callback function or objects of buttons for dialog option
     // title - either string for title, or object with labels {title:, yes: ,no, cancel, }
-    // ext_options:
+    // ext_options:   default_palette_class
     //
     showMsgDlg: function(message, buttons, labels, ext_options){
 
@@ -1172,6 +1172,17 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             $dlg.parent().find('.ui-dialog-titlebar').hide();
         }else{
             $dlg.parent().find('.ui-dialog-titlebar').show();
+        }
+
+        
+        if($dlg.attr('data-palette'))
+            $dlg.parent().removeClass($dlg.attr('data-palette'));
+        
+        if(ext_options.default_palette_class){
+            $dlg.attr('data-palette', ext_options.default_palette_class);
+            $dlg.parent().addClass(ext_options.default_palette_class);
+        }else{
+            $dlg.attr('data-palette', null);
         }
         
         return $dlg;

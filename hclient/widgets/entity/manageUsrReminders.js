@@ -29,6 +29,8 @@ $.widget( "heurist.manageUsrReminders", $.heurist.manageEntity, {
     
     _init: function() {
         
+        this.options.default_palette_class = 'ui-heurist-admin';
+        
         this.options.use_cache = false;
         
         if(this.options.edit_mode=='editonly'){

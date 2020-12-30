@@ -53,7 +53,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     
     
     _init: function() {
-
+        
         if(this.options.layout_mode=='short'){
                 this.options.layout_mode = //slightly modified 'short' layout
                         '<div class="ent_wrapper editor">'

@@ -33,6 +33,8 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
     //
     _init: function() {
         
+        this.options.default_palette_class = 'ui-heurist-design';
+        
         this.options.coverall_on_save = true;
         this.options.layout_mode = 'short';
         this.options.use_cache = false;

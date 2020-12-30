@@ -65,7 +65,7 @@ function hEditing(_options) {
         
         if(!_options.className) {
             if($container.parents('.editor').length==0){
-                _options.className = 'ui-heurist-bg-light';
+                //2020-12-29 _options.className = 'ui-heurist-bg-light';
             }else {
                 _options.className = '';
             }

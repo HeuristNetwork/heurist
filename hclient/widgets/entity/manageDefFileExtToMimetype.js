@@ -24,6 +24,8 @@ $.widget( "heurist.manageDefFileExtToMimetype", $.heurist.manageEntity, {
     _entityName:'defFileExtToMimetype',
     
     _init: function() {
+
+        this.options.default_palette_class = 'ui-heurist-admin';
         
         if(isNaN(this.options.width)) this.options.width = 570;
         this.options.height = 600;

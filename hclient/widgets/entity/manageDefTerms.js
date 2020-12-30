@@ -43,65 +43,67 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
     //    
     _init: function() {
 
+        this.options.default_palette_class = 'ui-heurist-design';
+
         if(!window.hWin.HEURIST4.ui.collapsed_terms){
             window.hWin.HEURIST4.ui.collapsed_terms = [];
         }
-        
+
         this.options.innerTitle = false;
-        
+
         this.options.use_cache = true;
         this.options.use_structure = false
-        
+
         if(!this.options.layout_mode) this.options.layout_mode = 'short';
         if(this.options.auxilary!='vocabulary') this.options.auxilary='term';
-        
+
         if(this.options.edit_mode=='editonly'){
             this.options.select_mode = 'manager';
             this.options.layout_mode = 'editonly';
         }else{
-            
+
             if(this.options.isFrontUI &&
                 this.options.select_mode=='manager' && this.options.auxilary!='vocabulary'){
                 //window.hWin.HEURIST4.msg.bringCoverallToFront(this.element, {});                   
                 $('<div>').addClass('coverall-div').css({'zIndex':60000, 
-                        'background-color':'#fff', opacity:1}).appendTo(this.element);
+                    'background-color':'#fff', opacity:1}).appendTo(this.element);
             }
-            
+
         }
         /*
         if(this.options.auxilary=='vocabulary'){
-            this.options.edit_height = 440;
+        this.options.edit_height = 440;
         }else{
-            this.options.edit_height = 660;
+        this.options.edit_height = 660;
         }*/
         this.options.edit_height = 440;
-        
+
         this._super();
-        
+
         var that = this;
-        
+
 
         window.hWin.HAPI4.addEventListener(this, window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, 
-        function(data) { 
-            
+            function(data) { 
+
                 if(!data || 
-                   (data.source != that.uuid && data.type == this.options.auxilary))
+                    (data.source != that.uuid && data.type == this.options.auxilary))
                 {
                     that.refreshRecordList();
                     //that._loadData();
                 }else
-                if(data && (((data.type == 'vcg'||data.type == 'vocabulary') && that.options.auxilary=='vocabulary') 
-                            || ((data.type == 'vocabulary'||data.type == 'term') && that.options.auxilary=='term')
-                           )){
-                    that._filterByVocabulary();
-                    //that._loadData();
-                }
-                
-            
+                    if(data && (((data.type == 'vcg'||data.type == 'vocabulary') && that.options.auxilary=='vocabulary') 
+                        || ((data.type == 'vocabulary'||data.type == 'term') && that.options.auxilary=='term')
+                    )){
+                        that._filterByVocabulary();
+                        //that._loadData();
+                    }
+
+
         });
-        
+
     },
-    
+
     _destroy: function() {
 
         if(this.fields_list_div){
@@ -1043,7 +1045,8 @@ if(window.hWin.HEURIST4.util.isArrayNotEmpty(res.records)){
         sMsg += '<p><a href="#" class="records-list"'
         +'>List of records which '+(res.children==0?'this term':'these terms')+'</a></p>';
 }
-                                   $dlg = window.hWin.HEURIST4.msg.showMsgDlg(sMsg, null, {title:'Terms in use'});        
+                                   $dlg = window.hWin.HEURIST4.msg.showMsgDlg(sMsg, null, {title:'Terms in use'},
+                                   {default_palette_class:this.options.default_palette_class});        
 
                                    that._on($dlg.find('a.records-list'),{click:function(e){
                                         var request = {q:'ids:'+res.records.join(',')};
@@ -1065,7 +1068,8 @@ if(window.hWin.HEURIST4.util.isArrayNotEmpty(res.records)){
                 +this.options.auxilary+' <b>'+$Db.trm(this._currentEditID, 'trm_Label')
                 +'</b>? Proceed?', 
                 function(){ that._deleteAndClose(true) }, 
-                {title:'Warning',yes:'Proceed',no:'Cancel'});        
+                {title:'Warning',yes:'Proceed',no:'Cancel'},
+                {default_palette_class:this.options.default_palette_class});        
         }
     },
     
@@ -1629,7 +1633,8 @@ console.log('Error !!! Parent not found for '+trm_ID);
                 if(window.hWin.HEURIST4.util.findArrayIndex(trm_ID, trm_ids)>=0){
                     window.hWin.HEURIST4.msg.showMsgDlg( (isRef?'Term':'Reference')
                         + ' "'+$Db.trm(trm_ID, 'trm_Label')
-                        +'" is already in vocabulary "'+$Db.trm(new_parent_id,'trm_Label')+'"',null,'Duplication'); 
+                        +'" is already in vocabulary "'+$Db.trm(new_parent_id,'trm_Label')+'"',null,'Duplication',
+                        {default_palette_class:this.options.default_palette_class}); 
                     return;
                 }
             
@@ -1643,7 +1648,8 @@ console.log('Error !!! Parent not found for '+trm_ID);
                         +'<p>To make this move, edit the term so that it is different from any in the top level '
                         +'of the vocabulary to which you wish to move it. Once moved, you can merge within '
                         +'the vocabulary or reposition the term and edit it appropriately.</p>'
-                        ,null,'Duplication'); 
+                        ,null,'Duplication',
+                        {default_palette_class:this.options.default_palette_class}); 
                     return;
                 }
             }else{
@@ -1796,7 +1802,8 @@ console.log('Error !!! Parent not found for '+trm_ID);
                     window.hWin.HEURIST4.msg.showMsgDlg(
                         'Delete vocabulary <b>'+$Db.trm(recID, 'trm_Label')+'</b> and all its child terms?',
                         function(){ that._currentEditID = recID; that._deleteAndClose(true) }, 
-                        {title:'Deletion of vocabulary',yes:'Proceed',no:'Cancel'});        
+                        {title:'Deletion of vocabulary',yes:'Proceed',no:'Cancel'},
+                        {default_palette_class:this.options.default_palette_class});        
                     return false;                    
                }               
 
@@ -1831,14 +1838,16 @@ console.log('Error !!! Parent not found for '+trm_ID);
                         window.hWin.HEURIST4.msg.showMsgDlg(
                             sMsg,
                             function(){ that._currentEditID = recID; that._deleteAndClose(true) }, 
-                            {title:'Deletion of branch',yes:'Proceed',no:'Cancel'});        
+                            {title:'Deletion of branch',yes:'Proceed',no:'Cancel'},
+                            {default_palette_class:this.options.default_palette_class});        
                         return false;                    
                     }
                    
                }else if(ref_lvl>0){
                    
                         window.hWin.HEURIST4.msg.showMsgDlg('This term is added as reference via its parent. '
-                        +'You can remove this reference along with it parents only');
+                        +'You can remove this reference along with it parents only',null,null,
+                        {default_palette_class:this.options.default_palette_class});
                         return;
                    
                }else{
@@ -1857,7 +1866,8 @@ console.log('Error !!! Parent not found for '+trm_ID);
                                 }
                             }
                         }, 
-                        {title:'Info',yes:'Proceed',no:'Cancel'});        
+                        {title:'Info',yes:'Proceed',no:'Cancel'},
+                        {default_palette_class:this.options.default_palette_class});        
                     return true;
                    
                }
@@ -2351,7 +2361,8 @@ console.log('Error !!! Parent not found for '+trm_ID);
                         window.hWin.HEURIST4.msg.showMsgDlg(context.result.length
                             + ' term'
                             + (context.result.length>1?'s were':' was')
-                            + ' added.', null, 'Terms imported');
+                            + ' added.', null, 'Terms imported',
+                            {default_palette_class:this.options.default_palette_class});
 
                     }
                     
@@ -2425,7 +2436,8 @@ console.log('Error !!! Parent not found for '+trm_ID);
                        '<p>Vocabulary <b>'+$Db.trm(recID,'trm_Label')+'</b> is referenced by the following fields:</p>'
                        + sList
                        +'<p>Please remove these fields altogether, or click the links above <br>to modify base field (will affect all record types which use it).</p>'
-                       , null, {title:'Warning'});        
+                       , null, {title:'Warning'},
+                       {default_palette_class:this.options.default_palette_class});        
 
                    this._on($dlg.find('a[data-dty_ID]'),{click:function(e){
 

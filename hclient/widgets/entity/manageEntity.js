@@ -127,6 +127,8 @@ $.widget( "heurist.manageEntity", {
         
         no_bottom_button_bar: false,
         btn_array: null,   //bottom bar buttons
+        
+        default_palette_class: null
     },
     
     //system name of entity  - define it to load entity config from server
@@ -1032,6 +1034,10 @@ $.widget( "heurist.manageEntity", {
                 this._toolbar = this._as_dialog.parent().find('.ui-dialog-buttonpane');
                 //assign unique identificator to get proper position of child edit dialogs
                 this._toolbar.attr('posid','edit'+this._entityName+'-'+(new Date()).getTime());
+                
+            }else if(this.options.default_palette_class){
+                this._as_dialog.parent().addClass(this.options.default_palette_class);
+                //this.element.addClass(this.options.default_palette_class);
             }
                 
             
@@ -1945,6 +1951,16 @@ this._time_debug = fin_time;
         window.hWin.HEURIST4.ui.applyCompetencyLevel(-1, this.editForm); 
         
         this._afterInitEditForm_restoreGroupStatus();
+        
+        
+        if(this.options.default_palette_class){
+            var $dlg = this._getEditDialog(true);
+            if($dlg){
+                $dlg.parent().addClass(this.options.default_palette_class);
+            }else{
+                //this.element.addClass(this.options.default_palette_class);
+            }
+        }
     },
     
     //

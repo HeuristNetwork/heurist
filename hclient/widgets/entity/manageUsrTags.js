@@ -28,6 +28,8 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
     
     _init: function() {
         
+        this.options.default_palette_class = 'ui-heurist-admin';
+        
         if(!$.isArray(this.options.selection_ids)) this.options.selection_ids = [];
         
         //this.options.layout_mode = 'basic';

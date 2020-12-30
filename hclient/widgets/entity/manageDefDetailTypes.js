@@ -34,6 +34,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
     _init: function() {
 
 //this._time_debug = new Date().getTime() / 1000;
+        this.options.default_palette_class = 'ui-heurist-design';
         
         //allow select existing fieldtype by typing
         //or add new field both to defDetailTypes and defRecStructure
@@ -485,7 +486,8 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                         +'You have to either delete the field from the record type, '
                         +'or delete the record type (it may not be possible or desirable to delete the record type)</div>';
 
-                $dlg = window.hWin.HEURIST4.msg.showMsgDlg(sUsage, null, {title:'Warning'});        
+                $dlg = window.hWin.HEURIST4.msg.showMsgDlg(sUsage, null, {title:'Warning'}, 
+                            {default_palette_class:this.options.default_palette_class});        
                 
                 this._on($dlg.find('a[data-rty_ID]'),{click:function(e){
                     //edit structure
@@ -602,7 +604,8 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             var that = this;
             window.hWin.HEURIST4.msg.showMsgDlg(
                 'Are you sure you wish to delete this field type? Proceed?', function(){ that._deleteAndClose(true) }, 
-                {title:'Warning',yes:'Proceed',no:'Cancel'});        
+                {title:'Warning',yes:'Proceed',no:'Cancel'},
+                {default_palette_class:this.options.default_palette_class});        
         }
         
     },
@@ -748,7 +751,8 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                                                 "'.\n\nAre you sure?",                                            
                                                 function(){   
                                                     that._onDataTypeChange(context);                                                   
-                                                }, {title:'Change type for field',yes:'Continue',no:'Cancel'});                                                
+                                                }, {title:'Change type for field',yes:'Continue',no:'Cancel'},
+                                                {default_palette_class:this.options.default_palette_class});                                                
                                         }else{
                                             that._onDataTypeChange(context);                                                   
                                         }                            
@@ -1469,7 +1473,8 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                         return;
                     }else if(dt_type=='relmarker'){
                         window.hWin.HEURIST4.msg.showMsgDlg(
-                            'Please select target record type. Unconstrained relationship is not allowed',null, 'Warning');
+                            'Please select target record type. Unconstrained relationship is not allowed',null, 'Warning',
+                            {default_palette_class:this.options.default_palette_class});
                         return;
                     }    
                     
@@ -1538,7 +1543,8 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                             'Please select or add a vocabulary. Vocabularies must contain at least one term.', 'Warning');
                     }else{
                         window.hWin.HEURIST4.msg.showMsgDlg(
-                            'Please select or add relationship types',null, 'Warning');
+                            'Please select or add relationship types',null, 'Warning',
+                            {default_palette_class:this.options.default_palette_class});
                     }
                     return null;                    
                 }
