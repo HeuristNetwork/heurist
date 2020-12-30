@@ -350,6 +350,13 @@ $.widget( "heurist.svs_list", {
             $(this.treeviews, function(groupID, tree){
                 that._applyTreeViewFilter(groupID, value);            
             });
+            if(this.helper_btm){
+                if(value==2){
+                    this.helper_btm.hide();
+                }else{
+                    this.helper_btm.show();
+                }
+            }
         }
     },
 
@@ -490,18 +497,21 @@ $.widget( "heurist.svs_list", {
             +'&nbsp;Faceted search</div>'
 
             +'<div title="'+this._HINT_WITHRULES+'">'
-            +'<span class="ui-icon ui-icon-plus" style="color:orange;display:inline-block; vertical-align: bottom; font-size:0.8em;width:0.7em;"></span>'
             +'<span class="ui-icon ui-icon-shuffle" style="color:orange;display:inline-block; vertical-align: bottom; font-size:1em;width:0.9em;"></span>'
-            +'&nbsp;Search with rules</div>'
-            
+            +'&nbsp;Search with rules</div>';
+/*            
             +'<div title="'+this._HINT_RULESET+'">'
             +'<span class="ui-icon ui-icon-shuffle" style="color:orange;display:inline-block; vertical-align: bottom; font-size:1em"></span>'
             +'&nbsp;RuleSet</div>';
-
+*/
             this.helper_btm = $( '<div class="heurist-helper3" style="float:right;padding:2.5em 0.5em 0 0;">'+t1+'</div>' )
             //IAN request 2015-06-23 .addClass('heurist-helper1')
             .appendTo( this.accordeon );
             //IAN request 2015-06-23 if(window.hWin.HAPI4.get_prefs('help_on')=='0') this.helper_btm.hide(); // this.helper_btm.css('visibility','hidden');
+            
+            if(this.options.filter_by_type==2){
+                this.helper_btm.hide();    
+            }
         }
 
         var islogged = (window.hWin.HAPI4.has_access());
@@ -968,7 +978,7 @@ $.widget( "heurist.svs_list", {
                     iconBtn = 'ui-icon-box';
                 }else {
                     if(params.type==1){ //with rules
-                        iconBtn = 'ui-icon-plus ui-icon-shuffle';
+                        iconBtn = 'ui-icon-shuffle'; //ui-icon-plus 
                     }else if(params.type==2){ //rules only
                         iconBtn = 'ui-icon-shuffle';
                     }else  if(params.type<0){ //broken empty
@@ -1261,6 +1271,7 @@ $.widget( "heurist.svs_list", {
 
                         var s_hint = '';  //NOT USED this hint shows explanatory text about mode of search:faceted,with rules,rules only
                         var s_hint2 = ''; //this hint shows notes and RAW text of query,rules
+                        var hasRules = false;
 
                         var svs = window.hWin.HAPI4.currentUser.usr_SavedSearch[node.key];
                         
@@ -1288,27 +1299,32 @@ $.widget( "heurist.svs_list", {
                         }
                         if(!Hul.isempty(prms.rules)){
                             s_hint2 = s_hint2 + '\nRules: '+prms.rules;
+                            hasRules = true;
                         }
 
+                        s = '';
                         if(prms.type==3){ //node.data.isfaceted
                             s = '<span class="ui-icon ui-icon-box svs-type-icon" title="faceted" ></span>';
+                            if(hasRules){
+                                s = s + '<span class="ui-icon ui-icon-shuffle svs-type-icon"></span>';
+                            }
                             s_hint = this._HINT_FACETED;
                         }else if(prms.type==1){ //withrules
-                                s = '<span class="ui-icon ui-icon-plus svs-type-icon"></span>'
-                                +'<span class="ui-icon ui-icon-shuffle svs-type-icon"></span>';
+                                s = //'<span class="ui-icon ui-icon-plus svs-type-icon"></span>'
+                                '<span class="ui-icon ui-icon-shuffle svs-type-icon"></span>';
                                 s_hint = this._HINT_WITHRULES;
                         }else if(prms.type==2){ //rules only
-                                s = '<span class="ui-icon ui-icon-shuffle svs-type-icon" title="rules" ></span>';
+                                s = '<span/>'; //'<span class="ui-icon ui-icon-shuffle svs-type-icon" title="rules" ></span>';
                                 s_hint = this._HINT_RULESET;
                         }else if(prms.type<0){ //broken
-                                s = '<span class="ui-icon ui-icon-alert svs-type-icon" title="rules" ></span>';
+                                s = '<span class="ui-icon ui-icon-alert svs-type-icon" title="broken"></span>';
                                 s_hint = 'Broken filter. Remove and re-create it';
                         }
 
                         if(s==''){
                             //$span.find("> span.fancytree-title").text(node.title);
                         }else{
-                            node.title = svs[_NAME] + '  ' + s;
+                            node.title = svs[_NAME] + ' ' + s;
                             $span.find("> span.fancytree-title").html(node.title);
                         }
                         $span.attr('title', s_hint2)
