@@ -1873,8 +1873,9 @@ window.hWin.HEURIST4.ui = {
                         + '</span>'
                         
                         +'<span class="related_record_title'
-                            +((info['rec_RecTypeID']>0)?'':' ui-state-error')
-                            +'" data-recID="'
+                            + ((info['rec_RecTypeID']>0)?'':' ui-state-error')
+                            + '" data-rectypeid="'+ info['rec_RecTypeID']
+                            + '" data-recid="'
                                         +info['rec_ID']
                                         +'" style="display:table-cell;">'  //padding-top:4px;
                         + rec_Title
@@ -2011,7 +2012,7 @@ window.hWin.HEURIST4.ui = {
                                         
                                                     ele.find('.related_record_title')
                                                             .text( window.hWin.HEURIST4.util.stripTags(rec_Title) )
-                                                            .attr('data-recID', related_ID);
+                                                            .attr('data-recid', related_ID);
                                                             
                                                     var rec_RecType = recordset.fld(record,'rec_RecTypeID');                            
                                                     //@todo - update record type icon

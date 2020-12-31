@@ -1191,11 +1191,7 @@ $.widget( "heurist.editing_input", {
                   
                     if(relations && (relations.direct || relations.reverse)){
                         
-                        var ptrset = that.f('rst_PtrFilteredIDs');
-                        if(!$.isArray(ptrset)){
-                            if(ptrset) ptrset = ptrset.split(',')
-                            else ptrset = [];
-                        }
+                        var ptrset = that._prepareIds(that.f('rst_PtrFilteredIDs'));
                         
                         var vocab_id = this.f('rst_FilteredJsonTermIDTree');        
 
@@ -1380,15 +1376,8 @@ $.widget( "heurist.editing_input", {
             $input = $( "<div>").css({'display':'inline-block','vertical-align':'middle','min-wdith':'25ex'})
                             .uniqueId().appendTo( $inputdiv );
             
-            var ptrset = that.f('rst_PtrFilteredIDs');
-            if(!$.isArray(ptrset)){
-                if(window.hWin.HEURIST4.util.isempty(ptrset)){
-                    ptrset = [];
-                }else if(window.hWin.HEURIST4.util.isNumber(ptrset)){
-                    ptrset = [ptrset];
-                }else
-                    ptrset = ptrset.split(',')
-            }            
+            var ptrset = that._prepareIds(that.f('rst_PtrFilteredIDs'));
+            
             var rts = [];
             for (var k=0; k<ptrset.length; k++) {
                 var sname = $Db.rty(ptrset[k],'rty_Name');
@@ -3557,6 +3546,35 @@ console.log('onpaste');
         }else if(data_type=='float'){
             
             
+        }else if(data_type=='resource'){
+            
+            var ptrset = this._prepareIds(this.f('rst_PtrFilteredIDs'));
+            
+            var idx, snames = [];
+            if(ptrset.length>0){
+                for (idx in ptrset) {
+                    snames.push($Db.rty(ptrset[idx],'rty_Name'));
+                }
+            }
+            snames = snames.join(', ');
+            
+            for (idx in this.inputs) {
+                var res = this._getValue(this.inputs[idx]);
+                //check record type
+                var rty_ID = $(this.inputs[idx]).find('.related_record_title').attr('data-rectypeid')
+                
+                if(rty_ID>0  && ptrset.length>0 && 
+                    window.hWin.HEURIST4.util.findArrayIndex(rty_ID, ptrset)<0)
+                {
+                    //error highlight
+                    $(this.inputs[idx]).addClass( "ui-state-error" );
+                    //add error message
+                    errorMessage = 'Target type "'+$Db.rty(rty_ID,'rty_Name')+'" is not allowed.'
+                    +' Field expects target type'+((ptrset.length>1)?'s ':' ')+snames;
+                    
+                }
+            }
+            
         }
         
 
@@ -3673,7 +3691,22 @@ console.log('onpaste');
         
         }
         */   
+    },
+    
+    //
+    //
+    //
+    _prepareIds: function(ptrset)
+    {
+        if(!$.isArray(ptrset)){
+            if(window.hWin.HEURIST4.util.isempty(ptrset)){
+                ptrset = [];
+            }else if(window.hWin.HEURIST4.util.isNumber(ptrset)){
+                ptrset = [ptrset];
+            }else
+                ptrset = ptrset.split(',')
+        }
+        return ptrset;
     }
-
 
 });
