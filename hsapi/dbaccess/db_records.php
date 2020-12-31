@@ -1646,12 +1646,21 @@
 
                         if($is_strict){
                             //check if resource record exists
-                            $rectype_tocheck = mysql__select_value($mysqli, "select rec_RecTypeID from Records where rec_ID = ".$dtl_Value); //or dbs_GetRectypeByID from db_strucuture
+                            $rectype_tocheck = mysql__select_row($mysqli, 'select rec_RecTypeID, rec_Title '
+                            .'from Records where rec_ID = '.$dtl_Value); //or dbs_GetRectypeByID from db_strucuture
                             if($rectype_tocheck){
+                                
+                                
                                 //check that this rectype is valid for given detail (constrained pointer)
-                                $isValid = isValidRectype($system, $rectype_tocheck, $dtyID, $rectype);
+                                $isValid = isValidRectype($system, $rectype_tocheck[0], $dtyID, $rectype);
                                 if(!$isValid){
-                                    $err_msg = 'Record type '.$rectype_tocheck.' is not valid for specified constraints';
+                                    
+                                    $err_msg = '<div style="padding-left:30px">'
+                                        . _getRtConstraintNames($system, $dtyID, $rectype)
+                                        . '<br>Target ID:'.$dtl_Value.'  '.strip_tags($rectype_tocheck[1]).'</div>';
+                                    
+                                    
+                                    //$err_msg = 'Record type '.$rectype_tocheck.' is not valid for specified constraints';
                                 }
                             }else{
                                 $err_msg = 'Record with specified id '.htmlspecialchars($dtl_Value).' does not exist';
@@ -1827,11 +1836,7 @@
         $res = false;
 
         //there is undefined required details
-        if (count($det_required)>0) {
-
-            $system->addError(HEURIST_ERROR, 'Required field'.(count($det_required)>1?'s':'').' not defined: '.implode(',',array_values($det_required)));
-
-        }else if (count($errorValues)>0) {
+        if (count($errorValues)>0) {
 
             $ss = (count($errorValues)>1?'s':'');    
             array_push($errorValues,                                                        
@@ -1841,6 +1846,13 @@
             $system->addError(HEURIST_ERROR, 'Encountered invalid value'.$ss
                                                         .' for Record#'.$recID.'<br>'.implode('<br>',$errorValues), null);
 
+        }else if (count($det_required)>0) {
+
+            $system->addError(HEURIST_ERROR, 'Required field'.(count($det_required)>1?'s':'')
+            .' not defined or '.
+            (count($det_required)>1?'have':'has')
+            .' wrong value: '.implode(',',array_values($det_required)));
+                                                        
         }else if (count($insertValues)<1) {
 
             $system->addError(HEURIST_INVALID_REQUEST, "Fields not defined");
@@ -2125,6 +2137,41 @@
         return true;
     }
 
+    //
+    //
+    //
+    function _getRtConstraintNames($system, $dtyID, $rectype)
+    {
+        global $recstructures;
+        
+        $recstr = dbs_GetRectypeStructure($system, $recstructures, $rectype);
+
+        if($recstr && @$recstr['dtFields'][$dtyID])
+        {
+            $val = $recstr['dtFields'][$dtyID];
+            $idx = $recstructures['dtFieldNamesToIndex']['rst_PtrFilteredIDs'];
+            $rectype_ids = $val[$idx]; //constraint for pointer
+
+            $idx_name = $recstructures['commonNamesToIndex']['rty_Name'];
+            
+            $rty_Name = $recstructures[$rectype]['commonFields'][$idx_name];
+        
+            
+            $allowed_rectypes = explode(",", $rectype_ids);
+            $allowed_names = array();
+            
+            foreach($allowed_rectypes as $rty_ID){
+                $recstr = dbs_GetRectypeStructure($system, $recstructures, $rty_ID);
+                array_push( $allowed_names, $recstructures[$rty_ID]['commonFields'][$idx_name] );
+            }
+            return 'Field expects target type <i>'.implode(', ',$allowed_names)
+                .'</i><br>Target record is type <i>'.$rty_Name.'</i>';
+        }
+        return '';
+    }
+    
+
+    
     //
     //
     //
