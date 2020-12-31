@@ -1903,9 +1903,9 @@ console.log('No active tree node!!!!')
 
             var record = recset.getById(recID);
             
-            if(fieldvalues==null){
+            /*if(fieldvalues==null){
                 fieldvalues = recset.getRecord(recID);
-            }
+            }*/
 
             //2. update $Db
 //console.log($Db.rst(this.options.rty_ID, recID));           
@@ -1917,8 +1917,8 @@ console.log('No active tree node!!!!')
                     if(node) {
                         var sType = $Db.dty(recID,'dty_Type');
                         var isSep = (sType=='separator');
-                        var title = fieldvalues['rst_DisplayName'];
-                        var req = fieldvalues['rst_RequirementType'];
+                        var title = record['rst_DisplayName'];
+                        var req = record['rst_RequirementType'];
                         if(isSep){
                             title = '<span data-dtid="'+recID+'">' + title +'</span>';
                         }else{
@@ -1936,7 +1936,7 @@ console.log('No active tree node!!!!')
                             $(node.li).addClass( isSep?'separator2':req );
                         }
                         this.__defineActionIcons( $(node.li).find('.fancytree-node') );
-                        $(node.li).find('.svs-contextmenu3').css('visibility','hidden');
+//$(node.li).find('.svs-contextmenu3').css('visibility','hidden');
                         
                     }
             }        
