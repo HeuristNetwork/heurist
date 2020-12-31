@@ -268,7 +268,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                             that._filterByVocabulary();
                          }
                          
-                     }
+                     },
+                     add_to_begin: true
                 };
 
                 //initially selected vocabulary

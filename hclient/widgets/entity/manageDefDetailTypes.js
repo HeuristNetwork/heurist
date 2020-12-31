@@ -191,7 +191,8 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                                 that.searchForm.searchDefDetailTypes('option','dtg_ID', res[0])
                             }
                          }
-                     }
+                     },
+                     add_to_begin: true
                 };
                                                                              
                 window.hWin.HEURIST4.ui.showEntityDialog('defDetailTypeGroups', rg_options);        

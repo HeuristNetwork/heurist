@@ -159,8 +159,8 @@ $.widget( "heurist.searchDefDetailTypes", $.heurist.searchEntity, {
             }else{
         
                 sGroupTitle = '<h4 style="margin:0">';
-                if(this.input_search_group.val()>0){
-                    var dtg_id = this.input_search_group.val();
+                if(!this.element.find('#chb_show_all_groups').is(':checked') && this.options.dtg_ID>0){ //this.input_search_group.val()
+                    var dtg_id = this.options.dtg_ID; //this.input_search_group.val();
                     request['dty_DetailTypeGroupID'] = dtg_id;
                     sGroupTitle += ($Db.dtg(dtg_id,'dtg_Name')
                                         +'</h5><div class="heurist-helper3 truncate" style="font-size:0.7em">'

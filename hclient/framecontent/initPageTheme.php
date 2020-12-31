@@ -462,8 +462,12 @@ span.fancytree-node:hover{
 }
 .ui-heurist-populate .ui-button-icon-only{
     background: none;
-    color:<?php uout('import_bg', '#e3f0f0')?> !important;
+    color:<?php uout('import_bg', '#307D96')?> !important;
 }
+.ui-heurist-populate .ui-heurist-header .ui-button-icon-only, .ui-heurist-populate .ui-dialog-titlebar .ui-button-icon-only{
+    color:<?php uout('import_fade_bg', '#e3f0f0')?> !important;
+}
+
 .ui-menu6 .ui-menu6-container.ui-heurist-populate, .ui-heurist-populate .ui-helper-popup{
     border-width: 2px !important;
     border-color:<?php uout('import_bg', '#307D96');?> !important; 
