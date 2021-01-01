@@ -65,7 +65,8 @@
                 
                 $('button').button();
                 
-                var fields = [window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'],
+                var fields = [
+                window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'],
                 window.hWin.HAPI4.sysinfo['dbconst']['DT_SHORT_SUMMARY'],
                 window.hWin.HAPI4.sysinfo['dbconst']['DT_THUMBNAIL'],
                 window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_OBJECT'],
@@ -78,7 +79,7 @@
                 
                 for(var idx=0; idx< fields.length; idx++){
                     var dty_ID = fields[idx];
-                    _checked = (idx==0)?'checked':'';
+                    _checked = (idx==0)?'checked disabled="disabled"':'';
                     
             $('<tr><td style="padding:10px" align="center"><input type="checkbox" class="ids" data-id="'+dty_ID+'" '+_checked
             +'></td>'

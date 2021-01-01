@@ -1390,12 +1390,12 @@ console.log('No active tree node!!!!')
                 edit_ele = this._editing.getFieldByName('rst_SeparatorType');
                 edit_ele.hide();
             }else{
-                sep_type = this._editing.getValue('rst_DefaultValue')[0];
+                sep_type = this._editing.getValue('rst_SeparatorType')[0];
                 if(!(sep_type=='accordion' || sep_type=='tabs' || sep_type=='tabs_new' || sep_type=='expanded')){
-                    sep_type = 'group';
+                    sep_type = 'tabs';
                 }
             }
-            this._editing.setFieldValueByName( 'rst_SeparatorType', sep_type, false );
+            this._editing.setFieldValueByName( 'rst_SeparatorType', sep_type, true );
 
 
             sep_type = this._editing.getValue('rst_RequirementType')[0];

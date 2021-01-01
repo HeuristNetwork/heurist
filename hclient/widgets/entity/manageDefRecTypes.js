@@ -1282,8 +1282,30 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                     title:' Select fields for new record type',
                     afterclose:function(){
                         //add fields to structure in any case - by default DT_NAME and DT_DESCRIPTION
-                        if(!window.hWin.HEURIST4.util.isArrayNotEmpty(this._selected_fields)) this._selected_fields = [];
+                        //if(!window.hWin.HEURIST4.util.isArrayNotEmpty(that._selected_fields)) that._selected_fields = [];
 
+                        that._selected_fields['values'] = {};
+                        //get first 3 separator base fields
+                        var k = 0;
+                        $Db.dty().each(function(dty_ID, rec){
+                           if($Db.dty(dty_ID,'dty_Type')=='separator'){
+                               if(k==0){
+                                   that._selected_fields['fields'].unshift(dty_ID);    
+                                   that._selected_fields['values'][dty_ID] = {dty_Name:'Overview',rst_DefaultValue:'tabs'};
+                               }else{
+                                   that._selected_fields['fields'].push(dty_ID);    
+                                   if(k==1){
+                                        that._selected_fields['values'][dty_ID] = {dty_Name:'Details',rst_DefaultValue:'tabs_new'};
+                                   }else{
+                                        that._selected_fields['values'][dty_ID] = {dty_Name:'References',rst_DefaultValue:'tabs'};
+                                   }
+                               }
+                               k++;
+                               if(k>2) return false;
+                           } 
+                        });                        
+                        
+                        
                         var request = {};
                         request['a']        = 'action'; //batch action
                         request['entity']   = 'defRecStructure';

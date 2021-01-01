@@ -1007,7 +1007,9 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 'recID'      : this._currentEditID                     
                 };
                 
-                var that = this;                                                
+                var that = this;                        
+                
+                var it_was_vocab = !($Db.trm(this._currentEditID, 'trm_ParentTermID')>0);
                 
                 window.hWin.HAPI4.EntityMgr.doRequest(request, 
                     function(response){
@@ -1017,7 +1019,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                             if(that.options.use_cache){
                                 that._cachedRecordset.removeRecord( recID );
                             }
-                            that._afterDeleteEvenHandler( recID );
+                            that._afterDeleteEvenHandler( recID, it_was_vocab );
                             
                         }else{
                             if(response.sysmsg && response.sysmsg.children){
@@ -1077,12 +1079,10 @@ if(window.hWin.HEURIST4.util.isArrayNotEmpty(res.records)){
     //
     //
     //
-    _afterDeleteEvenHandler: function(recID){
+    _afterDeleteEvenHandler: function(recID, it_was_vocab){
 
         this._super(recID); 
         
-        var it_was_vocab = !($Db.trm(recID, 'trm_ParentTermID')>0);
-
         //get all children
         var all_ids = $Db.trm_TreeData(recID, 'set', true);
         

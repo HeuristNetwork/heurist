@@ -560,6 +560,10 @@ $.widget( "heurist.editing_input", {
             this.newvalues = {};
         }
         
+        //if(this.f('rst_DisplayName')=="Group/separator type:"){
+        //    console.log(this.f('rst_DefaultValue'));
+        //}
+        
         var that = this;
 
         var $input = null;
@@ -791,6 +795,9 @@ $.widget( "heurist.editing_input", {
                     dwidth = dwidth+'ex';
                 }
             }
+            var def_value = this.f('rst_DefaultValue');
+            if(window.hWin.HEURIST4.util.isempty(value) && 
+                !window.hWin.HEURIST4.util.isempty(def_value)) value = def_value;            
 
             $input = $('<select>').uniqueId()
                 .addClass('text ui-widget-content ui-corner-all')
