@@ -626,30 +626,6 @@ WHERE
                     }
                 },
                 {
-                    "dtID": "rty_Thumb",
-                    "dtFields":{
-                        "dty_Type":"file",
-                        "rst_DisplayName":"Thumbnail (~64x64):",
-                        "rst_DisplayHelpText": "Image to represent this record type", 
-                        "rst_FieldConfig":{"entity":"defRecTypes", "accept":".png,.jpg,.gif", "size":64, 
-                             "use_assets":["admin/setup/iconLibrary/64px/"],
-                        "css":{"display":"inline-block","width":"45%"}},
-                        "dty_Role":"virtual"
-                    }
-                },
-                {
-                    "dtID": "rty_Icon",
-                    "dtFields":{
-                        "dty_Type":"file",
-                        "rst_DisplayName":"Icon (~16x16):",
-                        "rst_DisplayHelpText": "Icon to represent this record type", 
-                        "rst_FieldConfig":{"entity":"defRecTypes", "accept":".png,.jpg,.gif", "size":16, "version":"icon",
-                        "use_assets":["admin/setup/iconLibrary/16px/"],
-                        "css":{"display":"inline-block","width":"45%"}},
-                        "dty_Role":"virtual"
-                    }
-                },
-                {
                     "dtID": "rty_Name",
                     "dtFields":{
                         "dty_Type":"freetext",
@@ -676,6 +652,7 @@ WHERE
                         "dty_Type":"blocktext",
                         "dty_Size":5000,
                         "rst_DisplayWidth":100,
+                        "rst_DisplayHeight":4,
                         "rst_RequirementType":"required",
                         "rst_DisplayName": "Description",
                         "rst_DisplayHelpText": "Detailed description of the record type, providing an explanation of its content. A good description here is important for future documentation of the database." 
@@ -684,9 +661,10 @@ WHERE
                  {
                     "dtID": "rty_TitleMask",
                     "dtFields":{
-                        "dty_Type":"freetext",
+                        "dty_Type":"blocktext",
                         "dty_Size":5000,
-                        "rst_DisplayWidth":60,
+                        "rst_DisplayWidth":100,
+                        "rst_DisplayHeight":2,
                         "rst_DisplayName": "Title mask",
                         "rst_DisplayHelpText": "The title mask is a string into which data field values are inserted to create a constructed title for each record, e.g. [Title], pp. [Start_Page]-[End_Page] renders a title such as \"Alice in Wonderland, pp. 37-39\". The constructed title is displayed in search results and other lists. [ ] encloses a field name. To insert [ or ], use [[ or ]]",
                         "rst_RequirementType":"required"
@@ -706,10 +684,34 @@ WHERE
                     "dtID": "rty_ShowURLOnEditForm",
                     "dtFields":{
                         "dty_Type":"boolean",
-                        "rst_DisplayName": "Show record URL on edit form:",
+                        "rst_DisplayName": "Show record URL on edit&nbsp;form:",
                         "rst_DisplayHelpText": "Display URL at top of edit form for this record type. This is a special URL used to hyperlink search results. It is distinct from any URL fields in the record, which are not affected. Use only where a majority of records of this type have one, and only one, principle URL eg. for web sites/internet bookmarks.",
                         "rst_DefaultValue": "1",
                         "rst_FieldConfig":["1","0"]
+                    }
+                },
+                {
+                    "dtID": "rty_Thumb",
+                    "dtFields":{
+                        "dty_Type":"file",
+                        "rst_DisplayName":"Thumbnail (~64x64):",
+                        "rst_DisplayHelpText": "Image to represent this record type", 
+                        "rst_FieldConfig":{"entity":"defRecTypes", "accept":".png,.jpg,.gif", "size":64, 
+                             "use_assets":["admin/setup/iconLibrary/64px/"],
+                        "css":{"display":"inline-block","width":"45%"}},
+                        "dty_Role":"virtual"
+                    }
+                },
+                {
+                    "dtID": "rty_Icon",
+                    "dtFields":{
+                        "dty_Type":"file",
+                        "rst_DisplayName":"Icon (~16x16):",
+                        "rst_DisplayHelpText": "Icon to represent this record type", 
+                        "rst_FieldConfig":{"entity":"defRecTypes", "accept":".png,.jpg,.gif", "size":16, "version":"icon",
+                        "use_assets":["admin/setup/iconLibrary/16px/"],
+                        "css":{"display":"inline-block","width":"45%"}},
+                        "dty_Role":"virtual"
                     }
                 },
                 {  "dtID": "rty_LocallyModified",

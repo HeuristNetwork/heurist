@@ -1173,8 +1173,14 @@ console.log('No active tree node!!!!')
                                 that.manageRecords('showOptionalFieds', true);    
                             }
                             if(that2._open_formlet_for_recID>0){
-                                if(window.hWin.HAPI4.get_prefs_def('edit_rts_open_formlet_after_add',0)==1){
-                                    that2.editField( that2._open_formlet_for_recID );    
+                                
+                                var sType = $Db.dty(that2._open_formlet_for_recID, 'dty_Type');
+                                var isSep = (sType=='separator');
+                                
+                                if(isSep ||
+                                  window.hWin.HAPI4.get_prefs_def('edit_rts_open_formlet_after_add',0)==1){
+                                    that2._clear_title_for_separator = isSep; // clear title for separator
+                                    that2.editField( that2._open_formlet_for_recID); 
                                 }
                             }
                             that2._show_optional = false;
@@ -1409,12 +1415,20 @@ console.log('No active tree node!!!!')
                     sep_type = 'tabs';
                 }
             }
-            this._editing.setFieldValueByName( 'rst_SeparatorType', sep_type, true );
+            this._editing.setFieldValueByName( 'rst_SeparatorType', sep_type, false );
 
 
             sep_type = this._editing.getValue('rst_RequirementType')[0];
             sep_type = (sep_type=='forbidden')?sep_type:'optional';
             this._editing.setFieldValueByName( 'rst_SeparatorRequirementType', sep_type, false );
+            
+            
+            //clear title to force change default one
+            if(this._clear_title_for_separator){
+                this._editing.setFieldValueByName( 'rst_DisplayName', '', true );    
+                this._editing.setFocus();
+            }
+            this._clear_title_for_separator = false;
             
             this.editForm.find('.ui-accordion').hide();
         }else{
@@ -1998,7 +2012,7 @@ console.log('No active tree node!!!!')
             $Db.dty().each(function(dty_ID, rec){
                if($Db.dty(dty_ID,'dty_Type')=='separator'){
                    k++;
-                   if(all_fields_ids.indexOf(dty_ID)<0){
+                   if( window.hWin.HEURIST4.util.findArrayIndex( dty_ID, all_fields_ids )<0){
                        ft_separator_group = $Db.dty(dty_ID,'dty_DetailTypeGroupID');
                        ft_separator_id = dty_ID; //not used yet
                        return false;
@@ -2014,7 +2028,7 @@ console.log('No active tree node!!!!')
                 var fields = {                
                     dty_DetailTypeGroupID: ft_separator_group,
                     dty_ID: -1,
-                    dty_Name: 'DIVIDER'+k,
+                    dty_Name: 'Header '+k+' - edit the name',
                     dty_HelpText: 'new separator',
                     dty_NonOwnerVisibility: "viewable",
                     dty_Status: "open",

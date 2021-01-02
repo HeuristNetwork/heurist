@@ -1631,7 +1631,7 @@ window.hWin.HEURIST4.ui = {
                         + '<div class="editFormDialog ent_content_full">'
                         
                                 + '<div class="ui-layout-north">'
-                                        +'<div class="editStructureHeader" style="background:white"><h1 style="float:left;margin: 10px;">Record structure editor</h1></div>'
+                                        +'<div class="editStructureHeader" style="background:white"></div>'
                                 + '</div>' 
                         
                                 + '<div class="ui-layout-west"><div class="editStructure treeview_with_header" style="background:white">'

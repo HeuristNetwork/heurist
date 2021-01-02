@@ -1929,6 +1929,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 edit_mode: 'editonly', //only edit form is visible, list is hidden
                 rec_ID: rty_ID,
                 selectOnSave: true,
+                suppress_edit_structure: true,
                 height: 820,
                 onClose: function(){
                     //refresh icon, title, mask
@@ -3231,7 +3232,9 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 if(this.options.edit_structure){
                     
                     var cont = this.element.find('.editStructureHeader').css({overflow:'hidden'});
+                    btn.hide();
 
+                    /*  2021-01-02
                     btn.button({icon:'ui-icon-pencil',label:'Edit attributes<br>(name, icon ...)'})
                             .css(btn_css)
                             .width(150).show()
@@ -3242,13 +3245,20 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                                 .appendTo(cont);    
                     btn2.find('.ui-button-icon')
                             .css({'font-size':'25px','float':'left',width:'25px',height:'25px','margin-top':'0px'});
-                
+                    */
+                    
+                    $('<div style="float:left;">'
+                        +'<span style="margin-top: 15px;display: inline-block;font-size: 12px;">Fields for: </span>'
+                        +'<h1 style="float:right;margin:10px;">'
+                        +$Db.rty(this._currentEditRecTypeID,'rty_Name')+'</h1></div>')
+                        .appendTo(cont);      
+                    
                     $('<span>').addClass('heurist-helper3').css({'float':'left','margin': '10px'}).html(
                         'This is an empty record. Test data entry as you develop the structure. '
                         +'<br>If you want to retain the data entered, hit [Save data], otherwise [Close]')  
                             .appendTo(cont);      
                 
-                    this.element.find('.btn-edit-rt').hide();
+                    this.element.find('.btn-edit-rt').hide(); //Attributes button next to Edit title mask
                 }else{
                     btn.button({icon:'ui-icon-gear',label:'Modify<br>structure'})
                             .css(btn_css)

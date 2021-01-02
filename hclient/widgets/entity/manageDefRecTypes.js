@@ -47,8 +47,8 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                 name:150,description:34,show:34,duplicate:34,fields:34,status:34},
     //fields_name:{rtyid:'ID',ccode:'Code',addrec:'Add',filter:'Filter',count:'Count',group:'Group',icon:'Icon',edit:'Attr',editstr:'Edit',
     //             name:'Name',description:'Description',show:'Show',duplicate:'Dup',fields:'Info',status:'Del'},
-        
-        
+
+
     //
     //                                                  
     //    
@@ -559,10 +559,10 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                     html += fld2(40,'Icon','','text-align:center');
                     break;
                 case 'edit':  
-                    html += fld2(34,'Attribs','Edit attributes','text-align:center;'); //font-size:12px
+                    html += fld2(34,'Edit','Edit','text-align:center;'); //font-size:12px
                     break;
                 case 'editstr': 
-                    html += fld2(34,'Edit','Edit','text-align:center');
+                    html += fld2(34,'Fields','Edit structure','text-align:center');
                     break;
                 case 'name':  
                     html += '$$NAME$$';//fld2(150,'Name','text-align:left');
@@ -1125,10 +1125,47 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                 
             }
 
-            //extent editing for record title
+            // extent editing for record title
             ele_mask.editing_input('option', 'onrecreate', __extendTitleMaskInput);
             __extendTitleMaskInput(ele_mask);
-
+            
+            //
+            // add edit structure button
+            //
+            if(this.options.suppress_edit_structure!==true){
+                
+            var $s = $('<div><div class="header optional" style="vertical-align: top; display: table-cell;"></div>'
+            +'<span class="editint-inout-repeat-button" style="min-width: 22px; display: table-cell;"></span>'
+            +'<div class="input-cell"><button></button>'
+            +'<span class="heurist-helper3" style="vertical-align: middle;padding-left: 20px;">'
+                +'You can also modify the fields for this record type whenever you are editing data</span>'
+            +'</div></div>');
+            
+            var edit_ele = this._editing.getFieldByName('rty_ShowURLOnEditForm');
+            $s.insertAfter(edit_ele);
+        
+            var btn = $s.find('button');
+            var new_record_params = {RecTypeID: this._currentEditID};
+            btn.button({icon:'ui-icon-pencil',label:'Edit fields'})
+                            .css({'font-weight': 'bold','font-size':'12px'})
+                            .width(150)
+                            .click(function(){
+                                //close this form and open edit structure
+                                function __openEditStructure(){
+                                    that._currentEditID = null;
+                                    that._getEditDialog(true).dialog('close');
+                                    
+                                    window.hWin.HEURIST4.ui.openRecordEdit(-1, null, 
+                                        {new_record_params:new_record_params, edit_structure:true});
+                                }
+                                
+                                if(that._editing.isModified()){
+                                    that._saveEditAndClose( null , __openEditStructure );
+                                }else{
+                                    __openEditStructure();
+                                }
+                            });
+            }
         }
         
         
@@ -1142,6 +1179,8 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         }});
         
         window.hWin.HEURIST4.ui.switchHintState2(ishelp_on, this.editForm, '.heurist-helper1');
+        
+        this.editForm.find('div.header').css({'min-widht':160, width:160});
         
         this._adjustEditDialogHeight();
     },   
