@@ -229,6 +229,9 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                 
                 //via entity data
                 this._cachedRecordset = $Db.rst(this.options.rty_ID);
+                if(this._cachedRecordset==null){
+                    this._cachedRecordset = new hRecordSet({entityName:'defRecStructure',count:0,offset:0,order:[]});
+                }
                 /*from server
                 var that = this;
                 window.hWin.HAPI4.EntityMgr.getEntityData(this.options.entity.entityName, false,
@@ -334,6 +337,12 @@ dty_TermIDTreeNonSelectableIDs
     _initTreeView: function(){
         
         var recset = this._cachedRecordset;
+        
+        if(recset.length()==0){
+            this.showBaseFieldEditor(-1, 0);
+        }
+        
+        
         //find all separators and detect json tree data in Extended Description field
         //if such treeview data is missed creates new one based on header/separators and rst_DisplayOrder
 
@@ -341,6 +350,7 @@ dty_TermIDTreeNonSelectableIDs
 
         //if such treeview data is missed creates new one based on header/separators and rst_DisplayOrder
         if(!treeData){
+            
             //order by rts_DisplayOrder
             var _order = recset.getOrder();
             _order.sort(function(a,b){  
@@ -929,6 +939,7 @@ dty_TermIDTreeNonSelectableIDs
         
         if(!(dtyID>0)){ //new field
         
+            var after_dty_ID = 0;
             if(arg2>0){ //add after
                 this._lockDefaultEdit = true;
                 var tree = this._treeview.fancytree("getTree");
@@ -936,6 +947,7 @@ dty_TermIDTreeNonSelectableIDs
                 if(node) node.setActive();
                 after_dty_ID = arg2;
             }
+            if(!(after_dty_ID>=0)) after_dty_ID = 0; //add as first
             
             //add new field to this record type structure
             popup_options['title'] = 'Select or Define new field';
@@ -1065,7 +1077,7 @@ dty_TermIDTreeNonSelectableIDs
                     if(after_dty_ID>0){
                         parentnode = tree.getNodeByKey(after_dty_ID);
                     }else{
-                        parentnode = tree.getActiveNode();
+                        parentnode = tree.rootNode; //getRootNode();//getActiveNode();
                     }
                     if(!parentnode){
 console.log('No active tree node!!!!')                      
@@ -1073,7 +1085,9 @@ console.log('No active tree node!!!!')
                     } 
                     
                     //add new node to tree
-                    parentnode.addNode({key:recID}, (parentnode.folder==true)?'firstChild':'after');
+                    parentnode.addNode({key:recID}, 
+                            (parentnode.isRootNode() || parentnode.folder==true)
+                                                    ?'firstChild':'after');
                     if(parentnode.folder){
                         parentnode.setExpanded(true);
                     }
@@ -1950,9 +1964,11 @@ console.log('No active tree node!!!!')
     //
     addNewSeparator: function( after_dtid, allow_proceed ){
         
+        var that = this;
+        
         if(allow_proceed!==true){
             this._allowActionIfModified( function(){ 
-                this.addNewSeparator( after_dtid, true );                            
+                that.addNewSeparator( after_dtid, true );                            
             } );
             return;
         }
@@ -1972,7 +1988,7 @@ console.log('No active tree node!!!!')
             var rty_ID = this.options.rty_ID;
     
             //find seprator field type ID that is not yet added to this record strucuture
-            var that = this;
+            
             var ft_separator_id =  null;
             var ft_separator_group =  $Db.dtg().getOrder()[0]; //add to first group
             
@@ -1999,13 +2015,14 @@ console.log('No active tree node!!!!')
                     dty_DetailTypeGroupID: ft_separator_group,
                     dty_ID: -1,
                     dty_Name: 'DIVIDER'+k,
+                    dty_HelpText: 'new separator',
                     dty_NonOwnerVisibility: "viewable",
                     dty_Status: "open",
                     dty_Type: "separator"};
                     
                 var request = {
                     'a'          : 'save',
-                    'entity'     : this.options.entity.entityName,
+                    'entity'     : 'defDetailTypes',
                     'fields'     : fields                     
                     };
                 window.hWin.HAPI4.EntityMgr.doRequest(request, 
@@ -2014,7 +2031,7 @@ console.log('No active tree node!!!!')
                             var dty_ID = response.data[0];
                             fields[ 'dty_ID' ] = (''+dty_ID);
                         
-                            $Db.dty(recID, null, fields); //add on client side  
+                            $Db.dty(dty_ID, null, fields); //add on client side  
                             
                             that.addNewFieldToStructure( dty_ID, after_dtid );
                         }else{
