@@ -77,11 +77,14 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         this.options.edit_height = 660;
         }*/
         this.options.edit_height = 440;
+        this.options.edit_width = (this.options.auxilary=='term')?550:610;
 
         this._super();
 
         var that = this;
 
+        this.editForm.css({'padding-top':'20px'});
+        
 
         window.hWin.HAPI4.addEventListener(this, window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, 
             function(data) { 
@@ -1223,6 +1226,8 @@ if(window.hWin.HEURIST4.util.isArrayNotEmpty(res.records)){
         
         //this.editForm.find('.heurist-helper1').removeClass('heurist-helper1').addClass('heurist-helper3');
         window.hWin.HEURIST4.ui.switchHintState2(ishelp_on, this.editForm, '.heurist-helper1');
+        
+        this._editing.getFieldByName('trm_Label').find('.input-cell').css({'padding-bottom': '20px'});
         
         this._adjustEditDialogHeight();
         

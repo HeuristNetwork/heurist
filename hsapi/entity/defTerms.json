@@ -15,16 +15,6 @@
         
         "fields": [
                 {
-                    "dtID": "trm_VocabularyGroupID",
-                    "dtFields":{
-                        "dty_Type":"enum",
-                        "rst_DisplayName":"Group:",
-                        "rst_DisplayHelpText": "The vocabulary group to which this vocabulary should be assigned", 
-                        "rst_FieldConfig": {"entity":"defVocabularyGroups"},
-                        "rst_RequirementType":"recommended"
-                    }
-                },
-                {
                     "dtID": "trm_Label",
                     "titleField": true,
                     "dtFields":{
@@ -38,6 +28,16 @@
                         "rst_DefaultValue":"",
                         "rst_RequirementType":"required",
                         "rst_MaxValues":1
+                    }
+                },
+                {
+                    "dtID": "trm_VocabularyGroupID",
+                    "dtFields":{
+                        "dty_Type":"enum",
+                        "rst_DisplayName":"Group:",
+                        "rst_DisplayHelpText": "The vocabulary group to which this vocabulary should be assigned", 
+                        "rst_FieldConfig": {"entity":"defVocabularyGroups"},
+                        "rst_RequirementType":"recommended"
                     }
                 },
                 {
@@ -92,7 +92,7 @@
                         "rst_DefaultValue": "enum",
                         "rst_Display":"hidden",
                         "rst_FieldConfig":["relation","enum"],
-                        "rst_DisplayHelpText": "This vocabulary can be used for relationship type (set this only if you want the vocabulary to appear as an option under Relationship type)"
+                        "rst_DisplayHelpText": "This vocabulary can be used for relationship type (set this only if you want<br>the vocabulary to appear as an option under Relationship type)"
                     }
                 },
                 {

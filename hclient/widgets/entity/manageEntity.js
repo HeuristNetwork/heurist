@@ -858,7 +858,7 @@ $.widget( "heurist.manageEntity", {
             }
         });
         
-        sh = sh+120
+        sh = sh+140
         
         if(sh!=dh && (dh<wh || sh<wh)){
             
@@ -1982,7 +1982,7 @@ this._time_debug = fin_time;
             }   
         }
         if(this._keepPos>0){
-console.log('scroll '+this._keepPos);            
+//console.log('scroll '+this._keepPos);            
             this.editForm.scrollTop(this._keepPos);  
         } 
     },

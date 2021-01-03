@@ -37,6 +37,7 @@ $.widget( "heurist.manageDefVocabularyGroups", $.heurist.manageEntity, {
             this.options.edit_mode = 'none';
             this.options.width = 300;
         }
+        this.options.edit_width = 550;
         
         this._super();
         
@@ -45,7 +46,7 @@ $.widget( "heurist.manageDefVocabularyGroups", $.heurist.manageEntity, {
             this.editForm.parent().hide();
             this.recordList.parent().css('width','100%');
         }
-
+        
     },
     
     //  
