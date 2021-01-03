@@ -1462,11 +1462,19 @@ span.fancytree-checkbox{
 .tree-rts .required, a.required{
     color:#CC0000 !important;
 }
-.tree-rts .recommended, .tree-rts .optional, a.recommended{
+.tree-rts .recommended, a.recommended{
     color:#6A7C99 !important;
 }
-.tree-rts .forbidden, a.forbidden{
-    color:lightgray !important;
+.tree-rts .forbidden, a.forbidden, .tree-rts .forbidden span{
+    color:black !important;
+    text-decoration: line-through;
+}
+.forbidden > label{
+    color:black !important;
+    text-decoration: line-through;
+}
+.tree-rts .optional, a.optional, .optional{
+    color:black !important;
 }
 
 
