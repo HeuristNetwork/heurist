@@ -136,7 +136,7 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
                     that.btn_select_rt.click();
                 }
             });  
-
+            
             this.btn_select_rt
                 .button({label:window.hWin.HR("Select record type"), icon: "ui-icon-carat-1-s", showLabel:false});
                 
@@ -148,6 +148,8 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
                     return false;
                         
                 }});
+            if(rt_list.length==1) this.btn_select_rt.hide()
+
            
            //adjust position of dropdown    
            this.sel_rectypes_btn = this.element.find( "#sel_rectypes-button");

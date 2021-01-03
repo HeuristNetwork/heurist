@@ -95,8 +95,9 @@ $.widget( "heurist.resultList", {
         search_realm:  null,  //accepts search/selection events from elements of the same realm only
         search_initial: null,  //NOT USED query string or svs_ID for initial search
         
-        supress_load_fullrecord: false //do not load full record data
+        supress_load_fullrecord: false, //do not load full record data
         
+        transparent_background: false 
     },
 
     _is_publication:false, //this is CMS publication - take css from parent
@@ -135,7 +136,7 @@ $.widget( "heurist.resultList", {
 
         this._is_publication  = this.element.parent().attr('data-heurist-app-id');
         
-        if(this._is_publication){
+        if(this._is_publication || this.options.transparent_background){
             //this is CMS publication - take css from parent
             this.element.addClass('ui-widget-content').css({'background':'none','border':'none'});
         }else{
@@ -479,7 +480,7 @@ $.widget( "heurist.resultList", {
         .css({'overflow-y':'auto'})
         .appendTo( this.element );
         
-        if(this._is_publication){ //make BG transparent
+        if(this._is_publication || this.options.transparent_background){ //make BG transparent
             this.div_toolbar.css({'background':'none'});
             this.div_content.css({'background':'none'});
         }else{
