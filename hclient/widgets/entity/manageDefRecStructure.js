@@ -1049,6 +1049,11 @@ dty_TermIDTreeNonSelectableIDs
             */
         };
         
+        if($Db.dty(dty_ID,'dty_Type')=='separator'){
+            fields['rst_SeparatorType'] = 'tabs';    
+        }
+        
+        
         var that = this;
         this._saveEditAndClose(fields, function( recID, fields ){
             
@@ -1410,13 +1415,12 @@ console.log('No active tree node!!!!')
                 edit_ele = this._editing.getFieldByName('rst_SeparatorType');
                 edit_ele.hide();
             }else{
-                sep_type = this._editing.getValue('rst_SeparatorType')[0];
+                sep_type = this._editing.getValue('rst_DefaultValue')[0]; //take from db
                 if(!(sep_type=='accordion' || sep_type=='tabs' || sep_type=='tabs_new' || sep_type=='expanded')){
-                    sep_type = 'tabs';
+                    sep_type = 'group';
                 }
             }
-            this._editing.setFieldValueByName( 'rst_SeparatorType', sep_type, false );
-
+            this._editing.setFieldValueByName( 'rst_SeparatorType', sep_type, false ); //assign to entry selector
 
             sep_type = this._editing.getValue('rst_RequirementType')[0];
             sep_type = (sep_type=='forbidden')?sep_type:'optional';
@@ -1425,11 +1429,13 @@ console.log('No active tree node!!!!')
             
             //clear title to force change default one
             if(this._clear_title_for_separator){
-                this._editing.setFieldValueByName( 'rst_DisplayName', '', true );    
+                this._editing.setFieldValueByName( 'rst_DisplayName', '', true );
+                //sep_type = 'tabs'; //default for new separator    
                 this._editing.setFocus();
+                this._editing.setModified(true);
             }
             this._clear_title_for_separator = false;
-            
+
             this.editForm.find('.ui-accordion').hide();
         }else{
             

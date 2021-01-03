@@ -40,8 +40,8 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         width:(window.hWin?window.hWin.innerWidth:window.innerWidth)*0.95,
         height:(window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95,
 //rtyid,'ccode','addrec','filter','count','group','icon','edit','editstr','name','description','show','duplicate','fields','status'        
-        fields:['icon','fields','editstr','name','count','filter','addrec','description','show','duplicate','status','rtyid','ccode'] 
-        //'edit',
+        fields:['icon','fields','edit','name','count','filter','addrec','description','show','duplicate','status','rtyid','ccode'] 
+        //'editstr',
         },
     fields_width: {rtyid:30,ccode:80,addrec:34,filter:34,count:40,group:34,icon:40,edit:34,editstr:34,
                 name:150,description:34,show:34,duplicate:34,fields:34,status:34},
@@ -185,7 +185,12 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         var that = this;
         
         if(this.options.select_mode=='manager'){
-            
+   
+            if(this.options.ui_params && $.isArray(this.options.ui_params.fields)){
+                var fields = this.options.ui_params.fields;
+                if(fields.indexOf('name')<0) fields.unshift('name');
+                if(fields.indexOf('edit')<0) fields.unshift('edit');
+            }    
             
             if(this.options.isFrontUI){
                 
@@ -534,8 +539,8 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         
         var html = '';
         if (!(this.usrPreferences && this.usrPreferences.fields)) return '';
-        var fields = this.usrPreferences.fields;
-
+        var fields = this.options.ui_params.fields; //this.usrPreferences.fields;
+        
         var i = 0;
         for (;i<fields.length;i++){
             switch ( fields[i] ) {
@@ -561,9 +566,9 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                 case 'edit':  
                     html += fld2(34,'Edit','Edit','text-align:center;'); //font-size:12px
                     break;
-                case 'editstr': 
-                    html += fld2(34,'Fields','Edit structure','text-align:center');
-                    break;
+//                case 'editstr': 
+//                    html += fld2(34,'Fields','Edit structure','text-align:center');
+//                    break;
                 case 'name':  
                     html += '$$NAME$$';//fld2(150,'Name','text-align:left');
                     break;
@@ -731,9 +736,9 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                 case 'edit':  
                     html += __action_btn('edit','ui-icon-pencil','Click to edit record type');
                     break;
-                case 'editstr': 
-                    html += __action_btn('editstr','ui-icon-pencil','Click to edit structure');
-                    break;
+//                case 'editstr': 
+//                    html += __action_btn('editstr','ui-icon-pencil','Click to edit structure');
+//                    break;
                 case 'name':  
                     html += '$$NAME$$'; 
                     break;
@@ -1134,8 +1139,8 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             //
             if(this.options.suppress_edit_structure!==true){
                 
-            var $s = $('<div><div class="header optional" style="vertical-align: top; display: table-cell;"></div>'
-            +'<span class="editint-inout-repeat-button" style="min-width: 22px; display: table-cell;"></span>'
+            var $s = $('<div style="margin: 10px 0 10px 175px;border: 2px solid orange;'
+            +'border-radius: 10px;padding: 10px 10px 5px;display: block;width: 570px;">'
             +'<div class="input-cell"><button></button>'
             +'<span class="heurist-helper3" style="vertical-align: middle;padding-left: 20px;">'
                 +'You can also modify the fields for this record type whenever you are editing data</span>'
@@ -1148,6 +1153,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             var new_record_params = {RecTypeID: this._currentEditID};
             btn.button({icon:'ui-icon-pencil',label:'Edit fields'})
                             .css({'font-weight': 'bold','font-size':'12px'})
+                            .addClass('ui-heurist-button')
                             .width(150)
                             .click(function(){
                                 //close this form and open edit structure
@@ -1166,6 +1172,11 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                                 }
                             });
             }
+            
+            edit_ele = this._editing.getFieldByName('rty_ID');
+            $('<div style="display:block"><span style="margin-top: 15px;display: inline-block;font-size: 12px;">'
+            +'Define: </span><h1 style="display: inline-block;margin:10px;">'
+            +$Db.rty(this._currentEditID,'rty_Name')+'</h1></div>').insertBefore(edit_ele);            
         }
         
         

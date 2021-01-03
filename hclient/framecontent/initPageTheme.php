@@ -397,6 +397,7 @@ span.fancytree-node:hover{
     background:<?php uout('design_fade_bg', '#DAD0E4');?>
 }
 
+.ui-heurist-design .ui-heurist-button, 
 .ui-heurist-design .ui-state-active, 
 .ui-heurist-design .fancytree-active,
 .ui-heurist-design .fancytree-node:hover
