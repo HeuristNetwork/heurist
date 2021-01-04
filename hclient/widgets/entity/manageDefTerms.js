@@ -897,6 +897,12 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 parents = '';
             }
             
+            var inv_id = $Db.trm(recID, 'trm_InverseTermId');
+            if ( inv_id>0 ){
+                var sInvLabel = window.hWin.HEURIST4.util.htmlEscape($Db.trm(inv_id, 'trm_Label'));
+                if(sInvLabel) sLabel = sLabel + '&nbsp;&nbsp;&nbsp;[> '+ sInvLabel +']';    
+            }
+            
             sWidth = 'display:inline-block;padding-top:4px;max-width:320px;'; //+((lvl>2)?'25':'30')+'%;';
             //sPad = 'padding-left:'+(lvl*20);
             
@@ -1754,7 +1760,8 @@ console.log('Error !!! Parent not found for '+trm_ID);
             //open multi selector
             var popup_options = {
                 select_mode:'select_multi',
-                height: (window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95,
+                width: 500,
+                height: Math.min(600,(window.hWin?window.hWin.innerHeight:window.innerHeight)*0.75),
                 title: ('Select terms to be added to vocabulary "'
                         + $Db.trm(this.options.trm_VocabularyID,'trm_Label')
                         + '" by reference'),
