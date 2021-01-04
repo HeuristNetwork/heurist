@@ -117,6 +117,7 @@ window.hWin.HEURIST4.collection = {
         if(!window.hWin.HEURIST4.util.isempty(window.hWin.HEURIST4.collection._collection)){
 
             var  widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('svs_list');
+            
             if(widget){
                 //call method editSavedSearch - save collection as search
 

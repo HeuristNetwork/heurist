@@ -212,6 +212,16 @@ $.widget( "heurist.mainMenu6", {
 */                
         });
         
+        //find all saved searches for current user
+        if(!window.hWin.HAPI4.currentUser.usr_SavedSearch){  
+            window.hWin.HAPI4.SystemMgr.ssearch_get( null,
+                function(response){
+                    if(response.status == window.hWin.ResponseStatus.OK){
+                        window.hWin.HAPI4.currentUser.usr_SavedSearch = response.data;
+                    }
+            });
+        }
+        
         //that.initHelpDiv();
 
         $(window.hWin.document).on(window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE
@@ -943,10 +953,15 @@ $.widget( "heurist.mainMenu6", {
     //
     //    
     getSvsList: function(){
-        if(!this.svs_list){
-           this.svs_list = this._init_SvsList(this.menues['explore'].find('#svs_list'),0);  
+        
+        var cont = this.menues_explore_popup.find('#search_filters');
+        
+        if(cont.length==0){
+            //create new one
+            cont = $('<div id="search_filters" class="explore-widgets">').appendTo(this.menues_explore_popup);
         }
-        return this.svs_list; 
+        return this._init_SvsList(cont, 1);
+     
     },
     
     //
@@ -1427,7 +1442,8 @@ $.widget( "heurist.mainMenu6", {
         is_modal = (is_modal!==false);
         
         var that = this;
-        
+  
+/*        
         //find all saved searches for current user
         if(!window.hWin.HAPI4.currentUser.usr_SavedSearch){  
             window.hWin.HAPI4.SystemMgr.ssearch_get( null,
@@ -1437,6 +1453,7 @@ $.widget( "heurist.mainMenu6", {
                     }
             });
         }
+*/        
 
         var $dlg = this.edit_svs_dialog.showSavedFilterEditDialog( mode, null, null, this.currentSearch , false, 
             { my: 'left+'+left_position+' top+'+top_position, at: 'left top', of:this.divMainMenu},

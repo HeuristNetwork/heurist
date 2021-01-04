@@ -2369,9 +2369,16 @@ $.widget( "heurist.svs_list", {
                 setTimeout(function(){that.options.menu_locked.call( that, false );}, 300);
             }
             
+            var pos = null;
+            if(this.options.is_h6style && this.element.is(':visible')){
+                pos = { my: "left top", at: "left top", of: this.element};
+            }else{
+                pos = { my: "center", at: "center", of: window};
+            }
+            
             //this.edit_dialog.callback_method  = callback;
             this.edit_dialog.showSavedFilterEditDialog( mode, groupID, svsID, squery, is_short, 
-                this.options.is_h6style?{ my: "left top", at: "left top", of: this.element}:null, 
+                pos, 
                 callback, 
                 true,  //modal
                 this.options.is_h6style );
