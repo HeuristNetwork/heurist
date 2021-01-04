@@ -175,7 +175,7 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
         }
 */        
         //get all saved searches
-        var saved_searches = [];
+        var saved_searches = [{key:0, title:'select saved filter....'}];
         var ssearches = window.hWin.HAPI4.currentUser.usr_SavedSearch;
         var grp_IDs = [];
         for (var svsID in ssearches)
@@ -203,6 +203,7 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
                 that.options.entity.fields[idx]['dtFields']['rst_FieldConfig'] = menu_entries;
                 k++;
             }else if(fields[idx]['dtID']=='dsh_ParameterSavedSearch'){
+                that.options.entity.fields[idx]['dtFields']['rst_DefaultValue'] = 0;
                 that.options.entity.fields[idx]['dtFields']['rst_FieldConfig'] = saved_searches;
                 k++;
             }
