@@ -40,7 +40,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         width:(window.hWin?window.hWin.innerWidth:window.innerWidth)*0.95,
         height:(window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95,
 //rtyid,'ccode','addrec','filter','count','group','icon','edit','editstr','name','description','show','duplicate','fields','status'        
-        fields:['icon','fields','edit','name','count','filter','addrec','description','show','duplicate','status','rtyid','ccode'] 
+        fields:['icon','fields','edit','name','count','filter','addrec','show','duplicate','status','rtyid','ccode','description'] 
         //'editstr',
         },
     fields_width: {rtyid:30,ccode:80,addrec:34,filter:34,count:40,group:34,icon:40,edit:34,editstr:34,
@@ -146,7 +146,8 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                     },500);
                 };
                 */
-            }    
+            }
+            
         }
                 
         
@@ -231,6 +232,25 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                                     //delay: 200
                                 });   
                     }});
+                    
+                    
+            if(this.options.isFrontUI) {
+                this._on( this.recordList, {        
+                        "resultlistondblclick": function(event, selected_recs){
+                                    this.selectedRecords(selected_recs); //assign
+                                    
+                                    if(window.hWin.HEURIST4.util.isRecordSet(selected_recs)){
+                                        var recs = selected_recs.getOrder();
+                                        if(recs && recs.length>0){
+                                            var recID = recs[recs.length-1];
+                                            this._onActionListener(event, {action:'edit',recID:recID}); 
+                                        }
+                                    }
+                                }
+                        });
+
+            }    
+                    
                     
         }else if(this.options.select_mode=='select_multi'){
             this.recordList.resultList({ 
@@ -549,7 +569,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                     html += fld2(80,'ConceptID','Concept code','text-align:center');     
                     break;
                 case 'addrec': 
-                    html += fld2(34,'Add','Add record,text-align:center');
+                    html += fld2(34,'Add','Add record','text-align:center');
                     break;
                 case 'filter':
                     html += fld2(34,'Filter','Filter records','text-align:center');
@@ -594,12 +614,12 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         // otherwise this is Name
         var w_desc = 0, i_desc = fields.indexOf('description');
         if(i_desc>=0){
-            w_desc = max_width-used_width-150;
+            w_desc = max_width-used_width-250;
             if(w_desc<30) w_desc = 30;
 //console.log(max_width+'  '+'  '+used_width+'  '+w_desc);            
             html = html.replace('$$DESC$$',fld2(w_desc, 'Description', 'Description', 'text-align:left'))
         }
-        var name_width = max_width - used_width;
+        var name_width = 250; //max_width - used_width;
 //console.log('  =>'+name_width);        
         html = html.replace('$$NAME$$',fld2(name_width, 'Name', 'Name', 'text-align:left'))
         
@@ -792,14 +812,14 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
 
         var w_desc = 0, i_desc = fields.indexOf('description');
         if(i_desc>=0){
-            w_desc = max_width-used_width-150;
+            w_desc = max_width-used_width-250;
             if(w_desc<30) w_desc = 30;
             
             html = html.replace('$$DESC$$', fld2('rty_Description',null,null,
                     'min-width:'+w_desc+'px;max-width:'+w_desc+'px;font-style:italic;font-size:smaller')); 
         }
         
-        var name_width = max_width - used_width - w_desc;
+        var name_width = 250; //max_width - used_width - w_desc;
 //console.log('  '+max_width+'  '+'  '+used_width+'  '+w_desc+'  =>'+name_width);        
         
         html = html.replace('$$NAME$$',fld2('rty_Name', name_width, null,'text-align:left'))

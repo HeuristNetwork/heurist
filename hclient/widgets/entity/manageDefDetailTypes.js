@@ -158,6 +158,24 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                                 });   
                     }
             });
+            
+            
+            if(this.options.isFrontUI) {
+                this._on( this.recordList, {        
+                        "resultlistondblclick": function(event, selected_recs){
+                                    this.selectedRecords(selected_recs); //assign
+                                    
+                                    if(window.hWin.HEURIST4.util.isRecordSet(selected_recs)){
+                                        var recs = selected_recs.getOrder();
+                                        if(recs && recs.length>0){
+                                            var recID = recs[recs.length-1];
+                                            this._onActionListener(event, {action:'edit',recID:recID}); 
+                                        }
+                                    }
+                                }
+                        });
+
+            }                
         }
         
 //console.log( 'DT initControls  ' + (new Date().getTime() / 1000 - this._time_debug));
@@ -278,7 +296,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
 */    
 
 
-    visible_fields: ['dtyid','ccode','edit','name','type','description','show','usedin','status'], //'ccode','group',       
+    visible_fields: ['dtyid','ccode','edit','name','type','show','usedin','status','description'], //'ccode','group',       
     //----------------------
     //
     //
@@ -315,7 +333,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
            switch ( fields[i] ) {
                 case 'dtyid': html += fld2(30,'ID','text-align:center'); break;
                 case 'ccode': 
-                    html += fld2(80,'Code','text-align:center');     
+                    html += fld2(80,'ConceptID','text-align:center');     
                     break;
                 case 'group': 
                     html += fld2(30,'Group','text-align:center');
@@ -336,20 +354,20 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                     html += fld2(30,'Show','text-align:center');
                     break;
                 case 'usedin': 
-                    html += fld2(30,'Fields','text-align:center');
+                    html += fld2(30,'RecTypes','text-align:center');
                     break;
                 case 'status': 
-                    html += fld2(30,'Status','text-align:center');
+                    html += fld2(30,'Del','text-align:center');
                     break;
             }   
         }
         
-        var w_desc = max_width-used_width-190;
+        var w_desc = max_width-used_width-330;
         if(w_desc<30) w_desc = 30;
 //console.log(max_width+'  '+'  '+used_width+'  '+w_desc);            
         html = html.replace('$$DESC$$',fld2(w_desc, 'Description', 'text-align:left'));
 
-        var name_width = max_width - used_width;
+        var name_width = 330; //max_width - used_width;
 //console.log('  =>'+name_width);        
         html = html.replace('$$NAME$$',fld2(name_width, 'Name', 'text-align:left'))
         
@@ -399,9 +417,9 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                             - ((this.options.select_mode=='select_multi') ?40:33);
         var used_width = 330;//244;
 
-        var w_desc = max_width - used_width - 190;
+        var w_desc = max_width - used_width - 330;
         if(w_desc<30) w_desc = 30;
-        var name_width = max_width - used_width - w_desc;
+        var name_width = 330; //max_width - used_width - w_desc;
         
         
 
@@ -481,11 +499,11 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                 }
                 
                 var sUsage = '<div><b>Warning</b><br/><br/><b>'+$Db.dty(action.recID,'dty_Name')
-                        +'</b> is used in the following record types:<br/>'
+                        +'</b> is used in the following record types:<br/><br/>'
                         +sList
                         +'<br/><br/>'
                         +'You have to either delete the field from the record type, '
-                        +'or delete the record type (it may not be possible or desirable to delete the record type)</div>';
+                        +'or delete the record type<br>(it may not be possible or desirable to delete the record type)</div>';
 
                 $dlg = window.hWin.HEURIST4.msg.showMsgDlg(sUsage, null, {title:'Warning'}, 
                             {default_palette_class:this.options.default_palette_class});        
