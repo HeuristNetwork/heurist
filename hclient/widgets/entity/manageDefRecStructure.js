@@ -49,6 +49,8 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
     //
     //    
     _init: function() {
+
+        this.options.default_palette_class = 'ui-heurist-design';
         
         //special header field stores UI structure
         if(!(this.options.rec_ID_sample>0)) {
@@ -1454,8 +1456,29 @@ console.log('No active tree node!!!!')
                 +this._currentEditID+' <span class="ui-icon ui-icon-circle-info"/></span>')
                 .attr('title', baseFieldDetails)
                 .appendTo(bottom_div);
-        
-            
+                
+                
+            var edit_ele= this._editing.getFieldByName('rst_DisplayWidth');
+            if(edit_ele){
+                edit_ele.editing_input('option','change', function(){
+                    
+                    var res = this.getValues()[0];
+                    if(res>120){
+                        window.hWin.HEURIST4.msg.showMsgDlg(
+                        'This field width might result in the field being wider than the screen. '
+                        +'Click OK for this width, Cancel to set to 120 (conservative setting).',
+                        function(){
+                            that._editing.setFieldValueByName('rst_DisplayWidth', 120, true);        
+                            that.onEditFormChange(); //trigger change   
+                        }, 
+                        {title:'Warning',yes:'Cancel',no:'OK'},
+                        {default_palette_class:that.options.default_palette_class});  
+                    }else{
+                        that.onEditFormChange(); //trigger change
+                    }
+                }); 
+            }
+                
         }
 
         var btnCancel = $('<button>').attr('id', 'btnCloseEditor_rts')
@@ -1850,6 +1873,8 @@ console.log('No active tree node!!!!')
             if(window.hWin.HEURIST4.util.isempty(fields['rst_DisplayOrder'])){
                 fields['rst_DisplayOrder'] = '0';
             }
+            
+            if(fields['rst_DisplayWidth']>255) fields['rst_DisplayWidth'] = 255;
             
             
             this._stillNeedUpdateForRecID = recID;    
