@@ -703,7 +703,7 @@ $.widget( "heurist.editing_input", {
                     
                     var div_prompt = $('<div style="line-height:20px"><b>Please use the '
                         + fname
-                        + ' button in the <span>website editor</span> to edit this field. '
+                        + ' button in the <span>website editor</span> to edit this field.<br>'
                         + fstatus+'</b></div>')
                         .insertBefore($input);
                     $input.hide();
@@ -2698,7 +2698,8 @@ console.log('onpaste');
 
               //if the size is greater than zero
               if (parseFloat( dwidth ) > 0) 
-                  var nw = Math.round(2 + Math.min(120, Number(dwidth))) + "ex";
+                  var nw = Math.round( 2+Number(dwidth) ) + "ex";
+                    //Math.round(2 + Math.min(120, Number(dwidth))) + "ex";
                   $input.css('min-width', nw); //was *4/3
         }
         
