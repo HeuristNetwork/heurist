@@ -3954,7 +3954,7 @@ function onFieldAddSuggestion(event, insertAfterRstID){
                                 fields_list_div.hide();
                                 input_name.val('').focus();
                                 
-                                window.hWin.HEURIST4.msg.showMsgFlash('Field is added to record structure');
+                                window.hWin.HEURIST4.msg.showMsgFlash('Field added to record structure');
                                 
                                 editStructure.doExpliciteCollapse(insertAfterRstID, false);
                                 editStructure.addDetails(_dty_ID, null, insertAfterRstID);

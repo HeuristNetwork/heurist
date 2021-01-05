@@ -241,7 +241,7 @@ $system_folders = $system->getSystemFolders();
 
             doHarvest($dirs);
 
-            print "<div>Syncronization completed</div>";
+            print "<div>Synchronisation completed</div>";
             print "<div style=\"color:green\">Total files processed: $rep_counter </div>";
         }
 
