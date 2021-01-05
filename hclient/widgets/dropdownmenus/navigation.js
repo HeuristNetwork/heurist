@@ -146,7 +146,10 @@ $.widget( "heurist.navigation", {
             DT_CMS_CSS = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_CSS'],
             DT_CMS_SCRIPT = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_SCRIPT'],
             DT_CMS_TARGET = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_TARGET'];//target element on page or popup
-            DT_CMS_PAGETITLE = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_PAGETITLE'];//show page title above content
+            DT_CMS_PAGETITLE = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_PAGETITLE'],//show page title above content
+            
+            TERM_NO = $Db.getLocalID('trm','2-531'),
+            TERM_NO_old = $Db.getLocalID('trm','99-5447');
             
         var that = this;
         var ids_was_added = [], ids_recurred = [];
@@ -173,7 +176,10 @@ $.widget( "heurist.navigation", {
                     //target and position
                     var pageTarget = resdata.fld(record, DT_CMS_TARGET);
                     var pageStyle = resdata.fld(record, DT_CMS_CSS);
-                    var showTitle = (resdata.fld(record, DT_CMS_PAGETITLE)=='5949');
+                    var showTitle = resdata.fld(record, DT_CMS_PAGETITLE); 
+                    
+                    showTitle = (showTitle!==TERM_NO && showTitle!==TERM_NO_old);
+                    
                     var hasContent = !window.hWin.HEURIST4.util.isempty(resdata.fld(record, DT_EXTENDED_DESCRIPTION))
                     
                     if(!(that.first_not_empty_page_id>0) && hasContent){

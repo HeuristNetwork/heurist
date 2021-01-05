@@ -270,8 +270,10 @@ $image_logo = $image_logo?'<img style="max-height:80px;max-width:270px;" src="'.
 
 $meta_keywords = htmlspecialchars(__getValue($rec, DT_CMS_KEYWORDS));
 $meta_description = htmlspecialchars(__getValue($rec, DT_SHORT_SUMMARY));
-$show_pagetitle = ((__getValue($rec, DT_CMS_PAGETITLE))!==ConceptCode::getTermLocalID('99-5447'));
-
+$show_pagetitle = __getValue($rec, DT_CMS_PAGETITLE);
+$show_pagetitle = ($show_pagetitle!==ConceptCode::getTermLocalID('2-531') && 
+                       $show_pagetitle!==ConceptCode::getTermLocalID('99-5447'));
+//2-532 - YES   2-531 - NO
 
 if(!$isWebPage && __getValue($rec,DT_EXTENDED_DESCRIPTION)==''){
     //home page is empty
