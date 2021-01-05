@@ -1177,6 +1177,7 @@ $.widget( "heurist.editing_input", {
                                 title: 'Create relationship between records ( Field: "'
                                     +$Db.dty(that.options.dtID, 'dty_Name')+'" )',
                                 relmarker_dty_ID: that.options.dtID,
+                                default_palette_class: 'ui-heurist-populate',
                                 onClose: __onCloseAddLink 
                             };
                            
@@ -2166,6 +2167,7 @@ $.widget( "heurist.editing_input", {
                             select_return_mode:select_return_mode, //ids or recordset(for files)
                             filter_group_selected:null,
                             filter_groups: this.configMode.filter_group,
+                            default_palette_class: 'ui-heurist-populate',
                             onselect:function(event, data){
 
                              if(data){
@@ -2588,9 +2590,10 @@ console.log('onpaste');
                         window.hWin.HEURIST4.msg.showDialog(url, {height:'900', width:'1000',
                             window: window.hWin,  //opener is top most heurist window
                             dialogid: 'map_digitizer_dialog',
+                            default_palette_class: 'ui-heurist-populate',
                             params: wkt_params,
                             title: window.hWin.HR('Heurist map digitizer'),
-                            class:'ui-heurist-bg-light',
+                            //class:'ui-heurist-bg-light',
                             callback: function(location){
                                 if( !window.hWin.HEURIST4.util.isempty(location) ){
                                     //that.newvalues[$input.attr('id')] = location

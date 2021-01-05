@@ -999,7 +999,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             }
             
             if(options.h6style_class){
-                $dlg.addClass('ui-heurist-bg-light');
+                //$dlg.addClass('ui-heurist-bg-light');
                 $dlg.parent().addClass('ui-dialog-heurist '+options.h6style_class);
             }
             
