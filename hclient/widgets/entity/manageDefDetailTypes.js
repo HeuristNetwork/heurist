@@ -968,7 +968,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                             that.fields_list_div.hide();
                             input_name.val('').focus();
 
-                            window.hWin.HEURIST4.msg.showMsgFlash('Field is added to record structure');
+                            window.hWin.HEURIST4.msg.showMsgFlash('Field added to record structure');
 
                             //that.selectedRecords( [_dty_ID] );
                             //that._selectAndClose();
