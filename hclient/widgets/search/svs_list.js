@@ -498,7 +498,7 @@ $.widget( "heurist.svs_list", {
 
             +'<div title="'+this._HINT_WITHRULES+'">'
             +'<span class="ui-icon ui-icon-shuffle" style="color:orange;display:inline-block; vertical-align: bottom; font-size:1em;width:0.9em;"></span>'
-            +'&nbsp;Search with rules</div>';
+            +'&nbsp;&nbsp;Rules</div>';
 /*            
             +'<div title="'+this._HINT_RULESET+'">'
             +'<span class="ui-icon ui-icon-shuffle" style="color:orange;display:inline-block; vertical-align: bottom; font-size:1em"></span>'
@@ -1142,7 +1142,7 @@ $.widget( "heurist.svs_list", {
         var sInfo = '';
         if(this.options.container_width>199){
             sWidth = this.options.container_width - 100;
-            sInfo = '<span style="font-size:0.8em;font-weight:normal;vertical-align:top;line-height: 1.8em;"> ('
+            sInfo = '<span style="font-size:0.8em;font-weight:normal;vertical-align:top;line-height: 1.8em;display:inline-block;"> ('
             + ((sIcon=='user')?'private':'workgroup')
             + ')</span>';
         }else if(this.options.container_width>0){
