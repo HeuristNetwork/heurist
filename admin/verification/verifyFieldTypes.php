@@ -125,10 +125,10 @@ function getInvalidFieldTypes($rectype_id){
     "dty_Type,".
     "rst_RecTypeID,".
     "rst_DisplayName, rty_Name,".
-    "rst_DefaultValue".
+    "rst_DefaultValue, rst_ID, dty_PtrTargetRectypeIDs, dty_JsonTermIDTree".
     " FROM defDetailTypes, defRecStructure, defRecTypes WHERE rst_RecTypeID=rty_ID ".
-    " AND rst_DetailTypeID=dty_ID and rst_DefaultValue is not null and ".
-    "dty_Type in ('enum','relationtype') ";  //,'resource'
+    " AND rst_DetailTypeID=dty_ID and rst_DefaultValue is not null and rst_DefaultValue<>'' AND ".
+    "dty_Type in ('resource','enum') ";  //,'relationtype','relmarker'
     if($rectype_id>0) {
         $query = $query.' and rst_RecTypeID='.$rectype_id;
     }
@@ -138,30 +138,55 @@ function getInvalidFieldTypes($rectype_id){
     $rtysWithInvalidDefaultValues = array();
     if($res){
         while ($row = $res->fetch_assoc()) {
+            
+            $reason = null;
 
             $dtyID = $row['dty_ID'];
             $rtyID = $row['rst_RecTypeID'];
             
-            if($row['dty_Type']=='resource'){
-                
-                $res2 = getInvalidRectypes($row['rst_DefaultValue']);
-                if (count($res2[0])){
-                    $rtysWithInvalidDefaultValues[] = $row;
+
+            if(is_numeric($row['rst_DefaultValue']) && $row['rst_DefaultValue']>0){
+                if($row['dty_Type']=='resource'){
+                    
+                        //check that record for resource field exists
+                        $res2 = mysql__select_value($mysqli, 'select rec_RecTypeID from Records where rec_ID='.$row['rst_DefaultValue']);    
+                        if($res2>0){
+                            //record exists - check that it fits constraints
+                            if($row['dty_PtrTargetRectypeIDs']){
+                                if(!in_array($res2, explode(',',$row['dty_PtrTargetRectypeIDs']))){
+                                    $reason = ' Record type does not fit constraints';
+                                }
+                            }
+                        }else{
+                            //record does not exist
+                            $reason = ' Record does not exist';
+                        }
+                }else{
+                    //check that default term belongs to vocabulary
+                    if(!VerifyValue::isValidTerm($row['dty_JsonTermIDTree'], null, $row['rst_DefaultValue'], $dtyID )){
+                        $reason = ' Value does not belong to specified vocabulary';
+                    }
                 }
-                
             }else{
-                $res2 = getInvalidTerms($row['rst_DefaultValue'], false);
-                if (count($res2[0])){
-                    $rtysWithInvalidDefaultValues[] = $row;
-                }
+                    $reason = ' Value is not numeric';
+                    
             }
+                
+            
+            if($reason){
+                //clear wrong defult value
+                $row['reason'] = $reason;
+                $rtysWithInvalidDefaultValues[] = $row;    
+                $mysqli->query('UPDATE defRecStructure set rst_DefaultValue=NULL where rst_ID='.$row['rst_ID']);
+            }
+            
         }
     }
 
     return array("terms"=>$dtysWithInvalidTerms, 
                  "terms_nonselectable"=>$dtysWithInvalidNonSelectableTerms, 
                  "rt_contraints"=>$dtysWithInvalidRectypeConstraint,
-                 "rt_defvalues"=>$rtysWithInvalidDefaultValues);
+                 "rt_defvalues"=>$rtysWithInvalidDefaultValues);  //wrong default values
 }
 
 //
@@ -251,7 +276,7 @@ function createValidTermTree($termTree, $invalidTermIDs){
 }
 
 //
-// function that check the existaance of all rectype ids in the passed string
+// function that check the existance of all rectype ids in the passed string
 //
 function getInvalidRectypes($formattedStringOfRectypeIDs) {
     global $RTN;

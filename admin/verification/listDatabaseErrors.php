@@ -70,7 +70,7 @@ $dtysWithInvalidTerms = @$lists["terms"];
 $dtysWithInvalidNonSelectableTerms = @$lists["terms_nonselectable"];
 $dtysWithInvalidRectypeConstraint = @$lists["rt_contraints"];
 
-$rtysWithInvalidRectypeConstraint = @$lists["rt_defvalues"];
+$rtysWithInvalidDefaultValues = @$lists["rt_defvalues"];
 ?>
 <html>
     <head>
@@ -397,18 +397,21 @@ $rtysWithInvalidRectypeConstraint = @$lists["rt_defvalues"];
                 print '<br/><h3 class="res-valid">OK: All field type definitions are valid</h3>';
             }
 
-            if($rtysWithInvalidRectypeConstraint && is_array($rtysWithInvalidRectypeConstraint) && count($rtysWithInvalidRectypeConstraint)>0){
+            if($rtysWithInvalidDefaultValues && 
+                is_array($rtysWithInvalidDefaultValues) && 
+                count($rtysWithInvalidDefaultValues)>0){
             ?>
                 <br/><p><br/></p><h3>Warning: Wrong field default values for record type structures</h3><br/>&nbsp;<br/>
 
-The following fields' default values in record type structures have inconsistent data (unknown codes for terms). This is nothing to be concerned about, unless it reoccurs, in which case please <?php echo CONTACT_HEURIST_TEAM;?>. 
+The following fields' default values in record type structures have inconsistent data (unknown codes for terms). All these values are removed from database definitions.
 <br/><br/>
-You can edit the record type structure by clicking on the name in the list below. Simply opening the problem field and hitting save will in many cases resolve the problem; you may also wish to choose a default value from the dropdown of allowable values.<br />&nbsp;<br/>
+You can define new default value by clicking on the name in the list below.<br />&nbsp;<br/>
                 
                 <?php 
-                foreach ($rtysWithInvalidRectypeConstraint as $row) {
+                foreach ($rtysWithInvalidDefaultValues as $row) {
                     ?>
-                    <div class="msgline"><b><a href="#" onclick='{ onEditRtStructure(<?= $row['rst_RecTypeID'] ?>); return false}'><?= $row['rst_DisplayName'] ?></a></b> field (code <?= $row['dty_ID'] ?>) in record type <?= $row['rty_Name'] ?>  has invalid default value (<?= ($row['dty_ID']=='resource'?'record ID ':'term ID ').$row['rst_DefaultValue'] ?>)
+                    <div class="msgline"><b><a href="#" onclick='{ onEditRtStructure(<?= $row['rst_RecTypeID'] ?>); return false}'><?= $row['rst_DisplayName'] ?></a></b> field (code <?= $row['dty_ID'] ?>) in record type <?= $row['rty_Name'] ?>  has invalid default value (<?= ($row['dty_Type']=='resource'?'record ID ':'term ID ').$row['rst_DefaultValue'] ?>)
+                    <span style="font-style:italic"><?=$row['reason'] ?></span>
                     </div>
                     <?php
                 }//for
