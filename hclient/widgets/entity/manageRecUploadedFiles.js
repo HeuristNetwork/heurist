@@ -34,7 +34,9 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
     //
     _init: function() {
         
-        this.options.default_palette_class = 'ui-heurist-admin';
+        if(!this.options.default_palette_class){
+            this.options.default_palette_class = 'ui-heurist-admin';    
+        }
         
         this.options.coverall_on_save = true;
         this.options.layout_mode = 'short';

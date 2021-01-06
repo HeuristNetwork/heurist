@@ -1596,7 +1596,11 @@ $.widget( "heurist.mainMenu6", {
                 ele.load(window.hWin.HAPI4.baseURL+'hclient/widgets/dropdownmenus/welcome.html',
                         function(){
                            var url = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database;
-                           $('.bookmark-url').html('<a href="'+url+'">'+url+'</a>');
+                           $('.bookmark-url').html('<a href="#">'+url+'</a>').click(function(e){
+                                window.hWin.HEURIST4.util.stopEvent(e);
+                                window.hWin.HEURIST4.msg.showMsgFlash('Press Ctrl+D to bookmark this page',1000);
+                                return false;
+                           });
                            $('.template-url').attr('href', window.hWin.HAPI4.baseURL
                                             +'documentation_and_templates/db_design_template.rtf');
                         });

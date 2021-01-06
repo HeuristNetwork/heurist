@@ -739,7 +739,7 @@ console.log(menu.find('.ui-menu-item').css('padding'));
             padding: '0px',
             title: window.hWin.HR(action_type),
             callback: callback,
-            class:'ui-heurist-bg-light'} );
+            default_palette_class:'ui-heurist-explore'} );
     },
 
 

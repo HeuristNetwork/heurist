@@ -23,6 +23,7 @@ $.widget( "heurist.recordAction", {
     options: {
     
         is_h6style: false,    
+        default_palette_class: 'ui-heurist-explore', 
         //DIALOG section       
         isdialog: false,     // show as dialog @see  _initDialog(), popupDialog(), closeDialog
         supress_dialog_title: false, //hide dialog title bar (applicable if isdialog=true
@@ -73,8 +74,6 @@ $.widget( "heurist.recordAction", {
     //
     _init: function() {
         
-        this.element.addClass('ui-heurist-bg-light');
-            
         if(this.options.currentRecordset){
             this._currentRecordset  = this.options.currentRecordset;
             this._currentRecordsetSelIds = null; //this.options.currentRecordsetSel;
@@ -90,7 +89,11 @@ $.widget( "heurist.recordAction", {
         
         if(this.options.isdialog){  //show this widget as popup dialog
             this._initDialog();
+        }else{
+            this.element.addClass('ui-heurist-bg-light');
         }
+            
+            
         
         //init layout
         var that = this;
@@ -287,6 +290,19 @@ $.widget( "heurist.recordAction", {
 
             var $dlg = this._as_dialog.dialog("open");
             
+            
+            if(this._as_dialog.attr('data-palette')){
+                $dlg.parent().removeClass(this._as_dialog.attr('data-palette'));
+            }
+            if(this.options.default_palette_class){
+                this._as_dialog.attr('data-palette', this.options.default_palette_class);
+                $dlg.parent().addClass(this.options.default_palette_class);
+                this.element.removeClass('ui-heurist-bg-light');
+            }else{
+                this._as_dialog.attr('data-palette', null);
+                this.element.addClass('ui-heurist-bg-light');
+            }
+
             if(this.options.supress_dialog_title) $dlg.parent().find('.ui-dialog-titlebar').hide();
             
             var helpURL = (this.options.helpContent)
