@@ -2337,12 +2337,12 @@ console.log('Error !!! Parent not found for '+trm_ID);
         
             if(isVocab){
                 
-                    sTitle = 'Import vocabularies for vocabulary group '+
+                    sTitle = 'Import vocabularies (excluding terms) for vocabulary group: '+
                         window.hWin.HEURIST4.util.htmlEscape($Db.vcg(parent_ID,'vcg_Name'));                
             }else{
                     var isTerm = ($Db.trm(parent_ID,'trm_ParentTermID')>0);
                 
-                    sTitle = 'Import terms '+(isTerm?'as children for term ' :'for vocabulary ')+
+                    sTitle = 'Import terms '+(isTerm?'as children of term: ' :'of vocabulary: ')+
                         window.hWin.HEURIST4.util.htmlEscape($Db.trm(parent_ID,'trm_Label'));                
             }
 
