@@ -125,6 +125,8 @@ $.widget( "heurist.manageEntity", {
         beforeClose:null,
         onClose:null,
         
+        keep_visible_on_selection: false, //for select_single it closes popup on selection
+        
         no_bottom_button_bar: false,
         btn_array: null,   //bottom bar buttons
         
@@ -423,11 +425,15 @@ $.widget( "heurist.manageEntity", {
 
                 this._on( this.recordList, {        
                         "resultlistonselect": function(event, selected_recs){
-                                    this.selectedRecords(selected_recs); //assign
+                                    //if(!window.hWin.HEURIST4.util.isRecordSet(selected_recs) 
+                                    //    || selected_recs.entityName==this._entityName)
+                                    //{}
+                                        this.selectedRecords(selected_recs); //assign
+                                        
+                                        if (this.options.edit_mode=='inline'){
+                                                this._onActionListener(event, {action:'edit'}); //default action of selection
+                                        }
                                     
-                                    if (this.options.edit_mode=='inline'){
-                                            this._onActionListener(event, {action:'edit'}); //default action of selection
-                                    }
                                 },
                         "resultlistonaction": this._onActionListener        
                         });
@@ -1126,7 +1132,8 @@ $.widget( "heurist.manageEntity", {
                 this._as_dialog.dialog("close");
             }
 
-        }else if(this.element.hasClass('ui-menu6-container')){
+        }else if( this.options.keep_visible_on_selection!==true &&
+                    this.element.hasClass('ui-menu6-container')){
             this.element.hide();
         }
         
