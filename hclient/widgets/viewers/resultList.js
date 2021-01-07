@@ -2073,9 +2073,11 @@ $.widget( "heurist.resultList", {
         }
         
 
+        //window.hWin.HEURIST4.util.stopEvent(event);
+        
         this.triggerSelection();
     },
-    
+    //_recordDivOnClick
     
     //
     // expand ALL recordDivs

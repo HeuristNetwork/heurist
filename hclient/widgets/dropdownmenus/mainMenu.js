@@ -1589,6 +1589,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
             edit_mode: 'none',
             use_cache: true,
             except_current: true,
+            keep_visible_on_selection: true,
             onselect:function(event, data){
                 if(data && data.selection && data.selection.length>0){
                         var selected_database = data.selection[0].substr(4);
@@ -1599,6 +1600,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                             database: selected_database,
                             select_mode: 'select_multi',
                             edit_mode: 'none',
+                            keep_visible_on_selection: true,
                             onselect:function(event, data){
                                 if(data && data.selection &&  data.selection.length>0){
                                     var selected_users = data.selection;
@@ -1610,6 +1612,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                                         selectbutton_label: 'Allocate roles',
                                         sort_type_int: 'recent',
                                         edit_mode: 'none',
+                                        keep_visible_on_selection: false,
                                         onselect:function(event, data){
                                             if(data && !$.isEmptyObject(data.selection)){
                                                 //selection is array of object

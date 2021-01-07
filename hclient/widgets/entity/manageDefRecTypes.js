@@ -1365,7 +1365,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                                }else{
                                    that._selected_fields['fields'].push(dty_ID);    
                                    if(k==1){
-                                        that._selected_fields['values'][dty_ID] = {dty_Name:'Details',rst_DefaultValue:'tabs_new'};
+                                        that._selected_fields['values'][dty_ID] = {dty_Name:'Details',rst_DefaultValue:'tabs'};
                                    }else{
                                         that._selected_fields['values'][dty_ID] = {dty_Name:'References',rst_DefaultValue:'tabs'};
                                    }
