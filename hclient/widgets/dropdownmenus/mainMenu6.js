@@ -1211,8 +1211,10 @@ $.widget( "heurist.mainMenu6", {
             var li = $(e.target);
             if(!li.is('li')) li = li.parents('li');
             
-            //this.menues[section].find('li').removeClass('ui-state-active');
-            //li.addClass('ui-state-active');
+            if(li.attr('data-action')=='menu-admin-server'){
+                this.menues[section].find('li').removeClass('ui-state-active');
+                li.addClass('ui-state-active');
+            }
             
             
             if(section=='design'){    

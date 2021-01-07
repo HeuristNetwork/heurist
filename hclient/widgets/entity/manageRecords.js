@@ -1366,7 +1366,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                currentAccess: that._getField('rec_NonOwnerVisibility'),
                currentAccessGroups: that._getField('rec_NonOwnerVisibilityGroups'),
                scope_types: 'none', onClose: __assignOwnerAccess,
-               height:400
+               height:400,
+               default_palette_class: 'ui-heurist-populate'
         });
               
                     }); //on edit ownership click
@@ -1718,7 +1719,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     
                         window.hWin.HEURIST4.ui.showEntityDialog('usrBookmarks', {
                                 bkm_RecID: that._currentEditID,
-                                height:400,
+                                height:410,
+                                default_palette_class: 'ui-heurist-populate',
                                 onClose:function(){
                                     //refresh
                                     that._renderSummaryBookmarks(null, panel);
@@ -1899,6 +1901,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 title: 'Record Type Title Mask Edit',
                 height: 800,
                 width: 800,
+                default_palette_class: 'ui-heurist-design',
                 callback: function(newvalue) {
                     if(newvalue){
                     }
@@ -2209,7 +2212,9 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                              that.closeDialog();
                         }
                             
-                }});
+                    },
+                    default_palette_class: 'ui-heurist-populate'
+                });
 
             }else{
                 
@@ -3280,7 +3285,9 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 
                 this.element.find('.btn-edit-rt-template').button({icon:'ui-icon-arrowthickstop-1-s'})
                         .css(btn_css).click(function(){
-                            window.hWin.HEURIST4.ui.showRecordActionDialog('recordTemplate',{recordType:that._currentEditRecTypeID});});
+                            window.hWin.HEURIST4.ui.showRecordActionDialog('recordTemplate'
+                                    ,{recordType:that._currentEditRecTypeID,
+                                      default_palette_class: 'ui-heurist-design'});});
                 
             }else{
                 this.element.find('.btns-admin-only').hide();

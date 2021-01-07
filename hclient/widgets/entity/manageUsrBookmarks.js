@@ -29,13 +29,15 @@ $.widget( "heurist.manageUsrBookmarks", $.heurist.manageEntity, {
     
     _init: function() {
         
-        this.options.default_palette_class = 'ui-heurist-admin';
+        if(!this.options.default_palette_class){
+            this.options.default_palette_class = 'ui-heurist-admin';   
+        }
         
         this.options.edit_mode = 'editonly';
         this.options.select_mode = 'manager';
         this.options.layout_mode = 'editonly';
         this.options.width = 620;
-        this.options.height = 320;
+        if(!(this.options.height>0)) this.options.height = 410;
         
 
         this._super();

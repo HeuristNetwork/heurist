@@ -35,7 +35,7 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
     _init: function() {
         
         if(!this.options.default_palette_class){
-            this.options.default_palette_class = 'ui-heurist-admin';    
+            this.options.default_palette_class = 'ui-heurist-populate';    
         }
         
         this.options.coverall_on_save = true;
