@@ -900,7 +900,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             var inv_id = $Db.trm(recID, 'trm_InverseTermId');
             if ( inv_id>0 ){
                 var sInvLabel = window.hWin.HEURIST4.util.htmlEscape($Db.trm(inv_id, 'trm_Label'));
-                if(sInvLabel) sLabel = sLabel + '&nbsp;&nbsp;&nbsp;[> '+ sInvLabel +']';    
+                if(sInvLabel) sLabel = sLabel + '&nbsp;&nbsp;&nbsp;[ inv: '+ sInvLabel +' ]';    
             }
             
             sWidth = 'display:inline-block;padding-top:4px;max-width:320px;'; //+((lvl>2)?'25':'30')+'%;';
