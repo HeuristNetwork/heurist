@@ -200,7 +200,7 @@ $.widget( "heurist.manageUsrReminders", $.heurist.manageEntity, {
         }else{
             var that = this;
             window.hWin.HEURIST4.msg.showMsgDlg(
-                'Are you sure you wish to delete this reminder? Proceed?', function(){ that._deleteAndClose(true) }, 
+                'Are you sure you wish to delete this reminder?', function(){ that._deleteAndClose(true) }, 
                 {title:'Warning',yes:'Proceed',no:'Cancel'});        
         }
     },

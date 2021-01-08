@@ -531,7 +531,7 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
         }else{
             var that = this;
             window.hWin.HEURIST4.msg.showMsgDlg(
-                'Are you sure you wish to delete this user? Proceed?', function(){ that._deleteAndClose(true) }, 
+                'Are you sure you wish to delete this user?', function(){ that._deleteAndClose(true) }, 
                 {title:'Warning',yes:'Proceed',no:'Cancel'});        
         }
     },

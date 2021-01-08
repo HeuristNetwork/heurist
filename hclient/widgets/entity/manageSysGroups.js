@@ -581,7 +581,7 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
         }else{
             var that = this;
             window.hWin.HEURIST4.msg.showMsgDlg(
-                'Are you sure you wish to delete this group? Proceed?', function(){ that._deleteAndClose(true) }, 
+                'Are you sure you wish to delete this group?', function(){ that._deleteAndClose(true) }, 
                 {title:'Warning',yes:'Proceed',no:'Cancel'});        
         }
     }

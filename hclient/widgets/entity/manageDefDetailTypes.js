@@ -622,7 +622,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             
             var that = this;
             window.hWin.HEURIST4.msg.showMsgDlg(
-                'Are you sure you wish to delete this field type? Proceed?', function(){ that._deleteAndClose(true) }, 
+                'Are you sure you wish to delete this field type?', function(){ that._deleteAndClose(true) }, 
                 {title:'Warning',yes:'Proceed',no:'Cancel'},
                 {default_palette_class:this.options.default_palette_class});        
         }

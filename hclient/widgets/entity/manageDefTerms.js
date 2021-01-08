@@ -1078,7 +1078,7 @@ if(window.hWin.HEURIST4.util.isArrayNotEmpty(res.records)){
             window.hWin.HEURIST4.msg.showMsgDlg(
                 'Are you sure you wish to delete '
                 +this.options.auxilary+' <b>'+$Db.trm(this._currentEditID, 'trm_Label')
-                +'</b>? Proceed?', 
+                +'</b>?', 
                 function(){ that._deleteAndClose(true) }, 
                 {title:'Warning',yes:'Proceed',no:'Cancel'},
                 {default_palette_class:this.options.default_palette_class});        
@@ -1839,7 +1839,7 @@ console.log('Error !!! Parent not found for '+trm_ID);
                         }
                         
                         sMsg = '<p>The term you are deleting is referenced by the '+names.join(', ')
-                        +' vocabularies. If you delete it it will be removed from those vocabularies. Proceed?</p>';
+                        +' vocabularies. If you delete it it will be removed from those vocabularies.</p>';
                     }
                     
                     //check for children 
@@ -1866,7 +1866,7 @@ console.log('Error !!! Parent not found for '+trm_ID);
                }else{
                    
                     window.hWin.HEURIST4.msg.showMsgDlg(
-                        'You are going to remove the term reference. Actual term retains. Proceed?', 
+                        'You are going to remove the term reference. Actual term retains.', 
                         function(){ 
                             //find parent 
                             var parents = $Db.trm(recID, 'trm_Parents');
@@ -1956,7 +1956,7 @@ console.log('Error !!! Parent not found for '+trm_ID);
             }else if(action=='delete-group' && recID>0){
                 
                 window.hWin.HEURIST4.msg.showMsgDlg(
-                        'Are you sure you wish to delete this vocabulary type? Proceed?', function(){
+                        'Are you sure you wish to delete this vocabulary type?', function(){
                             
                             var request = {
                                 'a'          : 'delete',

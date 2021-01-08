@@ -808,7 +808,7 @@ $.widget( "heurist.importStructure", {
                 window.hWin.HEURIST4.msg.showMsgDlg(
                     'These links are intended only as a shortcut for the owner of this database and '
                     +'would require you to be able to log into the database. '
-                    +'Please use download or clone links on the left if you are not the owner of the database. Proceed?', 
+                    +'Please use download or clone links on the left if you are not the owner of the database.', 
                     function(){ window.open(recURL+'?db='+dbName,'_blank'); }, 
                     {title:'Info',yes:'Proceed',no:'Cancel'});        
 

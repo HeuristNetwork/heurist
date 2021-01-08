@@ -98,7 +98,7 @@ $.widget( "heurist.manageUsrBookmarks", $.heurist.manageEntity, {
                 btns[idx].text = window.hWin.HR('Delete bookmark');
                 /*btns[idx].click = function(){
                         window.hWin.HEURIST4.msg.showMsgDlg(
-            'Are you sure you wish to delete this bookmark? Proceed?', function(){
+            'Are you sure you wish to delete this bookmark?', function(){
                 that._deleteAndClose();
                 }, {title:'Warning',yes:'Proceed',no:'Cancel'});        
                 }*/
@@ -117,7 +117,7 @@ $.widget( "heurist.manageUsrBookmarks", $.heurist.manageEntity, {
         }else{
             var that = this;
             window.hWin.HEURIST4.msg.showMsgDlg(
-                'Are you sure you wish to delete this bookmark? Proceed?', function(){ that._deleteAndClose(true) }, 
+                'Are you sure you wish to delete this bookmark?', function(){ that._deleteAndClose(true) }, 
                 {title:'Warning',yes:'Proceed',no:'Cancel'});        
         }
     },

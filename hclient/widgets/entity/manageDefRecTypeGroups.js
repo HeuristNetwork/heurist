@@ -254,7 +254,7 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
         }else{
             var that = this;
             window.hWin.HEURIST4.msg.showMsgDlg(
-                'Are you sure you wish to delete this record type group? Proceed?', function(){ that._deleteAndClose(true) }, 
+                'Are you sure you wish to delete this record type group?', function(){ that._deleteAndClose(true) }, 
                 {title:'Warning',yes:'Proceed',no:'Cancel'},
                 {default_palette_class:this.options.default_palette_class});        
         }

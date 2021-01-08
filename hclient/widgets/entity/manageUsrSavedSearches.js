@@ -322,7 +322,7 @@ $.widget( "heurist.manageUsrSavedSearches", $.heurist.manageEntity, {
         }else{
             var that = this;
             window.hWin.HEURIST4.msg.showMsgDlg(
-                'Are you sure you wish to delete this filter? Proceed?', function(){ that._deleteAndClose(true) }, 
+                'Are you sure you wish to delete this filter?', function(){ that._deleteAndClose(true) }, 
                 {title:'Warning',yes:'Proceed',no:'Cancel'});        
         }
     },
