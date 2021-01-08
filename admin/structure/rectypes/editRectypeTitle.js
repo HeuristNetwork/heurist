@@ -583,7 +583,7 @@ function EditRectypeTitle() {
                 var baseurl = window.hWin.HAPI4.baseURL + "admin/structure/saveStructure.php";
                 var callback = _updateTitleMask;// updateResult;
                 
-                var request = {method:'saveRT', db:window.hWin.HAPI4.database, data:oRectype }; //styep
+                var request = {method:'saveRT', db:window.hWin.HAPI4.database, data:oRectype, no_purify:1 }; //styep
                 
                 window.hWin.HEURIST4.util.sendRequest(baseurl, request, null, 
                     function (response) {
