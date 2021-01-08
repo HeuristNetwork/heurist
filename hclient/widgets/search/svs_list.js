@@ -2712,11 +2712,11 @@ console.log(err)
         
                 var domain = (domain=='b' || domain=='bookmark')?'bookmark':'all';
 
-                var s_all = "?w="+domain+"&q=sortby:-m after:\"1 week ago\"&label=Recent changes";
-                var s_recent = "?w="+domain+"&q=sortby:-m&label=All records";
+                var s_recent = "?w="+domain+"&q=sortby:-m after:\"1 week ago\"&label=Recent changes";
+                var s_all = "?w="+domain+"&q=sortby:-m&label=All records";
 
-                res.push( { title: window.hWin.HR('Recent changes'), folder:false, url: s_all}  );
-                res.push( { title: window.hWin.HR('All (date order)'), folder:false, url: s_recent}  );
+                res.push( { title: window.hWin.HR('Recent changes'), folder:false, url: s_recent}  );
+                res.push( { title: window.hWin.HR('All (date order)'), folder:false, url: s_all}  );
         }
 
         //_NAME = 0, _QUERY = 1, _GRPID = 2
