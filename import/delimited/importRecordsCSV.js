@@ -2747,9 +2747,9 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 if(key_idx>=0){
                     if(haveMapping){
                         if(disamb_resolv==null){
-                        sWarning = 'You choose to match the incoming data and selected the existing identification field "'
+                        sWarning = 'You chose to match the incoming data and selected the existing identification field "'
                                 +imp_session['columns'][key_idx]
-                                +'".<br>It means it will be filled with new values.<br><br>Proceed?';
+                                +'".<br>This means it will be filled with new values.<br><br>';
                         }
                     }else{
 //@todo here and on server side

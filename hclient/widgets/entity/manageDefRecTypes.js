@@ -1039,7 +1039,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             this.deleted_from_group_ID = 0;
             var that = this;
             window.hWin.HEURIST4.msg.showMsgDlg(
-                'Are you sure you wish to delete this record type? Proceed?', function(){ that._deleteAndClose(true) }, 
+                'Are you sure you wish to delete this record type?', function(){ that._deleteAndClose(true) }, 
                 {title:'Warning',yes:'Proceed',no:'Cancel'},
                 {default_palette_class:this.options.default_palette_class});        
         }

@@ -383,8 +383,8 @@ function calculateImageExtentFromWorldFile(_editing){
         }else{
 
             window.hWin.HEURIST4.msg.showMsgDlg(
-                '<p>Recalculate image extent based on these parameters and image dimensions. Proceed?</p>'+
-                '<p>Also, you can define extent directly by drawing rectangle in map digitizer</p>',
+                '<p>Recalculate image extent based on these parameters and image dimensions. </p>'+
+                '<p>You can also define extent directly by drawing rectangle in map digitizer</p>',
                 function() {
                     //get image dimensions
                     window.hWin.HAPI4.checkImage('Records', ulf_ID, 

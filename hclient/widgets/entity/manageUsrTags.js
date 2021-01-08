@@ -1162,7 +1162,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
             var oldTagLabel = this._getTagLabel(tagID); 
             
             window.hWin.HEURIST4.msg.showMsgDlg(
-                'Are you sure you wish to rename tag "'+oldTagLabel+'" to "'+newTagLabel+'"? Proceed?', 
+                'Are you sure you wish to rename tag "'+oldTagLabel+'" to "'+newTagLabel+'"?', 
                     function(){ that._renameTag(2) }, 
                     
                 {title:'Warning',yes:'Proceed',no:'Cancel'});        
@@ -1217,7 +1217,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
         }else{
             
             window.hWin.HEURIST4.msg.showMsgDlg(
-                'Are you sure you wish to replace tag "'+oldTagLabel+'" with tag "'+newTagLabel+'"? Proceed?', 
+                'Are you sure you wish to replace tag "'+oldTagLabel+'" with tag "'+newTagLabel+'"?', 
                     function(){ that._replaceTag(newTagID, true) }, 
                     
                 {title:'Warning',yes:'Proceed',no:'Cancel'});        
@@ -1280,7 +1280,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
         }else{
             var that = this;
             window.hWin.HEURIST4.msg.showMsgDlg(
-                'Are you sure you wish to delete this tag? Proceed?', function(){ that._deleteAndClose(true) }, 
+                'Are you sure you wish to delete this tag?', function(){ that._deleteAndClose(true) }, 
                 {title:'Warning',yes:'Proceed',no:'Cancel'});        
         }
     }

@@ -1237,7 +1237,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                                         'Data will be re-allocated to appropriate fields, where available. '+
                                         'Not all data may fit in the new record structure, but these data '+
                                         'are retained and shown at the end of the form. No data will be lost, '+
-                                        'even when the record is saved. Proceed?', 
+                                        'even when the record is saved.', 
                                         function() {
                                         
                                               that._editing.assignValuesIntoRecord();
