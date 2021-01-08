@@ -437,7 +437,11 @@ $.widget( "heurist.mainMenu6", {
             that.divMainMenu.find('li.menu-explore').css({padding:'6px 2px 6px 30px',background:'none'});
             //that.divMainMenu.find('.menu-explore[data-action-popup="recordAdd"]').css({padding:'0px 2px 6px 30px'});
             that.divMainMenu.find('.ui-heurist-quicklinks').css({'text-align':'center'});
-            that.divMainMenu.find('.section-head').css({'padding-left':'0px'});
+            
+            $.each(that.divMainMenu.find('.section-head'), function(i,ele){
+                ele = $(ele);
+                ele.css({'padding-left': ele.attr('data-pl')+'px'});
+            });
             
             that.divMainMenu.find('#svs_list').hide();
             //that.divMainMenu.find('#filter_by_groups').show(); IJ 2020-11-23 always show in explore menu only
@@ -1098,6 +1102,7 @@ $.widget( "heurist.mainMenu6", {
             });
                     
                     
+                    
             
             this.menues_explore_gap = $('<div>')
                     .css({'width':'4px', position:'absolute', opacity: '0.8', 'z-index':103, left:this._widthMenu+'px'}) //200
@@ -1127,7 +1132,7 @@ $.widget( "heurist.mainMenu6", {
                 window.hWin.HAPI4.baseURL+'hclient/widgets/dropdownmenus/mainMenu6_'+section+'.html',
                 function(){ 
                     if(section=='explore'){
-                        that._initSectionMenuExlore();                        
+                        that._initSectionMenuExplore();                        
                     }else{
                         that._initSectionMenu(section);    
                     }
@@ -1140,7 +1145,7 @@ $.widget( "heurist.mainMenu6", {
     //
     // special behaviour form mainMenu6_explore
     //
-    _initSectionMenuExlore: function(){
+    _initSectionMenuExplore: function(){
         
             var that = this;
             this._on(this.menues['explore'].find('.menu-explore'),{
@@ -1154,6 +1159,16 @@ $.widget( "heurist.mainMenu6", {
                 }
             });
             this._updateDefaultAddRectype();
+
+            this._on(this.element.find('li[data-action-popup="search_recent"]'),{
+                click: function(){
+                    var request = window.hWin.HEURIST4.util.parseHeuristQuery( 
+                        '?w=a&q=sortby:-m after:"1 week ago"' );
+                    request.qname = 'Recent changes';
+                    window.hWin.HAPI4.SearchMgr.doSearch( this, request );
+                }
+            });
+
             
             //init 
             this._switch_SvsList( 0 );

@@ -620,7 +620,10 @@ $.widget( "heurist.editing_input", {
                             $(eid).html($.parseHTML($input.val())).width($input.width()).height($input.height()).show();
 
                             $btn_edit_switcher.text('text');
-                            
+        
+                            var nw = $input.css('min-width');
+
+
                             tinymce.init({
                                     //target: $editor, 
                                     selector: (eid),
@@ -632,7 +635,8 @@ $.widget( "heurist.editing_input", {
                                     menubar: false,
                                     relative_urls : false,
                                     remove_script_host : false,
-                                    convert_urls : true,            
+                                    convert_urls : true, 
+                                    width: nw, // '120ex',           
                                     
                                     entity_encoding:'raw',
                                      setup:function(ed) {
@@ -2700,10 +2704,13 @@ console.log('onpaste');
         }else if ( this.detailType=='freetext' || this.detailType=='url' || this.detailType=='blocktext' ) {  
 
               //if the size is greater than zero
-              if (parseFloat( dwidth ) > 0) 
-                  var nw = Math.round( 2+Number(dwidth) ) + "ex";
+              var nw = 120;
+              if (parseFloat( dwidth ) > 0){ 
+                  nw = Math.round( 2+Number(dwidth) );
                     //Math.round(2 + Math.min(120, Number(dwidth))) + "ex";
-                  $input.css('min-width', nw); //was *4/3
+              }
+              $input.css('min-width', nw+'ex'); //was *4/3
+console.log(this.options.dtID+'  '+nw);              
         }
         
         //if(this.detailType!='blocktext')
