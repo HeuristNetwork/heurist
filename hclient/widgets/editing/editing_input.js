@@ -623,7 +623,6 @@ $.widget( "heurist.editing_input", {
         
                             var nw = $input.css('min-width');
 
-
                             tinymce.init({
                                     //target: $editor, 
                                     selector: (eid),
@@ -1854,7 +1853,6 @@ $.widget( "heurist.editing_input", {
                     }
 
                     //$input.focusout( __url_input_state ); 
-                    
                     __url_input_state(true);               
                 
             }
@@ -2710,7 +2708,7 @@ console.log('onpaste');
                     //Math.round(2 + Math.min(120, Number(dwidth))) + "ex";
               }
               $input.css('min-width', nw+'ex'); //was *4/3
-console.log(this.options.dtID+'  '+nw);              
+
         }
         
         //if(this.detailType!='blocktext')

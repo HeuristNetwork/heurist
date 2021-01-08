@@ -1159,8 +1159,8 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             //
             if(this.options.suppress_edit_structure!==true){
                 
-            var $s = $('<div style="margin: 10px 0 10px 175px;border: 2px solid orange;'
-            +'border-radius: 10px;padding: 10px 10px 5px;display: block;width: 570px;">'
+            var $s = $('<div style="margin: 15px 0 20px 175px;' //border: 2px solid orange;border-radius: 10px;
+            +'padding: 10px 10px 5px;display: block;width: 570px;">'
             +'<div class="input-cell"><button></button>'
             +'<span class="heurist-helper3" style="vertical-align: middle;padding-left: 20px;">'
                 +'You can also modify the fields for this record type whenever you are editing data</span>'
