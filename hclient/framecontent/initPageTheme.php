@@ -465,7 +465,9 @@ span.fancytree-node:hover{
     background: none;
     color:<?php uout('import_bg', '#307D96')?> !important;
 }
-.ui-heurist-populate .ui-heurist-header .ui-button-icon-only, .ui-heurist-populate .ui-dialog-titlebar .ui-button-icon-only{
+.ui-heurist-populate .ui-heurist-header .ui-button-icon-only, 
+.ui-heurist-populate .ui-dialog-titlebar .ui-button-icon-only,
+.ui-heurist-populate  .ui-fade-color{
     color:<?php uout('import_fade_bg', '#e3f0f0')?> !important;
 }
 
