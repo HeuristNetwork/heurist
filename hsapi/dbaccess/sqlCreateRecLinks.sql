@@ -129,7 +129,7 @@ DELIMITER $$
         if NEW.dtl_DetailTypeID=5 then -- linked resource pointer
         begin
             update recRelationshipsCache
-            -- need to also save teh RecTypeID for the record
+            -- need to also save the RecTypeID for the record
                 set rrc_TargetRecID = NEW.dtl_Value
                 where rrc_RecID=NEW.dtl_RecID;
                 
@@ -142,7 +142,7 @@ DELIMITER $$
         begin
             update recRelationshipsCache
                 set rrc_SourceRecID = NEW.dtl_Value
--- need to also save teh RecTypeID for the record
+-- need to also save the RecTypeID for the record
                 where rrc_RecID=NEW.dtl_RecID;
             update recLinks
                 set rl_SourceID = NEW.dtl_Value

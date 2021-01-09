@@ -127,7 +127,7 @@ if (! window.hWin.HEURIST4.ajax) window.hWin.HEURIST4.ajax = {
         };
     }(),
 /**
-* thin wrapper for sendRequest that translates the results into a JSon object and calls teh callback function
+* thin wrapper for sendRequest that translates the results into a JSon object and calls the callback function
 *
 * @param url
 * @param callback
