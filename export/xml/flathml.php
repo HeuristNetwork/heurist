@@ -422,7 +422,7 @@ if(@$_REQUEST['depth']=='all'){
 }
 
 
-// handle special case for collection where ids are stored in teh session.
+// handle special case for collection where ids are stored in the session.
 if (array_key_exists('q', $_REQUEST)) {
     if (preg_match('/_COLLECTED_/', $_REQUEST['q'])) {
         //@todo check if (!session_id()) session_start();

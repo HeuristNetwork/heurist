@@ -109,8 +109,8 @@ private static function readDataFile($filename, $type=null, $validate=true){
                 if($data==null || !$imp_rectypes)
                 {
                     if(!(count(self::$system->getError())>0))
-                        self::$system->addError(HEURIST_ACTION_BLOCKED, 
-                            'Import data has wrong data. "Record type" section is not found');
+                        self::$system->addError(HEUc`cRIST_ACTION_BLOCKED, 
+                            'The data file contains data which does not correspond with expectations.<br> "Record type" section not found');
                 }
                 
                 

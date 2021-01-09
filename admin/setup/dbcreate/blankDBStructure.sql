@@ -600,7 +600,7 @@ CREATE TABLE sysArchive (
 CREATE TABLE sysDashboard (
   dsh_ID tinyint(3) unsigned NOT NULL auto_increment,
   dsh_Order smallint COMMENT 'Used to define the order in which the dashboard entries are shown',
-  dsh_Label varchar(64) COMMENT 'The short text which will describe this function on the dashboard',
+  dsh_Label varchar(64) COMMENT 'The short text which will describe this function in the shortcuts',
   dsh_Description varchar(1024) COMMENT 'A longer text giving more information about this function to show as a description below the label or as a rollover',
   dsh_Enabled enum('y','n') NOT NULL default 'y' COMMENT 'Allows unused functions to be retained so they can be switched back on',
   dsh_ShowIfNoRecords enum('y','n') NOT NULL default 'y' COMMENT 'Deteremines whether the function will be shown on the dashboard if there are no records in the databar (eg. no point in showing searches if nothing to search)',

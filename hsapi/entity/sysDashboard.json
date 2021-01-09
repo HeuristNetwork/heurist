@@ -8,9 +8,9 @@
         
         "searchFormContent": "searchSysDashboard.html",
         
-        "entityTitle": "Dashboard entry",
-        "entityTitlePlural": "Dashboard entries",
-        "empty_remark": "Nothing has been added to the dashboard",
+        "entityTitle": "Shortcuts entry",
+        "entityTitlePlural": "Shortcuts entries",
+        "empty_remark": "Nothing has been added to the shortcuts",
 
         "fields": [
                 {
@@ -77,7 +77,7 @@
                         "dty_Size":63,
                         "rst_DisplayWidth":25,
                         "rst_DisplayName": "Label:",
-                        "rst_DisplayHelpText": "The short text which will describe this function on the dashboard", 
+                        "rst_DisplayHelpText": "The short text which will describe this function in the shortcuts", 
                         "rst_RequirementType":"required"
                     }
                 },
@@ -99,7 +99,7 @@
                     "dtFields":{
                         "dty_Type":"file",
                         "rst_DisplayName":"Icon:",
-                        "rst_DisplayHelpText": "The icon which will represent this function on the dashboard", 
+                        "rst_DisplayHelpText": "The icon which will represent this function in the shortcuts", 
                         "rst_FieldConfig":{"entity":"sysDashboard", "accept":".png,.jpg,.gif", "size":64, "use_assets":["admin/setup/iconLibrary/64px/","HEURIST_ICON_DIR/thumb/"]},
                         "dty_Role":"virtual",
                         "rst_RequirementType":"required"
@@ -128,7 +128,7 @@
                         "dty_Type":"enum",
                         "rst_DisplayWidth":3,
                         "rst_DisplayName": "Show for empty DB:",
-                        "rst_DisplayHelpText": "Determines whether the function will be shown on the dashboard if there are no records in the database",
+                        "rst_DisplayHelpText": "Determines whether the function will be shown in the shortcuts if there are no records in the database",
                         "rst_DefaultValue":"y",
                         "rst_FieldConfig":[
                             {"key":"y","title":"Yes"},
@@ -146,7 +146,7 @@
                         "rst_DisplayWidth":20,
                         "rst_DisplayName": "Order:",
                         "rst_DefaultValue":0,
-                        "rst_DisplayHelpText": "Define the order in which the dashboard entries are shown"
+                        "rst_DisplayHelpText": "Define the order in which the shortcuts entries are shown"
                     }
                 }
                 
