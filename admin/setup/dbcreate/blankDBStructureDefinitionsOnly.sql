@@ -247,7 +247,7 @@ CREATE TABLE defRecStructure (
 CREATE TABLE defRecTypeGroups (
   rtg_ID tinyint(3) unsigned NOT NULL auto_increment COMMENT 'Record type group ID referenced in defRectypes',
   rtg_Name varchar(40) NOT NULL COMMENT 'Name for this group of record types, shown as heading in lists',
-  rtg_Domain enum('functionalgroup','modelview') NOT NULL default 'functionalgroup' COMMENT 'Functional group (rectype has only one) or a Model/View group',
+  rtg_Domain enum('functionalgroup','modelview','trashgroup') NOT NULL default 'functionalgroup' COMMENT 'Functional group (rectype has only one) or a Model/View group',
   rtg_Order tinyint(3) unsigned zerofill NOT NULL default '002' COMMENT 'Ordering of record type groups within pulldown lists',
   rtg_Description varchar(250) default NULL COMMENT 'A description of the record type group and its purpose',
   rtg_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record, used to get last updated date for table',
