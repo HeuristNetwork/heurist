@@ -186,6 +186,7 @@ function hEditing(_options) {
                 
             var currGroupType = null, currGroupHeaderClass = null; //current accodion or tab control
             var groupTabHeader, groupEle;
+            var hasVisibleFields = false;
             
             //var groupEle,      //current accordion or tab control
             //    fieldContainer, groupTabHeader;
@@ -366,6 +367,8 @@ function hEditing(_options) {
                         }
                                 
                         editing_inputs.push(inpt);  
+                        
+                        hasVisibleFields = true;
                     }
                 }//end field addition
                 
@@ -383,6 +386,11 @@ function hEditing(_options) {
                 }else if(currGroupType == 'tabs'){
                     groupEle.tabs({active: 0}).addClass('edit-form-tabs');;
                 }
+            }
+            
+            if(!hasVisibleFields){
+                $('<div>There are no fields visible in this tab. Please define new fields or move fields into this tab</div>')
+                    .addClass('heurist-helper3').appendTo(fieldContainer);
             }
             
         }//end of function
