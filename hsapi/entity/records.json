@@ -46,6 +46,7 @@
                     "dtFields":{
                         "dty_Type":"freetext",
                         "dty_Size":2000,
+                        "rst_DisplayWidth": 85,
                         "rst_DisplayName": "Record hyperlink URL",
                         "rst_DisplayHelpText": "This is a special URL field which is hyperlinked in search results. Use where one primary URL applies to <br>each record, eg. for internet bookmarks. These URLs can be auto-verified. Turn on/off in record attributes" ,
                         "rst_Display": "hidden"

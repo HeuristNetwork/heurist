@@ -91,8 +91,9 @@ else
     
         $mysqli = $system->get_mysqli();
     
-    
-        purifyHTML($_REQUEST);
+        if(@$_REQUEST['no_purify']==null){
+            purifyHTML($_REQUEST);
+        }
         //stripScriptTagInRequest($_REQUEST);
     
         $data = @$_REQUEST['data'];

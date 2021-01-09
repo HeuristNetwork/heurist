@@ -578,6 +578,9 @@ $.widget( "heurist.mainMenu6", {
                 if(ele.parents('.ui-heurist-quicklinks').length>0) ele.css('background','aliceblue');
 //23-12                ele.find('.menu-text').css('text-decoration','underline');
                 hasAction = ele.attr('data-action-popup');
+                
+                if(hasAction=='search_recent') hasAction = false;
+                
             }
         }
 
