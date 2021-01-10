@@ -809,11 +809,10 @@ $.widget( "heurist.mainMenu6", {
                 if(!cont.recordAdd('instance')){
                     cont.recordAdd({
                         is_h6style: true,
-                        onClose: function() { that._closeExploreMenuPopup();},
-                        isExpanded: expandRecordAddSetting,
-                        onClose: function(){
-                            that.coverAll.hide();
+                        onClose: function() { 
+                            that._closeExploreMenuPopup();
                         },
+                        isExpanded: expandRecordAddSetting,
                         mouseover: function() { that._resetCloseTimers()},
                         menu_locked: function(is_locked, is_mouseleave){ 
                             if(!is_mouseleave){

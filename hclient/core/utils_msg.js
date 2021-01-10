@@ -461,6 +461,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
     *   is_h6style - apply heurist6 style
     *   position - adjust dialog position
     *   maximize - set maximum allowed widht and height  
+    *   default_palette_class - color scheme class
     */
     showDialog: function(url, options){
 

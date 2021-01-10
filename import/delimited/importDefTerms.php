@@ -56,7 +56,7 @@ require_once(dirname(__FILE__)."/../../hclient/framecontent/initPage.php");
             }
             .tbmain
             {
-                border-collapse:collapse;
+                /*border-collapse:collapse;*/
                 font-size: 1em;
             }        
         </style>
@@ -64,15 +64,15 @@ require_once(dirname(__FILE__)."/../../hclient/framecontent/initPage.php");
     </head>
 
     <!-- HTML -->
-    <body class="ui-heurist-bg-light" style="overflow:hidden;">
+    <body style="overflow:hidden;">
 <div style="width:100%;height:60%;position:absolute;top:0">
-<div style="position:absolute;left:0;right:400px; height:100%;  border-right:1px lightgray solid" id="divStep1">
-    <div class="ent_header" style="height:8em;">
+<div style="position:absolute;left:0;right:400px; height:100%; margin-right:10px; " id="divStep1">
+    <div class="ent_header" style="height:8em;padding:0">
         <p><b>Step 1</b></p>
-        <p style="padding-top:0.4em">Paste content in area below (one label per line, may optionally be followed by description, code and semantic URI, with usual delimiters eg. comma)</p>
+        <p>Paste content in area below (one label per line, may optionally be followed by description, code and semantic URI, with usual delimiters eg. comma)</p>
         <input type="file" id="uploadFile" style="display:none">
       <div style="padding-top:4px">
-        <h2 style="display: inline-block">or</h2>
+        <h2 style="display: inline-block;margin:0">or</h2>
         <div id="btnUploadFile">Upload File</div>
         <div style="float:right">encoding: 
 <select id="csv_encoding" class="text ui-widget-content ui-corner-all" style="width:120px;font-size:0.9em">

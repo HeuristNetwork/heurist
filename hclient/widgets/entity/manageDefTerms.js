@@ -170,10 +170,10 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                     {showText:true, icons:{primary:'ui-icon-plus'}, text:window.hWin.HR('Add'), //Add Vocab
                           css:{'margin-right':'0.5em','display':'inline-block',padding:'2px'}, id:'btnAddButton',
                           click: function() { that._onActionListener(null, 'add'); }},
-                    {showText:false, icons:{primary:'ui-icon-upload'}, text:window.hWin.HR('Export Vocabularies'),
+                    {showText:false, icons:{primary:'ui-icon-download'}, text:window.hWin.HR('Export Vocabularies'),
                           css:{'margin-right':'0.5em','display':'inline-block',padding:'2px'}, id:'btnExportVocab',
                           click: function() { that._onActionListener(null, 'term-export'); }},
-                    {showText:false, icons:{primary:'ui-icon-download',padding:'2px'}, text:window.hWin.HR('Import Vocabularies'),
+                    {showText:false, icons:{primary:'ui-icon-upload',padding:'2px'}, text:window.hWin.HR('Import Vocabularies'),
                           css:{'margin-right':'0.5em','display':'inline-block',padding:'2px'}, id:'btnImportVocab',
                           click: function() { that._onActionListener(null, 'term-import'); }}
                     ];
@@ -2354,11 +2354,12 @@ console.log('Error !!! Parent not found for '+trm_ID);
             
 
             window.hWin.HEURIST4.msg.showDialog(sURL, {
+                default_palette_class: 'ui-heurist-design',
                 "close-on-blur": false,
                 "no-resize": false,                  
                 title: sTitle,
                 height: 600,
-                width: 800,
+                width: 900,
                 'context_help':window.hWin.HAPI4.baseURL+'context_help/defTerms.html #import',
                 callback: function(context){ 
                     
@@ -2375,7 +2376,7 @@ console.log('Error !!! Parent not found for '+trm_ID);
                             + ' term'
                             + (context.result.length>1?'s were':' was')
                             + ' added.', null, 'Terms imported',
-                            {default_palette_class:this.options.default_palette_class});
+                            {default_palette_class:that.options.default_palette_class});
 
                     }
                     
