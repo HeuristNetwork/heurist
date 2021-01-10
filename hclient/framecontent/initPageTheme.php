@@ -491,15 +491,34 @@ span.fancytree-node:hover{
 .ui-heurist-publish .ui-dialog-titlebar,
 .ui-heurist-publish .ui-dialog-buttonpane{
     background:<?php uout('publish_bg', '#627E5D');?> !important;
+    color: white;
 }
+.ui-heurist-publish-fade{background:<?php uout('publish_fade_bg', '#CCEAC5');?> !important;}
+.ui-heurist-publish .ui-heurist-title{color:<?php uout('publish_title_color', '#627E5D');?>}
+.ui-heurist-publish .ui-widget-content{
+    background:<?php uout('publish_fade_bg', '#CCEAC5');?>
+}
+/* button within menu section */
+.ui-heurist-publish .ui-heurist-btn-header1{    
+    background:none !important;
+    border:1px solid <?php uout('import_bg', '#307D96')?> !important;
+    color:<?php uout('publish_bg', '#627E5D')?> !important;
+}
+.ui-heurist-publish .ui-button-icon-only{
+    background: none;
+    color:<?php uout('publish_bg', '#627E5D')?> !important;
+}
+.ui-heurist-publish .ui-heurist-header .ui-button-icon-only, 
+.ui-heurist-publish .ui-dialog-titlebar .ui-button-icon-only,
+.ui-heurist-publish  .ui-fade-color{
+    color:<?php uout('publish_fade_bg', '#CCEAC5')?> !important;
+}
+
 .ui-menu6 .ui-menu6-container.ui-heurist-publish, .ui-heurist-publish .ui-helper-popup{
     border-width: 2px !important;
     border-color:<?php uout('publish_bg', '#627E5D');?> !important; 
 } 
-.ui-heurist-publish-fade{background:<?php uout('publish_fade_bg', '#CCEAC5');?> 0% 0% no-repeat padding-box;}
-.ui-heurist-publish .ui-heurist-title{
-    color:<?php uout('publish_title_color', '#627E5D');?>
-}
+
 .ui-heurist-publish .ui-state-active, 
 .ui-heurist-publish .fancytree-active,
 .ui-heurist-publish .fancytree-node:hover

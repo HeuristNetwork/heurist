@@ -1129,6 +1129,7 @@ function editCMS( options ){
                         title: window.hWin.HR('Select or create a website menu record'),
                         rectype_set: RT_CMS_MENU,
                         parententity: 0,
+                        default_palette_class: 'ui-heurist-publish',
                         
                         onselect:function(event, data){
                                  if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){

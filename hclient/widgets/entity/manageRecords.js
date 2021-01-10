@@ -54,7 +54,9 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     
     _init: function() {
         
-        this.options.default_palette_class = 'ui-heurist-populate';
+        if(!this.options.default_palette_class){
+            this.options.default_palette_class = 'ui-heurist-populate';   
+        }
         
         if(this.options.layout_mode=='short'){
                 this.options.layout_mode = //slightly modified 'short' layout
