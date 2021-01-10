@@ -162,7 +162,7 @@ $.widget( "heurist.editing_input", {
                 //.button({icon:"ui-icon-circlesmall-plus", showLabel:false, label:'Add another ' + lblTitle +' value'})
                 .attr('tabindex', '-1')
                 .attr('title', 'Add another ' + lblTitle +' value' )                    
-                .css({display:'table-cell', 'font-size':'2em', cursor:'pointer','vertical-align':'top',
+                .css({display:'table-cell', 'font-size':'2em', cursor:'pointer','vertical-align':'top', 'padding-top':'2px',
 //outline_suppress does not work - so list all these props here explicitely                
                     outline: 'none','outline-style':'none', 'box-shadow':'none',  'border-color':'transparent'
                 });
@@ -184,6 +184,17 @@ $.widget( "heurist.editing_input", {
                         }
                     }
                 });
+            }
+            
+            if(this.detailType=="resource"){
+                
+                $('<div style="float:right;padding-top:3px;"><span class="ui-icon ui-icon-triangle-1-e"/></div>')                
+                    .appendTo( this.header )
+            }else if(this.detailType=="relmarker"){
+                
+                $('<div style="float:right;padding-top:1px;"><span style="font-size:10px" class="ui-icon ui-icon-triangle-2-e-w"/></div>')                
+                    .appendTo( this.header )
+                
             }
         }        
 
