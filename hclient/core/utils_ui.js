@@ -1179,7 +1179,7 @@ window.hWin.HEURIST4.ui = {
             if(dminwidth=='0px' || window.hWin.HEURIST4.util.isempty(dminwidth)) dminwidth = '10em';
 
             var menuwidget = menu.hSelect( "menuWidget" );
-            menuwidget.css( {'padding':0,'background':'#F4F2F4','zIndex':9999999 });
+            menuwidget.css( {'background':'#F4F2F4','zIndex':9999999 }); //'padding':0,
             menuwidget.addClass('heurist-selectmenu overflow').css({'max-height':'300px','font-size':'12px'});
             
             if(apply_style){
