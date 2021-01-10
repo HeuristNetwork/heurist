@@ -951,7 +951,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             sPad = lvl==1?0:(lvl==2?(lvl-0.5):lvl);                                                                         
             var exp_btn_style = 'width:20px;display:inline-block;vertical-align:bottom;margin-left:'+sPad+'em;';
            
-            html = '<div class="recordDiv white-borderless'+(!(ref_lvl>0)?' rt_draggable':'')+'" recid="'+recID+'"'+parents+'>'
+            html = '<div class="recordDiv densed white-borderless'+(!(ref_lvl>0)?' rt_draggable':'')
+                        +'" recid="'+recID+'"'+parents+'>'
                         + ($Db.trm_HasChildren(recID)
                                 ?this._defineActionButton(
                                     {key:'expand',label:'Show/hide children',            
