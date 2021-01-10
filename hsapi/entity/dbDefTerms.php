@@ -449,21 +449,41 @@ class DbDefTerms extends DbEntityBase
     // returns array of saved record ids or false
     //
     public function save(){
-        
+
+        $mysqli = $this->system->get_mysqli();
+
+        if($this->data['isfull']!=0){
+
+            //extract records from $_REQUEST data 
+            if($this->records==null){ //records can be pepared beforehand
+                if(!$this->prepareRecords()){
+                    return false;    
+                }
+            }
+            //keep old inverse id
+            foreach($this->records as $idx=>$record){
+                if(!$record['is_new']){
+
+                    $this->records[$idx]['old_inverse_id'] = mysql__select_value($mysqli, 
+                        'select trm_InverseTermId from defTerms where trmID='.$record['trm_ID']);
+
+                }
+            }
+        }
+
         
         $ret = parent::save();
 
-        //treat thumbnail image
+        //treat thumbnail image and symmetrical inverse terms (the latter for new term only) 
         if($ret!==false){
             
             $dbID = $this->system->get_system('sys_dbRegisteredID');
             if(!($dbID>0)) $dbID = 0;
             
-            $mysqli = $this->system->get_mysqli();
-            
             foreach($this->records as $record){
                 $trm_ID = @$record['trm_ID'];
-                if($trm_ID>0 && in_array($trm_ID, $ret)){
+                if($trm_ID>0 && in_array($trm_ID, $ret) && $this->data['isfull']!=0)
+                {
                     
                     $query = null;
                     //set dbid or update modified locally
@@ -486,6 +506,28 @@ class DbDefTerms extends DbEntityBase
                     if($thumb_file_name){
                         parent::renameEntityImage($thumb_file_name, $record['trm_ID']);
                     }
+                    
+                    
+                    $inverse_termid = @$record['trm_InverseTermId'];
+                    $inverse_termid_old = @$record['old_inverse_id'];
+                    $is_symmetrical = (@$record['trm_InverseSymmetrical']!=0);
+                                        
+                    if($inverse_termid_old!=$inverse_termid && $is_symmetrical){
+                        $trmID = $record['trm_ID'];
+                        if($inverse_termid>0){
+                            //set mutual inversion for inverse term
+                            $query = "update defTerms set trm_InverseTermId=$trmID where trm_ID=$inverse_termid";
+                            $res = $mysqli->query($query);
+                        }
+                        if ($inverse_termid_old>0){
+                            //clear mutual inversion for previous inversion
+                            $query = "update defTerms set trm_InverseTermId=null where trm_ID=$inverse_termid_old and trm_InverseTermId=$trmID";
+                            $res = $mysqli->query($query);
+                        }
+                    }
+
+
+                    
                 }
             }
         }

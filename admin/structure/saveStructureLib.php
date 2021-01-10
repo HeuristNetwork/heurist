@@ -1562,14 +1562,18 @@ function updateTerms( $colNames, $trmID, $values, $ext_db) {
                     $ext_db->query($query);
                 }
 
-                if($inverse_termid!=null){
-                    $query = "update defTerms set trm_InverseTermId=$trmID where trm_ID=$inverse_termid";
-                    mysql__exec_param_query($ext_db, $query, null, true);
-                }else if ($inverse_termid_old!=null){
-                    $query = "update defTerms set trm_InverseTermId=null where trm_ID=$inverse_termid_old";
-                    mysql__exec_param_query($ext_db, $query, null, true);
+                if($inverse_termid_old!=$inverse_termid){
+                    if($inverse_termid!=null){
+                        //set mutual inversion for inverse term
+                        $query = "update defTerms set trm_InverseTermId=$trmID where trm_ID=$inverse_termid";
+                        mysql__exec_param_query($ext_db, $query, null, true);
+                    }
+                    if ($inverse_termid_old!=null){
+                        //clear mutual inversion
+                        $query = "update defTerms set trm_InverseTermId=null where trm_ID=$inverse_termid_old and trm_InverseTermId=$trmID";
+                        mysql__exec_param_query($ext_db, $query, null, true);
+                    }
                 }
-
 
                 $ret = $trmID;
             }

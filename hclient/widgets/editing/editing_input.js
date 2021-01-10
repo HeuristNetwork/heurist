@@ -186,7 +186,7 @@ $.widget( "heurist.editing_input", {
                 });
             }
             
-            if(this.detailType=="resource"){
+            if(this.detailType=="resource" && this.configMode.entity=='records'){
                 
                 $('<div style="float:right;padding-top:3px;"><span class="ui-icon ui-icon-triangle-1-e"/></div>')                
                     .appendTo( this.header )
