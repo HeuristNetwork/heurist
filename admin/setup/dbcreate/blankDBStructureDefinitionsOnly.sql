@@ -247,7 +247,7 @@ CREATE TABLE defRecStructure (
 CREATE TABLE defRecTypeGroups (
   rtg_ID tinyint(3) unsigned NOT NULL auto_increment COMMENT 'Record type group ID referenced in defRectypes',
   rtg_Name varchar(40) NOT NULL COMMENT 'Name for this group of record types, shown as heading in lists',
-  rtg_Domain enum('functionalgroup','modelview','trashgroup') NOT NULL default 'functionalgroup' COMMENT 'Functional group (rectype has only one) or a Model/View group',
+  rtg_Domain enum('functionalgroup','modelview') NOT NULL default 'functionalgroup' COMMENT 'functionalgroup is normal record types group, modelview group for visualising actual structure based on data',
   rtg_Order tinyint(3) unsigned zerofill NOT NULL default '002' COMMENT 'Ordering of record type groups within pulldown lists',
   rtg_Description varchar(250) default NULL COMMENT 'A description of the record type group and its purpose',
   rtg_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this record, used to get last updated date for table',
@@ -324,7 +324,7 @@ CREATE TABLE defRelationshipConstraints (
 CREATE TABLE defVocabularyGroups (
   vcg_ID tinyint(3) unsigned NOT NULL auto_increment COMMENT 'Vocabulary group ID referenced in vocabs editor',
   vcg_Name varchar(40) NOT NULL COMMENT 'Name for this group of vocabularies, shown as heading in lists',
-  vcg_Domain enum('enum','relation') NOT NULL default 'enum' COMMENT 'Field of application of the vocabulary - can be both',
+  vcg_Domain enum('enum','relation') NOT NULL default 'enum' COMMENT 'Normal vocabularies are termed enum, relational are for relationship types but can also be used as normal vocabularies',
   vcg_Order tinyint(3) unsigned zerofill NOT NULL default '002' COMMENT 'Ordering of vocabulary groups within pulldown lists',
   vcg_Description varchar(250) default NULL COMMENT 'A description of the vocabulary group and its purpose',
   vcg_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this vocabulary group record, used to get last updated date for table',
