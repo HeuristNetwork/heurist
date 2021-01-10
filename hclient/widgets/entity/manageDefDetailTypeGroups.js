@@ -266,6 +266,7 @@ $.widget( "heurist.manageDefDetailTypeGroups", $.heurist.manageEntity, {
             var that = this;
             window.hWin.HEURIST4.dbs.applyOrder(recordset, 'dtg', function(res){
                 that._toolbar.find('#btnApplyOrder').hide();
+                that._triggerRefresh('dtg');
             });
         }
 

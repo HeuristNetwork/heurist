@@ -273,6 +273,7 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
             var that = this;
             window.hWin.HEURIST4.dbs.applyOrder(recordset, 'rtg', function(res){
                 that._toolbar.find('#btnApplyOrder').hide();
+                that._triggerRefresh('rtg');
             });
 
         }

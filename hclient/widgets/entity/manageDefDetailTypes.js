@@ -1607,6 +1607,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             function(){
                 window.hWin.HEURIST4.msg.sendCoverallToBack();
                 that.searchForm.searchDefDetailTypes('startSearch');
+                that._triggerRefresh('dty');
                 /*
                 window.hWin.HAPI4.EntityMgr.refreshEntityData('dtg',
                     function(){
