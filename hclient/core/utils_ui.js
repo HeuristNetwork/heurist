@@ -1833,7 +1833,7 @@ window.hWin.HEURIST4.ui = {
             //margin-left:0.5em;
             sRelBtn = '<div style="display:table-cell;min-width:40px;text-align:right;"><div class="btn-rel"/><div class="btn-del"/></div>';
         }else if (!isHiddenRecord) {
-            sRelBtn = '<div style="display:table-cell;min-width:23px;text-align:right;"><div class="btn-edit"/></div>';     // data-recID="'+info['rec_ID']+'"
+            sRelBtn = '<div style="display:table-cell;min-width:23px;text-align:right;padding-left:16px;"><div class="btn-edit"/></div>';     // data-recID="'+info['rec_ID']+'"
         }
         
         var reltype = ''
@@ -1847,7 +1847,7 @@ window.hWin.HEURIST4.ui = {
                 + $Db.trm(term_ID, 'trm_Label') + '</div>'
         }
         
-        var rectype_icon = '<div style="display:table-cell;vertical-align: middle;padding: 0 4px;">' 
+        var rectype_icon = '<div style="display:table-cell;vertical-align: middle;padding: 0 4px'+(reltype==''?'':' 0 16px')+';">'
                         + '<img src="'+ph_gif+'"  class="rt-icon" style="' //'margin-right:10px;'
                         + ((info['rec_RecTypeID']>0)?
                             'background-image:url(\''    //vertical-align:top;margin-top:2px;
@@ -1858,7 +1858,7 @@ window.hWin.HEURIST4.ui = {
         
         var ele = $('<div class="link-div ui-widget-content ui-corner-all"  data-relID="'
                         +(info['relation_recID']>0?info['relation_recID']:'')+'" '
-                        +' style="margin-bottom:0.2em;background:#F4F2F4 !important;">' //padding-bottom:0.2em;
+                        +' style="display: table-row;margin-bottom:0.2em;background:#F4F2F4 !important;">' //padding-bottom:0.2em;
 
                         //relation type
                         

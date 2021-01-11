@@ -188,12 +188,14 @@ $.widget( "heurist.editing_input", {
             
             if(this.detailType=="resource" && this.configMode.entity=='records'){
                 
-                $('<div style="float:right;padding-top:3px;"><span class="ui-icon ui-icon-triangle-1-e"/></div>')                
-                    .appendTo( this.header )
+                $('<div style="float:right;padding-top:3px;width: 18px;"><span class="ui-icon ui-icon-triangle-1-e"/></div>')                
+                    .appendTo( this.header );
+                    this.header.css('padding-right',0);
             }else if(this.detailType=="relmarker"){
                 
-                $('<div style="float:right;padding-top:1px;"><span style="font-size:10px" class="ui-icon ui-icon-triangle-2-e-w"/></div>')                
+                $('<div style="float:right;padding-top:1px;width: 18px;"><span style="font-size:10px" class="ui-icon ui-icon-triangle-2-e-w"/></div>')                
                     .appendTo( this.header )
+                    this.header.css('padding-right',0);
                 
             }
         }        
@@ -1141,7 +1143,8 @@ $.widget( "heurist.editing_input", {
         else if(this.detailType=='relmarker'){ //---------------------------------------------------- 
             
                 this.options.showclear_button = false;
-                $inputdiv.css({'display':'inline-block','vertical-align':'middle'});
+                //$inputdiv.css({'display':'inline-block','vertical-align':'middle'});
+                $inputdiv.css({'display': 'table','vertical-align': 'middle', 'border-spacing': '0px 4px'});
             
                 if(this.inputs.length==0){ //show current relations
                 
