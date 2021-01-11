@@ -764,33 +764,40 @@ prof =Profile
                 
                 var that = this;
                 
-                window.hWin.HAPI4.EntityMgr.refreshEntityData('all', function(){
+                window.hWin.HAPI4.EntityMgr.refreshEntityData('all', function(success){
 
-                    //get defintions in nold format
-                that.get_defs({rectypes:'all', terms:'all', detailtypes:'all', mode:2}, function(response){
-                    
-                    window.hWin.HEURIST4.msg.sendCoverallToBack();
-                    
-                    if(response.status == window.hWin.ResponseStatus.OK){
-                        
-                        window.hWin.HEURIST4.rectypes = response.data.rectypes;
-                        window.hWin.HEURIST4.terms = response.data.terms;
-                        window.hWin.HEURIST4.detailtypes = response.data.detailtypes;
-                        
-                        $Db.baseFieldType = window.hWin.HEURIST4.detailtypes.lookups;
-                        
-                        if (is_message==true) {
-                            $dlg = window.hWin.HEURIST4.msg.showMsgDlg('Database structure definitions in browser memory have been refreshed.<br>'+
-                                'You may need to reload pages to see changes.');
-                            $dlg.parent('.ui-dialog').css({top:150,left:150});    
-                        }      
-                        
-                        if($.isFunction(callback)) callback.call();
-
-                        window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE);
-                        
+                    if(success){
+                        //get defintions in old format
+                        that.get_defs({rectypes:'all', terms:'all', detailtypes:'all', mode:2}, function(response){
+                            
+                            window.hWin.HEURIST4.msg.sendCoverallToBack();
+                            
+                            if(response.status == window.hWin.ResponseStatus.OK){
+                                
+                                window.hWin.HEURIST4.rectypes = response.data.rectypes;
+                                window.hWin.HEURIST4.terms = response.data.terms;
+                                window.hWin.HEURIST4.detailtypes = response.data.detailtypes;
+                                
+                                $Db.baseFieldType = window.hWin.HEURIST4.detailtypes.lookups;
+                                
+                                if (is_message==true) {
+                                    $dlg = window.hWin.HEURIST4.msg.showMsgDlg('Database structure definitions in browser memory have been refreshed.<br>'+
+                                        'You may need to reload pages to see changes.');
+                                    $dlg.parent('.ui-dialog').css({top:150,left:150});    
+                                }      
+                                
+                                window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE);
+                                res = true;
+                            }else{
+                                res = false;
+                            }
+                            
+                            if($.isFunction(callback)) callback.call(that, res);
+                        });
+                    }else{
+                        window.hWin.HEURIST4.msg.sendCoverallToBack();
+                        if($.isFunction(callback)) callback.call(that, false);
                     }
-                });
                 
                 });
 
@@ -1372,7 +1379,7 @@ prof =Profile
                                 }
                             }
 
-                            if($.isFunction(callback)) callback();  
+                            if($.isFunction(callback)) callback(this, true);  
                             
                         }else{
                             window.hWin.HEURIST4.msg.showMsgErr(response);

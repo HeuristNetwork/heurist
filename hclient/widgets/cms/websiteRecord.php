@@ -666,22 +666,51 @@ function afterPageLoad(document, pageid){
 //
 function onHapiInit(success){   
     
-//    console.log('webpage hapi inited  '+(new Date().getTime() / 1000 - _time_debug));
+//    console.log('webpage hapi inited  ');//+(new Date().getTime() / 1000 - _time_debug));
     _time_debug = new Date().getTime() / 1000;
     
     if(!success){    
             window.hWin.HEURIST4.msg.showMsgErr('Cannot initialize system on client side, please consult Heurist developers');
+            window.hWin.HEURIST4.msg.sendCoverallToBack();            
             return;
     }
     
-    window.hWin.HAPI4.EntityMgr.refreshEntityData('all');
+    var res = window.hWin.HEURIST4.util.versionCompare(window.hWin.HAPI4.sysinfo.db_version_req, 
+                                                window.hWin.HAPI4.sysinfo.db_version);   
+    if(res==-2){ //-2= db_version_req newer
+    window.hWin.HEURIST4.msg.showMsgErr('<h3>Old version database</h3>'
++'<p>You are trying to load a website using a more recent version of Heurist than the one used for the database being accessed.</p>'
++'<p>Please ask the owner of the database to open it in the latest version of Heurist which will apply the necessary updates.</p>');
+        window.hWin.HEURIST4.msg.sendCoverallToBack();
+        return;
+    }
+
+    window.hWin.HAPI4.SystemMgr.get_defs_all(false, null, function(success){
         
+        if(success){
+    _time_debug = new Date().getTime() / 1000;
+            //substitute values in header
+            initHeaderElements();
+            
+            onPageInit(success);
+            
+            if(window.hWin.HAPI4.sysinfo.host_logo && $('#host_info').length>0){
+                
+                $('<div style="height:40px;padding-left:4px;float:right">'  //background: white;
+                    +'<a href="'+(window.hWin.HAPI4.sysinfo.host_url?window.hWin.HAPI4.sysinfo.host_url:'#')
+                    +'" target="_blank" style="text-decoration:none;color:black;">'
+                            +'<label>at: </label>'
+                            +'<img src="'+window.hWin.HAPI4.sysinfo.host_logo
+                            +'" height="35" align="center"></a></div>')
+                .appendTo( $('#host_info') );
+            }
+        }
+    });
+    
+/*
+    window.hWin.HAPI4.EntityMgr.refreshEntityData('all');
     window.hWin.HAPI4.SystemMgr.get_defs({rectypes:'all', terms:'all', detailtypes:'all', mode:2}, function(response){
         
-//console.log('DBG execution time "get_defs" '+response.exec_time);                            
-//console.log('DBG size "get_defs" '+response.zip_size);                            
-        
-//console.log('webpage db struct  '+(new Date().getTime() / 1000 - _time_debug));
 _time_debug = new Date().getTime() / 1000;
         
         if(response.status == window.hWin.ResponseStatus.OK){
@@ -717,6 +746,7 @@ _time_debug = new Date().getTime() / 1000;
             .appendTo( $('#host_info') );
         }
     });
+*/    
 }
 
 
@@ -787,7 +817,7 @@ $(document).ready(function() {
             $('body').find('#main-pagetitle').hide();
         }
             
-//console.log('webpage doc ready '+(window.hWin.HAPI4)+'    '+(new Date().getTime() / 1000 - _time_debug));
+//console.log('webpage doc ready ');//+(window.hWin.HAPI4)+'    '+(new Date().getTime() / 1000 - _time_debug));
         _time_debug = new Date().getTime() / 1000;
     
         // Standalone check
