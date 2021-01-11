@@ -62,10 +62,11 @@ of the codebase and rename it to index.html
 
 // *** DO NOT CHANGE VERSION NUMBER, THIS IS SET BY THE HEURIST DEVELOPMENT TEAM ***
 
-$version = "6.1.3"; // sets current program version number, determined by Heurist development lead
+$version = "6.1.4"; // sets current program version number, determined by Heurist development lead
 
 // dates below are the date of release of the given version, and list changes since last release
 
+// h6.1.4 11 Jan 2021 Bug fixing. cosmetics
 // h6.1.3 7 Jan 2021 Bug fixing, new display mode for continuous details result lists
 // h6.1.1 19 Dec 2020 Fix up problems with icons for record types in core definitions
 // h6.1.0 16 Dec 2020 Alpah release of version 6 to 'inner circle' 
