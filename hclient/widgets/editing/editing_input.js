@@ -188,15 +188,16 @@ $.widget( "heurist.editing_input", {
             
             if(this.detailType=="resource" && this.configMode.entity=='records'){
                 
-                $('<div style="float:right;padding-top:3px;width: 18px;"><span class="ui-icon ui-icon-triangle-1-e"/></div>')                
+                $('<div style="float:right;padding-top:3px;width: 14px;"><span class="ui-icon ui-icon-triangle-1-e"/></div>')                
                     .appendTo( this.header );
                     this.header.css('padding-right',0);
+                    this.header.find('label').css({display:'inline-block', width: 130});
             }else if(this.detailType=="relmarker"){
                 
-                $('<div style="float:right;padding-top:1px;width: 18px;"><span style="font-size:10px" class="ui-icon ui-icon-triangle-2-e-w"/></div>')                
+                $('<div style="float:right;padding-top:1px;width: 14px;"><span style="font-size:10px" class="ui-icon ui-icon-triangle-2-e-w"/></div>')                
                     .appendTo( this.header )
                     this.header.css('padding-right',0);
-                
+                    this.header.find('label').css({display:'inline-block', width: 130});
             }
         }        
 
