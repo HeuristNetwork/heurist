@@ -558,26 +558,31 @@ WHERE
             $this->system->defineConstant('RT_CMS_HOME');
             $this->system->defineConstant('RT_CMS_MENU');
             
-            $query = 'SELECT count(r0.rec_ID) as cnt '
-                .'FROM Records r0 WHERE (not r0.rec_FlagTemporary) '
-                .'AND (r0.rec_RecTypeID='.RT_CMS_HOME.')';
-            
-            $res = mysql__select_value($this->system->get_mysqli(), $query); //total count
-            
-            $query = 'SELECT r0.rec_ID '
-                .'FROM Records r0 WHERE (not r0.rec_FlagTemporary) '
-                .'AND (r0.rec_NonOwnerVisibility!="public") '
-                .'AND (r0.rec_RecTypeID='.RT_CMS_HOME.')';
+            $query = 'SELECT count(r0.rec_ID) as cnt FROM Records r0 ';
+            $where = 'WHERE (r0.rec_RecTypeID='.RT_CMS_HOME.') ';
 
-            $res2 = mysql__select_list2($this->system->get_mysqli(), $query);
+
+            if((@$this->data['ugr_ID']>0) || (@$this->data['ugr_ID']===0)){
+                $conds = $this->_getRecordOwnerConditions($this->data['ugr_ID']);
+                if(@$conds[1]) $conds[1] = ' AND '.$conds[1];
+            }else{
+                $conds = array('', ' AND (not r0.rec_FlagTemporary)');
+            }
+           
+            $res = mysql__select_value($this->system->get_mysqli(), $query.$conds[0].$where.$conds[1]); //total count
+            
+            $query = 'SELECT r0.rec_ID FROM Records r0 ';
+            $where = 'WHERE (r0.rec_NonOwnerVisibility!="public") '
+                                .'AND (r0.rec_RecTypeID='.RT_CMS_HOME.')';
+
+            $res2 = mysql__select_list2($this->system->get_mysqli(), $query.$conds[0].$where.$conds[1]);
             if($res2==null) $res2 = array();
             
-            $query = 'SELECT r0.rec_ID '
-                .'FROM Records r0 WHERE (not r0.rec_FlagTemporary) '
-                .'AND (r0.rec_NonOwnerVisibility!="public") '
-                .'AND (r0.rec_RecTypeID='.RT_CMS_MENU.')';
+            $query = 'SELECT r0.rec_ID FROM Records r0 ';
+            $where = 'WHERE (r0.rec_NonOwnerVisibility!="public") '
+                                .'AND (r0.rec_RecTypeID='.RT_CMS_MENU.')';
 
-            $res3 = mysql__select_list2($this->system->get_mysqli(), $query);
+            $res3 = mysql__select_list2($this->system->get_mysqli(), $query.$conds[0].$where.$conds[1]);
             if($res3==null) $res3 = array();
             
             $res = array('all'=>$res, 'private_home'=>count($res2), 'private_menu'=>count($res3), 
