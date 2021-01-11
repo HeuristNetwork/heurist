@@ -428,6 +428,9 @@ div.recordDiv.white-borderless{
     background: white;
     border: none;
 }
+.list div.recordDiv.densed{
+    padding:0;
+}
 
 div.groupHeader:hover > .action-button-container{
     display:table-cell;

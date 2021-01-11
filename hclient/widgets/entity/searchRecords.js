@@ -90,7 +90,7 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
                              icon: is_browse?'ui-icon-search':"ui-icon-plus"})
                     .attr('data-rtyid', rectypeID)
                     .css({'font-size':'11px',display:'inline-block',width:190,'text-align':'left','margin':'6px 0px 3px 8px'})
-                    .addClass('truncate')
+                    .addClass('truncate ui-button-action')
                     .click(function(e) {
                         
                         var rtyid = $(e.target).attr('data-rtyid');
@@ -129,6 +129,7 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
             this.btn_add_record
             .button({label: window.hWin.HR(is_browse?"Search Record":"Add Record"), 
                         icon: is_browse?null:"ui-icon-plus"})
+            .addClass('ui-button-action')
             .click(function(e) {
                 if(!is_browse && that.selectRectype.val()>0){
                     that._trigger( "onaddrecord", null, that.selectRectype.val() );

@@ -44,9 +44,20 @@
                     "dtID": "trm_InverseTermId",
                     "dtFields":{
                         "dty_Type":"resource",
-                        "rst_DisplayName":"Inverse Relation type:",
-                        "rst_DisplayHelpText": "Some relation type can be in pair. Example: IsSon and IsFather", 
+                        "rst_DisplayName":"Inverse term:",
+                        "rst_DisplayHelpText": "Choose another term which is the inverse eg. is Onwer Of and is Onwed By", 
                         "rst_FieldConfig": {"entity":"defTerms","filter_group":"relation","button_browse":true}
+                    }
+                },
+                {
+                    "dtID": "trm_InverseSymmetrical",
+                    "dtFields":{
+                        "dty_Role": "virtual",
+                        "dty_Type": "boolean",
+                        "rst_DefaultValue": "1",
+                        "rst_FieldConfig":["1","0"],
+                        "rst_DisplayName": "Symmetrical:",
+                        "rst_DisplayHelpText": "The terms are mutually the inverse of one-another (not always the case)"
                     }
                 },
                 {

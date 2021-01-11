@@ -679,6 +679,8 @@ console.log(menu.find('.ui-menu-item').css('padding'));
         var url = window.hWin.HAPI4.baseURL + "admin/verification/combineDuplicateRecords.php?bib_ids="+recIDs_list.join(",")+"&db=" + window.hWin.HAPI4.database;
 
         window.hWin.HEURIST4.msg.showDialog(url, {
+            width:700, height:550,
+            default_palette_class:'ui-heurist-explore',
             title: window.hWin.HR('Combine duplicate records'),
             callback: function(context) {
                 that.reloadSearch();

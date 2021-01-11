@@ -346,12 +346,16 @@ $.widget( "heurist.search_faceted_wiz", {
         //if(width<minw) 
         this._dialog.dialog( 'option', 'width', minw);
         
+        var topPos = 0;
+        var pos = this._dialog.dialog('option', 'position');
+        if(pos && pos.of){
+            topPos = $(pos.of).offset().top+40;
+        }
 
         var dh =  this._dialog.dialog('option', 'height');
-        //if(ch>dh){
-            var ht = Math.min(ch, window.innerHeight);
-            this._dialog.dialog('option', 'height', ch);
-        //}
+
+        var ht = Math.min(ch, window.innerHeight-topPos);
+        this._dialog.dialog('option', 'height', ht);    
         
         /*
         if(this.options.is_h6style){

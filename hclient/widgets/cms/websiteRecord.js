@@ -1181,6 +1181,7 @@ console.log('foter:'+footer_content_raw);
                 +"hclient/widgets/cms/editCMS_AddWidget.html?t="+(new Date().getTime()), 
                 buttons, 'Add Heurist Widget to your Web Page', 
         {  container:'cms-add-widget-popup',
+           default_palette_class: 'ui-heurist-publish',
            width:750,
            close: function(){
                is_edit_widget_open = false;

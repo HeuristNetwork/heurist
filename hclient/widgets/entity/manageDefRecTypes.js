@@ -1525,8 +1525,8 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
     },
 
 
-    //
-    //
+    // Change group for rectype
+    // params:  {rty_ID:rty_ID, rty_RecTypeGroupID:rtg_ID }
     //                                
     changeRectypeGroup: function(params){                                    
         window.hWin.HEURIST4.msg.bringCoverallToFront(this.recordList);
@@ -1536,6 +1536,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             function(){
                 window.hWin.HEURIST4.msg.sendCoverallToBack();
                 that.searchForm.searchDefRecTypes('startSearch');
+                that._triggerRefresh('rty');
                 /*
                 window.hWin.HAPI4.EntityMgr.refreshEntityData('rtg',
                     function(){

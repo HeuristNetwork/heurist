@@ -29,7 +29,7 @@
     define('MANAGER_REQUIRED',1);   
     define('PDIR','../../');  //need for proper path to js and css    
 
-    require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
+    require_once(dirname(__FILE__).'/../../hclient/framecontent/initPage.php');
 
     $fuzziness = intval($_REQUEST['fuzziness']);
     if (! $fuzziness) $fuzziness = 10;
@@ -130,7 +130,7 @@
         </style>
     </head>
 
-    <body class="popup">
+    <body class="popup" style="overflow:auto;">
         <script type="text/javascript">
             function setAsNonDuplication(){
                 var checkboxes = document.getElementsByName('dupeDiffHash[]');
@@ -143,6 +143,29 @@
 
                 alert('Check several groups and then click any of the "ignore in future" links to set this for multiple groups.');
             }
+            
+            
+            function fixDuplicatesPopup(sRecIds, sGroupID){
+
+                var url = window.hWin.HAPI4.baseURL
+                        + 'admin/verification/combineDuplicateRecords.php?bib_ids='
+                        + sRecIds
+                        + '&db=' + window.hWin.HAPI4.database;
+                
+                window.hWin.HEURIST4.msg.showDialog(url, {
+                    width:700, height:600,
+                    default_palette_class:'ui-heurist-explore',
+                    title: window.hWin.HR('Combine duplicate records'),
+                    callback: function(context) {
+                            if(context=='commited'){
+                                $('.group_'+sGroupID).hide();
+                            }
+                    }
+                });
+                
+                return false;
+            }
+            
         </script>
 
         <div class="banner"><h2 style="padding:10px">Find Duplicate Records</h2></div>
@@ -200,28 +223,32 @@
                     "<br /><b>Merge this group</b> link will ask which members of the group to merge before any changes are made.".
                     "<br />Click on any of the listed records to edit the data for that record";
 
+                    $unique_group_id = 1;
+                    
                     foreach ($dupes as $rectype => $subarr) {
                         foreach ($subarr as $index => $key) {
                             $diffHash = array_keys($bibs[$key]);
                             sort($diffHash,SORT_ASC);
                             $diffHash = join(',',$diffHash );
                             if (in_array($diffHash,$dupeDifferences)) continue;
-                            print '<div style="padding: 10px 20px;">';
+                            print '<div style="padding: 10px 20px;" class="group_'.$unique_group_id.'">';
                             print '<input type="checkbox" name="dupeDiffHash[]" '.
                             'title="Check to idicate that all records in this set are unique." id="'.$key.
                             '" value="' . $diffHash . '">&nbsp;&nbsp;';
                             print '<label style="font-weight: bold;">'.$rectype .'</label>&nbsp;&nbsp;&nbsp;&nbsp;';
                             //print '<input type="submit" value="&nbsp;ignore in future&nbsp;">&nbsp;&nbsp;&nbsp;&nbsp;';
 
-                            print '<a target="fix" href="combineDuplicateRecords.php?db='.HEURIST_DBNAME.
-                            '&bib_ids=' . join(',', array_keys($bibs[$key])) . '">merge this group</a>&nbsp;&nbsp;&nbsp;&nbsp;';
+                            print '<a href="#" onclick="{return fixDuplicatesPopup(\''
+                                .implode(',',array_keys($bibs[$key]))
+                                .'\', '.$unique_group_id.');}">merge this group</a>&nbsp;&nbsp;&nbsp;&nbsp;';
+                            
                             print '<a target="_new" href="'.HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.
                             '&w=all&q=ids:' . join(',', array_keys($bibs[$key])) . '">view as search</a>';
 
                             print '&nbsp;&nbsp;&nbsp;&nbsp;<a href="#"  onclick="setAsNonDuplication()">ignore in future</a>';
 
                             print '</div>';
-                            print '<ul style="padding: 10px 30px;">';
+                            print '<ul style="padding: 10px 30px;" class="group_'.$unique_group_id.'">';
                             foreach ($bibs[$key] as $rec_id => $vals) {
                                 $recURL = mysql__select_value($mysqli, 'select rec_URL from Records where rec_ID = ' . $rec_id);
                                 
@@ -234,6 +261,8 @@
                                 print '</li>';
                             }
                             print '</ul>';
+                            
+                            $unique_group_id++;
                         }
                     }
                 ?>

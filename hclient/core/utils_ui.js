@@ -1179,7 +1179,7 @@ window.hWin.HEURIST4.ui = {
             if(dminwidth=='0px' || window.hWin.HEURIST4.util.isempty(dminwidth)) dminwidth = '10em';
 
             var menuwidget = menu.hSelect( "menuWidget" );
-            menuwidget.css( {'padding':0,'background':'#F4F2F4','zIndex':9999999 });
+            menuwidget.css( {'background':'#F4F2F4','zIndex':9999999 }); //'padding':0,
             menuwidget.addClass('heurist-selectmenu overflow').css({'max-height':'300px','font-size':'12px'});
             
             if(apply_style){
@@ -1830,9 +1830,10 @@ window.hWin.HEURIST4.ui = {
         var isEdit = (selector_function!==false);
         
         if(info['trm_ID']>0){
-            sRelBtn = '<div style="display:table-cell;margin-left:0.5em;min-width:46px;text-align:right;"><div class="btn-rel"/><div class="btn-del"/></div>';
+            //margin-left:0.5em;
+            sRelBtn = '<div style="display:table-cell;min-width:40px;text-align:right;"><div class="btn-rel"/><div class="btn-del"/></div>';
         }else if (!isHiddenRecord) {
-            sRelBtn = '<div style="display:table-cell;margin-left:0.5em;min-width:23px;text-align:right;"><div class="btn-edit"/></div>';     // data-recID="'+info['rec_ID']+'"
+            sRelBtn = '<div style="display:table-cell;min-width:23px;text-align:right;"><div class="btn-edit"/></div>';     // data-recID="'+info['rec_ID']+'"
         }
         
         var reltype = ''
@@ -1841,36 +1842,41 @@ window.hWin.HEURIST4.ui = {
             if (info['is_inward']){
                 term_ID = window.hWin.HEURIST4.dbs.getInverseTermById(term_ID);    
             }
-            
-            reltype = '<div class="detailType" style="display:table-cell;min-width:'
-                + Math.max(19, Math.min(reltype.length,25))+'ex;">'
+            //class="detailType" 'min-width:'+ Math.max(19, Math.min(reltype.length,25))+'ex;
+            reltype = '<div style="display:table-cell;color: #999999;text-transform: none;padding-left:4px">'
                 + $Db.trm(term_ID, 'trm_Label') + '</div>'
         }
         
-        var ele = $('<div class="link-div ui-widget-content ui-corner-all"  data-relID="'
-                        +(info['relation_recID']>0?info['relation_recID']:'')+'" '
-                        +' style="margin-bottom:0.2em;background:#F4F2F4 !important;">' //padding-bottom:0.2em;
-
-                        + '<div class="detail" '  // truncate
-                        + 'style="display:table-cell;min-width:60ex;max-width:160ex;">'  //padding:2px;
-                        
-                        + reltype
-                        
-                        + (info['rec_IsChildRecord']==1
-                            ?'<span style="font-size:0.8em;color:#999999;padding:4px 2px;display:table-cell;min-width: 5ex;">child</span>':'')
-                        + (isEdit?'<span style="display:table-cell;vertical-align: bottom"><span class="ui-icon ui-icon-triangle-1-e"/></span>':'') //padding-top:3px;
-                        
-                        + '<span style="display:table-cell;vertical-align:top;">'  //;padding-top:2px;
-                        + '<img src="'+ph_gif+'"  class="rt-icon" style="margin-right:10px;'
+        var rectype_icon = '<div style="display:table-cell;vertical-align: middle;padding: 0 4px;">' 
+                        + '<img src="'+ph_gif+'"  class="rt-icon" style="' //'margin-right:10px;'
                         + ((info['rec_RecTypeID']>0)?
                             'background-image:url(\''    //vertical-align:top;margin-top:2px;
                             + top.HAPI4.iconBaseURL+info['rec_RecTypeID'] + '\');'   //rectype icon
                            :'') 
                         + '"/>'
-                        //2017-11-08 no more link here
-                        //+ '<a target=_new href="#" data-recID="'+info['rec_ID'] +'">'
-                        //+ window.hWin.HEURIST4.util.htmlEscape(info['rec_Title'])+'</a>'
-                        + '</span>'
+                        + '</div>';
+        
+        var ele = $('<div class="link-div ui-widget-content ui-corner-all"  data-relID="'
+                        +(info['relation_recID']>0?info['relation_recID']:'')+'" '
+                        +' style="margin-bottom:0.2em;background:#F4F2F4 !important;">' //padding-bottom:0.2em;
+
+                        //relation type
+                        
+        + '<div '  // class="detail"   truncate
+                        + 'style="display:table-cell; word-break: break-word;">'  //min-width:60ex;max-width:160ex;
+                        
+                        + reltype
+                        
+                        + (info['rec_IsChildRecord']==1
+                            ?'<span style="font-size:0.8em;color:#999999;padding:4px 2px;display:table-cell;min-width: 5ex;">child</span>':'')
+                            
+                        //triangle icon fo
+                        + ((reltype!='' && isEdit)?'<span style="display:table-cell;vertical-align: bottom"><span class="ui-icon ui-icon-triangle-1-e"/></span>':'') //padding-top:3px;
+
+                        //record type icon for resource
+                        + (reltype==''?rectype_icon:'')
+                        
+                        // record title 
                         
                         +'<span class="related_record_title'
                             + ((info['rec_RecTypeID']>0)?'':' ui-state-error')
@@ -1880,7 +1886,10 @@ window.hWin.HEURIST4.ui = {
                                         +'" style="display:table-cell;">'  //padding-top:4px;
                         + rec_Title
                         + '</span>'
-                        + '</div>'
+                        
+        + '</div>'
+                        //record type icon for relmarker
+                        + (reltype==''?'':rectype_icon)                        
                         + sRelBtn
                         + '</div>')
         .appendTo($(container));

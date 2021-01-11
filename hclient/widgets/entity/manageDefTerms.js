@@ -314,11 +314,11 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                           css:{'margin-right':'0.5em','display':'inline-block',padding:'2px'}, id:'btnAddButton2',
                           click: function() { that._onActionListener(null, 'add-reference'); }},
                           
-                    {showText:false, icons:{primary:'ui-icon-upload'}, text:window.hWin.HR('Export Terms'), //ui-icon-arrowthick-1-e
+                    {showText:false, icons:{primary:'ui-icon-download'}, text:window.hWin.HR('Export Terms'), //ui-icon-arrowthick-1-e
                           css:{'margin-right':'0.5em','display':'inline-block',padding:'2px'}, id:'btnExportVocab',
                           click: function() { that._onActionListener(null, 'term-export'); }},
                           
-                    {showText:false, icons:{primary:'ui-icon-download',padding:'2px'}, text:window.hWin.HR('Import Terms'), //ui-icon-arrowthick-1-w
+                    {showText:false, icons:{primary:'ui-icon-upload',padding:'2px'}, text:window.hWin.HR('Import Terms'), //ui-icon-arrowthick-1-w
                           css:{'margin-right':'0.5em','display':'inline-block',padding:'2px'}, id:'btnImportVocab',
                           click: function() { that._onActionListener(null, 'term-import'); }}
                     ];
@@ -951,7 +951,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             sPad = lvl==1?0:(lvl==2?(lvl-0.5):lvl);                                                                         
             var exp_btn_style = 'width:20px;display:inline-block;vertical-align:bottom;margin-left:'+sPad+'em;';
            
-            html = '<div class="recordDiv white-borderless'+(!(ref_lvl>0)?' rt_draggable':'')+'" recid="'+recID+'"'+parents+'>'
+            html = '<div class="recordDiv densed white-borderless'+(!(ref_lvl>0)?' rt_draggable':'')
+                        +'" recid="'+recID+'"'+parents+'>'
                         + ($Db.trm_HasChildren(recID)
                                 ?this._defineActionButton(
                                     {key:'expand',label:'Show/hide children',            
@@ -1119,6 +1120,8 @@ if(window.hWin.HEURIST4.util.isArrayNotEmpty(res.records)){
     _afterInitEditForm: function(){
         this._super();
         
+        this.inverse_termid_old = 0;
+        
         var ele, currentDomain = null;
         var isVocab = !(this.options.trm_VocabularyID>0);
         if(isVocab){
@@ -1129,6 +1132,7 @@ if(window.hWin.HEURIST4.util.isArrayNotEmpty(res.records)){
         
             //hide fields for vocab    
             this._editing.getFieldByName('trm_InverseTermId').hide();
+            this._editing.getFieldByName('trm_InverseSymmetrical').hide();
             this._editing.getFieldByName('trm_Code').hide();
             this._editing.getFieldByName('trm_Thumb').hide();
 
@@ -1178,12 +1182,29 @@ if(window.hWin.HEURIST4.util.isArrayNotEmpty(res.records)){
             currentDomain = $Db.trm(vocab_ID, 'trm_Domain');
             if( currentDomain=='enum' ){
                 this._editing.getFieldByName('trm_InverseTermId').hide();
+                this._editing.getFieldByName('trm_InverseSymmetrical').hide();
             }else{
                 ele = this._editing.getFieldByName('trm_InverseTermId');
                 ele.show();
                 var cfg = ele.editing_input('getConfigMode');
                 cfg.initial_filter = vocab_ID;
                 ele.editing_input('setConfigMode', cfg);
+                
+                ele = this._editing.getFieldByName('trm_InverseSymmetrical');
+                ele.show();
+                
+                if(this._currentEditID>0){
+                    //detect: is it symmetrical?
+                    var val = '1';
+                    var trm_InverseTermId = $Db.trm(this._currentEditID, 'trm_InverseTermId');
+                    if(trm_InverseTermId>0){
+                        this.inverse_termid_old = $Db.trm(trm_InverseTermId, 'trm_InverseTermId');
+                        val = (this._currentEditID == this.inverse_termid_old)?'1':'0';
+                    }
+                    ele.editing_input('setValue', val, true);
+                }
+                window.hWin.HEURIST4.util.setDisabled(ele, (this._currentEditID>0));
+                
             }
         }
         
@@ -1441,6 +1462,32 @@ if(window.hWin.HEURIST4.util.isArrayNotEmpty(res.records)){
             //highlight in list 
             this.recordList.resultList('setSelected', [recID]);
         }else{*/
+        }
+        
+        if(this.options.auxilary=='term' && 
+            !window.hWin.HEURIST4.util.isempty(fieldvalues['trm_InverseSymmetrical']))
+        {
+            
+            //update inverse terms
+            var inverse_termid = fieldvalues['trm_InverseTermId'];
+            //var inverse_termid_old = @$record['old_inverse_id'];
+            var is_symmetrical = (fieldvalues['trm_InverseSymmetrical']!=0);
+            
+            if(this.inverse_termid_old!=inverse_termid && is_symmetrical)
+            {
+                if(inverse_termid>0){
+                    //set mutual inversion for inverse term
+                    $Db.trm(inverse_termid, 'trm_InverseTermId', recID);
+                }
+                if (this.inverse_termid_old>0){
+                    //clear mutual inversion for previous inversion
+                    var invid = $Db.trm(this.inverse_termid_old, 'trm_InverseTermId');
+                    if(invid==recID){
+                        $Db.trm(this.inverse_termid_old, 'trm_InverseTermId', null);
+                    }
+                }
+            }
+            
         }
         
         this._triggerRefresh(this.options.auxilary);    

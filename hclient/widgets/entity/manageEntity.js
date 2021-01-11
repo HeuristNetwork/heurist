@@ -1442,9 +1442,12 @@ $.widget( "heurist.manageEntity", {
             }
             
             //2020-12-06 if(this.options.edit_structure){ return; }            
+            
+            var is_full = 0;
         
             if(!fields){
                 fields = this._getValidatedValues(); 
+                is_full = 1;
             }
 
             
@@ -1454,7 +1457,8 @@ $.widget( "heurist.manageEntity", {
                 'a'          : 'save',
                 'entity'     : this.options.entity.entityName,
                 'request_id' : window.hWin.HEURIST4.util.random(),
-                'fields'     : fields                     
+                'fields'     : fields,
+                'isfull'     : is_full  //
                 };
              
                 if(this.options.coverall_on_save) {

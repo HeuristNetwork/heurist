@@ -54,7 +54,9 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     
     _init: function() {
         
-        this.options.default_palette_class = 'ui-heurist-populate';
+        if(!this.options.default_palette_class){
+            this.options.default_palette_class = 'ui-heurist-populate';   
+        }
         
         if(this.options.layout_mode=='short'){
                 this.options.layout_mode = //slightly modified 'short' layout
@@ -3236,7 +3238,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 
                 this.element.find('.btns-admin-only').show();
 
-                this.element.find('.btn-edit-rt').button().css(btn_css).css({'padding':'4.5px'})
+                this.element.find('.btn-edit-rt').button({icon:'ui-icon-pencil'}).css(btn_css).css({'padding':'4.5px'})
                         .click(function(){that.editRecordTypeAttributes();}); //was editRecordType(false)
                 
                 var btn = this.element.find('.btn-edit-rt2');        
@@ -3280,7 +3282,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 btn.find('.ui-button-icon')
                             .css({'font-size':'25px','float':'left',width:'25px',height:'25px','margin-top':'0px'});
                         
-                this.element.find('.btn-edit-rt-titlemask').button({icon:'ui-icon-pencil'})
+                this.element.find('.btn-edit-rt-titlemask').button({icon:'ui-icon-tags'})  //marker, pencil, tags
                         .css(btn_css).click(function(){that.editRecordTypeTitle();});
                 
                 this.element.find('.btn-edit-rt-template').button({icon:'ui-icon-arrowthickstop-1-s'})

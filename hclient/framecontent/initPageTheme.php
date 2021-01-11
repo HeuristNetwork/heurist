@@ -189,6 +189,13 @@ select.ui-heurist-header2, input.ui-heurist-header2{
     background-color:<?php uout('ce_bg', '#ECF1FB');?> !important;
 }
 <?php }  ?>
+
+.ui-selectmenu-button{
+    background:<?php uout('ce_input', '#ffffff');?>;
+    border: 1px solid  <?php uout('cd_bg', '#e0dfe0' );?> !important;
+    outline: none;
+    padding: 1px;
+}
 .ent_wrapper.editor{
     font-size:0.9em;
 }
@@ -197,7 +204,7 @@ select.ui-heurist-header2, input.ui-heurist-header2{
 }
 .ent_wrapper.editor .text{
     background: none repeat scroll 0 0 <?php uout('ce_input', '#ffffff');?>; /* 0511 !important */
-    border: 1px solid  <?php uout('cd_bg', '#e0dfe0' );?>;;
+    border: 1px solid  <?php uout('cd_bg', '#e0dfe0' );?>;
 }
 .separator2{
     color: black; /* <?php uout('ce_helper', '#999999');?>; */
@@ -392,8 +399,7 @@ span.fancytree-node:hover{
 .ui-heurist-design .ui-heurist-title{color:<?php uout('design_title_color', '#7B4C98');?>}
 
 .ui-heurist-design .ui-widget-content,
-.ui-heurist-design .ui-dialog-heurist,
-.ui-heurist-design .ui-selectmenu-button{
+.ui-heurist-design .ui-dialog-heurist{
     background:<?php uout('design_fade_bg', '#DAD0E4');?>
 }
 
@@ -415,8 +421,7 @@ span.fancytree-node:hover{
 }
 .ui-heurist-explore-fade{background:<?php uout('explore_fade_bg', '#D4DBEA');?> !important;}
 .ui-heurist-explore .ui-heurist-title{color:<?php uout('explore_title_color', '#4477B9');?>} 
-.ui-heurist-explore .ui-widget-content,
-.ui-heurist-explore .ui-selectmenu-button{
+.ui-heurist-explore .ui-widget-content{
     background:<?php uout('explore_fade_bg', '#D4DBEA');?>
 }
 /* button within menu section */
@@ -450,8 +455,7 @@ span.fancytree-node:hover{
 }
 .ui-heurist-populate-fade{background:<?php uout('import_fade_bg', '#e3f0f0');?> !important;}
 .ui-heurist-populate .ui-heurist-title{color:<?php uout('import_title_color', '#307D96');?>}
-.ui-heurist-populate .ui-widget-content,
-.ui-heurist-populate .ui-selectmenu-button{
+.ui-heurist-populate .ui-widget-content{
     background:<?php uout('import_fade_bg', '#e3f0f0');?>
 }
 
@@ -487,15 +491,34 @@ span.fancytree-node:hover{
 .ui-heurist-publish .ui-dialog-titlebar,
 .ui-heurist-publish .ui-dialog-buttonpane{
     background:<?php uout('publish_bg', '#627E5D');?> !important;
+    color: white;
 }
+.ui-heurist-publish-fade{background:<?php uout('publish_fade_bg', '#CCEAC5');?> !important;}
+.ui-heurist-publish .ui-heurist-title{color:<?php uout('publish_title_color', '#627E5D');?>}
+.ui-heurist-publish .ui-widget-content{
+    background:<?php uout('publish_fade_bg', '#CCEAC5');?>
+}
+/* button within menu section */
+.ui-heurist-publish .ui-heurist-btn-header1{    
+    background:none !important;
+    border:1px solid <?php uout('import_bg', '#307D96')?> !important;
+    color:<?php uout('publish_bg', '#627E5D')?> !important;
+}
+.ui-heurist-publish .ui-button-icon-only{
+    background: none;
+    color:<?php uout('publish_bg', '#627E5D')?> !important;
+}
+.ui-heurist-publish .ui-heurist-header .ui-button-icon-only, 
+.ui-heurist-publish .ui-dialog-titlebar .ui-button-icon-only,
+.ui-heurist-publish  .ui-fade-color{
+    color:<?php uout('publish_fade_bg', '#CCEAC5')?> !important;
+}
+
 .ui-menu6 .ui-menu6-container.ui-heurist-publish, .ui-heurist-publish .ui-helper-popup{
     border-width: 2px !important;
     border-color:<?php uout('publish_bg', '#627E5D');?> !important; 
 } 
-.ui-heurist-publish-fade{background:<?php uout('publish_fade_bg', '#CCEAC5');?> 0% 0% no-repeat padding-box;}
-.ui-heurist-publish .ui-heurist-title{
-    color:<?php uout('publish_title_color', '#627E5D');?>
-}
+
 .ui-heurist-publish .ui-state-active, 
 .ui-heurist-publish .fancytree-active,
 .ui-heurist-publish .fancytree-node:hover
@@ -514,8 +537,7 @@ span.fancytree-node:hover{
 }
 .ui-heurist-admin-fade{background:<?php uout('admin_fade_bg', '#D4DBEA');?> !important;}
 .ui-heurist-admin .ui-heurist-title{color:<?php uout('admin_title_color', '#676E80');?>}
-.ui-heurist-admin .ui-widget-content,
-.ui-heurist-admin .ui-selectmenu-button{
+.ui-heurist-admin .ui-widget-content{
     background:<?php uout('admin_fade_bg', '#D4DBEA');?>
 }
 
