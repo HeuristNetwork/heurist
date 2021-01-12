@@ -173,7 +173,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                         +'<select class="edit_rts s_width" style="display:none">'
                         +'<option>5</option><option>10</option><option>20</option><option>30</option>'
                         +'<option>40</option><option>50</option><option>60</option><option>80</option><option>100</option>'
-                        +'<option>120</option></select></div>'
+                        +'<option>120</option><option>150</option>'
+                        +'<option>200</option></select></div>'
 
                    +'<span class="edit_rts_btn" style="top:24px;left:80px;position:absolute;background:lightblue;display:none" '
                    +' data-apply="1" title="Save changes for field properties">Apply</span>'

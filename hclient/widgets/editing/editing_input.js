@@ -515,7 +515,7 @@ $.widget( "heurist.editing_input", {
             $.each(this.inputs, function(index, input){ 
                 var ow = $(input).width(); //current width
                 if(ow<580){
-                    var nw = ($(input).val().length+10)+'ex';
+                    var nw = ($(input).val().length+3)+'ex';
                     $(input).css('width', nw);
                     if($(input).width()<ow) $(input).width(ow); //we can only increase - restore
                     else if($(input).width()>600){
@@ -652,30 +652,38 @@ $.widget( "heurist.editing_input", {
                                     width: nw, // '120ex',           
                                     
                                     entity_encoding:'raw',
-                                     setup:function(ed) {
-                                       ed.on('change', function(e) {
-                                           var newval = ed.getContent();
-                                           var nodes = $.parseHTML(newval);
-                                           if(nodes && nodes.length==1 &&  !(nodes[0].childElementCount>0) &&
-                                               (nodes[0].nodeName=='#text' || nodes[0].nodeName=='P'))
-                                           { 
-                                               //remove the only tag
-                                               $input.val(nodes[0].textContent);
-                                           }else{
-                                               $input.val(newval);     
-                                           }
-                                           
-                                           //$input.val( ed.getContent() );
-                                           that.onChange();
-                                       });
-                                     },
+                                    setup:function(ed) {
+                                        ed.addButton('customHeuristMedia', {
+                                                icon: 'image',
+                                                text: 'Media',
+                                                onclick: function (_) {  //since v5 onAction in v4 onclick
+                                                    that._addHeuristMedia();
+                                                }
+                                            });
+
+                                        ed.on('change', function(e) {
+                                            var newval = ed.getContent();
+                                            var nodes = $.parseHTML(newval);
+                                            if(nodes && nodes.length==1 &&  !(nodes[0].childElementCount>0) &&
+                                                (nodes[0].nodeName=='#text' || nodes[0].nodeName=='P'))
+                                            { 
+                                                //remove the only tag
+                                                $input.val(nodes[0].textContent);
+                                            }else{
+                                                $input.val(newval);     
+                                            }
+
+                                            //$input.val( ed.getContent() );
+                                            that.onChange();
+                                        });
+                                    },
                                     plugins: [
                                         'advlist autolink lists link image preview textcolor', //anchor charmap print 
                                         'searchreplace visualblocks code fullscreen',
                                         'media table contextmenu paste help'  //insertdatetime  wordcount
                                       ],      
                                       //undo redo | code insert  |  fontselect fontsizeselect |  forecolor backcolor | media image link | alignleft aligncenter alignright alignjustify | fullscreen            
-                                    toolbar: ['formatselect | bold italic forecolor | align | bullist numlist outdent indent | removeformat | help'],
+                                    toolbar: ['formatselect | bold italic forecolor | customHeuristMedia link | align | bullist numlist outdent indent | removeformat | help'],
                                     content_css: [
                                         '//fonts.googleapis.com/css?family=Lato:300,300i,400,400i'
                                         //,'//www.tinymce.com/css/codepen.min.css'
@@ -2719,10 +2727,10 @@ console.log('onpaste');
               //if the size is greater than zero
               var nw = 120;
               if (parseFloat( dwidth ) > 0){ 
-                  nw = Math.round( 2+Number(dwidth) );
+                  nw = Math.round( 3+Number(dwidth) );
                     //Math.round(2 + Math.min(120, Number(dwidth))) + "ex";
               }
-              $input.css('min-width', nw+'ex'); //was *4/3
+              $input.css({'min-width':nw+'ex','width':nw+'ex'}); //was *4/3
 
         }
         
@@ -3724,6 +3732,44 @@ console.log('onpaste');
         */   
     },
     
+    //
+    // browse for heurist uploaded/registered files/resources and add player link
+    //         
+    _addHeuristMedia: function(){
+
+        var popup_options = {
+            isdialog: true,
+            select_mode: 'select_single',
+            edit_addrecordfirst: false, //show editor atonce
+            selectOnSave: true,
+            select_return_mode:'recordset', //ids or recordset(for files)
+            filter_group_selected:null,
+            //filter_groups: this.configMode.filter_group,
+            onselect:function(event, data){
+
+                if(data){
+
+                    if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
+                        var recordset = data.selection;
+                        var record = recordset.getFirstRecord();
+
+                        var thumbURL = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database
+                        +"&thumb="+recordset.fld(record,'ulf_ObfuscatedFileID');
+
+                        var playerTag = recordset.fld(record,'ulf_PlayerTag');
+
+                        tinymce.activeEditor.insertContent( playerTag );
+                    }
+
+                }//data
+
+            }
+        };//popup_options        
+
+        window.hWin.HEURIST4.ui.showEntityDialog('recUploadedFiles', popup_options);
+    },
+
+
     //
     //
     //

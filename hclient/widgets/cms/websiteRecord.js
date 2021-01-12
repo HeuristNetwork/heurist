@@ -719,36 +719,36 @@ console.log('foter:'+footer_content_raw);
     // browse for heurist uploaded/registered files/resources and add player link
     //         
     function __addHeuristMedia(){
-        
+
         var popup_options = {
-                            isdialog: true,
-                            select_mode: 'select_single',
-                            edit_addrecordfirst: false, //show editor atonce
-                            selectOnSave: true,
-                            select_return_mode:'recordset', //ids or recordset(for files)
-                            filter_group_selected:null,
-                            //filter_groups: this.configMode.filter_group,
-                            onselect:function(event, data){
+            isdialog: true,
+            select_mode: 'select_single',
+            edit_addrecordfirst: false, //show editor atonce
+            selectOnSave: true,
+            select_return_mode:'recordset', //ids or recordset(for files)
+            filter_group_selected:null,
+            //filter_groups: this.configMode.filter_group,
+            onselect:function(event, data){
 
-                             if(data){
-                                
-                                    if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
-                                        var recordset = data.selection;
-                                        var record = recordset.getFirstRecord();
-                                        
-                                        var thumbURL = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database
-                                                +"&thumb="+recordset.fld(record,'ulf_ObfuscatedFileID');
-                                        
-                                        var playerTag = recordset.fld(record,'ulf_PlayerTag');
-                                        
-                                        tinymce.activeEditor.insertContent( playerTag );
-                                    }
-                                
-                             }//data
+                if(data){
 
-                            }
-                        };//popup_options        
-        
+                    if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
+                        var recordset = data.selection;
+                        var record = recordset.getFirstRecord();
+
+                        var thumbURL = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database
+                        +"&thumb="+recordset.fld(record,'ulf_ObfuscatedFileID');
+
+                        var playerTag = recordset.fld(record,'ulf_PlayerTag');
+
+                        tinymce.activeEditor.insertContent( playerTag );
+                    }
+
+                }//data
+
+            }
+        };//popup_options        
+
         window.hWin.HEURIST4.ui.showEntityDialog('recUploadedFiles', popup_options);
     }
 
