@@ -200,7 +200,20 @@ console.log(data);
             
             
         // Refreshing
-        this.element.on("myOnShowEvent", function(event){
+        this.element.on("myOnShowEvent", this.refreshOnShow);
+            
+        //this.div_search.find('.div-table-cell').css('vertical-align','top');
+
+        this._recreateRectypeSelectors();
+        
+        this._refresh();
+
+    }, //end _create
+    
+    //
+    //
+    //    
+    refreshOnShow: function(){
             if( $Db.needUpdateRtyCount==0 ){
                 $Db.needUpdateRtyCount = -1;    
                 that._recreateRectypeSelectors();
@@ -210,16 +223,7 @@ console.log(data);
                     that._recreateRectypeSelectors();
                 });
             }
-            
-        });
-            
-        //this.div_search.find('.div-table-cell').css('vertical-align','top');
-
-        this._recreateRectypeSelectors();
-        
-        this._refresh();
-
-    }, //end _create
+    },
              
     //
     // recreate list of buttons or recreate combined_select

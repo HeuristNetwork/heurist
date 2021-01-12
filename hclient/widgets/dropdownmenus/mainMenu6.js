@@ -556,12 +556,9 @@ $.widget( "heurist.mainMenu6", {
         
         //this._expandMainMenuPanel();
 
-        clearTimeout(this._myTimeoutId3); this._myTimeoutId3 = 0;
+        clearTimeout(this._myTimeoutId3); this._myTimeoutId3 = 0; //clear timeout on show section menu
         
         this._resetCloseTimers();
-        if(e && $(e.target).parents('.ui-heurist-quicklinks').length==0){
-            this._collapseMainMenuPanel(true); //close instantly 
-        }
         
         this.divMainMenu.find('li.menu-explore').css('background','none');  
 //23-12        this.divMainMenu.find('li.menu-explore > .menu-text').css('text-decoration', 'none');
@@ -579,11 +576,20 @@ $.widget( "heurist.mainMenu6", {
 //23-12                ele.find('.menu-text').css('text-decoration','underline');
                 hasAction = ele.attr('data-action-popup');
                 
-                if(hasAction=='search_recent') hasAction = false;
+                if(hasAction=='search_recent') {
+                    hasAction = false;   
+                    return;
+                }
                 
             }
         }
 
+        if(e && $(e.target).parents('.ui-heurist-quicklinks').length==0)
+        {
+            this._collapseMainMenuPanel(true); //close instantly 
+        }
+        
+        
         if(hasAction){
             this.show_ExploreMenu(e);    
         } else {
@@ -836,8 +842,18 @@ $.widget( "heurist.mainMenu6", {
             //show menu section
             that.menues_explore_popup.css({'z-index':103}).show(); 
             
-            cont.show('fade',{},delay+200); //delay>=500?500:10); //show current widget in menu section
-            //cont.effect( 'fadeIn', options, 500, callback );
+            //explore-widgets - show current widget in menu section
+            //cont.show('fade',{},delay+200); 
+            
+            cont.fadeIn(delay+200, function(){
+                var action_name = $(this).attr('id');
+                that.menues_explore_popup.find('.explore-widgets[id!="'+action_name+'"]').hide();
+                
+                if(action_name=='search_entity'){
+                    //trigger refresh  myOnShowEvent
+                    $(this).search_entity('refreshOnShow');
+                }
+            });
             
             /*  BBBB
             if(action_name!='recordAdd' && action_name!='search_quick' 
@@ -989,7 +1005,7 @@ $.widget( "heurist.mainMenu6", {
     //
     //
     _closeExploreMenuPopup: function(){
-      
+
         if(this.menues_explore_popup){
             
             this.menues_explore_popup.hide();  
