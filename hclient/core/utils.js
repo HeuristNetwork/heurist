@@ -626,7 +626,7 @@ window.hWin.HEURIST4.util = {
             $dlg.dialog( "close" );
         };
         
-        var opts = {width:450, buttons:buttons}
+        var opts = {width:450, buttons:buttons, default_palette_class: 'ui-heurist-explore'}
         if(pos_element){
             if(pos_element.my){
                 opts.my = pos_element.my;

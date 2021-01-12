@@ -1049,7 +1049,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
     // MAIN method
     // buttons - callback function or objects of buttons for dialog option
     // title - either string for title, or object with labels {title:, yes: ,no, cancel, }
-    // ext_options:   default_palette_class
+    // ext_options:   default_palette_class, position
     //
     showMsgDlg: function(message, buttons, labels, ext_options){
 
