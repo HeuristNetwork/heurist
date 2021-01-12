@@ -741,7 +741,7 @@ function hSvsEdit(args) {
         //
         isModified: function(){
             if(edit_dialog && edit_dialog.dialog('instance') && edit_dialog.dialog('isOpen')){
-//console.log('>>>>'+_isModified());                
+
                 return _isModified();    
                 //return true;
             }else{

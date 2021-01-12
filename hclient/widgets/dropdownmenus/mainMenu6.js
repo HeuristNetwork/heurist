@@ -909,6 +909,8 @@ $.widget( "heurist.mainMenu6", {
                     cont.svs_list('option', 'filter_by_type', mode);
                 }
                 
+                this.svs_list = cont;
+                
                 return cont;        
     },
     
@@ -1477,8 +1479,9 @@ $.widget( "heurist.mainMenu6", {
         var $dlg = this.edit_svs_dialog.showSavedFilterEditDialog( mode, null, null, this.currentSearch , false, 
             { my: 'left+'+left_position+' top+'+top_position, at: 'left top', of:this.divMainMenu},
             function(){  //after save - trigger refresh of saved filter tree
+                
                 window.hWin.HAPI4.currentUser.usr_SavedSearch = null;
-                window.hWin.HAPI4.currentUser.ugr_SvsTreeData = null;
+                //!!! window.hWin.HAPI4.currentUser.ugr_SvsTreeData = null;
                 if(that.svs_list){ 
                     that.svs_list.svs_list('option','hide_header',true);//to trigger refresh
                 }
