@@ -1596,12 +1596,14 @@ $.widget( "heurist.search_faceted_wiz", {
                         var vocab_id = $Db.dty(dtid, 'dty_JsonTermIDTree');    
                         var list = $Db.trm_TreeData(vocab_id, 'set');
                         
-                        if(list.length<5){
-                            facets[k].isfacet = 2; //wrap 
-                        }else if (list.length<25) {
-                            facets[k].isfacet = 3; //list
-                        }else{
-                            facets[k].isfacet = 1;    
+                        if(!(facets[k].isfacet>0)){
+                            if(list.length<5){
+                                facets[k].isfacet = 2; //wrap 
+                            }else if (list.length<25) {
+                                facets[k].isfacet = 3; //list
+                            }else{
+                                facets[k].isfacet = 1; //dropdown   
+                            }
                         }
                     }else{
                         facets[k].isfacet = (facets[k].type=='freetext')?0:1;
@@ -1628,8 +1630,7 @@ $.widget( "heurist.search_faceted_wiz", {
                 //listdiv.find('input:radio[name="facet_Type'+idd+'"][value="'+facets[k].isfacet+'"]').attr('checked', true);
                 listdiv.find('button.btnset_radio[data-idx="'+idd+'"]').removeClass('ui-heurist-btn-header1');
                 var btn =   listdiv.find('button.btnset_radio[data-idx="'+idd+'"][data-value="'+facets[k].isfacet+'"]');
-                btn.addClass('ui-heurist-btn-header1');                
-
+                btn.addClass('ui-heurist-btn-header1');  //heighlight               
 
                     function __dateGrouping(idd){
                         
