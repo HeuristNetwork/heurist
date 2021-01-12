@@ -626,7 +626,7 @@ $.widget( "heurist.search_faceted_wiz", {
             this._showStep(newstep);
 
             if($.isFunction(this.options.menu_locked)){
-                if(newstep>0)
+                if(newstep>0)  //increase delay on mouse exit 
                     this.options.menu_locked.call( this, 'delay');
             }
             

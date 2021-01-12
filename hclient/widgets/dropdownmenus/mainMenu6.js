@@ -743,6 +743,8 @@ $.widget( "heurist.mainMenu6", {
                 if(explore_top+explore_height>that.element.innerHeight()){
                     explore_top = that.element.innerHeight() - explore_height;
                 }
+                
+                that._delayOnCollapse_ExploreMenu = 2000; //increase delay on mouse exit 
 
                 that.menues_explore_popup.css({width:'700px',overflow:'hidden'});
             }
@@ -1491,6 +1493,8 @@ $.widget( "heurist.mainMenu6", {
             });
         }
 */        
+        //for faceted wizard and save filter delay is increased to 2sec
+        this._delayOnCollapse_ExploreMenu = 2000;
 
         var $dlg = this.edit_svs_dialog.showSavedFilterEditDialog( mode, null, null, this.currentSearch , false, 
             { my: 'left+'+left_position+' top+'+top_position, at: 'left top', of:this.divMainMenu},
@@ -1508,7 +1512,7 @@ $.widget( "heurist.mainMenu6", {
                 if(is_mouseleave){
                     that._resetCloseTimers();
                     if(that._explorer_menu_locked) return;
-                    that._myTimeoutId2 = setTimeout(function(){
+                    that._myTimeoutId2 = setTimeout(function(){ //delay on close
                             that._closeExploreMenuPopup();
                             that._collapseMainMenuPanel();
                     }, that._delayOnCollapse_ExploreMenu);
@@ -1519,6 +1523,7 @@ $.widget( "heurist.mainMenu6", {
                     //that._collapseMainMenuPanel();
                 }else{
                     that._resetCloseTimers();    
+                    
                     if(is_locked=='delay'){
                         that.coverAll.show();
                         that._delayOnCollapse_ExploreMenu = 2000;        
