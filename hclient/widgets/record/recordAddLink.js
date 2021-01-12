@@ -564,7 +564,7 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
                 var records = resdata.getRecords();
             
                 var record = resdata.getById(rec_id);
-                var rec_title = resdata.fld(record, 'rec_Title');
+                var rec_title = window.hWin.HEURIST4.util.stripTags(resdata.fld(record, 'rec_Title'));
                 if(!rec_title) rec_title = 'Record title is not defined yet';
 
                 var recRecTypeID = resdata.fld(record, 'rec_RecTypeID');
@@ -577,10 +577,11 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
                     that.target_RecTypeID = recRecTypeID;
                 }
                 
+                var rty_Name = window.hWin.HEURIST4.util.stripTags($Db.rty(recRecTypeID,'rty_Name'));
 
-                rec_titles.push('<b>'+$Db.rty(recRecTypeID,'rty_Name')+'</b>');
+                rec_titles.push('<b>'+rty_Name+'</b>');
                 $('#'+party+'_title').text(rec_title);
-                $('#'+party+'_rectype').text($Db.rty(recRecTypeID,'rty_Name'));
+                $('#'+party+'_rectype').text(rty_Name);
                 $('#'+party+'_rectype_img').css('background-image', 'url("'+top.HAPI4.iconBaseURL+recRecTypeID+'")');
                 
                 //find fields
