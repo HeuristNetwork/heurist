@@ -22,6 +22,8 @@ $.widget( "heurist.searchSysDatabases", $.heurist.searchEntity, {
     //
     _initControls: function() {
         this._super();
+        
+        this.input_search.parent().css('padding-top','15px'); 
 
         this.input_search_type = this.element.find('#input_search_type');
         this._on(this.input_search_type,  { change:this.startSearch });

@@ -1072,7 +1072,13 @@ $.widget( "heurist.importStructure", {
                 if(report!=''){ 
 
                     //report = 'Added';
-                    window.hWin.HEURIST4.msg.showMsgFlash(report, 2000);
+                    //FLASH window.hWin.HEURIST4.msg.showMsgFlash(report, 2000);
+                    
+                    //modal report
+                    window.hWin.HEURIST4.msg.showMsgDlg('<br>'+report,null,
+                            {title:'Import templates report'},
+                            {default_palette_class:'ui-heurist-design'});        
+
 
                     /*                    
                     report = '<div style="font-size:0.9em;"><h2>Record type and associated structures imported</h2>'

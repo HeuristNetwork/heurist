@@ -114,7 +114,7 @@ define('HEURIST_DB_PREFIX', $dbPrefix);
 //---------------------------------
 $date = new DateTime();
 //define('HEURIST_TITLE', 'Heurist Academic Knowledge Management System - &copy; 2005-2020 The University of Sydney.');
-define('HEURIST_TITLE', 'Heurist V'.HEURIST_VERSION.' '.$date->format('d M Y @ H:i') );
+define('HEURIST_TITLE', 'Heurist V'.HEURIST_VERSION); //.' '.$date->format('d M Y @ H:i') );
 
 /**
 * Response status for ajax requests. See ResponseStatus in hapi.js
