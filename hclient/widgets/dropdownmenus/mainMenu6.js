@@ -162,10 +162,14 @@ $.widget( "heurist.mainMenu6", {
                     mouseleave: function(e){
                         if($(e.target).parent('#filter_by_groups').length==0){
                             clearTimeout(this._myTimeoutId3); this._myTimeoutId3 = 0; //clear timeout on show section menu
-                            //this._resetCloseTimers();//reset
-                            this._myTimeoutId2 = setTimeout(function(){
-                                        that._closeExploreMenuPopup();
-                                    },  this._delayOnCollapse_ExploreMenu); //600
+                            
+                            if (!this._isCurrentActionFilter()) { //close on mouse exit
+                            
+                                //this._resetCloseTimers();//reset
+                                this._myTimeoutId2 = setTimeout(function(){
+                                            that._closeExploreMenuPopup();
+                                        },  this._delayOnCollapse_ExploreMenu); //600
+                            }
                         }
                     }
                 });
@@ -187,6 +191,17 @@ $.widget( "heurist.mainMenu6", {
                             that._collapseMainMenuPanel(true);
                     }
                 });
+                
+                that._on(window.hWin.document, { //that.element
+                    click: function(e){
+                        if(!$(e.target).parents().hasClass('save-filter-dialog')){
+                            that._closeExploreMenuPopup();
+                        }
+                    }
+                });
+                    
+                    
+                
                 
                 //keep main menu open on document mouse leave
                 //that._on($(document),{mouseleave: that._resetCloseTimers });
@@ -286,6 +301,15 @@ $.widget( "heurist.mainMenu6", {
         
         
     }, //end _create
+    
+    //
+    //
+    //
+    _isCurrentActionFilter: function(){
+            return (this._current_explore_action=='search_quick' ||
+                    this._current_explore_action=='svsAdd' || 
+                    this._current_explore_action=='svsAddFaceted' );
+    },
     
     //
     // 0 - disabled
@@ -529,10 +553,12 @@ $.widget( "heurist.mainMenu6", {
         
         if(e){
             this._resetCloseTimers();//reset
-            this._myTimeoutId2 = setTimeout(function(){
-                                            that._closeExploreMenuPopup();
-                                            that._collapseMainMenuPanel();                                        
-                                    },  this._delayOnCollapse_ExploreMenu);
+            if (!this._isCurrentActionFilter()){
+                this._myTimeoutId2 = setTimeout(function(){
+                                                that._closeExploreMenuPopup();
+                                                that._collapseMainMenuPanel();                                        
+                                        },  this._delayOnCollapse_ExploreMenu);
+            }
         }else{
             __closeAllsectionMenu();
         }
@@ -675,7 +701,7 @@ $.widget( "heurist.mainMenu6", {
             if(action_name!='svsAddFaceted'){
                 that.closeFacetedWizard();
             }
-        
+
             if(action_name=='search_entity'){
 
                 if(!cont.search_entity('instance'))
@@ -707,6 +733,7 @@ $.widget( "heurist.mainMenu6", {
                                 //that.switchContainer('explore'); 
                         },
                         menu_locked: function(is_locked, is_mouseleave){ 
+
                             if(!is_mouseleave){
                                 that._resetCloseTimers();    
                                 if(is_locked=='delay'){
@@ -717,6 +744,8 @@ $.widget( "heurist.mainMenu6", {
                                 }
                             }
                     }  });    
+                    
+                    cont.addClass('save-filter-dialog');
                 }
 
                 explore_top = 0;
@@ -744,8 +773,6 @@ $.widget( "heurist.mainMenu6", {
                     explore_top = that.element.innerHeight() - explore_height;
                 }
                 
-                that._delayOnCollapse_ExploreMenu = 2000; //increase delay on mouse exit 
-
                 that.menues_explore_popup.css({width:'700px',overflow:'hidden'});
             }
             else if(action_name=='search_advanced'){
@@ -1511,6 +1538,8 @@ $.widget( "heurist.mainMenu6", {
             function(is_locked, is_mouseleave){  //menu_locked
                 if(is_mouseleave){
                     that._resetCloseTimers();
+                    return; //prevent close on mouse out
+                    
                     if(that._explorer_menu_locked) return;
                     that._myTimeoutId2 = setTimeout(function(){ //delay on close
                             that._closeExploreMenuPopup();
@@ -1534,6 +1563,8 @@ $.widget( "heurist.mainMenu6", {
             },
             that.reset_svs_edit
         );  
+        
+        $dlg.addClass('save-filter-dialog');
         
         /*
         setTimeout(function(){
