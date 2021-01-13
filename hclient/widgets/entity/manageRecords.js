@@ -3529,6 +3529,9 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                     that._createRtsEditButton(dtId, item);
                 }
             });
+            //extend separator help left padding
+            $(this.element).find('.separator-helper').css({'padding-left':'52px'});
+            
             //init back button - if there is opened rts editor
             var btn = this.element.find('.btn-edit-rt-back');
             

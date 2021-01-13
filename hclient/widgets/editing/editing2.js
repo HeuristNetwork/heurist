@@ -296,7 +296,7 @@ function hEditing(_options) {
                          if(currGroupType == 'tabs'){
                             div_prompt.css({padding:'5px 0 0 5px'});
                          }else{
-                            div_prompt.css({'padding-left':'14px'});
+                            div_prompt.addClass('separator-helper').css({'padding-left':'14px'});
                          }
                     }
                     if(currGroupType == 'tabs'){ //some space on the top

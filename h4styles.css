@@ -327,7 +327,7 @@ input.text, select.text {
 .separator2{
     text-transform: uppercase;
     font-weight:bold;
-    background: #ECF1FB !important;
+    /* background: #ECF1FB !important; */
 }
 
 .separator {
@@ -2239,6 +2239,10 @@ input[type="file"] {
 .ui-accordion .ui-accordion-header {
     padding: .5em .5em .5em 2.2em;
 }
+.ui-accordion-header{
+    outline: none;
+}
+
 .ui-resizable-w {
     left: 0px; /* was -5px */
 }
@@ -2273,7 +2277,7 @@ input[type="file"] {
     padding-bottom: 10px !important;    
 }
 .edit-form-tabs li.ui-tabs-active{
-    background: #ECF1FB !important;
+    background: #ECF1FB; /* !important */
 }
 li.edit-form-tab {
     border-top-left-radius: 6px;
