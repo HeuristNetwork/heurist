@@ -85,7 +85,6 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
         this.editForm.css({'padding-top':'20px'});
         
-
         window.hWin.HAPI4.addEventListener(this, window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, 
             function(data) { 
 
@@ -613,20 +612,25 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             
                 var c1 = this.searchForm;//.find('div:first');
 
+                if(this.options.select_mode_target){
+                    $('<h3 style="margin:10px 0">Adding to vocabulary: <i>'+this.options.select_mode_target+'</i></h3>').appendTo(c1);
+                }
+                
                 //add vocabulary
-                var sel = $('<div style="float:left"><label>Select vocabulary: </label>'
+                var sel = $('<div style="float:left"><label>From vocabulary: </label>'
                 +'<select type="text" style="min-width:15em;" class="text ui-widget-content ui-corner-all"></select></div>')
                 .appendTo(c1);
                 
                 //add input search
-                c1 = $('<div style="float:right"><label>Find: </label>'
+                /*
+                c1 = $('<div style="float:left"><label>Find: </label>'
                 +'<input type="text" style="width:10em" class="text ui-widget-content ui-corner-all"/></div>')
                 .appendTo(c1);
                 
                 this._on(c1.find('input'), {
                     //keypress: window.hWin.HEURIST4.ui.preventChars,
                     keyup: this._onFindTerms }); //keyup
-                    
+                */    
                     
                 if(!this.options.title){
                     this.setTitle('Select '+(this.options.filter_groups=='enum'?'term':'relation'));    
@@ -644,7 +648,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                         this._filterByVocabulary();
                     } }); 
 
-            
+                this.options.trm_VocabularyID = this.options.initial_filter;
+                    
                 this.options.recordList = {
                     empty_remark: 'Select vocabulary',
                     show_toolbar: false,
@@ -653,6 +658,14 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                     
                 this.options.trm_VocabularyID = this.options.initial_filter;
                 //this._onActionListener(null, 'viewmode-tree');
+                
+                if(this.options.select_mode_reference){
+                    this.searchForm.css('height','5.5em');
+                    this.recordList.css('top','5.5em');
+                    this.options.recordList.transparent_background = true;
+                    this.options.recordList.recordDivEvenClass = null;
+                    //this.recordList.removeClass('ui-heurist-bg-light').css({'background':'none','border':'none'});
+                }
                 
         }
 
@@ -896,11 +909,23 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             }else{
                 parents = '';
             }
+
+            var ref_lvl = $Db.isTermByReference(this.options.trm_VocabularyID, recID);
+            if(ref_lvl!==false){
+                sRef = '<span style="color:blue;font-size:smaller;vertical-align:text-top;">&nbsp;(ref)</span>';
+            }
+            
+            var sLabelHint = sLabel;
+            sLabel = sLabel + sRef;
             
             var inv_id = $Db.trm(recID, 'trm_InverseTermId');
             if ( inv_id>0 ){
                 var sInvLabel = window.hWin.HEURIST4.util.htmlEscape($Db.trm(inv_id, 'trm_Label'));
-                if(sInvLabel) sLabel = sLabel + '&nbsp;&nbsp;&nbsp;[ inv: '+ sInvLabel +' ]';    
+                if(sInvLabel) {
+                    sLabel = sLabel + 
+                    '&nbsp;&nbsp;&nbsp;<span style="font-size:smaller;font-style:italic;">inv: '+sInvLabel+'</span>';    
+                    sLabelHint = sLabelHint + '    [inv: '+sInvLabel+' ]';
+                }
             }
             
             sWidth = 'display:inline-block;padding-top:4px;max-width:320px;'; //+((lvl>2)?'25':'30')+'%;';
@@ -912,25 +937,21 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             var sCode = $Db.trm(recID, 'trm_Code');
             var sURI = $Db.trm(recID, 'trm_SemanticReferenceURL');
             
-            sHint = 'title="'+sLabel+'<br>'
+            sHint = 'title="'+sLabelHint+'<br>'
                 + (sDesc?('<p><i>'+sDesc+'</i></p>'):'')
                 + (sCode?('<p>Code: '+sCode+'</p>'):'')
                 + (sURI?('<p>URI: '+sURI+'</p>'):'')
                 + '<p>ID: '+recID+' ('+$Db.getConceptID('trm',recID)+')</p>';
-            
-            var ref_lvl = $Db.isTermByReference(this.options.trm_VocabularyID, recID);
             
             if(ref_lvl!==false)
             {
                 var vocab_id = $Db.getTermVocab(recID); //real vocab
                 
                 sHint = sHint +     
-                '<p style=&quot;color:blue&quot;>This is a reference to a term defined in the '
-                +window.hWin.HEURIST4.util.htmlEscape($Db.vcg($Db.trm(vocab_id,'trm_VocabularyGroupID'), 'vcg_Name'))+'.'
-                +window.hWin.HEURIST4.util.htmlEscape($Db.trm(vocab_id, 'trm_Label'))+' vocabulary. '
-                +'The term can only be edited in that vocabulary.</p>';
-                
-                sRef = '<span style="color:blue;font-size:smaller;">(ref)</span>';
+                '<p>Reference to: <i>'
+                  +window.hWin.HEURIST4.util.htmlEscape($Db.vcg($Db.trm(vocab_id,'trm_VocabularyGroupID'), 'vcg_Name'))+'.'
+                  +window.hWin.HEURIST4.util.htmlEscape($Db.trm(vocab_id, 'trm_Label'))+'</i> vocabulary.</p>'
+                +'<p style=&quot;color:orange&quot;>The term can only be edited in that vocabulary.</p>';
                 
                 //sWidth = sWidth + '45%;';
             }else{
@@ -940,7 +961,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             
             recTitle = '<div class="item truncate label_term rolloverTooltip"'
                     +' style="'+sFontSize+sWidth+sBold+'" '+sHint+'>'
-                    +sLabel+'</div>'+sRef; // $Db.trm(recID, 'trm_Parents')+'  '+recID+' '+
+                    +sLabel+'</div>'; // $Db.trm(recID, 'trm_Parents')+'  '+recID+' '+
                     //+sPad            
             
             var recThumb = window.hWin.HAPI4.getImageUrl(this._entityName, recID, 'thumb');
@@ -950,9 +971,15 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                                     
             sPad = lvl==1?0:(lvl==2?(lvl-0.5):lvl);                                                                         
             var exp_btn_style = 'width:20px;display:inline-block;vertical-align:bottom;margin-left:'+sPad+'em;';
+            
+            var sclass = 'white-borderless', sstyle = '';
+            if(this.options.select_mode_reference){
+                sclass = '';
+                sstyle = 'style="background:transparent;border:none;"';
+            }
            
-            html = '<div class="recordDiv densed white-borderless'+(!(ref_lvl>0)?' rt_draggable':'')
-                        +'" recid="'+recID+'"'+parents+'>'
+            html = '<div class="recordDiv densed '+sclass+(!(ref_lvl>0)?' rt_draggable':'')
+                        +'" '+sstyle+' recid="'+recID+'"'+parents+'>'
                         + ($Db.trm_HasChildren(recID)
                                 ?this._defineActionButton(
                                     {key:'expand',label:'Show/hide children',            
@@ -1464,7 +1491,7 @@ if(window.hWin.HEURIST4.util.isArrayNotEmpty(res.records)){
         }else{*/
         }
         
-        if(this.options.auxilary=='term' && 
+        if(this.options.auxilary=='term' && fieldvalues &&
             !window.hWin.HEURIST4.util.isempty(fieldvalues['trm_InverseSymmetrical']))
         {
             
@@ -1720,7 +1747,11 @@ console.log('Error !!! Parent not found for '+trm_ID);
 
                 var vocab_id = $Db.getTermVocab(new_parent_id); //get real vocab
                 if(this.options.trm_VocabularyID!=vocab_id){
-                    window.hWin.HEURIST4.msg.showMsgFlash( 'Reference can\'t have children' ); 
+                    window.hWin.HEURIST4.msg.showMsgDlg( 'Reference can\'t have children<br><br>'
+                        + 'Please EDIT/move the term <i>'
+                        + $Db.trm(new_parent_id, 'trm_Label') 
+                        + '</i> within its original vocabulary <i>'
+                        + $Db.trm(vocab_id, 'trm_Label') +'</i>'); 
                     return;
                 }
 
@@ -1807,11 +1838,13 @@ console.log('Error !!! Parent not found for '+trm_ID);
             //open multi selector
             var popup_options = {
                 select_mode:'select_multi',
-                width: 500,
+                select_mode_reference: true,
+                select_mode_target: $Db.trm(this.options.trm_VocabularyID,'trm_Label'),
+                selectbutton_label: 'Add Reference',
+                initial_filter: this.options.trm_VocabularyID,
+                width: 350,
                 height: Math.min(600,(window.hWin?window.hWin.innerHeight:window.innerHeight)*0.75),
-                title: ('Select terms to be added to vocabulary "'
-                        + $Db.trm(this.options.trm_VocabularyID,'trm_Label')
-                        + '" by reference'),
+                title: 'Add terms by reference',
                 onselect:function(event, data){
 
                     var sels;
@@ -1824,6 +1857,8 @@ console.log('Error !!! Parent not found for '+trm_ID);
                     that.setTermReferences(that.options.trm_VocabularyID, sels, null);
                 }
             }
+            
+            // to vocabulary "'+ $Db.trm(this.options.trm_VocabularyID,'trm_Label')+ '"'
             
             window.hWin.HEURIST4.ui.showEntityDialog('defTerms', popup_options);
             

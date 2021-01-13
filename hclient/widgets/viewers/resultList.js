@@ -136,12 +136,6 @@ $.widget( "heurist.resultList", {
 
         this._is_publication  = this.element.parent().attr('data-heurist-app-id');
         
-        if(this._is_publication || this.options.transparent_background){
-            //this is CMS publication - take css from parent
-            this.element.addClass('ui-widget-content').css({'background':'none','border':'none'});
-        }else{
-            this.element.addClass('ui-heurist-bg-light');
-        }
         //this.element.css({'font-size':'0.9em'});
 
         this._initControls();
@@ -480,21 +474,6 @@ $.widget( "heurist.resultList", {
         .css({'overflow-y':'auto'})
         .appendTo( this.element );
         
-        if(this._is_publication || this.options.transparent_background){ //make BG transparent
-            this.div_toolbar.css({'background':'none'});
-            this.div_content.css({'background':'none'});
-        }else{
-            //set background to none ???? if inner header visible 
-            //???? this.element.parent().css({'background':'none','border':'none'});
-            //???? this.element.parent().parent().css({'background':'none','border':'none'});
-            if(true || this.element.parent().hasClass('ui-widget-content')){
-                this.element.parent().css({'background':'none','border':'none'});
-            }
-
-            //this.div_toolbar.addClass('ui-heurist-bg-light');
-            this.div_content.addClass('ui-heurist-bg-light');
-        }
-
 
         this.div_loading = $( "<div>" )
         .css({ 'width': '50%', 'height': '50%', 'top': '25%', 'margin': '0 auto', 'position': 'relative',
@@ -773,6 +752,23 @@ $.widget( "heurist.resultList", {
             $(this.div_content).find('.logged-in-only').css('visibility','hidden');
         }
 
+        if(this._is_publication || this.options.transparent_background){
+            //this is CMS publication - take css from parent
+            this.element.removeClass('ui-heurist-bg-light').addClass('ui-widget-content').css({'background':'none','border':'none'});
+            this.div_toolbar.css({'background':'none'});
+            this.div_content.removeClass('ui-heurist-bg-light').css({'background':'none'});
+        }else{
+            this.element.addClass('ui-heurist-bg-light');
+            
+            if(true || this.element.parent().hasClass('ui-widget-content')){
+                this.element.parent().css({'background':'none','border':'none'});
+            }
+
+            //this.div_toolbar.addClass('ui-heurist-bg-light');
+            this.div_content.addClass('ui-heurist-bg-light');
+        }
+        
+        
 /*
         var abtns = (this.options.actionbuttons?this.options.actionbuttons:"tags,share,more,sort,view").split(',');
         var that = this;
