@@ -243,8 +243,8 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                                         var recs = selected_recs.getOrder();
                                         if(recs && recs.length>0){
                                             var recID = recs[recs.length-1];
-                                            var isTrash = ($Db.rty(recID,'rty_RecTypeGroupID') == $Db.getTrashGroupId('rtg'));
-                                            if(isTrash) return;
+                                            //var isTrash = ($Db.rty(recID,'rty_RecTypeGroupID') == $Db.getTrashGroupId('rtg'));
+                                            //if(isTrash) return;
                                             this._onActionListener(event, {action:'edit',recID:recID}); 
                                         }
                                     }
@@ -711,7 +711,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
 //console.log(fields);
         //fields = ['rtyid','ccode','addrec','filter','count','group','icon','edit','editstr','name','description','show','duplicate','fields','status'];        
 
-        var isTrash = (recordset.fld(record, 'rty_RecTypeGroupID') == $Db.getTrashGroupId('rtg'));
+        var isTrash = false;//(recordset.fld(record, 'rty_RecTypeGroupID') == $Db.getTrashGroupId('rtg'));
         
         function __action_btn(action,icon,title,color){
             if(!color) color = '#555555';            

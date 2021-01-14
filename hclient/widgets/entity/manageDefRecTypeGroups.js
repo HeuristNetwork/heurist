@@ -109,11 +109,16 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
                                 var rtg_ID = trg.attr('recid');
                                 
                                 if(rty_ID>0 && rtg_ID>0 && that.options.reference_rt_manger){
-                                        
-                                        //if source group is trash - change "show in list" to true
+
                                         var params = {rty_ID:rty_ID, rty_RecTypeGroupID:rtg_ID };
-                                        if($Db.rty(rty_ID,'rty_RecTypeGroupID') == $Db.getTrashGroupId('rtg')){
+                                        
+                                        var trash_id = $Db.getTrashGroupId('rtg');
+                                        //if source group is trash - change "show in list" to true
+                                        if($Db.rty(rty_ID,'rty_RecTypeGroupID') == trash_id){
+                                            //from target
                                             params['rty_ShowInLists'] = 1;
+                                        }else if(rtg_ID == trash_id){
+                                            params['rty_ShowInLists'] = 0;
                                         }
                                     
                                         that.options.reference_rt_manger
@@ -150,7 +155,7 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
             
             this.searchForm.height(70);
             
-            
+/* IJ does not want trash button/zone - trash group is in common list            
             var ele = $('<div title="Drag record types here to hide them"><span class="ui-icon ui-icon-trash"/>Trash</div>')
                 .css({float:'right',border:'2px dashed blue',cursor:'pointer',
                         margin:'5px','font-size': '11px', padding:'3px'})
@@ -173,7 +178,7 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
                                                 {rty_ID:rty_ID, rty_RecTypeGroupID:rtg_ID, rty_ShowInLists:0});
                                 }
                         }});
-            
+*/            
             
         }
         
@@ -208,7 +213,6 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
         
         var recID   = recordset.fld(record, 'rtg_ID');
         var recName = recordset.fld(record, 'rtg_Name');
-        if(recName=='Trash') return '';
         
         var html = '<div class="recordDiv white-borderless" id="rd'+recID+'" recid="'+recID+'">'; // style="height:1.3em"
         if(this.options.select_mode=='select_multi'){
@@ -216,27 +220,34 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
         }else{
             //html = html + '<div>';
         }
+
+        if(recName=='Trash'){
+            html = html + '<div style="display:table-cell;vertical-align: middle;"><span class="ui-icon ui-icon-trash"></span></div>';
+        }
         
         html = html + 
             '<div class="item" style="font-weight:bold;display:table-cell;width:250;max-width:250;padding:6px;">'
             +window.hWin.HEURIST4.util.htmlEscape(recName)+'</div>';
         
-        if(this.options.edit_mode=='popup'){
-            html = html
-            + this._defineActionButton({key:'edit',label:'Edit', title:'', icon:'ui-icon-pencil', class:'rec_actions_button'}, 
-                            null,'icon_text','padding-top:9px');
+        if(recName!='Trash'){
+            if(this.options.edit_mode=='popup'){
+                html = html
+                + this._defineActionButton({key:'edit',label:'Edit', title:'', icon:'ui-icon-pencil', class:'rec_actions_button'}, 
+                                null,'icon_text','padding-top:9px');
+            }
+            
+            //var cnt = 0;//recordset.fld(record, 'rtg_RtCount');
+            //        +((cnt>0)
+            //        ?'<div style="display:table-cell;padding:0 4px">'+cnt+'</div>'
+            
+            html = html 
+                    + this._defineActionButton({key:'delete',label:'Remove', title:'', icon:'ui-icon-delete', class:'rec_actions_button'}, 
+                                null,'icon_text');
         }
         
-        var cnt = 0;//recordset.fld(record, 'rtg_RtCount');
-        
-        html = html 
-                +((cnt>0)
-                ?'<div style="display:table-cell;padding:0 4px">'+cnt+'</div>'
-                :this._defineActionButton({key:'delete',label:'Remove', title:'', icon:'ui-icon-delete', class:'rec_actions_button'}, 
-                            null,'icon_text'))
-                + '<div class="selection_pointer" style="display:table-cell">'
-                    +'<span class="ui-icon ui-icon-carat-r"></span></div>';
-        
+        html = html + '<div class="selection_pointer" style="display:table-cell;vertical-align: middle;">'
+                        +'<span class="ui-icon ui-icon-carat-r"></span></div>';
+                
         
 
         return html+'</div>';
