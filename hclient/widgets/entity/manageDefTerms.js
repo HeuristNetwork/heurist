@@ -33,6 +33,10 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
     
     */
     
+    //options for special mode 
+    // select_mode_reference - reference | inverse 
+    // select_mode_target  - name of target term or vocabulary (for header at the top of search form)
+    
    
     _entityName: 'defTerms',
     fields_list_div: null,  //term search result
@@ -468,7 +472,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                     },
                     droppable: function(){
                     
-                        that.recordList.find('.recordDiv')  //change parent for term (within vocab tree) OR merge
+                        that.recordList.find('.recordDiv')  //change parent for term (within the same vocab tree) OR merge
                             .droppable({
                                 scope: 'vocab_change',
                                 hoverClass: 'ui-drag-drop', //highlight
@@ -488,7 +492,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                                         if(that.rbMergeOnDnD.is(':checked')){
                                             that.mergeTerms({trm_ID:trm_ID, trm_ParentTermID:trm_ParentTermID });    
                                         }else{
-                                            that.changeVocabularyGroup({trm_ID:trm_ID, trm_ParentTermID:trm_ParentTermID });    
+                                            that.changeVocabularyGroup({trm_ID:trm_ID, trm_ParentTermID:trm_ParentTermID });        
                                         }
                                     }
                             }
@@ -507,7 +511,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                                     var trm_ParentTermID = that.options.trm_VocabularyID;
                                     if(trm_ID>0){
                                         if(!that.rbMergeOnDnD.is(':checked')){
-                                            that.changeVocabularyGroup({ trm_ID:trm_ID, trm_ParentTermID:trm_ParentTermID }, true);    
+                                            that.changeVocabularyGroup({ trm_ID:trm_ID, trm_ParentTermID:trm_ParentTermID }, true);
                                         }
                                     }
                                 }});
@@ -613,7 +617,14 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 var c1 = this.searchForm;//.find('div:first');
 
                 if(this.options.select_mode_target){
-                    $('<h3 style="margin:10px 0">Adding to vocabulary: <i>'+this.options.select_mode_target+'</i></h3>').appendTo(c1);
+                    
+                    if(this.options.select_mode_reference=='inverse'){
+                        $('<h3 style="margin:10px 0">Select inverse term for: <i>'
+                            +this.options.select_mode_target+'</i></h3>').appendTo(c1);
+                    }else{
+                        $('<h3 style="margin:10px 0">Adding to vocabulary: <i>'+this.options.select_mode_target+'</i></h3>').appendTo(c1);
+                    }
+                    
                 }
                 
                 //add vocabulary
@@ -659,7 +670,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 this.options.trm_VocabularyID = this.options.initial_filter;
                 //this._onActionListener(null, 'viewmode-tree');
                 
-                if(this.options.select_mode_reference){
+                if( !window.hWin.HEURIST4.util.isempty(this.options.select_mode_reference) ){
                     this.searchForm.css('height','5.5em');
                     this.recordList.css('top','5.5em');
                     this.options.recordList.transparent_background = true;
@@ -973,7 +984,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             var exp_btn_style = 'width:20px;display:inline-block;vertical-align:bottom;margin-left:'+sPad+'em;';
             
             var sclass = 'white-borderless', sstyle = '';
-            if(this.options.select_mode_reference){
+            if( !window.hWin.HEURIST4.util.isempty(this.options.select_mode_reference) ){
                 sclass = '';
                 sstyle = 'style="background:transparent;border:none;"';
             }
@@ -1207,6 +1218,7 @@ if(window.hWin.HEURIST4.util.isArrayNotEmpty(res.records)){
 
             var vocab_ID = $Db.getTermVocab(this.options.trm_VocabularyID);
             currentDomain = $Db.trm(vocab_ID, 'trm_Domain');
+
             if( currentDomain=='enum' ){
                 this._editing.getFieldByName('trm_InverseTermId').hide();
                 this._editing.getFieldByName('trm_InverseSymmetrical').hide();
@@ -1215,6 +1227,10 @@ if(window.hWin.HEURIST4.util.isArrayNotEmpty(res.records)){
                 ele.show();
                 var cfg = ele.editing_input('getConfigMode');
                 cfg.initial_filter = vocab_ID;
+                cfg.popup_options = {};
+                cfg.popup_options.width = 400;
+                cfg.popup_options.select_mode_reference = 'inverse';
+                cfg.popup_options.select_mode_target = this._currentEditID>0?$Db.trm(this._currentEditID,'trm_Label'):'new term';
                 ele.editing_input('setConfigMode', cfg);
                 
                 ele = this._editing.getFieldByName('trm_InverseSymmetrical');
@@ -1233,6 +1249,7 @@ if(window.hWin.HEURIST4.util.isArrayNotEmpty(res.records)){
                 window.hWin.HEURIST4.util.setDisabled(ele, (this._currentEditID>0));
                 
             }
+            
         }
         
         ele = this._editing.getFieldByName('trm_Domain')
@@ -1690,60 +1707,60 @@ if(window.hWin.HEURIST4.util.isArrayNotEmpty(res.records)){
         
             var trm_ID = params['trm_ID'];
             var new_parent_id = params['trm_ParentTermID'];
-            var old_parent_id = -1;
+            var old_parent_ids = [];
             
             var vocab_id = $Db.getTermVocab(trm_ID);
             var isRef = (this.options.trm_VocabularyID!=vocab_id);
             if (isRef) {
                 var parents = $Db.trm(trm_ID, 'trm_Parents');
                 if(parents){
-                    parents = parents.split(',');
-                    old_parent_id = parents[parents.length-1]; 
+                    old_parent_ids = parents.split(',');
                 }
             }else{
-                old_parent_id = $Db.trm(trm_ID, 'trm_ParentTermID');    
+                old_parent_ids = [$Db.trm(trm_ID, 'trm_ParentTermID')];    
             }
             
-            if(old_parent_id<0){
+            if(old_parent_ids.length<1){
 console.log('Error !!! Parent not found for '+trm_ID);
                 return;
             }
-            
-            if(no_check!==true){
+
+            //change parent within vocab
+            if(window.hWin.HEURIST4.util.findArrayIndex(new_parent_id, old_parent_ids)>=0){ //the same
+console.log('same parent nothing to change');            
+                return;
+            }
             
             //if new parent is vocabulary
             if( !($Db.trm(new_parent_id, 'trm_ParentTermID')>0) ){
-                
-                //1. check that selected terms are already in this vocabulary
-                var trm_ids = $Db.trm_TreeData(new_parent_id, 'set'); //ids
-                if(window.hWin.HEURIST4.util.findArrayIndex(trm_ID, trm_ids)>=0){
-                    window.hWin.HEURIST4.msg.showMsgDlg( (isRef?'Term':'Reference')
-                        + ' "'+$Db.trm(trm_ID, 'trm_Label')
-                        +'" is already in vocabulary "'+$Db.trm(new_parent_id,'trm_Label')+'"',null,'Duplication',
-                        {default_palette_class:this.options.default_palette_class}); 
-                    return;
+            
+                if(no_check!==true){    
+                    //1. check that selected terms are already in this vocabulary
+                    var trm_ids = $Db.trm_TreeData(new_parent_id, 'set'); //ids
+                    if(window.hWin.HEURIST4.util.findArrayIndex(trm_ID, trm_ids)>=0){
+                        window.hWin.HEURIST4.msg.showMsgDlg( (isRef?'Term':'Reference')
+                            + ' "'+$Db.trm(trm_ID, 'trm_Label')
+                            +'" is already in vocabulary "'+$Db.trm(new_parent_id,'trm_Label')+'"',null,'Duplication',
+                            {default_palette_class:this.options.default_palette_class}); 
+                        return;
+                    }
+                    //2. check there is not term with the same name
+                    var trm_labels = $Db.trm_TreeData(new_parent_id, 'labels'); //labels in lowcase
+                    var lbl = $Db.trm(trm_ID, 'trm_Label');
+                    if(trm_labels.indexOf(lbl.toLowerCase())>=0){
+                        window.hWin.HEURIST4.msg.showMsgDlg( (isRef?'Term':'Reference')
+                            + ' with name "'+lbl
+                            +'" is already in vocabulary "'+$Db.trm(new_parent_id,'trm_Label')+'"'
+                            +'<p>To make this move, edit the term so that it is different from any in the top level '
+                            +'of the vocabulary to which you wish to move it. Once moved, you can merge within '
+                            +'the vocabulary or reposition the term and edit it appropriately.</p>'
+                            ,null,'Duplication',
+                            {default_palette_class:this.options.default_palette_class}); 
+                        return;
+                    }
                 }
             
-                //2. check there is not term with the same name
-                var trm_labels = $Db.trm_TreeData(new_parent_id, 'labels'); //labels in lowcase
-                var lbl = $Db.trm(trm_ID, 'trm_Label');
-                if(trm_labels.indexOf(lbl.toLowerCase())>=0){
-                    window.hWin.HEURIST4.msg.showMsgDlg( (isRef?'Term':'Reference')
-                        + ' with name "'+lbl
-                        +'" is already in vocabulary "'+$Db.trm(new_parent_id,'trm_Label')+'"'
-                        +'<p>To make this move, edit the term so that it is different from any in the top level '
-                        +'of the vocabulary to which you wish to move it. Once moved, you can merge within '
-                        +'the vocabulary or reposition the term and edit it appropriately.</p>'
-                        ,null,'Duplication',
-                        {default_palette_class:this.options.default_palette_class}); 
-                    return;
-                }
             }else{
-                //tree within vocab
-                
-                if(new_parent_id==old_parent_id){ //the same
-                    return;
-                }
 
                 var vocab_id = $Db.getTermVocab(new_parent_id); //get real vocab
                 if(this.options.trm_VocabularyID!=vocab_id){
@@ -1767,18 +1784,19 @@ console.log('Error !!! Parent not found for '+trm_ID);
                 }
             }
             
-            }
+            
             
             if(isRef){
-                //change parent for reference
-                this.setTermReferences(new_parent_id, trm_ID, old_parent_id);
+                //change parent for reference   @todo!
+                this.setTermReferences(new_parent_id, trm_ID, old_parent_ids[0]);
             }else{
             
                 var that = this;
-                this._saveEditAndClose( params ,
-                    function(){
+                this._saveEditAndClose( params ,  //change in defTerms
+                    function(){  
                         if(params.trm_ParentTermID>0){
-                            that.changeParentInIndex(new_parent_id, trm_ID, old_parent_id);
+console.log('!!!!!! '+old_parent_ids[0]+' -> '+new_parent_id);                            
+                            that.changeParentInIndex(new_parent_id, trm_ID, old_parent_ids[0]);
                             that._filterByVocabulary();
                         }
                         that._triggerRefresh('term');
@@ -1838,7 +1856,7 @@ console.log('Error !!! Parent not found for '+trm_ID);
             //open multi selector
             var popup_options = {
                 select_mode:'select_multi',
-                select_mode_reference: true,
+                select_mode_reference: 'reference', 
                 select_mode_target: $Db.trm(this.options.trm_VocabularyID,'trm_Label'),
                 selectbutton_label: 'Add Reference',
                 initial_filter: this.options.trm_VocabularyID,
@@ -2213,6 +2231,8 @@ console.log('Error !!! Parent not found for '+trm_ID);
     // change links in trm_Links (after server action)
     //
     changeParentInIndex: function(new_parent_id, term_ID, old_parent_id){
+        
+            if(new_parent_id==old_parent_id) return;
 
             var t_idx = window.hWin.HAPI4.EntityMgr.getEntityData('trm_Links'); 
             if(new_parent_id>0){
