@@ -1732,28 +1732,27 @@ $.widget( "heurist.editing_input", {
                 filter_groups: this.configMode.filter_group,
                 onselect:function(event, data){
 
-                 if(data){
+                    if(data){
 
                         if(select_return_mode=='ids'){
-                            
-                            
+
+
                             var newsel = window.hWin.HEURIST4.util.isArrayNotEmpty(data.selection)?data.selection:[];
-                            
+
                             //config and data are loaded already, since dialog was opened
                             that._findAndAssignTitle($input, newsel);
                             that.newvalues[$input.attr('id')] = newsel.join(',');
                             that.onChange();
-                            
+
                         }else if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
                             //todo
 
                         }
-                 }//data
+                    }//data
 
                 }
             };//popup_options
-                        
-
+            
             $input.hide();
             that._findAndAssignTitle($input, value);
 
@@ -1778,16 +1777,22 @@ $.widget( "heurist.editing_input", {
                         popup_options.selection_on_init = sels.split(',');
                     } else {
                         popup_options.selection_on_init = null;    
-                    }                                                                                       
+                    }                                
+                    
                     if(this.configMode.initial_filter){
                         popup_options.initial_filter = this.configMode.initial_filter;    
                     }
                     if(!window.hWin.HEURIST4.util.isnull(this.configMode.search_form_visible)){
                         popup_options.search_form_visible = this.configMode.search_form_visible;    
                     }
+
+                    var popup_options2 = popup_options;
+                    if(this.configMode.popup_options){
+                         popup_options2  = $.extend(popup_options, this.configMode.popup_options);
+                    }
                     
                     //init dialog to select related entities
-                    window.hWin.HEURIST4.ui.showEntityDialog(this.configMode.entity, popup_options);
+                    window.hWin.HEURIST4.ui.showEntityDialog(this.configMode.entity, popup_options2);
             }
             
             
