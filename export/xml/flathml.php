@@ -829,6 +829,48 @@ function _getReversePointers($rec_id, $depth){
 }
 
 //
+// get linked records for relationship record
+//
+function _getForwardPointers_for_relRT($rec_id, $depth){
+
+    global $system, $mysqli, $relSrcDT, $relTrgDT, $ACCESSABLE_OWNER_IDS, $PUBONLY, $RECTYPE_FILTERS, $PTRTYPE_FILTERS;
+
+    $rtfilter = (@$RECTYPE_FILTERS && array_key_exists($depth, $RECTYPE_FILTERS) ? $RECTYPE_FILTERS[$depth] : null);
+    $ptrfilter = (@$PTRTYPE_FILTERS && array_key_exists($depth, $PTRTYPE_FILTERS) ? $PTRTYPE_FILTERS[$depth] : null);
+
+    $query = 'SELECT dtl_RecID, dtl_Value, trg.rec_RecTypeID, dtl_DetailTypeID FROM recDetails, Records trg '
+    .' where dtl_RecID='.$rec_id.' and (dtl_DetailTypeID='.$relSrcDT.' OR dtl_DetailTypeID='.$relTrgDT.') '
+    .'  and (trg.rec_ID = dtl_Value)  and (trg.rec_FlagTemporary=0) '
+    . ($rtfilter && count($rtfilter) > 0 ? ' and trg.rec_RecTypeID in (' . join(',', $rtfilter) . ') ' : '') 
+    . ($ptrfilter && count($ptrfilter) > 0 ? ' and dtl_DetailTypeID in (' . join(',', $ptrfilter) . ') ' : '') 
+    .'AND ('.(count($ACCESSABLE_OWNER_IDS) > 0 && !$PUBONLY 
+                    ? 'trg.rec_OwnerUGrpID in (' .join(',', $ACCESSABLE_OWNER_IDS) . ') OR ' 
+                    : '') .
+    ($system->has_access() && !$PUBONLY ? 'NOT trg.rec_NonOwnerVisibility = "hidden")' : 'trg.rec_NonOwnerVisibility = "public")');
+
+
+    $resout = array();
+
+    $res = $mysqli->query($query);
+    if($res){ 
+        while ($row = $res->fetch_assoc()) {
+
+            if(@$resout[$row['dtl_Value']]){
+                if(!in_array($row['dtl_DetailTypeID'], $resout[$row['dtl_Value']]['dty_IDs'])){ //rare case
+                    array_push($resout[$row['dtl_Value']]['dty_IDs'], $row['dtl_DetailTypeID']);
+                }
+            }else{
+                $resout[$row['dtl_Value']] = array('rec_RecTypeID'=>$row['rec_RecTypeID'], 'dty_IDs'=>array($row['dtl_DetailTypeID']));
+            }
+        }
+        $res->close();
+    }
+
+    return $resout;    
+
+}
+
+//
 //
 //
 function _getForwardPointers($rec_id, $depth){
@@ -1270,7 +1312,11 @@ function outputRecord($recID, $depth, $outputStub = false, $parentID = null){
         }
 
         if($depth<$MAX_DEPTH){
-            $relations = _getForwardPointers($recID, $depth+1);
+            if($record['rec_RecTypeID']==$relRT){
+                $relations = _getForwardPointers_for_relRT($recID, $depth+1);
+            }else{
+                $relations = _getForwardPointers($recID, $depth+1);
+            }
             $resout['related'] = array_merge($resout['related'], array_keys($relations));
         }
 
