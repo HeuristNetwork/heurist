@@ -503,7 +503,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 
 
         this.editForm.css({'overflow-y':'auto !important', 'overflow-x':'hidden', 'padding':'5px'});
-            
+         
         return true;
     },
     

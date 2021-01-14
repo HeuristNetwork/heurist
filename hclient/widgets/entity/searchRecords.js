@@ -38,6 +38,8 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
             }
             is_expand_rt_list = (rt_list.length>1 && rt_list.length<10);
             is_only_rt = (rt_list.length==1);
+        }else{
+            rt_list = [];
         }
         
         this.selectRectype.empty();
@@ -221,6 +223,8 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
         //this.searchForm.find('#input_search').focus();
         this.input_search.focus();
 
+       this._trigger( "onstart" ); //trigger ajust          
+        
     },  
 
     //
