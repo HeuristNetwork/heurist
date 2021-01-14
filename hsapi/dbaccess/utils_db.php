@@ -1559,6 +1559,33 @@ error_log('UPDATED '.$session_id.'  '.$value);
    
         return $res;
     }    
-    
+
+    //
+    //
+    //
+    function updateDatabseToLatest4($system){
+        
+        $mysqli = $system->get_mysqli();
+
+        if(!(mysql__select_value($mysqli, 'select rtg_ID FROM defRecTypeGroups WHERE rtg_Name="Trash"')>0)){
+$query = 'INSERT INTO defRecTypeGroups (rtg_Name,rtg_Order,rtg_Description) '
+.'VALUES ("Trash",255,"Drag record types here to hide them, use dustbin icon on a record type to delete permanently")';
+            $mysqli->query($query);
+        }
+
+        if(!(mysql__select_value($mysqli, 'select vcg_ID FROM defVocabularyGroups WHERE vcg_Name="Trash"')>0)){
+$query = 'INSERT INTO defVocabularyGroups (vcg_Name,vcg_Order,vcg_Description) '
+.'VALUES ("Trash",255,"Drag vocabularies here to hide them, use dustbin icon on a vocabulary to delete permanently")';
+            $mysqli->query($query);
+        }
+
+        if(!(mysql__select_value($mysqli, 'select dtg_ID FROM defDetailTypeGroups WHERE dtg_Name="Trash"')>0)){
+$query = 'INSERT INTO defDetailTypeGroups (dtg_Name,dtg_Order,dtg_Description) '
+.'VALUES ("Trash",255,"Drag base fields here to hide them, use dustbin icon on a field to delete permanently")';        
+            $mysqli->query($query);
+        }
+        
+        
+    }  
     
 ?>

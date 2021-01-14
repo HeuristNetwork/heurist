@@ -685,6 +685,9 @@ $.widget( "heurist.manageEntity", {
         if(options.class){
             btn.addClass(options.class);
         }
+        if(options.title){
+            btn.attr({'title':options.title})    
+        }
     },
     
     // @todo  to remove

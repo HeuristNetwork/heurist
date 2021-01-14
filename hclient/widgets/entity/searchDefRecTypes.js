@@ -164,6 +164,13 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
             if(!this.element.find('#chb_show_all_groups').is(':checked'))
                 this.startSearch();
                 //this.element.find('#input_search_group').val(value).change();
+                
+                if(value==$Db.getTrashGroupId('rtg')){
+                    this.btn_add_record.hide();
+                }else{
+                    this.btn_add_record.show();
+                }
+                
         }
     },
     

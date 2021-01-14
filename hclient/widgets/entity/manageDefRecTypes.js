@@ -243,6 +243,8 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                                         var recs = selected_recs.getOrder();
                                         if(recs && recs.length>0){
                                             var recID = recs[recs.length-1];
+                                            var isTrash = ($Db.rty(recID,'rty_RecTypeGroupID') == $Db.getTrashGroupId('rtg'));
+                                            if(isTrash) return;
                                             this._onActionListener(event, {action:'edit',recID:recID}); 
                                         }
                                     }
@@ -281,34 +283,31 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
 
             
             if(that.options.isFrontUI){
-                var rg_options = {
-                     isdialog: false, 
-                     isFrontUI: true,
-                     container: that.rectype_groups,
-                     title: 'Record type groups',
-                     layout_mode: 'short',
-                     select_mode: 'manager',
-                     reference_rt_manger: that.element,
-                     onSelect:function(res){
+                    var rg_options = {
+                        isdialog: false, 
+                        isFrontUI: true,
+                        container: that.rectype_groups,
+                        title: 'Record type groups',
+                        layout_mode: 'short',
+                        select_mode: 'manager',
+                        reference_rt_manger: that.element,
+                        onSelect:function(res){
 
-                         if(window.hWin.HEURIST4.util.isRecordSet(res)){
-
-                            res = res.getIds();                     
-                            if(res && res.length>0){
+                            if(window.hWin.HEURIST4.util.isRecordSet(res)){
+                                res = res.getIds();                     
+                            }
+                            
+                            if(res && $.isArray(res) && res.length>0){
                                 that.options.rtg_ID = res[0];
                                 that.searchForm.searchDefRecTypes('option','rtg_ID', that.options.rtg_ID);
                             }
-                             
+
                             if(!that.getRecordSet()){
                                 that._loadData( true ); //not yet loaded
                             }
-                            
-                            
-                            
-                         }
-                     },
-                     add_to_begin: true
-                };
+                        },
+                        add_to_begin: true
+                    };
                 window.hWin.HEURIST4.ui.showEntityDialog('defRecTypeGroups', rg_options);
             }else{
                 that._loadData( true );
@@ -711,10 +710,20 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         var fields = this.options.ui_params?this.options.ui_params.fields:['rtyid'];
 //console.log(fields);
         //fields = ['rtyid','ccode','addrec','filter','count','group','icon','edit','editstr','name','description','show','duplicate','fields','status'];        
+
+        var isTrash = (recordset.fld(record, 'rty_RecTypeGroupID') == $Db.getTrashGroupId('rtg'));
         
         function __action_btn(action,icon,title,color){
             if(!color) color = '#555555';            
-            return '<div class="item" style="min-width:34px;max-width:34px;text-align:center;"><div title="'+title+'" '
+            var sbg = '';
+            if(isTrash && action!='delete' && action!='') {
+                color = '#d7d7d7';
+                sbg = 'background:#f0f0f0';
+                action = '';
+            }
+            
+            return '<div class="item" style="min-width:34px;max-width:34px;text-align:center;'+sbg+'">'
+                    +'<div title="'+title+'" '
                     +'class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" '
                     +'role="button" aria-disabled="false" data-key="'+action+'" style="height:18px;">'
                     +     '<span class="ui-button-icon-primary ui-icon '+icon+'" style="color:'+color+'"></span>'

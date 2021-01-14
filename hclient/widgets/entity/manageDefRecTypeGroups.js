@@ -110,9 +110,14 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
                                 
                                 if(rty_ID>0 && rtg_ID>0 && that.options.reference_rt_manger){
                                         
+                                        //if source group is trash - change "show in list" to true
+                                        var params = {rty_ID:rty_ID, rty_RecTypeGroupID:rtg_ID };
+                                        if($Db.rty(rty_ID,'rty_RecTypeGroupID') == $Db.getTrashGroupId('rtg')){
+                                            params['rty_ShowInLists'] = 1;
+                                        }
+                                    
                                         that.options.reference_rt_manger
-                                            .manageDefRecTypes('changeRectypeGroup',
-                                                {rty_ID:rty_ID, rty_RecTypeGroupID:rtg_ID });
+                                            .manageDefRecTypes('changeRectypeGroup', params);
                                 }
                         }});
                 }
@@ -127,14 +132,48 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
                       click: function() { that._onActionListener(null, 'add'); }},
 
                 {text:window.hWin.HR('Save'),
-                      css:{'margin-right':'0.5em','float':'left',display:'none'}, id:'btnApplyOrder',
-                      click: function() { that._onActionListener(null, 'save-order'); }}];
+                          css:{'margin-right':'0.5em','float':'left',display:'none'}, id:'btnApplyOrder',
+                      click: function() { that._onActionListener(null, 'save-order'); }},
+                      
+                {showText:true, icons:{primary:'ui-icon-trash'},text:window.hWin.HR('Trash'),
+                      title: 'Drag record types here to hide them',
+                      css:{'margin':'5px','float':'right',padding:'3px'}, id:'btnTrashGroup',
+                      click: function() { that._onActionListener(null, 'trash'); }}
+                      ];
 
             this._toolbar = this.searchForm;
             this.searchForm.css({'padding-top': '8px'}).empty();
             $('<h4>Record Type Groups</h4>').css({'margin':5}).appendTo(this.searchForm);
             this._defineActionButton2(btn_array[0], this.searchForm);
             this._defineActionButton2(btn_array[1], this.searchForm);
+            //this._defineActionButton2(btn_array[2], this.searchForm);
+            
+            this.searchForm.height(70);
+            
+            
+            var ele = $('<div title="Drag record types here to hide them"><span class="ui-icon ui-icon-trash"/>Trash</div>')
+                .css({float:'right',border:'2px dashed blue',cursor:'pointer',
+                        margin:'5px','font-size': '11px', padding:'3px'})
+                .appendTo(this.searchForm);
+            
+            this._on(ele, {click:function(){ this._onActionListener(null, 'trash'); }});
+            
+            ele.droppable({
+                            activeClass: "ui-state-highlight",
+                            scope: 'rtg_change',  
+                            tolerance: 'pointer',
+                            drop: function( event, ui ){
+                                var rty_ID = $(ui.draggable).parent().attr('recid');
+                                var rtg_ID = $Db.getTrashGroupId('rtg');
+                                
+                                if(rty_ID>0 && rtg_ID>0 && that.options.reference_rt_manger){
+                                        
+                                        that.options.reference_rt_manger
+                                            .manageDefRecTypes('changeRectypeGroup',
+                                                {rty_ID:rty_ID, rty_RecTypeGroupID:rtg_ID, rty_ShowInLists:0});
+                                }
+                        }});
+            
             
         }
         
@@ -168,6 +207,8 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
     _recordListItemRenderer: function(recordset, record){
         
         var recID   = recordset.fld(record, 'rtg_ID');
+        var recName = recordset.fld(record, 'rtg_Name');
+        if(recName=='Trash') return '';
         
         var html = '<div class="recordDiv white-borderless" id="rd'+recID+'" recid="'+recID+'">'; // style="height:1.3em"
         if(this.options.select_mode=='select_multi'){
@@ -178,7 +219,7 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
         
         html = html + 
             '<div class="item" style="font-weight:bold;display:table-cell;width:250;max-width:250;padding:6px;">'
-            +window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, 'rtg_Name'))+'</div>';
+            +window.hWin.HEURIST4.util.htmlEscape(recName)+'</div>';
         
         if(this.options.edit_mode=='popup'){
             html = html
@@ -267,15 +308,24 @@ $.widget( "heurist.manageDefRecTypeGroups", $.heurist.manageEntity, {
 
         var isresolved = this._super(event, action);
 
-        if(!isresolved && action=='save-order'){
+        if(!isresolved){
+            
+            if(action=='save-order'){
 
-            var recordset = this.getRecordSet();
-            var that = this;
-            window.hWin.HEURIST4.dbs.applyOrder(recordset, 'rtg', function(res){
-                that._toolbar.find('#btnApplyOrder').hide();
-                that._triggerRefresh('rtg');
-            });
-
+                var recordset = this.getRecordSet();
+                var that = this;
+                window.hWin.HEURIST4.dbs.applyOrder(recordset, 'rtg', function(res){
+                    that._toolbar.find('#btnApplyOrder').hide();
+                    that._triggerRefresh('rtg');
+                });
+                
+            }else if(action=='trash'){
+                if($.isFunction(this.options.onSelect)){
+                    var id = $Db.getTrashGroupId('rtg');
+                    this.options.onSelect.call( this, [id] );
+                }
+            }
+            
         }
 
     },

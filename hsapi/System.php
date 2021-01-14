@@ -1539,6 +1539,7 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
                 return null;
             }
             
+            updateDatabseToLatest4($this);
             //updateDatabseToLatest3($this);
             //updateDatabseToLatest2($this);
             /*

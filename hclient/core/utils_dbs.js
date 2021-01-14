@@ -54,7 +54,7 @@ rstField - Returns rectype header or details field values
     getLocalID
     getConceptID
 
-
+getTrashGroupId
 */
 
 if (!window.hWin.HEURIST4){
@@ -70,6 +70,10 @@ window.hWin.HEURIST4.dbs = {
     baseFieldType: {},
     
     needUpdateRtyCount: -1,
+    
+    rtg_trash_id: 0,
+    dtg_trash_id: 0,
+    vcg_trash_id: 0,
 
     //
     // return vocabulary for given term - real vocabulary (not by reference)
@@ -1556,6 +1560,24 @@ window.hWin.HEURIST4.dbs = {
                 }
         });
         
+    },
+    
+    //
+    //
+    //
+    getTrashGroupId: function(entity){
+        
+        if(!(this[entity+'_trash_id']>0)){
+            var name = entity+'_Name';
+            var that = this;
+            $Db[entity]().each2(function(id, record){
+                if(record[name]=='Trash'){
+                    that[entity+'_trash_id'] = id;
+                    return false;
+                }
+            });
+        }
+        return this[entity+'_trash_id'];
     }
 
 }//end dbs
