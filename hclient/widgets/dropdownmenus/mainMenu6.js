@@ -194,9 +194,28 @@ $.widget( "heurist.mainMenu6", {
                 
                 that._on(window.hWin.document, { //that.element
                     click: function(e){
-                        if(!$(e.target).parents().hasClass('save-filter-dialog')){
-                            that._closeExploreMenuPopup();
-                        }
+                        //get current filter dialog
+                        var ele = $('.save-filter-dialog:visible')
+                        if(ele.length>0){
+                                var prnt = ele.parent();
+                                if(prnt.hasClass('ui-dialog') || prnt.hasClass('ui-menu6-section')){
+                                    ele = prnt;
+                                }
+                                var x = e.pageX;
+                                var y = e.pageY;
+                                var x1 = $(ele).offset().left;
+                                var y1 = $(ele).offset().top;
+                                
+//console.log(x+'   '+x1);                                    
+                                if(x>0 && y>0){
+                                if(x<x1 || x>x1+$(ele).width() ||
+                                   y<y1 || y>y1+$(ele).height())
+                                {
+//console.log('outside');                                    
+                                   that._closeExploreMenuPopup();
+                                }
+                                }
+                        }                        
                     }
                 });
                     
@@ -1563,8 +1582,6 @@ $.widget( "heurist.mainMenu6", {
             },
             that.reset_svs_edit
         );  
-        
-        $dlg.addClass('save-filter-dialog');
         
         /*
         setTimeout(function(){

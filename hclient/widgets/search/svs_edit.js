@@ -214,7 +214,7 @@ function hSvsEdit(args) {
     function _showSearchFacetedWizard ( params ){
 
         if($.isFunction($('body').search_faceted_wiz)){ //already loaded
-            showSearchFacetedWizard(params);  //this function from search_faceted_wiz.js
+            return showSearchFacetedWizard(params);  //this function from search_faceted_wiz.js
         }else{
             $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/search/search_faceted_wiz.js', 
                         function(){ showSearchFacetedWizard(params); } );
@@ -375,7 +375,7 @@ function hSvsEdit(args) {
                         is_h6style:is_h6style, is_modal:is_modal, menu_locked:menu_locked };
                         
             if(!facet_params) opts.params = facet_params;
-            _showSearchFacetedWizard( opts );
+            return _showSearchFacetedWizard( opts );
                         
             //function(event, request){   that._updateAfterSave(request, 'faceted');
 
@@ -395,7 +395,7 @@ function hSvsEdit(args) {
         }else if(null == edit_dialog){
             //create new dialog
 
-            var $dlg = edit_dialog = $( "<div>" ).addClass('ui-heurist-bg-light').appendTo(  $('body') );
+            var $dlg = edit_dialog = $( "<div>" ).addClass('save-filter-dialog ui-heurist-bg-light').appendTo(  $('body') );
 
             //load edit dialogue
             $dlg.load(window.hWin.HAPI4.baseURL+"hclient/widgets/search/svs_edit.html?t="+(new Date().time), function(){
@@ -638,7 +638,7 @@ function hSvsEdit(args) {
                 });
                 
                 
-                $dlg.dialog({
+                edit_dialog = $dlg.dialog({
                     autoOpen: false,
                     height: is_short?360:520,
                     width: 650,                                                                                               

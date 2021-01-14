@@ -348,7 +348,7 @@ $.widget( "heurist.search_faceted_wiz", {
         
         var topPos = 0;
         var pos = this._dialog.dialog('option', 'position');
-        if(pos && pos.of){
+        if(pos && pos.of && !(pos.of instanceof Window)){
             topPos = $(pos.of).offset().top+40;
         }
 
@@ -2002,6 +2002,7 @@ function showSearchFacetedWizard( params ){
         if( need_create ){
 
             manage_dlg = $('<div id="heurist-search-faceted-dialog">')
+            .addClass('save-filter-dialog')
             .appendTo( $('body') );
             manage_dlg.search_faceted_wiz( params );
         }else{
@@ -2013,5 +2014,7 @@ function showSearchFacetedWizard( params ){
         }
 
         manage_dlg.search_faceted_wiz( 'show' );
+        
+        return manage_dlg;
     }
 }
