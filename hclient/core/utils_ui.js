@@ -733,6 +733,9 @@ window.hWin.HEURIST4.ui = {
             useIds            = options['useIds']===true;
         }
         
+        //var trash_id = $Db.getTrashGroupId('dtg');
+        
+        
         var dtyID, details;
      
         //show fields for specified set of record types
@@ -866,7 +869,7 @@ window.hWin.HEURIST4.ui = {
 
                     var field_reqtype = detail['rst_RequirementType'];
                     
-                    if(field_reqtype=='forbidden') return true; //continue;
+                    if(field_reqtype=='forbidden' || $Db.dty(dtyID, 'dty_ShowInLists')==0) return true; //continue;
                     
                     var field_type = $Db.dty(dtyID, 'dty_Type');
 
@@ -929,7 +932,8 @@ window.hWin.HEURIST4.ui = {
                 
                 $Db.dty().each2(function(detailID, field)
                 {
-                    if(field['dty_DetailTypeGroupID']==groupID && 
+                    if(field['dty_DetailTypeGroupID']==groupID &&
+                      (field['dty_ShowInLists']==1) &&
                       (allowedlist==null || allowedlist.indexOf(field['dty_Type'])>=0))
                     {
                         arrterm.push([detailID, field['dty_Name']]);

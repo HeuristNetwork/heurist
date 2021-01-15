@@ -109,8 +109,22 @@ $.widget( "heurist.manageDefDetailTypeGroups", $.heurist.manageEntity, {
                     
                                 if(dty_ID>0 && dtg_ID>0 && that.options.reference_dt_manger){
                                         
+                                        var params = {dty_ID:dty_ID, dty_DetailTypeGroupID:dtg_ID };
+                                        
+                                        var trash_id = $Db.getTrashGroupId('dtg');
+                                        //if source group is trash - change "show in list" to true
+                                        if($Db.dty(dty_ID,'dty_DetailTypeGroupID') == trash_id){
+                                            //from target
+                                            params['dty_ShowInLists'] = 1;
+                                        }else if(dtg_ID == trash_id){
+                                            params['dty_ShowInLists'] = 0;
+                                        }
+                                    
                                         that.options.reference_dt_manger
-                                            .manageDefDetailTypes('changeDetailtypeGroup',{dty_ID:dty_ID, dty_DetailTypeGroupID:dtg_ID });
+                                            .manageDefDetailTypes('changeDetailtypeGroup',params);
+                                            
+                                            
+                                            
                                 }
                         }});
                 }
@@ -163,6 +177,7 @@ $.widget( "heurist.manageDefDetailTypeGroups", $.heurist.manageEntity, {
     _recordListItemRenderer: function(recordset, record){
         
         var recID   = recordset.fld(record, 'dtg_ID');
+        var recName = recordset.fld(record, 'dtg_Name');
         
         var html = '<div class="recordDiv white-borderless" id="rd'+recID+'" recid="'+recID+'">'; // style="height:1.3em"
         if(this.options.select_mode=='select_multi'){
@@ -171,24 +186,31 @@ $.widget( "heurist.manageDefDetailTypeGroups", $.heurist.manageEntity, {
             //html = html + '<div>';
         }
         
+        if(recName=='Trash'){
+            html = html + '<div style="display:table-cell;vertical-align: middle;"><span class="ui-icon ui-icon-trash"></span></div>';
+        }
+        
         html = html + 
             '<div class="item truncate" style="font-weight:bold;display:table-cell;width:150;max-width:150;padding:6px;">'
-            +window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, 'dtg_Name'))+'</div>';
-        
-        if(this.options.edit_mode=='popup'){
-            html = html
-            + this._defineActionButton({key:'edit',label:'Edit', title:'', icon:'ui-icon-pencil', class:'rec_actions_button'},
-                    null,'icon_text','padding-top:9px');
-        }
+            +window.hWin.HEURIST4.util.htmlEscape(recName)+'</div>';
 
-        var cnt = 0;//recordset.fld(record, 'dtg_FieldCount');
-        
-        html = html 
-                +((cnt>0)
+        if(recName!='Trash'){        
+            if(this.options.edit_mode=='popup'){
+                html = html
+                + this._defineActionButton({key:'edit',label:'Edit', title:'', icon:'ui-icon-pencil', class:'rec_actions_button'},
+                    null,'icon_text','padding-top:9px');
+            }
+
+            var cnt = 0;//recordset.fld(record, 'dtg_FieldCount');
+
+            html = html 
+            +((cnt>0)
                 ?'<div style="display:table-cell;padding:0 4px">'+cnt+'</div>'
                 :this._defineActionButton({key:'delete',label:'Remove', title:'', icon:'ui-icon-delete', class:'rec_actions_button'}, 
-                            null,'icon_text'))
-                + '<div class="selection_pointer" style="display:table-cell">'
+                    null,'icon_text'));
+        }
+        
+        html = html + '<div class="selection_pointer" style="display:table-cell">'
                     +'<span class="ui-icon ui-icon-carat-r"></span></div>';
         
 
