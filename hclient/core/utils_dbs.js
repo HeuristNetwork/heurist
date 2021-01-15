@@ -1409,7 +1409,32 @@ window.hWin.HEURIST4.dbs = {
         return (children && children.length>0);
     },
 
-
+    //
+    // change parent in links
+    //
+    trm_ChangeChildren: function(old_parent_id, new_parent_id){
+        var t_idx = window.hWin.HAPI4.EntityMgr.getEntityData('trm_Links'); 
+        var children = t_idx[old_parent_id];
+        
+        if((children && children.length>0)){
+            
+            $.each(children,function(i,trm_id){
+                 if($Db.trm(trm_id,'trm_ParentTermID')==old_parent_id){
+                     $Db.trm(trm_id,'trm_ParentTermID',new_parent_id);
+                 }
+            });
+            
+            var target_children = t_idx[new_parent_id];
+            if(target_children && target_children.length>0){
+                t_idx[new_parent_id] = target_children.concat(children)
+            }else{
+                t_idx[new_parent_id] = children;
+            }
+           //window.hWin.HAPI4.EntityMgr.setEntityData('trm_Links',t_idx);
+        }
+    },
+    
+    
     //
     // get all vocabularies OR for given domain
     //

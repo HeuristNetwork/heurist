@@ -92,8 +92,11 @@ $.widget( "heurist.manageDefVocabularyGroups", $.heurist.manageEntity, {
                     var trm_ID = $(ui.draggable).parent().attr('recid');
                     var vcg_ID = trg.attr('recid');
                             if(trm_ID>0 && vcg_ID>0 && that.options.reference_vocab_manger){
+                                
+                                    var params = {trm_ID:trm_ID, trm_VocabularyGroupID:vcg_ID};
+                                
                                     that.options.reference_vocab_manger
-                                        .manageDefTerms('changeVocabularyGroup',{trm_ID:trm_ID, trm_VocabularyGroupID:vcg_ID });
+                                        .manageDefTerms('changeVocabularyGroup',params);
                             }
                         }});
                 }
@@ -155,6 +158,7 @@ $.widget( "heurist.manageDefVocabularyGroups", $.heurist.manageEntity, {
         
         
         var recID   = recordset.fld(record, 'vcg_ID');
+        var recName = recordset.fld(record, 'vcg_Name');
         
         var html = '<div class="recordDiv white-borderless" id="rd'+recID+'" recid="'+recID+'">'; // style="height:1.3em"
         if(this.options.select_mode=='select_multi'){
@@ -163,20 +167,26 @@ $.widget( "heurist.manageDefVocabularyGroups", $.heurist.manageEntity, {
             //html = html + '<div>';
         }
         
-        html = html + '<div class="item truncate" '
-                + 'style="display:table-cell;min-width:170px;max-width:170px;font-weight:bold;font-size:14px;padding:6px">'
-                + window.hWin.HEURIST4.util.htmlEscape(recordset.fld(record, 'vcg_Name'))+'</div>'; 
-        
-        if(this.options.edit_mode=='popup'){
-            html = html
-            + this._defineActionButton({key:'edit',label:'Edit', title:'', icon:'ui-icon-pencil', class:'rec_actions_button'}, 
-                            null,'icon_text','padding-top:10px');
+        if(recName=='Trash'){
+            html = html + '<div style="display:table-cell;vertical-align: middle;"><span class="ui-icon ui-icon-trash"></span></div>';
         }
         
-        html = html 
-                + this._defineActionButton({key:'delete',label:'Remove', title:'', icon:'ui-icon-delete', class:'rec_actions_button'}, 
-                            null,'icon_text')
-                + '<div class="selection_pointer" style="display:table-cell">'
+        html = html + '<div class="item truncate" '
+                + 'style="display:table-cell;min-width:170px;max-width:170px;font-weight:bold;font-size:14px;padding:6px">'
+                + window.hWin.HEURIST4.util.htmlEscape(recName)+'</div>'; 
+        
+        if(recName!='Trash'){
+            if(this.options.edit_mode=='popup'){
+                html = html
+                + this._defineActionButton({key:'edit',label:'Edit', title:'', icon:'ui-icon-pencil', class:'rec_actions_button'}, 
+                                null,'icon_text','padding-top:10px');
+            }
+            
+            html = html 
+                    + this._defineActionButton({key:'delete',label:'Remove', title:'', icon:'ui-icon-delete', class:'rec_actions_button'}, 
+                                null,'icon_text');
+        }
+        html = html + '<div class="selection_pointer" style="display:table-cell">'
                     +'<span class="ui-icon ui-icon-carat-r"></span></div>';
         
         

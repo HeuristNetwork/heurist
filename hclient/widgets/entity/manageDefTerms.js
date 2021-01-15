@@ -1539,7 +1539,7 @@ if(window.hWin.HEURIST4.util.isArrayNotEmpty(res.records)){
     },
     
     //
-    //
+    // params: {trm_ID:trm_ID, trm_ParentTermID:trm_ParentTermID }
     //
     mergeTerms: function(params){
 
@@ -1551,7 +1551,7 @@ if(window.hWin.HEURIST4.util.isArrayNotEmpty(res.records)){
 
         var vocab_id = $Db.getTermVocab(target_id);
         var vocab_id2 = $Db.getTermVocab(trm_ID);
-        if((this.options.trm_VocabularyID!=vocab_id)|| (this.options.trm_VocabularyID!=vocab_id2))
+        if((this.options.trm_VocabularyID!=vocab_id) || (this.options.trm_VocabularyID!=vocab_id2))
         {
             window.hWin.HEURIST4.msg.showMsgFlash( 'Merge with reference is not allowed' ); 
             return;                
@@ -1611,6 +1611,9 @@ if(window.hWin.HEURIST4.util.isArrayNotEmpty(res.records)){
                             window.hWin.HEURIST4.msg.sendCoverallToBack();
 
                             if(response.status == window.hWin.ResponseStatus.OK){
+                                
+                                //change parent for all children
+                                $Db.trm_ChangeChildren(trm_ID, target_id);
 
                                 $Db.trm_RemoveLinks(trm_ID);
                                 $Db.trm().removeRecord(trm_ID);  //from record set
@@ -1727,7 +1730,7 @@ console.log('Error !!! Parent not found for '+trm_ID);
 
             //change parent within vocab
             if(window.hWin.HEURIST4.util.findArrayIndex(new_parent_id, old_parent_ids)>=0){ //the same
-console.log('same parent nothing to change');            
+//console.log('same parent nothing to change');            
                 return;
             }
             
@@ -1787,7 +1790,7 @@ console.log('same parent nothing to change');
             
             
             if(isRef){
-                //change parent for reference   @todo!
+                //change parent for reference   @todo - take correct old_parent_ids
                 this.setTermReferences(new_parent_id, trm_ID, old_parent_ids[0]);
             }else{
             
@@ -1795,7 +1798,7 @@ console.log('same parent nothing to change');
                 this._saveEditAndClose( params ,  //change in defTerms
                     function(){  
                         if(params.trm_ParentTermID>0){
-console.log('!!!!!! '+old_parent_ids[0]+' -> '+new_parent_id);                            
+//console.log('!!!!!! '+old_parent_ids[0]+' -> '+new_parent_id);                            
                             that.changeParentInIndex(new_parent_id, trm_ID, old_parent_ids[0]);
                             that._filterByVocabulary();
                         }
