@@ -288,7 +288,7 @@ class DbsTerms
     }
     
     //
-    // get all labels and codes of childrent for giveb parent term
+    // get all labels and codes of children for giveb parent term
     //
     public function getSameLevelLabelsAndCodes($parent_id, $domain){
         
@@ -301,10 +301,12 @@ class DbsTerms
                 $idx_label = intval($this->data['fieldNamesToIndex']["trm_Label"]);
                 
                 foreach($children as $trmId){
-                    $code = removeLastNum(trim($this->data['termsByDomainLookup'][$domain][$trmId][$idx_code]));
-                    $label = removeLastNum(trim($this->data['termsByDomainLookup'][$domain][$trmId][$idx_label]));
-                    $lvl_src['code'][] = $code;
-                    $lvl_src['label'][] = $label;
+                    if(@$this->data['termsByDomainLookup'][$domain][$trmId]){
+                        $code = removeLastNum(trim($this->data['termsByDomainLookup'][$domain][$trmId][$idx_code]));
+                        $label = removeLastNum(trim($this->data['termsByDomainLookup'][$domain][$trmId][$idx_label]));
+                        $lvl_src['code'][] = $code;
+                        $lvl_src['label'][] = $label;
+                    }
                 }
             }
         }
