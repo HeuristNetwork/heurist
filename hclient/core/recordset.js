@@ -431,7 +431,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                         
                     }
                 }else{
-                    recID = recID + "_link"; //for DH
+                    recID = recID + "_link"; //for Digital Harlem
                 }
                 
                         var iconImgEvt, iconImg;
@@ -796,7 +796,7 @@ mapDraw.js initial_wkt -> parseWKT -> GeoJSON -> _loadGeoJSON (as set of separat
                         
                     }//for geo fields
                 }else{
-                    recID = recID + "_link"; //for DH
+                    recID = recID + "_link"; //for Digital Harlem
                 }
                                                
                 //disable selection for map source databaset bboxes

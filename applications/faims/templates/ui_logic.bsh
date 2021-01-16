@@ -548,14 +548,10 @@ saveEntity(String rectypeTab, Boolean needValidation, Boolean andclose) {
     }
 
     String uuid = getUuid(rectypeTab);
-
-//DEBUG print("BORO save entity: "+uuid+"  "+rectypeTab);
     
     // save record/entity
     saveTabGroup(rectypeTab, uuid, attachedGeometry, null, new SaveCallback() {
         onSave(uuid, newRecord) {
-
-//DEBUG print("BORO on save entity: "+uuid);
 
             setUuid(rectypeTab, uuid);
             saveRelations(rectypeTab);
@@ -578,8 +574,6 @@ print("after save "+geometry);
 */
         }
         onError(message) {
-//DEBUG             Log.e("saveEntity", message);
-//DEBUG print("BORO on save entity error: "+message);
             showToast(message);
         }
         
