@@ -113,6 +113,7 @@ $.widget( "heurist.resultList", {
     max_page: 0,
     count_total: null,  //total records in query - actual number can be less
     hintDiv:null, // rollover for thumbnails
+    _current_view_mode: null,
 
     _currentRecordset:null,
     _currentMultiSelection:null, //for select_multi - to keep selection across pages and queries
@@ -1010,6 +1011,8 @@ $.widget( "heurist.resultList", {
             this.div_content.removeClass('list icons thumbs thumbs3 horizontal icons_list');
             this.div_content.addClass(newmode);
             
+            this._current_view_mode = newmode;
+            
             if(newmode=='horizontal'){ // || newmode=='icons_list'){
                 this._on(this.div_content,
                         {'mousewheel':this._recordDivNavigateUpDown
@@ -1081,7 +1084,10 @@ $.widget( "heurist.resultList", {
                 //.removeClass(this.options.is_h6style?'':'ui-heurist-btn-header1')
                 .removeClass('ui-heurist-btn-header1')
                 .css({'border':'none'});
-            if(this._expandAllDivs) newmode='record_content';
+            if(this._expandAllDivs){
+                newmode='record_content';
+                this._current_view_mode = newmode;
+            } 
           
                
             var btn =   this.view_mode_selector.find('button[value="'+newmode+'"]');
@@ -2079,9 +2085,13 @@ $.widget( "heurist.resultList", {
     //
     // expand ALL recordDivs
     //
-    expandDetailsInlineALL: function(){
+    expandDetailsInlineALL: function(can_proceed){
         
         var that = this;
+        
+        if(can_proceed!==true && this.allowedPageSizeForRecContent(function(){
+            that.expandDetailsInlineALL(true);
+        })) return;
     
         $allrecs = this.div_content.find('.recordDiv');
         $allrecs.each(function(idx, item){
@@ -2640,13 +2650,46 @@ $.widget( "heurist.resultList", {
     //
     //
     //    
-    , refreshPage: function(){
+    , refreshPage: function( callback ){
         
         var keep_selection = this.getSelected(true);
         this._renderPage(this.current_page);
         if(keep_selection && keep_selection.length>0){
             //this.setSelected(keep_selection);
         }
+    }
+    
+    , allowedPageSizeForRecContent: function( callback ){
+
+        if(!this._currentRecordset) return true;
+        
+        var n = Math.min(this._currentRecordset.length(),this.options.pagesize);
+        
+        if(n>10){
+                var that = this;
+                
+                var s = '';
+                if(window.hWin.HAPI4.has_access()){
+                    s = '<p style="color:green">This warning is triggered if the are more than 10 records</p>'; // (edit here to change)
+                }
+                
+                var $__dlg = window.hWin.HEURIST4.msg.showMsgDlg(
+'<p>You have selected '+n
++' records. This display mode loads complete information for each record and will take a long time to load and display all of these data.</p>'
++s,
+{'Proceed' :function(){ 
+    callback.call();
+    $__dlg.dialog( "close" );
+},
+'Use simple display mode':function(){
+    that.applyViewMode('list');
+    $__dlg.dialog( "close" );
+}}, {title:'Warning'});
+            return true;          
+        }else{
+            return false;
+        }
+        
     }
 
     //
@@ -2689,8 +2732,9 @@ $.widget( "heurist.resultList", {
             
         }
         
+        
         this.clearAllRecordDivs(null);
-
+        
         var recs = recordset.getRecords();
         var rec_order = recordset.getOrder();
         var rec_toload = [];

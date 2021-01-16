@@ -1256,7 +1256,12 @@ $mysqli->commit();
         }else{
 
             $terms = $this->source_defs['terms'];
-        
+            
+            if(!(@$terms['fieldNamesToIndex']['trm_NameInOriginatingDB']>0)){
+                $terms['fieldNamesToIndex']['trm_NameInOriginatingDB'] = 19;
+                $terms['commonFieldNames'][19] = 'trm_NameInOriginatingDB';
+            }
+
             $columnNames = $terms['commonFieldNames'];
             $idx_ccode = intval($terms['fieldNamesToIndex']["trm_ConceptID"]);
             $idx_parentid = intval($terms['fieldNamesToIndex']["trm_ParentTermID"]);
@@ -1338,7 +1343,7 @@ if($term_id==11 || $term_id==518 || $term_id==497){
                     $term_import[$idx_label] = $this->targetTerms->doDisambiguateTerms($term_import[$idx_label],
                                                             null, $domain, $idx_label);
                     
-                    if($this->vcg_correspondence[$term_import[$idx_vocab_group_id]]>0){
+                    if(@$term_import[$idx_vocab_group_id]>0 && @$this->vcg_correspondence[$term_import[$idx_vocab_group_id]]>0){
                         $term_import[$idx_vocab_group_id] = $this->vcg_correspondence[$term_import[$idx_vocab_group_id]];
                     }else{
                         //be default place into 1
@@ -1366,10 +1371,10 @@ if($term_id==11 || $term_id==518 || $term_id==497){
                         $term_import[$idx_origin_id] = $term_id;
                     }
                 }
-                if(!$term_import[$idx_origin_name]){
+                if(!@$term_import[$idx_origin_name]){
                     $term_import[$idx_origin_name] = $term_import[$idx_label];
                 }
-
+                
                 $res = updateTerms($columnNames, null, $term_import, $this->system->get_mysqli()); //see saveStructureLib
                 if(is_numeric($res)){
                     $new_term_id = $res;
@@ -1428,7 +1433,7 @@ if($term_id==11 || $term_id==518 || $term_id==497){
     private function _importVocabularyGroups($src_vocab_ids){
 
         $columnNames = array("vcg_Name","vcg_Domain","vcg_Order","vcg_Description");
-        $idx_vcg_grp = $this->source_defs['terms']['fieldNamesToIndex']['trm_VocabularyGroupID'];
+        $idx_vcg_grp = @$this->source_defs['terms']['fieldNamesToIndex']['trm_VocabularyGroupID'];
         $idx_parent = $this->source_defs['terms']['fieldNamesToIndex']['trm_ParentTermID'];
 
         $mysqli = $this->system->get_mysqli();
@@ -1439,14 +1444,14 @@ if($term_id==11 || $term_id==518 || $term_id==497){
             $is_old_db_version = true;
             
             if(!($idx_vcg_grp>0)){
-                $this->source_defs['terms']['commonFieldNames'].push('trm_VocabularyGroupID');
-                $idx_vcg_grp = count($this->source_defs['terms']['commonFieldNames'])-1;
+                $idx_vcg_grp = 20;
+                $this->source_defs['terms']['commonFieldNames'][$idx_vcg_grp] = 'trm_VocabularyGroupID';
                 $this->source_defs['terms']['fieldNamesToIndex']['trm_VocabularyGroupID'] = $idx_vcg_grp;
             }
             
             $this->source_defs['terms']['groups'] = array(11=>
-                array('vcg_ID'=>"11", 'vcg_Name'=>"Import", vcg_Domain=>"enum", 
-                vcg_Order=>"007", vcg_Description=>"Imported vocabularies"));
+                array('vcg_ID'=>"11", 'vcg_Name'=>"Import", 'vcg_Domain'=>"enum", 
+                'vcg_Order'=>"007", 'vcg_Description'=>"Imported vocabularies"));
         }
         
         foreach($src_vocab_ids as $term_id){

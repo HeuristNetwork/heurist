@@ -1585,7 +1585,7 @@ function updateTerms( $colNames, $trmID, $values, $ext_db) {
 
 
     if ($ret==null){
-        $ret = "no data supplied for updating record structure - $trmID";
+        $ret = "no data supplied for updating term - $trmID";
     }
 
     return $ret;
