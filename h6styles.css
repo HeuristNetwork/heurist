@@ -233,3 +233,7 @@ div.mainMenu6 > div.ui-heurist-header:hover{
     background: white !important;
     border-right: 1px solid gray;
 }
+
+.ui-dialog .ui-dialog-content{
+    padding: 1.5em 1em;
+}
