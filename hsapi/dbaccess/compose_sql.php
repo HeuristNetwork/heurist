@@ -1731,10 +1731,15 @@ class FieldPredicate extends Predicate {
                 $fieldname = 'rd.dtl_UploadedFileID';
                 
                 if(!($isnumericvalue || $isin)){
-                    return '('.$not . 'exists (select rd.dtl_ID from recDetails rd, recUploadedFiles rf '
+                    $q = 'exists (select rd.dtl_ID from recDetails rd, recUploadedFiles rf '
                     . ' where rd.dtl_RecID=TOPBIBLIO.rec_ID and rf.ulf_ID=rd.dtl_UploadedFileID'
                     . ' and rd.dtl_DetailTypeID=' . intval($this->field_type)
                     . ' and (rf.ulf_OrigFileName ' . $match_pred. ' or rf.ulf_MimeExt '. $match_pred.'))';
+                    
+                    if($not){
+                        $q = '('.$not . $q . ')';
+                    }
+                    return $q;
                 }
             }else if($this->parent->fulltext){
                 
