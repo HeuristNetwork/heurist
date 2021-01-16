@@ -2727,10 +2727,11 @@ console.log('onpaste');
             
             $input.css('width', dwidth);
             
-        }else if ( this.detailType=='freetext' || this.detailType=='url' || this.detailType=='blocktext' ) {  
+        }else if ( this.detailType=='freetext' || this.detailType=='url' || this.detailType=='blocktext'  
+                || this.detailType=='integer' || this.detailType=='float') {  
 
               //if the size is greater than zero
-              var nw = 120;
+              var nw = (this.detailType=='integer' || this.detailType=='float')?40:120;
               if (parseFloat( dwidth ) > 0){ 
                   nw = Math.round( 3+Number(dwidth) );
                     //Math.round(2 + Math.min(120, Number(dwidth))) + "ex";
