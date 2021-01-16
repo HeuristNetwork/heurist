@@ -967,7 +967,7 @@ $mysqli->commit();
             }else{
                  $fieldName = 'trm_ConceptID';
                  $idx_ccode = intval($this->source_defs['terms']['fieldNamesToIndex'][$fieldName]);
-                 $term = $this->sourceTerms->getTerm($term_id, $defType);
+                 $term = $this->sourceTerms->getTerm($source_id, $defType);
                  
                  $conceptCode = @$term[$idx_ccode];
             }

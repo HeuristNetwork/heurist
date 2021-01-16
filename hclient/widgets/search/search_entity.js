@@ -216,8 +216,9 @@ console.log(data);
     refreshOnShow: function(){
             if( $Db.needUpdateRtyCount==0 ){
                 $Db.needUpdateRtyCount = -1;    
-                that._recreateRectypeSelectors();
+                this._recreateRectypeSelectors();
             }else if( $Db.needUpdateRtyCount>0 ){
+                var that = this;
                 $Db.needUpdateRtyCount = -1;    
                 $Db.get_record_counts(function(){
                     that._recreateRectypeSelectors();
