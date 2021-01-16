@@ -179,7 +179,7 @@ function imagepalettetotruecolor(&$img)
 function create_rt_icon_with_bg( $rectype_id,  $color_new, $circle_color, $bg_circle_color ){ //}, $bg_color ) {
 
     if(substr($rectype_id,0,4)=='term'){
-        //icons for DH
+        //icons for Digital Harlem
         $rectype_id = substr($rectype_id, 4);
         $path = HEURIST_TERM_ICON_DIR;
     }else{

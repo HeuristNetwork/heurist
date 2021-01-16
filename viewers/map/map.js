@@ -1926,7 +1926,7 @@ console.log('tileloaded 2');
             // 1. as a result of mapdocument smarty template  (popupURL)  - expermental
             // 2. renderRecordData.php output (default)  (popupURL) - default
             // 3. item.opts.info - popupURL or html content - filled in _toTimemap as rec_Info field content 
-            //              - this is main customization way for DH
+            //              - this is main customization way for Digital Harlem
             // 4. html content is created from item.opts values here - deprecated way
             
             if(true){ //Since 2016-11-17 use common renderRecordData !window.hWin.HEURIST4.util.isnull(item.opts.info)){

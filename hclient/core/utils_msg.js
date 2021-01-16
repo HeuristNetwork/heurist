@@ -1079,7 +1079,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                 if(isobj){
                     $dlg.append(message);
                 }else if(message.indexOf('#')===0 && $(message).length>0){
-                    //it seems it is in DH only
+                    //it seems it is in Digital Harlem only
                     $dlg.html($(message).html());
                 }else{
                     $dlg.html(message);

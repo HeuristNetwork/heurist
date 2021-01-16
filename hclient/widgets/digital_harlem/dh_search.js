@@ -140,7 +140,7 @@ $.widget( "heurist.dh_search", {
 
         var lt = window.hWin.HAPI4.sysinfo['layout'];
         if(lt=='Beyond1914' || lt=='UAdelaide'){
-            //find on page external search_value and search_button elements  - for BORO external search form
+            //find on page external search_value and search_button elements  - for USyd Book of Remembrance  external search form
             var ele_search = $('#search_query'); //$(window.hWin.document).find('#search_query');
             if(ele_search.length>0){
                 
