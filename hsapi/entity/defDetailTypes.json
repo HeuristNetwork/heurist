@@ -11,7 +11,7 @@
         
         "entityTitle": "Base Field",
         "entityTitlePlural": "Base Fields",
-        "empty_remark": "Please use the search field above to locate relevant field (partial string match on title)",
+        "empty_remark": "No fields in this group",
         
         "fields": [
                 {
