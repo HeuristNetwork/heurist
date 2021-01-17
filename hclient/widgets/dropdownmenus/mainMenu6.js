@@ -197,6 +197,8 @@ $.widget( "heurist.mainMenu6", {
                         //get current filter dialog
                         var ele = $('.save-filter-dialog:visible')
                         if(ele.length>0){
+                                if (ele.parents('.ui-menu')) return;
+                            
                                 var prnt = ele.parent();
                                 if(prnt.hasClass('ui-dialog') || prnt.hasClass('ui-menu6-section')){
                                     ele = prnt;
