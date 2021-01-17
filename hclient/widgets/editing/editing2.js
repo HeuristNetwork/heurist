@@ -253,7 +253,7 @@ function hEditing(_options) {
 
                         if(!(currGroupType == 'tabs' || currGroupType == 'accordion' || currGroupType == 'expanded')){
                             //div for gearwheel
-                            $('<div>').css({'padding-left':'7px','height':'12px','display':'inline-block'})
+                            $('<div>').css({'padding-left':'7px','height':'12px','display':'inline-block'}) 
                                 .attr('data-dtid', fields[idx]['dtID'])
                                 .appendTo(groupContainer);
                         }else{
@@ -289,15 +289,19 @@ function hEditing(_options) {
                         newFieldContainer.appendTo(groupContainer);
                     }
 
-                    if(headerHelpText!=''){
+                    if(true || headerHelpText!=''){
                          var div_prompt = $('<div>').text(headerHelpText)
                             .addClass('heurist-helper1')
                             .appendTo(newFieldContainer);
                          if(currGroupType == 'tabs'){
-                            div_prompt.css({padding:'5px 0 0 5px'});
+                            div_prompt.addClass('tab-separator-helper')
+                                .attr('separator-dtid',fields[idx]['dtID']).css({padding:'5px 0 0 5px',display:'inline-block'});
                          }else{
                             div_prompt.addClass('separator-helper').css({'padding-left':'14px'});
                          }
+                         if(!is_header_visible){
+                            div_prompt.addClass('separator-hidden').hide();
+                        }
                     }
                     if(currGroupType == 'tabs'){ //some space on the top
                         $(newFieldContainer).append('<div style="min-height:10px">&nbsp;</div>');

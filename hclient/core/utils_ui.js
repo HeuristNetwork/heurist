@@ -1378,8 +1378,15 @@ window.hWin.HEURIST4.ui = {
         
             if(state){
                 //$help_button.addClass('ui-state-focus');    
-                $container.find(className).css('display','block');
-                $container.find('div.div-table-cell'+className).css('display','table-cell');
+                $.each($container.find(className),function(i,ele){ 
+                    if(!$(ele).hasClass('separator-hidden')) $(ele).css('display','block');
+                });
+                $.each($container.find('div.div-table-cell'+className),function(i,ele){ 
+                    if(!$(ele).hasClass('separator-hidden')) $(ele).css('display','table-cell');
+                });
+                
+                //$container.find(className).css('display','block');
+                //$container.find('div.div-table-cell'+className).css('display','table-cell');
             }else{
                 //$help_button.removeClass('ui-state-focus');
                 $container.find('div.div-table-cell'+className).css('display','none');

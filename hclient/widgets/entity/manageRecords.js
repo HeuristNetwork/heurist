@@ -366,7 +366,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     
     
     //
-    // adds gear button befor edit field - it opens rts_actions_menu on mouse over
+    // adds gear button before edit field - it opens rts_actions_menu on mouse over
     //
     _createRtsEditButton : function(dtId, div_ele){  
         
@@ -374,19 +374,27 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                       
         var rst_fields = $Db.rst(that._currentEditRecTypeID, dtId);
         if(rst_fields){
+            
+            var sep_id = $(div_ele).attr('separator-dtid');
 
             var is_folder = false;      
-            var ele = $('<div><span  data-hh="bbbb" class="ui-icon ui-icon-gear"></span></div>')
-            .css({'display':'table-cell','vertical-align':'top',
-                'min-width':'32px','cursor':'pointer','padding-top':'0.4em'})
-            .prependTo($(div_ele));    
-
+            var ele = $('<div'+(sep_id>0?(' data-dtid="'+sep_id+'"'):'')
+                    +'><span class="ui-icon ui-icon-gear"></span></div>')
+            .css({'display':(sep_id>0?'inline-block':'table-cell'),'vertical-align':'top',
+                'min-width':'32px','cursor':'pointer','padding-top':'0.4em'});
+            if(sep_id>0){
+                ele.insertBefore($(div_ele));    
+            }else{
+                ele.prependTo($(div_ele));        
+            }
+                
             //ele = ele.find('.ui-icon-gear');
             that._on(ele,{mouseover:function(event){
                 clearTimeout(that._menuTimeoutId);
                 var el = $(event.target);
 
-                var dtId = el.parents('div[data-dtid]').attr('data-dtid');
+                var dtId = el.attr('data-dtid');
+                if(!(dtId>0)) dtId = el.parents('div[data-dtid]').attr('data-dtid');
 
                 var rst_fields = $Db.rst(that._currentEditRecTypeID, dtId);
                 
@@ -425,7 +433,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 that.rts_actions_menu.find('.edit_rts_btn').hide();
                 that._rts_changed_flag = false;
                 that.rts_actions_menu
-                .attr('data-did', el.parents('div[data-dtid]').attr('data-dtid'))
+                .attr('data-did', dtId)
                 .show()
                 .position({ my:'left top', at:'left+20 top', of: el});
                 /*
@@ -3529,6 +3537,15 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                     that._createRtsEditButton(dtId, item);
                 }
             });
+            //add action button for accordion panels
+            $(this.element).find('div.tab-separator-helper').each(function(idx, item){
+                var dtId = parseInt($(item).attr('separator-dtid'));
+                if(dtId>0){
+                    that._createRtsEditButton(dtId, item);
+                }
+            });
+            
+            
             //extend separator help left padding
             $(this.element).find('.separator-helper').css({'padding-left':'52px'});
             
@@ -3573,12 +3590,15 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             
             //reduce width of header
             $(this.element).find('.separator').css({width: '80%', display: 'inline-block'});
+            $(this.element).find('.separator-hidden').css({width: '80%', display: 'inline-block'});
             
             //if record type has been changed - reload rts_editor
             this._reloadRtsEditor();
             
         }else{
 
+            $(this.element).find('.separator-hidden').hide();
+            
             this.element.find('.btn-edit-rt2').show();
             this.element.find('.btn-edit-rt-back').hide();
             this.element.find('.chb_opt_fields').show();
