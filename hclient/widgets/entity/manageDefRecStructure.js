@@ -670,8 +670,11 @@ dty_TermIDTreeNonSelectableIDs
                         }else{
                             newVal = ele.attr('data-req');
                             
+                            if(node.extraClasses) {
+                                $(node.li).find('span.fancytree-node').removeClass(node.extraClasses);      
+                            }
                             node.extraClasses = newVal;
-                            $(node.li).addClass(newVal);
+                            $(node.li).find('span.fancytree-node').addClass(newVal);
                             node.setActive( false );
                             fieldName = 'rst_RequirementType';
                         }
@@ -1991,8 +1994,12 @@ console.log('No active tree node!!!!')
                         node.setTitle( title );   
                         if(!node.folder){
                             
+                            if(node.extraClasses){
+                                $(node.li).find('span.fancytree-node').removeClass(node.extraClasses);
+                            }
+                            
                             node.extraClasses = isSep?'separator2':req;
-                            $(node.li).addClass( isSep?'separator2':req );
+                            $(node.li).find('span.fancytree-node').addClass( isSep?'separator2':req );
                         }
                         this.__defineActionIcons( $(node.li).find('.fancytree-node') );
 //$(node.li).find('.svs-contextmenu3').css('visibility','hidden');

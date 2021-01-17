@@ -215,7 +215,8 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
     getMsgDlg: function(){
         var $dlg = $( "#dialog-common-messages" );
         if($dlg.length==0){
-            $dlg = $('<div>',{id:'dialog-common-messages'}).css({'min-wdith':'380px','max-width':'640px'})
+            $dlg = $('<div>',{id:'dialog-common-messages'})
+                .css({'min-wdith':'380px','max-width':'640px'}) //,padding:'1.5em 1em'
                 .appendTo( $('body') ); //
                 //$(window.hWin.document['body'])
         }

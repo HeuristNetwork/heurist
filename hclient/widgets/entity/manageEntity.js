@@ -226,7 +226,7 @@ $.widget( "heurist.manageEntity", {
             layout = 
                 '<div class="ent_wrapper">'
                         + '<div class="recordList" style="display:none;"/>'
-                        + '<div class="ent_content editForm ui-widget" style="top:0;bottom:0"/>'
+                        + '<div class="ent_content editForm ui-widget" style="top:15px;bottom:0"/>'
                         //+ '<div class="ent_footer editForm-toolbar"/>'
                 +'</div>';
         

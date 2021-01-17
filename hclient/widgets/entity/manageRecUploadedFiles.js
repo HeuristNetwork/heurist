@@ -494,10 +494,10 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
         // add edit/remove action buttons
         if(this.options.select_mode=='manager' && this.options.edit_mode!='none'){
             html = html 
-                + '<div title="Click to edit file" class="rec_edit_link action-button logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit">'
+                + '<div title="Click to edit file" class="action-button logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="edit">'
                 +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'
                 + '</div>&nbsp;&nbsp;'
-                + '<div title="Click to delete file" class="rec_view_link action-button logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="delete">'
+                + '<div title="Click to delete file" class="action-button logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="delete">'
                 +     '<span class="ui-button-icon-primary ui-icon ui-icon-circle-close"></span><span class="ui-button-text"></span>'
                 + '</div>';
                 
@@ -621,6 +621,52 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
             }
         }
         this._super( recID, fieldvalues );
-    }
+    },
+    
+    _deleteAndClose: function(unconditionally){
+    
+        if(unconditionally===true){
+            this._super(); 
+        }else{
+            
+            var that = this;
+            
+            //get full field info to update local definitions
+            var request = {
+                'a'          : 'search',
+                'entity'     : that.options.entity.entityName,
+                'details'    : 'related_records', 
+                'ulf_ID': this._currentEditID};
+            
+            window.hWin.HAPI4.EntityMgr.doRequest(request, 
+            function(response){
+                if(response.status == window.hWin.ResponseStatus.OK){
+                    var recs = response.data;
+                    if(recs.length==0){
+                        
+                        window.hWin.HEURIST4.msg.showMsgDlg(
+                            'Are you sure you wish to delete this file?', function(){ that._deleteAndClose(true) }, 
+                            {title:'Warning',yes:'Proceed',no:'Cancel'},
+                            {default_palette_class:that.options.default_palette_class});        
+                        
+                    }else{
+                        var url = window.hWin.HAPI4.baseURL + "?db=" + window.hWin.HAPI4.database + "&q=ids:"+recs.join(',');
+                        window.hWin.HEURIST4.msg.showMsgDlg(
+                        ((recs.length==1)?'There is a reference':('There are '+recs.length+' references'))
+                        +' from record(s) to this File.<br>You must delete the records'
+                        +' or the File field values in order to be able to delete the file.'
+                        +'<br><br>Click <a href="#" onclick="window.open(\''+url+'\', \'_blank\');">here</a> '
+                        +'for records which reference this image',null,
+                        {title:'Delete blocked'},
+                        {default_palette_class:that.options.default_palette_class});
+                    }
+                }else{
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                }
+            });
+            
+            
+        }
+    }    
     
 });

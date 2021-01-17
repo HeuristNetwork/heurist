@@ -64,6 +64,10 @@ class DbRecUploadedFiles extends DbEntityBase
               return false;   
         }
         
+        if(@$this->data['details']=='related_records'){
+            return $this->_getRelatedRecords($this->data['ulf_ID'], true);
+        }
+
         //compose WHERE 
         $where = array();
         $from_table = array($this->config['tableName']);  //'recUploadedFiles'
@@ -205,39 +209,69 @@ class DbRecUploadedFiles extends DbEntityBase
         //find related records 
         if($needRelations && !(is_bool($result) && $result==false) && count($result['order'])>0 ){
             
-            $mysqli = $this->system->get_mysqli();
-        
-            //find all reverse related records
-            $query = 'SELECT dtl_UploadedFileID, dtl_RecID, dtl_ID, rec_Title, rec_RecTypeID FROM recDetails, Records WHERE dtl_UploadedFileID in ('.implode(',',$result['order']).') and dtl_RecID=rec_ID';
-
-            $direct = array();
-            $headers = array();
-            
-            $res = $mysqli->query($query);
-            if (!$res){
-                $this->system->addError(HEURIST_DB_ERROR, "Search query error for records that use files. Query ".$query
-                                        , $mysqli->error);
+            $result['relations'] = $this->_getRelatedRecords($result['order'], false);
+            if(!$result['relations']){
                 return false;
-            }else{
-                    while ($row = $res->fetch_row()) {
-                        $relation = new stdClass();
-                        $relation->recID = intval($row[0]);  //file id 
-                        $relation->targetID = intval($row[1]);  //record id
-                        $relation->dtID  = intval($row[2]);
-                        array_push($direct, $relation);
-                        $headers[$row[1]] = array($row[3], $row[4]);   
-                    }
-                    $res->close();
-            }            
+            }
             
-            $result['relations']  = array("direct"=>$direct, "headers"=>$headers);
         
         }//end find related records 
         
         return $result;
 
     }
-    
+
+    //
+    //
+    //    
+    private function _getRelatedRecords($ulf_IDs, $ids_only){
+        
+            $ulf_IDs = prepareIds($ulf_IDs);
+        
+            if(count($ulf_IDs)>1){
+                $s = ' in ('.implode(',',$ulf_IDs).')';
+            }else{
+                $s = '='.$ulf_IDs[0];
+            }
+     
+            $mysqli = $this->system->get_mysqli();
+        
+            //find all related records (that refer to this file)
+            if($ids_only){
+                $query = 'SELECT dtl_RecID FROM recDetails WHERE dtl_UploadedFileID '.$s;                
+                
+                $res = mysql__select_list2($mysqli, $query);
+                
+            }else{
+                $query = 'SELECT dtl_UploadedFileID, dtl_RecID, dtl_ID, rec_Title, rec_RecTypeID '
+                        .'FROM recDetails, Records WHERE dtl_UploadedFileID '.$s.' and dtl_RecID=rec_ID';
+                $direct = array();
+                $headers = array();
+                
+                $res = $mysqli->query($query);
+                if ($res){
+                        while ($row = $res->fetch_row()) {
+                            $relation = new stdClass();
+                            $relation->recID = intval($row[0]);  //file id 
+                            $relation->targetID = intval($row[1]);  //record id
+                            $relation->dtID  = intval($row[2]);
+                            array_push($direct, $relation);
+                            $headers[$row[1]] = array($row[3], $row[4]);   
+                        }
+                        $res->close();
+                        
+                        $res = array("direct"=>$direct, "headers"=>$headers);
+                }            
+            }
+            if($res===null || $res===false){
+                    $this->system->addError(HEURIST_DB_ERROR, 
+                        'Search query error for records that use files. Query '.$query,
+                        $mysqli->error);
+                    return false;
+            }else{
+                    return $res;
+            }
+    }
     
     //
     //
@@ -527,8 +561,7 @@ class DbRecUploadedFiles extends DbEntityBase
                 ? 'There is a reference'
                 : 'There are '.$cnt.' references')
                 .' from record(s) to this File.<br>You must delete the records'
-                .' or the File field values in order to be able to delete the file.'
-                .' <br><br>Click the edit icon to see the records which reference this image');
+                .' or the File field values in order to be able to delete the file.');
             return false;
         }
         
