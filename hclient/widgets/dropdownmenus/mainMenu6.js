@@ -685,13 +685,7 @@ $.widget( "heurist.mainMenu6", {
         //menu section has several containers with particular widgets
         var cont = this.menues_explore_popup.find('#'+action_name);
         
-        if(cont.length==0){
-            //create new one
-            cont = $('<div id="'+action_name+'" class="explore-widgets">').appendTo(this.menues_explore_popup);
-        }else if( cont.is(':visible')){ // && action_name!='svs_list'
-            return;
-        }
-        
+      
         var explore_top = '2px',
         explore_height = 'auto',
         explore_left = that.divMainMenu.width()+4; //204; this._widthMenu
@@ -710,6 +704,14 @@ $.widget( "heurist.mainMenu6", {
         //delay before open explore section menu
         this._myTimeoutId3 = setTimeout(function(){
 
+            if(cont.length==0){
+                //create new one
+                cont = $('<div id="'+action_name+'" class="explore-widgets">').appendTo(that.menues_explore_popup);
+            }else if( cont.is(':visible')){ // && action_name!='svs_list'
+                //return;
+            }
+            
+            
             that._current_explore_action = action_name;
             
             //stop show animation and hide others
