@@ -584,7 +584,7 @@ CREATE TABLE sysArchive (
   arc_OwnerUGrpID smallint(5) unsigned default NULL COMMENT 'Owner of the data being modified (if applicable eg. records, bookmarks, tags)',
   arc_RecID int(10) unsigned default NULL COMMENT 'Heurist record id (if applicable, eg. for records, bookmarks, tag links)',
   arc_TimeOfChange timestamp NOT NULL default CURRENT_TIMESTAMP COMMENT 'Timestamp of the modification',
-  arc_DataBeforeChange blob COMMENT 'A representation of the data in the MySQL record before the mod, may be a diff',
+  arc_DataBeforeChange mediumblob COMMENT 'A representation of the data in the MySQL record before the mod, may be a diff',
   arc_ContentType enum('del','raw','zraw','diff','zdiff') NOT NULL default 'raw' COMMENT 'Format of the data stored, del=deleted, raw=text dump, Diff=delta, Z=zipped indicates ',
   PRIMARY KEY  (arc_ID),
   KEY arc_Table (arc_Table,arc_ChangedByUGrpID,arc_OwnerUGrpID,arc_RecID,arc_TimeOfChange)
