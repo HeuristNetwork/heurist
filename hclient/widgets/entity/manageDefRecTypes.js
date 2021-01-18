@@ -1191,7 +1191,8 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                                     that._getEditDialog(true).dialog('close');
                                     
                                     window.hWin.HEURIST4.ui.openRecordEdit(-1, null, 
-                                        {new_record_params:new_record_params, edit_structure:true});
+                                        {new_record_params:new_record_params, 
+                                            edit_structure:true});
                                 }
                                 
                                 if(that._editing.isModified()){

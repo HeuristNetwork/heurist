@@ -55,7 +55,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     _init: function() {
         
         if(!this.options.default_palette_class){
-            this.options.default_palette_class = 'ui-heurist-populate';   
+            this.options.default_palette_class = this.options.edit_structure?'ui-heurist-design':'ui-heurist-populate';   
         }
         
         if(this.options.layout_mode=='short'){
@@ -100,6 +100,12 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             // see recordEdit.php
             if(hasSearchForm) this.searchForm.parent().css({width:'0px'});    
             this.editFormPopup.css({left:0}).show();
+            
+            var $dlg = this._getEditDialog(true);
+            if($dlg){
+                $dlg.parent().addClass(this.options.default_palette_class);
+            }
+            
         }else{
             //for select mode we never will have inline mode
             if(hasSearchForm) this.searchForm.parent().width('100%');
