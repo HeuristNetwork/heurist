@@ -165,8 +165,9 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
             this.element.find('.add_record').show();
             this.element.find('#div_more_options').hide();
             this.element.parent().height('auto');
+            
+            this._adjustHeight();
         }});
-        
         
         window.hWin.HEURIST4.ui.showEntityDialog('usrTags', {
                 isdialog : false,
@@ -207,6 +208,14 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
         //$(window.hWin.document).off(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE);
         window.hWin.HAPI4.removeEventListener(this, window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE);        
         return this._super();
+    },
+    
+    _adjustHeight:function(){
+                var ele = this.element.find('#txt_add_link');
+                var t1 = ele.offset().top;
+                var t2 = this.element.find('.ent_footer').offset().top;
+                var h = Math.max(t2-t1-40,40);
+                ele.height(h);                
     },
     
     //
