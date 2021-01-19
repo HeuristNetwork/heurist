@@ -1703,10 +1703,11 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 .css({position:'absolute',right:'13px', height: '18px'})
                 .addClass('non-owner-disable')
                 .click(function(){
-                    
                         window.hWin.HEURIST4.ui.showEntityDialog('usrReminders', {
                                 edit_mode: 'editonly',
                                 rem_RecID: that._currentEditID,
+                                height: 500,
+                                default_palette_class: that.options.default_palette_class,
                                 onClose:function(){
                                     //refresh
                                     that._renderSummaryReminders(null, panel);
