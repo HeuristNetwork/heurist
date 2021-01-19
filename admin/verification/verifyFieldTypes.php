@@ -36,9 +36,9 @@
 $TL = array();
 $RTN = array();
 
-function getInvalidFieldTypes($rectype_id){
+function getInvalidFieldTypes($mysqli, $rectype_id){
 
-    global $TL, $RTN, $mysqli;
+    global $TL, $RTN;
 
     // lookup detail type enum values
     $query = 'SELECT trm_ID, trm_Label, trm_ParentTermID, trm_OntID, trm_Code FROM defTerms';
