@@ -32,7 +32,7 @@ function hCmsEditing(_options) {
         _version   = "0.4";
 
     var main_content = $('body').find('#main-content');
-console.log('assign main_content');        
+//console.log('assign main_content');        
     var main_menu = $('body').find('#main-menu');
     var main_header = $('body').find('#main-header');
     

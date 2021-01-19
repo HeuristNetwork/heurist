@@ -2176,7 +2176,7 @@ $.widget( "heurist.resultList", {
                             var h = ele2[0].scrollHeight+10;
                             //h = Math.min(h+10, 600);
                             if(that._expandAllDivs){
-                                ele2.removeClass('loading').height(h);    
+                                ele2.removeClass('loading').height('auto');    
                             }else{
                                 ele2.removeClass('loading').animate({height:h},300);
                             }
@@ -2203,7 +2203,7 @@ $.widget( "heurist.resultList", {
                                 console.log(e);
                             }
                             if(that._expandAllDivs){
-                                ele2.removeClass('loading').height(h);    
+                                ele2.removeClass('loading').height('auto');    
                             }else{
                                 ele2.removeClass('loading').animate({height:h},300);    
                             }
