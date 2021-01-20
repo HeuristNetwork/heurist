@@ -1,7 +1,7 @@
--- Heurist Definitions Exchange File generated: 20 Jan 2021 @ 08:30
+-- Heurist Definitions Exchange File generated: 20 Jan 2021 @ 11:46
 -- Installation = https://heuristplus.sydney.edu.au/h6-ao/
 -- Database = Heurist_Core_Definitions
--- Program Version: 6.1.5
+-- Program Version: 6.1.6
 -- Database Version: 1.3.0
 
 -- RECORD TYPE GROUPS
@@ -3336,12 +3336,13 @@
 
 -- `dsh_ID`,`dsh_Order`,`dsh_Label`,`dsh_Description`,`dsh_Enabled`,`dsh_ShowIfNoRecords`,`dsh_CommandToRun`,`dsh_Parameters`
 
->>StartData>> ('1','3','Add Person','Adds a Person record, editable and viewable by any logged in user.','y','y', 'action-AddRecord','{\"RecTypeID\":\"10\",\"OwnerUGrpID\":\"0\",\"NonOwnerVisibility\":\"viewable\",\"NonOwnerVisibilityGroups\":\"\",\"RecTags\":\"\"}'),
-('4','4','Persons search','Run a saved filter to retrieve all Persons in the database (you can also use the buttons above the filter field on the main page or the quick filter builder).','y','y', 'action-SearchById','29'),
-('5','6','Preferences','Set your preferences for experience level, page length, startup filter, map clustering and other behaviours.','y','y', 'menu-profile-preferences',''),
-('7','1','Browse templates','Save a heap of time (and promote compatibility) by borrowing structure definitions selectively from other users, then customise them to your needs with the structure editor.','y','y', 'menu-structure-import',''),
-('11','2','Add record','Add a new record selecting record (entity) type and access rights. The record opens in the editor.','y','y', 'menu-import-add-record',''),
-('14','5','Edit website','Create/edit a CMS website. The website is an integral part of the database. Database content can be filtered and visualised using Heurist display methods.','y','y', 'menu-cms-edit',''),
+>>StartData>> ('1','6','Add Person','Adds a Person record, editable and viewable by any logged in user.','y','y', 'action-AddRecord','{\"RecTypeID\":\"10\",\"OwnerUGrpID\":\"0\",\"NonOwnerVisibility\":\"viewable\",\"NonOwnerVisibilityGroups\":\"\",\"RecTags\":\"\"}'),
+('5','4','Preferences','Set your preferences for experience level, page length, startup filter, map clustering and other behaviours.','y','y', 'menu-profile-preferences',''),
+('7','7','Browse templates','Save a heap of time (and promote compatibility) by borrowing structure definitions selectively from other users, then customise them to your needs with the structure editor.','y','y', 'menu-structure-import',''),
+('11','5','Add record','Add a new record selecting record (entity) type and access rights. The record opens in the editor.','y','y', 'menu-import-add-record',''),
+('14','2','Edit website','Create/edit a CMS website. The website is an integral part of the database. Database content can be filtered and visualised using Heurist display methods.','y','y', 'menu-cms-edit',''),
+('15','1','Report a Bug','Use the bug reporter to report a bug or feature request','y','y', 'menu-help-bugreport',''),
+('16','3','Refresh memory','Clears browser memory - apply before reloading the page to ensure all old values are cleared out','y','y', 'menu-structure-refresh',''),
 >>EndData>>
 
  
