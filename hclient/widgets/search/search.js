@@ -278,9 +278,61 @@ $.widget( "heurist.search", {
         //
         this.div_buttons = $('<div>')
             .addClass('div-table-cell')
-            .css({'text-align': 'center',width:'2px'}) // , 'width':'50px'
+            .css({'text-align': 'center', 'vertical-align': 'baseline'})
             .appendTo( this.div_search );
-        if(true || !this.options.is_h6style){  //button to open quick filter builder
+        
+        //
+        // show saved filters tree
+        //         
+        if(!this._is_publication && this.options.is_h6style){
+            
+            this.div_buttons.css({'min-width':'46px'});
+            
+            this.btn_saved_filters = 
+            $('<span class="ui-main-color" '
+            +'style="font-size: 9px;position: relative;margin-left: -48px;min-width: 50px;cursor:pointer;padding-right:4px">'
+                +'<span style="display:inline-block;width:30px;margin-top: 4px;">saved filters</span>'
+            +'<span class="ui-icon ui-icon-carat-1-s" style="font-size: inherit;height: 11px;display: inline-block;vertical-align: super;">'
+            +'</span></span>')
+                .appendTo(this.div_buttons);
+            
+            this._on(this.btn_saved_filters, {click: function(){
+                    var widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('mainMenu6');
+                    if(widget){
+                         var ele = this.btn_saved_filters;
+                         widget.mainMenu6('show_ExploreMenu', null, 'search_filters', 
+                            {top:ele.position().top+18 , left:ele.offset().left });
+                    }            
+            }});
+            
+            var linkGear = $('<a>',{href:'#', 
+                title:window.hWin.HR('Build a filter expression using a form-driven approach')})
+                .css({display:'inline-block',padding:'0 2px'})
+                .addClass('ui-icon ui-icon-magnify-explore') //was ui-icon-gear was ui-icon-filter-form
+                .appendTo(this.div_buttons);
+            this._on( linkGear, {  click: this.showSearchAssistant });
+            
+            this.btn_faceted_wiz = $('<a>',{href:'#', 
+                title:window.hWin.HR('Build new faceted search')})
+                .css({display:'inline-block',padding:'0 2px'})
+                .addClass('ui-icon ui-icon-box ui-main-color') //was ui-icon-gear was ui-icon-filter-form
+                .appendTo(this.div_buttons);
+            this._on( this.btn_faceted_wiz, {  click: function(){
+                
+                    var widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('mainMenu6');
+                    if(widget){
+                         var ele = this.btn_faceted_wiz;
+                         widget.mainMenu6('show_ExploreMenu', null, 'svsAddFaceted', 
+                            {top:ele.offset().top , left:ele.offset().left });
+                    }            
+            }});
+
+
+            
+        }else{
+
+            this.div_buttons.css({'min-width':'10px'});
+            
             var linkGear = $('<a>',{href:'#', 
                 title:window.hWin.HR('Build a filter expression using a form-driven approach')})
                 .css({'padding-right':'1.5em','display':'inline-block','margin-left':'-27px','opacity':'0.5','margin-top': '0.6em', width:'20px'})
@@ -288,8 +340,11 @@ $.widget( "heurist.search", {
                 .appendTo(this.div_buttons);
             this._on( linkGear, {  click: this.showSearchAssistant });
         }
+        
+        
+        /* 2021-01-17 - moved after FILTER button
         //
-        // save filter
+        // save filter - below input
         //         
         if(!this._is_publication && this.options.is_h6style){
             this.btn_save_filter = $('<button>')
@@ -309,6 +364,7 @@ $.widget( "heurist.search", {
                     }            
             }});
         } 
+        */
         
 
         //
@@ -379,30 +435,33 @@ $.widget( "heurist.search", {
         });
 
         //
-        // show saved filters tree
-        //         
+        // Save button AFTER Filter (since 2021-01-17)
+        //        
         if(!this._is_publication && this.options.is_h6style){
-            this.btn_saved_filters = $('<button>')
-                .button({label:'Saved filters',icon:'ui-icon-carat-1-s',iconPosition: 'end'})
-                .css({'font-size':'9px','margin-top':'2px','min-width':'90px',height: '19px'})
-                //.css({float:'right','font-size':'9px',padding:'0px 2px','margin-top':'-27px'})
-                .appendTo(this.div_search_as_user);
-            this.btn_saved_filters.find('span.ui-icon').css({'font-size':'inherit',height:'11px'});
             
-            this._on(this.btn_saved_filters, {click: function(){
+            var div_save_filter = $('<div>').addClass('div-table-cell logged-in-only')
+                .css({'padding-top':'5px', 'vertical-align':'baseline'})
+                .appendTo( this.div_search );
+            
+            this.btn_save_filter = $('<button>')
+                .button({icon:'ui-icon-save',showLabel:false, label:'Save filter',iconPosition:'end'})
+                .appendTo(div_save_filter);
+            
+            this._on(this.btn_save_filter, {click: function(){
                     var widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('mainMenu6');
                     if(widget){
                          var ele = this.btn_saved_filters;
-                         widget.mainMenu6('show_ExploreMenu', null, 'search_filters', 
-                            {top:ele.position().top+18 , left:ele.offset().left });
+//console.log(ele.offset().top+'  '+ele.position().top);
+            
+                         widget.mainMenu6('show_ExploreMenu', null, 'svsAdd', 
+                            {top:ele.offset().top , left:ele.offset().left-300 });
                     }            
             }});
-        } 
-
+        }else  
         //
-        //
+        // NOT USED
         //        
-        if(this.options.btn_visible_save){
+        if(this.options.btn_visible_save){  
             
             // Save search popup button
             var div_save_filter = $('<div>').addClass('div-table-cell logged-in-only')

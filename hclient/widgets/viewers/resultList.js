@@ -1763,7 +1763,6 @@ $.widget( "heurist.resultList", {
             }
             rdivs.removeClass('expanded').show();
                                         
-
             $.each(rdivs, function(i,rdiv){ 
                 $(rdiv).children().not('.recTypeThumb').show();
                 $(rdiv).find('.action-button').addClass('ui-button-icon-only');
@@ -1772,7 +1771,7 @@ $.widget( "heurist.resultList", {
             this.div_content.scrollTop(spos);
         }
                             
-
+        this.div_content.find('.recordDiv .action-button-container').css('display','');
     },
     
     //
@@ -2146,9 +2145,14 @@ $.widget( "heurist.resultList", {
 
                             $rdiv.addClass('expanded');
                             $rdiv.children().not('.recTypeThumb').hide();
-                            $rdiv.find('.action-button-container').show()
+                            $rdiv.find('.action-button-container').show();
                             $rdiv.find('.action-button').removeClass('ui-button-icon-only');
-                            ele.css({'margin':'0px 0px 0px 80px'}).appendTo($rdiv);
+                            if(window.hWin.HAPI4.has_access()){
+                                ele.css({'margin':'0px 0px 0px 80px'});
+                            }else{
+                                ele.css({'margin':'0px'});
+                            }
+                            ele.appendTo($rdiv);
                         }else{
                             ele.insertAfter($rdiv);
                         }
@@ -2172,7 +2176,7 @@ $.widget( "heurist.resultList", {
                             var h = ele2[0].scrollHeight+10;
                             //h = Math.min(h+10, 600);
                             if(that._expandAllDivs){
-                                ele2.removeClass('loading').height(h);    
+                                ele2.removeClass('loading').height('auto');    
                             }else{
                                 ele2.removeClass('loading').animate({height:h},300);
                             }
@@ -2199,7 +2203,7 @@ $.widget( "heurist.resultList", {
                                 console.log(e);
                             }
                             if(that._expandAllDivs){
-                                ele2.removeClass('loading').height(h);    
+                                ele2.removeClass('loading').height('auto');    
                             }else{
                                 ele2.removeClass('loading').animate({height:h},300);    
                             }

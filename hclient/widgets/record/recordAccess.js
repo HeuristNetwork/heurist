@@ -113,6 +113,7 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
                 //|| (this.options.currentAccess=='viewable' && this.options.currentAccessGroups)){
                 this.element.find('#rb_Access-hidden').prop('checked', true); //was viewable-group
                 this.element.find('#div_AccessGroups').show();//css({display:'table-row'});
+                this._adjustHeight();
             }else{
                 this.element.find('#rb_Access-'+this.options.currentAccess).prop('checked', true);
                 
@@ -138,6 +139,8 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
             }else{
                 that.element.find('#div_AccessGroups').hide();
             }
+            
+            that._adjustHeight();
            
             that._onRecordScopeChange();
         });
@@ -148,6 +151,10 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
         //if(this.options.scope_types=='none'){
         //    this._onRecordScopeChange();    
         //}
+        
+    },
+    
+    _adjustHeight: function(){
         
     },
 
@@ -196,6 +203,9 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
         ele.editing_input(ed_options);
         ele.find('.editint-inout-repeat-button').hide();
         ele.find('.header').css({'padding-right':'16px', 'padding-top':'4px'});
+        
+        ele.find('.entity_selector').css('max-width',200);
+        
     },
     
     //

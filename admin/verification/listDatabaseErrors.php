@@ -48,7 +48,7 @@ $system->defineConstant('DT_RELATION_TYPE');
 if(@$_REQUEST['data']){
     $lists = json_decode($_REQUEST['data'], true);
 }else{
-    $lists = getInvalidFieldTypes(@$_REQUEST['rt']); //in getFieldTypeDefinitionErrors.php
+    $lists = getInvalidFieldTypes($mysqli, @$_REQUEST['rt']); //in getFieldTypeDefinitionErrors.php
     if(!@$_REQUEST['show']){
         if(count($lists["terms"])==0 && count($lists["terms_nonselectable"])==0
         && count($lists["rt_contraints"])==0  && count($lists["rt_defvalues"])==0){
@@ -929,7 +929,9 @@ $rtysWithInvalidDefaultValues = @$lists["rt_defvalues"];
                     //                        $mysqli->query('delete from recDetails where dtl_ID='.$row['dtl_ID']);
                 }
 
-                $wascorrected++;
+                if($row['new_value']!=null && $row['new_value']!=''){
+                        $wascorrected++;
+                }
                 //autocorrection }else{
                 array_push($bibs, $row);
                 $ids[$row['dtl_RecID']] = 1;  //all record ids -to show as search result
@@ -990,7 +992,7 @@ $rtysWithInvalidDefaultValues = @$lists["rt_defvalues"];
                         </a></td>
                     <td class="truncate" style="max-width:400px"><?=strip_tags($row['rec_Title']) ?></td>
                     <td><?= @$row['dtl_Value']?$row['dtl_Value']:'empty' ?></td>
-                    <td><?= ($row['new_value']?('=>&nbsp;&nbsp;'.$row['new_value']):'<no auto fix>') ?></td>
+                    <td><?= ($row['new_value']!=null && $row['new_value']!=''?('=>&nbsp;&nbsp;'.$row['new_value']):'&lt;no auto fix&gt;') ?></td>
                 </tr>
                 <?php
             }

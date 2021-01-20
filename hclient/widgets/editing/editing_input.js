@@ -137,7 +137,7 @@ $.widget( "heurist.editing_input", {
             //spacer
             $( "<span>")
             .addClass('editint-inout-repeat-button')
-            .css({'min-width':'20px', display:'table-cell'})
+            .css({'min-width':'22px', display:'table-cell'})
             .appendTo( this.element );
 
         }else{
@@ -163,6 +163,7 @@ $.widget( "heurist.editing_input", {
                 .attr('tabindex', '-1')
                 .attr('title', 'Add another ' + lblTitle +' value' )                    
                 .css({display:'table-cell', 'font-size':'2em', cursor:'pointer','vertical-align':'top', 'padding-top':'2px',
+                    'min-width':'22px',
 //outline_suppress does not work - so list all these props here explicitely                
                     outline: 'none','outline-style':'none', 'box-shadow':'none',  'border-color':'transparent'
                 });
@@ -186,19 +187,21 @@ $.widget( "heurist.editing_input", {
                 });
             }
             
+            
             if(this.detailType=="resource" && this.configMode.entity=='records'){
                 
                 $('<div style="float:right;padding-top:3px;width: 14px;"><span class="ui-icon ui-icon-triangle-1-e"/></div>')                
                     .appendTo( this.header );
-                    this.header.css('padding-right',0);
-                    this.header.find('label').css({display:'inline-block', width: 130});
+                    this.header.css({'padding-right':0, width:154});
+                    this.header.find('label').css({display:'inline-block', width: 135});
             }else if(this.detailType=="relmarker"){
                 
                 $('<div style="float:right;padding-top:1px;width: 14px;"><span style="font-size:10px" class="ui-icon ui-icon-triangle-2-e-w"/></div>')                
                     .appendTo( this.header )
-                    this.header.css('padding-right',0);
-                    this.header.find('label').css({display:'inline-block', width: 130});
+                    this.header.css({'padding-right':0, width:154});
+                    this.header.find('label').css({display:'inline-block', width: 135});
             }
+            
         }        
 
 

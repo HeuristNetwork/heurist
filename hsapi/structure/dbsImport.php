@@ -1273,6 +1273,10 @@ $mysqli->commit();
             $idx_origin_name   = $terms['fieldNamesToIndex']['trm_NameInOriginatingDB'];
             
             $idx_vocab_group_id  = intval($terms['fieldNamesToIndex']["trm_VocabularyGroupID"]);
+            
+            if($term_id==7256){
+                error_log('!!!!!');
+            }
 
             //search both domains
             $term_import = $this->sourceTerms->getTerm($term_id, $domain);

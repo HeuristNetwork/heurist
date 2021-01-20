@@ -1,4 +1,6 @@
 <?php
+require_once(dirname(__FILE__).'/../../verification/verifyValue.php');
+require_once(dirname(__FILE__).'/../../verification/verifyFieldTypes.php');
 
     /*
     * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
@@ -20,7 +22,6 @@ function updateDatabseTo_v3($system, $dbname=null){
         }
     
         $report = array();
-        
         
         //create new tables
         $value = mysql__select_value($mysqli, "SHOW TABLES LIKE 'usrRecPermissions'");
@@ -373,8 +374,31 @@ $query = "CREATE TABLE defTermsLinks (
             $report[] = 'sysTableLastUpdated and related triggers removed';            
         }
         
+        
         //update version
         $mysqli->query('UPDATE sysIdentification SET sys_dbVersion=1, sys_dbSubVersion=3, sys_dbSubSubVersion=0 WHERE 1');
+        
+        $system->get_system(null, true); //reset system values - to update version
+        
+        //validate default values for record type structures
+        $list = getInvalidFieldTypes($mysqli, null);
+        
+        if($list && @$list['rt_defvalues'] && count($list['rt_defvalues'])>0){
+            $report[] = count($list['rt_defvalues']).' wrong default values have been cleared';                        
+/*            
+            $list = $list['rt_defvalues'];
+            foreach ($list as $row) {
+?>                
+                <div class="msgline"><b><a href="#" onclick='{ onEditRtStructure(<?= $row['rst_RecTypeID'] ?>); return false}'><?= $row['rst_DisplayName'] ?></a></b> field (code <?= $row['dty_ID'] ?>) in record type <?= $row['rty_Name'] ?>  has invalid default value (<?= ($row['dty_Type']=='resource'?'record ID ':'term ID ').$row['rst_DefaultValue'] ?>)
+                    <span style="font-style:italic"><?=$row['reason'] ?></span>
+                </div>
+<?php                
+            }//for
+*/            
+        }
+        
+
+        
    
         return $report;
 }

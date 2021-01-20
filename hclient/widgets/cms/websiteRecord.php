@@ -855,7 +855,7 @@ body{
     display:none;
     position:absolute;
     left:0;right:0;top:0;bottom:0;
-    padding:10px;
+    /*padding:10px;*/
 }
 #main-header{
     /*background:rgb(112,146,190);*/
@@ -941,7 +941,7 @@ if ($page_template!=null && substr($page_template,-4,4)=='.tpl') {
         print '<div style="top:0;height:20px;position:absolute;text-align:center;width:100%;color:red;">Web page record is not public. It will not be visible to the public</div>';  
     }
 ?>
-    <div class="ent_content_full ui-heurist-bg-light" style="padding: 5px; top:<?php echo ($showWarnAboutPublic)?20:0; ?>px" 
+    <div class="ent_content_full ui-heurist-bg-light" style="top:<?php echo ($showWarnAboutPublic)?20:0; ?>px" 
                     id="main-content-container">
         <div id="main-content" data-homepageid="<?php print $rec_id;?>" 
                                data-viewonly="<?php print ($hasAccess)?0:1;?>">

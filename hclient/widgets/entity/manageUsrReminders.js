@@ -29,7 +29,9 @@ $.widget( "heurist.manageUsrReminders", $.heurist.manageEntity, {
     
     _init: function() {
         
-        this.options.default_palette_class = 'ui-heurist-admin';
+        if(!this.options.default_palette_class){
+            this.options.default_palette_class = 'ui-heurist-admin';    
+        }
         
         this.options.use_cache = false;
         
@@ -38,7 +40,7 @@ $.widget( "heurist.manageUsrReminders", $.heurist.manageEntity, {
             this.options.select_mode = 'manager';
             this.options.layout_mode = 'editonly';
             this.options.width = 790;
-            this.options.height = 600;
+            if(!(this.options.height>0)) this.options.height = 600;
             this.options.beforeClose = function(){}; //to supress default warning
         }else{
            this.options.edit_mode = 'popup'; 
