@@ -171,7 +171,9 @@ function validateAndConvertToISO($value, $today_date=null){
                 }
                 //$date = parseDateTime($value);
                 //return @$date['year'].'-'.@$date['month'].'-'.@$date['day'];
-                return removeLeadingYearZeroes($value, false, true);
+                $res = removeLeadingYearZeroes($value, false, true);
+                
+                return $res;
           }
 }
 //
@@ -187,49 +189,24 @@ function removeLeadingYearZeroes($value, $is_greg_or_julian=true, $is_strict_iso
     if( preg_match('/^-?\d+$/', $value) ){ //only digits with possible minus
         $date = array('year'=>$value);
     }else{
-
-        $cnt_dash = substr_count($value,'-');
-        if($cnt_dash==0){
-            $cnt_dots = substr_count($value,'.');  //try to convert from format with . fullstops
-            $cnt_slash = substr_count($value,'/');  //try to convert from format with / separator
-            if( $cnt_slash>0){  // 6/2006  =  1-6-2006
-                /*if($cnt_slash==1){
-                    $value = '1-'.$value;
-                    $need_day = false;
-                }*/
-                $value = str_replace('/','-',$value);
-            }else if( $cnt_dots>0){  // 4.3.2006  =  4-3-2006
-                $value = str_replace('.','-',$value);
-            }
-        }
         
-        if(substr_count($value,'-')==1) {
-            $need_day = false;
-            list($m, $y) = explode('-', $value);
-            if(strlen($m)<3 && $m<13 && strlen($y)>2){
-                $value = $y.'-'.$m;
-            }
-        }
-        
-        if(substr_count($value,'-')==2 && strpos($value,':')===false) {
-            //change d-m-y to y-m-d
-            list($m, $d, $y) = explode('-', $value);
-            if(strlen($d)<3 && $d>12 && strlen($y)>2){
-                $value = $y.'-'.$m.'-'.$d;
-            }
-        }
-        
-        
-
-        try{   
-            $origHasSeconds = (substr_count($value,':')>1);
-            $t2 = new DateTime($value);
-            $datestamp = $t2->format('Y-m-d H:i:s');
-            $date = date_parse($datestamp);
-        } catch (Exception  $e){
+        if(strpos($value,'XX')>0){
             $date = null;
-            //print $value.' => NOT SUPPORTED<br>';                            
-        }                            
+        }else{
+            
+            $value = correctDMYorder($value, false);
+
+            try{   
+                $origHasSeconds = (substr_count($value,':')>1);
+                $t2 = new DateTime($value);
+                $datestamp = $t2->format('Y-m-d H:i:s');
+                $date = date_parse($datestamp);
+            } catch (Exception  $e){
+                $date = null;
+                //print $value.' => NOT SUPPORTED<br>';                            
+            }                            
+        }
+        
     }
 
 	if($date){
@@ -313,6 +290,79 @@ function removeLeadingYearZeroes($value, $is_greg_or_julian=true, $is_strict_iso
 	}else{
 		return ($is_strict_iso)?null:$value;
 	}
+}
+
+//
+//
+//
+function correctDMYorder($value, $need_ambguation=false){
+    
+        $is_dots_slash = false;
+        $is_ambguation = false;
+        
+        //chnage / and . separators to -
+        $cnt_dash = substr_count($value,'-');  
+        if($cnt_dash==0){
+            $cnt_dots = substr_count($value,'.');  //try to convert from format with . fullstops
+            $cnt_slash = substr_count($value,'/');  //try to convert from format with / separator
+            if( $cnt_slash>0){  // 6/2006  =  1-6-2006
+                $value = str_replace('/','-',$value);
+            }else if( $cnt_dots>0){  // 4.3.2006  =  4-3-2006
+                $value = str_replace('.','-',$value);
+            }
+            $is_dots_slash = ($cnt_dots>0 || $cnt_slash>0);
+        }
+        
+        if(substr_count($value,'-')==1) {
+            $need_day = false;
+            list($m, $y) = explode('-', $value);
+            
+            //Oct-12
+            if((strlen($m)>2 && !is_numeric($m)) || $y>12){
+                $value = $y.'-'.$m;
+                
+                    if($y>22 && $y<100){
+                        $value = '19'.$y.'-'.$m;
+                    }else  if($y>=0 && $y<22){
+                        $value = '20'.$y.'-'.$m;
+                    }
+                
+            }else if( (strlen($y)>2 && !is_numeric($y)) || $y<13){ //09-Nov 09-11
+                
+                    if($m>22 && $m<100){
+                        $value = '19'.$m.'-'.$y;
+                    }else  if($m>=0 && $m<22){
+                        $value = '20'.$m.'-'.$y;
+                    }
+            }
+            $is_ambguation = ($y<13 && $m<13); //ambiguation
+        }
+        
+        if(substr_count($value,'-')==2 && strpos($value,':')===false) {
+            //change d-m-y to y-m-d
+            list($m, $d, $y) = explode('-', $value);
+
+            // Mar.2.20  2/Jan/17  for / and . separators is is assumed that year is the last
+            // or rare case: year is last  as 10-11-1970
+            if( $y>31 || ($is_dots_slash && (!is_numeric($m) || $m<32)) ){
+            
+                if($y>22 && $y<100) $y = '19'.$y; 
+                
+                if(strlen($m)>2 || $d>12){ // month is word
+                    $value = $y.'-'.$m.'-'.$d;
+                }else if(strlen($d)>2 || $m>12){ //$d is word month 
+                    $value = $y.'-'.$d.'-'.$m;
+                }else if($d<13 && $m>12){
+                    $value = $y.'-'.$d.'-'.$m;
+                }else{
+                    $value = $y.'-'.$m.'-'.$d;
+                    
+                    $is_ambguation = ($m<13 && $d<13); //day-month ambiguation
+                }
+            }
+        }
+
+        return $need_ambguation ?$is_ambguation :$value;    
 }
 
 //

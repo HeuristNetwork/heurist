@@ -887,6 +887,7 @@ $rtysWithInvalidDefaultValues = @$lists["rt_defvalues"];
         and (dty_Type = "date") and (dtl_Value is not null)');
 
         $wascorrected = 0;
+        $ambigious = 0;
         $bibs = array();
         $ids  = array();
         $dtl_ids = array();
@@ -897,6 +898,9 @@ $rtysWithInvalidDefaultValues = @$lists["rt_defvalues"];
         $decade_regex = '/^\d{4}s$/';
 
         while ($row = $res->fetch_assoc()){
+            
+            $row['is_ambig'] = false;
+            $autofix = false;
 
             if(!($row['dtl_Value']==null || trim($row['dtl_Value'])=='')){ //empty dates are not allowed
 
@@ -912,35 +916,51 @@ $rtysWithInvalidDefaultValues = @$lists["rt_defvalues"];
                 $row['new_value'] = validateAndConvertToISO($row['dtl_Value'], $row['rec_Added']);
                 if($row['new_value']=='Temporal'){
                     continue;
-                }else if($row['new_value']==$row['dtl_Value']){
+                }else if($row['new_value']==$row['dtl_Value']){ //nothing to correct - result is the same
                     continue;
                 }
+                if($row['new_value']!=null && $row['new_value']!=''){
+                    $row['is_ambig'] = correctDMYorder($row['dtl_Value'], true);
+                    $autofix = ($row['is_ambig']===false);
+                }
+                
             }else{
                 $row['new_value'] = 'remove';
             }
 
+            $was_fixed = false;
             //correct wrong dates and remove empty values
-            if(true){ //now autocorrection
-                //was @$_REQUEST['fixdates']=="1" && count($recids)>0 && in_array($row['dtl_RecID'], $recids)){
+            if($autofix || (@$_REQUEST['fixdates']=="1" && count($recids)>0 && in_array($row['dtl_RecID'], $recids)) ){
 
                 if($row['new_value']!=null && $row['new_value']!=''){
-                    //                       $mysqli->query('update recDetails set dtl_Value="'.$row['new_value'].'" where dtl_ID='.$row['dtl_ID']);
-                }else if($row['new_value']=='remove'){
-                    //                        $mysqli->query('delete from recDetails where dtl_ID='.$row['dtl_ID']);
+//print ' u-'.$row['dtl_RecID'];                    
+                    $mysqli->query('update recDetails set dtl_Value="'.$row['new_value'].'" where dtl_ID='.$row['dtl_ID']);
+                }else{ // if($row['new_value']=='remove')
+//print ' r-'.$row['dtl_RecID'];                    
+                    $mysqli->query('delete from recDetails where dtl_ID='.$row['dtl_ID']);
                 }
+                $was_fixed = true;
+            }
 
+            if($autofix || !$was_fixed){
                 if($row['new_value']!=null && $row['new_value']!=''){
-                        $wascorrected++;
+                        if(@$row['is_ambig']){
+                            $ambigious++;    
+                            $ids[$row['dtl_RecID']] = 1;
+                        }else{
+                            $wascorrected++;    
+                        }
+                }else{
+                    $ids[$row['dtl_RecID']] = 1;  //all record ids - to show as search result
                 }
                 //autocorrection }else{
                 array_push($bibs, $row);
-                $ids[$row['dtl_RecID']] = 1;  //all record ids -to show as search result
                 array_push($dtl_ids, $row['dtl_ID']); //not used
             }
         }
 
 
-        print '<a name="date_values"/>';
+        print '<a name="date_values"></a>'; //anchor
 
         if(count($bibs)==0){
             print '<div><h3 class="res-valid">OK: All records have recognisable Date values</h3></div>';
@@ -953,7 +973,32 @@ $rtysWithInvalidDefaultValues = @$lists["rt_defvalues"];
                 <h3>Records with incorrect Date fields</h3>
                 <?php
                 if($wascorrected>0){
-                    print "<div style='margin-bottom:10px'>$wascorrected suggestions for date field corrections (gray color in the list)</div>";
+                    print '<div style="margin-bottom:10px"><b>Auto-corrected dates</b> '
+                            ."The following dates have been corrected as shown ($wascorrected)</div><table>";
+                    
+                    foreach ($bibs as $row) 
+                        if($row['new_value']!=null && $row['new_value']!='' && @$row['is_ambig']===false)
+                    {
+                    ?>
+                    <tr>
+                        <td></td>
+                        <td><img class="rft" style="background-image:url(<?php echo HEURIST_ICON_URL.$row['rec_RecTypeID']?>.png)" src="<?php echo HEURIST_BASE_URL.'common/images/16x16.gif'?>"></td>
+                        <td style="white-space: nowrap;"><a target=_new
+                                href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl_RecID'] ?>'>
+                                <?= $row['dtl_RecID'] ?>
+                                <img src='../../common/images/external_link_16x16.gif' title='Click to edit record'>
+                            </a></td>
+                        <td class="truncate" style="max-width:400px"><?=strip_tags($row['rec_Title']) ?></td>
+                        <td><?= @$row['dtl_Value']?$row['dtl_Value']:'empty' ?></td>
+                        <td><?= ($row['new_value']=='remove'?'=>&nbsp;removed':('=>&nbsp;&nbsp;'.$row['new_value'])) ?></td>
+                    </tr>
+                    <?php
+                    }
+                    print '</table>';                    
+                }
+
+                if($ambigious>0){
+                    print "<div style='margin:10px 0'><b>$ambigious Suggestions</b> for date field corrections (gray color in the list)</div>";
                 }
                 ?>
                 <span>
@@ -977,9 +1022,11 @@ $rtysWithInvalidDefaultValues = @$lists["rt_defvalues"];
                 </td>
             </tr>
             <?php
-            foreach ($bibs as $row) {
+            foreach ($bibs as $row) 
+            if($row['new_value']==null || @$row['is_ambig']===true)
+            {
                 ?>
-                <tr<?=(($row['new_value'])?' style="color:gray"':'');?>>
+                <tr<?php echo (($row['new_value'])?' style="color:gray"':''); //if null - no auto fix   ?>>
                     <td><?php if(true || $row['new_value']) 
                             print '<input type=checkbox name="recCB5" value='.$row['dtl_RecID'].'>';
                         ?>
@@ -992,7 +1039,7 @@ $rtysWithInvalidDefaultValues = @$lists["rt_defvalues"];
                         </a></td>
                     <td class="truncate" style="max-width:400px"><?=strip_tags($row['rec_Title']) ?></td>
                     <td><?= @$row['dtl_Value']?$row['dtl_Value']:'empty' ?></td>
-                    <td><?= ($row['new_value']!=null && $row['new_value']!=''?('=>&nbsp;&nbsp;'.$row['new_value']):'&lt;no auto fix&gt;') ?></td>
+                    <td><?= ($row['new_value']!=null && $row['new_value']!=''?('=>&nbsp;&nbsp;'.$row['new_value']):'&lt;no auto fix, to be removed&gt;') ?></td>
                 </tr>
                 <?php
             }
