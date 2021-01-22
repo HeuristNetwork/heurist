@@ -187,24 +187,27 @@ $.widget( "heurist.search_entity", {
             function(data) { 
 console.log('ON_REC_UPDATE');
 console.log(data);
-                that._recreateRectypeSelectors();
+                that.recreateRectypeSelectors();
             });
 */        
             
         window.hWin.HAPI4.addEventListener(this, window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, 
             function(data) { 
                 if(!data || data.type=='rty'){
-                    that._recreateRectypeSelectors();
+                    that.recreateRectypeSelectors();
                 }
             });
             
             
         // Refreshing
-        this.element.on("myOnShowEvent", this.refreshOnShow);
+        this.element.on("myOnShowEvent", function(){ 
+            if ($Db.needUpdateRtyCount>=0) {
+                    setTimeout(function(){that.refreshOnShow()},500);
+            }} );
             
         //this.div_search.find('.div-table-cell').css('vertical-align','top');
 
-        this._recreateRectypeSelectors();
+        this.recreateRectypeSelectors();
         
         this._refresh();
 
@@ -216,12 +219,12 @@ console.log(data);
     refreshOnShow: function(){
             if( $Db.needUpdateRtyCount==0 ){
                 $Db.needUpdateRtyCount = -1;    
-                this._recreateRectypeSelectors();
+                this.recreateRectypeSelectors();
             }else if( $Db.needUpdateRtyCount>0 ){
                 var that = this;
                 $Db.needUpdateRtyCount = -1;    
                 $Db.get_record_counts(function(){
-                    that._recreateRectypeSelectors();
+                    that.recreateRectypeSelectors();
                 });
             }
     },
@@ -447,7 +450,7 @@ console.log(data);
     // 2. redraw buttons by entiry
     // 3. recres selectors for config and "by usage"
     //
-    _recreateRectypeSelectors: function(){
+    recreateRectypeSelectors: function(){
 
 
         //selector to filter by entity
