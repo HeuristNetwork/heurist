@@ -1842,9 +1842,11 @@ window.hWin.HEURIST4.ui = {
         
         if(info['trm_ID']>0){
             //margin-left:0.5em;
-            sRelBtn = '<div style="display:table-cell;min-width:40px;text-align:right;"><div class="btn-rel"/><div class="btn-del"/></div>';
+            sRelBtn = '<div style="display:table-cell;min-width:40px;text-align:right;vertical-align: middle;">'
+                +'<div class="btn-rel"/><div class="btn-del"/></div>';
         }else if (!isHiddenRecord) {
-            sRelBtn = '<div style="display:table-cell;min-width:23px;text-align:right;padding-left:16px;"><div class="btn-edit"/></div>';     // data-recID="'+info['rec_ID']+'"
+            sRelBtn = '<div style="display:table-cell;min-width:23px;text-align:right;padding-left:16px;vertical-align: middle;">'
+            +'<div class="btn-edit"/></div>';     // data-recID="'+info['rec_ID']+'"
         }
         
         var reltype = ''
@@ -1854,7 +1856,7 @@ window.hWin.HEURIST4.ui = {
                 term_ID = window.hWin.HEURIST4.dbs.getInverseTermById(term_ID);    
             }
             //class="detailType" 'min-width:'+ Math.max(19, Math.min(reltype.length,25))+'ex;
-            reltype = '<div style="display:table-cell;color: #999999;text-transform: none;padding-left:4px">'
+            reltype = '<div style="display:table-cell;color: #999999;text-transform: none;padding-left:4px;vertical-align: middle;">'
                 + $Db.trm(term_ID, 'trm_Label') + '</div>'
         }
         
@@ -1874,15 +1876,17 @@ window.hWin.HEURIST4.ui = {
                         //relation type
                         
         + '<div '  // class="detail"   truncate
-                        + 'style="display:table-cell; word-break: break-word;">'  //min-width:60ex;max-width:160ex;
+                        + 'style="display:table-cell; word-break: break-word; vertical-align: middle;">'  //min-width:60ex;max-width:160ex;
                         
                         + reltype
                         
                         + (info['rec_IsChildRecord']==1
-                            ?'<span style="font-size:0.8em;color:#999999;padding:4px 2px;display:table-cell;min-width: 5ex;">child</span>':'')
+                            ?'<span style="font-size:0.8em;color:#999999;padding:4px 2px;display:table-cell;min-width: 5ex;vertical-align:middle;">'
+                                +'child</span>':'')
                             
                         //triangle icon fo
-                        + ((reltype!='' && isEdit)?'<span style="display:table-cell;vertical-align: bottom"><span class="ui-icon ui-icon-triangle-1-e"/></span>':'') //padding-top:3px;
+                        + ((reltype!='' && isEdit)?'<span style="display:table-cell;vertical-align:middle;padding-top:3px">'
+                            +'<span class="ui-icon ui-icon-triangle-1-e"/></span>':'') //padding-top:3px;
 
                         //record type icon for resource
                         + (reltype==''?rectype_icon:'')
@@ -1894,7 +1898,7 @@ window.hWin.HEURIST4.ui = {
                             + '" data-rectypeid="'+ info['rec_RecTypeID']
                             + '" data-recid="'
                                         +info['rec_ID']
-                                        +'" style="display:table-cell;">'  //padding-top:4px;
+                                        +'" style="display:table-cell;vertical-align:middle">'  //padding-top:4px;
                         + rec_Title
                         + '</span>'
                         
