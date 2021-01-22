@@ -316,11 +316,8 @@ $.widget("heurist.recordLookupLRC18C", $.heurist.recordAction, {
         estcRecordListWindow = this;
 
         estc_edition_id = that.element.context.querySelector(".selected_last").getAttribute('recid');
-        queryResponse = that._checkIfEditionExistsInLibraries(estc_edition_id);
-        xmlDoc = $.parseXML(queryResponse.responseText);
-        if (xmlDoc.getElementsByTagName('resultCount')[0].innerHTML.trim() == "0") {
-            editionInLibraries = false;
-        }
+
+
 
         mapToHoldingRecord = that.options.mapping.fields['properties.edition']
         mapDict[mapToHoldingRecord] = ""
@@ -328,7 +325,7 @@ $.widget("heurist.recordLookupLRC18C", $.heurist.recordAction, {
         var $__dlg = window.hWin.HEURIST4.msg.showMsgDlg(
             'Selected Edition does not exist in Libraries database. Importing now...',
             {
-                'Check Author': function () {
+                'Proceed': function () {
                     $__dlg.dialog("close");
                     window.hWin.HEURIST4.msg.bringCoverallToFront(that._as_dialog.parent());
                     that._checkAuthor(estc_edition_id, estcRecordListWindow)
@@ -515,7 +512,6 @@ $.widget("heurist.recordLookupLRC18C", $.heurist.recordAction, {
         }
 
         ids.forEach(buildAuthorDict);
-
         var author_rec_data = {
             ID: 0, RecTypeID: 10,
             no_validation: true, //allows save without filled required field 1061
@@ -985,13 +981,13 @@ $.widget("heurist.recordLookupLRC18C", $.heurist.recordAction, {
         estc_no = "";
         vol_count = "";
         vol_parts = "";
-        
+
         if(true){ //use json format and fulltext search
 
             var query = {"t":"30"}; //search for Books
 
             if (this.element.find('#edition_name').val() != '') {
-                query['f:1'] = '@'+this.element.find('#edition_name').val();
+                query['f:1 '] = '@'+this.element.find('#edition_name').val() ;
             }
             if (this.element.find('#edition_date').val() != '') {
                 query['f:9'] = this.element.find('#edition_date').val();
@@ -1022,6 +1018,8 @@ $.widget("heurist.recordLookupLRC18C", $.heurist.recordAction, {
             if (this.element.find('#estc_no').val() != '') {
                 query['f:254'] = '@'+this.element.find('#estc_no').val();
             }
+            sort_by_key = "'sortby'"
+            query[sort_by_key.slice(1, -1)] = 'f:9:'
 /*
             selectedBF = this.element.find('#select_bf option:selected').text()
             if (selectedBF != null && selectedBF != '' && selectedBF != "Select Book Format") {
@@ -1034,9 +1032,8 @@ $.widget("heurist.recordLookupLRC18C", $.heurist.recordAction, {
             query_string = query;
 
         }else{
-            
             if (this.element.find('#edition_name').val() != '') {
-                edition_name = ' f:1: ' + '"' + this.element.find('#edition_name').val() + '"'
+                edition_name = ' f:1: ' + '"' + this.element.find('#edition_name').val() + '" '
             }
             if (this.element.find('#edition_date').val() != '') {
                 edition_date = ' f:9: ' + '"' + this.element.find('#edition_date').val() + '"'
@@ -1074,9 +1071,10 @@ $.widget("heurist.recordLookupLRC18C", $.heurist.recordAction, {
         console.log("Query String is")
         console.log(query_string);
 
+
         window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent());
 
-        var query_request = {db: 'ESTC_Helsinki_Bibliographic_Metadata', q:query_string};
+        var query_request = {db: 'ESTC_Helsinki_Bibliographic_Metadata', q: query_string};
         var that = this;
         query_request['detail'] = 'details';
         window.hWin.HAPI4.RecordMgr.search(query_request,
@@ -1087,7 +1085,8 @@ $.widget("heurist.recordLookupLRC18C", $.heurist.recordAction, {
                 } else {
                     that._onSearchResult(response);
                 }
-            });
+        });
+
 
     },
     /* Build each Book(Edition) as a record to display list of records that can be selected by the user*/

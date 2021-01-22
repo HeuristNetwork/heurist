@@ -280,9 +280,10 @@ error_log($e->getCode().' ('.$e->getErrorType().'): '.$e->getMessage());
                 
             }
     }else{
-        $system->error_exit_api('Record '
-            .$params['recID']
-            .' does not have fields where stored reference to shp or zip file',
+        $system->error_exit_api(
+'Cannot process shp file. Please ask the owner of the layer data source record (id:'
+.$params['recID']
+.') to check that the file exists, is readable and has not been corrupted.',
             HEURIST_NOT_FOUND); 
     }
     
