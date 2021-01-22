@@ -361,7 +361,7 @@ class DbsTerms
 
         if($parent_id>0){
            
-            foreach($lvl as $trmId=>$childs){
+            foreach($lvl as $trmId=>$children){
                 if($trmId==$parent_id){
                     
                     if(!is_array(@$lvl[$trmId])) $lvl[$trmId] = array();
@@ -369,7 +369,7 @@ class DbsTerms
                     
                     break;
                     
-                }else if(count($childs)>0){
+                }else if(count($children)>0){
                     $this->addChild($lvl[$trmId], $parent_id, $new_term_id);
                 }
             }
@@ -396,7 +396,7 @@ class DbsTerms
 
             if($sub_term_id == $term_id){
                 return $topmost?$topmost:$term_id;
-            }else if( count($childs)>0 ) {
+            }else if( count($children)>0 ) {
 
                 $res = $this->getTopMostTermParent($term_id, $children, $topmost?$topmost:$sub_term_id );
                 if($res) return $res;
