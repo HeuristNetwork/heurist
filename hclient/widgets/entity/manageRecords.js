@@ -1512,7 +1512,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     $('<div class="detailRowHeader" style="border:none">Related</div>').css('border','none').insertBefore(ele1);
                 }
                 //prevent wrapping
-                $(ele1).find('.related_record_title').addClass('truncate').css({'max-width':'44ex'});
+                //2021-01-21 $(ele1).find('.related_record_title').addClass('truncate').css({'max-width':'44ex'});
                 if(sLink_Ids.length>0){
                     var ee2 = $('<div class="detailRowHeader">Linked from</div>').insertBefore(ele2);
                     if(sRel_Ids.length==0){
@@ -1520,7 +1520,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                     }
                 }
                 //prevent wrapping
-                $(ele2).find('.related_record_title').addClass('truncate').css({'max-width':'64ex'});
+                //2021-01-21 $(ele2).find('.related_record_title').addClass('truncate').css({'max-width':'44ex'});
                 
                 
                 if(sRel_Ids.length==0 && sLink_Ids.length==0){

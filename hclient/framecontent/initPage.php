@@ -229,7 +229,6 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
 
     var onAboutInit, onPageInit, isHapiInited = false;
 
-
     // if hAPI is not defined in parent(top most) window we have to create new instance
     $(document).ready(function() {
 
