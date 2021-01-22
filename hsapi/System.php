@@ -809,6 +809,27 @@ error_log(print_r($_REQUEST, true));
         return $this->errors;
     }
 
+    //
+    //
+    //
+    private function _checkRecLinks(){
+        
+        $total_records = mysql__select_value($this->mysqli, 'select count(*) from Records where rec_RecTypeID=1 and rec_FlagTemporary=0');
+
+        $total_cache = mysql__select_value($this->mysqli, 'select count(*) from recLinks where rl_RelationID>0');
+        
+        if($total_records!=$total_cache){
+            //recreate cache
+            
+                include(dirname(__FILE__).'/utilities/utils_db_load_script.php'); // used to execute SQL script
+
+                if(!db_script(HEURIST_DBNAME_FULL, dirname(__FILE__)."/dbaccess/sqlCreateRecLinks.sql")){
+                    $system->addError(HEURIST_DB_ERROR, "Cannot execute script sqlCreateRecLinks.sql");
+                    $response = $system->getError();
+                    $isok = false;
+                }
+        }
+    }
 
     //
     // returns total records in db and counts of active entries in dashboard  
@@ -938,6 +959,7 @@ error_log(print_r($_REQUEST, true));
                 $res['sysinfo']['db_has_active_dashboard'] = $res2[1];
                 $res['sysinfo']['db_workset_count'] = $res2[2];
             }
+            $this->_checkRecLinks(); //check cache
 
         }else{
 

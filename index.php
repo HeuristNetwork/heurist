@@ -253,7 +253,6 @@ $(document).on('focusin', function(e) {
                 
                 
 <?php
-
      //returns total records in db and counts of active entries in dashboard  
      list($db_total_records, $db_has_active_dashboard, $db_workset_count) = $system->getTotalRecordsAndDashboard(); 
      echo 'window.hWin.HAPI4.sysinfo.db_total_records = '.$db_total_records.';';

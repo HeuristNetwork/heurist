@@ -40,7 +40,7 @@ DELIMITER $$
     DROP TRIGGER IF EXISTS insert_Details_trigger$$
 
     CREATE
-    DEFINER=`root`@`localhost`
+    DEFINER=CURRENT_USER 
     TRIGGER `insert_Details_trigger`
     AFTER INSERT ON `recDetails`
     FOR EACH ROW
@@ -103,7 +103,7 @@ DELIMITER $$
     DROP TRIGGER IF EXISTS update_Details_trigger$$
 
     CREATE
-    DEFINER=`root`@`localhost`
+    DEFINER=CURRENT_USER 
     TRIGGER `update_Details_trigger`
     AFTER UPDATE ON `recDetails`
     FOR EACH ROW
@@ -165,7 +165,7 @@ DELIMITER $$
     DROP TRIGGER IF EXISTS delete_detail_trigger$$
 
     CREATE
-    DEFINER=`root`@`localhost`
+    DEFINER=CURRENT_USER 
     TRIGGER `delete_detail_trigger`
     AFTER DELETE ON `recDetails`
     FOR EACH ROW
@@ -178,7 +178,7 @@ DELIMITER $$
     DROP TRIGGER IF EXISTS insert_record_trigger$$
 
     CREATE
-    DEFINER=`root`@`localhost`
+    DEFINER=CURRENT_USER 
     TRIGGER `insert_record_trigger`
     AFTER INSERT ON `Records`
     FOR EACH ROW
@@ -209,7 +209,7 @@ DELIMITER $$
     DROP TRIGGER IF EXISTS delete_record_trigger$$
 
     CREATE
-    DEFINER=`root`@`localhost`
+    DEFINER=CURRENT_USER 
     TRIGGER `delete_record_trigger`
     AFTER DELETE ON `Records`
     FOR EACH ROW
@@ -240,7 +240,7 @@ DELIMITER $$
     DROP TRIGGER IF EXISTS usrRecentRecords_updater$$
 
     CREATE
-    DEFINER=`root`@`localhost`
+    DEFINER=CURRENT_USER 
     TRIGGER `usrRecentRecords_updater`
     AFTER UPDATE ON `Records`
     FOR EACH ROW
