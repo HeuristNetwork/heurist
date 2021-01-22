@@ -814,6 +814,24 @@ $mysqli->commit();
             return true;
     }
     
+    
+    //
+    //
+    //
+    public function doMapping($mapping){
+        
+        $defType = 'rectypes';
+        $this->source_defs['rectypes'] = array();
+        foreach($mapping as $sourceID=>$fields){
+            if($sourceID>0){
+                $this->source_defs['rectypes'][$sourceID] = $fields['rty_ID'];
+                
+            }
+        }
+        //$defType = 'detailtypes';
+        
+    }
+    
     //
     // returns database URL by its ID in master index database see getDatabaseURL
     // @todo move it to special class?
@@ -930,7 +948,7 @@ $mysqli->commit();
         
         return ($defs!=null)?$localID:false;
     }
-    
+
     // 
     // finds target id by source id via concept code
     // get concept code in source - find local in target
@@ -941,22 +959,33 @@ $mysqli->commit();
         
         //get concept code in source
         if($defType=='rectype' || $defType=='rt' || $defType == 'rectypes'){
+            
             $defType = 'rectypes';
-            $defs = $this->source_defs[$defType]['typedefs'];
-
-            //get concept code
-            $fieldName = 'rty_ConceptID';
-            $idx_ccode = intval($defs['commonNamesToIndex'][$fieldName]);
-            $conceptCode = $iscc ?$source_id :@$defs[$source_id]['commonFields'][$idx_ccode];
+            
+            if(@$this->source_defs[$defType]['typedefs']){
+                $defs = $this->source_defs[$defType]['typedefs'];
+                //get concept code
+                $fieldName = 'rty_ConceptID';
+                $idx_ccode = intval($defs['commonNamesToIndex'][$fieldName]);
+                $conceptCode = $iscc ?$source_id :@$defs[$source_id]['commonFields'][$idx_ccode];
+            }else{
+                return $defs = $this->source_defs[$defType][$source_id]; //via mapping
+            }
             
         }else if($defType=='detailtype' || $defType=='dt' || $defType == 'detailtypes'){
 
             $defType = 'detailtypes';
-            $defs = $this->source_defs[$defType]['typedefs'];
+            
+            if(@$this->source_defs[$defType]['typedefs']){
+                $defs = $this->source_defs[$defType]['typedefs'];
+                $fieldName = 'dty_ConceptID';
+                $idx_ccode = intval($defs['fieldNamesToIndex'][$fieldName]);
+                $conceptCode = $iscc ?$source_id :@$defs[$source_id]['commonFields'][$idx_ccode];
 
-            $fieldName = 'dty_ConceptID';
-            $idx_ccode = intval($defs['fieldNamesToIndex'][$fieldName]);
-            $conceptCode = $iscc ?$source_id :@$defs[$source_id]['commonFields'][$idx_ccode];
+            }else{
+                return $defs = $this->source_defs[$defType][$source_id]; //via mapping
+            }
+
             
         }else if($defType=='enum' || $defType=='relationtype'){
             

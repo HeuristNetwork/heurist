@@ -453,7 +453,9 @@ public static function importRecordsFromDatabase($params, $session_id){
     $remote_path = $remote_path.'&q='.$params['q'];
 
     if(@$params['rules']!=null){
-        $remote_path = $remote_path.'&rules='.$params['rules'];
+        //$rules = json_decode($params['rules']);
+        
+        $remote_path = $remote_path.'&rules='.rawurlencode($params['rules']);
         if(@$params['rulesonly']==true || @$params['rulesonly']==1){
             $remote_path = $remote_path.'&rulesonly=1';
         }
@@ -473,7 +475,7 @@ public static function importRecordsFromDatabase($params, $session_id){
 //2. import records
     if($filesize>0 && file_exists($heurist_path)){
         //read temp file, import records
-        $res = self::importRecords($heurist_path, $session_id, false, true, self::$system->get_user_id() );
+        $res = self::importRecords($heurist_path, $session_id, false, true, self::$system->get_user_id(), @$params['mapping'] );
     
         if(@$params['tlcmapshot'] && $res!==false){
             //find map document among imported records
@@ -545,7 +547,7 @@ returns array
     resource_notfound
 
 */
-public static function importRecords($filename, $session_id, $is_cms_init=false, $make_public=true, $owner_id=1){
+public static function importRecords($filename, $session_id, $is_cms_init=false, $make_public=true, $owner_id=1, $mapping_defs=null){
 
     self::initialize();
 
@@ -640,13 +642,34 @@ EOD;
                 'terms' => dbs_GetTerms(self::$system));
             
         }else{
-           
+        
             $importDef = new DbsImport( self::$system );
-            //Finds all defintions to be imported
-            $res2 = $importDef->doPrepare(  array('defType'=>'rectype', 
+            
+            if($mapping_defs!=null){
+        
+                //for import records by mapping we check and import affected vocabularies only
+                $res2 = $importDef->doPrepare(  array('defType'=>'term', 
                         'databaseID'=>@$data['heurist']['database']['id'], 
-                        'definitionID'=>array_keys($imp_rectypes),
-                        'rectypes'=>$imp_rectypes ));
+                        'definitionID'=>$mapping_defs['vocabularies'])); //array of vocabularies to be imported
+                        
+                if($res2){
+                 //   $importDef->doImport(); //sync/import vocabularies
+                }     
+                //mapping for fields and rectypes
+                $importDef->doMapping($mapping_defs);
+                
+                $defs = $importDef->getDefinitions();        
+                $defs['rectypes'] = dbs_GetRectypeStructures(self::$system, null, 2);
+                $defs['detailtypes'] = dbs_GetDetailTypes(self::$system, null, 2);
+                        
+            }else{
+           
+                //Finds all defintions to be imported
+                $res2 = $importDef->doPrepare(  array('defType'=>'rectype', 
+                            'databaseID'=>@$data['heurist']['database']['id'], 
+                            'definitionID'=>array_keys($imp_rectypes), //array of record type source ids
+                            'rectypes'=>$imp_rectypes ));
+            }
                         
             if(!$res2){
                 $err = self::$system->getError();
@@ -655,9 +678,10 @@ EOD;
                     return false;
                 }
                 self::$system->clearError();  
+                
+                //get target definitions (this database)
+                $defs = $importDef->getDefinitions();
             }  
-            //get target definitions (this database)
-            $defs = $importDef->getDefinitions();
         }
         
         $def_dts  = $defs['detailtypes']['typedefs'];
@@ -668,7 +692,7 @@ EOD;
         $file_entity = new DbRecUploadedFiles(self::$system, null);
         $file_entity->setNeedTransaction(false);
         
-        $records = $data['heurist']['records'];
+        $records = $data['heurist']['records']; //records to be imported
         
         $records_corr_alphanum = array();
         $records_corr = array(); //correspondance: source rec id -> target rec id
@@ -695,11 +719,31 @@ EOD;
                 //@todo
             }
             
+            $target_RecID = 0;
+            
             if($dbsource_is_same){
                 $recTypeID = DbsImport::getLocalCode('rectypes', $defs, 
                     $record_src['rec_RecTypeID']>0
                         ?$record_src['rec_RecTypeID']
                         :$record_src['rec_RecTypeConceptID'], false);
+            }else if($mapping_defs!=null){
+                
+                $recTypeID = @$mapping_defs[$record_src['rec_RecTypeID']]['rty_ID'];
+                
+                //check that record already exists in
+                //get key value from target
+                if($recTypeID>0){
+                    $keyDty_ID = $mapping_defs[$record_src['rec_RecTypeID']]['key'];
+                    $key_value = $record_src['details'][$keyDty_ID];
+                    if(is_array($key_value)) $key_value = array_shift($key_value);
+                    
+                    //search in target 
+                    $keyDty_ID = $mapping_defs[$record_src['rec_RecTypeID']]['details'][$keyDty_ID];
+                    $target_RecID = mysql__select_value($mysqli, 'select rec_ID from Records, recDetails where dtl_RecID=rec_ID '
+                    .' AND rec_RecTypeID='.$recTypeID.' AND dtl_DetailTypeID='.$keyDty_ID.' AND dtl_Value="'.$key_value.'"');
+            
+                    if(!($target_RecID>0)) $target_RecID = 0;
+                }
                 
             }else{
                 $recTypeID = $importDef->getTargetIdBySourceId('rectypes',
@@ -717,7 +761,7 @@ EOD;
             // prepare records - replace all fields, terms, record types to local ones
             // keep record IDs in resource fields to replace them later
             $record = array();
-            $record['ID'] = 0; //add new
+            $record['ID'] = $target_RecID; //0 - add new
             $record['RecTypeID'] = $recTypeID;
             
             $record_src_original_id = null;
@@ -777,6 +821,10 @@ EOD;
                 if($dbsource_is_same){
                     //$dty_ID can be local id or concept code
                     $ftId = DbsImport::getLocalCode('detailtypes', $defs, $dty_ID, false);
+                }else if($mapping_defs!=null){
+                
+                    $ftId = @$mapping_defs[$record_src['rec_RecTypeID']]['details'][$dty_ID];
+                
                 }else{
                     $ftId = $importDef->getTargetIdBySourceId('detailtypes', $dty_ID);
                 }
