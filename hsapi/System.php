@@ -814,11 +814,11 @@ error_log(print_r($_REQUEST, true));
     //
     private function _checkRecLinks(){
         
-        $total_records = mysql__select_value($this->mysqli, 'select count(*) from Records where rec_RecTypeID=1 and rec_FlagTemporary=0');
-
-        $total_cache = mysql__select_value($this->mysqli, 'select count(*) from recLinks where rl_RelationID>0');
+        $total_not_in_cache = mysql__select_value($this->mysqli, 
+        'SELECT count(rec_ID) FROM Records left join recLinks on rec_ID=rl_RelationID '
+            .'where rec_RecTypeID=1 and rec_FlagTemporary=0 and rl_RelationID is null');
         
-        if($total_records!=$total_cache){
+        if($total_not_in_cache==null || $total_not_in_cache>0){
             //recreate cache
             
                 include(dirname(__FILE__).'/utilities/utils_db_load_script.php'); // used to execute SQL script
