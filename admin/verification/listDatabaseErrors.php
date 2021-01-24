@@ -886,6 +886,7 @@ $rtysWithInvalidDefaultValues = @$lists["rt_defvalues"];
             where (a.rec_ID = dtl_RecID) and (dty_ID = dtl_DetailTypeID) and (a.rec_FlagTemporary!=1)
         and (dty_Type = "date") and (dtl_Value is not null)');
 
+        $wassuggested = 0;
         $wascorrected = 0;
         $ambigious = 0;
         $bibs = array();
@@ -895,7 +896,9 @@ $rtysWithInvalidDefaultValues = @$lists["rt_defvalues"];
         if($recids!=null){
             $recids = explode(',', $recids);
         }
-        $decade_regex = '/^\d{4}s$/';
+        
+        $decade_regex = '/^\d{2,4}s$/'; //words like 80s 1990s
+        $year_range_regex = '/^\d{2,4}\-\d{2,4}$/'; //2-4 year ranges
 
         while ($row = $res->fetch_assoc()){
             
@@ -907,21 +910,41 @@ $rtysWithInvalidDefaultValues = @$lists["rt_defvalues"];
                 //ignore decade dates
                 $row['new_value'] = null;
                 $row['dtl_Value'] = trim($row['dtl_Value']);
-
-                if(strlen($row['dtl_Value'])==5 && preg_match( $decade_regex, $row['dtl_Value'] )){
-                    continue;
+                $row['is_ambig'] = true;
+                
+                if($row['dtl_RecID']==9 || $row['dtl_RecID']==5){
+                    error_log('!!!');
                 }
 
-                //parse and validate value
-                $row['new_value'] = validateAndConvertToISO($row['dtl_Value'], $row['rec_Added']);
-                if($row['new_value']=='Temporal'){
-                    continue;
-                }else if($row['new_value']==$row['dtl_Value']){ //nothing to correct - result is the same
-                    continue;
+                if(  (strlen($row['dtl_Value'])==3 || strlen($row['dtl_Value'])==5) 
+                    && preg_match( $decade_regex, $row['dtl_Value'] )){
+                        
+                    //this is decades    
+                    $row['is_ambig'] = 'we suggest using a date range';
+                    $wassuggested++;
+                    
+                }else if(preg_match( $year_range_regex, $row['dtl_Value'])){
+                    
+                    list($y1, $y2) = explode('-',$row['dtl_Value']);
+                    if($y1>31 && $y2>12){
+                        //this is year range
+                        $row['is_ambig'] = 'we suggest using a date range';
+                        $wassuggested++;
+                    }
                 }
-                if($row['new_value']!=null && $row['new_value']!=''){
-                    $row['is_ambig'] = correctDMYorder($row['dtl_Value'], true);
-                    $autofix = ($row['is_ambig']===false);
+                
+                if($row['is_ambig']===true){
+                    //parse and validate value
+                    $row['new_value'] = validateAndConvertToISO($row['dtl_Value'], $row['rec_Added']);
+                    if($row['new_value']=='Temporal'){
+                        continue;
+                    }else if($row['new_value']==$row['dtl_Value']){ //nothing to correct - result is the same
+                        continue;
+                    }
+                    if($row['new_value']!=null && $row['new_value']!=''){
+                        $row['is_ambig'] = correctDMYorder($row['dtl_Value'], true);
+                        $autofix = ($row['is_ambig']===false);
+                    }
                 }
                 
             }else{
@@ -996,6 +1019,31 @@ $rtysWithInvalidDefaultValues = @$lists["rt_defvalues"];
                     }
                     print '</table>';                    
                 }
+                
+                
+                if($wassuggested>0){
+                    print '<div style="margin-bottom:10px"><b>Decades and year ranges</b> '
+                            ."we suggest using a date ranges for dates below</div><table>";
+                    
+                    foreach ($bibs as $row) 
+                    if(!is_bool($row['is_ambig']))
+                    {
+                    ?>
+                    <tr>
+                        <td></td>
+                        <td><img class="rft" style="background-image:url(<?php echo HEURIST_ICON_URL.$row['rec_RecTypeID']?>.png)" src="<?php echo HEURIST_BASE_URL.'common/images/16x16.gif'?>"></td>
+                        <td style="white-space: nowrap;"><a target=_new
+                                href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl_RecID'] ?>'>
+                                <?= $row['dtl_RecID'] ?>
+                                <img src='../../common/images/external_link_16x16.gif' title='Click to edit record'>
+                            </a></td>
+                        <td class="truncate" style="max-width:400px;min-width:200px"><?=strip_tags($row['rec_Title']) ?></td>
+                        <td><?= @$row['dtl_Value']?$row['dtl_Value']:'empty' ?></td>
+                    </tr>
+                    <?php
+                    }
+                    print '</table>';                    
+                }                
 
                 if($ambigious>0){
                     print "<div style='margin:10px 0'><b>$ambigious Suggestions</b> for date field corrections (gray color in the list)</div>";
@@ -1023,7 +1071,7 @@ $rtysWithInvalidDefaultValues = @$lists["rt_defvalues"];
             </tr>
             <?php
             foreach ($bibs as $row) 
-            if($row['new_value']==null || @$row['is_ambig']===true)
+            if(is_bool($row['is_ambig']) && ($row['new_value']==null || $row['is_ambig']===true))
             {
                 ?>
                 <tr<?php echo (($row['new_value'])?' style="color:gray"':''); //if null - no auto fix   ?>>
@@ -1039,7 +1087,10 @@ $rtysWithInvalidDefaultValues = @$lists["rt_defvalues"];
                         </a></td>
                     <td class="truncate" style="max-width:400px"><?=strip_tags($row['rec_Title']) ?></td>
                     <td><?= @$row['dtl_Value']?$row['dtl_Value']:'empty' ?></td>
-                    <td><?= ($row['new_value']!=null && $row['new_value']!=''?('=>&nbsp;&nbsp;'.$row['new_value']):'&lt;no auto fix, to be removed&gt;') ?></td>
+                    <td><?php 
+                        echo ($row['new_value']!=null && $row['new_value']!=''
+                            ?('=>&nbsp;&nbsp;'.$row['new_value'])
+                            :'&lt;No auto-fix available, will be deleted if checked&gt;'); ?></td>
                 </tr>
                 <?php
             }
