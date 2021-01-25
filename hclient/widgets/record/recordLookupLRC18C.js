@@ -661,7 +661,7 @@ $.widget("heurist.recordLookupLRC18C", $.heurist.recordAction, {
             edition_estc_id=''
         }
 
-        query_string = 't:55 f:1094="' + edition_estc_id + '"'
+        query_string = 't:55 f:1094:="' + edition_estc_id + '"'
         urlToCheckEditioninLibraries = that._getQueryURL(query_string, "libraries")
         edition_id = parsedXML['idsNTitleDict']['editionID'];
 
