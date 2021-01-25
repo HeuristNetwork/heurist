@@ -177,13 +177,13 @@ function hMapManager( _options )
                 .css('border-bottom-color','lightgray')
                 .append( _defineHeader('Map Documents', 'mapdocs'))
                 .append( _defineContent('mapdocs') ).appendTo(options.container);
+        $('<div>').attr('grpid','tempmap').addClass('svs-acordeon outline_suppress')
+                .append( _defineHeader('Temp Map', 'tempmap'))
+                .append( _defineContent('tempmap') ).appendTo(options.container);        
         $('<div>').attr('grpid','basemaps').addClass('svs-acordeon outline_suppress')
                 .css('border-bottom','none')
                 .append( _defineHeader('Base Maps', 'basemaps'))
                 .append( _defineContent('basemaps') ).appendTo(options.container);        
-        $('<div>').attr('grpid','tempmap').addClass('svs-acordeon outline_suppress')
-                .append( _defineHeader('Temp Map', 'tempmap'))
-                .append( _defineContent('tempmap') ).appendTo(options.container);        
                 
         
         //restore expand/collapse status
@@ -520,7 +520,7 @@ function hMapManager( _options )
                                         }else if(node.data.type=='layer'){
                                             
                                             var mapdoc_id = node.data.mapdoc_id;
-                                            if(mapdoc_id>=0){
+                                            if(mapdoc_id>=0 || mapdoc_id=='temp'){
                                                 //node.key - heurist layer record id
                                                 var layer_rec = mapDocuments.getLayer(mapdoc_id, node.key);
                                                 if(layer_rec){
@@ -965,6 +965,7 @@ function hMapManager( _options )
                         params = {basemaps:params.indexOf('-basemaps')<0?(params.indexOf('basemaps')<0?-1:1):0,
                                   mapdocs:params.indexOf('-mapdocs')<0?(params.indexOf('mapdocs')<0?-1:1):0,
                                   search:params.indexOf('-search')<0?(params.indexOf('search')<0?-1:1):0,
+                                  tempmap:params.indexOf('-tempmap')<0?(params.indexOf('tempmap')<0?-1:1):0,
                                   open:params.indexOf('off')<0?1:0,
                                   width:defWidth};
                     }
@@ -992,6 +993,7 @@ function hMapManager( _options )
                 var ele = options.container.find('.svs-acordeon[grpid="'+val+'"]');
                 if(val=='tempmap'){
                     is_visible = options.hasTempMap;
+                    is_collapsed = !window.hWin.HEURIST4.util.istrue(options.visible_panels[val], true);
                 }else{
                     val = options.visible_panels[val];
                     is_collapsed = !window.hWin.HEURIST4.util.istrue(val, false);
