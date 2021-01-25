@@ -175,10 +175,12 @@ function recordSearchFacets($system, $params){
         }
 
         if( $system->get_user_id() > 0 ) {
-            //find user work susbset
-            $params['use_user_wss'] = true;
-        }            
-
+            //use subset for initial search only
+            $params['use_user_wss'] = @$params['step']==0;
+        } else {
+            $params['use_user_wss'] = false;  
+        }           
+        
         //get SQL clauses for current query
         $qclauses = get_sql_query_clauses_NEW($mysqli, $params, $currentUser);
 
