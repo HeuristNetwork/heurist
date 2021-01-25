@@ -73,6 +73,7 @@ $.widget( "heurist.resultList", {
         
         // smarty template or url (or todo function) to draw inline record details when recordview_onselect='inline'. (LINE view mode only)
         rendererExpandDetails: null,  //name of smarty template or function to draw expanded details
+        rendererExpandInFrame: true, 
         expandDetailsOnClick: true,
 
         searchfull: null,  // custom function to search full data
@@ -2161,15 +2162,58 @@ $.widget( "heurist.resultList", {
                         
                     
                     var infoURL;
+                    var isSmarty = false;
                     
-                    //content is smarty report
-                    if ( typeof this.options.rendererExpandDetails === 'string' 
-                        && this.options.rendererExpandDetails.substr(-4)=='.tpl' ){
+                    if( typeof this.options.rendererExpandDetails === 'string' 
+                            && this.options.rendererExpandDetails.substr(-4)=='.tpl' ){
 
                         infoURL = window.hWin.HAPI4.baseURL + 'viewers/smarty/showReps.php?publish=1&debug=0&q=ids:'
                         + recID 
                         + '&db='+window.hWin.HAPI4.database+'&template='
                         + encodeURIComponent(this.options.rendererExpandDetails);
+                                
+                        isSmarty = true;
+                    }else{
+                        //content is record view 
+                        infoURL = window.hWin.HAPI4.baseURL + 'viewers/record/renderRecordData.php?recID='
+                        +recID
+                        +'&db='+window.hWin.HAPI4.database;
+                    }
+                    
+                    
+                    //content is smarty report
+                    if( this.options.rendererExpandInFrame ||  !isSmarty)
+                    {
+                        
+                        $('<iframe>').attr('data-recid',recID)
+                            .appendTo(ele)
+                            .addClass('loading')
+                            .attr('src', infoURL).on('load',function()
+                            { 
+                                var _recID = $(this).attr('data-recid');
+                                var ele2 = that.div_content.find('.record-expand-info[data-recid='+_recID+']');
+                            //var ele2 = 
+                            var h = 400;
+
+                            try{
+                                h = $(this.contentWindow.document).height();
+                                ele2.removeClass('loading').height(h+(h*0.05));    
+                            }catch(e){
+                                ele2.removeClass('loading').height('auto');    
+                                console.log(e);
+                            }
+                            /*
+                            //ele2.removeClass('loading').height('auto');    
+                            if(that._expandAllDivs){
+                                ele2.removeClass('loading').height('auto');    
+                            }else{
+                                ele2.removeClass('loading').animate({height:h},300);    
+                            }
+                            */
+                        });
+                        
+
+                    }else{
 
                         ele.addClass('loading').css({'overflow-y':'auto'}).load(infoURL, function(){ 
                             var ele2 = $(this);
@@ -2184,37 +2228,6 @@ $.widget( "heurist.resultList", {
                                 ele2.removeClass('loading').animate({height:h},300);
                             }*/
                         });   
-                    }else{
-                    //content is record view 
-                        infoURL = window.hWin.HAPI4.baseURL + 'viewers/record/renderRecordData.php?recID='
-                        +recID
-                        +'&db='+window.hWin.HAPI4.database;
-                        
-                        $('<iframe>').attr('data-recid',recID)
-                            .appendTo(ele)
-                            .addClass('loading')
-                            .attr('src', infoURL).on('load',function()
-                            { 
-                                var _recID = $(this).attr('data-recid');
-                                var ele2 = that.div_content.find('.record-expand-info[data-recid='+_recID+']');
-                            //var ele2 = 
-                            var h = 400;
-
-                            try{
-                                h = $(this.contentWindow.document).height();
-                            }catch(e){
-                                console.log(e);
-                            }
-                            ele2.removeClass('loading').height('auto');    
-                            /*
-                            if(that._expandAllDivs){
-                                ele2.removeClass('loading').height('auto');    
-                            }else{
-                                ele2.removeClass('loading').animate({height:h},300);    
-                            }
-                            */
-                        });
-                        
                     }  
                     
                 }
