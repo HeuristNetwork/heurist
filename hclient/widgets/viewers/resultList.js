@@ -2163,7 +2163,8 @@ $.widget( "heurist.resultList", {
                     var infoURL;
                     
                     //content is smarty report
-                    if ( typeof this.options.rendererExpandDetails === 'string' && this.options.rendererExpandDetails.substr(-4)=='.tpl' ){
+                    if ( typeof this.options.rendererExpandDetails === 'string' 
+                        && this.options.rendererExpandDetails.substr(-4)=='.tpl' ){
 
                         infoURL = window.hWin.HAPI4.baseURL + 'viewers/smarty/showReps.php?publish=1&debug=0&q=ids:'
                         + recID 
@@ -2175,11 +2176,13 @@ $.widget( "heurist.resultList", {
                             //var ele2 = that.div_content.find('.record-expand-info[data-recid='+recID+']');
                             var h = ele2[0].scrollHeight+10;
                             //h = Math.min(h+10, 600);
+                            ele2.removeClass('loading').height('auto');    
+                            /*
                             if(that._expandAllDivs){
                                 ele2.removeClass('loading').height('auto');    
                             }else{
                                 ele2.removeClass('loading').animate({height:h},300);
-                            }
+                            }*/
                         });   
                     }else{
                     //content is record view 
@@ -2202,11 +2205,14 @@ $.widget( "heurist.resultList", {
                             }catch(e){
                                 console.log(e);
                             }
+                            ele2.removeClass('loading').height('auto');    
+                            /*
                             if(that._expandAllDivs){
                                 ele2.removeClass('loading').height('auto');    
                             }else{
                                 ele2.removeClass('loading').animate({height:h},300);    
                             }
+                            */
                         });
                         
                     }  
