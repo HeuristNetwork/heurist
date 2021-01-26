@@ -667,7 +667,7 @@ $.widget( "heurist.mainMenu6", {
                                 that._resetCloseTimers();    
                                 that._explorer_menu_locked = is_locked; 
                             }
-                    }  });    
+                    }  });
 
                 explore_top = 0;
                 explore_height = 255;//268+36;
@@ -689,7 +689,7 @@ $.widget( "heurist.mainMenu6", {
                 }
 
 
-                that.menues_explore_popup.css({width:'700px',overflow:'hidden'});
+                that.menues_explore_popup.css({width:'800px',overflow:'hidden'});
 
 
             }
@@ -766,13 +766,19 @@ $.widget( "heurist.mainMenu6", {
                 }
 
             }//endif
-            
+
             that.menues_explore_popup.css({left:explore_left, top:explore_top, height:explore_height});
             
             //show menu section
             that.menues_explore_popup.css({'z-index':103}).show(); 
             
             cont.show('fade',{},delay>=500?500:10); //show current widget in menu section
+
+            // Refresh container height.
+            if (action_name === 'search_quick' && cont.search_quick('instance')) {
+                cont.search_quick('instance').refreshContainerHeight();
+                cont.search_quick('instance').refreshContainerWidth();
+            }
             
             /*  BBBB
             if(action_name!='recordAdd' && action_name!='search_quick' 

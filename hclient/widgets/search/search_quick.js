@@ -24,7 +24,7 @@ $.widget( "heurist.search_quick", $.heurist.recordAction, {
     // default options
     options: {
         is_h6style: true,
-        is_json_query: false,    
+        is_json_query: true,
         
         isdialog: false, 
         supress_dialog_title: true,
@@ -33,7 +33,8 @@ $.widget( "heurist.search_quick", $.heurist.recordAction, {
         button_class: 'ui-button-action',
         
         currentRecordset: {},  //stub
-        search_realm: null
+        search_realm: null,
+        options_pane_expanded: false,
     },
     
     current_query:null,
@@ -48,19 +49,15 @@ $.widget( "heurist.search_quick", $.heurist.recordAction, {
         this._super();        
     },
 
-    //  
-    // invoked from _init after loading of html content
-    //
+    /**
+     * Initialize all controls.
+     *
+     * @return {boolean}
+     * @private
+     */
     _initControls:function(){
         
         var that = this;
-
-        /*
-        this.selectRecordScope = this.element.find('#sel_record_scope');
-        if(this.selectRecordScope.length>0){
-            this._fillSelectRecordScope();
-        }
-        */
         
         var $dlg = this.element.children('fieldset');
         
@@ -107,28 +104,17 @@ $.widget( "heurist.search_quick", $.heurist.recordAction, {
                 this.getQueryString();
             }
         });
-        
-        
-        
 
         //find all labels and apply localization
         $dlg.find('label').each(function(){
             $(this).html(window.hWin.HR($(this).html()));
         });
         
-        $dlg.find(".fld_enum").hide();
-        
-/* BAX
-        var select_rectype = $dlg.find(".sa_rectype");//.uniqueId();
-        var select_fieldtype = $dlg.find(".sa_fieldtype");
-        var select_sortby = $dlg.find(".sa_sortby");
-        var select_terms = $dlg.find(".sa_termvalue");
-        var sortasc =  $dlg.find('.sa_sortasc');
-        var exp_level = window.hWin.HAPI4.get_prefs_def('userCompetencyLevel', 2);
-        select_rectype = window.hWin.HEURIST4.ui.createRectypeSelectNew(select_rectype.get(0), 
-                    {useIcons: false, useCounts:true, useGroups:true, useIds: (exp_level<2), 
-                        topOptions:window.hWin.HR('Any record type'), useHtmlSelect:false});
-*/
+        $dlg.find('.search_field_value_label').html(window.hWin.HR('Contains'));
+        $dlg.find(".sa_termvalue").hide();
+        $dlg.find('.search_field_coordinates').hide();
+        $dlg.find('.search_field_option').hide();
+
         function __startSearchOnEnterPress(e){
                 var code = (e.keyCode ? e.keyCode : e.which);
                 if (code == 13) {
@@ -138,58 +124,7 @@ $.widget( "heurist.search_quick", $.heurist.recordAction, {
         }
         
         that._on( $dlg.find('.text'), { keypress: __startSearchOnEnterPress});
-        
 
-        
-/*        
-        that._on( select_terms, { change: function(event){
-                this.calcShowSimpleSearch();
-                //AAAA
-                search_quick_go.focus();
-            }
-        } );
-        that._on( select_sortby, { change: function(event){
-                this.calcShowSimpleSearch();
-                //AAAA
-                search_quick_go.focus();
-            }
-        } );
-        that._on( $dlg.find(".sa_fieldvalue"), {
-            keyup: function(event){
-                this.calcShowSimpleSearch();
-            }
-        });
-        that._on( $dlg.find(".sa_negate"), {
-            change: function(event){
-                this.calcShowSimpleSearch();
-                //AAAA
-                search_quick_go.focus();
-            }
-        });
-        that._on( $dlg.find(".sa_negate2"), {
-            change: function(event){
-                this.calcShowSimpleSearch();
-            }
-        });
-        that._on( $dlg.find(".sa_coord1"), {
-            change: function(event){
-                this.calcShowSimpleSearch();
-            }
-        });
-        that._on( $dlg.find(".sa_coord2"), {
-            change: function(event){
-                this.calcShowSimpleSearch();
-            }
-        });
-        that._on( sortasc, {
-            click: function(event){
-                //window.hWin.HEURIST4.util.stopEvent(event);
-                //sortasc.prop('checked', !sortasc.is(':checked'));
-                this.calcShowSimpleSearch();
-            }
-        });
-
-*/        
         $dlg.find(".sa_spatial").button();
         that._on( $dlg.find(".sa_spatial"), {    //opens digitizer
             click: function(event){
@@ -221,7 +156,6 @@ $.widget( "heurist.search_quick", $.heurist.recordAction, {
                         if( !window.hWin.HEURIST4.util.isempty(location) ){
                             //that.newvalues[$input.attr('id')] = location
                             $dlg.find(".sa_spatial_val").val(location.wkt);
-                            that.calcShowSimpleSearch();
                         }
                     }
                 } );
@@ -235,26 +169,51 @@ $.widget( "heurist.search_quick", $.heurist.recordAction, {
         that._on( $dlg.find(".sa_spatial_clear"), {
             click: function(event){
                 $dlg.find(".sa_spatial_val").val('');
-                that.calcShowSimpleSearch();
+            }
+        });
+
+        that._on($dlg.find(".search_option_switch"), {
+            click: function (event) {
+                that.toggleOptionsPane();
+            }
+        });
+
+        that._on($dlg.find('.search_field_value_add'), {
+            click: function (event) {
+                that.addFieldValueControls(event.target);
+            }
+        });
+
+        that._on($dlg.find('.search_field_add'), {
+            click: function (event) {
+                that.addFieldControls(event.target);
+            }
+        });
+
+        that._on($dlg.find('.search_sort_add'), {
+            click: function (event) {
+                that.addSortControls(event.target);
             }
         });
         
         this.popupDialog();
-        
-        
+
         window.hWin.HAPI4.addEventListener(this, window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, 
             function(data) { 
                 that._recreateSelectors();
             });
         
-        this._recreateSelectors();       
+        this._recreateSelectors();
+        this.refreshContainerHeight();
         
         return true;
     },
-    
-    //
-    //
-    //
+
+    /**
+     * Recreate all select controls.
+     *
+     * @private
+     */
     _recreateSelectors: function(){
         
         var that = this;
@@ -279,207 +238,763 @@ $.widget( "heurist.search_quick", $.heurist.recordAction, {
         //change list of field types on rectype change
         that._on( select_rectype, {
             change: function (event){
-
-                var rectype = (event)?Number(event.target.value):0;
-                
-                //var topOptions2 = 'All fields';
-                var topOptions2 = [{key:'',title:window.hWin.HR('All fields')},{key:'title',title:'Recor title (constructed)'}];
-                var bottomOptions = null;
-
-                if(!(rectype>0)){
-                    bottomOptions = [{key:'latitude',title:window.hWin.HR('geo: Latitude')},
-                                     {key:'longitude',title:window.hWin.HR('geo: Longitude')}]; 
-                }
-                var exp_level = window.hWin.HAPI4.get_prefs_def('userCompetencyLevel', 2);
-                
-                select_fieldtype = window.hWin.HEURIST4.ui.createRectypeDetailSelect(
-                        select_fieldtype[0], //$dlg.find(".sa_fieldtype").get(0), 
-                            rectype, allowed, topOptions2, 
-                            {show_parent_rt:true, show_latlong:true, bottom_options:bottomOptions, 
-                                useIds: (exp_level<2), useHtmlSelect:false});
-
-                var topOptions = [{key:'t', title:window.hWin.HR("record title")},
-                    {key:'id', title:window.hWin.HR("record id")},
-                    {key:'rt', title:window.hWin.HR("record type")},
-                    {key:'u', title:window.hWin.HR("record URL")},
-                    {key:'m', title:window.hWin.HR("date modified")},
-                    {key:'a', title:window.hWin.HR("date added")},
-                    {key:'r', title:window.hWin.HR("personal rating")},
-                    {key:'p', title:window.hWin.HR("popularity")}];
-
-                if(Number(rectype)>0){
-                    topOptions.push({optgroup:'yes', title:$Db.rty(rectype,'rty_Name')+' '+window.hWin.HR('fields')});
-                }
-                select_sortby = window.hWin.HEURIST4.ui.createRectypeDetailSelect(
-                        select_sortby[0], //$dlg.find(".sa_sortby").get(0)
-                        rectype, allowed, topOptions,
-                            {initial_indent:1, useHtmlSelect:false});
-                
-                select_sortby.css({margin:'4px 0px'});            
-                            
-                that._on( select_fieldtype, {
-                    change: __onFieldTypeChange
-                });
-                that._on( select_sortby, {
-                    change: function(event){ 
-                        this.calcShowSimpleSearch(); 
-                        this.search_quick_go.focus();
-                    }
-                });
-                            
-                $dlg.find(".sa_fieldvalue").val("");
-                $dlg.find(".sa_negate").prop("checked",'');
-                $dlg.find(".sa_negate2").prop("checked",'');
-                
-                $dlg.find(".fld_contain").css({'display':'inline-block'});
-                $dlg.find(".fld_enum").hide();
-                $dlg.find(".fld_coord").hide();
-                this.calcShowSimpleSearch();
-                //AAAA 
+                that._resetSearchControls();
                 this.search_quick_go.focus();
             }
         });
-        
-        //change compare option according to selected field type
-        // enum, geocoord, others
-        function __onFieldTypeChange(event){
 
-                if(event.target.value=='longitude' || event.target.value=='latitude'){
-
-                    $dlg.find(".fld_contain").hide();
-                    $dlg.find(".fld_enum").hide();
-                    $dlg.find(".fld_coord").css({'display':'inline-block'});
-                    
-                }else{
-                    var dtID = Number(event.target.value);
-                    
-                    $dlg.find(".fld_coord").hide();
-                
-                    var detailType = '';
-
-                    if(Number(dtID)>0){
-                        detailType = $Db.dty(dtID,'dty_Type');
-                    }
-                    if(detailType=='enum'  || detailType=='relationtype'){
-                        $dlg.find(".fld_contain").hide();
-                        $dlg.find(".fld_enum").css({'display':'inline-block'});
-
-                        var select_terms = $dlg.find(".sa_termvalue");
-                        
-                        window.hWin.HEURIST4.ui.createTermSelect(select_terms.get(0),
-                        {vocab_id: $Db.dty(dtID,'dty_JsonTermIDTree'),
-                            topOptions:[{ key:'any', title:window.hWin.HR('<any>')},{ key:'blank', title:'  '}] });
-                                             
-                        that._on( select_terms, { change: function(event){
-                                this.calcShowSimpleSearch();
-                            }
-                        } );
-                                                                                                 
-                    } else {
-                        $dlg.find(".fld_contain").css({'display':'inline-block'});
-                        $dlg.find(".fld_enum").hide();
-                    }
-                    
-                }
-
-                this.calcShowSimpleSearch();
-                //AAAA
-                this.search_quick_go.focus();
-        }//__onFieldTypeChange
-            
         that._on( select_fieldtype, {
-            change: __onFieldTypeChange
+            change: that._onFieldTypeChangeHandler()
         });                        
-                        
-                        
+
         select_rectype.trigger('change'); 
     },
-    
-    //
-    //
-    //
-    calcShowSimpleSearch: function(){
-      
-        var $dlg = this.element.children('fieldset');
-        
-        var q = $dlg.find(".sa_rectype").val(); if(q) q = "t:"+q;
-        var fld = $dlg.find(".sa_fieldtype").val(); 
-        var ctn = '';  //field value
-        var spatial = '';
-        
-        if(fld=='latitude' || fld=='longitude'){
-            var coord1 = $dlg.find(".sa_coord1").val();
-            var coord2 = $dlg.find(".sa_coord2").val();
-            
-            var morethan = !isNaN(parseFloat(coord1));
-            var lessthan = !isNaN(parseFloat(coord2));
-            
-            if(morethan && lessthan){
-                fld = fld+':'+coord1+'<>'+coord2;
-            }else if(morethan){
-                fld = fld+'>'+coord1;
-            }else if(lessthan){
-                fld = fld+'<'+coord2;
+
+    /**
+     * Get the event handler when the field is changed.
+     *
+     * @return {function}
+     * @private
+     */
+    _onFieldTypeChangeHandler: function () {
+        var that = this;
+
+        return function __onFieldTypeChange(event){
+            var fieldItemElement = $(event.target).closest('.search_field_item');
+            that._resetFieldValueControls(event.target);
+
+            if(event.target.value === 'longitude' || event.target.value === 'latitude'){
+                that._setFieldValueControlsToCoordinatesMode(event.target);
+
             }else{
-                fld = '';
-            }
-        }else{
-            
-            var isEnum = false;//$dlg.find(".fld_enum").is(':visible');
-            
-            if(fld){
+                var dtID = Number(event.target.value);
+
                 var detailType = '';
 
-                if(Number(fld)>0){
-                    var detailType = $Db.dty(fld,'dty_Type');
-                    isEnum = (detailType=='enum'  || detailType=='relationtype');
-                    fld = "f:"+fld+":";
-                }else{
-                    fld = fld+":";
+                if(Number(dtID)>0){
+                    detailType = $Db.dty(dtID,'dty_Type');
                 }
-                  
-            } 
-            
-            if(isEnum){
-                var termid = $dlg.find(".sa_termvalue").val();
-                if(termid=='any' || termid=='blank'){
-                    ctn = ''; 
-                }else{
-                    ctn = termid;
+                if(detailType === 'enum'  || detailType === 'relationtype'){
+                    that._setFieldValueControlsToEnumerationMode(event.target);
+
+                } else if (detailType === 'date'  || detailType === 'float') {
+                    that._setFieldValueControlsToNumericMode(event.target);
+                } else {
+                    that._setFieldValueControlsToCommonMode(event.target);
                 }
-                if(termid=='blank' || $dlg.find(".sa_negate2").is(':checked')){
-                    fld  = '-'+fld;
+
+            }
+
+            that.search_quick_go.focus();
+        }
+    },
+
+    /**
+     * Reset the UI controls to initial states.
+     *
+     * This will reset the fields, field values, and sort to single, and set them to their
+     * initial states.
+     *
+     * @private
+     */
+    _resetSearchControls: function () {
+        var that = this;
+        var $dlg = this.element.children('fieldset');
+        $dlg.find('.search_field_item').not(':first').remove();
+        that._resetFieldValueControls($dlg.find('.sa_fieldtype')[0]);
+        that._setFieldValueControlsToCommonMode($dlg.find('.sa_fieldtype')[0]);
+        $dlg.find('.search_sort_item .search_layout_grid .search_layout_row').not(':first').remove();
+        that.collapseOptionsPane();
+        that.refreshContainerHeight();
+
+        $dlg.find(".sa_sortby").each(function () {
+            that._populateSortbyList(this);
+        });
+
+        $dlg.find(".sa_fieldtype").each(function () {
+            var select = that._populateFieldList(this);
+            that._on( select, {
+                change: that._onFieldTypeChangeHandler()
+            });
+        });
+    },
+
+    /**
+     * Reset the field value controls to their initial states.
+     *
+     * This will reset the field value controls to single.
+     *
+     * @param {object} fieldSelectElement The DOM element of the field select control.
+     * @private
+     */
+    _resetFieldValueControls: function (fieldSelectElement) {
+        var fieldItemElement = $(fieldSelectElement).closest('.search_field_item');
+        fieldItemElement.find('.search_field_common').children('.search_layout_row').not(':first').remove();
+    },
+
+    /**
+     * Set the field value controls to common mode.
+     *
+     * The common mode is the default mode which is used for all other type of field such
+     * as text and memo types.
+     *
+     * @param {object} fieldSelectElement The DOM element of the field select control.
+     * @private
+     */
+    _setFieldValueControlsToCommonMode: function (fieldSelectElement) {
+        var fieldItemElement = $(fieldSelectElement).closest('.search_field_item');
+        fieldItemElement.data('field-type', 'common');
+        fieldItemElement.find(".search_field_coordinates").hide();
+        fieldItemElement.find(".search_field_common_value").show();
+        fieldItemElement.find('.search_field_value_label').html(window.hWin.HR('Contains'));
+        fieldItemElement.find('.sa_fieldvalue').show();
+        fieldItemElement.find(".sa_termvalue").hide();
+        fieldItemElement.find(".sa_termvalue").next('.ui-selectmenu-button').hide();
+        this._populateFieldValueOptionsList(fieldItemElement.find(".sa_fieldvalue_option"));
+        if (this.options.options_pane_expanded) {
+            fieldItemElement.find(".search_field_option").show();
+        } else {
+            fieldItemElement.find(".search_field_option").hide();
+        }
+    },
+
+    /**
+     * Set the field value controls to numeric mode.
+     *
+     * The numeric mode is used for number and date field types.
+     *
+     * @param {object} fieldSelectElement The DOM element of the field select control.
+     * @private
+     */
+    _setFieldValueControlsToNumericMode: function (fieldSelectElement) {
+        var fieldItemElement = $(fieldSelectElement).closest('.search_field_item');
+        fieldItemElement.data('field-type', 'numeric');
+        fieldItemElement.find(".search_field_coordinates").hide();
+        fieldItemElement.find(".search_field_common_value").show();
+        fieldItemElement.find('.search_field_value_label').html(window.hWin.HR('Contains'));
+        fieldItemElement.find('.sa_fieldvalue').show();
+        fieldItemElement.find(".sa_termvalue").hide();
+        fieldItemElement.find(".sa_termvalue").next('.ui-selectmenu-button').hide();
+        this._populateFieldValueOptionsList(fieldItemElement.find(".sa_fieldvalue_option"));
+        if (this.options.options_pane_expanded) {
+            fieldItemElement.find(".search_field_option").show();
+        } else {
+            fieldItemElement.find(".search_field_option").hide();
+        }
+    },
+
+    /**
+     * Set the field value controls to coordinates mode.
+     *
+     * The coordinates mode is used for latitude and longitude.
+     *
+     * @param {object} fieldSelectElement The DOM element of the field select control.
+     * @private
+     */
+    _setFieldValueControlsToCoordinatesMode: function (fieldSelectElement) {
+        var fieldItemElement = $(fieldSelectElement).closest('.search_field_item');
+        fieldItemElement.find(".search_field_common_value").hide();
+        fieldItemElement.find(".search_field_coordinates").show();
+        fieldItemElement.data('field-type', 'coordinates');
+        this._populateFieldValueOptionsList(fieldItemElement.find(".sa_fieldvalue_option"));
+        fieldItemElement.find(".search_field_option").hide();
+    },
+
+    /**
+     * Set the field value controls to enumeration mode.
+     *
+     * The enumeration mode is used for term field types.
+     *
+     * @param {object} fieldSelectElement The DOM element of the field select control.
+     * @private
+     */
+    _setFieldValueControlsToEnumerationMode: function (fieldSelectElement) {
+        var that = this;
+        var fieldItemElement = $(fieldSelectElement).closest('.search_field_item');
+        fieldItemElement.data('field-type', 'enumeration');
+        fieldItemElement.find(".search_field_coordinates").hide();
+        fieldItemElement.find(".search_field_common_value").show();
+        fieldItemElement.find('.search_field_value_label').html(window.hWin.HR('Is'));
+        fieldItemElement.find('.sa_fieldvalue').hide();
+        fieldItemElement.find(".sa_termvalue").show();
+        this._populateFieldValueOptionsList(fieldItemElement.find(".sa_fieldvalue_option"));
+        fieldItemElement.find(".search_field_option").hide();
+
+        fieldItemElement.find(".sa_termvalue").each(function (e) {
+            that._populateTermList(this);
+        });
+    },
+
+    /**
+     * Generate the options for the term select control.
+     *
+     * @param {Object} termSelectElement The DOM element of the term select control.
+     * @return {*} The generated select control.
+     * @private
+     */
+    _populateTermList: function (termSelectElement) {
+        var fieldTypeID = Number($(termSelectElement).closest('.search_field_item').find('.sa_fieldtype').val());
+        var detailType = '';
+
+        if(fieldTypeID > 0){
+            detailType = $Db.dty(fieldTypeID,'dty_Type');
+        }
+        if(detailType === 'enum'  || detailType === 'relationtype') {
+            return window.hWin.HEURIST4.ui.createTermSelect(termSelectElement,
+                {vocab_id: $Db.dty(fieldTypeID, 'dty_JsonTermIDTree'),
+                    topOptions:[{ key:'any', title:window.hWin.HR('<any>')},{ key:'blank', title:'  '}] });
+        }
+    },
+
+    /**
+     * Generate the options for the field select control.
+     *
+     * @param {Object} fieldSelectElement The DOM element of the field select control.
+     * @return {*} The generated select control.
+     * @private
+     */
+    _populateFieldList: function (fieldSelectElement) {
+        var $dlg = this.element.children('fieldset');
+        var rectTypeValue = Number($dlg.find('.sa_rectype').val());
+        var topOptions2 = [{key:'',title:window.hWin.HR('All fields')},{key:'title',title:'Recor title (constructed)'}];
+        var bottomOptions = null;
+
+        var allowed = Object.keys($Db.baseFieldType);
+        allowed.splice(allowed.indexOf("separator"),1);
+        allowed.splice(allowed.indexOf("geo"),1);
+        allowed.splice(allowed.indexOf("relmarker"),1);
+
+        if(!(rectTypeValue > 0)){
+            bottomOptions = [{key:'latitude',title:window.hWin.HR('geo: Latitude')},
+                {key:'longitude',title:window.hWin.HR('geo: Longitude')}];
+        }
+        var exp_level = window.hWin.HAPI4.get_prefs_def('userCompetencyLevel', 2);
+
+        var jqUIFieldSelect = window.hWin.HEURIST4.ui.createRectypeDetailSelect(
+            fieldSelectElement,
+            rectTypeValue, allowed, topOptions2,
+            {show_parent_rt:true, show_latlong:true, bottom_options:bottomOptions,
+                useIds: (exp_level<2), useHtmlSelect:false});
+        return jqUIFieldSelect;
+
+    },
+
+    /**
+     * Generate the options for the sort select control.
+     *
+     * @param {Object} sortBySelectElement The DOM element of the sort select control.
+     * @return {*} The generated select control.
+     * @private
+     */
+    _populateSortbyList: function (sortBySelectElement) {
+        var $dlg = this.element.children('fieldset');
+        var rectTypeValue = Number($dlg.find('.sa_rectype').val());
+        var topOptions = [{key:'t', title:window.hWin.HR("record title")},
+            {key:'id', title:window.hWin.HR("record id")},
+            {key:'rt', title:window.hWin.HR("record type")},
+            {key:'u', title:window.hWin.HR("record URL")},
+            {key:'m', title:window.hWin.HR("date modified")},
+            {key:'a', title:window.hWin.HR("date added")},
+            {key:'r', title:window.hWin.HR("personal rating")},
+            {key:'p', title:window.hWin.HR("popularity")}];
+
+        var allowed = Object.keys($Db.baseFieldType);
+        allowed.splice(allowed.indexOf("separator"),1);
+        allowed.splice(allowed.indexOf("geo"),1);
+        allowed.splice(allowed.indexOf("relmarker"),1);
+
+        if(rectTypeValue > 0){
+            topOptions.push({optgroup:'yes', title:$Db.rty(rectTypeValue, 'rty_Name')+' '+window.hWin.HR('fields')});
+        }
+        var jqUISortBySelect = window.hWin.HEURIST4.ui.createRectypeDetailSelect(
+            sortBySelectElement,
+            rectTypeValue, allowed, topOptions,
+            {initial_indent:1, useHtmlSelect:false});
+
+        jqUISortBySelect.css({margin:'4px 0px'});
+        return jqUISortBySelect;
+    },
+
+    /**
+     * Generate the options for the field value option select control.
+     *
+     * @param {Object} optionSelectElement The DOM element of the field value option select control.
+     * @private
+     */
+    _populateFieldValueOptionsList: function (optionSelectElement) {
+        var fieldType = $(optionSelectElement).closest('.search_field_item').data('field-type');
+        var options = '';
+        if (fieldType === 'common') {
+            options = '<option selected value="all">All words</option>' +
+                '<option value="any">Any word</option>' +
+                '<option value="quoted">Quoted string</option>';
+        } else if (fieldType === 'numeric') {
+            options = '<option selected value="equal">=</option>' +
+                '<option value="less">&lt;</option>' +
+                '<option value="greater">&gt;</option>';
+        }
+        $(optionSelectElement).html(options);
+    },
+
+
+    /**
+     * Generate the search query from the UI form.
+     */
+    calcShowSimpleSearch: function(){
+        if (this.options.is_json_query) {
+            this.current_query_json = this._jsonQueryStringConstructor();
+        } else {
+            this.current_query = this._simpleQueryStringConstructor();
+        }
+    },
+
+    /**
+     * TODO: fill up the function for the simple filter syntax queries.
+     * @return {string}
+     * @private
+     */
+    _simpleQueryStringConstructor: function () {
+        return '';
+    },
+
+    /**
+     * Generate the JSON syntax query from the UI elements.
+     *
+     * @return {string} The search query in JSON syntax.
+     * @private
+     */
+    _jsonQueryStringConstructor: function () {
+        var that = this;
+        var $dlg = this.element.children('fieldset');
+        var queryObject = {};
+
+        var recTypeValue = $dlg.find(".sa_rectype").val();
+        if (recTypeValue) {
+            queryObject.t = recTypeValue;
+        }
+
+        var numOfField = $dlg.find('.search_field_item').length;
+        if (numOfField === 1) {
+            queryObject = this._mergeQueryObject(queryObject, this._createFieldQueryObject($dlg.find('.search_field_item')[0]));
+        } else {
+            var fieldItems = [];
+            var operators = [];
+            $dlg.find('.search_field_item').each(function () {
+                fieldItems.push(that._createFieldQueryObject(this));
+                if ($(this).find('.sa_field_operator').length > 0) {
+                    operators.push($(this).find('.sa_field_operator').val());
                 }
-                
-            }else{
-                ctn =  $dlg.find(".sa_fieldvalue").val();
-                if($dlg.find(".sa_negate").is(':checked')){
-                    fld  = '-'+fld;
-                }
+            });
+            queryObject = this._mergeQueryObject(queryObject, this._createLogicalObject(fieldItems, operators));
+        }
+
+        if($dlg.find(".sa_spatial_val").val()){
+            queryObject.geo = $dlg.find(".sa_spatial_val").val();
+        }
+
+        var sortByValues = [];
+        var sortOrderOperator;
+        var sortByValue;
+        $dlg.find('.search_sort_item > .search_layout_grid > .search_layout_row').each(function () {
+            sortOrderOperator = ($(this).find(".sa_sortasc").val() === "1" ? "-" : '') ;
+            sortByValue = $(this).find(".sa_sortby").val();
+            if (!(sortByValue === 't' && sortOrderOperator === '')) {
+                sortByValues.push(sortOrderOperator + (isNaN(sortByValue) ? "" : "f:") + sortByValue);
+            }
+        });
+        if (sortByValues.length > 1) {
+            queryObject.sortby = sortByValues;
+        } else if (sortByValues.length === 1) {
+            queryObject.sortby = sortByValues[0];
+        }
+
+        if(Object.keys(queryObject).length === 0){
+            queryObject.sortby = 't';
+        }
+        return JSON.stringify(queryObject);
+    },
+
+    /**
+     * Construct the query object for a single field.
+     *
+     * @param {Object} fieldItemElement The DOM element of the field wrap (class .search_field_item).
+     * @return {Object}
+     * @private
+     */
+    _createFieldQueryObject: function (fieldItemElement) {
+        var queryObject = {};
+        var that = this;
+
+        fieldItemElement = $(fieldItemElement);
+
+        var fieldType = fieldItemElement.data('field-type');
+        var fieldTypeValue = this._createFieldQueryObjectName(fieldItemElement.find(".sa_fieldtype").val());
+
+        var numOfValues;
+        var fieldValueItems;
+        var fieldOperators;
+
+        if (fieldType === 'coordinates') {
+            var coord1 = fieldItemElement.find(".sa_coord1").val();
+            var coord2 = fieldItemElement.find(".sa_coord2").val();
+
+            var morethan = !isNaN(parseFloat(coord1));
+            var lessthan = !isNaN(parseFloat(coord2));
+
+            if(morethan && lessthan){
+                queryObject[fieldTypeValue] = coord1 + '<>' + coord2;
+            }else if(morethan){
+                queryObject[fieldTypeValue] = '>' + coord1;
+            }else if(lessthan){
+                queryObject[fieldTypeValue] = '<' + coord2;
+            }
+        } else if (fieldType === 'numeric') {
+            numOfValues = fieldItemElement.find('.search_field_common > .search_layout_row').length;
+            if (numOfValues > 1) {
+                fieldValueItems = [];
+                fieldOperators = [];
+                fieldItemElement.find('.search_field_common > .search_layout_row').each(function () {
+                    fieldValueItems.push(that._createNumericValueQueryObject(
+                        fieldTypeValue,
+                        $(this).find('.sa_fieldvalue').val(),
+                        $(this).find('.sa_fieldvalue_option').val()));
+                    if ($(this).find('.sa_fieldvalue_operator').length > 0) {
+                        fieldOperators.push($(this).find('.sa_fieldvalue_operator').val());
+                    }
+                });
+                queryObject = this._createLogicalObject(fieldValueItems, fieldOperators);
+            } else {
+                queryObject = this._createNumericValueQueryObject(fieldTypeValue, fieldItemElement.find('.sa_fieldvalue').val(), fieldItemElement.find('.sa_fieldvalue_option').val());
+            }
+        } else if (fieldType === 'enumeration') {
+            numOfValues = fieldItemElement.find('.search_field_common > .search_layout_row').length;
+            if (numOfValues > 1) {
+                fieldValueItems = [];
+                fieldOperators = [];
+                fieldItemElement.find('.search_field_common > .search_layout_row').each(function () {
+                    fieldValueItems.push(that._createEnumerationValueQueryObject(
+                        fieldTypeValue,
+                        $(this).find('.sa_termvalue').val(),
+                        $(this).find(".sa_negate").is(':checked')));
+
+                    if ($(this).find('.sa_fieldvalue_operator').length > 0) {
+                        fieldOperators.push($(this).find('.sa_fieldvalue_operator').val());
+                    }
+                });
+                queryObject = this._createLogicalObject(fieldValueItems, fieldOperators);
+            } else {
+                queryObject = this._createEnumerationValueQueryObject(fieldTypeValue, fieldItemElement.find('.sa_termvalue').val(), fieldItemElement.find(".sa_negate").is(':checked'));
+            }
+        } else {
+            numOfValues = fieldItemElement.find('.search_field_common > .search_layout_row').length;
+            if (numOfValues > 1) {
+                fieldValueItems = [];
+                fieldOperators = [];
+                fieldItemElement.find('.search_field_common > .search_layout_row').each(function () {
+                    fieldValueItems.push(that._createTextValueQueryObject(
+                        fieldTypeValue,
+                        $(this).find('.sa_fieldvalue').val(),
+                        $(this).find('.sa_fieldvalue_option').val(),
+                        $(this).find(".sa_negate").is(':checked')));
+                    if ($(this).find('.sa_fieldvalue_operator').length > 0) {
+                        fieldOperators.push($(this).find('.sa_fieldvalue_operator').val());
+                    }
+                });
+                queryObject = this._createLogicalObject(fieldValueItems, fieldOperators);
+            } else {
+                queryObject = this._createTextValueQueryObject(fieldTypeValue, fieldItemElement.find('.sa_fieldvalue').val(), fieldItemElement.find('.sa_fieldvalue_option').val(), fieldItemElement.find(".sa_negate").is(':checked'));
             }
         }
-        
-        if($dlg.find(".sa_spatial_val").val()){
-            spatial = ' geo:'+$dlg.find(".sa_spatial_val").val();  
+        return queryObject;
+    },
+
+    /**
+     * Construct the property name of a field in the query object.
+     *
+     * @param {string} fieldName Original field name.
+     * @return {string}
+     * @private
+     */
+    _createFieldQueryObjectName: function (fieldName) {
+        if (fieldName === "") {
+            fieldName = 'all';
+        } else if (Number(fieldName) > 0) {
+            fieldName = 'f:' + fieldName;
         }
+        return fieldName;
+    },
 
-        var asc = ($dlg.find(".sa_sortasc").val()==1?"-":'') ; //($("#sa_sortasc:checked").length > 0 ? "" : "-");
-        var srt = $dlg.find(".sa_sortby").val();
-        srt = (srt == "t" && asc == "" ? "" : ("sortby:" + asc + (isNaN(srt)?"":"f:") + srt));
-
-        q = (q? (fld?q+" ": q ):"") + (fld?fld: (ctn?" all:":"")) 
-                 + (ctn?(isNaN(Number(ctn))?'"'+ctn+'"':ctn):"")
-                 + spatial
-                 + (srt? " " + srt : "");
-        if(!q){
-            q = "sortby:t";
+    /**
+     * Construct the query object for the text type value.
+     *
+     * @param {string} fieldName The field property name in the query object.
+     * @param {string} fieldValue The field value.
+     * @param {string} option The field option value.
+     * @param {boolean} negate The negate flag.
+     * @return {Object}
+     * @private
+     */
+    _createTextValueQueryObject: function (fieldName, fieldValue, option, negate) {
+        var words = fieldValue.split(' ');
+        var queryObj = {};
+        if (words.length === 1 || option === 'quoted') {
+            if (negate) {
+                fieldValue = '-' + fieldValue;
+            }
+            queryObj[fieldName] = fieldValue;
+        } else {
+            queryObj[option] = [];
+            var i;
+            var wordQueryObj;
+            for (i = 0; i < words.length; i++) {
+                wordQueryObj = {};
+                wordQueryObj[fieldName] = (negate ? '-' : '') + words[i];
+                queryObj[option].push(wordQueryObj);
+            }
         }
-        
-        
-        this.current_query = q;
-        this.current_query_json = {};// q_json;
+        return queryObj;
+    },
 
-        //e = window.hWin.HEURIST4.util.stopEvent(e);        
+    /**
+     * Construct the query object for the numeric type value.
+     *
+     * @param {string} fieldName The field property name in the query object.
+     * @param {string} fieldValue The field value.
+     * @param {string} option The field option value.
+     * @return {Object}
+     * @private
+     */
+    _createNumericValueQueryObject: function (fieldName, fieldValue, option) {
+        var queryObj = {};
+        if (option === 'greater') {
+            fieldValue = '>' + fieldValue;
+        } else if (option === 'less') {
+            fieldValue = '<' + fieldValue;
+        }
+        queryObj[fieldName] = fieldValue;
+        return queryObj;
+    },
+
+    /**
+     * Construct the query object for the enumeration type value.
+     *
+     * @param {string} fieldName The field property name in the query object.
+     * @param {string} fieldValue The field value.
+     * @param {boolean} negate The negate flag.
+     * @return {Object}
+     * @private
+     */
+    _createEnumerationValueQueryObject: function (fieldName, fieldValue, negate) {
+        var queryObj = {};
+        if(fieldValue === 'any' || fieldValue === 'blank'){
+            fieldValue = '';
+        }
+        if(negate){
+            fieldValue  = '-' + fieldValue;
+        }
+        queryObj[fieldName] = fieldValue;
+        return queryObj;
+    },
+
+    /**
+     * Construct the query object for a number of objects based on the operators.
+     *
+     * Note: the length of operators is always 1 less than the length of objects.
+     *
+     * @param {Array} items The objects array.
+     * @param {Array} operators The operators array. The element is either "and" or "or".
+     * @return {Object}
+     * @private
+     */
+    _createLogicalObject: function (items, operators) {
+        var logicalObj = {};
+        var i;
+        var orIndices = [];
+        var andIndices = [];
+        for (i = 0; i < operators.length; i++) {
+            if (operators[i] === 'and') {
+                andIndices.push(i);
+            } else if (operators[i] === 'or') {
+                orIndices.push(i);
+            }
+        }
+        if (orIndices.length === 0) {
+            logicalObj.all = items;
+        } else if (andIndices.length === 0) {
+            logicalObj.any = items;
+        } else {
+            logicalObj.any = [];
+            var andSegment = {
+                all: []
+            };
+            var andItemIndices = [];
+            for (i = 0; i < andIndices.length; i++) {
+                andItemIndices.push(andIndices[i]);
+                if (i === andIndices.length - 1) {
+                    andItemIndices.push(andIndices[i] + 1);
+                } else if (andIndices[i + 1] - andIndices[i] > 1) {
+                    andItemIndices.push(andIndices[i] + 1);
+                }
+            }
+            var lastAndIndex = -1;
+            for (i = 0; i < items.length; i++) {
+                if (andItemIndices.indexOf(i) >= 0) {
+                    if (lastAndIndex > 0 && (i - lastAndIndex > 1 || orIndices.indexOf(lastAndIndex) >= 0)) {
+                        logicalObj.any.push(andSegment);
+                        andSegment = {
+                            all: []
+                        };
+                    }
+                    andSegment.all.push(items[i]);
+                    lastAndIndex = i;
+                } else {
+                    logicalObj.any.push(items[i]);
+                }
+            }
+            if (andSegment.all.length > 0) {
+                logicalObj.any.push(andSegment);
+            }
+        }
+        return logicalObj;
+    },
+
+    /**
+     * Merge the properties from one object to another.
+     *
+     * @param {Object} hostObj
+     * @param {Object} guestObj
+     * @return {Object}
+     * @private
+     */
+    _mergeQueryObject: function (hostObj, guestObj) {
+        var key;
+        for (key in guestObj) {
+            if (guestObj.hasOwnProperty(key) && !hostObj.hasOwnProperty(key)) {
+                hostObj[key] = guestObj[key];
+            }
+        }
+        return hostObj;
+    },
+
+    /**
+     * Refresh the container height to fit its contents.
+     */
+    refreshContainerHeight: function () {
+        var contentHeight = this.element.find('.ui-heurist-header').outerHeight() + this.element.find('fieldset').outerHeight();
+        this.element.parent().height(contentHeight);
+    },
+
+    /**
+     * Refresh the container width to adapt the options pane.
+     */
+    refreshContainerWidth: function () {
+        this.element.parent().width(this.options.options_pane_expanded ? 930 : 800);
+    },
+
+    /**
+     * Expand the options pane.
+     */
+    expandOptionsPane: function () {
+        this.options.options_pane_expanded = true;
+        this.element.parent().width(930);
+        var $dlg = this.element.children('fieldset');
+        $dlg.find('.search_option_switch').html(window.hWin.HR('Options <<'));
+        $dlg.find('.search_field_item').each(function () {
+            if ($(this).data('field-type') === 'common' || $(this).data('field-type') === 'numeric') {
+                $(this).find('.search_field_option').show();
+            }
+        });
+    },
+
+    /**
+     * Collapse the options pane.
+     */
+    collapseOptionsPane: function () {
+        this.options.options_pane_expanded = false;
+        this.element.parent().width(800);
+        var $dlg = this.element.children('fieldset');
+        $dlg.find('.search_option_switch').html(window.hWin.HR('Options >>'));
+        $dlg.find('.search_field_option').hide();
+    },
+
+    /**
+     * Toggle the options pane.
+     */
+    toggleOptionsPane: function () {
+        if (this.options.options_pane_expanded) {
+            this.collapseOptionsPane();
+        } else {
+            this.expandOptionsPane();
+        }
+    },
+
+    /**
+     * Add a set of new field value controls in the UI.
+     *
+     * @param {Object} addBtnElement The DOM element of the field value add button.
+     */
+    addFieldValueControls: function (addBtnElement) {
+        var fieldValuesParentElement = $(addBtnElement).closest('.search_field_common');
+
+        if (fieldValuesParentElement) {
+            var fieldValueMode = fieldValuesParentElement.parent().data('field-type');
+            if (fieldValueMode === 'common' || fieldValueMode === 'numeric' || fieldValueMode === 'enumeration') {
+                var addFieldValueElement = $($('#templateFieldValue').html());
+                fieldValuesParentElement.append(addFieldValueElement);
+
+                if (fieldValueMode === 'common' || fieldValueMode === 'numeric') {
+                    addFieldValueElement.find('.sa_termvalue').hide();
+                    this._populateFieldValueOptionsList(addFieldValueElement.find('.sa_fieldvalue_option'));
+                } else {
+                    addFieldValueElement.find('.sa_fieldvalue').hide();
+                    this._populateTermList(addFieldValueElement.find('.sa_termvalue')[0]);
+                }
+                if (!this.options.options_pane_expanded) {
+                    addFieldValueElement.find('.search_field_option').hide();
+                }
+                this.refreshContainerHeight();
+            }
+        }
+    },
+
+    /**
+     * Add a new set of field controls in the UI.
+     *
+     * @param {Object} addBtnElement The DOM element of the field add button.
+     */
+    addFieldControls: function (addBtnElement) {
+        var that = this;
+        var parentElement = $(addBtnElement).closest('.search_field_section').children('.search_field_set');
+        if (parentElement) {
+            var addElement = $($('#templateField').html());
+            parentElement.append(addElement);
+            this._populateFieldList(addElement.find('.sa_fieldtype')[0]);
+            this._setFieldValueControlsToCommonMode(addElement.find('.sa_fieldtype')[0]);
+            this._on(addElement.find('.search_field_value_add'), {
+                click: function (event) {
+                    that.addFieldValueControls(event.target);
+                }
+            });
+            that._on(addElement.find('.sa_fieldtype'), {
+                change: that._onFieldTypeChangeHandler()
+            });
+            this.refreshContainerHeight();
+        }
+    },
+
+    /**
+     * Add a new set of sort controls in the UI.
+     *
+     * @param {Object} addBtnElement The DOM element of the sort add button.
+     */
+    addSortControls: function (addBtnElement) {
+        var parentElement = $(addBtnElement).closest('.search_sort_section').find('.search_sort_item .search_layout_grid');
+        if (parentElement) {
+            var addElement = $($('#templateSortField').html());
+            parentElement.append(addElement);
+            this._populateSortbyList(addElement.find('.sa_sortby')[0]);
+            this.refreshContainerHeight();
+        }
     },
     
     //
@@ -492,7 +1007,10 @@ $.widget( "heurist.search_quick", $.heurist.recordAction, {
         
         //this.div_entity_btns.remove();
     },
-    
+
+    /**
+     * Show the query string in UI.
+     */
     getQueryString: function(){
         
         this.calcShowSimpleSearch();
@@ -503,9 +1021,9 @@ $.widget( "heurist.search_quick", $.heurist.recordAction, {
 
     },
 
-    //
-    //
-    //
+    /**
+     * The action function when do the search.
+     */
     doAction: function(){
         
         this.calcShowSimpleSearch();
@@ -520,7 +1038,5 @@ $.widget( "heurist.search_quick", $.heurist.recordAction, {
         
         this.closeDialog();
     }
-
-    
 
 });
