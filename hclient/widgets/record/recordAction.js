@@ -142,7 +142,7 @@ $.widget( "heurist.recordAction", {
 
         this.selectRecordScope = this.element.find('#sel_record_scope');
         if(this.selectRecordScope.length>0){
-            this._fillSelectRecordScope();
+            if(this._fillSelectRecordScope()===false) return;
         }
         
         this.popupDialog();

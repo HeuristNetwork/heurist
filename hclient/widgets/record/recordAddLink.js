@@ -113,9 +113,9 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
         
         return res;
     },
-    
+
     //
-    //
+    // select option by rectypes
     //
     _fillSelectRecordScope: function (){
 
@@ -129,7 +129,78 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
             return;    
         }
 
-        var opt, selScope = this.selectRecordScope.get(0);
+        var opt, selScope = this.selectRecordScope.get(0); //selector
+        window.hWin.HEURIST4.ui.addoption(selScope,0,'please select the records to be affected …');
+
+        var rty = 0;
+        var rectype_Ids = this._currentRecordset.getRectypes();
+        
+        if(rectype_Ids.length==1){
+
+            rty = rectype_Ids[0];
+            window.hWin.HEURIST4.ui.addoption(selScope,
+                rty, 'All records: ' + $Db.rty(rty,'rty_Plural'));
+        }
+        
+        rectype_Ids = [];
+        var sels = this._currentRecordsetSelIds;
+        if(sels && sels.length>0)
+            for (var idx in sels){ //find all selected rectypes
+              if(idx>=0){  
+                var rec = window.hWin.HAPI4.currentRecordset.getById(sels[idx]);
+                var rt = Number(window.hWin.HAPI4.currentRecordset.fld(rec, 'rec_RecTypeID'));
+                if(rectype_Ids.indexOf(rt)<0) rectype_Ids.push(rt);
+              }
+            }
+
+        if(rectype_Ids.length==1){
+
+            rty = rectype_Ids[0];
+            
+            opt = new Option('Selected records: ' + $Db.rty(rty,'rty_Plural'), rty);
+            $(opt).attr('data-select', 1);
+            selScope.appendChild(opt);
+            
+            //window.hWin.HEURIST4.ui.addoption(selScope,rty, 'Selected records: ' + $Db.rty(rty,'rty_Plural'));
+        }
+          
+        if(!(rty>0)){
+            window.hWin.HEURIST4.msg.showMsgDlg(
+        '<b>Mixed record types</b>'
+        +'<p>Relationship links can only be built for one record type at a time. </p>'
+        +'<p>Please select records of a single type, either by individual selection or a revised filter, and repeat this action. </p>');
+            return false;
+        }
+            
+        
+        this._on( this.selectRecordScope, {
+                change: this._onRecordScopeChange} );        
+        this.selectRecordScope.val(rty);    
+        if(selScope.selectedIndex<0) selScope.selectedIndex=0;
+        
+        window.hWin.HEURIST4.ui.initHSelect(this.selectRecordScope, false);
+        
+        this._onRecordScopeChange();
+        
+        return true;
+    },
+    
+    //
+    // select option by rectypes
+    //
+    _fillSelectRecordScope_byRty: function (){
+
+        var scope_types = this.options.scope_types;
+        this.selectRecordScope.empty();
+        
+        var useHtmlSelect = false;
+        
+        if(scope_types=='none'){
+            this.selectRecordScope.parent().hide();
+            return;    
+        }
+
+        var opt, selScope = this.selectRecordScope.get(0); //selector
 
         var rectype_Ids = this._currentRecordset.getRectypes();
         
@@ -320,7 +391,7 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
                 return false;
             }
         });//for fields
-        
+
         if(this.options.relmarker_dty_ID>0){
             //hide radio and field name - since it is the only one field in list
             var ele = this.element.find('#source_field').find('.field_item').css('padding-left',0);
@@ -344,8 +415,15 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
                     +'<label style="font-style:italic;line-height: 1em;" for="cbsource_cb_0">Reverse links: Add links to the target record rather than the current selection<br><span style="width:1.5em;display:inline-block;"/>(where appropriate record pointer or relationship marker fields exist in the target record)</label><div>')
                 .appendTo($('#source_field'));
                 this._on(ele, {change:this._createInputElement});
+                
             }
         }
+        
+        var ele = this.element.find('#source_field').find('input[type=radio]');
+        if(ele.length==1){
+            ele.click();
+        }
+        
 
         }//if rectype defined
 
