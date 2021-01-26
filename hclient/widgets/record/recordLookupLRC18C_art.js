@@ -26,11 +26,135 @@
 */
 
 mapDict = {}
-$.widget("heurist.recordLookupLRC18C", $.heurist.recordAction, {
+$.widget("heurist.recordLookupLRC18C_art", $.heurist.recordAction, {
+    
+    //defintions mapping
+    // source rectype: target rectype
+    mapping_defs:{
+        10:{rty_ID:10, key:253,  //Author->Agent
+            details: { //source:target
+                //Standarised Name
+                250: 1,
+                //Given Name
+                18: 18,
+                //Designation
+                248: 999,
+                //Family Name
+                1: 1046,
+                //ESTC Actor ID
+                252: 1098,
+                //ESTC Name Unified
+                253: 1086, //KEY
+                //Also Known As
+                287: 132,
+                //Birth Date
+                10:  10,
+                //Death Date
+                11:  11,
+                // Prefix
+                249: 1049,   //ENUM!
+                // Suffix to Name
+                279: 1050,
+                // Agent Type
+                278: 1000   //ENUM!
+        }},
+
+        49:{rty_ID:56, key:271,  //Work->Work
+            details: { 
+                //Title
+                1: 1,
+                //Full/Extended title
+                276: 1091,
+                //Project Record ID
+                271: 1092,
+                //Helsinki Work Name
+                273: 1093
+        }},    
+
+        
+        12:{rty_ID:12, key:268,  //Place->Place
+            details: { 
+                //Title
+                1: 1,
+                //Country
+                26: 26,  //ENUM
+                //ESTC location ID                
+                265: 1089, 
+                //Place yupe
+                133: 133, //ENUM
+                //ESTC Place ID
+                268: 1090  //KEY
+        }},    
+        
+        
+        30:{rty_ID:54, key:254,  //Book(edition)->Edition
+            details: {
+                //Title
+                1: 1,
+                // Year of First Volume
+                9: 10,
+                // Year of Final Volume
+                275: 955,
+                //Book Format
+                256: 991,  //ENUM
+                //Plase - POINTER
+                259: 238,
+                //Summary Publisher Statement
+                285: 1096,
+                //ESTC ID
+                254: 1094,  //KEY
+                //Author - POINTER
+                15: 1106,
+                //Work - POINTER
+                284: 949,
+                //Extended Edition title
+                277: 1095,
+                //No of volumes
+                // 962: buildEditionDict[289],
+                137: 962,
+                // No of parts
+                290: 1107,
+                // Imprint details
+                270: 652
+        }},
+        
+        vocabularies:[5430, //1321-5430 book formats for 256 => 991  6891 ( 1323-6891 )
+            509,  //  ( 2-509 ) country for 26 => 26      509  ( 2-509 )
+            5039, //  ( 3-5039 ) place type for 133 =>    5039  ( 3-5039 )
+            
+            507,  //    ( 2-507 ) prefix/honorofic for 249:1049       7124 (1323-7124)
+            5848  // ( 1321-5848 )  agent type for 278: 1000   6901 (1323-6901)
+         ]
+
+    },
+
+/*
+
+hdb_estc_helsinki_bibliographic_metadata hdb_artem_lrc
+
+update hdb_artem_lrc.defTerms t2, defTerms t1 set t2.trm_OriginatingDBID=t1.trm_OriginatingDBID, t2.trm_IDInOriginatingDB= t1.trm_IDInOriginatingDB
+where t1.trm_Label=t2.trm_Label and t2.trm_ParentTermID=6891 and t1.trm_ParentTermID=5430;
+
+
+
+use hdb_ESTC_Helsinki_Bibliographic_Metadata;
+SELECT t1.trm_Label, t1.trm_OriginatingDBID, t1.trm_IDInOriginatingDB, t2.trm_OriginatingDBID, t2.trm_IDInOriginatingDB FROM defTerms t1
+left join hdb_Libraries_Readers_Culture_18C_Atlantic.defTerms t2 on t1.trm_Label=t2.trm_Label and t2.trm_ParentTermID=6891
+where t1.trm_ParentTermID=5430 order by t1.trm_Label;
+
+
+use hdb_ESTC_Helsinki_Bibliographic_Metadata;
+SELECT t1.trm_Label, t1.trm_OriginatingDBID, t1.trm_IDInOriginatingDB, t2.trm_OriginatingDBID, t2.trm_IDInOriginatingDB FROM defTerms t1
+left join hdb_artem_lrc.defTerms t2 on BINARY t1.trm_Label=t2.trm_Label and t2.trm_ParentTermID=7124
+where t1.trm_ParentTermID=507 order by t1.trm_Label;
+
+*/
+    
+    
 
     options: {
-        height: 520,
-        width: 800,
+        height: 540,
+        width: 820,
         modal: true,
         show_toolbar: true,   //toolbar contains menu,savefilter,counter,viewmode and paginathorizontalion
         show_menu: true,       //@todo ? - replace to action_select and action_buttons
@@ -42,12 +166,14 @@ $.widget("heurist.recordLookupLRC18C", $.heurist.recordAction, {
         mapping: null, //configuration from record_lookup_configuration.json
         edit_fields: null,  //realtime values from edit form fields
         edit_record: false,  //recordset of the only record - currently editing record (values before edit start)
-        title: 'Lookup values for Heurist record',
-        htmlContent: 'recordLookupLRC18C.html',
+        title: 'Lookup ESTC Helsinki Bibliographic Metadata values for Heurist record',
+        htmlContent: 'recordLookupLRC18C_art.html',
         helpContent: null, //help file in context_help folder
 
     },
     recordList: null,
+    
+    TRM_BOOK_FORMAT: 5430,
 
     _initControls: function () {
 
@@ -114,7 +240,7 @@ $.widget("heurist.recordLookupLRC18C", $.heurist.recordAction, {
         );
 */
         var request = {db:'ESTC_Helsinki_Bibliographic_Metadata', a:'search', 'entity':'defTerms', 
-                    'details':'list', 'trm_ParentTermID':5430};
+                    'details':'list', 'trm_ParentTermID':this.TRM_BOOK_FORMAT};
 
         var selBf = this.element.find('#select_bf').empty();
         window.hWin.HEURIST4.ui.addoption(selBf[0], 0, 'select...'); //first option
@@ -189,6 +315,73 @@ $.widget("heurist.recordLookupLRC18C", $.heurist.recordAction, {
             this._doSearch();
         }
     },
+    
+    /* Show a confirmation window after user selects a record from the lookup query results */
+    /* If the user clicks "Check Author", then call method _checkAuthor*/
+    doAction: function () {
+        var that = this;
+        
+        var sels = this.recordList.resultList('getSelected', true); //ids of selected records
+        
+        if(sels && sels.length>0){
+            
+                window.hWin.HEURIST4.msg.bringCoverallToFront(that._as_dialog.parent());
+            
+                var request = { action: 'import_records',
+                    source_db: 'ESTC_Helsinki_Bibliographic_Metadata',
+                    q: 'ids:'+sels.join(','),
+                    rules: '[{"query":"t:10 linkedfrom:30-15"},{"query":"t:12 linkedfrom:30-259"},{"query":"t:49 linkedfrom:30-284"}]',
+                    mapping: this.mapping_defs,
+                    //session: session_id,
+                    id: window.hWin.HEURIST4.util.random()
+                };
+
+                //create default set of records for website see importController
+                window.hWin.HAPI4.doImportAction(request, function( response ){
+                    
+                    window.hWin.HEURIST4.msg.sendCoverallToBack();
+                
+                    if(response.status == window.hWin.ResponseStatus.OK){
+        
+                    }else{
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                    }
+                });
+        }else{
+            window.hWin.HEURIST4.msg.showMsDlg('Select at least one source record');
+        }        
+        
+        return;
+        
+        
+        estcRecordListWindow = this;
+        var estc_edition_id = that.element.context.querySelector(".selected_last").getAttribute('recid');
+        queryResponse = that._checkIfEditionExistsInLibraries(estc_edition_id);  //ARTEM: where is callback
+        xmlDoc = $.parseXML(queryResponse.responseText);
+        if (xmlDoc.getElementsByTagName('resultCount')[0].innerHTML.trim() == "0") {
+            editionInLibraries = false;
+        }
+
+        mapToHoldingRecord = that.options.mapping.fields['properties.edition']
+        mapDict[mapToHoldingRecord] = ""
+
+        var $__dlg = window.hWin.HEURIST4.msg.showMsgDlg(
+            'Selected Edition does not exist in Libraries database. Importing now...',
+            {
+                'Check Author': function () {
+                    $__dlg.dialog("close");
+                    window.hWin.HEURIST4.msg.bringCoverallToFront(that._as_dialog.parent());
+                    that._checkAuthor(estc_edition_id, estcRecordListWindow)
+                    // checkIfAuthorExistsInLibraries(estc_edition_id, estcRecordListWindow);
+                },
+                'Cancel': function () {
+                    $__dlg.dialog("close");
+                }
+            });
+    },
+
+    
+    
 
     /* Parse the output XML for a user selected Edition */
     /* Build estc_edition, author_dict, work_dict and ids_n_title of edition dict */
@@ -308,34 +501,12 @@ $.widget("heurist.recordLookupLRC18C", $.heurist.recordAction, {
         window.hWin.HEURIST4.msg.showMsgErr(msg);
         window.hWin.HEURIST4.msg.sendCoverallToBack();
     },
-
-    /* Show a confirmation window after user selects a record from the lookup query results */
-    /* If the user clicks "Check Author", then call method _checkAuthor*/
-    doAction: function () {
-        var that = this;
-        estcRecordListWindow = this;
-
-        estc_edition_id = that.element.context.querySelector(".selected_last").getAttribute('recid');
+    
+    //_checkAuthor ->get Edition t:30 id -> t:10 f:1086 (Author) - check by full name
+    //     _createAuthorRecord  -> _checkWorkRecordInLibraries -> _createWorkRecord -> _createEditionRecord
+    
 
 
-
-        mapToHoldingRecord = that.options.mapping.fields['properties.edition']
-        mapDict[mapToHoldingRecord] = ""
-
-        var $__dlg = window.hWin.HEURIST4.msg.showMsgDlg(
-            'Selected Edition does not exist in Libraries database. Importing now...',
-            {
-                'Proceed': function () {
-                    $__dlg.dialog("close");
-                    window.hWin.HEURIST4.msg.bringCoverallToFront(that._as_dialog.parent());
-                    that._checkAuthor(estc_edition_id, estcRecordListWindow)
-                    // checkIfAuthorExistsInLibraries(estc_edition_id, estcRecordListWindow);
-                },
-                'Cancel': function () {
-                    $__dlg.dialog("close");
-                }
-            });
-    },
 
     /* Get Term ID of a Vocabulary item that exists in the Libraries database*/
     _getTermThatExists: function(type, term) {
@@ -404,6 +575,7 @@ $.widget("heurist.recordLookupLRC18C", $.heurist.recordAction, {
         }
     },
 
+    //ARTEM - @todo use standard search method, callback
     /* Check if Edition exists in Libraries database */
     _checkIfEditionExistsInLibraries: function (estc_edition_id) {
         var that = this;
@@ -512,6 +684,7 @@ $.widget("heurist.recordLookupLRC18C", $.heurist.recordAction, {
         }
 
         ids.forEach(buildAuthorDict);
+
         var author_rec_data = {
             ID: 0, RecTypeID: 10,
             no_validation: true, //allows save without filled required field 1061
@@ -527,7 +700,7 @@ $.widget("heurist.recordLookupLRC18C", $.heurist.recordAction, {
                 //ESTC Actor ID
                 1098: author_details[252],
                 //ESTC Name Unified
-                1086: author_details[253],
+                1086: author_details[253], //KEY
                 //Also Known As
                 132: author_details[287],
                 //Birth Date
@@ -661,7 +834,7 @@ $.widget("heurist.recordLookupLRC18C", $.heurist.recordAction, {
             edition_estc_id=''
         }
 
-        query_string = 't:55 f:1094:="' + edition_estc_id + '"'
+        query_string = 't:55 f:1094:"' + edition_estc_id + '"'
         urlToCheckEditioninLibraries = that._getQueryURL(query_string, "libraries")
         edition_id = parsedXML['idsNTitleDict']['editionID'];
 
@@ -892,8 +1065,8 @@ $.widget("heurist.recordLookupLRC18C", $.heurist.recordAction, {
         createAuthor = false;
         query_string = 'ids%3A' + estc_edition_id
         urlToGetEditionDetails = that._getQueryURL(query_string, "ESTC")
-        console.log("URL TO GET EDITION DETAILS")
-        console.log(urlToGetEditionDetails)
+console.log("URL TO GET EDITION DETAILS");
+console.log(urlToGetEditionDetails);
         return $.ajax({
             url: urlToGetEditionDetails,
             async: false,
@@ -969,7 +1142,7 @@ $.widget("heurist.recordLookupLRC18C", $.heurist.recordAction, {
         });
 
     },
-
+    
     /* Get the user input from recordLookupLRC18C.html and build the query string */
     /* Then lookup ESTC database if the query produces any search results */
     _doSearch: function () {
@@ -981,13 +1154,13 @@ $.widget("heurist.recordLookupLRC18C", $.heurist.recordAction, {
         estc_no = "";
         vol_count = "";
         vol_parts = "";
-
+        
         if(true){ //use json format and fulltext search
 
             var query = {"t":"30"}; //search for Books
 
             if (this.element.find('#edition_name').val() != '') {
-                query['f:1 '] = '@'+this.element.find('#edition_name').val() ;
+                query['f:1'] = '@'+this.element.find('#edition_name').val();
             }
             if (this.element.find('#edition_date').val() != '') {
                 query['f:9'] = this.element.find('#edition_date').val();
@@ -1018,8 +1191,6 @@ $.widget("heurist.recordLookupLRC18C", $.heurist.recordAction, {
             if (this.element.find('#estc_no').val() != '') {
                 query['f:254'] = '@'+this.element.find('#estc_no').val();
             }
-            sort_by_key = "'sortby'"
-            query[sort_by_key.slice(1, -1)] = 'f:9:'
 /*
             selectedBF = this.element.find('#select_bf option:selected').text()
             if (selectedBF != null && selectedBF != '' && selectedBF != "Select Book Format") {
@@ -1032,8 +1203,9 @@ $.widget("heurist.recordLookupLRC18C", $.heurist.recordAction, {
             query_string = query;
 
         }else{
+            
             if (this.element.find('#edition_name').val() != '') {
-                edition_name = ' f:1: ' + '"' + this.element.find('#edition_name').val() + '" '
+                edition_name = ' f:1: ' + '"' + this.element.find('#edition_name').val() + '"'
             }
             if (this.element.find('#edition_date').val() != '') {
                 edition_date = ' f:9: ' + '"' + this.element.find('#edition_date').val() + '"'
@@ -1071,10 +1243,9 @@ $.widget("heurist.recordLookupLRC18C", $.heurist.recordAction, {
         console.log("Query String is")
         console.log(query_string);
 
-
         window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent());
 
-        var query_request = {db: 'ESTC_Helsinki_Bibliographic_Metadata', q: query_string};
+        var query_request = {db: 'ESTC_Helsinki_Bibliographic_Metadata', q:query_string};
         var that = this;
         query_request['detail'] = 'details';
         window.hWin.HAPI4.RecordMgr.search(query_request,
@@ -1085,8 +1256,7 @@ $.widget("heurist.recordLookupLRC18C", $.heurist.recordAction, {
                 } else {
                     that._onSearchResult(response);
                 }
-        });
-
+            });
 
     },
     /* Build each Book(Edition) as a record to display list of records that can be selected by the user*/

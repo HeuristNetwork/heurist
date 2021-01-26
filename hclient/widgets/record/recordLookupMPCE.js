@@ -44,6 +44,10 @@ $.widget( "heurist.recordLookupMPCE", $.heurist.recordAction, {
         helpContent: null, //help file in context_help folder
 
     },
+    
+    //constants for RTy and DTy
+    RT_WORK: 56,
+    
 
     //  
     // invoked from _init after loading of html content
@@ -324,7 +328,7 @@ $.widget( "heurist.recordLookupMPCE", $.heurist.recordAction, {
             edit_mode: 'popup',
             selectOnSave: true, // true = select popup will be closed after add/edit is completed
             title: 'Select or Add record',
-            rectype_set: '56', // record type ID, Project Keywords = 56
+            rectype_set: 56, // record type ID, Project Keywords = 56
             pointer_mode: 'browseonly', // options = both, addonly or browseonly, self explanatory
             pointer_filter: null, // initial filter on record lookup, default = none
             parententity: 0,
@@ -526,6 +530,8 @@ $.widget( "heurist.recordLookupMPCE", $.heurist.recordAction, {
     },
 
 });
+//END recordLookupMPCE
+
 
 /*
     Call Add Associated Keyword for each starting Associated Keyword
