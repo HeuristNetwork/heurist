@@ -1842,8 +1842,9 @@ window.hWin.HEURIST4.ui = {
         
         if(info['trm_ID']>0){
             //margin-left:0.5em;
-            sRelBtn = '<div style="display:table-cell;min-width:40px;text-align:right;vertical-align: middle;">'
-                +'<div class="btn-rel"/><div class="btn-del"/></div>';
+            sRelBtn = 
+                '<div style="display:table-cell;min-width:120px;text-align:right;vertical-align: middle;">'
+                +'<div class="btn-edit"/><div class="btn-rel"/><div class="btn-del"/></div>';
         }else if (!isHiddenRecord) {
             sRelBtn = '<div style="display:table-cell;min-width:23px;text-align:right;padding-left:16px;vertical-align: middle;">'
             +'<div class="btn-edit"/></div>';     // data-recID="'+info['rec_ID']+'"
@@ -1904,7 +1905,7 @@ window.hWin.HEURIST4.ui = {
                         
         + '</div>'
                         //record type icon for relmarker
-                        + (reltype==''?'':rectype_icon)                        
+                        //+ (reltype==''?'': '<div class="btn-edit"/>')                        
                         + sRelBtn
                         + '</div>')
         .appendTo($(container));
@@ -1990,20 +1991,28 @@ window.hWin.HEURIST4.ui = {
 
         if(info['relation_recID']>0){
             
-            ele.find('.btn-rel').button({text:false, label:top.HR((isEdit?'Edit':'View')+' relationship record'),
-                            icons:{primary:'ui-icon-pencil'}})
-            .css({'font-size': '0.8em', height: '21px', 'max-width': '18px'})
+            var bele = ele.find('.btn-rel');
+            
+            $('<img src="'+ph_gif+'"  class="rt-icon" style="vertical-align: middle;background-image:url(\''
+                            + top.HAPI4.iconBaseURL + '1\');"/>'
+            +'<span class="ui-button-icon ui-icon ui-icon-pencil" style="margin:0"></span>').appendTo(bele);
+            
+            //.button({text:false, label:top.HR((isEdit?'Edit':'View')+' relationship record'),icons:{primary:'ui-icon-pencil'}})
+            
+            bele.addClass('ui-button').css({'font-size': '0.8em', height: '18px', 'max-width': '40px',
+                'min-width': '40px', display: 'inline-block', padding: 0, background: 'none'})
             .click(function(event){
                 event.preventDefault();
                 
                 var recID = ele.attr('data-relID');
                 window.hWin.HEURIST4.ui.openRecordInPopup(recID, null, isEdit,
-                {selectOnSave:true, edit_obstacle: true, onselect:
+                    {relmarker_field: info['relmarker_field'], relmarker_is_inward: info['is_inward'],
+                    selectOnSave:true, edit_obstacle: true, onselect:
                     function(event, res){
                         if(res && window.hWin.HEURIST4.util.isRecordSet(res.selection)){
                             var recordset = res.selection;
                             var record = recordset.getFirstRecord();
-                            var related_ID = recordset.fld(record, 'rec_ID');                              
+                            var related_ID = recordset.fld(record, 'rec_ID'); //relationship record                             
                             var DT_RELATION_TYPE = window.hWin.HAPI4.sysinfo['dbconst']['DT_RELATION_TYPE'];
                             var DT_RELATED_REC_ID = window.hWin.HAPI4.sysinfo['dbconst']
                                 [info['is_inward']?'DT_PRIMARY_RESOURCE':'DT_TARGET_RESOURCE'];
@@ -2074,14 +2083,32 @@ window.hWin.HEURIST4.ui = {
         var btn_edit = ele.find('div.btn-edit');
         if(btn_edit.length>0){
             
-            if(info['rec_RecTypeID']>0){
             
-            btn_edit.button({text:false, label:top.HR('Edit linked record'),
-                            icons:{primary:'ui-icon-pencil'}})
-                        .attr('data-recID', info['rec_ID'])
-                        .css({'font-size': '0.8em', height: '21px', 'max-width': '18px'})
-                        .click(function(event){
-           
+            //rectype_icon+
+            
+            if(info['rec_RecTypeID']>0){
+                
+                
+                if(info['relation_recID']>0){
+            
+                    $('<img src="'+ph_gif+'"  class="rt-icon" style="vertical-align: middle;background-image:url(\''
+                            + top.HAPI4.iconBaseURL + info['rec_RecTypeID'] + '\');"/>'
+                            +'<span class="ui-button-icon ui-icon ui-icon-pencil" style="margin:0"></span>').appendTo(btn_edit);
+            
+                    btn_edit.addClass('ui-button').css({'font-size': '0.8em', 'height': '18px', 'max-width': '40px',
+                            'min-width': '40px', padding: 0, 'margin-right': '10px', background: 'none'});
+                            
+                }else{
+                    
+                    btn_edit.button({text:false, label:top.HR('Edit linked record'),
+                                    icons:{primary:'ui-icon-pencil'}})
+                                .css({'font-size': '0.8em', height: '21px', 'max-width': '18px'})
+                    
+                }
+                
+                btn_edit
+                    .attr('data-recID', info['rec_ID'])
+                    .click(function(event){
            
             var recID = $(event.target).hasClass('ui-button')
                     ?$(event.target).attr('data-recID')

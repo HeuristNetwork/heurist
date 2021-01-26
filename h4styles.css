@@ -242,7 +242,7 @@ fieldset > div > .header,
 fieldset > div > .header_narrow{
     display:table-cell;
     text-align:right;
-    padding:0.4em 0.4em 0 0;
+    padding:4px 0.4em 0 0;
 }
 fieldset.ontop > div > .header{
     display:block;

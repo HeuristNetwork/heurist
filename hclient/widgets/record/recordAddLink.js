@@ -59,7 +59,10 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
             this.element.find('#div_source2').css('display','inline-block');
         }else{
             this.element.find('#div_source_header').css('vertical-align','top');
-            this.getRecordValue(this.options.source_ID, 'source');            
+            this.getRecordValue(this.options.source_ID, 'source'); 
+            
+            //show hint 
+            this.element.find('#edit_attrib_helper').show();
         }
        
         if(window.hWin.HEURIST4.util.isempty(this.options.target_ID)){
@@ -93,13 +96,15 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
         res[1].text = window.hWin.HR((this.options.source_ID>0)?'Create link':'Create links');
         
         if(this.options.source_ID>0){ //this.options.relmarker_dty_ID>0){
+        
             var that = this;
             //enable for relationships only
             res.splice(1, 0, 
-                 {text:window.hWin.HR('Create link and edit'),
+                 {text:window.hWin.HR('Edit attributes'),
                     id:'btnDoAction2',
                     disabled:'disabled',
-                    css:{'float':'right', 'font-size':'0.82em', 'margin-top':'0.6em', 'padding':'6.1px'},
+                    class: 'ui-button-action',
+                    css:{'float':'right'}, //'font-size':'0.82em', 'margin-top':'0.6em', 'padding':'6.1px' 
                     click: function() { 
                             that._openRelationRecordEditor = true;
                             that.doAction(); 

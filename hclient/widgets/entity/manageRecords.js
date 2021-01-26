@@ -32,10 +32,15 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     _rts_changed_flag: false,
     _resizeTimer: 0,
     
-    //this.options.edit_structure - open edit structure mode at once and work with fake record
-    //this.options.selectOnSave - special case when open edit record from select popup
-    //this.options.allowAdminToolbar  - if false hide ModifyStructure, Edit title mask and others
-    //this.options.rts_editor  - back reference to manageDefRecStructure widget
+    // additional option for this widget
+    // this.options.edit_structure - open edit structure mode at once and work with fake record
+    // this.options.selectOnSave - special case when open edit record from select popup
+    // this.options.allowAdminToolbar  - if false hide ModifyStructure, Edit title mask and others
+    // this.options.rts_editor  - back reference to manageDefRecStructure widget
+    // parententity
+    // relmarker_field - if relationship record is opened from source or target record - constraints are applied
+    // relmarker_is_inward
+
 
     usrPreferences:{},
     defaultPrefs:{
@@ -2492,6 +2497,16 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             // 2. fields from $Db.rst - basefields
             // 3. non - standard fields that are taken from record
             
+            // special case for relationship record - assign constraints 
+            // for reltype selector and target pointer fields
+            var RT_RELATION = window.hWin.HAPI4.sysinfo['dbconst']['RT_RELATION'];
+            var DT_RELATION_TYPE, DT_TARGET_RESOURCE;
+            if(rectypeID == RT_RELATION && that.options.relmarker_field>0){
+                DT_RELATION_TYPE = window.hWin.HAPI4.sysinfo['dbconst']['DT_RELATION_TYPE'];
+                
+                DT_RESOURCE = window.hWin.HAPI4.sysinfo['dbconst']
+                        [that.options.relmarker_is_inward?'DT_PRIMARY_RESOURCE':'DT_TARGET_RESOURCE'];
+            }
        
             //prepare db structure from $Db.rst for editing
             var fields = window.hWin.HEURIST4.util.cloneJSON(that.options.entity.fields); //retuns record header field rec_XXXX
@@ -2518,12 +2533,23 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             // s_fields - sorted 
             // field_in_recset - all fields in record 
             
-            var rst_details = $Db.rst(rectypeID)  //array of dty_ID:rst_ID
+            var rst_details = $Db.rst(rectypeID);  //array of dty_ID:rst_ID
             var s_fields = [];  //sorted fields including hidden fields from record header 
             var fields_ids = []; //fields in structure
             
             if(window.hWin.HEURIST4.util.isRecordSet(rst_details)){
                 rst_details.each2(function(dt_ID, rfr){
+                    
+                        if(rectypeID == RT_RELATION && that.options.relmarker_field>0){
+                            if(dt_ID==DT_RESOURCE){
+                                //constraint for target            
+                                rfr['rst_PtrFilteredIDs'] = $Db.dty(that.options.relmarker_field, 'dty_PtrTargetRectypeIDs');
+                            }else if(dt_ID==DT_RELATION_TYPE){
+                                //constraint for relation vocabulary
+                                rfr['rst_FilteredJsonTermIDTree'] = $Db.dty(that.options.relmarker_field, 'dty_JsonTermIDTree');
+                            }
+                        }
+                    
                         rfr['dt_ID'] = dt_ID;
                         s_fields.push(rfr) //array of json
                         fields_ids.push(Number(dt_ID));  //fields in structure

@@ -190,7 +190,7 @@ $.widget( "heurist.editing_input", {
             
             if(this.detailType=="resource" && this.configMode.entity=='records'){
                 
-                $('<div style="float:right;padding-top:3px;width: 14px;"><span class="ui-icon ui-icon-triangle-1-e"/></div>')                
+                $('<div style="float:right;padding-top:1px;width: 14px;"><span class="ui-icon ui-icon-triangle-1-e"/></div>')                
                     .appendTo( this.header );
                     this.header.css({'padding-right':0, width:154});
                     this.header.find('label').css({display:'inline-block', width: 135});
@@ -876,11 +876,15 @@ $.widget( "heurist.editing_input", {
             
             //allow edit terms only for true defTerms enum and if not DT_RELATION_TYPE
             
-            if(window.hWin.HEURIST4.util.isempty(allTerms) 
-                && (this.options.dtID!=window.hWin.HAPI4.sysinfo['dbconst']['DT_RELATION_TYPE']))
+            if(window.hWin.HEURIST4.util.isempty(allTerms)) 
+                //&& (allTerms!='relation'))  //'this.options.dtID!=window.hWin.HAPI4.sysinfo['dbconst']['DT_RELATION_TYPE']))
             {
-
+                
                 allTerms = this.f('rst_FilteredJsonTermIDTree');        
+            
+                if (!(window.hWin.HEURIST4.util.isempty(allTerms) &&
+                    this.options.dtID==window.hWin.HAPI4.sysinfo['dbconst']['DT_RELATION_TYPE']))
+                { 
 
                 var isVocabulary = !isNaN(Number(allTerms)); 
 
@@ -1093,7 +1097,7 @@ $.widget( "heurist.editing_input", {
                 
                 }} ); //end btn onclick
 
-            
+                }
             }//allow edit terms only for true defTerms enum
             
             
@@ -1156,7 +1160,7 @@ $.widget( "heurist.editing_input", {
             
                 this.options.showclear_button = false;
                 //$inputdiv.css({'display':'inline-block','vertical-align':'middle'});
-                $inputdiv.css({'display': 'table','vertical-align': 'middle', 'border-spacing': '0px 4px'});
+                $inputdiv.css({'display': 'table','vertical-align': 'middle', 'border-spacing': '0px'}); //was '0px 4px'
             
                 if(this.inputs.length==0){ //show current relations
                 
@@ -1189,7 +1193,8 @@ $.widget( "heurist.editing_input", {
                                     if(context && context.count>0){
                                         
                                         var link_info = isInwardRelation?context.source:context.target;
-                                        link_info.relation_recID = context.relation_recID;
+                                        link_info.relation_recID = context.relation_recID; //existing relationship record
+                                        link_info.relmarker_field = that.options.dtID;
                                         link_info.trm_ID = context.trm_ID;
                                         link_info.is_inward = isInwardRelation;
                                         
@@ -1267,6 +1272,7 @@ $.widget( "heurist.editing_input", {
                                                  rec_Title: headers[targetID][0], 
                                                  rec_RecTypeID: headers[targetID][1], 
                                                  relation_recID: direct[k]['relationID'], 
+                                                 relmarker_field: that.options.dtID,
                                                  trm_ID: direct[k]['trmID'],
                                                  dtl_StartDate: direct[k]['dtl_StartDate'], 
                                                  dtl_EndDate: direct[k]['dtl_EndDate'],
@@ -1324,6 +1330,7 @@ $.widget( "heurist.editing_input", {
                                                  rec_Title: headers[targetID][0], 
                                                  rec_RecTypeID: targetRectypeID, 
                                                  relation_recID: reverse[k]['relationID'], 
+                                                 relmarker_field: that.options.dtID,
                                                  trm_ID: reverse[k]['trmID'], //invTermID,
                                                  dtl_StartDate: reverse[k]['dtl_StartDate'], 
                                                  dtl_EndDate: reverse[k]['dtl_EndDate'],
@@ -3186,13 +3193,17 @@ console.log('onpaste');
         }else{ //this is usual enumeration from defTerms
 
             var headerTerms = '';
-            if(this.options.dtID==window.hWin.HAPI4.sysinfo['dbconst']['DT_RELATION_TYPE']){ //specific behaviour - show all
+            allTerms = this.f('rst_FilteredJsonTermIDTree');        
+            //headerTerms - disabled terms
+            headerTerms = this.f('rst_TermIDTreeNonSelectableIDs') || this.f('dty_TermIDTreeNonSelectableIDs');
+            
+            if(window.hWin.HEURIST4.util.isempty(allTerms) &&
+               this.options.dtID==window.hWin.HAPI4.sysinfo['dbconst']['DT_RELATION_TYPE'])
+            { //specific behaviour - show all
                 allTerms = 'relation'; //show all possible relations
-            }else{
-                allTerms = this.f('rst_FilteredJsonTermIDTree');        
-                //headerTerms - disabled terms
-                headerTerms = this.f('rst_TermIDTreeNonSelectableIDs') || this.f('dty_TermIDTreeNonSelectableIDs');
             }
+            
+            
             var dt_type = this.detailType;
             var topOptions = true;
             if(!window.hWin.HEURIST4.util.isempty(this.f('dty_Type'))){
