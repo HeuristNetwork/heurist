@@ -2002,6 +2002,8 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
            popup_dialog_options.menu_container.find('ul').show();
            popup_dialog_options.menu_container.find('ul.for_web_site').hide();
            popup_dialog_options.menu_container.find('ul.for_web_page').hide();
+           popup_dialog_options.menu_container.find('span.ui-icon-circle-b-close').hide();
+           popup_dialog_options.menu_container.find('span.ui-icon-circle-b-help').show();
         }
         if(this.isResultSetEmpty()) return false;
     

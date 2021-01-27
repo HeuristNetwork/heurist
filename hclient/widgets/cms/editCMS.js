@@ -132,6 +132,8 @@ function editCMS( options ){
             options.menu_container.find('ul').hide();
             //show cms
             options.menu_container.find('ul.for_web_site').show();
+            options.menu_container.find('span.ui-icon-circle-b-close').show();
+            options.menu_container.find('span.ui-icon-circle-b-help').hide();
         }
         
         options.container.empty();
@@ -484,11 +486,13 @@ function editCMS( options ){
                                         if(web_link)
                                         web_link.html('<b>Website URL:</b>&nbsp;<a href="'+url+'" target="_blank" style="color:blue">'+url+'</a>');
                                         
-                                        edit_dialog.find('#btn_exit').button({icon:'ui-icon-arrowthick-1-w'}).click( closeCMSEditor );
+                                        edit_dialog.find('#btn_exit').button({icon:'ui-icon-circle-b-close'}).click( closeCMSEditor );
                                         
                                         
                                         if(options.menu_container){ //init menu items
                                             
+                                            options.menu_container.find('span.ui-icon-circle-b-close').click( closeCMSEditor );
+
                                             options.menu_container.find('li[data-cms-action]').each(
                                                 function(i,item){
                                                     var li = $(item);
@@ -952,9 +956,11 @@ function editCMS( options ){
             if(web_link)
             web_link.html('<b>Webpage URL:</b>&nbsp;<a href="'+url+'" target="_blank" style="color:blue">'+url+'</a>');
             
-            edit_dialog.find('#btn_exit').button({icon:'ui-icon-arrowthick-1-w'}).click( closeCMSEditor );
+            edit_dialog.find('#btn_exit').button({icon:'ui-icon-circle-b-close'}).click( closeCMSEditor );
             
             if(options.menu_container){ //init menu items
+            
+                options.menu_container.find('span.ui-icon-circle-b-close').click( closeCMSEditor );
                 
                 options.menu_container.find('li[data-cms-action]').each(
                     function(i,item){
@@ -1090,6 +1096,9 @@ function editCMS( options ){
                     //show cms
                     options.menu_container.find('ul.for_web_site').hide();
                     options.menu_container.find('ul.for_web_page').hide();
+                    options.menu_container.find('span.ui-icon-circle-b-close').hide();
+                    options.menu_container.find('span.ui-icon-circle-b-help').show();
+                    
                 }
             }
         }
