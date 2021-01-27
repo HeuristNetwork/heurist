@@ -75,6 +75,25 @@
 <fieldset>
 
 <div>
+    <div class="header"><label>Sort by</label></div>
+    <select class="text ui-widget-content ui-corner-all sa_sortby" style="min-width:220px;margin:4px 0px;">
+            <option value="">define order...</option>
+            <option value="t">record title</option>
+            <option value="id">record id</option>
+            <option value="u">record URL</option>
+            <option value="m">date modified</option>
+            <option value="a">date added</option>
+            <option value="r">personal rating</option>
+            <option value="p">popularity</option>
+    </select>&nbsp;&nbsp;
+    <select class="text ui-widget-content ui-corner-all sa_sortasc" style="min-width:220px;margin:0;">
+        <option value="0">Ascending (A..Z, 1..9)</option>
+        <option value="1">Descending (Z..A, 9..1)</option>
+    </select>
+</div>
+
+
+<div>
     <div class="header">
         <label for="svs_SpatialFilter">Show spatial filter</label>
     </div>

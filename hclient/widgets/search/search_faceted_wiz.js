@@ -735,7 +735,7 @@ $.widget( "heurist.search_faceted_wiz", {
             var svs_rules = $dlg.find('#svs_Rules');
             var svs_rules_only = $dlg.find('#svs_RulesOnly');
             var svs_filter = $dlg.find('#svs_Query'); //preliminary query
-            
+
             this._on(svs_filter,{keyup:function(){                                 
                         if(svs_filter.val()!=''){
                             $dlg.find('.prefilter-settings').show();    
@@ -885,6 +885,17 @@ $.widget( "heurist.search_faceted_wiz", {
                 $dlg.find('#svs_ExitButton').prop('checked', this.options.params.ui_exit_button!==false);
                 $dlg.find('#svs_ExitButtonLabel').val(this.options.params.ui_exit_button_label);
                 
+                if(this.options.params.sort_order){
+                    var s = this.options.params.sort_order;
+                    if(s.indexOf('-')==0){
+                        $dlg.find('.sa_sortasc').val(1);    
+                        s = s.substr(1);
+                    }
+                    $dlg.find('.sa_sortby').val(s)
+                }else{
+                    $dlg.find('.sa_sortby').val('')
+                }
+                
             }else{ //add new saved search
                 this.originalRectypeID == null;
 
@@ -915,6 +926,8 @@ $.widget( "heurist.search_faceted_wiz", {
                 
                 $dlg.find('#svs_ExitButton').prop('checked', true);
                 $dlg.find('#svs_ExitButtonLabel').val('');
+                
+                $dlg.find('.sa_sortby').val('')
                 
                 this.select_main_rectype.val('');
                 if(this.select_main_rectype.hSelect('instance')){
@@ -1937,6 +1950,13 @@ $.widget( "heurist.search_faceted_wiz", {
         this.options.params.ui_exit_button = $dlg.find('#svs_ExitButton').is(':checked');
         this.options.params.ui_exit_button_label = $dlg.find('#svs_ExitButtonLabel').val();
 
+        var s = $dlg.find('.sa_sortby').val();
+        if(s!=''){
+            this.options.params.sort_order = ($dlg.find('.sa_sortasc').val()==1?'-':'')+s;    
+        }else{
+            this.options.params.sort_order = null;
+        }
+        
         var svs_ugrid = svs_ugrid.val();
         if(parseInt(svs_ugrid)>0){
             this.options.params.domain = 'all';
