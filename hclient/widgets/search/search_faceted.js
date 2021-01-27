@@ -136,8 +136,8 @@ $.widget( "heurist.search_faceted", {
     _MIN_DROPDOWN_CONTENT: 50,//0, //min number in dropdown selector, otherwise facet values are displayed in explicit list
     _FT_INPUT: 0,  //direct search input
     _FT_SELECT: 1, //slider for numeric and date  (for freetext it is considered as _FT_LIST)
-    _FT_LIST: 2,
-    _FT_COLUMN: 3,
+    _FT_LIST: 2,    //list view mode  
+    _FT_COLUMN: 3,  //wrapped list view mode
 
     
     // default options
@@ -1734,6 +1734,13 @@ $.widget( "heurist.search_faceted", {
                     
                     if(field['type']=='enum' && field['groupby']!='firstlevel'){
                         
+                        var is_first_level = false;
+                        if(!field['step0_vals']){
+                            //keep all terms with values for first level
+                            field['step0_vals'] = {};  
+                            is_first_level = true;
+                        } 
+                        
                         //enumeration
                         var dtID = field['id'];  
                         var vocab_id = $Db.dty(dtID, 'dty_JsonTermIDTree');    
@@ -1796,7 +1803,9 @@ if(!(vocab_id>0)){
                                             
                                         }else{
                                         //SELECTOR/DROPDOWN
-                                            that._createOption( facet_index, level, {title:term.title, value:term.value, count:term.count} ).appendTo($container);
+                                            that._createOption( facet_index, level, {title:term.title, 
+                                                value:term.value, 
+                                                count:term.count} ).appendTo($container);
                                         }
                                 }
                                 if(term.children){
@@ -1888,14 +1897,25 @@ if(!(vocab_id>0)){
 
                                         //res_count++;
                                 }else{
-                                    
                                         //term.value_0 = null;
                                         //term.count_0 = 0;
+                                        var val = term.termssearch ?term.termssearch :term.key;
                                         if(res_count>0){
-                                            term.value = term.termssearch?term.termssearch:term.key;
+                                            term.value = val;
                                             term.count = res_count;
+                                            
+                                            if(is_first_level && val && field['multisel']){
+                                                //keep counts for level 0 - to show all terms for multisel mode
+                                                field['step0_vals'][val] = 1;
+                                            }
+                                            
                                         }else{
-                                            term.value = null;
+                                            if(!is_first_level && field['step0_vals'][val]>0){
+                                                term.value = val;
+                                            }else{
+                                                term.value = null;
+                                            }
+                                            
                                             term.count = 0;
                                         }
                                     
@@ -1911,8 +1931,18 @@ if(!(vocab_id>0)){
                                     term.value = termData.value;
                                     term.count = termData.count;
                                     res_count = 1; 
+                                    
+                                    if(is_first_level && field['multisel']){
+                                        //keep counts for level 0 - to show all terms for multisel mode
+                                        field['step0_vals'][term.value] = 1;
+                                    }
+                                    
                                 }else{
-                                    term.value = null;
+                                    if(!is_first_level && field['step0_vals'][term.key]>0){
+                                        term.value = term.key;
+                                    }else{
+                                        term.value = null;
+                                    }
                                     term.count = 0;
                                 }
                             }
@@ -1935,7 +1965,7 @@ if(!(vocab_id>0)){
                         }                        
 
                         if (field['isfacet']==this._FT_COLUMN || field['isfacet']==this._FT_LIST) {
-                                __drawTerm(term, 0, $facet_values, field);
+                                __drawTerm(term, 0, $facet_values, field); //term is a tree for vocabulary
                                 
                                 //show viewport collapse/exand control
                                 if(this.options.params.viewport<terms_drawn){
@@ -2496,7 +2526,7 @@ if(!(vocab_id>0)){
         return f_link;
     }
     
-    , _onTermSelect:function(event){
+    , _onTermSelect: function(event){
         
                 var link = $(event.target).find( "option:selected" );
                 var facet_index = Number(link.attr('facet_index'));
@@ -2521,7 +2551,7 @@ if(!(vocab_id>0)){
     }
 
     // cterm - {title, value, count}
-    ,_createFacetLink : function(facet_index, cterm, display_mode){
+    ,_createFacetLink: function(facet_index, cterm, display_mode){
 
         var field = this.options.params.facets[facet_index];
         //var step = cterm.step;
@@ -2561,7 +2591,12 @@ if(!(vocab_id>0)){
             }
             
             if(!window.hWin.HEURIST4.util.isempty(currval)){
-                iscurrent = (currval == cterm.value);
+                
+                if(field.multisel){
+                    iscurrent = (window.hWin.HEURIST4.util.findArrayIndex(cterm.value, currval.split(','))>=0);
+                }else{
+                    iscurrent = (currval == cterm.value);    
+                }
                 if(iscurrent) 
                     //do not highlight if initals selected
                     //|| (currval.length==2 &&  currval.substr(1,1)=='%' && currval.substr(0,1)==cterm.value.substr(0,1)) )
@@ -2596,7 +2631,7 @@ if(!(vocab_id>0)){
             }
         }
         
-        if(!iscurrent || cterm.count=='reset'){ 
+        if( field.multisel || !iscurrent || cterm.count=='reset'){ 
 
         var that = this;
 
@@ -2614,6 +2649,20 @@ if(!(vocab_id>0)){
                 if(window.hWin.HEURIST4.util.isempty(value)){
                     value = '';
                     field.selectedvalue = null;
+                }else if(field.multisel && field.selectedvalue!=null){
+                    
+                    var vals = field.selectedvalue.value.split(',');
+                    var k = window.hWin.HEURIST4.util.findArrayIndex(value, vals);
+                    if(k<0){ //add
+                        vals.push(value);
+                    }else{ //remove
+                        vals.splice(k,1);
+                    }
+                    if(value.length==0){
+                        field.selectedvalue = null;
+                    }else{
+                        field.selectedvalue.value = vals.join(',');    
+                    }
                 }else{
                     field.selectedvalue = {title:label, value:value, step:step};                    
                 }
