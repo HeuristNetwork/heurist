@@ -663,12 +663,15 @@ EOD;
                 $defs['detailtypes'] = dbs_GetDetailTypes(self::$system, null, 2);
                         
             }else{
-           
                 //Finds all defintions to be imported
                 $res2 = $importDef->doPrepare(  array('defType'=>'rectype', 
                             'databaseID'=>@$data['heurist']['database']['id'], 
                             'definitionID'=>array_keys($imp_rectypes), //array of record type source ids
                             'rectypes'=>$imp_rectypes ));
+                            
+                //get target definitions (this database)
+                $defs = $importDef->getDefinitions();
+           
             }
                         
             if(!$res2){
@@ -678,10 +681,8 @@ EOD;
                     return false;
                 }
                 self::$system->clearError();  
-                
-                //get target definitions (this database)
-                $defs = $importDef->getDefinitions();
             }  
+            
         }
         
         $def_dts  = $defs['detailtypes']['typedefs'];
