@@ -1389,6 +1389,7 @@ $.widget( "heurist.search_faceted_wiz", {
                             title: old_facet.title,
                             help: old_facet.help,
                             isfacet: old_facet.isfacet,
+                            multisel: old_facet.multisel,
                             groupby: old_facet.groupby,
                             type: node.data.type,
                             order: old_facet.order>=0?old_facet.order:order_for_new
