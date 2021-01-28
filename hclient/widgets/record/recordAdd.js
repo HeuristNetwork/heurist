@@ -1,6 +1,8 @@
 /**
 /**
-* recordAccess.js - apply ownership and access rights
+* recordAdd.js - two modes - list of all rectypes to add 
+*                and based on recordAccess dialog  (isExpanded - true)  
+*                to define default new record params and add new record 
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -32,7 +34,7 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
         currentRecTags: null,
         scope_types: 'none',
         get_params_only: false,
-        isExpanded: false
+        isExpanded: false  //false - show list, true - show preferences dialog
     },
     
     rectype_list:null,
@@ -75,6 +77,15 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
             this._innerTitle = $('<div class="ui-heurist-header" style="top:0px;">'+this.options.title+'</div>')
                 .insertBefore($dlg); // menu-text
 //'<span class="ui-icon ui-icon-gear" style="cursor:pointer;float:right;margin:0px 6px">Define parameters</span>                
+
+            this.closeBtn = $('<button>').button({icon:'ui-icon-closethick',showLabel:false, label:'Close'}) 
+                     .css({'position':'absolute', 'right':'4px', 'top':'6px', height:24, width:24})
+                     .addClass('ui-fade-color')
+                     .insertBefore($dlg);
+            this._on(this.closeBtn, {click:function(){
+                         this.closeDialog();
+                     }});
+
                 
             //toolbar for control buttons                    
             this._toolbar = $('<div><div class="ui-dialog-buttonset" style="text-align:right">'
@@ -92,9 +103,9 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
                 .show(), {click:this.doAction});
             this._on(this.element.find('#btnAddRecordInNewWin').button({icon:'ui-icon-extlink', 
                     label:window.hWin.HR('Add Record in New Window'), showLabel:false })
-                    .css({background:'revert', margin:'0 4px'})
+                    .css({margin:'0 24px 0 4px'}) //background:'revert', 
                     .show(), {click:this.doAction});
-            this._on(this.element.find('#btnSavePreferences').button({label: window.hWin.HR('Save').toUpperCase() })
+            this._on(this.element.find('#btnSavePreferences').button({label: window.hWin.HR('Save Settings').toUpperCase() })
                 .show(), {click:this.doAction});
 
                 
@@ -148,13 +159,15 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
                 */
         }
             //function(event){that.doAction(event)} );
-        
-        $('#div_more_options').show();
-        $('#btn_more_options').click(function(){
-            $('.add_record').show();
-            $('#div_more_options').hide();
-        })
-        
+
+        this.element.find('#div_more_options').show();
+        this._on(this.element.find('#btn_more_options'),{click:function(){
+            this.element.find('.add_record').show();
+            this.element.find('#div_more_options').hide();
+            this.element.parent().height('auto');
+            
+            this._adjustHeight();
+        }});
         
         window.hWin.HEURIST4.ui.showEntityDialog('usrTags', {
                 isdialog : false,
@@ -197,6 +210,14 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
         return this._super();
     },
     
+    _adjustHeight:function(){
+                var ele = this.element.find('#txt_add_link');
+                var t1 = ele.offset().top;
+                var t2 = this.element.find('.ent_footer').offset().top;
+                var h = Math.max(t2-t1-40,40);
+                ele.height(h);                
+    },
+    
     //
     //
     //    
@@ -207,20 +228,29 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
         var $dlg = this.element.children('fieldset');
         //var $icon = this.element.find('.ui-heurist-header > span.ui-icon');
         
-        if(is_expand){
+        if(is_expand){ //show preferences dialog
+            
             this._toolbar.show();
             this.rectype_list.hide();
             this.expandBtn.hide();
-            $dlg.css('bottom','40px').show();
-            this.element.parent().width(500);
+            this.closeBtn.show();
+            $dlg.css('bottom','40px').show(); //space to show button toolbar
+            this.element.parent().width(500).height(450);
             //$icon.css('float','left').removeClass('ui-icon-gear').addClass('ui-icon-carat-2-w');
             this._innerTitle.text('Record addition settings');
+
+            this.element.find('#div_more_options').show();
+            this.element.find('.add_record').hide()
+        
         }else{
+             //show record type list
+            
             this._toolbar.hide();
             this.rectype_list.show();
             this.expandBtn.show();
+            this.closeBtn.hide();
             $dlg.css('bottom','2px').hide();
-            this.element.parent().width(200);
+            this.element.parent().width(200).height('auto');
             //$icon.css('float','right').removeClass('ui-icon-carat-2-w').addClass('ui-icon-gear');
             this._innerTitle.text('Add Record');
         }    
@@ -296,8 +326,9 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
             if(action=='btnSavePreferences'){
                 
             }else if(action=='btnAddRecordInNewWin'){
-                var url = $('#txt_add_link').val();
-                window.open(url, '_blank');
+                var url = this._onRecordScopeChange();
+//                $('#txt_add_link').val();
+               window.open(url, '_blank');
             }else{
                 window.hWin.HEURIST4.ui.openRecordEdit(-1, null, {new_record_params:new_record_params});    
             }
@@ -441,6 +472,7 @@ $.widget( "heurist.recordAdd", $.heurist.recordAccess, {
         }
         $('#txt_add_link').val(url);
         
+        return url;
         
     }
     

@@ -29,11 +29,15 @@ $.widget( "heurist.manageUsrBookmarks", $.heurist.manageEntity, {
     
     _init: function() {
         
+        if(!this.options.default_palette_class){
+            this.options.default_palette_class = 'ui-heurist-admin';   
+        }
+        
         this.options.edit_mode = 'editonly';
         this.options.select_mode = 'manager';
         this.options.layout_mode = 'editonly';
         this.options.width = 620;
-        this.options.height = 320;
+        if(!(this.options.height>0)) this.options.height = 410;
         
 
         this._super();
@@ -94,7 +98,7 @@ $.widget( "heurist.manageUsrBookmarks", $.heurist.manageEntity, {
                 btns[idx].text = window.hWin.HR('Delete bookmark');
                 /*btns[idx].click = function(){
                         window.hWin.HEURIST4.msg.showMsgDlg(
-            'Are you sure you wish to delete this bookmark? Proceed?', function(){
+            'Are you sure you wish to delete this bookmark?', function(){
                 that._deleteAndClose();
                 }, {title:'Warning',yes:'Proceed',no:'Cancel'});        
                 }*/
@@ -113,7 +117,7 @@ $.widget( "heurist.manageUsrBookmarks", $.heurist.manageEntity, {
         }else{
             var that = this;
             window.hWin.HEURIST4.msg.showMsgDlg(
-                'Are you sure you wish to delete this bookmark? Proceed?', function(){ that._deleteAndClose(true) }, 
+                'Are you sure you wish to delete this bookmark?', function(){ that._deleteAndClose(true) }, 
                 {title:'Warning',yes:'Proceed',no:'Cancel'});        
         }
     },

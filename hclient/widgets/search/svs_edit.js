@@ -25,7 +25,8 @@ function hSvsEdit(args) {
     edit_dialog = null,
     keep_values = {'svs_Name':'','svs_Query':'','svs_UGrpID':'','svs_Rules':'','svs_RulesOnly':false,'svs_Notes':'','svs_ViewMode':''},
     _save_in_porgress = false,
-    callback_method;
+    callback_method,
+    _menu_locked;
 
     /**
     * Initialization
@@ -41,10 +42,11 @@ function hSvsEdit(args) {
 
         var $dlg = edit_dialog;
         if($dlg){
-            
-            for (var key in Object.keys(keep_values)){
+            var keys = Object.keys(keep_values);
+            for (var idx in keys){
+                var key = keys[idx];
                 var ele = $dlg.find('#'+key);
-                if(keep_values[key] !== (ele.attr('type')=='checkbox')?ele.is(':checked'):ele.val()){
+                if(keep_values[key] !== ((ele.attr('type')=='checkbox')?ele.is(':checked'):ele.val())){
                     return true;
                 }
             }
@@ -212,7 +214,7 @@ function hSvsEdit(args) {
     function _showSearchFacetedWizard ( params ){
 
         if($.isFunction($('body').search_faceted_wiz)){ //already loaded
-            showSearchFacetedWizard(params);  //this function from search_faceted_wiz.js
+            return showSearchFacetedWizard(params);  //this function from search_faceted_wiz.js
         }else{
             $.getScript(window.hWin.HAPI4.baseURL+'hclient/widgets/search/search_faceted_wiz.js', 
                         function(){ showSearchFacetedWizard(params); } );
@@ -293,6 +295,7 @@ function hSvsEdit(args) {
         is_modal = (is_modal!==false);
         is_h6style = (is_h6style===true);
         reset_svs_edit = (reset_svs_edit!==false);
+        _menu_locked = menu_locked;
         
         //var is_h6style = (window.hWin.HAPI4.sysinfo['layout']!='H5Default');
 
@@ -372,7 +375,7 @@ function hSvsEdit(args) {
                         is_h6style:is_h6style, is_modal:is_modal, menu_locked:menu_locked };
                         
             if(!facet_params) opts.params = facet_params;
-            _showSearchFacetedWizard( opts );
+            return _showSearchFacetedWizard( opts );
                         
             //function(event, request){   that._updateAfterSave(request, 'faceted');
 
@@ -392,7 +395,7 @@ function hSvsEdit(args) {
         }else if(null == edit_dialog){
             //create new dialog
 
-            var $dlg = edit_dialog = $( "<div>" ).addClass('ui-heurist-bg-light').appendTo(  $('body') );
+            var $dlg = edit_dialog = $( "<div>" ).addClass('save-filter-dialog ui-heurist-bg-light').appendTo(  $('body') );
 
             //load edit dialogue
             $dlg.load(window.hWin.HAPI4.baseURL+"hclient/widgets/search/svs_edit.html?t="+(new Date().time), function(){
@@ -411,7 +414,20 @@ function hSvsEdit(args) {
                 .click(function( event ) {
                     //that.
                     
-                    var dlg_options = is_h6style?{is_h6style:true}:null;
+                    var dlg_options = null;
+                    if(is_h6style){
+                        dlg_options = {
+                            is_h6style:true, 
+                            close:function(){
+                                if(menu_locked && $.isFunction(menu_locked)){
+                                    menu_locked.call( this, false, false); //unlock
+                                }
+                            }
+                            };
+                    }
+                    if(menu_locked && $.isFunction(menu_locked)){
+                        menu_locked.call( this, true, false); //lock
+                    }
                     
                     _editRules( $dlg.find('#svs_Rules'), $dlg.find('#svs_Rules2'), '', groupID, dlg_options);
                 });
@@ -469,13 +485,29 @@ function hSvsEdit(args) {
                             for (var id in window.hWin.HAPI4.currentUser.usr_SavedSearch){
                                 var svs = window.hWin.HAPI4.currentUser.usr_SavedSearch[id];
                                 if(svs[_NAME]==svs_name.val() && svs[_GRPID]==svs_ugrid && id!=svs_id.val()){
+                                    
+                                    if(menu_locked && $.isFunction(menu_locked)){
+                                        menu_locked.call( this, true, false); //unlock
+                                    }
+                                    
                                     var $mdlg = window.hWin.HEURIST4.msg.showMsgDlg('Filter with such name already exists in group',
                                     [
                                       {text:'Replace existing', click: function(){ 
                                             svs_id.val(id);
                                             __doSave(false), 
-                                            $mdlg.dialog( "close" );}},
-                                      {text:'Cancel', click: function(){ $mdlg.dialog( "close" ); svs_name.focus() }}
+                                            $mdlg.dialog( "close" );
+                                            
+                                            if(menu_locked && $.isFunction(menu_locked)){
+                                                menu_locked.call( this, false, false); //unlock
+                                            }
+                                      }},
+                                      {text:'Cancel', click: function(){ 
+                                            $mdlg.dialog( "close" ); 
+                                            svs_name.focus();
+                                            if(menu_locked && $.isFunction(menu_locked)){
+                                                menu_locked.call( this, false, false); //unlock
+                                            }
+                                      }}
                                     ]
                                     );
                                     return;
@@ -606,7 +638,7 @@ function hSvsEdit(args) {
                 });
                 
                 
-                $dlg.dialog({
+                edit_dialog = $dlg.dialog({
                     autoOpen: false,
                     height: is_short?360:520,
                     width: 650,                                                                                               
@@ -628,6 +660,13 @@ function hSvsEdit(args) {
                     ],
                     close: function() {
                         allFields.removeClass( "ui-state-error" );
+                        if(!isRules && menu_locked && $.isFunction(menu_locked)){
+                                menu_locked.call( this, 'close'); //is_locked, is_mouseleave    
+                        }
+                    },
+                    show: {
+                        effect: 'fade',
+                        duration: 500
                     }
                 });
                 
@@ -644,7 +683,10 @@ function hSvsEdit(args) {
                 }
                 if($.isFunction(menu_locked)){  //@todo add call on open rulebuilder
                     $dlg.parent('.ui-dialog').on({
-                        mouseover:function(){ menu_locked.call( this, false, false );},
+                        mouseover:function(){ 
+                            var is_mod = _isModified();
+                            menu_locked.call( this, is_mod?'delay':false, false ); //is_locked, is_mouseleave
+                        },  
                         mouseleave: function(e){ menu_locked.call( this, false, true ) }}); //that.closeEditDialog();
                 }
 
@@ -699,16 +741,16 @@ function hSvsEdit(args) {
         //
         isModified: function(){
             if(edit_dialog && edit_dialog.dialog('instance') && edit_dialog.dialog('isOpen')){
-//console.log('>>>>'+_isModified());                
-                //return _isModified();    
-                return true;
+
+                return _isModified();    
+                //return true;
             }else{
                 return false;
             }
         },
 
         closeEditDialog: function () {
-            if(edit_dialog && edit_dialog.dialog('instance')){
+            if(edit_dialog && edit_dialog.dialog('instance')){  
                 edit_dialog.dialog("close");    
             }
         },
@@ -716,7 +758,8 @@ function hSvsEdit(args) {
         showSavedFilterEditDialog: function( mode, groupID, svsID, squery, is_short, 
                     position, callback, is_modal, is_h6style, menu_locked, reset_svs_edit ) 
         {
-            return _showDialog( mode, groupID, svsID, squery, is_short, position, callback, is_modal, is_h6style, menu_locked, reset_svs_edit );
+            return _showDialog( mode, groupID, svsID, squery, is_short, position, 
+                        callback, is_modal, is_h6style, menu_locked, reset_svs_edit );
         }
         
     }

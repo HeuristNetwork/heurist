@@ -474,7 +474,7 @@ class DbUtils {
         $warnings[] = folderCreate2($database_folder. '/html-output', 'used to write published records as generic html files', true);
         $warnings[] = folderCreate2($database_folder. '/generated-reports', 'used to write generated reports');
         $warnings[] = folderCreate2($database_folder. '/backup', 'used to write files for user data dump');
-        $warnings[] = folderCreate2($database_folder. '/term-images', 'used for images illustrating terms'); //DH only, todo move to entity
+        $warnings[] = folderCreate2($database_folder. '/term-images', 'used for images illustrating terms'); //Digital Harlem only, todo move to entity
         
         //remove empty warns
         $warnings = array_filter($warnings, function($value) { return $value !== ''; });
@@ -614,11 +614,11 @@ class DbUtils {
                 //$isCloneTemplate
                 $exception_for_clone_template = array('sysugrps','sysusrgrplinks',
                 'woot_chunkpermissions','woot_chunks','woot_recpermissions','woots',
-                'usrreminders','usrremindersblocklist','recthreadedcomments','usrrecentrecords','usrreportschedule','usrhyperlinkfilters');
+                'usrreminders','usrremindersblocklist','recthreadedcomments','usrrecentrecords','usrreportschedule','usrhyperlinkfilters', 'sysarchive');
                 
                 $data_tables = array('records','recdetails','reclinks','recrelationshipscache',
                 'recsimilarbutnotdupes','recthreadedcomments','recuploadedfiles','usrbookmarks','usrrecentrecords','usrrectaglinks',
-                'usrreminders','usrremindersblocklist','woot_chunkpermissions','woot_chunks','woot_recpermissions','woots');
+                'usrreminders','usrremindersblocklist','woot_chunkpermissions','woot_chunks','woot_recpermissions','woots', 'sysarchive');
           
                 
                 $tables = $mysqli->query("SHOW TABLES");  //get all tables from target db

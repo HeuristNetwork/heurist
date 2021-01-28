@@ -134,7 +134,7 @@ $('#btnDelete').on({click:function(){
                        ,null, 'Database deleted',
                        {
                             width:700,
-                            height:180,
+                            height:'auto',
                             close: function(){
                                 //redirects to startup page - list of all databases
                                 window.hWin.document.location = window.hWin.HAPI4.baseURL; //startup page

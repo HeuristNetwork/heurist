@@ -164,6 +164,13 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
             if(!this.element.find('#chb_show_all_groups').is(':checked'))
                 this.startSearch();
                 //this.element.find('#input_search_group').val(value).change();
+                
+                if(value==$Db.getTrashGroupId('rtg')){
+                    this.btn_add_record.hide();
+                }else{
+                    this.btn_add_record.show();
+                }
+                
         }
     },
     
@@ -192,7 +199,7 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
             popele.find('input[name="'+val+'"]').prop('checked', 'checked');    
         });
         popele.find('input[name="name"]').prop('checked', 'checked');
-        popele.find('input[name="editstr"]').prop('checked', 'checked');
+        popele.find('input[name="edit"]').prop('checked', 'checked');
         
         //sort
         var cnt = flist.children().length;
@@ -220,7 +227,7 @@ $.widget( "heurist.searchDefRecTypes", $.heurist.searchEntity, {
                         fields.push($(item).attr('name'));
                     });*/
                     flist.find('input[name="name"]').prop('checked', 'checked');
-                    flist.find('input[name="editstr"]').prop('checked', 'checked');
+                    flist.find('input[name="edit"]').prop('checked', 'checked');
                     flist.children().each(function(idx,item){
                         var item = $(item).find('input');
                         if(item.is(':checked')){

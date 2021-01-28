@@ -86,7 +86,7 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
     </head>
 
 
-    <body class="popup ui-heurist-import" style="margin:0 !important; color:black;"">
+    <body class="popup ui-heurist-populate" style="margin:0 !important; color:black;"">
 
         <div class="banner">
             <h2>FILE MANAGEMENT</h2>
@@ -255,7 +255,7 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
                 <label><input type="checkbox" checked=checked onchange="setUploadEntireFolder()">
                     Upload directory and keep its structure on server side
                 </label>
-                <label style="font-size:smaller;font-style:italic"> (If you want to maintain the directory structure, you must use Chrome or FireFox browser)</label>
+                <label style="font-size:smaller;font-style:italic"> To maintain the directory structure, you should use Chrome or FireFox</label>
                 <br>
                 <br>
                 <div class="fileupload-buttons">

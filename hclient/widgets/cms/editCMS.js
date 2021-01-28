@@ -30,7 +30,7 @@ function editCMS( options ){
      DT_CMS_TOP_MENU = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_TOP_MENU'],
      DT_CMS_MENU  = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_MENU'],
 //     DT_CMS_THEME = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_THEME'],
-     DT_NAME       = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'];
+     DT_NAME       = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'],
      DT_CMS_HEADER = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_HEADER'];
      
      if(!(RT_CMS_HOME>0 && RT_CMS_MENU>0 && DT_CMS_TOP_MENU>0 && DT_CMS_MENU>0)){
@@ -132,6 +132,8 @@ function editCMS( options ){
             options.menu_container.find('ul').hide();
             //show cms
             options.menu_container.find('ul.for_web_site').show();
+            options.menu_container.find('span.ui-icon-circle-b-close').show();
+            options.menu_container.find('span.ui-icon-circle-b-help').hide();
         }
         
         options.container.empty();
@@ -484,11 +486,13 @@ function editCMS( options ){
                                         if(web_link)
                                         web_link.html('<b>Website URL:</b>&nbsp;<a href="'+url+'" target="_blank" style="color:blue">'+url+'</a>');
                                         
-                                        edit_dialog.find('#btn_exit').button({icon:'ui-icon-arrowthick-1-w'}).click( closeCMSEditor );
+                                        edit_dialog.find('#btn_exit').button({icon:'ui-icon-circle-b-close'}).click( closeCMSEditor );
                                         
                                         
                                         if(options.menu_container){ //init menu items
                                             
+                                            options.menu_container.find('span.ui-icon-circle-b-close').click( closeCMSEditor );
+
                                             options.menu_container.find('li[data-cms-action]').each(
                                                 function(i,item){
                                                     var li = $(item);
@@ -952,9 +956,11 @@ function editCMS( options ){
             if(web_link)
             web_link.html('<b>Webpage URL:</b>&nbsp;<a href="'+url+'" target="_blank" style="color:blue">'+url+'</a>');
             
-            edit_dialog.find('#btn_exit').button({icon:'ui-icon-arrowthick-1-w'}).click( closeCMSEditor );
+            edit_dialog.find('#btn_exit').button({icon:'ui-icon-circle-b-close'}).click( closeCMSEditor );
             
             if(options.menu_container){ //init menu items
+            
+                options.menu_container.find('span.ui-icon-circle-b-close').click( closeCMSEditor );
                 
                 options.menu_container.find('li[data-cms-action]').each(
                     function(i,item){
@@ -1090,6 +1096,9 @@ function editCMS( options ){
                     //show cms
                     options.menu_container.find('ul.for_web_site').hide();
                     options.menu_container.find('ul.for_web_page').hide();
+                    options.menu_container.find('span.ui-icon-circle-b-close').hide();
+                    options.menu_container.find('span.ui-icon-circle-b-help').show();
+                    
                 }
             }
         }
@@ -1129,6 +1138,7 @@ function editCMS( options ){
                         title: window.hWin.HR('Select or create a website menu record'),
                         rectype_set: RT_CMS_MENU,
                         parententity: 0,
+                        default_palette_class: 'ui-heurist-publish',
                         
                         onselect:function(event, data){
                                  if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){

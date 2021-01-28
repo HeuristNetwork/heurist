@@ -102,6 +102,7 @@ function hImportDefTerms(_trm_ParentTermID, _vcg_ID) {
                         });
         var btnStartImport = $('#btnImportData')
                     .css({'width':'110px'})
+                    .addClass('ui-button-action')
                     .button({label: window.hWin.HR('Import'), icons:{secondary: "ui-icon-circle-arrow-e"}})
                     .click(function(e) {
                             _doPost();

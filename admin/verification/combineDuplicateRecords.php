@@ -137,16 +137,17 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
             
             $(document).ready(function() {
                $('input[type="button"]').button();
-               $('input[type="submit"]').button();
+               $('input[type="submit"]').addClass('ui-button-action').button();
             });
             
             -->
         </script>
     </head>
 
-    <body class="popup" width="600" height="400">
-        <div style="max-width:600px;">
-            <form>
+    <body class="popup" width="800" height="600">
+        <form>
+        <div class="ent_wrapper">
+            <div class="ent_content" style="top:0">
                 <div>
                     <?php
                     if (! @$do_merge_details){
@@ -319,16 +320,16 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                                         $repeatCount = intval($rec_requirements[$record['rec_RecTypeID']][$rd_type]['rst_MaxValues']);
                                         if ($repeatCount==0){
                                             foreach ($detail as $val) {
-                                                print '<div>'. $val . '</div>';
+                                                print '<div style="word-break: break-word;">'. $val . '</div>';
                                             }
                                         } else{
                                             for ($i = 0; $i < $repeatCount; $i++) {
-                                                print '<div>'. $detail[$i] . '</div>';
+                                                print '<div style="word-break: break-word;">'. $detail[$i] . '</div>';
                                             }
                                             //FIXME  add code to remove the extra details that are not supposed to be there
                                         }
                                     } else{
-                                        print '<div>'. $detail . '</div>';
+                                        print '<div style="word-break: break-word;">'. $detail . '</div>';
                                     }
 
                                     print '</td>';
@@ -522,18 +523,20 @@ $reference_bdts = mysql__select_assoc2($mysqli,'select dty_ID, dty_Name from def
                         }
                         ?>
                     </tbody></table>
-
+                <input type="hidden" name="db" id="db" value="<?php echo HEURIST_DBNAME;?>">
+            </div>
+        </div>
+        <div class="ent_footer ui-dialog-buttonpane" style="padding-top:10px">
                 <?php
                 if (! $finished_merge) {
                     print '<input type="submit" name="'.($do_merge_details? "commit":"merge").'" style="float:right;" value="'. ($do_merge_details? "Commit&nbsp;Changes":"Merge&nbsp;Duplicates").'" >';
                 } else{
-                    print '<div> Changes were commited <br><br></div>';
-                    print '<input type="button" name="close_window" id="close_window" value="Close Window" title="Cick here to close this window" onclick="window.close();">';
+                    print 'Changes were commited';
+                    print '<input type="button" style="float:right;"  name="close_window" id="close_window" value="Close Window" title="Cick here to close this window" onclick="window.close(\'commited\');">';
                 }
                 ?>
-                <input type="hidden" name="db" id="db" value="<?php echo HEURIST_DBNAME;?>">
-            </form>
         </div>
+        </form>
     </body>
 </html>
 
@@ -761,7 +764,7 @@ function do_fix_dupe()
         foreach($add_dt_ids as $key => $detail_ids){
             foreach($detail_ids as $detail_id){
                 // since adds are only for repeatables check if it exist in delete array ?yes - remove from delete list if there
-                if ($key_remove = array_search($detail_id, $master_delete_dt_ids)!== FALSE){      //FIXME need to compare teh value not the dtl_ID (they will always be diff)
+                if ($key_remove = array_search($detail_id, $master_delete_dt_ids)!== FALSE){      //FIXME need to compare the value not the dtl_ID (they will always be diff)
                     //remove from array
                     unset($master_delete_dt_ids[$key_remove]);
                 }else{ //no  then lookup data for detail and insert the data as detail under the master rec id

@@ -293,8 +293,8 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
             var request = {
                     'a'       : 'counts',
                     'entity'  : 'defRecTypes',
-                    'mode'    : 'cms_record_count'
-                    //'ugr_ID'  : -1,
+                    'mode'    : 'cms_record_count',
+                    'ugr_ID'  : window.hWin.HAPI4.currentUser['ugr_ID'],
                     //'rty_ID'  : RT_CMS_HOME
                     };
             var that = this;        
@@ -328,7 +328,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                             +'parts of your website(s) will not be visible to visitors '
                             +'who are not logged in to the database'*/
                             
-                            +'<br>'
+                            +'<br><br>'
                             +'<a target="_blank" href="'+window.hWin.HAPI4.baseURL
                             +'?db='+window.hWin.HAPI4.database+'&q=ids:'+aPriv.join(',')+'">Click here</a>'
                             +' to view these records and set their visibility '
@@ -694,6 +694,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         var action = item.attr('id');
         var action_log = item.attr('data-logaction');
         var action_level = item.attr('data-user-admin-status');
+        var action_member_level = item.attr('data-user-member-status');
         var action_passworded = item.attr('data-pwd');
         var action_container = item.attr('data-container');
         
@@ -759,6 +760,10 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         //  2 - db owner
         var requiredLevel = (action_level==-1 || action_level>=0) ?action_level :0;
         
+        if(action_member_level>0){
+            requiredLevel = requiredLevel + ';' + action_member_level;  
+        } 
+        
         window.hWin.HAPI4.SystemMgr.verify_credentials(
             function( entered_password ){
             
@@ -816,7 +821,8 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                         popup_dialog_options.webpage_private = is_private;
                         
                         window.hWin.HEURIST4.ui.showEditCMSDialog(popup_dialog_options); 
-                    },'New website');
+                    },'New website',
+                    {default_palette_class: 'ui-heurist-publish'});
 
                 }
             );
@@ -842,7 +848,8 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                                         $dlg.dialog('close'); 
                                         that._select_CMS_Home( false, popup_dialog_options ); 
                                    }},
-                                   'Non-public website records');
+                                   'Non-public website records',
+                                   {default_palette_class: 'ui-heurist-publish'});
                             }else{
                                 that._select_CMS_Home( false, popup_dialog_options );    
                             }
@@ -851,7 +858,9 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                             popup_dialog_options.record_id = -1;
                             window.hWin.HEURIST4.msg.showMsgDlg(
                                     'New website will be created. Continue?',
-                                    function(){ window.hWin.HEURIST4.ui.showEditCMSDialog( popup_dialog_options ); });
+                                    function(){ window.hWin.HEURIST4.ui.showEditCMSDialog( popup_dialog_options ); },
+                                    null,
+                                    {default_palette_class: 'ui-heurist-publish'});
                         }
                     });
                 
@@ -866,7 +875,8 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                         if(that.sMsgCmsPrivate!=''){
                             var $dlg = window.hWin.HEURIST4.msg.showMsgDlg(that.sMsgCmsPrivate,
                                {Continue:function(){ $dlg.dialog('close'); that._select_CMS_Home( true, popup_dialog_options ); }},
-                               'Non-public website records');
+                               'Non-public website records',
+                               {default_palette_class: 'ui-heurist-publish'});
                         }else{
                             that._select_CMS_Home( true, popup_dialog_options );
                         }
@@ -875,7 +885,9 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                         popup_dialog_options.record_id = -1;
                         window.hWin.HEURIST4.msg.showMsgDlg(
                                 'New website will be created. Continue?',
-                                function(){ window.hWin.HEURIST4.ui.showEditCMSDialog( popup_dialog_options ); });
+                                function(){ window.hWin.HEURIST4.ui.showEditCMSDialog( popup_dialog_options ); },
+                                null,
+                                {default_palette_class: 'ui-heurist-publish'});
                     }else{
                         window.hWin.HEURIST4.msg.showMsgFlash('No websites defined',2000);
                     }
@@ -1122,7 +1134,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                 var size_type = item.attr('data-size');
                 var dlg_title = item.attr('data-header');
                 if(!dlg_title) dlg_title = item.text();
-                var dlg_help = item.attr('data-help');
+                var dlg_help = item.attr('data-help'); //name of context file from context_help folder
 
                 var size_w = item.attr('data-dialog-width');
                 var size_h = item.attr('data-dialog-height');
@@ -1584,6 +1596,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
             edit_mode: 'none',
             use_cache: true,
             except_current: true,
+            keep_visible_on_selection: true,
             onselect:function(event, data){
                 if(data && data.selection && data.selection.length>0){
                         var selected_database = data.selection[0].substr(4);
@@ -1594,6 +1607,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                             database: selected_database,
                             select_mode: 'select_multi',
                             edit_mode: 'none',
+                            keep_visible_on_selection: true,
                             onselect:function(event, data){
                                 if(data && data.selection &&  data.selection.length>0){
                                     var selected_users = data.selection;
@@ -1605,6 +1619,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                                         selectbutton_label: 'Allocate roles',
                                         sort_type_int: 'recent',
                                         edit_mode: 'none',
+                                        keep_visible_on_selection: false,
                                         onselect:function(event, data){
                                             if(data && !$.isEmptyObject(data.selection)){
                                                 //selection is array of object
@@ -1697,10 +1712,11 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
                         
                         layout_mode: 'listonly',
                         width:500, height:400,
+                        default_palette_class: 'ui-heurist-publish',
                         
                         resultList:{
                             show_toolbar: false,
-                            view_mode:'list',
+                            view_mode:'icons',
                             searchfull:null,
                             renderer:function(recordset, record){
                                 var recID = recordset.fld(record, 'rec_ID')
@@ -1764,7 +1780,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
             window.hWin.HEURIST4.msg.showMsgDlg('<p>You are currently running a development version of Heurist.</p>' 
 +'<p>Reply "Current (development) version" to use the development version for previewing your site, but please do not publish this URL.</p>' 
 +'<p>Reply "Production version" to obtain the URL for public dissemination, which will load the production version of Heurist.</p>' 
-,buttons);
+,buttons,null,{default_palette_class:'ui-heurist-publish'});
             
             return;
         }
@@ -1986,6 +2002,8 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
            popup_dialog_options.menu_container.find('ul').show();
            popup_dialog_options.menu_container.find('ul.for_web_site').hide();
            popup_dialog_options.menu_container.find('ul.for_web_page').hide();
+           popup_dialog_options.menu_container.find('span.ui-icon-circle-b-close').hide();
+           popup_dialog_options.menu_container.find('span.ui-icon-circle-b-help').show();
         }
         if(this.isResultSetEmpty()) return false;
     

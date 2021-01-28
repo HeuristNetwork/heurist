@@ -67,7 +67,6 @@ class DbsTerms
         $this->data = $data; 
     }
     
-    
     //
     //
     //
@@ -289,7 +288,7 @@ class DbsTerms
     }
     
     //
-    // get all labels and codes of childrent for giveb parent term
+    // get all labels and codes of children for giveb parent term
     //
     public function getSameLevelLabelsAndCodes($parent_id, $domain){
         
@@ -302,10 +301,12 @@ class DbsTerms
                 $idx_label = intval($this->data['fieldNamesToIndex']["trm_Label"]);
                 
                 foreach($children as $trmId){
-                    $code = removeLastNum(trim($this->data['termsByDomainLookup'][$domain][$trmId][$idx_code]));
-                    $label = removeLastNum(trim($this->data['termsByDomainLookup'][$domain][$trmId][$idx_label]));
-                    $lvl_src['code'][] = $code;
-                    $lvl_src['label'][] = $label;
+                    if(@$this->data['termsByDomainLookup'][$domain][$trmId]){
+                        $code = removeLastNum(trim($this->data['termsByDomainLookup'][$domain][$trmId][$idx_code]));
+                        $label = removeLastNum(trim($this->data['termsByDomainLookup'][$domain][$trmId][$idx_label]));
+                        $lvl_src['code'][] = $code;
+                        $lvl_src['label'][] = $label;
+                    }
                 }
             }
         }
@@ -360,7 +361,7 @@ class DbsTerms
 
         if($parent_id>0){
            
-            foreach($lvl as $trmId=>$childs){
+            foreach($lvl as $trmId=>$children){
                 if($trmId==$parent_id){
                     
                     if(!is_array(@$lvl[$trmId])) $lvl[$trmId] = array();
@@ -368,7 +369,7 @@ class DbsTerms
                     
                     break;
                     
-                }else if(count($childs)>0){
+                }else if(count($children)>0){
                     $this->addChild($lvl[$trmId], $parent_id, $new_term_id);
                 }
             }
@@ -391,13 +392,13 @@ class DbsTerms
         }else{
             $lvl = $this->data['treesByDomain'][$domain];
         }
-        foreach($lvl as $sub_term_id=>$childs){
+        foreach($lvl as $sub_term_id=>$children){
 
             if($sub_term_id == $term_id){
                 return $topmost?$topmost:$term_id;
-            }else if( count($childs)>0 ) {
+            }else if( count($children)>0 ) {
 
-                $res = $this->getTopMostTermParent($term_id, $childs, $topmost?$topmost:$sub_term_id );
+                $res = $this->getTopMostTermParent($term_id, $children, $topmost?$topmost:$sub_term_id );
                 if($res) return $res;
             }
         }
@@ -419,10 +420,9 @@ class DbsTerms
 
         $lvl_values = array();
         
-        if($lvl_src==null){
-            $lvl_src = $this->data['treesByDomain'][$domain];
-        }
-        
+        $domain = 'enum';
+        $lvl_src = $this->data['treesByDomain'][$domain];
+
         if(is_array($lvl_src)){
             foreach($lvl_src as $trmId=>$children){
                 $name1 = removeLastNum(trim($this->data['termsByDomainLookup'][$domain][$trmId][$idx]));
@@ -430,6 +430,17 @@ class DbsTerms
             }
         }
 
+        $domain = 'relation';
+        $lvl_src = $this->data['treesByDomain'][$domain];
+
+        if(is_array($lvl_src)){
+            foreach($lvl_src as $trmId=>$children){
+                $name1 = removeLastNum(trim($this->data['termsByDomainLookup'][$domain][$trmId][$idx]));
+                $lvl_values[] = $name1;
+            }
+        }
+        
+        
         return $this->doDisambiguateTerms2($term_import, $lvl_values);
     }
     

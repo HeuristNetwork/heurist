@@ -137,7 +137,7 @@ $.widget( "heurist.editing_input", {
             //spacer
             $( "<span>")
             .addClass('editint-inout-repeat-button')
-            .css({'min-width':'20px', display:'table-cell'})
+            .css({'min-width':'22px', display:'table-cell'})
             .appendTo( this.element );
 
         }else{
@@ -162,7 +162,8 @@ $.widget( "heurist.editing_input", {
                 //.button({icon:"ui-icon-circlesmall-plus", showLabel:false, label:'Add another ' + lblTitle +' value'})
                 .attr('tabindex', '-1')
                 .attr('title', 'Add another ' + lblTitle +' value' )                    
-                .css({display:'table-cell', 'font-size':'2em', cursor:'pointer','vertical-align':'top',
+                .css({display:'table-cell', 'font-size':'2em', cursor:'pointer','vertical-align':'top', 'padding-top':'2px',
+                    'min-width':'22px',
 //outline_suppress does not work - so list all these props here explicitely                
                     outline: 'none','outline-style':'none', 'box-shadow':'none',  'border-color':'transparent'
                 });
@@ -185,6 +186,22 @@ $.widget( "heurist.editing_input", {
                     }
                 });
             }
+            
+            
+            if(this.detailType=="resource" && this.configMode.entity=='records'){
+                
+                $('<div style="float:right;padding-top:1px;width: 14px;"><span class="ui-icon ui-icon-triangle-1-e"/></div>')                
+                    .appendTo( this.header );
+                    this.header.css({'padding-right':0, width:154});
+                    this.header.find('label').css({display:'inline-block', width: 135});
+            }else if(this.detailType=="relmarker"){
+                
+                $('<div style="float:right;padding-top:1px;width: 14px;"><span style="font-size:10px" class="ui-icon ui-icon-triangle-2-e-w"/></div>')                
+                    .appendTo( this.header )
+                    this.header.css({'padding-right':0, width:154});
+                    this.header.find('label').css({display:'inline-block', width: 135});
+            }
+            
         }        
 
 
@@ -501,7 +518,7 @@ $.widget( "heurist.editing_input", {
             $.each(this.inputs, function(index, input){ 
                 var ow = $(input).width(); //current width
                 if(ow<580){
-                    var nw = ($(input).val().length+10)+'ex';
+                    var nw = ($(input).val().length+3)+'ex';
                     $(input).css('width', nw);
                     if($(input).width()<ow) $(input).width(ow); //we can only increase - restore
                     else if($(input).width()>600){
@@ -560,6 +577,10 @@ $.widget( "heurist.editing_input", {
             this.newvalues = {};
         }
         
+        //if(this.f('rst_DisplayName')=="Group/separator type:"){
+        //    console.log(this.f('rst_DefaultValue'));
+        //}
+        
         var that = this;
 
         var $input = null;
@@ -616,7 +637,9 @@ $.widget( "heurist.editing_input", {
                             $(eid).html($.parseHTML($input.val())).width($input.width()).height($input.height()).show();
 
                             $btn_edit_switcher.text('text');
-                            
+        
+                            var nw = $input.css('min-width');
+
                             tinymce.init({
                                     //target: $editor, 
                                     selector: (eid),
@@ -628,33 +651,42 @@ $.widget( "heurist.editing_input", {
                                     menubar: false,
                                     relative_urls : false,
                                     remove_script_host : false,
-                                    convert_urls : true,            
+                                    convert_urls : true, 
+                                    width: nw, // '120ex',           
                                     
                                     entity_encoding:'raw',
-                                     setup:function(ed) {
-                                       ed.on('change', function(e) {
-                                           var newval = ed.getContent();
-                                           var nodes = $.parseHTML(newval);
-                                           if(nodes && nodes.length==1 &&  !(nodes[0].childElementCount>0) &&
-                                               (nodes[0].nodeName=='#text' || nodes[0].nodeName=='P'))
-                                           { 
-                                               //remove the only tag
-                                               $input.val(nodes[0].textContent);
-                                           }else{
-                                               $input.val(newval);     
-                                           }
-                                           
-                                           //$input.val( ed.getContent() );
-                                           that.onChange();
-                                       });
-                                     },
+                                    setup:function(ed) {
+                                        ed.addButton('customHeuristMedia', {
+                                                icon: 'image',
+                                                text: 'Media',
+                                                onclick: function (_) {  //since v5 onAction in v4 onclick
+                                                    that._addHeuristMedia();
+                                                }
+                                            });
+
+                                        ed.on('change', function(e) {
+                                            var newval = ed.getContent();
+                                            var nodes = $.parseHTML(newval);
+                                            if(nodes && nodes.length==1 &&  !(nodes[0].childElementCount>0) &&
+                                                (nodes[0].nodeName=='#text' || nodes[0].nodeName=='P'))
+                                            { 
+                                                //remove the only tag
+                                                $input.val(nodes[0].textContent);
+                                            }else{
+                                                $input.val(newval);     
+                                            }
+
+                                            //$input.val( ed.getContent() );
+                                            that.onChange();
+                                        });
+                                    },
                                     plugins: [
                                         'advlist autolink lists link image preview textcolor', //anchor charmap print 
                                         'searchreplace visualblocks code fullscreen',
                                         'media table contextmenu paste help'  //insertdatetime  wordcount
                                       ],      
                                       //undo redo | code insert  |  fontselect fontsizeselect |  forecolor backcolor | media image link | alignleft aligncenter alignright alignjustify | fullscreen            
-                                    toolbar: ['formatselect | bold italic forecolor | align | bullist numlist outdent indent | removeformat | help'],
+                                    toolbar: ['formatselect | bold italic forecolor | customHeuristMedia link | align | bullist numlist outdent indent | removeformat | help'],
                                     content_css: [
                                         '//fonts.googleapis.com/css?family=Lato:300,300i,400,400i'
                                         //,'//www.tinymce.com/css/codepen.min.css'
@@ -699,17 +731,42 @@ $.widget( "heurist.editing_input", {
                     
                     var div_prompt = $('<div style="line-height:20px"><b>Please use the '
                         + fname
-                        + ' button in the <span>website editor</span> to edit this field. '
+                        + ' button in the <span>website editor</span> to edit this field.<br>'
                         + fstatus+'</b></div>')
                         .insertBefore($input);
                     $input.hide();
                     
-                    $btn_edit_switcher.text('edit html as text')
-                    this._on( $btn_edit_switcher, { click: function(){
-                        $btn_edit_switcher.hide();
-                        $input.show();
-                    }});
+                    $btn_edit_switcher.text('edit source');
                     
+                    var $btn_edit_switcher2 = $( '<span>edit wyswyg</span>', {title: 'Show rich text editor'})
+                        .addClass('smallbutton')
+                        .css({'line-height': '20px','vertical-align':'top',cursor:'pointer','text-decoration':'underline'})
+                        .insertAfter( $btn_edit_switcher );
+                    var $label_edit_switcher = $('<span>Advanced users:</span>')
+                        .css({'line-height': '20px','vertical-align':'top'}).addClass('smallbutton')
+                        .insertBefore( $btn_edit_switcher );
+                    
+                    this._on( $btn_edit_switcher, { click: function(){
+                        //$btn_edit_switcher.hide();
+                        //$input.show();
+                        $btn_edit_switcher2.hide();
+                        $label_edit_switcher.hide();
+                        var eid = '#'+$input.attr('id')+'_editor';                    
+                        if($input.is(':visible')){
+                            __showEditor(true); //show tinymce editor
+                        }else{
+                            $btn_edit_switcher.text('wyswyg');
+                            $input.show();
+                            tinymce.remove(eid);
+                            $(eid).hide();
+                        }                        
+                    }});
+                    this._on( $btn_edit_switcher2, { click: function(){
+                        $btn_edit_switcher2.hide();
+                        $label_edit_switcher.hide();
+                        __showEditor(true); //show tinymce editor
+                    }});
+
                     
                     var $cms_dialog = window.hWin.HEURIST4.msg.getPopupDlg();
                     if($cms_dialog.find('.main_cms').length>0){ 
@@ -766,6 +823,9 @@ $.widget( "heurist.editing_input", {
                     dwidth = dwidth+'ex';
                 }
             }
+            var def_value = this.f('rst_DefaultValue');
+            if(window.hWin.HEURIST4.util.isempty(value) && 
+                !window.hWin.HEURIST4.util.isempty(def_value)) value = def_value;            
 
             $input = $('<select>').uniqueId()
                 .addClass('text ui-widget-content ui-corner-all')
@@ -816,14 +876,17 @@ $.widget( "heurist.editing_input", {
             
             //allow edit terms only for true defTerms enum and if not DT_RELATION_TYPE
             
-            if(window.hWin.HEURIST4.util.isempty(allTerms) 
-                && (this.options.dtID!=window.hWin.HAPI4.sysinfo['dbconst']['DT_RELATION_TYPE']))
+            if(window.hWin.HEURIST4.util.isempty(allTerms)) 
+                //&& (allTerms!='relation'))  //'this.options.dtID!=window.hWin.HAPI4.sysinfo['dbconst']['DT_RELATION_TYPE']))
             {
-
+                
                 allTerms = this.f('rst_FilteredJsonTermIDTree');        
+            
+                if (!(window.hWin.HEURIST4.util.isempty(allTerms) &&
+                    this.options.dtID==window.hWin.HAPI4.sysinfo['dbconst']['DT_RELATION_TYPE']))
+                { 
 
                 var isVocabulary = !isNaN(Number(allTerms)); 
-
 
                 var $btn_termsel = $( '<span>', {title: 'Select Term By Picture'})
                 .addClass('smallicon ui-icon ui-icon-image')
@@ -891,14 +954,53 @@ $.widget( "heurist.editing_input", {
                 }});
 
                     
-                var $btn_termedit = $( '<span>', {title: 'Add new term to this list'})
-                .addClass('smallicon ui-icon ui-icon-circle-b-plus btn_add_term')
-                .css({'margin-top':'2px',cursor:'pointer'})
-                .appendTo( $inputdiv );
-                //.button({icons:{primary: 'ui-icon-gear'},text:false});
                 
                 var vocab_id = Number(allTerms);
+
+                if(window.hWin.HAPI4.is_admin()){            
+                    
+                    var $btn_termedit2 = $( '<span>', {title: 'Edit term tree'})
+                    .addClass('smallicon ui-icon ui-icon-gear btn_add_term')
+                    .css({'margin-top':'2px',cursor:'pointer'})
+                    .appendTo( $inputdiv );
+                    
+                    this._on( $btn_termedit2,{ click:
+                        function(){
+                            var rg_options = {
+                                height:800, width:1300,
+                                selection_on_init: allTerms,
+                                innerTitle: false,
+                                innerCommonHeader: $('<div>'
+                                    +(that.options.dtID>0?('modifying field :<b>'+$Db.dty(that.options.dtID,'dty_Name')+'</b>'):'')
+                                    +' dropdown is populated from <b>'+$Db.trm(allTerms,'trm_Label')+'</b> vocabulary</div>'),
+                                onInitFinished: function(){
+                                    var that2 = this;
+                                    setTimeout(function(){
+                                        that2.vocabularies_div.manageDefTerms('selectVocabulary', vocab_id);
+                                    },500);
+                                },
+                                onClose: function(){
+                                    $.each(that.inputs, function(index, input){ 
+                                        input = $(input);
+                                        input.css('width','auto');
+                                        input = that._recreateSelector(input, true);
+                                        input.change( __onTermChange );
+                                    });
+                                    __showHideSelByImage();                                    
+                                }
+                            };
+                            window.hWin.HEURIST4.ui.showEntityDialog('defTerms', rg_options);
+                        }
+                    });
                 
+                }
+            
+                
+                var $btn_termedit = $( '<span>', {title: 'Add new term to this list'})
+                .addClass('smallicon ui-icon ui-icon-plus btn_add_term')
+                .css({'margin-top':'2px',cursor:'pointer','font-size':'11px'})
+                .appendTo( $inputdiv );
+
                 //
                 // open add term popup
                 //
@@ -994,47 +1096,8 @@ $.widget( "heurist.editing_input", {
                 
                 
                 }} ); //end btn onclick
-            
 
-                if(window.hWin.HAPI4.is_admin()){            
-                    
-                    var $btn_termedit2 = $( '<span>', {title: 'Edit term tree'})
-                    .addClass('smallicon ui-icon ui-icon-gear btn_add_term')
-                    .css({'margin-top':'2px',cursor:'pointer'})
-                    .appendTo( $inputdiv );
-                    
-                    this._on( $btn_termedit2,{ click:
-                        function(){
-                            var rg_options = {
-                                height:800, width:1300,
-                                selection_on_init: allTerms,
-                                innerTitle: false,
-                                innerCommonHeader: $('<div>'
-                                    +(that.options.dtID>0?('modifying field :<b>'+$Db.dty(that.options.dtID,'dty_Name')+'</b>'):'')
-                                    +' dropdown is populated from <b>'+$Db.trm(allTerms,'trm_Label')+'</b> vocabulary</div>'),
-                                onInitFinished: function(){
-                                    var that2 = this;
-                                    setTimeout(function(){
-                                        that2.vocabularies_div.manageDefTerms('selectVocabulary', vocab_id);
-                                    },500);
-                                },
-                                onClose: function(){
-                                    $.each(that.inputs, function(index, input){ 
-                                        input = $(input);
-                                        input.css('width','auto');
-                                        input = that._recreateSelector(input, true);
-                                        input.change( __onTermChange );
-                                    });
-                                    __showHideSelByImage();                                    
-                                }
-                            };
-                            window.hWin.HEURIST4.ui.showEntityDialog('defTerms', rg_options);
-                        }
-                    });
-                
                 }
-            
-            
             }//allow edit terms only for true defTerms enum
             
             
@@ -1096,7 +1159,8 @@ $.widget( "heurist.editing_input", {
         else if(this.detailType=='relmarker'){ //---------------------------------------------------- 
             
                 this.options.showclear_button = false;
-                $inputdiv.css({'display':'inline-block','vertical-align':'middle'});
+                //$inputdiv.css({'display':'inline-block','vertical-align':'middle'});
+                $inputdiv.css({'display': 'table','vertical-align': 'middle', 'border-spacing': '0px'}); //was '0px 4px'
             
                 if(this.inputs.length==0){ //show current relations
                 
@@ -1129,7 +1193,8 @@ $.widget( "heurist.editing_input", {
                                     if(context && context.count>0){
                                         
                                         var link_info = isInwardRelation?context.source:context.target;
-                                        link_info.relation_recID = context.relation_recID;
+                                        link_info.relation_recID = context.relation_recID; //existing relationship record
+                                        link_info.relmarker_field = that.options.dtID;
                                         link_info.trm_ID = context.trm_ID;
                                         link_info.is_inward = isInwardRelation;
                                         
@@ -1146,6 +1211,7 @@ $.widget( "heurist.editing_input", {
                                 title: 'Create relationship between records ( Field: "'
                                     +$Db.dty(that.options.dtID, 'dty_Name')+'" )',
                                 relmarker_dty_ID: that.options.dtID,
+                                default_palette_class: 'ui-heurist-populate',
                                 onClose: __onCloseAddLink 
                             };
                            
@@ -1167,11 +1233,7 @@ $.widget( "heurist.editing_input", {
                   
                     if(relations && (relations.direct || relations.reverse)){
                         
-                        var ptrset = that.f('rst_PtrFilteredIDs');
-                        if(!$.isArray(ptrset)){
-                            if(ptrset) ptrset = ptrset.split(',')
-                            else ptrset = [];
-                        }
+                        var ptrset = that._prepareIds(that.f('rst_PtrFilteredIDs'));
                         
                         var vocab_id = this.f('rst_FilteredJsonTermIDTree');        
 
@@ -1210,6 +1272,7 @@ $.widget( "heurist.editing_input", {
                                                  rec_Title: headers[targetID][0], 
                                                  rec_RecTypeID: headers[targetID][1], 
                                                  relation_recID: direct[k]['relationID'], 
+                                                 relmarker_field: that.options.dtID,
                                                  trm_ID: direct[k]['trmID'],
                                                  dtl_StartDate: direct[k]['dtl_StartDate'], 
                                                  dtl_EndDate: direct[k]['dtl_EndDate'],
@@ -1267,6 +1330,7 @@ $.widget( "heurist.editing_input", {
                                                  rec_Title: headers[targetID][0], 
                                                  rec_RecTypeID: targetRectypeID, 
                                                  relation_recID: reverse[k]['relationID'], 
+                                                 relmarker_field: that.options.dtID,
                                                  trm_ID: reverse[k]['trmID'], //invTermID,
                                                  dtl_StartDate: reverse[k]['dtl_StartDate'], 
                                                  dtl_EndDate: reverse[k]['dtl_EndDate'],
@@ -1356,15 +1420,8 @@ $.widget( "heurist.editing_input", {
             $input = $( "<div>").css({'display':'inline-block','vertical-align':'middle','min-wdith':'25ex'})
                             .uniqueId().appendTo( $inputdiv );
             
-            var ptrset = that.f('rst_PtrFilteredIDs');
-            if(!$.isArray(ptrset)){
-                if(window.hWin.HEURIST4.util.isempty(ptrset)){
-                    ptrset = [];
-                }else if(window.hWin.HEURIST4.util.isNumber(ptrset)){
-                    ptrset = [ptrset];
-                }else
-                    ptrset = ptrset.split(',')
-            }            
+            var ptrset = that._prepareIds(that.f('rst_PtrFilteredIDs'));
+            
             var rts = [];
             for (var k=0; k<ptrset.length; k++) {
                 var sname = $Db.rty(ptrset[k],'rty_Name');
@@ -1685,28 +1742,27 @@ $.widget( "heurist.editing_input", {
                 filter_groups: this.configMode.filter_group,
                 onselect:function(event, data){
 
-                 if(data){
+                    if(data){
 
                         if(select_return_mode=='ids'){
-                            
-                            
+
+
                             var newsel = window.hWin.HEURIST4.util.isArrayNotEmpty(data.selection)?data.selection:[];
-                            
+
                             //config and data are loaded already, since dialog was opened
                             that._findAndAssignTitle($input, newsel);
                             that.newvalues[$input.attr('id')] = newsel.join(',');
                             that.onChange();
-                            
+
                         }else if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
                             //todo
 
                         }
-                 }//data
+                    }//data
 
                 }
             };//popup_options
-                        
-
+            
             $input.hide();
             that._findAndAssignTitle($input, value);
 
@@ -1731,16 +1787,22 @@ $.widget( "heurist.editing_input", {
                         popup_options.selection_on_init = sels.split(',');
                     } else {
                         popup_options.selection_on_init = null;    
-                    }                                                                                       
+                    }                                
+                    
                     if(this.configMode.initial_filter){
                         popup_options.initial_filter = this.configMode.initial_filter;    
                     }
                     if(!window.hWin.HEURIST4.util.isnull(this.configMode.search_form_visible)){
                         popup_options.search_form_visible = this.configMode.search_form_visible;    
                     }
+
+                    var popup_options2 = popup_options;
+                    if(this.configMode.popup_options){
+                         popup_options2  = $.extend(popup_options, this.configMode.popup_options);
+                    }
                     
                     //init dialog to select related entities
-                    window.hWin.HEURIST4.ui.showEntityDialog(this.configMode.entity, popup_options);
+                    window.hWin.HEURIST4.ui.showEntityDialog(this.configMode.entity, popup_options2);
             }
             
             
@@ -1829,7 +1891,6 @@ $.widget( "heurist.editing_input", {
                     }
 
                     //$input.focusout( __url_input_state ); 
-                    
                     __url_input_state(true);               
                 
             }
@@ -2146,6 +2207,7 @@ $.widget( "heurist.editing_input", {
                             select_return_mode:select_return_mode, //ids or recordset(for files)
                             filter_group_selected:null,
                             filter_groups: this.configMode.filter_group,
+                            default_palette_class: 'ui-heurist-populate',
                             onselect:function(event, data){
 
                              if(data){
@@ -2568,9 +2630,10 @@ console.log('onpaste');
                         window.hWin.HEURIST4.msg.showDialog(url, {height:'900', width:'1000',
                             window: window.hWin,  //opener is top most heurist window
                             dialogid: 'map_digitizer_dialog',
+                            default_palette_class: 'ui-heurist-populate',
                             params: wkt_params,
                             title: window.hWin.HR('Heurist map digitizer'),
-                            class:'ui-heurist-bg-light',
+                            //class:'ui-heurist-bg-light',
                             callback: function(location){
                                 if( !window.hWin.HEURIST4.util.isempty(location) ){
                                     //that.newvalues[$input.attr('id')] = location
@@ -2674,12 +2737,17 @@ console.log('onpaste');
             
             $input.css('width', dwidth);
             
-        }else if ( this.detailType=='freetext' || this.detailType=='url' || this.detailType=='blocktext' ) {  
+        }else if ( this.detailType=='freetext' || this.detailType=='url' || this.detailType=='blocktext'  
+                || this.detailType=='integer' || this.detailType=='float') {  
 
               //if the size is greater than zero
-              if (parseFloat( dwidth ) > 0) 
-                  var nw = Math.round(2 + Math.min(120, Number(dwidth))) + "ex";
-                  $input.css('min-width', nw); //was *4/3
+              var nw = (this.detailType=='integer' || this.detailType=='float')?40:120;
+              if (parseFloat( dwidth ) > 0){ 
+                  nw = Math.round( 3+Number(dwidth) );
+                    //Math.round(2 + Math.min(120, Number(dwidth))) + "ex";
+              }
+              $input.css({'min-width':nw+'ex','width':nw+'ex'}); //was *4/3
+
         }
         
         //if(this.detailType!='blocktext')
@@ -3125,13 +3193,17 @@ console.log('onpaste');
         }else{ //this is usual enumeration from defTerms
 
             var headerTerms = '';
-            if(this.options.dtID==window.hWin.HAPI4.sysinfo['dbconst']['DT_RELATION_TYPE']){ //specific behaviour - show all
+            allTerms = this.f('rst_FilteredJsonTermIDTree');        
+            //headerTerms - disabled terms
+            headerTerms = this.f('rst_TermIDTreeNonSelectableIDs') || this.f('dty_TermIDTreeNonSelectableIDs');
+            
+            if(window.hWin.HEURIST4.util.isempty(allTerms) &&
+               this.options.dtID==window.hWin.HAPI4.sysinfo['dbconst']['DT_RELATION_TYPE'])
+            { //specific behaviour - show all
                 allTerms = 'relation'; //show all possible relations
-            }else{
-                allTerms = this.f('rst_FilteredJsonTermIDTree');        
-                //headerTerms - disabled terms
-                headerTerms = this.f('rst_TermIDTreeNonSelectableIDs') || this.f('dty_TermIDTreeNonSelectableIDs');
             }
+            
+            
             var dt_type = this.detailType;
             var topOptions = true;
             if(!window.hWin.HEURIST4.util.isempty(this.f('dty_Type'))){
@@ -3533,6 +3605,35 @@ console.log('onpaste');
         }else if(data_type=='float'){
             
             
+        }else if(data_type=='resource'){
+            
+            var ptrset = this._prepareIds(this.f('rst_PtrFilteredIDs'));
+            
+            var idx, snames = [];
+            if(ptrset.length>0){
+                for (idx in ptrset) {
+                    snames.push($Db.rty(ptrset[idx],'rty_Name'));
+                }
+            }
+            snames = snames.join(', ');
+            
+            for (idx in this.inputs) {
+                var res = this._getValue(this.inputs[idx]);
+                //check record type
+                var rty_ID = $(this.inputs[idx]).find('.related_record_title').attr('data-rectypeid')
+                
+                if(rty_ID>0  && ptrset.length>0 && 
+                    window.hWin.HEURIST4.util.findArrayIndex(rty_ID, ptrset)<0)
+                {
+                    //error highlight
+                    $(this.inputs[idx]).addClass( "ui-state-error" );
+                    //add error message
+                    errorMessage = 'Target type "'+$Db.rty(rty_ID,'rty_Name')+'" is not allowed.'
+                    +' Field expects target type'+((ptrset.length>1)?'s ':' ')+snames;
+                    
+                }
+            }
+            
         }
         
 
@@ -3649,7 +3750,60 @@ console.log('onpaste');
         
         }
         */   
-    }
+    },
+    
+    //
+    // browse for heurist uploaded/registered files/resources and add player link
+    //         
+    _addHeuristMedia: function(){
 
+        var popup_options = {
+            isdialog: true,
+            select_mode: 'select_single',
+            edit_addrecordfirst: false, //show editor atonce
+            selectOnSave: true,
+            select_return_mode:'recordset', //ids or recordset(for files)
+            filter_group_selected:null,
+            //filter_groups: this.configMode.filter_group,
+            onselect:function(event, data){
+
+                if(data){
+
+                    if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
+                        var recordset = data.selection;
+                        var record = recordset.getFirstRecord();
+
+                        var thumbURL = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database
+                        +"&thumb="+recordset.fld(record,'ulf_ObfuscatedFileID');
+
+                        var playerTag = recordset.fld(record,'ulf_PlayerTag');
+
+                        tinymce.activeEditor.insertContent( playerTag );
+                    }
+
+                }//data
+
+            }
+        };//popup_options        
+
+        window.hWin.HEURIST4.ui.showEntityDialog('recUploadedFiles', popup_options);
+    },
+
+
+    //
+    //
+    //
+    _prepareIds: function(ptrset)
+    {
+        if(!$.isArray(ptrset)){
+            if(window.hWin.HEURIST4.util.isempty(ptrset)){
+                ptrset = [];
+            }else if(window.hWin.HEURIST4.util.isNumber(ptrset)){
+                ptrset = [ptrset];
+            }else
+                ptrset = ptrset.split(',')
+        }
+        return ptrset;
+    }
 
 });

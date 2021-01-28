@@ -39,7 +39,12 @@ $.widget( "heurist.search_quick", $.heurist.recordAction, {
     
     current_query:null,
     current_query_json:null,
+
+    _suprress_change: true,
     
+    //
+    //
+    //
     _init: function(){
         
         this.element.css('overflow','hidden');
@@ -65,8 +70,16 @@ $.widget( "heurist.search_quick", $.heurist.recordAction, {
             //add title 
             $dlg.css({top:'36px',position:'absolute',width: 'auto', margin: '0px','font-size':'0.9em'});
             
-            $('<div class="ui-heurist-header" style="top:0px;">Filter builder</div>')
+            var _innerTitle = $('<div class="ui-heurist-header" style="top:0px;padding-left:10px;text-align:left">Filter builder</div>')
                 .insertBefore($dlg);
+                
+            $('<button>').button({icon:'ui-icon-closethick',showLabel:false, label:'Close'}) 
+                     .css({'position':'absolute', 'right':'4px', 'top':'6px', height:20, width:20})
+                     .appendTo(_innerTitle)
+                     .on({click:function(){
+                         that.closeDialog();
+                     }});
+                
         }else{
              $dlg.addClass('ui-heurist-header1');
         }
@@ -129,9 +142,7 @@ $.widget( "heurist.search_quick", $.heurist.recordAction, {
         that._on( $dlg.find(".sa_spatial"), {    //opens digitizer
             click: function(event){
                 
-                if($.isFunction(this.options.menu_locked)){
-                    this.options.menu_locked.call( this, true );
-                }
+                this._lockPopup(true)
                 
                 //open map digitizer - returns WKT rectangle 
                 var rect_wkt = $dlg.find(".sa_spatial_val").val();
@@ -147,9 +158,7 @@ $.widget( "heurist.search_quick", $.heurist.recordAction, {
                     title: window.hWin.HR('Heurist spatial search'),
                     class:'ui-heurist-bg-light',
                     afterclose: function(){
-                        if($.isFunction(that.options.menu_locked)){
-                            that.options.menu_locked.call( this, false );
-                        }
+                        that._lockPopup(false)
                     },
                     callback: function(location){
                         
@@ -208,13 +217,22 @@ $.widget( "heurist.search_quick", $.heurist.recordAction, {
         
         return true;
     },
-
+  
+    _lockPopup: function( is_locked ){
+        
+        if($.isFunction(this.options.menu_locked)){
+            this.options.menu_locked.call( this, is_locked );
+        }
+    },
+  
     /**
      * Recreate all select controls.
      *
      * @private
      */
     _recreateSelectors: function(){
+        
+        this._suprress_change = true;
         
         var that = this;
         var $dlg = this.element.children('fieldset');
@@ -356,6 +374,7 @@ $.widget( "heurist.search_quick", $.heurist.recordAction, {
         } else {
             fieldItemElement.find(".search_field_option").hide();
         }
+
     },
 
     /**
@@ -541,6 +560,7 @@ $.widget( "heurist.search_quick", $.heurist.recordAction, {
      * Generate the search query from the UI form.
      */
     calcShowSimpleSearch: function(){
+
         if (this.options.is_json_query) {
             this.current_query_json = this._jsonQueryStringConstructor();
         } else {
@@ -565,6 +585,11 @@ $.widget( "heurist.search_quick", $.heurist.recordAction, {
      */
     _jsonQueryStringConstructor: function () {
         var that = this;
+
+      
+        //if(!this._suprress_change) this._lockPopup('delay');
+        
+
         var $dlg = this.element.children('fieldset');
         var queryObject = {};
 
@@ -1037,6 +1062,27 @@ $.widget( "heurist.search_quick", $.heurist.recordAction, {
             window.hWin.HAPI4.SearchMgr.doSearch( this, request );
         
         this.closeDialog();
-    }
+    },
+    
+    outerHeight: function(callback){
+        
+        var fs = this.element.children('fieldset');
+        var eles = fs.children();
+        if(!fs.is(':visible') || eles.length==0){
+            var that = this;
+            setTimeout(function(){that.outerHeight(callback)},500);
+            return 246;
+        }
+        var h = fs.outerHeight();
+        if(h<20){
+            $.each(eles,function(i,ele){ h = h + $(ele).outerHeight();});
+        }
+        
+        h = h + this.element.children('div.ui-heurist-header').outerHeight();
+        
+        callback.call(this, h);
 
+        return h;
+    }
+    
 });

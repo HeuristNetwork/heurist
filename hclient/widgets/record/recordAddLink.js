@@ -59,7 +59,10 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
             this.element.find('#div_source2').css('display','inline-block');
         }else{
             this.element.find('#div_source_header').css('vertical-align','top');
-            this.getRecordValue(this.options.source_ID, 'source');            
+            this.getRecordValue(this.options.source_ID, 'source'); 
+            
+            //show hint 
+            this.element.find('#edit_attrib_helper').show();
         }
        
         if(window.hWin.HEURIST4.util.isempty(this.options.target_ID)){
@@ -93,13 +96,15 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
         res[1].text = window.hWin.HR((this.options.source_ID>0)?'Create link':'Create links');
         
         if(this.options.source_ID>0){ //this.options.relmarker_dty_ID>0){
+        
             var that = this;
             //enable for relationships only
             res.splice(1, 0, 
-                 {text:window.hWin.HR('Create link and edit'),
+                 {text:window.hWin.HR('Edit attributes'),
                     id:'btnDoAction2',
                     disabled:'disabled',
-                    css:{'float':'right', 'font-size':'0.82em', 'margin-top':'0.6em', 'padding':'6.1px'},
+                    class: 'ui-button-action',
+                    css:{'float':'right'}, //'font-size':'0.82em', 'margin-top':'0.6em', 'padding':'6.1px' 
                     click: function() { 
                             that._openRelationRecordEditor = true;
                             that.doAction(); 
@@ -108,9 +113,9 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
         
         return res;
     },
-    
+
     //
-    //
+    // select option by rectypes
     //
     _fillSelectRecordScope: function (){
 
@@ -124,7 +129,78 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
             return;    
         }
 
-        var opt, selScope = this.selectRecordScope.get(0);
+        var opt, selScope = this.selectRecordScope.get(0); //selector
+        window.hWin.HEURIST4.ui.addoption(selScope,0,'please select the records to be affected …');
+
+        var rty = 0;
+        var rectype_Ids = this._currentRecordset.getRectypes();
+        
+        if(rectype_Ids.length==1){
+
+            rty = rectype_Ids[0];
+            window.hWin.HEURIST4.ui.addoption(selScope,
+                rty, 'All records: ' + $Db.rty(rty,'rty_Plural'));
+        }
+        
+        rectype_Ids = [];
+        var sels = this._currentRecordsetSelIds;
+        if(sels && sels.length>0)
+            for (var idx in sels){ //find all selected rectypes
+              if(idx>=0){  
+                var rec = window.hWin.HAPI4.currentRecordset.getById(sels[idx]);
+                var rt = Number(window.hWin.HAPI4.currentRecordset.fld(rec, 'rec_RecTypeID'));
+                if(rectype_Ids.indexOf(rt)<0) rectype_Ids.push(rt);
+              }
+            }
+
+        if(rectype_Ids.length==1){
+
+            rty = rectype_Ids[0];
+            
+            opt = new Option('Selected records: ' + $Db.rty(rty,'rty_Plural'), rty);
+            $(opt).attr('data-select', 1);
+            selScope.appendChild(opt);
+            
+            //window.hWin.HEURIST4.ui.addoption(selScope,rty, 'Selected records: ' + $Db.rty(rty,'rty_Plural'));
+        }
+          
+        if(!(rty>0)){
+            window.hWin.HEURIST4.msg.showMsgDlg(
+        '<b>Mixed record types</b>'
+        +'<p>Relationship links can only be built for one record type at a time. </p>'
+        +'<p>Please select records of a single type, either by individual selection or a revised filter, and repeat this action. </p>');
+            return false;
+        }
+            
+        
+        this._on( this.selectRecordScope, {
+                change: this._onRecordScopeChange} );        
+        this.selectRecordScope.val(rty);    
+        if(selScope.selectedIndex<0) selScope.selectedIndex=0;
+        
+        window.hWin.HEURIST4.ui.initHSelect(this.selectRecordScope, false);
+        
+        this._onRecordScopeChange();
+        
+        return true;
+    },
+    
+    //
+    // select option by rectypes
+    //
+    _fillSelectRecordScope_byRty: function (){
+
+        var scope_types = this.options.scope_types;
+        this.selectRecordScope.empty();
+        
+        var useHtmlSelect = false;
+        
+        if(scope_types=='none'){
+            this.selectRecordScope.parent().hide();
+            return;    
+        }
+
+        var opt, selScope = this.selectRecordScope.get(0); //selector
 
         var rectype_Ids = this._currentRecordset.getRectypes();
         
@@ -315,7 +391,7 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
                 return false;
             }
         });//for fields
-        
+
         if(this.options.relmarker_dty_ID>0){
             //hide radio and field name - since it is the only one field in list
             var ele = this.element.find('#source_field').find('.field_item').css('padding-left',0);
@@ -339,8 +415,15 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
                     +'<label style="font-style:italic;line-height: 1em;" for="cbsource_cb_0">Reverse links: Add links to the target record rather than the current selection<br><span style="width:1.5em;display:inline-block;"/>(where appropriate record pointer or relationship marker fields exist in the target record)</label><div>')
                 .appendTo($('#source_field'));
                 this._on(ele, {change:this._createInputElement});
+                
             }
         }
+        
+        var ele = this.element.find('#source_field').find('input[type=radio]');
+        if(ele.length==1){
+            ele.click();
+        }
+        
 
         }//if rectype defined
 
@@ -564,7 +647,7 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
                 var records = resdata.getRecords();
             
                 var record = resdata.getById(rec_id);
-                var rec_title = resdata.fld(record, 'rec_Title');
+                var rec_title = window.hWin.HEURIST4.util.stripTags(resdata.fld(record, 'rec_Title'));
                 if(!rec_title) rec_title = 'Record title is not defined yet';
 
                 var recRecTypeID = resdata.fld(record, 'rec_RecTypeID');
@@ -577,10 +660,11 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
                     that.target_RecTypeID = recRecTypeID;
                 }
                 
+                var rty_Name = window.hWin.HEURIST4.util.stripTags($Db.rty(recRecTypeID,'rty_Name'));
 
-                rec_titles.push('<b>'+$Db.rty(recRecTypeID,'rty_Name')+'</b>');
+                rec_titles.push('<b>'+rty_Name+'</b>');
                 $('#'+party+'_title').text(rec_title);
-                $('#'+party+'_rectype').text($Db.rty(recRecTypeID,'rty_Name'));
+                $('#'+party+'_rectype').text(rty_Name);
                 $('#'+party+'_rectype_img').css('background-image', 'url("'+top.HAPI4.iconBaseURL+recRecTypeID+'")');
                 
                 //find fields

@@ -134,7 +134,7 @@ if(!in_array($action_type, $allowed_actions)){
 </head>
 
 <!-- HTML -->
-<body style="overflow:hidden;background:white">
+<body style="overflow:hidden;" class="ui-heurist-explore">
 
     <div id="div_parameters" class="popup_content_div">
 
@@ -179,7 +179,7 @@ if(!in_array($action_type, $allowed_actions)){
         RESULT
     </div>
     
-    <div class="ui-dialog-buttonpane ui-widget-content ui-helper-clearfix popup_buttons_div">
+    <div class="ui-dialog-buttonpane ui-widget-content ui-helper-clearfix popup_buttons_div" style="padding:10px">
         <div class="ui-dialog-buttonset">
             <div id="btn-ok" class="ui-state-disabled">OK</div>
             <div id="btn-cancel">Cancel</div>

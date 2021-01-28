@@ -98,11 +98,11 @@
         <div class="header"><label>Viewmode:</label></div>
         <select name="view_mode" class="text ui-widget-content ui-corner-all"
             title="">
-            <option value="icons_expanded">Scrollable content</option>
-            <option value="list">List (line per entry)</option>
-            <option value="icons">List (large icon + title)</option>
-            <option value="thumbs">Thumbnails</option>
-            <option value="thumbs3">Large thumbnails</option>
+            <option value="record_content">Record contents</option>
+            <option value="list">Single lines</option>
+            <option value="icons">Single lines with icon</option>
+            <option value="thumbs">Small images</option>
+            <option value="thumbs3">Large images</option>
             <option value="horizontal">Horizontal gallery</option>
         </select>
     </div>
@@ -127,16 +127,17 @@
         <select name="rendererExpandDetails" class="text ui-widget-content ui-corner-all" title="" style="width:400px">
         </select>
     </div>
-    
+
     <div  class="heurist_resultList">
-        <div class="header"><label>Show URL as link</label></div>
-        <input name="show_url_as_link" type="checkbox" checked/>
+        <div class="header"><label>Show record view in frame</label></div>
+        <input name="rendererExpandInFrame" type="checkbox" checked/>
     </div>
 
     <div  class="heurist_resultList">
-        <div class="header"><label>Support collection</label></div>
-        <input name="support_collection" type="checkbox"/>
-        
+        <div class="header"><label>Show URL as link</label></div>
+        <input name="show_url_as_link" type="checkbox" checked/>
+
+        <label>&nbsp;&nbsp;Support collection&nbsp;</label><input name="support_collection" type="checkbox"/>
         <label>&nbsp;&nbsp;Support reorder&nbsp;<input type="checkbox" name="support_reorder"/></label>
     </div>
     
@@ -274,10 +275,18 @@
         <input name="menu_recIDs" type="hidden" value=""/>
         <div id="menu_recIDs" style="display:table-row"></div>
     </div>
+    <div  class="heurist_Navigation" id="expandLevels">
+        <div class="header"><label>On loading:</label></div>
+        <label><input name="expand_levels" type="radio" value="0" checked/>Show first level only</label>
+        <label><input name="expand_levels" type="radio" value="1"/>Open second level</label>
+        <label><input name="expand_levels" type="radio" value="2"/>Open all levels</label>
+    </div>
+<!--        
     <div  class="heurist_Navigation">
         <div class="header" style="width:165px;"><label>If root has only one menu item,<br>display items from next level</label></div>
         <input name="use_next_level" type="checkbox"/>
     </div>
+-->    
     <div class="heurist_Navigation">
         <div class="header"><label>Open:</label></div>
         <select name="target" class="text ui-widget-content ui-corner-all" title="" style="width:400px">

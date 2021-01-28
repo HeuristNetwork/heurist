@@ -125,8 +125,14 @@ $.widget( "heurist.manageEntity", {
         beforeClose:null,
         onClose:null,
         
+        keep_visible_on_selection: false, //for select_single it closes popup on selection
+        
         no_bottom_button_bar: false,
         btn_array: null,   //bottom bar buttons
+        
+        add_to_begin: false,
+        
+        default_palette_class: null
     },
     
     //system name of entity  - define it to load entity config from server
@@ -220,7 +226,7 @@ $.widget( "heurist.manageEntity", {
             layout = 
                 '<div class="ent_wrapper">'
                         + '<div class="recordList" style="display:none;"/>'
-                        + '<div class="ent_content editForm ui-widget" style="top:0;bottom:0"/>'
+                        + '<div class="ent_content editForm ui-widget" style="top:15px;bottom:0"/>'
                         //+ '<div class="ent_footer editForm-toolbar"/>'
                 +'</div>';
         
@@ -419,11 +425,15 @@ $.widget( "heurist.manageEntity", {
 
                 this._on( this.recordList, {        
                         "resultlistonselect": function(event, selected_recs){
-                                    this.selectedRecords(selected_recs); //assign
+                                    //if(!window.hWin.HEURIST4.util.isRecordSet(selected_recs) 
+                                    //    || selected_recs.entityName==this._entityName)
+                                    //{}
+                                        this.selectedRecords(selected_recs); //assign
+                                        
+                                        if (this.options.edit_mode=='inline'){
+                                                this._onActionListener(event, {action:'edit'}); //default action of selection
+                                        }
                                     
-                                    if (this.options.edit_mode=='inline'){
-                                            this._onActionListener(event, {action:'edit'}); //default action of selection
-                                    }
                                 },
                         "resultlistonaction": this._onActionListener        
                         });
@@ -675,6 +685,9 @@ $.widget( "heurist.manageEntity", {
         if(options.class){
             btn.addClass(options.class);
         }
+        if(options.title){
+            btn.attr({'title':options.title})    
+        }
     },
     
     // @todo  to remove
@@ -854,7 +867,7 @@ $.widget( "heurist.manageEntity", {
             }
         });
         
-        sh = sh+120
+        sh = sh+140
         
         if(sh!=dh && (dh<wh || sh<wh)){
             
@@ -940,6 +953,7 @@ $.widget( "heurist.manageEntity", {
             //dialog buttons SELECT and CLOSE
             if(options['select_mode']=='select_multi' || options['select_mode']=='select_roles'){ 
                 btn_array.push({text:window.hWin.HR( options['selectbutton_label'] ),
+                        class: 'ui-button-action',
                         click: function() { that._selectAndClose(); }}); 
             }
 
@@ -1032,6 +1046,10 @@ $.widget( "heurist.manageEntity", {
                 this._toolbar = this._as_dialog.parent().find('.ui-dialog-buttonpane');
                 //assign unique identificator to get proper position of child edit dialogs
                 this._toolbar.attr('posid','edit'+this._entityName+'-'+(new Date()).getTime());
+                
+            }else if(this.options.default_palette_class){
+                this._as_dialog.parent().addClass(this.options.default_palette_class);
+                //this.element.addClass(this.options.default_palette_class);
             }
                 
             
@@ -1118,7 +1136,8 @@ $.widget( "heurist.manageEntity", {
                 this._as_dialog.dialog("close");
             }
 
-        }else if(this.element.hasClass('ui-menu6-container')){
+        }else if( this.options.keep_visible_on_selection!==true &&
+                    this.element.hasClass('ui-menu6-container')){
             this.element.hide();
         }
         
@@ -1260,7 +1279,8 @@ $.widget( "heurist.manageEntity", {
         }else{
             recset = this.getRecordSet();
         }
-        
+    
+        //select first    
         if(!rec_ID && recset && recset.length()>0){
             rec_ID = recset.getOrder()[0];
         }
@@ -1426,9 +1446,12 @@ $.widget( "heurist.manageEntity", {
             }
             
             //2020-12-06 if(this.options.edit_structure){ return; }            
+            
+            var is_full = 0;
         
             if(!fields){
                 fields = this._getValidatedValues(); 
+                is_full = 1;
             }
 
             
@@ -1438,7 +1461,8 @@ $.widget( "heurist.manageEntity", {
                 'a'          : 'save',
                 'entity'     : this.options.entity.entityName,
                 'request_id' : window.hWin.HEURIST4.util.random(),
-                'fields'     : fields                     
+                'fields'     : fields,
+                'isfull'     : is_full  //
                 };
              
                 if(this.options.coverall_on_save) {
@@ -1474,7 +1498,8 @@ this._time_debug = fin_time;
                             
                             //update record in cache
                             if(that.options.use_cache && that._cachedRecordset){
-                                that._cachedRecordset.addRecord(recID, fields); //add or update record in cache
+                                //add or update record in cache
+                                that._cachedRecordset.addRecord(recID, fields, that.options.add_to_begin); 
                             }else{
                                 //add/update record in recordset in _afterSaveEventHandler depends on entity
                             }
@@ -1945,6 +1970,16 @@ this._time_debug = fin_time;
         window.hWin.HEURIST4.ui.applyCompetencyLevel(-1, this.editForm); 
         
         this._afterInitEditForm_restoreGroupStatus();
+        
+        
+        if(this.options.default_palette_class){
+            var $dlg = this._getEditDialog(true);
+            if($dlg){
+                $dlg.parent().addClass(this.options.default_palette_class);
+            }else{
+                //this.element.addClass(this.options.default_palette_class);
+            }
+        }
     },
     
     //
@@ -1962,7 +1997,7 @@ this._time_debug = fin_time;
             }   
         }
         if(this._keepPos>0){
-console.log('scroll '+this._keepPos);            
+//console.log('scroll '+this._keepPos);            
             this.editForm.scrollTop(this._keepPos);  
         } 
     },

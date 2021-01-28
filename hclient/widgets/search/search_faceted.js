@@ -136,8 +136,8 @@ $.widget( "heurist.search_faceted", {
     _MIN_DROPDOWN_CONTENT: 50,//0, //min number in dropdown selector, otherwise facet values are displayed in explicit list
     _FT_INPUT: 0,  //direct search input
     _FT_SELECT: 1, //slider for numeric and date  (for freetext it is considered as _FT_LIST)
-    _FT_LIST: 2,
-    _FT_COLUMN: 3,
+    _FT_LIST: 2,    //list view mode  
+    _FT_COLUMN: 3,  //wrapped list view mode
 
     
     // default options
@@ -1353,12 +1353,17 @@ $.widget( "heurist.search_faceted", {
             
             
 //{"f:10":"1934-12-31T23:59:59.999Z<>1935-12-31T23:59:59.999Z"}            
-            if(window.hWin.HAPI4.database=='johns_hamburg' &&
+            if(this.options.params.sort_order){
+                
+                this._current_query.push({sortby:this.options.params.sort_order});
+            
+            }else if(window.hWin.HAPI4.database=='johns_hamburg' &&
                 //special order by date fields 
                 window.hWin.HEURIST4.util.findArrayIndex(this.options.svs_ID,[21,23,24])>=0){
                     
                 this._current_query.push({sortby:'hie'});
-            }else{
+                
+            }else {
                 this._current_query.push({sortby:'t'});
             }
         
@@ -1734,6 +1739,13 @@ $.widget( "heurist.search_faceted", {
                     
                     if(field['type']=='enum' && field['groupby']!='firstlevel'){
                         
+                        var is_first_level = false;
+                        if(!field['step0_vals']){
+                            //keep all terms with values for first level
+                            field['step0_vals'] = {};  
+                            is_first_level = true;
+                        } 
+                        
                         //enumeration
                         var dtID = field['id'];  
                         var vocab_id = $Db.dty(dtID, 'dty_JsonTermIDTree');    
@@ -1796,7 +1808,9 @@ if(!(vocab_id>0)){
                                             
                                         }else{
                                         //SELECTOR/DROPDOWN
-                                            that._createOption( facet_index, level, {title:term.title, value:term.value, count:term.count} ).appendTo($container);
+                                            that._createOption( facet_index, level, {title:term.title, 
+                                                value:term.value, 
+                                                count:term.count} ).appendTo($container);
                                         }
                                 }
                                 if(term.children){
@@ -1888,14 +1902,25 @@ if(!(vocab_id>0)){
 
                                         //res_count++;
                                 }else{
-                                    
                                         //term.value_0 = null;
                                         //term.count_0 = 0;
+                                        var val = term.termssearch ?term.termssearch :term.key;
                                         if(res_count>0){
-                                            term.value = term.termssearch?term.termssearch:term.key;
+                                            term.value = val;
                                             term.count = res_count;
+                                            
+                                            if(is_first_level && val && field['multisel']){
+                                                //keep counts for level 0 - to show all terms for multisel mode
+                                                field['step0_vals'][val] = 1;
+                                            }
+                                            
                                         }else{
-                                            term.value = null;
+                                            if(!is_first_level && field['step0_vals'][val]>0){
+                                                term.value = val;
+                                            }else{
+                                                term.value = null;
+                                            }
+                                            
                                             term.count = 0;
                                         }
                                     
@@ -1911,8 +1936,18 @@ if(!(vocab_id>0)){
                                     term.value = termData.value;
                                     term.count = termData.count;
                                     res_count = 1; 
+                                    
+                                    if(is_first_level && field['multisel']){
+                                        //keep counts for level 0 - to show all terms for multisel mode
+                                        field['step0_vals'][term.value] = 1;
+                                    }
+                                    
                                 }else{
-                                    term.value = null;
+                                    if(!is_first_level && field['step0_vals'][term.key]>0){
+                                        term.value = term.key;
+                                    }else{
+                                        term.value = null;
+                                    }
                                     term.count = 0;
                                 }
                             }
@@ -1935,7 +1970,7 @@ if(!(vocab_id>0)){
                         }                        
 
                         if (field['isfacet']==this._FT_COLUMN || field['isfacet']==this._FT_LIST) {
-                                __drawTerm(term, 0, $facet_values, field);
+                                __drawTerm(term, 0, $facet_values, field); //term is a tree for vocabulary
                                 
                                 //show viewport collapse/exand control
                                 if(this.options.params.viewport<terms_drawn){
@@ -2013,6 +2048,8 @@ if(!(vocab_id>0)){
                         || field['type']=="date" || field['type']=="year") && field['isfacet']==this._FT_SELECT)
                     {  //add slider
                     
+                        $input_div.find('.input-cell').css('padding-bottom','20px');
+                    
                         $facet_values.parent().css({'display':'block'});
                         //AAA strange padding ,'padding-left':'1em','padding-right':'2em'
                         //'width':'90%', $facet_values.css({'width':'100%','padding':'1em'});
@@ -2038,7 +2075,7 @@ if(!(vocab_id>0)){
                         var mmax  = cterm[1];
                         var daymsec = 86400000; //24*60*60*1000;   1day
                  
-console.log(cterm[0]+'   '+cterm[1]);
+//console.log(cterm[0]+'   '+cterm[1]);
                         
                         if(!(window.hWin.HEURIST4.util.isempty(mmin) || window.hWin.HEURIST4.util.isempty(mmax))){
                             
@@ -2101,7 +2138,7 @@ console.log(cterm[0]+'   '+cterm[1]);
                         }else if(!field.selectedvalue && cterm[0]==cterm[1]){ //range was not set and initial
                             
                             //show the only date without slider
-                            s = temporalSimplifyDate(_cterm[0]);
+                            s = temporalSimplifyDate(cterm[0]);
                             
                             $("<span>").html(s 
                                     + ((sl_count>0) ?'<span class="badge" style="float: right;">'+sl_count+'</span>':''))
@@ -2215,8 +2252,14 @@ console.log(cterm[0]+'   '+cterm[1]);
                                 if(field['type']=="date"){
                                     try{
                                         //year must be four digit
-                                        min = (new TDate(min)).toString();
-                                        max = (new TDate(max)).toString(); 
+                                        //min = (new TDate(min)).toString();
+                                        //max = (new TDate(max)).toString(); 
+                                        
+                                        var tDate = new TDate((new Date(min)).toISOString());
+                                        min = tDate.toString();
+                                        
+                                            tDate = new TDate((new Date(max)).toISOString());
+                                        max = tDate.toString();
                                         
                                         //min = (new Date(min)).toISOString();
                                         //max = (new Date(max)).toISOString(); 
@@ -2227,7 +2270,7 @@ console.log(cterm[0]+'   '+cterm[1]);
 
                                 var value = (min==max)?min :min + '<>' + max; //search in between
                                 
-console.log('start search  '+value);                                
+//console.log('start search  '+value);                                
                                 
                                 if(window.hWin.HEURIST4.util.isempty(value)){
                                     value = '';
@@ -2317,7 +2360,7 @@ console.log('start search  '+value);
                         
                             var w = that.element.width();
                             var flbl = $("<div>",{id:"facet_range"+facet_index})
-                                        .css({display: 'inline-block', 'padding-bottom': '1em', width:(w-50)})
+                                        .css({display: 'inline-block', 'padding': '0 0 1em 16px', width:(w-40)})
                                         .appendTo($facet_values);
                                         
                             if(field['type']=="date"){
@@ -2330,7 +2373,7 @@ console.log('start search  '+value);
 
                             var ele2 = $('<div><span class="ui-icon ui-icon-triangle-1-w-stop" '
                                 +'style="cursor:pointer;font-size:smaller;float:left;color:gray"/>'
-                            +'<div style="height:0.4em;margin:2px 0px 0px 2px;float:left;width:'+(w-52)+'px"/>'
+                            +'<div style="height:0.4em;margin:2px 0px 0px 2px;float:left;width:'+(w-62)+'px"/>'
                             +'<span class="ui-icon ui-icon-triangle-1-e-stop" '
                                 +'style="cursor:pointer;font-size:smaller;float:left;color:gray"/></div>'
                             ).appendTo($facet_values);
@@ -2351,7 +2394,7 @@ console.log('start search  '+value);
                                           $(this).find('.ui-slider-handle').css({width:'4px',background:'black'});
                                       }
                                     });
-                            
+                                    
                             that._on( ele2.find('span.ui-icon-triangle-1-w-stop'),
                                  {click: function(){
                                      __onSlideStartSearch(field.mmin0, mmax);
@@ -2361,6 +2404,15 @@ console.log('start search  '+value);
                                      __onSlideStartSearch(mmin, field.mmax0);
                                  }});
 
+                                 
+                            if(mmin==field.mmin0){
+                                ele2.find('span.ui-icon-triangle-1-w-stop').css('visibility','hidden');
+                            }                                    
+                            if(mmax==field.mmax0){
+                                ele2.find('span.ui-icon-triangle-1-e-stop').css('visibility','hidden');
+                            }                                    
+                            
+                                 
                             //show initial values
                             __updateSliderLabel(mmin, mmax, sl_count);
                             
@@ -2479,7 +2531,7 @@ console.log('start search  '+value);
         return f_link;
     }
     
-    , _onTermSelect:function(event){
+    , _onTermSelect: function(event){
         
                 var link = $(event.target).find( "option:selected" );
                 var facet_index = Number(link.attr('facet_index'));
@@ -2504,7 +2556,7 @@ console.log('start search  '+value);
     }
 
     // cterm - {title, value, count}
-    ,_createFacetLink : function(facet_index, cterm, display_mode){
+    ,_createFacetLink: function(facet_index, cterm, display_mode){
 
         var field = this.options.params.facets[facet_index];
         //var step = cterm.step;
@@ -2544,7 +2596,12 @@ console.log('start search  '+value);
             }
             
             if(!window.hWin.HEURIST4.util.isempty(currval)){
-                iscurrent = (currval == cterm.value);
+                
+                if(field.multisel){
+                    iscurrent = (window.hWin.HEURIST4.util.findArrayIndex(cterm.value, currval.split(','))>=0);
+                }else{
+                    iscurrent = (currval == cterm.value);    
+                }
                 if(iscurrent) 
                     //do not highlight if initals selected
                     //|| (currval.length==2 &&  currval.substr(1,1)=='%' && currval.substr(0,1)==cterm.value.substr(0,1)) )
@@ -2579,7 +2636,7 @@ console.log('start search  '+value);
             }
         }
         
-        if(!iscurrent || cterm.count=='reset'){ 
+        if( field.multisel || !iscurrent || cterm.count=='reset'){ 
 
         var that = this;
 
@@ -2597,6 +2654,20 @@ console.log('start search  '+value);
                 if(window.hWin.HEURIST4.util.isempty(value)){
                     value = '';
                     field.selectedvalue = null;
+                }else if(field.multisel && field.selectedvalue!=null){
+                    
+                    var vals = field.selectedvalue.value.split(',');
+                    var k = window.hWin.HEURIST4.util.findArrayIndex(value, vals);
+                    if(k<0){ //add
+                        vals.push(value);
+                    }else{ //remove
+                        vals.splice(k,1);
+                    }
+                    if(value.length==0){
+                        field.selectedvalue = null;
+                    }else{
+                        field.selectedvalue.value = vals.join(',');    
+                    }
                 }else{
                     field.selectedvalue = {title:label, value:value, step:step};                    
                 }

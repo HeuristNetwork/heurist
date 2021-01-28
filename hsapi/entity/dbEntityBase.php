@@ -75,7 +75,8 @@ class DbEntityBase
     function __construct( $system, $data ) {
        $this->system = $system;
        $this->data = $data;
-       $this->_readConfig();
+       $this->_readConfig();    
+       
        $this->init();
        
        

@@ -11,7 +11,7 @@
         
         "entityTitle": "Base Field",
         "entityTitlePlural": "Base Fields",
-        "empty_remark": "Please use the search field above to locate relevant field (partial string match on title)",
+        "empty_remark": "No fields in this group",
         
         "fields": [
                 {
@@ -205,6 +205,16 @@
                     "groupStyle": null,
                     "children":[
                 
+                {
+                    "dtID": "dty_SemanticReferenceURL",
+                    "dtFields":{
+                        "dty_Type":"freetext",
+                        "dty_Size":255,
+                        "rst_DisplayWidth":80,
+                        "rst_DisplayName": "Semantic/Reference URI:",
+                        "rst_DisplayHelpText": "URI to a full description or ontological reference definition of the base field" 
+                    }
+                },
                 {
                     "dtID": "dty_ExtendedDescription",
                     "dtFields":{

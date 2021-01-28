@@ -672,7 +672,7 @@ $mysqli = $system->get_mysqli();
                     $smsg = $smsg.'<a href="#unused_local" style="white-space: nowrap;padding-right:20px">Unused local files</a>';
                 }
                 if(count($files_unused_remote)>0){
-                    $smsg = $smsg.'<a href="#unused_remote" style="white-space: nowrap;padding-right:20px">Unsed remote files</a>';
+                    $smsg = $smsg.'<a href="#unused_remote" style="white-space: nowrap;padding-right:20px">Unused remote files</a>';
                 }
                 if(count($files_notfound)>0){
                     $smsg = $smsg.'<a href="#files_notfound" style="white-space: nowrap;padding-right:20px">Files not found</a>';
@@ -696,7 +696,7 @@ $mysqli = $system->get_mysqli();
                     <div style="padding-bottom:10px;font-weight:bold"><?php echo count($files_unused_local);?> entries</div>
                     <div>These files are not referenced by any record in the database. 
                     Select all or some entries and click the button 
-                    <button onclick="doRepairAction('unused_file_local')">Remove selected unsed local files</button>
+                    <button onclick="doRepairAction('unused_file_local')">Remove selected unused local files</button>
                     to remove registrations from the database. Files remain untouched</div>
                     <br>
                     <label><input type=checkbox
@@ -710,7 +710,7 @@ $mysqli = $system->get_mysqli();
                                     //@$row['ulf_ExternalFileReference'];
                 }//for
                 if(count($files_unused_local)>10){
-                    print '<div><br><button onclick="doRepairAction(\'unused_file_local\')">Remove selected unsed local files</button></div>';
+                    print '<div><br><button onclick="doRepairAction(\'unused_file_local\')">Remove selected unused local files</button></div>';
                 }
                 print '<br><br><hr/></div>';
                 }
@@ -723,7 +723,7 @@ $mysqli = $system->get_mysqli();
                     <div style="padding-bottom:10px;font-weight:bold"><?php echo count($files_unused_remote);?> entries</div>
                     <div>These URLs are not referenced by any record in the database. 
                     Select all or some entries and click the button 
-                    <button onclick="doRepairAction('unused_file_remote')">Remove selected unsed URLs</button>
+                    <button onclick="doRepairAction('unused_file_remote')">Remove selected unused URLs</button>
                     to remove registrations from the database.</div>
                     
                     <br>
@@ -737,7 +737,7 @@ $mysqli = $system->get_mysqli();
                             .'<b>'.$row['ulf_ID'].'</b> '.$row['ulf_ExternalFileReference'].'</label></div>';
                 }//for
                 if(count($files_unused_remote)>10){
-                    print '<div><br><button onclick="doRepairAction(\'unused_file_remote\')">Remove selected unsed URLs</button></div>';
+                    print '<div><br><button onclick="doRepairAction(\'unused_file_remote\')">Remove selected unused URLs</button></div>';
                 }
                 print '<br><br><hr/></div>';
                 }//if

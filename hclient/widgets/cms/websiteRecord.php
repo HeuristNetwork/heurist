@@ -152,11 +152,12 @@ $rec_id = recordSearchReplacement($mysqli, $rec_id, 0);
 //$rec = mysql__select_row_assoc($mysqli, 
 //        'select rec_Title, rec_NonOwnerVisibility, rec_OwnerUGrpID from Records where rec_ID='.$rec_id);
 $rec = recordSearchByID($system, $rec_id, true);
-        
+
+$home_page_on_init = $rec_id;        
 
 if($rec==null){
     //header('Location: '.ERROR_REDIR.'&msg='.rawurlencode('Record #'.$rec_id.' not found'));
-    $message = 'Record #'.$rec_id.' not found';
+    $message = 'Record #'.$home_page_on_init.' not found';
     include ERROR_REDIR;
     exit();
 }
@@ -227,8 +228,16 @@ window.hWin.HEURIST4.msg.showMsgDlg(
         
         $empty_mark = (trim($content)=='')?' date-empty="1"':'';
         
-        print '<h2 class="webpageheading" '.$empty_mark.'>'.__getValue($rec, DT_NAME).'</h2>'
+        $term_ID = mysql__select_value($mysqli, 
+                'select trm_ID from defTerms where trm_OriginatingDBID=2 and trm_IDInOriginatingDB=6254');
+
+        $isWebPage = ($rec['rec_RecTypeID']==RT_CMS_MENU && __getValue($rec, DT_CMS_PAGETYPE)==$term_ID);
+        if($isWebPage){
+            print $content;
+        }else{
+            print '<h2 class="webpageheading" '.$empty_mark.'>'.__getValue($rec, DT_NAME).'</h2>'
                             .$content;
+        }        
     }
     exit();
 }
@@ -261,8 +270,10 @@ $image_logo = $image_logo?'<img style="max-height:80px;max-width:270px;" src="'.
 
 $meta_keywords = htmlspecialchars(__getValue($rec, DT_CMS_KEYWORDS));
 $meta_description = htmlspecialchars(__getValue($rec, DT_SHORT_SUMMARY));
-$show_pagetitle = ((__getValue($rec, DT_CMS_PAGETITLE))!==ConceptCode::getTermLocalID('99-5447'));
-
+$show_pagetitle = __getValue($rec, DT_CMS_PAGETITLE);
+$show_pagetitle = ($show_pagetitle!==ConceptCode::getTermLocalID('2-531') && 
+                       $show_pagetitle!==ConceptCode::getTermLocalID('99-5447'));
+//2-532 - YES   2-531 - NO
 
 if(!$isWebPage && __getValue($rec,DT_EXTENDED_DESCRIPTION)==''){
     //home page is empty
@@ -356,7 +367,7 @@ if (($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1')
 <script>
     var _time_debug = new Date().getTime() / 1000;
     var page_first_not_empty = 0;
-    var home_page_record_id=<?php echo $rec_id; ?>;
+    var home_page_record_id=<?php echo $home_page_on_init; ?>;
     var init_page_record_id=<?php echo $open_page_on_init; ?>;
     var is_embed =<?php echo array_key_exists('embed', $_REQUEST)?'true':'false'; ?>;
 </script>
@@ -489,6 +500,14 @@ _time_debug = new Date().getTime() / 1000;
 
         var topmenu = $('#main-menu');
         topmenu.attr('data-heurist-app-id','heurist_Navigation');
+
+        function __onInitComplete(not_empty_page){
+            //load given page or home page content
+            var load_initially = home_page_record_id;
+            <?php if($isEmptyHomePage) echo 'if(not_empty_page){ load_initially=not_empty_page;}'; ?>
+            
+            loadPageContent(init_page_record_id>0 ?init_page_record_id :load_initially);
+        }
                
         window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, "#main-header",
             {heurist_Navigation:{
@@ -497,13 +516,10 @@ _time_debug = new Date().getTime() / 1000;
                     orientation: 'horizontal',
                     toplevel_css: {background:'none'}, //bg_color 'rgba(112,146,190,0.7)'
                     aftermenuselect: afterPageLoad,
-                    onInitComplete: function(not_empty_page){
-                        //load given page or home page content
-                        <?php if($isEmptyHomePage) echo 'if(not_empty_page){ home_page_record_id=not_empty_page;}'; ?>
-                        
-                        loadPageContent(init_page_record_id>0 ?init_page_record_id :home_page_record_id);
-                    }
-            }} );
+                    onInitComplete: __onInitComplete
+            }},
+            __onInitComplete
+            );
             
         $('#main-menu').show();
         
@@ -534,7 +550,7 @@ function loadPageContent(pageid){
                   function(){
                       
                       var pagetitle = $(page_target.children()[0]);
-                      pagetitle.remove();
+                      if(pagetitle.is('h2.webpageheading')) pagetitle.remove()
                       $('#main-pagetitle').empty();
                       window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, '#main-content' );
                       window.hWin.HEURIST4.msg.sendCoverallToBack();
@@ -614,7 +630,6 @@ function afterPageLoad(document, pageid){
     if(!is_embed){    
         var s = location.pathname;
         while (s.substring(0, 2) === '//') s = s.substring(1);
-
         window.history.pushState("object or string", "Title", s+'?db='
         +window.hWin.HAPI4.database+'&website&id='+home_page_record_id+(pageid!=home_page_record_id?'&pageid='+pageid:''));
     }
@@ -651,22 +666,51 @@ function afterPageLoad(document, pageid){
 //
 function onHapiInit(success){   
     
-//    console.log('webpage hapi inited  '+(new Date().getTime() / 1000 - _time_debug));
+//    console.log('webpage hapi inited  ');//+(new Date().getTime() / 1000 - _time_debug));
     _time_debug = new Date().getTime() / 1000;
     
     if(!success){    
             window.hWin.HEURIST4.msg.showMsgErr('Cannot initialize system on client side, please consult Heurist developers');
+            window.hWin.HEURIST4.msg.sendCoverallToBack();            
             return;
     }
     
-    window.hWin.HAPI4.EntityMgr.refreshEntityData('all');
+    var res = window.hWin.HEURIST4.util.versionCompare(window.hWin.HAPI4.sysinfo.db_version_req, 
+                                                window.hWin.HAPI4.sysinfo.db_version);   
+    if(res==-2){ //-2= db_version_req newer
+    window.hWin.HEURIST4.msg.showMsgErr('<h3>Old version database</h3>'
++'<p>You are trying to load a website using a more recent version of Heurist than the one used for the database being accessed.</p>'
++'<p>Please ask the owner of the database to open it in the latest version of Heurist which will apply the necessary updates.</p>');
+        window.hWin.HEURIST4.msg.sendCoverallToBack();
+        return;
+    }
+
+    window.hWin.HAPI4.SystemMgr.get_defs_all(false, null, function(success){
         
+        if(success){
+    _time_debug = new Date().getTime() / 1000;
+            //substitute values in header
+            initHeaderElements();
+            
+            onPageInit(success);
+            
+            if(window.hWin.HAPI4.sysinfo.host_logo && $('#host_info').length>0){
+                
+                $('<div style="height:40px;padding-left:4px;float:right">'  //background: white;
+                    +'<a href="'+(window.hWin.HAPI4.sysinfo.host_url?window.hWin.HAPI4.sysinfo.host_url:'#')
+                    +'" target="_blank" style="text-decoration:none;color:black;">'
+                            +'<label>at: </label>'
+                            +'<img src="'+window.hWin.HAPI4.sysinfo.host_logo
+                            +'" height="35" align="center"></a></div>')
+                .appendTo( $('#host_info') );
+            }
+        }
+    });
+    
+/*
+    window.hWin.HAPI4.EntityMgr.refreshEntityData('all');
     window.hWin.HAPI4.SystemMgr.get_defs({rectypes:'all', terms:'all', detailtypes:'all', mode:2}, function(response){
         
-//console.log('DBG execution time "get_defs" '+response.exec_time);                            
-//console.log('DBG size "get_defs" '+response.zip_size);                            
-        
-//console.log('webpage db struct  '+(new Date().getTime() / 1000 - _time_debug));
 _time_debug = new Date().getTime() / 1000;
         
         if(response.status == window.hWin.ResponseStatus.OK){
@@ -702,6 +746,7 @@ _time_debug = new Date().getTime() / 1000;
             .appendTo( $('#host_info') );
         }
     });
+*/    
 }
 
 
@@ -772,7 +817,7 @@ $(document).ready(function() {
             $('body').find('#main-pagetitle').hide();
         }
             
-//console.log('webpage doc ready '+(window.hWin.HAPI4)+'    '+(new Date().getTime() / 1000 - _time_debug));
+//console.log('webpage doc ready ');//+(window.hWin.HAPI4)+'    '+(new Date().getTime() / 1000 - _time_debug));
         _time_debug = new Date().getTime() / 1000;
     
         // Standalone check
@@ -810,7 +855,7 @@ body{
     display:none;
     position:absolute;
     left:0;right:0;top:0;bottom:0;
-    padding:10px;
+    /*padding:10px;*/
 }
 #main-header{
     /*background:rgb(112,146,190);*/
@@ -896,7 +941,7 @@ if ($page_template!=null && substr($page_template,-4,4)=='.tpl') {
         print '<div style="top:0;height:20px;position:absolute;text-align:center;width:100%;color:red;">Web page record is not public. It will not be visible to the public</div>';  
     }
 ?>
-    <div class="ent_content_full ui-heurist-bg-light" style="padding: 5px; top:<?php echo ($showWarnAboutPublic)?20:0; ?>px" 
+    <div class="ent_content_full ui-heurist-bg-light" style="top:<?php echo ($showWarnAboutPublic)?20:0; ?>px" 
                     id="main-content-container">
         <div id="main-content" data-homepageid="<?php print $rec_id;?>" 
                                data-viewonly="<?php print ($hasAccess)?0:1;?>">
@@ -942,7 +987,7 @@ if ($page_template!=null && substr($page_template,-4,4)=='.tpl') {
             </div>    
         </div>
         
-        <div id="main-menu" class="mceNonEditable" style="float:left;width:100%;min-height:40px;padding-top:16px;color:black;font-size:1.1em;" data-heurist-app-id="heurist_Navigation" data-generated="1">
+        <div id="main-menu" class="mceNonEditable" style="position: absolute;top: 88px;width:100%;min-height:40px;padding-top:16px;color:black;font-size:1.1em;" data-heurist-app-id="heurist_Navigation" data-generated="1">
             <div class="widget-design-header" style="padding: 10px;"><img style="vertical-align: middle;"
              height="22" /> <strong>navigation</strong><a class="edit" style="padding: 0 10px;" title="Click to edit" href="#">edit</a>  <a class="remove" href="#">remove</a> height:50px width:100%</div>
             <span class="widget-options" style="font-style: italic; display: none;">{"menu_recIDs":"<?php print $rec_id;?>","use_next_level":true,"orientation":"horizontal","init_at_once":true}</span>
@@ -999,7 +1044,7 @@ if ($page_template!=null && substr($page_template,-4,4)=='.tpl') {
     
     if(!$edit_Available && $system->is_member(2)){
         print '<a href="'.HEURIST_BASE_URL.'?db='.$system->dbname().'&cms='.$rec_id.'" id="btn_editor" target="_blank" '
-        .'style="position:absolute;right:10px; top:5px;" class="cms-button">Edit website</a>';
+        .'style="position:absolute;right:10px; top:5px;" class="cms-button">Heurist interface</a>';
     }
     ?>  
         <div id="main-pagetitle" class="ui-heurist-bg-light" style="display:none">loading...</div>       

@@ -29,6 +29,8 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
     //    
     _init: function() {
 
+        this.options.default_palette_class = 'ui-heurist-admin';
+
         this.options.layout_mode = 'short';
         this.options.use_cache = false;
         this.options.width = 800;
@@ -361,7 +363,7 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
 
             html = html
             +'<div class="user-list-count">' + fld('ugr_Members') + '</div>'
-            +'<div class="rec_actions user-list-edit user-list-member">'
+            +'<div class="user-list-edit user-list-member">'
             +'<div class="adminSelector" style="padding-top:2px;width:60px"><input type="checkbox" id="adm'+recID
             +'" '+(this._select_roles[recID]=='admin'?'checked':'')
             +'/><label for="adm'+recID+'">Admin</label></div>' 
@@ -369,7 +371,7 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
             +'" '+(this._select_roles[recID]=='member'?'checked':'')
             +'/><label for="mem'+recID+'">Member</label></div></div>';
 
-            html = html + '<div class="rec_actions user-list" style="top:4px;width:60px"></div></div>';
+            html = html + '<div class="rec_actions user-list" style="top:4px;width:60px;right:2px;position:absolute;"></div></div>';
 
 
         } else
@@ -380,7 +382,7 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
 
                     html = html
                     +'<div class="user-list-count">' + fld('ugr_Members') + '</div>'
-                    +'<div class="rec_actions user-list-edit user-list-member">'
+                    +'<div class="user-list-edit user-list-member">'
                     +'<div class="adminSelector" style="padding-top:2px;width:60px"><input type="checkbox" id="adm'+recID
                     +'" '+(fld('ugl_Role')=='admin'?'checked':'')
                     +'/><label for="adm'+recID+'">Admin</label></div>' 
@@ -388,16 +390,16 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
                     +'" '+(fld('ugl_Role')=='member'?'checked':'')
                     +'/><label for="mem'+recID+'">Member</label></div></div>';
 
-                    html = html + '<div class="rec_actions user-list" style="top:4px;width:60px">';
+                    html = html + '<div class="rec_actions user-list" style="top:4px;width:60px;right:2px;position:absolute;">';
 
                 }else{
 
                     html = html 
-                    + '<div class="rec_actions user-list user-list-edit edit-members" style="right:140px;width:50px;">'
+                    + '<div class="user-list user-list-edit edit-members" style="right:150px;width:50px;">'
                     + fld('ugr_Members') + '<span class="ui-icon ui-icon-pencil" '
                     + ' style="font-size:0.8em;float:right;top:2px;right:2px"/></div>'  //'<span class="ui-icon ui-icon-pencil" style="font-size:0.8em"></span>
 
-                    html = html + '<div class="rec_actions user-list" style="top:4px;width:140px">';
+                    html = html + '<div class="rec_actions user-list" style="top:4px;width:140px;right:2px;position:absolute;">';
 
                     if(this.searchForm.find('#input_search_type').val()!='any'){
 
@@ -579,7 +581,7 @@ $.widget( "heurist.manageSysGroups", $.heurist.manageEntity, {
         }else{
             var that = this;
             window.hWin.HEURIST4.msg.showMsgDlg(
-                'Are you sure you wish to delete this group? Proceed?', function(){ that._deleteAndClose(true) }, 
+                'Are you sure you wish to delete this group?', function(){ that._deleteAndClose(true) }, 
                 {title:'Warning',yes:'Proceed',no:'Cancel'});        
         }
     }

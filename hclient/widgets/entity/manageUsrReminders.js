@@ -29,6 +29,10 @@ $.widget( "heurist.manageUsrReminders", $.heurist.manageEntity, {
     
     _init: function() {
         
+        if(!this.options.default_palette_class){
+            this.options.default_palette_class = 'ui-heurist-admin';    
+        }
+        
         this.options.use_cache = false;
         
         if(this.options.edit_mode=='editonly'){
@@ -36,7 +40,7 @@ $.widget( "heurist.manageUsrReminders", $.heurist.manageEntity, {
             this.options.select_mode = 'manager';
             this.options.layout_mode = 'editonly';
             this.options.width = 790;
-            this.options.height = 600;
+            if(!(this.options.height>0)) this.options.height = 600;
             this.options.beforeClose = function(){}; //to supress default warning
         }else{
            this.options.edit_mode = 'popup'; 
@@ -198,7 +202,7 @@ $.widget( "heurist.manageUsrReminders", $.heurist.manageEntity, {
         }else{
             var that = this;
             window.hWin.HEURIST4.msg.showMsgDlg(
-                'Are you sure you wish to delete this reminder? Proceed?', function(){ that._deleteAndClose(true) }, 
+                'Are you sure you wish to delete this reminder?', function(){ that._deleteAndClose(true) }, 
                 {title:'Warning',yes:'Proceed',no:'Cancel'});        
         }
     },

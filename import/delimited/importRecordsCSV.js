@@ -246,8 +246,9 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                                 _loadSession();    
                            }
                         });
+                        $('#selImportId-button').css('vertical-align',4); 
                     });
-                        
+                
         
                         
         //init STEP 3 - matching and import
@@ -2746,9 +2747,9 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 if(key_idx>=0){
                     if(haveMapping){
                         if(disamb_resolv==null){
-                        sWarning = 'You choose to match the incoming data and selected the existing identification field "'
+                        sWarning = 'You chose to match the incoming data and selected the existing identification field "'
                                 +imp_session['columns'][key_idx]
-                                +'".<br>It means it will be filled with new values.<br><br>Proceed?';
+                                +'".<br>This means it will be filled with new values.<br><br>';
                         }
                     }else{
 //@todo here and on server side
@@ -4267,13 +4268,13 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         currentStep = page;
 
         if(page>1){
-            var container = $(window.hWin.document).find('.ui-menu6-container.ui-heurist-import');
+            var container = $(window.hWin.document).find('.ui-menu6-container.ui-heurist-populate');
             if(container.find('.ui-helper-popup').is(':visible')){
                 container.find('.ui-helper-popup').hide();    
                 //container.find('.ui-helper-popup-button').button({icons:{primary:"ui-icon-circle-help"}});
                 container.find('.ui-helper-popup-button').find('.ui-button-icon')
                     .removeClass('ui-icon-carat-2-e').addClass('ui-icon-circle-help');
-                container.find('.ent_content_full').css({right:1});
+                container.find('.ent_content_full').css({right:1,width:'auto'});
             }
         }
         

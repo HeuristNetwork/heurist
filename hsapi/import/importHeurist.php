@@ -110,7 +110,7 @@ private static function readDataFile($filename, $type=null, $validate=true){
                 {
                     if(!(count(self::$system->getError())>0))
                         self::$system->addError(HEURIST_ACTION_BLOCKED, 
-                            'Import data has wrong data. "Record type" section is not found');
+                            'The data file contains data which does not correspond with expectations.<br> "Record type" section not found');
                 }
                 
                 
@@ -175,7 +175,7 @@ private static function hmlToJson($filename){
     {
             foreach($xml_recs->children() as $xml_rec){
                 $rectype = $xml_rec->type->attributes();
-                $rectype_id = ''.$rectype['id'];
+                $rectype_id = ''.$rectype['id']; //may be not defined
                 
                 $record = array(
                     'rec_ID'=>''.$xml_rec->id,
@@ -192,6 +192,7 @@ private static function hmlToJson($filename){
                 );
                 
                 //fill rectype array - it will be required to find missed rectypes
+                //if id is not defined we take concept code
                 $rt_idx = ($rectype_id>0)?$rectype_id: ''.$rectype['conceptID'];
                 if(!@$rectypes[$rt_idx]){
                     $rectypes[$rt_idx] = array(
@@ -452,7 +453,9 @@ public static function importRecordsFromDatabase($params, $session_id){
     $remote_path = $remote_path.'&q='.$params['q'];
 
     if(@$params['rules']!=null){
-        $remote_path = $remote_path.'&rules='.$params['rules'];
+        //$rules = json_decode($params['rules']);
+        
+        $remote_path = $remote_path.'&rules='.rawurlencode($params['rules']);
         if(@$params['rulesonly']==true || @$params['rulesonly']==1){
             $remote_path = $remote_path.'&rulesonly=1';
         }
@@ -472,7 +475,7 @@ public static function importRecordsFromDatabase($params, $session_id){
 //2. import records
     if($filesize>0 && file_exists($heurist_path)){
         //read temp file, import records
-        $res = self::importRecords($heurist_path, $session_id, false, true, self::$system->get_user_id() );
+        $res = self::importRecords($heurist_path, $session_id, false, true, self::$system->get_user_id(), @$params['mapping'] );
     
         if(@$params['tlcmapshot'] && $res!==false){
             //find map document among imported records
@@ -544,7 +547,7 @@ returns array
     resource_notfound
 
 */
-public static function importRecords($filename, $session_id, $is_cms_init=false, $make_public=true, $owner_id=1){
+public static function importRecords($filename, $session_id, $is_cms_init=false, $make_public=true, $owner_id=1, $mapping_defs=null){
 
     self::initialize();
 
@@ -639,13 +642,34 @@ EOD;
                 'terms' => dbs_GetTerms(self::$system));
             
         }else{
-           
+        
             $importDef = new DbsImport( self::$system );
-            //Finds all defintions to be imported
-            $res2 = $importDef->doPrepare(  array('defType'=>'rectype', 
+            
+            if($mapping_defs!=null){
+        
+                //for import records by mapping we check and import affected vocabularies only
+                $res2 = $importDef->doPrepare(  array('defType'=>'term', 
                         'databaseID'=>@$data['heurist']['database']['id'], 
-                        'definitionID'=>array_keys($imp_rectypes),
-                        'rectypes'=>$imp_rectypes ));
+                        'definitionID'=>$mapping_defs['vocabularies'])); //array of vocabularies to be imported
+                        
+                if($res2){
+                 //   $importDef->doImport(); //sync/import vocabularies
+                }     
+                //mapping for fields and rectypes
+                $importDef->doMapping($mapping_defs);
+                
+                $defs = $importDef->getDefinitions();        
+                $defs['rectypes'] = dbs_GetRectypeStructures(self::$system, null, 2);
+                $defs['detailtypes'] = dbs_GetDetailTypes(self::$system, null, 2);
+                        
+            }else{
+           
+                //Finds all defintions to be imported
+                $res2 = $importDef->doPrepare(  array('defType'=>'rectype', 
+                            'databaseID'=>@$data['heurist']['database']['id'], 
+                            'definitionID'=>array_keys($imp_rectypes), //array of record type source ids
+                            'rectypes'=>$imp_rectypes ));
+            }
                         
             if(!$res2){
                 $err = self::$system->getError();
@@ -654,9 +678,10 @@ EOD;
                     return false;
                 }
                 self::$system->clearError();  
+                
+                //get target definitions (this database)
+                $defs = $importDef->getDefinitions();
             }  
-            //get target definitions (this database)
-            $defs = $importDef->getDefinitions();
         }
         
         $def_dts  = $defs['detailtypes']['typedefs'];
@@ -667,10 +692,10 @@ EOD;
         $file_entity = new DbRecUploadedFiles(self::$system, null);
         $file_entity->setNeedTransaction(false);
         
-        $records = $data['heurist']['records'];
+        $records = $data['heurist']['records']; //records to be imported
         
         $records_corr_alphanum = array();
-        $records_corr = array(); //source rec id -> target rec id
+        $records_corr = array(); //correspondance: source rec id -> target rec id
         $resource_fields = array(); //source rec id -> field type id -> field value (target recid)
         $keep_rectypes = array(); //keep rectypes for furhter rectitle update
         $recid_already_checked = array(); //keep verified H-ID resource records
@@ -694,11 +719,31 @@ EOD;
                 //@todo
             }
             
+            $target_RecID = 0;
+            
             if($dbsource_is_same){
                 $recTypeID = DbsImport::getLocalCode('rectypes', $defs, 
                     $record_src['rec_RecTypeID']>0
                         ?$record_src['rec_RecTypeID']
                         :$record_src['rec_RecTypeConceptID'], false);
+            }else if($mapping_defs!=null){
+                
+                $recTypeID = @$mapping_defs[$record_src['rec_RecTypeID']]['rty_ID'];
+                
+                //check that record already exists in
+                //get key value from target
+                if($recTypeID>0){
+                    $keyDty_ID = $mapping_defs[$record_src['rec_RecTypeID']]['key'];
+                    $key_value = $record_src['details'][$keyDty_ID];
+                    if(is_array($key_value)) $key_value = array_shift($key_value);
+                    
+                    //search in target 
+                    $keyDty_ID = $mapping_defs[$record_src['rec_RecTypeID']]['details'][$keyDty_ID];
+                    $target_RecID = mysql__select_value($mysqli, 'select rec_ID from Records, recDetails where dtl_RecID=rec_ID '
+                    .' AND rec_RecTypeID='.$recTypeID.' AND dtl_DetailTypeID='.$keyDty_ID.' AND dtl_Value="'.$key_value.'"');
+            
+                    if(!($target_RecID>0)) $target_RecID = 0;
+                }
                 
             }else{
                 $recTypeID = $importDef->getTargetIdBySourceId('rectypes',
@@ -716,7 +761,7 @@ EOD;
             // prepare records - replace all fields, terms, record types to local ones
             // keep record IDs in resource fields to replace them later
             $record = array();
-            $record['ID'] = 0; //add new
+            $record['ID'] = $target_RecID; //0 - add new
             $record['RecTypeID'] = $recTypeID;
             
             $record_src_original_id = null;
@@ -734,12 +779,12 @@ EOD;
                         .$record_src['rec_ID'];
                 
                 if((!ctype_digit($record_src['rec_ID'])) || strlen($record_src['rec_ID'])>9 ){  //4 957 948 868
-                    $rec_id_an = strtolower($record_src['rec_ID']);
-                    if(@$records_corr_alphanum[$rec_id_an]){ //aplhanum->random int
-                        $record_src['rec_ID'] = $records_corr_alphanum[$rec_id_an];
+                    $rec_id_low = strtolower($record_src['rec_ID']);
+                    if(@$records_corr_alphanum[$rec_id_low]){ //aplhanum->random int
+                        $record_src['rec_ID'] = $records_corr_alphanum[$rec_id_low];
                     }else{
                         $rand_id = rand(900000000,999999999); //random_int
-                        $records_corr_alphanum[$rec_id_an] = $rand_id;
+                        $records_corr_alphanum[$rec_id_low] = $rand_id;
                         $record_src['rec_ID'] = $rand_id; 
                     }
                 }
@@ -776,6 +821,10 @@ EOD;
                 if($dbsource_is_same){
                     //$dty_ID can be local id or concept code
                     $ftId = DbsImport::getLocalCode('detailtypes', $defs, $dty_ID, false);
+                }else if($mapping_defs!=null){
+                
+                    $ftId = @$mapping_defs[$record_src['rec_RecTypeID']]['details'][$dty_ID];
+                
                 }else{
                     $ftId = $importDef->getTargetIdBySourceId('detailtypes', $dty_ID);
                 }
@@ -797,6 +846,10 @@ EOD;
                 
                 $def_field = $def_dts[$ftId]['commonFields'];
                 
+                if($def_field[$idx_type] == "relmarker"){ //ignore
+                    continue;
+                }
+                                
                 $new_values = array();
                 if($def_field[$idx_type] == "enum" || 
                    $def_field[$idx_type] == "relationtype")
@@ -971,11 +1024,13 @@ EOD;
                        }else{                       
 
                            if((!ctype_digit($value)) || strlen($value)>9 ){  //8 724 803 625
-                               if(@$records_corr_alphanum[$value]){
-                                   $value = $records_corr_alphanum[$value];
+                           
+                               $rec_id_low = strtolower($value);
+                               if(@$records_corr_alphanum[$rec_id_low]){
+                                   $value = $records_corr_alphanum[$rec_id_low];
                                }else{
                                    $rand_id = rand(900000000,999999999); //was random_int
-                                   $records_corr_alphanum[$value] = $rand_id;
+                                   $records_corr_alphanum[$rec_id_low] = $rand_id;
                                    $value = $rand_id; 
                                }
                            }
@@ -1163,7 +1218,7 @@ EOD;
             }
             if(!$is_rollback){ 
                 $idx_mask = $defs['rectypes']['typedefs']['commonNamesToIndex']['rty_TitleMask'];         
-                //update resource fields with new record ids
+                //update recrord title
                 foreach ($keep_rectypes as $rec_id=>$rty_id){
                     $mask = @$defs['rectypes']['typedefs'][$rty_id]['commonFields'][$idx_mask];
                     recordUpdateTitle(self::$system, $rec_id, $mask, null);

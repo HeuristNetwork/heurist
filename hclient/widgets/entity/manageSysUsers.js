@@ -27,6 +27,8 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
     //    
     _init: function() {
         
+        this.options.default_palette_class = 'ui-heurist-admin';
+        
         this.options.layout_mode = 'short';
         this.options.use_cache = false;
         //this.options.edit_mode = 'popup';
@@ -379,8 +381,8 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
         
             var ugl_GroupID = this.searchForm.find('#input_search_group').val(); 
             if(window.hWin.HAPI4.is_admin() && !(ugl_GroupID>0)){  //all groups - show count of groups where user is a member
-                html = html 
-                    + '<div class="rec_actions user-list user-list-edit" style="right:90px;width:50px;" title="Edit participation of user in groups">'
+                html = html   //rec_actions 
+                    + '<div class="user-list user-list-edit" style="right:90px;width:50px;" title="Edit participation of user in groups">'
                     + fld('ugr_Member') + '<span class="ui-icon ui-icon-pencil" '
                     + ' style="font-size:0.8em;float:right;top:2px;right:2px"></span></div>';
             }
@@ -389,7 +391,7 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
             var ugl_GroupID = this.searchForm.find('#input_search_group').val();
                 
             if(ugl_GroupID>0){
-                html = html + '<div class="rec_actions user-list" style="top:4px;width:150px;">'
+                html = html + '<div class="rec_actions user-list" style="top:4px;width:150px;right:2px;position:absolute">'
                 if(recID==2 && ugl_GroupID==window.hWin.HAPI4.sysinfo.db_managers_groupid){
                     html = html + '<div style="min-width:88px;text-align:center">admin</div>';
                 }else 
@@ -405,7 +407,7 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
                         + fld('ugl_Role')+'</div>';
                 }
             }else{
-                html = html + '<div class="rec_actions user-list" style="top:4px;width:60px;">'
+                html = html + '<div class="rec_actions user-list" style="top:4px;width:60px;right:2px;position:absolute">'
                 //placeholder
                 //html = html + '<div style="min-width:78px;"></div>';
             }
@@ -529,7 +531,7 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
         }else{
             var that = this;
             window.hWin.HEURIST4.msg.showMsgDlg(
-                'Are you sure you wish to delete this user? Proceed?', function(){ that._deleteAndClose(true) }, 
+                'Are you sure you wish to delete this user?', function(){ that._deleteAndClose(true) }, 
                 {title:'Warning',yes:'Proceed',no:'Cancel'});        
         }
     },

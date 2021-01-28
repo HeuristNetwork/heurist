@@ -49,6 +49,8 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
     //
     //    
     _init: function() {
+
+        this.options.default_palette_class = 'ui-heurist-design';
         
         //special header field stores UI structure
         if(!(this.options.rec_ID_sample>0)) {
@@ -229,6 +231,9 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
                 
                 //via entity data
                 this._cachedRecordset = $Db.rst(this.options.rty_ID);
+                if(this._cachedRecordset==null){
+                    this._cachedRecordset = new hRecordSet({entityName:'defRecStructure',count:0,offset:0,order:[]});
+                }
                 /*from server
                 var that = this;
                 window.hWin.HAPI4.EntityMgr.getEntityData(this.options.entity.entityName, false,
@@ -334,6 +339,12 @@ dty_TermIDTreeNonSelectableIDs
     _initTreeView: function(){
         
         var recset = this._cachedRecordset;
+        
+        if(recset.length()==0){
+            this.showBaseFieldEditor(-1, 0);
+        }
+        
+        
         //find all separators and detect json tree data in Extended Description field
         //if such treeview data is missed creates new one based on header/separators and rst_DisplayOrder
 
@@ -341,6 +352,7 @@ dty_TermIDTreeNonSelectableIDs
 
         //if such treeview data is missed creates new one based on header/separators and rst_DisplayOrder
         if(!treeData){
+            
             //order by rts_DisplayOrder
             var _order = recset.getOrder();
             _order.sort(function(a,b){  
@@ -658,8 +670,11 @@ dty_TermIDTreeNonSelectableIDs
                         }else{
                             newVal = ele.attr('data-req');
                             
+                            if(node.extraClasses) {
+                                $(node.li).find('span.fancytree-node').removeClass(node.extraClasses);      
+                            }
                             node.extraClasses = newVal;
-                            $(node.li).addClass(newVal);
+                            $(node.li).find('span.fancytree-node').addClass(newVal);
                             node.setActive( false );
                             fieldName = 'rst_RequirementType';
                         }
@@ -802,7 +817,8 @@ dty_TermIDTreeNonSelectableIDs
                 'Are you sure you wish to delete field "'
                 + window.hWin.HEURIST4.util.htmlEscape(this._cachedRecordset.fld(rst_ID, 'rst_DisplayName'))
                 +'"?', function(){ that._deleteAndClose(true) }, 
-                {title:'Warning',yes:'Proceed',no:'Cancel'});        
+                {title:'Warning',yes:'Proceed',no:'Cancel'},
+                {default_palette_class:this.options.default_palette_class});        
         }
         
     },
@@ -928,6 +944,7 @@ dty_TermIDTreeNonSelectableIDs
         
         if(!(dtyID>0)){ //new field
         
+            var after_dty_ID = 0;
             if(arg2>0){ //add after
                 this._lockDefaultEdit = true;
                 var tree = this._treeview.fancytree("getTree");
@@ -935,6 +952,7 @@ dty_TermIDTreeNonSelectableIDs
                 if(node) node.setActive();
                 after_dty_ID = arg2;
             }
+            if(!(after_dty_ID>=0)) after_dty_ID = 0; //add as first
             
             //add new field to this record type structure
             popup_options['title'] = 'Select or Define new field';
@@ -1036,6 +1054,11 @@ dty_TermIDTreeNonSelectableIDs
             */
         };
         
+        if($Db.dty(dty_ID,'dty_Type')=='separator'){
+            fields['rst_SeparatorType'] = 'tabs';    
+        }
+        
+        
         var that = this;
         this._saveEditAndClose(fields, function( recID, fields ){
             
@@ -1064,7 +1087,7 @@ dty_TermIDTreeNonSelectableIDs
                     if(after_dty_ID>0){
                         parentnode = tree.getNodeByKey(after_dty_ID);
                     }else{
-                        parentnode = tree.getActiveNode();
+                        parentnode = tree.rootNode; //getRootNode();//getActiveNode();
                     }
                     if(!parentnode){
 console.log('No active tree node!!!!')                      
@@ -1072,7 +1095,9 @@ console.log('No active tree node!!!!')
                     } 
                     
                     //add new node to tree
-                    parentnode.addNode({key:recID}, (parentnode.folder==true)?'firstChild':'after');
+                    parentnode.addNode({key:recID}, 
+                            (parentnode.isRootNode() || parentnode.folder==true)
+                                                    ?'firstChild':'after');
                     if(parentnode.folder){
                         parentnode.setExpanded(true);
                     }
@@ -1158,8 +1183,14 @@ console.log('No active tree node!!!!')
                                 that.manageRecords('showOptionalFieds', true);    
                             }
                             if(that2._open_formlet_for_recID>0){
-                                if(window.hWin.HAPI4.get_prefs_def('edit_rts_open_formlet_after_add',0)==1){
-                                    that2.editField( that2._open_formlet_for_recID );    
+                                
+                                var sType = $Db.dty(that2._open_formlet_for_recID, 'dty_Type');
+                                var isSep = (sType=='separator');
+                                
+                                if(isSep ||
+                                  window.hWin.HAPI4.get_prefs_def('edit_rts_open_formlet_after_add',0)==1){
+                                    that2._clear_title_for_separator = isSep; // clear title for separator
+                                    that2.editField( that2._open_formlet_for_recID); 
                                 }
                             }
                             that2._show_optional = false;
@@ -1389,18 +1420,27 @@ console.log('No active tree node!!!!')
                 edit_ele = this._editing.getFieldByName('rst_SeparatorType');
                 edit_ele.hide();
             }else{
-                sep_type = this._editing.getValue('rst_DefaultValue')[0];
+                sep_type = this._editing.getValue('rst_DefaultValue')[0]; //take from db
                 if(!(sep_type=='accordion' || sep_type=='tabs' || sep_type=='tabs_new' || sep_type=='expanded')){
                     sep_type = 'group';
                 }
             }
-            this._editing.setFieldValueByName( 'rst_SeparatorType', sep_type, false );
-
+            this._editing.setFieldValueByName( 'rst_SeparatorType', sep_type, false ); //assign to entry selector
 
             sep_type = this._editing.getValue('rst_RequirementType')[0];
             sep_type = (sep_type=='forbidden')?sep_type:'optional';
             this._editing.setFieldValueByName( 'rst_SeparatorRequirementType', sep_type, false );
             
+            
+            //clear title to force change default one
+            if(this._clear_title_for_separator){
+                this._editing.setFieldValueByName( 'rst_DisplayName', '', true );
+                //sep_type = 'tabs'; //default for new separator    
+                this._editing.setFocus();
+                this._editing.setModified(true);
+            }
+            this._clear_title_for_separator = false;
+
             this.editForm.find('.ui-accordion').hide();
         }else{
             
@@ -1419,8 +1459,29 @@ console.log('No active tree node!!!!')
                 +this._currentEditID+' <span class="ui-icon ui-icon-circle-info"/></span>')
                 .attr('title', baseFieldDetails)
                 .appendTo(bottom_div);
-        
-            
+                
+                
+            var edit_ele= this._editing.getFieldByName('rst_DisplayWidth');
+            if(edit_ele){
+                edit_ele.editing_input('option','change', function(){
+                    
+                    var res = this.getValues()[0];
+                    if(res>120){
+                        window.hWin.HEURIST4.msg.showMsgDlg(
+                        'This field width might result in the field being wider than the screen. '
+                        +'Click OK for this width, Cancel to set to 120 (conservative setting).',
+                        function(){
+                            that._editing.setFieldValueByName('rst_DisplayWidth', 120, true);        
+                            that.onEditFormChange(); //trigger change   
+                        }, 
+                        {title:'Warning',yes:'Cancel',no:'OK'},
+                        {default_palette_class:that.options.default_palette_class});  
+                    }else{
+                        that.onEditFormChange(); //trigger change
+                    }
+                }); 
+            }
+                
         }
 
         var btnCancel = $('<button>').attr('id', 'btnCloseEditor_rts')
@@ -1447,7 +1508,8 @@ console.log('No active tree node!!!!')
                             $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
                                 'You have made changes to the data. Click "Save" otherwise all changes will be lost.',
                                 buttons,
-                                {title:'Confirm',yes:'Save',no:'Ignore and close'});
+                                {title:'Confirm',yes:'Save',no:'Ignore and close'},
+                                {default_palette_class:this.options.default_palette_class});
                         }else{
                             that._closeFormlet();
                         }
@@ -1803,7 +1865,7 @@ console.log('No active tree node!!!!')
             
             if(dt_type=='enum' || dt_type=='relmarker' || dt_type=='relationtype'){
                 fields['rst_DefaultValue'] = fields['rst_TermPreview'];
-            }else if(dt_type=='enum'){
+            }else if(dt_type=='resource'){
                 fields['rst_DefaultValue'] = fields['rst_DefaultValue_resource'];
             }else if(dt_type=='separator'){
                 fields['rst_DefaultValue'] = fields['rst_SeparatorType'];
@@ -1814,6 +1876,8 @@ console.log('No active tree node!!!!')
             if(window.hWin.HEURIST4.util.isempty(fields['rst_DisplayOrder'])){
                 fields['rst_DisplayOrder'] = '0';
             }
+            
+            if(fields['rst_DisplayWidth']>255) fields['rst_DisplayWidth'] = 255;
             
             
             this._stillNeedUpdateForRecID = recID;    
@@ -1901,9 +1965,9 @@ console.log('No active tree node!!!!')
 
             var record = recset.getById(recID);
             
-            if(fieldvalues==null){
+            /*if(fieldvalues==null){
                 fieldvalues = recset.getRecord(recID);
-            }
+            }*/
 
             //2. update $Db
 //console.log($Db.rst(this.options.rty_ID, recID));           
@@ -1915,8 +1979,8 @@ console.log('No active tree node!!!!')
                     if(node) {
                         var sType = $Db.dty(recID,'dty_Type');
                         var isSep = (sType=='separator');
-                        var title = fieldvalues['rst_DisplayName'];
-                        var req = fieldvalues['rst_RequirementType'];
+                        var title = record['rst_DisplayName'];
+                        var req = record['rst_RequirementType'];
                         if(isSep){
                             title = '<span data-dtid="'+recID+'">' + title +'</span>';
                         }else{
@@ -1930,11 +1994,15 @@ console.log('No active tree node!!!!')
                         node.setTitle( title );   
                         if(!node.folder){
                             
+                            if(node.extraClasses){
+                                $(node.li).find('span.fancytree-node').removeClass(node.extraClasses);
+                            }
+                            
                             node.extraClasses = isSep?'separator2':req;
-                            $(node.li).addClass( isSep?'separator2':req );
+                            $(node.li).find('span.fancytree-node').addClass( isSep?'separator2':req );
                         }
                         this.__defineActionIcons( $(node.li).find('.fancytree-node') );
-                        $(node.li).find('.svs-contextmenu3').css('visibility','hidden');
+//$(node.li).find('.svs-contextmenu3').css('visibility','hidden');
                         
                     }
             }        
@@ -1948,9 +2016,11 @@ console.log('No active tree node!!!!')
     //
     addNewSeparator: function( after_dtid, allow_proceed ){
         
+        var that = this;
+        
         if(allow_proceed!==true){
             this._allowActionIfModified( function(){ 
-                this.addNewSeparator( after_dtid, true );                            
+                that.addNewSeparator( after_dtid, true );                            
             } );
             return;
         }
@@ -1970,7 +2040,7 @@ console.log('No active tree node!!!!')
             var rty_ID = this.options.rty_ID;
     
             //find seprator field type ID that is not yet added to this record strucuture
-            var that = this;
+            
             var ft_separator_id =  null;
             var ft_separator_group =  $Db.dtg().getOrder()[0]; //add to first group
             
@@ -1980,7 +2050,7 @@ console.log('No active tree node!!!!')
             $Db.dty().each(function(dty_ID, rec){
                if($Db.dty(dty_ID,'dty_Type')=='separator'){
                    k++;
-                   if(all_fields_ids.indexOf(dty_ID)<0){
+                   if( window.hWin.HEURIST4.util.findArrayIndex( dty_ID, all_fields_ids )<0){
                        ft_separator_group = $Db.dty(dty_ID,'dty_DetailTypeGroupID');
                        ft_separator_id = dty_ID; //not used yet
                        return false;
@@ -1996,14 +2066,15 @@ console.log('No active tree node!!!!')
                 var fields = {                
                     dty_DetailTypeGroupID: ft_separator_group,
                     dty_ID: -1,
-                    dty_Name: 'DIVIDER'+k,
+                    dty_Name: 'Header '+k+' - edit the name',
+                    dty_HelpText: 'new separator',
                     dty_NonOwnerVisibility: "viewable",
                     dty_Status: "open",
                     dty_Type: "separator"};
                     
                 var request = {
                     'a'          : 'save',
-                    'entity'     : this.options.entity.entityName,
+                    'entity'     : 'defDetailTypes',
                     'fields'     : fields                     
                     };
                 window.hWin.HAPI4.EntityMgr.doRequest(request, 
@@ -2012,7 +2083,7 @@ console.log('No active tree node!!!!')
                             var dty_ID = response.data[0];
                             fields[ 'dty_ID' ] = (''+dty_ID);
                         
-                            $Db.dty(recID, null, fields); //add on client side  
+                            $Db.dty(dty_ID, null, fields); //add on client side  
                             
                             that.addNewFieldToStructure( dty_ID, after_dtid );
                         }else{
@@ -2119,7 +2190,8 @@ console.log('No active tree node!!!!')
                     that.onEditFormChange();
                     $dlg.dialog('close'); },
                 'Cancel':function(){ ed_input.setValue(1, true); $dlg.dialog('close'); } },
-                {title:'Warning'});    
+                {title:'Warning'},
+                {default_palette_class:this.options.default_palette_class});    
 
         }else{
             $dlg = window.hWin.HEURIST4.msg.showMsgDlg(

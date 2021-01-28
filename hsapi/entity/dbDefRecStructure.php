@@ -355,7 +355,7 @@ class DbDefRecStructure extends DbEntityBase
                     'SELECT count(*) FROM '.$this->config['tableName']
                     .' WHERE rst_RecTypeID='.$mysqli->real_escape_string( $rty_ID ))===0){
                         
-                        $newfields['fields'] = array(DT_NAME,DT_DESCRIPTION);
+                        $newfields['fields'] = array(DT_NAME, DT_DESCRIPTION);
                         $newfields['reqs'] = array(DT_NAME);
             }else{
                 $this->system->addError(HEURIST_INVALID_REQUEST, 'Invalid values for new fields');
@@ -365,6 +365,7 @@ class DbDefRecStructure extends DbEntityBase
         
         $fields = prepareIds($newfields['fields'], false);
         $reqs   = @$newfields['reqs']?$newfields['reqs']:array();
+        $newfields_values  = @$newfields['values']?$newfields['values']:array();
         $order = 0;
         
         $dt_fields = dbs_GetDetailTypes($this->system, $fields);
@@ -377,16 +378,25 @@ class DbDefRecStructure extends DbEntityBase
         
             $dt = $dt_fields[$dty_ID]['commonFields'];
             
-            $records[] = array(
+            $recvalues = array(
             'rst_ID'=> $dty_ID,
             'rst_RecTypeID'=> $rty_ID,
             'rst_DisplayOrder'=> $order,
             'rst_DetailTypeID'=> $dty_ID,
-            'rst_DisplayName'=> $dt[$di['dty_Name']],
+            'rst_DisplayName'=> @$newfields_values[$dty_ID]['dty_Name']
+                                     ?$newfields_values[$dty_ID]['dty_Name'] 
+                                     :$dt[$di['dty_Name']],
             'rst_DisplayHelpText'=> $dt[$di['dty_HelpText']],
             'rst_RequirementType'=> in_array($dty_ID,$reqs)?'required':'recommended',
             'rst_MaxValues'=> 1,
-            'rst_DisplayWidth'=>$dt[$di['dty_Type']]=='date'?20:100);
+            'rst_DisplayWidth'=>($dt[$di['dty_Type']]=='date')?20:100);
+            
+            if(@$newfields_values[$dty_ID]['rst_DefaultValue']){
+                $recvalues['rst_DefaultValue'] = $newfields_values[$dty_ID]['rst_DefaultValue'];
+            }
+            
+            $records[] = $recvalues;
+            
             $order = $order+10;
         }
         

@@ -33,6 +33,8 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
     //
     _init: function() {
         
+        this.options.default_palette_class = 'ui-heurist-design';
+        
         this.options.coverall_on_save = true;
         this.options.layout_mode = 'short';
         this.options.use_cache = false;
@@ -173,7 +175,7 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
         }
 */        
         //get all saved searches
-        var saved_searches = [];
+        var saved_searches = [{key:0, title:'select saved filter....'}];
         var ssearches = window.hWin.HAPI4.currentUser.usr_SavedSearch;
         var grp_IDs = [];
         for (var svsID in ssearches)
@@ -201,6 +203,7 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
                 that.options.entity.fields[idx]['dtFields']['rst_FieldConfig'] = menu_entries;
                 k++;
             }else if(fields[idx]['dtID']=='dsh_ParameterSavedSearch'){
+                that.options.entity.fields[idx]['dtFields']['rst_DefaultValue'] = 0;
                 that.options.entity.fields[idx]['dtFields']['rst_FieldConfig'] = saved_searches;
                 k++;
             }
@@ -590,6 +593,14 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
                     //temporal fix (error in coreDefinition.txt)
                     if(command=='menu-export-csv' && dsh_ID==10){
                         command = 'menu-import-csv';
+                    }else if(command=='menu-import-add-record'){
+                        
+                        var widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('mainMenu6');
+                        if(widget){
+                             var ele = this.element.find('div.recordDiv[recid='+dsh_ID+']');
+                             widget.mainMenu6('show_ExploreMenu', null, 'recordAdd', {top:0, left:ele.offset().left });
+                             return;
+                        }
                     }
 
                     var widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('mainMenu');

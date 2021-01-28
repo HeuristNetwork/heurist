@@ -209,8 +209,8 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
     
     function _triggerRecordUpdateEvent(response, callback){
         if(response && response.status == window.hWin.ResponseStatus.OK){
-            if($Db) $Db.needUpdateRtyCount = true;
-            //window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_REC_UPDATE); //after save record     
+            if($Db) $Db.needUpdateRtyCount = 1;
+            window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_REC_UPDATE); //after save record     
         }
         if($.isFunction(callback)){
                 callback(response);
@@ -328,10 +328,21 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             *  for internal actions use client side methods of hapi.is_admin, is_member, has_access
             */
             , verify_credentials: function(callback, requiredLevel, password_protected, password_entered){
+                
+                var requiredMembership = 0;
+                
+                if(typeof requiredLevel==='string' && requiredLevel.indexOf(';')>0){
+                    
+                    requiredLevel = requiredLevel.split(';');
+                    requiredMembership = requiredLevel[1];
+                    requiredLevel = requiredLevel[0];
+                    if(requiredLevel<0) requiredLevel = 0;
+                }
 
                 requiredLevel = Number(requiredLevel);
                 if(requiredLevel<0){ //no verification required - everyone access
                 
+                    //however need to check password protection
                     if(window.hWin.HEURIST4.util.isempty(password_protected)){
                             //no password protection
                             callback(password_entered);
@@ -371,16 +382,27 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                 //verify locally
                 function __verify( is_expired ){
                     
-                        if(window.hWin.HAPI4.has_access(requiredLevel)){ 
+                        if( (requiredMembership==0 || window.hWin.HAPI4.is_member(requiredMembership))
+                            && 
+                             window.hWin.HAPI4.has_access(requiredLevel))
+                        { 
+                            //verification is accepted now check for password protection
                             window.hWin.HAPI4.SystemMgr.verify_credentials(callback, -1, password_protected, password_entered);
-                            //callback( password_entered );  
                         }else{
                             var response = {};
                             response.sysmsg = 0;
                             response.status = window.hWin.ResponseStatus.REQUEST_DENIED;
                             response.message = 'To perform this operation you have to be logged in';
                             
-                            if(requiredLevel==window.hWin.HAPI4.sysinfo.db_managers_groupid){
+                            if(requiredMembership>0){
+                               var sGrpName = '';
+                               if( window.hWin.HAPI4.sysinfo.db_usergroups 
+                                    && window.hWin.HAPI4.sysinfo.db_usergroups[requiredMembership]){
+                                    sGrpName = ' "'+window.hWin.HAPI4.sysinfo.db_usergroups[requiredMembership]+'"';
+                               } 
+                               response.message += ' as member of group #'+requiredMembership+sGrpName;
+                               
+                            }else if(requiredLevel==window.hWin.HAPI4.sysinfo.db_managers_groupid){
                                response.message += ' as database administrator';// of group "Database Managers"' 
                             }else if(requiredLevel==2){
                                response.message += ' as database onwer';
@@ -742,33 +764,40 @@ prof =Profile
                 
                 var that = this;
                 
-                window.hWin.HAPI4.EntityMgr.refreshEntityData('all', function(){
+                window.hWin.HAPI4.EntityMgr.refreshEntityData('all', function(success){
 
-                    //get defintions in nold format
-                that.get_defs({rectypes:'all', terms:'all', detailtypes:'all', mode:2}, function(response){
-                    
-                    window.hWin.HEURIST4.msg.sendCoverallToBack();
-                    
-                    if(response.status == window.hWin.ResponseStatus.OK){
-                        
-                        window.hWin.HEURIST4.rectypes = response.data.rectypes;
-                        window.hWin.HEURIST4.terms = response.data.terms;
-                        window.hWin.HEURIST4.detailtypes = response.data.detailtypes;
-                        
-                        $Db.baseFieldType = window.hWin.HEURIST4.detailtypes.lookups;
-                        
-                        if (is_message==true) {
-                            $dlg = window.hWin.HEURIST4.msg.showMsgDlg('Database structure definitions in browser memory have been refreshed.<br>'+
-                                'You may need to reload pages to see changes.');
-                            $dlg.parent('.ui-dialog').css({top:150,left:150});    
-                        }      
-                        
-                        if($.isFunction(callback)) callback.call();
-
-                        window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE);
-                        
+                    if(success){
+                        //get defintions in old format
+                        that.get_defs({rectypes:'all', terms:'all', detailtypes:'all', mode:2}, function(response){
+                            
+                            window.hWin.HEURIST4.msg.sendCoverallToBack();
+                            
+                            if(response.status == window.hWin.ResponseStatus.OK){
+                                
+                                window.hWin.HEURIST4.rectypes = response.data.rectypes;
+                                window.hWin.HEURIST4.terms = response.data.terms;
+                                window.hWin.HEURIST4.detailtypes = response.data.detailtypes;
+                                
+                                $Db.baseFieldType = window.hWin.HEURIST4.detailtypes.lookups;
+                                
+                                if (is_message==true) {
+                                    $dlg = window.hWin.HEURIST4.msg.showMsgDlg('Database structure definitions in browser memory have been refreshed.<br>'+
+                                        'You may need to reload pages to see changes.');
+                                    $dlg.parent('.ui-dialog').css({top:150,left:150});    
+                                }      
+                                
+                                window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE);
+                                res = true;
+                            }else{
+                                res = false;
+                            }
+                            
+                            if($.isFunction(callback)) callback.call(that, res);
+                        });
+                    }else{
+                        window.hWin.HEURIST4.msg.sendCoverallToBack();
+                        if($.isFunction(callback)) callback.call(that, false);
                     }
-                });
                 
                 });
 
@@ -1350,7 +1379,7 @@ prof =Profile
                                 }
                             }
 
-                            if($.isFunction(callback)) callback();  
+                            if($.isFunction(callback)) callback(this, true);  
                             
                         }else{
                             window.hWin.HEURIST4.msg.showMsgErr(response);
@@ -1542,7 +1571,10 @@ prof =Profile
                 window.hWin.HEURIST4.ui.onInactiveReset( true );
             }
             
-            if(window.hWin.HEURIST4.dbs && isChanged) window.hWin.HEURIST4.dbs.needUpdateRtyCount = true;
+            if(window.hWin.HEURIST4.dbs && isChanged){
+                window.hWin.HEURIST4.dbs.needUpdateRtyCount = 1;  
+                window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_REC_UPDATE); //after save record 
+            } 
         },
         
         currentUserRemoveGroup: function(groupID, isfinal){

@@ -43,14 +43,16 @@ $.widget( "heurist.manageSysBugreport", $.heurist.manageEntity, {
     // invoked from _init after load entity config    
     //
     _initControls: function() {
-        
+
+        this.options.default_palette_class = 'ui-heurist-admin';
+
         if(!this._super()){
             return false;
         }
-        
+
         // always new report
         this.addEditRecord(-1);
-        
+
         return true;
     },
     

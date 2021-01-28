@@ -1,5 +1,5 @@
 /**
-* result list for BORO
+* result list for USyd Book of Remembrance
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org

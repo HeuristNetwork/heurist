@@ -257,7 +257,9 @@ function hPublishDialog( _options )
                 + 'hclient/framecontent/publishDialog.html?t'
                 + window.hWin.HEURIST4.util.random(), 
                     null, window.hWin.HR(sTitle), 
-            {  container:'embed-publish-popup',
+            {  
+               container:'embed-publish-popup',
+               default_palette_class: 'ui-heurist-publish',
                height: 600, // options.mapdocument_id>0?600:680,
                width: 700,
                close: function(){

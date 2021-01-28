@@ -10,7 +10,7 @@
         
         "entityTitle": "Record",
         "entityTitlePlural": "Records",
-        "empty_remark": "Please use the search field above to locate relevant record (partial string match on title)",
+        "empty_remark": "No record types in this group",
 
         "sel_actions": [{"key":"edit", "title":"Edit Record"},
                         {"key":"delete", "title":"Remove Record"}],
@@ -41,13 +41,14 @@
                         "rst_Display":"hidden"
                     }
                 },
-                {
+                {   
                     "dtID": "rec_URL",
                     "dtFields":{
                         "dty_Type":"freetext",
                         "dty_Size":2000,
-                        "rst_DisplayName": "URL",
-                        "rst_DisplayHelpText": "This is a special URL field which is hyperlinked in search results. Use where one primary URL applies to each record, eg. for internet bookmarks. These URLs can be auto-checked. Turn on/off in record attributes" ,
+                        "rst_DisplayWidth": 85,
+                        "rst_DisplayName": "Record hyperlink URL",
+                        "rst_DisplayHelpText": "This is a special URL field which is hyperlinked in search results. Use where one primary URL applies to <br>each record, eg. for internet bookmarks. These URLs can be auto-verified. Turn on/off in record attributes" ,
                         "rst_Display": "hidden"
                     }
                 },

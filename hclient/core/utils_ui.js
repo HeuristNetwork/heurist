@@ -733,6 +733,9 @@ window.hWin.HEURIST4.ui = {
             useIds            = options['useIds']===true;
         }
         
+        //var trash_id = $Db.getTrashGroupId('dtg');
+        
+        
         var dtyID, details;
      
         //show fields for specified set of record types
@@ -866,7 +869,7 @@ window.hWin.HEURIST4.ui = {
 
                     var field_reqtype = detail['rst_RequirementType'];
                     
-                    if(field_reqtype=='forbidden') return true; //continue;
+                    if(field_reqtype=='forbidden' || $Db.dty(dtyID, 'dty_ShowInLists')==0) return true; //continue;
                     
                     var field_type = $Db.dty(dtyID, 'dty_Type');
 
@@ -929,7 +932,8 @@ window.hWin.HEURIST4.ui = {
                 
                 $Db.dty().each2(function(detailID, field)
                 {
-                    if(field['dty_DetailTypeGroupID']==groupID && 
+                    if(field['dty_DetailTypeGroupID']==groupID &&
+                      (field['dty_ShowInLists']==1) &&
                       (allowedlist==null || allowedlist.indexOf(field['dty_Type'])>=0))
                     {
                         arrterm.push([detailID, field['dty_Name']]);
@@ -1179,7 +1183,7 @@ window.hWin.HEURIST4.ui = {
             if(dminwidth=='0px' || window.hWin.HEURIST4.util.isempty(dminwidth)) dminwidth = '10em';
 
             var menuwidget = menu.hSelect( "menuWidget" );
-            menuwidget.css( {'padding':0,'background':'#F4F2F4','zIndex':9999999 });
+            menuwidget.css( {'background':'#F4F2F4','zIndex':9999999 }); //'padding':0,
             menuwidget.addClass('heurist-selectmenu overflow').css({'max-height':'300px','font-size':'12px'});
             
             if(apply_style){
@@ -1374,8 +1378,15 @@ window.hWin.HEURIST4.ui = {
         
             if(state){
                 //$help_button.addClass('ui-state-focus');    
-                $container.find(className).css('display','block');
-                $container.find('div.div-table-cell'+className).css('display','table-cell');
+                $.each($container.find(className),function(i,ele){ 
+                    if(!$(ele).hasClass('separator-hidden')) $(ele).css('display','block');
+                });
+                $.each($container.find('div.div-table-cell'+className),function(i,ele){ 
+                    if(!$(ele).hasClass('separator-hidden')) $(ele).css('display','table-cell');
+                });
+                
+                //$container.find(className).css('display','block');
+                //$container.find('div.div-table-cell'+className).css('display','table-cell');
             }else{
                 //$help_button.removeClass('ui-state-focus');
                 $container.find('div.div-table-cell'+className).css('display','none');
@@ -1412,7 +1423,7 @@ window.hWin.HEURIST4.ui = {
         var oEffect = {effect:'slide',direction:'right',duration:500};
         
         function __closeHelpDiv($helper_div){
-            oEffect.complete =  function(){ options.container.children('.ent_content_full').css({right:1}); };
+            oEffect.complete =  function(){ options.container.children('.ent_content_full').css({right:1, width:'auto'}); };
             $helper_div.hide(oEffect);
             $help_button.button({icons:{primary:"ui-icon-circle-help"}});
         }
@@ -1435,6 +1446,7 @@ window.hWin.HEURIST4.ui = {
                                             hide: oEffect
                                          });                 
                             }else{
+                                $helper_div.css('width','30%');
                                 /*
                                 _innerTitle = $('<div>').addClass('ui-heurist-header').appendTo($helper_div);  
                                 
@@ -1476,7 +1488,7 @@ window.hWin.HEURIST4.ui = {
                                     
                                     if(status=='error'){
                                         
-                                        window.hWin.HEURIST4.msg.showMsgFlash('Sorry context help is not found');
+                                        window.hWin.HEURIST4.msg.showMsgFlash('Sorry context help is not found',500);
                                         
                                     }else{
 
@@ -1538,7 +1550,7 @@ window.hWin.HEURIST4.ui = {
                                         
                                         //_innerTitle.find('span').text( options.title );
                                         $helper_div.show( 'slide', {direction:'right'}, 500 );                        
-                                        options.container.children('.ent_content_full').css({right:424});
+                                        options.container.children('.ent_content_full').css({width:'70%'}); //right:424
                                     
                                         setTimeout(function(){
                                                 $helper_div.find('#content').scrollTop(1);
@@ -1630,7 +1642,7 @@ window.hWin.HEURIST4.ui = {
                         + '<div class="editFormDialog ent_content_full">'
                         
                                 + '<div class="ui-layout-north">'
-                                        +'<div class="editStructureHeader" style="background:white"><h1 style="float:left;margin: 10px;">Record structure editor</h1></div>'
+                                        +'<div class="editStructureHeader" style="background:white"></div>'
                                 + '</div>' 
                         
                                 + '<div class="ui-layout-west"><div class="editStructure treeview_with_header" style="background:white">'
@@ -1829,9 +1841,13 @@ window.hWin.HEURIST4.ui = {
         var isEdit = (selector_function!==false);
         
         if(info['trm_ID']>0){
-            sRelBtn = '<div style="display:table-cell;margin-left:0.5em;min-width:46px;text-align:right;"><div class="btn-rel"/><div class="btn-del"/></div>';
+            //margin-left:0.5em;
+            sRelBtn = 
+                '<div style="display:table-cell;min-width:120px;text-align:right;vertical-align: middle;">'
+                +'<div class="btn-edit"/><div class="btn-rel"/><div class="btn-del"/></div>';
         }else if (!isHiddenRecord) {
-            sRelBtn = '<div style="display:table-cell;margin-left:0.5em;min-width:23px;text-align:right;"><div class="btn-edit"/></div>';     // data-recID="'+info['rec_ID']+'"
+            sRelBtn = '<div style="display:table-cell;min-width:23px;text-align:right;padding-left:16px;vertical-align: middle;">'
+            +'<div class="btn-edit"/></div>';     // data-recID="'+info['rec_ID']+'"
         }
         
         var reltype = ''
@@ -1840,45 +1856,56 @@ window.hWin.HEURIST4.ui = {
             if (info['is_inward']){
                 term_ID = window.hWin.HEURIST4.dbs.getInverseTermById(term_ID);    
             }
-            
-            reltype = '<div class="detailType" style="display:table-cell;min-width:'
-                + Math.max(19, Math.min(reltype.length,25))+'ex;">'
+            //class="detailType" 'min-width:'+ Math.max(19, Math.min(reltype.length,25))+'ex;
+            reltype = '<div style="display:table-cell;color: #999999;text-transform: none;padding-left:4px;vertical-align: middle;">'
                 + $Db.trm(term_ID, 'trm_Label') + '</div>'
         }
         
-        var ele = $('<div class="link-div ui-widget-content ui-corner-all"  data-relID="'
-                        +(info['relation_recID']>0?info['relation_recID']:'')+'" '
-                        +' style="margin-bottom:0.2em;background:#F4F2F4 !important;">' //padding-bottom:0.2em;
-
-                        + '<div class="detail" '  // truncate
-                        + 'style="display:table-cell;min-width:60ex;max-width:160ex;">'  //padding:2px;
-                        
-                        + reltype
-                        
-                        + (info['rec_IsChildRecord']==1
-                            ?'<span style="font-size:0.8em;color:#999999;padding:4px 2px;display:table-cell;min-width: 5ex;">child</span>':'')
-                        + (isEdit?'<span style="display:table-cell;vertical-align: bottom"><span class="ui-icon ui-icon-triangle-1-e"/></span>':'') //padding-top:3px;
-                        
-                        + '<span style="display:table-cell;vertical-align:top;">'  //;padding-top:2px;
-                        + '<img src="'+ph_gif+'"  class="rt-icon" style="margin-right:10px;'
+        var rectype_icon = '<div style="display:table-cell;vertical-align: middle;padding: 0 4px'+(reltype==''?'':' 0 16px')+';">'
+                        + '<img src="'+ph_gif+'"  class="rt-icon" style="' //'margin-right:10px;'
                         + ((info['rec_RecTypeID']>0)?
                             'background-image:url(\''    //vertical-align:top;margin-top:2px;
                             + top.HAPI4.iconBaseURL+info['rec_RecTypeID'] + '\');'   //rectype icon
                            :'') 
                         + '"/>'
-                        //2017-11-08 no more link here
-                        //+ '<a target=_new href="#" data-recID="'+info['rec_ID'] +'">'
-                        //+ window.hWin.HEURIST4.util.htmlEscape(info['rec_Title'])+'</a>'
-                        + '</span>'
+                        + '</div>';
+        
+        var ele = $('<div class="link-div ui-widget-content ui-corner-all"  data-relID="'
+                        +(info['relation_recID']>0?info['relation_recID']:'')+'" '
+                        +' style="display: table-row;margin-bottom:0.2em;background:#F4F2F4 !important;">' //padding-bottom:0.2em;
+
+                        //relation type
+                        
+        + '<div '  // class="detail"   truncate
+                        + 'style="display:table-cell; word-break: break-word; vertical-align: middle;">'  //min-width:60ex;max-width:160ex;
+                        
+                        + reltype
+                        
+                        + (info['rec_IsChildRecord']==1
+                            ?'<span style="font-size:0.8em;color:#999999;padding:4px 2px;display:table-cell;min-width: 5ex;vertical-align:middle;">'
+                                +'child</span>':'')
+                            
+                        //triangle icon fo
+                        + ((reltype!='' && isEdit)?'<span style="display:table-cell;vertical-align:middle;padding-top:3px">'
+                            +'<span class="ui-icon ui-icon-triangle-1-e"/></span>':'') //padding-top:3px;
+
+                        //record type icon for resource
+                        + (reltype==''?rectype_icon:'')
+                        
+                        // record title 
                         
                         +'<span class="related_record_title'
-                            +((info['rec_RecTypeID']>0)?'':' ui-state-error')
-                            +'" data-recID="'
+                            + ((info['rec_RecTypeID']>0)?'':' ui-state-error')
+                            + '" data-rectypeid="'+ info['rec_RecTypeID']
+                            + '" data-recid="'
                                         +info['rec_ID']
-                                        +'" style="display:table-cell;">'  //padding-top:4px;
+                                        +'" style="display:table-cell;vertical-align:middle">'  //padding-top:4px;
                         + rec_Title
                         + '</span>'
-                        + '</div>'
+                        
+        + '</div>'
+                        //record type icon for relmarker
+                        //+ (reltype==''?'': '<div class="btn-edit"/>')                        
                         + sRelBtn
                         + '</div>')
         .appendTo($(container));
@@ -1964,20 +1991,28 @@ window.hWin.HEURIST4.ui = {
 
         if(info['relation_recID']>0){
             
-            ele.find('.btn-rel').button({text:false, label:top.HR((isEdit?'Edit':'View')+' relationship record'),
-                            icons:{primary:'ui-icon-pencil'}})
-            .css({'font-size': '0.8em', height: '21px', 'max-width': '18px'})
+            var bele = ele.find('.btn-rel');
+            
+            $('<img src="'+ph_gif+'"  class="rt-icon" style="vertical-align: middle;background-image:url(\''
+                            + top.HAPI4.iconBaseURL + '1\');"/>'
+            +'<span class="ui-button-icon ui-icon ui-icon-pencil" style="margin:0"></span>').appendTo(bele);
+            
+            //.button({text:false, label:top.HR((isEdit?'Edit':'View')+' relationship record'),icons:{primary:'ui-icon-pencil'}})
+            
+            bele.addClass('ui-button').css({'font-size': '0.8em', height: '18px', 'max-width': '40px',
+                'min-width': '40px', display: 'inline-block', padding: 0, background: 'none'})
             .click(function(event){
                 event.preventDefault();
                 
                 var recID = ele.attr('data-relID');
                 window.hWin.HEURIST4.ui.openRecordInPopup(recID, null, isEdit,
-                {selectOnSave:true, edit_obstacle: true, onselect:
+                    {relmarker_field: info['relmarker_field'], relmarker_is_inward: info['is_inward'],
+                    selectOnSave:true, edit_obstacle: true, onselect:
                     function(event, res){
                         if(res && window.hWin.HEURIST4.util.isRecordSet(res.selection)){
                             var recordset = res.selection;
                             var record = recordset.getFirstRecord();
-                            var related_ID = recordset.fld(record, 'rec_ID');                              
+                            var related_ID = recordset.fld(record, 'rec_ID'); //relationship record                             
                             var DT_RELATION_TYPE = window.hWin.HAPI4.sysinfo['dbconst']['DT_RELATION_TYPE'];
                             var DT_RELATED_REC_ID = window.hWin.HAPI4.sysinfo['dbconst']
                                 [info['is_inward']?'DT_PRIMARY_RESOURCE':'DT_TARGET_RESOURCE'];
@@ -2010,7 +2045,7 @@ window.hWin.HEURIST4.ui = {
                                         
                                                     ele.find('.related_record_title')
                                                             .text( window.hWin.HEURIST4.util.stripTags(rec_Title) )
-                                                            .attr('data-recID', related_ID);
+                                                            .attr('data-recid', related_ID);
                                                             
                                                     var rec_RecType = recordset.fld(record,'rec_RecTypeID');                            
                                                     //@todo - update record type icon
@@ -2048,14 +2083,32 @@ window.hWin.HEURIST4.ui = {
         var btn_edit = ele.find('div.btn-edit');
         if(btn_edit.length>0){
             
-            if(info['rec_RecTypeID']>0){
             
-            btn_edit.button({text:false, label:top.HR('Edit linked record'),
-                            icons:{primary:'ui-icon-pencil'}})
-                        .attr('data-recID', info['rec_ID'])
-                        .css({'font-size': '0.8em', height: '21px', 'max-width': '18px'})
-                        .click(function(event){
-           
+            //rectype_icon+
+            
+            if(info['rec_RecTypeID']>0){
+                
+                
+                if(info['relation_recID']>0){
+            
+                    $('<img src="'+ph_gif+'"  class="rt-icon" style="vertical-align: middle;background-image:url(\''
+                            + top.HAPI4.iconBaseURL + info['rec_RecTypeID'] + '\');"/>'
+                            +'<span class="ui-button-icon ui-icon ui-icon-pencil" style="margin:0"></span>').appendTo(btn_edit);
+            
+                    btn_edit.addClass('ui-button').css({'font-size': '0.8em', 'height': '18px', 'max-width': '40px',
+                            'min-width': '40px', padding: 0, 'margin-right': '10px', background: 'none'});
+                            
+                }else{
+                    
+                    btn_edit.button({text:false, label:top.HR('Edit linked record'),
+                                    icons:{primary:'ui-icon-pencil'}})
+                                .css({'font-size': '0.8em', height: '21px', 'max-width': '18px'})
+                    
+                }
+                
+                btn_edit
+                    .attr('data-recID', info['rec_ID'])
+                    .click(function(event){
            
             var recID = $(event.target).hasClass('ui-button')
                     ?$(event.target).attr('data-recID')

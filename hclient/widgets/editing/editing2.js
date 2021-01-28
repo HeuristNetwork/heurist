@@ -65,7 +65,7 @@ function hEditing(_options) {
         
         if(!_options.className) {
             if($container.parents('.editor').length==0){
-                _options.className = 'ui-heurist-bg-light';
+                //2020-12-29 _options.className = 'ui-heurist-bg-light';
             }else {
                 _options.className = '';
             }
@@ -186,6 +186,7 @@ function hEditing(_options) {
                 
             var currGroupType = null, currGroupHeaderClass = null; //current accodion or tab control
             var groupTabHeader, groupEle;
+            var hasVisibleFields = false;
             
             //var groupEle,      //current accordion or tab control
             //    fieldContainer, groupTabHeader;
@@ -252,7 +253,7 @@ function hEditing(_options) {
 
                         if(!(currGroupType == 'tabs' || currGroupType == 'accordion' || currGroupType == 'expanded')){
                             //div for gearwheel
-                            $('<div>').css({'padding-left':'7px','height':'12px','display':'inline-block'})
+                            $('<div>').css({'padding-left':'7px','height':'12px','display':'inline-block'}) 
                                 .attr('data-dtid', fields[idx]['dtID'])
                                 .appendTo(groupContainer);
                         }else{
@@ -275,8 +276,6 @@ function hEditing(_options) {
 
                         $(newFieldContainer).appendTo(groupEle);
 
-                        $(newFieldContainer).append('<div style="min-height:20px">&nbsp;</div>');
-
                         newFieldContainer.addClass(options.className);
 
                     }else{
@@ -290,10 +289,22 @@ function hEditing(_options) {
                         newFieldContainer.appendTo(groupContainer);
                     }
 
-                    if(headerHelpText!=''){
-                         var div_prompt = $('<div>').text(headerHelpText).css('padding-left','14px')
+                    if(true || headerHelpText!=''){
+                         var div_prompt = $('<div>').text(headerHelpText)
                             .addClass('heurist-helper1')
                             .appendTo(newFieldContainer);
+                         if(currGroupType == 'tabs'){
+                            div_prompt.addClass('tab-separator-helper')
+                                .attr('separator-dtid',fields[idx]['dtID']).css({padding:'5px 0 0 5px',display:'inline-block'});
+                         }else{
+                            div_prompt.addClass('separator-helper').css({'padding-left':'14px'});
+                         }
+                         if(!is_header_visible){
+                            div_prompt.addClass('separator-hidden').hide();
+                        }
+                    }
+                    if(currGroupType == 'tabs'){ //some space on the top
+                        $(newFieldContainer).append('<div style="min-height:10px">&nbsp;</div>');
                     }
                         
                     __createGroup(fields[idx].children, groupContainer, newFieldContainer);
@@ -360,6 +371,8 @@ function hEditing(_options) {
                         }
                                 
                         editing_inputs.push(inpt);  
+                        
+                        hasVisibleFields = true;
                     }
                 }//end field addition
                 
@@ -377,6 +390,11 @@ function hEditing(_options) {
                 }else if(currGroupType == 'tabs'){
                     groupEle.tabs({active: 0}).addClass('edit-form-tabs');;
                 }
+            }
+            
+            if(!hasVisibleFields){
+                $('<div>There are no fields visible in this tab. Please define new fields or move fields into this tab</div>')
+                    .addClass('heurist-helper3').appendTo(fieldContainer);
             }
             
         }//end of function

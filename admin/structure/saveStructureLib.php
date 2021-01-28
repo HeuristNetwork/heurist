@@ -1472,6 +1472,8 @@ function updateTerms( $colNames, $trmID, $values, $ext_db) {
                     $inverse_termid = $val;   //set null value, otherwise we get mysql error
                 }else if($colName=="trm_Status"){
                     if($val=="") $val="open";
+                }else if($colName=="trm_NameInOriginatingDB"){
+                    $val = $val?substr($val,0,63):'';
                 }
 
                 if($isInsert){
@@ -1554,20 +1556,24 @@ function updateTerms( $colNames, $trmID, $values, $ext_db) {
                     if(!($dbID>0)) $dbID = 0;
                     
                     $query= 'UPDATE defTerms SET trm_OriginatingDBID='.$dbID
-                                .', trm_NameInOriginatingDB=trm_Label'
+                                .', trm_NameInOriginatingDB=SUBSTR(trm_Label,0,63)'
                                 .', trm_IDInOriginatingDB='.$trmID
                                 .' WHERE (NOT trm_OriginatingDBID>0 OR trm_OriginatingDBID IS NULL) AND trm_ID='.$trmID;
                     $ext_db->query($query);
                 }
 
-                if($inverse_termid!=null){
-                    $query = "update defTerms set trm_InverseTermId=$trmID where trm_ID=$inverse_termid";
-                    mysql__exec_param_query($ext_db, $query, null, true);
-                }else if ($inverse_termid_old!=null){
-                    $query = "update defTerms set trm_InverseTermId=null where trm_ID=$inverse_termid_old";
-                    mysql__exec_param_query($ext_db, $query, null, true);
+                if($inverse_termid_old!=$inverse_termid){
+                    if($inverse_termid!=null){
+                        //set mutual inversion for inverse term
+                        $query = "update defTerms set trm_InverseTermId=$trmID where trm_ID=$inverse_termid";
+                        mysql__exec_param_query($ext_db, $query, null, true);
+                    }
+                    if ($inverse_termid_old!=null){
+                        //clear mutual inversion
+                        $query = "update defTerms set trm_InverseTermId=null where trm_ID=$inverse_termid_old and trm_InverseTermId=$trmID";
+                        mysql__exec_param_query($ext_db, $query, null, true);
+                    }
                 }
-
 
                 $ret = $trmID;
             }
@@ -1579,7 +1585,7 @@ function updateTerms( $colNames, $trmID, $values, $ext_db) {
 
 
     if ($ret==null){
-        $ret = "no data supplied for updating record structure - $trmID";
+        $ret = "no data supplied for updating term - $trmID";
     }
 
     return $ret;

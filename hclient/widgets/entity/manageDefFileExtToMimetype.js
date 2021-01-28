@@ -24,8 +24,11 @@ $.widget( "heurist.manageDefFileExtToMimetype", $.heurist.manageEntity, {
     _entityName:'defFileExtToMimetype',
     
     _init: function() {
-        
+
+        this.options.default_palette_class = 'ui-heurist-admin';
+
         if(isNaN(this.options.width)) this.options.width = 570;
+        if(this.options.width<420) this.options.width = 420;
         this.options.height = 600;
 
         this._super();
@@ -35,7 +38,6 @@ $.widget( "heurist.manageDefFileExtToMimetype", $.heurist.manageEntity, {
     // invoked from _init after load entity config    
     //
     _initControls: function() {
-        
         
         if(this.options.select_mode!='manager'){
             this.options.width = (isNaN(this.options.width) || this.options.width<600)?600:this.options.width;                    
@@ -115,15 +117,16 @@ $.widget( "heurist.manageDefFileExtToMimetype", $.heurist.manageEntity, {
         
     },
 
+    /*
     updateRecordList: function( event, data ){
         this._super(event, data);
-        this.selectRecordInRecordset();
     },
     
     filterRecordList: function(event, request){
         var subset = this._super(event, request);
         this.selectRecordInRecordset(subset);
     },
+    */
     
     _initEditForm_step3: function(recID){
         

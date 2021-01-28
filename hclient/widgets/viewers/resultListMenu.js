@@ -660,8 +660,9 @@ console.log(menu.find('.ui-menu-item').css('padding'));
     //
     collectionRender: function(_collection) {
         
-        this.menu_Collected_link.html( window.hWin.HR('Collected') + 
-                (_collection && _collection.length>0?':'+_collection.length:''));
+        this.menu_Collected_link.html( window.hWin.HR('Collected')
+                + (_collection && _collection.length>0?':'+_collection.length:'') 
+                + '<span class="ui-icon ui-icon-carat-d" style="right: 2px; left: unset;">');
     },
 
     //-------------------------------------- RELATION, MERGE -------------------------------
@@ -678,6 +679,8 @@ console.log(menu.find('.ui-menu-item').css('padding'));
         var url = window.hWin.HAPI4.baseURL + "admin/verification/combineDuplicateRecords.php?bib_ids="+recIDs_list.join(",")+"&db=" + window.hWin.HAPI4.database;
 
         window.hWin.HEURIST4.msg.showDialog(url, {
+            width:700, height:550,
+            default_palette_class:'ui-heurist-explore',
             title: window.hWin.HR('Combine duplicate records'),
             callback: function(context) {
                 that.reloadSearch();
@@ -738,7 +741,7 @@ console.log(menu.find('.ui-menu-item').css('padding'));
             padding: '0px',
             title: window.hWin.HR(action_type),
             callback: callback,
-            class:'ui-heurist-bg-light'} );
+            default_palette_class:'ui-heurist-explore'} );
     },
 
 

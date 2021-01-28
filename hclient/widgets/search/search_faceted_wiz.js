@@ -159,15 +159,15 @@ $.widget( "heurist.search_faceted_wiz", {
 
         this._dialog = this.element.dialog({
             autoOpen: false,
-            height: 500,
+            height: 350,
             width: 650,
             modal: this.options.is_modal,
 
             resizable: true, //!is_h6style,
-            draggable: !this.options.is_h6style,
+            draggable: this.options.is_modal, //!this.options.is_h6style,
             //position: this.options.position,
             
-            title: window.hWin.HR("Define Faceted Search"),
+            title: window.hWin.HR('Facet builder'),
             resizeStop: function( event, ui ) {//fix bug
                     var pele = that.element.parents('div[role="dialog"]');
                     that.element.css({overflow: 'none !important', 'width':pele.width()-24 });
@@ -199,7 +199,11 @@ $.widget( "heurist.search_faceted_wiz", {
                         that._doSaveSearch()
                         //that.navigateWizard(1);
                 }},
-            ]
+            ],
+            show: {
+                effect: 'fade',
+                duration: 500
+            }
         });
         this.element.parent().addClass('ui-dialog-heurist');
 
@@ -324,17 +328,34 @@ $.widget( "heurist.search_faceted_wiz", {
     //
     , adjustDimension: function(){
 
+        var ch =   this._dialog[0].scrollHeight+100; 
+        var width = this._dialog.dialog( 'option', 'width');
         if(this.step==3){
-            var width = this._dialog.dialog( 'option', 'width');
-            if(width<990) this._dialog.dialog( 'option', 'width', 990);
+            minw = 990;
+        }else if(this.step==0){
+            
+            var $dlg = this.step0.find("#facets_options");
+            minw = $dlg.find( ".ui-accordion-content-active" ).length>0?800:650;
+            
+            ch = Math.max($dlg.height(),$dlg[0].scrollHeight)+100; 
+            if(ch<350) ch = 350;
+            
+        }else{
+            minw = 650;
+        }
+        //if(width<minw) 
+        this._dialog.dialog( 'option', 'width', minw);
+        
+        var topPos = 0;
+        var pos = this._dialog.dialog('option', 'position');
+        if(pos && pos.of && !(pos.of instanceof Window)){
+            topPos = $(pos.of).offset().top+40;
         }
 
         var dh =  this._dialog.dialog('option', 'height');
-        var ch =   this._dialog[0].scrollHeight+85; 
-        if(ch>dh){
-            var ht = Math.min(ch, window.innerHeight);
-            this._dialog.dialog('option', 'height', ch);
-        }
+
+        var ht = Math.min(ch, window.innerHeight-topPos);
+        this._dialog.dialog('option', 'height', ht);    
         
         /*
         if(this.options.is_h6style){
@@ -352,6 +373,7 @@ $.widget( "heurist.search_faceted_wiz", {
         this.current_tree_rectype_ids = null;
         
         this.element.dialog( 'option', 'modal', this.options.is_modal);
+        this.element.dialog( 'option', 'draggable', this.options.is_modal);
         
         if(this.options.position!=null){
             this._dialog.dialog( 'option', 'position', this.options.position );   
@@ -375,13 +397,15 @@ $.widget( "heurist.search_faceted_wiz", {
             this.element.parent().addClass('ui-heurist-explore');
             this.adjustDimension();
         }
+        
         if($.isFunction(this.options.menu_locked)){
+            
             this._on(this.element.parent('.ui-dialog'), {
-                        mouseover:function(){ this.options.menu_locked.call( this, false, false );},
+                        mouseover:function(){ this.options.menu_locked.call( this, false, false );},  //just prevent close
                         mouseleave: function(e){ 
-                            if(!(this.step>0))
-                                this.options.menu_locked.call( this, false, true ) 
+                            this.options.menu_locked.call( this, false, true ); //close after delay
                         }}); //that.closeEditDialog();
+            
         }else{
             
             this._off(this.element.parent('.ui-dialog'), 'mouseover mouseleave');
@@ -423,7 +447,10 @@ $.widget( "heurist.search_faceted_wiz", {
                     $dlg.load(window.hWin.HAPI4.baseURL+"hclient/widgets/search/search_faceted_wiz.html?t=19", function(){
                         that._initStep0_options();
                         
-                        $dlg.find( ".optional_fields" ).accordion({collapsible:true, active:false});
+                        $dlg.find( ".optional_fields" ).accordion({collapsible:true, active:false, animate: false});
+                        //, activate:function(){that.adjustDimension();}}
+                        that._on($dlg.find( ".optional_fields" ),{click:that.adjustDimension});
+                        
                         $dlg.find( ".optional_fields > fieldset" ).css({'background':'none'});
 
                         /* it works however it produces a large gap below
@@ -598,13 +625,18 @@ $.widget( "heurist.search_faceted_wiz", {
 
             this._showStep(newstep);
 
+            if($.isFunction(this.options.menu_locked)){
+                if(newstep>0)  //increase delay on mouse exit 
+                    this.options.menu_locked.call( this, 'delay');
+            }
+            
             //if(newstep==3)               //skip step - define ranges
             //this.navigateWizard(1);
-
         }
 
         
         window.hWin.HEURIST4.ui.applyCompetencyLevel(-1, $dlg); 
+        
     }
 
     //
@@ -673,14 +705,14 @@ $.widget( "heurist.search_faceted_wiz", {
         
         this.step = newstep;
         
+        this.adjustDimension();
+        
         if(newstep==0){
             var that = this;
             setTimeout(function(){that.step0.find('#svs_Name').focus();},500);
             btns.find("#btnBack").hide();
             
         }else{
-            this.adjustDimension()
-
             btns.find("#btnBack").show();
         }
 
@@ -703,7 +735,7 @@ $.widget( "heurist.search_faceted_wiz", {
             var svs_rules = $dlg.find('#svs_Rules');
             var svs_rules_only = $dlg.find('#svs_RulesOnly');
             var svs_filter = $dlg.find('#svs_Query'); //preliminary query
-            
+
             this._on(svs_filter,{keyup:function(){                                 
                         if(svs_filter.val()!=''){
                             $dlg.find('.prefilter-settings').show();    
@@ -853,6 +885,17 @@ $.widget( "heurist.search_faceted_wiz", {
                 $dlg.find('#svs_ExitButton').prop('checked', this.options.params.ui_exit_button!==false);
                 $dlg.find('#svs_ExitButtonLabel').val(this.options.params.ui_exit_button_label);
                 
+                if(this.options.params.sort_order){
+                    var s = this.options.params.sort_order;
+                    if(s.indexOf('-')==0){
+                        $dlg.find('.sa_sortasc').val(1);    
+                        s = s.substr(1);
+                    }
+                    $dlg.find('.sa_sortby').val(s)
+                }else{
+                    $dlg.find('.sa_sortby').val('')
+                }
+                
             }else{ //add new saved search
                 this.originalRectypeID == null;
 
@@ -883,6 +926,8 @@ $.widget( "heurist.search_faceted_wiz", {
                 
                 $dlg.find('#svs_ExitButton').prop('checked', true);
                 $dlg.find('#svs_ExitButtonLabel').val('');
+                
+                $dlg.find('.sa_sortby').val('')
                 
                 this.select_main_rectype.val('');
                 if(this.select_main_rectype.hSelect('instance')){
@@ -995,9 +1040,21 @@ $.widget( "heurist.search_faceted_wiz", {
         if(!Hul.isnull(ele_rules)){
             url = url + '&rules=' + encodeURIComponent(ele_rules.val());
         }
+        
+        if(this.options.menu_locked && $.isFunction(this.options.menu_locked)){
+            this.options.menu_locked.call( this, true, false); //lock
+        }
+        
 
         window.hWin.HEURIST4.msg.showDialog(url, { is_h6style:this.options.is_h6style, 
-                    closeOnEscape:true, width:1200, height:600, title:'Ruleset Editor', callback:
+                    closeOnEscape:true, width:1200, height:600, 
+                    title:'Ruleset Editor', 
+                    close:function(){
+                            if(this.options.menu_locked && $.isFunction(this.options.menu_locked)){
+                                this.options.menu_locked.call( this, false, false); //unlock
+                            }
+                    },
+                    callback:
             function(res){
                 if(!Hul.isempty(res)) {
                     ele_rules.val( JSON.stringify(res.rules) ); //assign new rules
@@ -1482,7 +1539,9 @@ $.widget( "heurist.search_faceted_wiz", {
                 if(facets[k].type=='freetext'){
                     sGroupBy =
                         '<label><input type="checkbox" name="facet_Group'+idd+'" value="firstchar"/>'
-                        +'Group by first character</label>';
+                        +'Group by first character</label>'
+                        +'<label title="applicable for list and wrapped modes only">'
+                        +'<input type="checkbox" name="facet_MultiSel'+idd+'" value="1"/>multi-select</label>';
                    
                 }else if(facets[k].type=='float' || facets[k].type=='integer'){
                     sContent = sContent 
@@ -1507,7 +1566,9 @@ $.widget( "heurist.search_faceted_wiz", {
                         +'<button label="dropdown" class="btnset_radio" data-idx="'+idd+'" data-value="1" data-type="dropdown"/>';
                     
                     sGroupBy = '<label>'
-                                            +'<input type="checkbox" name="facet_Group'+idd+'" value="firstlevel"/>Group by first level</label>';
+                                            +'<input type="checkbox" name="facet_Group'+idd+'" value="firstlevel"/>Group by first level</label>'
+                               +'<label title="applicable for list and wrapped modes only">'
+                               +'<input type="checkbox" name="facet_MultiSel'+idd+'" value="1"/>multi-select</label>';
                     
                 }
                 
@@ -1552,12 +1613,14 @@ $.widget( "heurist.search_faceted_wiz", {
                         var vocab_id = $Db.dty(dtid, 'dty_JsonTermIDTree');    
                         var list = $Db.trm_TreeData(vocab_id, 'set');
                         
-                        if(list.length<5){
-                            facets[k].isfacet = 2; //wrap 
-                        }else if (list.length<25) {
-                            facets[k].isfacet = 3; //list
-                        }else{
-                            facets[k].isfacet = 1;    
+                        if(!(facets[k].isfacet>0)){
+                            if(list.length<5){
+                                facets[k].isfacet = 2; //wrap 
+                            }else if (list.length<25) {
+                                facets[k].isfacet = 3; //list
+                            }else{
+                                facets[k].isfacet = 1; //dropdown   
+                            }
                         }
                     }else{
                         facets[k].isfacet = (facets[k].type=='freetext')?0:1;
@@ -1584,10 +1647,9 @@ $.widget( "heurist.search_faceted_wiz", {
                 //listdiv.find('input:radio[name="facet_Type'+idd+'"][value="'+facets[k].isfacet+'"]').attr('checked', true);
                 listdiv.find('button.btnset_radio[data-idx="'+idd+'"]').removeClass('ui-heurist-btn-header1');
                 var btn =   listdiv.find('button.btnset_radio[data-idx="'+idd+'"][data-value="'+facets[k].isfacet+'"]');
-                btn.addClass('ui-heurist-btn-header1');                
+                btn.addClass('ui-heurist-btn-header1');  //heighlight               
 
-
-                    function __dateGrouping(idd){
+                    function __dateGrouping(idd){ //for year-date
                         
                             var idx = -1;
                             for(var m=0; m<facets.length; m++){
@@ -1646,6 +1708,9 @@ $.widget( "heurist.search_faceted_wiz", {
                     */
                 }else{
                     listdiv.find('input:checkbox[name="facet_Group'+idd+'"][value="'+facets[k].groupby+'"]').attr('checked', true);
+                    if(facets[k].multisel){
+                        listdiv.find('input:checkbox[name="facet_MultiSel'+idd+'"]').attr('checked', true);    
+                    }
                 }
                 
                 k++;
@@ -1694,6 +1759,7 @@ $.widget( "heurist.search_faceted_wiz", {
             this._on( listdiv.find('input[id^="facet_Title"]'), {change: this._refresh_FacetsPreview});
             this._on( listdiv.find('input[id^="facet_Help"]'), {change: this._refresh_FacetsPreview});
             this._on( listdiv.find('input[name^="facet_Group"]'), {change: this._refresh_FacetsPreview});
+            this._on( listdiv.find('input[name^="facet_MultiSel"]'), {change: this._refresh_FacetsPreview});
             this._on( listdiv.find('input[id^="facet_Group"]'), {change: this._refresh_FacetsPreview});
             this._on( listdiv.find('input[id^="facet_Order"]'), {change: this._refresh_FacetsPreview});
             this._on( $(this.step3).find('#cbShowHierarchy'), {change: this._refresh_FacetsPreview});
@@ -1737,6 +1803,7 @@ $.widget( "heurist.search_faceted_wiz", {
                     
                 }else{
                     this.options.params.facets[k].groupby = listdiv.find('input:checkbox[name="facet_Group'+idd+'"]:checked').val();    
+                    this.options.params.facets[k].multisel = listdiv.find('input:checkbox[name="facet_MultiSel'+idd+'"]').is(':checked'); 
                 }
                 
                 this.options.params.facets[k]['order'] = $('#facet'+idd).index();
@@ -1883,6 +1950,13 @@ $.widget( "heurist.search_faceted_wiz", {
         this.options.params.ui_exit_button = $dlg.find('#svs_ExitButton').is(':checked');
         this.options.params.ui_exit_button_label = $dlg.find('#svs_ExitButtonLabel').val();
 
+        var s = $dlg.find('.sa_sortby').val();
+        if(s!=''){
+            this.options.params.sort_order = ($dlg.find('.sa_sortasc').val()==1?'-':'')+s;    
+        }else{
+            this.options.params.sort_order = null;
+        }
+        
         var svs_ugrid = svs_ugrid.val();
         if(parseInt(svs_ugrid)>0){
             this.options.params.domain = 'all';
@@ -1957,6 +2031,7 @@ function showSearchFacetedWizard( params ){
         if( need_create ){
 
             manage_dlg = $('<div id="heurist-search-faceted-dialog">')
+            .addClass('save-filter-dialog')
             .appendTo( $('body') );
             manage_dlg.search_faceted_wiz( params );
         }else{
@@ -1968,5 +2043,7 @@ function showSearchFacetedWizard( params ){
         }
 
         manage_dlg.search_faceted_wiz( 'show' );
+        
+        return manage_dlg;
     }
 }

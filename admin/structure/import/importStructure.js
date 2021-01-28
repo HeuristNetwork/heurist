@@ -808,7 +808,7 @@ $.widget( "heurist.importStructure", {
                 window.hWin.HEURIST4.msg.showMsgDlg(
                     'These links are intended only as a shortcut for the owner of this database and '
                     +'would require you to be able to log into the database. '
-                    +'Please use download or clone links on the left if you are not the owner of the database. Proceed?', 
+                    +'Please use download or clone links on the left if you are not the owner of the database.', 
                     function(){ window.open(recURL+'?db='+dbName,'_blank'); }, 
                     {title:'Info',yes:'Proceed',no:'Cancel'});        
 
@@ -1072,7 +1072,13 @@ $.widget( "heurist.importStructure", {
                 if(report!=''){ 
 
                     //report = 'Added';
-                    window.hWin.HEURIST4.msg.showMsgFlash(report, 2000);
+                    //FLASH window.hWin.HEURIST4.msg.showMsgFlash(report, 2000);
+                    
+                    //modal report
+                    window.hWin.HEURIST4.msg.showMsgDlg('<br>'+report,null,
+                            {title:'Import templates report'},
+                            {default_palette_class:'ui-heurist-design'});        
+
 
                     /*                    
                     report = '<div style="font-size:0.9em;"><h2>Record type and associated structures imported</h2>'

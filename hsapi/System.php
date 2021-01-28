@@ -809,6 +809,27 @@ error_log(print_r($_REQUEST, true));
         return $this->errors;
     }
 
+    //
+    //
+    //
+    private function _checkRecLinks(){
+        
+        $total_not_in_cache = mysql__select_value($this->mysqli, 
+        'SELECT count(rec_ID) FROM Records left join recLinks on rec_ID=rl_RelationID '
+            .'where rec_RecTypeID=1 and rec_FlagTemporary=0 and rl_RelationID is null');
+        
+        if($total_not_in_cache==null || $total_not_in_cache>0){
+            //recreate cache
+            
+                include(dirname(__FILE__).'/utilities/utils_db_load_script.php'); // used to execute SQL script
+
+                if(!db_script(HEURIST_DBNAME_FULL, dirname(__FILE__)."/dbaccess/sqlCreateRecLinks.sql")){
+                    $system->addError(HEURIST_DB_ERROR, "Cannot execute script sqlCreateRecLinks.sql");
+                    $response = $system->getError();
+                    $isok = false;
+                }
+        }
+    }
 
     //
     // returns total records in db and counts of active entries in dashboard  
@@ -938,6 +959,7 @@ error_log(print_r($_REQUEST, true));
                 $res['sysinfo']['db_has_active_dashboard'] = $res2[1];
                 $res['sysinfo']['db_workset_count'] = $res2[2];
             }
+            $this->_checkRecLinks(); //check cache
 
         }else{
 
@@ -1539,6 +1561,7 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
                 return null;
             }
             
+            updateDatabseToLatest4($this);
             //updateDatabseToLatest3($this);
             //updateDatabseToLatest2($this);
             /*

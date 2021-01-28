@@ -103,7 +103,7 @@
         CHANGE rcs_TermLimit rcs_TermLimit TINYINT(2) UNSIGNED NULL DEFAULT NULL
         COMMENT 'Null=none 0=not allowed 1,2..=max # times a term from termSet ident. by termID can be used';
 
-   -- not used anywhere in teh code
+   -- not used anywhere in the code
    ALTER TABLE defRelationshipConstraints
         CHANGE rcs_RelationshipsLimit rcs_RelationshipsLimit TINYINT(3) UNSIGNED NULL DEFAULT NULL
         COMMENT 'Deprecated: Null= no limit; 0=forbidden, 1, 2 ... =max # of relationship records per record per detailtype/rectypes triplet';

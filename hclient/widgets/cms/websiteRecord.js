@@ -32,7 +32,7 @@ function hCmsEditing(_options) {
         _version   = "0.4";
 
     var main_content = $('body').find('#main-content');
-console.log('assign main_content');        
+//console.log('assign main_content');        
     var main_menu = $('body').find('#main-menu');
     var main_header = $('body').find('#main-header');
     
@@ -318,29 +318,31 @@ console.log('foter:'+footer_content_raw);
                 {
                         //first child is webpage title
                         var pagetitle = $(main_content.children()[0]);
-                        if(pageid==home_pageid){
-                            pagetitle.empty();
-                        }        
-                        if(is_show_pagetitle){
-                            main_header.find('#main-pagetitle').empty().show();
-                        }
-                        //move title to header
-                        pagetitle.addClass("webpageheading");
-                        pagetitle.detach().appendTo(main_header.find('#main-pagetitle'));
-                        
-                        if(pagetitle.attr('date-empty')==1){
-                            pagetitle.attr('date-empty',0);
-                            
+                        if(pagetitle.is('h2')){
                             if(pageid==home_pageid){
-                                window.hWin.HEURIST4.msg.showMsgFlash('Home page is empty. First menu item will be loaded');
-                            }else{
-                                window.hWin.HEURIST4.msg.showMsgDlg(
-                                    'This menu item does not have associated page content.'
-                                    +'<br>It will not be selectable in the website. '
-                                    +'<br>We recommend this for parent menus.',null,null,
-                                    {my:'left top', at:'left+200 top+100', of:$('#main-content-container')});    
+                                pagetitle.empty();
+                            }        
+                            if(is_show_pagetitle){
+                                main_header.find('#main-pagetitle').empty().show();
                             }
-                            
+                            //move title to header
+                            pagetitle.addClass("webpageheading");
+                            pagetitle.detach().appendTo(main_header.find('#main-pagetitle'));
+                        
+                            if(pagetitle.attr('date-empty')==1){
+                                pagetitle.attr('date-empty',0);
+                                
+                                if(pageid==home_pageid){
+                                    window.hWin.HEURIST4.msg.showMsgFlash('Home page is empty. First menu item will be loaded');
+                                }else{
+                                    window.hWin.HEURIST4.msg.showMsgDlg(
+                                        'This menu item does not have associated page content.'
+                                        +'<br>It will not be selectable in the website. '
+                                        +'<br>We recommend this for parent menus.',null,null,
+                                        {my:'left top', at:'left+200 top+100', of:$('#main-content-container')});    
+                                }
+                                
+                            }
                         }
                         
                         //assign content to editor
@@ -717,36 +719,36 @@ console.log('foter:'+footer_content_raw);
     // browse for heurist uploaded/registered files/resources and add player link
     //         
     function __addHeuristMedia(){
-        
+
         var popup_options = {
-                            isdialog: true,
-                            select_mode: 'select_single',
-                            edit_addrecordfirst: false, //show editor atonce
-                            selectOnSave: true,
-                            select_return_mode:'recordset', //ids or recordset(for files)
-                            filter_group_selected:null,
-                            //filter_groups: this.configMode.filter_group,
-                            onselect:function(event, data){
+            isdialog: true,
+            select_mode: 'select_single',
+            edit_addrecordfirst: false, //show editor atonce
+            selectOnSave: true,
+            select_return_mode:'recordset', //ids or recordset(for files)
+            filter_group_selected:null,
+            //filter_groups: this.configMode.filter_group,
+            onselect:function(event, data){
 
-                             if(data){
-                                
-                                    if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
-                                        var recordset = data.selection;
-                                        var record = recordset.getFirstRecord();
-                                        
-                                        var thumbURL = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database
-                                                +"&thumb="+recordset.fld(record,'ulf_ObfuscatedFileID');
-                                        
-                                        var playerTag = recordset.fld(record,'ulf_PlayerTag');
-                                        
-                                        tinymce.activeEditor.insertContent( playerTag );
-                                    }
-                                
-                             }//data
+                if(data){
 
-                            }
-                        };//popup_options        
-        
+                    if( window.hWin.HEURIST4.util.isRecordSet(data.selection) ){
+                        var recordset = data.selection;
+                        var record = recordset.getFirstRecord();
+
+                        var thumbURL = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database
+                        +"&thumb="+recordset.fld(record,'ulf_ObfuscatedFileID');
+
+                        var playerTag = recordset.fld(record,'ulf_PlayerTag');
+
+                        tinymce.activeEditor.insertContent( playerTag );
+                    }
+
+                }//data
+
+            }
+        };//popup_options        
+
         window.hWin.HEURIST4.ui.showEntityDialog('recUploadedFiles', popup_options);
     }
 
@@ -1179,6 +1181,7 @@ console.log('foter:'+footer_content_raw);
                 +"hclient/widgets/cms/editCMS_AddWidget.html?t="+(new Date().getTime()), 
                 buttons, 'Add Heurist Widget to your Web Page', 
         {  container:'cms-add-widget-popup',
+           default_palette_class: 'ui-heurist-publish',
            width:750,
            close: function(){
                is_edit_widget_open = false;
@@ -1266,6 +1269,12 @@ console.log('foter:'+footer_content_raw);
                            
                            var is_horiz = ($(e.target).val()=='horizontal');
 
+                           if($(e.target).val()=='treeview'){
+                               $dlg.find('#expandLevels').show();
+                           }else{
+                               $dlg.find('#expandLevels').hide();
+                           }
+                           
                            var vals = $dlg.find('#widgetCss').val().split(';');
                            for (var i=0; i<vals.length; i++){
                                var vs = vals[i].split(':');

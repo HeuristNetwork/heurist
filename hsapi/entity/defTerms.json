@@ -15,16 +15,6 @@
         
         "fields": [
                 {
-                    "dtID": "trm_VocabularyGroupID",
-                    "dtFields":{
-                        "dty_Type":"enum",
-                        "rst_DisplayName":"Group:",
-                        "rst_DisplayHelpText": "The vocabulary group to which this vocabulary should be assigned", 
-                        "rst_FieldConfig": {"entity":"defVocabularyGroups"},
-                        "rst_RequirementType":"recommended"
-                    }
-                },
-                {
                     "dtID": "trm_Label",
                     "titleField": true,
                     "dtFields":{
@@ -41,12 +31,33 @@
                     }
                 },
                 {
+                    "dtID": "trm_VocabularyGroupID",
+                    "dtFields":{
+                        "dty_Type":"enum",
+                        "rst_DisplayName":"Group:",
+                        "rst_DisplayHelpText": "The vocabulary group to which this vocabulary should be assigned", 
+                        "rst_FieldConfig": {"entity":"defVocabularyGroups"},
+                        "rst_RequirementType":"recommended"
+                    }
+                },
+                {
                     "dtID": "trm_InverseTermId",
                     "dtFields":{
                         "dty_Type":"resource",
-                        "rst_DisplayName":"Inverse Relation type:",
-                        "rst_DisplayHelpText": "Some relation type can be in pair. Example: IsSon and IsFather", 
+                        "rst_DisplayName":"Inverse term:",
+                        "rst_DisplayHelpText": "Choose another term which is the inverse eg. is Onwer Of and is Onwed By", 
                         "rst_FieldConfig": {"entity":"defTerms","filter_group":"relation","button_browse":true}
+                    }
+                },
+                {
+                    "dtID": "trm_InverseSymmetrical",
+                    "dtFields":{
+                        "dty_Role": "virtual",
+                        "dty_Type": "boolean",
+                        "rst_DefaultValue": "1",
+                        "rst_FieldConfig":["1","0"],
+                        "rst_DisplayName": "Symmetrical:",
+                        "rst_DisplayHelpText": "The terms are mutually the inverse of one-another (not always the case)"
                     }
                 },
                 {
@@ -92,7 +103,7 @@
                         "rst_DefaultValue": "enum",
                         "rst_Display":"hidden",
                         "rst_FieldConfig":["relation","enum"],
-                        "rst_DisplayHelpText": "This vocabulary can be used for relationship type (set this only if you want the vocabulary to appear as an option under Relationship type)"
+                        "rst_DisplayHelpText": "This vocabulary can be used for relationship type (set this only if you want<br>the vocabulary to appear as an option under Relationship type)"
                     }
                 },
                 {

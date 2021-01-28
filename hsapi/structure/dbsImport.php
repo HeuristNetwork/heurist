@@ -220,7 +220,7 @@ $time_debug = microtime(true);
         $this->sourceTerms = new DbsTerms(null, $this->source_defs['terms']);
         if($entityTypeToBeImported=='term'){
             if(count($local_ids)>0){
-                foreach($local_ids as $local_id){
+                foreach($local_ids as $local_id){ 
                     $rt = $this->sourceTerms->getTerm($local_id);        
                     if($rt!=null){
                         $def_ids[] = $local_id;
@@ -814,6 +814,24 @@ $mysqli->commit();
             return true;
     }
     
+    
+    //
+    //
+    //
+    public function doMapping($mapping){
+        
+        $defType = 'rectypes';
+        $this->source_defs['rectypes'] = array();
+        foreach($mapping as $sourceID=>$fields){
+            if($sourceID>0){
+                $this->source_defs['rectypes'][$sourceID] = $fields['rty_ID'];
+                
+            }
+        }
+        //$defType = 'detailtypes';
+        
+    }
+    
     //
     // returns database URL by its ID in master index database see getDatabaseURL
     // @todo move it to special class?
@@ -930,7 +948,7 @@ $mysqli->commit();
         
         return ($defs!=null)?$localID:false;
     }
-    
+
     // 
     // finds target id by source id via concept code
     // get concept code in source - find local in target
@@ -941,29 +959,48 @@ $mysqli->commit();
         
         //get concept code in source
         if($defType=='rectype' || $defType=='rt' || $defType == 'rectypes'){
+            
             $defType = 'rectypes';
-            $defs = $this->source_defs[$defType]['typedefs'];
-
-            //get concept code
-            $fieldName = 'rty_ConceptID';
-            $idx_ccode = intval($defs['commonNamesToIndex'][$fieldName]);
-            $conceptCode = $iscc ?$source_id :@$defs[$source_id]['commonFields'][$idx_ccode];
+            
+            if(@$this->source_defs[$defType]['typedefs']){
+                $defs = $this->source_defs[$defType]['typedefs'];
+                //get concept code
+                $fieldName = 'rty_ConceptID';
+                $idx_ccode = intval($defs['commonNamesToIndex'][$fieldName]);
+                $conceptCode = $iscc ?$source_id :@$defs[$source_id]['commonFields'][$idx_ccode];
+            }else{
+                return $defs = $this->source_defs[$defType][$source_id]; //via mapping
+            }
             
         }else if($defType=='detailtype' || $defType=='dt' || $defType == 'detailtypes'){
 
             $defType = 'detailtypes';
-            $defs = $this->source_defs[$defType]['typedefs'];
+            
+            if(@$this->source_defs[$defType]['typedefs']){
+                $defs = $this->source_defs[$defType]['typedefs'];
+                $fieldName = 'dty_ConceptID';
+                $idx_ccode = intval($defs['fieldNamesToIndex'][$fieldName]);
+                $conceptCode = $iscc ?$source_id :@$defs[$source_id]['commonFields'][$idx_ccode];
 
-            $fieldName = 'dty_ConceptID';
-            $idx_ccode = intval($defs['fieldNamesToIndex'][$fieldName]);
-            $conceptCode = $iscc ?$source_id :@$defs[$source_id]['commonFields'][$idx_ccode];
+            }else{
+                return $defs = $this->source_defs[$defType][$source_id]; //via mapping
+            }
+
             
         }else if($defType=='enum' || $defType=='relationtype'){
-            $defs = $this->source_defs['terms']['termsByDomainLookup'][($defType=='enum'?'enum':'relation')];
             
-            $fieldName = 'trm_ConceptID';
-            $idx_ccode = intval($this->source_defs['terms']['fieldNamesToIndex'][$fieldName]);
-            $conceptCode = $iscc ?$source_id :@$defs[$source_id][$idx_ccode];
+            //$defs = $this->source_defs['terms']['termsByDomainLookup'][($defType=='enum'?'enum':'relation')];
+            
+            if($iscc){
+                 $conceptCode = $source_id;   
+            }else{
+                 $fieldName = 'trm_ConceptID';
+                 $idx_ccode = intval($this->source_defs['terms']['fieldNamesToIndex'][$fieldName]);
+                 $term = $this->sourceTerms->getTerm($source_id, $defType);
+                 
+                 $conceptCode = @$term[$idx_ccode];
+            }
+            //$conceptCode = $iscc ?$source_id :@$defs[$source_id][$idx_ccode];
             
         }
         
@@ -985,6 +1022,7 @@ $mysqli->commit();
     // 
     public static function getLocalCode($defType, $database_defs, $conceptCode, $sall=false){
         $res = array();
+        $defs2 = null;
         
         if($defType=='rectype' || $defType=='rt' || $defType == 'rectypes'){
             $defType = 'rectypes';
@@ -1002,10 +1040,13 @@ $mysqli->commit();
             
         }else if($defType=='enum' || $defType=='relationtype'){
             
-            $defs = $database_defs['terms']['termsByDomainLookup'][($defType=='enum'?'enum':'relation')];
+//            $defs = $database_defs['terms']['termsByDomainLookup'][($defType=='enum'?'enum':'relation')];
 
             $fieldName = 'trm_ConceptID';
             $idx_ccode = intval($database_defs['terms']['fieldNamesToIndex'][$fieldName]);
+            
+            $defs = $database_defs['terms']['termsByDomainLookup']['enum'];
+            $defs2 = $database_defs['terms']['termsByDomainLookup']['relation'];
             
         }
         
@@ -1050,6 +1091,14 @@ $mysqli->commit();
                     
                 }
             }
+            if($defs2){
+                foreach ($defs2 as $id => $def) {
+                    if(is_numeric($id) && $def[$idx_ccode]==$conceptCode){
+                        return $id;
+                    }
+                }
+            }
+            
         }
         
         return ($sall)?$res:null;
@@ -1236,7 +1285,12 @@ $mysqli->commit();
         }else{
 
             $terms = $this->source_defs['terms'];
-        
+            
+            if(!(@$terms['fieldNamesToIndex']['trm_NameInOriginatingDB']>0)){
+                $terms['fieldNamesToIndex']['trm_NameInOriginatingDB'] = 19;
+                $terms['commonFieldNames'][19] = 'trm_NameInOriginatingDB';
+            }
+
             $columnNames = $terms['commonFieldNames'];
             $idx_ccode = intval($terms['fieldNamesToIndex']["trm_ConceptID"]);
             $idx_parentid = intval($terms['fieldNamesToIndex']["trm_ParentTermID"]);
@@ -1248,8 +1302,14 @@ $mysqli->commit();
             $idx_origin_name   = $terms['fieldNamesToIndex']['trm_NameInOriginatingDB'];
             
             $idx_vocab_group_id  = intval($terms['fieldNamesToIndex']["trm_VocabularyGroupID"]);
+            
+            if($term_id==7256){
+                error_log('!!!!!');
+            }
 
-            $term_import = $terms['termsByDomainLookup'][$domain][$term_id]; //6256 returns wrong!!
+            //search both domains
+            $term_import = $this->sourceTerms->getTerm($term_id, $domain);
+            //$term_import = $terms['termsByDomainLookup'][$domain][$term_id]; //6256 returns wrong!!
 
             if(!$term_import[$idx_ccode]){
                 if($term_import[$idx_origin_dbid]>0 && $term_import[$idx_origin_id]>0){
@@ -1316,7 +1376,7 @@ if($term_id==11 || $term_id==518 || $term_id==497){
                     $term_import[$idx_label] = $this->targetTerms->doDisambiguateTerms($term_import[$idx_label],
                                                             null, $domain, $idx_label);
                     
-                    if($this->vcg_correspondence[$term_import[$idx_vocab_group_id]]>0){
+                    if(@$term_import[$idx_vocab_group_id]>0 && @$this->vcg_correspondence[$term_import[$idx_vocab_group_id]]>0){
                         $term_import[$idx_vocab_group_id] = $this->vcg_correspondence[$term_import[$idx_vocab_group_id]];
                     }else{
                         //be default place into 1
@@ -1344,10 +1404,10 @@ if($term_id==11 || $term_id==518 || $term_id==497){
                         $term_import[$idx_origin_id] = $term_id;
                     }
                 }
-                if(!$term_import[$idx_origin_name]){
+                if(!@$term_import[$idx_origin_name]){
                     $term_import[$idx_origin_name] = $term_import[$idx_label];
                 }
-
+                
                 $res = updateTerms($columnNames, null, $term_import, $this->system->get_mysqli()); //see saveStructureLib
                 if(is_numeric($res)){
                     $new_term_id = $res;
@@ -1406,7 +1466,7 @@ if($term_id==11 || $term_id==518 || $term_id==497){
     private function _importVocabularyGroups($src_vocab_ids){
 
         $columnNames = array("vcg_Name","vcg_Domain","vcg_Order","vcg_Description");
-        $idx_vcg_grp = $this->source_defs['terms']['fieldNamesToIndex']['trm_VocabularyGroupID'];
+        $idx_vcg_grp = @$this->source_defs['terms']['fieldNamesToIndex']['trm_VocabularyGroupID'];
         $idx_parent = $this->source_defs['terms']['fieldNamesToIndex']['trm_ParentTermID'];
 
         $mysqli = $this->system->get_mysqli();
@@ -1417,14 +1477,14 @@ if($term_id==11 || $term_id==518 || $term_id==497){
             $is_old_db_version = true;
             
             if(!($idx_vcg_grp>0)){
-                $this->source_defs['terms']['commonFieldNames'].push('trm_VocabularyGroupID');
-                $idx_vcg_grp = count($this->source_defs['terms']['commonFieldNames'])-1;
+                $idx_vcg_grp = 20;
+                $this->source_defs['terms']['commonFieldNames'][$idx_vcg_grp] = 'trm_VocabularyGroupID';
                 $this->source_defs['terms']['fieldNamesToIndex']['trm_VocabularyGroupID'] = $idx_vcg_grp;
             }
             
             $this->source_defs['terms']['groups'] = array(11=>
-                array('vcg_ID'=>"11", 'vcg_Name'=>"Import", vcg_Domain=>"enum", 
-                vcg_Order=>"007", vcg_Description=>"Imported vocabularies"));
+                array('vcg_ID'=>"11", 'vcg_Name'=>"Import", 'vcg_Domain'=>"enum", 
+                'vcg_Order'=>"007", 'vcg_Description'=>"Imported vocabularies"));
         }
         
         foreach($src_vocab_ids as $term_id){

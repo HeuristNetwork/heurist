@@ -24,6 +24,8 @@ $.widget( "heurist.manageSysDatabases", $.heurist.manageEntity, {
     _entityName:'sysDatabases',
     
     _init: function() {
+  
+        this.options.default_palette_class = 'ui-heurist-design';
         
         this.options.width = 800;
         this.options.height = 600;

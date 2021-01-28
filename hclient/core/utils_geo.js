@@ -25,7 +25,7 @@ wktValueToShapes
 prepareGeoJSON  json to timemap
 wktValueToDescription
 
-parseCoordinates - old way for DH
+parseCoordinates - old way for Digital Harlem
 
 simplePointsToWKT -  coordinate pairs to WKT
 
@@ -407,7 +407,7 @@ window.hWin.HEURIST4.geo = {
     
     //
     // OLD WAY to parse coordinates from WKT to timemap or google
-    // it is still in use in DH search
+    // it is still in use in Digital Harlem search
     //
     parseCoordinates: function(type, wkt, format, google) {
 

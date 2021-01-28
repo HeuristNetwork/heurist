@@ -163,6 +163,7 @@ function hSearchMinimal() {
                 $(_owner_doc).trigger(window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH,   //_searchCompleted
                             {search_realm:_query_request.search_realm, 
                              recordset: recordset,      //result 
+                             request: _query_request,
                              query: _query_request.q}); //orig query
             }
     }

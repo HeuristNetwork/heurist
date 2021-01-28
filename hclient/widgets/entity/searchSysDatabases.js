@@ -22,6 +22,8 @@ $.widget( "heurist.searchSysDatabases", $.heurist.searchEntity, {
     //
     _initControls: function() {
         this._super();
+        
+        this.input_search.parent().css('padding-top','15px'); 
 
         this.input_search_type = this.element.find('#input_search_type');
         this._on(this.input_search_type,  { change:this.startSearch });
@@ -38,7 +40,7 @@ $.widget( "heurist.searchSysDatabases", $.heurist.searchEntity, {
         if(this.options.subtitle){
             var ele = this.element.find('.sub-title');
             if(ele.length>0){
-                ele.html('<h3>'+this.options.subtitle+'</h3>');
+                ele.html('<h3 style="margin:1em 0 0 0">'+this.options.subtitle+'</h3>');
             }
         }
     },  

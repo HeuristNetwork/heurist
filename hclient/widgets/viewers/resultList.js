@@ -25,7 +25,7 @@ $.widget( "heurist.resultList", {
     // default options
     options: {
         is_h6style: false,
-        view_mode: null, // list|icons|thumbs|preview(thumbs3)|horizontal
+        view_mode: null, // 'list','icons','thumbs','thumbs3','horizontal','icons_list','record_content' 
         list_mode_is_table: false,
 
         select_mode:null,//none, manager, select_single, select_multi
@@ -73,6 +73,7 @@ $.widget( "heurist.resultList", {
         
         // smarty template or url (or todo function) to draw inline record details when recordview_onselect='inline'. (LINE view mode only)
         rendererExpandDetails: null,  //name of smarty template or function to draw expanded details
+        rendererExpandInFrame: true, 
         expandDetailsOnClick: true,
 
         searchfull: null,  // custom function to search full data
@@ -95,8 +96,9 @@ $.widget( "heurist.resultList", {
         search_realm:  null,  //accepts search/selection events from elements of the same realm only
         search_initial: null,  //NOT USED query string or svs_ID for initial search
         
-        supress_load_fullrecord: false //do not load full record data
+        supress_load_fullrecord: false, //do not load full record data
         
+        transparent_background: false 
     },
 
     _is_publication:false, //this is CMS publication - take css from parent
@@ -112,6 +114,7 @@ $.widget( "heurist.resultList", {
     max_page: 0,
     count_total: null,  //total records in query - actual number can be less
     hintDiv:null, // rollover for thumbnails
+    _current_view_mode: null,
 
     _currentRecordset:null,
     _currentMultiSelection:null, //for select_multi - to keep selection across pages and queries
@@ -135,12 +138,6 @@ $.widget( "heurist.resultList", {
 
         this._is_publication  = this.element.parent().attr('data-heurist-app-id');
         
-        if(this._is_publication){
-            //this is CMS publication - take css from parent
-            this.element.addClass('ui-widget-content').css({'background':'none','border':'none'});
-        }else{
-            this.element.addClass('ui-heurist-bg-light');
-        }
         //this.element.css({'font-size':'0.9em'});
 
         this._initControls();
@@ -479,21 +476,6 @@ $.widget( "heurist.resultList", {
         .css({'overflow-y':'auto'})
         .appendTo( this.element );
         
-        if(this._is_publication){ //make BG transparent
-            this.div_toolbar.css({'background':'none'});
-            this.div_content.css({'background':'none'});
-        }else{
-            //set background to none ???? if inner header visible 
-            //???? this.element.parent().css({'background':'none','border':'none'});
-            //???? this.element.parent().parent().css({'background':'none','border':'none'});
-            if(true || this.element.parent().hasClass('ui-widget-content')){
-                this.element.parent().css({'background':'none','border':'none'});
-            }
-
-            //this.div_toolbar.addClass('ui-heurist-bg-light');
-            this.div_content.addClass('ui-heurist-bg-light');
-        }
-
 
         this.div_loading = $( "<div>" )
         .css({ 'width': '50%', 'height': '50%', 'top': '25%', 'margin': '0 auto', 'position': 'relative',
@@ -580,18 +562,27 @@ $.widget( "heurist.resultList", {
         .css({'float':'right','padding':'2px '+right_padding+'px'})
         .html('<button value="list" class="btnset_radio"/>'
             +'<button value="icons" class="btnset_radio"/>'
-            +'<button value="icons_expanded" class="btnset_radio"/>'
+            +(this.options.entityName=='records'?'<button value="record_content" class="btnset_radio"/>':'')
             +'<button value="thumbs" class="btnset_radio"/>'
             +'<button value="thumbs3" class="btnset_radio"/>'
         )
         .appendTo( this.div_toolbar );
         
-        this.view_mode_selector.find('button[value="list"]').button({icon: "ui-icon-menu", showLabel:false, label:window.hWin.HR('list')}).css('font-size','1em');
-        this.view_mode_selector.find('button[value="icons"]').button({icon: "ui-icon-list", showLabel:false, label:window.hWin.HR('icons')}).css('font-size','1em'); //ui-icon-view-icons-b
-        this.view_mode_selector.find('button[value="icons_expanded"]').button({icon: "ui-icon-template", showLabel:false, label:window.hWin.HR('icons exanaded')}).css('font-size','1em'); //ui-icon-newspaper
-        
-        this.view_mode_selector.find('button[value="thumbs"]').button({icon: "ui-icon-view-icons", showLabel:false, label:window.hWin.HR('thumbs')}).css('font-size','1em');
-        this.view_mode_selector.find('button[value="thumbs3"]').button({icon: "ui-icon-stop", showLabel:false, label:window.hWin.HR('thumbs3')}).css('font-size','1em');
+        this.view_mode_selector.find('button[value="list"]')
+            .button({icon: "ui-icon-menu", showLabel:false, label:window.hWin.HR('Single lines')})
+            .css('font-size','1em');
+        this.view_mode_selector.find('button[value="icons"]')
+            .button({icon: "ui-icon-list", showLabel:false, label:window.hWin.HR('Single lines with icon')})
+            .css('font-size','1em'); //ui-icon-view-icons-b
+        this.view_mode_selector.find('button[value="record_content"]')
+            .button({icon: "ui-icon-template", showLabel:false, label:window.hWin.HR('Record contents')})
+            .css('font-size','1em'); //ui-icon-newspaper
+        this.view_mode_selector.find('button[value="thumbs"]')
+            .button({icon: "ui-icon-view-icons", showLabel:false, label:window.hWin.HR('Small images')})
+            .css('font-size','1em');
+        this.view_mode_selector.find('button[value="thumbs3"]')
+            .button({icon: "ui-icon-stop", showLabel:false, label:window.hWin.HR('Large image')})
+            .css('font-size','1em');
         this.view_mode_selector.controlgroup();
         
         this._on( this.view_mode_selector.find('button'), {
@@ -623,7 +614,7 @@ $.widget( "heurist.resultList", {
                         btn_visible_newrecord: false,
                         search_button_label: 'Filter',
                         btn_entity_filter: false})
-                    .css({display:'block','max-height':'55px','height':'55px',
+                    .css({  //display:'block','max-height':'55px','height':'55px',
                             padding:'15px 10px 0px 4px','border-bottom':'1px solid gray'}) //,width:'100%'
                     .appendTo(this.div_header);
         
@@ -763,6 +754,23 @@ $.widget( "heurist.resultList", {
             $(this.div_content).find('.logged-in-only').css('visibility','hidden');
         }
 
+        if(this._is_publication || this.options.transparent_background){
+            //this is CMS publication - take css from parent
+            this.element.removeClass('ui-heurist-bg-light').addClass('ui-widget-content').css({'background':'none','border':'none'});
+            this.div_toolbar.css({'background':'none'});
+            this.div_content.removeClass('ui-heurist-bg-light').css({'background':'none'});
+        }else{
+            this.element.addClass('ui-heurist-bg-light');
+            
+            if(true || this.element.parent().hasClass('ui-widget-content')){
+                this.element.parent().css({'background':'none','border':'none'});
+            }
+
+            //this.div_toolbar.addClass('ui-heurist-bg-light');
+            this.div_content.addClass('ui-heurist-bg-light');
+        }
+        
+        
 /*
         var abtns = (this.options.actionbuttons?this.options.actionbuttons:"tags,share,more,sort,view").split(',');
         var that = this;
@@ -959,15 +967,19 @@ $.widget( "heurist.resultList", {
     applyViewMode: function(newmode, forceapply){
 
         
-        var allowed = ['list','icons','thumbs','thumbs3','horizontal','icons_list','icons_expanded'];
+        var allowed = ['list','icons','thumbs','thumbs3','horizontal','icons_list','record_content'];
+        
+        if(newmode=='icons_expanded') newmode=='record_content'; //backward capability 
 
         if(window.hWin.HEURIST4.util.isempty(newmode) || allowed.indexOf(newmode)<0) {
             newmode = window.hWin.HAPI4.get_prefs('rec_list_viewmode_'+this.options.entityName);
         }
-        if(window.hWin.HEURIST4.util.isempty(newmode)){
+
+        if(window.hWin.HEURIST4.util.isempty(newmode) 
+            || (newmode=='record_content' && this.options.entityName!='records')){
             newmode = 'list'; //default
         }
-        if(newmode=='icons_expanded') {
+        if(newmode=='record_content') {
             newmode = 'icons';    
             this._expandAllDivs = true;
             forceapply = true;
@@ -999,6 +1011,8 @@ $.widget( "heurist.resultList", {
             
             this.div_content.removeClass('list icons thumbs thumbs3 horizontal icons_list');
             this.div_content.addClass(newmode);
+            
+            this._current_view_mode = newmode;
             
             if(newmode=='horizontal'){ // || newmode=='icons_list'){
                 this._on(this.div_content,
@@ -1071,7 +1085,10 @@ $.widget( "heurist.resultList", {
                 //.removeClass(this.options.is_h6style?'':'ui-heurist-btn-header1')
                 .removeClass('ui-heurist-btn-header1')
                 .css({'border':'none'});
-            if(this._expandAllDivs) newmode='icons_expanded';
+            if(this._expandAllDivs){
+                newmode='record_content';
+                this._current_view_mode = newmode;
+            } 
           
                
             var btn =   this.view_mode_selector.find('button[value="'+newmode+'"]');
@@ -1472,7 +1489,7 @@ $.widget( "heurist.resultList", {
             var hint = __getOwnerName(owner_id)+', '+visibility;
 
             // Displays oner group ID, green if hidden, gray if visible to others, red if public visibility
-            html_owner =  '<span class="rec_owner logged-in-only" style="width:20px;padding-top:6;display:inline-block;color:'
+            html_owner =  '<span class="rec_owner logged-in-only" style="width:20px;padding-top:2px;display:inline-block;color:'
                      + clr + '" title="' + hint + '"><b>' + (owner_id==0?'':owner_id) + '</b></span>';
             
             if(clr != 'blue')         
@@ -1499,6 +1516,7 @@ $.widget( "heurist.resultList", {
         +     '<span class="logged-in-only ui-icon ui-icon-bookmark" style="color:'+(bkm_ID?'#ff8844':'#dddddd')+';display:inline-block;"></span>'
         +     html_owner
         +     html_pwdrem
+        +     '<span class="recid-in-list">id: '+recID+'</span>'
         + '</div>'
 
 
@@ -1516,13 +1534,14 @@ $.widget( "heurist.resultList", {
         + 'class="rec_edit_link action-button logged-in-only ui-button ui-widget ui-state-default ui-corner-all'+btn_icon_only+'" '
         + 'role="button" aria-disabled="false" data-key="edit">'
         + '<span class="ui-button-text">Edit</span>'
-        + '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"/>'
+        + '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span>'
         + '</div>'
 
         + '<div title="Click to edit record (opens in new tab)" '
         + ' class="rec_edit_link_ext action-button logged-in-only ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only"'
         + ' role="button" aria-disabled="false" data-key="edit_ext">'
-        + '<span class="ui-button-icon-primary ui-icon ui-icon-newwin"/><span class="ui-button-text"/>'
+        + '<span class="ui-button-text">New tab</span>'
+        + '<span class="ui-button-icon-primary ui-icon ui-icon-newwin"/>'
         + '</div>'  // Replace ui-icon-pencil with ui-icon-extlink and swap position when this is finished 
         
         /* Ian removed 5/2/2020. TODO: Need to replace with Select, Preview and Download buttons */
@@ -1739,15 +1758,21 @@ $.widget( "heurist.resultList", {
             rdiv2.css({'height':'','width':''}).insertBefore(tmp_parent);
             tmp_parent.remove();
             */
+            var rdivs = this.div_content.find('.recordDiv');
             if(this.options.view_mode=='thumbs'){
-                this.div_content.find('.recordDiv').css({height:'154px', width:'128px'});
+                rdivs.css({height:'154px', width:'128px'});
             }
-            this.div_content.find('.recordDiv').removeClass('expanded');
+            rdivs.removeClass('expanded').show();
+                                        
+            $.each(rdivs, function(i,rdiv){ 
+                $(rdiv).children().not('.recTypeThumb').show();
+                $(rdiv).find('.action-button').addClass('ui-button-icon-only');
+            });
             
             this.div_content.scrollTop(spos);
         }
                             
-
+        this.div_content.find('.recordDiv .action-button-container').css('display','');
     },
     
     //
@@ -2051,16 +2076,22 @@ $.widget( "heurist.resultList", {
         }
         
 
+        //window.hWin.HEURIST4.util.stopEvent(event);
+        
         this.triggerSelection();
     },
-    
+    //_recordDivOnClick
     
     //
     // expand ALL recordDivs
     //
-    expandDetailsInlineALL: function(){
+    expandDetailsInlineALL: function(can_proceed){
         
         var that = this;
+        
+        if(can_proceed!==true && this.allowedPageSizeForRecContent(function(){
+            that.expandDetailsInlineALL(true);
+        })) return;
     
         $allrecs = this.div_content.find('.recordDiv');
         $allrecs.each(function(idx, item){
@@ -2109,36 +2140,50 @@ $.widget( "heurist.resultList", {
                                  //'width':'97%',
                                   padding:'5px',
                                  'border-radius': '3px 3px 3px 3px',
-                                 'border':'2px solid #62A7F8'}).insertAfter($rdiv);
+                                 'border':'2px solid #62A7F8'});
+                                 
+                        if(this.options.view_mode=='icons' && this._expandAllDivs){
+
+                            $rdiv.addClass('expanded');
+                            $rdiv.children().not('.recTypeThumb').hide();
+                            $rdiv.find('.action-button-container').show();
+                            $rdiv.find('.action-button').removeClass('ui-button-icon-only');
+                            if(window.hWin.HAPI4.has_access()){
+                                ele.css({'margin':'0px 0px 0px 80px'});
+                            }else{
+                                ele.css({'margin':'0px'});
+                            }
+                            ele.appendTo($rdiv);
+                        }else{
+                            ele.insertAfter($rdiv);
+                        }
+                                 
                     }
                         
                     
                     var infoURL;
+                    var isSmarty = false;
                     
-                    //content is smarty report
-                    if ( typeof this.options.rendererExpandDetails === 'string' && this.options.rendererExpandDetails.substr(-4)=='.tpl' ){
+                    if( typeof this.options.rendererExpandDetails === 'string' 
+                            && this.options.rendererExpandDetails.substr(-4)=='.tpl' ){
 
                         infoURL = window.hWin.HAPI4.baseURL + 'viewers/smarty/showReps.php?publish=1&debug=0&q=ids:'
                         + recID 
                         + '&db='+window.hWin.HAPI4.database+'&template='
                         + encodeURIComponent(this.options.rendererExpandDetails);
-
-                        ele.addClass('loading').css({'overflow-y':'auto'}).load(infoURL, function(){ 
-                            var ele2 = $(this);
-                            //var ele2 = that.div_content.find('.record-expand-info[data-recid='+recID+']');
-                            var h = ele2[0].scrollHeight+10;
-                            //h = Math.min(h+10, 600);
-                            if(that._expandAllDivs){
-                                ele2.removeClass('loading').height(h);    
-                            }else{
-                                ele2.removeClass('loading').animate({height:h},300);
-                            }
-                        });   
+                                
+                        isSmarty = true;
                     }else{
-                    //content is record view 
+                        //content is record view 
                         infoURL = window.hWin.HAPI4.baseURL + 'viewers/record/renderRecordData.php?recID='
                         +recID
                         +'&db='+window.hWin.HAPI4.database;
+                    }
+                    
+                    
+                    //content is smarty report
+                    if( this.options.rendererExpandInFrame ||  !isSmarty)
+                    {
                         
                         $('<iframe>').attr('data-recid',recID)
                             .appendTo(ele)
@@ -2152,16 +2197,37 @@ $.widget( "heurist.resultList", {
 
                             try{
                                 h = $(this.contentWindow.document).height();
+                                ele2.removeClass('loading').height(h+(h*0.05));    
                             }catch(e){
+                                ele2.removeClass('loading').height('auto');    
                                 console.log(e);
                             }
+                            /*
+                            //ele2.removeClass('loading').height('auto');    
                             if(that._expandAllDivs){
-                                ele2.removeClass('loading').height(h);    
+                                ele2.removeClass('loading').height('auto');    
                             }else{
                                 ele2.removeClass('loading').animate({height:h},300);    
                             }
+                            */
                         });
                         
+
+                    }else{
+
+                        ele.addClass('loading').css({'overflow-y':'auto'}).load(infoURL, function(){ 
+                            var ele2 = $(this);
+                            //var ele2 = that.div_content.find('.record-expand-info[data-recid='+recID+']');
+                            var h = ele2[0].scrollHeight+10;
+                            //h = Math.min(h+10, 600);
+                            ele2.removeClass('loading').height('auto');    
+                            /*
+                            if(that._expandAllDivs){
+                                ele2.removeClass('loading').height('auto');    
+                            }else{
+                                ele2.removeClass('loading').animate({height:h},300);
+                            }*/
+                        });   
                     }  
                     
                 }
@@ -2607,13 +2673,46 @@ $.widget( "heurist.resultList", {
     //
     //
     //    
-    , refreshPage: function(){
+    , refreshPage: function( callback ){
         
         var keep_selection = this.getSelected(true);
         this._renderPage(this.current_page);
         if(keep_selection && keep_selection.length>0){
             //this.setSelected(keep_selection);
         }
+    }
+    
+    , allowedPageSizeForRecContent: function( callback ){
+
+        if(!this._currentRecordset) return true;
+        
+        var n = Math.min(this._currentRecordset.length(),this.options.pagesize);
+        
+        if(n>10){
+                var that = this;
+                
+                var s = '';
+                if(window.hWin.HAPI4.has_access()){
+                    s = '<p style="color:green">This warning is triggered if the are more than 10 records</p>'; // (edit here to change)
+                }
+                
+                var $__dlg = window.hWin.HEURIST4.msg.showMsgDlg(
+'<p>You have selected '+n
++' records. This display mode loads complete information for each record and will take a long time to load and display all of these data.</p>'
++s,
+{'Proceed' :function(){ 
+    callback.call();
+    $__dlg.dialog( "close" );
+},
+'Use simple display mode':function(){
+    that.applyViewMode('list');
+    $__dlg.dialog( "close" );
+}}, {title:'Warning'});
+            return true;          
+        }else{
+            return false;
+        }
+        
     }
 
     //
@@ -2656,8 +2755,9 @@ $.widget( "heurist.resultList", {
             
         }
         
+        
         this.clearAllRecordDivs(null);
-
+        
         var recs = recordset.getRecords();
         var rec_order = recordset.getOrder();
         var rec_toload = [];

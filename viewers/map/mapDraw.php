@@ -1,7 +1,7 @@
 <?php
 
     /**
-    * Map digitizing tool
+    * Map digitizing tool - LEAFLET based
     *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org

@@ -1,4 +1,6 @@
 <?php
+require_once(dirname(__FILE__).'/../../verification/verifyValue.php');
+require_once(dirname(__FILE__).'/../../verification/verifyFieldTypes.php');
 
     /*
     * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
@@ -20,7 +22,6 @@ function updateDatabseTo_v3($system, $dbname=null){
         }
     
         $report = array();
-        
         
         //create new tables
         $value = mysql__select_value($mysqli, "SHOW TABLES LIKE 'usrRecPermissions'");
@@ -53,7 +54,7 @@ function updateDatabseTo_v3($system, $dbname=null){
 $query = 'CREATE TABLE sysDashboard ('
   .'dsh_ID tinyint(3) unsigned NOT NULL auto_increment,'
   ."dsh_Order smallint COMMENT 'Used to define the order in which the dashboard entries are shown',"
-  ."dsh_Label varchar(64) COMMENT 'The short text which will describe this function on the dashboard',"
+  ."dsh_Label varchar(64) COMMENT 'The short text which will describe this function in the shortcuts',"
   ."dsh_Description varchar(1024) COMMENT 'A longer text giving more information about this function to show as a description below the label or as a rollover',"
   ."dsh_Enabled enum('y','n') NOT NULL default 'y' COMMENT 'Allows unused functions to be retained so they can be switched back on',"
   ."dsh_ShowIfNoRecords enum('y','n') NOT NULL default 'y' COMMENT 'Deteremines whether the function will be shown on the dashboard if there are no records in the database (eg. no point in showing searches if nothing to search)',"
@@ -102,7 +103,7 @@ $query = 'CREATE TABLE usrWorkingSubsets ( '
 $query = "CREATE TABLE defVocabularyGroups (
   vcg_ID tinyint(3) unsigned NOT NULL auto_increment COMMENT 'Vocabulary group ID referenced in vocabs editor',
   vcg_Name varchar(40) NOT NULL COMMENT 'Name for this group of vocabularies, shown as heading in lists',
-  vcg_Domain enum('enum','relation') NOT NULL default 'enum' COMMENT 'Field of application of the vocabulary - can be both',
+  vcg_Domain enum('enum','relation') NOT NULL default 'enum' COMMENT 'Normal vocabularies are termed enum, relational are for relationship types but can also be used as normal vocabularies',
   vcg_Order tinyint(3) unsigned zerofill NOT NULL default '002' COMMENT 'Ordering of vocabulary groups within pulldown lists',
   vcg_Description varchar(250) default NULL COMMENT 'A description of the vocabulary group and its purpose',
   vcg_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this vocabulary group record, used to get last updated date for table',
@@ -373,8 +374,31 @@ $query = "CREATE TABLE defTermsLinks (
             $report[] = 'sysTableLastUpdated and related triggers removed';            
         }
         
+        
         //update version
         $mysqli->query('UPDATE sysIdentification SET sys_dbVersion=1, sys_dbSubVersion=3, sys_dbSubSubVersion=0 WHERE 1');
+        
+        $system->get_system(null, true); //reset system values - to update version
+        
+        //validate default values for record type structures
+        $list = getInvalidFieldTypes($mysqli, null);
+        
+        if($list && @$list['rt_defvalues'] && count($list['rt_defvalues'])>0){
+            $report[] = count($list['rt_defvalues']).' wrong default values have been cleared';                        
+/*            
+            $list = $list['rt_defvalues'];
+            foreach ($list as $row) {
+?>                
+                <div class="msgline"><b><a href="#" onclick='{ onEditRtStructure(<?= $row['rst_RecTypeID'] ?>); return false}'><?= $row['rst_DisplayName'] ?></a></b> field (code <?= $row['dty_ID'] ?>) in record type <?= $row['rty_Name'] ?>  has invalid default value (<?= ($row['dty_Type']=='resource'?'record ID ':'term ID ').$row['rst_DefaultValue'] ?>)
+                    <span style="font-style:italic"><?=$row['reason'] ?></span>
+                </div>
+<?php                
+            }//for
+*/            
+        }
+        
+
+        
    
         return $report;
 }

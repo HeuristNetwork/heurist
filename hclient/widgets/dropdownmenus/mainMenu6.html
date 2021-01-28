@@ -20,17 +20,17 @@
 */
 -->
 
-<div class="ui-heurist-explore ui-heurist-header" style="top:0px;">Explore</div>
+<div class="ui-heurist-admin ui-heurist-header" style="top:0px;">Admin</div>
 <div class="ui-heurist-design ui-heurist-header" style="top:36px;border-top:1px solid lightgray;">Design</div>
-<div class="ui-heurist-import ui-heurist-header" style="top:72px;border-top:1px solid lightgray;">Populate</div>
-<div class="ui-heurist-publish ui-heurist-header" style="top:108px;border-top:1px solid lightgray;">Publish</div>
-<div class="ui-heurist-admin ui-heurist-header" style="top:144px;border-top:1px solid lightgray;">Admin</div>
+<div class="ui-heurist-populate ui-heurist-header" style="top:72px;border-top:1px solid lightgray;">Populate</div>
+<div class="ui-heurist-explore ui-heurist-header" style="top:108px;border-top:1px solid lightgray;">Explore</div>
+<div class="ui-heurist-publish ui-heurist-header" style="top:144px;border-top:1px solid lightgray;">Publish</div>
 
 <div class="ui-heurist-quicklinks" 
     style="top:180px;left:0;right:0px;bottom:0px;overflow-y:auto;position:absolute;text-align:center;background:lightgray;color:black">
 
     <span style="display:block;margin:0;padding:12px 6px 0px 6px">
-        <span class="section-head">Quick links</span>
+        <span class="section-head"  data-pl="0">New</span>
     </span>                                                              
     
     <ul style="border-bottom:1px gray solid;list-style-type:none;margin:0;padding:12px 30px 12px 0px">
@@ -40,9 +40,26 @@
             <span class="menu-text truncate" style="display:inline-block;max-width:105px;">Add record</span>
         </li>
 
+        <span style="display:block;margin:0;padding:12px 6px 6px 0px">
+            <span class="section-head" data-pl="17" style="padding-left:17px">Navigate</span>
+        </span>                                                              
+
+        <li class="menu-explore" data-action-popup="search_recent">
+            <span class="ui-icon ui-icon-clock-b"/><span class="menu-text">Recent</span>
+        </li>
         <li class="menu-explore" data-action-popup="search_entity">
             <span class="ui-icon ui-icon-entity"/><span class="menu-text">Entities</span>
         </li>
+        <li class="menu-explore" data-action-popup="search_filters">
+            <span class="ui-icon ui-icon-filter-black"/><span class="menu-text">Saved filters</span>
+        </li>
+
+<!-- Removed Ian 8 Jan 2021 to reduce clutter and focus on instant access to repetitive actions
+        
+        <span style="display:block;margin:0;padding:12px 6px 6px 0px">
+            <span class="section-head" data-pl="28" style="padding-left:28px">Build</span>
+        </span>                                                              
+        
         <li class="menu-explore" data-action-popup="search_quick">
             <span class="ui-icon ui-icon-magnify-search"/><span class="menu-text">Filter builder</span>
         </li>
@@ -53,6 +70,8 @@
             <span class="ui-icon ui-icon-filter-plus"/><span class="menu-text">Save filter
             <span class="ui-icon ui-icon-arrowreturn-1-e" style="transform: rotate(90deg);"/></span>
         </li>
+        
+-->
     </ul>
     
     <span style="display:none;margin:0;padding:12px 6px">

@@ -30,8 +30,9 @@ $.widget( "heurist.search_entity", {
         by_favorites: true,  // show buttons: filter by entity (show selected (favorires) entities)
         by_usage: true, // show dropdown entity filter (by usage)
         
-        mouseover: null, //callback to prevent close h6 menu NOT USED
-        search_realm: null
+        search_realm: null,
+        
+        menu_locked: null ////callback to prevent close in h6
     },
 
     selected_rty_ids:[], //
@@ -167,10 +168,12 @@ $.widget( "heurist.search_entity", {
                     this._redraw_buttons_by_entity();
                 },
                 onselect: function __onSelectRectypeFilter(event, data){
+                               /* 
                                var selval = data.item.value;
                                if(selval>0){
                                    that._doSearch(selval);
                                }
+                               */
                                return false;
                            }};            
         
@@ -184,33 +187,47 @@ $.widget( "heurist.search_entity", {
             function(data) { 
 console.log('ON_REC_UPDATE');
 console.log(data);
-                that._recreateRectypeSelectors();
+                that.recreateRectypeSelectors();
             });
 */        
             
         window.hWin.HAPI4.addEventListener(this, window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, 
             function(data) { 
                 if(!data || data.type=='rty'){
-                    that._recreateRectypeSelectors();
+                    that.recreateRectypeSelectors();
                 }
             });
             
             
         // Refreshing
-        this.element.on("myOnShowEvent", function(event){
-            if( $Db.needUpdateRtyCount ){
-                $Db.needUpdateRtyCount = false;
-                that._recreateRectypeSelectors2();
-            }
-        });
+        this.element.on("myOnShowEvent", function(){ 
+            if ($Db.needUpdateRtyCount>=0) {
+                    setTimeout(function(){that.refreshOnShow()},500);
+            }} );
             
         //this.div_search.find('.div-table-cell').css('vertical-align','top');
 
-        this._recreateRectypeSelectors();
+        this.recreateRectypeSelectors();
         
         this._refresh();
 
     }, //end _create
+    
+    //
+    //
+    //    
+    refreshOnShow: function(){
+            if( $Db.needUpdateRtyCount==0 ){
+                $Db.needUpdateRtyCount = -1;    
+                this.recreateRectypeSelectors();
+            }else if( $Db.needUpdateRtyCount>0 ){
+                var that = this;
+                $Db.needUpdateRtyCount = -1;    
+                $Db.get_record_counts(function(){
+                    that.recreateRectypeSelectors();
+                });
+            }
+    },
              
     //
     // recreate list of buttons or recreate combined_select
@@ -413,7 +430,14 @@ console.log(data);
             if(this[select_rectype].hSelect("instance")!=undefined){
                 var menu = this[select_rectype].hSelect( "menuWidget" );
                 menu.css({'max-height':'450px'});                        
-                this[select_rectype].hSelect({change: opts.onselect});
+                this[select_rectype].hSelect({
+                        change: opts.onselect,
+                        close: function(){
+                                if($.isFunction(that.options.menu_locked)){
+                                    that.options.menu_locked.call( that, false ); //unlock
+                                }
+                        }
+                });
                 this[select_rectype].hSelect('hideOnMouseLeave', opts.ancor);
             }
             
@@ -426,7 +450,7 @@ console.log(data);
     // 2. redraw buttons by entiry
     // 3. recres selectors for config and "by usage"
     //
-    _recreateRectypeSelectors: function(){
+    recreateRectypeSelectors: function(){
 
 
         //selector to filter by entity
@@ -444,57 +468,21 @@ console.log(data);
         
     },      
         
-    //with counts
-    _recreateRectypeSelectors2: function(){
-    
-        var that = this;
-        
-        var request = {
-                'a'       : 'counts',
-                'entity'  : 'defRecTypes',
-                'mode'    : 'record_count',
-                //'rty_ID'  :
-                'ugr_ID'  : window.hWin.HAPI4.user_id()
-                };
-                             
-        window.hWin.HAPI4.EntityMgr.doRequest(request, 
-            function(response){
-
-                if(response.status == window.hWin.ResponseStatus.OK){
-                    
-                    $Db.rty().each(function(rty_ID,rec){
-                        var cnt = response.data[rty_ID]
-                        if(!(cnt>0)) cnt = 0;
-                        $Db.rty(rty_ID, 'rty_RecCount', cnt);
-                    });
-                    /*
-                    $.each( response.data, function(rty_ID,cnt){
-                        $Db.rty(rty_ID, 'rty_RecCount', cnt);    
-                    })
-                    */
-                    
-                    that._recreateRectypeSelectors();
-        
-                }else{
-                    window.hWin.HEURIST4.msg.showMsgErr(response);
-                }
-        });
-    },
-
     //
     // opens selector on correct position
     //
     _openSelectRectypeFilter: function( opts ){
         
                 var select_rectype = opts['select_name'];
-        
+       
+//console.log(opts);        
                 var that = this;
                 function __openSelect(){
                     
                     that[select_rectype].hSelect('open');
                     that[select_rectype].val(-1);
                     that[select_rectype].hSelect('menuWidget')
-                        .position({my: "left top", at: "left+10 bottom-4", of: opts['ancor']});
+                        .position({my: "left top", at: "left top", of: opts['ancor']}); //left+10 bottom-4
             
                     var menu = $(that[select_rectype].hSelect('menuWidget'));
                     var ele = $(menu[0]);
@@ -521,6 +509,10 @@ console.log(data);
                 }
                 
                 if(this[select_rectype]){
+                    
+                    if($.isFunction(this.options.menu_locked)){
+                        this.options.menu_locked.call( this, true); //lock
+                    }
                     __openSelect();
                 }
 

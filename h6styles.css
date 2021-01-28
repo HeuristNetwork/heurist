@@ -23,6 +23,7 @@ body {
 }
 body.popup {
     font-size: 13px;
+    background: none;
 }
 
 .logo {
@@ -76,6 +77,12 @@ body.popup {
     height: 18;
     background-size: contain;
 }
+.ui-icon-filter-explore { 
+    background-image: url(hclient/assets/v6/filter-305586.png) !important; 
+    width: 18;
+    height: 18;
+    background-size: contain;
+}
 .ui-icon-filter-plus-explore { 
     background-image: url(hclient/assets/v6/filter-plus-305586.png) !important; 
     width: 18;
@@ -98,6 +105,18 @@ body.popup {
 }
 .ui-icon-database-search { 
     background-image: url(hclient/assets/v6/database-search.png) !important; 
+    width: 18;
+    height: 18;
+    background-size: contain;
+}
+.ui-icon-filter { 
+    background-image: url(hclient/assets/filter_icon.png) !important; 
+    width: 18;
+    height: 18;
+    background-size: contain;
+}
+.ui-icon-filter-black { 
+    background-image: url(hclient/assets/v6/filter-000000.png) !important; 
     width: 18;
     height: 18;
     background-size: contain;
@@ -181,7 +200,7 @@ body.popup {
 }
 
 .ui-heurist-admin .banner,
-.ui-heurist-import .banner{
+.ui-heurist-populate .banner{
     display: none;
     visibility: hidden;
 }
@@ -207,4 +226,14 @@ body.popup {
 /* narrow scroll for saved filters list */
 div.svs-list-container::-webkit-scrollbar {
     width: 6px;
+}
+
+div.mainMenu6 > div.ui-heurist-header:hover{
+    color:black;
+    background: white !important;
+    border-right: 1px solid gray;
+}
+
+.ui-dialog .ui-dialog-content{
+    padding: 1.5em 1em;
 }

@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS `usrRecPermissions` (
 CREATE TABLE IF NOT EXISTS sysDashboard (
    dsh_ID tinyint(3) unsigned NOT NULL auto_increment,
    dsh_Order smallint COMMENT 'Used to define the order in which the dashboard entries are shown',
-   dsh_Label varchar(64) COMMENT 'The short text which will describe this function on the dashboard',
+   dsh_Label varchar(64) COMMENT 'The short text which will describe this function in the shortcuts',
    dsh_Description varchar(1024) COMMENT 'A longer text giving more information about this function to show as a description below the label or as a rollover',
    dsh_Enabled enum('y','n') NOT NULL default 'y' COMMENT 'Allows unused functions to be retained so they can be switched back on',
    dsh_ShowIfNoRecords enum('y','n') NOT NULL default 'y' COMMENT 'Deteremines whether the function will be shown on the dashboard if there are no records in the database (eg. no point in showing searches if nothing to search)',
@@ -80,7 +80,7 @@ CREATE TABLE IF NOT EXISTS usrWorkingSubsets (
 CREATE TABLE IF NOT EXISTS defVocabularyGroups (
   vcg_ID tinyint(3) unsigned NOT NULL auto_increment COMMENT 'Vocabulary group ID referenced in vocabs editor',
   vcg_Name varchar(40) NOT NULL COMMENT 'Name for this group of vocabularies, shown as heading in lists',
-  vcg_Domain enum('enum','relation') NOT NULL default 'enum' COMMENT 'Field of application of the vocabulary - can be both',
+  vcg_Domain enum('enum','relation') NOT NULL default 'enum' COMMENT 'Normal vocabularies are termed enum, relational are for relationship types but can also be used as normal vocabularies',
   vcg_Order tinyint(3) unsigned zerofill NOT NULL default '002' COMMENT 'Ordering of vocabulary groups within pulldown lists',
   vcg_Description varchar(250) default NULL COMMENT 'A description of the vocabulary group and its purpose',
   vcg_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this vocabulary group record, used to get last updated date for table',

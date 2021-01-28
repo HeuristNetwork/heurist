@@ -241,10 +241,6 @@ $.widget("heurist.recordLookupLRC18C", $.heurist.recordAction, {
             }
         }
 
-        //Store years in an array
-        estc_edition_dict['year'] = []
-        author_dict['year'] = []
-
         //Generic function to build Edition, Author, Place and Work XML
         function buildDict(i, j, records, dict_name) {
             if (records[i].children[j].nodeName == 'detail') {
@@ -255,9 +251,6 @@ $.widget("heurist.recordLookupLRC18C", $.heurist.recordAction, {
         for (i = 0; i < records.length; i++) {
             for (j = 0; j < records[i].children.length; j++) {
                 if (i == edition_xml_record) {
-                    if (records[i].children[j].nodeName == 'year') {
-                        estc_edition_dict['year'].push(records[i].children[j].innerHTML)
-                    }
                     if (records[i].children[j].nodeName == 'id') {
                         ids_n_title['editionID'] = records[i].children[j].innerHTML
                     }
@@ -267,9 +260,6 @@ $.widget("heurist.recordLookupLRC18C", $.heurist.recordAction, {
                     buildDict(i, j, records, estc_edition_dict)
 
                 } else if (i == author_xml_record) {
-                    if (records[i].children[j].nodeName == 'year') {
-                        author_dict['year'].push(records[i].children[j].innerHTML)
-                    }
                     if (records[i].children[j].nodeName == 'id') {
                         ids_n_title['authorID'] = records[i].children[j].innerHTML
                     }
@@ -326,11 +316,8 @@ $.widget("heurist.recordLookupLRC18C", $.heurist.recordAction, {
         estcRecordListWindow = this;
 
         estc_edition_id = that.element.context.querySelector(".selected_last").getAttribute('recid');
-        queryResponse = that._checkIfEditionExistsInLibraries(estc_edition_id);
-        xmlDoc = $.parseXML(queryResponse.responseText);
-        if (xmlDoc.getElementsByTagName('resultCount')[0].innerHTML.trim() == "0") {
-            editionInLibraries = false;
-        }
+
+
 
         mapToHoldingRecord = that.options.mapping.fields['properties.edition']
         mapDict[mapToHoldingRecord] = ""
@@ -338,7 +325,7 @@ $.widget("heurist.recordLookupLRC18C", $.heurist.recordAction, {
         var $__dlg = window.hWin.HEURIST4.msg.showMsgDlg(
             'Selected Edition does not exist in Libraries database. Importing now...',
             {
-                'Check Author': function () {
+                'Proceed': function () {
                     $__dlg.dialog("close");
                     window.hWin.HEURIST4.msg.bringCoverallToFront(that._as_dialog.parent());
                     that._checkAuthor(estc_edition_id, estcRecordListWindow)
@@ -450,18 +437,21 @@ $.widget("heurist.recordLookupLRC18C", $.heurist.recordAction, {
             "281": "", "282": "", "283": "", "286": "", "287": "", "288": ""
         };
 
-        // The first element of the array is assumed to be Birth date
-        try {
-            authorDict['10'] = parsedXML['authorDict']['year'][0];
-        } catch (err) {
-            authorDict['10'] = "";
+        try{
+            if(author_details[10].length > 5){
+                authorBirthDate = jQuery.parseHTML(String(author_details[10]))
+                authorDict[10] =authorBirthDate[3].innerHTML
+            }
+        }catch(e){
+            authorDict[10] = ''
         }
-        // The second element of the array is assumed to be Death date
-        try {
-            authorDict['11'] = parsedXML['authorDict']['year'][1];
-        } catch (err) {
-            authorDict['11'] = "";
-
+        try{
+            if(author_details[11].length > 5){
+                authorDeathDate = jQuery.parseHTML(String(author_details[11]))
+                authorDict[11] =authorDeathDate[3].innerHTML
+            }
+        }catch(e){
+            authorDict[11] = ''
         }
 
         // If Author does not exist in ESTC database, proceed to check if Work exists in Libraries
@@ -522,7 +512,6 @@ $.widget("heurist.recordLookupLRC18C", $.heurist.recordAction, {
         }
 
         ids.forEach(buildAuthorDict);
-
         var author_rec_data = {
             ID: 0, RecTypeID: 10,
             no_validation: true, //allows save without filled required field 1061
@@ -664,13 +653,15 @@ $.widget("heurist.recordLookupLRC18C", $.heurist.recordAction, {
         holdingKey = Object.keys(mapDict)[0];
         buildEditionDict = {}
 
-        if (parsedXML['editionDict']['1'] && parsedXML['editionDict'][1] != "") {
+        if (parsedXML['editionDict']['254'] && parsedXML['editionDict'][254] != "") {
             edition_title = parsedXML['editionDict'][1];
+            edition_estc_id=parsedXML['editionDict'][254]
         } else {
             edition_title = parsedXML['idsNTitleDict']['editionTitle']
+            edition_estc_id=''
         }
 
-        query_string = 't:55 f:1:"' + edition_title + '"'
+        query_string = 't:55 f:1094:="' + edition_estc_id + '"'
         urlToCheckEditioninLibraries = that._getQueryURL(query_string, "libraries")
         edition_id = parsedXML['idsNTitleDict']['editionID'];
 
@@ -686,7 +677,7 @@ $.widget("heurist.recordLookupLRC18C", $.heurist.recordAction, {
 
                 if (editionDetailsXML.getElementsByTagName('resultCount')[0].innerHTML.trim() == "0") {
 
-                    edition_ids = ["1", "10", "15", "137", "254", "256", "257", "258", "259", "268", "270","277", "284", "285","289" , "290", "955"];
+                    edition_ids = ["1", "9", "15", "137", "254", "256", "257", "258", "259", "268", "270", "275","277", "284", "285","289" , "290", "955"];
                     if (parsedXML['placeDict'] == {}) {
                         buildEditionDict["268"] = "";
                     } else {
@@ -757,24 +748,21 @@ $.widget("heurist.recordLookupLRC18C", $.heurist.recordAction, {
                     }
 
 
-                    // If there are two years in the edition dict, assume first one is the first year of publication
-                    // Second one as final year of publication
-                    if (parsedXML['editionDict']['year'].length > 0) {
-                        buildEditionDict['10'] = parsedXML['editionDict']['year'][0]
-                    } else if (parsedXML['editionDict']['year'].length > 1) {
-                        buildEditionDict['10'] = parsedXML['editionDict']['year'][0];
-                        buildEditionDict['955'] = parsedXML['editionDict']['year'][1];
+                    try{
+                        if(estc_edition_dict[9].length > 5){
+                            yearOf1stVol = jQuery.parseHTML(String(estc_edition_dict['9']))
+                            buildEditionDict[9] =yearOf1stVol[3].innerHTML
+                        }
+                    }catch(e){
+                        buildEditionDict[9] = ''
                     }
-
-                    try {
-                        buildEditionDict[10] = parsedXML['editionDict']['year'][0];
-                    } catch (err) {
-                        buildEditionDict[10] = "";
-                    }
-                    try {
-                        buildEditionDict[955] = parsedXML['editionDict']['year'][1];
-                    } catch (err) {
-                        buildEditionDict[955] = "";
+                    try{
+                        if(estc_edition_dict[275].length > 5){
+                            yearOf1stVol = jQuery.parseHTML(String(estc_edition_dict['275']))
+                            buildEditionDict[275] =yearOf1stVol[3].innerHTML
+                        }
+                    }catch(e){
+                        buildEditionDict[275] = ''
                     }
 
                     // Build Edition Record dict
@@ -785,9 +773,9 @@ $.widget("heurist.recordLookupLRC18C", $.heurist.recordAction, {
                             //Title
                             1: buildEditionDict[1],
                             // Year of First Volume
-                            10: buildEditionDict[10],
+                            10: buildEditionDict[9],
                             // Year of Final Volume
-                            955: buildEditionDict[955],
+                            955: buildEditionDict[275],
                             //Book Format
                             991: buildEditionDict[256],
                             // 238: editionDict[259],
@@ -858,9 +846,17 @@ $.widget("heurist.recordLookupLRC18C", $.heurist.recordAction, {
     /* If Work exists in Libraries database, then call method _createEditionRecordx */
     _checkWorkRecordInLibraries: function (parsedXML, author_id, estcRecordListWindow, mapToHoldingRecord) {
         that = this;
-        work_title = parsedXML['idsNTitleDict']['workTitle']
+        // work_title = parsedXML['idsNTitleDict']['workTitle']
+
+        try{
+            work_proj_id = parsedXML['workDict'][271]
+        }
+        catch(e){
+            work_proj_id='';
+        }
         workID = "";
-        query_string = 't:56 f:1:"' + work_title + '"'
+        // query_string = 't:56 f:1:"' + work_title + '"'
+        query_string = 't:56 f:1092:"' + work_proj_id + '"'
         urlToCheckWorkinLibraries = that._getQueryURL(query_string, "libraries")
         $.ajax({
             url: urlToCheckWorkinLibraries,
@@ -985,13 +981,13 @@ $.widget("heurist.recordLookupLRC18C", $.heurist.recordAction, {
         estc_no = "";
         vol_count = "";
         vol_parts = "";
-        
+
         if(true){ //use json format and fulltext search
-        
+
             var query = {"t":"30"}; //search for Books
-            
+
             if (this.element.find('#edition_name').val() != '') {
-                query['f:1'] = '@'+this.element.find('#edition_name').val();
+                query['f:1 '] = '@'+this.element.find('#edition_name').val() ;
             }
             if (this.element.find('#edition_date').val() != '') {
                 query['f:9'] = this.element.find('#edition_date').val();
@@ -1022,6 +1018,8 @@ $.widget("heurist.recordLookupLRC18C", $.heurist.recordAction, {
             if (this.element.find('#estc_no').val() != '') {
                 query['f:254'] = '@'+this.element.find('#estc_no').val();
             }
+            sort_by_key = "'sortby'"
+            query[sort_by_key.slice(1, -1)] = 'f:9:'
 /*
             selectedBF = this.element.find('#select_bf option:selected').text()
             if (selectedBF != null && selectedBF != '' && selectedBF != "Select Book Format") {
@@ -1031,12 +1029,11 @@ $.widget("heurist.recordLookupLRC18C", $.heurist.recordAction, {
             }
             query_string = 't:30 ' + edition_name + edition_date + edition_author + edition_work + edition_place + book_format + estc_no + vol_count + vol_parts;
 */
-            query_string = query; 
-            
+            query_string = query;
+
         }else{
-            
             if (this.element.find('#edition_name').val() != '') {
-                edition_name = ' f:1: ' + '"' + this.element.find('#edition_name').val() + '"'
+                edition_name = ' f:1: ' + '"' + this.element.find('#edition_name').val() + '" '
             }
             if (this.element.find('#edition_date').val() != '') {
                 edition_date = ' f:9: ' + '"' + this.element.find('#edition_date').val() + '"'
@@ -1074,9 +1071,10 @@ $.widget("heurist.recordLookupLRC18C", $.heurist.recordAction, {
         console.log("Query String is")
         console.log(query_string);
 
+
         window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent());
 
-        var query_request = {db: 'ESTC_Helsinki_Bibliographic_Metadata', q:query_string};
+        var query_request = {db: 'ESTC_Helsinki_Bibliographic_Metadata', q: query_string};
         var that = this;
         query_request['detail'] = 'details';
         window.hWin.HAPI4.RecordMgr.search(query_request,
@@ -1087,7 +1085,8 @@ $.widget("heurist.recordLookupLRC18C", $.heurist.recordAction, {
                 } else {
                     that._onSearchResult(response);
                 }
-            });
+        });
+
 
     },
     /* Build each Book(Edition) as a record to display list of records that can be selected by the user*/

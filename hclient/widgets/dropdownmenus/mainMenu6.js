@@ -28,8 +28,7 @@ $.widget( "heurist.mainMenu6", {
     options: {
     },
     
-    sections: ['design','import','explore','publish','admin'],
-    //sections: ['admin','design','import','publish','explore'],
+    sections: ['design','populate','explore','publish','admin'],
     
     menues:{}, //section menu - div with menu actions
     containers:{}, //operation containers (next to section menu)
@@ -45,8 +44,8 @@ $.widget( "heurist.mainMenu6", {
     _delayOnCollapseMainMenu: 800,
     _delayOnCollapse_ExploreMenu: 600,
     
-    _delayOnShow_ExploreMenu: 250, //5 500,
-    _delayOnShow_AddRecordMenu: 250, //10 1000,
+    _delayOnShow_ExploreMenu: 500, //5 500,
+    _delayOnShow_AddRecordMenu: 500, //10 1000,
     
     _widthMenu: 170, //left menu
     
@@ -65,7 +64,7 @@ $.widget( "heurist.mainMenu6", {
     
     coverAll: null,
     
-    menues_explore_popup: null,
+    menues_explore_popup: null,  //popup next to explore menu (filters)
     menues_explore_gap: null,
     search_faceted: null,
     edit_svs_dialog: null,
@@ -88,7 +87,8 @@ $.widget( "heurist.mainMenu6", {
             .appendTo( this.element );
         //91 200    
         this.divMainMenu = $('<div>')
-        .css({position:'absolute',width:'91px',top:'2px',left:'0px',bottom:'4px',
+        .addClass('mainMenu6')
+        .css({position:'absolute',width:'91px',top:'2px',left:'0px',bottom:'4px', //91
                 cursor:'pointer','z-index':104})
         .appendTo( this.element )
         .load(
@@ -103,7 +103,7 @@ $.widget( "heurist.mainMenu6", {
                     that._initIntroductory(section);
                 });
                 
-                //explore menu in main(left) menu
+                //explore menu in main(left) menu  -  quicklinks
                 that._on(that.divMainMenu.children('.ui-heurist-quicklinks').find('li.menu-explore'),
                 {
                     mouseenter: that._expandMainMenuPanel,
@@ -151,7 +151,7 @@ $.widget( "heurist.mainMenu6", {
                 }
                 
 
-                //init menu itemms in ui-heurist-quicklinks
+                //init menu items in ui-heurist-quicklinks
                 that._createListOfGroups(); //add list of groups for saved filters
                 
                 that.divMainMenu.find('.menu-text').hide();
@@ -162,9 +162,14 @@ $.widget( "heurist.mainMenu6", {
                     mouseleave: function(e){
                         if($(e.target).parent('#filter_by_groups').length==0){
                             clearTimeout(this._myTimeoutId3); this._myTimeoutId3 = 0; //clear timeout on show section menu
-                            this._myTimeoutId2 = setTimeout(function(){
-                                        that._closeExploreMenuPopup();
-                                    },  this._delayOnCollapse_ExploreMenu); //600
+                            
+                            if (!this._isCurrentActionFilter()) { //close on mouse exit
+                            
+                                //this._resetCloseTimers();//reset
+                                this._myTimeoutId2 = setTimeout(function(){
+                                            that._closeExploreMenuPopup();
+                                        },  this._delayOnCollapse_ExploreMenu); //600
+                            }
                         }
                     }
                 });
@@ -172,6 +177,7 @@ $.widget( "heurist.mainMenu6", {
                     mouseenter: that._mousein_ExploreMenu,
                     mouseleave: function(e){
                             clearTimeout(this._myTimeoutId3); this._myTimeoutId3 = 0; //clear timeout on show section menu
+                            //this._resetCloseTimers();//reset
                             this._myTimeoutId2 = setTimeout(function(){
                                         that._closeExploreMenuPopup();
                                     },  this._delayOnCollapse_ExploreMenu); //600
@@ -180,10 +186,46 @@ $.widget( "heurist.mainMenu6", {
                 
                 //forcefully hide coverAll on click
                 that._on(that.coverAll, {
-                    click: function(){that._collapseMainMenuPanel(true);}
+                    click: function(){
+                            that._closeExploreMenuPopup();
+                            that._collapseMainMenuPanel(true);
+                    }
                 });
                 
-                that._on($(document),{mouseleave: that._resetCloseTimers });
+                that._on(window.hWin.document, { //that.element
+                    click: function(e){
+                        //get current filter dialog
+                        var ele = $('.save-filter-dialog:visible')
+                        if(ele.length>0){
+                                if (ele.parents('.ui-menu')) return;
+                            
+                                var prnt = ele.parent();
+                                if(prnt.hasClass('ui-dialog') || prnt.hasClass('ui-menu6-section')){
+                                    ele = prnt;
+                                }
+                                var x = e.pageX;
+                                var y = e.pageY;
+                                var x1 = $(ele).offset().left;
+                                var y1 = $(ele).offset().top;
+                                
+//console.log(x+'   '+x1);                                    
+                                if(x>0 && y>0){
+                                if(x<x1 || x>x1+$(ele).width() ||
+                                   y<y1 || y>y1+$(ele).height())
+                                {
+//console.log('outside');                                    
+                                   that._closeExploreMenuPopup();
+                                }
+                                }
+                        }                        
+                    }
+                });
+                    
+                    
+                
+                
+                //keep main menu open on document mouse leave
+                //that._on($(document),{mouseleave: that._resetCloseTimers });
                 
                 
                 var cms_record_id = window.hWin.HEURIST4.util.getUrlParameter('cms', window.hWin.location.search);
@@ -205,6 +247,16 @@ $.widget( "heurist.mainMenu6", {
                 }});
 */                
         });
+        
+        //find all saved searches for current user
+        if(!window.hWin.HAPI4.currentUser.usr_SavedSearch){  
+            window.hWin.HAPI4.SystemMgr.ssearch_get( null,
+                function(response){
+                    if(response.status == window.hWin.ResponseStatus.OK){
+                        window.hWin.HAPI4.currentUser.usr_SavedSearch = response.data;
+                    }
+            });
+        }
         
         //that.initHelpDiv();
 
@@ -261,7 +313,7 @@ $.widget( "heurist.mainMenu6", {
                     }else{
                         that._updateDefaultAddRectype();
                     }
-                }else{
+                }else{  //ON_STRUCTURE_CHANGE
                     //if(e.type == window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE){}
                     //refresh list of rectypes afrer structure edit
                     that._updateDefaultAddRectype();
@@ -270,6 +322,15 @@ $.widget( "heurist.mainMenu6", {
         
         
     }, //end _create
+    
+    //
+    //
+    //
+    _isCurrentActionFilter: function(){
+            return (this._current_explore_action=='search_quick' ||
+                    this._current_explore_action=='svsAdd' || 
+                    this._current_explore_action=='svsAddFaceted' );
+    },
     
     //
     // 0 - disabled
@@ -326,25 +387,24 @@ $.widget( "heurist.mainMenu6", {
             var rty_ID = prefs[0];
             //var ele = this.divMainMenu.find('.menu-explore[data-action-popup="recordAdd"]');
             
-            /*var ele = [this.menues['import'].find('li[data-action-popup="recordAdd"]'),   
-                       this.menues['explore'].find('li[data-action-popup="recordAdd"]')];*/
             var ele = this.element.find('li[data-action-popup="recordAdd"]')
             
             if(ele.length>0){
 
                 if(rty_ID>0 && $Db.rty(rty_ID,'rty_Name')){
-                    ele.find('.menu-text').css('margin-left',0).html('Add&nbsp;&nbsp; [<i>'
+                    ele.find('.menu-text').css('margin-left',0).html('New&nbsp;&nbsp; [<i>'
                             +window.hWin.HEURIST4.util.htmlEscape($Db.rty(rty_ID,'rty_Name'))+'</i>]');
                     ele.attr('data-id', rty_ID);
                     this._off(ele, 'click');
                     this._on(ele, {click: function(e){
                         var ele = $(e.target).is('li')?$(e.target):$(e.target).parents('li');
                         var rty_ID = ele.attr('data-id');
-                        this.coverAll.hide();
-                        window.hWin.HEURIST4.ui.openRecordEdit(-1, null,{new_record_params:{RecTypeID:rty_ID}});
+
+                        this._collapseMainMenuPanel(true); 
+                        setTimeout('window.hWin.HEURIST4.ui.openRecordEdit(-1, null,{new_record_params:{RecTypeID:'+rty_ID+'}})',200);
                     }});
                 }else{
-                    ele.find('.menu-text').text('Add record');
+                    ele.find('.menu-text').text('New record');
                     ele.attr('data-id','');
                     this._off(ele, 'click');
                 }
@@ -352,6 +412,7 @@ $.widget( "heurist.mainMenu6", {
             }
       }
       
+      //show/hide bookmarks section in saved filters list
       var bm_on = (window.hWin.HAPI4.get_prefs('bookmarks_on')=='1');
       var ele = this.divMainMenu.find('.menu-explore[data-action-popup="svs_list"][data-id="bookmark"]')
       if(bm_on) ele.show();
@@ -375,14 +436,15 @@ $.widget( "heurist.mainMenu6", {
                 +' '+window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH);
     },
     
-    //
-    //
+    // 
+    // returns true if explore menu popup should remain open (even on mouse out)
     //
     _isExplorerMenu_locked: function(){
         
-        var isSvsEditVisible = ( this.edit_svs_dialog && this.edit_svs_dialog.isModified() );
+        //var isSvsEditVisible = ( this.edit_svs_dialog && this.edit_svs_dialog.isModified() );
         //isSvsEditVisible = false;
-//console.log('>>>'+isSvsEditVisible);        
+        //console.log('>>>'+isSvsEditVisible);        
+        
         return (this._explorer_menu_locked    //isSvsEditVisible || 
                 || this.element.find('.ui-selectmenu-open').length>0
                 || $('.list_div').is(':visible')      //tag selector dropdown      
@@ -395,6 +457,7 @@ $.widget( "heurist.mainMenu6", {
     //    
     _collapseMainMenuPanel: function(is_instant, is_forcefully) {
 
+//console.log('_collapseMainMenuPanel');        
         var that = this;
         if(is_forcefully>0){
             this._is_prevent_expand_mainmenu = true;
@@ -419,13 +482,17 @@ $.widget( "heurist.mainMenu6", {
             that.divMainMenu.find('li.menu-explore').css({padding:'6px 2px 6px 30px',background:'none'});
             //that.divMainMenu.find('.menu-explore[data-action-popup="recordAdd"]').css({padding:'0px 2px 6px 30px'});
             that.divMainMenu.find('.ui-heurist-quicklinks').css({'text-align':'center'});
-            that.divMainMenu.find('.section-head').css({'padding-left':'0px'});
+            
+            $.each(that.divMainMenu.find('.section-head'), function(i,ele){
+                ele = $(ele);
+                ele.css({'padding-left': ele.attr('data-pl')+'px'});
+            });
             
             that.divMainMenu.find('#svs_list').hide();
             //that.divMainMenu.find('#filter_by_groups').show(); IJ 2020-11-23 always show in explore menu only
 
             if(that.divMainMenu.width()>91)
-                that.divMainMenu.stop().effect('size',  { to: { width: 91 } }, is_instant===true?10:300, function(){
+                that.divMainMenu.stop().effect('size',  { to: { width: 91 } }, is_instant===true?10:300, function(){ //91
                     that.divMainMenu.css({bottom:'4px',height:'auto'});
                     that._closeExploreMenuPopup();
                 });
@@ -455,7 +522,7 @@ $.widget( "heurist.mainMenu6", {
         
         var that = this;
         this._mouseout_SectionMenu();
-        this.divMainMenu.stop().effect('size',  { to: { width: that._widthMenu } }, 300,
+        this.divMainMenu.stop().effect('size',  { to: { width: that._widthMenu } }, 300, //300
                 function(){
                     that.divMainMenu.find('ul').css({'padding-right':'0px'});
                     that.divMainMenu.find('.ui-heurist-quicklinks').css({'text-align':'left'});
@@ -483,7 +550,7 @@ $.widget( "heurist.mainMenu6", {
     // leave explore popup
     //    
     _mouseout_SectionMenu: function(e) {
-        
+
         if( this._isExplorerMenu_locked() ) return;
         
         var that = this;
@@ -506,11 +573,13 @@ $.widget( "heurist.mainMenu6", {
         }        
         
         if(e){
-            
-            this._myTimeoutId2 = setTimeout(function(){
-                                            that._closeExploreMenuPopup();
-                                            that._collapseMainMenuPanel();                                        
-                                    },  this._delayOnCollapse_ExploreMenu);
+            this._resetCloseTimers();//reset
+            if (!this._isCurrentActionFilter()){
+                this._myTimeoutId2 = setTimeout(function(){
+                                                that._closeExploreMenuPopup();
+                                                that._collapseMainMenuPanel();                                        
+                                        },  this._delayOnCollapse_ExploreMenu);
+            }
         }else{
             __closeAllsectionMenu();
         }
@@ -521,11 +590,11 @@ $.widget( "heurist.mainMenu6", {
     //
     _resetCloseTimers: function(){
 
-        clearTimeout(this._myTimeoutId2); this._myTimeoutId2 = 0; //delay on collapse main menu
-        clearTimeout(this._myTimeoutId); this._myTimeoutId = 0; //delay on close section menu
+        clearTimeout(this._myTimeoutId2); this._myTimeoutId2 = 0; //delay on close explore popup menu
+        clearTimeout(this._myTimeoutId); this._myTimeoutId = 0; //delay on collapse main menu (_expandMainMenuPanel/_collapseMainMenuPanel)
     },
     //
-    // expand main menu and show explore menu popup
+    // show explore menu popup (show_ExploreMenu) next to mainMenu6_explore or mainMany quick links
     //
     _mousein_ExploreMenu: function(e) {
 
@@ -534,13 +603,13 @@ $.widget( "heurist.mainMenu6", {
         
         //this._expandMainMenuPanel();
 
-        clearTimeout(this._myTimeoutId3); this._myTimeoutId3 = 0;
+        clearTimeout(this._myTimeoutId3); this._myTimeoutId3 = 0; //clear timeout on show section menu
+        
         this._resetCloseTimers();
         
         this.divMainMenu.find('li.menu-explore').css('background','none');  
-        this.divMainMenu.find('li.menu-explore > .menu-text').css('text-decoration', 'none');
-
-        this.menues['explore'].find('li.menu-explore > .menu-text').css('text-decoration', 'none');
+//23-12        this.divMainMenu.find('li.menu-explore > .menu-text').css('text-decoration', 'none');
+//23-12        this.menues['explore'].find('li.menu-explore > .menu-text').css('text-decoration', 'none');
         
         var ele, hasAction = false;
         
@@ -551,11 +620,23 @@ $.widget( "heurist.mainMenu6", {
             ele = $(e.target).is('li')?$(e.target):$(e.target).parents('li');
             if(ele){
                 if(ele.parents('.ui-heurist-quicklinks').length>0) ele.css('background','aliceblue');
-                ele.find('.menu-text').css('text-decoration','underline');
+//23-12                ele.find('.menu-text').css('text-decoration','underline');
                 hasAction = ele.attr('data-action-popup');
+                
+                if(hasAction=='search_recent') {
+                    hasAction = false;   
+                    return;
+                }
+                
             }
         }
 
+        if(e && $(e.target).parents('.ui-heurist-quicklinks').length==0)
+        {
+            this._collapseMainMenuPanel(true); //close instantly 
+        }
+        
+        
         if(hasAction){
             this.show_ExploreMenu(e);    
         } else {
@@ -589,11 +670,11 @@ $.widget( "heurist.mainMenu6", {
             
         if(action_name == 'recordAdd'){
             if(menu_item && menu_item.attr('data-id')>0){
-                delay = this._delayOnShow_AddRecordMenu; //1000;
+                delay = this._delayOnShow_AddRecordMenu;
             }
         }else{
             this.menues_explore_popup
-                    .removeClass('ui-heurist-import record-addition').addClass('ui-heurist-explore');
+                    .removeClass('ui-heurist-populate record-addition').addClass('ui-heurist-explore');
 
             if(action_name=='recordAddSettings'){
                 action_name = 'recordAdd';
@@ -604,18 +685,13 @@ $.widget( "heurist.mainMenu6", {
         //menu section has several containers with particular widgets
         var cont = this.menues_explore_popup.find('#'+action_name);
         
-        if(cont.length==0){
-            cont = $('<div id="'+action_name+'" class="explore-widgets">').appendTo(this.menues_explore_popup);
-        }else if( cont.is(':visible')){ // && action_name!='svs_list'
-            return;
-        }
-        
+      
         var explore_top = '2px',
         explore_height = 'auto',
         explore_left = that.divMainMenu.width()+4; //204; this._widthMenu
         
         if(menu_item && menu_item.parents('.ui-heurist-quicklinks').length==0 && 
-                (this._active_section=='explore' || this._active_section=='import')){
+                (this._active_section=='explore' || this._active_section=='populate')){
             explore_left = 302;
         }else if(menu_item && menu_item.parents('.ui-heurist-quicklinks').length==1){
             explore_left = this._widthMenu+4;
@@ -628,20 +704,27 @@ $.widget( "heurist.mainMenu6", {
         //delay before open explore section menu
         this._myTimeoutId3 = setTimeout(function(){
 
+            if(cont.length==0){
+                //create new one
+                cont = $('<div id="'+action_name+'" class="explore-widgets">').appendTo(that.menues_explore_popup);
+            }else if( cont.is(':visible')){ // && action_name!='svs_list'
+                //return;
+            }
+            
+            
             that._current_explore_action = action_name;
             
-//console.log('show_ExploreMenu '+action_name);            
+            //stop show animation and hide others
+            that.menues_explore_popup.find('.explore-widgets').finish().hide();
             
-            that.menues_explore_popup.find('.explore-widgets').hide(); //hide others
             if(action_name!='svsAdd'){
                 //attempt for non modal 
-//console.log('close in show_ExploreMenu');                
                 that.closeSavedSearch();
             }
             if(action_name!='svsAddFaceted'){
                 that.closeFacetedWizard();
             }
-        
+
             if(action_name=='search_entity'){
 
                 if(!cont.search_entity('instance'))
@@ -650,6 +733,12 @@ $.widget( "heurist.mainMenu6", {
                         onClose: function() { 
                                 //start search on close
                                 that.switchContainer('explore'); 
+                        },
+                        menu_locked: function(is_locked, is_mouseleave){ 
+                            if(!is_mouseleave){
+                                that._resetCloseTimers();    
+                                that._explorer_menu_locked = is_locked;     
+                            }
                         }
                     });    
 
@@ -658,19 +747,40 @@ $.widget( "heurist.mainMenu6", {
             }
             else if(action_name=='search_quick'){
 
-                if(!cont.search_quick('instance'))
+                if(!cont.search_quick('instance')){
                     //initialization
                     this.search_quick = cont.search_quick({
-                        onClose: function() { that.switchContainer('explore'); },
+                        onClose: function() { 
+                            
+                                that._closeExploreMenuPopup();
+                                //that.switchContainer('explore'); 
+                        },
                         menu_locked: function(is_locked, is_mouseleave){ 
+
                             if(!is_mouseleave){
                                 that._resetCloseTimers();    
-                                that._explorer_menu_locked = is_locked; 
+                                if(is_locked=='delay'){
+                                    that.coverAll.show();
+                                    that._delayOnCollapse_ExploreMenu = 2000;        
+                                }else{
+                                    that._explorer_menu_locked = is_locked;     
+                                }
                             }
-                    }  });
+
+                    }  });    
+                    
+                    cont.addClass('save-filter-dialog');
+                }
+
 
                 explore_top = 0;
-                explore_height = 255;//268+36;
+//                explore_height = 275;
+                explore_height = this.search_quick.search_quick('outerHeight', function(properHeight){
+                    explore_height = properHeight; 
+                    that.menues_explore_popup.css({height: properHeight});
+                });
+
+
                 if(position){
                     explore_top = position.top;
                     explore_left = position.left;
@@ -687,10 +797,7 @@ $.widget( "heurist.mainMenu6", {
                 if(explore_top+explore_height>that.element.innerHeight()){
                     explore_top = that.element.innerHeight() - explore_height;
                 }
-
-
                 that.menues_explore_popup.css({width:'800px',overflow:'hidden'});
-
 
             }
             else if(action_name=='search_advanced'){
@@ -708,6 +815,17 @@ $.widget( "heurist.mainMenu6", {
 
                 that.menues_explore_popup.css({width:'606px', overflow:'hidden'});
             }
+            else if(action_name=='search_filters' || action_name=='search_rules'){ //list of saved filters
+
+                that._init_SvsList(cont, (action_name=='search_rules')?2:1);                
+                
+                if(position){
+                    explore_top = position.top;
+                    explore_left = position.left;
+                }
+                
+                that.menues_explore_popup.css({bottom:'4px',width:'300px','overflow-y':'auto','overflow-x':'hidden'});
+            }
             else if(action_name=='svsAdd'){
                 that._closeExploreMenuPopup();
                 /*
@@ -720,7 +838,15 @@ $.widget( "heurist.mainMenu6", {
                 }else{
                         explore_top = 2;
                 }*/
-                that.addSavedSearch( 'saved', false, explore_left );
+                
+                if(position){
+                    explore_top = position.top;
+                    explore_left = position.left;
+                }else{
+                    explore_top = 0;
+                }
+                
+                that.addSavedSearch( 'saved', false, explore_left, explore_top );
                 return;
             }
             else if(action_name=='svsAddFaceted'){
@@ -728,32 +854,25 @@ $.widget( "heurist.mainMenu6", {
                 that.addSavedSearch( 'faceted', false, explore_left );
                 return;
             }
-            else if(action_name=='svs_list'){
-/*                
-                //show in menu section
-                that.menues_explore_popup.css({bottom:'4px',width:'300px',overflow:'auto'});
-                //cont.width(300);
-                that.svs_list.detach().appendTo(cont);
-                that.svs_list.css({'top':0, 'font-size':'1em'}).show();
-                that.svs_list.svs_list('option','container_width',300);
-                that.svs_list.svs_list('option','hide_header', false);
-                that._off(that.svs_list,'mouseenter');
-*/
-            }
             else if(action_name=='recordAdd'){
 
                 that.menues_explore_popup
                     .css({bottom:'4px',width:'300px',overflow:'hidden'})
-                    .removeClass('ui-heurist-explore').addClass('ui-heurist-import record-addition');
+                    .removeClass('ui-heurist-explore').addClass('ui-heurist-populate record-addition');
 
+                if(position){
+                    expandRecordAddSetting = true;
+                    explore_top = position.top;
+                    explore_left = position.left;
+                }
+                    
                 if(!cont.recordAdd('instance')){
                     cont.recordAdd({
                         is_h6style: true,
-                        onClose: function() { that._closeExploreMenuPopup();},
-                        isExpanded: expandRecordAddSetting,
-                        onClose: function(){
-                            that.coverAll.hide();
+                        onClose: function() { 
+                            that._closeExploreMenuPopup();
                         },
+                        isExpanded: expandRecordAddSetting,
                         mouseover: function() { that._resetCloseTimers()},
                         menu_locked: function(is_locked, is_mouseleave){ 
                             if(!is_mouseleave){
@@ -764,21 +883,36 @@ $.widget( "heurist.mainMenu6", {
                 }else{
                     cont.recordAdd('doExpand', expandRecordAddSetting);                        
                 }
+                if(expandRecordAddSetting) explore_height = 430;
 
             }//endif
+         
+            if(explore_left+that.menues_explore_popup.outerWidth() > that.element.innerWidth()){
+                explore_left = that.element.innerWidth() - that.menues_explore_popup.outerWidth();
+            }
 
             that.menues_explore_popup.css({left:explore_left, top:explore_top, height:explore_height});
             
             //show menu section
             that.menues_explore_popup.css({'z-index':103}).show(); 
             
-            cont.show('fade',{},delay>=500?500:10); //show current widget in menu section
+            //explore-widgets - show current widget in menu section
+            //cont.show('fade',{},delay+200); 
+            
+            cont.fadeIn(delay+200, function(){
+                var action_name = $(this).attr('id');
+                that.menues_explore_popup.find('.explore-widgets[id!="'+action_name+'"]').hide();
+                
+                if(action_name=='search_entity'){
+                    //trigger refresh  myOnShowEvent
+                    $(this).search_entity('refreshOnShow');
+                }else if (action_name === 'search_quick' && cont.search_quick('instance')) {
+                    // Refresh container height.
+                    cont.search_quick('instance').refreshContainerHeight();
+                    cont.search_quick('instance').refreshContainerWidth();
+                }
+            });
 
-            // Refresh container height.
-            if (action_name === 'search_quick' && cont.search_quick('instance')) {
-                cont.search_quick('instance').refreshContainerHeight();
-                cont.search_quick('instance').refreshContainerWidth();
-            }
             
             /*  BBBB
             if(action_name!='recordAdd' && action_name!='search_quick' 
@@ -793,17 +927,18 @@ $.widget( "heurist.mainMenu6", {
     },    
     
     //
+    // mode - filter mode - 0 all , 1 - filters only, 2 rules only
     //
-    //
-    _init_SvsList: function(cont, group_ID){
+    _init_SvsList: function(cont, mode){  //, group_ID
         
                 if(!cont.svs_list('instance')){
                     var that = this;
                     
                     cont.svs_list({
                         is_h6style: true,
-                        hide_header: true,
-                        container_width: 200,
+                        hide_header: false,
+                        container_width: 300,
+                        filter_by_type: mode,
                         onClose: function(noptions) { 
                             //!!! that.switchContainer('explore'); 
 
@@ -826,6 +961,9 @@ $.widget( "heurist.mainMenu6", {
                                     //not created yet
                                     that.search_faceted.search_faceted( noptions );
                                 }
+                                
+                                that._closeExploreMenuPopup();
+                                that._collapseMainMenuPanel(true);
 
                             } 
                         },
@@ -843,7 +981,10 @@ $.widget( "heurist.mainMenu6", {
                     
                 }else{
                     //cont.svs_list('option', 'allowed_UGrpID', group_ID);                        
+                    cont.svs_list('option', 'filter_by_type', mode);
                 }
+                
+                this.svs_list = cont;
                 
                 return cont;        
     },
@@ -854,8 +995,10 @@ $.widget( "heurist.mainMenu6", {
     //    
     _switch_SvsList: function( mode ){
         
+        return;//2020-12-15
+        
         if(!this.svs_list && this.menues['explore'].find('#svs_list').length>0){
-            this.svs_list = this._init_SvsList(this.menues['explore'].find('#svs_list'));
+            this.svs_list = this._init_SvsList(this.menues['explore'].find('#svs_list'),1);
         }
         if(!this.svs_list){
             return;
@@ -893,10 +1036,15 @@ $.widget( "heurist.mainMenu6", {
     //
     //    
     getSvsList: function(){
-        if(!this.svs_list){
-           this.svs_list = this._init_SvsList(this.menues['explore'].find('#svs_list'));  
+        
+        var cont = this.menues_explore_popup.find('#search_filters');
+        
+        if(cont.length==0){
+            //create new one
+            cont = $('<div id="search_filters" class="explore-widgets">').appendTo(this.menues_explore_popup);
         }
-        return this.svs_list; 
+        return this._init_SvsList(cont, 1);
+     
     },
     
     //
@@ -916,20 +1064,25 @@ $.widget( "heurist.mainMenu6", {
     //
     //
     _closeExploreMenuPopup: function(){
-      
+
         if(this.menues_explore_popup){
             
             this.menues_explore_popup.hide();  
                 
             //attempt for non modal 
-            this.divMainMenu.find('li.menu-explore > .menu-text').css('text-decoration', 'none');
-            this.menues['explore'].find('li.menu-explore > .menu-text').css('text-decoration', 'none');
+//23-12            this.divMainMenu.find('li.menu-explore > .menu-text').css('text-decoration', 'none');
+//23-12            this.menues['explore'].find('li.menu-explore > .menu-text').css('text-decoration', 'none');
             
             this._current_explore_action = null;
             this.closeSavedSearch();
             this.closeFacetedWizard();
             
         }
+        // restore default values
+        this._explorer_menu_locked = false;
+        this._delayOnCollapse_ExploreMenu = 600;
+        this.coverAll.hide();
+
     },
     
     //
@@ -1019,13 +1172,14 @@ $.widget( "heurist.mainMenu6", {
                     //clearTimeout(this._myTimeoutId2); this._myTimeoutId2 = 0; //prevent collapse of section menu popup
                 },
                 mouseleave: function(e){
-                    if(this._active_section=='explore' || this._active_section=='import'){
+                    if(this._active_section=='explore' || this._active_section=='populate'){
                         this._mouseout_SectionMenu(e);       
                     }else{
                         this._collapseMainMenuPanel()    
                     }
                 }
             });
+                    
                     
                     
             
@@ -1057,7 +1211,7 @@ $.widget( "heurist.mainMenu6", {
                 window.hWin.HAPI4.baseURL+'hclient/widgets/dropdownmenus/mainMenu6_'+section+'.html',
                 function(){ 
                     if(section=='explore'){
-                        that._initSectionMenuExlore();                        
+                        that._initSectionMenuExplore();                        
                     }else{
                         that._initSectionMenu(section);    
                     }
@@ -1068,21 +1222,32 @@ $.widget( "heurist.mainMenu6", {
     },
     
     //
+    // special behaviour form mainMenu6_explore
     //
-    //
-    _initSectionMenuExlore: function(){
+    _initSectionMenuExplore: function(){
         
             var that = this;
             this._on(this.menues['explore'].find('.menu-explore'),{
                 mouseenter: this._mousein_ExploreMenu,
                 mouseleave: function(e){
                         clearTimeout(this._myTimeoutId3); this._myTimeoutId3 = 0; //clear timeout on show section menu
+                        //this._resetCloseTimers();//reset
                         this._myTimeoutId2 = setTimeout(function(){
                                     that._closeExploreMenuPopup();
                                 },  this._delayOnCollapse_ExploreMenu); //600
                 }
             });
             this._updateDefaultAddRectype();
+
+            this._on(this.element.find('li[data-action-popup="search_recent"]'),{
+                click: function(){
+                    var request = window.hWin.HEURIST4.util.parseHeuristQuery( 
+                        '?w=a&q=sortby:-m after:"1 week ago"' );
+                    request.qname = 'Recent changes';
+                    window.hWin.HAPI4.SearchMgr.doSearch( this, request );
+                }
+            });
+
             
             //init 
             this._switch_SvsList( 0 );
@@ -1116,7 +1281,7 @@ $.widget( "heurist.mainMenu6", {
                         .appendTo(item);
                         
                         if(action_id=='menu-import-get-template'){
-                            item.css({'font-size':'10px', padding:'0 0 0 20px'})
+                            item.css({'font-size':'10px', padding:'0 0 0 8px','margin-top':'-2px'})
                         }else{
                             item.css({'font-size':'smaller', padding:'6px'})    
                         }
@@ -1140,8 +1305,10 @@ $.widget( "heurist.mainMenu6", {
             var li = $(e.target);
             if(!li.is('li')) li = li.parents('li');
             
-            //this.menues[section].find('li').removeClass('ui-state-active');
-            //li.addClass('ui-state-active');
+            if(li.attr('data-action')=='menu-admin-server'){
+                this.menues[section].find('li').removeClass('ui-state-active');
+                li.addClass('ui-state-active');
+            }
             
             
             if(section=='design'){    
@@ -1169,12 +1336,12 @@ $.widget( "heurist.mainMenu6", {
                 if(btn.length>0) btn.click();
                 
             }});
-        }else  if (section=='import'){ //DEBUG - open record types 
+        }else  if (section=='populate'){ //DEBUG - open record types 
         
                 this._updateDefaultAddRectype();
                 
                 //special behavior for 
-                var ele = this.menues['import'].find('li[data-action-popup="recordAdd"]');
+                var ele = this.menues['populate'].find('li[data-action-popup="recordAdd"]');
                 var that = this;
                 this._on(ele,{
                      mouseenter: function(e){
@@ -1184,7 +1351,7 @@ $.widget( "heurist.mainMenu6", {
                      },
                      mouseleave: function(e){
                             clearTimeout(this._myTimeoutId3); this._myTimeoutId3 = 0; //clear timeout on show section menu
-                          
+                            this._resetCloseTimers();//reset
                             this._myTimeoutId2 = setTimeout(function(){  //was 6
 //console.log('hide explore record ADD');
                                         that._closeExploreMenuPopup();
@@ -1352,7 +1519,7 @@ $.widget( "heurist.mainMenu6", {
     // define new saved filter/search
     // mode - saved or faceted
     //
-    addSavedSearch: function( mode, is_modal, left_position ){
+    addSavedSearch: function( mode, is_modal, left_position, top_position ){
 
         if(this.edit_svs_dialog==null){
             this.edit_svs_dialog = new hSvsEdit();    
@@ -1364,29 +1531,64 @@ $.widget( "heurist.mainMenu6", {
                 left_position = 302;
             }
         }
+        if(!(top_position>0)){
+            top_position = 40; //140;
+        }
 
         is_modal = (is_modal!==false);
         
         var that = this;
+  
+/*        
+        //find all saved searches for current user
+        if(!window.hWin.HAPI4.currentUser.usr_SavedSearch){  
+            window.hWin.HAPI4.SystemMgr.ssearch_get( null,
+                function(response){
+                    if(response.status == window.hWin.ResponseStatus.OK){
+                        window.hWin.HAPI4.currentUser.usr_SavedSearch = response.data;
+                    }
+            });
+        }
+*/        
+        //for faceted wizard and save filter delay is increased to 2sec
+        this._delayOnCollapse_ExploreMenu = 2000;
 
         var $dlg = this.edit_svs_dialog.showSavedFilterEditDialog( mode, null, null, this.currentSearch , false, 
-            { my: 'left+'+left_position+' top+120', at: 'left top', of:this.divMainMenu},
-            function(){
+            { my: 'left+'+left_position+' top+'+top_position, at: 'left top', of:this.divMainMenu},
+            function(){  //after save - trigger refresh of saved filter tree
+                
                 window.hWin.HAPI4.currentUser.usr_SavedSearch = null;
-                window.hWin.HAPI4.currentUser.ugr_SvsTreeData = null;
-                that.svs_list.svs_list('option','hide_header',true);//to trigger refresh
+                //!!! window.hWin.HAPI4.currentUser.ugr_SvsTreeData = null;
+                if(that.svs_list){ 
+                    that.svs_list.svs_list('option','hide_header',true);//to trigger refresh
+                }
             }, 
             is_modal, 
             true, //is_h6style                                                                                                         
             function(is_locked, is_mouseleave){  //menu_locked
                 if(is_mouseleave){
-                    that._myTimeoutId2 = setTimeout(function(){
+                    that._resetCloseTimers();
+                    return; //prevent close on mouse out
+                    
+                    if(that._explorer_menu_locked) return;
+                    that._myTimeoutId2 = setTimeout(function(){ //delay on close
                             that._closeExploreMenuPopup();
                             that._collapseMainMenuPanel();
-                    }, 1000); //thar._delayOnCollapse_ExploreMenu);
+                    }, that._delayOnCollapse_ExploreMenu);
+                }else if(is_locked=='close'){
+                    that.coverAll.hide();                 
+                    //that._resetCloseTimers();
+                    //that._closeExploreMenuPopup();
+                    //that._collapseMainMenuPanel();
                 }else{
                     that._resetCloseTimers();    
-                    that._explorer_menu_locked = is_locked; 
+                    
+                    if(is_locked=='delay'){
+                        that.coverAll.show();
+                        that._delayOnCollapse_ExploreMenu = 2000;        
+                    }else{
+                        that._explorer_menu_locked = is_locked;     
+                    }
                 }
             },
             that.reset_svs_edit
@@ -1431,7 +1633,7 @@ $.widget( "heurist.mainMenu6", {
     _refreshSubsetSign: function(){
         
             var container = this.menues['explore'].find('li[data-action="menu-subset-set"]');
-            container.removeClass('fancytree-node');
+            //container.removeClass('fancytree-node');
             var ele = container.find('span.subset-info');
             if(window.hWin.HAPI4.sysinfo.db_workset_count>0){
                 if(ele.length==0){
@@ -1467,7 +1669,7 @@ $.widget( "heurist.mainMenu6", {
         if(!this.introductions[section]){
             
             var sname;
-            if(section=='import'){
+            if(section=='populate'){
                 sname = 'Populate';
             }else{
                 sname = section[0].toUpperCase()+section.substr(1);
@@ -1496,7 +1698,11 @@ $.widget( "heurist.mainMenu6", {
                 ele.load(window.hWin.HAPI4.baseURL+'hclient/widgets/dropdownmenus/welcome.html',
                         function(){
                            var url = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database;
-                           $('.bookmark-url').html('<a href="'+url+'">'+url+'</a>');
+                           $('.bookmark-url').html('<a href="#">'+url+'</a>').click(function(e){
+                                window.hWin.HEURIST4.util.stopEvent(e);
+                                window.hWin.HEURIST4.msg.showMsgFlash('Press Ctrl+D to bookmark this page',1000);
+                                return false;
+                           });
                            $('.template-url').attr('href', window.hWin.HAPI4.baseURL
                                             +'documentation_and_templates/db_design_template.rtf');
                         });

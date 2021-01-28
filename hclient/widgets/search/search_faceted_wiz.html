@@ -43,7 +43,7 @@
 <div>
     <div class="header"><label for="svs_Name">Faceted search name</label></div>
     <input type="text" name="svs_Name" id="svs_Name" class="text ui-widget-content ui-corner-all"
-        maxlength="64" size="64" />
+        maxlength="64" size="64" style="width:250px" />
     <div style="width: 290px; margin-top: 0px; margin-bottom: 5px;" class="heurist-helper2">
         Used in navigation tree (maximum 64 characters).
 
@@ -73,6 +73,25 @@
 
 <div class="optional_fields"><h4>Advanced</h4>
 <fieldset>
+
+<div>
+    <div class="header"><label>Sort by</label></div>
+    <select class="text ui-widget-content ui-corner-all sa_sortby" style="min-width:220px;margin:4px 0px;">
+            <option value="">define order...</option>
+            <option value="t">record title</option>
+            <option value="id">record id</option>
+            <option value="u">record URL</option>
+            <option value="m">date modified</option>
+            <option value="a">date added</option>
+            <option value="r">personal rating</option>
+            <option value="p">popularity</option>
+    </select>&nbsp;&nbsp;
+    <select class="text ui-widget-content ui-corner-all sa_sortasc" style="min-width:220px;margin:0;">
+        <option value="0">Ascending (A..Z, 1..9)</option>
+        <option value="1">Descending (Z..A, 9..1)</option>
+    </select>
+</div>
+
 
 <div>
     <div class="header">
@@ -121,7 +140,7 @@
     <div class="header" style="vertical-align:top;"><label for="svs_Query">Preliminary filter</label></div>
     <div>
         <textarea name="svs_Query" id="svs_Query" rows="2" class="text ui-widget-content ui-corner-all"
-                style="margin-top:0.4em;width:650px"></textarea>
+                style="margin-top:0.4em;width:500px"></textarea>
         <div id="svs_btnset2" style="float:right;padding-left:0.4em">
             <div id="svs_getCurrentFilter"  style="margin-top:0.4em"></div>
         </div>
@@ -172,7 +191,7 @@
     </div>
     <div>
         <textarea name="svs_Rules" id="svs_Rules" rows="5" class="text ui-widget-content ui-corner-all"
-        style="margin-top:0.4em;width:650px" readonly="readonly"></textarea>
+        style="margin-top:0.4em;width:500px" readonly="readonly"></textarea>
         <div id="svs_btnset" style="float:right;padding-left:0.4em">
             <div id="svs_Rules_edit"  style="margin-top:0.4em;display:block"></div>
             <div id="svs_Rules_clear" style="margin-top:0.4em"></div>
@@ -225,10 +244,11 @@
     <div class="header"><label for="svs_ViewMode">Result View Mode</label></div>
     <select name="svs_ViewMode" id="svs_ViewMode" class="text ui-widget-content ui-corner-all">
             <option value="">as is</option>
-            <option value="list">list</option>
-            <option value="icons">icons</option>
-            <option value="thumbs">thumbnails</option>
-            <option value="thumbs3">large</option>
+            <option value="list">Single lines</option>
+            <option value="icons">Single lines with icon</option>
+            <option value="record_content">Record contents</option>
+            <option value="thumbs">Small images</option>
+            <option value="thumbs3">Large image</option>
     </select>
 </div>  
 

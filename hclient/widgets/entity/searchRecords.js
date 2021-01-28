@@ -1,5 +1,5 @@
 /**
-* Search header for DefTerms manager
+* Search header
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -38,6 +38,8 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
             }
             is_expand_rt_list = (rt_list.length>1 && rt_list.length<10);
             is_only_rt = (rt_list.length==1);
+        }else{
+            rt_list = [];
         }
         
         this.selectRectype.empty();
@@ -90,7 +92,7 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
                              icon: is_browse?'ui-icon-search':"ui-icon-plus"})
                     .attr('data-rtyid', rectypeID)
                     .css({'font-size':'11px',display:'inline-block',width:190,'text-align':'left','margin':'6px 0px 3px 8px'})
-                    .addClass('truncate')
+                    .addClass('truncate ui-button-action')
                     .click(function(e) {
                         
                         var rtyid = $(e.target).attr('data-rtyid');
@@ -129,6 +131,7 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
             this.btn_add_record
             .button({label: window.hWin.HR(is_browse?"Search Record":"Add Record"), 
                         icon: is_browse?null:"ui-icon-plus"})
+            .addClass('ui-button-action')
             .click(function(e) {
                 if(!is_browse && that.selectRectype.val()>0){
                     that._trigger( "onaddrecord", null, that.selectRectype.val() );
@@ -136,7 +139,7 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
                     that.btn_select_rt.click();
                 }
             });  
-
+            
             this.btn_select_rt
                 .button({label:window.hWin.HR("Select record type"), icon: "ui-icon-carat-1-s", showLabel:false});
                 
@@ -148,6 +151,8 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
                     return false;
                         
                 }});
+            if(rt_list.length==1) this.btn_select_rt.hide()
+
            
            //adjust position of dropdown    
            this.sel_rectypes_btn = this.element.find( "#sel_rectypes-button");
@@ -218,6 +223,8 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
         //this.searchForm.find('#input_search').focus();
         this.input_search.focus();
 
+       this._trigger( "onstart" ); //trigger ajust          
+        
     },  
 
     //
@@ -245,10 +252,30 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
         }   
 
         //by title        
-        if(this.input_search.val()!=''){
-            qstr = qstr + ' title:'+this.input_search.val();
-            qobj.push({"title":this.input_search.val()});
-        }
+        if(this.input_search.val().trim()!=''){
+            var is_whole_phrase = true;
+            var s = this.input_search.val().trim();
+            if(s.length>4 && s[0]=='"' && s[s.length-1]=='"'){
+                s = s.substring(1,s.length-2);
+                is_whole_phrase = true;
+            }else{
+                s = s.split(' ');
+                is_whole_phrase = !(s.length>1);
+            }    
+                
+            if(is_whole_phrase){
+                s = this.input_search.val().trim()
+                qstr = qstr + ' title:'+s;
+                qobj.push({"title":s});
+            }else{        
+                for(var i=0;i<s.length;i++)
+                if(s[i]!=''){
+                    qobj.push({"title":s[i]});    
+                    qstr = qstr + ' title:'+s[i];
+                }
+            }
+        
+        }        
 
         //by ids of recently selected
         if(this.element.find('#cb_selected').is(':checked')){

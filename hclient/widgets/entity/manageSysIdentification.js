@@ -24,6 +24,8 @@ $.widget( "heurist.manageSysIdentification", $.heurist.manageEntity, {
     
     _init: function() {
 
+        this.options.default_palette_class = 'ui-heurist-design';
+        
         this.options.edit_mode = 'editonly';
         this.options.select_mode = 'manager';
         this.options.layout_mode = 'editonly';

@@ -242,7 +242,7 @@ fieldset > div > .header,
 fieldset > div > .header_narrow{
     display:table-cell;
     text-align:right;
-    padding:0.4em 0.4em 0 0;
+    padding:4px 0.4em 0 0;
 }
 fieldset.ontop > div > .header{
     display:block;
@@ -327,11 +327,11 @@ input.text, select.text {
 .separator2{
     text-transform: uppercase;
     font-weight:bold;
-    background: #ECF1FB !important;
+    /* background: #ECF1FB !important; */
 }
 
 .separator {
-    padding: 5px 0 5px 20px;
+    padding: 5px 0 0 20px;
     text-align:left;
 }
 
@@ -428,6 +428,9 @@ div.recordDiv.white-borderless{
     background: white;
     border: none;
 }
+.list div.recordDiv.densed{
+    padding:0;
+}
 
 div.groupHeader:hover > .action-button-container{
     display:table-cell;
@@ -502,14 +505,14 @@ div.recordDiv.public  > .action-button-container{
     vertical-align:middle;
 }
 
-div.recordDiv  .action-button {
+div.recordDiv .action-button {
     height: 16px;
     width: 16px;
     color: gray;
 }
 
-div.recordDiv > .action-button-container,
-div.recordDiv .rec_actions
+div.recordDiv > .action-button-container
+/*div.recordDiv .rec_actions*/
 {
     position: absolute;
     top: 4px;
@@ -584,9 +587,12 @@ div.recordDiv > .rec_action_link2{
     right:2;
     top:6;
 }
+
+/*
 div.expanded.recordDiv > .rec_action_link2{
     display: none;   
 }
+*/
 .rec_action_link2 > .rec_actions_button{
     padding: 5px 2px;
 }
@@ -852,6 +858,47 @@ div.div-result-list-content.icons_list{
     width:144px;   -2px */
     margin:4px;
 }
+.icons div.recordDiv.expanded{
+    height:auto;
+    border:none;
+    box-shadow:none;
+    background:none;
+}
+.icons div.recordDiv.expanded:hover{
+    z-index:10;
+    -moz-box-shadow:none;
+    -webkit-box-shadow:none;
+    box-shadow:none;
+    height:auto;
+    margin: 6px;
+}
+
+.icons div.recordDiv.expanded .action-button-container{
+    left:2px;
+    width:60px;
+}
+.icons div.recordDiv.expanded .action-button{
+    width: 58px;
+    padding: 0;
+    margin: 2px;
+}
+.icons div.recordDiv.expanded .action-button .ui-button-text{
+    position: absolute;
+    left:2px;
+    right:18px;
+    top: 3px;
+    display:block;
+}
+.icons div.recordDiv.expanded .action-button .ui-button-icon-primary{
+    top: 3px;
+    right:2px;   
+    position: absolute;
+}
+
+.icons div.recordDiv.expanded .recTypeThumb {
+    display: none;
+}
+
 
 .icons .recordDiv .recTypeThumb {
     /*
@@ -895,9 +942,17 @@ div.div-result-list-content.icons_list{
    /* display: none; */
    position: absolute;
    left: 64px;
+   top: 3px;
 }
 .icons .rt-icon{
     display: none;
+}
+.recid-in-list{
+    display:none;
+    padding-left:10px;
+}
+.icons .recid-in-list{
+    display:inline-block;
 }
 .rt-icon{
     background-repeat: no-repeat;
@@ -1359,6 +1414,15 @@ span.fancytree-checkbox{
     width:26;
 }
 
+.fancytree-ext-filter{
+    color: black !important;
+}
+.fancytree-ext-filter .fancytree-node.fancytree-match .fancytree-title{
+    font-weight: normal !important;
+}
+
+
+
 .tree-map{
     padding:0;
 }
@@ -1409,11 +1473,19 @@ span.fancytree-checkbox{
 .tree-rts .required, a.required{
     color:#CC0000 !important;
 }
-.tree-rts .recommended, .tree-rts .optional, a.recommended{
+.tree-rts .recommended, a.recommended{
     color:#6A7C99 !important;
 }
-.tree-rts .forbidden, a.forbidden{
-    color:lightgray !important;
+.tree-rts .forbidden, a.forbidden, .tree-rts .forbidden span{
+    color:black !important;
+    text-decoration: line-through;
+}
+.forbidden > label{
+    color:black !important;
+    text-decoration: line-through;
+}
+.tree-rts .optional, a.optional, .optional{
+    color:black !important;
 }
 
 
@@ -2167,6 +2239,10 @@ input[type="file"] {
 .ui-accordion .ui-accordion-header {
     padding: .5em .5em .5em 2.2em;
 }
+.ui-accordion-header{
+    outline: none;
+}
+
 .ui-resizable-w {
     left: 0px; /* was -5px */
 }
@@ -2201,7 +2277,7 @@ input[type="file"] {
     padding-bottom: 10px !important;    
 }
 .edit-form-tabs li.ui-tabs-active{
-    background: #ECF1FB !important;
+    background: #ECF1FB; /* !important */
 }
 li.edit-form-tab {
     border-top-left-radius: 6px;

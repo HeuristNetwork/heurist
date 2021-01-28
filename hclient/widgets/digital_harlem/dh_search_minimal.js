@@ -217,8 +217,8 @@ function hSearchMinimalDigitalHarlem() {
     TERM_ROLE_RESIDENT = 4527,
     TERM_PATH = 4537;
 
-    //constants for special DH record types - to display them in different layers
-    var DH_RECORDTYPE = 99913, //special record type to display DH entities on map
+    //constants for special Digital Harlem record types - to display them in different layers
+    var DH_RECORDTYPE = 99913, //special record type to display Digital Harlem entities on map
         DH_RECORDTYPE_SECONDARY = 99914, //special record type to display secondary events (FOR EVENTS search ONLY)
         DH_RECORDTYPE_RESIDENCES = 99915; //special record type to display residential addresses (FOR EVENTS search ONLY)
 

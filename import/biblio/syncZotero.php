@@ -119,7 +119,7 @@ if($fh_data==null || is_string($fh_data)){
         </script>
     </head>
 
-    <body class="popup">
+    <body class="popup" style="margin-right:30px">
 
         <?php
         

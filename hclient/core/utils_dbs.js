@@ -54,7 +54,7 @@ rstField - Returns rectype header or details field values
     getLocalID
     getConceptID
 
-
+getTrashGroupId
 */
 
 if (!window.hWin.HEURIST4){
@@ -69,7 +69,11 @@ window.hWin.HEURIST4.dbs = {
     
     baseFieldType: {},
     
-    needUpdateRtyCount: false,
+    needUpdateRtyCount: -1,
+    
+    rtg_trash_id: 0,
+    dtg_trash_id: 0,
+    vcg_trash_id: 0,
 
     //
     // return vocabulary for given term - real vocabulary (not by reference)
@@ -1397,15 +1401,40 @@ window.hWin.HEURIST4.dbs = {
     },
     
     //
-    // is given term has children
+    // is given term has children (including references)
     //
     trm_HasChildren: function(trm_id){
         var t_idx = window.hWin.HAPI4.EntityMgr.getEntityData('trm_Links'); 
-        var children = t_idx[recID];
+        var children = t_idx[trm_id];
         return (children && children.length>0);
     },
 
-
+    //
+    // change parent in links
+    //
+    trm_ChangeChildren: function(old_parent_id, new_parent_id){
+        var t_idx = window.hWin.HAPI4.EntityMgr.getEntityData('trm_Links'); 
+        var children = t_idx[old_parent_id];
+        
+        if((children && children.length>0)){
+            
+            $.each(children,function(i,trm_id){
+                 if($Db.trm(trm_id,'trm_ParentTermID')==old_parent_id){
+                     $Db.trm(trm_id,'trm_ParentTermID',new_parent_id);
+                 }
+            });
+            
+            var target_children = t_idx[new_parent_id];
+            if(target_children && target_children.length>0){
+                t_idx[new_parent_id] = target_children.concat(children)
+            }else{
+                t_idx[new_parent_id] = children;
+            }
+           //window.hWin.HAPI4.EntityMgr.setEntityData('trm_Links',t_idx);
+        }
+    },
+    
+    
     //
     // get all vocabularies OR for given domain
     //
@@ -1518,8 +1547,63 @@ window.hWin.HEURIST4.dbs = {
         }else{
             if($.isFunction(callback)) callback.call();
         }
-    }
+    },
     
+    //
+    // returns record count by types
+    //
+    get_record_counts: function( callback )
+    {
+    
+        $Db.needUpdateRtyCount = 0; 
+        
+        var request = {
+                'a'       : 'counts',
+                'entity'  : 'defRecTypes',
+                'mode'    : 'record_count',
+                //'rty_ID'  :
+                'ugr_ID'  : window.hWin.HAPI4.user_id()
+                };
+                             
+        window.hWin.HAPI4.EntityMgr.doRequest(request, 
+            function(response){
+
+                if(response.status == window.hWin.ResponseStatus.OK){
+                    
+                    $Db.rty().each(function(rty_ID,rec){
+                        var cnt = response.data[rty_ID]
+                        if(!(cnt>0)) cnt = 0;
+                        $Db.rty(rty_ID, 'rty_RecCount', cnt);
+                    });
+                    
+                    if($.isFunction(callback)){
+                        callback.call();
+                    }
+        
+                }else{
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                }
+        });
+        
+    },
+    
+    //
+    //
+    //
+    getTrashGroupId: function(entity){
+        
+        if(!(this[entity+'_trash_id']>0)){
+            var name = entity+'_Name';
+            var that = this;
+            $Db[entity]().each2(function(id, record){
+                if(record[name]=='Trash'){
+                    that[entity+'_trash_id'] = id;
+                    return false;
+                }
+            });
+        }
+        return this[entity+'_trash_id'];
+    }
 
 }//end dbs
 

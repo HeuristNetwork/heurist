@@ -215,7 +215,8 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
     getMsgDlg: function(){
         var $dlg = $( "#dialog-common-messages" );
         if($dlg.length==0){
-            $dlg = $('<div>',{id:'dialog-common-messages'}).css({'min-wdith':'380px','max-width':'640px'})
+            $dlg = $('<div>',{id:'dialog-common-messages'})
+                .css({'min-wdith':'380px','max-width':'640px'}) //,padding:'1.5em 1em'
                 .appendTo( $('body') ); //
                 //$(window.hWin.document['body'])
         }
@@ -461,6 +462,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
     *   is_h6style - apply heurist6 style
     *   position - adjust dialog position
     *   maximize - set maximum allowed widht and height  
+    *   default_palette_class - color scheme class
     */
     showDialog: function(url, options){
 
@@ -709,9 +711,8 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                         };
                         $dlg.dialog(opts);
                         
-                        if(options.is_h6style){
-                                $dlg.addClass('ui-heurist-bg-light');
-                                $dlg.parent().addClass('ui-dialog-heurist ui-heurist-explore');
+                        if(options.is_h6style)
+                        {
                                 if(options.container){
 
                                     $dlg.dialog( 'option', 'position', 
@@ -745,6 +746,20 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                                     }
                                 }
                         }
+                        
+                        //$dlg.addClass('ui-heurist-bg-light');
+                        //$dlg.parent().addClass('ui-dialog-heurist ui-heurist-explore');
+                        
+                        if($dlg.attr('data-palette'))
+                            $dlg.parent().removeClass($dlg.attr('data-palette'));
+                        if(options.default_palette_class){
+                            $dlg.attr('data-palette', options.default_palette_class);
+                            $dlg.parent().addClass(options.default_palette_class);
+                        }else{
+                            $dlg.attr('data-palette', null);
+                        }
+                        
+                        
                         
                         
                         if(options.noClose){
@@ -986,7 +1001,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             }
             
             if(options.h6style_class){
-                $dlg.addClass('ui-heurist-bg-light');
+                //$dlg.addClass('ui-heurist-bg-light');
                 $dlg.parent().addClass('ui-dialog-heurist '+options.h6style_class);
             }
             
@@ -1035,7 +1050,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
     // MAIN method
     // buttons - callback function or objects of buttons for dialog option
     // title - either string for title, or object with labels {title:, yes: ,no, cancel, }
-    // ext_options:
+    // ext_options:   default_palette_class, position
     //
     showMsgDlg: function(message, buttons, labels, ext_options){
 
@@ -1065,7 +1080,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                 if(isobj){
                     $dlg.append(message);
                 }else if(message.indexOf('#')===0 && $(message).length>0){
-                    //it seems it is in DH only
+                    //it seems it is in Digital Harlem only
                     $dlg.html($(message).html());
                 }else{
                     $dlg.html(message);
@@ -1172,6 +1187,16 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             $dlg.parent().find('.ui-dialog-titlebar').hide();
         }else{
             $dlg.parent().find('.ui-dialog-titlebar').show();
+        }
+
+        
+        if($dlg.attr('data-palette'))
+            $dlg.parent().removeClass($dlg.attr('data-palette'));
+        if(ext_options.default_palette_class){
+            $dlg.attr('data-palette', ext_options.default_palette_class);
+            $dlg.parent().addClass(ext_options.default_palette_class);
+        }else{
+            $dlg.attr('data-palette', null);
         }
         
         return $dlg;
