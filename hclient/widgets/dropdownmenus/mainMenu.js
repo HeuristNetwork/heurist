@@ -54,7 +54,7 @@ $.widget( "heurist.mainMenu", {
 
         this.div_logo = $( "<div>")
         .addClass('logo')   //width was 198
-        .css({'width':'150px', 'float':'left', 'margin':'6px 10px'}) //'height':'56px', 
+        .css({'width':'150px', 'float':'left', 'margin':'6px 10px', cursor:'pointer'}) //'height':'56px', 
         .appendTo( this.element );
 
         if(window.hWin.HAPI4.get_prefs('layout_theme')!='heurist'){
@@ -93,7 +93,9 @@ $.widget( "heurist.mainMenu", {
                     +"Heurist is copyright (C) 2005-2020 The University of Sydney and available as Open Source software under the GNU-GPL licence. "
                     +"Beta versions of the software with new features may also be available at the GitHub repository or linked from the HeuristNetwork home page.");
                 }else{
-                    document.location.reload();    
+                    //reload without query string
+                    document.location = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database;
+                    //.reload();    
                 }
             }
         });
