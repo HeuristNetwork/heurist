@@ -766,10 +766,12 @@ $.widget( "heurist.mainMenu6", {
                                     that._explorer_menu_locked = is_locked;     
                                 }
                             }
+
                     }  });    
                     
                     cont.addClass('save-filter-dialog');
                 }
+
 
                 explore_top = 0;
 //                explore_height = 275;
@@ -795,8 +797,8 @@ $.widget( "heurist.mainMenu6", {
                 if(explore_top+explore_height>that.element.innerHeight()){
                     explore_top = that.element.innerHeight() - explore_height;
                 }
-                
-                that.menues_explore_popup.css({width:'700px',overflow:'hidden'});
+                that.menues_explore_popup.css({width:'800px',overflow:'hidden'});
+
             }
             else if(action_name=='search_advanced'){
                 
@@ -884,11 +886,11 @@ $.widget( "heurist.mainMenu6", {
                 if(expandRecordAddSetting) explore_height = 430;
 
             }//endif
-            
-            
+         
             if(explore_left+that.menues_explore_popup.outerWidth() > that.element.innerWidth()){
                 explore_left = that.element.innerWidth() - that.menues_explore_popup.outerWidth();
             }
+
             that.menues_explore_popup.css({left:explore_left, top:explore_top, height:explore_height});
             
             //show menu section
@@ -904,8 +906,13 @@ $.widget( "heurist.mainMenu6", {
                 if(action_name=='search_entity'){
                     //trigger refresh  myOnShowEvent
                     $(this).search_entity('refreshOnShow');
+                }else if (action_name === 'search_quick' && cont.search_quick('instance')) {
+                    // Refresh container height.
+                    cont.search_quick('instance').refreshContainerHeight();
+                    cont.search_quick('instance').refreshContainerWidth();
                 }
             });
+
             
             /*  BBBB
             if(action_name!='recordAdd' && action_name!='search_quick' 
