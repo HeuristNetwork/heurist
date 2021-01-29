@@ -1540,9 +1540,9 @@ $.widget( "heurist.search_faceted_wiz", {
                 if(facets[k].type=='freetext'){
                     sGroupBy =
                         '<label><input type="checkbox" name="facet_Group'+idd+'" value="firstchar"/>'
-                        +'Group by first character</label>'
-                        +'<label title="applicable for list and wrapped modes only">'
-                        +'<input type="checkbox" name="facet_MultiSel'+idd+'" value="1"/>multi-select</label>';
+                        +'Group by first character</label>';
+                        //+'<label title="applicable for list and wrapped modes only">'
+                        //+'<input type="checkbox" name="facet_MultiSel'+idd+'" value="1"/>multi-select</label>';
                    
                 }else if(facets[k].type=='float' || facets[k].type=='integer'){
                     sContent = sContent 

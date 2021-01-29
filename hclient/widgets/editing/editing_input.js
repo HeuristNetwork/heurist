@@ -67,6 +67,15 @@ $.widget( "heurist.editing_input", {
         if(this.options.dtFields==null && this.options.dtID>0 && this.options.rectypeID>0) //only for recDetails
         {
             this.options.dtFields = window.hWin.HEURIST4.util.cloneJSON($Db.rst(this.options.rectypeID, this.options.dtID));
+        
+            if(this.options.is_faceted_search){
+                if(window.hWin.HEURIST4.util.isempty(this.options['dtFields']['rst_FilteredJsonTermIDTree'])){
+                    this.options['dtFields']['rst_FilteredJsonTermIDTree'] = 
+                                $Db.dty(this.options.dtID,'dty_JsonTermIDTree');
+                } 
+                this.options['dtFields']['rst_DefaultValue'] = '';
+            }
+
         }
 
         if(this.options.dtFields==null){ //field description is not defined
@@ -880,8 +889,8 @@ $.widget( "heurist.editing_input", {
                 //&& (allTerms!='relation'))  //'this.options.dtID!=window.hWin.HAPI4.sysinfo['dbconst']['DT_RELATION_TYPE']))
             {
                 
-                allTerms = this.f('rst_FilteredJsonTermIDTree');        
-            
+                allTerms = this.f('rst_FilteredJsonTermIDTree');
+                
                 if (!(window.hWin.HEURIST4.util.isempty(allTerms) &&
                     this.options.dtID==window.hWin.HAPI4.sysinfo['dbconst']['DT_RELATION_TYPE']))
                 { 

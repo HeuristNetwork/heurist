@@ -999,6 +999,7 @@ $.widget( "heurist.search_faceted", {
                                         + "<span style='font-weight:bold'>" + field['title'] + "</span>",
                                 detailtype: field['type'],  //overwrite detail type from db (for example freetext instead of memo)
                                 showclear_button: false,
+                                showedit_button: false,
                                 suppress_prompts: true,  //supress help, error and required features
                                 suppress_repeat: true,
                                 is_faceted_search: true
@@ -1345,7 +1346,7 @@ $.widget( "heurist.search_faceted", {
             //it works however 
             //1) it requires that this filter must be a valid json  - FIXED
             //2) it makes whole request heavier
-            //add additional/supplementary filter
+            //adds additional/supplementary and spatial filters
             this._current_query = window.hWin.HEURIST4.util.mergeHeuristQuery(query, 
                             (this._use_sup_filter)?this.options.params.sup_filter:'', 
                             this.options.params.add_filter,
@@ -1367,6 +1368,7 @@ $.widget( "heurist.search_faceted", {
                 this._current_query.push({sortby:'t'});
             }
         
+//console.log( 'start search' );        
 //console.log( this._current_query );
 
             
@@ -1443,18 +1445,21 @@ $.widget( "heurist.search_faceted", {
                         break;
                 }
                 
-                var subs_value = null;
+                var subs_value = null; //either initial query OR rectype+current result set
                 
-                if(this._isInited){
+                if(this._isInited || (field.multisel && field.selectedvalue!=null)){
                     //replace with current query   - @todo check for empty 
                     subs_value = window.hWin.HEURIST4.util.mergeHeuristQuery(this._first_query, 
                                     (this._use_sup_filter)?this.options.params.sup_filter:'',
                                     this.options.params.add_filter,
                                     this._prepareSpatial(this.options.params.spatial_filter));
+                    
                 }else{
+                    
                     //replace with list of ids
                     subs_value = window.hWin.HEURIST4.util.mergeHeuristQuery(this._first_query,
-                                    {ids:this._currentRecordset.getMainSet().join(',')});
+                                        {ids:this._currentRecordset.getMainSet().join(',')});
+                    
                 }
                 
                 //
@@ -1521,6 +1526,7 @@ $.widget( "heurist.search_faceted", {
 
                         
                     }else{
+                        
                         //replace with list of ids
                         query = {ids: this._currentRecordset.getMainSet().join(',')};
                     }
@@ -1548,7 +1554,7 @@ $.widget( "heurist.search_faceted", {
                 // it is combination of a) currect first query plus ids of result OR first query plus supplementary filters
                 // b) facets[i].query  with replacement of $Xn to value
                 var count_query = window.hWin.HEURIST4.util.mergeHeuristQuery(subs_value,
-                                                 window.hWin.HEURIST4.util.cloneJSON(this.options.params.q).splice(1) );
+                                                 window.hWin.HEURIST4.util.cloneJSON(this.options.params.q).splice(1) ); //remove t:XX
                 
                 //var count_query = window.hWin.HEURIST4.util.cloneJSON( this.options.params.q );
                 this._fillQueryWithValues( count_query, i );
@@ -1598,6 +1604,9 @@ $.widget( "heurist.search_faceted", {
                     fieldid = '1,18,231,304';
                 }
 
+//console.log(query);                
+//console.log(count_query);                
+                
                 var request = {q: query, count_query:count_query, w: 'a', a:'getfacets',
                                      facet_index: i, 
                                      field:  fieldid,
