@@ -4,8 +4,12 @@ Directory:    /hclient/widgets/cms
 Overview:   Functions to manage a CMS-based website within a Heurist database. Developed late 2019.
             
             To configure a default look for all websites created on a particular server, 
-            eg. adding institutional headers, copy one of the template files to the parent 
-            of the Heurist code (normally /HEURIST/) and name it website_template.php
+            eg. adding institutional headers, copy cmsTemplate.php to the parent 
+            of the Heurist code (normally /HEURIST/)
+            
+            You may use several tempates per server (for specific websites). Name cmsTemplate.php arbitrary, 
+            copy to /HEUIST root folder and specify this name for field "Template file name" (field 2-922) 
+            in CMS home page record
 
 Notes:
 
