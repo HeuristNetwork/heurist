@@ -1597,7 +1597,7 @@ $.widget( "heurist.search_faceted", {
                 }else if(fieldid==1  && that._use_multifield){
                     fieldid = '1,18,231,304';
                 }
- 
+
                 var request = {q: query, count_query:count_query, w: 'a', a:'getfacets',
                                      facet_index: i, 
                                      field:  fieldid,

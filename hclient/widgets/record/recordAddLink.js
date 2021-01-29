@@ -865,7 +865,8 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
                 this._context_on_close = res;
                 
                 if(this._openRelationRecordEditor && res.count==1 && res.relation_recID>0){
-                     window.hWin.HEURIST4.ui.openRecordEdit(res.relation_recID, null, {});   
+                     window.hWin.HEURIST4.ui.openRecordEdit(res.relation_recID, null, 
+                        {relmarker_field: this.options.relmarker_dty_ID, relmarker_is_inward: false});   
                 }
                 this._as_dialog.dialog('close');
                 //)window.close(res);//'Link'+(requests.length>1?'s':'')+' created...');
