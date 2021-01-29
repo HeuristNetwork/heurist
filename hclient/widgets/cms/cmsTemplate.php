@@ -3,9 +3,14 @@
     /**
     *  CMS website template 
     * 
-    *  You may use several tempates per server (for specific websites). Name this file arbitrary, 
-    *  copy to /HEUIST root folder and specify this name for field "Template file name" (field 2-922) 
-    *  in CMS home page record
+    *  You may use several templates per server (for specific websites).
+    *  We encourage the following of naming convention cmsTemplate_OrganisationName.php
+    *  Copy to /HEURIST root folder and specify this name in the field "Website Template" (field 2-922) 
+    *  in the Advanced tab of the CMS home page record.
+    * 
+    *  The template can also be specified as a relative path hclient/widgets/cms/<template name> but this
+    *  should ONLY be used for development as it uses a path which might change and local changes could
+    *  get overwritten by code updates.
     * 
     *  The template must contain at least two html elements main-header with main-menu and
     *  main-content
