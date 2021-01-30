@@ -1042,8 +1042,9 @@ $.widget( "heurist.editing_input", {
                 window.hWin.HEURIST4.ui.showEntityDialog('defTerms', rg_options); // it recreates  
                 
                 return;
-                
-                if(isVocabulary){
+//OLD version with admin/structure/terms                
+/*
+                if(isVocabulary){ 
 
                     var type = (this.detailType!='enum')?'relation':'enum';
                     
@@ -1072,7 +1073,7 @@ $.widget( "heurist.editing_input", {
                     
 
                 }else{
-                    /*NOT USED ANYMORE
+                    //NOT USED ANYMORE
                     var url = window.hWin.HAPI4.baseURL 
                         + 'admin/structure/terms/selectTerms.html?mode=editrecord&db='
                         + window.hWin.HAPI4.database
@@ -1099,9 +1100,8 @@ $.widget( "heurist.editing_input", {
                             }
                         }
                     });
-                    */
                 }                
-                
+*/                
                 
                 
                 }} ); //end btn onclick

@@ -862,7 +862,9 @@ $.widget( "heurist.manageEntity", {
         //calculate content height
         var sh = 0;
         this.editForm.children().each(function(i,ele){
-            if($(ele).is('fieldset') || $(ele).hasClass('ui-accordion')){
+            if($(ele).is(':visible') && ($(ele).is('fieldset') || 
+                $(ele).hasClass('ui-accordion') || 
+                  $(ele).hasClass('heurist-helper1'))){
                 sh = sh + $(ele).height();
             }
         });

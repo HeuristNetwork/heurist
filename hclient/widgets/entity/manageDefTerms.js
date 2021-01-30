@@ -87,7 +87,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
         var that = this;
 
-        this.editForm.css({'padding-top':'20px'});
+        this.editForm.css({'top':0, 'padding-top':'20px'});
 
         window.hWin.HAPI4.addEventListener(this, window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, 
             function(data) { 
@@ -1203,6 +1203,16 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 if(this.options.trm_VocabularyID>0){
                     s = s + ' to vocabulary "'
                     +window.hWin.HEURIST4.util.htmlEscape($Db.trm(this.options.trm_VocabularyID,'trm_Label'))+'"';
+                    
+                    if(!(this._currentEditID>0)){
+                    $('<div class="heurist-helper1" style="padding:0 0 10px 20px;max-width:410px">'
++'If the terms you need already exist in other vocabularies, '
++'for example a subset of countries or languages, close this popup,'
++'click on the gearwheel icon or the vocabularies editor link, '
++'then use the Ref(erence) button to add references in the vocabulary'
++'which point to existing terms</div>').insertBefore($(this.editForm.find('fieldset')[0]));
+                    }
+                    
                 }
                 dlg.dialog('option', 'title', s);
             }
