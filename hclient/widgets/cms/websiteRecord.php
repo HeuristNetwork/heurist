@@ -401,12 +401,16 @@ if($custom_template){
     $custom_template = PDIR.'../'.$custom_template;
 }
 
-if($custom_template && file_exists($custom_template)){
-
-    //use custom template for website
-    include ($custom_template);
-
-}else if(file_exists(PDIR.'../cmsTemplate.php')){
+if($custom_template){
+    if(file_exists($custom_template)){
+        //use custom template for website
+        include ($custom_template);
+        exit;
+    }else{
+        $cutomTemplateNotFound = $custom_template;
+    }
+}        
+if(file_exists(PDIR.'../cmsTemplate.php')){
     //use server custom template
     include '../cmsTemplate.php';
     

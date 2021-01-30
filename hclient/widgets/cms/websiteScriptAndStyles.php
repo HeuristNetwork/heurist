@@ -188,6 +188,7 @@ _time_debug = new Date().getTime() / 1000;
             <?php if($isEmptyHomePage) echo 'if(not_empty_page){ load_initially=not_empty_page;}'; ?>
             
             loadPageContent(init_page_record_id>0 ?init_page_record_id :load_initially);
+            
         }
         
         var menu_cont = $("#main-header");
@@ -389,6 +390,13 @@ function onHapiInit(success){
                             +'" height="35" align="center"></a></div>')
                 .appendTo( $('#host_info') );
             }
+            
+<?php             
+if(isset($cutomTemplateNotFound)){
+    print 'window.hWin.HEURIST4.msg.showMsgDlg("Custom website template '
+        .$cutomTemplateNotFound.' not found. Default template will be used");';
+}?>
+            
         }
     });
 }
