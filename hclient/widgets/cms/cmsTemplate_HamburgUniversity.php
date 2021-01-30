@@ -33,69 +33,74 @@
         include 'websiteScriptAndStyles.php';  
     ?>
     <style>
-        body{
-            overflow:auto;
-        }
+body{
+    overflow:auto;
+}
+
+#main-menu  ul.horizontalmenu>li>a{
+    font-size: 18px;
+    text-transform: uppercase;
+    font-family: TheSansUHHBoldCaps;
+}
+#main-menu .ui-menu .ui-menu-item a {
+    font-size: 18px;
+    color: #333;
+    font-family: TheSansUHHBold;
+}
+#main-menu .ui-menu .ui-menu-item a:hover,
+#main-menu .ui-menu .ui-menu-item a.ui-state-active {
+    color:#0271bb !important;   
+    background: none;
+    border:none !important;
+}
+#main-menu ul.ui-widget-content>li{
+    padding: 5px 0px !important;
+}
+#main-menu ul.ui-widget-content>li>ul {
+    padding: 30px 70px 35px 50px !important;
+    background-color: #fff;
+    border: none;
+}
     </style>
     </head>
 
     <body>
         <div class="suche" id="uhh-header-search">
-          <form action="https://www.fdm.uni-hamburg.de/search.html">
-            <h6 class="versteckt">Suche</h6>
-            <label for="suchfeld" class="versteckt">Suche nach </label>
-            <input id="suchfeld" placeholder="Suche" name="q" class="text" type="text">
-            <input name="suchen" class="button" alt="suchen" title="suchen" type="submit">
-          </form>
+            <form action="https://www.fdm.uni-hamburg.de/search.html">
+                <h6 class="versteckt">Suche</h6>
+                <label for="suchfeld" class="versteckt">Suche nach </label>
+                <input id="suchfeld" placeholder="Suche" name="q" class="text" type="text">
+                <input name="suchen" class="button" alt="suchen" title="suchen" type="submit">
+            </form>
         </div>
 
         <div id="uhh-header-sublogo">
-          <a href="#">
-            <div class="kurz">ZFDM</div>
-            <h1 class="wortmarke"><b>Zentrum</b>für Nachhaltiges Forschungsdatenmanagement</h1>
-          </a>
+            <!-- HEURIST CMS LOGO IMAGE -->
+            <span style="position: absolute;top:30px;right:0;height:140px;width:500px">
+                <div id="main-title" style="margin-top:50px"></div>
+                <span id="main-logo"></span>
+            </span>
+            <a href="#"></a><!-- do not touch this stub for UH script -->
         </div>
 
         <div id="uhh-header-nav">
-          <ul>
-            <li><a href="#1">Service</a>
-              <ul>
-                <li><a href="html/heurist/index.php?db=">Browse Datenbanken</a></li>
-                <li><a href="html/heurist/admin/setup/dbcreate/createNewDB.php">Datenbank erstellen</a></li>
-              </ul>
-            </li>
-            <li><a href="#2">Hilfe</a>
-              <ul>
-                <li><a href="#3">Tutorial</a></li>
-                <li><a href="http://heuristnetwork.org/faq/">FAQ</a></li>
-                <li><a href="http://HeuristNetwork.org">HeuristNetwork.org</a></li>
-              </ul>
-            </li>
-            <li><a href="#5">About</a>
-              <ul>
-                <li><a href="https://www.fdm.uni-hamburg.de/kontakt.html">Kontakt</a></li>
-                <li><a href="https://www.fdm.uni-hamburg.de/imprint.html">Impressum</a></li>
-              </ul>
-            </li>
-          </ul>
-        </div>
-        <div class="page" style="overflow:auto">
-                <div id="main-header" style="width:100%;min-height:40px;">
-                    <div id="main-menu" class="mceNonEditable header-element" 
-                        style="width:100%;min-height:40px;border:2px none yellow;color:black;font-size:1.1em;" 
-                        data-heurist-app-id="heurist_Navigation" data-generated="1">
-                        <?php print $page_header_menu; ?>
-                    </div>
-                </div>
-                <div id="main-content" 
-                    data-homepageid="<?php print $rec_id;?>" 
-                    <?php print ($open_page_on_init>0)?' data-initid="'.$open_page_on_init.'"':''; ?> 
-                    data-viewonly="<?php print ($hasAccess)?0:1;?>">
-                </div>
-<!--                
-            <div class="container"> 
+            <ul><li></li></ul> <!-- do not touch this stub for UH script -->
+            <!-- HEURIST CMS MENU -->
+            <div id="main-menu" class="mceNonEditable header-element" 
+                style="" 
+                data-heurist-app-id="heurist_Navigation" data-generated="1">
+                <?php print $page_header_menu; ?>
             </div>
--->            
+        </div>
+
+        <div class="page">
+            <!-- HEURIST CMS PAGE CONTENT -->
+            <div id="main-content" 
+                style="padding:0 10px;"    
+                data-homepageid="<?php print $home_page_record_id;?>" 
+                <?php print ($open_page_on_init>0)?' data-initid="'.$open_page_on_init.'"':''; ?> 
+                data-viewonly="<?php print ($hasAccess)?0:1;?>">
+            </div>
         </div>
         <div id="uhh-footer-info">
           <ul>
