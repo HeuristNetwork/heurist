@@ -151,7 +151,7 @@ if($isWebPage){
 ?>
     <div class="ent_content_full ui-heurist-bg-light" style="top:<?php echo ($showWarnAboutPublic)?20:0; ?>px" 
                     id="main-content-container">
-        <div id="main-content" data-homepageid="<?php print $rec_id;?>" 
+        <div id="main-content" data-homepageid="<?php print $home_page_record_id;?>" 
                                data-viewonly="<?php print ($hasAccess)?0:1;?>">
         </div>
     </div>
@@ -188,7 +188,7 @@ if($isWebPage){
     }//header
 
     if(!$edit_Available && $system->is_member(2)){
-        print '<a href="'.HEURIST_BASE_URL.'?db='.$system->dbname().'&cms='.$rec_id.'" id="btn_editor" target="_blank" '
+        print '<a href="'.HEURIST_BASE_URL.'?db='.$system->dbname().'&cms='.$home_page_record_id.'" id="btn_editor" target="_blank" '
         .'style="position:absolute;right:10px; top:5px;" class="cms-button">Heurist interface</a>';
     }
     ?>  
@@ -196,7 +196,7 @@ if($isWebPage){
     </div>
     <div class="ent_content_full ui-heurist-bg-light"  id="main-content-container"
             style="top:<?php echo ($show_pagetitle?'190px':'152px').($is_page_footer_fixed?';bottom:'.$page_footer_height.'px':''); ?>;padding: 5px;">
-        <div id="main-content" data-homepageid="<?php print $rec_id;?>" 
+        <div id="main-content" data-homepageid="<?php print $home_page_record_id;?>" 
             <?php print ($open_page_on_init>0)?'data-initid="'.$open_page_on_init.'"':''; ?> 
             data-viewonly="<?php print ($hasAccess)?0:1;?>" 
             style="<?php echo (!$is_page_footer_fixed?'padding-bottom:'.$page_footer_height.'px;position:relative':'');?>">

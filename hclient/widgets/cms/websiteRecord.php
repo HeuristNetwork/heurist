@@ -3,16 +3,18 @@
     /**
     *  Website generator based on CMS records 99-51,52,53
     * 
+    *  It is either generate home page from cmsTemplate file (inits main menu, header, footer) 
+    *  or returns content for particular page
+    * 
     *  Parameters
     *  recID - home page record (99-51) or web page (99-53)
     *          if is is not defined it takes first record of type 'Home page'
-    *  field - if defined it is assumed web page and it returns value of specified field (by default DT_EXTENDED_DESCRIPTION)
+    *  field - if defined it is assumed web page and it returns value of specified 
+    *          field (by default DT_EXTENDED_DESCRIPTION)
     * 
     * if home page has defined as template file it is loaded as body, otherwise default template
     * that includes header with main-logo, main-title, main-menu and 
     * main-content where content of particular page will be loaded
-    *  
-    * 
     * 
     *
     * @package     Heurist academic knowledge management system
@@ -44,13 +46,17 @@ Main setting for these elements is height of header. To change it set
 
 HEADER:
     
-#main_header.ent_header is hardcoded in websiteRecord.php. It has the following elements
+#main_header.ent_header is hardcoded in cmsTemplate.php. It has the following elements
     #main-logo      - content defined via field "Site logo" (99-51.2-38). On click it reloads main page
     #main-logo-alt  - content defined via field "Supplementary logo image" (99-51.2-926)
     #main-title>h2  - field "Website title" (99-51.2-1)
     #main-host      - information about host and heurist. Content defined in Heurist settings
     #main-menu      - generated based on linked Menu/Page records (99-52)
     #main-pagetitle>.webpageheading - loaded Page title "Menu label" (99-52.2-1) hidden if 99-952
+    
+If your write your own cms template you have to define only 2 mandatory elements 
+#main-menu and #main-content
+
         
 You may overwrite default styles for these elements in field "Website CSS" (99-51.99-46).
 Background image for #main_header is defiend in field "Banner image" (99-51.99-951).

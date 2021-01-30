@@ -1,5 +1,6 @@
 /**
-* embedDialog.js - Embed Heurist functionality in website
+* embedDialog.js - Popup to get code (url or script snippet) to embed Heurist 
+* functionality as a single page into third party website
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org

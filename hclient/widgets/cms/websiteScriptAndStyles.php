@@ -1,4 +1,28 @@
 <?php
+
+    /**
+    *  Injection of Heuirst core scripts, styles and scripts to init CMS website template 
+    * 
+    *  It should be included in CMS template php sript in html header section
+    *   
+    *  include 'websiteScriptAndStyles.php'; 
+    *
+    * @package     Heurist academic knowledge management system
+    * @link        http://HeuristNetwork.org
+    * @copyright   (C) 2005-2020 University of Sydney
+    * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+    * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+    * @version     4.0
+    */
+
+    /*
+    * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+    * with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+    * Unless required by applicable law or agreed to in writing, software distributed under the License is
+    * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+    * See the License for the specific language governing permissions and limitations under the License.
+    */
+
 if (($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1')&& !@$_REQUEST['embed'])  {
     ?>
     <script type="text/javascript" src="<?php echo PDIR;?>external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
@@ -154,7 +178,6 @@ _time_debug = new Date().getTime() / 1000;
     setTimeout(function(){
         //init main menu in page header
         //add menu definitions to main-menu
-        var bg_color = $('#main-header').css('background');
 
         var topmenu = $('#main-menu');
         topmenu.attr('data-heurist-app-id','heurist_Navigation');
@@ -166,8 +189,13 @@ _time_debug = new Date().getTime() / 1000;
             
             loadPageContent(init_page_record_id>0 ?init_page_record_id :load_initially);
         }
+        
+        var menu_cont = $("#main-header");
+        if(menu_cont.length==0){
+            menu_cont = topmenu.parent();    
+        }
                
-        window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, "#main-header",
+        window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, menu_cont,
             {heurist_Navigation:{
                     menu_recIDs: home_page_record_id, 
                     use_next_level: true, 
@@ -179,8 +207,7 @@ _time_debug = new Date().getTime() / 1000;
             __onInitComplete
             );
             
-        $('#main-menu').show();
-        
+        topmenu.show();
         
         $(document).trigger(window.hWin.HAPI4.Event.ON_SYSTEM_INITED, []);
         
@@ -401,7 +428,7 @@ $website_title -> #main-title>h2
   if(ele.length>0){
       ele.empty().hide();
       $('<h2 style="font-size:1.7em;margin-top:4px;padding:0 10px;max-height:80px;overflow: hidden;"><?php print htmlspecialchars($website_title, ENT_QUOTES);?></h2>').appendTo(ele);
-      if(!$('#main-logo-alt').is(':visible')){
+      if(ele.parent().is('#main-header') && !$('#main-logo-alt').is(':visible')){
             ele.css({right:10}); 
       }
       ele.fadeIn(3000);
