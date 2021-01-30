@@ -222,8 +222,9 @@ function createOverlay(x, y, type, selector, node_obj, parent_node) {
         }
         var rty_ID = '', rec_ID = '';                 
         // Title
+        info[0].text = window.hWin.HEURIST4.util.stripTags(info[0].text);
         var rollover = info[0].text;
-
+        
         //var title = overlay.append("title").text(info[0].text+' rollover?');
         if(type=='record'){
             if(settings.isDatabaseStructure){
