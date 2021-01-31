@@ -937,7 +937,7 @@ function recordSearchFindParent($system, $rec_ID, $target_recTypeID, $allowedDet
 // $menuitems - record ids
 // fills $result array recursively with record ids and returns full detail at the end
 //
-function recordSearchMenuItems($system, $menuitems, &$result){
+function recordSearchMenuItems($system, $menuitems, &$result, $ids_only=false){
 
     $system->defineConstants();
 
@@ -1035,10 +1035,14 @@ function recordSearchMenuItems($system, $menuitems, &$result){
 
 
     if($isRoot){
-        //return recordset
-        return recordSearch($system, array('q'=>array('ids'=>$result), 
-            'detail'=>array(DT_NAME,DT_SHORT_SUMMARY,DT_CMS_TARGET,DT_CMS_CSS,DT_CMS_PAGETITLE,DT_EXTENDED_DESCRIPTION,DT_CMS_TOP_MENU,DT_CMS_MENU), //'detail' 
-            'w'=>'e', 'cms_cut_description'=>1));
+        if($ids_only){
+            return $result;
+        }else{
+            //return recordset
+            return recordSearch($system, array('q'=>array('ids'=>$result), 
+                'detail'=>array(DT_NAME,DT_SHORT_SUMMARY,DT_CMS_TARGET,DT_CMS_CSS,DT_CMS_PAGETITLE,DT_EXTENDED_DESCRIPTION,DT_CMS_TOP_MENU,DT_CMS_MENU), //'detail' 
+                'w'=>'e', 'cms_cut_description'=>1));
+        }
     }
 
 }

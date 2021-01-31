@@ -179,9 +179,6 @@ _time_debug = new Date().getTime() / 1000;
         //init main menu in page header
         //add menu definitions to main-menu
 
-        var topmenu = $('#main-menu');
-        topmenu.attr('data-heurist-app-id','heurist_Navigation');
-
         function __onInitComplete(not_empty_page){
             //load given page or home page content
             var load_initially = home_page_record_id;
@@ -191,24 +188,27 @@ _time_debug = new Date().getTime() / 1000;
             
         }
         
-        var menu_cont = $("#main-header");
-        if(menu_cont.length==0){
-            menu_cont = topmenu.parent();    
-        }
-               
-        window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, menu_cont,
-            {heurist_Navigation:{
-                    menu_recIDs: home_page_record_id, 
-                    use_next_level: true, 
-                    orientation: 'horizontal',
-                    toplevel_css: {background:'none'}, //bg_color 'rgba(112,146,190,0.7)'
-                    aftermenuselect: afterPageLoad,
-                    onInitComplete: __onInitComplete
-            }},
-            __onInitComplete
-            );
+        var topmenu = $('#main-menu');
+        
+        if(topmenu.length==0){
             
-        topmenu.show();
+            __onInitComplete();
+            
+        }else{
+            topmenu.attr('data-heurist-app-id','heurist_Navigation');
+            window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, topmenu.parent(),
+                {heurist_Navigation:{
+                        menu_recIDs: home_page_record_id, 
+                        use_next_level: true, 
+                        orientation: 'horizontal',
+                        toplevel_css: {background:'none'}, //bg_color 'rgba(112,146,190,0.7)'
+                        aftermenuselect: afterPageLoad,
+                        onInitComplete: __onInitComplete
+                }},
+                __onInitComplete
+                );
+            topmenu.show();
+        }
         
         $(document).trigger(window.hWin.HAPI4.Event.ON_SYSTEM_INITED, []);
         
@@ -324,26 +324,40 @@ function afterPageLoad(document, pageid){
     //find all link elements
     $('a').each(function(i,link){
         
+        //var href = $(link).attr('data-href');
+        //if(!href) 
         var href = $(link).attr('href');
-        if(href && href!='#'){
+        if (href && href!='#') 
+        {
             if(  (href.indexOf(window.hWin.HAPI4.baseURL)===0 || href[0] == '?')
                 && window.hWin.HEURIST4.util.getUrlParameter('db',href) == window.hWin.HAPI4.database
                 && window.hWin.HEURIST4.util.getUrlParameter('id',href) == home_page_record_id)
             {
                 var pageid = window.hWin.HEURIST4.util.getUrlParameter('pageid',href);
                 if(pageid>0){
+                    
                     $(link).attr('data-pageid', pageid);
+                    
+                    var scr = 'javascript:{loadPageContent('+pageid+');window.hWin.HEURIST4.util.stopEvent(event);}';
+                    $(link).attr('href',scr);
+                    //$(link).attr('data-href',scr);
+                    
+                    /*
                     $(link).on({click:function(e){
                         var pageid = $(e.target).attr('data-pageid');
                         loadPageContent(pageid);            
                         window.hWin.HEURIST4.util.stopEvent(e);
                     }});
+                    */
                     
                 }
             }
         }
         
     });
+    
+    //var ele = $('#mobilemenu');
+    //console.log('MOBILE '+ele.find('a.extern').length);
     
 }
 
@@ -501,3 +515,107 @@ if($site_css!=null){
 }
 ?>          
 </style>  
+<?php
+    
+//generate main menu on server side - for bootstrap menu     
+$mainmenu_content = null;
+
+$ids_was_added = array();
+$resids = array();
+$records = recordSearchMenuItems($system, array($home_page_on_init), $resids, true);
+if(is_array($records) && !@$records['status']){
+$mainmenu_content = _getMenuContent(0, array($home_page_on_init), 0);     
+$mainmenu_content = '<ul>'.$mainmenu_content.'</ul>';
+}
+
+function _getFld($record,$dty_ID){
+    $res = @$record['details'][$dty_ID];
+    return (is_array($res)&&count($res)>0)?array_shift($res):null;
+}
+
+function _getMenuContent($parent_id, $menuitems, $lvl){
+   global $system, $records, $ids_was_added, $home_page_on_init;         
+   
+            $res = '';
+            $resitems = array();
+            
+            $fields = array(DT_NAME,DT_SHORT_SUMMARY,DT_CMS_TARGET, //DT_CMS_CSS,
+            DT_CMS_PAGETITLE,DT_EXTENDED_DESCRIPTION,DT_CMS_TOP_MENU,DT_CMS_MENU );
+        
+            //$TERM_NO = $Db.getLocalID('trm','2-531'),
+            //$TERM_NO_old = $Db.getLocalID('trm','99-5447');
+        
+        
+            foreach($menuitems as $page_id){
+                
+                if(in_array($page_id, $ids_was_added)){
+                    //already was included - recursion
+                    //ids_recurred.push(menuitems[i]);
+                }else{
+                
+                    $record = recordSearchByID($system,$page_id,$fields,'rec_ID,rec_RecTypeID');
+                
+                    $menuName = _getFld($record, DT_NAME);
+                    $menuTitle = _getFld($record, DT_SHORT_SUMMARY);
+                    $recType = $record['rec_RecTypeID'];
+                    
+                    //target and position
+                    $pageTarget = _getFld($record,DT_CMS_TARGET);
+                    //$pageStyle = _getFld($record,DT_CMS_CSS);
+                    $showTitle = _getFld($record,DT_CMS_PAGETITLE); 
+                    
+                    $showTitle = true; //($showTitle!==TERM_NO && $showTitle!==TERM_NO_old);
+                    
+                    $hasContent = (_getFld($record,DT_EXTENDED_DESCRIPTION)!=null);
+                    
+                    array_push($ids_was_added, $page_id);
+                        
+                    //$url = '?db='.HEURIST_DBNAME.'&id='.$home_page_on_init.'&pageid='.$page_id;
+                    $url = 'javascript:{loadPageContent('.$page_id.');window.hWin.HEURIST4.util.stopEvent(event);}';
+                        
+                    $res = $res.'<li><a href="'.$url.'" data-pageid="'.$page_id.'"'
+                                        .($pageTarget?' data-target="'.$pageTarget.'"':'')
+                                        .($showTitle?' data-showtitle="1"':'')
+                                        .($hasContent?' data-hascontent="1"':'')
+                                        .' title="'.htmlspecialchars($menuTitle).'">'
+                                        .htmlspecialchars($menuName).'</a>';
+                        
+                    $subres = '';
+                    $submenu = @$record['details'][DT_CMS_MENU];
+                    if(!$submenu){
+                        $submenu = $record['details'][DT_CMS_TOP_MENU];
+                    }
+                    //has submenu
+                    if($submenu){
+                        //if(!is_array($submenu)) $submenu = explode(',',$submenu);
+                        
+                        if(count($submenu)>0){ 
+                            
+                            $subrec = array();
+                            foreach($submenu as $id=>$rec){
+                                $subrec[] = $rec['id'];
+                            }
+
+                            //next level                         
+                            $subres = _getMenuContent($page_id, $subrec, $lvl+1);
+                            
+                            if($subres!='') {
+                                $res = $res.'<ul>'.$subres.'</ul>'; //'.($lvl==0?' class="level-1"':'').'
+                            }
+                        }
+                    }
+                    
+                    $res = $res.'</li>';
+                    
+                    if($lvl==0 && count($menuitems)==1){ // && that.options.use_next_level
+                            return $subres;    
+                    }
+                    
+                
+                }
+            }//for
+            
+            return $res;
+}//_getMenuContent   
+
+?>

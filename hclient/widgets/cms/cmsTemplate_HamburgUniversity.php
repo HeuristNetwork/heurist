@@ -1,10 +1,11 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html lang="de">
     <head>
-        <title>ZFDM Heurist Service</title>
+        <title><?php print htmlspecialchars($website_title);?></title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
         <meta content="Hagen Peukert" name="author">
-        <meta content="Open Source collaborative web database software for richly interlinked heterogeneous research data" name="description">
+        <meta name="keywords" content="Heurist, Digital Humanities, Humanities Data, Research Data, Database Management, Academic data, Open Source, Free software, FOSS, University of Sydney,<?php echo $meta_keywords;?>">
+        <meta name="description" content="<?php echo $meta_description;?>">
 
         <!-- 9 Oct 2019: The styles were commented out. Probably the stylesheets no longer contain
         styles for the homepage - to check - as the page is largely unstyled, but the button styles 
@@ -84,13 +85,20 @@ body{
         </div>
 
         <div id="uhh-header-nav">
-            <ul><li></li></ul> <!-- do not touch this stub for UH script -->
-            <!-- HEURIST CMS MENU -->
+          <!-- HEADER MENU -->  
+          <?php 
+          //output bootstrap menu
+          if($mainmenu_content!=null){
+                print $mainmenu_content;
+          }
+          ?>
+            <!-- HEURIST CMS MENU
             <div id="main-menu" class="mceNonEditable header-element" 
                 style="" 
                 data-heurist-app-id="heurist_Navigation" data-generated="1">
                 <?php print $page_header_menu; ?>
             </div>
+            -->
         </div>
 
         <div class="page">
