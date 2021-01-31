@@ -727,11 +727,17 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                                */
                         }
                     });
-                }else if(!this.set_detail_type_btn){  //change selector to button
+                }else {  //change selector to button
                     
                     var ele = this._editing.getFieldByName('dty_Type');  
                     ele = ele.find('.input-div');
                     ele.find('.ui-selectmenu-button').hide();
+                    
+                    if(this.set_detail_type_btn){
+                        this._off( this.set_detail_type_btn);
+                        this.set_detail_type_btn.remove();
+                    }
+                    
                     
                     this.set_detail_type_btn = $('<button>')
                         .button({label:'click to select data type'})
@@ -745,7 +751,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
 
                             var dt_type = this._editing.getValue('dty_Type')[0];
 
-                            var dim = { h:530, w:800 };
+                            var dim = { h:540, w:800 };
                             var sURL = window.hWin.HAPI4.baseURL +
                             "admin/structure/fields/selectFieldType.html?&db="+window.hWin.HAPI4.database;
                             window.hWin.HEURIST4.msg.showDialog(sURL, {
@@ -771,7 +777,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                                                 function(){   
                                                     that._onDataTypeChange(context);                                                   
                                                 }, {title:'Change type for field',yes:'Continue',no:'Cancel'},
-                                                {default_palette_class:this.options.default_palette_class});                                                
+                                                {default_palette_class:that.options.default_palette_class});                                                
                                         }else{
                                             that._onDataTypeChange(context);                                                   
                                         }                            
@@ -782,6 +788,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                             });
 
                     }});
+                    
                 }
 
             $(elements[0]).change(); //trigger
@@ -1050,17 +1057,21 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                 $('<div style="line-height:2ex;padding-top:4px">'
                         +'<div id="enumVocabulary" style="display:inline-block;">' //padding-left:4px;
                             +'<select id="selVocab" class="sel_width"></select>'
+                            +'<a href="#" id="show_terms_1" style="padding-left:10px">'
+                                +'<span class="ui-icon ui-icon-pencil"/>vocabularies editor</a>'
                             +'<span id="termsPreview1" style="display:none;padding-left:10px">'
                                 +'<label style="width:60px;min-width:60px">Preview</label><select id="selPreview"></select>'
                             +'</span>'
+                        +'</div>'
+                +'</div>').appendTo(this.enum_container);
+/*            
                             +'<div style="padding:5px 3px">'
                                 //+'<a href="#" id="add_advanced">advanced</a>&nbsp;'  style="margin-left:90px;"
                                 +'<a href="#" id="add_vocabulary">add a vocabulary</a>&nbsp;'
                                 +'<a href="#" id="add_terms" style="padding-left:10px">add terms to vocabulary</a>&nbsp;'
                                 +'<a href="#" id="show_terms_1" style="padding-left:10px">edit terms tree</a>'
                             +'</div>'
-                        +'</div>'
-                +'</div>').appendTo(this.enum_container);
+*/            
             
             }else{     //@todo remove   Individidual selection
             

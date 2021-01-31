@@ -168,7 +168,7 @@
                         "rst_Class":"relationtype enum relmarker",
                         "rst_Display":"hidden",
                         "rst_DisplayName":"Vocabulary (terms):",
-                        "rst_DisplayHelpText": "The set of terms which may be selected for this field"
+                        "rst_DisplayHelpText": "The set of terms which may be selected for this field. If there is no suitable vocabulary use the vocabularies editor to create one. If the terms you need already exist in other vocabularies, for example a subset of countries or languages, create a new vocabulary in the editor, then use the Ref(erence) button to add references in the vocabulary which point to existing terms."
                     }
                 },
                 {  "dtID": "dty_JsonTermIDTree",
