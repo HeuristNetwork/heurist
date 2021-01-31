@@ -1856,9 +1856,13 @@ window.hWin.HEURIST4.ui = {
             if (info['is_inward']){
                 term_ID = window.hWin.HEURIST4.dbs.getInverseTermById(term_ID);    
             }
+            var lbl = $Db.trm(term_ID, 'trm_Label');
+            var len = lbl.length;
+            lbl = window.hWin.HEURIST4.util.htmlEscape(lbl);
             //class="detailType" 'min-width:'+ Math.max(19, Math.min(reltype.length,25))+'ex;
-            reltype = '<div style="display:table-cell;color: #999999;text-transform: none;padding-left:4px;vertical-align: middle;">'
-                + $Db.trm(term_ID, 'trm_Label') + '</div>'
+            reltype = '<div style="display:table-cell;min-width:'+(Math.min(20,len)+1)+'ex;'
+                +'color: #999999;text-transform: none;padding-left:4px;vertical-align: middle;">'
+                +  lbl + '</div>'
         }
         
         var rectype_icon = '<div style="display:table-cell;vertical-align: middle;padding: 0 4px'+(reltype==''?'':' 0 16px')+';">'
