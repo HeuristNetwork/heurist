@@ -398,7 +398,14 @@ if($custom_template){
     if(substr( $custom_template, -4 ) !== '.php'){
             $custom_template = $custom_template.'.php';
     }
-    $custom_template = PDIR.'../'.$custom_template;
+    
+    if(strpos($custom_template,'/')!==false){
+        //otherwise this is relative to code directory
+        $custom_template = HEURIST_DIR.$custom_template;
+    }else{
+        //if there are not slashes - it is assumed it is in heurist root folder
+        $custom_template = PDIR.'../'.$custom_template;    
+    }
 }
 
 if($custom_template){
