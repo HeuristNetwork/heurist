@@ -1280,7 +1280,21 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                             ?this.enum_container.find("#selPreview").val()
                             :this.enum_container.find("#selVocab").val();
 
-        vocab_id = $Db.getTermVocab(vocab_id)
+        vocab_id = $Db.getTermVocab(vocab_id);
+        
+        if(term_type=='relmarker' && !(vocab_id>0)){
+            //get first vocab in relationship group
+            var vocab_ids = $Db.trm_getVocabs('relation');
+            vocab_id = vocab_ids[0];
+/*            
+            $Db.vcg().each2(function(id,rec){
+                if(rec['vcg_Domain']=='relation'){
+                    
+                }
+            });
+*/            
+        }
+        
                             
         var that = this;
         window.hWin.HEURIST4.ui.showEntityDialog('defTerms', 
