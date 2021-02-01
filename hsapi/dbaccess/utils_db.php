@@ -1566,7 +1566,8 @@ error_log('UPDATED '.$session_id.'  '.$value);
     function updateDatabseToLatest4($system){
         
         $mysqli = $system->get_mysqli();
-
+        
+        //adds trash groups
         if(!(mysql__select_value($mysqli, 'select rtg_ID FROM defRecTypeGroups WHERE rtg_Name="Trash"')>0)){
 $query = 'INSERT INTO defRecTypeGroups (rtg_Name,rtg_Order,rtg_Description) '
 .'VALUES ("Trash",255,"Drag record types here to hide them, use dustbin icon on a record type to delete permanently")';
@@ -1583,6 +1584,23 @@ $query = 'INSERT INTO defVocabularyGroups (vcg_Name,vcg_Order,vcg_Description) '
 $query = 'INSERT INTO defDetailTypeGroups (dtg_Name,dtg_Order,dtg_Description) '
 .'VALUES ("Trash",255,"Drag base fields here to hide them, use dustbin icon on a field to delete permanently")';        
             $mysqli->query($query);
+        }
+
+        $system->defineConstant('RT_CMS_HOME');
+        $system->defineConstant('DT_POPUP_TEMPLATE');
+        
+        //adds 2-922 int CMS_HOME_RECORD
+        if(RT_CMS_HOME>0 && DT_POPUP_TEMPLATE>0 && 
+            !(mysql__select_value($mysqli, 
+                'select rst_ID from defRecStructure where rst_RecTypeID='.RT_CMS_HOME
+                    .' and rst_DetailTypeID='.DT_POPUP_TEMPLATE)>0))
+        {
+            
+            $entity = new DbDefRecStructure($system, array('rtyID'=>RT_CMS_HOME,
+                'newfields'=>array('fields'=>DT_POPUP_TEMPLATE,
+                'values'=>array(DT_POPUP_TEMPLATE=>array('dty_Name'=>'Website template',
+                'dty_HelpText'=>'Specify the name of a template php file in the /HEURIST/ directory to provide a particular (eg. institutional) layout The template will have been set up by the server administrator.'))  )));
+            $ret = $entity->batch_action();
         }
         
         

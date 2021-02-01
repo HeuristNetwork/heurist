@@ -27,6 +27,22 @@ require_once (dirname(__FILE__).'/dbEntitySearch.php');
 
 class DbDefRecStructure extends DbEntityBase
 {
+    
+    //
+    // constructor - load configuration from json file
+    //    
+    function __construct( $system, $data ) {
+        
+       if($data==null){
+           $data = array();
+       } 
+       if(!@$data['entity']){
+           $data['entity'] = 'defRecStructure';
+       }
+        
+       parent::__construct( $system, $data );
+    }
+    
 
     /**
     *  search user or/and groups
@@ -341,7 +357,10 @@ class DbDefRecStructure extends DbEntityBase
     }
     
     //
-    //
+    // newfields=>array(
+    //        fields=>  array of ids 
+    //        reqs=>   array of ids 
+    //        values=>  [dty_ID][fieldName]=>value
     //
     private function addNewFields(){
         
@@ -386,7 +405,9 @@ class DbDefRecStructure extends DbEntityBase
             'rst_DisplayName'=> @$newfields_values[$dty_ID]['dty_Name']
                                      ?$newfields_values[$dty_ID]['dty_Name'] 
                                      :$dt[$di['dty_Name']],
-            'rst_DisplayHelpText'=> $dt[$di['dty_HelpText']],
+            'rst_DisplayHelpText'=> @$newfields_values[$dty_ID]['dty_HelpText']
+                                     ?$newfields_values[$dty_ID]['dty_HelpText'] 
+                                     :$dt[$di['dty_HelpText']],
             'rst_RequirementType'=> in_array($dty_ID,$reqs)?'required':'recommended',
             'rst_MaxValues'=> 1,
             'rst_DisplayWidth'=>($dt[$di['dty_Type']]=='date')?20:100);
