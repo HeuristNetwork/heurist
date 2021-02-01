@@ -10,16 +10,33 @@
 </fieldset>
 
 <!-- TREE for field selection -->
-<div style="top:5.2em; bottom:11em; padding: 1.2em; min-width: 600px;overflow:hidden" class="input ent_content">
-    <div class="header" style="padding: 0 16px 0 16px;display: inline-block;vertical-align:top"><label>Select fields to export:</label></div>
-    
-    <div class="detailRow rtt-tree" style="display: inline-block;overflow-y:auto;outline: none;position: absolute;bottom: 0px;top: 8px;" 
-                id="rectype_tree">
+<div style="top:5.2em; bottom:11em; padding: 1.2em; min-width: 600px;overflow-x:hidden;overflow-y:auto" class="input ent_content">
+    <div class="export-field-tree-container">
+        <div class="header" style="padding: 0 16px 0 16px;display: inline-block;vertical-align:top"><label>Select fields to export:</label></div>
+
+        <div class="detailRow rtt-tree" style="display: inline-block;outline: none;margin-top: -8px;"
+             id="rectype_tree">
+        </div>
+    </div>
+    <div class="export-advanced-button" style="font-weight: bold;margin-bottom: 1em;cursor: pointer;text-decoration: underline;color: #6A7C99;">Advanced</div>
+    <div class="export-advanced-container" style="padding: 10px 16px;">
+        <div class="export-filed-advanced-info" style="margin-bottom: 1em">Advanced options for fields selected above</div>
+        <table class="export-advanced-list" style="font-size: 1em;">
+            <thead>
+                <th style="text-align: left;color: #6A7C99;">Field</th>
+                <th style="text-align: left;color: #6A7C99;">Total</th>
+                <th style="text-align: left;color: #6A7C99;">Sort</th>
+                <th style="text-align: left;color: #6A7C99;">&nbsp;</th>
+            </thead>
+            <tbody>
+
+            </tbody>
+        </table>
     </div>
 </div>
 
 <!-- CSV preferences -->
-<div class="ent_footer" style="height:10.6em">
+<div class="ent_footer" style="height:11.6em">
 <div style="padding:0px 0.2em; min-width: 640px;" class="input">
     <hr style="margin:5px"/>
     
@@ -72,3 +89,32 @@
 <form method="post" target="_blank" id="postform">
 <input type="hidden" id="postdata" name="postdata"/>
 </form>
+
+<!--Template of advanced options for a single field-->
+<script id="templateAdvancedFieldOptions" type="text/template">
+    <tr class="export-advanced-list-item" data-field-code="{fieldCode}" data-field-type="{fieldType}">
+        <td class="export-advanced-list-item-field" style="padding-right: 1em">{fieldName}</td>
+        <td class="export-advanced-list-item-total" style="padding-right: 1em">
+            <select class="export-advanced-list-item-total-select" style="width:80px">
+                <option value="" selected>None</option>
+                <option value="group">Group By</option>
+                <option value="sum">Sum</option>
+                <option value="count">Count</option>
+            </select>
+        </td>
+        <td class="export-advanced-list-item-sort" style="padding-right: 1em">
+            <select class="export-advanced-list-item-sort-select" style="width:80px">
+                <option value="" selected>None</option>
+                <option value="asc">Ascending</option>
+                <option value="des">Descending</option>
+            </select>
+        </td>
+        <td class="export-advanced-list-item-percentage" style="padding-right: 1em; display: none;">
+            <label>
+                <input class="export-advanced-list-item-percentage-checkbox" type="checkbox" />
+                Use Percentage
+            </label>
+        </td>
+    </tr>
+</script>
+<!--End of template-->
