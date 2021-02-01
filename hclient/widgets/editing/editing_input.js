@@ -1326,10 +1326,10 @@ $.widget( "heurist.editing_input", {
                                         {
                                             if(!isSubHeaderAdded){
                                                 isSubHeaderAdded = true;
-                                                $('<div>Referenced by</div>') //Reverse relationships
-                                                        .css('padding-top','4px')
-                                                        .addClass('header reverse-relation-header')
-                                                        .appendTo($inputdiv);
+//Removed 30 Jan 2021: not relevant to distinguish relationships on the basis of which side is source and which side is target           //                                                $('<div>Referenced by</div>') //Reverse relationships
+//                                                        .css('padding-top','4px')
+//                                                        .addClass('header reverse-relation-header')
+//                                                        .appendTo($inputdiv);
                                             }
                                             
                                             //var invTermID = window.hWin.HEURIST4.dbs.getInverseTermById(reverse[k]['trmID']);
