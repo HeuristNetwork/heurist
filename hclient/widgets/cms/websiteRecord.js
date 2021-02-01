@@ -33,6 +33,11 @@ function onPageInit(success){
     
 }   
 
+function loadPageContent(pageid){
+    cmsEditing.loadPageById(pageid);
+}
+
+
 /*
 workflow
 _init - #main-menu navigation wizard onselect -> __iniLoadPageById warn for changes -> _hideEditor -> __loadPageById
@@ -196,27 +201,28 @@ function hCmsEditing(_options) {
             
             var bg_color = main_header.css('background');
 
-            //init main menu in header
-            var topmenu = main_menu; //$('#main-menu');
-            topmenu.attr('data-heurist-app-id','heurist_Navigation');
-            
-            header_content_generated = (topmenu.attr('data-generated')==1);
-            topmenu.attr('data-generated', 0).show();
-
             header_content_raw = main_header.html();
             
-            topmenu.hide();
+            //init main menu in header
+            var topmenu = main_menu; //$('#main-menu');
+            if(topmenu.length>0){
+                topmenu.attr('data-heurist-app-id','heurist_Navigation');
+                header_content_generated = (topmenu.attr('data-generated')==1);
+                topmenu.attr('data-generated', 0).show();
+
+                topmenu.hide();
             
-            LayoutMgr.appInitFromContainer( document, topmenu.parent(),
-                {heurist_Navigation:{menu_recIDs:home_pageid
-                , use_next_level:true
-                , orientation:'horizontal'
-                , onmenuselect:__iniLoadPageById    //load page on select menu item
-                //aftermenuselect: afterPageLoad,  //function in header websiteRecord.php
-                , toplevel_css:{background:'none'} //bg_color  //'rgba(112,146,190,0.7)' ,color:'white','margin-right':'24px'
-                }} ); 
-            
-            topmenu.show();
+                LayoutMgr.appInitFromContainer( document, topmenu.parent(),
+                    {heurist_Navigation:{menu_recIDs:home_pageid
+                    , use_next_level:true
+                    , orientation:'horizontal'
+                    , onmenuselect:__iniLoadPageById    //load page on select menu item
+                    //aftermenuselect: afterPageLoad,  //function in header websiteRecord.php
+                    , toplevel_css:{background:'none'} //bg_color  //'rgba(112,146,190,0.7)' ,color:'white','margin-right':'24px'
+                    }} ); 
+                
+                topmenu.show();
+            }
             
             //init home page content
             __iniLoadPageById( init_pageid>0?init_pageid:home_pageid );
@@ -273,6 +279,8 @@ console.log('foter:'+footer_content_raw);
             .show();
 
     }//_init  
+    
+    
             
     //
     // menu listener - init page switch - warns for  changes and hides editor
@@ -338,18 +346,12 @@ console.log('foter:'+footer_content_raw);
                 +'&field=1&recid='+pageid, function()
                 {
                         //first child is webpage title
-                        var pagetitle = $(main_content.children()[0]);
-                        if(pagetitle.is('h2')){
+                        var pagetitle = main_content.find('h2.webpageheading');
+                        if(pagetitle.length>0)
+                        {
                             if(pageid==home_pageid){
-                                pagetitle.empty();
+                                pagetitle.empty().hide();
                             }        
-                            if(is_show_pagetitle){
-                                $('#main-pagetitle').empty().show();
-                            }
-                            //move title to header
-                            pagetitle.addClass("webpageheading");
-                            pagetitle.detach().appendTo($('#main-pagetitle'));
-                        
                             if(pagetitle.attr('date-empty')==1){
                                 pagetitle.attr('date-empty',0);
                                 
@@ -362,9 +364,18 @@ console.log('foter:'+footer_content_raw);
                                         +'<br>We recommend this for parent menus.',null,null,
                                         {my:'left top', at:'left+200 top+100', of:$('#main-content-container')});    
                                 }
-                                
+                            }
+                            
+                            if($('#main-pagetitle').length>0){
+                                if(is_show_pagetitle){
+                                    $('#main-pagetitle').empty().show();
+                                }
+                                //move title to header
+                                pagetitle.addClass("webpageheading");
+                                pagetitle.detach().appendTo($('#main-pagetitle'));
                             }
                         }
+                        
                         
                         //assign content to editor
                         $('.tinymce-body').val($('#main-content').html());

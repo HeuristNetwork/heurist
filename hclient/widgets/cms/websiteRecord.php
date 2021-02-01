@@ -202,6 +202,22 @@ $hasAccess = ($system->is_admin() || $system->is_member($rec['rec_OwnerUGrpID'])
 
 $site_owner = user_getDbOwner($mysqli); //info about user #2
 
+$website_title = '';
+$show_pagetitle = false;
+$isWebPage = false;
+
+if(!(@$_REQUEST['field']>1)){
+    $website_title = __getValue($rec, DT_NAME);
+    $isWebPage = ($rec['rec_RecTypeID']==RT_CMS_MENU && __getValue($rec, DT_CMS_PAGETYPE)==ConceptCode::getTermLocalID('2-6254'));
+    
+    if(!$isWebPage){ //for standalone webpage always without title
+        $show_pagetitle = __getValue($rec, DT_CMS_PAGETITLE);
+        $show_pagetitle = ($show_pagetitle!==ConceptCode::getTermLocalID('2-531') && 
+                           $show_pagetitle!==ConceptCode::getTermLocalID('99-5447'));
+    }
+}
+
+
 //-----------------------------------------------
 //if REQUEST has parameter "field" - this is special request for content of particular field 
 // by default it returns value of DT_EXTENDED_DESCRIPTION - content of web page
@@ -232,34 +248,22 @@ window.hWin.HEURIST4.msg.showMsgDlg(
         $content = __getValue($rec, DT_EXTENDED_DESCRIPTION);
         
         $empty_mark = (trim($content)=='')?' date-empty="1"':'';
+        $hide_mark = ($show_pagetitle) ?'' :' style="display:none;"';
         
-        $term_ID = mysql__select_value($mysqli, 
-                'select trm_ID from defTerms where trm_OriginatingDBID=2 and trm_IDInOriginatingDB=6254');
-
-        $isWebPage = ($rec['rec_RecTypeID']==RT_CMS_MENU && __getValue($rec, DT_CMS_PAGETYPE)==$term_ID);
-        if($isWebPage){
-            print $content;
-        }else{
-            print '<h2 class="webpageheading" '.$empty_mark.'>'.__getValue($rec, DT_NAME).'</h2>'
-                            .$content;
-        }        
+        print '<h2 class="webpageheading" '.$empty_mark.$hide_mark.'>'.$website_title.'</h2>';    
+        
+        print $content;
     }
     exit();
 }
 //-----------------------
 
-if(!($rec['rec_RecTypeID']==RT_CMS_HOME || 
-        ($rec['rec_RecTypeID']==RT_CMS_MENU && ConceptCode::getTermConceptID(__getValue($rec,DT_CMS_PAGETYPE))=='2-6254')  )){
+if(!($rec['rec_RecTypeID']==RT_CMS_HOME || $isWebPage)){
     $message = 'Record #'.$rec_id.' is not allowed record type. Expecting Website Home Page or Standalone Web Page';
     include ERROR_REDIR;
     exit();
 }                
 
-   
-
-$isWebPage = ($rec['rec_RecTypeID']==RT_CMS_MENU); //standalone web page - Heurist embed
-
-$website_title = __getValue($rec, DT_NAME);
 $image_icon = __getFile($rec, DT_THUMBNAIL, (array_key_exists('embed', $_REQUEST)?PDIR:HEURIST_BASE_URL).'favicon.ico');
 $image_logo = __getFile($rec, DT_FILE_RESOURCE, null); 
 $image_altlogo = null;
@@ -275,9 +279,6 @@ $image_logo = $image_logo?'<img style="max-height:80px;max-width:270px;" src="'.
 
 $meta_keywords = htmlspecialchars(__getValue($rec, DT_CMS_KEYWORDS));
 $meta_description = htmlspecialchars(__getValue($rec, DT_SHORT_SUMMARY));
-$show_pagetitle = __getValue($rec, DT_CMS_PAGETITLE);
-$show_pagetitle = ($show_pagetitle!==ConceptCode::getTermLocalID('2-531') && 
-                       $show_pagetitle!==ConceptCode::getTermLocalID('99-5447'));
 //2-532 - YES   2-531 - NO
 
 if(!$isWebPage && __getValue($rec,DT_EXTENDED_DESCRIPTION)==''){

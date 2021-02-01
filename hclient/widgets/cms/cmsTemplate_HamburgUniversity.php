@@ -62,6 +62,27 @@ body{
     background-color: #fff;
     border: none;
 }
+
+.text{
+    width:100% !important;   
+}
+
+.text2{
+    display: table-row !important;
+    position: absolute !important;
+    left: 300px !important;
+    top: 65px !important;
+    height: 80px;
+}
+#UHH_HEADER:not(.l) .text2{
+    top: 44px !important;
+    left: 150px !important;
+}
+.text2 a{
+    position:relative !important;
+}
+
+
     </style>
     </head>
 
@@ -77,10 +98,11 @@ body{
 
         <div id="uhh-header-sublogo">
             <!-- HEURIST CMS LOGO IMAGE -->
-            <span style="position: absolute;top:30px;right:0;height:140px;width:500px">
-                <div id="main-title" style="margin-top:50px"></div>
-                <span id="main-logo"></span>
-            </span>
+            <div class="text2">
+                <div id="main-title" style="display: table-cell;width: 70%;"></div>
+                <div id="main-logo" style="width: 145px;display: table-cell"></div>
+                <div id="main-logo-alt" style="display: table-cell;min-width: 140px;height: 80px;"></div>
+            </div>
             <a href="#"></a><!-- do not touch this stub for UH script -->
         </div>
 
@@ -92,13 +114,6 @@ body{
                 print $mainmenu_content;
           }
           ?>
-            <!-- HEURIST CMS MENU
-            <div id="main-menu" class="mceNonEditable header-element" 
-                style="" 
-                data-heurist-app-id="heurist_Navigation" data-generated="1">
-                <?php print $page_header_menu; ?>
-            </div>
-            -->
         </div>
 
         <div class="page">

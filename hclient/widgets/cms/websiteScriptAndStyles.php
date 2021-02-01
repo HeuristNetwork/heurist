@@ -172,7 +172,7 @@ _time_debug = new Date().getTime() / 1000;
     
     //reload home page content by click on logo
     $("#main-logo").click(function(event){
-              loadPageContent( home_page_record_id );
+            loadPageContent( home_page_record_id, false );
     });
     
     setTimeout(function(){
@@ -184,7 +184,7 @@ _time_debug = new Date().getTime() / 1000;
             var load_initially = home_page_record_id;
             <?php if($isEmptyHomePage) echo 'if(not_empty_page){ load_initially=not_empty_page;}'; ?>
             
-            loadPageContent(init_page_record_id>0 ?init_page_record_id :load_initially);
+            loadPageContent(init_page_record_id>0 ?init_page_record_id :load_initially, (init_page_record_id!=home_page_record_id));
             
         }
         
@@ -223,7 +223,7 @@ _time_debug = new Date().getTime() / 1000;
 //
 //
 //
-function loadPageContent(pageid){
+function loadPageContent(pageid, page_showtitle){
         if(pageid>0){
               //window.hWin.HEURIST4.msg.bringCoverallToFront($('body').find('#main-content'));
               var page_target = $('#main-content');
@@ -235,9 +235,12 @@ function loadPageContent(pageid){
                         +window.hWin.HAPI4.database+'&field=1&recid='+pageid,
                   function(){
                       
-                      var pagetitle = $(page_target.children()[0]);
-                      if(pagetitle.is('h2.webpageheading')) pagetitle.remove()
+                      if(page_showtitle===false){
+                          page_target.find('h2.webpageheading').hide();
+                      }
+                      
                       $('#main-pagetitle').empty();
+                      
                       window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, '#main-content' );
                       window.hWin.HEURIST4.msg.sendCoverallToBack();
 
@@ -450,11 +453,14 @@ $website_title -> #main-title>h2
   if(ele.length>0){
       ele.empty().hide();
       $('<h2 style="font-size:1.7em;margin-top:4px;padding:0 10px;max-height:80px;overflow: hidden;"><?php print htmlspecialchars($website_title, ENT_QUOTES);?></h2>').appendTo(ele);
-      if(ele.parent().is('#main-header') && !$('#main-logo-alt').is(':visible')){
-            ele.css({right:10}); 
+      if(ele.parent().is('#main-header'))
+      {
+          if(!$('#main-logo-alt').is(':visible')){
+                ele.css({right:10}); 
+          }
+          setTimeout(function(){ ele.css({left:$('#main-logo').width()+10 }); },2000);
       }
       ele.fadeIn(3000);
-      setTimeout(function(){ ele.css({left:$('#main-logo').width()+10 }); },2000);
       
   }
   <?php } ?>
