@@ -18,271 +18,57 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 -->
-<style>
-    .search_layout_grid {
-        display: table;
-    }
 
-    .search_layout_row {
-        display: table-row;
-    }
-
-    .search_layout_col {
-        display: table-cell;
-        white-space: nowrap;
-        padding: 5px 10px;
-    }
-
-    .search_layout_col_header {
-        text-align: right;
-        color: #6A7C99;
-        white-space: nowrap;
-        width: 90px;
-    }
-
-    .search_layout_divider {
-        display: block;
-        width: 100%;
-        padding-left: 120px;
-    }
-
-    .search_field_value_add {
-        display: inline-block;
-        font-size: 2em;
-        cursor: pointer;
-        margin-top: -5px;
-        vertical-align: top;
-    }
-
-    .search_option_switch {
-        float: right;
-        cursor: pointer;
-        font-weight: bold;
-        color: #2c66e4;
-    }
-</style>
-
-
-<fieldset>
-    <div class="search_option_switch">Options >></div>
-    <div class="search_layout_grid">
-        <div class="search_layout_row">
-            <div class="search_layout_col search_layout_col_header"><label>Record type</label></div>
-            <div class="search_layout_col">
-                <select class="text ui-widget-content ui-corner-all sa_rectype"
-                        style="min-width:420px;max-width:500px" tabindex="-1"></select>
-            </div>
-
-        </div>
+<fieldset style="height:auto;display:block">
+    <div>
+        <div class="header_narrow" style="width:100px"><label>Record type</label></div>
+        <select class="text ui-widget-content ui-corner-all sa_rectype" 
+                style="min-width:420px;max-width:500px" tabindex="-1"></select>&nbsp;&nbsp;
+                
+        <hr/>
     </div>
-    <div class="search_layout_divider">
-        <hr />
-    </div>
-
-    <div class="search_field_section">
-        <div class="search_field_set">
-            <div class="search_field_item" data-field-type="common">
-                <div class="search_layout_grid search_field_common">
-                    <div class="search_layout_row">
-                        <div class="search_layout_col search_layout_col_header"><label>Field</label></div>
-                        <div class="search_layout_col">
-                            <select class="text ui-widget-content ui-corner-all sa_fieldtype" style="min-width:220px;display:inline-block"></select>
-                        </div>
-                        <div class="search_field_common_value">
-                            <div class="search_layout_col search_layout_col_header">
-                                <label class="search_field_value_label">Contains</label>
-                                <span tabindex="-1" class="search_field_value_add smallbutton editint-inout-repeat-button ui-icon-circlesmall-plus"></span>
-                            </div>
-                            <div class="search_layout_col">
-                                <input type="text" class="text ui-widget-content ui-corner-all sa_fieldvalue" />
-                                <select class="text ui-widget-content ui-corner-all sa_termvalue" style="min-width:141px;max-width: 141px"></select>
-                            </div>
-                            <div class="search_layout_col">
-                                <label><input type="checkbox" class="sa_negate" style="vertical-align: -3px;margin-left:2em" />negate</label>
-                            </div>
-                        </div>
-                        <div class="search_layout_col search_field_option">
-                            <select class="text ui-widget-content ui-corner-all sa_fieldvalue_option" style="min-width:100px;margin:0;">
-
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                <div class="search_layout_grid search_field_coordinates">
-                    <div class="search_layout_row">
-                        <div class="search_layout_col search_layout_col_header">&nbsp;</div>
-                        <div class="search_layout_col search_layout_col_header">
-                            <label>More than</label>
-                        </div>
-                        <div class="search_layout_col">
-                            <input type="text" class="text ui-widget-content ui-corner-all sa_coord1" style="max-width:110px" />
-                        </div>
-                        <div class="search_layout_col search_layout_col_header">
-                            <label>Less than</label>
-                        </div>
-                        <div class="search_layout_col">
-                            <input type="text" class="text ui-widget-content ui-corner-all sa_coord2" style="max-width:110px"/>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    <div>
+        <div class="header_narrow"><label>Field</label></div>
+        <select class="text ui-widget-content ui-corner-all sa_fieldtype" style="min-width:220px;display:inline-block"></select>
+        &nbsp;&nbsp;
+        <div class="fld_coord" style="display:none">
+            <div class="header_narrow" style="display:inline-block"><label>More than</label></div>
+            <input type="text" id="sa_coord1" class="text ui-widget-content ui-corner-all sa_coord1" style="max-width:110px" />
+            <label>&nbsp;&nbsp;Less than</label>
+            <input type="text" id="sa_coord2"  class="text ui-widget-content ui-corner-all sa_coord2" style="max-width:110px"/>
         </div>
-        <div class="search_layout_grid">
-            <div class="search_layout_row">
-                <div class="search_layout_col search_layout_col_header">&nbsp;</div>
-                <div class="search_layout_col">
-                    <span class="search_field_add" style="color:#6A7C99;cursor:pointer">+ add field</span>
-                </div>
-            </div>
+        <div class="fld_contain">
+            <div class="header_narrow" style="display:inline-block"><label>Contains</label></div>
+            <input type="text" class="text ui-widget-content ui-corner-all sa_fieldvalue" />
+            <label><input type="checkbox" class="sa_negate" id="sa_negate" style="vertical-align: -3px;margin-left:2em" />negate</label>
         </div>
-    </div>
-    <div class="search_layout_divider">
-        <hr />
-    </div>
-    <div class="search_sort_section">
-        <div class="search_sort_set">
-            <div class="search_sort_item">
-                <div class="search_layout_grid">
-                    <div class="search_layout_row">
-                        <div class="search_layout_col search_layout_col_header"><label>Sort by</label></div>
-                        <div class="search_layout_col">
-                            <select class="text ui-widget-content ui-corner-all sa_sortby" style="min-width:220px;margin:4px 0px;"></select>
-                        </div>
-                        <div class="search_layout_col">
-                            <select class="text ui-widget-content ui-corner-all sa_sortasc" style="min-width:220px;margin:0;">
-                                <option value="0">Ascending (A..Z, 1..9)</option>
-                                <option value="1">Descending (Z..A, 9..1)</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div class="fld_enum">
+            <div class="header_narrow" style="display:inline-block"><label>Is</label></div>
+            <select class="text ui-widget-content ui-corner-all sa_termvalue" style="min-width:220px;max-width: 220px"></select>
+            <label><input type="checkbox" class="sa_negate2" id="sa_negate2" style="vertical-align: -3px;margin-left:2em" />negate</label>
         </div>
-        <div class="search_layout_grid">
-            <div class="search_layout_row">
-                <div class="search_layout_col search_layout_col_header">&nbsp;</div>
-                <div class="search_layout_col">
-                    <span class="search_sort_add" style="color:#6A7C99;cursor:pointer">+ add sort</span>
-                </div>
-            </div>
-        </div>
+        <hr/>
     </div>
-    <div class="search_spatial_section">
-        <div class="search_layout_grid">
-            <div class="search_layout_row">
-                <div class="search_layout_col search_layout_col_header"><label>Spatial search</label></div>
-                <div class="search_layout_col">
-                    <button class="sa_spatial" style="min-width:170px;max-width:170px;margin-right:10px" title="Click this button to set and apply spatial search limits">Draw on map</button>
-                </div>
-                <div class="search_layout_col">
-                    <button class="sa_spatial_clear" style="min-width:40px;max-width: 40px">reset</button>
-                    <input type="hidden" class="sa_spatial_val" />
-                </div>
-            </div>
-        </div>
+    <div>
+        <div class="header_narrow"><label>Sort by</label></div>
+        <select class="text ui-widget-content ui-corner-all sa_sortby" style="min-width:220px;margin:4px 0px;"></select>&nbsp;&nbsp;
+        <select class="text ui-widget-content ui-corner-all sa_sortasc" style="min-width:220px;margin:0;">
+            <option value="0">Ascending (A..Z, 1..9)</option>
+            <option value="1">Descending (Z..A, 9..1)</option>
+        </select>
     </div>
+    <div>
+        <div class="header_narrow"><label>Spatial search</label></div>
+        <button class="sa_spatial" style="min-width:170px;max-width:170px;margin-right:10px" title="Click this button to set and apply spatial search limits">Draw on map</button>
+        <button class="sa_spatial_clear" style="min-width:40px;max-width: 40px">reset</button>
+        <input type="hidden" class="sa_spatial_val" />
+    </div>
+    
+<!--    <div>
+        <div class="header"><label for="sa_sortasc">Sort Ascending:</label></div>
+        <input type="checkbox" name="sa_sortasc" id="sa_sortasc" class="ui-widget-content ui-corner-all" />
+    </div> -->
     <br />
     <span class="btns" style="width:100%"></span>
     <br />
 </fieldset>
-
-<!--The HTML template for field values which is used when add a new field value-->
-<script id="templateFieldValue" type="text/template">
-    <div class="search_layout_row">
-        <div class="search_layout_col search_layout_col_header">&nbsp;</div>
-        <div class="search_layout_col">&nbsp;</div>
-        <div class="search_field_common_value">
-            <div class="search_layout_col search_layout_col_header">
-                <select class="text ui-widget-content ui-corner-all sa_fieldvalue_operator" style="min-width:80px;margin:0;">
-                    <option value="and">And</option>
-                    <option value="or">Or</option>
-                </select>
-            </div>
-            <div class="search_layout_col">
-                <input type="text" class="text ui-widget-content ui-corner-all sa_fieldvalue" />
-                <select class="text ui-widget-content ui-corner-all sa_termvalue" style="min-width:141px;max-width: 141px"></select>
-            </div>
-            <div class="search_layout_col">
-                <label><input type="checkbox" class="sa_negate" style="vertical-align: -3px;margin-left:2em" />negate</label>
-            </div>
-        </div>
-        <div class="search_layout_col search_field_option">
-            <select class="text ui-widget-content ui-corner-all sa_fieldvalue_option" style="min-width:100px;margin:0;">
-
-            </select>
-        </div>
-    </div>
-</script>
-<!--End of field value template-->
-
-<!--HTML template for fields which is used when add a new field.-->
-<script id="templateField" type="text/template">
-    <div class="search_field_item" data-field-type="common">
-        <div class="search_layout_grid search_field_common">
-            <div class="search_layout_row">
-                <div class="search_layout_col search_layout_col_header">
-                    <select class="text ui-widget-content ui-corner-all sa_field_operator" style="min-width:80px;margin:0;">
-                        <option value="and">And</option>
-                        <option value="or">Or</option>
-                    </select>
-                </div>
-                <div class="search_layout_col">
-                    <select class="text ui-widget-content ui-corner-all sa_fieldtype" style="min-width:220px;display:inline-block"></select>
-                </div>
-                <div class="search_field_common_value">
-                    <div class="search_layout_col search_layout_col_header">
-                        <label class="search_field_value_label">Contains</label>
-                        <span tabindex="-1" class="search_field_value_add smallbutton editint-inout-repeat-button ui-icon-circlesmall-plus"></span>
-                    </div>
-                    <div class="search_layout_col">
-                        <input type="text" class="text ui-widget-content ui-corner-all sa_fieldvalue" />
-                        <select class="text ui-widget-content ui-corner-all sa_termvalue" style="min-width:141px;max-width: 141px"></select>
-                    </div>
-                    <div class="search_layout_col">
-                        <label><input type="checkbox" class="sa_negate" style="vertical-align: -3px;margin-left:2em" />negate</label>
-                    </div>
-                </div>
-                <div class="search_layout_col search_field_option">
-                    <select class="text ui-widget-content ui-corner-all sa_fieldvalue_option" style="min-width:100px;margin:0;">
-
-                    </select>
-                </div>
-            </div>
-        </div>
-        <div class="search_layout_grid search_field_coordinates">
-            <div class="search_layout_row">
-                <div class="search_layout_col search_layout_col_header">&nbsp;</div>
-                <div class="search_layout_col search_layout_col_header">
-                    <label>More than</label>
-                </div>
-                <div class="search_layout_col">
-                    <input type="text" class="text ui-widget-content ui-corner-all sa_coord1" style="max-width:110px" />
-                </div>
-                <div class="search_layout_col search_layout_col_header">
-                    <label>Less than</label>
-                </div>
-                <div class="search_layout_col">
-                    <input type="text" class="text ui-widget-content ui-corner-all sa_coord2" style="max-width:110px"/>
-                </div>
-            </div>
-        </div>
-    </div>
-</script>
-<!--End of field template-->
-
-<!--HTML template for sort by field which is used when adding a new sort by field-->
-<script id="templateSortField" type="text/template">
-    <div class="search_layout_row">
-        <div class="search_layout_col search_layout_col_header">&nbsp;</div>
-        <div class="search_layout_col">
-            <select class="text ui-widget-content ui-corner-all sa_sortby" style="min-width:220px;margin:4px 0px;"></select>
-        </div>
-        <div class="search_layout_col">
-            <select class="text ui-widget-content ui-corner-all sa_sortasc" style="min-width:220px;margin:0;">
-                <option value="0">Ascending (A..Z, 1..9)</option>
-                <option value="1">Descending (Z..A, 9..1)</option>
-            </select>
-        </div>
-    </div>
-</script>
-<!--End of sort by template-->
