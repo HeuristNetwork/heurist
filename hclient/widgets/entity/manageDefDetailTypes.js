@@ -1354,8 +1354,8 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         
         var term_type = this._editing.getValue('dty_Type')[0];
         
-        if(term_type!="enum"){
-            term_type="relation";
+        if(term_type!='enum'){
+            term_type='relation';
         }
         
         var defaultTermID = null;
@@ -1369,8 +1369,14 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         }
         
         var orig_selector = this.enum_container.find("#selVocab");
-        var selnew = window.hWin.HEURIST4.ui.createVocabularySelect(orig_selector[0],
-                    {topOptions:'select...', defaultTermID:is_vocabulary?defaultTermID:0}); 
+        
+        var opts = {topOptions:'select...', defaultTermID:is_vocabulary?defaultTermID:0};
+        
+        if(term_type=='relation'){
+            opts.domain = term_type;
+        }
+        
+        var selnew = window.hWin.HEURIST4.ui.createVocabularySelect(orig_selector[0], opts); 
 
         this._off(orig_selector, 'change');
         this._on(orig_selector, {change: function(event){
