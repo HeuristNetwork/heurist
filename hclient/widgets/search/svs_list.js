@@ -50,6 +50,8 @@ $.widget( "heurist.svs_list", {
     svs_order: null,
     search_faceted: null,
     
+    showclosebutton: true, //for faceted search
+    
     groups_desc:{}, //cache for groups descriptions
 
     currentSearch: null,
@@ -1022,6 +1024,8 @@ console.log('refresh '+(window.hWin.HAPI4.currentUser.usr_SavedSearch==null));
                     if (svs_ID){
                         var qsearch = that.loaded_saved_searches[svs_ID][_QUERY];
                         var qname   = that.loaded_saved_searches[svs_ID][_NAME];
+                        
+                        that.showclosebutton = !($(this).attr('data-only-one')==1);
 
                         that.doSearch( svs_ID, svs_ID, qsearch, event.target ); //qname replaced with svs_ID
                         that.accordeon.find('#search_query').val('');
@@ -1078,7 +1082,8 @@ console.log('refresh '+(window.hWin.HAPI4.currentUser.usr_SavedSearch==null));
         
         //if the only search - start search at once
         if(visible_cnt==1){//this.loaded_saved_searches &&
-            $(this.accordeon).find('button[data-svs-id="'+visible_svsID+'"]').click();
+            var btn = $(this.accordeon).find('button[data-svs-id="'+visible_svsID+'"]');
+            btn.attr('data-only-one',1).click(); //only one is visible
         }else if(this.options.init_svsID){
             $(this.accordeon).find('button[data-svs-id="'+this.options.init_svsID+'"]').click();
         }
@@ -2114,7 +2119,8 @@ console.log('refresh '+(window.hWin.HAPI4.currentUser.usr_SavedSearch==null));
                         svs_ID: svs_ID,
                         query_name:qname, 
                         params:params, 
-                        showresetbutton:(this.options.showresetbutton!==false),
+                        showclosebutton: this.showclosebutton,
+                        showresetbutton: (this.options.showresetbutton!==false),
                         search_realm:this.options.search_realm};
                     
                     
