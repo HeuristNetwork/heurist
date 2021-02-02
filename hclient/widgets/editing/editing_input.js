@@ -1189,15 +1189,20 @@ $.widget( "heurist.editing_input", {
                             that.element.find('.reverse-relation-header').remove();
                         }
                     }
+                    
+                    var isOpened = false;
                 
                     var __show_addlink_dialog = function(){
-                            if(that.is_disabled) return;
+                            if(isOpened || that.is_disabled) return;
+                            
+                            isOpened = true;
                             
                             if(that.options.editing && (that.options.editing.editStructureFlag()===true)){
                                 window.hWin.HEURIST4.msg.showMsgFlash('This feature is disabled in edit structure mode');                     return;
                             }
                             
                             function __onCloseAddLink(context){
+                                    isOpened = false;
                                     
                                     if(context && context.count>0){
                                         
@@ -1382,8 +1387,8 @@ $.widget( "heurist.editing_input", {
                         $btn_add_rel_dialog.appendTo( $inputdiv );   
                    }
                         
-                
-                   $btn_add_rel_dialog.click(function(){__show_addlink_dialog()});
+                   this._on($btn_add_rel_dialog,{click:__show_addlink_dialog});
+                   //$btn_add_rel_dialog.click(function(){__show_addlink_dialog()});
                    
                    __onRelRemove();                   
                    /*if( this.element.find('.link-div').length>0){ //hide this button if there are links
