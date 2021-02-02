@@ -1287,7 +1287,8 @@ $.widget( "heurist.manageEntity", {
             rec_ID = recset.getOrder()[0];
         }
         
-        if(rec_ID){
+        if(rec_ID && this.recordList.resultList('instance'))
+        {
             this.recordList.resultList('setSelected', [rec_ID]);
             this.selectedRecords([rec_ID]);  //it trigger this.option.onSelect
             

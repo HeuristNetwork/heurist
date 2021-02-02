@@ -335,6 +335,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                             
                             function __modifyStructureAction(){
                                 
+                                that._editing.setModified(0);
+                                
                                 if(action=='field'){    
                                     that.options.rts_editor.manageDefRecStructure(
                                         'showBaseFieldEditor', -1, dt_id);
@@ -687,9 +689,9 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 }else if(this.options.edit_structure==true){
 
                         btns = [ 
-                            {text:window.hWin.HR('Save'), id:'btnRecSaveAndClose',
+                            {text:window.hWin.HR('Save'), id:'btnRecSave', //AndClose
                               css:{'margin-left':'0.5em'},
-                              click: function() { that._saveEditAndClose( null, 'close' ); }},
+                              click: function() { that._saveEditAndClose( null, 'none' ); }}, //'close'
                             {text:window.hWin.HR('Close'), 
                               click: function() { 
                                   that.closeEditDialog();

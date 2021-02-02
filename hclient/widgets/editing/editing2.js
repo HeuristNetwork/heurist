@@ -27,7 +27,6 @@ function hEditing(_options) {
          recdata = null,     //hRecordSet with data to be edited
          editing_inputs = [],
          recstructure,
-         wasModified = 0, //0 not modified (on init), 1 was modified, 2 - finalized(not modified)
          onChangeCallBack=null,
          entityConfig = null,
          options = {},
@@ -119,7 +118,7 @@ function hEditing(_options) {
     
     function _initEditForm(_recstructure, _recdata, _is_insert){
         
-        wasModified = 0;
+        that.wasModified = 0;
         
         $container.hide();
         $container.empty(); //clear previous edit elements
@@ -545,9 +544,9 @@ function hEditing(_options) {
     
     function _isModified(){
         
-        if(wasModified==2){ //modfied flag is reset (after save)
+        if(that.wasModified==2){ //modfied flag is reset (after save)
             return false;
-        }else if(wasModified==1){
+        }else if(that.wasModified==1){
             return true;
         }else{
             var idx;
@@ -646,6 +645,8 @@ function hEditing(_options) {
 
     //public members
     var that = {
+        
+        wasModified: 0, //0 not modified (on init), 1 was modified, 2 - finalized(not modified)
 
         getClass: function () {return _className;},
         isA: function (strClass) {return (strClass === _className);},
@@ -764,8 +765,9 @@ function hEditing(_options) {
         },
         
         setModified: function(val){
+            
             if(val===0){
-                wasModified = 0;    
+                that.wasModified = 0;    
                 var idx;
                 for (idx in editing_inputs) {
                     ele = $(editing_inputs[idx]);
@@ -776,7 +778,7 @@ function hEditing(_options) {
                 }
                 
             }else{
-                wasModified = (val===false)?2:1;
+                that.wasModified = (val===false)?2:1;
             }
         },
         
