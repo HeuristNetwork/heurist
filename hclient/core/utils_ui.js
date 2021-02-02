@@ -77,7 +77,7 @@ if (!window.hWin.HEURIST4.ui)
 {
 
 window.hWin.HEURIST4.ui = {
-
+    
     setValueAndWidth: function(ele, value, padding){
         
         if(window.hWin.HEURIST4.util.isempty(value)) value='';
@@ -2436,10 +2436,10 @@ window.hWin.HEURIST4.ui = {
         if( window.hWin.HEURIST4.util.isNumber( options ) ){
             options = {record_id:options};
         }
-        
+            
         editCMS(  options ); //see editCMS.js
     },
-    
+
     //
     // show action dialog based on 
     //   recordAction widgets (see widget/records) or 

@@ -908,8 +908,9 @@ $.widget( "heurist.mainMenu6", {
                     $(this).search_entity('refreshOnShow');
                 }else if (action_name === 'search_quick' && cont.search_quick('instance')) {
                     // Refresh container height.
-                    cont.search_quick('instance').refreshContainerHeight();
-                    cont.search_quick('instance').refreshContainerWidth();
+                    //cont.search_quick('instance').outerHeight();
+                    //cont.search_quick('instance').refreshContainerHeight();
+                    //cont.search_quick('instance').refreshContainerWidth();
                 }
             });
 
@@ -1436,6 +1437,8 @@ $.widget( "heurist.mainMenu6", {
             
         }else if(force_show || section=='explore'){
             that.containers[section].show();    
+        }else if(editCMS_instance && section=='publish'){
+            editCMS_instance.closeCMS();
         }else{
             return;
         }
