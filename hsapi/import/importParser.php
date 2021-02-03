@@ -21,9 +21,10 @@
 */
 
 /**
-* two public methods
-* validateImport
-* performImport
+* Public methods
+* saveToTempFile  - saves csv into temp file in scratch folder
+* encodeAndGetPreview - check encoding, save file in new encoding and parse first x lines for preview
+* parseAndValidate - read file, remove spaces, convert dates, validate identifies/integers, find memo and multivalues
 * 
 */
 class ImportParser {
@@ -386,6 +387,8 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
                             //Convert dates to standardised format.  //'field_'.
                             if($check_datefield && @$datefields[$k]!=null && $field!=""){
                                 $field = self::prepareDateField($field, $csv_dateformat);
+                                
+                                $field_sizes[$k] = max($field_sizes[$k],strlen($field));
                             }
 
                             $check_keyfield_K = ($check_keyfield && @$keyfields['field_'.$k]!=null);
@@ -569,6 +572,7 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
                             //Convert dates to standardised format.  //'field_'.
                             if($check_datefield && @$datefields[$k]!=null && $field!=""){
                                 $field = self::prepareDateField($field, $csv_dateformat);
+                                $field_sizes[$k] = max($field_sizes[$k],strlen($field));
                             }
                             
                             $check_keyfield_K =  ($check_keyfield && @$keyfields['field_'.$k]!=null);
@@ -699,10 +703,15 @@ public static function parseAndValidate($encoded_filename, $original_filename, $
 }
 
 //
-//
+// $csv_dateformat 1 - dd/mm/yyyy,  2 - mm/dd/yyyy
 //
 private static function prepareDateField($field, $csv_dateformat){
     
+    $t3 = validateAndConvertToISO($field, null, $csv_dateformat);
+    if($t3!='Temporal' && $t3!=null){
+        $field = $t3;
+    }
+    /*
     if(is_numeric($field) && abs($field)<99999){ //year????
 
     }else{
@@ -718,12 +727,7 @@ private static function prepareDateField($field, $csv_dateformat){
         } catch (Exception  $e){
             //print $field.' => NOT SUPPORTED<br>';                            
         }                            
-        /* strtotime works for dates after 1901 ONLY!
-        $field2 = strtotime($field);
-        $field3 = date('Y-m-d H:i:s', $field2);
-        $field = $field3;
-        */
-    }
+    }*/
     return $field;
 }
 

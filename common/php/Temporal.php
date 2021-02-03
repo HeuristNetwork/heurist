@@ -147,9 +147,9 @@ function temporalToHumanReadableString($value, $showoriginal_temporal=false){
 
 
 //
+// $month_day_order     1 - dd/mm,  2 - mm/dd
 //
-//
-function validateAndConvertToISO($value, $today_date=null){
+function validateAndConvertToISO($value, $today_date=null, $month_day_order=2){
           if (strpos($value,"|")!==false) {// temporal encoded date
                 return 'Temporal';
           }else{
@@ -171,15 +171,16 @@ function validateAndConvertToISO($value, $today_date=null){
                 }
                 //$date = parseDateTime($value);
                 //return @$date['year'].'-'.@$date['month'].'-'.@$date['day'];
-                $res = removeLeadingYearZeroes($value, false, true);
+                $res = removeLeadingYearZeroes($value, false, true, $month_day_order);
                 
                 return $res;
           }
 }
 //
-//   $is_greg_or_julian true - returns full month names
+// $is_greg_or_julian true - returns full month names
+// $month_day_order   1  dd/mm   2 mm/dd
 //
-function removeLeadingYearZeroes($value, $is_greg_or_julian=true, $is_strict_iso=false){
+function removeLeadingYearZeroes($value, $is_greg_or_julian=true, $is_strict_iso=false, $month_day_order=2){
 
 	//$date = parseDateTime($value);
     // preg_match('/^\d+$/', $value)  && is_int(intval($value))
@@ -194,7 +195,7 @@ function removeLeadingYearZeroes($value, $is_greg_or_julian=true, $is_strict_iso
             $date = null;
         }else{
             
-            $value = correctDMYorder($value, false);
+            $value = correctDMYorder($value, false, $month_day_order);
 
             try{   
                 $origHasSeconds = (substr_count($value,':')>1);
@@ -258,21 +259,21 @@ function removeLeadingYearZeroes($value, $is_greg_or_julian=true, $is_strict_iso
         }
 
         if(true){
-		if($has_time){
-			if(!@$date['hour']) {
-					$date['hour'] = 0;
-			}
+		    if($has_time){
+			    if(!@$date['hour']) {
+					    $date['hour'] = 0;
+			    }
 
-			if($date['hour']>0 || @$date['minute']>0 || @$date['second']>0){
-				$res = $res.' '.str_pad(''.$date['hour'],2,'0',STR_PAD_LEFT);
+			    if($date['hour']>0 || @$date['minute']>0 || @$date['second']>0){
+				    $res = $res.' '.str_pad(''.$date['hour'],2,'0',STR_PAD_LEFT);
 
-				if(!@$date['minute']) { $date['minute'] = 0; }
-				$res = $res.':'.str_pad(''.$date['minute'],2,'0',STR_PAD_LEFT);
-			}
-			if(@$date['second']>0 || $origHasSeconds){
-				$res = $res.':'.str_pad(''.$date['second'],2,'0',STR_PAD_LEFT);
-			}
-		}
+				    if(!@$date['minute']) { $date['minute'] = 0; }
+				    $res = $res.':'.str_pad(''.$date['minute'],2,'0',STR_PAD_LEFT);
+			    }
+			    if(@$date['second']>0 || $origHasSeconds){
+				    $res = $res.':'.str_pad(''.$date['second'],2,'0',STR_PAD_LEFT);
+			    }
+		    }
         }else{   //debug
             $res = $res.' '.@$date['hour'].':'.@$date['minute'].':'.@$date['second'];
         }
@@ -293,9 +294,11 @@ function removeLeadingYearZeroes($value, $is_greg_or_julian=true, $is_strict_iso
 }
 
 //
+// $month_day_order   true or 0 - returns true or false whether date/month ate ambiguate 
+//                    2 - mm/dd (default)
+//                    1 - dd/mm
 //
-//
-function correctDMYorder($value, $need_ambguation=false){
+function correctDMYorder($value, $month_day_order=2){
     
         $is_dots_slash = false;
         $is_ambguation = false;
@@ -313,7 +316,7 @@ function correctDMYorder($value, $need_ambguation=false){
             $is_dots_slash = ($cnt_dots>0 || $cnt_slash>0);
         }
         
-        if(substr_count($value,'-')==1) {
+        if(substr_count($value,'-')==1) { //year and month only
             $need_day = false;
             list($m, $y) = explode('-', $value);
             
@@ -357,12 +360,18 @@ function correctDMYorder($value, $need_ambguation=false){
                 }else{
                     $value = $y.'-'.$m.'-'.$d;
                     
+                    if($month_day_order==1){  //dd/mm
+                        $value = $y.'-'.$d.'-'.$m;
+                    }else{
+                        $value = $y.'-'.$m.'-'.$d; // mm/dd
+                    }
+                    
                     $is_ambguation = ($m<13 && $d<13); //day-month ambiguation
                 }
             }
         }
 
-        return $need_ambguation ?$is_ambguation :$value;    
+        return ($month_day_order===0 ||  $month_day_order===true)?$is_ambguation :$value;    
 }
 
 //
