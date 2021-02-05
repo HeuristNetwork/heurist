@@ -1468,7 +1468,7 @@ prof =Profile
             },
 
             //
-            // retrieve title of entity bt given id
+            // retrieve title of entity by given ids
             // entityScrud.action = title
             //
             getTitlesByIds:function(entityName, recIDs, callback){

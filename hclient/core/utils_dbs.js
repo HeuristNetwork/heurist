@@ -74,6 +74,8 @@ window.hWin.HEURIST4.dbs = {
     rtg_trash_id: 0,
     dtg_trash_id: 0,
     vcg_trash_id: 0,
+    
+    vocabs_already_synched: false, //set to true after first direct import by mapping to avoid sync on every request
 
     //
     // return vocabulary for given term - real vocabulary (not by reference)
