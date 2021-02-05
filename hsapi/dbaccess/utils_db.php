@@ -1586,6 +1586,7 @@ $query = 'INSERT INTO defDetailTypeGroups (dtg_Name,dtg_Order,dtg_Description) '
             $mysqli->query($query);
         }
 
+/*        
         $system->defineConstant('RT_CMS_HOME');
         $system->defineConstant('DT_POPUP_TEMPLATE');
         
@@ -1603,7 +1604,7 @@ $query = 'INSERT INTO defDetailTypeGroups (dtg_Name,dtg_Order,dtg_Description) '
             $ret = $entity->batch_action();
         }
         
+*/    
         
     }  
-    
 ?>

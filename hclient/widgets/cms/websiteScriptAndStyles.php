@@ -589,7 +589,7 @@ function _getMenuContent($parent_id, $menuitems, $lvl){
                     $subres = '';
                     $submenu = @$record['details'][DT_CMS_MENU];
                     if(!$submenu){
-                        $submenu = $record['details'][DT_CMS_TOP_MENU];
+                        $submenu = @$record['details'][DT_CMS_TOP_MENU];
                     }
                     //has submenu
                     if($submenu){
