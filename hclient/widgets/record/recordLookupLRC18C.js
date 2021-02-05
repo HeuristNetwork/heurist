@@ -234,11 +234,28 @@ where t1.trm_ParentTermID=507 order by t1.trm_Label;
         });
         this._on(this.element.find('input'), {
             'keypress': this.startSearchOnEnterPress
-        });
+        })
+        ;
         //Populate Bookformat dropdown on lookup page
-        // since this vocabulary is synced with ESTC we may init at once
-        var selBf = window.hWin.HEURIST4.ui.createTermSelect(this.element.find('#select_bf')[0],
-            {vocab_id:6891, topOptions: 'Select Book Format' });
+        //var selBf = window.hWin.HEURIST4.ui.createTermSelect(this.element.find('#select_bf')[0],
+        //    {vocab_id:6891, topOptions: 'Select Book Format' });
+            
+        var request = {db:'ESTC_Helsinki_Bibliographic_Metadata', a:'search', 'entity':'defTerms', 
+                    'details':'list', 'trm_ParentTermID':5430};
+
+        var selBf = this.element.find('#select_bf').empty();
+        window.hWin.HEURIST4.ui.addoption(selBf[0], 0, 'select...'); //first option
+
+        window.hWin.HAPI4.EntityMgr.doRequest(request, 
+            function(response){
+                if(response.status == window.hWin.ResponseStatus.OK){
+                    var recordset = new hRecordSet(response.data);
+                    
+                    recordset.each2(function(trm_ID, term){
+                         window.hWin.HEURIST4.ui.addoption(selBf[0], trm_ID, term['trm_Label']);
+                    });
+                }
+        });
         
         //by default action button is disabled
         window.hWin.HEURIST4.util.setDisabled(this.element.parents('.ui-dialog').find('#btnDoAction'), false);
@@ -410,13 +427,13 @@ where t1.trm_ParentTermID=507 order by t1.trm_Label;
         estc_no = "";
         vol_count = "";
         vol_parts = "";
-        
+
         if(true){ //use json format and fulltext search
 
             var query = {"t":"30"}; //search for Books
 
             if (this.element.find('#edition_name').val() != '') {
-                query['f:1'] = '@'+this.element.find('#edition_name').val();
+                query['f:1 '] = '@'+this.element.find('#edition_name').val() ;
             }
             if (this.element.find('#edition_date').val() != '') {
                 query['f:9'] = this.element.find('#edition_date').val();
@@ -447,21 +464,22 @@ where t1.trm_ParentTermID=507 order by t1.trm_Label;
             if (this.element.find('#estc_no').val() != '') {
                 query['f:254'] = '@'+this.element.find('#estc_no').val();
             }
-/*
+            sort_by_key = "'sortby'"
+            query[sort_by_key.slice(1, -1)] = 'f:9:'
+            /*
             selectedBF = this.element.find('#select_bf option:selected').text()
             if (selectedBF != null && selectedBF != '' && selectedBF != "Select Book Format") {
-                book_format = 'all: ' + selectedBF
+            book_format = 'all: ' + selectedBF
             } else {
-                book_format = ""
+            book_format = ""
             }
             query_string = 't:30 ' + edition_name + edition_date + edition_author + edition_work + edition_place + book_format + estc_no + vol_count + vol_parts;
-*/
+            */
             query_string = query;
 
         }else{
-            
             if (this.element.find('#edition_name').val() != '') {
-                edition_name = ' f:1: ' + '"' + this.element.find('#edition_name').val() + '"'
+                edition_name = ' f:1: ' + '"' + this.element.find('#edition_name').val() + '" '
             }
             if (this.element.find('#edition_date').val() != '') {
                 edition_date = ' f:9: ' + '"' + this.element.find('#edition_date').val() + '"'
@@ -499,9 +517,10 @@ where t1.trm_ParentTermID=507 order by t1.trm_Label;
         console.log("Query String is")
         console.log(query_string);
 
+
         window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent());
 
-        var query_request = {db: 'ESTC_Helsinki_Bibliographic_Metadata', q:query_string};
+        var query_request = {db: 'ESTC_Helsinki_Bibliographic_Metadata', q: query_string};
         var that = this;
         query_request['detail'] = 'details';
         window.hWin.HAPI4.RecordMgr.search(query_request,
@@ -512,9 +531,11 @@ where t1.trm_ParentTermID=507 order by t1.trm_Label;
                 } else {
                     that._onSearchResult(response);
                 }
-            });
+        });
 
-    },
+
+    },    
+    
     /* Build each Book(Edition) as a record to display list of records that can be selected by the user*/
     _onSearchResult: function (response) {
         this.recordList.show();

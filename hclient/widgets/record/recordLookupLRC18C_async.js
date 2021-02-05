@@ -148,38 +148,38 @@ $.widget("heurist.recordLookupLRC18C", $.heurist.recordAction, {
     },
 
     /* Render Lookup query results */
-    _rendererResultList: function (recordset, record) {
-        function fld(fldname, width) {
-            var s = recordset.fld(record, fldname);
-            s = s ? s : '';
-            if (width > 0) {
-                s = '<div style="display:inline-block;width:' + width + 'ex" class="truncate">' + s + '</div>';
-            }
-            return s;
+_rendererResultList: function (recordset, record) {
+    function fld(fldname, width) {
+        var s = recordset.fld(record, fldname);
+        s = s ? s : '';
+        if (width > 0) {
+            s = '<div style="display:inline-block;width:' + width + 'ex" class="truncate">' + s + '</div>';
         }
+        return s;
+    }
 
-        var recID = fld('rec_ID');
-        var rectypeID = fld('rec_RecTypeID');
-        var recIcon = window.hWin.HAPI4.iconBaseURL + 1 + '.png';
-        var html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'
-            + window.hWin.HAPI4.iconBaseURL + 'thumb/th_' + 1 + '.png&quot;);"></div>';
-        fld('properties.edition', 15)
+    var recID = fld('rec_ID');
+    var rectypeID = fld('rec_RecTypeID');
+    var recIcon = window.hWin.HAPI4.iconBaseURL + 1 + '.png';
+    var html_thumb = '<div class="recTypeThumb" style="background-image: url(&quot;'
+        + window.hWin.HAPI4.iconBaseURL + 'thumb/th_' + 1 + '.png&quot;);"></div>';
+    fld('properties.edition', 15)
 
-        var html = '<div class="recordDiv" id="rd' + record[2] + '" recid="' + record[2] + '" rectype="' + 1 + '">'
-            + html_thumb
-            + html_thumb
+    var html = '<div class="recordDiv" id="rd' + record[2] + '" recid="' + record[2] + '" rectype="' + 1 + '">'
+        + html_thumb
+        + html_thumb
 
-            + '<div class="recordIcons">'
-            + '<img src="' + window.hWin.HAPI4.baseURL + 'hclient/assets/16x16.gif'
-            + '" class="rt-icon" style="background-image: url(&quot;' + recIcon + '&quot;);"/>'
-            + '</div>'
+        + '<div class="recordIcons">'
+        + '<img src="' + window.hWin.HAPI4.baseURL + 'hclient/assets/16x16.gif'
+        + '" class="rt-icon" style="background-image: url(&quot;' + recIcon + '&quot;);"/>'
+        + '</div>'
 
-            + '<div class="recordTitle" style="left:30px;right:2px">'
-            + record[5]
-            + '</div>'
-            + '</div>';
-        return html;
-    },
+        + '<div class="recordTitle" style="left:30px;right:2px">'
+        + record[5]
+        + '</div>'
+        + '</div>';
+    return html;
+},
 
     startSearchOnEnterPress: function (e) {
         var code = (e.keyCode ? e.keyCode : e.which);
@@ -661,7 +661,7 @@ $.widget("heurist.recordLookupLRC18C", $.heurist.recordAction, {
             edition_estc_id=''
         }
 
-        query_string = 't:55 f:1094:="' + edition_estc_id + '"'
+        query_string = 't:55 f:1094="' + edition_estc_id + '"'
         urlToCheckEditioninLibraries = that._getQueryURL(query_string, "libraries")
         edition_id = parsedXML['idsNTitleDict']['editionID'];
 
@@ -1020,15 +1020,15 @@ $.widget("heurist.recordLookupLRC18C", $.heurist.recordAction, {
             }
             sort_by_key = "'sortby'"
             query[sort_by_key.slice(1, -1)] = 'f:9:'
-/*
+            /*
             selectedBF = this.element.find('#select_bf option:selected').text()
             if (selectedBF != null && selectedBF != '' && selectedBF != "Select Book Format") {
-                book_format = 'all: ' + selectedBF
+            book_format = 'all: ' + selectedBF
             } else {
-                book_format = ""
+            book_format = ""
             }
             query_string = 't:30 ' + edition_name + edition_date + edition_author + edition_work + edition_place + book_format + estc_no + vol_count + vol_parts;
-*/
+            */
             query_string = query;
 
         }else{
