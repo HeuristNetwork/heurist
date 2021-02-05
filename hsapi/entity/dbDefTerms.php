@@ -647,6 +647,8 @@ class DbDefTerms extends DbEntityBase
                     }
                 }
                 if($ret){
+                    $mysqli->query('set @suppress_update_trigger=1');
+
                     //2. update entries in recDetails for all detail type enum or reltype
                     $query = "update recDetails, defDetailTypes set dtl_Value=".$retain_id
                     ." where (dty_ID = dtl_DetailTypeID ) and "
@@ -659,6 +661,7 @@ class DbDefTerms extends DbEntityBase
                             'SQL error in mergeTerms updating record details', $mysqli->error);
                         $ret = false; 
                     }
+                    $mysqli->query('set @suppress_update_trigger=NULL');
                 }
                 if($ret){
                     //3. delete term $merge_id

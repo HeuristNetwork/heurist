@@ -560,6 +560,7 @@ public static function importRecords($filename, $session_id, $is_cms_init=false,
     $res = false;
     $cnt_imported = 0;
     $cnt_ignored = 0;
+    $ids_exist = array();
     $rec_ids_details_empty = array();
     $resource_notfound = array();
     
@@ -649,18 +650,22 @@ EOD;
         
                 //for import records by mapping we check and import affected vocabularies only
                 $res2 = $importDef->doPrepare(  array('defType'=>'term', 
-                        'databaseID'=>@$data['heurist']['database']['id'], 
-                        'definitionID'=>$mapping_defs['vocabularies'])); //array of vocabularies to be imported
-                        
-                if($res2){
-                 //   $importDef->doImport(); //sync/import vocabularies
-                }     
-                //mapping for fields and rectypes
-                $importDef->doMapping($mapping_defs);
+                            'databaseID'=>@$data['heurist']['database']['id'], 
+                            'definitionID'=>$mapping_defs['vocabularies'])); //array of vocabularies to be imported
+                            
+                if($res2 && @$mapping_defs['import_vocabularies']==1){
+                        $res2 = $importDef->doImport(); //sync/import vocabularies
+                }
                 
-                $defs = $importDef->getDefinitions();        
-                $defs['rectypes'] = dbs_GetRectypeStructures(self::$system, null, 2);
-                $defs['detailtypes'] = dbs_GetDetailTypes(self::$system, null, 2);
+                if($res2){
+                    //mapping for fields and rectypes
+                    $importDef->doMapping($mapping_defs);
+                    $defs = $importDef->getDefinitions(); //terms aready here
+                    
+                    $defs['rectypes'] = dbs_GetRectypeStructures(self::$system, null, 2);
+                    $defs['detailtypes'] = dbs_GetDetailTypes(self::$system, null, 2);
+                }
+                
                         
             }else{
                 //Finds all defintions to be imported
@@ -743,7 +748,20 @@ EOD;
                     $target_RecID = mysql__select_value($mysqli, 'select rec_ID from Records, recDetails where dtl_RecID=rec_ID '
                     .' AND rec_RecTypeID='.$recTypeID.' AND dtl_DetailTypeID='.$keyDty_ID.' AND dtl_Value="'.$key_value.'"');
             
-                    if(!($target_RecID>0)) $target_RecID = 0;
+                    $target_RecID = intval($target_RecID);
+                    if($target_RecID>0){
+                        $ids_exist[] = $target_RecID;                
+                        
+                        $records_corr[$record_src['rec_ID']] = $target_RecID; 
+                        $keep_rectypes[$target_RecID] = $recTypeID;
+                        
+                        continue; 
+                    }else{
+                        $target_RecID = 0;
+                    }
+                }else{
+                    $cnt_ignored++;                
+                    continue; 
                 }
                 
             }else{
@@ -778,7 +796,8 @@ EOD;
                 $record_src_original_id = ((@$data['heurist']['database']['id']>0)
                         ?$data['heurist']['database']['id']:'0').'-'
                         .$record_src['rec_ID'];
-                
+
+                //in case source id is not numerics or more than MAX INT                
                 if((!ctype_digit($record_src['rec_ID'])) || strlen($record_src['rec_ID'])>9 ){  //4 957 948 868
                     $rec_id_low = strtolower($record_src['rec_ID']);
                     if(@$records_corr_alphanum[$rec_id_low]){ //aplhanum->random int
@@ -1084,7 +1103,7 @@ EOD;
             }
             
             //source rec id => target rec id
-            $new_rec_id  = $out['data']; //new record id
+            $new_rec_id  = intval($out['data']); //new record id
             $records_corr[$record_src['rec_ID']] = $new_rec_id; 
             $keep_rectypes[$new_rec_id] = $record['RecTypeID'];
             
@@ -1160,7 +1179,7 @@ EOD;
             
             if(!$is_rollback){
                 //update resource fields with new record ids
-                foreach ($resource_fields as $src_recid=>$fields){
+                foreach ($resource_fields as $src_recid=>$fields){  //src recid => dty ids
 
                     //get new id in target db                
                     $trg_recid = @$records_corr[$src_recid];//source rec id -> target rec id
@@ -1236,10 +1255,14 @@ EOD;
                 if($keep_autocommit===true) $mysqli->autocommit(TRUE);
                 $res = array('count_imported'=>$cnt_imported, 
                              'count_ignored'=>$cnt_ignored, //rectype not found 
+                             'cnt_exist'=>count($ids_exist), //such record already exists
                              'details_empty'=>$rec_ids_details_empty, 
                              'resource_notfound'=>$resource_notfound  ); //if value is H-ID-nnn
                 if(count($records_corr)<1000){
                     $res['ids'] = array_values($records_corr);    
+                }
+                if(count($ids_exist)<1000){
+                    $res['exists'] = $ids_exist;    
                 }
         }
         $mysqli->query('SET FOREIGN_KEY_CHECKS = 1');

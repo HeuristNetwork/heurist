@@ -1302,11 +1302,11 @@ $mysqli->commit();
             $idx_origin_name   = $terms['fieldNamesToIndex']['trm_NameInOriginatingDB'];
             
             $idx_vocab_group_id  = intval($terms['fieldNamesToIndex']["trm_VocabularyGroupID"]);
-            
-            if($term_id==7256){
+/*            
+            if($term_id==5892){
                 error_log('!!!!!');
             }
-
+*/
             //search both domains
             $term_import = $this->sourceTerms->getTerm($term_id, $domain);
             //$term_import = $terms['termsByDomainLookup'][$domain][$term_id]; //6256 returns wrong!!

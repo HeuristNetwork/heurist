@@ -1,5 +1,6 @@
 /**
 * recordLookupCfg.js - configuration for record lookup services
+*                       original config is hsapi/controller/record_lookup_config.json
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org

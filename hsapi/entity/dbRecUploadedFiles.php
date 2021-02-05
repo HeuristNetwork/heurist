@@ -39,7 +39,7 @@ class DbRecUploadedFiles extends DbEntityBase
            $data = array();
        } 
        if(!@$data['entity']){
-           $data['entity'] = recUploadedFiles;
+           $data['entity'] = 'recUploadedFiles';
        }
         
        parent::__construct( $system, $data );

@@ -393,7 +393,9 @@ class DbDefRecStructure extends DbEntityBase
         
         
         $records = array();        
-        foreach($fields as $dty_ID){
+        foreach($fields as $dty_ID)
+        if(@$dt_fields[$dty_ID])
+        {
         
             $dt = $dt_fields[$dty_ID]['commonFields'];
             
@@ -421,9 +423,13 @@ class DbDefRecStructure extends DbEntityBase
             $order = $order+10;
         }
         
-        $this->data['fields'] = $records;
-        $this->is_addition = true;
-        return $this->save();
+        if(count($records)>0){
+            $this->data['fields'] = $records;
+            $this->is_addition = true;
+            return $this->save();
+        }else{
+            return false;
+        }
     }
     
     

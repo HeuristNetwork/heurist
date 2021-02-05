@@ -1386,8 +1386,20 @@ $.widget( "heurist.manageEntity", {
         if(this._editing.validate()){
             return this._editing.getValues(false);    
         }else{
-            window.hWin.HEURIST4.msg.showMsgFlash('Missing or invalid data entered',1500);
-            $(this.editForm.find('input.ui-state-error')[0]).focus();
+            var eles = this.editForm.find('.text.ui-state-error');
+            
+            window.hWin.HEURIST4.msg.showMsgFlash('Missing or invalid data entered'
+                +((eles.length>1)?(' for '+eles.length+' fields.'):'')
+                ,1500);
+                
+            var ele = $(eles[0]);
+                
+            var accrd = ele.parents('div.ui-tabs');
+            if(accrd.length>0 && accrd.tabs('instance')){
+                var idx = ele.parents('fieldset.ui-tabs-panel').attr('data-tabindex');        
+                accrd.tabs('option','active', idx);
+            }
+            ele.focus();
             
             return null;
         }
