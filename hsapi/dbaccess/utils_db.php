@@ -1590,7 +1590,7 @@ $query = 'INSERT INTO defDetailTypeGroups (dtg_Name,dtg_Order,dtg_Description) '
         $system->defineConstant('DT_POPUP_TEMPLATE');
         
         //adds 2-922 int CMS_HOME_RECORD
-        if(RT_CMS_HOME>0 && DT_POPUP_TEMPLATE>0 && 
+        if(defined('RT_CMS_HOME') && defined('DT_POPUP_TEMPLATE') && RT_CMS_HOME>0 && DT_POPUP_TEMPLATE>0 && 
             !(mysql__select_value($mysqli, 
                 'select rst_ID from defRecStructure where rst_RecTypeID='.RT_CMS_HOME
                     .' and rst_DetailTypeID='.DT_POPUP_TEMPLATE)>0))
