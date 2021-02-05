@@ -3396,6 +3396,8 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                                                 }
                                             }
                                         }else{
+                                            //lookup dialog returns pairs - dtyID=>value
+                                            
                                             var dtyIds = Object.keys(recset);
 
                                             for(var k=0; k<dtyIds.length; k++){
