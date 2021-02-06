@@ -456,7 +456,6 @@ $.widget( "heurist.navigation", {
                     },
                     open: function(){
 
-
                         var pagetitle = $dlg.find('h2.webpageheading');
                         if(pagetitle.length>0){ //find title - this is first children
                             //pagetitle.addClass("webpageheading");//.css({position:'absolute',left:0,width:'auto'});
@@ -531,16 +530,6 @@ $.widget( "heurist.navigation", {
                     $(page_target).empty().load(page_url,
                         function(){
 
-                            var pagetitle = $($(page_target).children()[0]);
-                            if(pagetitle.is('h2')){
-                                if(page_target=='#main-content')
-                                {   //move page title
-                                    pagetitle.addClass("webpageheading");
-                                    $('#main-pagetitle').empty().append(pagetitle);
-                                }else{
-                                    pagetitle.remove();
-                                }
-                            }
                             if(page_footer.length>0){
                                 page_footer.appendTo( $(page_target) );
                                 $(page_target).css({'min-height':$(page_target).parent().height()-page_footer.height()-10 });

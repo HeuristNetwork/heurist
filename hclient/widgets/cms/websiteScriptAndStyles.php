@@ -172,7 +172,7 @@ _time_debug = new Date().getTime() / 1000;
     
     //reload home page content by click on logo
     $("#main-logo").click(function(event){
-            loadPageContent( home_page_record_id, false );
+            loadPageContent( home_page_record_id );
     });
     
     setTimeout(function(){
@@ -184,7 +184,7 @@ _time_debug = new Date().getTime() / 1000;
             var load_initially = home_page_record_id;
             <?php if($isEmptyHomePage) echo 'if(not_empty_page){ load_initially=not_empty_page;}'; ?>
             
-            loadPageContent(init_page_record_id>0 ?init_page_record_id :load_initially, (init_page_record_id!=home_page_record_id));
+            loadPageContent( init_page_record_id>0 ?init_page_record_id :load_initially );
             
         }
         
@@ -223,7 +223,7 @@ _time_debug = new Date().getTime() / 1000;
 //
 //
 //
-function loadPageContent(pageid, page_showtitle){
+function loadPageContent(pageid){
         if(pageid>0){
               //window.hWin.HEURIST4.msg.bringCoverallToFront($('body').find('#main-content'));
               var page_target = $('#main-content');
@@ -234,12 +234,6 @@ function loadPageContent(pageid, page_showtitle){
               page_target.empty().load(window.hWin.HAPI4.baseURL+'?db='
                         +window.hWin.HAPI4.database+'&field=1&recid='+pageid,
                   function(){
-                      
-                      if(page_showtitle===false){
-                          page_target.find('h2.webpageheading').hide();
-                      }
-                      
-                      $('#main-pagetitle').empty();
                       
                       window.hWin.HAPI4.LayoutMgr.appInitFromContainer( document, '#main-content' );
                       window.hWin.HEURIST4.msg.sendCoverallToBack();
@@ -261,11 +255,6 @@ function loadPageContent(pageid, page_showtitle){
 <script>
 var page_scripts = {}; //pageid:functionname   cache to avoid call server every time on page load 
 
-var is_show_pagetitle = false;
-<?php if($show_pagetitle){ ?>
-        is_show_pagetitle = true;
-<?php } ?>        
-    
 var datatable_custom_render = null;
 //
 // Executes custom javascript defined in field DT_CMS_SCRIPT
@@ -273,6 +262,29 @@ var datatable_custom_render = null;
 // then it executes this function
 //
 function afterPageLoad(document, pageid){
+    
+//console.log('afterPageLoad');    
+    
+    //var pagetitle = $($(page_target).children()[0]);
+    var pagetitle = $('#main-content > h2.webpageheading');
+    var title_container = $('#main-pagetitle');
+    var show_page_title = false;
+        
+    if(pagetitle.length>0  && title_container.length>0)  //&& pagetitle.parent().attr('id')=='main-content'
+    {
+        //move page title to header - visibility is set in websiteRecord
+        title_container.empty();
+        pagetitle.detach().appendTo(title_container);
+        show_page_title = pagetitle.is(':visible');
+    }else{
+        //pagetitle.remove();
+    }
+    
+    if($('#main-header').length>0 && $('#main-content-container').length>0){
+        $('#main-header').height(show_page_title?180:144);
+        $('#main-content-container').css({top:show_page_title?190:152});
+    }
+    
     
     var DT_CMS_SCRIPT = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_SCRIPT'];
 
@@ -448,7 +460,7 @@ $website_title -> #main-title>h2
   <?php } ?>
   }
             
-  <?php if($website_title){ ?>
+  <?php if($website_title){  ?>
   var ele = $('#main-title');
   if(ele.length>0){
       ele.empty().hide();
@@ -482,7 +494,8 @@ $(document).ready(function() {
         ele.show();
     
         $('body').find('#main-menu').hide(); //will be visible after menu init
-        
+  
+/*        
         if(is_show_pagetitle){
             $('body').find('#main-pagetitle').show();
         }else{
@@ -490,6 +503,7 @@ $(document).ready(function() {
         }
             
 console.log('webpage doc ready ');
+*/
 //+(window.hWin.HAPI4)+'    '+(new Date().getTime() / 1000 - _time_debug));
         _time_debug = new Date().getTime() / 1000;
     
