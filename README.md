@@ -1,11 +1,11 @@
 HEURIST
 ==========
 
-Core development repository, Vsn 6 (2021 - ), Vsn 5 (2018 - 2020), Vsn 4 (2014-2017) 
+Core development repository, Vsn 6 (2021 - ), Vsn 5 (2018 - 2020), Vsn 4 (2014-2017). Vsn 1 - 3 on Sourceforge (2005 - 2013)
 
 **See below the intro for information on code, licensing, installating, contributing and issue tracking**
 
-Heurist is a mature web-based data management infrastructure that is specifically tailored to the needs of Humanities researchers. Heurist allows researchers to design, create, manage, analyse and publish their own richly-structured database(s) through a simple web interface, without the need for programmers or consultants. A complete application can be built in as little as half a day and complex databases in under a week. Database structure can be modified incrementally on live databases allowing them to evolve with project needs. The project runs free services for researchers which free them from the need to manage servers, backups and upgrades.
+Heurist is a mature web-based data management infrastructure that is specifically tailored to the needs of Humanities researchers. Heurist allows researchers to design, create, manage, analyse and publish their own richly-structured database(s) through a simple web interface, without the need for programmers or consultants. A complete application can be built in as little as half a day and complex databases in under a week. Database structure can be modified incrementally on live databases allowing them to evolve with project needs. The project runs free services for researchers independent of institution (through the University of Sydney in Australia and the Huma-Num eResearch service in France), which frees the researcher from the need to manage servers, backups and upgrades.
 
 ![Main Interface Vsn 6](/documentation_and_templates/assets/main%20interface%20v6.jpg "Main Interface Vsn 6")
 
@@ -18,13 +18,13 @@ Advanced features include foreign keys and relationships seen and modified by th
 _Research database workflow_
 
 Heurist has been developed at the University of Sydney since 2005, based on years of prior work, and is used by dozens of projects, particularly in Australia, France, Germany and the USA. These projects span the fields of history, archaeology, art history, geography, and literature. A selection of projects can be found here.
-Heurist is in active development; version 6 will be released in first quarter 2021. Version 6 represents a complete redesign of the menu system and overall appearance in collaboration with a professional UX designer (Brant Trim, Serata Digital, Canberra) but is fully backward compatible with databases developed in version 5.
-We transferred the help system from help builder software to a Heurist database in Nov 2020, which now generates the Heurist Help System (also accessible within Heurist). This is now being updated to reflect version 6 (work-in-progress). 
+Heurist is in active development with more than 1000 commits/year since moving to gitHub in 2014. Version 6 was released in February 2021 and represents a complete redesign of the menu system and overall appearance in collaboration with a professional UX designer (Brant Trim, Serata Digital, Canberra) but is fully backward compatible with databases developed in version 5.
+We transferred the help system from help builder software to a Heurist database in Nov 2020, which now generates the Heurist Help System (also accessible within Heurist). This is now being updated to reflect version 6 (work-in-progress 2021). Issue tracking is also handled by a Heurist database. 
 
 Example websites 
 ----------------
 
-Heurist has a built-in capability to generate data-driven interactive websites. The CMS website pages are stored and edited directly in the database and can render media, searches, maps etc. using the data.
+Heurist has a built-in capability to generate data-driven interactive websites. The CMS website pages are stored and edited directly in the database and can render media, searches, maps, blog pages etc. using the data.
 
 
 ![Website using standard functions (2019)](/documentation_and_templates/assets/CBAP%20website.jpg "Website using standard functions (2019)")
@@ -58,8 +58,13 @@ We're very bad about doing proper releases (to be addressed in 2021). The latest
 Issues and feature requests
 ---------------------------
 
-Please note, we do not use gitHub issues. Please visit our job tracking system developed in Heurist (we are in the process of transferring and coding the backlog as of Dec 2020). You can raise an issue or request a feature there: first click the Add Job link at top left, then use login guest + guest (or request a personal login via the link on the login page).
+Please note, we do not use gitHub issues. Please visit our job tracking system https://heuristplus.sydney.edu.au/heurist/?db=Heurist_Job_Tracker&website developed in Heurist (we are in the process of coding the backlog in first quarter 2021). You can raise an issue or request a feature there: first click the Add Job link at top left, then use login guest + guest (or request a personal login via the link on the login page).
 Issues and feature requests can also be submitted via the Issue tracker link in any Heurist database (Help > Bug report/feature request) - this also saves additional information about your use environment which may help resolve the issue.
+
+Online Help
+-----------
+
+Comprehensive help for the new version (6) is being built in a dedicated Heurist database, and is available via website at: https://heuristplus.sydney.edu.au/heurist/?db=Heurist_Help_System&website
 
 Installation
 ------------
