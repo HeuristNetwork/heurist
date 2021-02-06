@@ -719,10 +719,10 @@ a{
         <div class="ent_header" style="min-width:1330px;">
             <div class="logo_intro" style="float:left"></div>
             <div style="float:left;font-style:italic;padding:34px">
-                Designed by researchers, for researchers, Heurist reduces complex underlying decisions to simple, logical choices
+                Designed by researchers, for researchers, Heurist reduces complex relational structures to simple, logical choices
             </div>
             <div style="float:right;padding:34px">
-                <a href="https://heuristnetwork.org" target="_blank">Heurst Network website</a>
+                <a href="https://heuristnetwork.org" target="_blank">Heurist Network website</a>
             </div>
         </div>
         <div class="ent_content_full bg_intro">

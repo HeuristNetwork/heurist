@@ -171,13 +171,7 @@ $time_debug2 = $time_debug;
         $this->source_db_reg_id = $db_reg_id;
 
         // 1. get database url by database id
-        $database_url = $this->_getDatabaseURL($db_reg_id);
-        
-        //TEMPORARY SOLUTION - to use the lastest code
-        if(strpos($database_url,'https://heuristplus.sydney.edu.au/heurist/')===0){
-            $database_url = str_replace('/heurist/','/h6-ao/',$database_url);
-        }
-        
+        $database_url = $this->_getDatabaseURL($db_reg_id);        
         
 
 if(_DBG) error_log('get db url '.(microtime(true)-$time_debug));        
