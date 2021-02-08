@@ -138,7 +138,7 @@ $.widget( "heurist.configEntity", {
                                                 that.sel_saved_settings.hSelect('refresh'); 
                                             }
 
-                                            window.hWin.HEURIST4.msg.showMsgFlash('Settings are renamed');
+                                            window.hWin.HEURIST4.msg.showMsgFlash('Settings have been renamed');
 
                                         }else{
                                             window.hWin.HEURIST4.msg.showMsgErr(response);
@@ -213,7 +213,7 @@ $.widget( "heurist.configEntity", {
                                             that.sel_saved_settings.hSelect('refresh'); 
                                         }
                                         that.element.find('.btn-action-div').hide();
-                                        window.hWin.HEURIST4.msg.showMsgFlash('Settings are removed');
+                                        window.hWin.HEURIST4.msg.showMsgFlash('Settings have been removed');
                                     }else{
                                         window.hWin.HEURIST4.msg.showMsgErr(response);
                                     }
@@ -403,7 +403,7 @@ $.widget( "heurist.configEntity", {
                     }
                     
                     that.element.show();    
-                    window.hWin.HEURIST4.msg.showMsgFlash('Settings are saved');
+                    window.hWin.HEURIST4.msg.showMsgFlash('Settings have been saved');
                     
                     if($.isFunction(callback)){
                         callback.call( this, entity_ID+'/'+filename );

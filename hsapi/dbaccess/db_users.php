@@ -659,7 +659,7 @@
             "Full name:    ".$ugr_FullName."\n".
             "Email address: ".$ugr_eMail."\n".
             "Organisation:  ".$ugr_Organisation."\n".
-            "Go to the address below and navigate in menu Settings->Manage users to review further details and approve the registration:\n".
+            "Go to the address below and navigate in menu Admin > Manage Users to review further details and approve the registration:\n".
             HEURIST_BASE_URL."?db=".HEURIST_DBNAME; //."&recID=$recID&mode=users";
 
             $email_title = 'User Registration: '.$ugr_FullName.' ['.$ugr_eMail.']';
