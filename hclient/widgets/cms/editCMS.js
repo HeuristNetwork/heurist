@@ -1113,7 +1113,7 @@ function editCMS( options ){
     //
     function beforeCloseCMSEditor(){
         var preview_frame = edit_dialog.find('#web_preview');
-        if(preview_frame[0].contentWindow.cmsEditing){
+        if(preview_frame.length>0 && preview_frame[0].contentWindow.cmsEditing){
             //check that everything is saved
             var res = preview_frame[0].contentWindow.cmsEditing.onEditorExit(
                 function( need_close_explicitly ){

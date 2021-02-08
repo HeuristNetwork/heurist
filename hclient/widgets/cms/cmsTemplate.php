@@ -97,7 +97,7 @@
 }
 #main-header{
     /*background:rgb(112,146,190);*/
-    height:<?php echo $show_pagetitle?'180px':'144px';?>;   
+    height:144px; 
     padding: 0.5em;
     padding-bottom:0;
 }
@@ -192,10 +192,10 @@ if($isWebPage){
         .'style="position:absolute;right:10px; top:5px;" class="cms-button">Heurist interface</a>';
     }
     ?>  
-        <div id="main-pagetitle" class="ui-heurist-bg-light" style="display:none">loading...</div>       
+        <div id="main-pagetitle" class="ui-heurist-bg-light">loading...</div>       
     </div>
     <div class="ent_content_full ui-heurist-bg-light"  id="main-content-container"
-            style="top:<?php echo ($show_pagetitle?'190px':'152px').($is_page_footer_fixed?';bottom:'.$page_footer_height.'px':''); ?>;padding: 5px;">
+            style="top:152;<?php echo ($is_page_footer_fixed?'bottom:'.$page_footer_height.'px;':''); ?>padding: 5px;">
         <div id="main-content" data-homepageid="<?php print $home_page_record_id;?>" 
             <?php print ($open_page_on_init>0)?'data-initid="'.$open_page_on_init.'"':''; ?> 
             data-viewonly="<?php print ($hasAccess)?0:1;?>" 

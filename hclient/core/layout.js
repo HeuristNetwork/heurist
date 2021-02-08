@@ -1480,7 +1480,7 @@ console.log('Cardinal layout widget does not have proper options');
                 if($.isFunction(onInitComplete)){
                         onInitComplete.call();
                 }
-                console.log('appInitFromContainer: layout not defined');
+//                console.log('appInitFromContainer: layout not defined');
             }
             //
             _defineMediaSource($container); 
