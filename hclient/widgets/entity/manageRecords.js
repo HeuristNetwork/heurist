@@ -2313,7 +2313,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         //init array 
         var ffr = {};
             
-        ffr['rst_DisplayName'] = dt?dt['dty_Name']:'Fake field';
+        ffr['rst_DisplayName'] = dt?dt['dty_Name']:'Placeholder';
         ffr['dty_FieldSetRectypeID'] = dt?dt['dty_FieldSetRectypeID'] : 0;
         ffr['rst_FilteredJsonTermIDTree'] = (dt?dt['dty_JsonTermIDTree']:"");
         //ffr['rst_TermIDTreeNonSelectableIDs'] = (dt?dt['dty_TermIDTreeNonSelectableIDs']:"");
@@ -2587,7 +2587,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 //Add inward relationship fields
                 //1. scan all other record structures
                 //2. find relmarker feidls that targets current rectypes
-                //3. add fake field into structure
+                //3. add placeholder into structure
                 var rt, already_added = {};
                 for(rt in rectypes.typedefs)
                 if(rt>0 && rt!=rectypeID){
