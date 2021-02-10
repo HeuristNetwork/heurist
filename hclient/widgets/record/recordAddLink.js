@@ -124,7 +124,7 @@ $.widget( "heurist.recordAddLink", $.heurist.recordAction, {
         
         var useHtmlSelect = false;
         
-        if(scope_types=='none'){
+        if(scope_types=='none' || this.options.source_ID>0){
             this.selectRecordScope.parent().hide();
             return;    
         }
