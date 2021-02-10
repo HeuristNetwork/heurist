@@ -871,7 +871,7 @@ error_log(print_r($_REQUEST, true));
     */
     public function getCurrentUserAndSysInfo( $include_reccount_and_dashboard_count=false ){
         global $passwordForDatabaseCreation,$passwordForDatabaseDeletion,$passwordForReservedChanges,$passwordForServerFunctions;
-        
+   
         //current user reset - reload actual info from database
         $this->login_verify( true );
 
@@ -912,7 +912,7 @@ error_log(print_r($_REQUEST, true));
 
             //retrieve lastest code version (cached in localfile and refreshed from main index server daily)
             $lastCode_VersionOnServer = $this->get_last_code_and_db_version();
-            
+
             $res = array(
                 "currentUser"=>$this->current_User,
                 "sysinfo"=>array(
@@ -959,7 +959,8 @@ error_log(print_r($_REQUEST, true));
                 $res['sysinfo']['db_has_active_dashboard'] = $res2[1];
                 $res['sysinfo']['db_workset_count'] = $res2[2];
             }
-            $this->_checkRecLinks(); //check cache
+            
+            //$this->_checkRecLinks(); //check cache
 
         }else{
 
