@@ -21,7 +21,7 @@ update value set uri=5444 where value='Oui' and property_id in (227,228,232,285,
 //2,creator,380,,NULL,
 //24,modified,6239,,NULL,
 
-//rty,id,local_name,dty_Type,dty_Code,ptr|vocab
+//OMEKA property_ID=>dty_ID
 $config = <<<'EOD'
 7,9
 35,937

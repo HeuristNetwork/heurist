@@ -302,8 +302,8 @@ class DbsTerms
                 
                 foreach($children as $trmId){
                     if(@$this->data['termsByDomainLookup'][$domain][$trmId]){
-                        $code = removeLastNum(trim($this->data['termsByDomainLookup'][$domain][$trmId][$idx_code]));
-                        $label = removeLastNum(trim($this->data['termsByDomainLookup'][$domain][$trmId][$idx_label]));
+                        $code = (trim($this->data['termsByDomainLookup'][$domain][$trmId][$idx_code])); //removeLastNum
+                        $label = (trim($this->data['termsByDomainLookup'][$domain][$trmId][$idx_label])); //removeLastNum
                         $lvl_src['code'][] = $code;
                         $lvl_src['label'][] = $label;
                     }
@@ -453,7 +453,7 @@ class DbsTerms
     public function doDisambiguateTerms2($term_value, $same_level_values){
         
         if(!$term_value || $term_value=="") return $term_value;
-        
+/*        
         $name = removeLastNum(trim($term_value));
         $found = 0;
         
@@ -467,6 +467,16 @@ class DbsTerms
         if($found>0){
                 $term_value = $name." ".($found+1);
         }
+*/        
+        $name = removeLastNum(trim($term_value));
+        $found = 1;
+        
+        while (in_array($term_value, $same_level_values)){
+            $term_value = $name.' '.$found;
+            $found++;
+        }
+        
+        
         return $term_value;
     }
 

@@ -1026,6 +1026,8 @@ $.widget( "heurist.importStructure", {
                 that.panel_report.find('#btn_close_panel_report').click();
 
                 var report = ''
+               
+console.log( response.report );               
                 
                 if(response.report){
                 
@@ -1042,6 +1044,22 @@ $.widget( "heurist.importStructure", {
                             report += ($Db.rty(response.report.updated[idx],'rty_Name')+', ');    
                         }
                         report = report.substr(0,report.length-2);
+                    }
+                    if( window.hWin.HEURIST4.util.isArrayNotEmpty(response.report.broken_terms) ){
+                        
+                        report += ('<p>'+response.report.broken_terms.length
+                            +' terms were not properly imported.'
+                            +' Error report has been sent to Heurist support.<ul>');
+                        
+                        for(var i=0; i<response.report.broken_terms.length; i++){
+                            report += ('<li>'+response.report.broken_terms[i][0]+'</li>');    
+                            if(i>10){
+                                report += '...';
+                                break;
+                            }
+                        }
+                        
+                        report += ('</ul></p>');
                     }
                 }
                 

@@ -57,6 +57,9 @@ class DbsImport {
     private $rectypes_upddated;
     private $rectypes_added;
     
+    private $broken_terms;
+    private $broken_terms_reason;
+    
     
     //  $data = 
     function __construct( $system ) {
@@ -392,6 +395,9 @@ if(_DBG) error_log('Preparation '.(microtime(true)-$time_debug2));
 
 $time_debug = microtime(true);
 $time_debug2 = $time_debug;
+
+        $this->broken_terms = array();
+        $this->broken_terms_reason = array();
         
         // I. Add Terms (whole vocabulary)
         $stub = array();//stub for $all_terms_in_vocab
@@ -1387,13 +1393,15 @@ if($term_id==11 || $term_id==518 || $term_id==497){
                                                                                     
                                                             
                 }else{
-                    $term_import[$idx_code] = $this->targetTerms->doDisambiguateTerms2($term_import[$idx_code], $same_level_labels['code']);
-                    $term_import[$idx_label] = $this->targetTerms->doDisambiguateTerms2($term_import[$idx_label], $same_level_labels['label']);
+                    $term_import[$idx_code] = $this->targetTerms->doDisambiguateTerms2($term_import[$idx_code], 
+                                                $same_level_labels['code']);
+                    $term_import[$idx_label] = $this->targetTerms->doDisambiguateTerms2($term_import[$idx_label], 
+                                                $same_level_labels['label']);
                     
                     $term_import[$idx_vocab_group_id] = 0;
                 }
                 
-                //fill original ids (concept codes) if missed
+                // fill original ids (concept codes) if missed
                 if(!$term_import[$idx_origin_dbid] || !$term_import[$idx_origin_id]){
                     if($term_import[$idx_ccode]){
                         $codes = explode("-",$term_import[$idx_ccode]);
@@ -1410,7 +1418,8 @@ if($term_id==11 || $term_id==518 || $term_id==497){
                     $term_import[$idx_origin_name] = $term_import[$idx_label];
                 }
                 
-                $res = updateTerms($columnNames, null, $term_import, $this->system->get_mysqli()); //see saveStructureLib
+                $res = updateTerms($columnNames, null, $term_import, $this->system->get_mysqli()); //see saveStructureLib    
+                
                 if(is_numeric($res)){
                     $new_term_id = $res;
 
@@ -1418,9 +1427,16 @@ if($term_id==11 || $term_id==518 || $term_id==497){
                     
                     array_push($all_terms_in_vocab, $new_term_id);
                 }else{
-                    $this->system->addError(HEURIST_ERROR,
-                    "Can't add term ".$term_id.' '.print_r($term_import, true)."  ".$res);
-                    return false;
+                    if($parent_id==null){
+                        $this->system->addError(HEURIST_ERROR,
+                        "Can't import vocabulary ".$term_id.' '.$res); //.print_r($term_import, true)."  ".$res);
+                        return false;
+                    }else{
+                        //add to issue report - summary will be send to support email
+                        array_push($this->broken_terms, $term_import); 
+                        array_push($this->broken_terms_reason, $res); 
+                        return -1; // if this term has children they are ignored too
+                    }
                 }
             }
 
@@ -1685,28 +1701,28 @@ if($term_id==11 || $term_id==518 || $term_id==497){
     //    
     public function getReport($need_updated_defs=true){
 
-            //reload structures
-            $trg_rectypes = null;
-            $trg_detailtypes = null;
-            $trg_terms = null;
+        //reload structures
+        $trg_rectypes = null;
+        $trg_detailtypes = null;
+        $trg_terms = null;
 
-            $def_rts = @$this->source_defs['rectypes']['typedefs'];
-            $def_dts = @$this->source_defs['detailtypes']['typedefs'];
+        $def_rts = @$this->source_defs['rectypes']['typedefs'];
+        $def_dts = @$this->source_defs['detailtypes']['typedefs'];
 
-            $sRectypes = '';
-            $sFields  = '';
-            $sTerms  = '';
-            
-       //RECORD TYPES
-       if($def_rts){
-                
+        $sRectypes = '';
+        $sFields  = '';
+        $sTerms  = '';
+
+        //RECORD TYPES
+        if($def_rts){
+
             $idx_name  = $def_rts['commonNamesToIndex']['rty_Name'];
             $idx_ccode = $def_rts['commonNamesToIndex']["rty_ConceptID"];
-            
+
             foreach ($this->imp_recordtypes as $imp_id){
                 if(@$this->rectypes_correspondence[$imp_id]){
                     $trg_id = $this->rectypes_correspondence[$imp_id];
-                    
+
                     if($trg_rectypes==null){
                         $trg_rectypes = dbs_GetRectypeStructures($this->system, null, 2);
                     }
@@ -1739,8 +1755,8 @@ if($term_id==11 || $term_id==518 || $term_id==497){
                 ."</td><td>$trg_id</td><td>"
                 .$trg_detailtypes['typedefs'][$trg_id]['commonFields'][$idx_name]."</td></tr>";
             }
-            
-       }
+
+        }
 
         //TERMS TYPES
         $def_terms = $this->source_defs['terms'];
@@ -1766,17 +1782,22 @@ if($term_id==11 || $term_id==518 || $term_id==497){
             ."</td><td>$trg_id</td><td>"
             .$trg_terms['termsByDomainLookup'][$domain][$trg_id][$idx_name]."</td></tr>";
         }
-        
+
         $resp =  array( 'report'=>array('rectypes'=>$sRectypes,'detailtypes'=>$sFields,'terms'=>$sTerms,
-                        'updated'=>$this->rectypes_upddated, 'added'=>$this->rectypes_added) );
-        
+            'updated'=>$this->rectypes_upddated, 'added'=>$this->rectypes_added) );
+            
+        if(count($this->broken_terms_reason)>0){
+            $resp['report']['broken_terms'] = $this->broken_terms;
+            $resp['report']['broken_terms_reason'] = $this->broken_terms_reason;
+        }
+
         if($need_updated_defs){
             $resp['defs'] = array('rectypes'=>$trg_rectypes,'detailtypes'=>$trg_detailtypes,'terms'=>$trg_terms);
             $data = $this->system->getCurrentUserAndSysInfo(true);
             $resp['defs']['sysinfo'] = $data['sysinfo'];
-            
+
             $resp['defs']['entities'] = entityRefreshDefs($this->system, 'all', false);
-            
+
         }
         return $resp;    
     }    

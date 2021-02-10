@@ -135,6 +135,27 @@ ini_set('max_execution_time', 0);
 
             $response['status'] = HEURIST_OK;            
 
+            //
+            // send error report about terms that were failed
+            //            
+            if(@$response['report']['broken_terms'] && count($response['report']['broken_terms'])>0){
+                
+                $sText = 'Target database '.HEURIST_DBNAME;
+                $sText .= ("\n".'Source database '.@$_REQUEST["databaseID"]);
+                $sText .= ("\n".count($response['report']['broken_terms']).' terms were not imported.');
+                foreach($response['report']['broken_terms'] as $idx => $term){
+                    $sText .= ("\n".print_r($term, true));
+                    $sText .= ("\n reason: ".$response['report']['broken_terms_reason'][$idx]);
+                }
+                //$sText .= ('</ul>');
+                
+                sendEmail(HEURIST_MAIL_TO_BUG, 'Import terms report', $sText, null);
+                
+                $response['report']['broken_terms_reason'] = null;
+            }
+            
+            
+
         }else{
 
             //$currentUser = $system->getCurrentUser();
