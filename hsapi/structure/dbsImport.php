@@ -403,6 +403,13 @@ $time_debug2 = $time_debug;
             return false;                
         }
         
+        if(count($this->imp_recordtypes)==0 && count($this->imp_fieldtypes)==0){
+            $mysqli->commit(); 
+            return true;
+        }
+        
+        
+        
 if(_DBG) error_log('Terms '.(microtime(true)-$time_debug));        
 $time_debug = microtime(true);        
         
@@ -810,7 +817,8 @@ $mysqli->commit();
     
     
     //
-    //
+    //  fill "fake" source_defs for record types on base of mappping
+    //  it is required for $this->getTargetIdBySourceId
     //
     public function doMapping($mapping){
         

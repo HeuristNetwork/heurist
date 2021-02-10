@@ -659,7 +659,7 @@ EOD;
                 
                 if($res2){
                     //mapping for fields and rectypes
-                    $importDef->doMapping($mapping_defs);
+                    $importDef->doMapping($mapping_defs); //need for getTargetIdBySourceId
                     $defs = $importDef->getDefinitions(); //terms aready here
                     
                     $defs['rectypes'] = dbs_GetRectypeStructures(self::$system, null, 2);
