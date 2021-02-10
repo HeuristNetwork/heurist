@@ -218,7 +218,7 @@ $.widget( "heurist.search", {
         }else{
             
             if(this.options.is_h6style){
-                this.div_search_input.css({'width':'85%','min-width':'300px',height:'30px'}); //'max-width':'470px',  
+                this.div_search_input.css({'width':'85%','min-width':'80px',height:'30px'}); //'max-width':'470px',  
                 this.input_search.css({'width':'100%'});  
             }else{
                 this.div_search.css({'display':'table-row',height:'30px'});
@@ -286,11 +286,11 @@ $.widget( "heurist.search", {
         //         
         if(!this._is_publication && this.options.is_h6style){
             
-            this.div_buttons.css({'min-width':'46px'});
+            this.div_buttons.css({'min-width':'88px'});
             
             this.btn_saved_filters = 
             $('<span class="ui-main-color" '
-            +'style="font-size: 9px;position: relative;margin-left: -48px;min-width: 50px;cursor:pointer;padding-right:4px">'
+            +'style="font-size: 9px;position: relative;margin-left: -52px;min-width: 50px;cursor:pointer;padding-right:4px">'
                 +'<span style="display:inline-block;width:30px;margin-top: 4px;">saved filters</span>'
             +'<span class="ui-icon ui-icon-carat-1-s" style="font-size: inherit;height: 11px;display: inline-block;vertical-align: super;">'
             +'</span></span>')
@@ -305,16 +305,16 @@ $.widget( "heurist.search", {
                     }            
             }});
             
-            var linkGear = $('<a>',{href:'#', 
-                title:window.hWin.HR('Build a filter expression using a form-driven approach')})
-                .css({display:'inline-block',padding:'0 2px'})
-                .addClass('ui-icon ui-icon-magnify-explore') //was ui-icon-gear was ui-icon-filter-form
+            var linkGear = $('<a><span class="ui-icon ui-icon-magnify-explore"/></a>',{href:'#', 
+                title:window.hWin.HR('Build a filter expression using a for3m-driven approach')})
+                .css({display:'inline-block',padding:'0 2px',width:40})
+                //.addClass('') //was ui-icon-gear was ui-icon-filter-form
                 .appendTo(this.div_buttons);
             this._on( linkGear, {  click: this.showSearchAssistant });
             
             this.btn_faceted_wiz = $('<a>',{href:'#', 
                 title:window.hWin.HR('Build new faceted search')})
-                .css({display:'inline-block',padding:'0 2px'})
+                .css({display:'inline-block',padding:'0 2px',width:30})
                 .addClass('ui-icon ui-icon-box ui-main-color') //was ui-icon-gear was ui-icon-filter-form
                 .appendTo(this.div_buttons);
             this._on( this.btn_faceted_wiz, {  click: function(){
@@ -445,6 +445,7 @@ $.widget( "heurist.search", {
             
             this.btn_save_filter = $('<button>')
                 .button({icon:'ui-icon-save',showLabel:false, label:'Save filter',iconPosition:'end'})
+                .css({'margin-left': '15px'})
                 .appendTo(div_save_filter);
             
             this._on(this.btn_save_filter, {click: function(){
