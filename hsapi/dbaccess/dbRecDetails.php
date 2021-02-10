@@ -166,7 +166,7 @@ class DbRecDetails
             }
             if($passedRecIDCnt>0){
                 //exclude records if user has no right to edit
-                if($this->system->is_dbowner()){ //dbowner can edit any record
+                if($this->system->is_admin()){ //admin of database managers
                     $this->recIDs = $recIDs;
                 }else{
                     $this->recIDs = mysql__select_list($mysqli,'Records','rec_ID',"rec_ID in ("
