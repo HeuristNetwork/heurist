@@ -273,54 +273,62 @@ _dout('ipage doc ready '+(window.hWin.HAPI4)+'    '+(new Date().getTime() / 1000
     function onHapiInit(success)
     {
         //if(isHapiInited) return;
-        
+
         isHapiInited = true;
-        
-_dout('onHapiInit '+success);        
+
+        _dout('onHapiInit '+success);        
 
 
         if(success) // Successfully initialized system
         {
             applyTheme();
 
-_dout('ipage hapi inited  '+(new Date().getTime() / 1000 - _time_debug));
+            _dout('ipage hapi inited  '+(new Date().getTime() / 1000 - _time_debug));
             _time_debug = new Date().getTime() / 1000;
 
             if(!window.hWin.HEURIST4.rectypes){
 
                 if(!window.hWin.HEURIST4.util.isnull(onAboutInit) && $.isFunction(onAboutInit)){
                     if(window.hWin.HAPI4.sysinfo['layout']!='WebSearch')
-                            onAboutInit();
+                        onAboutInit();
                 }
-                
-                window.hWin.HAPI4.EntityMgr.refreshEntityData('all');
-                
-                window.hWin.HAPI4.SystemMgr.get_defs({rectypes:'all', terms:'all', detailtypes:'all', mode:2}, function(response){
-                    if(response.status == window.hWin.ResponseStatus.OK){
-                        window.hWin.HEURIST4.rectypes = response.data.rectypes;
-                        window.hWin.HEURIST4.terms = response.data.terms;
-                        window.hWin.HEURIST4.detailtypes = response.data.detailtypes;
-                        
-                        $Db.baseFieldType = window.hWin.HEURIST4.detailtypes.lookups;
+
+                var sMsg = 'Cannot obtain database definitions (get_defs function). '
+                +'This is probably due to a network timeout. However, if the problem '
+                +'persists please report to Heurist developers as it could indicate '
+                +'corruption of the database.';                            
+
+                window.hWin.HAPI4.EntityMgr.refreshEntityData('all', function(success){
+                    if(success){
+                        window.hWin.HAPI4.SystemMgr.get_defs({rectypes:'all', terms:'all', detailtypes:'all', mode:2}, function(response){
+                            if(response.status == window.hWin.ResponseStatus.OK){
+                                window.hWin.HEURIST4.rectypes = response.data.rectypes;
+                                window.hWin.HEURIST4.terms = response.data.terms;
+                                window.hWin.HEURIST4.detailtypes = response.data.detailtypes;
+
+                                $Db.baseFieldType = window.hWin.HEURIST4.detailtypes.lookups;
+                            }else{
+
+                                if(response.message){
+                                    sMsg =  sMsg + '<br><br>' + response.message;
+                                }
+                                window.hWin.HEURIST4.msg.showMsgErr(sMsg);
+                                success = false;
+                            }
+
+                            _dout('ipage db struct  '+(new Date().getTime() / 1000 - _time_debug));
+                            _time_debug = new Date().getTime() / 1000;
+
+
+                            if(!window.hWin.HEURIST4.util.isnull(onPageInit) && $.isFunction(onPageInit)){
+                                onPageInit(success);
+                            }
+
+                        });
                     }else{
-                        var sMsg = 'Cannot obtain database definitions (get_defs function). This is probably due to a network timeout. However, if the problem persists please report to Heurist developers as it could indicate corruption of the database.';                            
-                        
-                        if(response.message){
-                             sMsg =  sMsg + '<br><br>' + response.message;
-                        }
                         window.hWin.HEURIST4.msg.showMsgErr(sMsg);
-                        
-                        success = false;
+                        if($.isFunction(onPageInit)){ onPageInit(success); }
                     }
-
-_dout('ipage db struct  '+(new Date().getTime() / 1000 - _time_debug));
-                    _time_debug = new Date().getTime() / 1000;
-
-
-                    if(!window.hWin.HEURIST4.util.isnull(onPageInit) && $.isFunction(onPageInit)){
-                        onPageInit(success);
-                    }
-
                 });
                 return;
             }
