@@ -180,8 +180,9 @@
                     "dtFields":{
                         "dty_Type":"freetext",
                         "dty_Role":"virtual",
-                        "rst_DisplayName":"Terms:",
-                        "rst_Display":"hidden"
+                        "rst_Class":"enum relmarker",
+                        "rst_DisplayName":"Vocabulary(terms):",
+                        "rst_Display":"readonly"
                     }
                 },
                 {  "dtID": "dty_TermIDTreeNonSelectableIDs",
