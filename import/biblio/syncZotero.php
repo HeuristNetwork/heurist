@@ -741,7 +741,7 @@ if($step=="1"){  //first step - info about current status
             .' errors were encountered. Please check the errors (in red at the end of the list of records synchronised)'
             .' to see what problems have been encountered. '
             .'Since we depend on a third party things can change, which may throw out our synchronisation. '
-            .'Please submit a bug report (Settings > Bug report) if you think there is something wrong with the Zotero import."'
+            .'Please submit a bug report (Help > Bug report) if you think there is something wrong with the Zotero import."'
             .',null,"Zotero synchronisation errors");</script>';
     }
 

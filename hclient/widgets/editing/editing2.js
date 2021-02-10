@@ -392,7 +392,7 @@ function hEditing(_options) {
             }
             
             if(!hasVisibleFields){
-                $('<div>There are no fields visible in this tab. Please define new fields or move fields into this tab</div>')
+                $('<div>There are no fields visible under this heading/tab. Please define new fields or move fields into this section.</div>')
                     .addClass('heurist-helper3').appendTo(fieldContainer);
             }
             

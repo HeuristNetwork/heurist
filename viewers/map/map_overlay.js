@@ -1352,7 +1352,7 @@ map.data.addListener('mouseover', function(event) {
                         var MAXITEMS = window.hWin.HAPI4.get_prefs('search_detail_limit');
                         var s = '<p>The map and timeline are limited to display a maximum of <b>'+MAXITEMS+'</b> results to avoid overloading your browser.</p>'
                         +'<br/><p>There are <b>'+recset.count_total()+'</b> records with spatial and temporal data in the current results set. Please refine your filter to reduce the number of results.</p><br/>'
-                        +'<p>The map/timeline limit can be reset in Settings > Preferences.</p>';                        
+                        +'<p>The map/timeline limit can be reset in Design > Preferences.</p>';                        
 
                         mapdata.title = {title:mapdata.title,
                             warning:'<div class="ui-icon ui-icon-alert" style="display:inline-block;width:20px" onclick="{window.hWin.HEURIST4.msg.showMsgDlg(\''+s+'\')}">&nbsp;</div>'};
