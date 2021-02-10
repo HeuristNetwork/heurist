@@ -1445,8 +1445,15 @@ console.log('No active tree node!!!!')
         }else{
             
             var s = '';
-            if(dt_type=='enum' || dt_type=='relmarker' || dt_type=='resource' || dt_type=='relationtype'){
-                s = 'To change terms list or target entity types: ';
+            if (dt_type=='enum' || dt_type=='relmarker' || dt_type=='resource'){
+                s = 'To change';
+                if (dt_type=='enum' || dt_type=='relmarker'){
+                    s += ' vocabulary';    
+                }
+                if (dt_type=='relmarker' || dt_type=='resource'){
+                    s += (dt_type=='relmarker'?' or ':' ')+'target entity types';    
+                }
+                s += ': ';
             }
             
             var ele = $('<div style="font-style:italic;padding:10px;display:inline-block">'
@@ -1655,6 +1662,9 @@ console.log('No active tree node!!!!')
         ele.editing_input('fset','rst_TermIDTreeNonSelectableIDs', disTerms);
         this._editing.setFieldValueByName('rst_TermPreview', defval, false); //recreates
 
+        
+        this._editing.setFieldValueByName('rst_FilteredJsonTermIDTree', $Db.trm(allTerms,'trm_Label'), false); //recreates
+        
         /*
         var ele = this._editing.getFieldByName('rst_DefaultValue_enum');
         var defval = this._editing.getValue('rst_DefaultValue_enum')[0];

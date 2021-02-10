@@ -1014,6 +1014,9 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
     _activateRelationTypeControls: function( ele ){
 
             ele.find('.header').text('Relation types:');
+            ele.find('.heurist-helper1').text('Relationship Type can be any term within any vocabulary '
+            +'marked as a Relationships vocabulary. You can - and should - use Relationship Marker fields '
+            +'to constrain the creation of relationships between particular record types');
         
             var ele = ele.find('.input-div');
             //remove old content
@@ -1024,11 +1027,11 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             this.enum_container = ele;
             
             $('<div style="line-height:2ex;padding-top:4px">'
-                        +'<div id="enumVocabulary" style="display:inline-block;">' //padding-left:4px;
+                        +'<div id="enumVocabulary" style="display:inline-block;padding-bottom:10px">' //padding-left:4px;
                             +'<select id="selPreview"></select>'
-                            +'<div style="padding:5px 3px">'
+                            +'<span style="padding:5px 3px">'
                                 +'<a href="#" id="show_terms_1" style="padding-left:10px">edit terms tree</a>'
-                            +'</div>'
+                            +'</span>'
                         +'</div>'
                 +'</div>').appendTo(this.enum_container);
                 
@@ -1059,8 +1062,8 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                             +'<select id="selVocab" class="sel_width"></select>'
                             +'<a href="#" id="show_terms_1" style="padding-left:10px">'
                                 +'<span class="ui-icon ui-icon-pencil"/>vocabularies editor</a>'
-                            +'<span id="termsPreview1" style="display:none;padding-left:10px">'
-                                +'<label style="width:60px;min-width:60px">Preview</label><select id="selPreview"></select>'
+                            +'<br><span id="termsPreview1" style="display:none;padding:10px 0px">'
+                                +'<label style="width:60px;min-width:60px">Preview:&nbsp;</label><select id="selPreview"></select>'
                             +'</span>'
                         +'</div>'
                 +'</div>').appendTo(this.enum_container);
@@ -1073,7 +1076,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                             +'</div>'
 */            
             
-            }else{     //@todo remove   Individidual selection
+            }else{     //@todo remove   Individidual selection - not used anymore
             
                 $('<div style="line-height:2ex;padding-top:4px">'
                         +'<label style="text-align:left;line-height:19px;vertical-align:top">'

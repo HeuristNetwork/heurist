@@ -2313,7 +2313,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         //init array 
         var ffr = {};
             
-        ffr['rst_DisplayName'] = dt?dt['dty_Name']:'Fake field';
+        ffr['rst_DisplayName'] = dt?dt['dty_Name']:'Placeholder field';
         ffr['dty_FieldSetRectypeID'] = dt?dt['dty_FieldSetRectypeID'] : 0;
         ffr['rst_FilteredJsonTermIDTree'] = (dt?dt['dty_JsonTermIDTree']:"");
         //ffr['rst_TermIDTreeNonSelectableIDs'] = (dt?dt['dty_TermIDTreeNonSelectableIDs']:"");

@@ -197,18 +197,21 @@ $.widget( "heurist.editing_input", {
             }
             
             
-            if(this.detailType=="resource" && this.configMode.entity=='records'){
-                
-                $('<div style="float:right;padding-top:1px;width: 14px;"><span class="ui-icon ui-icon-triangle-1-e"/></div>')                
-                    .appendTo( this.header );
-                    this.header.css({'padding-right':0, width:154});
-                    this.header.find('label').css({display:'inline-block', width: 135});
-            }else if(this.detailType=="relmarker"){
-                
-                $('<div style="float:right;padding-top:1px;width: 14px;"><span style="font-size:10px" class="ui-icon ui-icon-triangle-2-e-w"/></div>')                
-                    .appendTo( this.header )
-                    this.header.css({'padding-right':0, width:154});
-                    this.header.find('label').css({display:'inline-block', width: 135});
+            if(this.options.dtID != 'rst_DefaultValue_resource'){
+                if(this.detailType=="resource" && this.configMode.entity=='records'){
+                    
+                    $('<div style="float:right;padding-top:1px;width: 14px;"><span class="ui-icon ui-icon-triangle-1-e"/></div>')                
+                        .appendTo( this.header );
+                        this.header.css({'padding-right':0, width:154});
+                        this.header.find('label').css({display:'inline-block', width: 135});
+                        
+                }else if(this.detailType=="relmarker"){
+                    
+                    $('<div style="float:right;padding-top:1px;width: 14px;"><span style="font-size:10px" class="ui-icon ui-icon-triangle-2-e-w"/></div>')                
+                        .appendTo( this.header )
+                        this.header.css({'padding-right':0, width:154});
+                        this.header.find('label').css({display:'inline-block', width: 135});
+                }
             }
             
         }        
