@@ -397,7 +397,28 @@ $query = "CREATE TABLE defTermsLinks (
 */            
         }
         
+        
+        //adds trash groups
+        if(!(mysql__select_value($mysqli, 'select rtg_ID FROM defRecTypeGroups WHERE rtg_Name="Trash"')>0)){
+$query = 'INSERT INTO defRecTypeGroups (rtg_Name,rtg_Order,rtg_Description) '
+.'VALUES ("Trash",255,"Drag record types here to hide them, use dustbin icon on a record type to delete permanently")';
+            $mysqli->query($query);
+            $report[] = '"Trash" group has been added to rectype groups';                        
+        }
 
+        if(!(mysql__select_value($mysqli, 'select vcg_ID FROM defVocabularyGroups WHERE vcg_Name="Trash"')>0)){
+$query = 'INSERT INTO defVocabularyGroups (vcg_Name,vcg_Order,vcg_Description) '
+.'VALUES ("Trash",255,"Drag vocabularies here to hide them, use dustbin icon on a vocabulary to delete permanently")';
+            $mysqli->query($query);
+            $report[] = '"Trash" group has been added to vocabulary groups';                        
+        }
+
+        if(!(mysql__select_value($mysqli, 'select dtg_ID FROM defDetailTypeGroups WHERE dtg_Name="Trash"')>0)){
+$query = 'INSERT INTO defDetailTypeGroups (dtg_Name,dtg_Order,dtg_Description) '
+.'VALUES ("Trash",255,"Drag base fields here to hide them, use dustbin icon on a field to delete permanently")';        
+            $mysqli->query($query);
+            $report[] = '"Trash" group has been added to field groups';                        
+        }
         
    
         return $report;
@@ -431,13 +452,18 @@ function fillTermsLinks( $mysqli ){
             .'SELECT trm_ParentTermID, trm_ID FROM defTerms WHERE trm_ParentTermID>0');
     
     $report[] = 'Terms links are filled';
+    
+
+            //clear individual term selection for relationtype (this is the only field (#6))     
+            $query = 'UPDATE defDetailTypes SET dty_JsonTermIDTree="" WHERE dty_Type="relationtype"'; //for dty_ID=6
+            $mysqli->query($query);
             
             $vocab_group = 7;//
             $is_first = true;
             
             //converts custom-selected term tree to vocab with references
             $query = 'SELECT dty_Name,dty_JsonTermIDTree, dty_TermIDTreeNonSelectableIDs, dty_ID, dty_Type, dty_OriginatingDBID, dty_IDInOriginatingDB FROM '
-                     .'defDetailTypes WHERE  dty_Type="enum" or dty_Type="relmarker"';
+                     .'defDetailTypes WHERE  dty_Type="enum" or dty_Type="relmarker"'; //except relationtype which is one dty_ID=6
         
             $res = $mysqli->query($query);
             while (($row = $res->fetch_row())) {
@@ -471,9 +497,9 @@ function fillTermsLinks( $mysqli ){
                                 'trm_Domain'=>$domain,
                                 'trm_VocabularyGroupID'=>$vocab_group);
                     
-                    $id_orig_db = 0;
-                    if($row[5]==3){
-                        if($row[6]==1079) $id_orig = 6255;
+                    $id_orig = 0;
+                    if($row[5]==3){  //dty_OriginatingDBID
+                        if($row[6]==1079) $id_orig = 6255;  //dty_IDInOriginatingDB
                         else if($row[6]==1080) $id_orig = 6256;
                         else if($row[6]==1087) $id_orig = 6257;
                         else if($row[6]==1088) $id_orig = 6258;
@@ -486,7 +512,7 @@ function fillTermsLinks( $mysqli ){
                     //add new vocabulary
                     $vocab_id = mysql__insertupdate($mysqli, 'defTerms', 'trm', $values);
                     
-                    if($db_regid>0 && $id_orig_db==0){
+                    if($db_regid>0 && $id_orig==0){
                         $values = array();
                         $values['trm_ID'] = $vocab_id;
                         $values['trm_OriginatingDBID'] = $db_regid;

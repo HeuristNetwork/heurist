@@ -39,7 +39,7 @@ if( $system->verifyActionPassword($_REQUEST['pwd'], $passwordForServerFunctions)
 
 ?>            
 <div style="font-family:Arial,Helvetica;font-size:12px">
-            <p>This list shows definitions without concept codes for registered databases</p>
+            <p>This report shows </p>
 <?php            
 
 
@@ -68,7 +68,7 @@ $mysqli = $system->get_mysqli();
         $query = 'SELECT sys_dbSubVersion from '.$db_name.'.sysIdentification';
         $ver = mysql__select_value($mysqli, $query);
         
-        if($ver<3){
+        if(false && $ver<3){
             /* databases without trm_VocabularyGroupID
             $query = "SHOW COLUMNS FROM '.$db_name.'defTerms LIKE 'trm_VocabularyGroupID'";
             if(!hasColumn($mysqli, $query)){
@@ -89,13 +89,13 @@ $mysqli = $system->get_mysqli();
             
             
             $query = 'select count(*) from '.$db_name.'.defDetailTypes where '
-            .'(dty_Type="relationtype") and (NOT dty_JsonTermIDTree>0)'; 
+            .'(dty_Type="relationtype") and (dty_JsonTermIDTree!="")'; 
             //dty_Type="enum" OR dty_Type="relmarker" OR  OR dty_Type="relationtype"
             $value = mysql__select_value($mysqli, $query);
             if($value>0){
 
                 $query = 'select dty_ID, dty_Name, dty_JsonTermIDTree from '.$db_name.'.defDetailTypes where '
-                .'(dty_Type="relationtype") and (NOT dty_JsonTermIDTree>0)'; // OR dty_Type="relationtype"
+                .'(dty_Type="relationtype") and (dty_JsonTermIDTree!="")'; // OR dty_Type="relationtype"
                 $value = mysql__select_all($mysqli, $query);
                 
                 if($ver<3){
@@ -118,6 +118,29 @@ $mysqli = $system->get_mysqli();
                 $dt = mysql__select_value($mysqli, $query);
                 $db3_with_terms[$db_name] = array($dt,$value);
                 */
+ /*               
+                //adds trash groups
+                if(!(mysql__select_value($mysqli, 'select rtg_ID FROM '.$db_name.'.defRecTypeGroups WHERE rtg_Name="Trash"')>0)){
+        $query = 'INSERT INTO '.$db_name.'.defRecTypeGroups (rtg_Name,rtg_Order,rtg_Description) '
+        .'VALUES ("Trash",255,"Drag record types here to hide them, use dustbin icon on a record type to delete permanently")';
+                    //$mysqli->query($query);
+                    $report[] = '"Trash" group has been added to rectype groups';                        
+                }
+
+                if(!(mysql__select_value($mysqli, 'select vcg_ID FROM '.$db_name.'.defVocabularyGroups WHERE vcg_Name="Trash"')>0)){
+        $query = 'INSERT INTO '.$db_name.'.defVocabularyGroups (vcg_Name,vcg_Order,vcg_Description) '
+        .'VALUES ("Trash",255,"Drag vocabularies here to hide them, use dustbin icon on a vocabulary to delete permanently")';
+                    //$mysqli->query($query);
+                    $report[] = '"Trash" group has been added to vocabulary groups';                        
+                }
+
+                if(!(mysql__select_value($mysqli, 'select dtg_ID FROM '.$db_name.'.defDetailTypeGroups WHERE dtg_Name="Trash"')>0)){
+        $query = 'INSERT INTO '.$db_name.'.defDetailTypeGroups (dtg_Name,dtg_Order,dtg_Description) '
+        .'VALUES ("Trash",255,"Drag base fields here to hide them, use dustbin icon on a field to delete permanently")';        
+                    //$mysqli->query($query);
+                    $report[] = '"Trash" group has been added to field groups';                        
+                }
+*/                
             }
         }
         //find terms with specific ccodes - create new or set vocabularies
@@ -128,7 +151,7 @@ Hide layer outside zoom range 3-1087  ( 2-6257 )  3-5081, 3-5082
 Show labels 3-1088  ( 2-6258 )  3-5084, 3-5085, 3-5086
         */        
         //from fields to vocabs to terms - assign proper ccodes
-        print "<br><br>".$db_name.'<br>';
+        //print "<br><br>".$db_name.'<br>';
         //verifySpatialVocab('Show legend on startup','3-1079','2-6255');
         //verifySpatialVocab('Suppress timeline','3-1080','2-6256');
         //verifySpatialVocab('Hide layer outside zoom range','3-1087','2-6257');
@@ -146,19 +169,21 @@ Show labels 3-1088  ( 2-6258 )  3-5084, 3-5085, 3-5086
             
         
     }//while  databases
-    print '<p>v2 with defTermLinks</p>';
-    print print_r($db2_with_links, true);
+    
+    if(count($db2_with_links)>0){
+        print '<p>v2 with defTermLinks</p>';
+        print print_r($db2_with_links, true);
+    }
 
-
-    print '<hr><p>v2 with individual term selection</p>';
+    print '<hr><p>v2 with individual term selection for relationtype</p>';
 
     foreach ($db2_with_terms as $db_name=>$value){
         print $db_name.'<br>';
-        print print_r($value, true).'<br>';
+        //print print_r($value, true).'<br>';
     }
 
     
-    print '<hr><p>v3 with individual term selection</p>';
+    print '<hr><p>v3 with individual term selection '.(@$_REQUEST["fix"]==1?'FIXED':'').'</p>';
 
     foreach ($db3_with_terms as $db_name=>$value){
         print $db_name.'<br>';
