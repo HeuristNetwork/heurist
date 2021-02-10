@@ -232,7 +232,7 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
     // if hAPI is not defined in parent(top most) window we have to create new instance
     $(document).ready(function() {
 
-        //console.log('ipage doc ready '+(window.hWin.HAPI4)+'    '+(new Date().getTime() / 1000 - _time_debug));
+_dout('ipage doc ready '+(window.hWin.HAPI4)+'    '+(new Date().getTime() / 1000 - _time_debug));
         _time_debug = new Date().getTime() / 1000;
 
         // Standalone check
@@ -259,19 +259,31 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
         }
 
     });
+    
+    //
+    // debug output
+    //
+    function _dout(msg){
+        //console.log(msg);        
+    }
 
+    //
     // Callback function on hAPI initialization
+    //
     function onHapiInit(success)
     {
         //if(isHapiInited) return;
         
         isHapiInited = true;
         
+_dout('onHapiInit '+success);        
+
+
         if(success) // Successfully initialized system
         {
             applyTheme();
 
-            //console.log('ipage hapi inited  '+(new Date().getTime() / 1000 - _time_debug));
+_dout('ipage hapi inited  '+(new Date().getTime() / 1000 - _time_debug));
             _time_debug = new Date().getTime() / 1000;
 
             if(!window.hWin.HEURIST4.rectypes){
@@ -301,7 +313,7 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
                         success = false;
                     }
 
-                    //console.log('ipage db struct  '+(new Date().getTime() / 1000 - _time_debug));
+_dout('ipage db struct  '+(new Date().getTime() / 1000 - _time_debug));
                     _time_debug = new Date().getTime() / 1000;
 
 
