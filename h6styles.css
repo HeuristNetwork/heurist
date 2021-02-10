@@ -171,9 +171,11 @@ body.popup {
     right: 0px;
     width:450px;
     font-size:0.9em;
-    padding-left: 20px;
     border-left: 2px solid;
     background: white;
+}
+.ui-helper-popup #content{
+    padding-left: 20px;
 }
 
 .menu-text{
