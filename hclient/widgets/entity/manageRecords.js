@@ -48,6 +48,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         height:(window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95,
         optfields:true, 
         help_on:true,
+        show_warn_about_relationship: true,
         
         structure_closed: 1,          
         structure_width:180, //280,
@@ -2169,7 +2170,54 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             //
             // create new temporary record to be edited
             //
-            function __onAddNewRecord(){
+            function __onAddNewRecord( force_proceeed ){
+                
+                //if new record is relationship - show warning
+                if(force_proceeed!==true && 
+                    that.options.new_record_params['RecTypeID']==window.hWin.HAPI4.sysinfo['dbconst']['RT_RELATION']){
+
+                    var params = window.hWin.HAPI4.get_prefs_def('prefs_'+that._entityName, that.defaultPrefs);
+
+                    if(params['show_warn_about_relationship']!==false){
+
+
+                        var $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
+                            '<p>We do not recommend creating relationship records directly. They are better created through Relationship Marker fields defined within the connected record types.</p>'       
+                            +'<p>Go to Design Menu to add Relationship Markers to the record types you wish to connect.</p>'
+                            +'<p>Relationship Marker fields have three important advantages:</p><ol>'
+                            +'<li>They constrain the types of record which can be connected and the types of relationship to be used in each connection. For instance, Person isAuthorOf Work, Person isChildOf Person, but not Person isAuthorOf Person.</li>'
+                            +'<li>They contextualise entry of relationships within the data entry forms streamlining data entry and encouraging well-structured data (including making relationships required and/or singular in certain contexts).</li>'
+                            +'<li>They guide the creation of complex queries through "wizards" which use the information provided to structure their pathway. Without them, much of the power of Heurist retrievals is lost; constructed titles, facet filters and custom reports can only use relationships defined in this way.</li></ol>'
+                            +'<br><br><label><input type="checkbox"> Do not show this message again</label> (current login session)'                    
+                            ,
+                            [
+                                {text:'Design menu', css:{'margin-right':'200px'}, click: function(){
+                                    $dlg.dialog( "close" ); 
+                                    that.closeEditDialog();
+                                    //open design menu
+                                    window.hWin.HAPI4.LayoutMgr.executeCommand('mainMenu', 'menuActionById', 'menu-structure-rectypes');
+                                }},
+                                {text:'Create relationship record', click: function(){ 
+                                    $dlg.dialog( "close" );                    
+                                    __onAddNewRecord( true );
+                                }},
+                                {text:'Cancel', click: function(){ $dlg.dialog( "close" ); that.closeEditDialog(); }}
+
+                            ],{  title:'Creation of relationship record' }        
+                        );
+
+                        var chb = $dlg.find('input[type="checkbox"]').change(function(){
+                            var params = window.hWin.HAPI4.get_prefs_def('prefs_'+that._entityName, that.defaultPrefs);
+                            params['show_warn_about_relationship'] = false;
+                            window.hWin.HAPI4.save_pref('prefs_'+that._entityName, params);     
+
+                        });
+
+                    }                            
+
+                }
+                
+                
                 
                 if(that.options.new_record_params['OwnerUGrpID']=='current_user') {
                     that.options.new_record_params.OwnerUGrpID = window.hWin.HAPI4.user_id();

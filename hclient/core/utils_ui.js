@@ -1622,10 +1622,13 @@ window.hWin.HEURIST4.ui = {
                 var isPopup = false;
                 
                 if(popup_options && 
-                    $.isPlainObject(popup_options.new_record_params) && popup_options.new_record_params['rt']>0){
+                    $.isPlainObject(popup_options.new_record_params) && 
+                        (popup_options.new_record_params['rt']>0 || popup_options.new_record_params['RecTypeID']>0)){
                     //rec_ID = -1;
                     query_or_recordset = null;
+                    
                 }
+                
                 
                 popup_options = $.extend(popup_options, {
                     select_mode: 'manager',
@@ -1738,7 +1741,8 @@ window.hWin.HEURIST4.ui = {
     },
     
     //
-    //  Opens record edit or viewer\
+    //  Opens record edit  ->  openRecordEdit 
+    //            or viewer  -> renderRecordData.php
     //  query_request - recordset or query string 
     //
     openRecordInPopup:function(rec_ID, query_request, isEdit, popup_options){

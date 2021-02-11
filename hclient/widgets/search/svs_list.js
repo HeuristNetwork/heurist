@@ -2471,7 +2471,7 @@ console.log('refresh '+(window.hWin.HAPI4.currentUser.usr_SavedSearch==null));
     }
     
     , _showRecTypeManager: function(){
-        window.hWin.HAPI4.LayoutMgr.executeCommand('mainMenu', 'menuActionById', 'menu-structure-structure');
+        window.hWin.HAPI4.LayoutMgr.executeCommand('mainMenu', 'menuActionById', 'menu-structure-rectypes');
     }
     
     //

@@ -603,10 +603,13 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
                         }
                     }
 
+                    window.hWin.HAPI4.LayoutMgr.executeCommand('mainMenu', 'menuActionById', command);
+                    /*
                     var widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('mainMenu');
                     if(widget){
                         widget.mainMenu('menuActionById', command);
                     }
+                    */
 
                 }else if(command=='action-AddRecord'){ //add new record
                     var params = window.hWin.HEURIST4.util.isJSON( this._selection.fld(record, 'dsh_Parameters') );
