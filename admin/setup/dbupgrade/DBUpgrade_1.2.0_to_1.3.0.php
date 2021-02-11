@@ -503,6 +503,7 @@ function fillTermsLinks( $mysqli ){
                         else if($row[6]==1080) $id_orig = 6256;
                         else if($row[6]==1087) $id_orig = 6257;
                         else if($row[6]==1088) $id_orig = 6258;
+                        
                         if($id_orig>0){
                             $values['trm_OriginatingDBID'] = 2;
                             $values['trm_IDInOriginatingDB'] = $id_orig;  

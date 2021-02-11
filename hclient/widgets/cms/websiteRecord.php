@@ -208,7 +208,9 @@ $isWebPage = false;
 
 if(!(@$_REQUEST['field']>1)){
     $website_title = __getValue($rec, DT_NAME);
-    $isWebPage = ($rec['rec_RecTypeID']==RT_CMS_MENU && __getValue($rec, DT_CMS_PAGETYPE)==ConceptCode::getTermLocalID('2-6254'));
+    $isWebPage = ($rec['rec_RecTypeID']==RT_CMS_MENU && 
+                defined('DT_CMS_PAGETYPE') &&
+                __getValue($rec, DT_CMS_PAGETYPE)==ConceptCode::getTermLocalID('2-6254'));
     
     if(!$isWebPage){ //for standalone webpage always without title
         $show_pagetitle = __getValue($rec, DT_CMS_PAGETITLE);
