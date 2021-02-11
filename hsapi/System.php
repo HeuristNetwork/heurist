@@ -59,7 +59,7 @@ class System {
     //private $guest_User = array('ugr_ID'=>0,'ugr_FullName'=>'Guest');
     private $current_User = null;
     private $system_settings = null;
-    private $send_email_on_error = 0;
+    private $send_email_on_error = 1; //set to 1 to send email for all severe errors
     
     /*
     
@@ -711,7 +711,7 @@ error_log(print_r($_REQUEST, true));
     * 
     * @param mixed $message
     */
-    public function error_exit( $message, $error_code=null ) {
+    public function error_exit( $message, $error_code=null) {
         
         header('Content-type: application/json;charset=UTF-8');
         if($message){
@@ -722,6 +722,7 @@ error_log(print_r($_REQUEST, true));
         }
 
         print json_encode( $this->getError() );
+        
         exit();
     }
 
@@ -786,7 +787,9 @@ error_log(print_r($_REQUEST, true));
            $status!=HEURIST_REQUEST_DENIED && $status!=HEURIST_ACTION_BLOCKED){
                
                 $Title = 'Heurist Error type: '.$status
-                    .' User: '.$this->get_user_id().' '.@$this->current_User['ugr_FullName']
+                    .' User: '.$this->get_user_id()
+                            .' '.@$this->current_User['ugr_FullName']
+                            .' <'.@$this->current_User['ugr_eMail'].'>'
                     .' Database: '.$this->dbname();
                
                 $sMsg = 'Message: '.$message."\n"
@@ -795,8 +798,8 @@ error_log(print_r($_REQUEST, true));
                 .'Script: '.@$_SERVER['REQUEST_URI']."\n";
                 //.'User: '.$this->get_user_id().' '.@$this->current_User['ugr_FullName']."\n"
                 //.'Database: '.$this->dbname();
-                if($this->send_email_on_error==1){
-                    $rv = sendEmail(HEURIST_MAIL_TO_BUG.',osmakov@gmail.com', $Title,
+                if($this->send_email_on_error==1){  //.',osmakov@gmail.com'
+                    $rv = sendEmail(HEURIST_MAIL_TO_BUG, $Title,
                                 $sMsg, null);
                     $message = 'Heurist was unable to process. '.$message;
                     $sysmsg = 'This error has been emailed to the Heurist team. We apologise for any inconvenience';

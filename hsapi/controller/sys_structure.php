@@ -153,7 +153,17 @@ ini_set('max_execution_time', 0);
                 
                 $response['report']['broken_terms_reason'] = null;
             }
+            if(@$response['report'] && $response['report']['rectypes']){
+                $email_header = 'From: HEURIST <no-reply@'.HEURIST_SERVER_NAME.">\r\nContent-Type: text/html;";
+
+                $sText = 'Target database '.HEURIST_DBNAME;
+                $sText .= ("<br>".'Source database '.@$_REQUEST["databaseID"]);
+                $sText .= ('<table><tr><td colspan="2">source</td><td colspan="2">target</td></tr>'
+                        .$response['report']['rectypes'].'</table>');
+                        
+                sendEmail(HEURIST_MAIL_TO_ADMIN, 'Download templates', $sText, $email_header);
             
+            }
             
 
         }else{
