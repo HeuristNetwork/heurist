@@ -341,9 +341,9 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 this._toolbar = this.searchForm;
 
                 //padding:'6px'
-                this.searchForm.css({'min-width': '470px', 'padding-top':this.options.isFrontUI?'6px':'4px', height:80})
+                this.searchForm.css({'min-width': '200px', 'padding-top':this.options.isFrontUI?'6px':'4px', height:80})
                 .empty();                                     
-                this.recordList.css({'min-width': '315px', top:80});
+                this.recordList.css({'min-width': '200px', top:80});
                 this.searchForm.parent().css({'overflow-x':'auto'});
 
                 $('<div style="vertical-align: middle;width: 100%;min-height: 32px; border-bottom: 1px solid gray; clear: both;">'
