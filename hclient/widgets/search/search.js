@@ -178,7 +178,7 @@ $.widget( "heurist.search", {
             'max-height':'70px', 'resize':'none', 
             'padding':'0.4em',
             'min-height':'41px', 'line-height': '14px', 
-            'min-width':'10em', 'width':'100%', 'padding-right':'28px' })  //was width:sz_input, 'max-width':sz_input,  
+            'min-width':'80px', 'width':'100%', 'padding-right':'28px' })  //was width:sz_input, 'max-width':sz_input,  
         .addClass("text ui-widget-content ui-corner-all")
         .appendTo(  this.div_search_input );
         
@@ -290,7 +290,7 @@ $.widget( "heurist.search", {
             
             this.btn_saved_filters = 
             $('<span class="ui-main-color" '
-            +'style="font-size: 9px;position: relative;margin-left: -52px;min-width: 50px;cursor:pointer;padding-right:4px">'
+            +'style="font-size: 9px;position: relative;margin-left: -58px;min-width: 50px;cursor:pointer;padding-right:10px">'
                 +'<span style="display:inline-block;width:30px;margin-top: 4px;">saved filters</span>'
             +'<span class="ui-icon ui-icon-carat-1-s" style="font-size: inherit;height: 11px;display: inline-block;vertical-align: super;">'
             +'</span></span>')
@@ -307,7 +307,8 @@ $.widget( "heurist.search", {
             
             var linkGear = $('<a><span class="ui-icon ui-icon-magnify-explore"/></a>',{href:'#', 
                 title:window.hWin.HR('Build a filter expression using a for3m-driven approach')})
-                .css({display:'inline-block',padding:'0 2px',width:40})
+                .css({display:'inline-block',padding:'0 2px',width:30})
+                .addClass('btn-aux')
                 //.addClass('') //was ui-icon-gear was ui-icon-filter-form
                 .appendTo(this.div_buttons);
             this._on( linkGear, {  click: this.showSearchAssistant });
@@ -315,7 +316,7 @@ $.widget( "heurist.search", {
             this.btn_faceted_wiz = $('<a>',{href:'#', 
                 title:window.hWin.HR('Build new faceted search')})
                 .css({display:'inline-block',padding:'0 2px',width:30})
-                .addClass('ui-icon ui-icon-box ui-main-color') //was ui-icon-gear was ui-icon-filter-form
+                .addClass('ui-icon ui-icon-box ui-main-color btn-aux') //was ui-icon-gear was ui-icon-filter-form
                 .appendTo(this.div_buttons);
             this._on( this.btn_faceted_wiz, {  click: function(){
                 
@@ -366,7 +367,7 @@ $.widget( "heurist.search", {
         } 
         */
         
-
+        
         //
         // search/filter buttons - may be Search or Bookmarks according to settings and whether logged in
         //
@@ -691,6 +692,7 @@ $.widget( "heurist.search", {
         //global listeners
         $(this.document).on(
             window.hWin.HAPI4.Event.ON_CREDENTIALS+' '
+                +window.hWin.HAPI4.Event.ON_LAYOUT_RESIZE+' '
                 +window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE, function(e, data) {
                     
             if(e.type == window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE){
@@ -700,7 +702,7 @@ $.widget( "heurist.search", {
                 that._refresh();
             }
         });
-
+        
         $(this.document).on(
             window.hWin.HAPI4.Event.ON_REC_SEARCHSTART
             + ' ' + window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH
@@ -755,260 +757,291 @@ $.widget( "heurist.search", {
         
    },
     
-    
-    _showhide_input_prompt:function() {
-                if(this.input_search.val()==''){
-                    this.input_search_prompt.show();    
-                    this.input_search_prompt2.css({'visibility':'hidden'});//hide();    
-                }else{
-                    this.input_search_prompt.hide();     
-                }
-    },
+   //
+   // help text inside input field
+   //
+   _showhide_input_prompt:function() {
+       if(this.input_search.val()==''){
+           this.input_search_prompt.show();    
+           this.input_search_prompt2.css({'visibility':'hidden'});//hide();    
+       }else{
+           this.input_search_prompt.hide();     
+       }
+   },
 
-    /* EXPERIMENTAL
-    _initPagination: function(){
-    this.div_paginator = $('<span>')
-    .css('display', 'inline-block')
-    .appendTo( this.div_search )
-    .pagination();
-    },
-    */
+   /* EXPERIMENTAL
+   _initPagination: function(){
+   this.div_paginator = $('<span>')
+   .css('display', 'inline-block')
+   .appendTo( this.div_search )
+   .pagination();
+   },
+   */
 
-    _setOption: function( key, value ) {
-        this._super( key, value );
+   _setOption: function( key, value ) {
+       this._super( key, value );
 
-        if(key=='search_domain'){
-            this._refresh();
-        }
-    },
+       if(key=='search_domain'){
+           this._refresh();
+       }
+   },
 
-    /* private function */
-    _refresh: function(){
+   /* private function */
+   _refresh: function(){
 
-        if(window.hWin.HAPI4.has_access()){
-            $(this.element).find('.logged-in-only').show();
-            $(this.element).find('.div-table-cell.logged-in-only').css({'display':'table-cell'});
-            
-            if(this.options.is_h6style){
-                $(this.element).find('.div-table-cell:visible').css({'display':'table-cell'});
-            }
-            
-            //$(this.element).find('.logged-in-only').css('visibility','visible');
-            //$(this.element).find('.logged-out-only').css('visibility','hidden');
-            $(this.element).find('.logged-out-only').hide();
-        }else{
-            $(this.element).find('.logged-in-only').hide();
-            //$(this.element).find('.logged-in-only').css('visibility','hidden');
-            //$(this.element).find('.logged-out-only').css('visibility','visible');
-            
-            $(this.element).find('.logged-out-only').show();
-            if(this.options.is_h6style){
-                $(this.element).find('.div-table-cell:visible').css({'display':'table-cell'});
-            }
-            
-        }
+       if(window.hWin.HAPI4.has_access()){
+           $(this.element).find('.logged-in-only').show();
+           $(this.element).find('.div-table-cell.logged-in-only').css({'display':'table-cell'});
 
-//ART        $(this.element).find('.div-table-cell').height( $(this.element).height() );
+           if(this.options.is_h6style){
+               $(this.element).find('.div-table-cell:visible').css({'display':'table-cell'});
+           }
 
-        this.btn_search_as_user.button( "option", "label", window.hWin.HR(this._getSearchDomainLabel(this.options.search_domain)));
+           //$(this.element).find('.logged-in-only').css('visibility','visible');
+           //$(this.element).find('.logged-out-only').css('visibility','hidden');
+           $(this.element).find('.logged-out-only').hide();
+       }else{
+           $(this.element).find('.logged-in-only').hide();
+           //$(this.element).find('.logged-in-only').css('visibility','hidden');
+           //$(this.element).find('.logged-out-only').css('visibility','visible');
 
-        this.btn_search_domain.css('display', (window.hWin.HAPI4.get_prefs('bookmarks_on')=='1')?'inline-block':'none');
+           $(this.element).find('.logged-out-only').show();
+           if(this.options.is_h6style){
+               $(this.element).find('.div-table-cell:visible').css({'display':'table-cell'});
+           }
 
-        if(this.options.btn_visible_newrecord){
+       }
 
-            if(!this.select_rectype_addrec){ //add record selector
+       //ART        $(this.element).find('.div-table-cell').height( $(this.element).height() );
 
-                this.select_rectype_addrec = window.hWin.HEURIST4.ui.createRectypeSelect();
-                if(this.select_rectype_addrec.hSelect("instance")!=undefined){
-                    this.select_rectype_addrec.hSelect( "menuWidget" ).css({'max-height':'450px'});                        
-                }
+       this.btn_search_as_user.button( "option", "label", window.hWin.HR(this._getSearchDomainLabel(this.options.search_domain)));
 
-                var that = this;
-                this.select_rectype_addrec.hSelect({change: function(event, data){
+       this.btn_search_domain.css('display', (window.hWin.HAPI4.get_prefs('bookmarks_on')=='1')?'inline-block':'none');
 
-                    var selval = data.item.value;
-                    that.select_rectype_addrec.val(selval);
-                    var opt = that.select_rectype_addrec.find('option[value="'+selval+'"]');
-                    that.btn_add_record.button({label: 'Add '+opt.text().trim()});
+       if(this.options.btn_visible_newrecord){
 
-                    var prefs = window.hWin.HAPI4.get_prefs('record-add-defaults');
-                    if(!$.isArray(prefs) || prefs.length<4){
-                        prefs = [selval, 0, 'viewable', '']; //default to everyone   window.hWin.HAPI4.currentUser['ugr_ID']
-                    }else{
-                        prefs[0] = selval; 
-                    }
-                    window.hWin.HAPI4.save_pref('record-add-defaults', prefs);
+           if(!this.select_rectype_addrec){ //add record selector
 
-                    window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE, {origin:'search'});
+               this.select_rectype_addrec = window.hWin.HEURIST4.ui.createRectypeSelect();
+               if(this.select_rectype_addrec.hSelect("instance")!=undefined){
+                   this.select_rectype_addrec.hSelect( "menuWidget" ).css({'max-height':'450px'});                        
+               }
 
-                    window.hWin.HEURIST4.ui.openRecordEdit(-1, null, {new_record_params:{RecTypeID:selval}});
-                    return false;
-                    }
-                });
-                this.select_rectype_addrec.hSelect('hideOnMouseLeave', this.btn_select_rt);
+               var that = this;
+               this.select_rectype_addrec.hSelect({change: function(event, data){
 
-            }
+                   var selval = data.item.value;
+                   that.select_rectype_addrec.val(selval);
+                   var opt = that.select_rectype_addrec.find('option[value="'+selval+'"]');
+                   that.btn_add_record.button({label: 'Add '+opt.text().trim()});
 
-            var add_rec_prefs = window.hWin.HAPI4.get_prefs('record-add-defaults');
-            if(!$.isArray(add_rec_prefs) || add_rec_prefs.length<4){
-                add_rec_prefs = [0, 0, 'viewable', '']; //rt, owner, access, tags  (default to Everyone)
-            }
-            if(add_rec_prefs.length<4){
-                add_rec_prefs.push(''); //visibility groups
-            }
+                   var prefs = window.hWin.HAPI4.get_prefs('record-add-defaults');
+                   if(!$.isArray(prefs) || prefs.length<4){
+                       prefs = [selval, 0, 'viewable', '']; //default to everyone   window.hWin.HAPI4.currentUser['ugr_ID']
+                   }else{
+                       prefs[0] = selval; 
+                   }
+                   window.hWin.HAPI4.save_pref('record-add-defaults', prefs);
 
-            if(add_rec_prefs[0]>0) {
-                this.select_rectype_addrec.val(add_rec_prefs[0]); 
-                var opt = this.select_rectype_addrec.find('option[value="'+add_rec_prefs[0]+'"]');
-                this.btn_add_record.button({label: 'Add '+opt.text()});
-            }
+                   window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE, {origin:'search'});
 
-            this.setOwnerAccessButtonLabel( add_rec_prefs );
+                   window.hWin.HEURIST4.ui.openRecordEdit(-1, null, {new_record_params:{RecTypeID:selval}});
+                   return false;
+                   }
+               });
+               this.select_rectype_addrec.hSelect('hideOnMouseLeave', this.btn_select_rt);
 
-        }
-        
-        this._showhide_input_prompt();
-    },
+           }
 
-    //
-    //
-    //
-    _showAdvancedAssistant: function(){
-        //call Heurist vsn 3 search builder
-        var q = "",
-        that = this;
-        if(this.input_search.val()!='') {
-            q ="&q=" + encodeURIComponent(this.input_search.val());
-        }else if(!Hul.isnull(this.query_request) && !Hul.isempty(this.query_request.q)){
-            q ="&q=" + encodeURIComponent(this.query_request.q);
-        }
+           var add_rec_prefs = window.hWin.HAPI4.get_prefs('record-add-defaults');
+           if(!$.isArray(add_rec_prefs) || add_rec_prefs.length<4){
+               add_rec_prefs = [0, 0, 'viewable', '']; //rt, owner, access, tags  (default to Everyone)
+           }
+           if(add_rec_prefs.length<4){
+               add_rec_prefs.push(''); //visibility groups
+           }
 
-        var url = window.hWin.HAPI4.baseURL+ "hclient/widgets/search/queryBuilderPopup.php?db=" 
-                            + window.hWin.HAPI4.database + q;
+           if(add_rec_prefs[0]>0) {
+               this.select_rectype_addrec.val(add_rec_prefs[0]); 
+               var opt = this.select_rectype_addrec.find('option[value="'+add_rec_prefs[0]+'"]');
+               this.btn_add_record.button({label: 'Add '+opt.text()});
+           }
 
-        window.hWin.HEURIST4.msg.showDialog(url, { width:740, height:540, title:'Advanced Search Builder', callback:
-            function(res){
-                if(!Hul.isempty(res)) {
-                    that.input_search.val(res);
-                    that.input_search.change();
-                    that._doSearch(true);
-                }
-        }});
-    },
+           this.setOwnerAccessButtonLabel( add_rec_prefs );
 
-    //
-    //
-    //
-    _isSameRealm: function(data){
-        return !this.options.search_realm || (data && this.options.search_realm==data.search_realm);
-    },
-    
+       }
 
-    _onSearchGlobalListener: function(e, data){
+       this._showhide_input_prompt();
+       
+       if(!this._is_publication && this.options.is_h6style 
+           && this.btn_search_as_user && this.btn_search_as_user.button('instance')){
 
-        var that = this;
+           if(this.element.width()<440){
 
-        if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCHSTART)
-        {
+               this.div_buttons.css('min-width',46);
+               this.div_buttons.find('.btn-aux').width(20);
+               this.btn_search_as_user.button('option','showLabel',false);
+               this.btn_search_as_user.css('min-width',31);
+               this.btn_save_filter.css('margin-left',0);
+           }else{
+               this.div_buttons.css('min-width',88);
+               this.div_buttons.find('.btn-aux').width(30);
+               this.btn_search_as_user.button('option','showLabel',true);
+               this.btn_search_as_user.css('min-width',90);
+               this.btn_save_filter.css('margin-left',15);
+           }
 
-            //accept events from the same realm only
-            if(!that._isSameRealm(data)) return;
-            
-            //data is search query request
-            if(data.reset){
-                that.input_search.val('');
-                that.input_search.change();
-            }else            
-            //topids not defined - this is not rules request
-            if(window.hWin.HEURIST4.util.isempty(data.topids) && data.apply_rules!==true){
+           if(this.element.width()<201){
+               this.div_buttons.hide();
+               this.btn_save_filter.parent().hide();
+           }else{
+               this.div_buttons.show();
+               this.btn_save_filter.parent().show();
+           }
 
-                //request is from some other widget (outside)
-                if(data.source!=that.element.attr('id')){
-                    var qs;
-                    if($.isArray(data.q)){
-                        qs = JSON.stringify(data.q);
-                    }else{
-                        qs = data.q;
-                    }
+       }
+       
+   },
 
-                    if(!window.hWin.HEURIST4.util.isempty(qs)){
-                        
-                        if(qs.length<10000){
-                            that.input_search.val(qs);
-                            that.options.search_domain = data.w;
-                            that.query_request = data;
-                            that._refresh();
-                        }
-                        if( true || window.hWin.HEURIST4.util.isJSON(data.q) || qs.length>100 ){
-                            that.input_search_prompt2.css({'visibility':'visible'}); //{display:'block'}
-                        }
-                    }
-                }
+   //
+   //
+   //
+   _showAdvancedAssistant: function(){
+       //call Heurist vsn 3 search builder
+       var q = "",
+       that = this;
+       if(this.input_search.val()!='') {
+           q ="&q=" + encodeURIComponent(this.input_search.val());
+       }else if(!Hul.isnull(this.query_request) && !Hul.isempty(this.query_request.q)){
+           q ="&q=" + encodeURIComponent(this.query_request.q);
+       }
 
-                var is_keep = window.hWin.HAPI4.get_prefs('searchQueryInBrowser');
-                is_keep = (is_keep==1 || is_keep==true || is_keep=='true');
-                
-                if(is_keep && !this.options.search_realm){
-                    var qs = window.hWin.HEURIST4.util.composeHeuristQueryFromRequest(data, true);
-                    if(qs && qs.length<2000){
-                        var s = location.pathname;
-                        while (s.substring(0, 2) === '//') s = s.substring(1);
-                        
-                        window.history.pushState("object or string", "Title", s+'?'+qs );
-                    }
-                }
-                
-                that.input_search.change();
+       var url = window.hWin.HAPI4.baseURL+ "hclient/widgets/search/queryBuilderPopup.php?db=" 
+       + window.hWin.HAPI4.database + q;
 
-            }
-            
+       window.hWin.HEURIST4.msg.showDialog(url, { width:740, height:540, title:'Advanced Search Builder', callback:
+           function(res){
+               if(!Hul.isempty(res)) {
+                   that.input_search.val(res);
+                   that.input_search.change();
+                   that._doSearch(true);
+               }
+       }});
+   },
 
-            //ART that.div_search.css('display','none');
-        }else 
-        if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH){ //search completed
-
-            //accept events from the same realm only
-            if(!that._isSameRealm(data)) return;
-        
-            window.hWin.HEURIST4.util.setDisabled(this.input_search, false);
-            
-            this._setFocus();
-            //show if there is resulst
-            if(this.btn_search_save){
-                if(window.hWin.HAPI4.currentRecordset && window.hWin.HAPI4.currentRecordset.length()>0) //
-                {
-                    this.btn_search_save.show();
-                }else{
-                    this.btn_search_save.hide();
-                }
-            }
-
-        }else 
-        if(e.type == window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE){
-            
-    
-           if(this.search_assistant!=null){
-                if(this.search_assistant_popup!=null && this.search_assistant_popup.dialog('instance')){
-                    this.search_assistant_popup.dialog('close');
-                    this.search_assistant_popup = null;
-                }
-                //this.search_assistant.dialog('destroy');
-                this.search_assistant.remove();
-                this.search_assistant = null;
-
-            }
-            //force recreate rectype selectors
-            if(this.select_rectype_addrec!=null){
-                this.select_rectype_addrec.remove();
-                this.select_rectype_addrec = null;
-                this._refresh();
-            }
-
-        }
+   //
+   //
+   //
+   _isSameRealm: function(data){
+       return !this.options.search_realm || (data && this.options.search_realm==data.search_realm);
+   },
 
 
+   _onSearchGlobalListener: function(e, data){
 
-    },
+       var that = this;
+
+       if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCHSTART)
+       {
+
+           //accept events from the same realm only
+           if(!that._isSameRealm(data)) return;
+
+           //data is search query request
+           if(data.reset){
+               that.input_search.val('');
+               that.input_search.change();
+           }else            
+               //topids not defined - this is not rules request
+               if(window.hWin.HEURIST4.util.isempty(data.topids) && data.apply_rules!==true){
+
+                   //request is from some other widget (outside)
+                   if(data.source!=that.element.attr('id')){
+                       var qs;
+                       if($.isArray(data.q)){
+                           qs = JSON.stringify(data.q);
+                       }else{
+                           qs = data.q;
+                       }
+
+                       if(!window.hWin.HEURIST4.util.isempty(qs)){
+
+                           if(qs.length<10000){
+                               that.input_search.val(qs);
+                               that.options.search_domain = data.w;
+                               that.query_request = data;
+                               that._refresh();
+                           }
+                           if( true || window.hWin.HEURIST4.util.isJSON(data.q) || qs.length>100 ){
+                               that.input_search_prompt2.css({'visibility':'visible'}); //{display:'block'}
+                           }
+                       }
+                   }
+
+                   var is_keep = window.hWin.HAPI4.get_prefs('searchQueryInBrowser');
+                   is_keep = (is_keep==1 || is_keep==true || is_keep=='true');
+
+                   if(is_keep && !this.options.search_realm){
+                       var qs = window.hWin.HEURIST4.util.composeHeuristQueryFromRequest(data, true);
+                       if(qs && qs.length<2000){
+                           var s = location.pathname;
+                           while (s.substring(0, 2) === '//') s = s.substring(1);
+
+                           window.history.pushState("object or string", "Title", s+'?'+qs );
+                       }
+                   }
+
+                   that.input_search.change();
+
+               }
+
+
+           //ART that.div_search.css('display','none');
+       }else 
+           if(e.type == window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH){ //search completed
+
+               //accept events from the same realm only
+               if(!that._isSameRealm(data)) return;
+
+               window.hWin.HEURIST4.util.setDisabled(this.input_search, false);
+
+               this._setFocus();
+               //show if there is resulst
+               if(this.btn_search_save){
+                   if(window.hWin.HAPI4.currentRecordset && window.hWin.HAPI4.currentRecordset.length()>0) //
+                   {
+                       this.btn_search_save.show();
+                   }else{
+                       this.btn_search_save.hide();
+                   }
+               }
+
+           }else 
+               if(e.type == window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE){
+
+
+                   if(this.search_assistant!=null){
+                       if(this.search_assistant_popup!=null && this.search_assistant_popup.dialog('instance')){
+                           this.search_assistant_popup.dialog('close');
+                           this.search_assistant_popup = null;
+                       }
+                       //this.search_assistant.dialog('destroy');
+                       this.search_assistant.remove();
+                       this.search_assistant = null;
+
+                   }
+                   //force recreate rectype selectors
+                   if(this.select_rectype_addrec!=null){
+                       this.select_rectype_addrec.remove();
+                       this.select_rectype_addrec = null;
+                       this._refresh();
+                   }
+
+               }
+
+
+
+   },
     
     _setFocus: function(){
       
@@ -1675,6 +1708,7 @@ $.widget( "heurist.search", {
     ,_destroy: function() {
 
         $(window.hWin.document).off(window.hWin.HAPI4.Event.ON_CREDENTIALS
+          +' '+window.hWin.HAPI4.Event.ON_LAYOUT_RESIZE
           +' '+window.hWin.HAPI4.Event.ON_PREFERENCES_CHANGE);
         $(this.document).off(window.hWin.HAPI4.Event.ON_REC_SEARCHSTART
           + ' ' + window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH
