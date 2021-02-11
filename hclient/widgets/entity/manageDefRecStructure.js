@@ -1457,8 +1457,15 @@ console.log('No active tree node!!!!')
             }
             
             var ele = $('<div style="font-style:italic;padding:10px;display:inline-block">'
-                +s+'<a href="#">Edit base field definitions</a></div>')
-                .appendTo(bottom_div);
+                +s+'<a href="#">Edit base field definitions</a></div>');
+            if(s==''){
+                ele.appendTo(bottom_div); //usual field
+            }else{
+                //enum,relmarker,resource
+                var edit_ele = this._editing.getFieldByName('rst_FilteredJsonTermIDTree');
+                ele.css({'border-top':'1px lightgray solid','padding':'10px 0px 0px',margin:'10px 0 0 126px'});
+                ele.insertBefore(edit_ele);                
+            }
             this._on(ele.find('a'),{click: this.showBaseFieldEditor}); 
             
             
