@@ -399,8 +399,9 @@ if($step=="1"){  //first step - info about current status
 
 
     // 1) start loop: fetch items by 100
-    $cnt_updated = 0;
-    $cnt_added = 0;
+    $cnt_updated = array();
+    $cnt_added = array();
+    $cnt_report = array();
 
     //not recognized zotero entries (rectypes)
     $cnt_ignored = 0;
@@ -424,6 +425,8 @@ if($step=="1"){  //first step - info about current status
     $totalitems = $_REQUEST['cnt'];
     $new_recid = 0;
     $isFailure = false;
+    
+    $is_echo = false;
     
     $mysqli = $system->get_mysqli();
     
@@ -478,7 +481,9 @@ if($step=="1"){  //first step - info about current status
                 }
                 else
                 {
-                    print $itemtype.": ".$itemtitle."&nbsp;";
+                    if($is_echo){
+                        print $itemtype.": ".$itemtitle."&nbsp;";    
+                    }
                 }
 
                 $recId = null;
@@ -686,15 +691,19 @@ if($step=="1"){  //first step - info about current status
                     $cnt_empty++;
                 }else{
                     //DEBUG echo print_r($details, true);
-                    $new_recid = addRecordFromZotero($recId, $recordType, $rec_URL, $details, $zotero_itemid, true);
+                    $new_recid = addRecordFromZotero($recId, $recordType, $rec_URL, $details, $zotero_itemid, $is_echo);
                     if($new_recid){
                         if(count($unresolved_records)>0){
                             $unresolved_pointers[$new_recid] = $unresolved_records;
                         }
+                        if(!@$cnt_report[$recordType]) $cnt_report[$recordType] = array('added'=>array(), 'updated'=>array());
+
                         if($recId==$new_recid){
-                            $cnt_updated++;
+                            $cnt_updated[]=$new_recid;
+                            $cnt_report[$recordType]['updated'][] = $new_recid;
                         }else{
-                            $cnt_added++;
+                            $cnt_added[]=$new_recid;
+                            $cnt_report[$recordType]['added'][] = $new_recid;
                         }
                     }
                 }
@@ -709,9 +718,25 @@ if($step=="1"){  //first step - info about current status
     }// end of while loop
 
 //fclose($fd);        
+    print '<table><tr><td>&nbsp;</td><td>added</td><td>updated</td></tr>';
+    foreach ($cnt_report as $rty_ID=>$cnt){
+        print '<tr><td>'.$rectypes['names'][$rty_ID]
+            .'</td><td align="center">'.(count($cnt['added'])>0?'<a target="_blank" href="'
+                            .HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&q=ids:'.implode(',',$cnt['added']).'">'
+                    .count($cnt['added']).'</a>':'0')
+            .'</td><td align="center">'.(count($cnt['updated'])>0?'<a target="_blank" href="'
+                            .HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&q=ids:'.implode(',',$cnt['updated']).'">'
+                    .count($cnt['updated']).'</a>':'0').'</td></tr>';
+                    
+            
+    }
     
-    print "<div><br>Added: ".$cnt_added."</div>";
-    print "<div>Updated: ".$cnt_updated."</div>";
+    print '</table><div><br>Records added : '.(count($cnt_added)>0?'<a  target="_blank" href="'
+                            .HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&q=ids:'.implode(',',$cnt_added).'">'
+                    .count($cnt_added).'</a>':'0').'</div>';
+    print '<div>Records updated : '.(count($cnt_updated)>0?'<a  target="_blank" href="'
+                            .HEURIST_BASE_URL.'?db='.HEURIST_DBNAME.'&q=ids:'.implode(',',$cnt_updated).'">'
+                    .count($cnt_updated).'</a>':'0').'</div>';
     
     $tot_erros = $cnt_ignored + $cnt_notmapped + $cnt_empty + $cnt_notfound;
     
@@ -888,7 +913,8 @@ function printMappingReport_dt($arr, $rt_id, $dt_id){
                 $code = $arr;
             }
     
-            print '<tr>&nbsp;&nbsp;&nbsp;<td></td><td>'.$label.'</td><td>'.$code.'</td>';
+            //&nbsp;&nbsp;&nbsp;
+            print '<tr><td></td><td>'.$label.'</td><td>'.$code.'</td>';
             if($dt_id==null){
                 print '<td>NOT FOUND'.'</td><td></td>';
             }else{
