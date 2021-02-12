@@ -146,7 +146,7 @@ print "</Ontologies>";
 }
 // ------------------------------------------------------------------------------------------
 // Detail Type TERMS
-if($trm_ID>0){
+if(!$is_subset || $trm_ID>0){
 
 print "\n\n<Terms>";
 include HEURIST_DIR.'admin/structure/crosswalk/defTermsFields.inc'; // sets value of $flds
@@ -162,7 +162,7 @@ print "</Terms>";
 }
 // ------------------------------------------------------------------------------------------
 // RECORD TYPES (this will be repeated for each of the tables)
-if($rty_ID>0){
+if(!$is_subset || $rty_ID>0){
 
 print "\n\n<RecordTypes>";
 include HEURIST_DIR.'admin/structure/crosswalk/defRecTypesFields.inc'; // sets value of $flds
@@ -178,7 +178,7 @@ print "</RecordTypes>";
 }
 // ------------------------------------------------------------------------------------------
 // DETAIL TYPES
-if($dty_ID>0){
+if(!$is_subset || $dty_ID>0){
 
 print "\n\n<DetailTypes>";
 include HEURIST_DIR.'admin/structure/crosswalk/defDetailTypesFields.inc'; // sets value of $flds
@@ -194,7 +194,7 @@ print "</DetailTypes>";
 }
 // ------------------------------------------------------------------------------------------
 // RECORD STRUCTURE
-if($rty_ID>0){
+if(!$is_subset || $rty_ID>0){
 
 print "\n\n<RecordStructures>";
 include HEURIST_DIR.'admin/structure/crosswalk/defRecStructureFields.inc'; // sets value of $flds
