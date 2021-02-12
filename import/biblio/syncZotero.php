@@ -406,6 +406,7 @@ if($step=="1"){  //first step - info about current status
     //not recognized zotero entries (rectypes)
     $cnt_ignored = 0;
     $arr_ignored = array();
+    $arr_ignored_by_type = array();
     
     //ignored zote entries since no keys are mapped
     $cnt_empty = 0;
@@ -476,6 +477,8 @@ if($step=="1"){  //first step - info about current status
                 if(!array_key_exists($itemtype, $mapping_rt)){ //this type is not mapped
                     #print " <br/> Undefined Record type".$itemtype."  ".$itemtitle."<br/>";
                     array_push($arr_ignored, $itemtype.':  '.$itemtitle);
+                    if(!@$arr_ignored_by_type[$itemtype]) $arr_ignored_by_type[$itemtype] = 0;
+                    $arr_ignored_by_type[$itemtype]++;
                     $cnt_ignored++;
                     continue;
                 }
@@ -743,8 +746,12 @@ if($step=="1"){  //first step - info about current status
     if($tot_erros>0){
         print '<div style="color:red">';
         if($cnt_ignored>0){
-            print '<br>Zotero entries that are not mapped to Heurist record types: '.$cnt_ignored;
-            print "<div style ='color:red; padding-left:20px'>- ".implode('<br>- ',$arr_ignored).'</div>';
+            print '<br>Zotero entries that are not mapped to Heurist record types: '.$cnt_ignored.'<table>';
+            foreach ($arr_ignored_by_type as $itemtype => $cnt){
+                print '<tr><td>'.$itemtype.'</td><td>'.$cnt.'</td></tr>';
+            }
+            print '</table>';
+            //print "<div style ='color:red; padding-left:20px'>- ".implode('<br>- ',$arr_ignored).'</div>';
         }
         if($cnt_notmapped>0){
             print '<br>Zotero keys that are not mapped to Heurist field types: '.$cnt_notmapped;
