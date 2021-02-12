@@ -436,6 +436,13 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
                     img = $(img);
                     img.attr('src',baseURL+'hclient/assets/v6/'+img.attr('data-src'));
                 });
+                
+                var smsg = 'Sorry, these videos are not yet available';
+                $('.video-anchor')
+                    .attr('title',smsg)
+                    .on({click:function(){
+                        window.hWin.HEURIST4.msg.showMsgFlash(smsg);return false;
+                    }});
 
                 $('#btnOpenHeurist').button({icon:'ui-icon-arrow-1-e',iconPosition:'end'}).on({click:function(){
                     var url = $('#newdblink').text();
@@ -543,7 +550,8 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
          
         _showStep(1);
         
-        //DEBUG _showGetStarted();
+        //DEBUG 
+        //_showGetStarted();
     }
     
     //
