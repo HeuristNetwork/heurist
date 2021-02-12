@@ -68,11 +68,12 @@ function sendEmail_NewDatabase($user_record, $database_name, $source_database){
     
     $email = new PHPMailer();
     $email->isHTML(true); 
-    $email->SetFrom('no-reply@'.HEURIST_SERVER_NAME, 'Heurist');
+    $email->SetFrom('no-reply@HeuristNetwork.org', 'Heurist'); //'no-reply@'.HEURIST_SERVER_NAME
     $email->Subject   = (($source_database!=null)?'CloneDB: ':'NewDB: ')
-                    .'Getting up to speed with your Heurist database ('.$database_name.')';
+                    .'Getting up to speed with your Heurist database ('.$database_name.') on '.HEURIST_SERVER_NAME;
     $email->Body      = $message;
-    $email->AddAddress( HEURIST_MAIL_TO_ADMIN ); //         
+    $email->AddAddress( $user_record['ugr_eMail'] );
+    $email->AddAddress( HEURIST_MAIL_TO_ADMIN ); // 
     $email->addAttachment(dirname(__FILE__).'/Heurist Welcome attachment.pdf');
    
     try{
