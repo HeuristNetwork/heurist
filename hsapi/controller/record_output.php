@@ -622,7 +622,7 @@ function output_CSV($system, $data, $params){
 
                     $values = @$record['details'][$dt_id];
 
-                    if($values){
+                    if(isset($values)){
 
                         //$values = array_values($values); //get plain array
                         $vals = array();
@@ -682,7 +682,7 @@ function output_CSV($system, $data, $params){
                     }
 
                     //empty values
-                    if($value == null){
+                    if($value === null){
                         if($dt_type=='enum' || $dt_type=='relationtype'){
 
                             $enum_label[] = '';
@@ -698,12 +698,12 @@ function output_CSV($system, $data, $params){
             }else if ($dt_id=='rec_Tags'){
 
                 $value = recordSearchPersonalTags($system, $recID);
-                $value = ($value==null)?'':implode($csv_mvsep, $value);
+                $value = ($value===null)?'':implode($csv_mvsep, $value);
 
             }else{
                 $value = @$record[$dt_id]; //from record header
             }
-            if($value==null) $value = '';
+            if($value===null) $value = '';
 
 
             if(count($enum_label)>0){
