@@ -73,6 +73,10 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
             that.toggleAdvancedPane();
         });
 
+        this.element.find('.export-to-bottom-button').on('click', function () {
+            $('.ent_content').scrollTop($('.ent_content')[0].scrollHeight);
+        });
+
     },
 
     //
