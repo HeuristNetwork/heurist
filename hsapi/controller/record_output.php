@@ -462,7 +462,6 @@ function output_CSV($system, $data, $params){
                             $percentageColIndices[$rt] = [];
                         }
                         $percentageColIndices[$rt][] = $csvColIndex;
-                        $headers[$rt][$csvColIndex] = $headers[$rt][$csvColIndex] . '(%)';
                     }
                     if (!empty($sortFields[$fieldKey])) {
                         if (!isset($sortColIndices[$rt])) {
@@ -737,6 +736,9 @@ function output_CSV($system, $data, $params){
             if (count($rows) > 0) {
                 if ($csv_header) {
                     $headerRow = array_shift($rows);
+                    if (!empty($percentageColIndices[$recordTypeID])) {
+                        $headerRow = usePercentageForCSVHeaders($headerRow, $percentageColIndices[$recordTypeID]);
+                    }
                     fputcsv($streams[$recordTypeID], $headerRow, $csv_delimiter, $csv_enclosure);
                 }
                 // Apply advanced options.
@@ -749,6 +751,15 @@ function output_CSV($system, $data, $params){
                     $rows = usePercentageForCSVRows($rows, $percentageColIndices[$recordTypeID]);
                 }
                 if (!empty($sortColIndices[$recordTypeID])) {
+                    // Mutate col indices as new columns inserted.
+                    for ($i = 0; $i < count($sortColIndices[$recordTypeID]); $i++) {
+                        $colIndex = $sortColIndices[$recordTypeID][$i];
+                        foreach ($percentageColIndices[$recordTypeID] as $percentageColIndex) {
+                            if ($colIndex > $percentageColIndex) {
+                                $sortColIndices[$recordTypeID][$i]++;
+                            }
+                        }
+                    }
                     $rows = sortCSVRows($rows, $sortColIndices[$recordTypeID], $sortOrders[$recordTypeID]);
                 }
 
@@ -1147,6 +1158,22 @@ function groupCSVRows(array $rows, array $groupColIndices = [], array $sumColInd
     }
 }
 
+function usePercentageForCSVHeaders(array $headers, array $usePercentageColIndices = []) {
+    if (count($usePercentageColIndices) > 0) {
+        $colIncrease = 0;
+        for ($i = 0; $i < count($usePercentageColIndices); $i++) {
+            $colIndex = $usePercentageColIndices[$i] + $colIncrease;
+            if ($colIndex + 1 > count($headers) - 1) {
+                $headers[] = $headers[$colIndex] . '(%)';
+            } else {
+                array_splice($headers, $colIndex + 1, 0, [$headers[$colIndex] . '(%)']);
+            }
+            $colIncrease++;
+        }
+    }
+    return $headers;
+}
+
 /**
  * Calculate the percentage value of the specified columns in the CSV rows.
  *
@@ -1169,9 +1196,16 @@ function usePercentageForCSVRows(array $rows, array $usePercentageColIndices = [
             }
         }
         for ($i = 0; $i < count($rows); $i++) {
+            $colIncrease = 0;
             for ($j = 0; $j < count($usePercentageColIndices); $j++) {
                 $colIndex = $usePercentageColIndices[$j];
-                $rows[$i][$colIndex] = round(valueToNumeric($rows[$i][$colIndex]) / $colTotal[$colIndex], 4) * 100;
+                $percentage = round(valueToNumeric($rows[$i][$colIndex + $colIncrease]) / $colTotal[$colIndex], 4) * 100;
+                if ($colIndex + 1 > count($rows[$i]) - 1) {
+                    $rows[$i][] = $percentage;
+                } else {
+                    array_splice($rows[$i], $colIndex + $colIncrease + 1, 0, [$percentage]);
+                }
+                $colIncrease++;
             }
         }
     }
