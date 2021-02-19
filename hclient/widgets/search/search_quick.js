@@ -385,7 +385,7 @@ $.widget( "heurist.search_quick", $.heurist.recordAction, {
                         var select_terms = $dlg.find(".sa_termvalue");
                         
                         window.hWin.HEURIST4.ui.createTermSelect(select_terms.get(0),
-                        {vocab_id: $Db.dty(dtID,'dty_JsonTermIDTree'),
+                        {vocab_id: (detailType=='relationtype')?'relation':$Db.dty(dtID,'dty_JsonTermIDTree'),
                             topOptions:[{ key:'any', title:window.hWin.HR('<any>')},{ key:'blank', title:'  '}] });
                                              
                         that._on( select_terms, { change: function(event){
