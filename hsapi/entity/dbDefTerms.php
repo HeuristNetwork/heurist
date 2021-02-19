@@ -451,8 +451,10 @@ class DbDefTerms extends DbEntityBase
     public function save(){
 
         $mysqli = $this->system->get_mysqli();
+        
+        $is_full = (@$this->data['isfull']!=0);
 
-        if($this->data['isfull']!=0){
+        if($is_full){
 
             //extract records from $_REQUEST data 
             if($this->records==null){ //records can be pepared beforehand
@@ -482,7 +484,7 @@ class DbDefTerms extends DbEntityBase
             
             foreach($this->records as $record){
                 $trm_ID = @$record['trm_ID'];
-                if($trm_ID>0 && in_array($trm_ID, $ret) && $this->data['isfull']!=0)
+                if($trm_ID>0 && in_array($trm_ID, $ret) && $is_full)
                 {
                     
                     $query = null;
