@@ -235,7 +235,7 @@
         {
             output_HeaderOnly($system, $response, $params);
         }else{
-            output_CSV($system, $response, $params);    
+            output_CSV($system, $response, $params);
         }
         
     }else{
@@ -268,67 +268,109 @@ NOTE: fastest way it simple concatenation in comparison to fputcsv and implode. 
 */
 function output_CSV($system, $data, $params){
     global $defRecTypes;
-    
+
     if (!($data && @$data['status']==HEURIST_OK)){
         print print_r($data, true); //print out error array
         return;
     }
 
     $data = $data['data'];
-    
+
     if(!(@$data['reccount']>0)){
         print 'EMPTY RESULT SET'; //'empty result set';
         return;
     }
-    
+
     $include_term_label_and_code = true;
     $include_term_ids = (@$params['prefs']['include_term_ids']==1);
     $include_term_codes = (@$params['prefs']['include_term_codes']==1);
     $include_resource_titles =  (@$params['prefs']['include_resource_titles']==1);
     $include_term_hierarchy = (@$params['prefs']['include_term_hierarchy']==1);
-    
+
     $fields = @$params['prefs']['fields'];
     $details = array();  //array of detail fields included into output
     $relmarker_details = array(); //relmarker fields included into output
-    
+
     if($defRecTypes==null) $defRecTypes = dbs_GetRectypeStructures($system, null, 2);
     $idx_name = $defRecTypes['typedefs']['dtFieldNamesToIndex']['rst_DisplayName'];
     $idx_dtype = $defRecTypes['typedefs']['dtFieldNamesToIndex']['dty_Type'];
     $idx_term_tree = $defRecTypes['typedefs']['dtFieldNamesToIndex']['rst_FilteredJsonTermIDTree'];
     $idx_term_nosel = $defRecTypes['typedefs']['dtFieldNamesToIndex']['dty_TermIDTreeNonSelectableIDs'];
-    
+
 
     if($include_term_label_and_code){
         $defTerms = dbs_GetTerms($system);
         $defTerms = new DbsTerms($system, $defTerms);
     }
-    
+
+    // Track column indices for advanced option fields.
+    $groupFields = [];
+    $sortFields = [];
+    $countFields = [];
+    $sumFields = [];
+    $percentageFields = [];
+    $groupColIndices = [];
+    $sortColIndices = [];
+    $sortOrders = [];
+    $countColIndices = [];
+    $sumColIndices = [];
+    $percentageColIndices = [];
+
+    if (isset($params['prefs']['advanced_options']) || is_array($params['prefs']['advanced_options'])) {
+        foreach ($params['prefs']['advanced_options'] as $fieldCode => $option) {
+            $codeParts = explode(':', $fieldCode);
+            if ($codeParts > 1) {
+                $recordTypeID = $codeParts[count($codeParts) - 2];
+                $fieldID = $codeParts[count($codeParts) - 1];
+                $fieldKey = $recordTypeID . ':' . $fieldID;
+                if (isset($option['total'])) {
+                    if ($option['total'] === 'group') {
+                        $groupFields[] = $fieldKey;
+                    } elseif ($option['total'] === 'sum') {
+                        $sumFields[]  = $fieldKey;
+                    } elseif ($option['total'] === 'count') {
+                        $countFields[]  = $fieldKey;
+                    }
+                }
+                if (!empty($option['sort'])) {
+                    $sortFields[$fieldKey] = $option['sort'];
+                }
+
+                if (isset($option['use_percentage']) && $option['use_percentage']) {
+                    $percentageFields[] = $fieldKey;
+                }
+            }
+        }
+    }
+
     //create header
     $any_rectype = null;
     $headers = array();
     if($fields){
         foreach($fields as $rt=>$flds){
-            
+
             //always include ID field into output
             if($flds[0]!='rec_ID') array_unshift($flds, 'rec_ID');
             $fields[$rt] = $flds;
-            
+
             $details[$rt] = array();
             $headers[$rt] = array();
             $relmarker_details[$rt] = array();
-            
+
             foreach($flds as $dt_id){
-                
+
+                $csvColIndex = null;
+
                 $constr_rt_id = 0;
                 if(strpos($dt_id,':')>0){ //for constrained resource fields
                     //example author:person or organization
                     list($dt_id, $constr_rt_id) = explode(':',$dt_id);
                 }
-                
+
                 $field_name_title = '';
-                
+
                 if(is_numeric($dt_id) && $dt_id>0){
-                    
+
                     if($dt_id==DT_PARENT_ENTITY){
                         $field_name = 'Parent entity';
                         $field_type = 'resource';
@@ -338,25 +380,25 @@ function output_CSV($system, $data, $params){
                         $field_type = $defRecTypes['typedefs'][$rt]['dtFields'][$dt_id][$idx_dtype];
                     }
                     if($constr_rt_id>0){
-                        $rectypename_is_in_fieldname = (strpos(strtolower($field_name), 
-                                            strtolower($defRecTypes['names'][$constr_rt_id]))!==false);
+                        $rectypename_is_in_fieldname = (strpos(strtolower($field_name),
+                                strtolower($defRecTypes['names'][$constr_rt_id]))!==false);
                         $field_name_title = $field_name.' '
-                                                //.($rectypename_is_in_fieldname?'':($defRecTypes['names'][$constr_rt_id].' '))
-                                                .'RecordTitle';
+                                            //.($rectypename_is_in_fieldname?'':($defRecTypes['names'][$constr_rt_id].' '))
+                                            .'RecordTitle';
                         $field_name = $field_name.($rectypename_is_in_fieldname
-                                            ?'':' ('.$defRecTypes['names'][$constr_rt_id].')').' H-ID';
+                                ?'':' ('.$defRecTypes['names'][$constr_rt_id].')').' H-ID';
                     }else{
                         $field_name_title = $field_name.' RecordTitle';
                     }
                     if($field_type=='relmarker'){
-                        $relmarker_details[$rt][$dt_id] = $constr_rt_id; 
+                        $relmarker_details[$rt][$dt_id] = $constr_rt_id;
                     }else{
-                        array_push($details[$rt], $dt_id);    
+                        array_push($details[$rt], $dt_id);
                     }
-                    
+
                 }else{
                     $field_type = null;
-                    
+
                     if($dt_id=='rec_ID'){
                         if($rt>0){
                             $field_name = $defRecTypes['names'][$rt].' H-ID';
@@ -368,76 +410,111 @@ function output_CSV($system, $data, $params){
                         $field_name = $dt_id; //record header field
                     }
                 }
-    
+
                 if($field_type=='enum' || $field_type=='relationtype'){
 
-                    array_push($headers[$rt], $field_name);  //labels are always included           
-                    
+                    array_push($headers[$rt], $field_name);  //labels are always included
+                    $csvColIndex = count($headers[$rt]) - 1;
+
                     if($include_term_ids){
-                        array_push($headers[$rt], $field_name.' ID');            
+                        array_push($headers[$rt], $field_name.' ID');
                     }
-                    
+
                     if($include_term_codes){
-                        array_push($headers[$rt], $field_name.' StdCode' );   
-                    }    
-                    
+                        array_push($headers[$rt], $field_name.' StdCode' );
+                    }
+
                 }else{
-                    array_push($headers[$rt], $field_name);                
+                    array_push($headers[$rt], $field_name);
+                    $csvColIndex = count($headers[$rt]) - 1;
                 }
-                
+
                 //add title for resource fields
                 if($include_resource_titles && ($field_type=='resource' || $field_type=='relmarker')){
-                    array_push($headers[$rt], $field_name_title);            
+                    array_push($headers[$rt], $field_name_title);
+                }
+
+                // Save column index for advanced options.
+                if ($csvColIndex !== null) {
+                    $fieldKey = $rt . ':' . $dt_id;
+                    if (in_array($fieldKey, $groupFields)) {
+                        if (!isset($groupColIndices[$rt])) {
+                            $groupColIndices[$rt] = [];
+                        }
+                        $groupColIndices[$rt][] = $csvColIndex;
+                    }
+                    if (in_array($fieldKey, $countFields)) {
+                        if (!isset($countColIndices[$rt])) {
+                            $countColIndices[$rt] = [];
+                        }
+                        $countColIndices[$rt][] = $csvColIndex;
+                        $headers[$rt][$csvColIndex] = 'Count of ' . $headers[$rt][$csvColIndex];
+                    }
+                    if (in_array($fieldKey, $sumFields)) {
+                        if (!isset($sumColIndices[$rt])) {
+                            $sumColIndices[$rt] = [];
+                        }
+                        $sumColIndices[$rt][] = $csvColIndex;
+                        $headers[$rt][$csvColIndex] = 'Sum of ' . $headers[$rt][$csvColIndex];
+                    }
+                    if (in_array($fieldKey, $percentageFields)) {
+                        if (!isset($percentageColIndices[$rt])) {
+                            $percentageColIndices[$rt] = [];
+                        }
+                        $percentageColIndices[$rt][] = $csvColIndex;
+                    }
+                    if (!empty($sortFields[$fieldKey])) {
+                        if (!isset($sortColIndices[$rt])) {
+                            $sortColIndices[$rt] = [];
+                        }
+                        if (!isset($sortOrders[$rt])) {
+                            $sortOrders[$rt] = [];
+                        }
+                        $sortColIndices[$rt][] = $csvColIndex;
+                        $sortOrders[$rt][] = $sortFields[$fieldKey];
+                    }
                 }
             }
         }
     }
-    
+
     $csv_delimiter =  $params['prefs']['csv_delimiter']?$params['prefs']['csv_delimiter']:',';
     $csv_enclosure =  $params['prefs']['csv_enclosure']?$params['prefs']['csv_enclosure']:'"';
     $csv_mvsep =  $params['prefs']['csv_mvsep']?$params['prefs']['csv_mvsep']:'|';
     $csv_linebreak =  $params['prefs']['csv_linebreak']?$params['prefs']['csv_linebreak']:'nix'; //not used
     $csv_header =  $params['prefs']['csv_header']?$params['prefs']['csv_header']:true;
-    
+
     //------------
-    $records = $data['records'];    
-    
+    $records = $data['records'];
+
     $streams = array(); //one per record type
     $rt_counts = array();
-    
+    $csvData = [];
+
     $error_log = array();
     $error_log[] = 'Total rec count '.count($records);
-    
+
     $idx = 0;
     while ($idx<count($records)){ //replace to WHILE
-    
+
         $recID = $records[$idx];
         $record = recordSearchByID($system, $recID, false);
         $rty_ID = ($any_rectype!=null)?$any_rectype :$record['rec_RecTypeID'];
 
         $idx++;
-        
+
         if(!@$fields[$rty_ID]) continue; //none of fields for this record type marked to output
-        
-        if(!@$streams[$rty_ID]){
-            // create a temporary file
-            $fd = fopen('php://temp/maxmemory:1048576', 'w');  //less than 1MB in memory otherwise as temp file 
-            if (false === $fd) {
-                die('Failed to create temporary file');
-            }        
-            $streams[$rty_ID] = $fd;
-            
-            //write header
-            if($csv_header)
-                fputcsv($fd, $headers[$rty_ID], $csv_delimiter, $csv_enclosure);
-            
+
+        if (!isset($csvData[$rty_ID])) {
+            $csvData[$rty_ID] = [];
             $rt_counts[$rty_ID] = 1;
-        }else{
-            $fd = $streams[$rty_ID];
-            
+            if($csv_header) {
+                $csvData[$rty_ID][] = $headers[$rty_ID];
+            }
+        } else {
             $rt_counts[$rty_ID]++;
         }
-        
+
         if(count(@$details[$rty_ID])>0){
             //fills $record
             recordSearchDetails($system, $record, $details[$rty_ID]);
@@ -447,220 +524,266 @@ function output_CSV($system, $data, $params){
             if(@$related_recs['status']==HEURIST_OK){
                 $related_recs = $related_recs['data'];
             }else{
-                $related_recs = array();    
+                $related_recs = array();
             }
         }else{
             $related_recs = array();
         }
-        
+
         //prepare output array
         $record_row = array();
         foreach($fields[$rty_ID] as $dt_id){
-            
+
             //suppl.fields for enum and resource fields
             $enum_label = array();
             $enum_code = array();
             $resource_titles = array();
-            
+
             $constr_rt_id = 0;
             if(strpos($dt_id,':')>0){ //for constrained resource fields
                 list($dt_id, $constr_rt_id) = explode(':', $dt_id);
             }
-            
+
             if(is_numeric($dt_id) && $dt_id>0){
-                
+
                 if ($constr_rt_id>0 && @$relmarker_details[$rty_ID][$dt_id]==$constr_rt_id) {  //relation
-                
+
                     $vals = array();
-                    
+
                     //if(window.hWin.HEURIST4.ui.isTermInList(this.detailType, allTerms, headerTerms, direct[k]['trmID']))
-                
+
                     foreach($related_recs['direct'] as $relation){
                         $target_rt = $related_recs['headers'][$relation->targetID][1];
                         if( $constr_rt_id==$target_rt && $relation->trmID>0){ //contrained rt and allowed relation type
-                            
+
                             $all_terms = $defRecTypes['typedefs'][$rty_ID]['dtFields'][$dt_id][$idx_term_tree];
                             $nonsel_terms = $defRecTypes['typedefs'][$rty_ID]['dtFields'][$dt_id][$idx_term_nosel];
-                            $is_allowed = VerifyValue::isValidTerm($all_terms, $nonsel_terms, $relation->trmID, $dt_id);    
-                            
+                            $is_allowed = VerifyValue::isValidTerm($all_terms, $nonsel_terms, $relation->trmID, $dt_id);
+
                             if($is_allowed){
                                 //if record type among selected -  add record to list to be exported
                                 //otherwise export only ID  as field "Rectype H-ID"
                                 if($fields[$target_rt]){ //record type exists in output
                                     if(!in_array($relation->targetID, $records)){
-                                             array_push($records, $relation->targetID);  //add to be exported  
+                                        array_push($records, $relation->targetID);  //add to be exported
                                     }
                                 }
                                 $vals[] = $relation->targetID;
-                                
+
                                 if($include_resource_titles){
-                                     $resource_titles[] = $related_recs['headers'][$relation->targetID][0];
+                                    $resource_titles[] = $related_recs['headers'][$relation->targetID][0];
                                 }
                             }
                         }
                     }//foreach
-                    
+
                     //reverse will work only in case source record has detail id as in target
                     foreach($related_recs['reverse'] as $relation){
                         $source_rt = $related_recs['headers'][$relation->sourceID][1];
                         if( $constr_rt_id==$source_rt && $relation->trmID>0
                             && @$defRecTypes['typedefs'][$source_rt]['dtFields'][$dt_id]
-                           ){ //contrained rt and allowed relation type
-                            
+                        ){ //contrained rt and allowed relation type
+
                             $all_terms = $defRecTypes['typedefs'][$source_rt]['dtFields'][$dt_id][$idx_term_tree];
                             $nonsel_terms = $defRecTypes['typedefs'][$source_rt]['dtFields'][$dt_id][$idx_term_nosel];
-                            $is_allowed = VerifyValue::isValidTerm($all_terms, $nonsel_terms, $relation->trmID, $dt_id);    
-                            
+                            $is_allowed = VerifyValue::isValidTerm($all_terms, $nonsel_terms, $relation->trmID, $dt_id);
+
                             if($is_allowed){
                                 //if record type among selected -  add record to list to be exported
                                 //otherwise export only ID  as field "Rectype H-ID"
                                 if($fields[$source_rt]){ //record type exists in output
                                     if(!in_array($relation->sourceID, $records)){
-                                             array_push($records, $relation->sourceID);  //add to be exported  
+                                        array_push($records, $relation->sourceID);  //add to be exported
                                     }
                                 }
                                 $vals[] = $relation->sourceID;
-                                
+
                                 if($include_resource_titles){
-                                     $resource_titles[] = $related_recs['headers'][$relation->sourceID][0];
+                                    $resource_titles[] = $related_recs['headers'][$relation->sourceID][0];
                                 }
                             }
                         }
-                    }                    
-                
+                    }
+
                     $value = implode($csv_mvsep, $vals);
-                    
+
                     if($include_resource_titles && count($vals)<1){ //empty value
                         $resource_titles[] = '';
                     }
-                    
+
                 }else{
-                    
+
                     if($dt_id == DT_PARENT_ENTITY){
                         $dt_type = 'resource';
                     }else{
-                        $dt_type = $defRecTypes['typedefs'][$rty_ID]['dtFields'][$dt_id][$idx_dtype];    
+                        $dt_type = $defRecTypes['typedefs'][$rty_ID]['dtFields'][$dt_id][$idx_dtype];
                     }
-                        
+
                     $values = @$record['details'][$dt_id];
-                    
-                    if($values){
-                        
+
+                    if(isset($values)){
+
                         //$values = array_values($values); //get plain array
                         $vals = array();
-                        
+
                         if($dt_type=="resource"){
-                            
-                                //if record type among selected -  add record to list to be exported
-                                //otherwise export only ID (and optionally title)  as field "Rectype H-ID"
-                                foreach($values as $val){
-                                    if( (!($constr_rt_id>0)) || $constr_rt_id==$val['type'] ){ //unconstrained or exact required rt
-                                        
-                                        if($fields[$val['type']]){ //record type exists in output
-                                            if(!in_array($val['id'], $records)){
-                                                     array_push($records, $val['id']);  //add to be exported  
-                                            }
-                                        }
-                                        $vals[] = $val['id'];
-                                        
-                                        if($include_resource_titles){
-                                             $resource_titles[] = $val['title'];
+
+                            //if record type among selected -  add record to list to be exported
+                            //otherwise export only ID (and optionally title)  as field "Rectype H-ID"
+                            foreach($values as $val){
+                                if( (!($constr_rt_id>0)) || $constr_rt_id==$val['type'] ){ //unconstrained or exact required rt
+
+                                    if($fields[$val['type']]){ //record type exists in output
+                                        if(!in_array($val['id'], $records)){
+                                            array_push($records, $val['id']);  //add to be exported
                                         }
                                     }
+                                    $vals[] = $val['id'];
+
+                                    if($include_resource_titles){
+                                        $resource_titles[] = $val['title'];
+                                    }
                                 }
+                            }
                         }else if($dt_type=='geo'){
-                                foreach($values as $val){
-                                     $vals[] = $val['geo']['wkt'];
-                                }
+                            foreach($values as $val){
+                                $vals[] = $val['geo']['wkt'];
+                            }
                         }else if($dt_type=='file'){
-                                foreach($values as $val){
-                                     $vals[] = $val['file']['ulf_ObfuscatedFileID'];
-                                }                        
+                            foreach($values as $val){
+                                $vals[] = $val['file']['ulf_ObfuscatedFileID'];
+                            }
                         }else if($dt_type=='date'){
-                                foreach($values as $val){
-                                     $vals[] = temporalToHumanReadableString(trim($val));
-                                }                        
+                            foreach($values as $val){
+                                $vals[] = temporalToHumanReadableString(trim($val));
+                            }
                         }else if($dt_type=='enum' || $dt_type=='relationtype'){
-                            
-                                if(count($values)>0){
-                                    foreach($values as $val){
-                                        $enum_label[] = $defTerms->getTermLabel($val, $include_term_hierarchy);
-                                        // @$defTerms[$val][$idx_term_label]?$defTerms[$val][$idx_term_label]:'';
-                                        $enum_code[] = $defTerms->getTermCode($val);
-                                        //@$defTerms[$val][$idx_term_code]?$defTerms[$val][$idx_term_code]:'';
-                                    }                        
-                                }else{
-                                    $enum_label[] = '';
-                                    $enum_code[] = ''; 
+
+                            if(count($values)>0){
+                                foreach($values as $val){
+                                    $enum_label[] = $defTerms->getTermLabel($val, $include_term_hierarchy);
+                                    // @$defTerms[$val][$idx_term_label]?$defTerms[$val][$idx_term_label]:'';
+                                    $enum_code[] = $defTerms->getTermCode($val);
+                                    //@$defTerms[$val][$idx_term_code]?$defTerms[$val][$idx_term_code]:'';
                                 }
-                                $vals = $values;
+                            }else{
+                                $enum_label[] = '';
+                                $enum_code[] = '';
+                            }
+                            $vals = $values;
                         }else{
                             $vals = $values;
                         }
-                        
+
                         $value = implode($csv_mvsep, $vals);
                     }else{
                         $value = null;
                     }
-                    
+
                     //empty values
-                    if($value == null){
+                    if($value === null){
                         if($dt_type=='enum' || $dt_type=='relationtype'){
-                            
+
                             $enum_label[] = '';
-                            $enum_code[] = ''; 
-                            
+                            $enum_code[] = '';
+
                         }else if($include_resource_titles && $dt_type=='resource'){
                             $resource_titles[] = '';
                         }
                     }
-                    
+
                 }
-                
+
             }else if ($dt_id=='rec_Tags'){
-                
+
                 $value = recordSearchPersonalTags($system, $recID);
-                $value = ($value==null)?'':implode($csv_mvsep, $value);
-                
+                $value = ($value===null)?'':implode($csv_mvsep, $value);
+
             }else{
                 $value = @$record[$dt_id]; //from record header
             }
-            if($value==null) $value = '';                       
-            
-            
+            if($value===null) $value = '';
+
+
             if(count($enum_label)>0){
-                $record_row[] = implode($csv_mvsep,$enum_label);    
+                $record_row[] = implode($csv_mvsep,$enum_label);
                 if($include_term_ids) $record_row[] = $value;
-                if($include_term_codes) $record_row[] = implode($csv_mvsep,$enum_code);    
+                if($include_term_codes) $record_row[] = implode($csv_mvsep,$enum_code);
             }else {
                 $record_row[] = $value;
-                
+
                 if (count($resource_titles)>0){
-                    $record_row[] = implode($csv_mvsep,$resource_titles);    
+                    $record_row[] = implode($csv_mvsep,$resource_titles);
                 }
             }
-            
+
         }//for fields
-        
+
         // write the data to csv
-        if(count($record_row)>0)
-        fputcsv($fd, $record_row, $csv_delimiter, $csv_enclosure);
-        
+        if(count($record_row)>0) {
+            //fputcsv($fd, $record_row, $csv_delimiter, $csv_enclosure);
+            $csvData[$rty_ID][] = $record_row;
+        }
+
+
     }//for records
-    
+
+    // Save data to streams.
+    if (!empty($csvData)) {
+        foreach ($csvData as $recordTypeID => $rows) {
+            $streams[$recordTypeID] = fopen('php://temp/maxmemory:1048576', 'w');
+
+            if (count($rows) > 0) {
+                if ($csv_header) {
+                    $headerRow = array_shift($rows);
+                    if (!empty($percentageColIndices[$recordTypeID])) {
+                        $headerRow = usePercentageForCSVHeaders($headerRow, $percentageColIndices[$recordTypeID]);
+                    }
+                    fputcsv($streams[$recordTypeID], $headerRow, $csv_delimiter, $csv_enclosure);
+                }
+                // Apply advanced options.
+                if (!empty($groupColIndices[$recordTypeID])) {
+                    $sumCols = empty($sumColIndices[$recordTypeID]) ? [] : $sumColIndices[$recordTypeID];
+                    $countCols = empty($countColIndices[$recordTypeID]) ? [] : $countColIndices[$recordTypeID];
+                    $rows = groupCSVRows($rows, $groupColIndices[$recordTypeID], $sumCols, $countCols);
+                }
+                if (!empty($percentageColIndices[$recordTypeID])) {
+                    $rows = usePercentageForCSVRows($rows, $percentageColIndices[$recordTypeID]);
+                }
+                if (!empty($sortColIndices[$recordTypeID])) {
+                    // Mutate col indices as new columns inserted.
+                    for ($i = 0; $i < count($sortColIndices[$recordTypeID]); $i++) {
+                        $colIndex = $sortColIndices[$recordTypeID][$i];
+                        foreach ($percentageColIndices[$recordTypeID] as $percentageColIndex) {
+                            if ($colIndex > $percentageColIndex) {
+                                $sortColIndices[$recordTypeID][$i]++;
+                            }
+                        }
+                    }
+                    $rows = sortCSVRows($rows, $sortColIndices[$recordTypeID], $sortOrders[$recordTypeID]);
+                }
+
+                foreach ($rows as $row) {
+                    fputcsv($streams[$recordTypeID], $row, $csv_delimiter, $csv_enclosure);
+                }
+            }
+        }
+    }
+
+
     //calculate number of streams with columns more than one
     $count_streams = 0;
     foreach($headers as $rty_ID => $columns){
         if(count($columns)>1){
-            $count_streams++;        
+            $count_streams++;
         }
     }
-    
+
     $error_log[] = print_r($rt_counts, true);
-        
+
     writeResults( $streams, 'Export_'.$system->dbname(), $headers, $error_log );
-    
-//DEBUG error_log(print_r($error_log,true));
+
+    //DEBUG error_log(print_r($error_log,true));
 
 
 }
@@ -982,5 +1105,171 @@ function writeResults( $streams, $temp_name, $headers, $error_log ) {
         
     }    
     
-}       
+}
+
+/**
+ * Group by columns for exported CSV rows.
+ *
+ * @param array $rows The CSV row data.
+ * @param array $groupColIndices The indices of the group by columns.
+ * @param array $sumColIndices The indices of the columns applied with SUM function.
+ * @param array $countColIndices The indices of the columns applied with COUNT function.
+ *
+ * @return array The grouped CSV rows.
+ */
+function groupCSVRows(array $rows, array $groupColIndices = [], array $sumColIndices = [], array $countColIndices = []) {
+    if (count($groupColIndices) > 0) {
+        $groupedRows = [];
+        foreach ($rows as $row) {
+            $findRowIndex = -1;
+            for ($i = 0; $i < count($groupedRows); $i++) {
+                $isMatch = true;
+                for ($j = 0; $j < count($groupColIndices); $j++) {
+                    if ($groupedRows[$i][$groupColIndices[$j]] !== $row[$groupColIndices[$j]]) {
+                        $isMatch = false;
+                        break;
+                    }
+                }
+                if ($isMatch) {
+                    $findRowIndex = $i;
+                    break;
+                }
+            }
+            if ($findRowIndex >= 0) {
+                for ($i = 0; $i < count($countColIndices); $i++) {
+                    $groupedRows[$findRowIndex][$countColIndices[$i]] += 1;
+                }
+                for ($i = 0; $i < count($sumColIndices); $i++) {
+                    $groupedRows[$findRowIndex][$sumColIndices[$i]] += valueToNumeric($row[$sumColIndices[$i]]);
+                }
+            } else {
+                for ($i = 0; $i < count($countColIndices); $i++) {
+                    $row[$countColIndices[$i]] = 1;
+                }
+                for ($i = 0; $i < count($sumColIndices); $i++) {
+                    $row[$sumColIndices[$i]] = valueToNumeric($row[$sumColIndices[$i]]);
+                }
+                $groupedRows[] = $row;
+            }
+        }
+        return $groupedRows;
+    } else {
+        return $rows;
+    }
+}
+
+function usePercentageForCSVHeaders(array $headers, array $usePercentageColIndices = []) {
+    if (count($usePercentageColIndices) > 0) {
+        $colIncrease = 0;
+        for ($i = 0; $i < count($usePercentageColIndices); $i++) {
+            $colIndex = $usePercentageColIndices[$i] + $colIncrease;
+            if ($colIndex + 1 > count($headers) - 1) {
+                $headers[] = $headers[$colIndex] . '(%)';
+            } else {
+                array_splice($headers, $colIndex + 1, 0, [$headers[$colIndex] . '(%)']);
+            }
+            $colIncrease++;
+        }
+    }
+    return $headers;
+}
+
+/**
+ * Calculate the percentage value of the specified columns in the CSV rows.
+ *
+ * @param array $rows The CSV row data.
+ * @param array $usePercentageColIndices The indices of the columns to calculate the percentages.
+ *
+ * @return array The CSV rows with the percentage values calculated.
+ */
+function usePercentageForCSVRows(array $rows, array $usePercentageColIndices = []) {
+    if (count($usePercentageColIndices) > 0) {
+        $colTotal = [];
+        for ($i = 0; $i < count($rows); $i++) {
+            for ($j = 0; $j < count($usePercentageColIndices); $j++) {
+                $colIndex = $usePercentageColIndices[$j];
+                if (!isset($colTotal[$colIndex])) {
+                    $colTotal[$colIndex] = valueToNumeric($rows[$i][$colIndex]);
+                } else {
+                    $colTotal[$colIndex] += valueToNumeric($rows[$i][$colIndex]);
+                }
+            }
+        }
+        for ($i = 0; $i < count($rows); $i++) {
+            $colIncrease = 0;
+            for ($j = 0; $j < count($usePercentageColIndices); $j++) {
+                $colIndex = $usePercentageColIndices[$j];
+                $percentage = round(valueToNumeric($rows[$i][$colIndex + $colIncrease]) / $colTotal[$colIndex], 4) * 100;
+                if ($colIndex + 1 > count($rows[$i]) - 1) {
+                    $rows[$i][] = $percentage;
+                } else {
+                    array_splice($rows[$i], $colIndex + $colIncrease + 1, 0, [$percentage]);
+                }
+                $colIncrease++;
+            }
+        }
+    }
+    return $rows;
+}
+
+/**
+ * Sort the CSV rows by specified columns and orders.
+ *
+ * @param array $rows The CSV row data.
+ * @param array $sortByColIndices The indices of the columns to sort.
+ * @param array $sortOrders The sort orders of the specified columns. Each element can either
+ *   be 'asc' or 'des'.
+ *
+ * @return array The sorted CSV rows.
+ */
+function sortCSVRows(array $rows, array $sortByColIndices = [], array $sortOrders = []) {
+    if (count($sortByColIndices) > 0) {
+        usort($rows, function($a, $b) use ($sortByColIndices, $sortOrders) {
+            $result = 0;
+            for ($i = 0; $i < count($sortByColIndices); $i++) {
+                $sortByColIndex = $sortByColIndices[$i];
+                $isAscending = true;
+                if (isset($sortOrders[$i])) {
+                    $isAscending = ($sortOrders[$i] === 'asc');
+                }
+                if (is_numeric($a[$sortByColIndex]) && is_numeric($b[$sortByColIndex])) {
+                    if ($a[$sortByColIndex] == $b[$sortByColIndex]) {
+                        $result = 0;
+                    } else {
+                        $result = $a[$sortByColIndex] < $b[$sortByColIndex] ? -1 : 1;
+                        if (!$isAscending) {
+                            $result = -$result;
+                        }
+                        break;
+                    }
+                } else {
+                    $result = strcmp($a[$sortByColIndex], $b[$sortByColIndex]);
+                    if ($result !== 0) {
+                        if (!$isAscending) {
+                            $result = -$result;
+                        }
+                        break;
+                    }
+                }
+            }
+            return $result;
+        });
+    }
+    return $rows;
+}
+
+/**
+ * Convert a value to numeric.
+ *
+ * @param $value
+ *
+ * @return int
+ */
+function valueToNumeric($value) {
+    if (!is_numeric($value)) {
+        $value = intval($value);
+    }
+    return $value;
+}
+
 ?>
