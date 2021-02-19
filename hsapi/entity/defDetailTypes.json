@@ -273,7 +273,8 @@
                         "rst_DefaultValue":"1",
                         "rst_RequirementType":"optional",
                         "rst_MaxValues":1,
-                        "rst_FieldConfig":["1","0"]
+                        "rst_FieldConfig":["1","0"],
+                        "rst_Display":"hidden"
                     }
                 },
                 {  "dtID": "dty_LocallyModified",

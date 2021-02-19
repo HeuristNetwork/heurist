@@ -864,12 +864,16 @@ window.hWin.HEURIST4.ui = {
                 }
             }
 
+            
+            var trash_id = $Db.getTrashGroupId('dtg');
+                                        
             details.each2(function(dtyID, detail){
                 if(dtyID){
 
                     var field_reqtype = detail['rst_RequirementType'];
                     
-                    if(field_reqtype=='forbidden' || $Db.dty(dtyID, 'dty_ShowInLists')==0) return true; //continue;
+                    if(field_reqtype=='forbidden' || detail['dty_DetailTypeGroupID'] == trash_id) return true; 
+                        //2021-02-19 || $Db.dty(dtyID, 'dty_ShowInLists')==0
                     
                     var field_type = $Db.dty(dtyID, 'dty_Type');
 
@@ -933,7 +937,7 @@ window.hWin.HEURIST4.ui = {
                 $Db.dty().each2(function(detailID, field)
                 {
                     if(field['dty_DetailTypeGroupID']==groupID &&
-                      (field['dty_ShowInLists']==1) &&
+                      //2021-02-19 (field['dty_ShowInLists']==1) &&
                       (allowedlist==null || allowedlist.indexOf(field['dty_Type'])>=0))
                     {
                         arrterm.push([detailID, field['dty_Name']]);

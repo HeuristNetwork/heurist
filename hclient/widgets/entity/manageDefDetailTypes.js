@@ -296,7 +296,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
 */    
 
 
-    visible_fields: ['dtyid','ccode','edit','name','type','show','usedin','status','description'], //'ccode','group',       
+    visible_fields: ['dtyid','ccode','edit','name','type','usedin','status','description'], //'usedin','show','ccode','group',       
     //----------------------
     //
     //
