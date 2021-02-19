@@ -166,6 +166,8 @@ public static function output($data, $params){
 
         if(@$params['leaflet']){
             fwrite($fd, '{"geojson":');         
+        }else{
+            fwrite($fd, '{"type":"FeatureCollection","features":');
         }
         
         fwrite($fd, '[');         
@@ -540,8 +542,9 @@ XML;
         if(@$params['leaflet']){ //return 2 array - pure geojson and timeline items
            fwrite($fd, ',"timeline":'.json_encode($timeline_data));
            fwrite($fd, ',"layers_ids":'.json_encode($layers_record_ids).'}');
+        }else{
+           fwrite($fd, '}'); //close for FeatureCollection
         }
-        
     }else if(@$params['restapi']==1){
         if(count($records)==1 && @$params['recID']>0){
             //fwrite($fd, '');             
