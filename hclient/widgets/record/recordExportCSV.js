@@ -79,6 +79,15 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
         });
 
         this.element.find('#divLoadSettings').configEntity( 'updateList', this.selectRecordScope.val() );    
+
+
+        // Initialize field advanced pane.
+        this._resetAdvancedControls();
+        this.hideAdvancedPane();
+
+        this.element.find('.export-advanced-button').on('click', function () {
+            that.toggleAdvancedPane();
+        });
         
         
         if(!this.options.isdialog && this.options.is_h6style){
@@ -94,6 +103,9 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
             }
         }
         
+        this.element.find('.export-to-bottom-button').on('click', function () {
+            $('.ent_content').scrollTop($('.ent_content')[0].scrollHeight);
+        });
         
         
 
@@ -121,6 +133,11 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
             
             setTimeout(function(){
                 that._assignSelectedFields();
+
+                // Set advanced options.
+                if (settings.hasOwnProperty('advanced_options') && settings.advanced_options) {
+                    that._setFieldAdvancedOptions(settings.advanced_options);
+                }
             },1000);
             
             that.element.find('#delimiterSelect').val(settings.csv_delimiter);
@@ -393,6 +410,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
         
         return {
                 'fields': selectedFields,
+                'advanced_options': this._getFieldAdvancedOptions(),
                 'csv_delimiter':  this.element.find('#delimiterSelect').val(),
                 'csv_enclosure':  this.element.find('#quoteSelect').val(),
                 'csv_mvsep':'|',
@@ -435,6 +453,8 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
             this.element.find('#divLoadSettings').configEntity( 'updateList', rtyID );    
         }
         
+        this._resetAdvancedControls();
+   
         return isdisabled;
     },
     
@@ -502,6 +522,19 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                     },500);
                 },
                 select: function(e, data) {
+                    // Only add/remove the advanced options for the fields from the main record type.
+                    if (data.node.data.code.split(':').length < 3) {
+                        if (data.node.isSelected()) {
+                            that._addFieldAdvancedOptions(data.node.title, data.node.data.type, data.node.data.code);
+                        } else {
+                            that._removeFieldAdvancedOptionsByCode(data.node.data.code);
+                        }
+                        if (that.element.find('.export-advanced-list-item').length > 0) {
+                            that.element.find('.export-advanced-list').show();
+                        } else {
+                            that.element.find('.export-advanced-list').hide();
+                        }
+                    }
                 },
                 click: function(e, data){
                    if($(e.originalEvent.target).is('span') && data.node.children && data.node.children.length>0){
@@ -525,6 +558,183 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
         }   
     },
     
-  
+   /**
+     * Get the content of a specified HTML template.
+     *
+     * @param {string} templateName The 'id' of the template HTML element.
+     * @param {Object} variables The passed-in variables for the template. The variable
+     *   placeholders in the template will be replaced to the value of the same
+     *   property name.
+     * @return {string}
+     * @private
+     */
+    _getTemplateContent: function (templateName, variables) {
+        var content = this.element.find('#' + templateName).html();
+        if (typeof variables === 'object' && variables !== null) {
+            for (var name in variables) {
+                if (variables.hasOwnProperty(name)) {
+                    content = content.replaceAll('{' + name + '}', variables[name]);
+                }
+            }
+        }
+        return content;
+    },
+
+    /**
+     * Reset the advanced pane to its initial state.
+     * @private
+     */
+    _resetAdvancedControls: function () {
+        this.element.find('.export-advanced-list tbody').html('');
+        this.element.find('.export-advanced-list').hide();
+    },
+
+    /**
+     * Show the advanced pane.
+     */
+    showAdvancedPane: function () {
+        this.element.find('.export-advanced-container').show();
+    },
+
+    /**
+     * Hide the advanced pane.
+     */
+    hideAdvancedPane: function () {
+        this.element.find('.export-advanced-container').hide();
+    },
+
+    /**
+     * Toggle the advanced pane.
+     */
+    toggleAdvancedPane: function () {
+        if (this.element.find('.export-advanced-container').is(":visible")) {
+            this.hideAdvancedPane();
+        } else {
+            this.showAdvancedPane();
+        }
+    },
+
+    /**
+     * Populate the options for the total select control.
+     *
+     * @param {Object} totalSelectElement The DOM element of the total select control.
+     * @param {bool} isNumeric Whether the field type is numeric.
+     * @private
+     */
+    _populateFieldAdvancedTotalSelectOptions: function (totalSelectElement, isNumeric) {
+        $(totalSelectElement).html('');
+        $(totalSelectElement).append('<option value="" selected>None</option>');
+        $(totalSelectElement).append('<option value="group">Group By</option>');
+        $(totalSelectElement).append('<option value="count">Count</option>');
+        if (isNumeric) {
+            $(totalSelectElement).append('<option value="sum">Sum</option>');
+        }
+    },
+
+    /**
+     * Add the advanced options for a field in the UI.
+     *
+     * @param {string} fieldName The field label to display.
+     * @param {string} fieldType The type of the field.
+     * @param {string} fieldCode The code of the field.
+     * @private
+     */
+    _addFieldAdvancedOptions: function (fieldName, fieldType, fieldCode) {
+        var content = this._getTemplateContent('templateAdvancedFieldOptions', {
+            "fieldName": fieldName,
+            "fieldType": fieldType,
+            "fieldCode": fieldCode
+        });
+        var fieldElement = $(content);
+        this.element.find('.export-advanced-list tbody').append(fieldElement);
+        this._populateFieldAdvancedTotalSelectOptions(fieldElement.find('.export-advanced-list-item-total-select')[0], fieldType === 'float');
+        this.element.find('.export-advanced-list-item-total-select').on('change', function () {
+            var itemElement = $(this).closest('.export-advanced-list-item');
+            itemElement.find('.export-advanced-list-item-percentage-checkbox').prop('checked', false);
+            if ($(this).val() === 'count' || $(this).val() === 'sum') {
+                itemElement.find('.export-advanced-list-item-percentage').show();
+            } else {
+                itemElement.find('.export-advanced-list-item-percentage').hide();
+            }
+        });
+    },
+
+    /**
+     * Remove the options for a field in the UI by field code.
+     *
+     * @param {string} fieldCode The code of the field.
+     * @private
+     */
+    _removeFieldAdvancedOptionsByCode: function (fieldCode) {
+        this.element.find('.export-advanced-list-item').each(function () {
+            if ($(this).data('field-code') === fieldCode) {
+                $(this).remove();
+            }
+        });
+    },
+
+    /**
+     * Get the advanced options from the UI controls.
+     *
+     * @return {Object} The object is keyed by the field code. Each element is an object which
+     *   contains the following possible keys:
+     *   - total: The total functions applied to the field: 'group', 'sum' or 'count'.
+     *   - sort: The sorting option for the field: 'asc' or 'des'.
+     *   - use_percentage: boolean value when the total is 'sum' or 'count'.
+     * @private
+     */
+    _getFieldAdvancedOptions: function () {
+        if (this.element.find('.export-advanced-list-item').length > 0) {
+            var options = {};
+            this.element.find('.export-advanced-list-item').each(function () {
+                var option = {};
+                var totalSelectValue = $(this).find('.export-advanced-list-item-total-select').val();
+                if (totalSelectValue) {
+                    option.total = totalSelectValue;
+                }
+                var sortSelectValue = $(this).find('.export-advanced-list-item-sort-select').val();
+                if (sortSelectValue) {
+                    option.sort = sortSelectValue;
+                }
+                if (totalSelectValue === 'sum' || totalSelectValue === 'count') {
+                    option.use_percentage = $(this).find('.export-advanced-list-item-percentage-checkbox').prop('checked');
+                }
+                options[$(this).data('field-code')] = option;
+            });
+            return options;
+        }
+        return null;
+    },
+
+    /**
+     * Set the advanced option UI controls by the options object.
+     *
+     * @param {Object} options
+     * @private
+     */
+    _setFieldAdvancedOptions: function (options) {
+        if (options) {
+            this.element.find('.export-advanced-list-item').each(function () {
+                var fieldCode = $(this).data('field-code');
+                var option;
+                if (options.hasOwnProperty(fieldCode)) {
+                    option = options[fieldCode];
+                    if (option.hasOwnProperty('total')) {
+                        $(this).find('.export-advanced-list-item-total-select').val(option.total);
+                        if (option.total === 'sum' || option.total === 'count') {
+                            $(this).find('.export-advanced-list-item-percentage').show();
+                        }
+                    }
+                    if (option.hasOwnProperty('sort')) {
+                        $(this).find('.export-advanced-list-item-sort-select').val(option.sort);
+                    }
+                    if (option.hasOwnProperty('use_percentage') && option.use_percentage) {
+                        $(this).find('.export-advanced-list-item-percentage-checkbox').prop('checked', true);
+                    }
+                }
+            });
+        }
+    }
+
 });
 
