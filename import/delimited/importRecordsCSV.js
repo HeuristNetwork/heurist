@@ -1704,7 +1704,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
             +'</b>'
             + ((currentStep==3)
                 ?''
-                :('<span style="font-size:0.7em;font-style:italic"> You only need to map all required fields (in red) if you plan to create new records</span>'
+                :('<span style="font-size:0.7em;font-style:italic"> You only need to map all required fields (red in dropdown) if you plan to create new records</span>'
                  +'<br><br><a href="#" class="lnk_SelectAll_remain" style="font-size:smaller">Select all/none</a>') )
             +'</td></tr>'
                 +sRemain;
@@ -1712,7 +1712,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         if(sProcessed!=''){
             sProcessed = '<tr height="40" style="valign:bottom"><td class="subh" colspan="5"><br />'
             +'<b>Already used</b>'
-             + ((currentStep==3)?'':'<span style="font-size:0.7em;font-style:italic"> You only need to map all required fields (in red) if you plan to create new records</span>')
+             + ((currentStep==3)?'':'<span style="font-size:0.7em;font-style:italic"> You only need to map all required fields (red in dropdown) if you plan to create new records</span>')
             +'<br><br><a href="#" class="lnk_SelectAll_processed" style="font-size:smaller">Select all/none</a></td></tr>'
                 +sProcessed;
         }
@@ -4224,10 +4224,10 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 + (both_insert_and_update?' or ':'')
                 + (to_be_updated>0 ?'updated':'')
                 + (to_be_inserted>0 && $('#sa_insert').prop('checked') 
-                        ?'. Since new records are to be created, make sure you select all relevant columns; '
+                        ?'. <br>Since new records are to be created, make sure you select all relevant columns; '
                                 +'all Required fields should be mapped to a column.':'');
                 
-                shelp = shelp + '<br><br>Note that no changes are made to the database when you click the Prepare button.';
+                shelp = shelp + '<br>Note that no changes are made to the database when you click the Prepare button.';
                 
                 $('#divPrepareSettingHelp').html(shelp);
                 
