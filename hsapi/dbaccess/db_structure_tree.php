@@ -237,7 +237,8 @@
             $res['type'] = 'rectype';
                                                                                                               
             if(@$dbs_rtStructs['typedefs'][$recTypeId] && ($mode!=5 || $recursion_depth==0)){
-                $details =  $dbs_rtStructs['typedefs'][$recTypeId]['dtFields'];
+                $details =  @$dbs_rtStructs['typedefs'][$recTypeId]['dtFields'];
+                if(!$details) $details = array(); //rectype without fields - exceptional case
                 
                 $children_links = array();
                 $new_pointer_fields = array();

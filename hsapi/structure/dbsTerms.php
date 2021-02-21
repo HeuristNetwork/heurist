@@ -203,7 +203,8 @@ class DbsTerms
         if(@$this->data['termsByDomainLookup'][$domain][$term_id]!=null){
             $term = $this->data['termsByDomainLookup'][$domain][$term_id];
         }else{
-            $term = $this->data['termsByDomainLookup'][$domain=='enum'?'relation':'enum'][$term_id];            
+            //search in other domain too
+            $term = @$this->data['termsByDomainLookup'][$domain=='enum'?'relation':'enum'][$term_id];            
         }
         return $term;
     }

@@ -248,6 +248,7 @@ if( isset($passwordForDatabaseCreation) && $passwordForDatabaseCreation!='' &&
             }
         }
 
+        
         $res = true;
     }else{
         $system->addError(HEURIST_INVALID_REQUEST, 'Name of new database not defined');

@@ -303,6 +303,46 @@ function output_CSV($system, $data, $params){
         $defTerms = new DbsTerms($system, $defTerms);
     }
     
+   // Track column indices for advanced option fields.
+    $groupFields = [];
+    $sortFields = [];
+    $countFields = [];
+    $sumFields = [];
+    $percentageFields = [];
+    $groupColIndices = [];
+    $sortColIndices = [];
+    $sortOrders = [];
+    $countColIndices = [];
+    $sumColIndices = [];
+    $percentageColIndices = [];
+
+    if (isset($params['prefs']['advanced_options']) || is_array($params['prefs']['advanced_options'])) {
+        foreach ($params['prefs']['advanced_options'] as $fieldCode => $option) {
+            $codeParts = explode(':', $fieldCode);
+            if ($codeParts > 1) {
+                $recordTypeID = $codeParts[count($codeParts) - 2];
+                $fieldID = $codeParts[count($codeParts) - 1];
+                $fieldKey = $recordTypeID . ':' . $fieldID;
+                if (isset($option['total'])) {
+                    if ($option['total'] === 'group') {
+                        $groupFields[] = $fieldKey;
+                    } elseif ($option['total'] === 'sum') {
+                        $sumFields[]  = $fieldKey;
+                    } elseif ($option['total'] === 'count') {
+                        $countFields[]  = $fieldKey;
+                    }
+                }
+                if (!empty($option['sort'])) {
+                    $sortFields[$fieldKey] = $option['sort'];
+                }
+
+                if (isset($option['use_percentage']) && $option['use_percentage']) {
+                    $percentageFields[] = $fieldKey;
+                }
+            }
+        }
+    }
+
     //create header
     $any_rectype = null;
     $headers = array();
@@ -319,6 +359,8 @@ function output_CSV($system, $data, $params){
             
             foreach($flds as $dt_id){
                 
+                $csvColIndex = null;
+
                 $constr_rt_id = 0;
                 if(strpos($dt_id,':')>0){ //for constrained resource fields
                     //example author:person or organization
@@ -372,7 +414,8 @@ function output_CSV($system, $data, $params){
                 if($field_type=='enum' || $field_type=='relationtype'){
 
                     array_push($headers[$rt], $field_name);  //labels are always included           
-                    
+                   $csvColIndex = count($headers[$rt]) - 1;
+
                     if($include_term_ids){
                         array_push($headers[$rt], $field_name.' ID');            
                     }
@@ -383,11 +426,53 @@ function output_CSV($system, $data, $params){
                     
                 }else{
                     array_push($headers[$rt], $field_name);                
+                    $csvColIndex = count($headers[$rt]) - 1;
                 }
                 
                 //add title for resource fields
                 if($include_resource_titles && ($field_type=='resource' || $field_type=='relmarker')){
                     array_push($headers[$rt], $field_name_title);            
+                }
+
+                // Save column index for advanced options.
+                if ($csvColIndex !== null) {
+                    $fieldKey = $rt . ':' . $dt_id;
+                    if (in_array($fieldKey, $groupFields)) {
+                        if (!isset($groupColIndices[$rt])) {
+                            $groupColIndices[$rt] = [];
+                        }
+                        $groupColIndices[$rt][] = $csvColIndex;
+                    }
+                    if (in_array($fieldKey, $countFields)) {
+                        if (!isset($countColIndices[$rt])) {
+                            $countColIndices[$rt] = [];
+                        }
+                        $countColIndices[$rt][] = $csvColIndex;
+                        $headers[$rt][$csvColIndex] = 'Count of ' . $headers[$rt][$csvColIndex];
+                    }
+                    if (in_array($fieldKey, $sumFields)) {
+                        if (!isset($sumColIndices[$rt])) {
+                            $sumColIndices[$rt] = [];
+                        }
+                        $sumColIndices[$rt][] = $csvColIndex;
+                        $headers[$rt][$csvColIndex] = 'Sum of ' . $headers[$rt][$csvColIndex];
+                    }
+                    if (in_array($fieldKey, $percentageFields)) {
+                        if (!isset($percentageColIndices[$rt])) {
+                            $percentageColIndices[$rt] = [];
+                        }
+                        $percentageColIndices[$rt][] = $csvColIndex;
+                    }
+                    if (!empty($sortFields[$fieldKey])) {
+                        if (!isset($sortColIndices[$rt])) {
+                            $sortColIndices[$rt] = [];
+                        }
+                        if (!isset($sortOrders[$rt])) {
+                            $sortOrders[$rt] = [];
+                        }
+                        $sortColIndices[$rt][] = $csvColIndex;
+                        $sortOrders[$rt][] = $sortFields[$fieldKey];
+                    }
                 }
             }
         }
@@ -404,6 +489,7 @@ function output_CSV($system, $data, $params){
     
     $streams = array(); //one per record type
     $rt_counts = array();
+    $csvData = [];
     
     $error_log = array();
     $error_log[] = 'Total rec count '.count($records);
@@ -419,22 +505,13 @@ function output_CSV($system, $data, $params){
         
         if(!@$fields[$rty_ID]) continue; //none of fields for this record type marked to output
         
-        if(!@$streams[$rty_ID]){
-            // create a temporary file
-            $fd = fopen('php://temp/maxmemory:1048576', 'w');  //less than 1MB in memory otherwise as temp file 
-            if (false === $fd) {
-                die('Failed to create temporary file');
-            }        
-            $streams[$rty_ID] = $fd;
-            
-            //write header
-            if($csv_header)
-                fputcsv($fd, $headers[$rty_ID], $csv_delimiter, $csv_enclosure);
-            
+        if (!isset($csvData[$rty_ID])) {
+            $csvData[$rty_ID] = [];
             $rt_counts[$rty_ID] = 1;
-        }else{
-            $fd = $streams[$rty_ID];
-            
+            if($csv_header) {
+                $csvData[$rty_ID][] = $headers[$rty_ID];
+            }
+        } else {
             $rt_counts[$rty_ID]++;
         }
         
@@ -542,7 +619,7 @@ function output_CSV($system, $data, $params){
                         
                     $values = @$record['details'][$dt_id];
                     
-                    if($values){
+                    if(isset($values)){
                         
                         //$values = array_values($values); //get plain array
                         $vals = array();
@@ -602,7 +679,7 @@ function output_CSV($system, $data, $params){
                     }
                     
                     //empty values
-                    if($value == null){
+                    if($value === null){
                         if($dt_type=='enum' || $dt_type=='relationtype'){
                             
                             $enum_label[] = '';
@@ -618,12 +695,12 @@ function output_CSV($system, $data, $params){
             }else if ($dt_id=='rec_Tags'){
                 
                 $value = recordSearchPersonalTags($system, $recID);
-                $value = ($value==null)?'':implode($csv_mvsep, $value);
+                $value = ($value===null)?'':implode($csv_mvsep, $value);
                 
             }else{
                 $value = @$record[$dt_id]; //from record header
             }
-            if($value==null) $value = '';                       
+            if($value===null) $value = '';                       
             
             
             if(count($enum_label)>0){
@@ -641,11 +718,56 @@ function output_CSV($system, $data, $params){
         }//for fields
         
         // write the data to csv
-        if(count($record_row)>0)
-        fputcsv($fd, $record_row, $csv_delimiter, $csv_enclosure);
+        if(count($record_row)>0) {
+            //fputcsv($fd, $record_row, $csv_delimiter, $csv_enclosure);
+            $csvData[$rty_ID][] = $record_row;
+        }
         
     }//for records
     
+    // Save data to streams.
+    if (!empty($csvData)) {
+        foreach ($csvData as $recordTypeID => $rows) {
+            $streams[$recordTypeID] = fopen('php://temp/maxmemory:1048576', 'w');
+
+            if (count($rows) > 0) {
+                if ($csv_header) {
+                    $headerRow = array_shift($rows);
+                    if (!empty($percentageColIndices[$recordTypeID])) {
+                        $headerRow = usePercentageForCSVHeaders($headerRow, $percentageColIndices[$recordTypeID]);
+                    }
+                    fputcsv($streams[$recordTypeID], $headerRow, $csv_delimiter, $csv_enclosure);
+                }
+                // Apply advanced options.
+                if (!empty($groupColIndices[$recordTypeID])) {
+                    $sumCols = empty($sumColIndices[$recordTypeID]) ? [] : $sumColIndices[$recordTypeID];
+                    $countCols = empty($countColIndices[$recordTypeID]) ? [] : $countColIndices[$recordTypeID];
+                    $rows = groupCSVRows($rows, $groupColIndices[$recordTypeID], $sumCols, $countCols);
+                }
+                if (!empty($percentageColIndices[$recordTypeID])) {
+                    $rows = usePercentageForCSVRows($rows, $percentageColIndices[$recordTypeID]);
+                }
+                if (!empty($sortColIndices[$recordTypeID])) {
+                    // Mutate col indices as new columns inserted.
+                    for ($i = 0; $i < count($sortColIndices[$recordTypeID]); $i++) {
+                        $colIndex = $sortColIndices[$recordTypeID][$i];
+                        foreach ($percentageColIndices[$recordTypeID] as $percentageColIndex) {
+                            if ($colIndex > $percentageColIndex) {
+                                $sortColIndices[$recordTypeID][$i]++;
+                            }
+                        }
+                    }
+                    $rows = sortCSVRows($rows, $sortColIndices[$recordTypeID], $sortOrders[$recordTypeID]);
+                }
+
+                foreach ($rows as $row) {
+                    fputcsv($streams[$recordTypeID], $row, $csv_delimiter, $csv_enclosure);
+                }
+            }
+        }
+    }
+
+
     //calculate number of streams with columns more than one
     $count_streams = 0;
     foreach($headers as $rty_ID => $columns){
@@ -989,4 +1111,170 @@ function writeResults( $streams, $temp_name, $headers, $error_log ) {
     }    
     
 }       
+
+/**
+ * Group by columns for exported CSV rows.
+ *
+ * @param array $rows The CSV row data.
+ * @param array $groupColIndices The indices of the group by columns.
+ * @param array $sumColIndices The indices of the columns applied with SUM function.
+ * @param array $countColIndices The indices of the columns applied with COUNT function.
+ *
+ * @return array The grouped CSV rows.
+ */
+function groupCSVRows(array $rows, array $groupColIndices = [], array $sumColIndices = [], array $countColIndices = []) {
+    if (count($groupColIndices) > 0) {
+        $groupedRows = [];
+        foreach ($rows as $row) {
+            $findRowIndex = -1;
+            for ($i = 0; $i < count($groupedRows); $i++) {
+                $isMatch = true;
+                for ($j = 0; $j < count($groupColIndices); $j++) {
+                    if ($groupedRows[$i][$groupColIndices[$j]] !== $row[$groupColIndices[$j]]) {
+                        $isMatch = false;
+                        break;
+                    }
+                }
+                if ($isMatch) {
+                    $findRowIndex = $i;
+                    break;
+                }
+            }
+            if ($findRowIndex >= 0) {
+                for ($i = 0; $i < count($countColIndices); $i++) {
+                    $groupedRows[$findRowIndex][$countColIndices[$i]] += 1;
+                }
+                for ($i = 0; $i < count($sumColIndices); $i++) {
+                    $groupedRows[$findRowIndex][$sumColIndices[$i]] += valueToNumeric($row[$sumColIndices[$i]]);
+                }
+            } else {
+                for ($i = 0; $i < count($countColIndices); $i++) {
+                    $row[$countColIndices[$i]] = 1;
+                }
+                for ($i = 0; $i < count($sumColIndices); $i++) {
+                    $row[$sumColIndices[$i]] = valueToNumeric($row[$sumColIndices[$i]]);
+                }
+                $groupedRows[] = $row;
+            }
+        }
+        return $groupedRows;
+    } else {
+        return $rows;
+    }
+}
+
+function usePercentageForCSVHeaders(array $headers, array $usePercentageColIndices = []) {
+    if (count($usePercentageColIndices) > 0) {
+        $colIncrease = 0;
+        for ($i = 0; $i < count($usePercentageColIndices); $i++) {
+            $colIndex = $usePercentageColIndices[$i] + $colIncrease;
+            if ($colIndex + 1 > count($headers) - 1) {
+                $headers[] = $headers[$colIndex] . '(%)';
+            } else {
+                array_splice($headers, $colIndex + 1, 0, [$headers[$colIndex] . '(%)']);
+            }
+            $colIncrease++;
+        }
+    }
+    return $headers;
+}
+
+/**
+ * Calculate the percentage value of the specified columns in the CSV rows.
+ *
+ * @param array $rows The CSV row data.
+ * @param array $usePercentageColIndices The indices of the columns to calculate the percentages.
+ *
+ * @return array The CSV rows with the percentage values calculated.
+ */
+function usePercentageForCSVRows(array $rows, array $usePercentageColIndices = []) {
+    if (count($usePercentageColIndices) > 0) {
+        $colTotal = [];
+        for ($i = 0; $i < count($rows); $i++) {
+            for ($j = 0; $j < count($usePercentageColIndices); $j++) {
+                $colIndex = $usePercentageColIndices[$j];
+                if (!isset($colTotal[$colIndex])) {
+                    $colTotal[$colIndex] = valueToNumeric($rows[$i][$colIndex]);
+                } else {
+                    $colTotal[$colIndex] += valueToNumeric($rows[$i][$colIndex]);
+                }
+            }
+        }
+        for ($i = 0; $i < count($rows); $i++) {
+            $colIncrease = 0;
+            for ($j = 0; $j < count($usePercentageColIndices); $j++) {
+                $colIndex = $usePercentageColIndices[$j];
+                $percentage = round(valueToNumeric($rows[$i][$colIndex + $colIncrease]) / $colTotal[$colIndex], 4) * 100;
+                if ($colIndex + 1 > count($rows[$i]) - 1) {
+                    $rows[$i][] = $percentage;
+                } else {
+                    array_splice($rows[$i], $colIndex + $colIncrease + 1, 0, [$percentage]);
+                }
+                $colIncrease++;
+            }
+        }
+    }
+    return $rows;
+}
+
+/**
+ * Sort the CSV rows by specified columns and orders.
+ *
+ * @param array $rows The CSV row data.
+ * @param array $sortByColIndices The indices of the columns to sort.
+ * @param array $sortOrders The sort orders of the specified columns. Each element can either
+ *   be 'asc' or 'des'.
+ *
+ * @return array The sorted CSV rows.
+ */
+function sortCSVRows(array $rows, array $sortByColIndices = [], array $sortOrders = []) {
+    if (count($sortByColIndices) > 0) {
+        usort($rows, function($a, $b) use ($sortByColIndices, $sortOrders) {
+            $result = 0;
+            for ($i = 0; $i < count($sortByColIndices); $i++) {
+                $sortByColIndex = $sortByColIndices[$i];
+                $isAscending = true;
+                if (isset($sortOrders[$i])) {
+                    $isAscending = ($sortOrders[$i] === 'asc');
+                }
+                if (is_numeric($a[$sortByColIndex]) && is_numeric($b[$sortByColIndex])) {
+                    if ($a[$sortByColIndex] == $b[$sortByColIndex]) {
+                        $result = 0;
+                    } else {
+                        $result = $a[$sortByColIndex] < $b[$sortByColIndex] ? -1 : 1;
+                        if (!$isAscending) {
+                            $result = -$result;
+                        }
+                        break;
+                    }
+                } else {
+                    $result = strcmp($a[$sortByColIndex], $b[$sortByColIndex]);
+                    if ($result !== 0) {
+                        if (!$isAscending) {
+                            $result = -$result;
+                        }
+                        break;
+                    }
+                }
+            }
+            return $result;
+        });
+    }
+    return $rows;
+}
+
+/**
+ * Convert a value to numeric.
+ *
+ * @param $value
+ *
+ * @return int
+ */
+function valueToNumeric($value) {
+    if (!is_numeric($value)) {
+        $value = intval($value);
+    }
+    return $value;
+}
+
 ?>
