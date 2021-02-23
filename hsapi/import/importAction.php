@@ -2019,10 +2019,10 @@ private static function doInsertUpdateRecord($recordId, $import_table, $recordTy
                         return $v == $old_id_in_idfield ? $new_id : $v;
                     }, $ids);*/                    
                     
-                    $new_id = implode($csv_mvsep, $ids);
+                    $new_ids = implode($csv_mvsep, $ids);
                     
                     $updquery = 'UPDATE '.$import_table
-                        .' SET '.$id_field.'="'.$new_recordID
+                        .' SET '.$id_field.'="'.$new_ids
                         .'" WHERE imp_id='.$row[0];
                         
                     self::$mysqli->query($updquery);
@@ -2837,7 +2837,7 @@ public static function performImport($params, $mode_output){
 
     }
 
-    //save mapping into import_sesssion
+    //save mapping into import_session
     if($use_sequence){
         $imp_session['sequence'][$currentSeqIndex]['mapping_flds'] = $mapping;         
     }else{
