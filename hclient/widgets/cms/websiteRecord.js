@@ -230,7 +230,7 @@ function hCmsEditing(_options) {
             
             footer_content_raw = $('#page-footer > .page-footer-content').html();
             footer_content_generated = (footer_content_raw=='');
-console.log('foter:'+footer_content_raw);
+//console.log('foter:'+footer_content_raw);
 
             $(document).trigger(window.hWin.HAPI4.Event.ON_SYSTEM_INITED, []);
             

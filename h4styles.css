@@ -508,7 +508,11 @@ div.recordDiv.public  > .action-button-container{
 div.recordDiv .action-button {
     height: 16px;
     width: 16px;
+    margin-left: 4px;
     color: gray;
+}
+.thumbs div.recordDiv .action-button {
+    margin-left: 0px;
 }
 
 div.recordDiv > .action-button-container

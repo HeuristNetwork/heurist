@@ -466,316 +466,330 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
     */
     showDialog: function(url, options){
 
-            if(!options) options = {};
-            
-            if(options.container){
-                window.hWin.HEURIST4.msg.showDialogInDiv(url, options);
-                return;
+        if(!options) options = {};
+
+        if(options.container){
+            window.hWin.HEURIST4.msg.showDialogInDiv(url, options);
+            return;
+        }
+
+
+        if(!options.title) options.title = ''; // removed 'Information'  which is not a particualrly useful title
+
+        var opener = options['window']?options['window'] :window;
+
+        //.appendTo( that.document.find('body') )
+        var $dlg = [];
+
+        if(options['dialogid']){
+            $dlg = $(opener.document).find('body #'+options['dialogid']);
+        }
+        
+        var $dosframe;
+
+        if($dlg.length>0){
+            //reassign dialog onclose and call new parameters
+            $dosframe = $dlg.find('iframe');
+            var content = $dosframe[0].contentWindow;
+
+            //close dialog from inside of frame
+            /*
+            content.close = function() {
+                var did = $dlg.attr('id');
+
+                var rval = true;
+                var closeCallback = options['callback'];
+                if($.isFunction(closeCallback)){
+                    rval = closeCallback.apply(opener, arguments);
+                }
+                if ( rval===false ){ //!rval  &&  rval !== undefined){
+                    return false;
+                }
+                $dlg.dialog('close');
+                return true;
+            };
+            */       
+
+            $dlg.dialog('open');  
+
+            if(options['params'] && $.isFunction(content.assignParameters)) {
+                content.assignParameters(options['params']);
             }
-            
 
-            if(!options.title) options.title = ''; // removed 'Information'  which is not a particualrly useful title
+        }else{
 
-            var opener = options['window']?options['window'] :window;
+            //create new div for dialogue with $(this).uniqueId();
+            $dlg = $('<div>')
+            .addClass('loading')
+            .appendTo( $(opener.document).find('body') );
 
-            //.appendTo( that.document.find('body') )
-            var $dlg = [];
-            
             if(options['dialogid']){
-                $dlg = $(opener.document).find('body #'+options['dialogid']);
+                $dlg.attr('id', options['dialogid']);
+            }else{
+                $dlg.uniqueId();
             }
-                
-           if($dlg.length>0){
-                    //reassign dialog onclose and call new parameters
-                    var $dosframe = $dlg.find('iframe');
-                    var content = $dosframe[0].contentWindow;
-                    
-                    //close dialog from inside of frame
-                    content.close = function() {
-                        var did = $dlg.attr('id');
 
-                        var rval = true;
-                        var closeCallback = options['callback'];
-                        if($.isFunction(closeCallback)){
-                            rval = closeCallback.apply(opener, arguments);
-                        }
-                        if ( rval===false ){ //!rval  &&  rval !== undefined){
-                            return false;
-                        }
-                        $dlg.dialog('close');
+
+            if(options.class){
+                $dlg.addClass(options.class);
+            }
+
+            $dosframe = $( "<iframe>").attr('parent-dlg-id', $dlg.attr('id'))
+            .css({overflow: 'none !important', width:'100% !important'}).appendTo( $dlg );
+            $dosframe.hide();
+            /*
+            //on close event listener - invoke callback function if defined
+            $dosframe[0].close = function() {
+            var rval = true;
+            var closeCallback = options['callback'];
+            if(closeCallback){
+            rval = closeCallback.apply(opener, arguments);
+            }
+            if ( !rval  &&  rval !== undefined){
+            return false;
+            }
+
+            $dlg.dialog('close');
+            return true;
+            };
+            */
+            //callback function to resize dialog from internal frame functions
+            $dosframe[0].doDialogResize = function(width, height) {
+                //window.hWin.HEURIST4.msg.showMsgDlg('resize to '+width+','+height);
+                /*
+                var body = $(this.document).find('body');
+                var dim = { h: Math.max(400, body.innerHeight()-10), w:Math.max(400, body.innerWidth()-10) };
+
+                if(width>0)
+                $dlg.dialog('option','width', Math.min(dim.w, width));
+                if(height>0)
+                $dlg.dialog('option','height', Math.min(dim.h, height));
+                */    
+            };
+
+            //on load content event listener
+            $dosframe.on('load', function(){
+
+                if(window.hWin.HEURIST4.util.isempty($dosframe.attr('src'))){
+                    return;
+                }
+
+                var content = $dosframe[0].contentWindow;
+                try{
+                    //replace standard "alert" to Heurist dialog    
+                    content.alert = function(txt){
+                        $dlg_alert = window.hWin.HEURIST4.msg.showMsgDlg(txt, null, ""); // Title was an unhelpful and inelegant "Info"
+                        $dlg_alert.dialog('open');
                         return true;
-                    };       
-                    
-                    $dlg.dialog('open');  
-                    
-                    if(options.is_h6style){
-                            $dlg.parent().addClass('ui-dialog-heurist ui-heurist-explore');
-                            if(options.position){
-                                $dlg.dialog( 'option', 'position', options.position );   
-                                if(options.maximize){
-                                    var dialog_height = window.innerHeight - $dlg.parent().position().top - 5;
-                                    $dlg.dialog( 'option', 'height', dialog_height);
-                                    var dialog_width = window.innerWidth - $dlg.parent().position().left - 5;
-                                    $dlg.dialog( 'option', 'width', dialog_width);
-                                }
-                            }
                     }
-                    
-                   
-                    if(options['params'] && $.isFunction(content.assignParameters)) {
-                        content.assignParameters(options['params']);
-                    }
-                    
-           }else{
-                
-                //create new div for dialogue with $(this).uniqueId();
-                $dlg = $('<div>')
-                    .addClass('loading')
-                    .appendTo( $(opener.document).find('body') );
-                    
-                if(options['dialogid']){
-                    $dlg.attr('id', options['dialogid']);
-                }else{
-                    $dlg.uniqueId();
+                }catch(e){
+                    console.log(e);
                 }
-                
-                        
-                if(options.class){
-                    $dlg.addClass(options.class);
+
+                if(!options["title"]){
+                    $dlg.dialog( "option", "title", content.document.title );
+                }  
+
+                //init help button     
+                if(false && options["context_help"] && window.hWin.HEURIST4.ui){
+                    window.hWin.HEURIST4.ui.initDialogHintButtons($dlg, null, options["context_help"], true);
                 }
-                
-                var $dosframe = $( "<iframe>").attr('parent-dlg-id', $dlg.attr('id'))
-                            .css({overflow: 'none !important', width:'100% !important'}).appendTo( $dlg );
-                $dosframe.hide();
-/*
-                //on close event listener - invoke callback function if defined
-                $dosframe[0].close = function() {
+
+
+                /*
+                content.confirm = function(txt){
+                var resConfirm = false,
+                isClosed = false;
+
+                var $confirm_dlg = window.hWin.HEURIST4.msg.showMsgDlg(txt, function(){
+                resConfirm = true;
+                }, "Confirm");
+
+                $confirm_dlg.dialog('option','close',
+                function(){
+                isClosed = true;        
+                });
+
+                while(!isClosed){
+                $.wait(1000);
+                }
+
+                return resConfirm;
+                }*/
+
+                //content.document.reference_to_parent_dialog = $dlg.attr('id');
+                //$dosframe[0].contentDocument.reference_to_parent_dialog = $dlg.attr('id');
+                //functions in internal document
+                //content.close = $dosframe[0].close;    // make window.close() do what we expect
+
+                //close dialog from inside of frame
+                content.close = function() {
+                    var did = $dlg.attr('id');
+
                     var rval = true;
                     var closeCallback = options['callback'];
-                    if(closeCallback){
+                    if($.isFunction(closeCallback)){
                         rval = closeCallback.apply(opener, arguments);
                     }
-                    if ( !rval  &&  rval !== undefined){
+                    if ( rval===false ){ //!rval  &&  rval !== undefined){
                         return false;
                     }
-
                     $dlg.dialog('close');
                     return true;
                 };
-*/
-                //callback function to resize dialog from internal frame functions
-                $dosframe[0].doDialogResize = function(width, height) {
-                    //window.hWin.HEURIST4.msg.showMsgDlg('resize to '+width+','+height);
-                    /*
-                    var body = $(this.document).find('body');
-                    var dim = { h: Math.max(400, body.innerHeight()-10), w:Math.max(400, body.innerWidth()-10) };
 
-                    if(width>0)
-                        $dlg.dialog('option','width', Math.min(dim.w, width));
-                    if(height>0)
-                        $dlg.dialog('option','height', Math.min(dim.h, height));
-                    */    
-                };
+                //content.popupOpener = opener;
+                content.doDialogResize = $dosframe[0].doDialogResize;
 
-                //on load content event listener
-                $dosframe.on('load', function(){
-                         
-                        if(window.hWin.HEURIST4.util.isempty($dosframe.attr('src'))){
-                            return;
-                        }
-                        
-                        var content = $dosframe[0].contentWindow;
-                        try{
-                        content.alert = function(txt){
-                            $dlg_alert = window.hWin.HEURIST4.msg.showMsgDlg(txt, null, ""); // Title was an unhelpful and inelegant "Info"
-                            $dlg_alert.dialog('open');
-                            return true;
-                        }
-                        }catch(e){
-                            console.log(e);
-                        }
-                        
-                        if(!options["title"]){
-                            $dlg.dialog( "option", "title", content.document.title );
-                        }  
-                        
-                        //init help button     
-                        if(false && options["context_help"] && window.hWin.HEURIST4.ui){
-                            window.hWin.HEURIST4.ui.initDialogHintButtons($dlg, null, options["context_help"], true);
-                        }
-                        
-                        
-                        /*
-                        content.confirm = function(txt){
-                            var resConfirm = false,
-                                isClosed = false;
-                            
-                            var $confirm_dlg = window.hWin.HEURIST4.msg.showMsgDlg(txt, function(){
-                                resConfirm = true;
-                            }, "Confirm");
-                            
-                            $confirm_dlg.dialog('option','close',
-                                function(){
-                                    isClosed = true;        
-                                });
-                            
-                            while(!isClosed){
-                               $.wait(1000);
-                            }
-                            
-                            return resConfirm;
-                        }*/
-                        
-                        //content.document.reference_to_parent_dialog = $dlg.attr('id');
-                        //$dosframe[0].contentDocument.reference_to_parent_dialog = $dlg.attr('id');
-                        //functions in internal document
-                        //content.close = $dosframe[0].close;    // make window.close() do what we expect
-                        
-                        //close dialog from inside of frame
-                        content.close = function() {
-                            var did = $dlg.attr('id');
+                $dlg.removeClass('loading');
+                $dosframe.show();    
 
-                            var rval = true;
-                            var closeCallback = options['callback'];
-                            if($.isFunction(closeCallback)){
-                                rval = closeCallback.apply(opener, arguments);
-                            }
-                            if ( rval===false ){ //!rval  &&  rval !== undefined){
-                                return false;
-                            }
-                            $dlg.dialog('close');
-                            return true;
-                        };
+                var onloadCallback = options['onpopupload'];
+                if(onloadCallback){
+                    onloadCallback.call(opener, $dosframe[0]);
+                }
+
+                if($.isFunction(content.onFirstInit)) {  //see mapPreview
+                    content.onFirstInit();
+                }
+                //pass parameters to frame 
+                if(options['params'] && $.isFunction(content.assignParameters)) {
+                    content.assignParameters(options['params']);
+                }
+
+            });
+
+            //    options['callback']
+            //(this.document.find('body').innerHeight()-20)
+            options.height = parseInt(options.height, 10);
+            if(isNaN(options.height) || options.height<50){
+                options.height = 480;
+            } 
+
+            //console.log('opener '+opener.innerHeight+'  '+opener.innerWidth);                        
+
+            if(options.height > opener.innerHeight-20){
+                options.height = opener.innerHeight-20;
+            }
+            options.width = parseInt(options.width, 10);
+            if(isNaN(options.width) || options.width<100){
+                options.width = 640; 
+            } 
+            if(options.width > opener.innerWidth-20){
+                options.width = opener.innerWidth-20;
+            }
+
+            var opts = {
+                autoOpen: true,
+                width : options.width,
+                height: options.height,
+                modal: (options['modal']!==false),
+                resizable: (options.resizable!==false),
+                draggable: (options.draggable!==false),
+                title: options["title"],
+                resizeStop: function( event, ui ) {
+                    $dosframe.css('width','100%');
+                },
+                closeOnEscape: options.closeOnEscape,
+                beforeClose: options.beforeClose,
+                close: function(event, ui){
+                    var closeCallback = options['afterclose'];
+                    if($.isFunction(closeCallback)){
+                        closeCallback.apply();
+                    }
+                    if(!options['dialogid']){
+                        $dlg.remove();
+                    }
+                }
+            };
+            $dlg.dialog(opts);
+
+            //$dlg.addClass('ui-heurist-bg-light');
+            //$dlg.parent().addClass('ui-dialog-heurist ui-heurist-explore');
+
+            if($dlg.attr('data-palette'))
+                $dlg.parent().removeClass($dlg.attr('data-palette'));
+            if(options.default_palette_class){
+                $dlg.attr('data-palette', options.default_palette_class);
+                $dlg.parent().addClass(options.default_palette_class);
+            }else{
+                $dlg.attr('data-palette', null);
+            }
+
+            if(options.noClose){
+                $dlg.parent().find('.ui-dialog-titlebar').find('.ui-icon-closethick').parent().hide();
+            }
 
 
-                        //content.popupOpener = opener;
-                        content.doDialogResize = $dosframe[0].doDialogResize;
+            if(!window.hWin.HEURIST4.util.isempty(options['padding'])) //by default 2em
+                $dlg.css('padding', options.padding);
 
-                        $dlg.removeClass('loading');
-                        $dosframe.show();    
-                        
-                        var onloadCallback = options['onpopupload'];
-                        if(onloadCallback){
-                                onloadCallback.call(opener, $dosframe[0]);
-                        }
-                        
-                        if($.isFunction(content.onFirstInit)) {  //see mapPreview
-                            content.onFirstInit();
-                        }
-                        //pass parameters to frame 
-                        if(options['params'] && $.isFunction(content.assignParameters)) {
-                            content.assignParameters(options['params']);
-                        }
+        }
 
-                });
 
-//    options['callback']
-                //(this.document.find('body').innerHeight()-20)
-                        options.height = parseInt(options.height, 10);
-                        if(isNaN(options.height) || options.height<50){
-                            options.height = 480;
-                        } 
-                        if(options.height > opener.innerHeight-20){
-                            options.height = opener.innerHeight-20;
-                        }
-                        options.width = parseInt(options.width, 10);
-                        if(isNaN(options.width) || options.width<100){
-                            options.width = 640; 
-                        } 
-                        if(options.width > opener.innerWidth-20){
-                            options.width = opener.innerWidth-20;
-                        }
+        if(options.is_h6style)
+        {
 
-                        var opts = {
-                                autoOpen: true,
-                                width : options.width,
-                                height: options.height,
-                                modal: (options['modal']!==false),
-                                resizable: (options.resizable!==false),
-                                draggable: (options.draggable!==false),
-                                title: options["title"],
-                                resizeStop: function( event, ui ) {
-                                    $dosframe.css('width','100%');
-                                },
-                                closeOnEscape: options.closeOnEscape,
-                                beforeClose: options.beforeClose,
-                                close: function(event, ui){
-                                    var closeCallback = options['afterclose'];
-                                    if($.isFunction(closeCallback)){
-                                        closeCallback.apply();
-                                    }
-                                    if(!options['dialogid']){
-                                        $dlg.remove();
-                                    }
-                                }
-                        };
-                        $dlg.dialog(opts);
-                        
-                        if(options.is_h6style)
-                        {
-                                if(options.container){
+            $dlg.parent().addClass('ui-dialog-heurist ui-heurist-explore');
 
-                                    $dlg.dialog( 'option', 'position', 
-                                        { my: "left top", at: "left top", of:options.container});
-                                        
-                                    function __adjustOneResize(e){
-                                            var ele = e ?$(e.target) :options.container;
-                                            
-                                            var dialog_height = ele.height(); //window.innerHeight - $dlg.parent().position().top - 5;
-                                            $dlg.dialog( 'option', 'height', dialog_height);
-                                            var dialog_width = ele.width(); //window.innerWidth - $dlg.parent().position().left - 5;
-                                            $dlg.dialog( 'option', 'width', dialog_width);
-                                    }
-                                    //$(window).resize(__adjustOneResize)
-                                    options.container.off('resize');
-                                    options.container.on('resize', __adjustOneResize);
-                                    __adjustOneResize();
-                                    
-                                }else
-                                if(options.position){
-                                    $dlg.dialog( 'option', 'position', options.position );   
-                                    if(options.maximize){
-                                        function __maximizeOneResize(){
-                                            var dialog_height = window.innerHeight - $dlg.parent().position().top - 5;
-                                            $dlg.dialog( 'option', 'height', dialog_height);
-                                            var dialog_width = window.innerWidth - $dlg.parent().position().left - 5;
-                                            $dlg.dialog( 'option', 'width', dialog_width);
-                                        }
-                                        //$(window).resize(__maximizeOneResize)
-                                        __maximizeOneResize();
-                                    }
-                                }
+            if(options.container){
+
+                $dlg.dialog( 'option', 'position', 
+                    { my: "left top", at: "left top", of:options.container});
+
+                function __adjustOneResize(e){
+                    var ele = e ?$(e.target) :options.container;
+
+                    var dialog_height = ele.height(); //window.innerHeight - $dlg.parent().position().top - 5;
+                    $dlg.dialog( 'option', 'height', dialog_height);
+                    var dialog_width = ele.width(); //window.innerWidth - $dlg.parent().position().left - 5;
+                    $dlg.dialog( 'option', 'width', dialog_width);
+                }
+                //$(window).resize(__adjustOneResize)
+                options.container.off('resize');
+                options.container.on('resize', __adjustOneResize);
+                __adjustOneResize();
+
+            }else
+                if(options.position){
+                    $dlg.dialog( 'option', 'position', options.position );   
+                    if(options.maximize){
+                        function __maximizeOneResize(){
+                            var dialog_height = window.innerHeight - $dlg.parent().position().top - 5;
+                            $dlg.dialog( 'option', 'height', dialog_height);
+                            var dialog_width = window.innerWidth - $dlg.parent().position().left - 5;
+                            $dlg.dialog( 'option', 'width', dialog_width);
                         }
-                        
-                        //$dlg.addClass('ui-heurist-bg-light');
-                        //$dlg.parent().addClass('ui-dialog-heurist ui-heurist-explore');
-                        
-                        if($dlg.attr('data-palette'))
-                            $dlg.parent().removeClass($dlg.attr('data-palette'));
-                        if(options.default_palette_class){
-                            $dlg.attr('data-palette', options.default_palette_class);
-                            $dlg.parent().addClass(options.default_palette_class);
+                        //$(window).resize(__maximizeOneResize)
+                        __maximizeOneResize();
+                    }else{
+                        if($dlg.parent().position().left<0){
+                            $dlg.parent().css({left:0});
                         }else{
-                            $dlg.attr('data-palette', null);
+                            var max_width = window.innerWidth - $dlg.parent().position().left - 5;
+                            var dlg_width = $dlg.dialog( 'option', 'width');
+                            if(max_width<380 || $dlg.parent().position().left<0){
+                                $dlg.parent().css({left:0});
+                                $dlg.dialog( 'option', 'width', 380);    
+                            }else if(dlg_width>max_width){
+                                $dlg.dialog( 'option', 'width', max_width);    
+                            }
                         }
-                        
-                        
-                        
-                        
-                        if(options.noClose){
-                            $dlg.parent().find('.ui-dialog-titlebar').find('.ui-icon-closethick').parent().hide();
-                        }
-                        
-                        
-                        if(!window.hWin.HEURIST4.util.isempty(options['padding'])) //by default 2em
-                            $dlg.css('padding', options.padding);
-                        
-                        //start content loading
-                        $dosframe.attr('src', url);
-                        
-                        return $dosframe;
-                        
-           }
+                    }
+                }
+        }
+
+
+        
+        if($.isFunction(options['menu_locked'])){
+            options['menu_locked'].call(this);
+        }                
+
+        //start content loading
+        if($dosframe.attr('src')!=url || options['force_reload']){
+            $dosframe.attr('src', url);
+        }
+        return $dosframe;
 
     },
 

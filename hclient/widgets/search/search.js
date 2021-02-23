@@ -1403,7 +1403,7 @@ $.widget( "heurist.search", {
         allowed.splice(allowed.indexOf("separator"),1);
         allowed.splice(allowed.indexOf("geo"),1);
         allowed.splice(allowed.indexOf("relmarker"),1);
-
+        
         function __startSearchOnEnterPress(e){
                 var code = (e.keyCode ? e.keyCode : e.which);
                 if (code == 13) {
