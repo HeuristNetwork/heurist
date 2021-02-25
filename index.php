@@ -481,7 +481,7 @@ if(strpos('heuristplus', $_SERVER["SERVER_NAME"])===false){
 
          
     </head>
-    <body style="background-color:#c9c9c9">
+    <body style="background-color:#c9c9c9;overflow:hidden;">
 
         <div id="layout_panes" style="height:100%">
             &nbsp;
