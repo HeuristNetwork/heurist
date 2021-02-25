@@ -83,8 +83,8 @@
 /* page (menu) title it is added to main-pagetitle */
 .webpageheading {
     font-size:1.5em;
-    /*color:black;*/
-    position:absolute;
+    /*color:black;
+    position:absolute;*/
     left:10;
     margin: 0;
     width:auto;
