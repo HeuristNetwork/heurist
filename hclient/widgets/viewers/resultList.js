@@ -126,6 +126,7 @@ $.widget( "heurist.resultList", {
     _expandAllDivs: false,
     
     _myTimeoutCloseRecPopup: 0,
+    _myTimeoutOpenRecPopup: 0,
     
     _grp_keep_status:{}, //expanded groups
     
@@ -1854,6 +1855,7 @@ $.widget( "heurist.resultList", {
                 
             if(isview){ //popup record view
             
+                this._clearTimeouts();
                 this._showRecordViewPopup( selected_rec_ID );
 
                 return;
@@ -2926,18 +2928,21 @@ $.widget( "heurist.resultList", {
             
             this._on( this.div_content.find('.rec_view_link'), {
                 mouseover: function(event){
+                    
                     var ele = $(event.target).parents('.recordDiv');
-                    this._showRecordViewPopup( ele.attr('recid') );
+                    var rec_id = ele.attr('recid');
+                    
+                    this._clearTimeouts();
+                    
+                    this._myTimeoutOpenRecPopup = setTimeout(function(){
+                        that._showRecordViewPopup( rec_id );
+                    },500);
+
                 }
-/*                    
-                ,mouseexit: function(){
-console.log('mouseexit');                    
-                    this._myTimeoutCloseRecPopup = setTimeout(function(){
-                        var dlg = $('#recordview_popup');
-                        if(dlg.dialog('instance')) dlg.dialog('close');
-                    },  1000); //600
+                ,mouseout: function(){
+                    this._closeRecordViewPopup();
                 }
-*/
+
             });
         }
         
@@ -3362,6 +3367,27 @@ console.log('mouseexit');
     //
     //
     //
+    _closeRecordViewPopup: function(){
+        
+        this._myTimeoutCloseRecPopup = setTimeout(function(){
+            var dlg = $('#recordview_popup');
+            if(dlg.dialog('instance')) dlg.dialog('close');
+        },  1000); //600
+                        
+                        
+        
+    },
+    
+    _clearTimeouts: function(){
+            clearTimeout(this._myTimeoutOpenRecPopup);
+            this._myTimeoutOpenRecPopup = 0;
+            clearTimeout(this._myTimeoutCloseRecPopup);
+            this._myTimeoutCloseRecPopup = 0;
+    },
+    
+    //
+    //
+    //
     _showRecordViewPopup: function( rec_ID ){
                     
                 var recInfoUrl = null;
@@ -3394,18 +3420,36 @@ console.log('mouseexit');
                     pos = { my: "left top", at: "right top+100", of: $(this.element) };
                 }
                 
-                var ifrm = window.hWin.HEURIST4.msg.showDialog(recInfoUrl, { 
+                window.hWin.HEURIST4.msg.showDialog(recInfoUrl, { 
                         is_h6style: true,
                         modal: false,
                         dialogid: 'recordview_popup',    
                         //width: 700, height: 800, //(lt=='WebSearch'?(window.hWin.innerWidth*0.9):
-                        menu_locked: function(){
-                            clearTimeout(that._myTimeoutCloseRecPopup);
-                            that._myTimeoutCloseRecPopup = 0;
+                        onmouseover: function(){
+                            that._clearTimeouts();
                         },
                         position: pos,
                         title:'Record Info'});
 
+                if(pos!=null){
+                    dlg = $('#recordview_popup').css('padding',0);
+                    this._on(dlg,{mouseout:function(){
+                        that._closeRecordViewPopup();
+                    }});
+                    var dlg_header = dlg.parent().find('.ui-dialog-titlebar');
+                    this._on(dlg_header,{mouseout:function(){
+                        that._closeRecordViewPopup();
+                    }});
+                    
+                }
+                
+                /*
+                this._on(dlg, ifrm[0].contentWindow,{mouseover:function(){
+                    console.log('OVER');
+                }});
+                */
+                
+                        
     }                        
     
     

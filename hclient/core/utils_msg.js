@@ -656,6 +656,16 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                 if(options['params'] && $.isFunction(content.assignParameters)) {
                     content.assignParameters(options['params']);
                 }
+                
+                if(options['onmouseover']){ 
+                    $dlg.parent().find('.ui-dialog-titlebar').mouseover(function(){
+                        options['onmouseover'].call();
+                    });
+                    $dosframe.mouseover(function(){
+                        options['onmouseover'].call();
+                    });
+                }
+                
 
             });
 
@@ -779,17 +789,11 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                 }
         }
 
-
-        
-        if($.isFunction(options['menu_locked'])){
-            options['menu_locked'].call(this);
-        }                
-
         //start content loading
         if($dosframe.attr('src')!=url || options['force_reload']){
             $dosframe.attr('src', url);
         }
-        return $dosframe;
+        //return $dosframe;
 
     },
 
@@ -828,7 +832,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             }else{
                 if($dosframe.attr('src')==url){ //not changed
                     $container.show();
-                    return;        
+                    return $dosframe;        
                 }
             }
 
@@ -938,7 +942,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                 if(options['params'] && $.isFunction(content.assignParameters)) {
                     content.assignParameters(options['params']);
                 }
-
+                
             }); //onload
 
                         
