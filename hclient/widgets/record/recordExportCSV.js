@@ -114,6 +114,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
             that.element.find('#cbIncludeTermCodes').prop('checked',(settings.include_term_codes==1));
             that.element.find('#cbIncludeTermHierarchy').prop('checked',(settings.include_term_hierarchy==1));
             that.element.find('#cbIncludeResourceTitles').prop('checked',(settings.include_resource_titles==1));
+            that.element.find('#chkJoinRecTypes').prop('checked',(settings.join_record_types==1));
             
         }
     },
@@ -320,6 +321,7 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                 }
                 return dtid;
             }
+            var mainRecordTypeIDs = [];
             function __addSelectedField(ids, lvl, constr_rt_id){
                 
                 if(ids.length < lvl) return;
@@ -333,6 +335,11 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                 }
                 if(constr_rt_id>0){
                     dtid = dtid+':'+constr_rt_id;
+                }
+
+                // Get main record type IDs.
+                if (lvl === 1 && typeof ids[0] !== 'undefined' && mainRecordTypeIDs.indexOf(ids[0]) < 0) {
+                    mainRecordTypeIDs.push(ids[0]);
                 }
                 
                 //window.hWin.HEURIST4.util.findArrayIndex( dtid, selectedFields[rtid] )<0
@@ -372,10 +379,12 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                 
                 //DEBUG console.log( node.data.code );
             }
-            //DEBUG 
-        
+            //DEBUG
+
         return {
                 'fields': selectedFields,
+                'main_record_type_ids': mainRecordTypeIDs,
+                'join_record_types': this.element.find('#chkJoinRecTypes').is(':checked')?1:0,
                 'advanced_options': this._getFieldAdvancedOptions(),
                 'csv_delimiter':  this.element.find('#delimiterSelect').val(),
                 'csv_enclosure':  this.element.find('#quoteSelect').val(),
@@ -488,18 +497,15 @@ $.widget( "heurist.recordExportCSV", $.heurist.recordAction, {
                     },500);
                 },
                 select: function(e, data) {
-                    // Only add/remove the advanced options for the fields from the main record type.
-                    if (data.node.data.code.split(':').length < 3) {
-                        if (data.node.isSelected()) {
-                            that._addFieldAdvancedOptions(data.node.title, data.node.data.type, data.node.data.code);
-                        } else {
-                            that._removeFieldAdvancedOptionsByCode(data.node.data.code);
-                        }
-                        if (that.element.find('.export-advanced-list-item').length > 0) {
-                            that.element.find('.export-advanced-list').show();
-                        } else {
-                            that.element.find('.export-advanced-list').hide();
-                        }
+                    if (data.node.isSelected()) {
+                        that._addFieldAdvancedOptions(data.node.title, data.node.data.type, data.node.data.code);
+                    } else {
+                        that._removeFieldAdvancedOptionsByCode(data.node.data.code);
+                    }
+                    if (that.element.find('.export-advanced-list-item').length > 0) {
+                        that.element.find('.export-advanced-list').show();
+                    } else {
+                        that.element.find('.export-advanced-list').hide();
                     }
                 },
                 click: function(e, data){
