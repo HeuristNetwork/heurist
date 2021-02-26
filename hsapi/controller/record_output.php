@@ -281,6 +281,17 @@ function output_CSV($system, $data, $params){
         return;
     }
 
+    $isJoinTable = (isset($params['prefs']['join_record_types']) && $params['prefs']['join_record_types']) ? true : false;
+
+    // Get the main record type IDs.
+    $mainRecordTypeIDs = [];
+    if (isset($params['prefs']['main_record_type_ids'])) {
+        $mainRecordTypeIDs = $params['prefs']['main_record_type_ids'];
+    } else {
+        print 'No field selected from the main record type';
+        return;
+    }
+
     $include_term_label_and_code = true;
     $include_term_ids = (@$params['prefs']['include_term_ids']==1);
     $include_term_codes = (@$params['prefs']['include_term_codes']==1);
@@ -358,6 +369,7 @@ function output_CSV($system, $data, $params){
     //create header
     $any_rectype = null;
     $headers = array();
+    $columnInfo = [];
     if($fields){
         foreach($fields as $rt=>$flds){
 
@@ -368,10 +380,12 @@ function output_CSV($system, $data, $params){
             $details[$rt] = array();
             $headers[$rt] = array();
             $relmarker_details[$rt] = array();
+            $columnInfo[$rt] = [];
 
             foreach($flds as $dt_id){
 
                 $csvColIndex = null;
+                $fieldFullID = $dt_id;
 
                 $constr_rt_id = 0;
                 if(strpos($dt_id,':')>0){ //for constrained resource fields
@@ -427,23 +441,50 @@ function output_CSV($system, $data, $params){
 
                     array_push($headers[$rt], $field_name);  //labels are always included           
                     $csvColIndex = count($headers[$rt]) - 1;
+                    $columnInfo[$rt][] = [
+                        'index' => $csvColIndex,
+                        'type' => 'value',
+                        'field_id' => $fieldFullID,
+                    ];
 
                     if($include_term_ids){
-                        array_push($headers[$rt], $field_name.' ID');            
+                        array_push($headers[$rt], $field_name.' ID');
+                        $columnInfo[$rt][] = [
+                            'index' => count($headers[$rt]) - 1,
+                            'type' => 'term_id',
+                            'field_id' => $fieldFullID,
+                        ];
                     }
 
                     if($include_term_codes){
-                        array_push($headers[$rt], $field_name.' StdCode' );   
-                    }    
+                        array_push($headers[$rt], $field_name.' StdCode' );
+                        $columnInfo[$rt][] = [
+                            'index' => count($headers[$rt]) - 1,
+                            'type' => 'term_code',
+                            'field_id' => $fieldFullID,
+                        ];
+                    }
+
 
                 }else{
                     array_push($headers[$rt], $field_name);                
                     $csvColIndex = count($headers[$rt]) - 1;
+                    $columnInfo[$rt][] = [
+                        'index' => $csvColIndex,
+                        'type' => 'value',
+                        'field_id' => $fieldFullID,
+                    ];
                 }
 
                 //add title for resource fields
                 if($include_resource_titles && ($field_type=='resource' || $field_type=='relmarker')){
-                    array_push($headers[$rt], $field_name_title);            
+
+                    array_push($headers[$rt], $field_name_title);
+                    $columnInfo[$rt][] = [
+                        'index' => count($headers[$rt]) - 1,
+                        'type' => 'resource_title',
+                        'field_id' => $fieldFullID,
+                    ];
                 }
 
                 // Save column index for advanced options.
@@ -779,6 +820,24 @@ function output_CSV($system, $data, $params){
         }
 
     }//for records
+
+    // Join csv tables.
+    if ($isJoinTable && !empty($mainRecordTypeIDs)) {
+        $mainRecordTypeID = $mainRecordTypeIDs[0];
+        if (!empty($csvData[$mainRecordTypeID]) && !empty($columnInfo[$mainRecordTypeID])) {
+            $csvData = [
+                $mainRecordTypeID => createJointCSVTables($csvData, $columnInfo, $mainRecordTypeID, $csv_mvsep, $csv_header),
+            ];
+
+            // Change advanced option column indices.
+            $groupColIndices = changeAdvancedOptionColumnIndex($groupColIndices, $mainRecordTypeID, $columnInfo);
+            $sumColIndices = changeAdvancedOptionColumnIndex($sumColIndices, $mainRecordTypeID, $columnInfo);
+            $countColIndices = changeAdvancedOptionColumnIndex($countColIndices, $mainRecordTypeID, $columnInfo);
+            $percentageColIndices = changeAdvancedOptionColumnIndex($percentageColIndices, $mainRecordTypeID, $columnInfo);
+            $sortColIndices = changeAdvancedOptionColumnIndex($sortColIndices, $mainRecordTypeID, $columnInfo);
+            $sortOrders = changeSortOrders($sortOrders, $mainRecordTypeID);
+        }
+    }
 
     // Save data to streams.
     if ($has_advanced && !empty($csvData)) {
@@ -1320,6 +1379,214 @@ function sortCSVRows(array $rows, array $sortByColIndices = [], array $sortOrder
         });
     }
     return $rows;
+}
+
+/**
+ * Create the joint CSV data from multiple record types.
+ *
+ * @param array $csvData The original CSV data divided by record types.
+ * @param array $columnInfo The column information of the original CSV data by
+ *   record types.
+ * @param int $mainRecordTypeID The ID of the root record type to export.
+ * @param string $filedValueDelimiter The delimiter used for multi-value field.
+ * @param bool $includeHeader Whether the header included in the CSV data.
+ *
+ * @return array The joint CSV data.
+ */
+function createJointCSVTables($csvData, &$columnInfo, $mainRecordTypeID, $filedValueDelimiter, $includeHeader = true) {
+    $csvRows = $csvData[$mainRecordTypeID];
+
+    // Create join table lookups.
+    $csvRowLookups = [];
+    foreach ($csvData as $recordTypeID => $rows) {
+        if ($recordTypeID != $mainRecordTypeID) {
+            if (!isset($csvRowLookups[$recordTypeID])) {
+                $csvRowLookups[$recordTypeID] = [];
+            }
+            foreach ($rows as $index => $row) {
+                if ($includeHeader && $index === 0) {
+                    $csvRowLookups[$recordTypeID]['header'] = $row;
+                } else {
+                    $csvRowLookups[$recordTypeID][$row[0]] = $row;
+                }
+            }
+        }
+    }
+
+    $jointRows = [];
+
+    foreach ($csvRows as $row) {
+        $jointRow = [];
+        $recordTypeIDTrack = [];
+        createJointCSVRow($jointRow, $row, $mainRecordTypeID, $columnInfo, $csvRowLookups, $recordTypeIDTrack, $filedValueDelimiter);
+        $jointRows[] = $jointRow;
+    }
+
+    return $jointRows;
+}
+
+/**
+ * Create a row for the joint CSV.
+ *
+ * @param array $jointRow Passed in reference. It will contain the data for the row
+ *   after the function is finished.
+ * @param array $row The row data from the original CSV data.
+ * @param int $recordTypeID The record type ID of the original row data.
+ * @param array $columnInfo The full array containing the original column information.
+ *   It will contain the new column indices in the joint CSV after the function is finished.
+ * @param array $csvRowLookups The lookup array for each record type keyed by record ID.
+ * @param array $recordTypeIDTrack The array which keeps a track of the record type IDs have
+ *   been joint.
+ * @param string $filedValueDelimiter The delimiter used for multi-value field.
+ * @param int $level The depth of the current record type.
+ */
+function createJointCSVRow(&$jointRow, $row, $recordTypeID, &$columnInfo, $csvRowLookups, &$recordTypeIDTrack, $filedValueDelimiter, $level = 1) {
+    $recordTypeIDTrack[] = (int) $recordTypeID;
+    foreach ($columnInfo[$recordTypeID] as &$colInfo) {
+        if (strpos($colInfo['field_id'], ':') === false) {
+            if ($level === 1 || $colInfo['index'] !== 0) {
+                $jointRow[] = $row[$colInfo['index']];
+                $colInfo['joint_column_index'] = count($jointRow) - 1;
+            }
+        } else {
+            $fieldIDParts = explode(':', $colInfo['field_id']);
+            $targetRecordTypeID = $fieldIDParts[count($fieldIDParts) - 1];
+            if (in_array((int) $targetRecordTypeID, $recordTypeIDTrack) && $colInfo['type'] !== 'resource_title') {
+                $jointRow[] = $row[$colInfo['index']];
+                $colInfo['joint_column_index'] = count($jointRow) - 1;
+            } else {
+                if ($colInfo['type'] === 'value') {
+                    $jointRow[] = $row[$colInfo['index']];
+                    $colInfo['joint_column_index'] = count($jointRow) - 1;
+                    $targetRecordID = $row[$colInfo['index']];
+                    if (!empty($targetRecordID) && !is_numeric($targetRecordID) && strpos($targetRecordID, $filedValueDelimiter) === false) {
+                        $targetRecordID = 'header';
+                    }
+                    if (empty($targetRecordID)) {
+                        $jointRow = array_merge($jointRow, generateEmptyCellsForTargetRecordType($targetRecordTypeID, $csvRowLookups));
+                    } else {
+                        $targetRow = findInCSVRowLookup($targetRecordID, $targetRecordTypeID, $csvRowLookups, $filedValueDelimiter);
+                        if ($targetRow) {
+                            createJointCSVRow($jointRow, $targetRow, $targetRecordTypeID, $columnInfo, $csvRowLookups, $recordTypeIDTrack, $filedValueDelimiter, $level + 1);
+                        } else {
+                            $jointRow = array_merge($jointRow, generateEmptyCellsForTargetRecordType($targetRecordTypeID, $csvRowLookups));
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Lookup the row data based on the record ID.
+ *
+ * @param string $recordIDLiteral The record ID. It could be multiple IDs separated
+ *   by the delimiter.
+ * @param string $targetRecordTypeID The ID of the target record type.
+ * @param string $csvRowLookups The lookup data.
+ * @param string $filedValueDelimiter The delimiter used for multiple IDs.
+ *
+ * @return array|bool
+ */
+function findInCSVRowLookup($recordIDLiteral, $targetRecordTypeID, $csvRowLookups, $filedValueDelimiter) {
+    $recordIDs = explode($filedValueDelimiter, $recordIDLiteral);
+    $lookupRow = [];
+    foreach ($recordIDs as $recordID) {
+        if (isset($csvRowLookups[$targetRecordTypeID][$recordID])) {
+            foreach ($csvRowLookups[$targetRecordTypeID][$recordID] as $index => $item) {
+                if (!isset($lookupRow[$index])) {
+                    $lookupRow[$index] = [];
+                }
+                $lookupRow[$index][] = $item;
+            }
+        }
+    }
+    if (empty($lookupRow)) {
+        return false;
+    } else {
+        $concatRow = [];
+        foreach ($lookupRow as $values) {
+            $concatRow[] = implode($filedValueDelimiter, $values);
+        }
+        return $concatRow;
+    }
+}
+
+/**
+ * Generate an array of empty strings for a target record type.
+ *
+ * This function is used to generate empty cells in the joint CSV when the
+ * reference value is empty, or the reference value can be found from the
+ * lookup data.
+ *
+ * @param string $targetRecordTypeID The ID of the target record type.
+ * @param array $csvRowLookups The lookup data.
+ *
+ * @return array
+ */
+function generateEmptyCellsForTargetRecordType($targetRecordTypeID, $csvRowLookups) {
+    $cells = [];
+    if (!empty($csvRowLookups[$targetRecordTypeID])) {
+        $length = count(reset($csvRowLookups[$targetRecordTypeID])) - 1;
+        for ($i = 0; $i < $length; $i++) {
+            $cells[] = "";
+        }
+    }
+    return $cells;
+}
+
+/**
+ * Change the column index array after the CSV data is joint.
+ *
+ * This function will change the column indices of advanced option to the
+ * new indices in the joint CSV table.
+ *
+ * @param array $columnIndices The original column indices of advanced option.
+ * @param array $mainRecordTypeID The ID of the root record type to export.
+ * @param array $columnInfo The column information. After the csv data is joined,
+ *   this array contains the new column indices in the joint CSV table.
+ *
+ * @return array The new column indices.
+ */
+function changeAdvancedOptionColumnIndex($columnIndices, $mainRecordTypeID, $columnInfo) {
+    if (empty($columnIndices)) {
+        return $columnIndices;
+    }
+    $newColumnIndices = [
+        $mainRecordTypeID => [],
+    ];
+    foreach ($columnIndices as $recordTypeID => $colIndices) {
+        foreach ($colIndices as $columnIndex) {
+            if (isset($columnInfo[$recordTypeID][$columnIndex]['joint_column_index'])) {
+                $newColumnIndices[$mainRecordTypeID][] = $columnInfo[$recordTypeID][$columnIndex]['joint_column_index'];
+            }
+        }
+    }
+    return $newColumnIndices;
+}
+
+/**
+ * Change the sorting orders to fit the joint CSV table.
+ *
+ * @param array $sortOrders The original sorting orders.
+ * @param array $mainRecordTypeID The ID of the root record type to export.
+ *
+ * @return array The new sorting orders.
+ */
+function changeSortOrders($sortOrders, $mainRecordTypeID) {
+    if (empty($sortOrders)) {
+        return $sortOrders;
+    }
+    $newSortOrders = [
+        $mainRecordTypeID => [],
+    ];
+    foreach ($sortOrders as $recordTypeID => $orders) {
+        foreach ($orders as $order) {
+            $newSortOrders[$mainRecordTypeID][] = $order;
+        }
+    }
+    return $newSortOrders;
 }
 
 /**
