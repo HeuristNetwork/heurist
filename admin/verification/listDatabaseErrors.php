@@ -47,6 +47,9 @@ $system->defineConstant('DT_RELATION_TYPE');
 
 if(@$_REQUEST['data']){
     $lists = json_decode($_REQUEST['data'], true);
+    
+    $lists2 = $lists;
+    
 }else{
     $lists = getInvalidFieldTypes($mysqli, @$_REQUEST['rt']); //in getFieldTypeDefinitionErrors.php
     if(!@$_REQUEST['show']){
@@ -55,6 +58,8 @@ if(@$_REQUEST['data']){
             $lists = array();
         }
     }
+    
+    $lists2 = getTermsWithIssues($mysqli);
 }
 
 //remove Records those which have been forwarded and still exist with no values
@@ -65,12 +70,17 @@ if(count($recids)>0){
     recordDelete($system, $recids); 
 }
 
-
+//see getInvalidFieldTypes in verifyFieldTypes.php
 $dtysWithInvalidTerms = @$lists["terms"];
 $dtysWithInvalidNonSelectableTerms = @$lists["terms_nonselectable"];
 $dtysWithInvalidRectypeConstraint = @$lists["rt_contraints"];
 
 $rtysWithInvalidDefaultValues = @$lists["rt_defvalues"];
+
+$trmWithWrongParents = @$lists2["trm_missed_parents"];
+$trmWithWrongInverse = @$lists2["trm_missed_inverse"];
+$trmDuplicates = @$lists2["trm_dupes"];
+
 ?>
 <html>
     <head>
@@ -307,11 +317,115 @@ $rtysWithInvalidDefaultValues = @$lists["rt_defvalues"];
                 ?>
                 <button onclick="window.open('listDatabaseErrors.php?db=<?= HEURIST_DBNAME?>&fixusers=1','_self')">
                     Attribute them to owner # 2 Database Manager</button>
-            </div>
+                </div>
             <?php
         }
         ?>
 
+        <!-- WRONG OR possible DUPLICATED TERMS -->
+        
+        <hr>
+
+        <?php
+
+            $wasassigned1 = 0;
+            $wasassigned2 = 0;
+            if(@$_REQUEST['fixterms']=="1"){
+                $mysqli->query('SET SQL_SAFE_UPDATES=0');
+                
+                if(count($trmWithWrongParents)>0){
+                
+                    $trash_group_id = mysql__select_value($mysqli, 'select vcg_ID from defVocabularyGroups where vcg_Name="Trash"');
+
+                    $query = 'UPDATE defTerms set trm_ParentTermID=NULL, trm_VocabularyGroupID='.$trash_group_id
+                    .' WHERE trm_ID in ('.implode(',',$trmWithWrongParents).')';
+                    $res = $mysqli->query( $query );
+                    if(! $res )
+                    {
+                        print "<div class='error'>Cannot delete invalid pointers to parent terms.</div>";
+                    }else{
+                        $wasassigned1 = $mysqli->affected_rows;
+                        $trmWithWrongParents = array();
+                    }
+                }
+
+                if(count($trmWithWrongInverse)>0){
+                    $query = 'UPDATE defTerms set trm_InverseTermId=NULL '
+                    .' WHERE trm_ID in ('.implode(',',$trmWithWrongInverse).')';
+                    $res = $mysqli->query( $query );
+                    if(! $res )
+                    {
+                        print "<div class='error'>Cannot clear missed inverse terms ids.</div>";
+                    }else{
+                        $wasassigned2 = $mysqli->affected_rows;
+                        $trmWithWrongInverse = array();
+                    }
+                }
+
+                $mysqli->query('SET SQL_SAFE_UPDATES=1');
+            }
+
+            if(count($trmWithWrongParents)==0 && count($trmWithWrongInverse)==0){
+                print '<div><h3 class="res-valid">OK: All terms have valid inverse and parent term references</h3></div>';
+                if($wasassigned1>0){
+                    print "<div>$wasassigned1 terms with wrong parent terms moved to 'Trash' group as vocabularies</div>";
+                }
+                if($wasassigned2>0){
+                    print "<div>$wasassigned2 wrong inverse term references are cleared</div>";
+                }
+            }
+            else
+            {
+                print '<div>';
+                if(count($trmWithWrongParents)>0){
+                    
+                    print '<h3>'.count($trmWithWrongParents).' terms have wrong parent term references</h3>';
+                    $cnt = 0;
+                    foreach ($trmWithWrongParents as $trm_ID) {
+                        print '<br>'.$trm_ID.'  '.$TL[$trm_ID]['trm_Label'];
+                        if($cnt>30){
+                          print '<br>'.count($trmWithWrongParents)-$cnt.' more...';      
+                          break;  
+                        } 
+                        $cnt++;
+                    }
+                }
+                if(count($trmWithWrongInverse)>0){
+                    
+                    print '<h3>'.count($trmWithWrongInverse).' terms have wrong inverse term references</h3>';
+                    $cnt = 0;
+                    foreach ($trmWithWrongInverse as $trm_ID) {
+                        print '<br>'.$trm_ID.'  '.$TL[$trm_ID]['trm_Label'];
+                        if($cnt>30){
+                          print '<br>'.count($trmWithWrongInverse)-$cnt.' more...';      
+                          break;  
+                        } 
+                        $cnt++;
+                    }
+                }
+                
+                ?>
+                <br><br>
+                <button onclick="window.open('listDatabaseErrors.php?db=<?= HEURIST_DBNAME?>&fixterms=1','_self')">
+                    Correct wrong parent and inverse term references</button>
+                </div>
+            <?php
+        }
+        
+        if(count($trmDuplicates)>0){                                                 
+            
+                print '<h3>Terms are duplicated or ending in a number: these may be the result of automatic duplicate-avoidance. '
+                .'If so, we suggest deleting the numbered term or using Design > Vocabularies to merge it with the un-numbered version.</h3>';
+                foreach ($trmDuplicates as $parent_ID=>$dupes) {
+                    print '<div style="padding-top:10px;font-style:italic">parent '.$parent_ID.'  '.$TL[$parent_ID]['trm_Label'].'</div>';
+                    foreach ($dupes as $trm_ID) {
+                        print '<div style="padding-left:60px">'.$trm_ID.'  '.$TL[$trm_ID]['trm_Label'].'</div>';
+                    }
+                }
+        }
+        
+        ?>        
+        
         <hr />
 
         <!-- CHECK FOR FIELD TYPE ERRORS -->

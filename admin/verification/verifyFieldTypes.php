@@ -33,15 +33,15 @@
 * @package     Heurist academic knowledge management system
 * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
 */
-$TL = array();
-$RTN = array();
+$TL = array();  //list of all terms
+$RTN = array();  //rty_ID=>rty_Name
 
 function getInvalidFieldTypes($mysqli, $rectype_id){
 
     global $TL, $RTN;
 
     // lookup detail type enum values
-    $query = 'SELECT trm_ID, trm_Label, trm_ParentTermID, trm_OntID, trm_Code FROM defTerms';
+    $query = 'SELECT trm_ID, trm_Label, trm_ParentTermID, trm_OntID, trm_Code FROM defTerms order by trm_ParentTermID,trm_Label';
     $res = $mysqli->query($query);
     while ($row = $res->fetch_assoc()) {
         $TL[$row['trm_ID']] = $row;
@@ -190,7 +190,78 @@ function getInvalidFieldTypes($mysqli, $rectype_id){
 }
 
 //
-// function that translates all term ids in the passed string to there local/imported value
+// searches for terms with missed parent and inverse term ids
+// detect duplications on the same level (exact and with numbers)
+//
+function getTermsWithIssues($mysqli){
+    
+    global $TL;
+    
+    //terms with missed parents
+    $query = 'SELECT t1.trm_ID FROM defTerms t1 left join defTerms t2 '
+    .'on t1.trm_ParentTermID = t2.trm_ID where t1.trm_ParentTermID>0  and t2.trm_ID is null';
+
+    $missed_parents = mysql__select_list2($mysqli, $query);
+    
+    //terms with missed inverse terms
+    $query = 'SELECT t1.trm_ID FROM defTerms t1 left join defTerms t2 '
+    .'on t1.trm_InverseTermId = t2.trm_ID where t1.trm_InverseTermId>0  and t2.trm_ID is null';
+
+    $missed_inverse = mysql__select_list2($mysqli, $query);
+    
+    //find label duplications
+    $all_dupes = array();
+    $dupes = array(); //dupes for parent
+    
+    $parent_id = 0;
+    $prev_id = 0;
+    $prev_lbl = '';
+    
+    foreach ($TL as $trm_ID=>$trm){
+        
+        if($parent_id!=$trm['trm_ParentTermID']){
+            if(count($dupes)>0 && $parent_id>0){
+                $all_dupes[$parent_id] = $dupes;                  
+            } 
+            $parent_id = $trm['trm_ParentTermID'];
+            $dupes = array(); //reset
+            
+            $prev_lbl = removeLastNum($trm['trm_Label']);
+            $prev_id = $trm_ID;
+        }else{ 
+        
+            $lbl = removeLastNum($trm['trm_Label']);
+            if($lbl==$prev_lbl){
+                if($prev_id>0){
+                    $dupes[] = $prev_id; //$TL[$prev_id]['trm_Label'];
+                    $prev_id = 0;
+                }
+                $dupes[] = $trm_ID;
+            }else{
+                $prev_lbl = $lbl;
+                $prev_id = $trm_ID;
+            }
+        }
+        
+    }
+    if(count($dupes)>0 && $parent_id>0){
+        $all_dupes[$parent_id] = $dupes;                  
+    } 
+    
+    
+    
+
+    return array(
+        'trm_missed_parents'=>$missed_parents,
+        'trm_missed_inverse'=>$missed_inverse,
+        'trm_dupes'=>$all_dupes
+    );
+    
+}
+
+
+//
+// function that translates all term ids in $formattedStringOfTermIDs to there local/imported value
 //
 function getInvalidTerms($formattedStringOfTermIDs, $is_tree) {
     global $TL;
