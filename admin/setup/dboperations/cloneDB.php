@@ -245,7 +245,7 @@ if(@$_REQUEST['mode']=='2'){
     $res = cloneDatabase($targetdbname, $nodata, $templateddb, $user_id);
     if(!$res){
         echo_flush ('<p style="padding-left:20px;"><h2 style="color:red">WARNING: Your database has not been cloned.</h2>'
-        .'Please run Verify &gt; Verify database integrity. If this does not find and fix errors, please send a bug report (Help &gt; Bug report) and we will investigate the problem.');
+        .'<p>Please run Verify &gt; Verify database integrity. If this does not find and fix the error, please send a bug report (Help &gt; Bug report) and we will investigate the problem.</p>');
     }
 
     print "</div></body></html>";
@@ -350,7 +350,7 @@ function cloneDatabase($targetdbname, $nodata=false, $templateddb, $user_id) {
         
         return false;
     }else{
-        echo_flush ('<script>document.getElementById("wait_p").style.display="none"</script><p style="padding-left:20px">SUCCESS</p>');
+        echo_flush ('<script>document.getElementById("wait_p").style.display="none"</script><p style="padding-left:0px">Structure created OK</p>');
     }
     
     // Connect to new database and  Remove initial values from empty database
@@ -380,10 +380,10 @@ function cloneDatabase($targetdbname, $nodata=false, $templateddb, $user_id) {
     list($source_database_full, $source_database) = mysql__get_names( $source_database );
     
 
-    echo_flush ("<p>Copying data</p>");
+    echo_flush ("<p><b>Copying data</b></p>");
     // db_clone function in /common/php/db_utils.php does all the work
     if( DbUtils::databaseClone($source_database_full, $targetdbname_full, true, $nodata, $isCloneTemplate) ){
-        echo_flush ('<p style="padding-left:20px">SUCCESS</p>');
+        echo_flush ('<p style="padding-left:20px">Data copied OK</p>');
     }else{
         DbUtils::databaseDrop( false, $targetdbname_full, false, false );
         
@@ -435,10 +435,10 @@ function cloneDatabase($targetdbname, $nodata=false, $templateddb, $user_id) {
     $sHighLoadWarning = "<p><h4>Note: </h4>Failure to clone a database may result from high server load. Please try again, and if the problem continues ".CONTACT_HEURIST_TEAM."</p>";
     
     // 4. add contrainsts, procedure and triggers
-    echo_flush ("<p>Addition of Referential Constraints</p>");
+    echo_flush ("<p><b>Addition of Referential Constraints</b></p>");
     
     if(db_script($targetdbname_full, HEURIST_DIR."admin/setup/dbcreate/addReferentialConstraints.sql")){
-        echo_flush ('<p style="padding-left:20px">SUCCESS</p>');
+        echo_flush ('<p style="padding-left:20px">Referential constraints added OK</p>');
     }else{
         DbUtils::databaseDrop( false, $targetdbname_full, false, false );
         print '<p><h4>Note: </h4>Cloning failed due to an SQL constraints problem (internal database inconsistency). Please '
@@ -448,9 +448,9 @@ function cloneDatabase($targetdbname, $nodata=false, $templateddb, $user_id) {
         return false;
     }
 
-    echo_flush ("<p>Addition of Procedures and Triggers</p>");
+    echo_flush ("<p><b>Addition of Procedures and Triggers</b></p>");
     if(db_script($targetdbname_full, HEURIST_DIR."admin/setup/dbcreate/addProceduresTriggers.sql")){
-        echo_flush ('<p style="padding-left:20px">SUCCESS</p>');
+        echo_flush ('<p style="padding-left:20px">Procedures and triggers added OK</p>');
     }else{
         DbUtils::databaseDrop( false, $targetdbname_full, false, false );
         print $sHighLoadWarning.$errorScriptExecution;
