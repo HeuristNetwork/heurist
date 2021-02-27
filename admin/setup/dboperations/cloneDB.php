@@ -337,7 +337,7 @@ function cloneDatabase($targetdbname, $nodata=false, $templateddb, $user_id) {
 
     //create new empty database and structure
     echo_flush ('<p>Creating Database Structure (tables)</p>'
-    .'<div id="wait_p" class="loading" style="width:90%;height:150px">'
+    .'<div id="wait_p" class="loading" style="width:95%;height:150px">'
     .'<i>Please wait for confirmation message (may take a couple of minutes for large databases)</i></div>');
     
     if(!DbUtils::databaseCreate($targetdbname_full, 1)){
