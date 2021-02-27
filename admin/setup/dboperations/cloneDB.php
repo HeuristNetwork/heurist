@@ -228,8 +228,8 @@ if(@$_REQUEST['mode']=='2'){
 
         <div class="banner"><h2>Clone <?php print ($isCloneTemplate?'Template ':'')?>Database</h2></div>
         <div id="page-inner" style="overflow:auto">
-            <div id="loading" style="display:none">
-                <img alt="cloning ..." src="../../../common/images/mini-loading.gif" width="16" height="16" />
+            <div id="loading" style="display:none;height:100%" class="loading">
+                <!-- <img alt="cloning ..." src="../../../common/images/mini-loading.gif" width="16" height="16" /> -->
                 <div id="divProgress" style="font-weight:bold;width:100%;">&nbsp; Cloning of database may take a few minutes for large databases.</div>
             </div>
       
@@ -252,7 +252,7 @@ if(@$_REQUEST['mode']=='2'){
 }else{
 ?>
     <div id="mainform">
-        <form name='selectdb' action='cloneDB.php' method='get' onsubmit="{return onSubmit(event);}">
+        <form name='selectdb' action='cloneDB.php' method='post' onsubmit="{return onSubmit(event);}">
 
         <?php if(!$isCloneTemplate) { ?>
 
@@ -337,8 +337,9 @@ function cloneDatabase($targetdbname, $nodata=false, $templateddb, $user_id) {
 
     //create new empty database and structure
     echo_flush ('<p>Creating Database Structure (tables)</p>'
-    .'<div id="wait_p" class="loading" style="width:100%;height:150px">'
+    .'<div id="wait_p" class="loading" style="width:90%;height:150px">'
     .'<i>Please wait for confirmation message (may take a couple of minutes for large databases)</i></div>');
+    
     if(!DbUtils::databaseCreate($targetdbname_full, 1)){
         $err = $system->getError();
         echo_flush ('<script>document.getElementById("wait_p").style.display="none"</script>'

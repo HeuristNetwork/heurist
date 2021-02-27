@@ -1585,6 +1585,14 @@ $query = 'INSERT INTO defDetailTypeGroups (dtg_Name,dtg_Order,dtg_Description) '
 .'VALUES ("Trash",255,"Drag base fields here to hide them, use dustbin icon on a field to delete permanently")';        
             $mysqli->query($query);
         }
+        
+        $sysValues = $system->get_system();
+        if(!array_key_exists('sys_ExternalReferenceLookups', $sysValues))
+        {
+            $query = "ALTER TABLE `sysIdentification` ADD COLUMN `sys_ExternalReferenceLookups` TEXT default NULL COMMENT 'Record type-function-field specifications for lookup to external reference sources such as GeoNames'";
+            $res = $mysqli->query($query);
+        }
+        
 
 /*        
         $system->defineConstant('RT_CMS_HOME');
