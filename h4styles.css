@@ -448,9 +448,8 @@ div.recordDiv  .rec_actions {
 div.recordDiv.public  > .action-button-container{
     display: block;
 }
-
 .list .recordDiv:hover .recordTitle{
-    right:80px;
+    right:95px;
 }
 
 .list .recordDiv > .item{

@@ -565,9 +565,9 @@ $.widget( "heurist.resultList", {
         .css({'float':'right','padding':'2px '+right_padding+'px'})
         .html('<button value="list" class="btnset_radio"/>'
             +'<button value="icons" class="btnset_radio"/>'
-            +(this.options.entityName=='records'?'<button value="record_content" class="btnset_radio"/>':'')
             +'<button value="thumbs" class="btnset_radio"/>'
             +'<button value="thumbs3" class="btnset_radio"/>'
+            +(this.options.entityName=='records'?'<button value="record_content" class="btnset_radio"/>':'')
         )
         .appendTo( this.div_toolbar );
         
@@ -577,15 +577,15 @@ $.widget( "heurist.resultList", {
         this.view_mode_selector.find('button[value="icons"]')
             .button({icon: "ui-icon-list", showLabel:false, label:window.hWin.HR('Single lines with icon')})
             .css('font-size','1em'); //ui-icon-view-icons-b
-        this.view_mode_selector.find('button[value="record_content"]')
-            .button({icon: "ui-icon-template", showLabel:false, label:window.hWin.HR('Record contents')})
-            .css('font-size','1em'); //ui-icon-newspaper
         this.view_mode_selector.find('button[value="thumbs"]')
             .button({icon: "ui-icon-view-icons", showLabel:false, label:window.hWin.HR('Small images')})
             .css('font-size','1em');
         this.view_mode_selector.find('button[value="thumbs3"]')
             .button({icon: "ui-icon-stop", showLabel:false, label:window.hWin.HR('Large image')})
             .css('font-size','1em');
+        this.view_mode_selector.find('button[value="record_content"]')
+            .button({icon: "ui-icon-template", showLabel:false, label:window.hWin.HR('Record contents')})
+            .css('font-size','1em'); //ui-icon-newspaper
         this.view_mode_selector.controlgroup();
         
         this._on( this.view_mode_selector.find('button'), {
@@ -2677,7 +2677,7 @@ $.widget( "heurist.resultList", {
                 
                 var s = '';
                 if(window.hWin.HAPI4.has_access()){
-                    s = '<p style="color:green">This warning is triggered if the are more than 10 records</p>'; // (edit here to change)
+                    s = '<p style="color:green">This warning is triggered if there are more than 10 records</p>'; // (edit here to change)
                 }
                 
                 var $__dlg = window.hWin.HEURIST4.msg.showMsgDlg(
