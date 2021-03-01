@@ -437,7 +437,8 @@ console.log(idx+'  '+width+'  '+that.options.dataTableParams['columns'][idx]['vi
                             }
                         });
                         
-                        this.selConfigs.find('div.header').css({'display':'inline-block'});
+                        this.selConfigs.find('div.header').css({padding: '7px 16px 3px 0', float: 'left'});
+                        this.selConfigs.find('span.btn-action-div').css({display: 'inline-block','padding-top':'10px'});
                         this.selConfigs.configEntity('updateList', 'all', 
                                 that.options.initial_cfg?that.options.initial_cfg.cfg_name:null);
                     }                    
