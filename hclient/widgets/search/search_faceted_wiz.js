@@ -1536,6 +1536,7 @@ $.widget( "heurist.search_faceted_wiz", {
                 + '<span id="buttonset'+idd+'">';
                 
                 
+                var sMultiSel = '';
                 var sGroupBy = '';
                 if(facets[k].type=='freetext'){
                     sGroupBy =
@@ -1566,10 +1567,12 @@ $.widget( "heurist.search_faceted_wiz", {
                         //+idd+'" value="1" data-type="dropdown"/><label for="facetType'+idd+'_1">dropdown</label>';
                         +'<button label="dropdown" class="btnset_radio" data-idx="'+idd+'" data-value="1" data-type="dropdown"/>';
                     
-                    sGroupBy = '<label>'
-                                            +'<input type="checkbox" name="facet_Group'+idd+'" value="firstlevel"/>Group by first level</label>'
-                               +'<label title="applicable for list and wrapped modes only">'
-                               +'<input type="checkbox" name="facet_MultiSel'+idd+'" value="1"/>multi-select</label>';
+                    sGroupBy = '<label><input type="checkbox" name="facet_Group'
+                                +idd+'" value="firstlevel"/>Group by first level</label>';
+                                
+                    sMultiSel = '<label title="applicable for list and wrapped modes only" style="font-size: smaller;">'
+                                + '<input type="checkbox" name="facet_MultiSel'
+                                + idd+'" value="1"/>multi-select</label>';
                     
                 }
                 
@@ -1580,10 +1583,11 @@ $.widget( "heurist.search_faceted_wiz", {
                 //+'<input type="radio" data-idx="'+idd+'" id="facetType'+idd+'_3" name="facet_Type'+idd+'" value="3"/><label for="facetType'+idd+'_3">list</label>'
                 //+'<input type="radio" data-idx="'+idd+'" id="facetType'+idd+'_2" name="facet_Type'+idd+'" value="2"/><label for="facetType'+idd+'_2">wrapped</label>'
                 //+'<input type="radio" data-idx="'+idd+'" id="facetType'+idd+'_0" name="facet_Type'+idd+'" value="0"/><label for="facetType'+idd+'_0">search</label>'
-                + '</span></div></div>' 
+                + '</span>'+sMultiSel+'</div></div>' 
 
                 //second/optional line
                 +'<div style="padding:5px 0 0 29px;display:none" class="optional_settings">'
+                
                 +'<div style="display:inline-block">'
                 +'<label style="font-size:smaller" for="facet_Help'+idd+'">Rollover (optional)&nbsp;</label>'
                 +'<input name="facet_Help'+idd+'" id="facet_Help'+idd+'" type="text" '
@@ -1597,6 +1601,7 @@ $.widget( "heurist.search_faceted_wiz", {
                 + idd+'" style="vertical-align: middle;margin-left:16px">'
                 + window.hWin.HR("Order by count")+"</label>"
                 + '</div>'
+                
                 + '</div>'
                 + '</div>'; 
                 

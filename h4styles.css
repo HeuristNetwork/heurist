@@ -449,7 +449,7 @@ div.recordDiv.public  > .action-button-container{
     display: block;
 }
 .list .recordDiv:hover .recordTitle{
-    right:95px;
+    right:96px;
 }
 
 .list .recordDiv > .item{
@@ -507,7 +507,7 @@ div.recordDiv.public  > .action-button-container{
 div.recordDiv .action-button {
     height: 16px;
     width: 16px;
-    margin-left: 4px;
+    margin-left: 6px;
     color: gray;
 }
 .thumbs div.recordDiv .action-button {
