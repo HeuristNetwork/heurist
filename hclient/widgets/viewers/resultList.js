@@ -98,7 +98,10 @@ $.widget( "heurist.resultList", {
         
         supress_load_fullrecord: false, //do not load full record data
         
-        transparent_background: false 
+        transparent_background: false,
+        
+        aggregate_values: null, //supplementary values per record id - usually to store counts, sum, avg 
+        aggregate_link: null    //link to assigned to aggregate value label
     },
 
     _is_publication:false, //this is CMS publication - take css from parent
@@ -1508,6 +1511,24 @@ $.widget( "heurist.resultList", {
         var btn_icon_only = window.hWin.HEURIST4.util.isempty(this.options.recordDivClass)
                                 ?' ui-button-icon-only':'';
 
+        var sCount = '';
+        if(this.options.aggregate_values){
+            sCount = this.options.aggregate_values[recID];
+            if(!(sCount>0)) {
+                sCount = ''
+            }else {
+                
+                if(this.options.aggregate_link){    
+                    sCount = '<a href="'
+                    + window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database
+                    + '&q=' + encodeURIComponent(this.options.aggregate_link.replace('[ID]',recID))
+                    + '" target="_blank" title="See records that already points to this one">'+sCount+'</a>';
+                }
+                sCount = '<span style="margin-right:10px">'+sCount+'</span>';
+            }
+            
+        }                        
+                                
         // construct the line or block
         var html = '<div class="recordDiv '+this.options.recordDivClass
         +'" recid="'+recID+'" '+pwd+' rectype="'+rectypeID+'" bkmk_id="'+bkm_ID+'">' //id="rd'+recID+'" 
@@ -1525,6 +1546,7 @@ $.widget( "heurist.resultList", {
 
         // it is useful to display the record title as a rollover in case the title is too long for the current display area
         + '<div title="'+(is_logged?'dbl-click to edit: ':'')+recTitle_strip_all+'" class="recordTitle '+rectypeTitleClass+'">'
+        +   sCount  
         +     (this.options.show_url_as_link && fld('rec_URL') ?("<a href='"+fld('rec_URL')+"' target='_blank'>"
             + recTitle_strip1 + "</a>") :recTitle_strip2)  
         + '</div>'

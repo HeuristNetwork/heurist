@@ -9,6 +9,7 @@
 * 
 * recordSearchRelatedIds - search all related (links and releationship) records for given set of records recursively
 * recordSearchRelated
+* recordLinkedCount  - search count by target record type for given source type and base field
 * recordSearchPermissions  - all view group permissions for given set of records
 * recordGetOwnerVisibility
 * recordGetRelationshipType - returns only first relationship type ID for 2 given records
@@ -448,13 +449,14 @@ function __assignFacetValue($params, $subs){
 
 /**
 * search all related (links and releationship) records for given set of records
-* it searches links recursively and adds found records into original array
+* it searches links recursively and adds found records into original array  $ids 
 * 
 * @param mixed $system
 * @param mixed $ids
 * @param mixed $direction  -  1 direct/ -1 reverse/ 0 both
 */
-function recordSearchRelatedIds($system, &$ids, $direction=0, $no_relationships=false, $depth=0, $max_depth=1, $limit=0, $new_level_ids=null, $temp_ids=null){
+function recordSearchRelatedIds($system, &$ids, $direction=0, $no_relationships=false, 
+        $depth=0, $max_depth=1, $limit=0, $new_level_ids=null, $temp_ids=null){
 
     if($depth>=$max_depth) return;
 
@@ -575,7 +577,7 @@ function recordSearchRelatedIds($system, &$ids, $direction=0, $no_relationships=
 function recordSearchRelated($system, $ids, $direction=0, $need_headers=true, $link_type=0){
 
     if(!@$ids){
-        return $system->addError(HEURIST_INVALID_REQUEST, "Invalid search request");
+        return $system->addError(HEURIST_INVALID_REQUEST, 'Invalid search request');
     }
     if(is_array($ids)){
         $ids = implode(",", $ids);
@@ -660,7 +662,7 @@ function recordSearchRelated($system, $ids, $direction=0, $need_headers=true, $l
 
         $res = $mysqli->query($query);
         if (!$res){
-            return $system->addError(HEURIST_DB_ERROR, "Search query error on reverse related records. Query ".$query, $mysqli->error);
+            return $system->addError(HEURIST_DB_ERROR, 'Search query error on reverse related records. Query '.$query, $mysqli->error);
         }else{
             while ($row = $res->fetch_row()) {
                 $relation = new stdClass();
@@ -722,6 +724,58 @@ function recordSearchRelated($system, $ids, $direction=0, $need_headers=true, $l
     return $response;
 
 }
+
+
+
+/**
+* Search count by target record type for given source type and base field
+* 
+* @param mixed $system
+* @param mixed $rty_ID
+* @param mixed $dty_ID - base field id
+* @param mixed $direction -  1 direct/ -1 reverse/ 0 both
+*/
+function recordLinkedCount($system, $source_rty_ID, $target_rty_ID, $dty_ID){
+    
+    if(!( (is_array($target_rty_ID) || $target_rty_ID>0) && $source_rty_ID>0)){
+        return $system->addError(HEURIST_INVALID_REQUEST, 'Invalid search request. Source and target record type not defined');
+    }
+    
+    $query = 'SELECT rl_TargetID, count(rl_SourceID) as cnt FROM recLinks, ';
+    
+    if(is_array($target_rty_ID)){
+        $query = $query.'Records r1 WHERE rl_TargetID in ('.implode(',',$target_rty_ID).')';
+    }else{
+        $query = $query.'Records r1,  Records r2 '
+            .'WHERE rl_TargetID=r2.rec_ID AND r2.rec_RecTypeID='.$target_rty_ID;
+
+    }
+    
+    $query = $query.' AND rl_SourceID=r1.rec_ID AND r1.rec_RecTypeID='.$source_rty_ID;
+    if($dty_ID>0){
+        $query = $query.' AND rl_DetailTypeID='.$dty_ID;    
+    }
+    $query = $query.' GROUP BY rl_TargetID ORDER BY cnt DESC';    
+  
+/*
+use hdb_MPCE_Mapping_Print_Charting_Enlightenment;
+SELECT rl_TargetID, count(rl_SourceID) FROM recLinks, Records r1,  Records r2 
+    WHERE rl_SourceID=r1.rec_ID AND r1.rec_RecTypeID=55
+         AND rl_TargetID=r2.rec_ID AND r2.rec_RecTypeID=56
+         AND rl_DetailTypeID=955
+group by rl_TargetID
+*/  
+    $mysqli = $system->get_mysqli();
+    
+    $list = mysql__select_assoc2($mysqli, $query);
+
+    if (!$list && $mysqli->error){
+        return $system->addError(HEURIST_DB_ERROR, 'Search query error on related records. Query '.$query, $mysqli->error);
+    }else{
+        return array("status"=>HEURIST_OK, "data"=> $list);
+    }
+}
+
 
 /**
 * get all view group permissions for given set of records
@@ -1703,7 +1757,36 @@ function recordSearch($system, $params)
                             'offset'=>get_offset($params),
                             'reccount'=>count($records),
                             'records'=>$records));
-
+                    
+                    if(@$params['links_count'] && count($records)>0){
+                        
+                        $links_counts = recordLinkedCount($system, 
+                                    $params['links_count']['source'], 
+                                    count($records)<500?$records:
+                                        $params['links_count']['target'], 
+                                    @$params['links_count']['dty_ID']);
+                                    
+                        if($links_counts['status']==HEURIST_OK && count(@$links_counts['data'])>0){
+                            
+                            //order output 
+                            $res = array_keys($links_counts['data']);
+                            if(count($res) < count($records)){
+                                foreach ($records as $id){
+                                    if(!in_array($id, $res)){
+                                        $res[] = $id;
+                                    }
+                                }
+                            }
+                            $response['data']['records'] = $res;
+                            $response['data']['links_count'] = $links_counts['data'];    
+                            $response['data']['links_query'] = '{"t":"'
+                                    .$params['links_count']['source']
+                                    .'","linkedto'
+                                    .(@$params['links_count']['dty_ID']>0?(':'.$params['links_count']['dty_ID']):'')
+                                    .'":"[ID]"}';
+                        }
+                    }
+                    
                 }
 
             }else{ //----------------------------------

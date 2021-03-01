@@ -1467,6 +1467,8 @@ $.widget( "heurist.editing_input", {
                 s_action = 'select or create';
             }
             
+//console.log(that.options.dtID+'  '+that.options.rectypeID);
+            
             var popup_options = {
                             select_mode: (this.configMode.csv==true?'select_multi':'select_single'),
                             select_return_mode: 'recordset',
@@ -1477,7 +1479,9 @@ $.widget( "heurist.editing_input", {
                                 :('Record pointer: '+s_action+' a linked record')),
                             rectype_set: that.f('rst_PtrFilteredIDs'),
                             pointer_mode: pointerMode,
-                            pointer_filter: that.f('rst_PointerBrowseFilter'),
+                            pointer_filter: that.f('rst_PointerBrowseFilter'),  //initial filter
+                            pointer_field_id: (isparententity)?0:that.options.dtID,
+                            pointer_source_rectype:  (isparententity)?0:that.options.rectypeID,
                             parententity: (isparententity)?that.options.recID:0,
                             
                             onselect:function(event, data){

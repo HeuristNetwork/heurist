@@ -68,10 +68,15 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
             this.element.find('#cb_initial_filter').text('');
             this.element.find('.i-filter').hide();
         }else{
+            //initial pre-filter (see rst_PointerBrowseFilter)
             this.element.find('#cb_initial_filter').text(this.options.pointer_filter);    
             this.element.find('.i-filter').show();
         }
-        
+        if(this.options.pointer_field_id>0 && this.options.pointer_source_rectype>0){
+            this.element.find('.i-counts').show();
+        }else{
+            this.element.find('.i-counts').hide();
+        }
         
             
         // create list of buttons for every rectype in this.options.rectype_set
@@ -245,10 +250,20 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
 
         var qstr = '', domain = 'a', qobj = [];
         
+        var links_count = null;
+        
         //by record type
         if(this.selectRectype.val()!=''){
             qstr = qstr + 't:'+this.selectRectype.val();
             qobj.push({"t":this.selectRectype.val()});
+            
+            if(this.options.pointer_field_id>0 && this.options.pointer_source_rectype>0){
+                if(this.element.find('#cb_getcounts').is(':checked')){
+                    links_count = {source:this.options.pointer_source_rectype, 
+                                   target:this.selectRectype.val(),
+                                   dty_ID:this.options.pointer_field_id};
+                }            
+            }    
         }   
 
         //by title        
@@ -333,6 +348,7 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
                 limit: limit,
                 needall: needall,
                 detail: 'ids',
+                links_count: links_count,
                 id: window.hWin.HEURIST4.util.random()}
             //source: this.element.attr('id') };
 
@@ -342,6 +358,17 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
             window.hWin.HAPI4.RecordMgr.search(request, function( response ){
                 //that.loadanimation(false);
                 if(response.status == window.hWin.ResponseStatus.OK){
+                    
+                    if(response.data.links_count){
+                        that._trigger( "onlinkscount", null, 
+                            {links_count: response.data.links_count,
+                             links_query: response.data.links_query});
+                    }else{
+                        that._trigger( "onlinkscount", null, 
+                            {links_count: null,
+                             links_query: null});
+                    }
+                    
                     that._trigger( "onresult", null, 
                         {recordset:new hRecordSet(response.data), request:request} );
                 }else{

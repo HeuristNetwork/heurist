@@ -1156,7 +1156,7 @@ prof =Profile
             *  callback - callback function or  $document we have trigger the event
             */
             ,search_related: function(request, callback){
-                if(request) request.a = 'related';
+                if(request && !request.a) request.a = 'related';
                 _callserver('record_search', request, callback);    //standard search
             }
 

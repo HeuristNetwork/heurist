@@ -105,6 +105,10 @@
 
         $response = recordSearchRelated($system, $_REQUEST['ids'], @$_REQUEST['direction']);
 
+    }else if(@$_REQUEST['a'] == 'links_count'){
+
+        $response = recordLinkedCount($system, @$_REQUEST['source_ID'], @$_REQUEST['target_ID'], @$_REQUEST['dty_ID']);
+        
     }else if(@$_REQUEST['a'] == 'cms_menu'){  //retrieve all child cms entries for given menu entries
         
         $resids = array();

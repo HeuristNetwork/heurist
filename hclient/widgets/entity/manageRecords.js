@@ -519,7 +519,14 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 "searchrecordsonaddrecord": function( event, _rectype_id ){
                     this._currentEditRecTypeID = _rectype_id;
                     this.addEditRecord(-1);
-                }
+                },
+                "searchrecordsonlinkscount": function( event, data ){
+                    this.recordList.resultList({
+                        aggregate_values: data.links_count,
+                        aggregate_link: data.links_query
+                    });
+                },
+                
         });
         }
                 
