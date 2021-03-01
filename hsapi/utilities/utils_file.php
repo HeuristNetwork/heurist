@@ -80,7 +80,9 @@
     
     autoDetectSeparators
     */
-
+    
+    $glb_curl_code = null;
+    $glb_curl_error = null;
     
     function sanitizeRequest(&$params){
 
@@ -1085,8 +1087,15 @@ function loadRemoteURLContent($url, $bypassProxy = true) {
 //
 //
 function loadRemoteURLContentWithRange($url, $range, $bypassProxy = true, $timeout=30) {
+    
+    global $glb_curl_code, $glb_curl_error;
+    
+    $glb_curl_code = null;
+    $glb_curl_error = null;
 
     if(!function_exists("curl_init"))  {
+        $glb_curl_code = HEURIST_SYSTEM_FATAL;
+        $glb_curl_error = 'Can not init curl extension. Verify php installation';
         return false;
     }
 
@@ -1131,18 +1140,23 @@ function loadRemoteURLContentWithRange($url, $range, $bypassProxy = true, $timeo
     $error = curl_error($ch);
 
     if ($error) {
+        
+        $glb_curl_code = 'curl';
+        $glb_curl_error = $error;
+        
         $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
 
-error_log($url.' http code = '.$code.'  curl error='.$error);
+//error_log($url.' http code = '.$code.'  curl error='.$error);
 
         curl_close($ch);
         return false;
     } else {
-        curl_close($ch);
         if(!$data){
             $code = intval(curl_getinfo($ch, CURLINFO_HTTP_CODE));
-
+            $glb_curl_code = HEURIST_SYSTEM_FATAL;
+            $glb_curl_error = 'It does not return data. HTTP code '.$code;
         }
+        curl_close($ch);
         return $data;
     }
 }

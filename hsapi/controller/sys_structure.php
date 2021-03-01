@@ -46,31 +46,33 @@
             unset($_REQUEST['remote']);
             $_REQUEST['db'] = $match[1];
        }else{
-           //load structure from remote server
-                $splittedURL = explode('?', $remoteURL);
-                   
-                $remoteURL = $splittedURL[0].'hsapi/controller/sys_structure.php?db='.$match[1];
-
-                if (@$_REQUEST['rectypes']) $remoteURL = $remoteURL.'&rectypes='.$_REQUEST['rectypes'];
-                if (@$_REQUEST['detailtypes']) $remoteURL = $remoteURL.'&detailtypes='.$_REQUEST['detailtypes'];
-                if (@$_REQUEST['mode']) $remoteURL = $remoteURL.'&mode='.$_REQUEST['mode'];
-
-                $data = loadRemoteURLContent($remoteURL);            
-            
-                if($data==false){
-                    
-$message = '<p>Unable to contact the selected source database. This might indicate one of the following:</p> '
-.'<ol><li>the database is no longer online;</li>'
-.'<li>the registration in the Heurist master index is missing or points to the wrong URL '
-.$_REQUEST['remote'].';</li>'
-.'<li>a proxy error in contacting the database;</li><li>network timeout.</li></ol> '
-.'<p>If you cannot determine the problem, please '.CONTACT_HEURIST_TEAM.' with the URL to the target database</p>';
-                    
-//'Cannot access database structure for database '.$match[1].' on '.$splittedURL[0]                    
-                    $data = array("status"=>HEURIST_ERROR, "message"=>$message, "sysmsg"=>null);
-                    $data = json_encode($data); 
+                if(@$match[1]==null || $match[1]==''){
+                     $data = __getErrMsg($remoteURL, HEURIST_ERROR, 'Can not detect database parameter in registration URL');
+                     $data = json_encode($data); 
                 }else{
-                    header('Content-Encoding: gzip');
+           
+                    //load structure from remote server
+                    $splittedURL = explode('?', $remoteURL);
+                    
+                    $remoteURL_original = $remoteURL;
+                       
+                    $remoteURL = $splittedURL[0].'hsapi/controller/sys_structure.php?db='.$match[1];
+
+                    if (@$_REQUEST['rectypes']) $remoteURL = $remoteURL.'&rectypes='.$_REQUEST['rectypes'];
+                    if (@$_REQUEST['detailtypes']) $remoteURL = $remoteURL.'&detailtypes='.$_REQUEST['detailtypes'];
+                    if (@$_REQUEST['mode']) $remoteURL = $remoteURL.'&mode='.$_REQUEST['mode'];
+
+                    $data = loadRemoteURLContent($remoteURL);            
+                
+                    if($data==false){
+                        
+                        //Server not found 
+                        //No response from server
+                        $data = __getErrMsg($remoteURL_original, $glb_curl_code, $glb_curl_error);
+                        $data = json_encode($data); 
+                    }else{
+                        header('Content-Encoding: gzip');
+                    }
                 }
                 
                 header('Content-type: application/json;charset=UTF-8');
@@ -88,18 +90,13 @@ $message = '<p>Unable to contact the selected source database. This might indica
     if( ! $system->init(@$_REQUEST['db']) ){
 
         //get error and response
-        if($remoteURL==null){
-            $response = $system->getError(); //errors['message']
-        }else{
-            $message = '<p>Unable to contact the selected source database. This might indicate one of the following:</p>' 
-    .'<ol><li>the database is no longer online;</li>'
-    .'<li>the registration in the Heurist master index is missing or points to the wrong URL '
-    .$remoteURL
-    .'<br>(check registration in Heurist Master Index);</li>'
-    .'<li>a sql server error in contacting the database;</li><li>network timeout.</li></ol> '
-    .'<p>If you cannot determine the problem, please '.CONTACT_HEURIST_TEAM.' with the URL to the target database</p>';
+        $response = $system->getError();
+        
+        if($remoteURL!=null){
             
-            $response = array("status"=>HEURIST_ERROR, "message"=>$message, "sysmsg"=>null);
+            //can not connect to registered database on the same server
+            $response = __getErrMsg($remoteURL, $response['code'], $response['message']);
+            
         }
         
         
@@ -244,4 +241,29 @@ $system->setResponseHeader();
 header('Content-Encoding: gzip');
 echo $output; 
 unset($output);   
+
+function __getErrMsg($remoteURL, $code, $err_msg){
+
+            if($code=='curl'){
+                $reason = 'This may be due to a missing server or timeout on connection';     
+            }else if($code==HEURIST_SYSTEM_FATAL){
+                $reason = 'This may be due to an installation problem on the server';
+            }else{
+                $reason = 'This may be due to an error in the registration information recorded in the Heurist master index';
+            }
+    
+            $message = '<h3>Unable to obtain database structure information</h3>'
+            .'<p>We are unable to contact the selected source database</p>'
+            .'<p>URL: <a href="'.$remoteURL.'">'.$remoteURL.'</a></p>'
+            .'<p>Error returned: '.$err_msg.'</p><p>'
+            .$reason
+            .'</p>'
+            .'<p>Please ask the owner of the database to correct registration information in the Heurist master index '
+            .'(login to their database and use Design > Register to correct the information), or ask the system administrator '
+            .'of the server in question to correct the installation. If the server/database no-longer exists please '
+            .CONTACT_HEURIST_TEAM.' with the URL to the target database</p>';
+            
+            return array("status"=>HEURIST_ERROR, "message"=>$message, "sysmsg"=>null);
+    
+}
 ?>
