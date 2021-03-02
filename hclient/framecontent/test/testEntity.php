@@ -69,6 +69,10 @@ require_once(dirname(__FILE__)."/../initPage.php");
         <script type="text/javascript" src="<?php echo PDIR;?>external/js/evol.colorpicker.js" charset="utf-8"></script>
         <link href="<?php echo PDIR;?>external/js/evol.colorpicker.css" rel="stylesheet" type="text/css">
 
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/record/recordAction.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/search/searchBuilder.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/search/searchBuilderItem.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/search/search_quick.js"></script>
         
         <!--      
 
@@ -140,11 +144,47 @@ require_once(dirname(__FILE__)."/../initPage.php");
                         $('#inputdiv').find('.ui-datepicker-trigger').hide();
                 
                 //open at once 
-                testLookuService();
+                //testLookuService();
                 //testEntity(true);
                 //testEditSymbology();
                 
                 //test console.log('>>>'+$Db.isTermByReference(6302, 528));
+
+//
+//
+//                
+                $('#btn_qs').button().click(function(){
+                    
+                showSearchBuilder();
+                    
+/*                    
+                    var cont = $('#search_quick');
+                
+                //if( cont.is(':visible')){ // already visisble
+                //    return;
+                //}
+            
+                    if(!cont.search_quick_new('instance'))
+                    //initialization
+                    cont.search_quick_new({
+                        onClose: function() {  },
+                        menu_locked: function(is_locked, is_mouseleave){ 
+                            if(!is_mouseleave){
+                                //that._resetCloseTimers();    
+                                //that._explorer_menu_locked = is_locked; 
+                            }
+                    }  });  
+                    
+                    var explore_left = 100, explore_top = 100, explore_height = 400;
+                    
+                    //cont.dialog({autoOpen: true});
+                    
+                    cont.css({left:explore_left, top:explore_top, height:explore_height,'z-index':103}).show();
+  */                    
+                    
+                });
+                
+                
             }
             
             function testLookuService(){
@@ -433,8 +473,15 @@ print $targetPath.'<br>';
      */   
 ?>    
     
-    
             <div>
+                <button id="btn_qs">Quick search</button>
+            </div>
+            <div id="search_quick" style="position: absolute;height: 400;width:900; display:none">afweewfwefwefe</div>
+        
+            
+            <div>
+                
+            
                 <div style="padding:5px; border-bottom:1px solid lightgrey">
                     <label>Entity:
                         <select id="entity-sel">
@@ -448,7 +495,7 @@ print $targetPath.'<br>';
                             <option value="UsrSavedSearches">Filters</option>
                             <option value="SysIdentification">Database Property</option>
                             <option value="SysDatabases">Databases</option>
-                            <option value="DefRecTypes" selected>Record Types</option>
+                            <option value="DefRecTypes">Record Types</option>
                             <option value="DefRecStructure">Record Type Structure</option>
                             <option value="DefRecTypeGroups">Record Type Groups+</option>
                             <option value="DefDetailTypes">Field Types</option>

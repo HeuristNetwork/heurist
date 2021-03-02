@@ -273,6 +273,7 @@ fieldset.ontop > div > .input-cell{
 
 div.input-div{
     padding-right:20px;
+    padding-bottom:2px;
 }
 
 div.input-div:hover > .btn_input_clear, .btn_input_clear:hover {

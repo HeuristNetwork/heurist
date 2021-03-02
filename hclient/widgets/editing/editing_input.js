@@ -54,7 +54,7 @@ $.widget( "heurist.editing_input", {
     detailType:null,
     configMode:null, //configuration settings, mostly for enum and resource types (from field rst_FieldConfig)
     customClasses:null, //custom classes to manipulate visibility and styles in editing
-    
+       
     isFileForRecord:false,
     entity_image_already_uploaded: false,
 
@@ -74,6 +74,11 @@ $.widget( "heurist.editing_input", {
                                 $Db.dty(this.options.dtID,'dty_JsonTermIDTree');
                 } 
                 this.options['dtFields']['rst_DefaultValue'] = '';
+                
+                if(this.options.suppress_repeat=='force_repeat'){
+                    this.options.suppress_repeat = false;
+                    this.options['dtFields']['rst_MaxValues'] = 100;
+                }
             }
 
         }
@@ -191,6 +196,7 @@ $.widget( "heurist.editing_input", {
 
                         if( !(Number(this.f('rst_MaxValues'))>0)  || this.inputs.length < this.f('rst_MaxValues')){
                             this._addInput('');
+                            this._refresh();
                         }
                     }
                 });
@@ -1945,6 +1951,13 @@ $.widget( "heurist.editing_input", {
                     }
                 });
                 
+                /*
+                if(this.options.is_faceted_search){
+                    $input.css({'max-width':'13ex','min-width':'13ex'});
+                }
+                */
+                
+                
                 /*$input.keyup(function () {
                 if (this.value != this.value.replace(/[^0-9-]/g, '')) {
                 this.value = this.value.replace(/[^0-9-]/g, '');  //[-+]?\d
@@ -1981,7 +1994,7 @@ $.widget( "heurist.editing_input", {
                             window.hWin.HEURIST4.msg.showTooltipFlash(window.hWin.HR('Numeric field'),1000,$input);
                         }
                     });
-                    
+
             }else
             if(this.detailType=='date'){//----------------------------------------------------
                 
@@ -2602,7 +2615,7 @@ console.log('onpaste');
             if(this.detailType=='geo'){   //----------------------------------------------------
                 
                 $input.css({'width':'62ex','padding-left':'30px',cursor:'hand'});
-                   
+                
                 var $gicon = $('<span>').addClass('ui-icon ui-icon-globe')
                     .css({position:'absolute',margin:'5px 0 0 8px',cursor:'hand'})
                     .insertBefore($input);
@@ -2770,6 +2783,11 @@ console.log('onpaste');
               $input.css({'min-width':nw+'ex','width':nw+'ex'}); //was *4/3
 
         }
+        
+        if( this.detailType!='date' && this.options.is_faceted_search){
+            $input.css({'max-width':'33ex','min-width':'33ex'});
+        }
+        
         
         //if(this.detailType!='blocktext')
         //    $input.css('max-width', '600px');

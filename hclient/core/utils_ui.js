@@ -348,12 +348,14 @@ window.hWin.HEURIST4.ui = {
         }
 
         //vocab groups    
-        var vgroups, vocabs = {};
+        var vgroups=[], vocabs = {};
         if(useGroups!==true){
             if(useGroups===false){
                 vocabs['0'] = [];
-            }else if(useGroups>0){
+                vgroups.push(0);
+            }else if(useGroups>0){  //specific group only
                 vocabs[useGroups] = [];
+                vgroups.push(useGroups);
             }
         }
 
@@ -367,7 +369,10 @@ window.hWin.HEURIST4.ui = {
                         vocabs['0'].push(trmID);
                     }else if(useGroups===true){
                         if(domain==null || domain==$Db.trm(trmID,'trm_Domain')){
-                            if(!vocabs[grp_id]) vocabs[grp_id] = [];
+                            if(!vocabs[grp_id]){
+                                vocabs[grp_id] = [];  
+                                vgroups.push(grp_id);
+                            } 
                             vocabs[grp_id].push(trmID);
                         }
                     }else if(useGroups>0 && useGroups==grp_id){
@@ -376,16 +381,31 @@ window.hWin.HEURIST4.ui = {
                 }
             }
         });
+        
+        //sort groups by vcg_Order
+        if(useGroups===true){
+             
+            //sort by name within group
+            vgroups.sort(function(a,b){
+                return $Db.vcg(a,'vcg_Order')<$Db.vcg(b,'vcg_Order')?-1:1;
+            });
+            
+            
+        }
+        
 
         //create selector 
         selObj = window.hWin.HEURIST4.ui.createSelector(selObj, topOptions);
 
-        //add optgroups and options
-        $.each(Object.keys(vocabs),function(i,grp_id){
+        //add optgroups and options  - vgroups is sorted array
+        $.each(vgroups,function(i,grp_id){
 
             if(useGroups===true  && grp_id>0 && vocabs[grp_id].length>1){
                 //add group header
-                var opt = window.hWin.HEURIST4.ui.addoption(selObj, grp_id, $Db.vcg(grp_id,'vcg_Name'));
+                var group_name = $Db.vcg(grp_id,'vcg_Name');
+                if(!group_name) group_name = 'Group# '+grp_id+' (missed)';
+                
+                var opt = window.hWin.HEURIST4.ui.addoption(selObj, grp_id, group_name);
                 $(opt).attr('disabled', 'disabled');
                 $(opt).attr('group', 1);
             }

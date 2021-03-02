@@ -97,9 +97,22 @@ VALUE
 4)  Query     "linked_to:15": [{ t:4 }, {"f:1":"Alex" } ]
 "f:10": {"any":[ {t:4}, {} ] }
 
-5) Find all records without field  "f:5":"NULL"
+5) Find all records without field  "f:5":"NULL"  - TODO!!!!
 6) Find all records with any value in field  "f:5":""
 7) Find all records with value not equal ABC  "f:5":"-ABC"
+
+Compare predicates
+        @    fulltext
+        OR
+        -   negate value
+            <> between 
+            OR
+            = exact  (== case sensetive)
+            > <  for numeric and dates only
+
+
+
+
 
 */
 
@@ -1585,7 +1598,7 @@ class HPredicate {
     */
     function isEmptyValue(){
                                             //$this->value=='' ||
-        return !is_array($this->value) && ( strtolower($this->value)=='null');
+        return !is_array($this->value) && ( strtolower($this->value)=='null'); // {"f:18":"NULL"}
     }
 
     /**
@@ -1611,7 +1624,22 @@ class HPredicate {
             */
         }
 
+        // -   negate value
+        // <> between 
+        
+        // then it analize for
+        // == case sensetive
+        // and at last
+        // = - exact or LIKE (check for % at begin and end)
+        // @    fulltext
+        // > <  for numeric and dates only
+        
         //
+        if(strpos($this->value, '-')===0){
+            $this->negate = true;
+            $this->value = substr($this->value, 1);
+        }
+                
         if (strpos($this->value,"<>")===false) {
             
             if(strpos($this->value, '==')===0){
@@ -1619,10 +1647,7 @@ class HPredicate {
                 $this->value = substr($this->value, 2);
             }
             
-            if(strpos($this->value, '-')===0){
-                $this->negate = true;
-                $this->value = substr($this->value, 1);
-            }else if(strpos($this->value, '=')===0){
+            if(strpos($this->value, '=')===0){
                 $this->exact = true;
                 $this->value = substr($this->value, 1);
             }else if(strpos($this->value, '@')===0){
@@ -1749,12 +1774,14 @@ class HPredicate {
                     
                 }else{
 
-                    if($eq=='=' && !$this->exact){
-                            $eq = 'LIKE';
-                            $k = strpos($this->value,"%");
+                    if(!$this->exact){ //$eq=='=' && 
+                            $eq = ($this->negate?'NOT ':'').'LIKE';
+                            $k = strpos($this->value,"%"); //if begin or end
                             if($k===false || ($k>0 && $k+1<strlen($this->value))){
                                 $this->value = '%'.$this->value.'%';
                             }
+                    }else{
+                        $eq = ($this->negate?'!=':'=');
                     }
                     if($this->case_sensitive){
                             $eq = 'COLLATE utf8_bin '.$eq;

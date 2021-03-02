@@ -1605,7 +1605,101 @@ window.hWin.HEURIST4.dbs = {
             });
         }
         return this[entity+'_trash_id'];
+    },
+    
+    //
+    // prase rt:dt:rt:dt....  hierarchy - returns composed label and fields
+    // used in facet and query builders
+    //
+    parseHierarchyCode: function(codes){
+
+        codes = codes.split(':');
+
+        var removeFacet = false;
+        var harchy = [];
+        var harchy_fields = []; //for facet.title
+        var j = 0;
+        while(j<codes.length){
+            var rtid = codes[j];
+            var dtid = codes[j+1];
+
+            if(rtid.indexOf(',')>0){
+                rtid = rtid.split(',')[0];
+            }
+
+            if($Db.rty(rtid)==null){
+                //record type was removed - remove facet
+                removeFacet = true;
+                break;
+            }
+
+            harchy.push('<b>'+$Db.rty(rtid,'rty_Name')+'</b>');
+
+            if(j==0 && dtid=='title'){
+                harchy_fields.push('Constructed record title');
+            }else
+                if(dtid=='modified'){
+                    harchy_fields.push("Modified"); 
+                }
+
+            var linktype = dtid.substr(0,2);                                
+            if(isNaN(Number(linktype))){
+                dtid = dtid.substr(2);
+
+                if(dtid>0){
+
+
+                    if(linktype=='lt' || linktype=='rt'){
+
+                        var sFieldName = $Db.rst(rtid, dtid, 'rst_DisplayName');
+
+                        if(window.hWin.HEURIST4.util.isempty(sFieldName)){
+                            //field was removed - remove facet
+                            removeFacet = true;
+                            break;
+                        }
+
+                        harchy.push(' . '+sFieldName+' &gt ');
+                        harchy_fields.push(sFieldName);
+                    }else{
+                        var from_rtid = codes[j+2];
+
+                        var sFieldName = $Db.rst(from_rtid, dtid, 'rst_DisplayName');
+
+                        if(window.hWin.HEURIST4.util.isempty(sFieldName)){
+                            //field was removed - remove facet
+                            removeFacet = true;
+                            break;
+                        }
+
+                        harchy.push(' &lt '+sFieldName+' . ');
+                    }
+
+                }//dtid>0
+
+            }else{
+
+                var sFieldName = $Db.rst(rtid, dtid, 'rst_DisplayName');
+
+                if(window.hWin.HEURIST4.util.isempty(sFieldName)){
+                    //field was removed - remove facet
+                    removeFacet = true;
+                    break;
+                }
+
+                harchy.push(' . '+sFieldName);
+                harchy_fields.push(sFieldName);
+            }
+            j = j+2;
+        }//while codes        
+
+
+
+        return removeFacet? false :{harchy:harchy, harchy_fields:harchy_fields};
     }
+
+    
+    
 
 }//end dbs
 

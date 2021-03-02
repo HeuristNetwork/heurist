@@ -725,10 +725,10 @@ $.widget( "heurist.mainMenu6", {
                 that.closeFacetedWizard();
             }
 
-            if(action_name=='search_entity'){
+            if(action_name=='searchEntity'){
 
-                if(!cont.search_entity('instance'))
-                    cont.search_entity({use_combined_select:true, 
+                if(!cont.searchEntity('instance'))
+                    cont.searchEntity({use_combined_select:true, 
                         mouseover: function(){that._resetCloseTimers()}, //NOT USED
                         onClose: function() { 
                                 //start search on close
@@ -742,7 +742,7 @@ $.widget( "heurist.mainMenu6", {
                         }
                     });    
 
-                that.menues_explore_popup.css({bottom:'4px',width:'200px','overflow-y':'auto','overflow-x':'hidden'});
+                that.menues_explore_popup.css({bottom:'4px',width:'220px','overflow-y':'auto','overflow-x':'hidden'});
 
             }
             else if(action_name=='search_quick'){
@@ -800,20 +800,29 @@ $.widget( "heurist.mainMenu6", {
                 that.menues_explore_popup.css({width:'800px',overflow:'hidden'});
 
             }
-            else if(action_name=='search_advanced'){
+            else if(action_name=='searchBuilder'){
                 
-                if(!cont.search_advanced('instance'))
+                if(!cont.searchBuilder('instance')){
                     //initialization
-                    cont.search_advanced({
-                        onClose: function() {that.switchContainer('explore'); },
+                    this.search_builder = cont.searchBuilder({
+                        is_h6style: true,
+                        onClose: function() { that._closeExploreMenuPopup(); },
                         menu_locked: function(is_locked, is_mouseleave){ 
                             if(!is_mouseleave){
-                                that._resetCloseTimers();
-                                that._explorer_menu_locked = is_locked; 
+                                that._resetCloseTimers();    
+                                if(is_locked=='delay'){
+                                    that.coverAll.show();
+                                    that._delayOnCollapse_ExploreMenu = 2000;        
+                                }else{
+                                    that._explorer_menu_locked = is_locked;     
+                                }
                             }
                     }  });    
-
-                that.menues_explore_popup.css({width:'606px', overflow:'hidden'});
+                    
+                    cont.addClass('save-filter-dialog');
+                }
+                    
+                that.menues_explore_popup.css({width:'850px', overflow:'hidden'});
             }
             else if(action_name=='search_filters' || action_name=='search_rules'){ //list of saved filters
 
@@ -903,9 +912,9 @@ $.widget( "heurist.mainMenu6", {
                 var action_name = $(this).attr('id');
                 that.menues_explore_popup.find('.explore-widgets[id!="'+action_name+'"]').hide();
                 
-                if(action_name=='search_entity'){
+                if(action_name=='searchEntity'){
                     //trigger refresh  myOnShowEvent
-                    $(this).search_entity('refreshOnShow');
+                    $(this).searchEntity('refreshOnShow');
                 }else if (action_name === 'search_quick' && cont.search_quick('instance')) {
                     // Refresh container height.
                     //cont.search_quick('instance').outerHeight();

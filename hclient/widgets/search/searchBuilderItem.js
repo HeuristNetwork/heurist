@@ -1,6 +1,4 @@
 /**
-* IN PROGRESS 
-* 
 * queryBuilderItem.js - element in query builder - to define query element
 *
 * @package     Heurist academic knowledge management system
@@ -19,7 +17,7 @@
 * See the License for the specific language governing permissions and limitations under the License.
 */
 
-$.widget( "heurist.queryBuilderItem", {
+$.widget( "heurist.searchBuilderItem", {
 
     //{ conjunction: [ {predicate} , {predicate}, .... ] }
     //
@@ -49,12 +47,21 @@ $.widget( "heurist.queryBuilderItem", {
     
     // default options
     options: {
-        token:null,
+        token:null,  //t, f, linkedXXX
+        
+        code: null, //hierarchy
+
+        rty_ID: 0,
+        dty_ID: 0,        
         
         rtyIDs:null, //array of record type IDs - to reduce fields for "F" and "LINKS"
         
+        hasTokenSelector: false,
+        hasFieldSelector: false,
+        
         // callback
-        onremove: null
+        onremove: null,
+        onchange: null
     },
 
     _current_field_type:null, //type of input field
@@ -73,10 +80,35 @@ $.widget( "heurist.queryBuilderItem", {
         // 4. value input
         // 5. OR button
         
-        // selecor container
-        this.sel_container = $('<div>').css({'display':'inline-block','vertical-align':'top'}).appendTo(this.element);
+        
+        // 0. Label (header)
+        this.label_token = $( "<div>" )
+            .css({"font-size":"smaller",padding:'10px 0 10px 20px',width:'95%','border-top':'1px solid lightgray'})
+            .appendTo( this.element );;
+
+        // selector container - for fields and comparison
+        this.sel_container = $('<div>')
+            .css({'display':'inline-block','vertical-align':'top','padding-top':'3px'})
+            .appendTo(this.element);
+            
+        // 0a. Remove icon
+        this.remove_token = $( "<span>" )
+        .attr('title', 'Remove this search token' )
+        .addClass('ui-icon ui-icon-circle-b-close')
+        .css({'cursor':'pointer','margin-top':'-55px'})
+        .appendTo( this.sel_container );        
+
+        this._on( this.remove_token, { click: function(){
+            if($.isFunction(this.options.onremove)){
+                this.options.onremove.call(this, this.options.code);
+            }    
+        } });
+            
+            
         // values container - consists of set of inputs (editing_input) and add/remove buttons
-        this.values_container = $( "<fieldset>" ).css({'display':'inline-block','padding':0}).appendTo( this.element );
+        this.values_container = $( "<fieldset>" )
+            .css({'display':'inline-block','padding':0}) //,'margin-bottom': '2px'
+            .appendTo( this.element );
         
         // 1. token selector (can be hidden)
         
@@ -84,6 +116,7 @@ $.widget( "heurist.queryBuilderItem", {
         .attr('title', 'Select what kind of object are you going to search' )
         .addClass('text ui-corner-all')
         .appendTo( this.sel_container );
+        
         
         window.hWin.HEURIST4.ui.createSelector(this.select_token.get(0), 
             [{key:'t',title:'Entity(Record) Type'},  //t,type
@@ -143,6 +176,12 @@ $.widget( "heurist.queryBuilderItem", {
 */
 
         this._refresh();
+        
+        if(this.options.dty_ID>0){
+            this._defineInputElement();            
+        }
+        
+        
     }, //end _create
     
     /*
@@ -150,6 +189,14 @@ $.widget( "heurist.queryBuilderItem", {
     * show/hide buttons depends on current login status
     */
     _refresh: function(){
+        
+        if(!this.options.hasTokenSelector){
+            this.select_token.hide();    
+            this.label_token.show();    
+        }else{
+            this.select_token.show();    
+            this.label_token.hide();    
+        }
 
         if(this.options.token=='f'){
             
@@ -157,13 +204,19 @@ $.widget( "heurist.queryBuilderItem", {
             allowed.splice(allowed.indexOf("separator"),1);
             allowed.splice(allowed.indexOf("relmarker"),1);
             allowed.splice(allowed.indexOf("resource"),1);
-            allowed.splice(allowed.indexOf("geo"),1);
+            //allowed.splice(allowed.indexOf("geo"),1);
             allowed.splice(allowed.indexOf("file"),1);
         
+            //list of fields for rtyIDs            
             window.hWin.HEURIST4.ui.createRectypeDetailSelect(this.select_fields.get(0), this.option.rtyIDs, 
-                        allowed, window.hWin.HR('Any field type'));
+                        allowed, window.hWin.HR('Any field type'), {selectedValue:this.options.dty_ID});
             
-            this.select_fields.show();
+            if(this.options.hasFieldSelector){
+                this.select_fields.show();
+            }else{
+                this.select_token.hide();    
+            }
+            
             
         }else if(this.options.token=='links'){    
             
@@ -212,38 +265,124 @@ $.widget( "heurist.queryBuilderItem", {
     },
 
     _defineInputElement: function( field_type ){
+        
+        if(this.options.code){
+            var res = $Db.parseHierarchyCode(this.options.code);
+            if(res!==false){
+                this.label_token.html(res.harchy.join(''));
+            }else{
+                this.label_token.text('broken!');
+            }
+        }else if(this.options.dty_ID>0){
+            this.label_token.text($Db.dty(this.options.dty_ID,'dty_Name'));    
+        }
+            
 
-           if(this._current_field_type!=field_type){
+        var ed_options = {
+            recID: -1,
+            //dtID: dtID,
+            values: [''],
+            readonly: false,
+            showclear_button: true,
+            show_header: false,
+            showedit_button: false,
+            suppress_prompts: true,  //supress help, error and required features
+            suppress_repeat: 'force_repeat',
+            dtFields: null,
+            is_faceted_search: true
+        };
+
+        if(this.options.dty_ID>0){
+            
+//console.log(this.options.rty_ID+'  '+this.options.dty_ID);            
+            
+            if(this.options.rty_ID>0){
+                ed_options['rectypeID'] = this.options.rty_ID;
+            }
+            field_type = $Db.dty(this.options.dty_ID,'dty_Type');
+            if(field_type=='blocktext') field_type = 'freetext';
+            ed_options['detailtype'] = field_type
+            ed_options['dtID'] = this.options.dty_ID;
+            
+            var eqopts = [];
+            
+            if(field_type=='geo'){
+
+                eqopts = [{key:'',title:'within'}];
+                
+            }else if(field_type=='enum' || field_type=='resource' || field_type=='relmarker'){
+
+                eqopts = [{key:'',title:'is'}];   //- negate
+            
+            } else if(field_type=='float' || field_type=='integer'){
+
+                eqopts = [
+                    {key:'=',title:'equal'},
+                    {key:'-',title:'not equal'},
+                    {key:'>',title:'greater than'},
+                    {key:'<',title:'less than'},
+                    {key:'<>',title:'between'},
+                    {key:'-<>',title:'not betweeen'}
+                ];
+                
+            }else if(field_type=='date'){
+                //
+                eqopts = [
+                    {key:'',title:'like'},
+                    {key:'=',title:'equal'},
+                    {key:'>',title:'greater than'},
+                    {key:'<',title:'less than'},
+                    {key:'<>',title:'between'}
+                ];
+                
+            }else{
+                
+                eqopts = [
+                    {key:'',title:'contains'},         //case sensetive ==
+                    {key:'starts',title:'starts with'},
+                    {key:'ends',title:'ends with'},
+                    {key:'=',title:'is exact'},    //cs
+                    {key:'<>',title:'between'},
+                    {key:'@',title:'full text'}
+                ]; // - negate  (except fulltext)
+                
+            }
+            
+            eqopts.push({key:'any', title:'any value'});
+            eqopts.push({key:'NULL', title:'not defined'});
+         
+            window.hWin.HEURIST4.ui.createSelector(this.select_comparison.get(0), eqopts);
+            
+
+        }else{        
+            //non base fields inputs
+
+            if(this._current_field_type!=field_type){
                 //clear input values
                 this.values_container.empty();
                 this._predicate_values = [];
-           }
-            
-            
-           this._current_field_type = field_type;
-        
-           dtFields = {dty_Type:field_type, rst_DisplayName:'', rst_MaxValues:100};
-           
-           if(field_type=="rectype"){
-                dtFields['cst_EmptyValue'] = window.hWin.HR('Any record type');
-           }
+            }
 
-           var ed_options = {
-                        recID: -1,
-                        //dtID: dtID,
-                        values: '',
-                        readonly: false,
-                        showclear_button: true,
-                        show_header: false,
-                        dtFields: dtFields
-                        
-                };
-                
-           this._predicate_values.push(
-                $("<div>").editing_input(ed_options).appendTo(this.values_container)
-           );
+
+            this._current_field_type = field_type;
+
+            dtFields = {dty_Type:field_type, rst_DisplayName:'', rst_MaxValues:100};
+
+            if(field_type=="rectype"){
+                dtFields['cst_EmptyValue'] = window.hWin.HR('Any record type');
+            }
+
+            ed_options[dtFields] = dtFields;
+        }
+
         
+
+        this._predicate_values.push(
+            $("<div>").editing_input(ed_options).appendTo(this.values_container)
+        );
+
     },
+    
     
     //
     //
@@ -278,7 +417,6 @@ $.widget( "heurist.queryBuilderItem", {
     //
     //    
     _onSelectField:function(){
-        
         
     },
 
