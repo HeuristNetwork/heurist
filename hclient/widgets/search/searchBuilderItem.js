@@ -64,9 +64,8 @@ $.widget( "heurist.searchBuilderItem", {
         onchange: null
     },
 
-    _current_field_type:null, //type of input field
-    _predicate_values:[], //list of possible predicate values (OR)
-    
+    _current_field_type:null, // type of input field
+    _predicate_input_ele:null,     // reference to editing_input
 
     // the widget's constructor
     _create: function() {
@@ -353,14 +352,19 @@ $.widget( "heurist.searchBuilderItem", {
          
             window.hWin.HEURIST4.ui.createSelector(this.select_comparison.get(0), eqopts);
             
+            this._current_field_type = field_type;
 
+            //clear input values
+            this.values_container.empty();
+            this._predicate_input_ele = null;
+            
         }else{        
             //non base fields inputs
 
             if(this._current_field_type!=field_type){
                 //clear input values
                 this.values_container.empty();
-                this._predicate_values = [];
+                this._predicate_input_ele = null;
             }
 
 
@@ -377,20 +381,79 @@ $.widget( "heurist.searchBuilderItem", {
 
         
 
-        this._predicate_values.push(
-            $("<div>").editing_input(ed_options).appendTo(this.values_container)
-        );
+        this._predicate_input_ele = $("<div>")
+                    .editing_input(ed_options).appendTo(this.values_container);
 
     },
     
+    getValues: function(){
+        if(this._predicate_input_ele){
+            
+            var vals = $(this._predicate_input_ele).editing_input('getValues');
+            var isnegate = false;
+            var op = this.select_comparison.val();
+            
+            if(vals.length==1 && window.hWin.HEURIST4.util.isempty(vals[0]) && 
+                    !(op=='any' || op=='NULL')){
+                
+                return null;
+            }            
+
+            if(op=='any'){
+                    op = '';
+                    vals = [''];
+            }else if(op=='NULL'){
+                    op = '';
+                    vals = ['NULL'];
+            }else if(this._current_field_type=='enum'){
+                vals = [vals.join(',')];
+            }else {
+                
+                if(op=='starts'){
+                    op = '';
+                    $.each(vals,function(i,val){vals[i]=vals[i]+'%'});
+                }else if(op=='ends'){
+                    op = '';
+                    $.each(vals,function(i,val){vals[i]='%'+vals[i]});
+                }
+                
+                if(isnegate){
+                    op = '-'+op;
+                }
+                
+                if(op!=''){
+                    $.each(vals,function(i,val){vals[i]=op+vals[i]});        
+                }
+            }
+            
+            var key = (this._current_field_type=='geo')?'geo':('f:'+this.options.dty_ID);
+            var res = {};
+            
+            if(vals.length==1){
+                res = {};
+                res[key] = vals[0];     
+            }else{
+                res['all'] = [];
+                $.each(vals,function(i,val){ 
+                    var p = {}; 
+                    p[key] = val;
+                    res['all'].push(p); 
+                });        
+            }
+          
+            return res;  
+        }else{
+            return null;
+        }
+    },
     
     //
     //
     //
     _isSomethingDefined:function(){
         var i;
-        for (i in _predicate_values){
-            var val = $(_predicate_values[i]).editing_input('getValues');
+        if (this._predicate_input_ele){
+            var val = $(this._predicate_input_ele).editing_input('getValues');
             if(!window.hWin.HEURIST4.util.isempty(val)){
                 return true;
             }

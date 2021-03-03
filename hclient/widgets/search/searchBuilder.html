@@ -33,19 +33,20 @@
             </div>
         </div>
             
-        <div style="width:390px; margin-top: 0px; margin-bottom: 5px;" class="heurist-helper2">
+        <div style="width:390px; margin-top: 0px; margin-bottom: 5px;display:block;" class="heurist-helper2">
             This determines the record type(s) which will be retrieved by the search.
             The search can, however, be based on attributes of other record types linked from this type.
         </div>
             
     </fieldset>    
-    <div>
+    <div class="header" style="padding:10px;border-top:1px gray solid">
         <label>Select fields</label>
-        <br><br>
-        <label for='fsw_showreverse'><input type='checkbox' id='fsw_showreverse' style='vertical-align: middle;' />&nbsp;
+        <br>
+        <label  class="heurist-helper2" for='fsw_showreverse'>
+            <input type='checkbox' id='fsw_showreverse' style='vertical-align: middle;' />&nbsp;
             Show linked-from record types (reverse pointers, indicated as &lt;&lt;</label>
     </div>
-    <div id="field_treeview" style="position: absolute;overflow-y: auto;bottom: 0;top: 126px;width: 100%;"></div>
+    <div id="field_treeview" style="position: absolute;overflow-y: auto;bottom: 0;top: 156px;width: 100%;"></div>
 </div>
 
 
@@ -56,3 +57,11 @@
 <div id="pnl_Result" style="position:absolute;height:80px;left:0;right:0;bottom:0px;border-top:1px gray solid">
 
 </div>
+
+<div class="ui-dialog-buttonpane ui-widget-content ui-helper-clearfix popup_buttons_div" style="display:none;padding:13px">
+            <div class="ui-dialog-buttonset">
+                <div class="btn-ok ui-button-action">Search</div>
+                <div class="btn-cancel">Save</div>
+            </div>
+</div>
+

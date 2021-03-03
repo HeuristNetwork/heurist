@@ -27,9 +27,12 @@ $.widget( "heurist.searchBuilder", {
         domain: null, // bookmark|all or usergroup ID
         is_modal: true,
         menu_locked: null,
-        onsave: null
+        onsave: null,
+        onClose: null,
+        beforeClose: null
     },
 
+    _dialog: null,
     is_edit_continuing: false, //???
     _lock_mouseleave: false,
     _save_in_porgress: false,
@@ -115,9 +118,12 @@ $.widget( "heurist.searchBuilder", {
             this.element.parent().addClass('ui-dialog-heurist');
             this.element.parent().find('.ui-dialog-buttonset').css('margin-right','260px');
         }else{
-            //add header and button set for inline mode
+            
+            
             
         }
+        
+console.log('start load');        
         
         this.element.load(window.hWin.HAPI4.baseURL+"hclient/widgets/search/searchBuilder.html", function(){
         
@@ -209,6 +215,12 @@ $.widget( "heurist.searchBuilder", {
         }
         */
     }
+    
+    ,adjustTreePanel: function(){
+        
+        var iTop = this.pnl_Tree.find('fieldset').height()+(this.options.is_dialog?120:60);
+        this.element.find('#field_treeview').css('top',iTop);
+    }
 
     ,show: function( ){
         this.current_tree_rectype_ids = null;
@@ -283,6 +295,7 @@ $.widget( "heurist.searchBuilder", {
                             this.select_additional_rectypes.editing_input('setValue', '');
                             this.select_additional_rectypes.hide();
                         }
+                        this.adjustTreePanel();
                     }}});
                     
                 this.select_main_rectype.hSelect({change: function(event, data){
@@ -295,7 +308,9 @@ $.widget( "heurist.searchBuilder", {
                     
             }
             
+            this.pnl_Tree  = this.element.find('#pnl_Tree');
             this.pnl_Items = this.element.find('#pnl_Items');
+            this.pnl_Result = this.element.find('#pnl_Result');
             
             /*                    
                 var rectypeIds = [this.select_main_rectype.val()];
@@ -319,6 +334,26 @@ $.widget( "heurist.searchBuilder", {
                     }
                 }
                  */
+                
+                
+            
+            if(!this.options.is_dialog){
+console.log("INIT");                
+                //add header and button set for inline mode
+                this.element.css({'font-size':'0.9em'});
+                this.pnl_Tree.css({top:'36px',bottom:'120px'});
+                this.pnl_Items.css({top:'36px',bottom:'120px'});
+                this.pnl_Result.css({bottom:'40px'});
+                var _innerTitle = $('<div class="ui-heurist-header" style="top:0px;padding-left:10px;text-align:left">Query builder</div>')
+                    .insertBefore(this.pnl_Tree);
+                    
+                var ele = this.element.find('.popup_buttons_div').show();
+            
+                ele.find('.btn-ok').button();
+                ele.find('.btn-cancel').button();
+                this._on(ele.find('.btn-ok'),{click:this._doSearch});
+                this._on(ele.find('.btn-ok'),{click:this._doSaveSearch});
+            }
                 
                 
 
@@ -347,6 +382,11 @@ $.widget( "heurist.searchBuilder", {
                     var val = this.getValues();
                     val = val[0].split(',');
                     //$.each(val,function(i,item){ names.push( $Db.rty(item,'rty_Name') ) });
+                    that.pnl_Tree.hide();
+                    setTimeout(function(){
+                        that.adjustTreePanel();
+                        that.pnl_Tree.fadeIn(500);
+                    },1000);
             }    
         };
 
@@ -498,6 +538,7 @@ $.widget( "heurist.searchBuilder", {
                                                     dty_ID: codes[codes.length-1],
                                                     onremove: function(code){
                                                         that.field_items[code] = null;
+                                                        delete that.field_items[code];
                                                         that.pnl_Items.find('div[data-code="'+code+'"]').remove();
                                                     },
                                                     onchange: function(){
@@ -581,6 +622,30 @@ $.widget( "heurist.searchBuilder", {
         });
     }
     
+     //
+    // close dialog
+    //
+    , closeDialog: function(is_force){
+        if(this.options.is_dialog){
+            
+            if(is_force===true){
+                this._dialog.dialog('option','beforeClose',null);
+            }
+            this._dialog.dialog("close");
+            
+        }else{
+            
+            var canClose = true;
+            if($.isFunction(this.options.beforeClose)){
+                canClose = this.options.beforeClose();
+            }
+            if(canClose){
+                if($.isFunction(this.options.onClose)){
+                    this.options.onClose();
+                }
+            }
+        }
+    }
 
     //
     // save into database
@@ -590,20 +655,149 @@ $.widget( "heurist.searchBuilder", {
     }
 
     ,_doSearch: function(){
+        
+        this._doCompose();
+        
+        var query = this.pnl_Result.text();
+        
+        if(query){
+        
+            var request = {};
+                request.q = query;
+                request.w  = 'a';
+                request.detail = 'ids';
+                request.source = this.element.attr('id');
+                request.search_realm = this.options.search_realm;
+                
+                window.hWin.HAPI4.SearchMgr.doSearch( this, request );
+            
+            this.closeDialog();
+        }else{
+           window.hWin.HEURIST4.msg.showMsgFlash('Define at least one criterion');
+        }
 
     }
     
     ,_doCompose: function(){
         
-        var query = {};
+        this.pnl_Result.empty()
+        
+        var mainquery = [];
         
         if(this.current_tree_rectype_ids){
-            query['t'] = this.current_tree_rectype_ids;
+            mainquery.push({t:this.current_tree_rectype_ids});
         }
         
-        $.each(Object.keys(this.field_items),function(i, item){
+        if(this.svs_MultiRtSearch.is(':checked')){
+            console.log(this.select_additional_rectypes.editing_input('getValues')[0]);
+        }
+        
+        //sort by code
+        var aCodes = Object.keys(this.field_items);
+        aCodes.sort(function(a,b){
+            return (a<b)?-1:1;            
+        });
+        
+/*
+console.log(aCodes);    
+0: "10:20"
+1: "10:lt134:12:1147"
+2: "10:lt134:12:26"
+3: "10:lt241:12:133"
+4: "10:lt241:12:rt:17:135"
+     0    1    2   3    4
+*/ 
+
+        var that = this;
+        
+        $.each(aCodes, function(i, code){
+            
+            var ele = that.field_items[code];
+            var value = ele.searchBuilderItem('getValues');
+            var branch;
+            if(value!=null){
+                codes = code.split(':');
+                
+                branch = mainquery;    
+                //find branch
+                if(codes.length>2){
+
+                    //add new ones if not found
+                    var key;
+                    for(var k=1; k<codes.length-1; k++){
+                        if(k%2 == 0){ //rectype
+                            //key = 't:'+codes[k];    
+                            var not_found = true;
+                            $.each(branch,function(m,item){
+                               if(item['t']){
+                                    not_found = false; 
+                                    if(item['t'].split(',').indexOf(codes[k])<0){
+                                        item['t'] = item['t']+','+codes[k];
+                                    }
+                                    return false;
+                               }
+                            });
+                            
+                            if(not_found){
+                                branch.push({t:codes[k]});    
+                            }
+                        }else{
+                            var dtid = codes[k];
+                            var linktype = dtid.substr(0,2);
+                            var slink = '';
+                            if(linktype=='rt'){
+                                slink = "related_to:";
+                            }else if(linktype=='rf'){
+                                slink = "relatedfrom:";
+                            }else if(linktype=='lt'){
+                                slink = "linked_to:";
+                            }else if(linktype=='lf'){
+                                slink = "linkedfrom:";
+                            }
+                            if(slink!=''){
+                                dtid = dtid.substr(2);
+                                key = slink+dtid;
+                            }else{
+                                key = 'f:'+dtid;
+                            }
+                        
+                            //find
+                            var not_found = true;
+                            $.each(branch, function(i,item){
+                                if(item[key]){
+                                    branch = item[key];
+                                    not_found = false;
+                                    return false;
+                                }
+                            });
+
+                            //add new branch 
+                            if(not_found){
+                                var newbranch = {};
+                                newbranch[key] = [];
+                                branch.push(newbranch);
+                                branch = newbranch[key];
+                            }   
+                        }   
+                        /*                    
+                        if(!branch[key]){
+                            var newbranch = {};
+                            newbranch[key] = [];
+                            branch.push(newbranch);
+                            branch = newbranch;
+                        }else{
+                            branch = branch[key]; //step down
+                        }
+                        */
+                    }//for
+                }
+                
+                branch.push(value);        
+            }
             
         });
+        
+        this.pnl_Result.text( JSON.stringify(mainquery) );
         
     }
 });

@@ -1623,7 +1623,7 @@ window.hWin.HEURIST4.dbs = {
             var rtid = codes[j];
             var dtid = codes[j+1];
 
-            if(rtid.indexOf(',')>0){
+            if(rtid.indexOf(',')>0){ //take first from list of rty_IDs
                 rtid = rtid.split(',')[0];
             }
 
@@ -1697,9 +1697,6 @@ window.hWin.HEURIST4.dbs = {
 
         return removeFacet? false :{harchy:harchy, harchy_fields:harchy_fields};
     }
-
-    
-    
 
 }//end dbs
 

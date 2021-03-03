@@ -888,11 +888,19 @@ class HPredicate {
         
         $p = "rd".$this->qlevel.".";
         $p = "";
-        
+
         $res = "exists (select dtl_ID from recDetails $p "
-            .' where r'.$this->qlevel.'.rec_ID='.$p.'dtl_RecID AND '
+            .' where r'.$this->qlevel.'.rec_ID='.$p.'dtl_RecID AND ';
+        
+        if($this->isEmptyValue()){
+            $res = $res.$p.'dtl_Geo IS NULL)'; //not defined
+        }else if($this->value==''){  
+            $res = $res.$p.'dtl_Geo IS NOT NULL)'; //any not null value
+        }else {
+            $res = $res
             .$p.'dtl_Geo is not null AND ST_Contains(ST_GeomFromText(\''.$this->value.'\'), '
             .$p.'dtl_Geo) limit 1)';  //MBRContains
+        }
         return array("where"=>$res);
     }
 
@@ -1429,6 +1437,7 @@ class HPredicate {
             }
         }
 
+        //search by relation type is disabled since it assigns field id instead  @todo fix
         $where = "r$p.rec_ID=$rl.rl_SourceID AND ".
         (($this->field_id && false) ?"$rl.rl_RelationTypeID=".$this->field_id :"$rl.rl_RelationID is not null")
         ." AND $rl.rl_TargetID".$val;
@@ -1471,6 +1480,7 @@ class HPredicate {
             }
         }
 
+        //search by relation type is disabled since it assigns field id instead  @todo fix
         $where = "r$p.rec_ID=$rl.rl_TargetID AND ".
         (($this->field_id && false) ?"$rl.rl_RelationTypeID=".$this->field_id :"$rl.rl_RelationID is not null")
         ." AND $rl.rl_SourceID".$val;

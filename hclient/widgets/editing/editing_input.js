@@ -2617,7 +2617,7 @@ console.log('onpaste');
                 $input.css({'width':'62ex','padding-left':'30px',cursor:'hand'});
                 
                 var $gicon = $('<span>').addClass('ui-icon ui-icon-globe')
-                    .css({position:'absolute',margin:'5px 0 0 8px',cursor:'hand'})
+                    .css({position:'absolute',margin:'4px 0 0 8px',cursor:'hand'})
                     .insertBefore($input);
                 
                 /* 2017-11-08 no more buttons
@@ -2644,6 +2644,9 @@ console.log('onpaste');
                             +'viewers/map/mapDraw.php?db='+window.hWin.HAPI4.database;
                        
                         var wkt_params = {'wkt': that.newvalues[$input.attr('id')] };
+                        if(that.options.is_faceted_search){
+                            wkt_params['geofilter'] = true;
+                        }
 
                         if(this.options.rectypeID == window.hWin.HAPI4.sysinfo['dbconst']['RT_GEOTIFF_SOURCE']){
 
@@ -2661,7 +2664,9 @@ console.log('onpaste');
                             }
                         }
 
-                        window.hWin.HEURIST4.msg.showDialog(url, {height:'900', width:'1000',
+                        window.hWin.HEURIST4.msg.showDialog(url, {
+                            height:that.options.is_faceted_search?540:'900',
+                            width:that.options.is_faceted_search?600:'1000',
                             window: window.hWin,  //opener is top most heurist window
                             dialogid: 'map_digitizer_dialog',
                             default_palette_class: 'ui-heurist-populate',
@@ -2671,9 +2676,16 @@ console.log('onpaste');
                             callback: function(location){
                                 if( !window.hWin.HEURIST4.util.isempty(location) ){
                                     //that.newvalues[$input.attr('id')] = location
-                                    that.newvalues[$input.attr('id')] = location.type+' '+location.wkt;
+                                    that.newvalues[$input.attr('id')] = (that.options.is_faceted_search
+                                                ?'':(location.type+' '))
+                                                +location.wkt;
                                     var geovalue = window.hWin.HEURIST4.geo.wktValueToDescription(location.type+' '+location.wkt);
-                                    $input.val(geovalue.type+'  '+geovalue.summary).change();
+                                    if(that.options.is_faceted_search){
+                                        $input.val(geovalue.summary).change();
+                                    }else{
+                                        $input.val(geovalue.type+'  '+geovalue.summary).change();    
+                                    }
+                                    
                                     //$input.val(location.type+' '+location.wkt)
                                 }
                             }

@@ -488,12 +488,12 @@ $.widget( "heurist.search_faceted", {
     // 
     // custom, widget-specific, cleanup.
     _destroy: function() {
-        
+
         $(this.document).off( window.hWin.HAPI4.Event.ON_REC_SEARCH_FINISH
             +' '+window.hWin.HAPI4.Event.ON_REC_SEARCHSTART
             +' '+window.hWin.HAPI4.Event.ON_LAYOUT_RESIZE
             +' '+window.hWin.HAPI4.Event.ON_CUSTOM_EVENT );
-        
+
         // remove generated elements
         if(this.div_title) this.div_title.remove();
         this.cached_counts = [];
@@ -508,161 +508,161 @@ $.widget( "heurist.search_faceted", {
     }
 
     //Methods specific for this widget---------------------------------
-    
+
     //
     // 1. create lists of queries to search facet values
     // 2. create main JSON query
     //
     ,_initFacetQueries: function(){
-       
-       var that = this, mainquery = [];
-       
-       $.each(this.options.params.facets, function(index, field){
-       
-           //value is defined - it will be used to create query
-           if( !window.hWin.HEURIST4.util.isnull(field['var']) && field['code']){
-               //create new query and add new parameter
-               var code = field['code'];
 
-              code = code.split(':');
-               
-               var dtid = code[code.length-1];
-               var linktype = dtid.substr(0,2);
-               if(linktype=='lt' || linktype=='lf' || linktype=='rt' || linktype=='rf'){
-                   //unconstrained link
-                   code.push('0');         //!!!!!!!!
-                   code.push('title');
-               }
-               
-               field['id']   = code[code.length-1];
-               field['rtid'] = code[code.length-2];
-               if(field['isfacet']!=that._FT_INPUT){  //not direct input
-               
-                       //create query to search facet values
-                       function __crt( idx ){
-                           var res = null;
-                           if(idx>0){  //this is relation or link
-                               
-                                res = [];
-                               
-                                var pref = '';
-                                var qp = {};
-                                
-                                if(code[idx]>0){ //if 0 - unconstrained
-                                    qp['t'] = code[idx];
-                                    res.push(qp);
-                                }
-                                
-                                var fld = code[idx-1]; //link field
-                                if(fld.indexOf('lf')==0){
-                                    pref = 'linked_to';    
-                                }else if(fld.indexOf('lt')==0){
-                                    pref = 'linkedfrom';    
-                                }else if(fld.indexOf('rf')==0){
-                                    pref = 'related_to';    
-                                    //pref = 'links';
-                                }else if(fld.indexOf('rt')==0){
-                                    pref = 'relatedfrom';    
-                                    //pref = 'links';
-                                }
-                                
-                                qp = {};
-                                qp[pref+':'+fld.substr(2)] = __crt(idx-2);    
+        var that = this, mainquery = [];
+
+        $.each(this.options.params.facets, function(index, field){
+
+            //value is defined - it will be used to create query
+            if( !window.hWin.HEURIST4.util.isnull(field['var']) && field['code']){
+                //create new query and add new parameter
+                var code = field['code'];
+
+                code = code.split(':');
+
+                var dtid = code[code.length-1];
+                var linktype = dtid.substr(0,2);
+                if(linktype=='lt' || linktype=='lf' || linktype=='rt' || linktype=='rf'){
+                    //unconstrained link
+                    code.push('0');         //!!!!!!!!
+                    code.push('title');
+                }
+
+                field['id']   = code[code.length-1];
+                field['rtid'] = code[code.length-2];
+                if(field['isfacet']!=that._FT_INPUT){  //not direct input
+
+                    //create query to search facet values
+                    function __crt( idx ){
+                        var res = null;
+                        if(idx>0){  //this is relation or link
+
+                            res = [];
+
+                            var pref = '';
+                            var qp = {};
+
+                            if(code[idx]>0){ //if 0 - unconstrained
+                                qp['t'] = code[idx];
                                 res.push(qp);
-                           }else{ //this is simple field
-                               res = '$IDS'; //{'ids':'$IDS}'};
-                           }
-                           return res;
-                       }
-                       
-                       /*if(code.length-2 == 0){
-                           field['facet'] = {ids:'$IDS'};
-                       }else{}*/
-                       field['facet'] = __crt( code.length-2 );
-                       
-               }
-               
-               
-                   function __checkEntry(qarr, key, val){
-                       var len0 = qarr.length, notfound = true, isarray;
-
-                       for (var i=0;i<len0;i++){
-                           if(! window.hWin.HEURIST4.util.isnull( qarr[i][key] ) ){ //such key already exsits
-
-                               if(window.hWin.HEURIST4.util.isArray(qarr[i][key])){ //next level
-                                   return qarr[i][key];   
-                               }else if(qarr[0][key]==val){ //already exists
-                                   return qarr;
-                               }
-                           }
-                       }
-
-                       var predicat = {};
-                       predicat[key] = val;
-                       qarr.push(predicat);
-
-                       if(window.hWin.HEURIST4.util.isArray(val)){
-                           return val;
-                       }else{
-                           return qarr;
-                       }
-                   }            
-                   
-                    var curr_level = mainquery;     
-                    var j = 0;    
-                    while(j<code.length){
-                        
-                        var rtid = code[j];
-                        var dtid = code[j+1];
-
-                        //first level can be multi rectype
-                        //add recordtype
-                        if(rtid>0 ||  rtid.indexOf(',')>0){  //AA!!  ||  rtid.indexOf(',')>0
-                            curr_level = __checkEntry(curr_level,"t",rtid);
-                        }
-                        var linktype = dtid.substr(0,2);
-                        var slink = null;
-                        
-                        if(linktype=='rt'){
-                            slink = "related_to:";
-                            //slink = "links:";
-                        }else if(linktype=='rf'){
-                            slink = "relatedfrom:";
-                            //slink = "links:";
-                        }else if(linktype=='lt'){
-                            slink = "linked_to:";
-                        }else if(linktype=='lf'){
-                            slink = "linkedfrom:";
-                        }
-
-                        var key, val;                         
-                        if(slink!=null){
-
-                            var rtid_linked = code[j+2];  //linked record type, if null or 0 - unconstrained
-                            key  = slink+rtid_linked+":"+dtid.substr(2); //rtid need to distinguish links/relations for various recordtypes
-                            val = [];
-                        }else{
-                            //multifield search for datetime
-                            if(dtid==9 && that._use_multifield){
-                                dtid = '9,10,11';
-                            }else if(dtid==1  && that._use_multifield){ //for name
-                                dtid = '1,18,231,304';
                             }
-                            
-                            key = "f:"+dtid
-                            val = "$X"+field['var']; 
-                        }
-                        curr_level = __checkEntry(curr_level, key, val);
-           
 
-                        j=j+2;
-                    }               
-               
-           }
-       });
-     
-       this.options.params['q'] = mainquery;
-   }
+                            var fld = code[idx-1]; //link field
+                            if(fld.indexOf('lf')==0){
+                                pref = 'linked_to';    
+                            }else if(fld.indexOf('lt')==0){
+                                pref = 'linkedfrom';    
+                            }else if(fld.indexOf('rf')==0){
+                                pref = 'related_to';    
+                                //pref = 'links';
+                            }else if(fld.indexOf('rt')==0){
+                                pref = 'relatedfrom';    
+                                //pref = 'links';
+                            }
+
+                            qp = {};
+                            qp[pref+':'+fld.substr(2)] = __crt(idx-2);    
+                            res.push(qp);
+                        }else{ //this is simple field
+                            res = '$IDS'; //{'ids':'$IDS}'};
+                        }
+                        return res;
+                    }
+
+                    /*if(code.length-2 == 0){
+                    field['facet'] = {ids:'$IDS'};
+                    }else{}*/
+                    field['facet'] = __crt( code.length-2 );
+
+                }
+
+
+                function __checkEntry(qarr, key, val){
+                    var len0 = qarr.length, notfound = true, isarray;
+
+                    for (var i=0;i<len0;i++){
+                        if(! window.hWin.HEURIST4.util.isnull( qarr[i][key] ) ){ //such key already exsits
+
+                            if(window.hWin.HEURIST4.util.isArray(qarr[i][key])){ //next level
+                                return qarr[i][key];   
+                            }else if(qarr[0][key]==val){ //already exists
+                                return qarr;
+                            }
+                        }
+                    }
+
+                    var predicat = {};
+                    predicat[key] = val;
+                    qarr.push(predicat);
+
+                    if(window.hWin.HEURIST4.util.isArray(val)){
+                        return val;
+                    }else{
+                        return qarr;
+                    }
+                }            
+
+                var curr_level = mainquery;     
+                var j = 0;    
+                while(j<code.length){
+
+                    var rtid = code[j];
+                    var dtid = code[j+1];
+
+                    //first level can be multi rectype
+                    //add recordtype
+                    if(rtid>0 ||  rtid.indexOf(',')>0){  //AA!!  ||  rtid.indexOf(',')>0
+                        curr_level = __checkEntry(curr_level,"t",rtid);
+                    }
+                    var linktype = dtid.substr(0,2);
+                    var slink = null;
+
+                    if(linktype=='rt'){
+                        slink = "related_to:";
+                        //slink = "links:";
+                    }else if(linktype=='rf'){
+                        slink = "relatedfrom:";
+                        //slink = "links:";
+                    }else if(linktype=='lt'){
+                        slink = "linked_to:";
+                    }else if(linktype=='lf'){
+                        slink = "linkedfrom:";
+                    }
+
+                    var key, val;                         
+                    if(slink!=null){
+
+                        var rtid_linked = code[j+2];  //linked record type, if null or 0 - unconstrained
+                        key  = slink+rtid_linked+":"+dtid.substr(2); //rtid need to distinguish links/relations for various recordtypes
+                        val = [];
+                    }else{
+                        //multifield search for datetime
+                        if(dtid==9 && that._use_multifield){
+                            dtid = '9,10,11';
+                        }else if(dtid==1  && that._use_multifield){ //for name
+                            dtid = '1,18,231,304';
+                        }
+
+                        key = "f:"+dtid
+                        val = "$X"+field['var']; 
+                    }
+                    curr_level = __checkEntry(curr_level, key, val);
+
+
+                    j=j+2;
+                }//while               
+
+            }
+        });
+
+        this.options.params['q'] = mainquery;
+    }
 
     ,doResetAll: function(){
         //this.options.params.spatial_filter = null;
