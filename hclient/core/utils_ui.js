@@ -215,7 +215,7 @@ window.hWin.HEURIST4.ui = {
     fillSelector: function(selObj, topOptions) {
         
         if(window.hWin.HEURIST4.util.isArray(topOptions)){
-            var idx,key,title,disabled;
+            var idx,key,title,disabled,depth;
             if(topOptions){  //list of options that must be on top of list
                 for (idx in topOptions)
                 {
@@ -226,10 +226,12 @@ window.hWin.HEURIST4.ui = {
                             key = topOptions[idx];
                             title = topOptions[idx];
                             disabled = false;
+                            depth = 0;
                         }else{
                             key = topOptions[idx].key;
                             title = topOptions[idx].title;
                             disabled = (topOptions[idx].disabled===true);
+                            depth = (topOptions[idx].depth>0)?topOptions[idx].depth:0;
                         }
                         if(!window.hWin.HEURIST4.util.isnull(title))
                         {
@@ -241,6 +243,8 @@ window.hWin.HEURIST4.ui = {
                                 var opt = window.hWin.HEURIST4.ui.addoption(selObj, key, title, disabled);
                                 if(topOptions[idx].group>0){
                                     $(opt).attr('group', topOptions[idx].group);
+                                }else if(depth>0){
+                                    $(opt).attr('depth', depth);
                                 }
                             }
 

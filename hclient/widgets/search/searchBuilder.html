@@ -25,7 +25,7 @@
             <div class="header_narrow" style="min-width:115px"><label for="opt_rectypes">Search for (entity type)</label></div>
             <select name="sa_rectype" id="opt_rectypes" class="text ui-widget-content ui-corner-all" style="min-width:250px"></select>
             
-            <div style="vertical-align:top;display:inline-block;font-size:smaller;padding: 7px">
+            <div class="rty-selected" style="vertical-align:top;display:inline-block;font-size:smaller;padding: 7px">
                     <label>search for more than one record types
                         <input name="svs_MultiRtSearch" id="svs_MultiRtSearch" class="text ui-widget-content ui-corner-all" type="checkbox"
                         style="display:inline-block;margin:0"/>
@@ -33,20 +33,28 @@
             </div>
         </div>
             
-        <div style="width:390px; margin-top: 0px; margin-bottom: 5px;display:block;" class="heurist-helper2">
+        <div style="width:390px; margin-top: 0px; margin-bottom: 5px;display:block;" class="heurist-helper2 rty-selected">
             This determines the record type(s) which will be retrieved by the search.
             The search can, however, be based on attributes of other record types linked from this type.
         </div>
             
     </fieldset>    
-    <div class="header" style="padding:10px;border-top:1px gray solid">
+    <div id="header_treeview" class="header" style="padding:10px;border-top:1px gray solid">
         <label>Select fields</label>
+<!--  <br>
+        <label  class="heurist-helper2" for="fsw_show_recfields">
+            <input type="checkbox" id="fsw_show_recfields" style="vertical-align: middle;" />&nbsp;
+            Show record header fields (title, dates, user, tags)</label> -->
         <br>
-        <label  class="heurist-helper2" for='fsw_showreverse'>
-            <input type='checkbox' id='fsw_showreverse' style='vertical-align: middle;' />&nbsp;
+        <label  class="rty-selected heurist-helper2" for="fsw_showreverse">
+            <input type="checkbox" id="fsw_showreverse" style="vertical-align: middle;" />&nbsp;
             Show linked-from record types (reverse pointers, indicated as &lt;&lt;</label>
     </div>
-    <div id="field_treeview" style="position: absolute;overflow-y: auto;bottom: 0;top: 156px;width: 100%;"></div>
+    <div id="field_all_list" class="rty-not-selected ui-selectmenu-menu"
+         style="display:none; position: absolute;overflow:hidden;bottom: 0;top: 156px;width: 100%;">
+        <select id="field_selector"></select>
+    </div>
+    <div id="field_treeview" class="rty-selected" style="position: absolute;overflow-y: auto;bottom: 0;top: 156px;width: 100%;"></div>
 </div>
 
 
@@ -60,8 +68,8 @@
 
 <div class="ui-dialog-buttonpane ui-widget-content ui-helper-clearfix popup_buttons_div" style="display:none;padding:13px">
             <div class="ui-dialog-buttonset">
-                <div class="btn-ok ui-button-action">Search</div>
-                <div class="btn-cancel">Save</div>
+                <div class="btn-search ui-button-action">Search</div>
+                <div class="btn-save">Preview</div>
             </div>
 </div>
 

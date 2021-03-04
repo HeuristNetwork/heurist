@@ -1611,13 +1611,13 @@ window.hWin.HEURIST4.dbs = {
     // prase rt:dt:rt:dt....  hierarchy - returns composed label and fields
     // used in facet and query builders
     //
-    parseHierarchyCode: function(codes){
+    parseHierarchyCode: function(codes, top_rty_ID){
 
         codes = codes.split(':');
 
         var removeFacet = false;
         var harchy = [];
-        var harchy_fields = []; //for facet.title
+        var harchy_fields = []; //for facet.title - only field names (w/o rectype)
         var j = 0;
         while(j<codes.length){
             var rtid = codes[j];
@@ -1626,69 +1626,102 @@ window.hWin.HEURIST4.dbs = {
             if(rtid.indexOf(',')>0){ //take first from list of rty_IDs
                 rtid = rtid.split(',')[0];
             }
-
-            if($Db.rty(rtid)==null){
+            
+            if(rtid=='any'){
+                harchy.push('');    
+                if(top_rty_ID>0) rtid = top_rty_ID;
+                
+            }else if($Db.rty(rtid)==null){
                 //record type was removed - remove facet
                 removeFacet = true;
                 break;
+            }else{
+                harchy.push('<b>'+$Db.rty(rtid,'rty_Name')+'</b>');    
             }
 
-            harchy.push('<b>'+$Db.rty(rtid,'rty_Name')+'</b>');
-
-            if(j==0 && dtid=='title'){
-                harchy_fields.push('Constructed record title');
-            }else
-                if(dtid=='modified'){
-                    harchy_fields.push("Modified"); 
-                }
-
-            var linktype = dtid.substr(0,2);                                
-            if(isNaN(Number(linktype))){
-                dtid = dtid.substr(2);
-
-                if(dtid>0){
-
-
-                    if(linktype=='lt' || linktype=='rt'){
-
-                        var sFieldName = $Db.rst(rtid, dtid, 'rst_DisplayName');
-
-                        if(window.hWin.HEURIST4.util.isempty(sFieldName)){
-                            //field was removed - remove facet
-                            removeFacet = true;
-                            break;
-                        }
-
-                        harchy.push(' . '+sFieldName+' &gt ');
-                        harchy_fields.push(sFieldName);
-                    }else{
-                        var from_rtid = codes[j+2];
-
-                        var sFieldName = $Db.rst(from_rtid, dtid, 'rst_DisplayName');
-
-                        if(window.hWin.HEURIST4.util.isempty(sFieldName)){
-                            //field was removed - remove facet
-                            removeFacet = true;
-                            break;
-                        }
-
-                        harchy.push(' &lt '+sFieldName+' . ');
-                    }
-
-                }//dtid>0
-
+            var rec_header = null;
+            
+            if(dtid=='title'){
+                rec_header = 'Constructed record title';
+            }else if(dtid=='added'){
+                rec_header = "Added"; 
+            }else if(dtid=='modified'){
+                rec_header = "Modified"; 
+            }else if(dtid=='addedby'){
+                rec_header = "Record author"; 
+            }else if(dtid=='url'){
+                rec_header = "URL"; 
+            }else if(dtid=='notes'){
+                rec_header = "Notes"; 
+            }else if(dtid=='owner'){
+                rec_header = "Owner"; 
+            }else if(dtid=='access'){
+                rec_header = "Visibility"; 
+            }else if(dtid=='tag'){
+                rec_header = "Keywords"; 
+            }else if(dtid=='anyfield'){
+                rec_header = "Any field"; 
+            }
+            
+            if( rec_header ){
+            
+                    harchy.push(' . '+rec_header);
+                    harchy_fields.push(rec_header);
+                
             }else{
 
-                var sFieldName = $Db.rst(rtid, dtid, 'rst_DisplayName');
+                var linktype = dtid.substr(0,2);                                
+                if(isNaN(Number(linktype))){
+                    dtid = dtid.substr(2);
 
-                if(window.hWin.HEURIST4.util.isempty(sFieldName)){
-                    //field was removed - remove facet
-                    removeFacet = true;
-                    break;
+                    if(dtid>0){
+
+
+                        if(linktype=='lt' || linktype=='rt'){
+
+                            var sFieldName = (rtid=='any')
+                                            ?$Db.dty(dtid, 'dty_Name')
+                                            :$Db.rst(rtid, dtid, 'rst_DisplayName');
+
+                            if(window.hWin.HEURIST4.util.isempty(sFieldName)){
+                                //field was removed - remove facet
+                                removeFacet = true;
+                                break;
+                            }
+
+                            harchy.push(' . '+sFieldName+' &gt ');
+                            harchy_fields.push(sFieldName);
+                        }else{
+                            var from_rtid = codes[j+2];
+
+                            var sFieldName = $Db.rst(from_rtid, dtid, 'rst_DisplayName');
+
+                            if(window.hWin.HEURIST4.util.isempty(sFieldName)){
+                                //field was removed - remove facet
+                                removeFacet = true;
+                                break;
+                            }
+
+                            harchy.push(' &lt '+sFieldName+' . ');
+                        }
+
+                    }//dtid>0
+
+                }else{
+
+                    var sFieldName = (rtid=='any')
+                                ?$Db.dty(dtid, 'dty_Name')
+                                :$Db.rst(rtid, dtid, 'rst_DisplayName');
+
+                    if(window.hWin.HEURIST4.util.isempty(sFieldName)){
+                        //field was removed - remove facet
+                        removeFacet = true;
+                        break;
+                    }
+
+                    harchy.push(' . '+sFieldName);
+                    harchy_fields.push(sFieldName);
                 }
-
-                harchy.push(' . '+sFieldName);
-                harchy_fields.push(sFieldName);
             }
             j = j+2;
         }//while codes        

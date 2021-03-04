@@ -41,6 +41,7 @@ $.widget( "heurist.searchBuilder", {
     select_main_rectype: null,
     select_additional_rectypes: null,
     svs_MultiRtSearch: null,
+    field_selector: null,
 
     current_tree_rectype_ids:null, //to avoid reload
     
@@ -122,8 +123,6 @@ $.widget( "heurist.searchBuilder", {
             
             
         }
-        
-console.log('start load');        
         
         this.element.load(window.hWin.HAPI4.baseURL+"hclient/widgets/search/searchBuilder.html", function(){
         
@@ -216,12 +215,37 @@ console.log('start load');
         */
     }
     
+    //
+    //
+    //
     ,adjustTreePanel: function(){
         
-        var iTop = this.pnl_Tree.find('fieldset').height()+(this.options.is_dialog?120:60);
-        this.element.find('#field_treeview').css('top',iTop);
+        if(!(this.select_main_rectype.val()>0)){
+            //show all fields
+            this.pnl_Tree.find('.rty-selected').hide();
+            this.pnl_Tree.find('.rty-not-selected').show();
+            var iTop = this.pnl_Tree.find('#header_treeview').position().top+45;
+            var cont = this.element.find('#field_all_list');
+            cont.css('top',iTop);
+            
+            this.field_selector.hSelect('open');
+            
+            var menu = this.field_selector.hSelect( "menuWidget" );
+            menu.css({position:'absolute', width:'99%', top: 0, bottom:1, 'max-height':2000});                
+            
+        }else{
+            this.pnl_Tree.find('.rty-selected').show();
+            this.pnl_Tree.find('.rty-not-selected').hide();
+            var iTop = this.pnl_Tree.find('#header_treeview').position().top+60;
+            this.element.find('#field_treeview').css('top',iTop);
+        }
+
+        
     }
 
+    //
+    //
+    //
     ,show: function( ){
         this.current_tree_rectype_ids = null;
         
@@ -271,7 +295,7 @@ console.log('start load');
                 
                 this.select_main_rectype = window.hWin.HEURIST4.ui.createRectypeSelectNew( this.element.find("#opt_rectypes").get(0),
                 {
-                    topOptions: [{key:'',title:'select...'}],
+                    topOptions: [{key:'',title:'any record type...'}],
                     useHtmlSelect: false,
                     showAllRectypes: true
                 });
@@ -300,12 +324,82 @@ console.log('start load');
                     
                 this.select_main_rectype.hSelect({change: function(event, data){
                     if(that.select_additional_rectypes){
+                        //reset
                         that.select_additional_rectypes.editing_input('setValue', '');
                     }
                     //load list of field types
+                    that.adjustTreePanel();
                     that._initFieldTreeView([that.select_main_rectype.val()]);
                 }});
+                
+                
+                var topOptions2 = [
+                        {key:'anyfield',title:window.hWin.HR('Any field')},
+                        {key:0,title:'Record', group:1, disabled:true},
+                            {key:'title',title:'Title (constructed)', depth:1},
+                            {key:'added',title:'Date added', depth:1},
+                            {key:'modified',title:'Date modified', depth:1},
+                            {key:'addedby',title:'Creator (user)', depth:1},
+                            {key:'url',title:'URL', depth:1},
+                            {key:'notes',title:'Notes', depth:1},
+                            {key:'owner',title:'Owner (user or group)', depth:1},
+                            {key:'access',title:'Visibility', depth:1},
+                            {key:'tag',title:'Tags (keywords)', depth:1}
+                        ];
+                        
+                var bottomOptions = null;
+                //[{key:'latitude',title:window.hWin.HR('geo: Latitude')},
+                //                     {key:'longitude',title:window.hWin.HR('geo: Longitude')}]; 
+                        
+                var allowed_fieldtypes = ['enum','freetext','blocktext',
+                                'geo','year','date','integer','float','resource','relmarker'];
+
+                this.field_selector = this.element.find('#field_selector');
+                
+                this.field_selector = window.hWin.HEURIST4.ui.createRectypeDetailSelect(
+                        this.field_selector[0], 
+                            null, allowed_fieldtypes, topOptions2, 
+                            {show_parent_rt:true, show_latlong:true, bottom_options:bottomOptions, 
+                                useIds: true, useHtmlSelect:false});                
+                
+                this.field_selector.hide();                
+                
+                var menu = this.field_selector.hSelect( "menuWidget" );
+                menu.show().appendTo( this.element.find('#field_all_list' ) );                        
+
+                //menu.css({'width':'90%','max-height':null,height:'100%'});                
+                this._on(menu,{click:function(event){
                     
+                    if ($(event.target).hasClass('ui-state-disabled')) return;
+                    
+                    var dty_ID = that.field_selector.val();
+
+console.log(dty_ID);
+                    //if(!(dty_ID>0))return;
+                                        
+                    var code = 'any:'+dty_ID;
+                    
+                    if(!that.field_items[code]){
+                    
+                        var ele = $('<div>').attr('data-code',code).appendTo(that.pnl_Items);
+                        that.field_items[code] = ele;
+                        
+                        ele.searchBuilderItem({
+                                token: dty_ID>0?'f':dty_ID,
+                                code: code,
+                                dty_ID: dty_ID>0?dty_ID:0,
+                                onremove: function(code){
+                                    that.field_items[code] = null;
+                                    delete that.field_items[code];
+                                    that.pnl_Items.find('div[data-code="'+code+'"]').remove();
+                                },
+                                onchange: function(){
+                                    that._doCompose();
+                                }
+                            });
+                    }
+                }});
+                                
             }
             
             this.pnl_Tree  = this.element.find('#pnl_Tree');
@@ -338,7 +432,6 @@ console.log('start load');
                 
             
             if(!this.options.is_dialog){
-console.log("INIT");                
                 //add header and button set for inline mode
                 this.element.css({'font-size':'0.9em'});
                 this.pnl_Tree.css({top:'36px',bottom:'120px'});
@@ -349,14 +442,14 @@ console.log("INIT");
                     
                 var ele = this.element.find('.popup_buttons_div').show();
             
-                ele.find('.btn-ok').button();
-                ele.find('.btn-cancel').button();
-                this._on(ele.find('.btn-ok'),{click:this._doSearch});
-                this._on(ele.find('.btn-ok'),{click:this._doSaveSearch});
+                ele.find('.btn-search').button();
+                ele.find('.btn-save').button();
+                this._on(ele.find('.btn-search'),{click:this._doSearch});
+                this._on(ele.find('.btn-save'),{click:this._doSaveSearch});
             }
                 
                 
-
+            this.adjustTreePanel();
         //window.hWin.HEURIST4.ui.applyCompetencyLevel(-1, $dlg); 
         
     }
@@ -382,10 +475,10 @@ console.log("INIT");
                     var val = this.getValues();
                     val = val[0].split(',');
                     //$.each(val,function(i,item){ names.push( $Db.rty(item,'rty_Name') ) });
-                    that.pnl_Tree.hide();
+                    that.pnl_Tree.find('#field_treeview').hide();
                     setTimeout(function(){
                         that.adjustTreePanel();
-                        that.pnl_Tree.fadeIn(500);
+                        that.pnl_Tree.find('#field_treeview').fadeIn(500);
                     },1000);
             }    
         };
@@ -517,7 +610,13 @@ console.log("INIT");
                                        data.node.setExpanded( true );
                                    }else{
                                         var code = data.node.data.code;
-                                        console.log(code);
+                                        var codes = code.split(':');
+
+                                        var codes2 = code.split(':');
+                                        codes2[0] = 'any';
+                                        code = codes2.join(':');
+                                            
+                                        //console.log(code);
                                         //highlight or add the selected field
                                         //data.node.code
                                         if(that.field_items[code]){
@@ -525,15 +624,14 @@ console.log("INIT");
                                             
                                         }else{
                                             //add the selected field
-                                            
-                                            var codes = code.split(':');
+
                                             var ele = $('<div>').attr('data-code',code).appendTo(that.pnl_Items);
                                             that.field_items[code] = ele;
-                                            
                                             
                                             ele.searchBuilderItem({
                                                     token: 'f',
                                                     code: code,
+                                                    top_rty_ID: codes[0], 
                                                     rty_ID: codes[codes.length-2],
                                                     dty_ID: codes[codes.length-1],
                                                     onremove: function(code){
@@ -651,6 +749,8 @@ console.log("INIT");
     // save into database
     //
     ,_doSaveSearch: function(prevent_real_save){
+        
+        this._doCompose();
 
     }
 
@@ -684,13 +784,25 @@ console.log("INIT");
         
         var mainquery = [];
         
-        if(this.current_tree_rectype_ids){
-            mainquery.push({t:this.current_tree_rectype_ids});
+        var rty_IDs = this.select_main_rectype.val();
+        
+        
+        if(rty_IDs>0){
+            
+            if(this.svs_MultiRtSearch.is(':checked')){
+                var s = this.select_additional_rectypes.editing_input('getValues')[0];
+                if(s){
+                    if(s.split(',').indexOf(rty_IDs)<0){
+                        rty_IDs = rty_IDs+','+s;    
+                    }else{
+                        rty_IDs = s;    
+                    }
+                }
+            }
+            
+            mainquery.push({t:rty_IDs});
         }
         
-        if(this.svs_MultiRtSearch.is(':checked')){
-            console.log(this.select_additional_rectypes.editing_input('getValues')[0]);
-        }
         
         //sort by code
         var aCodes = Object.keys(this.field_items);
@@ -797,7 +909,11 @@ console.log(aCodes);
             
         });
         
-        this.pnl_Result.text( JSON.stringify(mainquery) );
+        if(mainquery.length>0){
+            this.pnl_Result.text( JSON.stringify(mainquery) );    
+        }
+        
+        
         
     }
 });

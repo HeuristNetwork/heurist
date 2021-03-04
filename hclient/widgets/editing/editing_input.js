@@ -74,11 +74,6 @@ $.widget( "heurist.editing_input", {
                                 $Db.dty(this.options.dtID,'dty_JsonTermIDTree');
                 } 
                 this.options['dtFields']['rst_DefaultValue'] = '';
-                
-                if(this.options.suppress_repeat=='force_repeat'){
-                    this.options.suppress_repeat = false;
-                    this.options['dtFields']['rst_MaxValues'] = 100;
-                }
             }
 
         }
@@ -86,6 +81,12 @@ $.widget( "heurist.editing_input", {
         if(this.options.dtFields==null){ //field description is not defined
             return;
         }
+        
+        if(this.options.suppress_repeat=='force_repeat'){
+            this.options['dtFields']['rst_MaxValues'] = 100;
+            this.options.suppress_repeat = false;
+        }
+        
         this.detailType = this.options.detailtype ?this.options.detailtype :this.f('dty_Type');
         
         if((!(this.options.rectypeID>0)) && this.options.recordset){ //detect rectype for (heurist data) Records/recDetails
@@ -1172,8 +1173,26 @@ $.widget( "heurist.editing_input", {
             if(value){
                 $input.val(value);
             }
-
         }
+        /* todo
+        else if(this.detailType=="keyword"){ 
+
+            $input = $( "<select>")
+            .uniqueId()
+            .addClass('text ui-widget-content ui-corner-all')
+            .css('width','auto')
+            .val(value)
+            .change(function(){that.onChange();})
+            .appendTo( $inputdiv );
+
+            window.hWin.HEURIST4.ui.createUserGroupsSelect($input.get(0),null,
+                [{key:'',title:window.hWin.HR('select user/group...')},
+                    {key:window.hWin.HAPI4.currentUser['ugr_ID'], title:window.hWin.HAPI4.currentUser['ugr_FullName'] }] );
+            if(value){
+                $input.val(value);
+            }
+            
+        }*/
         else if(this.detailType=='relmarker'){ //---------------------------------------------------- 
             
                 this.options.showclear_button = false;
