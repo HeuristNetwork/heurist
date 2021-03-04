@@ -127,7 +127,7 @@ $.widget( "heurist.search", {
         this.options.btn_entity_filter = this.options.btn_entity_filter && (window.hWin.HAPI4.get_prefs_def('entity_btn_on','1')=='1');
         
         if(this.options.btn_entity_filter){
-            this.div_entity_fiter   = $('<div>').searchEntity({is_publication:this._is_publication})
+            this.div_entity_fiter   = $('<div>').searchByEntity({is_publication:this._is_publication})
                 .css({'height':'auto','font-size':'1em'})
                 .appendTo( this.element );
         }         

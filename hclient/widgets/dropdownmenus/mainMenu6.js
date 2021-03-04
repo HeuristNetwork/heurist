@@ -725,10 +725,10 @@ $.widget( "heurist.mainMenu6", {
                 that.closeFacetedWizard();
             }
 
-            if(action_name=='searchEntity'){
+            if(action_name=='searchByEntity'){
 
-                if(!cont.searchEntity('instance'))
-                    cont.searchEntity({use_combined_select:true, 
+                if(!cont.searchByEntity('instance'))
+                    cont.searchByEntity({use_combined_select:true, 
                         mouseover: function(){that._resetCloseTimers()}, //NOT USED
                         onClose: function() { 
                                 //start search on close
@@ -912,9 +912,9 @@ $.widget( "heurist.mainMenu6", {
                 var action_name = $(this).attr('id');
                 that.menues_explore_popup.find('.explore-widgets[id!="'+action_name+'"]').hide();
                 
-                if(action_name=='searchEntity'){
+                if(action_name=='searchByEntity'){
                     //trigger refresh  myOnShowEvent
-                    $(this).searchEntity('refreshOnShow');
+                    $(this).searchByEntity('refreshOnShow');
                 }else if (action_name === 'search_quick' && cont.search_quick('instance')) {
                     // Refresh container height.
                     //cont.search_quick('instance').outerHeight();
