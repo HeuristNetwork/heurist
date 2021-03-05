@@ -19,11 +19,25 @@
 */
 -->
 
-<div id="pnl_Tree" style="position:absolute;left:0;width:400px;top:0;bottom:80px;border-right:1px gray solid">
-    <fieldset>
-        <div class="main-rectype">
-            <div class="header_narrow" style="min-width:115px"><label for="opt_rectypes">Search for (entity type)</label></div>
+<div id="pnl_Rectype" style="position:absolute;left:0;right:0px;top:0;height:44px;border-bottom:1px gray solid; padding:10px">
+    <h3 style="margin:0 0 8 0;color:red;text-align:center" title="Actually there is not risk at all">
+            FUNCTION UNDER DEVELOPMENT, TRIAL AT YOUR OWN RISK!
+    </h3>
+
+    <button title="Advanced">&lt;&lt;</button>
+    
+        
+    
+    <div class="main-rectype" style="display: inline-block;padding:0 20px;">
+            <div class="header_narrow" style="min-width:115px;display:inline-block"><label for="opt_rectypes">Search for (entity type)</label></div>
             <select name="sa_rectype" id="opt_rectypes" class="text ui-widget-content ui-corner-all" style="min-width:250px"></select>
+    </div>
+        
+    
+    <button id="btn-clear" style="float:right">Clear All</button>
+</div>
+
+<div id="pnl_Tree" style="position:absolute;left:0;width:400px;top:65px;bottom:40px;border-right:1px gray solid;display:none;">
             
             <div class="rty-selected" style="vertical-align:top;display:inline-block;font-size:smaller;padding: 7px">
                     <label>search for more than one record types
@@ -31,14 +45,13 @@
                         style="display:inline-block;margin:0"/>
                     </label>
             </div>
-        </div>
-            
+
+<!--            
         <div style="width:390px; margin-top: 0px; margin-bottom: 5px;display:block;" class="heurist-helper2 rty-selected">
             This determines the record type(s) which will be retrieved by the search.
             The search can, however, be based on attributes of other record types linked from this type.
         </div>
-            
-    </fieldset>    
+-->            
     <div id="header_treeview" class="header" style="padding:10px;border-top:1px gray solid">
         <label>Select fields</label>
 <!--  <br>
@@ -58,11 +71,14 @@
 </div>
 
 
-<fieldset id="pnl_Items" style="position:absolute;left:401px;right:0;top:0;bottom:80px;overflow-y: auto;">
+<fieldset id="pnl_Items" style="position:absolute;left:0px;right:0;top:65px;bottom:40px;overflow-y: auto;">
    
+   <div class="search_field_add" style="color:#6A7C99;cursor:pointer;font-size:0.8em">
+        <span class="ui-icon ui-icon-circle-b-plus" style="font-size:1em"/> add field
+   </div>
 </fieldset>
 
-<div id="pnl_Result" style="position:absolute;height:80px;left:0;right:0;bottom:0px;border-top:1px gray solid">
+<div id="pnl_Result" style="position:absolute;height:40px;left:0;right:0;bottom:0px;border-top:1px gray solid">
 
 </div>
 

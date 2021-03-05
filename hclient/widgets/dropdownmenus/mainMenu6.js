@@ -821,7 +821,14 @@ $.widget( "heurist.mainMenu6", {
                     
                     cont.addClass('save-filter-dialog');
                 }
-                    
+                
+                explore_height = 450;    
+                
+                explore_top = menu_item.offset().top;
+                if(explore_top+explore_height>that.element.innerHeight()){
+                    explore_top = that.element.innerHeight() - explore_height;
+                }
+                
                 that.menues_explore_popup.css({width:'850px', overflow:'hidden'});
             }
             else if(action_name=='search_filters' || action_name=='search_rules'){ //list of saved filters
