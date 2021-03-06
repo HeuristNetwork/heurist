@@ -1160,22 +1160,22 @@ $.widget( "heurist.search", {
             var widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('mainMenu6');
             if(widget){
                     var pos = this.element.offset();
-                    widget.mainMenu6('show_ExploreMenu', null, 'search_quick', {top:pos.top+10, left:pos.left});
+                    widget.mainMenu6('show_ExploreMenu', null, 'searchQuick', {top:pos.top+10, left:pos.left});
                     return;
             }
         }else{
 /* todo
-                var cont = this.element.find('#search_quick');
+                var cont = this.element.find('#searchQuick');
                 
                 if(cont.length==0){
-                    cont = $('<div id="search_quick" class="explore-widgets">').appendTo(this.element);
+                    cont = $('<div id="searchQuick" class="explore-widgets">').appendTo(this.element);
                 }else if( cont.is(':visible')){ // already visisble
                     return;
                 }
             
-                if(!cont.search_quick('instance'))
+                if(!cont.searchQuick('instance'))
                     //initialization
-                    this.search_quick = cont.search_quick({
+                    this.searchQuick = cont.searchQuick({
                         onClose: function() { that.switchContainer('explore'); },
                         menu_locked: function(is_locked, is_mouseleave){ 
                             if(!is_mouseleave){
@@ -1222,7 +1222,7 @@ $.widget( "heurist.search", {
                 //.css({position:'absolute', zIndex:9999})
                 .appendTo( this.element ) //document.find('body')
                 .hide()
-                .load(window.hWin.HAPI4.baseURL+"hclient/widgets/search/search_quick.html?t="+(new Date().getTime()), 
+                .load(window.hWin.HAPI4.baseURL+"hclient/widgets/search/searchQuick.html?t="+(new Date().getTime()), 
                 function(){ that.showSearchAssistant(); } );
             return;
         }else if (this.search_assistant.find('.sa_termvalue').length==0){

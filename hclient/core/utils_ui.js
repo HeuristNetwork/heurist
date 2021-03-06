@@ -732,7 +732,7 @@ window.hWin.HEURIST4.ui = {
     * rtyIDs - record type ID otherwise returns all field types grouped by field groups
     * allowedlist - of data types to this list 
     * 
-    * usage search.js, search_quick.js, recordAction.js
+    * usage search.js, searchQuick.js, recordAction.js
     */
     createRectypeDetailSelect: function(selObj, rtyIDs, allowedlist, topOptions, options ) {
 

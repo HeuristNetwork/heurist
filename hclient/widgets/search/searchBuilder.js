@@ -492,7 +492,17 @@ $.widget( "heurist.searchBuilder", {
                 this.pnl_Result.css({bottom:'40px'});
                 var _innerTitle = $('<div class="ui-heurist-header" style="top:0px;padding-left:10px;text-align:left">Query builder</div>')
                     .insertBefore(this.pnl_Rectype);
+                
+                this._on(    
+                $('<button>').button({icon:'ui-icon-closethick',showLabel:false, label:'Close'}) 
+                     .css({'position':'absolute', 'right':'4px', 'top':'6px', height:20, width:20})
+                     .appendTo(_innerTitle),
+                     {click:function(){
+                         that.closeDialog();
+                     }});
                     
+                    
+                //button panel on the botom                        
                 var ele = this.element.find('.popup_buttons_div').show();
             
                 ele.find('.btn-search').button();

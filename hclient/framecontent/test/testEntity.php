@@ -72,7 +72,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/record/recordAction.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/search/searchBuilder.js"></script>
         <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/search/searchBuilderItem.js"></script>
-        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/search/search_quick.js"></script>
+        <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/search/searchQuick.js"></script>
         
         <!--      
 
@@ -158,7 +158,7 @@ require_once(dirname(__FILE__)."/../initPage.php");
                 showSearchBuilder();
                     
 /*                    
-                    var cont = $('#search_quick');
+                    var cont = $('#searchQuick');
                 
                 //if( cont.is(':visible')){ // already visisble
                 //    return;
@@ -476,7 +476,7 @@ print $targetPath.'<br>';
             <div>
                 <button id="btn_qs">Quick search</button>
             </div>
-            <div id="search_quick" style="position: absolute;height: 400;width:900; display:none">afweewfwefwefe</div>
+            <div id="searchQuick" style="position: absolute;height: 400;width:900; display:none">afweewfwefwefe</div>
         
             
             <div>

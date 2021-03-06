@@ -647,7 +647,7 @@ $.widget( "heurist.manageSysDashboard", $.heurist.manageEntity, {
                     var widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('mainMenu6');
                     if(widget){
                          var ele = this.element.find('div.recordDiv[recid='+dsh_ID+']');
-                         widget.mainMenu6('show_ExploreMenu', null, 'search_quick', {top:0, left:ele.offset().left });
+                         widget.mainMenu6('show_ExploreMenu', null, 'searchQuick', {top:0, left:ele.offset().left });
                     }else{
                         widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('search');
                         if(widget){
