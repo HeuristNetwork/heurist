@@ -215,7 +215,7 @@ window.hWin.HEURIST4.ui = {
     fillSelector: function(selObj, topOptions) {
         
         if(window.hWin.HEURIST4.util.isArray(topOptions)){
-            var idx,key,title,disabled,depth;
+            var idx,key,title,disabled,depth, border;
             if(topOptions){  //list of options that must be on top of list
                 for (idx in topOptions)
                 {
@@ -227,11 +227,13 @@ window.hWin.HEURIST4.ui = {
                             title = topOptions[idx];
                             disabled = false;
                             depth = 0;
+                            border = false;
                         }else{
                             key = topOptions[idx].key;
                             title = topOptions[idx].title;
                             disabled = (topOptions[idx].disabled===true);
                             depth = (topOptions[idx].depth>0)?topOptions[idx].depth:0;
+                            border = (topOptions[idx].hasborder===true);
                         }
                         if(!window.hWin.HEURIST4.util.isnull(title))
                         {
@@ -245,6 +247,9 @@ window.hWin.HEURIST4.ui = {
                                     $(opt).attr('group', topOptions[idx].group);
                                 }else if(depth>0){
                                     $(opt).attr('depth', depth);
+                                }
+                                if(border){
+                                    $(opt).attr('hasborder', 1);
                                 }
                             }
 
@@ -1213,6 +1218,8 @@ window.hWin.HEURIST4.ui = {
             var menuwidget = menu.hSelect( "menuWidget" );
             menuwidget.css( {'background':'#F4F2F4','zIndex':9999999 }); //'padding':0,
             menuwidget.addClass('heurist-selectmenu overflow').css({'max-height':'300px','font-size':'12px'});
+            
+            //menuwidget.find()
             
             if(apply_style){
                 menu.hSelect( "widget" ).css(apply_style);    

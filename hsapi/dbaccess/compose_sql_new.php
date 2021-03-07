@@ -836,6 +836,12 @@ class HPredicate {
 
                 return $res;
 
+            case 'tag':
+            case 'keyword':
+            case 'kwd':
+                
+                return $this->predicateKeywords();
+
             case 'linked_to':
             case 'linkedto':
 
@@ -1184,6 +1190,35 @@ class HPredicate {
 
     }
 
+    //
+    //
+    //
+    function predicateKeywords(){
+        
+        return array("where"=>'(1=1)');
+        
+        global $top_query;
+        
+        $this->field_type = "link";
+        $p = $this->qlevel;
+
+            $val = $this->getFieldValue();
+
+            if(!$this->field_list){
+                $val = "=0";
+            }else if ($p==0){
+                $cs_ids = getCommaSepIds($this->value);
+                if ($cs_ids && strpos($cs_ids, ',')>0) {  
+                    $top_query->fixed_sortorder = $cs_ids;
+                }
+            }
+
+        $where = "r$p.rec_ID".$val;
+
+        return array("where"=>$where);
+        
+    }    
+    
     /*
     linked_to: pointer field type : query     recordtype
     linkedfrom:

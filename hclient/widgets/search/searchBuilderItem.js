@@ -72,7 +72,6 @@ $.widget( "heurist.searchBuilderItem", {
         var that = this;
         
         //create elements for predicate
-        // 1. token selector (can be hidden)
         // 2. field selector for field or links tokens
         // 3. comparison selector or relationtype selector
         // 4. value input
@@ -98,7 +97,7 @@ $.widget( "heurist.searchBuilderItem", {
 
         this._on( this.remove_token, { click: function(){
             if($.isFunction(this.options.onremove)){
-                this.options.onremove.call(this, this.options.code, this.element.attr('id'));
+                this.options.onremove.call(this);
             }    
         } });
             
@@ -361,6 +360,7 @@ $.widget( "heurist.searchBuilderItem", {
             ed_options['dtFields'] = dtFields;
         }//========
 
+        
         var eqopts = [];
 
         if(field_type=='geo'){
@@ -370,13 +370,16 @@ $.widget( "heurist.searchBuilderItem", {
         }else if(field_type=='enum' || field_type=='resource' || field_type=='relmarker' 
                 || field_type=='keyword' || field_type=='user'){
 
-            eqopts = [{key:'',title:'is'}];   //- negate
+            eqopts = [{key:'',title:'equals'},
+                      {key:'-',title:'not equals'}];   //- negate
 
         } else if(field_type=='float' || field_type=='integer'){
 
+            //???less than or equals, greater than or equals
+            
             eqopts = [
-                {key:'=',title:'equal'},
-                {key:'-',title:'not equal'},
+                {key:'=',title:'equals'},
+                {key:'-',title:'not equals'},
                 {key:'>',title:'greater than'},
                 {key:'<',title:'less than'},
                 {key:'<>',title:'between'},
@@ -387,7 +390,8 @@ $.widget( "heurist.searchBuilderItem", {
             //
             eqopts = [
                 {key:'',title:'like'},
-                {key:'=',title:'equal'},
+                {key:'=',title:'equals'},
+                {key:'-',title:'not equals'},
                 {key:'>',title:'greater than'},
                 {key:'<',title:'less than'},
                 {key:'<>',title:'between'}
@@ -395,17 +399,38 @@ $.widget( "heurist.searchBuilderItem", {
 
         }else{
 
-            eqopts = [
-                {key:'',title:'contains'},         //case sensetive ==
+/*        
+Text:         String match, All words, Any word, No word, 
+         <separator> Whole value, Starts with, Ends with 
+        (I do not know what "between" does)
+String match = LIKE
+All words  = MATCH (field) AGAINST ('+MySQL +YourSQL' IN BOOLEAN MODE);
+Any word =  OR   AGAINST ('MySQL YourSQL');
+No word = None of the words is present AGAINST ('-MySQL -YourSQL' IN BOOLEAN MODE);
+Whole value = EQUAL
+    Any value = any value matches (current default for blank value)
+    No data = no data recorded (record missing the field)
+*/        
+            if(this.options.dty_ID>0 || this.options.dty_ID=='title'){
+                eqopts = [
+                    {key:'',title:'string match'}, //case sensetive ==
+                    {key:'@+',title:'all words'}, //full text
+                    {key:'@',title:'any words'},  //full text
+                    {key:'@-',title:'no word'},   //full text
+                    {key:'', title:'──────────', disabled:true}];
+                
+            }else{
+                eqopts = [
+                    {key:'',title:'string match'}];
+            }
+            
+            
+            eqopts = eqopts.concat([
+                {key:'=',title:'whole value'},    //cs
                 {key:'starts',title:'starts with'},
                 {key:'ends',title:'ends with'},
-                {key:'=',title:'is exact'},    //cs
                 {key:'<>',title:'between'}
-            ]; // - negate  (except fulltext)
-            
-            if(this.options.dty_ID>0){
-                eqopts.push({key:'@',title:'full text'});
-            }
+                ]);
         }
 
         if(this.options.dty_ID>0){            
@@ -413,12 +438,13 @@ $.widget( "heurist.searchBuilderItem", {
             eqopts.push({key:'NULL', title:'not defined'});
         }
 
-console.log('create comp');
+
         window.hWin.HEURIST4.ui.createSelector(this.select_comparison.get(0), eqopts);
         
         this._on( this.select_comparison, { change: function(){
 
-            if(this.select_comparison.val()=='NULL' || this.select_comparison.val()=='any'){
+            var cval = this.select_comparison.val();
+            if(cval=='NULL' || cval=='any'){
                 this._predicate_input_ele.hide();
                 this.select_conjunction.hide();
                 this.cb_negate.hide();
@@ -426,13 +452,18 @@ console.log('create comp');
                 this._predicate_input_ele.show();
                 this.select_conjunction.show();
                 
-                this.cb_negate.show();
+                //this.cb_negate.show();
             }
-            if(this.select_comparison.val()=='@' 
+            if(cval=='@' 
                 || field_type=='geo' || field_type=='float' || field_type=='integer'){
                 this.cb_negate.hide();
             }
             
+            if(cval=='<>' || cval=='-<>'){
+                this._predicate_input_ele.editing_input('setBetweenMode', true);        
+            }else{
+                this._predicate_input_ele.editing_input('setBetweenMode', false);        
+            }
             
         } });
             
@@ -493,11 +524,15 @@ console.log('create comp');
                 }else if(op=='ends'){
                     op = '';
                     $.each(vals,function(i,val){vals[i]='%'+vals[i]});
+                }else if (op=='<>'){
+                    op = '';
+                }else if (op=='-<>'){
+                    op = '-';
                 }
                 
-                if(isnegate){
-                    op = '-'+op;
-                }
+                //if(isnegate){
+                //    op = '-'+op;
+                //}
                 
                 if(op!=''){
                     $.each(vals,function(i,val){vals[i]=op+vals[i]});        
@@ -560,30 +595,6 @@ console.log('create comp');
             
         this._defineInputElement();
         
-    },
-
-
-    // Any time the widget is called with no arguments or with only an option hash,
-    // the widget is initialized; this includes when the widget is created.
-    _init: function() {
-
-    },
-    //Called whenever the option() method is called
-    //Overriding this is useful if you can defer processor-intensive changes for multiple option change
-    /*_setOptions: function( ) {
-    this._superApply( arguments );
-    },*/
-
-    /*
-    _setOption: function( key, value ) {
-    this._super( key, value );
-    if ( key === "recordtypes" ) {
-
-    window.hWin.HEURIST4.ui.createRectypeSelect(this.select_source_rectype.get(0), value, false, true);
-    this._onSelectRectype();
-    this._refresh();
     }
-    },*/
-
 
 });

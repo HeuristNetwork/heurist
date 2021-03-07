@@ -129,7 +129,7 @@ $.widget( "heurist.resultList", {
     _expandAllDivs: false,
     
     _myTimeoutCloseRecPopup: 0,
-    _myTimeoutOpenRecPopup: 0,
+    _myTimeoutOpenRecPopup: 0, 
     
     _grp_keep_status:{}, //expanded groups
     
@@ -2958,10 +2958,11 @@ $.widget( "heurist.resultList", {
                     
                     this._myTimeoutOpenRecPopup = setTimeout(function(){
                         that._showRecordViewPopup( rec_id );
-                    },500);
+                    },1000);
 
                 }
                 ,mouseout: function(){
+                    this._clearTimeouts();
                     this._closeRecordViewPopup();
                 }
 

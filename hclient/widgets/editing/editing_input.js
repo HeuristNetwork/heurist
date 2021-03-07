@@ -37,6 +37,7 @@ $.widget( "heurist.editing_input", {
         values: null,
         readonly: false,
         title: '',  //label (overwrite Display label from record structure)
+        suppress_repeat: false, //true,false or 'force_repeat'
         showclear_button: true,
         showedit_button: true,
         show_header: true, //show/hide label
@@ -47,7 +48,9 @@ $.widget( "heurist.editing_input", {
         change: null,  //onchange callback
         onrecreate: null, //onrefresh callback
         is_insert_mode:false,
-        is_faceted_search:false //is input used in faceted search
+        
+        is_faceted_search:false, //is input used in faceted search or query builder
+        is_between_mode:false    //duplicate input for freetext and dates for search mode 
     },
 
     //newvalues:{},  //keep actual value for resource (recid) and file (ulfID)
@@ -169,7 +172,7 @@ $.widget( "heurist.editing_input", {
                 
             }else{ //multiplier button
             
-                is_sortable = true; 
+                is_sortable = !that.options.is_faceted_search; 
             
                 this.btn_add = $( "<span>")
                 .addClass("smallbutton editint-inout-repeat-button ui-icon-circlesmall-plus")
@@ -418,6 +421,9 @@ $.widget( "heurist.editing_input", {
                     }else{
                         if($(input).hSelect('instance')!==undefined) $(input).hSelect('destroy');
                     }
+                    //check for "between" input
+                    that.element.find('#'+$(input).attr('id')+'-2').remove();
+                    
                     input.remove();
             } );
             this.input_cell.remove();
@@ -530,6 +536,8 @@ $.widget( "heurist.editing_input", {
     
     _setAutoWidth: function(){
 
+        if(this.options.is_faceted_search) return;
+        
         var that = this; 
         //auto width
         if ( this.detailType=='freetext' || this.detailType=='integer' || 
@@ -2017,181 +2025,7 @@ $.widget( "heurist.editing_input", {
             }else
             if(this.detailType=='date'){//----------------------------------------------------
                 
-                $input.css('width', this.options.is_faceted_search?'13ex':'20ex');
-
-                function __onDateChange(){
-                            var value = $input.val();
-                            
-                            that.newvalues[$input.attr('id')] = value; 
-                            
-                            if(that.options.dtID>0){
-                                var isTemporalValue = value && value.search(/\|VER/) != -1; 
-                                if(isTemporalValue) {
-                                    window.hWin.HEURIST4.ui.setValueAndWidth($input, temporalToHumanReadableString(value));    
-                                    
-                                    $input.addClass('Temporal').removeClass('text').attr('readonly','readonly');
-                                }else{
-                                    $input.removeClass('Temporal').addClass('text').removeAttr("readonly").css('width','20ex');
-                                }
-                            }
-                            
-                            that.onChange();
-                }
-                
-                
-                if($.isFunction($('body').calendarsPicker)){ //third party picker - NOT IN USE
-                        
-                    var defDate = window.hWin.HAPI4.get_prefs("record-edit-date");
-                    $input.calendarsPicker({
-                        calendar: $.calendars.instance('gregorian'),
-                        showOnFocus: false,
-                        defaultDate: defDate?defDate:'',
-                        selectDefaultDate: true,
-                        dateFormat: 'yyyy-mm-dd',
-                        pickerClass: 'calendars-jumps',
-                        //popupContainer: $input.parents('body'),
-                        onSelect: function(dates){
-                        },
-                        renderer: $.extend({}, $.calendars.picker.defaultRenderer,
-                                {picker: $.calendars.picker.defaultRenderer.picker.
-                                    replace(/\{link:prev\}/, '{link:prevJump}{link:prev}').
-                                    replace(/\{link:next\}/, '{link:nextJump}{link:next}')}),
-                        showTrigger: '<span class="ui-icon ui-icon-calendar trigger" style="display:inline-block" alt="Popup"></span>'}
-                    );     
-                           
-                }else{ // we use jquery datepicker
-                
-                        
-                        var $tinpt = $('<input type="hidden">').val($input.val()).appendTo( $inputdiv );
-
-                        var $btn_datepicker = $( '<span>', {title: 'Show calendar'})
-                            .addClass('smallicon ui-icon ui-icon-calendar')
-                            .appendTo( $inputdiv );
-                            
-                        
-                        var $datepicker = $tinpt.datepicker({
-                            /*showOn: "button",
-                            buttonImage: "ui-icon-calendar",
-                            buttonImageOnly: true,*/
-                            showButtonPanel: true,
-                            changeMonth: true,
-                            changeYear: true,
-                            dateFormat: 'yy-mm-dd',
-                            beforeShow: function(){
-                                
-                                if(that.is_disabled) return false;
-                                var cv = $input.val();
-                                
-                                var prev_dp_value = window.hWin.HAPI4.get_prefs('edit_record_last_entered_date'); 
-                                if(cv=='' && !window.hWin.HEURIST4.util.isempty(prev_dp_value)){
-                                    //$datepicker.datepicker( "setDate", prev_dp_value );    
-                                    $datepicker.datepicker( "option", "defaultDate", prev_dp_value); 
-                                }else if(cv!='' && cv.indexOf('-')<0){
-                                    $datepicker.datepicker( "option", "defaultDate", cv+'-01-01'); 
-                                }else if(cv!='') {
-                                    $tinpt.val($input.val());
-                                    //$datepicker.datepicker( "option", "setDate", cv); 
-                                }
-                            
-                            },
-                            onClose: function(dateText, inst){
-                                
-                                if($tinpt.val()!=''){
-                                    $input.val($tinpt.val());
-                                    window.hWin.HAPI4.save_pref('edit_record_last_entered_date', $input.val());
-                                    __onDateChange();
-                                }else{
-                                    $tinpt.val($input.val());
-                                }
-                            }
-                        });
-                        
-                        this._on( $input, {
-                            keyup: function(event){
-                                if(!isNaN(String.fromCharCode(event.which))){
-                                    var cv = $input.val();
-                                    if(cv!='' && cv.indexOf('-')<0){
-                                        $datepicker.datepicker( "setDate", cv+'-01-01');   
-                                        $input.val(cv);
-                                    }
-                                }
-                            },
-                            keypress: function (e) {
-                                var code = e.charCode || e.keyCode;
-                                var charValue = String.fromCharCode(code);
-                                var valid = false;
-
-                                if(charValue=='-'){
-                                    valid = true;
-                                }else{
-                                    valid = /^[0-9]+$/.test(charValue);
-                                }
-
-                                if(!valid){
-                                    window.hWin.HEURIST4.util.stopEvent(e);
-                                    e.preventDefault();
-                                }
-
-                            },
-                            dblclick: function(){
-                                $btn_datepicker.click();
-                            }
-                        });
-
-                        //.button({icons:{primary: 'ui-icon-calendar'},text:false});
-                       
-                        
-                        this._on( $btn_datepicker, { click: function(){
-                            
-                                if(that.is_disabled) return;
-                                
-                                $datepicker.datepicker( 'show' ); 
-                                $("#ui-datepicker-div").css("z-index", "999999 !important"); 
-                                //$(".ui-datepicker").css("z-index", "999999 !important");   
-                        }} );
-                } 
-
-                if(this.options.dtID>0){ //this is details of records
-                
-                    if(this.options.is_faceted_search){
-                        $input.css({'max-width':'13ex','min-width':'13ex'});
-                    }else{
-                        var $btn_temporal = $( '<span>', 
-                            {title: 'Pop up widget to enter compound date information (uncertain, fuzzy, radiometric etc.)'})
-                        .addClass('smallicon ui-icon ui-icon-clock')
-                        .appendTo( $inputdiv );
-                        //.button({icons:{primary: 'ui-icon-clock'}, text:false});
-                    }
-                    
-                    this._on( $btn_temporal, { click: function(){
-                        
-                                if(that.is_disabled) return;
-
-                                var url = window.hWin.HAPI4.baseURL 
-                                    + 'hclient/widgets/editing/editTemporalObject.html?'
-                                    + encodeURIComponent(that.newvalues[$input.attr('id')]
-                                                ?that.newvalues[$input.attr('id')]:$input.val());
-                                
-                                window.hWin.HEURIST4.msg.showDialog(url, {height:550, width:750,
-                                    title: 'Temporal Object',
-                                    //class:'ui-heurist-bg-light',
-                                    callback: function(str){
-                                        if(!window.hWin.HEURIST4.util.isempty(str) && that.newvalues[$input.attr('id')] != str){
-                                            $input.val(str);    
-                                            $input.change();
-                                        }
-                                    }
-                                } );
-                    
-                    }} );
-                    
-                    $input.change(__onDateChange);
-                   
-                }//temporal allowed
-                else{
-                    $input.change(__onDateChange);
-                    //this.newvalues[$input.attr('id')] = value;  //for this type assign value at init          
-                }
+                this._createDateInput($input, $inputdiv);
                 
                 $input.val(value);    
                 $input.change();   
@@ -2795,6 +2629,8 @@ console.log('onpaste');
         }
 
 
+
+        this.inputs.push($input);
         
         var dwidth = this.f('rst_DisplayWidth');
         
@@ -2815,15 +2651,25 @@ console.log('onpaste');
 
         }
         
-        if( this.detailType!='date' && this.options.is_faceted_search){
-            $input.css({'max-width':'33ex','min-width':'33ex'});
+        if(this.options.is_faceted_search){
+            
+            if(this.options.is_between_mode && 
+                (this.detailType=='freetext' || this.detailType=='date'
+                || this.detailType=='integer' || this.detailType=='float')){
+
+                    
+                this.addSecondInut( $input.attr('id') );
+                    
+            }else {
+                this.options.is_between_mode = false;
+                if(this.detailType!='date') 
+                        $input.css({'max-width':'33ex','min-width':'33ex'});
+            }
         }
-        
         
         //if(this.detailType!='blocktext')
         //    $input.css('max-width', '600px');
 
-        this.inputs.push($input);
 
         //name="type:1[bd:138]"
 
@@ -3512,11 +3358,28 @@ console.log('onpaste');
             var ress2 = [];
             
             for (idx in this.inputs) {
-                var res = this._getValue(this.inputs[idx]);
-             
+                var $input = this.inputs[idx];
+                
+                var res = this._getValue($input);
+
+
                 if(!window.hWin.HEURIST4.util.isempty( res )){ 
-                    
-                    var ele = this.inputs[idx].parents('.input-div');
+
+                    if(this.options.is_between_mode){
+                        var res2;
+                        if(this.detailType=='date'){
+                            res2 = this.newvalues[$input.attr('id')+'-2'];    
+                        }else{
+                            res2 = this.element.find('#'+$input.attr('id')+'-2').val();
+                        }
+                        if(window.hWin.HEURIST4.util.isempty( res2 )){ 
+                            res = '';
+                        }else{
+                            res  = res+'<>'+res2;
+                        }
+                    }
+                                    
+                    var ele = $input.parents('.input-div');
                     var k = ele.index();
                     
                     ress[k] = res;
@@ -3874,6 +3737,275 @@ console.log('onpaste');
                 ptrset = ptrset.split(',')
         }
         return ptrset;
+    },
+    
+    //
+    //
+    //
+    _createDateInput: function($input, $inputdiv){
+      
+                $input.css('width', this.options.is_faceted_search?'13ex':'20ex');
+                
+                var that = this;
+
+                function __onDateChange(){
+                            var value = $input.val();
+                            
+                            that.newvalues[$input.attr('id')] = value; 
+                            
+                            if(that.options.dtID>0){
+                                var isTemporalValue = value && value.search(/\|VER/) != -1; 
+                                if(isTemporalValue) {
+                                    window.hWin.HEURIST4.ui.setValueAndWidth($input, temporalToHumanReadableString(value));    
+                                    
+                                    $input.addClass('Temporal').removeClass('text').attr('readonly','readonly');
+                                }else{
+                                    $input.removeClass('Temporal').addClass('text').removeAttr("readonly").css('width','20ex');
+                                }
+                            }
+                            
+                            that.onChange();
+                }
+                
+                
+                if($.isFunction($('body').calendarsPicker)){ //third party picker - NOT IN USE
+                        
+                    var defDate = window.hWin.HAPI4.get_prefs("record-edit-date");
+                    $input.calendarsPicker({
+                        calendar: $.calendars.instance('gregorian'),
+                        showOnFocus: false,
+                        defaultDate: defDate?defDate:'',
+                        selectDefaultDate: true,
+                        dateFormat: 'yyyy-mm-dd',
+                        pickerClass: 'calendars-jumps',
+                        //popupContainer: $input.parents('body'),
+                        onSelect: function(dates){
+                        },
+                        renderer: $.extend({}, $.calendars.picker.defaultRenderer,
+                                {picker: $.calendars.picker.defaultRenderer.picker.
+                                    replace(/\{link:prev\}/, '{link:prevJump}{link:prev}').
+                                    replace(/\{link:next\}/, '{link:nextJump}{link:next}')}),
+                        showTrigger: '<span class="ui-icon ui-icon-calendar trigger" style="display:inline-block" alt="Popup"></span>'}
+                    );     
+                           
+                }else{ // we use jquery datepicker
+                
+                        
+                        var $tinpt = $('<input type="hidden" data-picker="'+$input.attr('id')+'">')
+                                .val($input.val()).insertAfter( $input );
+
+                        var $btn_datepicker = $( '<span>', {title: 'Show calendar'})
+                            .attr('data-picker',$input.attr('id'))
+                            .addClass('smallicon ui-icon ui-icon-calendar')
+                            .insertAfter( $tinpt );
+                            
+                        
+                        var $datepicker = $tinpt.datepicker({
+                            /*showOn: "button",
+                            buttonImage: "ui-icon-calendar",
+                            buttonImageOnly: true,*/
+                            showButtonPanel: true,
+                            changeMonth: true,
+                            changeYear: true,
+                            dateFormat: 'yy-mm-dd',
+                            beforeShow: function(){
+                                
+                                if(that.is_disabled) return false;
+                                var cv = $input.val();
+                                
+                                var prev_dp_value = window.hWin.HAPI4.get_prefs('edit_record_last_entered_date'); 
+                                if(cv=='' && !window.hWin.HEURIST4.util.isempty(prev_dp_value)){
+                                    //$datepicker.datepicker( "setDate", prev_dp_value );    
+                                    $datepicker.datepicker( "option", "defaultDate", prev_dp_value); 
+                                }else if(cv!='' && cv.indexOf('-')<0){
+                                    $datepicker.datepicker( "option", "defaultDate", cv+'-01-01'); 
+                                }else if(cv!='') {
+                                    $tinpt.val($input.val());
+                                    //$datepicker.datepicker( "option", "setDate", cv); 
+                                }
+                            
+                            },
+                            onClose: function(dateText, inst){
+                                
+                                if($tinpt.val()!=''){
+                                    $input.val($tinpt.val());
+                                    window.hWin.HAPI4.save_pref('edit_record_last_entered_date', $input.val());
+                                    __onDateChange();
+                                }else{
+                                    $tinpt.val($input.val());
+                                }
+                            }
+                        });
+                        
+                        this._on( $input, {
+                            keyup: function(event){
+                                if(!isNaN(String.fromCharCode(event.which))){
+                                    var cv = $input.val();
+                                    if(cv!='' && cv.indexOf('-')<0){
+                                        $datepicker.datepicker( "setDate", cv+'-01-01');   
+                                        $input.val(cv);
+                                    }
+                                }
+                            },
+                            keypress: function (e) {
+                                var code = e.charCode || e.keyCode;
+                                var charValue = String.fromCharCode(code);
+                                var valid = false;
+
+                                if(charValue=='-'){
+                                    valid = true;
+                                }else{
+                                    valid = /^[0-9]+$/.test(charValue);
+                                }
+
+                                if(!valid){
+                                    window.hWin.HEURIST4.util.stopEvent(e);
+                                    e.preventDefault();
+                                }
+
+                            },
+                            dblclick: function(){
+                                $btn_datepicker.click();
+                            }
+                        });
+
+                        //.button({icons:{primary: 'ui-icon-calendar'},text:false});
+                       
+                        
+                        this._on( $btn_datepicker, { click: function(){
+                            
+                                if(that.is_disabled) return;
+                                
+                                $datepicker.datepicker( 'show' ); 
+                                $("#ui-datepicker-div").css("z-index", "999999 !important"); 
+                                //$(".ui-datepicker").css("z-index", "999999 !important");   
+                        }} );
+                } 
+
+                if(this.options.is_faceted_search){
+                    
+                        $input.css({'max-width':'13ex','min-width':'13ex'});
+                    
+                }else if(this.options.dtID>0){ //this is details of records
+                
+                    
+                        var $btn_temporal = $( '<span>', 
+                            {title: 'Pop up widget to enter compound date information (uncertain, fuzzy, radiometric etc.)'})
+                        .addClass('smallicon ui-icon ui-icon-clock')
+                        .appendTo( $inputdiv );
+                        //.button({icons:{primary: 'ui-icon-clock'}, text:false});
+                        this._on( $btn_temporal, { click: function(){
+                            
+                                    if(that.is_disabled) return;
+
+                                    var url = window.hWin.HAPI4.baseURL 
+                                        + 'hclient/widgets/editing/editTemporalObject.html?'
+                                        + encodeURIComponent(that.newvalues[$input.attr('id')]
+                                                    ?that.newvalues[$input.attr('id')]:$input.val());
+                                    
+                                    window.hWin.HEURIST4.msg.showDialog(url, {height:550, width:750,
+                                        title: 'Temporal Object',
+                                        //class:'ui-heurist-bg-light',
+                                        callback: function(str){
+                                            if(!window.hWin.HEURIST4.util.isempty(str) && that.newvalues[$input.attr('id')] != str){
+                                                $input.val(str);    
+                                                $input.change();
+                                            }
+                                        }
+                                    } );
+                        
+                        }} );
+                    
+                }//temporal allowed
+                
+                $input.change(__onDateChange);
+    },
+    
+    
+    //
+    //
+    //
+    setBetweenMode: function(mode_val){
+        
+        if(this.options.is_faceted_search && 
+           this.options.is_between_mode!=mode_val && 
+                (this.detailType=='freetext' || this.detailType=='date'
+                || this.detailType=='integer' || this.detailType=='float')){
+            
+           this.options.is_between_mode = mode_val;
+           
+           if(this.options.is_between_mode){
+                this.addSecondInut();           
+           }else{
+               var that = this;
+               this.element.find('.span-dash').remove();
+               $.each(this.inputs, function(idx, item){
+                    var id = $(item).attr('id')+'-2';
+                    that.element.find('#'+id).remove();
+                    if(that.detailType=='date') {
+                        that.element.find('input[data-picker="'+id+'"]').remove();
+                        that.element.find('span[data-picker="'+id+'"]').remove();
+                    }
+               });
+           }
+        }
+    },
+    
+    //
+    //
+    //
+    addSecondInut: function(input_id){
+
+        var that = this;
+        $.each(this.inputs, function(idx, item){
+
+            var $input = $(item);
+            if(input_id==null || $input.attr('id')==input_id){
+                
+                var $inputdiv = $input.parents('.input-div');
+                
+                var edash = $('<span class="span-dash">&nbsp;-&nbsp;</span>')
+                //duplicate input for between mode
+                if(that.detailType=='date') {
+                    
+                    
+                    //var dpicker = that.element.find('input[data-picker="'+$input.attr('id')+'"]');
+                    var dpicker_btn = that.element.find('span[data-picker="'+$input.attr('id')+'"]');
+                    
+                    edash.insertAfter(dpicker_btn);
+                    
+                    var inpt2 = $('<input>').attr('id',$input.attr('id')+'-2')
+                            .addClass('text ui-widget-content ui-corner-all')
+                            .attr('autocomplete','disabled')
+                            .attr('autocorrect','off')
+                            .attr('autocapitalize','none')
+                            .attr('spellcheck','false')
+                            .change(function(){
+                                that.onChange();
+                            })
+                            .insertAfter(edash);
+                    that._createDateInput(inpt2, $inputdiv);
+            
+                    /*
+                    var opts = window.hWin.HEURIST4.util.cloneJSON(that.options);
+                    opts.showclear_button = false;
+                    opts.is_between_mode = false;
+                    opts.suppress_repeat = false;
+                    $('<div>').attr('id',$input.attr('id')+'-2').editing_input(that.options).insertAfter(edash);    
+                    */
+                }else{
+                    edash.insertAfter($input);
+                    
+                    $input.css({'max-width':'20ex','min-width':'20ex'});   
+                    
+                    $input.clone(true).attr('id',$input.attr('id')+'-2').insertAfter(edash);
+                }
+                if(input_id!=null){
+                    return false;
+                }
+            }
+        });
+        
     }
 
 });

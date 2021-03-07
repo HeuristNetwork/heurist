@@ -49,6 +49,7 @@ $.widget( "heurist.searchBuilder", {
     
     group_items:{}, //groups - to be implemented
     field_array:[], //defined fields for current groups
+    sort_array:[],
 
     // the widget's constructor
     _create: function() {
@@ -292,6 +293,34 @@ $.widget( "heurist.searchBuilder", {
 
     //
     //
+    //
+    , addSortItem: function(){
+        
+        var rty_ID = this.select_main_rectype.val();
+                                                   
+        var ele = $('<div>').uniqueId().insertBefore(this.btnAddSortItem);
+        this.sort_array.push(ele);
+        
+        var that = this;
+
+        ele.searchBuilderSort({ rty_ID: rty_ID ,
+                        onremove: function(){
+                            var id = this.element.attr('id');
+                            $.each(that.sort_array,function(k,item){
+                                if(item.attr('id')==id){
+                                    that.sort_array.splice(k,1);
+                                    that.pnl_Items.find('#'+id).remove();    
+                                    return false;
+                                }
+                            });
+                            
+                        }
+        });
+        
+    } 
+    
+    //
+    //
     //    
     , addFieldItem: function( code, codes ){
 
@@ -318,7 +347,7 @@ $.widget( "heurist.searchBuilder", {
                         top_rty_ID: top_rty_ID, 
                         rty_ID: rty_ID,
                         dty_ID: dty_ID,
-                        onremove: function(code, id2){
+                        onremove: function(){
                             var id = this.element.attr('id');
                             $.each(that.field_array,function(k,item){
                                 if(item.attr('id')==id){
@@ -445,12 +474,25 @@ $.widget( "heurist.searchBuilder", {
                         
                     that.addFieldItem( 'any:anyfield', [rty_ID , 'anyfield'] );
                 }});
+
+                //
+                //
+                this.btnAddSortItem = this.pnl_Items.find('.sort_field_add');
+
+                this._on(this.btnAddSortItem, {click:function(event){
+                    
+                    that.addSortItem();
+                }});
                 
                 
                 this._on(this.pnl_Rectype.find('#btn-clear').button()
                 , {click:function(event){
-                    this.pnl_Items.children('div:not(.search_field_add)').remove();
+                    this.pnl_Items.children('div:not(.btn_field_add)').remove();
                     this.field_array = [];
+                    this.sort_array = [];
+                    
+                    this.addFieldItem('any:anyfield');
+                    this.addSortItem();
                     
                 }});
                 
@@ -518,6 +560,7 @@ $.widget( "heurist.searchBuilder", {
         //add first field item
         if(!this.is_advanced && $.isEmptyObject(this.field_array)){
              this.addFieldItem('any:anyfield');
+             this.addSortItem();
         }
         
         
@@ -975,6 +1018,14 @@ console.log(aCodes);
         });
         
         if(mainquery.length>0){
+
+            $.each(this.sort_array, function(i, ele){
+                var val = ele.searchBuilderSort('getValue');
+                if(val){
+                    mainquery.push({sortby:val});    
+                }    
+            });
+            
             this.pnl_Result.text( JSON.stringify(mainquery) );    
         }
         
