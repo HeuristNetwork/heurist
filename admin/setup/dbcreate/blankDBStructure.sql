@@ -71,7 +71,8 @@ CREATE TABLE Records (
   KEY rec_Modified (rec_Modified),
   KEY rec_OwnerUGrpID (rec_OwnerUGrpID),
   KEY rec_Hash (rec_Hash(40)),
-  KEY rec_AddedByUGrpID (rec_AddedByUGrpID)
+  KEY rec_AddedByUGrpID (rec_AddedByUGrpID),
+  FULLTEXT KEY rec_Title_FullText (rec_Title)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
@@ -455,9 +456,9 @@ CREATE TABLE recDetails (
   PRIMARY KEY  (dtl_ID),
   KEY dtl_DetailtypeIDkey (dtl_DetailTypeID),
   KEY dtl_RecIDKey (dtl_RecID),
-  KEY dtl_ValShortenedKey (dtl_ValShortened),
   KEY dtl_ValueKey (dtl_Value(63)),
-  KEY dtl_UploadedFileIDKey (dtl_UploadedFileID)
+  KEY dtl_UploadedFileIDKey (dtl_UploadedFileID),
+  FULLTEXT KEY dtl_Value_FullText (dtl_Value)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='The detail (field) values for each record - public data';
 -- --------------------------------------------------------
 
