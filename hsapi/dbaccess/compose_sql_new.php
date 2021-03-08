@@ -102,7 +102,9 @@ VALUE
 7) Find all records with value not equal ABC  "f:5":"-ABC"
 
 Compare predicates
-        @    fulltext
+        @    fulltext (any word)
+        @-   no words
+        @+   all words
         OR
         -   negate value
             <> between 
@@ -210,6 +212,11 @@ function get_sql_query_clauses_NEW($db, $params, $currentUser=null){
     $query = new HQuery( "0", $query_json, $search_domain, $currUserID );
     $top_query = $query;
     $query->makeSQL();
+    
+    
+    if($query->error_message){
+        return array('error'=>$query->error_message);
+    }
 
     //1. create tree of predicates
     //2. make where
@@ -258,6 +265,8 @@ class HQuery {
     var $sort_clause = '';
     var $recVisibilityType;
     var $parentquery = null;
+    
+    var $error_message = null;
 
     var $top_limb = array();
     var $sort_phrases;
@@ -292,8 +301,11 @@ class HQuery {
         global $publicOnly, $wg_ids, $params_global; //, $mysqli, $use_user_wss;
 
         $res = $this->top_limb->makeSQL(); //it creates where_clause and fill tables array
-
-        if($this->search_domain!=null){
+        
+        if($this->top_limb->error_message){
+             $this->error_message = $this->top_limb->error_message;
+             return;
+        }else if($this->search_domain!=null){
 
             if ($this->search_domain == NO_BOOKMARK){
                 $this->from_clause = 'Records r'.$this->level.' ';
@@ -545,9 +557,10 @@ class HLimb {
     var $limbs = array();  // limbs and predicates
     var $conjunction = "all"; //and
 
-    //result
+    //results
     var $tables = array();
     var $where_clause = "";
+    var $error_message = null;
 
     var $allowed = array("all"=>" AND ","any"=>" OR ","not"=>"NOT ");
 
@@ -592,6 +605,9 @@ class HLimb {
         }
     }
 
+    //
+    // fills $tables and $where_clause
+    //
     function makeSQL(){
 
         $cnj = $this->allowed[$this->conjunction];
@@ -604,7 +620,11 @@ class HLimb {
             if($res){
                 $where = $cnj."(".$res["where"].")";
                 $this->addTable(@$res["from"]);
+            }else{
+                $this->error_message = $this->limbs[0]->error_message;
+                return null;
             }
+            
 
         }else{
 
@@ -624,6 +644,9 @@ class HLimb {
                         //$where = $where."(".$res["where"].")";
                         //if($ind<$cnt) $where = $where.$cnj;
                     }
+                }else if($limb->error_message){
+                    $this->error_message = $limb->error_message;
+                    return null;
                 }
             }
 
@@ -660,6 +683,9 @@ class HLimb {
 
 }
 
+// ===========================
+//
+//
 class HPredicate {
 
     var $pred_type;
@@ -671,6 +697,8 @@ class HPredicate {
     var $query = null;
 
     var $field_list = false; //list of id values
+    
+    var $error_message = null;    
 
     var $qlevel;
     var $index_of_predicate;
@@ -1109,6 +1137,8 @@ class HPredicate {
         }
         
         if($this->fulltext){
+                
+            
                 //execute fulltext search query
                 $res = 'select dtl_RecID from recDetails '
                 . ' left join defDetailTypes on dtl_DetailTypeID=dty_ID '
@@ -1650,7 +1680,7 @@ class HPredicate {
     * put your comment there...
     *
     */
-    function getFieldValue(  ){
+    function getFieldValue(){
 
         global $mysqli, $params_global, $currUserID;
         
@@ -1815,7 +1845,31 @@ class HPredicate {
                 
                 }else if($this->fulltext){
                     
-                    $res = " AGAINST ('".$mysqli->real_escape_string($this->value)."')";
+                    //1. check that fulltext index exists
+                    if($this->checkFullTextIndex()){ 
+                    //returns true and fill $this->error_message if something wrong
+                        return null;
+                    }
+                    
+                    $res = '';
+                    
+                    if(strpos($this->value, '++')===0 || strpos($this->value, '--')===0){
+                       
+                        $op = (strpos($this->value, '+')===0)?' +':' -';
+                        
+                        //get all words
+                        $pattern = "/(\w+)/";
+                        if (preg_match_all($pattern, $this->value, $matches)) {
+                                 $this->value = trim($op).implode($op, $matches[0]);
+                        }
+                        
+                    }
+                     
+                    if(strpos($this->value, '+')>=0 || strpos($this->value, '-')>=0){
+                        $res = ' IN BOOLEAN MODE ';
+                    }
+                    
+                    $res = " AGAINST ('".$mysqli->real_escape_string($this->value)."'$res)";
                     
                 }else{
 
@@ -1840,9 +1894,53 @@ class HPredicate {
 
         return $res;
 
-    }
+    }//getFieldValue
+    
+    //
+    // check existanse of full text index and creates it
+    // return true - if index is missed or its creation is in progress
+    //
+    function checkFullTextIndex(){
+        global $mysqli;
+        
+        $fld = mysql__select_value($mysqli,
+        'select group_concat(distinct column_name) as fld'
+        .' from information_schema.STATISTICS '
+        ." where table_schema = '".HEURIST_DBNAME_FULL."' and table_name = 'recDetails' and index_type = 'FULLTEXT'");        
+        
+        if($fld==null){
 
-}
+            $mysqli->query('ALTER TABLE recDetails ADD FULLTEXT INDEX `dtl_Value_FullText` (`dtl_Value`) VISIBLE');            
+          
+/*            
+            $k=0;
+            while($k<10){
+                $prog = mysql__select_value($mysqli,"select progress from FROM sys.session where db='".HEURIST_DBNAME_FULL."' "
+                ." AND current_statement like 'ALTER TABLE recDetails ADD FULLTEXT%'");
+error_log($prog);     
+usleep(200);           
+                $k++;
+            }
+*/            
+            
+            $this->error_message = 'create_fulltext';  
+            return true;
+        }
+        return false;
+/*        
+ALTER TABLE `hdb_osmak_7`.`recdetails` DROP INDEX `dtl_Value_FullText` ;        
+ALTER TABLE `hdb_osmak_7`.`recdetails` ADD FULLTEXT INDEX `dtl_Value_FullText` (`dtl_Value`) VISIBLE;
+
+SELECT thd_id, conn_id, db, command, state, current_statement,
+              statement_latency, progress, current_memory, program_name
+         FROM sys.session
+        WHERE progress IS NOT NULL
+*/
+    }
+                            
+
+
+}//HPredicate
 
 /*
 { all: { t:4, f1:peter , any: {}  } }

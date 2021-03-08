@@ -1665,12 +1665,17 @@ function recordSearch($system, $params)
         }
 
         if($is_mode_json){
-            $aquery = get_sql_query_clauses_NEW($mysqli, $params, $currentUser);
+            $aquery = get_sql_query_clauses_NEW($mysqli, $params, $currentUser); //main usage
         }else{
             $aquery = get_sql_query_clauses($mysqli, $params, $currentUser);   //!!!! IMPORTANT CALL OR compose_sql_query at once
         }
 
-        if(@$aquery['error']){
+        if(@$aquery['error']=='create_fulltext'){
+            return $system->addError(HEURIST_ACTION_BLOCKED, '<h3 style="margin:4px;">Building full text index</h3>'
+                    .'<p>To process word searches efficiently we are building a full text index.</p>'
+                    .'<p>This is a one-off operation and may take some time for large, text-rich databases '
+                    .'(where it will make the biggest difference to retrieval speeds).</p>', null);        
+        }else if(@$aquery['error']){
             return $system->addError(HEURIST_ERROR, 'Unable to construct valid SQL query. '.@$aquery['error'], null);
         }
         if(!isset($aquery["where"]) || trim($aquery["where"])===''){

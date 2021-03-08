@@ -1097,7 +1097,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                                 +'>List of records which '+(res.children==0?'this term':'these terms')+'</a></p>';
                             }
                             $dlg = window.hWin.HEURIST4.msg.showMsgDlg(sMsg, null, {title:'Terms in use'},
-                                {default_palette_class:this.options.default_palette_class});        
+                                {default_palette_class:that.options.default_palette_class});        
 
                             that._on($dlg.find('a.records-list'),{click:function(e){
                                 var request = {q:'ids:'+res.records.join(',')};

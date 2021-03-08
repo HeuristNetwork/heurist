@@ -414,9 +414,9 @@ Whole value = EQUAL
             if(this.options.dty_ID>0 || this.options.dty_ID=='title'){
                 eqopts = [
                     {key:'',title:'string match'}, //case sensetive ==
-                    {key:'@+',title:'all words'}, //full text
+                    {key:'@++',title:'all words'}, //full text
                     {key:'@',title:'any words'},  //full text
-                    {key:'@-',title:'no word'},   //full text
+                    {key:'@--',title:'no word'},   //full text
                     {key:'', title:'──────────', disabled:true}];
                 
             }else{
