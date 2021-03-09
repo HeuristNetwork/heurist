@@ -193,7 +193,7 @@ $.widget( "heurist.searchBuilderItem", {
                         {key:'notes',title:'Notes', depth:1},
                         {key:'owner',title:'Owner (user or group)', depth:1},
                         {key:'access',title:'Visibility', depth:1},
-                        {key:'tag',title:'Tags (NOT IMPLEMENTED)', depth:1}
+                        {key:'tag',title:'Tags', depth:1}
                     ];
                     
             var bottomOptions = null;
@@ -347,7 +347,7 @@ $.widget( "heurist.searchBuilderItem", {
 
                 }else  if (this.options.dty_ID=='tag'){
                         // tag selector 
-                        // field_type = 'keyword';
+                        field_type = 'tag';
                 }
             }
             
@@ -396,7 +396,16 @@ $.widget( "heurist.searchBuilderItem", {
                 {key:'<',title:'less than'},
                 {key:'<>',title:'between'}
             ];
+            
+        }else if(field_type=='tag'){
 
+            eqopts = eqopts.concat([
+                {key:'=',title:'equals'},    //cs
+                {key:'',title:'string match'},
+                {key:'starts',title:'starts with'},
+                {key:'ends',title:'ends with'}
+                ]);
+            
         }else{
 
 /*        
@@ -488,9 +497,6 @@ Whole value = EQUAL
             ed_options['dtID'] = this.options.dty_ID;
             
         } 
-            
-
-        
         
         this._predicate_input_ele = $("<div>")
             .editing_input(ed_options).appendTo(this.values_container);
@@ -543,7 +549,7 @@ Whole value = EQUAL
                     && vals.length>1 && this.select_conjunction.val()=='any')
             {
                 vals = [(isnegate?'-':'')+vals.join(',')];
-                
+
             }else if (this._current_field_type=='relmarker') {
                 
                 
@@ -602,12 +608,19 @@ Whole value = EQUAL
                 res[key] = vals[0];     
             }else{
                 var conj = this.select_conjunction.val();
-                res[conj] = [];
-                $.each(vals,function(i,val){ 
+                if(key=='tag'){
                     var p = {}; 
-                    p[key] = val;
-                    res[conj].push(p); 
-                });        
+                    p[conj] = vals;
+                    res[key] = p;
+                }else{
+                    res[conj] = [];
+                    $.each(vals,function(i,val){ 
+                        var p = {}; 
+                        p[key] = val;
+                        res[conj].push(p); 
+                    });        
+                }
+                
             }
           
             return res;  
