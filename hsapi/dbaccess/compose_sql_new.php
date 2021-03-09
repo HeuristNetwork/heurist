@@ -70,6 +70,7 @@ related: related in any direction
 relatedfrom: relation type id (termid)    recordtype
 related_to:
 links: recordtype
+rel, r: - relation type (enum)
 
 recordtype is added to link query  as first predicate
 
@@ -695,6 +696,8 @@ class HPredicate {
     var $value;
     var $valid = false;
     var $query = null;
+    
+    var $relation_types = null; //for related_to
 
     var $field_list = false; //list of id values
     
@@ -712,7 +715,7 @@ class HPredicate {
 
     var $allowed = array('title','t','modified','url','notes','type','ids','id','count','cnt',
             'f','field','geo','linked_to','linkedto','linkedfrom','related','related_to','relatedto','relatedfrom','links','plain',
-            'addedby','owner','access');
+            'addedby','owner','access','tag','keyword','kwd');
     /*
     notes, n:        record heder notes (scratchpad)
     title:           title contains
@@ -741,7 +744,7 @@ class HPredicate {
         $this->parent = &$parent;
         $this->qlevel = $this->parent->level; //
         $this->index_of_predicate = $index_of_predicate;
-
+        
         $key = explode(":", $key);
         $this->pred_type  = $key[0];
         $ll = count($key);
@@ -755,10 +758,34 @@ class HPredicate {
             if(is_array($value) &&  count($value)>0 && 
                 !(is_numeric(@$value[0]) || is_string(@$value[0])) )
             { //subqueries
-                $level = $this->parent->level."_".$this->parent->cnt_child_query;
-                $this->parent->cnt_child_query++;
+                //special bahvior for related_to - extract reltypes
+                if(strtolower($this->pred_type)=='related_to'){
+                    foreach($value as $idx=>$val){
+                        if(@$val['r']){
+                            $this->relation_types = $val['r'];
+                            if(is_array($this->relation_types) && count(is_array($this->relation_types)==1)){
+                                $this->relation_types = $this->relation_types[0];  
+                            } 
+                            array_splice($value, $idx, 1);
+                            $this->value = $value;
+                            break;
+                        }
+                    }
+                    foreach($value as $idx=>$val){
+                        if(@$val['ids']){
+                            $this->value = $val['ids'];
+                            $value = array();
+                            break;
+                        }
+                    }    
+                }
+                if(count($value)>0){
+            
+                    $level = $this->parent->level."_".$this->parent->cnt_child_query;
+                    $this->parent->cnt_child_query++;
 
-                $this->query = new HQuery( $level, $value );
+                    $this->query = new HQuery( $level, $value );
+                }
             }
             $this->valid = true; //@todo
         }
@@ -1225,25 +1252,88 @@ class HPredicate {
     //
     function predicateKeywords(){
         
-        return array("where"=>'(1=1)');
-        
-        global $top_query;
-        
         $this->field_type = "link";
         $p = $this->qlevel;
+        
+        $where = '';
 
-            $val = $this->getFieldValue();
+        if(false && !$this->field_list){
+            $where = "=0";
+        }else{
+            
+            $isAll = false;
 
-            if(!$this->field_list){
-                $val = "=0";
-            }else if ($p==0){
-                $cs_ids = getCommaSepIds($this->value);
-                if ($cs_ids && strpos($cs_ids, ',')>0) {  
-                    $top_query->fixed_sortorder = $cs_ids;
+            if(is_array($this->value)){
+                if(@$this->value['any']!=null){
+                    $this->value = $this->value['any'];
+                }else if(@$this->value['all']!=null){
+                    $this->value = $this->value['all'];
+                    $isAll = true;
                 }
             }
 
-        $where = "r$p.rec_ID".$val;
+            
+            $cs_ids = getCommaSepIds($this->value);
+            if ($cs_ids) {  
+                
+                if(strpos($cs_ids, '-')===0){
+                    $this->negate = true;
+                    $cs_ids = substr($cs_ids, 1);
+                }
+                
+                if(strpos($cs_ids, ',')>0){  //more than one
+
+                    $where = (($this->negate)?'NOT':'')
+                            . ' IN (SELECT rtl_RecID FROM usrRecTagLinks where '
+                            . 'rtl_TagID in ('.$cs_ids.')';
+                    if($isAll){
+                        $cnt = count(explode(',',$cs_ids));
+                        $where = $where.' GROUP BY rtl_RecID HAVING count(*)='.$cnt;
+                    }
+                    $where = $where.')';
+                    
+                }else{
+                    $where = (($this->negate)?'NOT':'')
+                        . ' IN (SELECT rtl_RecID FROM usrRecTagLinks where rtl_TagID = '.$cs_ids.')';
+                }
+                
+                
+//SELECT rtl_RecID as cnt FROM usrrectaglinks where rtl_TagID in (1,3) group by rtl_RecID having count(*)=2);                
+            }else{
+                $pred = null;
+                
+                if(is_array($this->value)){
+                    $values = $this->value;
+                    $pred = array();
+                    foreach ($values as $val){
+                        $this->value = $val;    
+                        $val = $this->getFieldValue();
+                        if($val) array_push($pred,'tag_Text '.$val);
+                    }
+                    
+                    $cnt = count($pred);
+                    if($cnt>0){
+                        $pred = '('.implode(' OR ',$pred).')';
+                        
+                        if($isAll){
+                            $pred = $pred.' GROUP BY rtl_RecID HAVING count(*)='.$cnt;
+                        }
+                    }
+                    
+                }else{
+                    $val = $this->getFieldValue();
+                    if($val) $pred = 'tag_Text '.$val;
+                }
+                
+                if($pred){
+                    $where = ' IN (SELECT rtl_RecID FROM usrRecTagLinks, usrTags where rtl_TagID=tag_ID and '.$pred.')';    
+                }else{
+                    $where = '=0';
+                }                
+            }
+        }
+
+        $where = "r$p.rec_ID ".$where;
 
         return array("where"=>$where);
         
@@ -1496,16 +1586,27 @@ class HPredicate {
             $val = $this->getFieldValue();
 
             if(!$this->field_list){
-                $val = "=0";
+                $val = "!=0";
                 //@todo  findAnyField query
                 //$val = " IN (SELECT rec_ID FROM ".$this->query->from_clause." WHERE".$this->query->where_clause.")";
             }
         }
 
         //search by relation type is disabled since it assigns field id instead  @todo fix
-        $where = "r$p.rec_ID=$rl.rl_SourceID AND ".
-        (($this->field_id && false) ?"$rl.rl_RelationTypeID=".$this->field_id :"$rl.rl_RelationID is not null")
-        ." AND $rl.rl_TargetID".$val;
+        $where = "r$p.rec_ID=$rl.rl_SourceID AND $rl.rl_TargetID".$val;
+        
+        if($this->relation_types){
+            //(($this->field_id && false) ?"$rl.rl_RelationTypeID=".$this->field_id :)
+            if(is_array($this->relation_types)&& count($this->relation_types)){
+                $where = $where . " AND $rl.rl_RelationTypeID IN (".implode(',',$this->relation_types).")";    
+            }else{
+                $where = $where . " AND $rl.rl_RelationTypeID = ".$this->relation_types;    
+            }
+            
+        }else{
+            $where = $where . " AND $rl.rl_RelationID is not null";
+        }
+        
 
         return array("from"=>"recLinks ".$rl, "where"=>$where);
     }
@@ -1709,6 +1810,12 @@ class HPredicate {
         // @    fulltext
         // > <  for numeric and dates only
         
+        $this->negate = false;
+        $this->exact = false;
+        $this->fulltext = false;
+        $this->lessthan = false;
+        $this->greaterthan = false;
+        
         //
         if(strpos($this->value, '-')===0){
             $this->negate = true;
@@ -1740,7 +1847,7 @@ class HPredicate {
         }
         $this->value = $this->cleanQuotedValue($this->value);
 
-        if(trim($this->value)=='') return "!=''";   //find any non empty value
+        if(is_string($this->value) && trim($this->value)=='') return "!=''";   //find any non empty value
 
         $eq = ($this->negate)? '!=' : (($this->lessthan) ? '<' : (($this->greaterthan) ? '>' : '='));
         
@@ -1843,7 +1950,7 @@ class HPredicate {
                         $res = $between."'".$mysqli->real_escape_string($vals[0])."' and '".$mysqli->real_escape_string($vals[1])."'";
                     }
                 
-                }else if($this->fulltext){
+                }else if($this->fulltext && $this->field_type!='link'){
                     
                     //1. check that fulltext index exists
                     if($this->checkFullTextIndex()){ 

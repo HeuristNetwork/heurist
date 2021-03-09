@@ -1383,7 +1383,12 @@ $query = 'CREATE TABLE sysDashboard ('
         $n = array_map('intval', $a);
         
         if(!array_diff($a, $n)){
-            return $value;
+            if(is_array($value)){
+                return implode(',', $value);
+            }else{
+                return $value;    
+            }
+            
         }else{
             return null;
         }

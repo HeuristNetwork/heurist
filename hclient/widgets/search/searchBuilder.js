@@ -102,16 +102,16 @@ $.widget( "heurist.searchBuilder", {
                 },
     */            
                 buttons: [
-                    {text:window.hWin.HR('Search'), id:'btnSearch',
-                        class:'ui-button-action', 
-                        click: function() {
-                            that._doSearch()
-                    }},
-                    {text:window.hWin.HR('Save'), id:'btnSave',
+                    {text:window.hWin.HR('Preview'), id:'btnSave',
                         click: function() {
                             that._doSaveSearch()
                             //that.navigateWizard(1);
                     }},
+                    {text:window.hWin.HR('Search'), id:'btnSearch',
+                        class:'ui-button-action', 
+                        click: function() {
+                            that._doSearch()
+                    }}
                 ],
                 show: {
                     effect: 'fade',
@@ -272,7 +272,6 @@ $.widget( "heurist.searchBuilder", {
         
         if(this.options.is_h6style){
             this.element.parent().addClass('ui-heurist-explore');
-            this.adjustDimension();
         }
         
         if($.isFunction(this.options.menu_locked)){
@@ -310,12 +309,15 @@ $.widget( "heurist.searchBuilder", {
                                 if(item.attr('id')==id){
                                     that.sort_array.splice(k,1);
                                     that.pnl_Items.find('#'+id).remove();    
+                                    that.adjustDimension();
                                     return false;
                                 }
                             });
                             
                         }
         });
+     
+        this.adjustDimension();
         
     } 
     
@@ -353,6 +355,7 @@ $.widget( "heurist.searchBuilder", {
                                 if(item.attr('id')==id){
                                     that.field_array.splice(k,1);
                                     that.pnl_Items.find('#'+id).remove();    
+                                    that.adjustDimension();
                                     return false;
                                 }
                             });
@@ -363,7 +366,7 @@ $.widget( "heurist.searchBuilder", {
                         }
                 });
             
-            
+                this.adjustDimension();
             
             }
     }
@@ -493,7 +496,6 @@ $.widget( "heurist.searchBuilder", {
                     
                     this.addFieldItem('any:anyfield');
                     this.addSortItem();
-                    
                 }});
                 
                                 
@@ -976,8 +978,13 @@ console.log(aCodes);
                             }
                             if(slink!=''){
                                 dtid = dtid.substr(2);
-                                key = slink+dtid;
+                                key = slink+dtid;    
                             }else{
+                                /*if($Db.dty(dtid,'rty_Type')=='relmarker'){
+                                    key = 'related_to:'+dtid;
+                                }else{
+                                    key = 'f:'+dtid;    
+                                }*/
                                 key = 'f:'+dtid;
                             }
                         

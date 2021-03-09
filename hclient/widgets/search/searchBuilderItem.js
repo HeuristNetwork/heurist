@@ -65,6 +65,7 @@ $.widget( "heurist.searchBuilderItem", {
 
     _current_field_type:null, // type of input field
     _predicate_input_ele:null,     // reference to editing_input
+    _predicate_reltype_ele:null,     // reference to relation type selector
 
     // the widget's constructor
     _create: function() {
@@ -200,7 +201,7 @@ $.widget( "heurist.searchBuilderItem", {
             //                     {key:'longitude',title:window.hWin.HR('geo: Longitude')}]; 
                     
             var allowed_fieldtypes = ['enum','freetext','blocktext',
-                            'geo','year','date','integer','float','resource']; //,'relmarker'
+                            'geo','year','date','integer','float','resource','relmarker'];
             
             //show field selector
             window.hWin.HEURIST4.ui.createRectypeDetailSelect(this.select_fields.get(0), this.options.top_rty_ID, 
@@ -322,9 +323,8 @@ $.widget( "heurist.searchBuilderItem", {
                     
                     ed_options['dtFields'] = dtFields;
             }
-            ed_options['detailtype'] = field_type
+            ed_options['detailtype'] = field_type;
             ed_options['dtID'] = this.options.dty_ID;
-
 
         }else{        
             //non base fields inputs
@@ -433,7 +433,7 @@ Whole value = EQUAL
                 ]);
         }
 
-        if(this.options.dty_ID>0){            
+        if(this.options.dty_ID>0 && field_type!='relmarker'){            
             eqopts.push({key:'any', title:'any value'});
             eqopts.push({key:'NULL', title:'not defined'});
         }
@@ -469,11 +469,31 @@ Whole value = EQUAL
             
         this._current_field_type = field_type;
         //clear input values
+        if(this._predicate_input_ele){
+            this._predicate_input_ele.remove(); this._predicate_input_ele = null;    
+        }
+        if(this._predicate_reltype_ele){
+            this._predicate_reltype_ele.remove(); this._predicate_reltype_ele = null;    
+        }
         this.values_container.empty();
-        this._predicate_input_ele = null;
+        
+        if(field_type=='relmarker'){
+            // for this type we create two elements 
+            // relation type selector and resource record selector
+            ed_options['detailtype'] = 'relationtype';
+            ed_options['dtID'] = 'r';
+            this._predicate_reltype_ele = $("<div>").editing_input(ed_options).appendTo(this.values_container);
+
+            ed_options['detailtype'] = 'resource';
+            ed_options['dtID'] = this.options.dty_ID;
+            
+        } 
+            
+
+        
         
         this._predicate_input_ele = $("<div>")
-        .editing_input(ed_options).appendTo(this.values_container);
+            .editing_input(ed_options).appendTo(this.values_container);
 
         this.select_comparison.trigger('change');
     },
@@ -493,14 +513,21 @@ Whole value = EQUAL
     getValues: function(){
         if(this._predicate_input_ele){
             
+            var relatype_vals = null;
+            var has_relatype_value = false, has_value = false;
             var vals = $(this._predicate_input_ele).editing_input('getValues');
             var isnegate =  this.cb_negate.is(':visible') && 
                             this.cb_negate.find('input').is(':checked');
             var op = this.select_comparison.val();
+
+            if(this._current_field_type=='relmarker'){
+                relatype_vals = $(this._predicate_reltype_ele).editing_input('getValues');
+                has_relatype_value = (relatype_vals.length>1 ||!window.hWin.HEURIST4.util.isempty(relatype_vals[0]));
+            }
+            has_value =  (vals.length>1 || !window.hWin.HEURIST4.util.isempty(vals[0]));
+
             
-            if(vals.length==1 && window.hWin.HEURIST4.util.isempty(vals[0]) && 
-                    !(op=='any' || op=='NULL')){
-                
+            if (!(has_relatype_value || has_value) && !(op=='any' || op=='NULL')){
                 return null;
             }            
 
@@ -516,6 +543,23 @@ Whole value = EQUAL
                     && vals.length>1 && this.select_conjunction.val()=='any')
             {
                 vals = [(isnegate?'-':'')+vals.join(',')];
+                
+            }else if (this._current_field_type=='relmarker') {
+                
+                
+                if(has_relatype_value){
+                    if(has_value){
+                        vals = [{ids:(isnegate?'-':'')+vals.join(',')}];
+                    } else{
+                        vals = [];
+                    }
+                    vals.push({r:(isnegate?'-':'')+relatype_vals.join(',')});
+                }else{
+                    vals = (isnegate?'-':'')+vals.join(',');    
+                }
+                
+                return {related_to:vals};
+                
             }else {
                 
                 if(op=='starts'){
@@ -570,20 +614,6 @@ Whole value = EQUAL
         }else{
             return null;
         }
-    },
-    
-    //
-    //
-    //
-    _isSomethingDefined:function(){
-        var i;
-        if (this._predicate_input_ele){
-            var val = $(this._predicate_input_ele).editing_input('getValues');
-            if(!window.hWin.HEURIST4.util.isempty(val)){
-                return true;
-            }
-        }
-        return false;
     },
     
     //
