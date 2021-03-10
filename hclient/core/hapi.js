@@ -1350,7 +1350,6 @@ prof =Profile
                 //entity_data['rst_Links'] = {direct:rst_direct, reverse:rst_reverse, refs:rst_references };
             },
 
-            
             //
             // refresh several entity data at once
             // 

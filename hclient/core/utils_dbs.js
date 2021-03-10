@@ -1022,7 +1022,7 @@ window.hWin.HEURIST4.dbs = {
         if(dfname){
             return $Db.dty(dty_ID, dfname);
         }else{
-            
+            //direct access (without check and reload)
             var rectype_structure = window.hWin.HAPI4.EntityMgr.getEntityData2('rst_Index');
             
             if(rectype_structure && rectype_structure[rec_ID]){

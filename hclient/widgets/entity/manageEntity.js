@@ -35,6 +35,7 @@
 // closeDialog
 
 //defaultBeforeClose
+
 //_selectAndClose - event handler for select-and-close (select_multi) or for any selection event for select_single
 // selectedRecords get and set selected records 
     
@@ -123,7 +124,7 @@ $.widget( "heurist.manageEntity", {
         onInitEditForm:null,  //event listener when EDIT form is fully inited - used in manageRecords._afterInitEditForm only to open structure field formlet
         onSelect:null,
         beforeClose:null,
-        onClose:null,
+        onClose:null,  //
         
         keep_visible_on_selection: false, //for select_single it closes popup on selection
         

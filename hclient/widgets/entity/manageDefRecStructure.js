@@ -230,7 +230,7 @@ $.widget( "heurist.manageDefRecStructure", $.heurist.manageEntity, {
             }else{
                 
                 //via entity data
-                this._cachedRecordset = $Db.rst(this.options.rty_ID);
+                this._cachedRecordset = $Db.rst(this.options.rty_ID);  //from  rst_Index
                 if(this._cachedRecordset==null){
                     this._cachedRecordset = new hRecordSet({entityName:'defRecStructure',count:0,offset:0,order:[]});
                 }
@@ -960,6 +960,10 @@ dty_TermIDTreeNonSelectableIDs
             popup_options['selectOnSave'] = true;
             popup_options['onselect'] = function(event, res)
             {
+                //update recordset
+                //user can add new record types while add new field 
+                //need refresh structure - obtain from rst_Index again
+                that._cachedRecordset = $Db.rst(that.options.rty_ID);  //from  rst_Index
                 
                 if(res && res.selection){
                     if(window.hWin.HEURIST4.util.isArrayNotEmpty(res.selection)){
@@ -977,7 +981,10 @@ dty_TermIDTreeNonSelectableIDs
         }else{
             popup_options['onClose'] = function(){
                 //update recordset
-                //that._cachedRecordset.setRecord(dtyID, fields);
+                //user can add new record types while add new field 
+                //need refresh structure - obtain from rst_Index again
+                that._cachedRecordset = $Db.rst(that.options.rty_ID);  //from  rst_Index
+        
 
                 //reload formlet after edit
                 that._initEditForm_step3( dtyID );
@@ -985,8 +992,6 @@ dty_TermIDTreeNonSelectableIDs
                 that._editing.setModified(true);
                 
             }
-            
-            
         }
         
         
@@ -1057,6 +1062,12 @@ dty_TermIDTreeNonSelectableIDs
         if($Db.dty(dty_ID,'dty_Type')=='separator'){
             fields['rst_SeparatorType'] = 'tabs';    
         }
+        
+/*            
+            refreshEntityData('defRecStructure',function(){
+                
+            });
+*/            
         
         
         var that = this;

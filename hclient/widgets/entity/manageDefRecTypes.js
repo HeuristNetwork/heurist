@@ -1338,6 +1338,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                 //{fields:{}, order:[recID], records:[fieldvalues]});
                 this._selection.addRecord(recID, fieldvalues);
                 this._selectAndClose();
+                this._triggerRefresh('rty');
                 return;    
         }
         
@@ -1425,8 +1426,8 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             });
             
         }else{
-            this._triggerRefresh('rty');
         }
+        this._triggerRefresh('rty');
         
 /*        
         this.getRecordSet().setRecord(recID, fieldvalues);

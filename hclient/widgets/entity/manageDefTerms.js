@@ -285,7 +285,6 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
                 
                 //initially selected vocabulary
-console.log('222.initially selected vocabulary>>>>>'+this.options.selection_on_init);                
                 if(this.options.selection_on_init=='add_new'){
                     this.options.selection_on_init = null;
                     this.addEditRecord(-1);
@@ -1341,7 +1340,6 @@ console.log('222.initially selected vocabulary>>>>>'+this.options.selection_on_i
         
         var last_vocab_id = this.vocabularies_div.manageDefTerms('getLastAddedVocabulary');
         
-console.log('contextOnClose '+this.options.trm_VocabularyID+'  '+last_vocab_id);        
         return last_vocab_id>0?last_vocab_id:this.options.trm_VocabularyID;
     },
 
