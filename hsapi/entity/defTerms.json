@@ -15,6 +15,16 @@
         
         "fields": [
                 {
+                    "dtID": "trm_VocabularyGroupID",
+                    "dtFields":{
+                        "dty_Type":"enum",
+                        "rst_DisplayName":"Group:",
+                        "rst_DisplayHelpText": "The vocabulary group to which this vocabulary should be assigned", 
+                        "rst_FieldConfig": {"entity":"defVocabularyGroups"},
+                        "rst_RequirementType":"recommended"
+                    }
+                },
+                {
                     "dtID": "trm_Label",
                     "titleField": true,
                     "dtFields":{
@@ -28,16 +38,6 @@
                         "rst_DefaultValue":"",
                         "rst_RequirementType":"required",
                         "rst_MaxValues":1
-                    }
-                },
-                {
-                    "dtID": "trm_VocabularyGroupID",
-                    "dtFields":{
-                        "dty_Type":"enum",
-                        "rst_DisplayName":"Group:",
-                        "rst_DisplayHelpText": "The vocabulary group to which this vocabulary should be assigned", 
-                        "rst_FieldConfig": {"entity":"defVocabularyGroups"},
-                        "rst_RequirementType":"recommended"
                     }
                 },
                 {

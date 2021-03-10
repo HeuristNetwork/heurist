@@ -992,6 +992,12 @@ class HPredicate {
         
         $is_empty = $this->isEmptyValue(); //search for empty or not defined value
         
+        
+        //@todo future - here we need to add code that will
+        // call $this->getFieldValue() inside the loop if $this->value is array
+        // any:[val1,val2,...] or all:[val1,val2,...] or [val1,val2,...] - by default use any
+        //
+        
         $val = $this->getFieldValue();
         if(!$val) return null;
         

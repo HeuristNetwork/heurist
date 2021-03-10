@@ -1032,7 +1032,7 @@ $.widget( "heurist.manageEntity", {
                     
                     if($.isFunction(that.options.onClose)){
                         //that.options.onClose(that._currentEditRecordset);  
-                        that.options.onClose.call();
+                        that.options.onClose.call(that, that.contextOnClose());
                     } 
                     $dlg.remove();    
                     //???? $dlg.parent().remove();    
@@ -1144,9 +1144,13 @@ $.widget( "heurist.manageEntity", {
         }
         
         if(!this.options.isdialog && $.isFunction(this.options.onClose)){
-            this.options.onClose.call();
+            this.options.onClose.call(this, this.contextOnClose());
         } 
         
+    },
+    
+    contextOnClose: function(){
+        return null;  
     },
     
     //

@@ -1060,6 +1060,8 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                 $('<div style="line-height:2ex;padding-top:4px">'
                         +'<div id="enumVocabulary" style="display:inline-block;">' //padding-left:4px;
                             +'<select id="selVocab" class="sel_width"></select>'
+                            +'<a href="#" id="add_vocabulary_2" style="padding-left:10px">'
+                                +'<span class="ui-icon ui-icon-plus"/>add vocabulary</a>'
                             +'<a href="#" id="show_terms_1" style="padding-left:10px">'
                                 +'<span class="ui-icon ui-icon-pencil"/>vocabularies editor</a>'
                             +'<br><span id="termsPreview1" style="display:none;padding:10px 0px">'
@@ -1117,6 +1119,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                 }});
             this._on(this.enum_container.find('#add_vocabulary'),{click: this._onAddVocabOrTerms});
             this._on(this.enum_container.find('#show_terms_1'),{click: this._showOtherTerms}); //manage defTerms
+            this._on(this.enum_container.find('#add_vocabulary_2'),{click: this._onAddVocabulary}); //add vocab via defTerms
             this._on(this.enum_container.find('#add_terms'),{click: this._onAddVocabOrTerms});
             /*
             this._on(this.enum_container.find('#show_terms_2'),{click: this._showOtherTerms});
@@ -1272,54 +1275,69 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
 
     },
 
+    _onAddVocabulary: function(){
+        this._showOtherTerms('add_new');
+    },    
+    
     //
     // Opens defTerms manager
     //
     _showOtherTerms: function(event){
+        
 
         var term_type = this._editing.getValue('dty_Type')[0];
 
-        var vocab_id = (term_type=='relationtype')
+        var vocab_id;
+        if(event=='add_new'){
+            vocab_id = 'add_new';
+        }else {
+            vocab_id = (term_type=='relationtype')
                             ?this.enum_container.find("#selPreview").val()
                             :this.enum_container.find("#selVocab").val();
-
-        vocab_id = $Db.getTermVocab(vocab_id);
-        
-        if(term_type=='relmarker' && !(vocab_id>0)){
-            //get first vocab in relationship group
-            var vocab_ids = $Db.trm_getVocabs('relation');
-            vocab_id = vocab_ids[0];
-/*            
-            $Db.vcg().each2(function(id,rec){
-                if(rec['vcg_Domain']=='relation'){
-                    
-                }
-            });
-*/            
+            vocab_id = $Db.getTermVocab(vocab_id); //get vocabulary for selected term
+            
+            if(term_type=='relmarker' && !(vocab_id>0)){
+                //get first vocab in relationship group
+                var vocab_ids = $Db.trm_getVocabs('relation');
+                vocab_id = vocab_ids[0];
+    /*            
+                $Db.vcg().each2(function(id,rec){
+                    if(rec['vcg_Domain']=='relation'){
+                        
+                    }
+                });
+    */            
+            }
+            
         }
-        
-                            
+
         var that = this;
         window.hWin.HEURIST4.ui.showEntityDialog('defTerms', 
-                {isdialog: true, 
-                 
-                 selection_on_init: vocab_id,  //selected vocabulary  
-                 innerTitle: false,
-                 innerCommonHeader: $('<div>modifying field :<b>'
-                        +(this._currentEditID>0?$Db.dty(this._currentEditID,'dty_Name'):'New field')
-                        +'</b> dropdown is populated from <b>'+$Db.trm(vocab_id,'trm_Label')+'</b> vocabulary</div>'),
-                 
-                 width: 1200, height:700,
-                 onClose: function(){
-                     if(term_type=='relationtype'){
+            {isdialog: true, 
+                //auxilary: vocab_id>0?'term':'vocabulary',
+                selection_on_init: vocab_id,  //selected vocabulary  
+                innerTitle: false,
+                innerCommonHeader: $('<div>modifying field :<b>'
+                    +(this._currentEditID>0?$Db.dty(this._currentEditID,'dty_Name'):'New field')
+                    +'</b> '
+                    + (vocab_id>0?('dropdown is populated from <b>'+$Db.trm(vocab_id,'trm_Label')+'</b> vocabulary')
+                        :'. Addition of new vocabulary')
+                    +'</div>'),
+
+                width: 1200, height:700,
+                onClose: function( context ){
+                    if(context>0 && vocab_id=='add_new'){ //change vocabulary for new addition only 
+                        that._editing.setFieldValueByName('dty_JsonTermIDTree', context);
+                    }
+                    if(term_type=='relationtype'){
                         that._recreateTermsPreviewSelector(); 
-                     }else{
+                    }else{
                         that._recreateTermsVocabSelector();    
-                     }
-                     
-                 }
+                    }
+
+                }
         });
-              
+
 /* H3 version        
         var sURL = window.hWin.HAPI4.baseURL + "admin/structure/terms/editTerms.php?"+
         "popup=1&treetype="+term_type+"&db="+window.hWin.HAPI4.database;
@@ -1353,6 +1371,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
     //
     _recreateTermsVocabSelector: function(newval){
         
+        //selected vocabulary
         var allTerms = newval>0?newval:this._editing.getValue('dty_JsonTermIDTree')[0];
         
         var term_type = this._editing.getValue('dty_Type')[0];
