@@ -101,13 +101,11 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                     (data.source != that.uuid && data.type == this.options.auxilary))
                 {
                     that.refreshRecordList();
-                    //that._loadData();
                 }else
                     if(data && (((data.type == 'vcg'||data.type == 'vocabulary') && that.options.auxilary=='vocabulary') 
                         || ((data.type == 'vocabulary'||data.type == 'term') && that.options.auxilary=='term')
                     )){
                         that._filterByVocabulary();
-                        //that._loadData();
                     }
 
 
@@ -621,7 +619,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
         }
         else { //if(this.options.select_mode=='select_single' || this.options.select_mode=='select_multi'){
-
+           //SELECT MODE
 
             var c1 = this.searchForm;//.find('div:first');
 
@@ -694,7 +692,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         that._loadData(true);
 
         return true;
-    },   
+    },//_initControls   
 
 
     //
@@ -777,16 +775,17 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
         if(this.options.auxilary=='vocabulary'){
             //show vocabs only
-            var recset = $Db.trm().getSubSetByRequest({'trm_ParentTermID':'=0', 'sort:trm_Label':1},
-                this.options.entity.fields);
+            var recset = $Db.trm()
+                    .getSubSetByRequest({'trm_ParentTermID':'=0', 'sort:trm_Label':1},
+                                            this.options.entity.fields);
             this.updateRecordList(null, {recordset:recset});
 
         }else{
-            this.updateRecordList(null, {recordset:$Db.trm()});
-            //if(is_first_call==true) 
+            //AAA this.updateRecordList(null, {recordset:$Db.trm()});
+            this._cachedRecordset = $Db.trm(); //updateRecordList is not used to avoid delay    
         }
         this._filterByVocabulary();
-
+        
     },
 
     //
@@ -2166,7 +2165,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 this.recordList.show();
                 this.recordList.resultList('applyViewMode','thumbs');
 
-            }else if(action=='viewmode-tree'){
+            }else if(action=='viewmode-tree'){ //NOT USED - @todo rempove all recordTree mentions
 
                 if(!this.recordTree){
                     this.recordTree = $('<div class="ent_content_full" style="display:none;"/>')
@@ -2526,7 +2525,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 if(context && context.result)
                 {
                     if(that.options.auxilary=='vocabulary'){
-                        that._loadData();
+                        that._loadData(); //reload
                     }else{
                         that._filterByVocabulary();    
                     }

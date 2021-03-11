@@ -1313,7 +1313,6 @@ $.widget( "heurist.manageEntity", {
         if (data){
             if(this.options.use_cache){
                 this._cachedRecordset = data.recordset;
-    
             }
             
             if(this.recordList.resultList('instance')){ //for editonly recordList is not inited
