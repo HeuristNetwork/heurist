@@ -345,6 +345,9 @@ $.widget( "heurist.searchBuilderItem", {
                         //user selector
                         field_type = 'user';
 
+                }else  if (this.options.dty_ID=='access'){
+                        
+                        field_type = 'access';
                 }else  if (this.options.dty_ID=='tag'){
                         // tag selector 
                         field_type = 'tag';
@@ -362,13 +365,14 @@ $.widget( "heurist.searchBuilderItem", {
 
         
         var eqopts = [];
+        var already2 = false;
 
         if(field_type=='geo'){
 
             eqopts = [{key:'',title:'within'}];
 
         }else if(field_type=='enum' || field_type=='resource' || field_type=='relmarker' 
-                || field_type=='keyword' || field_type=='user'){
+                 || field_type=='user' || field_type=='access'){
 
             eqopts = [{key:'',title:'equals'},
                       {key:'-',title:'not equals'}];   //- negate
@@ -427,6 +431,12 @@ Whole value = EQUAL
                     {key:'@',title:'any words'},  //full text
                     {key:'@--',title:'no word'},   //full text
                     {key:'', title:'──────────', disabled:true}];
+
+                if(this.options.dty_ID>0){
+                    already2 = true;
+                    eqopts.push({key:'any', title:'any value'});
+                    eqopts.push({key:'NULL', title:'not defined'});
+                }
                 
             }else{
                 eqopts = [
@@ -442,7 +452,7 @@ Whole value = EQUAL
                 ]);
         }
 
-        if(this.options.dty_ID>0 && field_type!='relmarker'){            
+        if(this.options.dty_ID>0 && field_type!='relmarker' && !already2){            
             eqopts.push({key:'any', title:'any value'});
             eqopts.push({key:'NULL', title:'not defined'});
         }

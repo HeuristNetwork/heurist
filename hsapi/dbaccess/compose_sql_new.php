@@ -1740,14 +1740,14 @@ class HPredicate {
             $datestamp0 = validateAndConvertToISO($vals[0]);
             $datestamp1 = validateAndConvertToISO($vals[1]);
 
-            return "between '$datestamp0' and '$datestamp1'";
+            return ($this->negate?'not ':'')."between '$datestamp0' and '$datestamp1'";
 
         }else{
 
             $datestamp = validateAndConvertToISO($this->value);
 
             if ($this->exact) {
-                return "= '$datestamp'";
+                return ($this->negate?'!':'')."= '$datestamp'";
             }
             else if ($this->lessthan) {
                 return "< '$datestamp'";
@@ -1756,21 +1756,22 @@ class HPredicate {
                 return "> '$datestamp'";
             }
             else {
-                return "LIKE '$datestamp%'";
+                //return "LIKE '$datestamp%'";
 
                 //old way
                 // it's a ":" ("like") query - try to figure out if the user means a whole year or month or default to a day
-                $match = preg_match('/^[0-9]{4}$/', $this->value, $matches);
+                /*$match = preg_match('/^[0-9]{4}$/', $this->value, $matches);
                 if (@$matches[0]) {
                     $date = $matches[0];
                 }
-                else if (preg_match('!^\d{4}[-/]\d{2}$!', $this->value)) {
-                    $date = date('Y-m', $timestamp);
+                else */
+                if (preg_match('!^\d{4}[-/]\d{2}$!', $this->value)) {
+                    $date = $this->value; //date('Y-m', $datestamp);
                 }
                 else {
-                    $date = date('Y-m-d', $timestamp);
+                    $date = $datestamp; //date('Y-m-d', $datestamp);
                 }
-                return "LIKE '$date%'";
+                return ($this->negate?'not ':'')."LIKE '$date%'";
             }
         }
     }
