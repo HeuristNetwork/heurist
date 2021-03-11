@@ -125,7 +125,7 @@ ui_additional_filter_label
 viewport - collapse facet to limit count of items
 
 rectypes[0] 
-*/
+*/            
 
 /*
 requires:
@@ -1341,6 +1341,25 @@ $.widget( "heurist.search_faceted", {
             
             var div_facets = this.facets_list.find(".facets");
             if(div_facets.length>0)  div_facets.empty();
+            
+            
+            var search_any_filter = window.hWin.HEURIST4.util.isJSON(this.options.params.add_filter);
+            if(search_any_filter==false){
+                if(this.options.params.add_filter){
+                    //check that this is not old search format
+                    var s = this.options.params.add_filter;
+                    var colon_pos = s.indexOf(':');
+                    if(colon_pos>0){
+                        //var pred_type = s.substring(0,colon_pos).toLowerCase();
+                        //if([].indexOf(pred_type)>=0){
+                            search_any_filter = s;
+                    }
+                        
+                    if(!search_any_filter) search_any_filter = {f:s};
+                }else{
+                    search_any_filter = '';
+                }
+            }
 
             //this approach adds supplemntary(preliminary) filter to every request 
             //it works however 
@@ -1349,7 +1368,7 @@ $.widget( "heurist.search_faceted", {
             //adds additional/supplementary and spatial filters
             this._current_query = window.hWin.HEURIST4.util.mergeHeuristQuery(query, 
                             (this._use_sup_filter)?this.options.params.sup_filter:'', 
-                            this.options.params.add_filter,
+                            search_any_filter,
                             this._prepareSpatial(this.options.params.spatial_filter));
             
             
