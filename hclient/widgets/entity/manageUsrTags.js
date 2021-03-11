@@ -372,7 +372,7 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
                 this._on(btns, {'click':this.onDeleteTag});
             }
             
-            //edit or select click
+            //edit on select click
             var items = this.recordList.find('div.recordDiv');
             this._on(items, {'click':this.onTagItemClick});
             
@@ -480,11 +480,18 @@ $.widget( "heurist.manageUsrTags", $.heurist.manageEntity, {
                             }else{
                                 
                                 this.selectedRecords([recid]);
-                                //this._onActionListener(event, {action:'edit'});
-                                //replace label with input element to edit/replace
-                                window.hWin.HEURIST4.util.stopEvent(event);
-                                this._showInlineEditorControls(item);
                                 
+                                var isSearch = $(event.target).is('.user-list-edit')
+                                window.hWin.HEURIST4.util.stopEvent(event);
+                                
+                                if(isSearch){
+                                    var sURL = window.hWin.HAPI4.baseURL + '?db='+window.hWin.HAPI4.database+'&q=tag:'+recid;
+                                    window.open(sURL)                                    
+                                } else{
+                                    //this._onActionListener(event, {action:'edit'});
+                                    //replace label with input element to edit/replace
+                                    this._showInlineEditorControls(item);
+                                }
                             }
                         }
     },
