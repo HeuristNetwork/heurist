@@ -1994,7 +1994,7 @@ label.small-header{
 option {padding-left:15px;}
 
 .ui-state-error{
-    color:red !important;
+    color:red;
     font-weight: bold;
     opacity: 1;
 }

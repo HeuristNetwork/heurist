@@ -863,37 +863,7 @@ $.widget( "heurist.editing_input", {
             $input = this._recreateSelector($input, value);
             $input = $($input);
             
-            function __onTermChange( event, data ){
-                
-                if(! $($input).attr('radiogroup')){
-                
-                    if($input.hSelect("instance")!=undefined){
-                        
-                        var opt = $input.find('option[value="'+$input.val()+'"]');
-                        var parentTerms = opt.attr('parents');
-                        if(parentTerms){
-                            $input.hSelect("widget").find('.ui-selectmenu-text').text( parentTerms+'.'+opt.text() );    
-                        }    
-                           
-                    }else{
-                        //restore plain text value               
-                        $input.find('option[term-view]').each(function(idx,opt){
-                            $(opt).text($(opt).attr('term-view'));
-                        });
-                        
-                        //assign for selected term value in format: parent.child 
-                        var opt = $input.find( "option:selected" );
-                        var parentTerms = opt.attr('parents');
-                        if(parentTerms){
-                             opt.text(parentTerms+'.'+opt.attr('term-orig'));
-                        }
-                    }
-                
-                }
-                that.onChange();
-            }
-            
-            $input.change( __onTermChange );
+            this._on( $input, {change:this._onTermChange} );
             
             var allTerms = this.f('rst_FieldConfig');    
             
@@ -920,19 +890,7 @@ $.widget( "heurist.editing_input", {
                 .css({'margin-top': '2px'})
                 .appendTo( $inputdiv );
 
-                function __showHideSelByImage(){
-                    var hasImage = ($input.find('option[term-img=1]').length>0);
-                    if(hasImage) {
-                        $input.css({'margin-right': '-44px', 'padding-right': '30px'});
-                        $btn_termsel.show();   
-                    }else{
-                        $input.css({'margin-right': 0, 'padding-right': 0});
-                        $btn_termsel.hide();   
-                    }
-                }
-                
-                __showHideSelByImage();
-                
+                this._showHideSelByImage($input);
 
                 this._on( $btn_termsel, { click: function(){
 
@@ -980,8 +938,6 @@ $.widget( "heurist.editing_input", {
 
                 }});
 
-                    
-                
                 var vocab_id = Number(allTerms);
 
                 if(window.hWin.HAPI4.is_admin()){            
@@ -991,35 +947,8 @@ $.widget( "heurist.editing_input", {
                     .css({'margin-top':'2px',cursor:'pointer'})
                     .appendTo( $inputdiv );
                     
-                    this._on( $btn_termedit2,{ click:
-                        function(){
-                            var rg_options = {
-                                height:800, width:1300,
-                                selection_on_init: allTerms,
-                                innerTitle: false,
-                                innerCommonHeader: $('<div>'
-                                    +(that.options.dtID>0?('modifying field :<b>'+$Db.dty(that.options.dtID,'dty_Name')+'</b>'):'')
-                                    +' dropdown is populated from <b>'+$Db.trm(allTerms,'trm_Label')+'</b> vocabulary</div>'),
-                                onInitFinished: function(){
-                                    var that2 = this;
-                                    setTimeout(function(){
-                                        that2.vocabularies_div.manageDefTerms('selectVocabulary', vocab_id);
-                                    },500);
-                                },
-                                onClose: function(){
-                                    $.each(that.inputs, function(index, input){ 
-                                        input = $(input);
-                                        input.css('width','auto');
-                                        input = that._recreateSelector(input, true);
-                                        input.change( __onTermChange );
-                                    });
-                                    __showHideSelByImage();                                    
-                                }
-                            };
-                            window.hWin.HEURIST4.ui.showEntityDialog('defTerms', rg_options);
-                        }
-                    });
-                
+                    this._on( $btn_termedit2,{ click: function(){ this._openManageTerms(vocab_id); }});
+                        
                 }
             
                 
@@ -1050,77 +979,16 @@ $.widget( "heurist.editing_input", {
                                 input = $(input);
                                 input.css('width','auto');
                                 input = that._recreateSelector(input, true);
-                                input.change( __onTermChange );
+                                that._on( input, {change:this._onTermChange} );
+                                that._showHideSelByImage(input);
+
                             });
-                            
-                            __showHideSelByImage();
                                 
                          }
                     };
                 window.hWin.HEURIST4.ui.showEntityDialog('defTerms', rg_options); // it recreates  
                 
                 return;
-//OLD version with admin/structure/terms                
-/*
-                if(isVocabulary){ 
-
-                    var type = (this.detailType!='enum')?'relation':'enum';
-                    
-                    var url = window.hWin.HAPI4.baseURL 
-                        + 'admin/structure/terms/editTermForm.php?db='+window.hWin.HAPI4.database
-                        + '&treetype='+type+'&parent='+Number(allTerms);
-                    
-                    window.hWin.HEURIST4.msg.showDialog(url, {height:340, width:700,
-                        title: 'Add Term',
-                        noClose: true, //hide close button
-                        //class:'ui-heurist-bg-light',
-                        onpopupload:function(dosframe){
-                            $(dosframe.contentDocument).find('#trmName').focus();
-                        },
-                        callback: function(context){
-                                $.each(that.inputs, function(index, input){ 
-                                    input = $(input);
-                                    input.css('width','auto');
-                                    input = that._recreateSelector(input, true);
-                                    input.change( __onTermChange );
-                                });
-                                
-                                __showHideSelByImage();
-                        }
-                    } );
-                    
-
-                }else{
-                    //NOT USED ANYMORE
-                    var url = window.hWin.HAPI4.baseURL 
-                        + 'admin/structure/terms/selectTerms.html?mode=editrecord&db='
-                        + window.hWin.HAPI4.database
-                        + '&detailTypeID='+this.options.dtID;
-
-                    window.hWin.HEURIST4.msg.showDialog(url, {height:540, width:750,
-                        title: 'Select Term',
-                        noClose: true, //hide close button
-                        //class:'ui-heurist-bg-light',
-                        callback: function(editedTermTree, editedDisabledTerms){
-                            if(editedTermTree || editedDisabledTerms) {
-                                
-                                that.options['dtFields']['rst_FilteredJsonTermIDTree'] = editedTermTree;
-                                that.options['dtFields']['rst_TermIDTreeNonSelectableIDs'] = editedDisabledTerms
-                                                                
-                                $.each(that.inputs, function(index, input){ 
-                                    input = $(input);
-                                    input.css('width','auto');
-                                    input = that._recreateSelector(input, true);
-                                    input.change( __onTermChange );
-                                });
-                                
-                                __showHideSelByImage();
-                            }
-                        }
-                    });
-                }                
-*/                
-                
                 
                 }} ); //end btn onclick
 
@@ -3025,7 +2893,95 @@ console.log('onpaste');
         }
         
     },
-
+    
+    //
+    //
+    //
+    _onTermChange: function( orig, data ){
+        
+        var $input = (orig.target)? $(orig.target): orig;
+         
+console.log('_onTermChange');
+                
+                if(! $input.attr('radiogroup')){
+                
+                    if($input.hSelect("instance")!=undefined){
+                        
+                        var opt = $input.find('option[value="'+$input.val()+'"]');
+                        var parentTerms = opt.attr('parents');
+                        if(parentTerms){
+                            $input.hSelect("widget").find('.ui-selectmenu-text').text( parentTerms+'.'+opt.text() );    
+                        }    
+                           
+                    }else{
+                        //restore plain text value               
+                        $input.find('option[term-view]').each(function(idx,opt){
+                            $(opt).text($(opt).attr('term-view'));
+                        });
+                        
+                        //assign for selected term value in format: parent.child 
+                        var opt = $input.find( "option:selected" );
+                        var parentTerms = opt.attr('parents');
+                        if(parentTerms){
+                             opt.text(parentTerms+'.'+opt.attr('term-orig'));
+                        }
+                    }
+                
+                }
+                this.onChange();
+    },
+    
+    //
+    //
+    //
+    _openManageTerms: function( vocab_id ){
+        
+        var that = this;
+        
+        var rg_options = {
+            height:800, width:1300,
+            selection_on_init: vocab_id,
+            innerTitle: false,
+            innerCommonHeader: $('<div>'
+                +(that.options.dtID>0?('modifying field :<b>'+$Db.dty(that.options.dtID,'dty_Name')+'</b>'):'')
+                +' dropdown is populated from <b>'+vocab_id+' '+$Db.trm(vocab_id, 'trm_Label')+'</b> vocabulary</div>'),
+            onInitFinished: function(){
+                var that2 = this;
+                setTimeout(function(){
+                    that2.vocabularies_div.manageDefTerms('selectVocabulary', vocab_id);
+                },500);
+            },
+            onClose: function(){
+                $.each(that.inputs, function(index, input){ 
+                    input = $(input);
+                    input.css('width','auto');
+                    input = that._recreateSelector(input, true);
+                    that._on( input, {change:that._onTermChange} );
+                    that._showHideSelByImage( input ); 
+                });
+                
+            }
+        };
+        
+        window.hWin.HEURIST4.ui.showEntityDialog('defTerms', rg_options);
+    },
+    
+    //
+    //
+    //
+    _showHideSelByImage: function($input){
+            var hasImage = ($input.find('option[term-img=1]').length>0);
+            
+            var $btn_termsel = $input.parent().find('.ui-icon-image');
+            
+            if(hasImage) {
+                $input.css({'margin-right': '-44px', 'padding-right': '30px'});
+                $btn_termsel.show();   
+            }else{
+                $input.css({'margin-right': 0, 'padding-right': 0});
+                $btn_termsel.hide();   
+            }
+    },
     //
     // recreate SELECT for enum/relation type
     //
@@ -3146,23 +3102,62 @@ console.log('onpaste');
             //value is not allowed
             if( !window.hWin.HEURIST4.util.isempty(allTerms) &&
                 window.hWin.HEURIST4.util.isNumber(value) && $input.val()!=value){
-                    
+                
+                this.error_message.css({'font-weight': 'bold', color: 'red'});    
+                var sMsg = null;
                 var name = $Db.trm(value,'trm_Label');
                 if(window.hWin.HEURIST4.util.isempty(name)){
+                    //missed
                     sMsg = 'The term code '+value+' recorded for this field is not recognised. Please select a term from the dropdown.';
                 }else{
+                    //exists however in different vocabulary
+                    //get name for this vocabulary
+                    var vocName = $Db.trm(allTerms,'trm_Label');
+                    //get name for term vocabulary
+                    var vocId2 = $Db.getTermVocab(value);
+                    var vocName2 = $Db.trm(vocId2, 'trm_Label');
+                    //check that the same name vocabulary exists in this vocabualry
+                    var code2 = $Db.getTermByLabel(allTerms, name);
+                    
+                    sMsg = '';
+                    if(code2>0){
+                        
+                        sMsg = '. Term (code '+code2+') with the same name already exists in "'
+                        +vocName+'". Select it in dropdown';
+                    }else{
+                        if(window.hWin.HAPI4.is_admin()){
+                            sMsg = '. If you are sure the term is not used by another field, you can '
+                            +'<a href="#" class="term-ref">move term</a> to the "'
+                            +vocName+'" vocabulary '
+                            +' Alternatively you may <a href="#" class="term-ref">create a reference</a> from vocabulary "'
+                            +vocName+'" to the term in its current location. ';
+                        }else {
+                            sMsg = sMsg + '. Ask database manager to correct this vocabulary';    
+                        }
+                    }
+                    
                     var opt = window.hWin.HEURIST4.ui.addoption($input[0], value, '!!! '+name); 
                     $(opt).attr('ui-state-error',1);
                     $input.val(value);
                     $input.hSelect('refresh');
-                    sMsg = 'The term "'+name+'" (code '+value+') is not valid for this field. '
-                    +'Please select from dropdown or modify field definition to include this term';
+                    sMsg = 'The term "'+name+'" (code '+value+') in vocabulary "'+vocName2
+                            +'" is not valid for this field which uses vocabulary "'+vocName+'" '
+                            +sMsg;
+                            
+                    this.error_message.css({'font-weight': 'normal', color: '#b15f4e'}); 
                 }
                 this.showErrorMsg(sMsg);
+
+                //this._on(this.error_message.find('.term-move'),{click:function(){}});
+                if(window.hWin.HAPI4.is_admin()){  
+                    this._on(this.error_message.find('.term-ref'),{click:function(){
+                           this._openManageTerms(allTerms);
+                    }});
+                };
                 
             }    
             
-        }
+        }                                                                   
         
         return $input;
     },
@@ -3172,7 +3167,7 @@ console.log('onpaste');
     //
     showErrorMsg: function(sMsg){
         if(!window.hWin.HEURIST4.util.isempty(sMsg)){
-            this.error_message.text(sMsg).show();    
+            this.error_message.html(sMsg).show();    
         }else{
             this.error_message.hide();
             $(this.inputs).removeClass('ui-state-error');

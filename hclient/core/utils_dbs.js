@@ -1249,7 +1249,7 @@ window.hWin.HEURIST4.dbs = {
     },
 
     //
-    //
+    //  Returns term ID in vocabulary by code
     //
     getTermByCode: function(vocab_id, code){
 
@@ -1262,6 +1262,24 @@ window.hWin.HEURIST4.dbs = {
         }
         return null;
     },
+
+    //
+    //  Returns term ID in vocabulary by label
+    //
+    getTermByLabel: function(vocab_id, label){
+
+        var _terms = $Db.trm_TreeData(vocab_id, 'set');
+        
+        label = label.toLowerCase();
+        
+        for(var i=0; i<_terms.length; i++){
+            if($Db.trm(_terms[i],'trm_Label').toLowerCase()==label){
+                return _terms[i];
+            }
+        }
+        return null;
+    },
+
     
     //
     // returns true if term belongs to vocabulary (including by reference)
