@@ -928,7 +928,9 @@ $.widget( "heurist.manageEntity", {
                  
                  
         //dialog buttons SELECT and CLOSE
-        if(this.options['select_mode']=='select_multi' || this.options['select_mode']=='select_roles'){ 
+        if( this.options.edit_mode!='popup' &&
+            (this.options['select_mode']=='select_multi' || this.options['select_mode']=='select_roles'))
+        { 
                 btn_array.push({text:window.hWin.HR( this.options['selectbutton_label'] ),
                         css:{'float':'right',margin:'.5em .4em .5em 0'},  
                         class: 'ui-button-action',
