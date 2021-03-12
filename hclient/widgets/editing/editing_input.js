@@ -180,7 +180,7 @@ $.widget( "heurist.editing_input", {
                 //.button({icon:"ui-icon-circlesmall-plus", showLabel:false, label:'Add another ' + lblTitle +' value'})
                 .attr('tabindex', '-1')
                 .attr('title', 'Add another ' + lblTitle +' value' )                    
-                .css({display:'table-cell', 'font-size':'2em', cursor:'pointer','vertical-align':'top', 'padding-top':'2px',
+                .css({display:'table-cell', 'font-size':'1.9em', cursor:'pointer','vertical-align':'top', //'padding-top':'2px',
                     'min-width':'22px',
 //outline_suppress does not work - so list all these props here explicitely                
                     outline: 'none','outline-style':'none', 'box-shadow':'none',  'border-color':'transparent'
@@ -217,7 +217,7 @@ $.widget( "heurist.editing_input", {
                         
                 }else if(this.detailType=="relmarker"){
                     
-                    $('<div style="float:right;padding-top:1px;width: 14px;"><span style="font-size:10px" class="ui-icon ui-icon-triangle-2-e-w"/></div>')                
+                    $('<div style="float:right;padding-top:1px;width: 14px;"><span style="font-size:11px" class="ui-icon ui-icon-triangle-2-e-w"/></div>')                
                         .appendTo( this.header )
                         this.header.css({'padding-right':0, width:154});
                         this.header.find('label').css({display:'inline-block', width: 135});
@@ -2404,7 +2404,8 @@ console.log('onpaste');
                                     if(that.options.is_faceted_search){
                                         $input.val(geovalue.summary).change();
                                     }else{
-                                        $input.val(geovalue.type+'  '+geovalue.summary).change();    
+                                        $input.val(geovalue.type+'  '+geovalue.summary);
+                                        $input.change();    
                                     }
                                     
                                     //$input.val(location.type+' '+location.wkt)
