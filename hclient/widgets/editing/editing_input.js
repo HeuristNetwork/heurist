@@ -3122,17 +3122,17 @@ console.log('_onTermChange');
                     sMsg = '';
                     if(code2>0){
                         
-                        sMsg = '. Term (code '+code2+') with the same name already exists in "'
-                        +vocName+'". Select it in dropdown';
+                        sMsg = '. Term (code '+code2+') with the same label already exists in "'
+                        +vocName+'".<br/>Either <a href="#" class="term-ref">use this term</a> or select the required term in the dropdown';
                     }else{
                         if(window.hWin.HAPI4.is_admin()){
-                            sMsg = '. If you are sure the term is not used by another field, you can '
+                            sMsg = '.<br>If you are sure the term is not used by another field, you can '
                             +'<a href="#" class="term-ref">move term</a> to the "'
-                            +vocName+'" vocabulary '
-                            +' Alternatively you may <a href="#" class="term-ref">create a reference</a> from vocabulary "'
+                            +vocName+'" vocabulary <br/>'
+                            +'Alternatively you may <a href="#" class="term-ref">create a reference</a> from vocabulary "'
                             +vocName+'" to the term in its current location. ';
                         }else {
-                            sMsg = sMsg + '. Ask database manager to correct this vocabulary';    
+                            sMsg = sMsg + '.<br/>Please ask the database manager to correct this vocabulary';    
                         }
                     }
                     
@@ -3141,7 +3141,7 @@ console.log('_onTermChange');
                     $input.val(value);
                     $input.hSelect('refresh');
                     sMsg = 'The term "'+name+'" (code '+value+') in vocabulary "'+vocName2
-                            +'" is not valid for this field which uses vocabulary "'+vocName+'" '
+                            +'" is not valid for this field which uses vocabulary "'+vocName+'"<br/>'
                             +sMsg;
                             
                     this.error_message.css({'font-weight': 'normal', color: '#b15f4e'}); 
