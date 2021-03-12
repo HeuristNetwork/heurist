@@ -492,8 +492,7 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
             $dosframe = $dlg.find('iframe');
             var content = $dosframe[0].contentWindow;
 
-            //close dialog from inside of frame
-            /*
+            //close dialog from inside of frame - need redifine each time
             content.close = function() {
                 var did = $dlg.attr('id');
 
@@ -508,12 +507,15 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                 $dlg.dialog('close');
                 return true;
             };
-            */       
-
+            
             $dlg.dialog('open');  
 
             if(options['params'] && $.isFunction(content.assignParameters)) {
                 content.assignParameters(options['params']);
+            }
+            if(options['height']>0 && options['width']>0){
+                 $dlg.dialog('option', 'width', options['width']);    
+                 $dlg.dialog('option', 'height', options['height']);    
             }
 
         }else{
