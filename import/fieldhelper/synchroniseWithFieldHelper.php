@@ -345,7 +345,7 @@ $system_folders = $system->getSystemFolders();
                         }
                     }
                 }else if ($dir) {
-                    print "<div style=\"color:red\">Folder is not found: $dir</div>";
+                    print "<div style=\"color:red\">Folder was not found: $dir</div>";
                 }
             }
         }

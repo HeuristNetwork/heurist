@@ -1523,7 +1523,7 @@ window.hWin.HEURIST4.ui = {
                                     
                                     if(status=='error'){
                                         
-                                        window.hWin.HEURIST4.msg.showMsgFlash('Sorry context help is not found',500);
+                                        window.hWin.HEURIST4.msg.showMsgFlash('Sorry context help was not found',1000);
                                         
                                     }else{
 
@@ -1564,7 +1564,7 @@ window.hWin.HEURIST4.ui = {
 
                                     if(status=='error'){
                                         
-                                        window.hWin.HEURIST4.msg.showMsgFlash('Sorry context help is not found');
+                                        window.hWin.HEURIST4.msg.showMsgFlash('Sorry context help was not found');
                                         __closeHelpDiv($helper_div);
                                         
                                     }else{

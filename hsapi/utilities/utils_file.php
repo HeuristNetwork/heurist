@@ -888,7 +888,7 @@ function createZipArchive($source, $only_these_folders, $destination, $verbose=t
         return false;
     }
     if (!file_exists($source)) {
-        echo "<br/>".$source." is not found";
+        echo "<br/>".$source." was not found";
         return false;
     }
 

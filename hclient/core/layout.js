@@ -1273,7 +1273,7 @@ console.log('Cardinal layout widget does not have proper options');
         }
     
         if(layout==null){
-            window.hWin.HEURIST4.msg.redirectToError('Layout ID:'+layoutid+' is not found. Verify your layout_default.js');
+            window.hWin.HEURIST4.msg.redirectToError('Layout ID:'+layoutid+' was not found. Verify your layout_default.js');
             if(layoutid!='H5Default') layout = _layoutGetById('H5Default');
             if(layout==null){
                 return;

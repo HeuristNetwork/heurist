@@ -755,7 +755,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
             }
 
             if(!_selectedRtyID || _selectedRtyID<1){
-                window.hWin.HEURIST4.msg.showMsgFlash('Record type is not defined',500);
+                window.hWin.HEURIST4.msg.showMsgFlash('Record type is not defined',1000);
                 $recTypeSelector.focus();
                 
                 return;

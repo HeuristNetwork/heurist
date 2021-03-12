@@ -729,7 +729,7 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
 
                             print "<div style='color:gray;padding-left:100px'>Added field ".$row3[0]." to structure. Based on FAIMS ".$row_recstr[0]." | ".$row3[1]."</div>";
                         }else{
-                            print  "<div style='color:red;padding-left:100px'>DETAIL NOT ADDED TO STRUCTURE. IT IS NOT FOUND. FAIMS:".$row_recstr[0]." !</div>";
+                            print  "<div style='color:red;padding-left:100px'>FIELD NOT ADDED TO STRUCTURE. IT WAS NOT FOUND. FAIMS:".$row_recstr[0]." !</div>";
                         }
                     }
 
@@ -869,7 +869,7 @@ $dt_Geo = (defined('DT_GEO_OBJECT')?DT_GEO_OBJECT:0);
 
                             print "<div style='color:gray;padding-left:100px'>Added field ".$row3[0]." to structure. Based on FAIMS ".$row_recstr[0]." | ".$row3[1]."</div>";
                         }else{
-                            print  "<div style='color:red;padding-left:100px'>DETAIL NOT ADDED TO STRUCTURE. IT IS NOT FOUND. FAIMS:".$row_recstr[0]." !</div>";
+                            print  "<div style='color:red;padding-left:100px'>FIELD NOT ADDED TO STRUCTURE. IT WAS NOT FOUND. FAIMS:".$row_recstr[0]." !</div>";
                         }
                     }
 

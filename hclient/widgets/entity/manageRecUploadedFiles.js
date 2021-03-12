@@ -413,8 +413,8 @@ $.widget( "heurist.manageRecUploadedFiles", $.heurist.manageEntity, {
                 
                 if(ext=='bin'){
                     ele2.editing_input('showErrorMsg', 'Cannot retrieve content type for given url '
-                    +' or mimetype is not found among allowed types.'
-                        +' Generic mimetype is selected. Please select or add mimetype manaully');
+                    +' or mimetype was not found among allowed types.'
+                        +' Generic mimetype has been selected. Please select or add mimetype manually.');
                     
                     /*
                     window.hWin.HEURIST4.msg.showMsgDlg();

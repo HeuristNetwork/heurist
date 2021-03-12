@@ -65,7 +65,7 @@ $.widget( "heurist.recordLookupCfg", {
         
         this._available_services = window.hWin.HAPI4.sysinfo['services_list'];
         if(!window.hWin.HEURIST4.util.isArrayNotEmpty(this._available_services)){
-            window.hWin.HEURIST4.msg.showMsgErr('There are not available services. Or configuration file is not found or broken');
+            window.hWin.HEURIST4.msg.showMsgErr('There are no available services, or the configuration file was not found or is broken');
             return;
         }
         

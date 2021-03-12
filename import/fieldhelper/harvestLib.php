@@ -157,7 +157,7 @@ function doHarvest($dirs_and_exts, $is_report, $imode) {
             }
         }else if ($dir) {
             if($is_report){
-                print "<div style=\"color:red\">Folder is not found: $dir</div>";
+                print "<div style=\"color:red\">Folder was not found: $dir</div>";
             }
         }
     }
