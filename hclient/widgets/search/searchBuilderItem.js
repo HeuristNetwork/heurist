@@ -92,19 +92,6 @@ $.widget( "heurist.searchBuilderItem", {
             .css({'display':'inline-block','vertical-align':'top','padding-top':'3px'})
             .appendTo(this.element);
             
-        // 1. Remove icon
-        this.remove_token = $( "<span>" )
-        .attr('title', 'Remove this search token' )
-        .addClass('ui-icon ui-icon-circle-b-close')
-        .css({'cursor':'pointer','font-size':'0.8em'})
-        .appendTo( this.sel_container );        
-
-        this._on( this.remove_token, { click: function(){
-            if($.isFunction(this.options.onremove)){
-                this.options.onremove.call(this);
-            }    
-        } });
-            
             
         // values container - consists of set of inputs (editing_input) and add/remove buttons
         this.values_container = $( '<fieldset>' )
@@ -131,6 +118,20 @@ $.widget( "heurist.searchBuilderItem", {
                 //this._onSelectField();
             }
         }});
+
+
+        // 1. Remove icon
+        this.remove_token = $( "<span>" )
+        .attr('title', 'Remove this search token' )
+        .addClass('ui-icon ui-icon-circle-b-close')
+        .css({'cursor':'pointer','font-size':'0.8em',visibility:'hidden'})
+        .appendTo( this.sel_container );        
+        
+        this._on( this.remove_token, { click: function(){
+            if($.isFunction(this.options.onremove)){
+                this.options.onremove.call(this);
+            }    
+        } });
             
         // 3a  negate  
         this.cb_negate = $( '<label><input type="checkbox">not</label>' )
@@ -167,6 +168,15 @@ $.widget( "heurist.searchBuilderItem", {
             .appendTo( this.sel_container );
         
 
+        var that = this;
+        this.sel_container.hover(function(){
+                   that.remove_token.css({visibility:'visible'});  },
+        function(){
+                   that.remove_token.css({visibility:'hidden'});
+        });
+        
+        
+        
 /*        var div_btn =  $('<div>').css({'width':(this.options.level<3)?'12em':'6em'}).appendTo(this.value_container); 
 
         var btn_delete = $( "<button>", {text:'Delete'})
@@ -350,6 +360,11 @@ $.widget( "heurist.searchBuilderItem", {
                     that.select_conjunction.parent().show();    
                 }
                 
+                if($.isFunction(that.options.onchange))
+                {
+                    that.options.onchange.call(this);
+                }
+        
             }
             
         };
@@ -530,6 +545,10 @@ Whole value = EQUAL
                 this._predicate_input_ele.editing_input('setBetweenMode', true);        
             }else{
                 this._predicate_input_ele.editing_input('setBetweenMode', false);        
+            }
+            
+            if($.isFunction(this.options.onchange)){
+                    this.options.onchange.call(this);
             }
             
         } });

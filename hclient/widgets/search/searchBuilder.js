@@ -317,6 +317,9 @@ $.widget( "heurist.searchBuilder", {
         var that = this;
 
         ele.searchBuilderSort({ rty_ID: rty_ID ,
+                        onchange: function(){
+                            that._doCompose();
+                        },
                         onremove: function(){
                             var id = this.element.attr('id');
                             $.each(that.sort_array,function(k,item){
@@ -327,7 +330,7 @@ $.widget( "heurist.searchBuilder", {
                                     return false;
                                 }
                             });
-                            
+                            that._doCompose();
                         }
         });
      
@@ -384,7 +387,7 @@ $.widget( "heurist.searchBuilder", {
                                         return false;
                                     }
                                 });
-                                
+                                that._doCompose();
                             },
                             onchange: function(){
                                 that._doCompose();
@@ -566,10 +569,12 @@ $.widget( "heurist.searchBuilder", {
             
             if(!this.options.is_dialog){
                 //add header and button set for inline mode
+                var h = this.element.find('.btn-preview').is(':checked') ?'82px':'50px';
+
                 this.element.css({'font-size':'0.9em'});
                 this.pnl_Rectype.css({top:'36px'});
-                this.pnl_Tree.css({top:'110px',bottom:'120px'});
-                this.pnl_Items.css({top:'110px',bottom:'120px'});
+                this.pnl_Tree.css({top:'110px', bottom:h});
+                this.pnl_Items.css({top:'110px', bottom:h});
                 this.pnl_Result.css({bottom:'40px'});
                 var _innerTitle = $('<div class="ui-heurist-header" style="top:0px;padding-left:10px;text-align:left">Filter builder</div>')
                     .insertBefore(this.pnl_Rectype);
@@ -586,10 +591,37 @@ $.widget( "heurist.searchBuilder", {
                 //button panel on the botom                        
                 var ele = this.element.find('.popup_buttons_div').show();
             
-                ele.find('.btn-search').button();
-                ele.find('.btn-save').button();
+                ele.find('.btn-search').button({icon:'ui-icon-filter'});
                 this._on(ele.find('.btn-search'),{click:this._doSearch});
+
+                ele.find('.btn-save').button().hide();
                 this._on(ele.find('.btn-save'),{click:this._doSaveSearch});
+                
+                this._on(ele.find('.btn-preview'),{change:function(e){
+                    
+                    
+                    if(this.element.find('.btn-preview').is(':checked')){
+                        var h = this.options.is_dialog ? '50px':'82px';                       
+                        this.pnl_Items.css('bottom',h);
+                        this.pnl_Tree.css('bottom',h);
+                        this.pnl_Result.show();
+                    }else{
+                        var h = this.options.is_dialog ? '0px':'50px';                       
+                        
+                        this.pnl_Items.css('bottom',h);
+                        this.pnl_Tree.css('bottom',h);
+                        this.pnl_Result.hide();
+                    }
+                }});
+                
+                if (window.clipboardData) { 
+                    this._on(ele.find('.btn-copy'),{click:function(e){
+                        if (window.clipboardData) clipboardData.setData('Text', this.pnl_Result.text());
+                    }});
+                }else{
+                    ele.find('.btn-copy').hide();
+                }
+                
             }
                 
                 
@@ -612,6 +644,7 @@ $.widget( "heurist.searchBuilder", {
     
     clearAll: function()
     {
+        this._doCompose();        
         
         this.pnl_Items.children('div:not(.btn_field_add)').remove();
         this.field_array = [];

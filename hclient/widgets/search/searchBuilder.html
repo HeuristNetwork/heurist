@@ -48,7 +48,7 @@
 -->
 
 
-<fieldset id="pnl_Items" style="display:none;position:absolute;left:0px;right:0;top:65px;bottom:40px;overflow-y: auto;">
+<fieldset id="pnl_Items" style="display:none;position:absolute;left:0px;right:0;top:65px;bottom:0px;overflow-y: auto;">
    
    <div class="btn_field_add search_field_add" style="color:#6A7C99;cursor:pointer;font-size:0.8em">
         <span class="ui-icon ui-icon-plus" style="font-size:1em;margin-left: 14px;"/> add field
@@ -63,7 +63,7 @@
 </fieldset>
 
 
-<div id="pnl_Tree" class="ui-widget-content" style="position:absolute;left:0;width:350px;top:0;bottom:40px;border-right:1px gray solid;display:none;">
+<div id="pnl_Tree" class="ui-widget-content" style="position:absolute;left:0;width:350px;top:0;bottom:0px;border-right:1px gray solid;display:none;">
 
     <label  class="rty-selected heurist-helper2" for="fsw_showreverse">
             <input type="checkbox" id="fsw_showreverse" style="vertical-align: middle;" />&nbsp;
@@ -75,13 +75,16 @@
 
 
 
-<div id="pnl_Result" style="position:absolute;height:40px;left:0;right:0;bottom:0px;border-top:1px gray solid">
+<div id="pnl_Result" style="position:absolute;height:40px;left:0;right:0;bottom:0px;border-top:1px gray solid;display:none">
 
 </div>
 
 <div class="ui-dialog-buttonpane ui-widget-content ui-helper-clearfix popup_buttons_div" style="display:none;padding:13px">
+
             <div class="ui-dialog-buttonset">
-                <div class="btn-search ui-button-action">Search</div>
+                <label><input type="checkbox" class="btn-preview"/>preview filter</label>
+                <a href="#" style="color:white;margin-left:10px" class="btn-copy">copy</a>
+                <div style="margin-left:40px" class="btn-search ui-button-action">Filter</div>
                 <div class="btn-save">Preview</div>
             </div>
 </div>
