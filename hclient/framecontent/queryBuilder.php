@@ -1,14 +1,15 @@
 <?php
 
     /**
-    * Query Builder Dialog   - EXPEREMENTAL
+    * Enhanced Filter Builder Dialog
     *
     * @package     Heurist academic knowledge management system
     * @link        http://HeuristNetwork.org
     * @copyright   (C) 2005-2020 University of Sydney
     * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+    * @designer    Ian Johnson <ian.johnson@sydney.edu.au>
     * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-    * @version     4.0
+    * @version     6.0
     */
 
     /*
@@ -36,7 +37,7 @@
                     
                     // init helper (see utils.js)
                     window.hWin.HEURIST4.ui.initHelper( {button:$('#btn_help'), 
-                            title:'Query Builder', 
+                            title:'Filter Builder', 
                             url:'../../context_help/search_query_builder.html #content'});
                 }
             }            

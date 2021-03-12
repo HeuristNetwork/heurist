@@ -1,11 +1,14 @@
 /**
-* Simpe query builder
+* Simple query builder
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
 * @copyright   (C) 2005-2020 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @designer    Ian Johnson     <ian.johnson@sydney.edu.au>
 * @note        Completely revised for Heurist version 4
+* @note        BEING REPLACVED WITH ENHANCED FILTER BUILDER IN VERSION 6
+* @TODO         DELETE WHEN NO LOGNER REFERENCED
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
 * @version     4.0
 */

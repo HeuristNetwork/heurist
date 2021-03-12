@@ -49,7 +49,7 @@ $.widget( "heurist.editing_input", {
         onrecreate: null, //onrefresh callback
         is_insert_mode:false,
         
-        is_faceted_search:false, //is input used in faceted search or query builder
+        is_faceted_search:false, //is input used in faceted search or filter builder
         is_between_mode:false    //duplicate input for freetext and dates for search mode 
     },
 

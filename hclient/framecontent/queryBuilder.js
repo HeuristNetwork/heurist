@@ -68,7 +68,7 @@ function hQueryBuilder(query_original, container) {
 
     }
 
-    //create query in given format from query builder items
+    //create query in given format from filter builder items
     function _getQuery(){
 
     }

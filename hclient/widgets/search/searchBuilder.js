@@ -5,8 +5,9 @@
 * @link        http://HeuristNetwork.org
 * @copyright   (C) 2005-2020 University of Sydney
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @designer    Ian Johnson     <ian.johnson@sydney.edu.au>
 * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-* @version     4.0
+* @version     6.0
 */
 
 /*
@@ -83,7 +84,7 @@ $.widget( "heurist.searchBuilder", {
                 draggable: this.options.is_modal, //!this.options.is_h6style,
                 //position: this.options.position,
                 
-                title: window.hWin.HR('Query builder'),
+                title: window.hWin.HR('Filter builder'),
                 resizeStop: function( event, ui ) {//fix bug
                         var pele = that.element.parents('div[role="dialog"]');
                         that.element.css({overflow: 'none !important', 'width':pele.width()-24 });
@@ -534,7 +535,7 @@ $.widget( "heurist.searchBuilder", {
                 this.pnl_Tree.css({top:'110px',bottom:'120px'});
                 this.pnl_Items.css({top:'110px',bottom:'120px'});
                 this.pnl_Result.css({bottom:'40px'});
-                var _innerTitle = $('<div class="ui-heurist-header" style="top:0px;padding-left:10px;text-align:left">Query builder</div>')
+                var _innerTitle = $('<div class="ui-heurist-header" style="top:0px;padding-left:10px;text-align:left">Filter builder</div>')
                     .insertBefore(this.pnl_Rectype);
                 
                 this._on(    
