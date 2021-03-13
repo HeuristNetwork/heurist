@@ -2588,6 +2588,12 @@ console.log('onpaste');
             });
 
         }
+        
+        //move term error message to last 
+        var trm_err = $inputdiv.find('.term-error-message');
+        if(trm_err.length>0){
+           trm_err.appendTo($inputdiv);
+        }
 
         return $input.attr('id');
 
@@ -2907,7 +2913,7 @@ console.log('onpaste');
         
         var $input = (orig.target)? $(orig.target): orig;
          
-console.log('_onTermChange');
+//console.log('_onTermChange');
                 
                 if(! $input.attr('radiogroup')){
                 
@@ -2934,6 +2940,10 @@ console.log('_onTermChange');
                     }
                 
                 }
+
+                //hide individual error                
+                $input.parent().find('.term-error-message').hide();
+                
                 this.onChange();
     },
     
@@ -3030,7 +3040,8 @@ console.log('_onTermChange');
                 }
                 
 
-            }else{
+            }
+            else{
 
                 if (!$.isArray(allTerms) && !window.hWin.HEURIST4.util.isempty(allTerms)) {
                     //is it CS string - convert to array
@@ -3068,7 +3079,8 @@ console.log('_onTermChange');
                            $($input).hSelect("refresh"); 
             }
 
-        }else{ //this is usual enumeration from defTerms
+        }
+        else{ //this is usual enumeration from defTerms
 
             var headerTerms = '';
             allTerms = this.f('rst_FilteredJsonTermIDTree');        
@@ -3104,6 +3116,11 @@ console.log('_onTermChange');
                $input.hSelect('widget').html('<span style="padding: 0.1em 2.1em 0.2em 0.2em">no terms defined, please add terms</span><span class="ui-selectmenu-icon ui-icon ui-icon-triangle-1-e"></span>'); 
             }
             
+            var err_ele = $input.parent().find('.term-error-message');
+            if(err_ele.length>0){
+                err_ele.remove();
+            }
+            
             //show error message on init                    
             //value is not allowed
             if( !window.hWin.HEURIST4.util.isempty(allTerms) &&
@@ -3128,17 +3145,20 @@ console.log('_onTermChange');
                     sMsg = '';
                     if(code2>0){
                         
-                        sMsg = '. Term (code '+code2+') with the same name already exists in "'
-                        +vocName+'". Select it in dropdown';
+                        sMsg = '.<br><span>Term (code '+code2+') with the same name already exists in "'
+                        +vocName+'". <a href="#" class="term-sel" data-term="'+code2+'">Use this term</a></span>';
                     }else{
                         if(window.hWin.HAPI4.is_admin()){
-                            sMsg = '. If you are sure the term is not used by another field, you can '
-                            +'<a href="#" class="term-ref">move term</a> to the "'
+                            sMsg = '.<br><span>If you are sure the term is not used by another field, you can '
+                            +'<a href="#" class="term-move">move term</a> to the "'
                             +vocName+'" vocabulary '
-                            +' Alternatively you may <a href="#" class="term-ref">create a reference</a> from vocabulary "'
-                            +vocName+'" to the term in its current location. ';
+                            +' Alternatively you may <a href="#" class="term-ref" data-term="'
+                                +value+'"  data-vocab="'
+                                +allTerms+'">create a reference</a> from vocabulary "'
+                            +vocName+'" to the term in its current location.</span>';
                         }else {
-                            sMsg = sMsg + '. Ask database manager to correct this vocabulary';    
+                            sMsg = sMsg + 
+                            '.<br><span>Ask database manager to correct this vocabulary</span>';    
                         }
                     }
                     
@@ -3146,27 +3166,68 @@ console.log('_onTermChange');
                     $(opt).attr('ui-state-error',1);
                     $input.val(value);
                     $input.hSelect('refresh');
-                    sMsg = 'The term "'+name+'" (code '+value+') in vocabulary "'+vocName2
-                            +'" is not valid for this field which uses vocabulary "'+vocName+'" '
+                    sMsg = '<span class="heurist-prompt ui-state-error">'
+                            +'The term "'+name+'" (code '+value+') in vocabulary "'+vocName2
+                            +'" is not valid for this field which uses vocabulary "'+vocName+'" </span>'
                             +sMsg;
                             
                     this.error_message.css({'font-weight': 'normal', color: '#b15f4e'}); 
                 }
-                this.showErrorMsg(sMsg);
 
-                //this._on(this.error_message.find('.term-move'),{click:function(){}});
-                if(window.hWin.HAPI4.is_admin()){  
-                    this._on(this.error_message.find('.term-ref'),{click:function(){
-                           this._openManageTerms(allTerms);
+                if(!window.hWin.HEURIST4.util.isempty(sMsg)){
+                    //add error message per every term
+                    
+                    err_ele = $( "<div>")
+                        .addClass('term-error-message')
+                        .html(sMsg)
+                        .css({'height': 'auto',
+                            'width': 'fit-content',
+                            'padding': '0.2em',
+                            'border': 0,
+                            'margin-bottom': '0.2em'})
+                        .appendTo( $input.parent() );
+                    
+                    err_ele.find('.ui-state-error')
+                        .css({color:'#b36b6b',
+                              border: 'none',
+                             'font-weight': 'normal'        
+                        });
+                    
+                
+                    //this.showErrorMsg(sMsg);
+                    
+                    this._on(err_ele.find('.term-sel'),{click:function(e){
+                        var trm_id = $(e.target).attr('data-term');
+                        $input.val(trm_id);
+                        $input.hSelect('refresh');
+                        $input.change();
                     }});
-                };
+                    
+
+                    //this._on(this.error_message.find('.term-move'),{click:function(){}});
+                    if(window.hWin.HAPI4.is_admin()){  
+                        var that = this;
+                        this._on(err_ele.find('.term-ref'),{click:function(e){
+                            var trm_id = $(e.target).attr('data-term');
+                            var voc_id = $(e.target).attr('data-vocab');
+                            $Db.setTermReferences(voc_id, trm_id, null, 
+                            function(){
+                                window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, 
+                                    { source:this.uuid, type:'trm' });    
+                                that._recreateSelector($input, value);
+                            });
+                               //this._openManageTerms(allTerms);
+                        }});
+                    };
+                }
+                
                 
             }    
             
         }                                                                   
         
         return $input;
-    },
+    },//_recreateSelector
     
     //
     //
