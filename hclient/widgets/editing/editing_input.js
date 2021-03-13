@@ -174,16 +174,21 @@ $.widget( "heurist.editing_input", {
             
                 is_sortable = !that.options.is_faceted_search; 
             
+                var btn_cont = $('<span>')
+                    .css({display:'table-cell', 'vertical-align':'top', //'padding-top':'2px',
+                            'min-width':'22px',  'border-color':'transparent'})
+                    .appendTo( this.element )
+            
                 this.btn_add = $( "<span>")
-                .addClass("smallbutton editint-inout-repeat-button ui-icon-circlesmall-plus")
-                .appendTo( this.element )
+                    .addClass("smallbutton editint-inout-repeat-button ui-icon-circlesmall-plus")
+                    .appendTo( btn_cont )
                 //.button({icon:"ui-icon-circlesmall-plus", showLabel:false, label:'Add another ' + lblTitle +' value'})
                 .attr('tabindex', '-1')
                 .attr('title', 'Add another ' + lblTitle +' value' )                    
-                .css({display:'table-cell', 'font-size':'1.9em', cursor:'pointer','vertical-align':'top', //'padding-top':'2px',
+                .css({display:'block', 'font-size':'1.9em', cursor:'pointer','vertical-align':'top', //'padding-top':'2px',
                     'min-width':'22px',
 //outline_suppress does not work - so list all these props here explicitely                
-                    outline: 'none','outline-style':'none', 'box-shadow':'none',  'border-color':'transparent'
+                    outline: 'none','outline-style':'none', 'box-shadow':'none'
                 });
                 
                 if(this.detailType=="blocktext"){

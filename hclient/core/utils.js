@@ -903,87 +903,87 @@ window.hWin.HEURIST4.util = {
     // Parse string date using Temoral library
     //
     parseDates: function(start, end){
-         if(window['Temporal'] && (start || end)){   
-                //Temporal.isValidFormat(start)){
-                if(start==null && end!=null){
-                    start = end;
-                    end = null;
-                }
-                
-                            // for VISJS timeline - must be ISO string
-                            function __forVis(dt){
-                                if(dt){
-                                    if(!dt.getMonth()){
-                                        dt.setMonth(1)
-                                    }
-                                    if(!dt.getDay()){
-                                        dt.setDay(1)
-                                    }
-                                    
-                                    var res = dt.toString('yyyy-MM-ddTHH:mm:ssz');
-                                    if(false && res.indexOf('-')==0){ //BCE
-                                        res = res.substring(1);
-                                        //for proper parsing need 6 digit year
-                                        res = '-00'+res;//.substring(res.length));
-                                    }
-                                    return res;
-                                }else{
-                                    return '';
-                                }
-                                
-                            }    
-                
-                
-                            try{
-                                var temporal;
-                                if(start!="" && $.type( start ) === "string"){
-                                
-                                    if(start.search(/VER=/)!==-1){
-                                        temporal = new Temporal(start);
-                                        if(temporal){
-                                            var dt = temporal.getTDate('PDB');  //probable begin
-                                            if(!dt) dt = temporal.getTDate('TPQ');
-                                            
-                                            if(dt){ //this is range - find end date
-                                                var dt2 = temporal.getTDate('PDE'); //probable end
-                                                if(!dt2) dt2 = temporal.getTDate('TAQ');
-                                                end = __forVis(dt2);
-                                            }else{
-                                                dt = temporal.getTDate('DAT');  //simple date
-                                            }
-                                            
-                                            if(dt){
-                                                start = __forVis(dt);
-                                            }else{
-                                                return null;
-                                            }
-                                        }
-                                    }else{
-                                        start = __forVis(new TDate(start));
-                                    }
-                                }
+        if(window['Temporal'] && (start || end)){   
+            //Temporal.isValidFormat(start)){
+            if(start==null && end!=null){
+                start = end;
+                end = null;
+            }
 
-                                if(start!="" && $.type( end ) === "string") {
-                                    if(end.search(/VER=/)!==-1){
-                                        temporal = new Temporal(end);
-                                        if(temporal){
-                                            var dt = temporal.getTDate('PDE'); //probable end
-                                            if(!dt) dt = temporal.getTDate('TAQ');
-                                            if(!dt) dt = temporal.getTDate('DAT');
-                                            end = __forVis(dt);
-                                        }
-                                    }else{
-                                        end = __forVis(new TDate(end));
-                                    }
-                                }
-                            }catch(e){
+            // for VISJS timeline - must be ISO string
+            function __forVis(dt){
+                if(dt){
+                    if(!dt.getMonth()){
+                        dt.setMonth(1)
+                    }
+                    if(!dt.getDay()){
+                        dt.setDay(1)
+                    }
+
+                    var res = dt.toString('yyyy-MM-ddTHH:mm:ssz');
+                    if(false && res.indexOf('-')==0){ //BCE
+                        res = res.substring(1);
+                        //for proper parsing need 6 digit year
+                        res = '-00'+res;//.substring(res.length));
+                    }
+                    return res;
+                }else{
+                    return '';
+                }
+
+            }    
+
+
+            try{
+                var temporal;
+                if(start!="" && $.type( start ) === "string"){
+
+                    if(start.search(/VER=/)!==-1){
+                        temporal = new Temporal(start);
+                        if(temporal){
+                            var dt = temporal.getTDate('PDB');  //probable begin
+                            if(!dt) dt = temporal.getTDate('TPQ');
+
+                            if(dt){ //this is range - find end date
+                                var dt2 = temporal.getTDate('PDE'); //probable end
+                                if(!dt2) dt2 = temporal.getTDate('TAQ');
+                                end = __forVis(dt2);
+                            }else{
+                                dt = temporal.getTDate('DAT');  //simple date
+                            }
+
+                            if(dt){
+                                start = __forVis(dt);
+                            }else{
                                 return null;
                             }
-                            return [start, end];
-         }
-         return null;
-   },    
-    
+                        }
+                    }else{
+                        start = __forVis(new TDate(start));
+                    }
+                }
+
+                if(start!="" && $.type( end ) === "string") {
+                    if(end.search(/VER=/)!==-1){
+                        temporal = new Temporal(end);
+                        if(temporal){
+                            var dt = temporal.getTDate('PDE'); //probable end
+                            if(!dt) dt = temporal.getTDate('TAQ');
+                            if(!dt) dt = temporal.getTDate('DAT');
+                            end = __forVis(dt);
+                        }
+                    }else{
+                        end = __forVis(new TDate(end));
+                    }
+                }
+            }catch(e){
+                return null;
+            }
+            return [start, end];
+        }
+        return null;
+    },    
+
     //
     // Get CSS property value for a not yet applied class
     //
@@ -996,7 +996,7 @@ window.hWin.HEURIST4.util = {
             $inspector.remove(); // and remove from DOM
         }
     },
-    
+
     //
     //
     //
@@ -1033,21 +1033,21 @@ window.hWin.HEURIST4.util = {
         return json;        
 
     },
-    
-    
+
+
     /*: function(e){
-        for(var r=0,i=0;i<e.length;i++){
-            r=(r<<5)-r+e.charCodeAt(i),r&=r;   
-        }
-        return r
+    for(var r=0,i=0;i<e.length;i++){
+    r=(r<<5)-r+e.charCodeAt(i),r&=r;   
+    }
+    return r
     },*/
 
     hashString: function(str) {
-    
+
         var hash = 0, i, c;
         var strlen = str?str.length:0;
         if (strlen == 0) return hash;
-        
+
         for (i = 0; i < strlen; i++) {
             c = str.charCodeAt(i);
             hash = ((hash<<5)-hash)+c;
@@ -1057,19 +1057,19 @@ window.hWin.HEURIST4.util = {
     },
 
     formatFileSize: function (bytes) {
-            if (typeof bytes !== 'number') {
-                return '';
-            }
-            if (bytes >= 1000000000) {
-                return (bytes / 1000000000).toFixed(2) + ' GB';
-            }
-            if (bytes >= 1000000) {
-                return (bytes / 1000000).toFixed(2) + ' MB';
-            }
-            return (bytes / 1000).toFixed(2) + ' KB';
+        if (typeof bytes !== 'number') {
+            return '';
+        }
+        if (bytes >= 1000000000) {
+            return (bytes / 1000000000).toFixed(2) + ' GB';
+        }
+        if (bytes >= 1000000) {
+            return (bytes / 1000000).toFixed(2) + ' MB';
+        }
+        return (bytes / 1000).toFixed(2) + ' KB';
     },
-    
-    
+
+
     //
     // download given url as a file (repalcement of usage A)
     //
@@ -1080,25 +1080,25 @@ window.hWin.HEURIST4.util = {
             $idown = $('<iframe>', { id:'idown' }).hide().appendTo('body');
         }
         if ($.isFunction(callback)) {
-                $idown.on('load', callback);   
+            $idown.on('load', callback);   
         }
         $idown.attr('src',url);
     },
-        
+
     //
     // download content of given element (for example text area) as a text file
     //
     downloadInnerHtml: function (filename, ele, mimeType) {
-        
-            var elHtml = $(ele).html();
-            window.hWin.HEURIST4.util.downloadData(filename, elHtml, mimeType);
+
+        var elHtml = $(ele).html();
+        window.hWin.HEURIST4.util.downloadData(filename, elHtml, mimeType);
     }, 
-       
+
     //
     // download some data locally
     //
     downloadData: function (filename, data, mimeType) {
-        
+
         mimeType = mimeType || 'text/plain';
         var  content = 'data:' + mimeType  +  ';charset=utf-8,' + encodeURIComponent(data);
 
@@ -1121,31 +1121,31 @@ window.hWin.HEURIST4.util = {
             document.body.appendChild(link);
             link.click();        
         }
-        
+
     },    
-    
-    
+
+
     isRecordSet: function(recordset){
         return !window.hWin.HEURIST4.util.isnull(recordset) && $.isFunction(recordset.isA) && recordset.isA("hRecordSet");   
     },
-    
+
     random: function(){
         //Math.round(new Date().getTime() + (Math.random() * 100));
         return Math.floor((Math.random() * 10000) + 1);
     },
-    
+
     //scan all frames of current window and return object by name
     findObjInFrame: function(name){
-      
-      var i, frames;
-      frames = document.getElementsByTagName("iframe");
-      for (i = 0; i < frames.length; ++i)
-      {  
-         if( !window.hWin.HEURIST4.util.isnull(frames[i]['contentWindow'][name])){
-             return frames[i]['contentWindow'][name];
-         }
-      }
-      return null;
+
+        var i, frames;
+        frames = document.getElementsByTagName("iframe");
+        for (i = 0; i < frames.length; ++i)
+        {  
+            if( !window.hWin.HEURIST4.util.isnull(frames[i]['contentWindow'][name])){
+                return frames[i]['contentWindow'][name];
+            }
+        }
+        return null;
     },
 
     getMediaServerFromURL:function(filename){
@@ -1160,7 +1160,7 @@ window.hWin.HEURIST4.util = {
             return null;
         }
     },
-    
+
     getFileExtension:function(filename){
         // (/[.]/.exec(filename)) ? /[^.]+$/.exec(filename)[0] : undefined;
         // filename.split('.').pop();
@@ -1171,20 +1171,20 @@ window.hWin.HEURIST4.util = {
         }else{
             return '';
         }
-        
+
     },
-    
+
     //
     //
     //
     versionCompare: function(v1, v2, options) {
-         // determines if the version in the cache (v1) is older than the version in configIni.php (v2)
-         // used to detect change in version so that user is prompted to clear cache and reload
-         // returns -1 if v1 is older, -2 v1 is newer, +1 if they are the same
+        // determines if the version in the cache (v1) is older than the version in configIni.php (v2)
+        // used to detect change in version so that user is prompted to clear cache and reload
+        // returns -1 if v1 is older, -2 v1 is newer, +1 if they are the same
         var lexicographical = options && options.lexicographical,
-            zeroExtend = options && options.zeroExtend,
-            v1parts = v1.split('.'),
-            v2parts = v2.split('.');
+        zeroExtend = options && options.zeroExtend,
+        v1parts = v1.split('.'),
+        v2parts = v2.split('.');
 
         function isValidPart(x) {
             return (lexicographical ? /^\d+[A-Za-z]*$/ : /^\d+$/).test(x);
@@ -1226,28 +1226,28 @@ window.hWin.HEURIST4.util = {
 
         return 0;
     },
-    
+
     uniqueArray: function(arr){
-        
-            var n = {},r=[];
-            for(var i = 0; i < arr.length; i++) 
+
+        var n = {},r=[];
+        for(var i = 0; i < arr.length; i++) 
+        {
+            if($.isPlainObject(arr[i])){
+                r.push(arr[i]);
+            }else if (!n[arr[i]]) 
             {
-                if($.isPlainObject(arr[i])){
-                    r.push(arr[i]);
-                }else if (!n[arr[i]]) 
-                {
-                    n[arr[i]] = true; 
-                    r.push(arr[i]); 
-                }
+                n[arr[i]] = true; 
+                r.push(arr[i]); 
             }
-            return r;            
+        }
+        return r;            
     },
-    
+
     //not strict search - valuable for numeric vs string 
     findArrayIndex: function(elt, arr /*, from*/)
     {
         if( window.hWin.HEURIST4.util.isempty(arr) ) return -1;
-        
+
         var len = arr.length;
 
         var from = Number(arguments[2]) || 0;
@@ -1265,16 +1265,31 @@ window.hWin.HEURIST4.util = {
         }
         return -1;
     },
-    
+
     //
     // assumed that sdate is in UTC
     //
     getTimeForLocalTimeZone: function (sdate){
         var date = new Date(sdate+"+00:00");
         return (''+date.getHours()).padStart(2, "0")
-                +':'+(''+date.getMinutes()).padStart(2, "0")
-                +':'+(''+date.getSeconds()).padStart(2, "0");
-    }
+        +':'+(''+date.getMinutes()).padStart(2, "0")
+        +':'+(''+date.getSeconds()).padStart(2, "0");
+    },
+
+    //
+    //flflnaixr
+    //
+    copyStringToClipboard: function(string_to_copy) {
+        function handler (event){
+            event.clipboardData.setData('text/plain', string_to_copy);
+            event.preventDefault();
+            document.removeEventListener('copy', handler, true);
+        }
+
+        document.addEventListener('copy', handler, true);
+        document.execCommand('copy');
+    }          
+    
 }//end util
 
 //-------------------------------------------------------------

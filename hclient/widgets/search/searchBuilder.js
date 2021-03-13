@@ -79,7 +79,7 @@ $.widget( "heurist.searchBuilder", {
             this._dialog = this.element.dialog({
                 autoOpen: false,
                 height: 450,
-                width:700,
+                width:750,
                 modal: this.options.is_modal,
 
                 resizable: true, //!is_h6style,
@@ -330,9 +330,21 @@ $.widget( "heurist.searchBuilder", {
                                     return false;
                                 }
                             });
+                            
+                            if(that.sort_array.length==0){
+                                 that.addSortItem();
+                            }else{
+                                that.pnl_Items.find('.sort_header').css('visibility','hidden');
+                                that.pnl_Items.find('.sort_header:first').css('visibility','visible');
+                            }
+                            
                             that._doCompose();
                         }
         });
+     
+        if(this.sort_array.length>1){
+            ele.find('.sort_header').css('visibility','hidden');
+        }
      
         this.adjustDimension();
         
@@ -384,9 +396,16 @@ $.widget( "heurist.searchBuilder", {
                                         that.field_array.splice(k,1);
                                         that.pnl_Items.find('#'+id).remove();    
                                         that.adjustDimension();
+                                        
                                         return false;
                                     }
                                 });
+                                if(that.field_array.length==0){
+                                     that.btnAddFieldItem.click();
+                                }else{
+                                    that.pnl_Items.find('.field_header').css('visibility','hidden');
+                                    that.pnl_Items.find('.field_header:first').css('visibility','visible');
+                                }
                                 that._doCompose();
                             },
                             onchange: function(){
@@ -397,6 +416,10 @@ $.widget( "heurist.searchBuilder", {
                                 that.showFieldSelector( id );
                             }
                     });
+                    
+                    if(this.field_array.length>1){
+                        ele.find('.field_header').css('visibility','hidden');
+                    }
                 }
                 
                 this.adjustDimension();
@@ -614,13 +637,11 @@ $.widget( "heurist.searchBuilder", {
                     }
                 }});
                 
-                if (window.clipboardData) { 
-                    this._on(ele.find('.btn-copy'),{click:function(e){
-                        if (window.clipboardData) clipboardData.setData('Text', this.pnl_Result.text());
-                    }});
-                }else{
-                    ele.find('.btn-copy').hide();
-                }
+                
+                this._on(ele.find('.btn-copy'),{click:function(e){
+                        var s = this.pnl_Result.text();
+                        if(s) window.hWin.HEURIST4.util.copyStringToClipboard(s);
+                }});
                 
             }
                 

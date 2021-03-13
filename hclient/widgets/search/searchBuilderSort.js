@@ -69,6 +69,11 @@ $.widget( "heurist.searchBuilderSort", {
             .css({'display':'inline-block','vertical-align':'top','padding-top':'3px'})
             .appendTo(this.element);
             
+        $('<div class="header_narrow sort_header" '
+        +'style="min-width:83px;display:inline-block;text-align:right;padding-right: 5px;">'
+        +'<label for="opt_rectypes">Sort by</label></div>')
+            .appendTo( this.sel_container );
+            
         // 2. field selector for field or links tokens
         this.select_fields = $( '<select>' )
             .attr('title', 'Select field' )

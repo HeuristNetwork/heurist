@@ -84,19 +84,24 @@ $.widget( "heurist.searchBuilderItem", {
         
         // 0. Label (header)
         this.label_token = $( "<div>" )
-            .css({"font-size":"smaller",'padding-left':'12px',width:'95%','margin-top':'4px'})
+            .css({"font-size":"smaller",'padding-left':'83px',width:'95%','margin-top':'4px'})
             .appendTo( this.element ); //10px 0 10px 20px,'border-top':'1px solid lightgray' 
 
         // selector container - for fields and comparison
         this.sel_container = $('<div>')
             .css({'display':'inline-block','vertical-align':'top','padding-top':'3px'})
             .appendTo(this.element);
-            
-            
+
         // values container - consists of set of inputs (editing_input) and add/remove buttons
         this.values_container = $( '<fieldset>' )
             .css({'display':'inline-block','padding':0}) //,'margin-bottom': '2px'
             .appendTo( this.element );
+
+            
+        $('<div class="header_narrow field_header" '
+        +'style="min-width:83px;display:inline-block;text-align:right;padding-right: 5px;">'
+        +'<label for="opt_rectypes">Criteria</label></div>')
+            .appendTo( this.sel_container );
         
         // 2. field selector for field or links tokens
         this.select_fields = $( '<select>' )
@@ -144,21 +149,20 @@ $.widget( "heurist.searchBuilderItem", {
         this.select_comparison = $( '<select>' )
             .attr('title', 'Select compare operator' )
             .addClass('text ui-corner-all')
-            .css({'margin':'0 1em','min-width':'90px','max-width':'90px',border:'none'})
+            .css({'margin-left':'1em','min-width':'99px','max-width':'99px',border:'none'})
             //.hide()
             .appendTo( this.sel_container );
 
             
         // 4. conjunction selector for multivalues
-        var ele = $('<div>').css('padding-top','2px').hide().appendTo( this.sel_container );
-        this.select_conjunction = $( "<select><option>any</option><option>all</option></select>" )
+        //var ele = $('<div>').css('padding-top','2px').hide().appendTo( this.sel_container );
+        this.select_conjunction = $( '<select><option value="any">or</option><option value="all">and</option></select>' )
             .attr('title', 'Should field satisfy all criteria or any of them' )
             .addClass('text ui-corner-all')
-            .css('float','right')
-            //.hide()
-            .appendTo( ele );
-
-
+            .css({'margin':'5px 0px 2px',border:'none'}) //,'margin-right':'-21px'
+            .appendTo( this.sel_container )
+            .hide();
+            
         
         this.select_relationtype = $( '<select>' )
             .attr('title', 'Select relation type' )
@@ -353,12 +357,7 @@ $.widget( "heurist.searchBuilderItem", {
             is_faceted_search: true,
             
             change: function(){
-                var vals = this.getValues();
-                if(vals.length<2){
-                    that.select_conjunction.parent().hide();    
-                }else{
-                    that.select_conjunction.parent().show();    
-                }
+                that._manageConjunction();
                 
                 if($.isFunction(that.options.onchange))
                 {
@@ -390,7 +389,8 @@ $.widget( "heurist.searchBuilderItem", {
             ed_options['detailtype'] = field_type;
             ed_options['dtID'] = this.options.dty_ID;
 
-        }else{        
+        }
+        else{        
             //non base fields inputs
 
             if(!field_type){
@@ -522,18 +522,24 @@ Whole value = EQUAL
 
 
         window.hWin.HEURIST4.ui.createSelector(this.select_comparison.get(0), eqopts);
+
+        this._on( this.select_conjunction, { change: function(){
+            this._manageConjunction();
+            if($.isFunction(this.options.onchange)){
+                    this.options.onchange.call(this);
+            }
+        }});
         
         this._on( this.select_comparison, { change: function(){
 
             var cval = this.select_comparison.val();
-            if(cval=='NULL' || cval=='any'){
+            if(cval=='NULL' || cval=='any' ){
                 this._predicate_input_ele.hide();
                 this.select_conjunction.hide();
                 this.cb_negate.hide();
             }else{
                 this._predicate_input_ele.show();
-                this.select_conjunction.show();
-                
+                this._manageConjunction();
                 //this.cb_negate.show();
             }
             if(cval=='@' 
@@ -556,6 +562,7 @@ Whole value = EQUAL
         this._current_field_type = field_type;
         //clear input values
         if(this._predicate_input_ele){
+            this.select_conjunction.appendTo(this.sel_container); //back to selcontainer
             this._predicate_input_ele.remove(); this._predicate_input_ele = null;    
         }
         if(this._predicate_reltype_ele){
@@ -575,9 +582,18 @@ Whole value = EQUAL
             
         } 
         
+        //init input elements
         this._predicate_input_ele = $("<div>")
             .editing_input(ed_options).appendTo(this.values_container);
-
+            
+        //transfer conjunction to input element
+        var ele = this._predicate_input_ele.find('.editint-inout-repeat-button')
+                    .css({'margin-left':'22px','min-width':'16px'});
+        var ele = ele.parent();
+        ele.css('min-width','40px');
+        this.select_conjunction.appendTo(ele);
+        this.select_conjunction.hide();
+            
         this.select_comparison.trigger('change');
     },
 
@@ -621,6 +637,7 @@ Whole value = EQUAL
                     op = '';
                     vals = ['NULL'];
             }else if( (this._current_field_type=='enum' 
+                        || this._current_field_type=='ids'
                         || this._current_field_type=='user'
                         || this._current_field_type=='resource') 
                     && vals.length>1 && this.select_conjunction.val()=='any')
@@ -719,6 +736,42 @@ Whole value = EQUAL
             
         this._defineInputElement();
         
-    }
+    },
+    
+
+    _manageConjunction: function()
+    {                
+        this.select_conjunction.parent().find('.conj').remove(); //previous
+        var ft = this._current_field_type;
+
+        var vals = !this._predicate_input_ele?0:this._predicate_input_ele.editing_input('getValues');
+        
+        if(ft=='user' ||  ft=='ids' || vals.length<2){
+            if(ft=='user' ||  ft=='ids'){
+                this.select_conjunction.val('any');    
+            }
+            this.select_conjunction.hide();
+        }else{
+            this.select_conjunction.show();    
+
+            //add or/and
+            if(vals.length>2){
+                var eles = this._predicate_input_ele.find('.input-cell > .input-div');
+
+                var mh = $(eles[0]).height();
+
+//console.log('changes '+vals.length+'  '+cnt+'  h='+mh);
+                var cnt = eles.length-2;
+                eles = [];
+                while(cnt--) eles.push('<div class="conj" style="line-height:'+(mh+1)+'px;padding:0px 4px 2px">'
+                    +(this.select_conjunction.val()=='any'?'or':'and')
+                    +'</div>');
+
+                $(eles.join('')).appendTo(this.select_conjunction.parent());
+            }
+
+        }
+    }                
+        
 
 });
