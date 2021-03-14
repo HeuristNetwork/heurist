@@ -174,16 +174,21 @@ $.widget( "heurist.editing_input", {
             
                 is_sortable = !that.options.is_faceted_search; 
             
+                var btn_cont = $('<span>')
+                    .css({display:'table-cell', 'vertical-align':'top', //'padding-top':'2px',
+                            'min-width':'22px',  'border-color':'transparent'})
+                    .appendTo( this.element )
+            
                 this.btn_add = $( "<span>")
-                .addClass("smallbutton editint-inout-repeat-button ui-icon-circlesmall-plus")
-                .appendTo( this.element )
+                    .addClass("smallbutton editint-inout-repeat-button ui-icon-circlesmall-plus")
+                    .appendTo( btn_cont )
                 //.button({icon:"ui-icon-circlesmall-plus", showLabel:false, label:'Add another ' + lblTitle +' value'})
                 .attr('tabindex', '-1')
                 .attr('title', 'Add another ' + lblTitle +' value' )                    
-                .css({display:'table-cell', 'font-size':'2em', cursor:'pointer','vertical-align':'top', 'padding-top':'2px',
+                .css({display:'block', 'font-size':'1.9em', cursor:'pointer','vertical-align':'top', //'padding-top':'2px',
                     'min-width':'22px',
 //outline_suppress does not work - so list all these props here explicitely                
-                    outline: 'none','outline-style':'none', 'box-shadow':'none',  'border-color':'transparent'
+                    outline: 'none','outline-style':'none', 'box-shadow':'none'
                 });
                 
                 if(this.detailType=="blocktext"){
@@ -217,7 +222,7 @@ $.widget( "heurist.editing_input", {
                         
                 }else if(this.detailType=="relmarker"){
                     
-                    $('<div style="float:right;padding-top:1px;width: 14px;"><span style="font-size:10px" class="ui-icon ui-icon-triangle-2-e-w"/></div>')                
+                    $('<div style="float:right;padding-top:1px;width: 14px;"><span style="font-size:11px" class="ui-icon ui-icon-triangle-2-e-w"/></div>')                
                         .appendTo( this.header )
                         this.header.css({'padding-right':0, width:154});
                         this.header.find('label').css({display:'inline-block', width: 135});
@@ -2404,7 +2409,8 @@ console.log('onpaste');
                                     if(that.options.is_faceted_search){
                                         $input.val(geovalue.summary).change();
                                     }else{
-                                        $input.val(geovalue.type+'  '+geovalue.summary).change();    
+                                        $input.val(geovalue.type+'  '+geovalue.summary);
+                                        $input.change();    
                                     }
                                     
                                     //$input.val(location.type+' '+location.wkt)
@@ -2581,6 +2587,12 @@ console.log('onpaste');
                 }
             });
 
+        }
+        
+        //move term error message to last 
+        var trm_err = $inputdiv.find('.term-error-message');
+        if(trm_err.length>0){
+           trm_err.appendTo($inputdiv);
         }
 
         return $input.attr('id');
@@ -2901,7 +2913,7 @@ console.log('onpaste');
         
         var $input = (orig.target)? $(orig.target): orig;
          
-console.log('_onTermChange');
+//console.log('_onTermChange');
                 
                 if(! $input.attr('radiogroup')){
                 
@@ -2928,6 +2940,10 @@ console.log('_onTermChange');
                     }
                 
                 }
+
+                //hide individual error                
+                $input.parent().find('.term-error-message').hide();
+                
                 this.onChange();
     },
     
@@ -3024,7 +3040,8 @@ console.log('_onTermChange');
                 }
                 
 
-            }else{
+            }
+            else{
 
                 if (!$.isArray(allTerms) && !window.hWin.HEURIST4.util.isempty(allTerms)) {
                     //is it CS string - convert to array
@@ -3062,7 +3079,8 @@ console.log('_onTermChange');
                            $($input).hSelect("refresh"); 
             }
 
-        }else{ //this is usual enumeration from defTerms
+        }
+        else{ //this is usual enumeration from defTerms
 
             var headerTerms = '';
             allTerms = this.f('rst_FilteredJsonTermIDTree');        
@@ -3098,6 +3116,11 @@ console.log('_onTermChange');
                $input.hSelect('widget').html('<span style="padding: 0.1em 2.1em 0.2em 0.2em">no terms defined, please add terms</span><span class="ui-selectmenu-icon ui-icon ui-icon-triangle-1-e"></span>'); 
             }
             
+            var err_ele = $input.parent().find('.term-error-message');
+            if(err_ele.length>0){
+                err_ele.remove();
+            }
+            
             //show error message on init                    
             //value is not allowed
             if( !window.hWin.HEURIST4.util.isempty(allTerms) &&
@@ -3123,26 +3146,27 @@ console.log('_onTermChange');
                     if(code2>0){
                         
                         sMsg = '.<br><span>Term (code '+code2+') with the same name already exists in "'
-                        +vocName+'".<br>';
+                        +vocName+'". ';
                         if(window.hWin.HAPI4.is_admin()){
-                            sMsg = sMsg + 'Either <a href="#" class="term-sel" '
-                                +'data-term-re="'+value+'" data-term="'+code2+'">use this term</a>';
+                            sMsg = sMsg + '<a href="#" class="term-sel" '
+                                +'data-term-re="'+value+'" data-term="'+code2+'">Use this term</a></span>';
                         }else{
                             sMsg = sMsg 
-                            +'Either ask database manager to replace term for all records';    
+                            +'.<br><span>You can select it in dropdown. '
+                            +'To replace for all records ask database manager</span>';    
                         }
-                        sMsg = sMsg + ' or select the required term in the dropdown</span>';
-                        
-
                     }else{
                         if(window.hWin.HAPI4.is_admin()){
-                            sMsg = '.<br>If you are sure the term is not used by another field, you can '
-                            +'<a href="#" class="term-ref">move term</a> to the "'
-                            +vocName+'" vocabulary <br/>'
-                            +'Alternatively you may <a href="#" class="term-ref">create a reference</a> from vocabulary "'
-                            +vocName+'" to the term in its current location. ';
+                            sMsg = '.<br><span>If you are sure the term is not used by another field, you can '
+                            +'<a href="#" class="term-move">move term</a> to the "'
+                            +vocName+'" vocabulary '
+                            +' Alternatively you may <a href="#" class="term-ref" data-term="'
+                                +value+'"  data-vocab="'
+                                +allTerms+'">create a reference</a> from vocabulary "'
+                            +vocName+'" to the term in its current location.</span>';
                         }else {
-                            sMsg = sMsg + '.<br/>Please ask the database manager to correct this vocabulary';    
+                            sMsg = sMsg + 
+                            '.<br><span>Ask database manager to correct this vocabulary</span>';    
                         }
                     }
                     
@@ -3150,13 +3174,13 @@ console.log('_onTermChange');
                     $(opt).attr('ui-state-error',1);
                     $input.val(value);
                     $input.hSelect('refresh');
-                    sMsg = 'The term "'+name+'" (code '+value+') in vocabulary "'+vocName2
-                            +'" is not valid for this field which uses vocabulary "'+vocName+'"<br/>'
+                    sMsg = '<span class="heurist-prompt ui-state-error">'
+                            +'The term "'+name+'" (code '+value+') in vocabulary "'+vocName2
+                            +'" is not valid for this field which uses vocabulary "'+vocName+'" </span>'
                             +sMsg;
                             
                     this.error_message.css({'font-weight': 'normal', color: '#b15f4e'}); 
                 }
-                this.showErrorMsg(sMsg);
 
                 if(!window.hWin.HEURIST4.util.isempty(sMsg)){
                     //add error message per every term
@@ -3239,7 +3263,7 @@ console.log('_onTermChange');
         }                                                                   
         
         return $input;
-    },
+    },//_recreateSelector
     
     //
     //
