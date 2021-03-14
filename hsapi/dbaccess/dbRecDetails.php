@@ -33,7 +33,7 @@ class DbRecDetails
     private $system;  
     
     /*  
-    *       recIDs - list of records IDS to be processed
+    *       recIDs - list of records IDS to be processed or 'ALL'
     *       rtyID  - filter by record type
     *       dtyID  - detail field to be added
     *       for addition: val: | geo: | ulfID: - value to be added
@@ -150,47 +150,62 @@ class DbRecDetails
         
         $mysqli = $this->system->get_mysqli();
 
-        //normalize recIDs to an array for code below
-        $recIDs = prepareIds($this->data['recIDs']);
-        
-        $rtyID = @$this->data['rtyID'];
-        
-        $passedRecIDCnt = count(@$recIDs);
+        if($this->system->is_admin() && $this->data['recIDs']=='ALL'){
+            
+            $passedRecIDCnt = mysql__select_value($mysqli,'select count(*) from Records');
+            
+            $this->result_data = array('passed'=>$passedRecIDCnt,
+                        'noaccess'=>0,'processed'=>0);
+            
+            $this->recIDs = array('all');
+            
+        }else{
+            
+            //normalize recIDs to an array for code below
+            $recIDs = prepareIds($this->data['recIDs']);
+            
+            $rtyID = @$this->data['rtyID'];
+            
+            $passedRecIDCnt = count(@$recIDs);
 
-        if ($passedRecIDCnt>0) {//check editable access for passed records
-        
-            if($rtyID){ //filter for record type
-                $recIDs = mysql__select_list($mysqli,'Records','rec_ID',"rec_RecTypeID = $rtyID and rec_ID  in ("
-                                    .implode(",",$recIDs).")");
-                $passedRecIDCnt = count(@$recIDs);
-            }
-            if($passedRecIDCnt>0){
-                //exclude records if user has no right to edit
-                if($this->system->is_admin()){ //admin of database managers
-                    $this->recIDs = $recIDs;
-                }else{
-                    $this->recIDs = mysql__select_list($mysqli,'Records','rec_ID',"rec_ID in ("
-                        .implode(",",$recIDs).") and rec_OwnerUGrpID in (0,"
-                        .join(",",$this->system->get_user_group_ids()).")");
+            if ($passedRecIDCnt>0) {//check editable access for passed records
+            
+                if($rtyID){ //filter for record type
+                    $recIDs = mysql__select_list($mysqli,'Records','rec_ID',"rec_RecTypeID = $rtyID and rec_ID  in ("
+                                        .implode(",",$recIDs).")");
+                    $passedRecIDCnt = count(@$recIDs);
                 }
+                if($passedRecIDCnt>0){
+                    //exclude records if user has no right to edit
+                    if($this->system->is_admin()){ //admin of database managers
+                        $this->recIDs = $recIDs;
+                    }else{
+                        $this->recIDs = mysql__select_list($mysqli,'Records','rec_ID',"rec_ID in ("
+                            .implode(",",$recIDs).") and rec_OwnerUGrpID in (0,"
+                            .join(",",$this->system->get_user_group_ids()).")");
+                    }
 
-                $inAccessibleRecCnt = $passedRecIDCnt - count(@$this->recIDs);
+                    $inAccessibleRecCnt = $passedRecIDCnt - count(@$this->recIDs);
+                }
             }
-        }
 
-        $this->result_data = array('passed'=> $passedRecIDCnt>0?$passedRecIDCnt:0,
-                                   'noaccess'=> @$inAccessibleRecCnt ?$inAccessibleRecCnt :0);
+            $this->result_data = array('passed'=> $passedRecIDCnt>0?$passedRecIDCnt:0,
+                                       'noaccess'=> @$inAccessibleRecCnt ?$inAccessibleRecCnt :0);
 
-        if (count(@$this->recIDs)==0){
-            $this->result_data['processed'] = 0;
-            return true;
-        }
-        
-        if($rtyID){
-            $this->rtyIDs = array($rtyID);
-        }else {
-            $this->rtyIDs = mysql__select_list($mysqli, 'Records','distinct(rec_RecTypeID)',"rec_ID in (".implode(",",$this->recIDs).")");
-        }
+            if (count(@$this->recIDs)==0){
+                $this->result_data['processed'] = 0;
+                return true;
+            }
+            
+            if($rtyID){
+                $this->rtyIDs = array($rtyID);
+            }else {
+                $this->rtyIDs = mysql__select_list($mysqli, 'Records','distinct(rec_RecTypeID)',"rec_ID in ("
+                    .implode(",",$this->recIDs).")");
+            }
+
+        }        
+
     
         return true;
     }
@@ -585,7 +600,7 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
 
         $rval = $mysqli->real_escape_string($this->data['rVal']);
 
-        $this->initPutifier();
+        //disabled $this->initPutifier();
         
         //split value if exceeds 64K        
         $splitValues = array();
@@ -679,26 +694,86 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
                 return false;
             }
         }
+
+        $is_multiline = count($splitValues)>0;
         
         foreach ($this->recIDs as $recID) {
-            //get matching detail value for record if there is one
-            $query = "SELECT dtl_ID, dtl_Value FROM recDetails WHERE dtl_RecID = $recID and dtl_DetailTypeID = $dtyID and $searchClause";
-            $valuesToBeReplaced = mysql__select_assoc2($mysqli, $query);
+
+            $query = 'SELECT dtl_ID, dtl_RecID '
+                    .($is_multiline?'':', dtl_Value')
+                    .'  FROM recDetails WHERE '
+                    ."dtl_DetailTypeID = $dtyID and $searchClause";
+            
+            if($recID!='all'){
+                //get matching detail value for record if there is one
+                $query = $query." AND  dtl_RecID = $recID ";
+            }
+            $query = $query.' ORDER BY dtl_RecID';
+            
+            //$valuesToBeReplaced = mysql__select_assoc2($mysqli, $query);
+            
+            $res = $mysqli->query($query);
+            
             if($mysqli->error!=null || $mysqli->error!=''){
                 $sqlErrors[$recID] = $mysqli->error;
                 continue;
-            }else if($valuesToBeReplaced==null || count($valuesToBeReplaced)==0){  //not found
-                array_push($undefinedFieldsRecIDs, $recID);
-                continue;
+            //}else if($valuesToBeReplaced==null || count($valuesToBeReplaced)==0){  //not found
+            //    array_push($undefinedFieldsRecIDs, $recID);
+            //    continue;
             }
-            
-            //update the details
+
             $recDetailWasUpdated = false;
             $valuesToBeDeleted = array();
+            $recID = 0;
+            $get_next_row = true;
             
-            foreach ($valuesToBeReplaced as $dtlID => $dtlVal) {
+            //update the details
+            while (true) {
                 
-                if(count($splitValues)>0){
+                if($get_next_row) $row = $res->fetch_row();
+                $get_next_row = true;
+                
+                if(!$row || ($recID>0 && $row[1]!=$recID) ){ 
+                    
+                    //next record - update changed record and 
+                    if($recID>0){
+                        
+                        if ($recDetailWasUpdated) {
+                            //only put in processed if a detail was processed, 
+                            // obscure case when record has multiple details we record in error array also
+                            array_push($processedRecIDs, $recID);
+                            
+                            //update record edit date
+                            $rec_update['rec_ID'] = $recID;
+                            $ret = mysql__insertupdate($mysqli, 'Records', 'rec', $rec_update);
+                            if (!is_numeric($ret)) {
+                                $sqlErrors[$recID] = 'Cannot update modify date. '.$ret;
+                            }
+                        }else{
+                            array_push($undefinedFieldsRecIDs, $recID);
+                        }
+                        if(count($valuesToBeDeleted)>0){
+                            //remove the rest for replace all occurences
+                            $sql = 'delete from recDetails where dtl_ID in ('.implode(',',$valuesToBeDeleted).')';
+                            if ($mysqli->query($sql) === false) {
+                                $sqlErrors[$recID] = $mysqli->error;         
+                            }
+                        }
+                    }
+                   
+                    if(!$row){ //end of loop
+                        break;
+                    }
+                    
+                    $recDetailWasUpdated = false;
+                    $valuesToBeDeleted = array();
+                }
+
+            //foreach ($valuesToBeReplaced as $dtlID => $dtlVal) {
+                $dtlID = $row[0];
+                $recID = $row[1];
+                
+                if($is_multiline){ //replace with several values (long text)
 
                     foreach($splitValues as $val){
                         $dtl['dtl_ID']  = -1;
@@ -708,10 +783,9 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
                         $ret = mysql__insertupdate($mysqli, 'recDetails', 'dtl', $dtl);    
                     }
                     $recDetailWasUpdated = true;
-                    $valuesToBeDeleted = array_keys($valuesToBeReplaced);
-                    break;
                     
                 }else{
+                    $dtlVal = $row[2];
                     
                     if (!$replace_all_occurences && $partialReplace) {// need to replace sVal with rVal
                         $newVal = preg_replace("/".$this->data['sVal']."/",$this->data['rVal'],$dtlVal);
@@ -745,35 +819,26 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
                     }
                     $recDetailWasUpdated = true;
 
-                    if($replace_all_occurences && count($valuesToBeReplaced)>1){
-                        $valuesToBeDeleted = array_keys($valuesToBeReplaced);
-                        array_shift($valuesToBeDeleted); //except first one
-                        break;
-                    }
                 }
-            }//for
-            if ($recDetailWasUpdated) {
-                //only put in processed if a detail was processed, 
-                // obscure case when record has multiple details we record in error array also
-                array_push($processedRecIDs, $recID);
                 
-                //update record edit date
-                $rec_update['rec_ID'] = $recID;
-                $ret = mysql__insertupdate($mysqli, 'Records', 'rec', $rec_update);
-                if (!is_numeric($ret)) {
-                    $sqlErrors[$recID] = 'Cannot update modify date. '.$ret;
-                }
-            }
-            if(count($valuesToBeDeleted)>0){
-                //remove the rest for repalce all occurences
-                $sql = 'delete from recDetails where dtl_ID in ('.implode(',',$valuesToBeDeleted).')';
-                if ($mysqli->query($sql) === false) {
-                    $sqlErrors[$recID] = $mysqli->error;         
-                }
-            }
+                if($replace_all_occurences || $is_multiline)
+                {
+                    if($is_multiline) array_push($valuesToBeDeleted, $dtlID);  //= array_keys($valuesToBeReplaced);
                     
+                    while ($row = $res->fetch_row()) { //gather all old detail IDs
+                        if($row[1]!=$recID){
+                            break;    
+                        }
+                        array_push($valuesToBeDeleted, $row[0]);
+                    }
+                    $get_next_row = false;
+                }
+                
+            }//while
             
-        }//for records
+        }//while records
+        
+        $res->close();
         
         //update record title
         foreach ($processedRecIDs as $recID){

@@ -502,7 +502,7 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
                     alert('Define value to replace');
                     return;
                 }
-
+                
             }else if(action_type=='delete_detail'){
 
                 request['a'] = 'delete';
@@ -564,6 +564,8 @@ function hRecordAction(_action_type, _scope_type, _field_type, _field_value) {
             _startAction_continue(request)
         }
     }
+        
+
         
     /*
     * recIDs - list of records IDS to be processed

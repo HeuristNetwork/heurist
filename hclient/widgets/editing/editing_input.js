@@ -3146,7 +3146,15 @@ console.log('onpaste');
                     if(code2>0){
                         
                         sMsg = '.<br><span>Term (code '+code2+') with the same name already exists in "'
-                        +vocName+'". <a href="#" class="term-sel" data-term="'+code2+'">Use this term</a></span>';
+                        +vocName+'". ';
+                        if(window.hWin.HAPI4.is_admin()){
+                            sMsg = sMsg + '<a href="#" class="term-sel" '
+                                +'data-term-re="'+value+'" data-term="'+code2+'">Use this term</a></span>';
+                        }else{
+                            sMsg = sMsg 
+                            +'.<br><span>You can select it in dropdown. '
+                            +'To replace for all records ask database manager</span>';    
+                        }
                     }else{
                         if(window.hWin.HAPI4.is_admin()){
                             sMsg = '.<br><span>If you are sure the term is not used by another field, you can '
@@ -3196,17 +3204,45 @@ console.log('onpaste');
                 
                     //this.showErrorMsg(sMsg);
                     
-                    this._on(err_ele.find('.term-sel'),{click:function(e){
-                        var trm_id = $(e.target).attr('data-term');
-                        $input.val(trm_id);
-                        $input.hSelect('refresh');
-                        $input.change();
-                    }});
-                    
 
                     //this._on(this.error_message.find('.term-move'),{click:function(){}});
                     if(window.hWin.HAPI4.is_admin()){  
                         var that = this;
+                        //
+                        // select term (with the same name) in all fields
+                        //
+                        this._on(err_ele.find('.term-sel'),{click:function(e){
+                            
+                            var trm_id = $(e.target).attr('data-term');
+                            var trm_id_re = $(e.target).attr('data-term-re');
+                            var fieldName = this.f('rst_DisplayName');
+                            
+                            window.hWin.HEURIST4.msg.bringCoverallToFront();                                             
+                            
+                            var request = {a:'replace', dtyID:this.options.dtID, sVal:trm_id_re, rVal:trm_id, tag:0, recIDs:'ALL'};                
+                            window.hWin.HEURIST4.msg.showMsgDlg(
+                                    'You are about to convert tag #'+trm_id_re+' to #'+trm_id
+                                    +' in field "'+fieldName+'" for all records'
+                                    + '<br><br>Are you sure?',
+                                    function(){
+                                        window.hWin.HAPI4.RecordMgr.batch_details(request, function(response){
+                                            window.hWin.HEURIST4.msg.sendCoverallToBack();
+                                            if(response.status == window.hWin.ResponseStatus.OK){
+                                                
+                                                $input.val(trm_id);
+                                                $input.hSelect('refresh');
+                                                $input.change();
+                                                
+                                            }else{
+                                                $('#div_result').hide();
+                                                window.hWin.HEURIST4.msg.showMsgErr(response.message);
+                                            }
+                                        });
+                                    },
+                                    {title:'Warning',yes:'Proceed',no:'Cancel'});
+            
+                        }});
+                    
                         this._on(err_ele.find('.term-ref'),{click:function(e){
                             var trm_id = $(e.target).attr('data-term');
                             var voc_id = $(e.target).attr('data-vocab');
