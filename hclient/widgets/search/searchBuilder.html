@@ -20,22 +20,20 @@
 */
 -->
 
-<div id="pnl_Rectype" style="position:absolute;left:0;right:0px;top:0;height:44px;border-bottom:1px gray solid; padding:10px">
-    <h3 style="margin:0 0 8 0;color:red;text-align:center" title="Actually there is not risk at all">
+<div id="pnl_Rectype" style="position:absolute;left:0;right:0px;top:0;height:34px;border-bottom:1px gray solid; padding:20px 10px 0 10px">
+    <h3 style="display:none; margin:0 0 8 0;color:red;text-align:center" title="Actually there is not risk at all">
             FUNCTION UNDER DEVELOPMENT, TRIAL AT YOUR OWN RISK!
     </h3>
 
     <div class="main-rectype" style="display: inline-block;padding:0 20px;">
-            <div class="header_narrow" style="min-width:115px;display:inline-block"><label for="opt_rectypes">Search for (entity type)</label></div>
-            <select name="sa_rectype" id="opt_rectypes" class="text ui-widget-content ui-corner-all" style="min-width:250px"></select>
+            <div class="header_narrow" style="min-width:63px;display:inline-block"><label for="opt_rectypes">Record type</label></div>
+            <select id="opt_rectypes" class="text ui-widget-content ui-corner-all" style="min-width:250px"></select>
     </div>
         
     
     <button id="btn-clear" style="float:right">Clear All</button>
 </div>
-
-<div id="pnl_Tree" style="position:absolute;left:0;width:400px;top:65px;bottom:40px;border-right:1px gray solid;display:none;">
-            
+<!--
             <div class="rty-selected" style="vertical-align:top;display:inline-block;font-size:smaller;padding: 7px">
                     <label>search for more than one record types
                         <input name="svs_MultiRtSearch" id="svs_MultiRtSearch" class="text ui-widget-content ui-corner-all" type="checkbox"
@@ -43,52 +41,50 @@
                     </label>
             </div>
 
-<!--            
-        <div style="width:390px; margin-top: 0px; margin-bottom: 5px;display:block;" class="heurist-helper2 rty-selected">
-            This determines the record type(s) which will be retrieved by the search.
-            The search can, however, be based on attributes of other record types linked from this type.
-        </div>
--->            
-    <div id="header_treeview" class="header" style="padding:10px;border-top:1px gray solid">
-        <label>Select fields</label>
-<!--  <br>
-        <label  class="heurist-helper2" for="fsw_show_recfields">
-            <input type="checkbox" id="fsw_show_recfields" style="vertical-align: middle;" />&nbsp;
-            Show record header fields (title, dates, user, tags)</label> -->
-        <br>
-        <label  class="rty-selected heurist-helper2" for="fsw_showreverse">
-            <input type="checkbox" id="fsw_showreverse" style="vertical-align: middle;" />&nbsp;
-            Show linked-from record types (reverse pointers, indicated as &lt;&lt;</label>
-    </div>
     <div id="field_all_list" class="rty-not-selected ui-selectmenu-menu"
          style="display:none; position: absolute;overflow:hidden;bottom: 0;top: 156px;width: 100%;">
         <select id="field_selector"></select>
     </div>
-    <div id="field_treeview" class="rty-selected" style="position: absolute;overflow-y: auto;bottom: 0;top: 156px;width: 100%;"></div>
-</div>
+-->
 
 
-<fieldset id="pnl_Items" style="position:absolute;left:0px;right:0;top:65px;bottom:40px;overflow-y: auto;">
+<fieldset id="pnl_Items" style="display:none;position:absolute;left:0px;right:0;top:65px;bottom:0px;overflow-y: auto;">
    
    <div class="btn_field_add search_field_add" style="color:#6A7C99;cursor:pointer;font-size:0.8em">
-        <span class="ui-icon ui-icon-plus" style="font-size:1em;margin-left: 14px;"/> add field
+        <span class="ui-icon ui-icon-plus" style="font-size:1em;margin-left: 85px;"/> add field
    </div>
    
    <hr/>
    
    <div class="btn_field_add sort_field_add" style="color:#6A7C99;cursor:pointer;font-size:0.8em">
-        <br><span class="ui-icon ui-icon-plus" style="font-size:1em;margin-left: 14px;"/> add sort
+        <br><span class="ui-icon ui-icon-plus" style="font-size:1em;margin-left: 85px;"/> add sort
    </div>
    
 </fieldset>
 
-<div id="pnl_Result" style="position:absolute;height:40px;left:0;right:0;bottom:0px;border-top:1px gray solid">
+
+<div id="pnl_Tree" class="ui-widget-content" style="position:absolute;left:0;width:350px;top:0;bottom:0px;border-right:1px gray solid;display:none;">
+
+    <label  class="rty-selected heurist-helper2" for="fsw_showreverse">
+            <input type="checkbox" id="fsw_showreverse" style="vertical-align: middle;" />&nbsp;
+            Show linked-from record types (reverse pointers, indicated as &lt;&lt;</label>
+
+    <div id="field_treeview" class="rty-selected" style="position: absolute;overflow-y: auto;bottom: 0;top:20px;width: 100%;"></div>
+</div>
+
+
+
+
+<div id="pnl_Result" style="position:absolute;height:40px;left:0;right:0;bottom:0px;border-top:1px gray solid;padding:4px;display:none">
 
 </div>
 
 <div class="ui-dialog-buttonpane ui-widget-content ui-helper-clearfix popup_buttons_div" style="display:none;padding:13px">
+
             <div class="ui-dialog-buttonset">
-                <div class="btn-search ui-button-action">Search</div>
+                <label><input type="checkbox" class="btn-preview"/>preview filter</label>
+                <a href="#" style="color:white;margin-left:10px" class="btn-copy">copy</a>
+                <div style="margin-left:40px" class="btn-search ui-button-action">Filter</div>
                 <div class="btn-save">Preview</div>
             </div>
 </div>

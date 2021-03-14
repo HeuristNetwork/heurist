@@ -69,18 +69,10 @@ $.widget( "heurist.searchBuilderSort", {
             .css({'display':'inline-block','vertical-align':'top','padding-top':'3px'})
             .appendTo(this.element);
             
-        // 1. Remove icon
-        this.remove_token = $( "<span>" )
-        .attr('title', 'Remove this sort token' )
-        .addClass('ui-icon ui-icon-circle-b-close')
-        .css({'cursor':'pointer','font-size':'0.8em'})
-        .appendTo( this.sel_container );        
-
-        this._on( this.remove_token, { click: function(){
-            if($.isFunction(this.options.onremove)){
-                this.options.onremove.call(this);
-            }    
-        } });
+        $('<div class="header_narrow sort_header" '
+        +'style="min-width:83px;display:inline-block;text-align:right;padding-right: 5px;">'
+        +'<label for="opt_rectypes">Sort by</label></div>')
+            .appendTo( this.sel_container );
             
         // 2. field selector for field or links tokens
         this.select_fields = $( '<select>' )
@@ -93,7 +85,7 @@ $.widget( "heurist.searchBuilderSort", {
         this.select_order = $( '<select>' )
             .attr('title', 'Select order' )
             .addClass('text ui-corner-all')
-            .css({'margin-left':'0.5em','min-width':'90px'})
+            .css({'margin':'0 1em','min-width':'90px', border:'none'})
             .appendTo( this.sel_container );
 
         var topOptions3 = [
@@ -101,6 +93,38 @@ $.widget( "heurist.searchBuilderSort", {
                 {key:'1', title: 'Descending (Z..A, 9..1)'}];
 
         window.hWin.HEURIST4.ui.createSelector(this.select_order.get(0), topOptions3);
+
+        // 1. Remove icon
+        this.remove_token = $( "<span>" )
+        .attr('title', 'Remove this sort token' )
+        .addClass('ui-icon ui-icon-circle-b-close')
+        .css({'cursor':'pointer','font-size':'0.8em',visibility:'hidden'})
+        .appendTo( this.sel_container );        
+
+        this._on( this.remove_token, { click: function(){
+            if($.isFunction(this.options.onremove)){
+                this.options.onremove.call(this);
+            }    
+        } });
+        
+        var that = this;
+        this.sel_container.hover(function(){
+                   that.remove_token.css({visibility:'visible'});  },
+        function(){
+                   that.remove_token.css({visibility:'hidden'});
+        });
+
+
+        this._on( this.select_order, { change: function(){
+                if($.isFunction(this.options.onchange))
+                {
+                    this.options.onchange.call(this);
+                }
+        }});
+
+
+
+
             
         this._refresh();
         
@@ -129,6 +153,14 @@ $.widget( "heurist.searchBuilderSort", {
             window.hWin.HEURIST4.ui.createRectypeDetailSelect(this.select_fields.get(0), this.options.rty_ID, 
                         allowed_fieldtypes, topOptions2, 
                         {useHtmlSelect:false});                
+            
+            this._on( this.select_fields, { change: function(){
+                    if($.isFunction(this.options.onchange))
+                    {
+                        this.options.onchange.call(this);
+                    }
+            }});
+            
             
     },
     //

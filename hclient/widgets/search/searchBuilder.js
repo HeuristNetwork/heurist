@@ -44,13 +44,15 @@ $.widget( "heurist.searchBuilder", {
     select_main_rectype: null,
     select_additional_rectypes: null,
     svs_MultiRtSearch: null,
-    field_selector: null,
+    //field_selector: null,
 
     current_tree_rectype_ids:null, //to avoid reload
     
     group_items:{}, //groups - to be implemented
     field_array:[], //defined fields for current groups
     sort_array:[],
+    
+    select_field_for_id: null,
 
     // the widget's constructor
     _create: function() {
@@ -77,7 +79,7 @@ $.widget( "heurist.searchBuilder", {
             this._dialog = this.element.dialog({
                 autoOpen: false,
                 height: 450,
-                width:700,
+                width:750,
                 modal: this.options.is_modal,
 
                 resizable: true, //!is_h6style,
@@ -136,6 +138,14 @@ $.widget( "heurist.searchBuilder", {
             //that.pnl_Result
         });
 
+        
+        //click outside - hide treeview
+        this._on(window.hWin.document, { 
+            click: function(e){
+                if(this.pnl_Tree) this.pnl_Tree.hide();
+            }}
+        );
+        
 
         this._refresh();
 
@@ -220,11 +230,13 @@ $.widget( "heurist.searchBuilder", {
     }
     
     //
+    //  show either treeview or menuWidget field selector
     //
-    //
-    ,adjustTreePanel: function(){
+    ,showFieldSelector: function( ele_id ){
         
         if(!(this.select_main_rectype.val()>0)){
+            this.pnl_Tree.hide();
+            /*
             //show all fields
             this.pnl_Tree.find('.rty-selected').hide();
             this.pnl_Tree.find('.rty-not-selected').show();
@@ -236,12 +248,13 @@ $.widget( "heurist.searchBuilder", {
             
             var menu = this.field_selector.hSelect( "menuWidget" );
             menu.css({position:'absolute', width:'99%', top: 0, bottom:1, 'max-height':2000});                
-            
+            */
         }else{
-            this.pnl_Tree.find('.rty-selected').show();
-            this.pnl_Tree.find('.rty-not-selected').hide();
-            var iTop = this.pnl_Tree.find('#header_treeview').position().top+60;
-            this.element.find('#field_treeview').css('top',iTop);
+            this.select_field_for_id = ele_id;
+            
+            this.pnl_Tree.show();
+            //var iTop = this.pnl_Tree.find('#header_treeview').position().top+60;
+            //this.pnl_Tree.find('#field_treeview').css('top',iTop);
         }
 
         
@@ -304,6 +317,9 @@ $.widget( "heurist.searchBuilder", {
         var that = this;
 
         ele.searchBuilderSort({ rty_ID: rty_ID ,
+                        onchange: function(){
+                            that._doCompose();
+                        },
                         onremove: function(){
                             var id = this.element.attr('id');
                             $.each(that.sort_array,function(k,item){
@@ -315,25 +331,34 @@ $.widget( "heurist.searchBuilder", {
                                 }
                             });
                             
+                            if(that.sort_array.length==0){
+                                 that.addSortItem();
+                            }else{
+                                that.pnl_Items.find('.sort_header').css('visibility','hidden');
+                                that.pnl_Items.find('.sort_header:first').css('visibility','visible');
+                            }
+                            
+                            that._doCompose();
                         }
         });
+     
+        if(this.sort_array.length>1){
+            ele.find('.sort_header').css('visibility','hidden');
+        }
      
         this.adjustDimension();
         
     } 
     
     //
-    //
+    // add or change selected field
     //    
-    , addFieldItem: function( code, codes ){
+    , addFieldItem: function( code, codes, ele_id ){
 
             if(true){
                 
                 if(!codes) codes = code.split(':');
         
-                var ele = $('<div>').uniqueId().attr('data-code',code).insertBefore(this.btnAddFieldItem);
-                this.field_array.push(ele);
-                
                 var rty_ID = codes[codes.length-2];
                 var dty_ID = codes[codes.length-1];
                 var top_rty_ID = codes[0];
@@ -341,34 +366,63 @@ $.widget( "heurist.searchBuilder", {
                 if(!(top_rty_ID>0)) top_rty_ID = 0;
                 if(!(rty_ID>0)) rty_ID = 0;
                 //if(!(dty_ID>0)) dty_ID = 0;
-                            
-                var that = this;
-                ele.searchBuilderItem({
-                        //token:  dty_ID>0?'f':dty_ID,
-                        hasFieldSelector: !this.is_advanced,
-                        code: code,
-                        top_rty_ID: top_rty_ID, 
-                        rty_ID: rty_ID,
-                        dty_ID: dty_ID,
-                        onremove: function(){
-                            var id = this.element.attr('id');
-                            $.each(that.field_array,function(k,item){
-                                if(item.attr('id')==id){
-                                    that.field_array.splice(k,1);
-                                    that.pnl_Items.find('#'+id).remove();    
-                                    that.adjustDimension();
-                                    return false;
+                
+                if(ele_id){
+                   
+                    var ele = this.pnl_Items.find('#'+ele_id)
+//console.log('assign '+code);                                            
+                    ele.searchBuilderItem('changeOptions',{
+                            code: code,
+                            top_rty_ID: top_rty_ID, 
+                            rty_ID: rty_ID,
+                            dty_ID: dty_ID});
+
+                }else{
+                    var ele = $('<div>').uniqueId().attr('data-code',code).insertBefore(this.btnAddFieldItem);
+                    this.field_array.push(ele);
+                
+                    var that = this;
+                    ele.searchBuilderItem({
+                            //token:  dty_ID>0?'f':dty_ID,
+                            hasFieldSelector: !this.is_advanced,
+                            code: code,
+                            top_rty_ID: top_rty_ID, 
+                            rty_ID: rty_ID,
+                            dty_ID: dty_ID,
+                            onremove: function(){
+                                var id = this.element.attr('id');
+                                $.each(that.field_array,function(k,item){
+                                    if(item.attr('id')==id){
+                                        that.field_array.splice(k,1);
+                                        that.pnl_Items.find('#'+id).remove();    
+                                        that.adjustDimension();
+                                        
+                                        return false;
+                                    }
+                                });
+                                if(that.field_array.length==0){
+                                     that.btnAddFieldItem.click();
+                                }else{
+                                    that.pnl_Items.find('.field_header').css('visibility','hidden');
+                                    that.pnl_Items.find('.field_header:first').css('visibility','visible');
                                 }
-                            });
-                            
-                        },
-                        onchange: function(){
-                            that._doCompose();
-                        }
-                });
-            
+                                that._doCompose();
+                            },
+                            onchange: function(){
+                                that._doCompose();
+                            },
+                            onselect_field: function(){
+                                var id = this.element.attr('id');
+                                that.showFieldSelector( id );
+                            }
+                    });
+                    
+                    if(this.field_array.length>1){
+                        ele.find('.field_header').css('visibility','hidden');
+                    }
+                }
+                
                 this.adjustDimension();
-            
             }
     }
 
@@ -380,7 +434,8 @@ $.widget( "heurist.searchBuilder", {
                 
                 this.select_main_rectype = window.hWin.HEURIST4.ui.createRectypeSelectNew( this.element.find("#opt_rectypes").get(0),
                 {
-                    topOptions: [{key:'',title:'any record type...'}],
+                    topOptions: [{key:'-1',title:'select record type to search...'},
+                                 {key:'',title:'any record type'}],
                     useHtmlSelect: false,
                     showAllRectypes: true
                 });
@@ -404,20 +459,32 @@ $.widget( "heurist.searchBuilder", {
                             this.select_additional_rectypes.editing_input('setValue', '');
                             this.select_additional_rectypes.hide();
                         }
-                        this.adjustTreePanel();
+                        //this.adjustTreePanel();
                     }}});
                     
                 this.select_main_rectype.hSelect({change: function(event, data){
+                    
                     if(that.select_additional_rectypes){
                         //reset
                         that.select_additional_rectypes.editing_input('setValue', '');
                     }
-                    //load list of field types
-                    that.adjustTreePanel();
-                    that._initFieldTreeView([that.select_main_rectype.val()]);
+                    
+                    if(that.select_main_rectype.val()<0){
+                        that.pnl_Items.hide();
+                        
+                    }else{
+                        that.pnl_Items.show();
+                        //load list of field types
+                        //that.adjustTreePanel();
+                        that._initTreeView([that.select_main_rectype.val()]);
+                    }
+                    
+                    that.clearAll();
+
                 }});
                 
                 
+/*                        
                 var topOptions2 = [
                         {key:'anyfield',title:window.hWin.HR('Any field')},
                         {key:0,title:'Record header fields', group:1, disabled:true},
@@ -429,13 +496,13 @@ $.widget( "heurist.searchBuilder", {
                             {key:'notes',title:'Notes', depth:1},
                             {key:'owner',title:'Owner (user or group)', depth:1},
                             {key:'access',title:'Visibility', depth:1},
-                            {key:'tag',title:'Tags (NOT IMPLEMENTED)', depth:1}
+                            {key:'tag',title:'Tags', depth:1}
                         ];
                         
                 var bottomOptions = null;
                 //[{key:'latitude',title:window.hWin.HR('geo: Latitude')},
                 //                     {key:'longitude',title:window.hWin.HR('geo: Longitude')}]; 
-                        
+
                 var allowed_fieldtypes = ['enum','freetext','blocktext',
                                 'geo','year','date','integer','float','resource','relmarker'];
 
@@ -446,7 +513,6 @@ $.widget( "heurist.searchBuilder", {
                             null, allowed_fieldtypes, topOptions2, 
                             {show_parent_rt:true, show_latlong:true, bottom_options:bottomOptions, 
                                 useIds: true, useHtmlSelect:false});                
-                
                 this.field_selector.hide();                
                 
                 var menu = this.field_selector.hSelect( "menuWidget" );
@@ -464,7 +530,7 @@ $.widget( "heurist.searchBuilder", {
                     that.addFieldItem( 'any:'+dty_ID, [rty_ID , dty_ID] );
 
                 }});
-            
+*/
             
                 this.pnl_Rectype  = this.element.find('#pnl_Rectype');
                 this.pnl_Tree  = this.element.find('#pnl_Tree');
@@ -478,6 +544,10 @@ $.widget( "heurist.searchBuilder", {
                         
                     that.addFieldItem( 'any:anyfield', [rty_ID , 'anyfield'] );
                 }});
+                
+                this._on(this.pnl_Tree, {click:function(event){
+                        event.stopPropagation(); 
+                }});
 
                 //
                 //
@@ -489,15 +559,7 @@ $.widget( "heurist.searchBuilder", {
                 }});
                 
                 
-                this._on(this.pnl_Rectype.find('#btn-clear').button()
-                , {click:function(event){
-                    this.pnl_Items.children('div:not(.btn_field_add)').remove();
-                    this.field_array = [];
-                    this.sort_array = [];
-                    
-                    this.addFieldItem('any:anyfield');
-                    this.addSortItem();
-                }});
+                this._on(this.pnl_Rectype.find('#btn-clear').button(), { click:this.clearAll });
                 
                                 
             }
@@ -530,10 +592,12 @@ $.widget( "heurist.searchBuilder", {
             
             if(!this.options.is_dialog){
                 //add header and button set for inline mode
+                var h = this.element.find('.btn-preview').is(':checked') ?'82px':'50px';
+
                 this.element.css({'font-size':'0.9em'});
                 this.pnl_Rectype.css({top:'36px'});
-                this.pnl_Tree.css({top:'110px',bottom:'120px'});
-                this.pnl_Items.css({top:'110px',bottom:'120px'});
+                this.pnl_Tree.css({top:'110px', bottom:h});
+                this.pnl_Items.css({top:'110px', bottom:h});
                 this.pnl_Result.css({bottom:'40px'});
                 var _innerTitle = $('<div class="ui-heurist-header" style="top:0px;padding-left:10px;text-align:left">Filter builder</div>')
                     .insertBefore(this.pnl_Rectype);
@@ -550,30 +614,74 @@ $.widget( "heurist.searchBuilder", {
                 //button panel on the botom                        
                 var ele = this.element.find('.popup_buttons_div').show();
             
-                ele.find('.btn-search').button();
-                ele.find('.btn-save').button();
+                ele.find('.btn-search').button({icon:'ui-icon-filter'});
                 this._on(ele.find('.btn-search'),{click:this._doSearch});
+
+                ele.find('.btn-save').button().hide();
                 this._on(ele.find('.btn-save'),{click:this._doSaveSearch});
+                
+                this._on(ele.find('.btn-preview'),{change:function(e){
+                    
+                    
+                    if(this.element.find('.btn-preview').is(':checked')){
+                        var h = this.options.is_dialog ? '50px':'82px';                       
+                        this.pnl_Items.css('bottom',h);
+                        this.pnl_Tree.css('bottom',h);
+                        this.pnl_Result.show();
+                    }else{
+                        var h = this.options.is_dialog ? '0px':'50px';                       
+                        
+                        this.pnl_Items.css('bottom',h);
+                        this.pnl_Tree.css('bottom',h);
+                        this.pnl_Result.hide();
+                    }
+                }});
+                
+                
+                this._on(ele.find('.btn-copy'),{click:function(e){
+                        var s = this.pnl_Result.text();
+                        if(s) window.hWin.HEURIST4.util.copyStringToClipboard(s);
+                }});
+                
             }
                 
                 
-            this.adjustTreePanel();
+            //this.adjustTreePanel();
         //window.hWin.HEURIST4.ui.applyCompetencyLevel(-1, $dlg); 
         
         //add first field item
         if(!this.is_advanced && $.isEmptyObject(this.field_array)){
-             this.addFieldItem('any:anyfield');
-             this.addSortItem();
+            
+            var rty_ID = this.select_main_rectype.val();
+            this.addFieldItem( 'any:anyfield', [rty_ID , 'anyfield'] );
+            
+            this.addSortItem();
         }
         
         
         
-    }
+    },
 
+    
+    clearAll: function()
+    {
+        this._doCompose();        
+        
+        this.pnl_Items.children('div:not(.btn_field_add)').remove();
+        this.field_array = [];
+        this.sort_array = [];
+        
+        var rty_ID = this.select_main_rectype.val();
+        this.addFieldItem( 'any:anyfield', [rty_ID , 'anyfield'] );
+        
+        this.addSortItem();
+        
+    },
+    
     //
-    // record type selector
+    // nulti record type selector
     //
-    ,_createInputElement_RecordTypeSelector: function(){
+    _createInputElement_RecordTypeSelector: function(){
         
         var that = this;
 
@@ -591,11 +699,13 @@ $.widget( "heurist.searchBuilder", {
                     var val = this.getValues();
                     val = val[0].split(',');
                     //$.each(val,function(i,item){ names.push( $Db.rty(item,'rty_Name') ) });
+                    /*
                     that.pnl_Tree.find('#field_treeview').hide();
                     setTimeout(function(){
                         that.adjustTreePanel();
                         that.pnl_Tree.find('#field_treeview').fadeIn(500);
                     },1000);
+                    */
             }    
         };
 
@@ -604,9 +714,9 @@ $.widget( "heurist.searchBuilder", {
   
 
     // init fieldtreeview
-    , _initFieldTreeView: function(rectypeIds){
+    , _initTreeView: function(rectypeIds){
         
-        if(!this.is_advanced) return;
+        //if(!this.is_advanced) return;
         
 
         if(window.hWin.HEURIST4.util.isArrayNotEmpty(rectypeIds) && this.current_tree_rectype_ids != rectypeIds.join(',') ){
@@ -629,7 +739,7 @@ $.widget( "heurist.searchBuilder", {
                 //window.hWin.HEURIST4.util.setDisabled($('#btnNext'),true);
 
                 //'title','modified',
-                var allowed_fieldtypes = ['enum','freetext','blocktext',
+                var allowed_fieldtypes = ['header_ext','enum','freetext','blocktext',
                                 'geo','year','date','integer','float','resource','relmarker'];
                       
 /*              
@@ -641,7 +751,7 @@ $.widget( "heurist.searchBuilder", {
                             {key:'notes',title:'Notes', depth:1},
                             {key:'owner',title:'Owner (user or group)', depth:1},
                             {key:'access',title:'Visibility', depth:1},
-                            {key:'tag',title:'Tags (NOT IMPLEMENTED)', depth:1}
+                            {key:'tag',title:'Tags', depth:1}
 */              
                 
                 var treedata = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 5, rectype, allowed_fieldtypes );
@@ -733,6 +843,8 @@ $.widget( "heurist.searchBuilder", {
                                     */
                                 },
                                 click: function(e, data){
+                                   e.stopPropagation(); 
+                                    
                                    if($(e.originalEvent.target).is('span') && data.node.children && data.node.children.length>0){
                                        data.node.setExpanded(!data.node.isExpanded());
                                        //treediv.find('.fancytree-expander').hide();
@@ -745,8 +857,11 @@ $.widget( "heurist.searchBuilder", {
                                         var codes2 = code.split(':');
                                         codes2[0] = 'any';
                                         code = codes2.join(':');
-                                        
-                                        that.addFieldItem( code, codes );
+                                      
+                                        //add or replace field in builderItem
+                                        that.addFieldItem( code, codes, that.select_field_for_id);
+                                        that.select_field_for_id = null;
+                                        that.pnl_Tree.hide();
                                    }
                                 },
                                 dblclick: function(e, data) {
@@ -888,6 +1003,10 @@ $.widget( "heurist.searchBuilder", {
         var mainquery = [];
         
         var rty_IDs = this.select_main_rectype.val();
+        
+        if(rty_IDs<0){
+            return '';
+        }
         
         
         if(rty_IDs>0){

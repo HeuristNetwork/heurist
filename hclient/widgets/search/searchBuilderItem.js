@@ -61,7 +61,9 @@ $.widget( "heurist.searchBuilderItem", {
         
         // callback
         onremove: null,
-        onchange: null
+        onchange: null,
+        
+        onselect_field: null  //callback to select field from treeview
     },
 
     _current_field_type:null, // type of input field
@@ -82,32 +84,24 @@ $.widget( "heurist.searchBuilderItem", {
         
         // 0. Label (header)
         this.label_token = $( "<div>" )
-            .css({"font-size":"smaller",padding:'10px 0 10px 20px',width:'95%','margin-top':'4px','border-top':'1px solid lightgray'})
-            .appendTo( this.element );;
+            .css({"font-size":"smaller",'padding-left':'83px',width:'95%','margin-top':'4px'})
+            .appendTo( this.element ); //10px 0 10px 20px,'border-top':'1px solid lightgray' 
 
         // selector container - for fields and comparison
         this.sel_container = $('<div>')
             .css({'display':'inline-block','vertical-align':'top','padding-top':'3px'})
             .appendTo(this.element);
-            
-        // 1. Remove icon
-        this.remove_token = $( "<span>" )
-        .attr('title', 'Remove this search token' )
-        .addClass('ui-icon ui-icon-circle-b-close')
-        .css({'cursor':'pointer','font-size':'0.8em'})
-        .appendTo( this.sel_container );        
 
-        this._on( this.remove_token, { click: function(){
-            if($.isFunction(this.options.onremove)){
-                this.options.onremove.call(this);
-            }    
-        } });
-            
-            
         // values container - consists of set of inputs (editing_input) and add/remove buttons
         this.values_container = $( '<fieldset>' )
             .css({'display':'inline-block','padding':0}) //,'margin-bottom': '2px'
             .appendTo( this.element );
+
+            
+        $('<div class="header_narrow field_header" '
+        +'style="min-width:83px;display:inline-block;text-align:right;padding-right: 5px;">'
+        +'<label for="opt_rectypes">Criteria</label></div>')
+            .appendTo( this.sel_container );
         
         // 2. field selector for field or links tokens
         this.select_fields = $( '<select>' )
@@ -117,6 +111,33 @@ $.widget( "heurist.searchBuilderItem", {
             .hide()
             .appendTo( this.sel_container );
 
+        this.select_fields_btn = $('<span role="combobox" class="ui-selectmenu-button ui-button '
+                    +'ui-widget ui-selectmenu-button-closed ui-corner-all" '
+                    +'style="padding: 0px; font-size: 1.1em; width: 210px; min-width: 210px;">'
+                    +'<span class="ui-selectmenu-icon ui-icon ui-icon-triangle-1-s"></span><span class="ui-selectmenu-text">Any field</span></span>')
+                .insertAfter(this.select_fields);
+        this._on( this.select_fields_btn, { click: function(event){
+            if($.isFunction(this.options.onselect_field)){
+                window.hWin.HEURIST4.util.stopEvent(event);
+                this.options.onselect_field.call(this);
+                //this._onSelectField();
+            }
+        }});
+
+
+        // 1. Remove icon
+        this.remove_token = $( "<span>" )
+        .attr('title', 'Remove this search token' )
+        .addClass('ui-icon ui-icon-circle-b-close')
+        .css({'cursor':'pointer','font-size':'0.8em',visibility:'hidden'})
+        .appendTo( this.sel_container );        
+        
+        this._on( this.remove_token, { click: function(){
+            if($.isFunction(this.options.onremove)){
+                this.options.onremove.call(this);
+            }    
+        } });
+            
         // 3a  negate  
         this.cb_negate = $( '<label><input type="checkbox">not</label>' )
             .css('font-size','0.8em')
@@ -128,21 +149,20 @@ $.widget( "heurist.searchBuilderItem", {
         this.select_comparison = $( '<select>' )
             .attr('title', 'Select compare operator' )
             .addClass('text ui-corner-all')
-            .css({'margin-left':'0.5em','min-width':'90px'})
+            .css({'margin-left':'1em','min-width':'99px','max-width':'99px',border:'none'})
             //.hide()
             .appendTo( this.sel_container );
 
             
         // 4. conjunction selector for multivalues
-        var ele = $('<div>').css('padding-top','2px').hide().appendTo( this.sel_container );
-        this.select_conjunction = $( "<select><option>any</option><option>all</option></select>" )
+        //var ele = $('<div>').css('padding-top','2px').hide().appendTo( this.sel_container );
+        this.select_conjunction = $( '<select><option value="any">or</option><option value="all">and</option></select>' )
             .attr('title', 'Should field satisfy all criteria or any of them' )
             .addClass('text ui-corner-all')
-            .css('float','right')
-            //.hide()
-            .appendTo( ele );
-
-
+            .css({'margin':'5px 0px 2px',border:'none'}) //,'margin-right':'-21px'
+            .appendTo( this.sel_container )
+            .hide();
+            
         
         this.select_relationtype = $( '<select>' )
             .attr('title', 'Select relation type' )
@@ -152,6 +172,15 @@ $.widget( "heurist.searchBuilderItem", {
             .appendTo( this.sel_container );
         
 
+        var that = this;
+        this.sel_container.hover(function(){
+                   that.remove_token.css({visibility:'visible'});  },
+        function(){
+                   that.remove_token.css({visibility:'hidden'});
+        });
+        
+        
+        
 /*        var div_btn =  $('<div>').css({'width':(this.options.level<3)?'12em':'6em'}).appendTo(this.value_container); 
 
         var btn_delete = $( "<button>", {text:'Delete'})
@@ -171,93 +200,113 @@ $.widget( "heurist.searchBuilderItem", {
         
     }, //end _create
     
+    //
+    //
+    //
+    changeOptions: function(ext_options){
+
+        this.options = $.extend(this.options, ext_options);
+        
+        this._refresh();
+    },
+    
     /*
     * private function
     * show/hide buttons depends on current login status
     */
     _refresh: function(){
-        
+
         if(!this.options.hasFieldSelector){
             this.remove_token.css({'margin-top':'-55px'});
-            this.label_token.show();    
+            //this.label_token.show();    
         }else{
-            this.label_token.hide();    
-            
+            //this.label_token.hide();    
+
             var topOptions2 = [
-                    {key:'anyfield',title:window.hWin.HR('Any field')},
-                    {key:0,title:'Record header fields', group:1, disabled:true},
-                        {key:'title',title:'Title (constructed)', depth:1},
-                        {key:'added',title:'Date added', depth:1},
-                        {key:'modified',title:'Date modified', depth:1},
-                        {key:'addedby',title:'Creator (user)', depth:1},
-                        {key:'url',title:'URL', depth:1},
-                        {key:'notes',title:'Notes', depth:1},
-                        {key:'owner',title:'Owner (user or group)', depth:1},
-                        {key:'access',title:'Visibility', depth:1},
-                        {key:'tag',title:'Tags', depth:1}
-                    ];
-                    
+                {key:'anyfield',title:window.hWin.HR('Any field')},
+                {key:0,title:'Record header fields', group:1, disabled:true},
+                {key:'title',title:'Title (constructed)', depth:1},
+                {key:'added',title:'Date added', depth:1},
+                {key:'modified',title:'Date modified', depth:1},
+                {key:'addedby',title:'Creator (user)', depth:1},
+                {key:'url',title:'URL', depth:1},
+                {key:'notes',title:'Notes', depth:1},
+                {key:'owner',title:'Owner (user or group)', depth:1},
+                {key:'access',title:'Visibility', depth:1},
+                {key:'tag',title:'Tags', depth:1}
+            ];
+
             var bottomOptions = null;
             //[{key:'latitude',title:window.hWin.HR('geo: Latitude')},
             //                     {key:'longitude',title:window.hWin.HR('geo: Longitude')}]; 
-                    
-            var allowed_fieldtypes = ['enum','freetext','blocktext',
-                            'geo','year','date','integer','float','resource','relmarker'];
-            
-            //show field selector
-            window.hWin.HEURIST4.ui.createRectypeDetailSelect(this.select_fields.get(0), this.options.top_rty_ID, 
-                        allowed_fieldtypes, topOptions2, 
-                        {show_parent_rt:true, show_latlong:true, bottom_options:bottomOptions, 
-                            selectedValue:this.options.dty_ID,
-                            useIds: true, useHtmlSelect:false});                
-            
-            this._on( this.select_fields, { change: this._onSelectField });
-            
+
+            if(this.options.top_rty_ID>0){
+                
+                this.select_fields_btn.show();
+                this.select_fields.hide();
+
+            }else{
+
+                var allowed_fieldtypes = ['enum','freetext','blocktext',
+                    'geo','year','date','integer','float','resource','relmarker'];
+
+                this.select_fields_btn.hide();
+                
+                //show field selector
+                window.hWin.HEURIST4.ui.createRectypeDetailSelect(this.select_fields.get(0), this.options.top_rty_ID, 
+                    allowed_fieldtypes, topOptions2, 
+                    {show_parent_rt:true, show_latlong:true, bottom_options:bottomOptions, 
+                        selectedValue:this.options.dty_ID, //initally selected
+                        useIds: true, useHtmlSelect:false});                
+
+                this._on( this.select_fields, { change: this._onSelectField });
+                
+            }
             this._onSelectField();
-            
+
         }
 
-/*        
+        /*        
         if(this.options.token=='f'){
-            
-            if(this.options.hasFieldSelector)
-            {
-                var allowed = Object.keys($Db.baseFieldType);
-                allowed.splice(allowed.indexOf("separator"),1);
-                allowed.splice(allowed.indexOf("relmarker"),1);
-                allowed.splice(allowed.indexOf("resource"),1);
-                //allowed.splice(allowed.indexOf("geo"),1);
-                allowed.splice(allowed.indexOf("file"),1);
-        
-                //list of fields for rtyIDs            
-                window.hWin.HEURIST4.ui.createRectypeDetailSelect(this.select_fields.get(0), this.option.rtyIDs, 
-                        allowed, window.hWin.HR('Any field type'), {selectedValue:this.options.dty_ID});
-            
-                this.select_fields.show();
-            }else{
-                this.select_fields.hide();    
-            }
-            
-            
+
+        if(this.options.hasFieldSelector)
+        {
+        var allowed = Object.keys($Db.baseFieldType);
+        allowed.splice(allowed.indexOf("separator"),1);
+        allowed.splice(allowed.indexOf("relmarker"),1);
+        allowed.splice(allowed.indexOf("resource"),1);
+        //allowed.splice(allowed.indexOf("geo"),1);
+        allowed.splice(allowed.indexOf("file"),1);
+
+        //list of fields for rtyIDs            
+        window.hWin.HEURIST4.ui.createRectypeDetailSelect(this.select_fields.get(0), this.option.rtyIDs, 
+        allowed, window.hWin.HR('Any field type'), {selectedValue:this.options.dty_ID});
+
+        this.select_fields.show();
+        }else{
+        this.select_fields.hide();    
+        }
+
+
         }else if(this.options.token=='links'){    
-            
-            this.select_fields.show();
+
+        this.select_fields.show();
         }else
         {
-            this.select_fields.hide();
-            this.select_relationtype.hide();
-           
-            this._defineInputElement();
-            
+        this.select_fields.hide();
+        this.select_relationtype.hide();
+
+        this._defineInputElement();
+
         }
         if(this.options.token=='links'){
-            this.select_relationtype.show();    
-            this.select_comparison.hide();
+        this.select_relationtype.show();    
+        this.select_comparison.hide();
         }else{
-            this.select_relationtype.hide();    
-            this.select_comparison.show();
+        this.select_relationtype.hide();    
+        this.select_comparison.show();
         }
-*/
+        */
     },
     //
     // custom, widget-specific, cleanup.
@@ -270,7 +319,20 @@ $.widget( "heurist.searchBuilderItem", {
         if(this.options.code){
             var res = $Db.parseHierarchyCode(this.options.code, this.options.top_rty_ID);
             if(res!==false){
-                this.label_token.html(res.harchy.join(''));
+                if(this.options.top_rty_ID>0){
+                    this.element
+                        .find('span.ui-selectmenu-button>span.ui-selectmenu-text')
+                        .text(res.harchy[res.harchy.length-1]);
+                }
+
+                if(res.harchy.length>2){
+                    res.harchy.pop();
+                    this.label_token.html(res.harchy.join(''));
+                    this.label_token.show();
+                }else{
+                    this.label_token.hide();
+                }
+                
             }else{
                 this.label_token.text('broken!');
             }
@@ -295,13 +357,13 @@ $.widget( "heurist.searchBuilderItem", {
             is_faceted_search: true,
             
             change: function(){
-                var vals = this.getValues();
-                if(vals.length<2){
-                    that.select_conjunction.parent().hide();    
-                }else{
-                    that.select_conjunction.parent().show();    
-                }
+                that._manageConjunction();
                 
+                if($.isFunction(that.options.onchange))
+                {
+                    that.options.onchange.call(this);
+                }
+        
             }
             
         };
@@ -327,7 +389,8 @@ $.widget( "heurist.searchBuilderItem", {
             ed_options['detailtype'] = field_type;
             ed_options['dtID'] = this.options.dty_ID;
 
-        }else{        
+        }
+        else{        
             //non base fields inputs
 
             if(!field_type){
@@ -346,12 +409,11 @@ $.widget( "heurist.searchBuilderItem", {
                         //user selector
                         field_type = 'user';
 
-                }else  if (this.options.dty_ID=='access'){
+                }else  if (this.options.dty_ID=='access' || 
+                           this.options.dty_ID=='ids' || 
+                           this.options.dty_ID=='tag'){
                         
-                        field_type = 'access';
-                }else  if (this.options.dty_ID=='tag'){
-                        // tag selector 
-                        field_type = 'tag';
+                        field_type = this.options.dty_ID;
                 }
             }
             
@@ -373,7 +435,7 @@ $.widget( "heurist.searchBuilderItem", {
             eqopts = [{key:'',title:'within'}];
 
         }else if(field_type=='enum' || field_type=='resource' || field_type=='relmarker' 
-                 || field_type=='user' || field_type=='access'){
+                 || field_type=='user' || field_type=='access' || field_type=='ids'){
 
             eqopts = [{key:'',title:'equals'},
                       {key:'-',title:'not equals'}];   //- negate
@@ -460,18 +522,24 @@ Whole value = EQUAL
 
 
         window.hWin.HEURIST4.ui.createSelector(this.select_comparison.get(0), eqopts);
+
+        this._on( this.select_conjunction, { change: function(){
+            this._manageConjunction();
+            if($.isFunction(this.options.onchange)){
+                    this.options.onchange.call(this);
+            }
+        }});
         
         this._on( this.select_comparison, { change: function(){
 
             var cval = this.select_comparison.val();
-            if(cval=='NULL' || cval=='any'){
+            if(cval=='NULL' || cval=='any' ){
                 this._predicate_input_ele.hide();
                 this.select_conjunction.hide();
                 this.cb_negate.hide();
             }else{
                 this._predicate_input_ele.show();
-                this.select_conjunction.show();
-                
+                this._manageConjunction();
                 //this.cb_negate.show();
             }
             if(cval=='@' 
@@ -485,11 +553,16 @@ Whole value = EQUAL
                 this._predicate_input_ele.editing_input('setBetweenMode', false);        
             }
             
+            if($.isFunction(this.options.onchange)){
+                    this.options.onchange.call(this);
+            }
+            
         } });
             
         this._current_field_type = field_type;
         //clear input values
         if(this._predicate_input_ele){
+            this.select_conjunction.appendTo(this.sel_container); //back to selcontainer
             this._predicate_input_ele.remove(); this._predicate_input_ele = null;    
         }
         if(this._predicate_reltype_ele){
@@ -509,9 +582,18 @@ Whole value = EQUAL
             
         } 
         
+        //init input elements
         this._predicate_input_ele = $("<div>")
             .editing_input(ed_options).appendTo(this.values_container);
-
+            
+        //transfer conjunction to input element
+        var ele = this._predicate_input_ele.find('.editint-inout-repeat-button')
+                    .css({'margin-left':'22px','min-width':'16px'});
+        var ele = ele.parent();
+        ele.css('min-width','40px');
+        this.select_conjunction.appendTo(ele);
+        this.select_conjunction.hide();
+            
         this.select_comparison.trigger('change');
     },
 
@@ -555,6 +637,7 @@ Whole value = EQUAL
                     op = '';
                     vals = ['NULL'];
             }else if( (this._current_field_type=='enum' 
+                        || this._current_field_type=='ids'
                         || this._current_field_type=='user'
                         || this._current_field_type=='resource') 
                     && vals.length>1 && this.select_conjunction.val()=='any')
@@ -602,11 +685,13 @@ Whole value = EQUAL
 
             var key;
             
+            if (this._current_field_type=='geo') {
+                key = 'geo';    
+            }else 
             if(this.options.dty_ID>0){
                 key = 'f:'+this.options.dty_ID; 
-            }else if (this._current_field_type=='geo') {
-                key = 'geo';    
-            }else if(this.options.dty_ID=='anyfield' || this.options.dty_ID==''){
+            }else 
+            if(this.options.dty_ID=='anyfield' || this.options.dty_ID==''){
                 key = 'f';
             }else {
                 key = this.options.dty_ID;
@@ -644,11 +729,49 @@ Whole value = EQUAL
     //
     //    
     _onSelectField:function(){
-        
-        this.options.dty_ID = this.select_fields.val();
+
+        if(!(this.options.top_rty_ID>0)){        
+            this.options.dty_ID = this.select_fields.val();
+        }
             
         this._defineInputElement();
         
-    }
+    },
+    
+
+    _manageConjunction: function()
+    {                
+        this.select_conjunction.parent().find('.conj').remove(); //previous
+        var ft = this._current_field_type;
+
+        var vals = !this._predicate_input_ele?0:this._predicate_input_ele.editing_input('getValues');
+        
+        if(ft=='user' ||  ft=='ids' || vals.length<2){
+            if(ft=='user' ||  ft=='ids'){
+                this.select_conjunction.val('any');    
+            }
+            this.select_conjunction.hide();
+        }else{
+            this.select_conjunction.show();    
+
+            //add or/and
+            if(vals.length>2){
+                var eles = this._predicate_input_ele.find('.input-cell > .input-div');
+
+                var mh = $(eles[0]).height();
+
+//console.log('changes '+vals.length+'  '+cnt+'  h='+mh);
+                var cnt = eles.length-2;
+                eles = [];
+                while(cnt--) eles.push('<div class="conj" style="line-height:'+(mh+1)+'px;padding:0px 4px 2px">'
+                    +(this.select_conjunction.val()=='any'?'or':'and')
+                    +'</div>');
+
+                $(eles.join('')).appendTo(this.select_conjunction.parent());
+            }
+
+        }
+    }                
+        
 
 });
