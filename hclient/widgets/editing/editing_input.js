@@ -206,6 +206,11 @@ $.widget( "heurist.editing_input", {
                         if( !(Number(this.f('rst_MaxValues'))>0)  || this.inputs.length < this.f('rst_MaxValues')){
                             this._addInput('');
                             this._refresh();
+                            
+                            if($.isFunction(this.options.onrecreate)){
+                                this.options.onrecreate.call(this);
+                            }
+                            
                         }
                     }
                 });

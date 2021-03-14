@@ -364,6 +364,9 @@ $.widget( "heurist.searchBuilderItem", {
                     that.options.onchange.call(this);
                 }
         
+            },
+            onrecreate:function(){
+                that._manageConjunction();
             }
             
         };
@@ -744,9 +747,15 @@ Whole value = EQUAL
         this.select_conjunction.parent().find('.conj').remove(); //previous
         var ft = this._current_field_type;
 
-        var vals = !this._predicate_input_ele?0:this._predicate_input_ele.editing_input('getValues');
+        //var vals = !this._predicate_input_ele?0:this._predicate_input_ele.editing_input('getValues');
+        //var vals = !this._predicate_input_ele?0:this._predicate_input_ele.editing_input('getInputs');
         
-        if(ft=='user' ||  ft=='ids' || vals.length<2){
+        var eles = !this._predicate_input_ele?[]:this._predicate_input_ele.find('.input-cell > .input-div');
+        var cnt = eles.length;
+        
+console.log('changes '+cnt);        
+        
+        if(ft=='user' ||  ft=='ids' || cnt<2){
             if(ft=='user' ||  ft=='ids'){
                 this.select_conjunction.val('any');    
             }
@@ -755,13 +764,12 @@ Whole value = EQUAL
             this.select_conjunction.show();    
 
             //add or/and
-            if(vals.length>2){
-                var eles = this._predicate_input_ele.find('.input-cell > .input-div');
+            if(cnt>2){
 
                 var mh = $(eles[0]).height();
 
 //console.log('changes '+vals.length+'  '+cnt+'  h='+mh);
-                var cnt = eles.length-2;
+                cnt = cnt-2;
                 eles = [];
                 while(cnt--) eles.push('<div class="conj" style="line-height:'+(mh+1)+'px;padding:0px 4px 2px">'
                     +(this.select_conjunction.val()=='any'?'or':'and')
