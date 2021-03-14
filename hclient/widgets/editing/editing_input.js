@@ -3146,20 +3146,21 @@ console.log('onpaste');
                     if(code2>0){
                         
                         sMsg = '.<br><span>Term (code '+code2+') with the same name already exists in "'
-                        +vocName+'". ';
+                        +vocName+'".<br>';
                         if(window.hWin.HAPI4.is_admin()){
-                            sMsg = sMsg + '<a href="#" class="term-sel" '
+                            sMsg = sMsg + 'Either <a href="#" class="term-sel" '
                                 +'data-term-re="'+value+'" data-term="'+code2+'">Use this term</a></span>';
                         }else{
                             sMsg = sMsg 
-                            +'.<br><span>You can select it in dropdown. '
-                            +'To replace for all records ask database manager</span>';    
+                            +'Either ask database manager to replace term for all records';    
                         }
+                        sMsg = sMsg + ' or select the required term in the dropdown</span>';
+
                     }else{
                         if(window.hWin.HAPI4.is_admin()){
                             sMsg = '.<br><span>If you are sure the term is not used by another field, you can '
                             +'<a href="#" class="term-move">move term</a> to the "'
-                            +vocName+'" vocabulary '
+                            +vocName+'" vocabulary <br/>'
                             +' Alternatively you may <a href="#" class="term-ref" data-term="'
                                 +value+'"  data-vocab="'
                                 +allTerms+'">create a reference</a> from vocabulary "'
