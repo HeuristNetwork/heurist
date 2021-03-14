@@ -1160,7 +1160,7 @@ $.widget( "heurist.search", {
             var widget = window.hWin.HAPI4.LayoutMgr.getWidgetByName('mainMenu6');
             if(widget){
                     var pos = this.element.offset();
-                    widget.mainMenu6('show_ExploreMenu', null, 'searchQuick', {top:pos.top+10, left:pos.left});
+                    widget.mainMenu6('show_ExploreMenu', null, 'searchBuilder', {top:pos.top+10, left:pos.left});
                     return;
             }
         }else{
