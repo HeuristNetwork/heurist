@@ -629,14 +629,17 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                     $('<h3 style="margin:10px 0">Select inverse term for: <i>'
                         +this.options.select_mode_target+'</i></h3>').appendTo(c1);
                 }else{
-                    $('<h3 style="margin:10px 0">Adding to vocabulary: <i>'+this.options.select_mode_target+'</i></h3>').appendTo(c1);
+                    $('<h3 style="margin:10px 0">Adding to vocabulary:'
+                    +'<div class="truncate" style="max-width:330px;font-style:italic">'
+                    +this.options.select_mode_target+'</div></h3>').appendTo(c1);
                 }
 
             }
 
             //add vocabulary
-            var sel = $('<div style="float:left"><label>From vocabulary: </label>'
-                +'<select type="text" style="min-width:15em;" class="text ui-widget-content ui-corner-all"></select></div>')
+            var sel = $('<div style="float:left"><label>From vocabulary: </label><br>'
+                +'<select type="text" style="max-width:330px;min-width:15em;" '
+                +'class="text ui-widget-content ui-corner-all"></select></div>')
             .appendTo(c1);
 
             //add input search
@@ -678,8 +681,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             //this._onActionListener(null, 'viewmode-tree');
 
             if( !window.hWin.HEURIST4.util.isempty(this.options.select_mode_reference) ){
-                this.searchForm.css('height','5.5em');
-                this.recordList.css('top','5.5em');
+                this.searchForm.css('height','7.5em');
+                this.recordList.css('top','7.5em');
                 this.options.recordList.transparent_background = true;
                 this.options.recordList.recordDivEvenClass = null;
                 //this.recordList.removeClass('ui-heurist-bg-light').css({'background':'none','border':'none'});
