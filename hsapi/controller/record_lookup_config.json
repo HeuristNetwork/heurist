@@ -36,9 +36,9 @@
 {
     "service": "MPCE",
     "rty_ID": "1268-53",
-    "label": "Classify Work",
+    "label": "MPCE Classify Work",
     "dialog": "recordLookupMPCE",
-    "description": "Lookup for Super Book (Work) Table [1268-53]",
+    "description": "A project keyword classification toolkit for the Super Book (Work) Table.",
     "fields": {
         "workID":"",
         "projectKywds":"",
