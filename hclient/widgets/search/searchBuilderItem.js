@@ -99,7 +99,7 @@ $.widget( "heurist.searchBuilderItem", {
 
             
         $('<div class="header_narrow field_header" '
-        +'style="min-width:83px;display:inline-block;text-align:right;padding-right: 5px;">'
+        +'style="min-width:90px;display:inline-block;text-align:right;padding-right: 9px;">'
         +'<label for="opt_rectypes">Criteria</label></div>')
             .appendTo( this.sel_container );
         
@@ -159,7 +159,7 @@ $.widget( "heurist.searchBuilderItem", {
         this.select_conjunction = $( '<select><option value="any">or</option><option value="all">and</option></select>' )
             .attr('title', 'Should field satisfy all criteria or any of them' )
             .addClass('text ui-corner-all')
-            .css({'margin':'5px 0px 2px',border:'none'}) //,'margin-right':'-21px'
+            .css({'margin':'10px 0px 2px 8px',border:'none',width:33}) //mr:1 w:40 for "and"
             .appendTo( this.sel_container )
             .hide();
             
@@ -446,26 +446,38 @@ $.widget( "heurist.searchBuilderItem", {
         } else if(field_type=='float' || field_type=='integer'){
 
             //???less than or equals, greater than or equals
+            already2 = true;
             
             eqopts = [
                 {key:'=',title:'equals'},
                 {key:'-',title:'not equals'},
+                {key:'any', title:'any value'},
+                {key:'NULL', title:'not data'},
+                {key:'>=',title:'>='},
+                {key:'<=',title:'<='}];
+/*                
                 {key:'>',title:'greater than'},
                 {key:'<',title:'less than'},
                 {key:'<>',title:'between'},
                 {key:'-<>',title:'not betweeen'}
-            ];
-
+*/
         }else if(field_type=='date'){
             //
+            already2 = true;
+            
             eqopts = [
                 {key:'',title:'like'},
                 {key:'=',title:'equals'},
                 {key:'-',title:'not equals'},
+                {key:'any', title:'any value'},
+                {key:'NULL', title:'not data'},
+                {key:'>=',title:'>='},
+                {key:'<=',title:'<='}];
+/*                
                 {key:'>',title:'greater than'},
                 {key:'<',title:'less than'},
                 {key:'<>',title:'between'}
-            ];
+*/
             
         }else if(field_type=='tag'){
 
@@ -513,8 +525,8 @@ Whole value = EQUAL
             eqopts = eqopts.concat([
                 {key:'=',title:'whole value'},    //cs
                 {key:'starts',title:'starts with'},
-                {key:'ends',title:'ends with'},
-                {key:'<>',title:'between'}
+                {key:'ends',title:'ends with'}
+                //{key:'<>',title:'between'}
                 ]);
         }
 
@@ -593,7 +605,7 @@ Whole value = EQUAL
         var ele = this._predicate_input_ele.find('.editint-inout-repeat-button')
                     .css({'margin-left':'22px','min-width':'16px'});
         var ele = ele.parent();
-        ele.css('min-width','40px');
+        ele.css('min-width','44px');
         this.select_conjunction.appendTo(ele);
         this.select_conjunction.hide();
             
@@ -753,8 +765,6 @@ Whole value = EQUAL
         var eles = !this._predicate_input_ele?[]:this._predicate_input_ele.find('.input-cell > .input-div');
         var cnt = eles.length;
         
-console.log('changes '+cnt);        
-        
         if(ft=='user' ||  ft=='ids' || cnt<2){
             if(ft=='user' ||  ft=='ids'){
                 this.select_conjunction.val('any');    
@@ -762,6 +772,14 @@ console.log('changes '+cnt);
             this.select_conjunction.hide();
         }else{
             this.select_conjunction.show();    
+            
+            var is_any = (this.select_conjunction.val()=='any');
+            
+            if(is_any){
+                this.select_conjunction.css({'margin':'10px 0px 2px 8px',width:'33px'});
+            }else{
+                this.select_conjunction.css({'margin':'10px 0px 2px 0',width:'44px'});
+            }
 
             //add or/and
             if(cnt>2){
@@ -771,8 +789,9 @@ console.log('changes '+cnt);
 //console.log('changes '+vals.length+'  '+cnt+'  h='+mh);
                 cnt = cnt-2;
                 eles = [];
-                while(cnt--) eles.push('<div class="conj" style="line-height:'+(mh+1)+'px;padding:0px 4px 2px">'
-                    +(this.select_conjunction.val()=='any'?'or':'and')
+                while(cnt--) eles.push('<div class="conj" style="line-height:'+(mh+1)+'px;padding:0px '
+                            +(is_any?12:5)+'px">'
+                    +(is_any?'or':'and')
                     +'</div>');
 
                 $(eles.join('')).appendTo(this.select_conjunction.parent());

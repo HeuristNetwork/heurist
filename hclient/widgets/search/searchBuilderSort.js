@@ -70,7 +70,7 @@ $.widget( "heurist.searchBuilderSort", {
             .appendTo(this.element);
             
         $('<div class="header_narrow sort_header" '
-        +'style="min-width:83px;display:inline-block;text-align:right;padding-right: 5px;">'
+        +'style="min-width:90px;display:inline-block;text-align:right;padding-right: 9px;">'
         +'<label for="opt_rectypes">Sort by</label></div>')
             .appendTo( this.sel_container );
             

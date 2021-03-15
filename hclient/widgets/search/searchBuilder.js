@@ -192,41 +192,57 @@ $.widget( "heurist.searchBuilder", {
     //
     //
     , adjustDimension: function(){
-        /*    
-        var ch =   this._dialog[0].scrollHeight+100; 
-        var width = this._dialog.dialog( 'option', 'width');
-        var minw = 650;
-            
-            //var $dlg = this.step0.find("#facets_options");
-            //minw = $dlg.find( ".ui-accordion-content-active" ).length>0?800:650;
-            
-        //ch = Math.max($dlg.height(),$dlg[0].scrollHeight)+100; 
-        if(ch<350) ch = 350;
-            
-        //if(width<minw) 
-        this._dialog.dialog( 'option', 'width', minw);
         
-        var topPos = 0;
-        var pos = this._dialog.dialog('option', 'position');
-        if(pos && pos.of && !(pos.of instanceof Window)){
-            topPos = $(pos.of).offset().top+40;
-        }
-
-        var dh =  this._dialog.dialog('option', 'height');
-
-        var ht = Math.min(ch, window.innerHeight-topPos);
-        this._dialog.dialog('option', 'height', ht);    
-        */
-        /*
-        if(this.options.is_h6style){
-            //var dialog_height = window.innerHeight - this.element.parent().position().top - 5;
-            //this.element.dialog( 'option', 'height', dialog_height);
+        if(this.field_array.length==0){
+            this.btnAddFieldItem.click();
         }else{
-            var ht = window.innerHeight; //$(window).height();
-            if(ht>700) ht = 700;
-            this.element.dialog( 'option', 'height',  ht );
+            this.pnl_Items.find('.field_header').css('visibility','hidden');
+            this.pnl_Items.find('.field_header:first').css('visibility','visible');
         }
-        */
+        if(this.field_array.length>1){
+            this.pnl_Items.find('.search_conjunction').css('visibility','visible');    
+        }else{
+            this.pnl_Items.find('.search_conjunction').css('visibility','hidden');    
+        }
+
+        if(this.sort_array.length==0){
+            this.addSortItem();
+        }else{
+            this.pnl_Items.find('.sort_header').css('visibility','hidden');
+            this.pnl_Items.find('.sort_header:first').css('visibility','visible');
+        }
+            
+
+        //var ch = this.pnl_Items[0].scrollHeight;
+        var ch = this.btnAddSortItem.position().top + 24;   
+            
+        ch = this.pnl_Rectype.height() + ch + 115; 
+        if(ch<450) ch = 450;
+
+        var topPos = 0;
+        if(this.options.is_dialog){        
+            var pos = this._dialog.dialog('option', 'position');
+            if(pos && pos.of && !(pos.of instanceof Window)){
+                topPos = $(pos.of).offset().top+40;
+            }
+
+            //var dh =  this._dialog.dialog('option', 'height');
+
+            var ht = Math.min(ch, window.innerHeight-topPos);
+
+            //console.log(ch+'  '+dh+'  new '+ht);                   
+            
+            this._dialog.dialog('option', 'height', ht);    
+        }else{
+            topPos = this.element.parent().offset().top + 10;
+            
+            if(ch > window.innerHeight-topPos){
+                ch = window.innerHeight-topPos;
+            }
+            
+            this.element.parent().height(ch);
+        }
+                
     }
     
     //
@@ -326,19 +342,13 @@ $.widget( "heurist.searchBuilder", {
                                 if(item.attr('id')==id){
                                     that.sort_array.splice(k,1);
                                     that.pnl_Items.find('#'+id).remove();    
-                                    that.adjustDimension();
                                     return false;
                                 }
                             });
-                            
-                            if(that.sort_array.length==0){
-                                 that.addSortItem();
-                            }else{
-                                that.pnl_Items.find('.sort_header').css('visibility','hidden');
-                                that.pnl_Items.find('.sort_header:first').css('visibility','visible');
-                            }
-                            
+
+                            that.adjustDimension();
                             that._doCompose();
+                            
                         }
         });
      
@@ -395,17 +405,12 @@ $.widget( "heurist.searchBuilder", {
                                     if(item.attr('id')==id){
                                         that.field_array.splice(k,1);
                                         that.pnl_Items.find('#'+id).remove();    
-                                        that.adjustDimension();
                                         
                                         return false;
                                     }
                                 });
-                                if(that.field_array.length==0){
-                                     that.btnAddFieldItem.click();
-                                }else{
-                                    that.pnl_Items.find('.field_header').css('visibility','hidden');
-                                    that.pnl_Items.find('.field_header:first').css('visibility','visible');
-                                }
+
+                                that.adjustDimension();
                                 that._doCompose();
                             },
                             onchange: function(){
@@ -541,7 +546,6 @@ $.widget( "heurist.searchBuilder", {
                 this._on(this.btnAddFieldItem, {click:function(event){
                     
                     var rty_ID = that.select_main_rectype.val();
-                        
                     that.addFieldItem( 'any:anyfield', [rty_ID , 'anyfield'] );
                 }});
                 
@@ -558,6 +562,8 @@ $.widget( "heurist.searchBuilder", {
                     that.addSortItem();
                 }});
                 
+                this.search_conjunction = this.pnl_Items.find('.search_conjunction').find('select');
+                this._on(this.search_conjunction, {change:this._doCompose});
                 
                 this._on(this.pnl_Rectype.find('#btn-clear').button(), { click:this.clearAll });
                 
@@ -592,12 +598,12 @@ $.widget( "heurist.searchBuilder", {
             
             if(!this.options.is_dialog){
                 //add header and button set for inline mode
-                var h = this.element.find('.btn-preview').is(':checked') ?'82px':'50px';
+                var h = this.element.find('.btn-preview').is(':checked') ?'88px':'50px';
 
                 this.element.css({'font-size':'0.9em'});
                 this.pnl_Rectype.css({top:'36px'});
-                this.pnl_Tree.css({top:'110px', bottom:h});
-                this.pnl_Items.css({top:'110px', bottom:h});
+                this.pnl_Tree.css({top:'90px', bottom:h});
+                this.pnl_Items.css({top:'90px', bottom:h});
                 this.pnl_Result.css({bottom:'40px'});
                 var _innerTitle = $('<div class="ui-heurist-header" style="top:0px;padding-left:10px;text-align:left">Filter builder</div>')
                     .insertBefore(this.pnl_Rectype);
@@ -624,7 +630,7 @@ $.widget( "heurist.searchBuilder", {
                     
                     
                     if(this.element.find('.btn-preview').is(':checked')){
-                        var h = this.options.is_dialog ? '50px':'82px';                       
+                        var h = this.options.is_dialog ? '50px':'88px';                       
                         this.pnl_Items.css('bottom',h);
                         this.pnl_Tree.css('bottom',h);
                         this.pnl_Result.show();
@@ -652,10 +658,10 @@ $.widget( "heurist.searchBuilder", {
         //add first field item
         if(!this.is_advanced && $.isEmptyObject(this.field_array)){
             
-            var rty_ID = this.select_main_rectype.val();
-            this.addFieldItem( 'any:anyfield', [rty_ID , 'anyfield'] );
-            
-            this.addSortItem();
+            this.btnAddFieldItem.click();
+            //var rty_ID = this.select_main_rectype.val();
+            //this.addFieldItem( 'any:anyfield', [rty_ID , 'anyfield'] );
+            //this.addSortItem();
         }
         
         
@@ -670,11 +676,11 @@ $.widget( "heurist.searchBuilder", {
         this.pnl_Items.children('div:not(.btn_field_add)').remove();
         this.field_array = [];
         this.sort_array = [];
+        this.adjustDimension();
         
-        var rty_ID = this.select_main_rectype.val();
-        this.addFieldItem( 'any:anyfield', [rty_ID , 'anyfield'] );
-        
-        this.addSortItem();
+        //var rty_ID = this.select_main_rectype.val();
+        //this.addFieldItem( 'any:anyfield', [rty_ID , 'anyfield'] );
+        //this.addSortItem();
         
     },
     
@@ -1047,6 +1053,8 @@ console.log(aCodes);
      0    1    2   3    4
 */ 
 
+        var fields_query = [];
+
         var that = this;
         
         $.each(this.field_array, function(i, ele){
@@ -1060,7 +1068,7 @@ console.log(aCodes);
             if(value!=null){
                 codes = code.split(':');
                 
-                branch = mainquery;    
+                branch = fields_query;    
                 //find branch
                 if(codes.length>2){
 
@@ -1143,6 +1151,17 @@ console.log(aCodes);
             }
             
         });
+        
+        if(fields_query.length>0){
+        
+            var fields_conjunction = this.search_conjunction.val();
+            if(fields_query.length>1 && fields_conjunction=='any'){
+                mainquery.push({any:fields_query});
+            }else{
+                mainquery = mainquery.concat(fields_query)
+            }
+        }
+        
         
         if(mainquery.length>0){
 

@@ -26,7 +26,7 @@
     </h3>
 
     <div class="main-rectype" style="display: inline-block;padding:0 20px;">
-            <div class="header_narrow" style="min-width:63px;display:inline-block"><label for="opt_rectypes">Record type</label></div>
+            <div class="header_narrow" style="min-width:72px;display:inline-block"><label for="opt_rectypes">Record type</label></div>
             <select id="opt_rectypes" class="text ui-widget-content ui-corner-all" style="min-width:250px"></select>
     </div>
         
@@ -48,11 +48,20 @@
 -->
 
 
-<fieldset id="pnl_Items" style="display:none;position:absolute;left:0px;right:0;top:65px;bottom:0px;overflow-y: auto;">
+<fieldset id="pnl_Items" style="display:none;position:absolute;left:0px;right:0;top:60px;bottom:0px;overflow-y: auto;">
+
+   <div class="btn_field_add search_conjunction" style="visibility:hidden;height:20px;">
+        <span style="margin-left: 99px;color:#6A7C99;cursor:pointer;font-size:0.8em">Search has to conform 
+            <select style="border:none">
+                <option value="all">ALL</option>
+                <option value="any">ANY</option>
+            </select> defined criteria</span>
+   </div>
    
-   <div class="btn_field_add search_field_add" style="color:#6A7C99;cursor:pointer;font-size:0.8em">
+   <div class="btn_field_add search_field_add" style="margin-left: 85px;color:#6A7C99;cursor:pointer;font-size:0.8em">
         <span class="ui-icon ui-icon-plus" style="font-size:1em;margin-left: 85px;"/> add field
    </div>
+        
    
    <hr/>
    
