@@ -36,14 +36,15 @@
 {
     "service": "MPCE",
     "rty_ID": "1268-53",
-    "label": "Lookup MPCE (not implemented)",
+    "label": "MPCE Classify Work",
     "dialog": "recordLookupMPCE",
-    "description": "Lookup for rectype 1268-53",
+    "description": "A project keyword classification toolkit for the Super Book (Work) Table.",
     "fields": {
-        "field1":"",
-        "field2":"",
-        "field3":"",
-        "field4":""
+        "workID":"",
+        "projectKywds":"",
+        "parisianClassify":"",
+        "basisClassify":"",
+        "classifyNotes":""
     }
 },
   {
