@@ -1750,10 +1750,10 @@ class HPredicate {
                 return ($this->negate?'!':'')."= '$datestamp'";
             }
             else if ($this->lessthan) {
-                return "< '$datestamp'";
+                return $this->lessthan." '$datestamp'";
             }
             else if ($this->greaterthan) {
-                return "> '$datestamp'";
+                return $this->greaterthan." '$datestamp'";
             }
             else {
                 //return "LIKE '$datestamp%'";
@@ -1842,11 +1842,17 @@ class HPredicate {
             }else if(strpos($this->value, '@')===0){
                 $this->fulltext = true;
                 $this->value = substr($this->value, 1);
+            }else if(strpos($this->value, '<=')===0){
+                $this->lessthan = '<=';
+                $this->value = substr($this->value, 2);
             }else if(strpos($this->value, '<')===0){
-                $this->lessthan = true;
+                $this->lessthan = '<';
                 $this->value = substr($this->value, 1);
+            }else if(strpos($this->value, '>=')===0){
+                $this->greaterthan = '>=';
+                $this->value = substr($this->value, 2);
             }else if(strpos($this->value, '>')===0){
-                $this->greaterthan = true;
+                $this->greaterthan = '>';
                 $this->value = substr($this->value, 1);
             }
             
@@ -1856,7 +1862,7 @@ class HPredicate {
 
         if(is_string($this->value) && trim($this->value)=='') return "!=''";   //find any non empty value
 
-        $eq = ($this->negate)? '!=' : (($this->lessthan) ? '<' : (($this->greaterthan) ? '>' : '='));
+        $eq = ($this->negate)? '!=' : (($this->lessthan) ? $this->lessthan : (($this->greaterthan) ? $this->greaterthan : '='));
         
         if($this->field_type=='enum' || $this->field_type=='relationtype'){
             
