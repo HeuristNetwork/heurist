@@ -3223,14 +3223,14 @@ console.log('onpaste');
                             var trm_id_re = $(e.target).attr('data-term-re');
                             var fieldName = this.f('rst_DisplayName');
                             
-                            window.hWin.HEURIST4.msg.bringCoverallToFront();                                             
-                            
                             var request = {a:'replace', dtyID:this.options.dtID, sVal:trm_id_re, rVal:trm_id, tag:0, recIDs:'ALL'};                
                             window.hWin.HEURIST4.msg.showMsgDlg(
                                     'You are about to convert tag #'+trm_id_re+' to #'+trm_id
                                     +' in field "'+fieldName+'" for all records'
                                     + '<br><br>Are you sure?',
                                     function(){
+                                        window.hWin.HEURIST4.msg.bringCoverallToFront();                                             
+                            
                                         window.hWin.HAPI4.RecordMgr.batch_details(request, function(response){
                                             window.hWin.HEURIST4.msg.sendCoverallToBack();
                                             if(response.status == window.hWin.ResponseStatus.OK){
