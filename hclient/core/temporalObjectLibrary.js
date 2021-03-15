@@ -356,7 +356,7 @@ Temporal.fieldsDict = {	"VER"	:	"Version Number",
 };
 
 Temporal.determination = {	0	:	"Unknown",
-    1	:	"Attested",
+    1	:	    "Attested",
     2	:	"Conjecture",
     3	:	"Measurement"
 };
@@ -1792,7 +1792,7 @@ function temporalToHumanReadableString(inputStr) {
     if (str && str.search(/\|VER/) != -1) {	//we have a temporal
 
         var cldname = 'gregorian';
-        if (str.match(/CLD=([^\|]+)/)){
+        if (str.match(/CLD=([^\|]+)/)){ //calendar
               cldname = str.match(/CLD=([^\|]+)/)[1].toLowerCase();
         }
 
@@ -1805,7 +1805,7 @@ function temporalToHumanReadableString(inputStr) {
 
         var isgj = (cldname=='gregorian' || cldname=='julian');
 
-        if (str.search(/SRT/) != -1 && str.match(/SRT=([^\|]+)/)) {
+        if (str.search(/SRT/) != -1 && str.match(/SRT=([^\|]+)/)) { //Sortby Date
             str = formatGregJulian(str.match(/SRT=([^\|]+)/)[1], isgj);
         }else if (str.search(/TYP=s/) != -1 ) {  //simple
             if (str.match(/DAT=([^\|]+)/)) {
@@ -1842,10 +1842,14 @@ function temporalToHumanReadableString(inputStr) {
         }else if (str.search(/TYP=f/) != -1 ) {//fuzzy date
             var dat = str.match(/DAT=([^\|]+)/);
             dat = dat ? formatGregJulian(dat[1], isgj): "";
-            var rng = str.match(/RNG=P(\d*)(Y|M|D)/);
-            var units = rng[2] ? (rng[2]=="Y" ? "year" : rng[2]=="M" ? "month" :rng[2]=="D" ? "day" :""): "";
-            rng = rng && rng[1] ? " ± " + rng[1] + " " + units + (rng[1]>1 ? "s":""): "";
-            str = dat + rng;
+            var rng = str.match(/RNG=P(\d*)(Y|M|D)/);  //range for fuzzy date in year,months or days
+            if(rng && rng.length>1){
+                var units = rng[2] ? (rng[2]=="Y" ? "year" : rng[2]=="M" ? "month" :rng[2]=="D" ? "day" :""): "";
+                rng = rng && rng[1] ? " ± " + rng[1] + " " + units + (rng[1]>1 ? "s":""): "";
+                str = dat + rng;
+            }else{
+                str = dat;
+            }
         }
         if(cld!=''){
             str = cld + ' (Gregorian '+str+')';
