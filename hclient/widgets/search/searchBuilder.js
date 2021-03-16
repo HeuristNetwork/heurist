@@ -1014,22 +1014,6 @@ $.widget( "heurist.searchBuilder", {
             return '';
         }
         
-        
-        if(rty_IDs>0){
-            
-            if(this.svs_MultiRtSearch.is(':checked')){
-                var s = this.select_additional_rectypes.editing_input('getValues')[0];
-                if(s){
-                    if(s.split(',').indexOf(rty_IDs)<0){
-                        rty_IDs = rty_IDs+','+s;    
-                    }else{
-                        rty_IDs = s;    
-                    }
-                }
-            }
-            
-            mainquery.push({t:rty_IDs});
-        }
 
         //sort by code
         this.field_array.sort( function(a, b){
@@ -1165,6 +1149,23 @@ console.log(aCodes);
         
         if(mainquery.length>0){
 
+        
+            if(rty_IDs>0){
+                
+                if(this.svs_MultiRtSearch.is(':checked')){
+                    var s = this.select_additional_rectypes.editing_input('getValues')[0];
+                    if(s){
+                        if(s.split(',').indexOf(rty_IDs)<0){
+                            rty_IDs = rty_IDs+','+s;    
+                        }else{
+                            rty_IDs = s;    
+                        }
+                    }
+                }
+                
+                mainquery.unshift({t:rty_IDs});
+            }            
+            
             $.each(this.sort_array, function(i, ele){
                 var val = ele.searchBuilderSort('getValue');
                 if(val){
