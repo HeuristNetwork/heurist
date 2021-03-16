@@ -1329,6 +1329,8 @@ $trmDuplicates = @$lists2["trm_dupes"];
             order by dtl_DetailTypeID'*/
             $bibs = array();
             $ids = array();
+            $ids2 = array();
+            $same_name_suggestions = array();
             $is_first = true;
             while ($row = $res->fetch_assoc()){ 
                 //verify value
@@ -1342,6 +1344,19 @@ $trmDuplicates = @$lists2["trm_dupes"];
                 trim($row['dtl_Value'])!="" &&
                 !VerifyValue::isValidTerm($row['dty_JsonTermIDTree'], $row['dty_TermIDTreeNonSelectableIDs'], $row['dtl_Value'], $row['dty_ID'] ))
                 {
+                    //ok - term does not belong to required vocabullary
+                    //check that this vocabulary already has term with the same label
+                    $existing_term_id = VerifyValue::hasVocabGivenLabel($row['dty_JsonTermIDTree'], $row['trm_Label']);
+                    if($existing_term_id>0){
+                        $code = $row['dty_ID'].'.'.$row['dtl_Value'];
+                        if(@$same_name_suggestions[$code]==null){
+                            $same_name_suggestions[$code] = array($existing_term_id, $row['trm_Label'], $row['dty_Name']);            
+                        }
+                        $ids2[$row['dtl_RecID']] = 1;
+                        continue;
+                    }
+                    
+                    
                     if($is_first){
                         $is_first = false;
                         ?>
@@ -1377,15 +1392,73 @@ $trmDuplicates = @$lists2["trm_dupes"];
                     $ids[$row['dtl_RecID']] = 1;  
                 }
 
-            }
-
+            }//while 
             if (count($ids) == 0) {
                 print '<h3 class="res-valid">OK: All records have valid terms (terms are as specified for each field)</h3>';
             }else{
                 echo '</table><br>';   
-                echo '<span><a target=_new id="link_wrongterms" href='.HEURIST_BASE_URL.'?db='.HEURIST_DBNAME
+                echo '<span style="font-size:0.9em;"><a target=_new id="link_wrongterms" href='.HEURIST_BASE_URL.'?db='.HEURIST_DBNAME
                 .'&w=all&q=ids:'.implode(',', array_keys($ids)).'>(show results as search)</a></span>';
             }
+            
+            if(count($same_name_suggestions)>0){
+                
+                if(@$_REQUEST['fix_samename_terms']=="1"){
+                    
+                    $keep_autocommit = mysql__begin_transaction($mysqli);    
+
+                    $isOk = true;
+                    foreach($same_name_suggestions as $code => $row){
+                        
+                        list($dty_ID,$trm_id) = explode('.',$code);
+                        //$existing_term_id, $row['trm_Label'], $row['dty_Name']
+                    
+                        $query = 'UPDATE recDetails set dtl_Value='.$row[0].' where dtl_DetailTypeID='.$dty_ID.' and dtl_Value='.$trm_id;
+                        $res = $mysqli->query( $query );
+                        if(! $res )
+                        {
+                            $isOk = false;
+                            print '<div class="error" style="color:red">Cannot replace terms in record details. SQL error: '.$mysqli->error.'</div>';
+                            $mysqli->rollback();
+                            break;
+                        }
+                    }//for
+                    if($isOK){
+                        $mysqli->commit();  
+                    }
+                    if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+                }//correct
+                else{
+?>             
+<hr/>
+<h3><?php echo count($same_name_suggestions);?> terms are referenced in a different vocabulary</h3><br>
+<span style="font-size:0.9em;">than that specified for the corresponding field, but the same term label exists in the vocabulary specified for the field. 
+<button onclick="window.open('listDatabaseErrors.php?db=<?= HEURIST_DBNAME?>&fix_samename_terms=1','_self')">Click here to change these terms</button> to the ones in the vocabularies specified for each field, otherwise they can be fixed for each term individually in record editing.</span><br><br>
+                        <table>
+                        <tr>
+                            <th style="width: 50px;text-align: left;">Field ID</th>
+                            <th style="width: 15ex;">Field</th>
+                            <th style="width: 25ex;">Term</th>
+                        </tr>
+
+<?php                   
+                foreach($same_name_suggestions as $code => $row){
+                    list($dty_ID,$trm_id) = explode('.',$code);
+?>                    
+                        <tr>
+                            <td style="width: 50px;"><?php echo $dty_ID;?></td>
+                            <td style="width: 15ex;"><?php echo $row[2];?></td>
+                            <td style="width: 25ex;"><?php echo $row[1];?></td>
+                        </tr>
+<?php                    
+                }
+                echo '</table><br>'; 
+                echo '<span style="font-size:0.9em;"><a target=_new id="link_wrongterms2" href='.HEURIST_BASE_URL.'?db='.HEURIST_DBNAME
+                .'&w=all&q=ids:'.implode(',', array_keys($ids2)).'>(show results as search)</a></span>';
+                    
+                }
+            }//same name suggestions
+
             ?>
         </div>
 

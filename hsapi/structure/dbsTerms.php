@@ -26,9 +26,10 @@
     *  getTermLabel
     *  getTermCode
     *  getTerm
+    *  getTermByLabl
     *  getVocabs - for specified domain
     *  getSiblings
-    *  treeData($parent_id, $mode) - returns tree of flat array of children ids
+    *  treeData($parent_id, $mode) - returns tree of flat array of children ids (all levels)
     *  addNewTerm
     *  addNewTermRef
     *  addChild - private
@@ -208,6 +209,26 @@ class DbsTerms
         }
         return $term;
     }
+
+    //
+    //
+    //
+    public function getTermByLabel($vocab_id, $label){
+        
+        $all_terms = $this->treeData($vocab_id, 3);
+        
+        $label = trim(mb_strtolower($label));
+        
+        foreach($all_terms as $trm_id){
+            
+            $label2 = mb_strtolower($this->getTermLabel($trm_id));
+            
+            if($label2==$label){
+                return $trm_id;
+            }
+        }
+        return null;
+    }
     
     //
     // get all vocabularies OR for given domain
@@ -289,7 +310,7 @@ class DbsTerms
     }
     
     //
-    // get all labels and codes of children for giveb parent term
+    // get all labels and codes of children for given parent term
     //
     public function getSameLevelLabelsAndCodes($parent_id, $domain){
         

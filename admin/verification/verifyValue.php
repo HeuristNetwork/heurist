@@ -154,6 +154,20 @@ public static function getAllowedTerms($defs, $defs_nonsel, $dtyID){
     return $allowed_terms;
 }
 
+//
+// return term id with given label in given vocabulary 
+//
+public static function hasVocabGivenLabel($vocab_id, $label){
+
+        if(self::$terms == null){
+               self::$terms = dbs_GetTerms(self::$system); 
+               self::$dbs_terms = new DbsTerms(self::$system, self::$terms);
+        }  
+        
+        return self::$dbs_terms->getTermByLabel($vocab_id, $label);
+}
+
+
 /**
 * Verifies that term ID value is valid for given detail id
 *
