@@ -48,6 +48,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         height:(window.hWin?window.hWin.innerHeight:window.innerHeight)*0.95,
         optfields:true, 
         help_on:true,
+        show_warn_about_relationship: true,
         
         structure_closed: 1,          
         structure_width:180, //280,
@@ -518,7 +519,14 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                 "searchrecordsonaddrecord": function( event, _rectype_id ){
                     this._currentEditRecTypeID = _rectype_id;
                     this.addEditRecord(-1);
-                }
+                },
+                "searchrecordsonlinkscount": function( event, data ){
+                    this.recordList.resultList({
+                        aggregate_values: data.links_count,
+                        aggregate_link: data.links_query
+                    });
+                },
+                
         });
         }
                 
@@ -2169,7 +2177,54 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
             //
             // create new temporary record to be edited
             //
-            function __onAddNewRecord(){
+            function __onAddNewRecord( force_proceeed ){
+                
+                //if new record is relationship - show warning
+                if(force_proceeed!==true && 
+                    that.options.new_record_params['RecTypeID']==window.hWin.HAPI4.sysinfo['dbconst']['RT_RELATION']){
+
+                    var params = window.hWin.HAPI4.get_prefs_def('prefs_'+that._entityName, that.defaultPrefs);
+
+                    if(params['show_warn_about_relationship']!==false){
+
+
+                        var $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
+                            '<p>We do not recommend creating relationship records directly. They are better created through Relationship Marker fields defined within the connected record types.</p>'       
+                            +'<p>Go to Design Menu to add Relationship Markers to the record types you wish to connect.</p>'
+                            +'<p>Relationship Marker fields have three important advantages:</p><ol>'
+                            +'<li>They constrain the types of record which can be connected and the types of relationship to be used in each connection. For instance, Person isAuthorOf Work, Person isChildOf Person, but not Person isAuthorOf Person.</li>'
+                            +'<li>They contextualise entry of relationships within the data entry forms streamlining data entry and encouraging well-structured data (including making relationships required and/or singular in certain contexts).</li>'
+                            +'<li>They guide the creation of complex queries through "wizards" which use the information provided to structure their pathway. Without them, much of the power of Heurist retrievals is lost; constructed titles, facet filters and custom reports can only use relationships defined in this way.</li></ol>'
+                            +'<br><br><label><input type="checkbox"> Do not show this message again</label> (current login session)'                    
+                            ,
+                            [
+                                {text:'Design menu', css:{'margin-right':'200px'}, click: function(){
+                                    $dlg.dialog( "close" ); 
+                                    that.closeEditDialog();
+                                    //open design menu
+                                    window.hWin.HAPI4.LayoutMgr.executeCommand('mainMenu', 'menuActionById', 'menu-structure-rectypes');
+                                }},
+                                {text:'Create relationship record', click: function(){ 
+                                    $dlg.dialog( "close" );                    
+                                    __onAddNewRecord( true );
+                                }},
+                                {text:'Cancel', click: function(){ $dlg.dialog( "close" ); that.closeEditDialog(); }}
+
+                            ],{  title:'Creation of relationship record' }        
+                        );
+
+                        var chb = $dlg.find('input[type="checkbox"]').change(function(){
+                            var params = window.hWin.HAPI4.get_prefs_def('prefs_'+that._entityName, that.defaultPrefs);
+                            params['show_warn_about_relationship'] = false;
+                            window.hWin.HAPI4.save_pref('prefs_'+that._entityName, params);     
+
+                        });
+
+                    }                            
+
+                }
+                
+                
                 
                 if(that.options.new_record_params['OwnerUGrpID']=='current_user') {
                     that.options.new_record_params.OwnerUGrpID = window.hWin.HAPI4.user_id();
@@ -2313,7 +2368,7 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
         //init array 
         var ffr = {};
             
-        ffr['rst_DisplayName'] = dt?dt['dty_Name']:'Fake field';
+        ffr['rst_DisplayName'] = dt?dt['dty_Name']:'Placeholder';
         ffr['dty_FieldSetRectypeID'] = dt?dt['dty_FieldSetRectypeID'] : 0;
         ffr['rst_FilteredJsonTermIDTree'] = (dt?dt['dty_JsonTermIDTree']:"");
         //ffr['rst_TermIDTreeNonSelectableIDs'] = (dt?dt['dty_TermIDTreeNonSelectableIDs']:"");
@@ -3344,10 +3399,9 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             var notfound = true;
             var lookup_div = this.element.find('.btn-lookup-values');
             lookup_div.empty();
-
             var service_config = window.hWin.HEURIST4.util.isJSON(window.hWin.HAPI4.sysinfo['service_config']);//sys_ExternalReferenceLookups
-
-//console.log(service_config);
+            
+//console.log(service_config);            
             if(service_config!==false){
                 
                 window.hWin.HAPI4.sysinfo['service_config'] = service_config;
@@ -3357,15 +3411,15 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                     var cfg = service_config[srvname];    
                     
                     if(cfg.rty_ID == this._currentEditRecTypeID){   //@todo many services
-                        notfound = false; 
-
+                        notfound = false;            
+                        
                         let btn_label = "Lookup External Sources: ";
 
                         var label = $('<div>')
                             .html(btn_label)
                             .css({'font-size': 'small'})
-                            .appendTo(lookup_div);                        
-                        
+                            .appendTo(lookup_div);                       
+                       
                         var btn = $('<div>')
                             .button({label:cfg.label?cfg.label:('Lookup '+cfg.service) })
                             .attr('data-cfg', srvname).css({'font-size': 'inherit', // 'padding-right':'4px',
@@ -3618,7 +3672,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 this.element.find('.btn-edit-rt2').hide();
             }
             
-            //switch on optional fields and hide checckbox
+            //switch on optional fields and disable checckbox
             this.element.find('.chb_opt_fields').prop('checked',true).attr('disabled', true).change();
             
             //hide message about forbidden fields
