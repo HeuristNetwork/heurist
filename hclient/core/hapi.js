@@ -353,8 +353,8 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                             //
                                 window.hWin.HEURIST4.msg.showPrompt(
                                 '<div style="padding:20px 0px">'
-                                +'Only the owner of the database or an administrator supplying<br>'
-                                +' the override password can carry out this action.'
+                                +'Only an administrator (server manager) or the owner (for<br>'
+                                +'actions on a single database) can carry out this action.'
                                 +'</div><span style="display: inline-block;padding: 10px 0px;">Enter password:&nbsp;</span>',
                                     function(password_entered){
                                         
