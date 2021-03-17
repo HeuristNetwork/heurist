@@ -1445,9 +1445,14 @@ span.fancytree-checkbox{
     font-weight: bold;
 }
 
+.tree-facets.hidden_checkboxes span.fancytree-checkbox
+{
+    display:none;
+}
 .tree-facets .fancytree-has-children span.fancytree-checkbox
 {
-    background-position: 0px -176px
+    background-position: 0px -176px;
+    display:inline-block;
 }
 .tree-facets .fancytree-has-children.fancytree-partsel span.fancytree-checkbox
 {

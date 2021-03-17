@@ -298,12 +298,13 @@ window.hWin.HEURIST4.dbs = {
               
 
                 if(all_header_fields){
-                    var s = '<span style="font-style:italic">Record header</span>';
+                    var s = '<span style="font-style:italic">Generic fields</span>';
                     $children = [
+                        {title:s, folder:true, children:$children},
                         {key:'anyfield', type:'freetext',
                         title:"Any field", 
-                        code:($recTypeId+':anyfield'), name:'Any field'},
-                        {title:s, children:$children}];
+                        code:($recTypeId+':anyfield'), name:'Any field'}
+                        ];
                 }
             }
 

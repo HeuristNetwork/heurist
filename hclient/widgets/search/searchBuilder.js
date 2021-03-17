@@ -492,7 +492,7 @@ $.widget( "heurist.searchBuilder", {
 /*                        
                 var topOptions2 = [
                         {key:'anyfield',title:window.hWin.HR('Any field')},
-                        {key:0,title:'Record header fields', group:1, disabled:true},
+                        {key:0,title:'Generic fields', group:1, disabled:true},
                             {key:'title',title:'Title (constructed)', depth:1},
                             {key:'added',title:'Date added', depth:1},
                             {key:'modified',title:'Date modified', depth:1},
@@ -786,10 +786,10 @@ $.widget( "heurist.searchBuilder", {
                             }
 
                             //setTimeout(function(){
-                            treediv.addClass('tree-facets').fancytree({
+                            treediv.addClass('tree-facets hidden_checkboxes').fancytree({
                                 //extensions: ["filter"],
                                 //            extensions: ["select"],
-                                checkbox: false,
+                                checkbox: true,
                                 selectMode: 1,  // single
                                 source: treedata,
                                 beforeSelect: function(event, data){

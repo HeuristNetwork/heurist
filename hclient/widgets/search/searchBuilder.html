@@ -74,11 +74,12 @@
 
 <div id="pnl_Tree" class="ui-widget-content" style="position:absolute;left:0;width:350px;top:0;bottom:0px;border-right:1px gray solid;display:none;">
 
-    <label  class="rty-selected heurist-helper2" for="fsw_showreverse">
-            <input type="checkbox" id="fsw_showreverse" style="vertical-align: middle;" />&nbsp;
-            Show linked-from record types (reverse pointers, indicated as &lt;&lt;</label>
+    <div  class="rty-selected heurist-helper2" 
+        style="background:inherit;position: absolute;z-index:999">
+            <label  for="fsw_showreverse"><input type="checkbox" id="fsw_showreverse" style="vertical-align: middle;" />&nbsp;
+            Show linked-from record types (reverse pointers, indicated as &lt;&lt;</label></div>
 
-    <div id="field_treeview" class="rty-selected" style="position: absolute;overflow-y: auto;bottom: 0;top:20px;width: 100%;"></div>
+    <div id="field_treeview" class="rty-selected" style="position: absolute;overflow-y: auto;bottom: 0;top:-3px;width: 100%;"></div>
 </div>
 
 

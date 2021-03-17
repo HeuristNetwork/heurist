@@ -223,8 +223,7 @@ $.widget( "heurist.searchBuilderItem", {
             //this.label_token.hide();    
 
             var topOptions2 = [
-                {key:'anyfield',title:window.hWin.HR('Any field')},
-                {key:0,title:'Record header fields', group:1, disabled:true},
+                {key:0,title:'Generic fields', group:1, disabled:true},
                 {key:'title',title:'Title (constructed)', depth:1},
                 {key:'added',title:'Date added', depth:1},
                 {key:'modified',title:'Date modified', depth:1},
@@ -233,7 +232,8 @@ $.widget( "heurist.searchBuilderItem", {
                 {key:'notes',title:'Notes', depth:1},
                 {key:'owner',title:'Owner (user or group)', depth:1},
                 {key:'access',title:'Visibility', depth:1},
-                {key:'tag',title:'Tags', depth:1}
+                {key:'tag',title:'Tags', depth:1},
+                {key:'anyfield',title:window.hWin.HR('Any field')}
             ];
 
             var bottomOptions = null;
@@ -256,7 +256,7 @@ $.widget( "heurist.searchBuilderItem", {
                 window.hWin.HEURIST4.ui.createRectypeDetailSelect(this.select_fields.get(0), this.options.top_rty_ID, 
                     allowed_fieldtypes, topOptions2, 
                     {show_parent_rt:true, show_latlong:true, bottom_options:bottomOptions, 
-                        selectedValue:this.options.dty_ID, //initally selected
+                        selectedValue:(this.options.dty_ID ?this.options.dty_ID:'anyfield'), //initally selected
                         useIds: true, useHtmlSelect:false});                
 
                 this._on( this.select_fields, { change: this._onSelectField });
