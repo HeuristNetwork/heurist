@@ -32,7 +32,8 @@ $.widget( "heurist.resultList", {
         selectbutton_label:'Select',
         action_select:null,  //array of actions
         action_buttons:null,
-                            
+                           
+        //action for onselect event - open preview inline, popup or none - used in cms for example
         recordview_onselect: false, //false/none, inline or popup - show record viewer/info on select
         multiselect: true,    //allows highlight several records
 
@@ -84,8 +85,8 @@ $.widget( "heurist.resultList", {
                          // finish render and assign draggable widget for all record divs
         droppable: null, //callback function to init dropable (see refreshPage)
 
-        //event
-        onselect: null,  //on select event for non event based
+        //events  
+        onselect: null,  //on select event 
 
         onPageRender: null, //event listner on complete of page render
 
@@ -2202,10 +2203,29 @@ $.widget( "heurist.resultList", {
                             var h = 400;
 
                             try{
-                                h = $(this.contentWindow.document).height();
-                                ele2.removeClass('loading').height(h+(h*0.05));    
+                                
+                                //var cw = this.contentWindow.document;
+                                
+                                var cw2  = this.contentWindow.document.documentElement;//.scrollHeight
+
+                                function __adjustHeight(){
+                                    //h = $(cw).height();
+                                    if(cw2){
+                                        var h = cw2.scrollHeight;  //cw.body                              
+        //console.log('scroll='+sh+'  h='+h+'  bh='+bh);
+                                        //h = Math.max(bh,sh);
+                                        ele2.removeClass('loading').height(h+(h*0.05));    
+                                    }
+                                }
+                                
+                               __adjustHeight();
+
+                                setTimeout(__adjustHeight, 2000);
+                                setTimeout(__adjustHeight, 4000);
+                                //setTimeout(__adjustHeight, 10000);
+                                
                             }catch(e){
-                                ele2.removeClass('loading').height('auto');    
+                                ele2.removeClass('loading').height(800);    
                                 console.log(e);
                             }
                             /*
@@ -2222,11 +2242,18 @@ $.widget( "heurist.resultList", {
                     }else{
 
                         ele.addClass('loading').css({'overflow-y':'auto'}).load(infoURL, function(){ 
+//console.log('loaded in div');                            
                             var ele2 = $(this);
                             //var ele2 = that.div_content.find('.record-expand-info[data-recid='+recID+']');
                             var h = ele2[0].scrollHeight+10;
                             //h = Math.min(h+10, 600);
                             ele2.removeClass('loading').height('auto');    
+                            
+/*                            if(that._expandAllDivs){
+console.log('scroll h='+h+'  auto='+ele2.height());                                                            
+setTimeout("console.log('2. auto='+ele2.height());",1000);
+                            }*/
+                            
                             /*
                             if(that._expandAllDivs){
                                 ele2.removeClass('loading').height('auto');    
