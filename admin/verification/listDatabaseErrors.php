@@ -1431,9 +1431,10 @@ $trmDuplicates = @$lists2["trm_dupes"];
                 else{
 ?>             
 <hr/>
-<h3><?php echo count($same_name_suggestions);?> terms are referenced in a different vocabulary</h3><br>
-<span style="font-size:0.9em;">than that specified for the corresponding field, but the same term label exists in the vocabulary specified for the field. 
-<button onclick="window.open('listDatabaseErrors.php?db=<?= HEURIST_DBNAME?>&fix_samename_terms=1','_self')">Click here to change these terms</button> to the ones in the vocabularies specified for each field, otherwise they can be fixed for each term individually in record editing.</span><br><br>
+<h3>Terms referenced in incorrect vocabulary (n = <?php echo count($same_name_suggestions);?> )</h3><br>
+<span style="font-size:0.9em;">Terms are referenced in a different vocabulary than that specified for the corresponding field, 
+<br>however the same term label exists in the vocabulary specified for the field.
+<br><button onclick="window.open('listDatabaseErrors.php?db=<?= HEURIST_DBNAME?>&fix_samename_terms=1','_self')">Click here to change these terms</button> to the ones in the vocabularies specified for each field,<br>otherwise they can be fixed for each term individually in record editing.</span><br><br>
                         <table>
                         <tr>
                             <th style="width: 50px;text-align: left;">Field ID</th>
