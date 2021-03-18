@@ -152,7 +152,7 @@ $.widget( "heurist.searchBuilderSort", {
             //show field selector
             window.hWin.HEURIST4.ui.createRectypeDetailSelect(this.select_fields.get(0), this.options.rty_ID, 
                         allowed_fieldtypes, topOptions2, 
-                        {useHtmlSelect:false});                
+                        {useHtmlSelect:false, selectedValue:'t'});                
             
             this._on( this.select_fields, { change: function(){
                     if($.isFunction(this.options.onchange))

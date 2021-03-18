@@ -368,7 +368,7 @@ $.widget( "heurist.recordLookupCfg", {
                 
                 window.hWin.HEURIST4.ui.createRectypeDetailSelect(ele, rty_ID, 
                     ['freetext','blocktext','enum','date','geo','float','year','integer','resource'], '...', 
-                    {show_latlong:true, show_dt_name:true, selected_value:dty_ID} );
+                    {show_latlong:true, show_dt_name:true, selectedValue:dty_ID} );
             });
         }else{
             

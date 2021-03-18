@@ -475,10 +475,13 @@ $.widget( "heurist.searchBuilder", {
                     }
                     
                     if(that.select_main_rectype.val()<0){
-                        that.pnl_Items.hide();
-                        
+                        //AAA that.pnl_Items.hide();
+                        that.pnl_CoverAll 
+                            .css({ top:that.pnl_Items.css('top'),bottom:that.pnl_Items.css('bottom') })
+                            .show();
                     }else{
-                        that.pnl_Items.show();
+                        //that.pnl_Items.show();
+                        that.pnl_CoverAll.hide();
                         //load list of field types
                         //that.adjustTreePanel();
                         that._initTreeView([that.select_main_rectype.val()]);
@@ -487,7 +490,6 @@ $.widget( "heurist.searchBuilder", {
                     that.clearAll();
 
                 }});
-                
                 
 /*                        
                 var topOptions2 = [
@@ -540,6 +542,8 @@ $.widget( "heurist.searchBuilder", {
                 this.pnl_Rectype  = this.element.find('#pnl_Rectype');
                 this.pnl_Tree  = this.element.find('#pnl_Tree');
                 this.pnl_Items = this.element.find('#pnl_Items');
+                this.pnl_CoverAll = this.element.find('#pnl_CoverAll');
+                
                 this.pnl_Result = this.element.find('#pnl_Result');
                 this.btnAddFieldItem = this.pnl_Items.find('.search_field_add');
 
@@ -602,8 +606,10 @@ $.widget( "heurist.searchBuilder", {
 
                 this.element.css({'font-size':'0.9em'});
                 this.pnl_Rectype.css({top:'36px'});
-                this.pnl_Tree.css({top:'90px', bottom:h});
-                this.pnl_Items.css({top:'90px', bottom:h});
+                //var itop = 36+this.pnl_Rectype.height()+1;
+                this.pnl_Tree.css({top:35, bottom:h});
+                this.pnl_Items.css({top:115, bottom:h});
+                this.pnl_CoverAll.css({top:115, bottom:h});
                 this.pnl_Result.css({bottom:'40px'});
                 var _innerTitle = $('<div class="ui-heurist-header" style="top:0px;padding-left:10px;text-align:left">Filter builder</div>')
                     .insertBefore(this.pnl_Rectype);
@@ -628,19 +634,17 @@ $.widget( "heurist.searchBuilder", {
                 
                 this._on(ele.find('.btn-preview'),{change:function(e){
                     
-                    
+                    var h;
                     if(this.element.find('.btn-preview').is(':checked')){
-                        var h = this.options.is_dialog ? '50px':'88px';                       
-                        this.pnl_Items.css('bottom',h);
-                        this.pnl_Tree.css('bottom',h);
+                        h = this.options.is_dialog ? '50px':'88px';                       
                         this.pnl_Result.show();
                     }else{
-                        var h = this.options.is_dialog ? '0px':'50px';                       
-                        
-                        this.pnl_Items.css('bottom',h);
-                        this.pnl_Tree.css('bottom',h);
+                        h = this.options.is_dialog ? '0px':'50px';                       
                         this.pnl_Result.hide();
                     }
+                        this.pnl_Items.css('bottom',h);
+                        this.pnl_CoverAll.css('bottom',h);
+                        this.pnl_Tree.css('bottom',h);
                 }});
                 
                 
@@ -656,6 +660,7 @@ $.widget( "heurist.searchBuilder", {
         //window.hWin.HEURIST4.ui.applyCompetencyLevel(-1, $dlg); 
         
         //add first field item
+        /*
         if(!this.is_advanced && $.isEmptyObject(this.field_array)){
             
             this.btnAddFieldItem.click();
@@ -663,6 +668,8 @@ $.widget( "heurist.searchBuilder", {
             //this.addFieldItem( 'any:anyfield', [rty_ID , 'anyfield'] );
             //this.addSortItem();
         }
+        */
+        this.adjustDimension();
         
         
         
