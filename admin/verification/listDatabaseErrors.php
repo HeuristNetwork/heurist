@@ -724,7 +724,7 @@ $trmDuplicates = @$lists2["trm_dupes"];
             .'LEFT JOIN recDetails child ON child.dtl_DetailTypeID='.DT_PARENT_ENTITY.' AND child.dtl_Value=parent.dtl_RecID '
             .'LEFT JOIN Records childrec ON parent.dtl_Value=childrec.rec_ID '
             .'WHERE '
-            .'parentrec.rec_ID=parent.dtl_RecID AND rst_CreateChildIfRecPtr=1 '
+            .'parentrec.rec_ID=parent.dtl_RecID AND rst_CreateChildIfRecPtr=1 AND parentrec.rec_FlagTemporary!=1 '
             .'AND rst_RecTypeID=parentrec.rec_RecTypeID AND rst_DetailTypeID=parent.dtl_DetailTypeID '
             .'AND child.dtl_RecID is NULL ORDER BY parentrec.rec_ID'; 
 
@@ -755,7 +755,8 @@ $trmDuplicates = @$lists2["trm_dupes"];
 
             //find children without reverse pointer in parent record               
             $query2 = 'SELECT child.dtl_ID as child_d_id, child.dtl_RecID as child_id, childrec.rec_Title as c_title, child.dtl_Value, '
-            .'parentrec.rec_Title as p_title, parent.dtl_ID as parent_d_id, parent.dtl_Value rev, dty_ID, rst_CreateChildIfRecPtr '
+            .'parentrec.rec_Title as p_title, parent.dtl_ID as parent_d_id, parent.dtl_Value rev, dty_ID, rst_CreateChildIfRecPtr, '
+            .'childrec.rec_FlagTemporary '
             .' FROM recDetails child '
             .'LEFT JOIN Records parentrec ON child.dtl_Value=parentrec.rec_ID '
             .'LEFT JOIN Records childrec ON childrec.rec_ID=child.dtl_RecID  '
@@ -771,6 +772,7 @@ $trmDuplicates = @$lists2["trm_dupes"];
             $prec_ids2 = array();
             $det_ids = array();
             while ($row = $res->fetch_assoc()){
+                if($row['rec_FlagTemporary']==1) continue;
                 if(in_array( $row['child_d_id'], $det_ids)) continue;
                 $bibs2[] = $row;
                 $prec_ids2[] = $row['dtl_Value'];  //remove DT_PARENT_ENTITY from orphaned children
@@ -815,7 +817,7 @@ $trmDuplicates = @$lists2["trm_dupes"];
             else
             {
                 ?>
-                <br><h3>Parent  records which are not correctly referenced by their child records (missing pointer to parent)</h3>
+                <br><h3>Parent records which are not correctly referenced by their child records (missing pointer to parent)</h3>
                 <span><a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= implode(',', $prec_ids1) ?>'>
                     (show results as search)</a></span>
 
@@ -1365,7 +1367,7 @@ $trmDuplicates = @$lists2["trm_dupes"];
                         <table>
                         <tr>
                             <th style="width: 30px;text-align:left">Record</th>
-                            <th style="width: 15ex;">Field</th>
+                            <th style="width: 45ex;text-align:left;">Field</th>
                             <th style="width: 25ex;">Term</th>
                             <th>Record title</th>
                         </tr>
@@ -1382,7 +1384,7 @@ $trmDuplicates = @$lists2["trm_dupes"];
                                     src="<?php echo HEURIST_BASE_URL.'common/images/16x16.gif'?>">&nbsp;<?= $row['dtl_RecID'] ?>
                             </a>
                         </td>
-                        <td style="width:15ex;padding-left:5px;"><?= $row['dty_Name'] ?></td>
+                        <td style="width:55ex;padding-left:5px;"><?= $row['dty_Name'] ?></td>
                         <!-- >Artem TODO: Need to render the value as the term label, not the numeric value -->
                         <td style="width: 23ex;padding-left: 5px;"><?= $row['dtl_Value'].'&nbsp;'.$row['trm_Label'] ?></td>
                         <td class="truncate" style="padding-left:25px;max-width:400px"><?=strip_tags($row['rec_Title']) ?></td>
@@ -1437,7 +1439,7 @@ $trmDuplicates = @$lists2["trm_dupes"];
                         <table>
                         <tr>
                             <th style="width: 50px;text-align: left;">Field ID</th>
-                            <th style="width: 15ex;">Field</th>
+                            <th style="width: 45ex;text-align:left;">Field</th>
                             <th style="width: 25ex;">Term</th>
                         </tr>
 
@@ -1447,7 +1449,7 @@ $trmDuplicates = @$lists2["trm_dupes"];
 ?>                    
                         <tr>
                             <td style="width: 50px;"><?php echo $dty_ID;?></td>
-                            <td style="width: 15ex;"><?php echo $row[2];?></td>
+                            <td style="width: 55ex;"><?php echo $row[2];?></td>
                             <td style="width: 25ex;"><?php echo $row[1];?></td>
                         </tr>
 <?php                    
