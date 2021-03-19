@@ -269,8 +269,8 @@ class DbDefRecTypes extends DbEntityBase
                     "Cannot delete from table defRecStructure", $mysqli->error);
             $res = false;
         }else if($affected===0){
-            $this->system->addError(HEURIST_NOT_FOUND, 'Cannot delete structure for rectype. No entries found');
-            $res = false;
+            //$this->system->addError(HEURIST_NOT_FOUND, 'Cannot delete structure for rectype. No entries found');
+            //$res = false;
         }
        
         

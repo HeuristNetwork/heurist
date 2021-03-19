@@ -1020,10 +1020,17 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                       .find(".ui-dialog-titlebar").remove();
             }
             
-            if(options.h6style_class){
-                //$dlg.addClass('ui-heurist-bg-light');
-                $dlg.parent().addClass('ui-dialog-heurist '+options.h6style_class);
+            if(options.default_palette_class){
+                $dlg.attr('data-palette', options.default_palette_class);
+                $dlg.parent().addClass(options.default_palette_class);
+            }else {
+                $dlg.attr('data-palette', null);
+                if (options.h6style_class){
+                    $dlg.parent().addClass('ui-dialog-heurist '+options.h6style_class);
+                }
             }
+
+            
             
             return $dlg;
     },
