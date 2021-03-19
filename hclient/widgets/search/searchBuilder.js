@@ -605,9 +605,9 @@ $.widget( "heurist.searchBuilder", {
                 var h = this.element.find('.btn-preview').is(':checked') ?'88px':'50px';
 
                 this.element.css({'font-size':'0.9em'});
-                this.pnl_Rectype.css({top:'36px'});
+                this.pnl_Rectype.css({top:'35px'});
                 //var itop = 36+this.pnl_Rectype.height()+1;
-                this.pnl_Tree.css({top:35, bottom:h});
+                this.pnl_Tree.css({top:35}); //, bottom:h
                 this.pnl_Items.css({top:115, bottom:h});
                 this.pnl_CoverAll.css({top:115, bottom:h});
                 this.pnl_Result.css({bottom:'40px'});
@@ -644,7 +644,7 @@ $.widget( "heurist.searchBuilder", {
                     }
                         this.pnl_Items.css('bottom',h);
                         this.pnl_CoverAll.css('bottom',h);
-                        this.pnl_Tree.css('bottom',h);
+                        //this.pnl_Tree.css('bottom',h);
                 }});
                 
                 

@@ -84,7 +84,7 @@ $.widget( "heurist.searchBuilderItem", {
         
         // 0. Label (header)
         this.label_token = $( "<div>" )
-            .css({"font-size":"smaller",'padding-left':'83px',width:'95%','margin-top':'4px'})
+            .css({"font-size":"smaller",'padding-left':'94px',width:'95%','margin-top':'4px'})
             .appendTo( this.element ); //10px 0 10px 20px,'border-top':'1px solid lightgray' 
 
         // selector container - for fields and comparison
