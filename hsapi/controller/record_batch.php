@@ -21,7 +21,7 @@
     */
 
     require_once (dirname(__FILE__).'/../System.php');
-    require_once (dirname(__FILE__).'/../dbaccess/dbRecDetails.php');
+    require_once (dirname(__FILE__).'/../dbaccess/recordsBatch.php');
     require_once (dirname(__FILE__).'/../dbaccess/utils_db.php');
 
     $response = array();
@@ -36,13 +36,9 @@
         
         set_time_limit(0);
         
-        $dbRecDetails = new DbRecDetails($system, $_REQUEST);
+        $dbRecDetails = new RecordsBatch($system, $_REQUEST);
 
-        if(@$_REQUEST['a'] == 'add_child'){ //add child record
-            
-           $res = $dbRecDetails->detailsAddChild();
-            
-        }else         
+         
         if(is_array(@$_REQUEST['actions'])){
         
             $res = $dbRecDetails->multiAction();

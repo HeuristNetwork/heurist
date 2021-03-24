@@ -6,9 +6,9 @@ require_once (dirname(__FILE__).'/../utilities/mapCoordConverter.php');
 require_once (dirname(__FILE__).'/../../common/php/Temporal.php');
 
 /**
-* exportRecords.php
+* recordsExport.php - produces output in json, geojson, xml, gephi formats
 * 
-* this is replacement to output_Records 
+* Controller is records_output
 *
 * @package     Heurist academic knowledge management system
 * @link        http://HeuristNetwork.org
@@ -33,7 +33,7 @@ require_once (dirname(__FILE__).'/../../common/php/Temporal.php');
 *  output - main method
 * 
 */
-class ExportRecords {
+class RecordsExport {
     private function __construct() {}    
     private static $system = null;
     private static $mysqli = null;

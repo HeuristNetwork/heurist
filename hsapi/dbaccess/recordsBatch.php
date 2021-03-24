@@ -1,24 +1,29 @@
 <?php
 
-    /**
-    * Class to update records details in batch
-    * to be renamed since in coinside with name scheme for entity
-    *
-    * @package     Heurist academic knowledge management system
-    * @link        http://HeuristNetwork.org
-    * @copyright   (C) 2005-2020 University of Sydney
-    * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
-    * @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
-    * @version     4.0
-    */
+/**
+* Class to perform actions in batch of records 
+*   1) add/replace and delete details
+*   2) change record type
+*   3) add reverse parent pointer field
+* 
+* Controller is record_batch.php
+*
+* @package     Heurist academic knowledge management system
+* @link        http://HeuristNetwork.org
+* @copyright   (C) 2005-2020 University of Sydney
+* @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
+* @license     http://www.gnu.org/licenses/gpl-3.0.txt GNU License 3.0
+* @version     4.0
+*/
 
-    /*
-    * Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
-    * with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
-    * Unless required by applicable law or agreed to in writing, software distributed under the License is
-    * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
-    * See the License for the specific language governing permissions and limitations under the License.
-    */
+/*
+* Licensed under the GNU License, Version 3.0 (the "License"); you may not use this file except in compliance
+* with the License. You may obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.txt
+* Unless required by applicable law or agreed to in writing, software distributed under the License is
+* distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
+* See the License for the specific language governing permissions and limitations under the License.
+*/
+
 // Include Composer autoloader if not already done.
 require_once (dirname(__FILE__).'/../../vendor/autoload.php');
 
@@ -28,14 +33,31 @@ require_once (dirname(__FILE__).'/../dbaccess/db_recsearch.php');
 require_once (dirname(__FILE__).'/../utilities/titleMask.php');
 require_once (dirname(__FILE__).'/../../vendor/ezyang/htmlpurifier/library/HTMLPurifier.auto.php');
 
-class DbRecDetails
+/**
+* Methods for batch actions for list of records (recIDs) OR by record type rtyID
+* 
+* 
+* detailsAdd - add details 
+* replace
+* detailsReplace - replace + detailsAdd
+* detailsDelete
+* multiAction  - several actions in tuen: add,replace,delete
+* 
+* addRevercePointerForChild - Adds parent pointer field converts - converts existing 
+*                             records to child record for given rectype/detailtype
+* changeRecordTypeInBatch - Changes rec_RecTypeID in batch
+* 
+* extractPDF - extracts PDF file content is put it into DT_EXTRACTED_TEXT field
+* 
+*/
+class RecordsBatch
 {
     private $system;  
     
     /*  
     *       recIDs - list of records IDS to be processed or 'ALL'
     *       rtyID  - filter by record type
-    *       dtyID  - detail field to be added
+    *       dtyID  - detail field to be added,replaced or deleted
     *       for addition: val: | geo: | ulfID: - value to be added
     *       for edit sVal - search value (if missed - replace all occurences),  rVal - replace value,  subs= 1 | 0
     *       for delete: sVal, subs= 1 | 0   
@@ -212,7 +234,8 @@ class DbRecDetails
     
     
     /**
-    * convert existing records to child record for givent rectype/detailtype
+    * Converts existing records to child record for given rectype/detailtype
+    * (adds rever pointer field DT_PARENT_ENTITY)
     * 
     * rtyID - record type that is parent 
     * dtyID - pointer detail type 
@@ -239,7 +262,7 @@ class DbRecDetails
        
         $mysqli = $this->system->get_mysqli(); 
         
-        //1. find resource (child) records for given recordtype and detail
+        //1. find resource (child) records for given record type and detail
         $query = 'SELECT dtl_RecID as parent_id, d.dtl_Value as child_id, child.rec_OwnerUGrpID, child.rec_RecTypeID, child.rec_Title '
             .'FROM  recDetails d LEFT JOIN Records child on child.rec_ID=d.dtl_Value, Records parent '
             .'WHERE d.dtl_RecID=parent.rec_ID and parent.rec_RecTypeID='
@@ -526,9 +549,11 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
         return $this->result_data;        
     }
 
-    //
-    //
-    //
+    /**
+    * Executes several actions in turn 
+    * Queue is defined in "actions" parameter 
+    * Supports add,replace,delete
+    */
     public function multiAction(){
         
         $main_data = $this->data['actions'];
@@ -1045,7 +1070,9 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
 
 
     /**
-    * change RecordType InBatch
+    * Changes rec_RecTypeID in batch
+    * 
+    * rtyID_new - new record type
     */
     public function changeRecordTypeInBatch(){
 
@@ -1100,7 +1127,10 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
 
 
     /**
-    * Extract PDF change RecordType InBatch
+    * Extracts text content from PDF file that is defined in dtyID field 
+    * and put this content to DT_EXTRACTED_TEXT field
+    * 
+    * for recIDs
     */
     public function extractPDF(){
 

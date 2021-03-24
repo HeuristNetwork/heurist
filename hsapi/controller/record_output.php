@@ -62,7 +62,7 @@
     require_once (dirname(__FILE__).'/../../common/php/Temporal.php');
     require_once (dirname(__FILE__).'/../../admin/verification/verifyValue.php');
 
-    require_once (dirname(__FILE__).'/../dbaccess/exportRecords.php');
+    require_once (dirname(__FILE__).'/../dbaccess/recordsExport.php');
     
     $response = array();
 
@@ -240,7 +240,7 @@
         
     }else{
         
-        if(!ExportRecords::output( $response, $params )) {
+        if(!RecordsExport::output( $response, $params )) {
             $system->error_exit_api();
         }
         

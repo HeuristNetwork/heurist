@@ -63,7 +63,7 @@ todo
 on server side - controller
 RecordMgr.add, save, duplicate, remove  -> record_edit.php -> db_records.php
 
-RecordMgr.batch_details -> record_details.php  -> $dbRecDetails
+RecordMgr.batch_details -> record_batch.php  -> RecordsBatch
 
 
 

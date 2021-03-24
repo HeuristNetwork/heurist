@@ -590,6 +590,8 @@
     }
     //
     // returns true ot mysql error
+    //  $query with parameters "?"
+    //  $params - array for parameters, first element is string with types "sdi"
     //
     function mysql__exec_param_query($mysqli, $query, $params, $return_affected_rows=false){
 
