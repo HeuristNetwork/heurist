@@ -53,7 +53,28 @@
             }
         }
     }
+    
+/*    
+    parameters:
+    
+    fuzziness - number of characters
+    
+    personmatch - if true it checks only RT_PERSON by DT_GIVEN_NAMES and DT_GIVEN_NAMES
+                  otherwise by rec_Title  
+                
+    crosstype  - if false check only records of the same type
 
+    
+    1. Retrieve all non temp records 
+    2. It creates metaphone key (exclude european articles) - the same key for 
+       similar sounding words based on rules of English pronunciation. 
+       The size of key (number of chars) is defined by “fuzziness” parameter
+    
+    3. Fills $bibs[metaphone key] = array(rectype, val) 
+    
+    4. If such metaphone key already exists adds it to $dupes[$typekey] and $dupekeys
+    
+*/    
 
     $crosstype = false;
     $personMatch = false;
@@ -74,7 +95,11 @@
         $res = $mysqli->query("select rec_ID, rec_RecTypeID, rec_Title, dtl_Value from Records left join recDetails on dtl_RecID=rec_ID and dtl_DetailTypeID=$titleDT where rec_RecTypeID = $perRT and not rec_FlagTemporary order by dtl_Value asc");    //Family Name
 
     } else{
-        $res = $mysqli->query("select rec_ID, rec_RecTypeID, rec_Title, dtl_Value from Records left join recDetails on dtl_RecID=rec_ID and dtl_DetailTypeID=$titleDT where rec_RecTypeID != $relRT and not rec_FlagTemporary order by rec_RecTypeID desc");
+        //$res = $mysqli->query("select rec_ID, rec_RecTypeID, rec_Title, dtl_Value from Records left join recDetails on dtl_RecID=rec_ID ///and dtl_DetailTypeID=$titleDT where rec_RecTypeID != $relRT and not rec_FlagTemporary order by rec_RecTypeID desc");
+        
+        $res = $mysqli->query("select rec_ID, rec_RecTypeID, rec_Title from Records "
+            ." where rec_RecTypeID != $relRT and not rec_FlagTemporary order by rec_RecTypeID desc");
+        
     }
 
     //rectype names
@@ -88,14 +113,54 @@
                                 . $recsGivenNames[$row['rec_ID']]: "" );
             }else {
                 if ($row['rec_Title']) $val = $row['rec_Title'];
-                else $val = $row['dtl_Value'];
+                else continue; //$val = $row['dtl_Value'];
             }
-            $mval = metaphone(preg_replace('/^(?:a|an|the|la|il|le|die|i|les|un|der|gli|das|zur|una|ein|eine|lo|une)\\s+|^l\'\\b/i', '', $val));
+            
+            //strip out european articles
+            $val2 = preg_replace('/^(?:a|an|the|la|il|le|die|i|les|un|der|gli|das|zur|una|ein|eine|lo|une)\\s+|^l\'\\b/i', '', $val);
+            
+            //creates metaphone key (exclude european articles)
+            if(true || $mode=='metaphone'){
+
+                $mval = metaphone($val2);
+                $key = mb_substr($mval, 0, $fuzziness);
+                
+            }else if($mode=='similar'){
+                //use https://www.php.net/manual/en/function.similar-text.php
+            }else{ //levenshtein is default
+                //take first 255 chars
+                
+                //1. first group the same
+                
+/*
+CHAR_LENGTH(a.name)-CHAR_LENGTH(b.name)>3
+                
+
+use hdb_osmak_7;
+SELECT a.rec_Title, b.rec_Title 
+FROM Records a, Records b  
+WHERE a.rec_RecTypeID=10 AND b.rec_RecTypeID=10
+AND CHAR_LENGTH(a.rec_Title)-CHAR_LENGTH(b.rec_Title)<4
+AND a.rec_ID < b.rec_ID 
+AND NEW_LEVENSHTEIN(NEW_LIPOSUCTION(a.rec_Title), NEW_LIPOSUCTION(b.rec_Title))<4
+
+
+SELECT a.rec_Title, b.rec_Title 
+FROM Records a JOIN Records b ON a.rec_ID != b.rec_ID AND b.rec_RecTypeID=10
+    AND NEW_LEVENSHTEIN(NEW_LIPOSUCTION(a.rec_Title), NEW_LIPOSUCTION(b.rec_Title))<5
+WHERE a.rec_ID=:XXX
+
+https://stackoverflow.com/questions/7217746/how-to-sort-an-array-by-similarity-in-relation-to-an-inputted-word/39477606
+*/                
+                
+            }
+            
+            
 
             if ($crosstype || $personMatch) { //for crosstype or person matching leave off the type ID
-                $key = ''.substr($mval, 0, $fuzziness);
+                $key = ''.$key;
             } else {
-                $key = $row['rec_RecTypeID'] . '.' . substr($mval, 0, $fuzziness);
+                $key = $row['rec_RecTypeID'] . '.' . $key;
             }
 
             $typekey = $rectypes[$row['rec_RecTypeID']];
@@ -114,8 +179,9 @@
         $res->close();
     }
 
-    ksort($dupes);
+    ksort($dupes); //Sorts by record types
     foreach ($dupes as $typekey => $subarr) {
+        //sorts methapone keys
         array_multisort($dupes[$typekey],SORT_ASC,SORT_STRING);
     }
 
@@ -233,7 +299,7 @@
                             if (in_array($diffHash,$dupeDifferences)) continue;
                             print '<div style="padding: 10px 20px;" class="group_'.$unique_group_id.'">';
                             print '<input type="checkbox" name="dupeDiffHash[]" '.
-                            'title="Check to idicate that all records in this set are unique." id="'.$key.
+                            'title="Check to indicate that all records in this set are unique." id="'.$key.
                             '" value="' . $diffHash . '">&nbsp;&nbsp;';
                             print '<label style="font-weight: bold;">'.$rectype .'</label>&nbsp;&nbsp;&nbsp;&nbsp;';
                             //print '<input type="submit" value="&nbsp;ignore in future&nbsp;">&nbsp;&nbsp;&nbsp;&nbsp;';
@@ -247,6 +313,8 @@
 
                             print '&nbsp;&nbsp;&nbsp;&nbsp;<a href="#"  onclick="setAsNonDuplication()">ignore in future</a>';
 
+                            print '&nbsp;&nbsp;metaphone key:'.$key;
+                            
                             print '</div>';
                             print '<ul style="padding: 10px 30px;" class="group_'.$unique_group_id.'">';
                             foreach ($bibs[$key] as $rec_id => $vals) {
