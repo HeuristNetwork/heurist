@@ -267,19 +267,19 @@ function getImageFromFile($filename){
         
             try{
         
-            switch($path_parts['extension']) {
-                case 'jpeg':
-                case 'jfif':
-                case 'jpg':
-                    $image = @imagecreatefromjpeg($filename);
-                    break;
-                case 'gif':
-                    $image = @imagecreatefromgif($filename);
-                    break;
-                case 'png':
-                    $image = @imagecreatefrompng($filename);
-                    break;
-            }
+                switch($path_parts['extension']) {
+                    case 'jpeg':
+                    case 'jfif':
+                    case 'jpg':
+                        $image = @imagecreatefromjpeg($filename);
+                        break;
+                    case 'gif':
+                        $image = @imagecreatefromgif($filename);
+                        break;
+                    case 'png':
+                        $image = @imagecreatefrompng($filename);
+                        break;
+                }
             
             }catch(Exception $e) {
                 $rv = sendEmail(HEURIST_MAIL_TO_ADMIN, 'Image corruption '.HEURIST_DBNAME, 
