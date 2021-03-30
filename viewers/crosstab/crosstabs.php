@@ -27,7 +27,11 @@
 define('PDIR','../../');  //need for proper path to js and css
 require_once(dirname(__FILE__).'/../../hclient/framecontent/initPage.php');
 ?>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/configEntity.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min,js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
 <script type="text/javascript">
 
     var mapping, menu_datasets, btn_datasets;
@@ -169,8 +173,18 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPage.php');
                 <div id="pmessage" class="progress-message">Requesting</div>
             </div>
 
-            <div id="divres" class="output-content" style="display:none;">
+            <div>
+                <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#modalDisplay">View Analysis</button>
             </div>
+
+            <div id="modalDisplay" class="modal fade" role="dialog">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div id="divres" class="output-content" style="display:none;">
+                        </div>
+                    </div>
+                </div>
+            <div>
 
             <div id="div_empty" class="output-content" style="color:red;font-weight:bold;display:none;">
                 Please apply a filter to create a result set
