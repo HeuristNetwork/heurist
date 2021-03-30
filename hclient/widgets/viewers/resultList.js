@@ -55,7 +55,7 @@ $.widget( "heurist.resultList", {
         //searchsource: null,
 
         emptyMessageURL: null, //url of page to be loaded on empty result set 
-        empty_remark:'No entries match the filter criteria', //html content for empty message
+        empty_remark:'No entries match the filter criteria (entries may exist but may not have been made visible to the public or to your user profile)', //html content for empty message
         pagesize: -1,
         
         groupByMode: null, //[null|'none','tab','accordion'],
