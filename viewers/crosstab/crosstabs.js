@@ -578,7 +578,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 var notused = true, itself = false;
                 var intvalues = fields3[name].intervals;
                 for(j=0; j<intvalues.length; j++){
-                    if(intvalues[j].values.indexOf( termlist[i].id )>=0){
+                    if(window.hWin.HEURIST4.util.findArrayIndex(termlist[i].id, intvalues[j])>=0){
                         if(idx==j){
                             itself = true;  //itself
                         }else{
@@ -1401,7 +1401,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
     function fitToInterval(type, values, val){
         if(type=="enum" || type=="resource" || type=="relationtype"){
-            return (values.indexOf(val)>=0);
+            return (window.hWin.HEURIST4.util.findArrayIndex(val,values)>=0); // values.indexOf(val)
         }else{
             val = parseFloat(val);
             return (val>=values[0] && val<=values[1]);
