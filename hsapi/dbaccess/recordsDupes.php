@@ -50,6 +50,9 @@ private static function initialize()
     self::$system  = $system;
     self::$mysqli = $system->get_mysqli();
     self::$initialized = true;
+    
+    //check existense NEW_LIPOSUCTION NEW_LEVENSHTEIN
+    checkDatabaseFunctionsForDuplications(self::$mysqli);
 }
 
 //
@@ -79,7 +82,6 @@ public static function findDupes( $params ){
         self::$system->addError(HEURIST_INVALID_REQUEST, 'Required parameter rty_ID is missed. Define record type ID');
         return false;
     }
-    
     
     $distance = @$params['distance'];
     if(!($distance>0)) $distance = 0;

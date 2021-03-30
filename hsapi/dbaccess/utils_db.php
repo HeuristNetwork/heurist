@@ -1237,7 +1237,7 @@ $query = 'CREATE TABLE sysDashboard ('
                 && isFunctionExists($mysqli, 'hhash') && isFunctionExists($mysqli, 'simple_hash')
                 //&& isFunctionExists('set_all_hhash')
 */                            
-            if(!isFunctionExists($mysqli, 'getTemporalDateString') || isFunctionExists($mysqli, 'NEW_LIPOSUCTION')){ //need drop old functions
+            if(!isFunctionExists($mysqli, 'getTemporalDateString')){ //need drop old functions
                 include(dirname(__FILE__).'/../utilities/utils_db_load_script.php'); // used to load procedures/triggers
                 if(db_script(HEURIST_DBNAME_FULL, dirname(__FILE__).'/../../admin/setup/dbcreate/addProceduresTriggers.sql', false)){
                     $res = true;
@@ -1249,6 +1249,25 @@ $query = 'CREATE TABLE sysDashboard ('
             return $res;
     }
 
+    //
+    //
+    //
+    function checkDatabaseFunctionsForDuplications($mysqli){
+        
+         if(!isFunctionExists($mysqli, 'NEW_LIPOSUCTION')){
+                include(dirname(__FILE__).'/../utilities/utils_db_load_script.php'); // used to load procedures/triggers
+                if(db_script(HEURIST_DBNAME_FULL, dirname(__FILE__).'/../../admin/setup/dbcreate/addFunctions.sql', false)){
+                    $res = true;
+                }
+         }else{
+                $res = true;
+         }
+
+         return $res;
+        
+    }
+    
+    
     
     //
     //

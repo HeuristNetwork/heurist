@@ -54,7 +54,7 @@
                 $system->error_exit_api();
             }else{
                 $system->setResponseHeader();
-                print json_encode($response);
+                print json_encode(array('status'=>HEURIST_OK, 'data'=>$response));
             }
         }
     }

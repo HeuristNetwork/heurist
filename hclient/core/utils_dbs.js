@@ -214,7 +214,10 @@ window.hWin.HEURIST4.dbs = {
          4 - find reverse links and relations   
          5 - for lazy treeview with reverse links (faceted search wiz)
          6 - for lazy tree without reverse (import structure, export csv)
-       returns:
+         
+      parentcode - prefix for code 
+         
+      returns:
          
        children:[{key: field#, type: fieldtype, title:'', code , name, conceptCode, dtyID_local, children:[]},... ]
      
