@@ -174,7 +174,7 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPage.php');
             </div>
 
             <div>
-                <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#modalDisplay">View Analysis</button>
+                <button id="modalButton" class="btn btn-info btn-lg" data-toggle="modal" data-target="#modalDisplay" disabled>View Analysis</button>
             </div>
 
             <div id="modalDisplay" class="modal fade" role="dialog">

@@ -1364,10 +1364,14 @@ function CrosstabsAnalysis(_query, _query_domain) {
             
             $divres.append('<div>---------------------------------</div>');
 
+            $("#modalButton").attr("disabled", false);
+
 
         }else if (!supressBlankPage) {
             $divres.append('<h2 class="crosstab-page">'+pageName+'</h2>');
             $divres.append("<div>empty set</div>");
+            
+            $("#modalButton").attr("disabled", false);
         }
 
         /*
