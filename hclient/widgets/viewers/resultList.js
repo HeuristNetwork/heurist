@@ -3415,7 +3415,7 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
     },
     
     //
-    //
+    // 
     //
     _closeRecordViewPopup: function(){
         
@@ -3466,8 +3466,14 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
                 var pos = null;
                 var dlg = $('#recordview_popup');
                 if(!(dlg.length>0)){
-                    //set intial position right to result list
-                    pos = { my: "left top", at: "right top+100", of: $(this.element) };
+                    
+                    if(this.element.parent().attr('data-heurist-app-id')){ //CMS publication 
+                        pos = {my:'center', of: window};
+                    }else{
+                        //set intial position right to result list - for main interface only!
+                        pos = { my: "left top", at: "right top+100", of: $(this.element) };
+                    }
+                    
                 }
                 
                 window.hWin.HEURIST4.msg.showDialog(recInfoUrl, { 
