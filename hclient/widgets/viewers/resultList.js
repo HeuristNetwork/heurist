@@ -2200,21 +2200,26 @@ $.widget( "heurist.resultList", {
                                 var _recID = $(this).attr('data-recid');
                                 var ele2 = that.div_content.find('.record-expand-info[data-recid='+_recID+']');
                             //var ele2 = 
-                            var h = 400;
+                            var h = 300;
 
                             try{
                                 
-                                //var cw = this.contentWindow.document;
+                                var cw = this.contentWindow.document;
                                 
                                 var cw2  = this.contentWindow.document.documentElement;//.scrollHeight
 
                                 function __adjustHeight(){
                                     //h = $(cw).height();
                                     if(cw2){
-                                        var h = cw2.scrollHeight;  //cw.body                              
+                                        var bh = cw.body?cw.body.scrollHeight:0;
+                                        var h = cw2.scrollHeight;                               
         //console.log('scroll='+sh+'  h='+h+'  bh='+bh);
-                                        //h = Math.max(bh,sh);
-                                        ele2.removeClass('loading').height(h+(h*0.05));    
+                                        if(bh>0 && h>0){
+                                            h = Math.max(bh,h);
+                                        }else{
+                                            h = 300 //default value
+                                        }
+                                        ele2.removeClass('loading').height(h);//+(h*0.05)    
                                     }
                                 }
                                 
@@ -2225,7 +2230,7 @@ $.widget( "heurist.resultList", {
                                 //setTimeout(__adjustHeight, 10000);
                                 
                             }catch(e){
-                                ele2.removeClass('loading').height(800);    
+                                ele2.removeClass('loading').height(400);    
                                 console.log(e);
                             }
                             /*
