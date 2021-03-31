@@ -73,7 +73,8 @@ $.widget( "heurist.recordLookupMPCE", $.heurist.recordAction, {
         /* Check if selected Work has: project keyword/s, parisian category, and a basis for classification */
         if (record[id_map.DT_Keywords] != null && record[id_map.DT_Keywords] != "") // Project Keywords
         {
-            sessionStorage.setItem("rec_kywd", JSON.stringify(record[973]));
+            //sessionStorage.setItem("rec_kywd", JSON.stringify(record[955])); //973
+            sessionStorage.setItem("rec_kywd", JSON.stringify(record[id_map.DT_Keywords]));
         }
 
         if (record[id_map.DT_Category] != null && record[id_map.DT_Category] != "")  // Parisian Category
@@ -115,8 +116,10 @@ $.widget( "heurist.recordLookupMPCE", $.heurist.recordAction, {
             }
         ); 
 
+        /* Array of Project Keyword's Record IDs */
+        var keyword_IDs = window.hWin.HEURIST4.util.isJSON(sessionStorage.getItem('rec_kywd'));
 
-        if (sessionStorage.getItem('rec_kywd') != null)   /* Check if Work has assigned Keywords */
+        if (keyword_IDs)   /* Check if Work has assigned Keywords */
         {
 	        /* Get all Project Keywords and grab the ones assigned to current Work */
 	        var query_request = {q:'t:' + id_map.RT_Keyword, detail: 'detail'}; /* set the option for the search, these options can be found in reacordSearch.php */
@@ -127,7 +130,7 @@ $.widget( "heurist.recordLookupMPCE", $.heurist.recordAction, {
                     if(response.status == window.hWin.ResponseStatus.OK){   /* Check if Record Search was successful */
 
                         var recordset = new hRecordSet(response.data);  /* Retieve Search Results */
-                        var keyword_IDs = JSON.parse(sessionStorage.getItem("rec_kywd"));   /* Array of Project Keyword's Record IDs */
+
                         var cnt = keyword_IDs.length;   /* Number of Project Keywords */
 
                         for (var i = 0; i < cnt; i++)
