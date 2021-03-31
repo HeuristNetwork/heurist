@@ -1025,9 +1025,10 @@ error_log(print_r($_REQUEST, true));
         if($ugrID>0){
             $groups = @$this->current_User['ugr_Groups'];
             if($refresh || !is_array($groups)){
-                $groups = $this->current_User['ugr_Groups'] = user_getWorkgroups($this->mysqli, $ugrID);
+                $this->current_User['ugr_Groups'] = user_getWorkgroups($this->mysqli, $ugrID);
             }
             if($level!=null){
+                $groups = array();
                 foreach($this->current_User['ugr_Groups'] as $grpid=>$lvl){
                     if($lvl==$level){
                         $groups[] = $grpid;        
@@ -1125,7 +1126,7 @@ error_log(print_r($_REQUEST, true));
         }else{
             //@$this->current_User['ugr_Groups'][$requiredLevel]=='admin'); //admin of given group
             $current_user_grps = $this->get_user_group_ids('admin');
-            return (is_array($current_user_grps) && in_array($ugrID, $current_user_grps));
+            return (is_array($current_user_grps) && in_array($requiredLevel, $current_user_grps));
         }
     }    
 
