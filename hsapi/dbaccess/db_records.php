@@ -756,7 +756,7 @@
             }
             
             if($msg_termination){
-                $res = $system->addError(HEURIST_ERROR, $msg_termination);
+                $res = $system->addError(HEURIST_ACTION_BLOCKED, $msg_termination);
             }else if($msg_error){
                 $res = $system->addError(HEURIST_DB_ERROR, 'Cannot delete record. '.$msg_error);
             }else{
@@ -883,16 +883,17 @@
 
             $allowed_recids = array();
 
+            $msg_termination = null;
+            $tot_count = count($recids); 
+            $processed = 0;
+            $progress_session_id = @$params['session'];
+            
             if($system->is_admin())  //admin can change everything
             { 
                 
                 $allowed_recids = $recids;
             }else{
                 
-                $msg_termination = null;
-                $tot_count = count($recids); 
-                $processed = 0;
-                $progress_session_id = @$params['session'];
                 if($progress_session_id){
                     //init progress session
                     mysql__update_progress(null, $progress_session_id, true, '0,'.$tot_count);
@@ -906,7 +907,7 @@
                     }
                     $processed++;
                     //update session and check for termination                
-                    if($progress_session_id && ($processed % 100 == 0)){
+                    if($progress_session_id && ($processed % 1000 == 0)){
                         $session_val = $processed.','.$tot_count;    
                         $current_val = mysql__update_progress(null, $progress_session_id, false, $session_val);
                         if($current_val && $current_val=='terminate'){
@@ -918,18 +919,21 @@
                     
                 }//foreach
                 
-                if($progress_session_id){
+            }//not admin
+
+            $cnt_allowed_recids = count($allowed_recids);
+            
+            if($cnt_allowed_recids==0 && $progress_session_id){
                     //remove session file
                     mysql__update_progress(null, $progress_session_id, false, 'REMOVE');    
                     if($msg_termination){
-                        return $system->addError(HEURIST_ERROR, $msg_termination);
+                        return $system->addError(HEURIST_ACTION_BLOCKED, $msg_termination);
                     }
-                }
-            }//not admin
-
+            }
+            
             if(count($recids)==1 && $noaccess_count==1){
                 return $system->getError();    
-            }else if(count($allowed_recids)==0) {
+            }else if($cnt_allowed_recids==0) {
                 return $system->addError(HEURIST_REQUEST_DENIED,
                     'User does not have sufficient authority to change ownership and access for any of '.count($recids).' selected record');
             }else{
@@ -940,38 +944,82 @@
             // start transaction
             $keep_autocommit = mysql__begin_transaction($mysqli);
 
-            $query = 'UPDATE Records set rec_Modified=?, rec_OwnerUGrpID=?, rec_NonOwnerVisibility=? '
-            .' where rec_ID in ('.implode(',', $allowed_recids).')';
-
-            $stmt = $mysqli->prepare($query);
+            $msg_termination = null;
+            $tot_count = $cnt_allowed_recids; 
 
             $rec_mod = date('Y-m-d H:i:s');
+            $main_owner = $owner_grps[0];
+            array_shift( $owner_grps );  //other owners
+            $access_grps = @$params['NonOwnerVisibilityGroups'];
+            $success = true;
+            $updated_count = 0;
+            
+            //update by chunks
+            $k = 0;
+            while ($k < $cnt_allowed_recids) {
+                
+                if($progress_session_id && $cnt_allowed_recids>5000){
+                    
+                        $session_val = $k.','.$cnt_allowed_recids;    
+                        $current_val = mysql__update_progress(null, $progress_session_id, false, $session_val);
+                        if($current_val && $current_val=='terminate'){
+                            $success = false;
+                            $msg_termination = 'Operation is terminated by user';
+                            break;
+                        }
+                }
+            
+                $chunk = array_slice($allowed_recids, $k, 5000);
 
-            $stmt->bind_param('sis', $rec_mod, $owner_grps[0], $access);
+                $query = 'UPDATE Records set rec_Modified=?, rec_OwnerUGrpID=?, rec_NonOwnerVisibility=? '
+                .' where rec_ID in ('.implode(',', $chunk).')';
 
-            if(!$stmt->execute()){
-                $syserror = $mysqli->error;
-                $stmt->close();
-                $mysqli->rollback();
+                $stmt = $mysqli->prepare($query);
 
-                $res = $system->addError(HEURIST_DB_ERROR, 'Cannot updated ownership and access', $syserror);
-            }else{
-                $updated_count = $mysqli->affected_rows;
-                $stmt->close();
+                $stmt->bind_param('sis', $rec_mod, $main_owner, $access);
 
-
-                $access_grps = @$params['NonOwnerVisibilityGroups'];
-                array_shift( $owner_grps );
-                updateUsrRecPermissions($mysqli, $allowed_recids, $access_grps, $owner_grps);
-
+                if(!$stmt->execute()){
+                    $syserror = $mysqli->error;
+                    $stmt->close();
+                    $system->addError(HEURIST_DB_ERROR, 'Cannot updated ownership and access', $syserror);
+                    $success = false;
+                    break;
+                }else{
+                    $updated_count = $updated_count + $mysqli->affected_rows;
+                    $stmt->close();
+                    
+                    updateUsrRecPermissions($mysqli, $chunk, $access_grps, $owner_grps);
+                }
+                
+                $k = $k + 5000;
+            }//while
+            
+            if($progress_session_id && $cnt_allowed_recids>5000){
+                    mysql__update_progress(null, $progress_session_id, false, 'REMOVE');    
+            }
+            
+            //
+            // commit ot rollback
+            //
+            if($success){
                 $mysqli->commit();
 
                 $res = array("status"=>HEURIST_OK, 
-                    "data"=> array('processed'=>count($allowed_recids), 
+                    "data"=> array('processed'=>$cnt_allowed_recids, 
                         'updated'=>$updated_count,
                         'noaccess'=>$noaccess_count));
+                
+            }else{
+                $mysqli->rollback();
+                
+                if($msg_termination){
+                        $system->addError(HEURIST_ACTION_BLOCKED, $msg_termination);
+                }
+                $res = false;
             }
+            
 
+            //restore
             if($keep_autocommit===true) $mysqli->autocommit(TRUE);
             return $res;
 
