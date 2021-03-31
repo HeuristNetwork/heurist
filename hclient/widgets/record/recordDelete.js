@@ -293,12 +293,13 @@ $.widget( "heurist.recordDelete", $.heurist.recordAction, {
                 }   
             }
 
+            //unique session id    
             var session_id = Math.round((new Date()).getTime()/1000);
         
             var request = {
-                'request_id' : window.hWin.HEURIST4.util.random(),
-                'ids'  : scope.join(','),
-                'session': session_id
+                request_id : window.hWin.HEURIST4.util.random(),
+                ids        : scope.join(','),
+                session    : session_id
             };
                 
             if(rec_RecTypeID>0){
