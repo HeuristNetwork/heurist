@@ -137,6 +137,8 @@ public static function findDupes( $params ){
     
     $res = self::$mysqli->query($query);
 
+    $all_similar_ids = array(); //plain array of ids of similar records (to facilitate search) 
+    $all_similar_records = array(); //result: ids of all similar records by groups
     
     //3. loop for records
     if($res){
@@ -175,10 +177,6 @@ public static function findDupes( $params ){
             $compare_fields = 'SUBSTRING('. $compare_fields .',1,255)';
         }
         
-        $all_similar_ids = array(); //plain array of ids of similar records (to facilitate search) 
-        $all_similar_records = array(); //result: ids of all similar records by groups
-        
-        
         while ($row = $res->fetch_assoc()) {
             
             //4. find                     
@@ -188,7 +186,7 @@ public static function findDupes( $params ){
             $query = $query . ' WHERE (rec_ID='.$row['rec_ID'].') OR ';
             
             $compare_with_distance = '';
-            $where = array('(rec_RecTypeID ='.$rty_ID.')', '(not rec_FlagTemporary)');
+            $where = array('(rec_ID>'.$row['rec_ID'].')', '(rec_RecTypeID ='.$rty_ID.')', '(not rec_FlagTemporary)');
             $values = array('');
             
             //rec_RecTypeID ='.rty_ID.' and not rec_FlagTemporary
@@ -270,6 +268,7 @@ WHERE a.rec_ID=:XXX'
     }//if $res 
     
     
+    $is_debug = false;
     if($is_debug){
         foreach ($all_similar_records as $group){
             foreach ($group as $rec_ID=>$rec_Title ){
