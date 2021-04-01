@@ -31,6 +31,10 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
         htmlContent: 'recordFindDuplicates.html',
         helpContent: 'recordFindDuplicates.html' //in context_help folder
     },
+    
+    //results
+    dupes:null,
+    summary:null,
 
     selectedFields:null,
     
@@ -61,9 +65,11 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
             var fele = this.element.find('.ent_wrapper:first');
             
             $('<div class="ui-heurist-header">'+this.options.title+'</div>').insertBefore(fele);    
-            this.toolbar = $('<div class="ent_footer button-toolbar ui-heurist-header" style="height:20px"></div>').insertAfter(fele);    
+            
             //append action buttons
-            this.toolbar.empty();
+            //this.toolbar = $('<div class="ent_footer button-toolbar ui-heurist-header" style="height:20px"></div>').insertAfter(fele);    
+            //this.toolbar.empty();
+            this.toolbar =  this.element.find('#div_button-toolbar');
             var btns = this._getActionButtons();
             for(var idx in btns){
                 this._defineActionButton2(btns[idx], this.toolbar);
@@ -130,52 +136,69 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
     // 0 - find, 1 - merge selected
     //
     doAction: function(mode){
-        
+
         if(this.element.find('#div_result').is(':visible')){
-            
+
             this.element.find('#div_search').show();
             this.element.find('#div_result').hide();
-            
+
         }else{
             var rty_ID = this.selectRecordScope.val();
-            
+
             if(rty_ID>0){
-                
-            
+
+
                 var settings = this.getSettings(true);            
                 if(!settings) return;
-               
-               settings.fields = settings.fields[rty_ID];
-               
+
+                settings.fields = settings.fields[rty_ID];
+
+                //unique session id    
+                var session_id = Math.round((new Date()).getTime()/1000);
+                this._showProgress( session_id, false, 1000 );
+
                 var request = {
-                    'a':'dupes',
-                    'db': window.hWin.HAPI4.database,
-                    'rty_ID'  : rty_ID,
-                    'fields': settings.fields,
-                    'distance': settings.distance};
-                    
+                    a        : 'dupes',
+                    db       : window.hWin.HAPI4.database,
+                    rty_ID   : rty_ID,
+                    fields   : settings.fields,
+                    session  : session_id,
+                    distance : settings.distance};
+
                 var url = window.hWin.HAPI4.baseURL + 'hsapi/controller/record_verify.php'
                 var that = this;
-            
+
                 window.hWin.HEURIST4.util.sendRequest(url, request, null, function(response){
+                    that._hideProgress();
+                    
                     //render groups
                     if(response.status == window.hWin.ResponseStatus.OK){
-                        
+
+                        that.summary = response.data['summary'];
+                        response.data['summary'] = null;
+                        delete response.data['summary'];
+                      
                         that.dupes = response.data;
                         that._renderDuplicates();
-                    
+
                     }else{
-                            window.hWin.HEURIST4.msg.showMsgErr(response);
+                        window.hWin.HEURIST4.msg.showMsgErr(response);
                     }
-                    
-                    
-                    
-console.log(response.data);                    
+
+                    //console.log(response.data);                    
                 });
-            
+
             }
         }
- 
+
+    },
+    
+    //
+    //
+    //
+    _hideProgress: function (){
+        this._super(); 
+        this.element.find('#div_search').show();  
     },
     
     //
@@ -420,11 +443,28 @@ console.log(response.data);
     _renderDuplicates: function(){
         
             var dupes = this.dupes;
-        
-            var s = '<div style="padding: 10px 20px;"><h4>There are '+dupes.length+' potential groups of duplicates</h4>'
-            +'<p><b>Merge this group</b> link will ask which members of the group to merge before any changes are made.</p></div>';
             
-            for(var i=0; i<dupes.length; i++) {
+            var s = '<div style="padding:10px;">' + this.summary['scope'] + ' records have been checked.'
+                    + '<p>There are '+this.summary['cnt_records']
+                            + ' potential duplicates grouped in '
+                            +  this.summary['cnt_groups'] +' groups</b></p>';
+            
+            if(this.summary['cnt_records']>this.summary['limit']){
+                s = s + '<p>Operation has been terminated since the number of possible duplicaions is more than limit in '
+                        +this.summary['limit']+' records. Reduce the distance or add additional search field</p>';   
+            }else if(this.summary['is_terminated']){
+
+                s = s + '<p>Operation has been terminated by user</p>';
+            }
+            
+            s = s +'<p><b>Merge this group</b> link will ask which members of the group to merge before any changes are made.</p>'
+                + '<p><button id="btn_back_to_search">Back to search form</button></p></div>'
+            
+//onsole.log(dupes);            
+
+            
+            var grp_cnt = Object.keys(dupes).length;
+            for(var i=0; i<grp_cnt; i++) {
 
                 var rec_ids = Object.keys(dupes[i]);
         
@@ -456,8 +496,10 @@ console.log(response.data);
             
             this.element.find('#div_search').hide();
             this.element.find('#div_result').html(s).show();
-           
-            this.element.find('#btnDoAction').button({label:'Back to search form'});
+            var ele = this.element.find('#btn_back_to_search');
+            ele.button();
+            this._on(ele, {click:this.doAction});
+            //this.element.find('#btnDoAction').button({label:'Back to search form'});
            
             this._on(
                 this.element.find('#div_result').find('a[data-action-merge]'),
