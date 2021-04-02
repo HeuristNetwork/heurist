@@ -2590,12 +2590,15 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             // s_fields - sorted 
             // field_in_recset - all fields in record 
             
-            var rst_details = $Db.rst(rectypeID);  //array of dty_ID:rst_ID
+            var rst_details =  $Db.rst(rectypeID);  //array of dty_ID:rst_ID
             var s_fields = [];  //sorted fields including hidden fields from record header 
             var fields_ids = []; //fields in structure
             
             if(window.hWin.HEURIST4.util.isRecordSet(rst_details)){
                 rst_details.each2(function(dt_ID, rfr){
+                    
+                        rfr = window.hWin.HEURIST4.util.cloneJSON(rfr);    
+                    
                     
                         if(rectypeID == RT_RELATION && that.options.relmarker_field>0){
                             if(dt_ID==DT_RESOURCE){

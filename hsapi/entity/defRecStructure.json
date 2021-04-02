@@ -176,13 +176,20 @@
                         "rst_DisplayHelpText": "Select default value from the list of terms available"
                     }
                 },
-                {  "dtID": "rst_FilteredJsonTermIDTree",
+                {  "dtID": "rst_TermVocabularyName",
                     "dtFields":{
                         "dty_Type":"freetext",
                         "dty_Role":"virtual",
                         "rst_Class":"enum relmarker",
                         "rst_DisplayName":"Vocabulary(terms):",
                         "rst_Display":"readonly"
+                    }
+                },
+                {  "dtID": "rst_FilteredJsonTermIDTree",
+                    "dtFields":{
+                        "dty_Type":"freetext",
+                        "dty_Role":"virtual",
+                        "rst_Display":"hidden"
                     }
                 },
                 {  "dtID": "dty_TermIDTreeNonSelectableIDs",
