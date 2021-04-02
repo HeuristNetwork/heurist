@@ -3424,10 +3424,16 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
     //
     _closeRecordViewPopup: function(){
         
+        var crs = $('#recordview_popup').css('cursor');
+        if(crs && crs.indexOf('resize')>0) return;
+        
         this._myTimeoutCloseRecPopup = setTimeout(function(){
             var dlg = $('#recordview_popup');
+            var crs = dlg.css('cursor');
+            if(crs && crs.indexOf('resize')>0) return;
+            
             if(dlg.dialog('instance')) dlg.dialog('close');
-        },  1000); //600
+        },  2000); //600
                         
                         
         
@@ -3469,19 +3475,10 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
                 var that = this;
                 
                 var pos = null;
-                var dlg = $('#recordview_popup');
-                if(!(dlg.length>0)){
-                    
-                    if(this.element.parent().attr('data-heurist-app-id')){ //CMS publication 
-                        pos = {my:'center', of: window};
-                    }else{
-                        //set intial position right to result list - for main interface only!
-                        pos = { my: "left top", at: "right top+100", of: $(this.element) };
-                    }
-                    
-                }
+                var dlg = $('#recordview_popup');               
                 
-                window.hWin.HEURIST4.msg.showDialog(recInfoUrl, { 
+                
+                var opts = { 
                         is_h6style: true,
                         modal: false,
                         dialogid: 'recordview_popup',    
@@ -3489,14 +3486,33 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
                         onmouseover: function(){
                             that._clearTimeouts();
                         },
-                        position: pos,
-                        title:'Record Info'});
+                        title:'Record Info'}                
+                    
+                if(!(dlg.length>0)){
+                    
+                    if(this.element.parent().attr('data-heurist-app-id')){ //CMS publication 
+                        pos = {my:'center', of: window};
+                        opts.width = window.hWin.innerWidth*0.8;
+                        opts.height = window.hWin.innerHeight*0.9;
+                    }else{
+                        //set intial position right to result list - for main interface only!
+                        pos = { my: "left top", at: "right top+100", of: $(this.element) };
+                    }
+                    
+                    opts.position = pos;
+                }
+                
+                
+                
+                window.hWin.HEURIST4.msg.showDialog(recInfoUrl, opts);
 
                 if(pos!=null){
                     dlg = $('#recordview_popup').css('padding',0);
-                    this._on(dlg,{mouseout:function(){
-                        that._closeRecordViewPopup();
-                    }});
+                    this._on(dlg,{
+                        mouseout:function(){
+                            that._closeRecordViewPopup();
+                        }
+                    });
                     var dlg_header = dlg.parent().find('.ui-dialog-titlebar');
                     this._on(dlg_header,{mouseout:function(){
                         that._closeRecordViewPopup();
