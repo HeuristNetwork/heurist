@@ -751,7 +751,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
 
                             var dt_type = this._editing.getValue('dty_Type')[0];
 
-                            var dim = { h:540, w:800 };
+                            var dim = { h:640, w:800 };
                             var sURL = window.hWin.HAPI4.baseURL +
                             "admin/structure/fields/selectFieldType.html?&db="+window.hWin.HAPI4.database;
                             window.hWin.HEURIST4.msg.showDialog(sURL, {

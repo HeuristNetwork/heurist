@@ -50,11 +50,14 @@
         if(@$_REQUEST['a'] == 'dupes' || @$_REQUEST['action'] == 'dupes'){
 
             $response = RecordsDupes::findDupes( $_REQUEST );
-            if($response===false) {
-                $system->error_exit_api();
-            }else{
+            if( is_bool($response) && !$response ){
+                $response = $system->getError();
+                //$system->error_exit_api();
                 $system->setResponseHeader();
                 print json_encode($response);
+            }else{
+                $system->setResponseHeader();
+                print json_encode(array('status'=>HEURIST_OK, 'data'=>$response));
             }
         }
     }

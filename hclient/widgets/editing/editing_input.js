@@ -3721,7 +3721,7 @@ console.log('onpaste');
             disp_value = $Db.getTermValue(value);
 
             if(window.hWin.HEURIST4.util.isempty(value)) {
-                disp_value = 'term missing. id '+termID
+                disp_value = 'term missing. id '+value;
             }
         } else if(this.detailType=='file'){
 

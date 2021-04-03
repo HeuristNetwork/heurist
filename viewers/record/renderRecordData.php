@@ -48,7 +48,7 @@ require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_recsearch.php');
 require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_users.php');
 require_once(dirname(__FILE__).'/../../hsapi/dbaccess/db_rel_details_temp.php');
 
-define('ALLOWED_TAGS', '<i><b><u><em><strong><sup><sub><small><br>');
+define('ALLOWED_TAGS', '<i><b><u><em><strong><sup><sub><small><br>'); //for record title see output_chunker for other fields
 
 $noclutter = array_key_exists('noclutter', $_REQUEST);
 $is_map_popup = array_key_exists('mapPopup', $_REQUEST) && ($_REQUEST['mapPopup']==1);
@@ -102,7 +102,7 @@ if(!($is_map_popup || $without_header)){
 <html>
     <head>
         <meta http-equiv="content-type" content="text/html; charset=utf-8">
-        <link rel="stylesheet" type="text/css" href="<?=HEURIST_BASE_URL?>common/css/global.css">
+        <link rel="stylesheet" type="text/css" href="<?=HEURIST_BASE_URL?>h4styles.css">
         <script type="text/javascript" src="../../external/jquery-ui-1.12.1/jquery-1.12.4.js"></script>
 
         <script type="text/javascript" src="../../hclient/core/hintDiv.js"></script> <!-- for mapviewer roolover -->
@@ -392,8 +392,77 @@ if(!($is_map_popup || $without_header)){
         </script>
         <style>
         .detailRowHeader{
-            padding: 20px 0 20px    
+            padding: 20px 0 20px;
+            text-align: left;
+            color: #7D9AAA;
+            text-transform: uppercase;            
         }
+        
+        A:hover {
+            text-decoration: underline !important;
+        }
+        A:link, A:active {
+            color: #2080C0;
+            text-decoration: none;
+        }
+        .detailRow {
+            display: table;
+            padding: 5px 0 5px 0;
+            font-size: 11px;
+            overflow: visible;
+        }        
+
+        H2 {
+            color: #6A7C99;
+            font-size: 14px;
+            line-height: 25px;
+            margin: 0;
+        }  
+        #recID {
+            float: right;
+            font-size: 11px;
+        }
+
+        .external-link {
+            background-image: url(../../hclient/assets/external_link_16x16.gif);
+            background-repeat: no-repeat;
+            padding-left: 16px;
+            padding-top: 4px;
+        }
+        
+        div.thumbnail img {
+            width: 80px;
+            border: 2px solid #FFF;
+            -moz-box-shadow: 0 2px 4px #BBB;
+            -webkit-box-shadow: 0 2px 4px #bbb;
+            box-shadow: 0 2px 4px #bbb;
+        }
+
+        img {
+            border: 0 none;
+            vertical-align: middle;
+        }   
+        .thumb_image {
+            clear: both;
+            margin: 5px;
+            cursor: url(../../hclient/assets/zoom-in.png),pointer;
+        }
+        div.thumbnail .fullSize img {
+            margin: 0px;
+            width: auto;
+            max-width: 100%;
+            cursor: url(../../hclient/assets/zoom-out.png),pointer;
+        }        
+        .download_link{
+            padding: 7px 0;
+            font-size: 9px;
+        }
+        .prompt {
+            color: #999999;
+            font-size: 10px;
+            font-weight: normal;
+            padding-top: 0.3em;
+        }        
 <?php if($is_production){
     print '.detailType {width:160px;}';
 }?>        
@@ -451,9 +520,9 @@ if ($bkm_ID>0 || $rec_id>0) {
         }
     
         if($is_map_popup){
-            print '<div data-recid="'.$bibInfo['rec_ID'].'" style="font-size:0.8em;max-height:250px;overflow-y:auto;">';
+            print '<div data-recid="'.$bibInfo['rec_ID'].'" style="max-height:250px;overflow-y:auto;">';// style="font-size:0.8em"
         }else{
-            print '<div data-recid="'.$bibInfo['rec_ID'].'" style="font-size:0.8em">';
+            print '<div data-recid="'.$bibInfo['rec_ID'].'">'; // style="font-size:0.8em"
         }
 	        
             print_details($bibInfo);
@@ -473,7 +542,7 @@ if ($bkm_ID>0 || $rec_id>0) {
                             .' where rec_ID='.$id.' and not rec_FlagTemporary');
                 
                     if($id!=$rec_id){  //print details for linked records - hidden
-                        print '<div data-recid="'.$id.'" style="font-size:0.8em;display:none">';
+                        print '<div data-recid="'.$id.'" style="display:none">'; //font-size:0.8em;
                         print_details($bibInfo);
                         print '</div>';
                     }
@@ -492,7 +561,8 @@ if ($bkm_ID>0 || $rec_id>0) {
                     $cnt++;
                 }
                 
-                print '<div class=detailType style="font-size:0.8em;text-align:left;line-height:21px;">Linked</div><div style="font-size:0.8em" class="map_popup">'.$list;
+                //font-size:0.8em;
+                print '<div class=detailType style="text-align:left;line-height:21px;">Linked</div><div style="font-size:0.8em" class="map_popup">'.$list;
                 if($cnt>3){
                     ?>
                     <div class="detailRow"><div class="detailType">
@@ -613,9 +683,9 @@ function print_header_line($bib) {
             print '<div id=recID style="padding-right:10px">ID:'.htmlspecialchars($bib['rec_ID']).'</div>';
         }
         
-    if(true){ 
+    if(true){  //font-size:1.1em;
     ?>
-        <h3 style="padding:10px 10px 0px 2px;margin:0;color: #DC8501;font-size:1.1em;">
+        <h3 style="padding:10px 10px 0px 2px;margin:0;color: #DC8501;">
             <div <?="style='padding-left:20px;height:20px;background-repeat: no-repeat;background-image:url("
                         .HEURIST_ICON_URL.$bib['rty_ID'].".png)' title='".htmlspecialchars($bib['rty_Description'])."'" ?> >
                 Type&nbsp;<?= $bib['rty_ID'].': '.htmlspecialchars($bib['rty_Name'])." " ?>
@@ -686,7 +756,8 @@ function print_private_details($bib) {
     <div class="detailRow fieldRow"<?php echo $is_map_popup?' style="display:none"':''?>>
         <div class=detailType>Cite as</div><div class="detail<?php echo ($is_map_popup?' truncate" style="max-width:400px;"':'"');?>>
             <a target=_blank class="external-link" 
-                href="<?= HEURIST_BASE_URL ?>?recID=<?= $bib['rec_ID']."&db=".HEURIST_DBNAME ?>">XML</a>
+                href="<?= HEURIST_BASE_URL ?>?recID=<?= $bib['rec_ID']."&db=".HEURIST_DBNAME ?>">XML
+            </a>
             &nbsp;&nbsp;
             <a target=_blank class="external-link" 
             href="<?= HEURIST_BASE_URL ?>?recID=<?= $bib['rec_ID']."&fmt=html&db=".HEURIST_DBNAME ?>">HTML</a><?php echo ($is_map_popup?'':'<span class="prompt" style="padding-left:10px">Right click to copy URL</span>');?></div>    
@@ -1541,7 +1612,7 @@ function print_text_details($bib) {
 function output_chunker($val) {
     // chunk up the value so that it will be able to line-break if necessary
     //$val = htmlspecialchars($val);    The tags listed are the tags allowed.
-    $val = strip_tags($val,'<a><u><i><b><strong><h1><h2><h3><h4><p><ul><li>');
+    $val = strip_tags($val,'<a><u><i><em><b><strong><sup><sub><small><br><h1><h2><h3><h4><p><ul><li>');
     return $val;
     /* it adds word breaker incorrectly, so Arabic words are displayed incorrecly
     return preg_replace('/(\\b.{15,20}\\b|.{20}.*?(?=[\x0-\x7F\xC2-\xF4]))/', '\\1<wbr>', $val);

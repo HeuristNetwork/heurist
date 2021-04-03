@@ -124,9 +124,10 @@ class DbDefRecStructure extends DbEntityBase
             "if(rst_DisplayHelpText is not null and (dty_Type='separator' OR CHAR_LENGTH(rst_DisplayHelpText)>0),rst_DisplayHelpText,dty_HelpText) as rst_DisplayHelpText",
             //here we check for an override in the recTypeStrucutre for ExtendedDescription which is a rectype specific ExtendedDescription, use detailType ExtendedDescription as default
             "if(rst_DisplayExtendedDescription is not null and CHAR_LENGTH(rst_DisplayExtendedDescription)>0,rst_DisplayExtendedDescription,dty_ExtendedDescription) as rst_DisplayExtendedDescription",
+            "rst_RequirementType",
             "rst_DisplayOrder", "rst_DisplayWidth", "rst_DisplayHeight", "rst_DefaultValue", 
             //XXX "rst_RecordMatchOrder", "rst_CalcFunctionID",
-            "rst_RequirementType",
+            
             "rst_NonOwnerVisibility", "rst_Status", "rst_OriginatingDBID", "rst_MaxValues", "rst_MinValues",
             //here we check for an override in the recTypeStrucutre for displayGroup
             //XXX "dty_DetailTypeGroupID as rst_DisplayDetailTypeGroupID",

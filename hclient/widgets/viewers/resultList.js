@@ -2200,21 +2200,26 @@ $.widget( "heurist.resultList", {
                                 var _recID = $(this).attr('data-recid');
                                 var ele2 = that.div_content.find('.record-expand-info[data-recid='+_recID+']');
                             //var ele2 = 
-                            var h = 400;
+                            var h = 300;
 
                             try{
                                 
-                                //var cw = this.contentWindow.document;
+                                var cw = this.contentWindow.document;
                                 
                                 var cw2  = this.contentWindow.document.documentElement;//.scrollHeight
 
                                 function __adjustHeight(){
                                     //h = $(cw).height();
                                     if(cw2){
-                                        var h = cw2.scrollHeight;  //cw.body                              
+                                        var bh = cw.body?cw.body.scrollHeight:0;
+                                        var h = cw2.scrollHeight;                               
         //console.log('scroll='+sh+'  h='+h+'  bh='+bh);
-                                        //h = Math.max(bh,sh);
-                                        ele2.removeClass('loading').height(h+(h*0.05));    
+                                        if(bh>0 && h>0){
+                                            h = Math.max(bh,h);
+                                        }else{
+                                            h = 300 //default value
+                                        }
+                                        ele2.removeClass('loading').height(h);//+(h*0.05)    
                                     }
                                 }
                                 
@@ -2225,7 +2230,7 @@ $.widget( "heurist.resultList", {
                                 //setTimeout(__adjustHeight, 10000);
                                 
                             }catch(e){
-                                ele2.removeClass('loading').height(800);    
+                                ele2.removeClass('loading').height(400);    
                                 console.log(e);
                             }
                             /*
@@ -3415,14 +3420,20 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
     },
     
     //
-    //
+    // 
     //
     _closeRecordViewPopup: function(){
         
+        var crs = $('#recordview_popup').css('cursor');
+        if(crs && crs.indexOf('resize')>0) return;
+        
         this._myTimeoutCloseRecPopup = setTimeout(function(){
             var dlg = $('#recordview_popup');
+            var crs = dlg.css('cursor');
+            if(crs && crs.indexOf('resize')>0) return;
+            
             if(dlg.dialog('instance')) dlg.dialog('close');
-        },  1000); //600
+        },  2000); //600
                         
                         
         
@@ -3464,13 +3475,10 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
                 var that = this;
                 
                 var pos = null;
-                var dlg = $('#recordview_popup');
-                if(!(dlg.length>0)){
-                    //set intial position right to result list
-                    pos = { my: "left top", at: "right top+100", of: $(this.element) };
-                }
+                var dlg = $('#recordview_popup');               
                 
-                window.hWin.HEURIST4.msg.showDialog(recInfoUrl, { 
+                
+                var opts = { 
                         is_h6style: true,
                         modal: false,
                         dialogid: 'recordview_popup',    
@@ -3478,14 +3486,33 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
                         onmouseover: function(){
                             that._clearTimeouts();
                         },
-                        position: pos,
-                        title:'Record Info'});
+                        title:'Record Info'}                
+                    
+                if(!(dlg.length>0)){
+                    
+                    if(this.element.parent().attr('data-heurist-app-id')){ //CMS publication 
+                        pos = {my:'center', of: window};
+                        opts.width = window.hWin.innerWidth*0.8;
+                        opts.height = window.hWin.innerHeight*0.9;
+                    }else{
+                        //set intial position right to result list - for main interface only!
+                        pos = { my: "left top", at: "right top+100", of: $(this.element) };
+                    }
+                    
+                    opts.position = pos;
+                }
+                
+                
+                
+                window.hWin.HEURIST4.msg.showDialog(recInfoUrl, opts);
 
                 if(pos!=null){
                     dlg = $('#recordview_popup').css('padding',0);
-                    this._on(dlg,{mouseout:function(){
-                        that._closeRecordViewPopup();
-                    }});
+                    this._on(dlg,{
+                        mouseout:function(){
+                            that._closeRecordViewPopup();
+                        }
+                    });
                     var dlg_header = dlg.parent().find('.ui-dialog-titlebar');
                     this._on(dlg_header,{mouseout:function(){
                         that._closeRecordViewPopup();

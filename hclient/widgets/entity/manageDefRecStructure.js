@@ -1472,8 +1472,8 @@ console.log('No active tree node!!!!')
             if(s==''){
                 ele.appendTo(bottom_div); //usual field
             }else{
-                //enum,relmarker,resource
-                var edit_ele = this._editing.getFieldByName('rst_FilteredJsonTermIDTree');
+                //enum,relmarker,resource  - show vocabulary name
+                var edit_ele = this._editing.getFieldByName('rst_TermVocabularyName');
                 ele.css({'border-top':'1px lightgray solid','padding':'10px 0px 0px',margin:'10px 0 0 126px'});
                 ele.insertBefore(edit_ele);                
             }
@@ -1681,7 +1681,7 @@ console.log('No active tree node!!!!')
         this._editing.setFieldValueByName('rst_TermPreview', defval, false); //recreates
 
         
-        this._editing.setFieldValueByName('rst_FilteredJsonTermIDTree', $Db.trm(allTerms,'trm_Label'), false); //recreates
+        this._editing.setFieldValueByName('rst_TermVocabularyName', $Db.trm(allTerms, 'trm_Label'), false); //recreates
         
         /*
         var ele = this._editing.getFieldByName('rst_DefaultValue_enum');
