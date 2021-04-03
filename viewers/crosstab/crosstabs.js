@@ -704,7 +704,6 @@ function CrosstabsAnalysis(_query, _query_domain) {
             window.hWin.HEURIST4.msg.showMsgDlg('There are no more terms available');
         }
 
-
     }
 
 
@@ -1118,6 +1117,11 @@ function CrosstabsAnalysis(_query, _query_domain) {
             }
         }//records
 
+        // If user selects one variable, the rows are to be sorted by descending order.
+        if(clen == 1){
+            rows = rows.sort(_rowCompare);
+        }
+        
         //special calc fo average
         if(isAVG)
         {
@@ -1521,6 +1525,18 @@ function CrosstabsAnalysis(_query, _query_domain) {
         $('#rbShowBlanks').prop('checked',settings.supressBlanks==0);
 
         _resetAllIntervals(settings.fields);
+    }
+
+    //Compare function to sort the rows by descending order.
+    function _rowCompare(b, a){
+        
+        if(a.output[0] < b.output[0]){
+            return -1;
+        }
+        if(a.output[0] > b.output[0]){
+            return 1;
+        }
+        return 0;
     }
 
     //
