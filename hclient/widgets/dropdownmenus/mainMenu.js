@@ -966,6 +966,11 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
             window.hWin.HEURIST4.ui.showRecordActionDialog('recordArchive');
         
         }else 
+        if(action == "menu-structure-duplicates"){
+            
+            window.hWin.HEURIST4.ui.showRecordActionDialog('recordFindDuplicates',popup_dialog_options);
+        
+        }else 
         if(action == "menu-export-csv"){
             
             popup_dialog_options.format = 'csv';
@@ -1311,7 +1316,7 @@ console.log('>>>>'+that.divProfileItems.find('.ui-menu-item').css('padding-left'
         
         if(!popup_options) popup_options = {};
 
-        var $dlg = (popup_options.container)
+        var $dlg = (popup_options.container)  //if ther is container - this is not a popup
                         ?popup_options.container
                         :$("#heurist-dialog").addClass('ui-heurist-bg-light');
         $dlg.empty();

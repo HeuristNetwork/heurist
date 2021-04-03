@@ -214,7 +214,10 @@ window.hWin.HEURIST4.dbs = {
          4 - find reverse links and relations   
          5 - for lazy treeview with reverse links (faceted search wiz)
          6 - for lazy tree without reverse (import structure, export csv)
-       returns:
+         
+      parentcode - prefix for code 
+         
+      returns:
          
        children:[{key: field#, type: fieldtype, title:'', code , name, conceptCode, dtyID_local, children:[]},... ]
      
@@ -300,9 +303,9 @@ window.hWin.HEURIST4.dbs = {
                 if(all_header_fields){
                     var s = '<span style="font-style:italic">Generic fields</span>';
                     $children = [
-                        {title:s, folder:true, children:$children},
-                        {key:'anyfield', type:'freetext',
-                        title:"Any field", 
+                        {title:s, folder:true, is_generic_fields:true, children:$children},
+                        {key:'anyfield', type:'freetext',                       //-16px -80px      -48px -80px open
+                        title:"<span style='font-size:0.9em;font-style:italic;padding-left:22px'>ANY FIELD</span>", 
                         code:($recTypeId+':anyfield'), name:'Any field'}
                         ];
                 }

@@ -830,11 +830,14 @@ $.widget( "heurist.searchBuilder", {
                                     */                                   
                                 },
                                 expand: function(e, data){
-                                    that.showHideReverse();
+                                    that.showHideReverse(data);
+                                },
+                                collapse: function(e, data){
+                                    that._update_GenericField(data.node);
                                 },
                                 loadChildren: function(e, data){
                                     setTimeout(function(){
-                                        that.showHideReverse();   
+                                        that.showHideReverse(data);   
                                         //that._assignSelectedFacets();
                                     },500);
                                 },
@@ -933,11 +936,12 @@ $.widget( "heurist.searchBuilder", {
         }
     }
     
-    , showHideReverse: function(){
+    , showHideReverse: function(data){
         
         var showrev = $('#fsw_showreverse').is(":checked");
         var treediv = $('#field_treeview');
         var tree = treediv.fancytree("getTree");
+        var that = this;
         tree.visit(function(node){
 
             if(node.data.isreverse==1){ 
@@ -948,7 +952,28 @@ $.widget( "heurist.searchBuilder", {
                     $(node.li).addClass('fancytree-hidden');
                 }
             }
+            if(node.data.is_generic_fields){ 
+                   that._update_GenericField(node);
+            }
         });
+        
+        //this._update_GenericField(data);
+    }
+    
+    ,_update_GenericField: function(node){
+        
+            if(!node) return;
+        
+            if(node.data.is_generic_fields){ 
+                    var ele = $(node.li).find('.fancytree-checkbox');
+                    if(node.isExpanded()){
+                       ele.css({'background-position': '-32px -80px'});   //-48px -80px  
+                    }else{
+                       ele.css({'background-position': '0px -80px'});     
+                    }
+            }
+            
+        
     }
     
      //

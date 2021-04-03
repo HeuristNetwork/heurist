@@ -62,10 +62,11 @@ of the codebase and rename it to index.html
 
 // *** DO NOT CHANGE VERSION NUMBER, THIS IS SET BY THE HEURIST DEVELOPMENT TEAM ***
 
-$version = "6.2.4"; // sets current program version number, determined by Heurist development lead
+$version = "6.2.5"; // sets current program version number, determined by Heurist development lead
 
 // dates below are the date of release of the given version, and list changes since last release
 
+// 6.2.5 2 Apr 2021 First draft new dupes finder but too slow, MPCE lookup function incorporated, vrious cosmetic and bug fixes
 // 6.2.4  18 Mar 2021 (since 6 Feb) lots of bug fixes on new version, extra checks and helpful instructions, fix XML structure download and geoJSon, summarising on CSV output (count, group, sort), additional integrity checks and automated fixing of bad terms, facet search multi-select, enhanced filter builder with AND, OR and multi-level searches, spatial search on specific fields, use of FULLTEXT search for word searches 
 // 6.2.0 06 Feb 2021 Replaced H5 as default on Sydney server. Customised templates for websites on a erver, set default template for new websites
 // 6.1.7 30 Jan 2021 (Planned replacement of version 5 as default) Blog function (draft), multi-select on facet searches, easy access to edit relationship attributes from relationship markers, improved automatic date fixing in Verify Integrity, auto relationship cache rebuild, better length adjustments for result list content display, sorting by addition date, use of xml in remote data access for MPCE, server-specific custom website template function (draft), fix issues with all images due to git settings error, lots of small nips and tucks on H6 interface.
