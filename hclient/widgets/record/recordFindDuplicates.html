@@ -11,13 +11,15 @@
         <div style="padding:0.2em; width: 100%;" class="input">
 
             <div class="header" style="padding: 0 16px 0 16px;">
-                <label>Distance:</label>
+                <label>Difference percentage:</label>
             </div>
 
-            <input style="width:80px" id="distance" value="2"/>
+            <input style="width:80px" id="distance" value="10"/>
                 <div class="heurist-helper2">
-                    Difference in characters betweeen compared strings. Zero means exact search. Max allowed value is 5. 
-                    Only first 255 characters are comapred. 
+                    It calculates a distance in characters between two strings to be compared depends on length of first string. 
+                    Minimal distance is 1. Maximum is 10 characters.  
+                    Zero percentage means exact search. Max allowed value is 10%. 
+                    Only first 255 characters are compared. 
                     Enumerations, numeric and date fields are compared by exact match.
                 </div>
         </div>
