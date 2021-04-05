@@ -1,7 +1,7 @@
 <div id="div_search" class="ent_wrapper">
     <fieldset class="ent_header" style="height:9em">
         <div style="padding: 0.2em; width: 100%;" class="input">
-            <div class="header" style="padding: 0 16px 0 16px;">
+            <div class="header" style="padding: 20px 16px 0 16px;">
                 <label for="sel_record_scope">Records type:</label>
             </div>
             <select id="sel_record_scope" class="text ui-widget-content ui-corner-all" style="width:300px;max-width:40em"></select>
@@ -14,13 +14,11 @@
                 <label>Difference percentage:</label>
             </div>
 
-            <input style="width:80px" id="distance" value="10"/>
-                <div class="heurist-helper2">
-                    It calculates a distance in characters between two strings to be compared depends on length of first string. 
-                    Minimal distance is 1. Maximum is 10 characters.  
-                    Zero percentage means exact search. Max allowed value is 10%. 
-                    Only first 255 characters are compared. 
-                    Enumerations, numeric and date fields are compared by exact match.
+            <input style="width:30px" id="distance" value="10"/>&nbsp;%
+                <div class="heurist-helper2"  style="padding: 5px 0 10px 0;">
+                    Locates duplicates based on similarity of the selected field(s). We recommend use of the constructed title in the first instance. <br> 
+                    Strings use levenshtein character distance as a percentage of string length. 0% = exact match only, 10 - 20% recommended. Terms, numeric and date fields apply exact match. 
+
                 </div>
         </div>
         
@@ -32,9 +30,9 @@
     </fieldset>
 
     <!-- TREE for field selection -->
-    <div style="top:9.2em; bottom:0em; padding: 1.2em; min-width: 600px;overflow-x:hidden;overflow-y:auto" class="input ent_content">
+    <div style="top:9.2em; bottom:0em; padding: 2.2em; min-width: 600px;overflow-x:hidden;overflow-y:auto" class="input ent_content">
         <div class="export-field-tree-container">
-            <div class="header" style="padding: 0 16px 0 16px;display: inline-block;vertical-align:top"><label>Select fields to compare:</label></div>
+            <div class="header" style="padding: 20px 16px 0 16px;display: inline-block;vertical-align:top"><label>Select fields to compare:</label></div>
 
             <div class="detailRow rtt-tree" style="display: inline-block;outline: none;margin-top: -8px;"
                 id="rectype_tree">
