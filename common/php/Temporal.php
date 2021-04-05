@@ -149,7 +149,7 @@ function temporalToHumanReadableString($value, $showoriginal_temporal=false){
 //
 // $month_day_order     1 - dd/mm,  2 - mm/dd
 //
-function validateAndConvertToISO($value, $today_date=null, $month_day_order=2){
+function validateAndConvertToISO($value, $today_date=null, $month_day_order=2, $need_day=true){
           if (strpos($value,"|")!==false) {// temporal encoded date
                 return 'Temporal';
           }else{
@@ -171,7 +171,7 @@ function validateAndConvertToISO($value, $today_date=null, $month_day_order=2){
                 }
                 //$date = parseDateTime($value);
                 //return @$date['year'].'-'.@$date['month'].'-'.@$date['day'];
-                $res = removeLeadingYearZeroes($value, false, true, $month_day_order);
+                $res = removeLeadingYearZeroes($value, false, true, $month_day_order, $need_day);
                 
                 return $res;
           }
@@ -179,13 +179,16 @@ function validateAndConvertToISO($value, $today_date=null, $month_day_order=2){
 //
 // $is_greg_or_julian true - returns full month names
 // $month_day_order   1  dd/mm   2 mm/dd
-//
-function removeLeadingYearZeroes($value, $is_greg_or_julian=true, $is_strict_iso=false, $month_day_order=2){
+// $is_strict_iso - adds zeroes, missed days
+//   
+function removeLeadingYearZeroes($value, $is_greg_or_julian=true, $is_strict_iso=false, $month_day_order=2, $need_day=false){
 
 	//$date = parseDateTime($value);
     // preg_match('/^\d+$/', $value)  && is_int(intval($value))
+    if(!$is_strict_iso){
+        $need_day = false;
+    }
     
-    $need_day = true;
     
     if( preg_match('/^-?\d+$/', $value) ){ //only digits with possible minus
         $date = array('year'=>$value);
@@ -194,11 +197,15 @@ function removeLeadingYearZeroes($value, $is_greg_or_julian=true, $is_strict_iso
         if(strpos($value,'XX')>0){
             $date = null;
         }else{
-            
+            if($value=='2021-03'){
+                $e = 1;
+            }
             $value = correctDMYorder($value, false, $month_day_order);
 
             try{   
                 $origHasSeconds = (substr_count($value,':')>1);
+                $origWithoutDays = substr_count($value,'-')==1;
+                
                 $t2 = new DateTime($value);
                 $datestamp = $t2->format('Y-m-d H:i:s');
                 $date = date_parse($datestamp);
@@ -238,8 +245,10 @@ function removeLeadingYearZeroes($value, $is_greg_or_julian=true, $is_strict_iso
         
         if($is_greg_or_julian && !$is_strict_iso){
 
-            $res2 = "";
-            if(@$date['day'] && $need_day){
+            $res2 = '';
+            if(!$need_day && $origWithoutDays){
+                
+            }else if(@$date['day']){
                 $res2 = $date['day']; 
             }
             if(@$date['month']){
@@ -252,7 +261,10 @@ function removeLeadingYearZeroes($value, $is_greg_or_julian=true, $is_strict_iso
         
 		    if(@$date['month'] || $has_time){
 			    $res = $res.'-'.str_pad($date['month'],2,'0',STR_PAD_LEFT);
-		        if(@$date['day'] && ($need_day || $has_time)){
+                
+                if(!$need_day && $origWithoutDays && !$has_time){
+                
+		        }else if(@$date['day']){ //&& ($need_day || $has_time)
 			        $res = $res.'-'.str_pad($date['day'],2,'0',STR_PAD_LEFT);
 		        }
             }
@@ -317,7 +329,7 @@ function correctDMYorder($value, $month_day_order=2){
         }
         
         if(substr_count($value,'-')==1) { //year and month only
-            $need_day = false;
+            
             list($m, $y) = explode('-', $value);
             
             //Oct-12

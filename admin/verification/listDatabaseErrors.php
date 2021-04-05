@@ -1028,10 +1028,6 @@ $trmDuplicates = @$lists2["trm_dupes"];
                 $row['dtl_Value'] = trim($row['dtl_Value']);
                 $row['is_ambig'] = true;
                 
-                if($row['dtl_RecID']==9 || $row['dtl_RecID']==5){
-                    error_log('!!!');
-                }
-
                 if(  (strlen($row['dtl_Value'])==3 || strlen($row['dtl_Value'])==5) 
                     && preg_match( $decade_regex, $row['dtl_Value'] )){
                         
@@ -1050,8 +1046,8 @@ $trmDuplicates = @$lists2["trm_dupes"];
                 }
                 
                 if($row['is_ambig']===true){
-                    //parse and validate value
-                    $row['new_value'] = validateAndConvertToISO($row['dtl_Value'], $row['rec_Added']);
+                    //parse and validate value   order 2 (mm/dd), don't add day  if it is not defined
+                    $row['new_value'] = validateAndConvertToISO($row['dtl_Value'], $row['rec_Added'], 2, false);
                     if($row['new_value']=='Temporal'){
                         continue;
                     }else if($row['new_value']==$row['dtl_Value']){ //nothing to correct - result is the same
