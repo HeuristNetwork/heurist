@@ -90,6 +90,8 @@ public static function findDupes( $params ){
         return false;
     }
     
+    $in_memory_limit = 10000;
+    
     $distance = @$params['distance'];
     if(!($distance>0)) $distance = 0;
     if($distance>20) $distance = 20; //percentage
@@ -137,7 +139,6 @@ public static function findDupes( $params ){
         }
     }
     
-    $need_levenshtein = false;
     $search_params = 'i'; //for recid
     $search_where = array('(rec_ID>?)');
     
@@ -153,14 +154,12 @@ public static function findDupes( $params ){
                     $search_where[] = '('.$v.'=?)';  //$header_fields2[
                     $search_params = $search_params.'s';
                  }
-             }else if(@$dty_IDs[$v]=='freetext' || @$dty_IDs[$v]=='blocktext'){
-                 if($distance>0){
+             }else if($distance>0 && (@$dty_IDs[$v]=='freetext' || @$dty_IDs[$v]=='blocktext')){
                     $compare_fields[] = $detail_fields2[$v];
-                 }else{
+             }else{
                     $exact_fields[] = $detail_fields[$v];        
                     $search_where[] = '(d'.$v.'=?)'; //$detail_fields2[
                     $search_params = $search_params.'s';
-                 }
              }
     }
         
@@ -173,9 +172,10 @@ public static function findDupes( $params ){
             $compare_fields = count($compare_fields)>1?'CONCAT('.implode(',',$compare_fields).')':$compare_fields[0];
             $compare_fields = ', SUBSTRING('. $compare_fields .',1,255) as C1 ';
             
-            $search_where[] = '(ABS(CHAR_LENGTH(?)-CHAR_LENGTH(C1))<'.$distance.') AND '
-                .'(LEVENSHTEIN_LIMIT(?, C1,'.$distance.')<'.$distance.')';
-            $search_params = $search_params.'ss';
+            // we use php levenshtein now
+            //$search_where[] = '(ABS(CHAR_LENGTH(?)-CHAR_LENGTH(C1))<'.$distance.') AND '
+            //    .'(LEVENSHTEIN_LIMIT(?, C1,'.$distance.')<'.$distance.')';
+            //$search_params = $search_params.'ss';
             $compare_mode = 1;
             
     }else{
@@ -197,19 +197,38 @@ public static function findDupes( $params ){
     self::$mysqli->query('DROP TABLE IF EXISTS tmp_find_dupes');
     
     //1. search for all records and create temporary table
-    $query = 'select rec_ID '.$compare_fields.' '.$exact_fields
-    .' from Records '.implode(' ',$detail_joins)
+    $query = ' from Records '.implode(' ',$detail_joins)
     .' where rec_RecTypeID ='.$rty_ID.' and not rec_FlagTemporary'
     .' order by rec_ID asc';
+
     
-    $query = 'CREATE TEMPORARY TABLE tmp_find_dupes (PRIMARY KEY find_dupes_pkey (rec_ID)) '.$query;    
+    $tot_count = mysql__select_value(self::$mysqli, 'SELECT count(rec_ID) '.$query);
+
+    if(!($tot_count>1)){
+        $response = self::$system->addError(HEURIST_NOT_FOUND, 
+                'There is '.($tot_count==0?'zero':'the only').' entry for record type '.$rty_ID);
+        return false;
+    }
+
+    $query = ' rec_ID '.$compare_fields.' '.$exact_fields.$query;
+    
+    if($compare_mode>1 || $tot_count >= $in_memory_limit){
+        $query = 'CREATE TEMPORARY TABLE tmp_find_dupes (PRIMARY KEY find_dupes_pkey (rec_ID)) SELECT '.$query;    
+    }else{
+        $query = 'SELECT SQL_CALC_FOUND_ROWS '.$query;
+    }
     
     $res = self::$mysqli->query($query);
     
     if(!$res){
         
-        $response = self::$system->addError(HEURIST_DB_ERROR, 
-                $savedSearchName.'Search duplications. Can not create temporary table', self::$mysqli->error);
+        if($compare_mode>1){
+            $response = self::$system->addError(HEURIST_DB_ERROR, 
+                'Search duplications. Can not create temporary table', self::$mysqli->error);
+        }else{
+            $response = self::$system->addError(HEURIST_DB_ERROR, 
+                'Search duplications. Can not executre main query', self::$mysqli->error);
+        }
         return false;
     }
         
@@ -233,12 +252,12 @@ public static function findDupes( $params ){
     
     $progress_session_id = @$params['session'];
     $msg_termination = null;
-    $tot_count = 0;
     $processed = 0;
     
-    $query = 'SELECT SQL_CALC_FOUND_ROWS * FROM tmp_find_dupes';
-    
-    $res = self::$mysqli->query($query);
+    if($compare_mode>1){
+        $query = 'SELECT * FROM tmp_find_dupes'; //SQL_CALC_FOUND_ROWS 
+        $res = self::$mysqli->query($query);
+    }
     
     //3. loop for records
     if(!$res){
@@ -249,6 +268,7 @@ public static function findDupes( $params ){
         
     }else{
         
+        /* we search count in separate query at the begining
         $fres = self::$mysqli->query('select found_rows()');
         if (!$fres)     {
             $response = self::$system->addError(HEURIST_DB_ERROR, 
@@ -260,6 +280,7 @@ public static function findDupes( $params ){
             $tot_count = $tot_count[0];
             $fres->close();
         }
+        */
         
         $limit_pc = $tot_count*$limit_pc/100;
         $limit_cnt = min($limit_cnt, $limit_pc);
@@ -270,7 +291,7 @@ public static function findDupes( $params ){
             mysql__update_progress(null, $progress_session_id, true, '0,'.$tot_count);
         }
         
-        if($compare_mode==1 || $compare_mode==2){
+        if($tot_count<$in_memory_limit && $compare_mode==1){
             self::$cache_id = array();
             self::$cache_str = array();
             
@@ -342,7 +363,7 @@ public static function findDupes( $params ){
         
         
             //3. create search query 
-            $search_query = 'SELECT rec_ID FROM tmp_find_dupes WHERE ';
+            $search_query = 'SELECT rec_ID '.($compare_mode<3?', C1':'').' FROM tmp_find_dupes WHERE ';
             $search_query = $search_query.' ('. implode(' AND ', $search_where) .')';
             //4. prepare query
             $stmt = self::$mysqli->prepare($search_query);
@@ -355,36 +376,39 @@ public static function findDupes( $params ){
             //----------------------------
             //
             //
+            $str1 = '';
+            $len1 = 0;
+            $dist = 0;
+            
             while ($row = $res->fetch_row()) {  //main query
 
-                $curr_recid = $row[0];
-
+                $curr_recid = intval($row[0]);
                 
                 //exclude this record and records that are already included in other groups
                 if(count($all_similar_ids)>0){
                     $idx = array_search($curr_recid,  $all_similar_ids, true); 
                     if($idx>0){
+                        $processed++;
                         continue;
                         
+                        
                     }
-                    /* QQQQ
-                    //remove ids less than current rec_ID
-                    foreach ($all_similar_ids as $idx => $id) {
-                        if ($id > $curr_recid) {
-                            $all_similar_ids = array_slice($all_similar_ids, $idx);  
-                            break;
-                        }
-                    }                   
-                    
-                    if(count($all_similar_ids)>0){
-                        $where[] = '(rec_ID NOT IN ('.implode(',',$all_similar_ids).'))';    
-                    }
-                    */
                 }
                 
+                if($compare_mode<3){ //need levenshtein
+                    $str1 = $row[1];
+                    array_splice($row,1,1); //get C1 and remove it from array
+                    $len1 = strlen($str1);
+                    $dist = ceil($len1*$distance/100);
+                    if($dist==0){
+                        $dist = 1;              
+                    }else if($dist>10){
+                        $dist = 10; 
+                    }
+                }
                 //fill values array    
-                if($need_levenshtein) array_push($row, $row[count($row)-1]);
-                array_unshift($row, $search_params);
+                array_unshift($row, $search_params); //add as a first element - list of parameter types 
+                
 
                 $group = null;            
                 call_user_func_array(array($stmt, 'bind_param'), referenceValues($row));
@@ -397,7 +421,19 @@ public static function findDupes( $params ){
                 if ($res2){
                     $group = array($curr_recid);
                     while ($row2 = $res2->fetch_row()){
-                        $group[] = $row2[0];//rec_ID
+                        
+                        if($compare_mode<3){ //need levenshtein
+                            $str2 = $row2[1];    
+                            if(abs($len1-strlen($str2))<$dist){
+                                $d = levenshtein($str1, $str2);
+                                if($d<$dist){
+                                    $group[] = $row2[0]; //for mix compare mode
+                                }
+                            }
+                        }else{
+                            $group[] = $row2[0];//rec_ID - for exact compare mode    
+                        }
+                        
                     }
                     $res2->close();
                 }
@@ -441,8 +477,7 @@ public static function findDupes( $params ){
             
         }
         
-        self::$mysqli->query('DROP TABLE tmp_find_dupes');
-        
+        self::$mysqli->query('DROP TABLE IF EXISTS tmp_find_dupes');
         
         //add info
         $all_similar_records['summary'] = array(

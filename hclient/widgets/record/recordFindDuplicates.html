@@ -1,16 +1,19 @@
 <div id="div_search" class="ent_wrapper">
-    <fieldset class="ent_header" style="height:9em">
-        <div style="padding: 0.2em; width: 100%;" class="input">
-            <div class="header" style="padding: 20px 16px 0 16px;">
+    <fieldset class="ent_header" style="height:110px;border-bottom:1px solid gray;">
+    
+        <div style="padding: 0.2em; width: 100%; line-height:3" class="input">
+            <div class="header">
                 <label for="sel_record_scope">Records type:</label>
             </div>
-            <select id="sel_record_scope" class="text ui-widget-content ui-corner-all" style="width:300px;max-width:40em"></select>
+            <div id="div_button-toolbar">
+                <select id="sel_record_scope" class="text ui-widget-content ui-corner-all" style="width:300px;max-width:40em"></select>
+            </div>
         </div>
         
         
         <div style="padding:0.2em; width: 100%;" class="input">
 
-            <div class="header" style="padding: 0 16px 0 16px;">
+            <div class="header">
                 <label>Difference percentage:</label>
             </div>
 
@@ -21,30 +24,19 @@
 
                 </div>
         </div>
-        
-        
-        <hr style="margin:5px"/>
-        
-        <div id="div_button-toolbar">
-        </div>
     </fieldset>
 
     <!-- TREE for field selection -->
-    <div style="top:9.2em; bottom:0em; padding: 2.2em; min-width: 600px;overflow-x:hidden;overflow-y:auto" class="input ent_content">
-        <div class="export-field-tree-container">
-            <div class="header" style="padding: 20px 16px 0 16px;display: inline-block;vertical-align:top"><label>Select fields to compare:</label></div>
-
-            <div class="detailRow rtt-tree" style="display: inline-block;outline: none;margin-top: -8px;"
-                id="rectype_tree">
-            </div>
+    <div style="top:117px; bottom:0; position:absolute; width:500px;" class="input ent_content">
+        <div style="padding:10px 0 0 18px"><label>Select fields to compare</label></div>
+        <div class="detailRow rtt-tree" style="padding:10px;outline: none;" id="rectype_tree">
         </div>
     </div>
 
+    <div id="div_result" style="position:absolute; top:117px; bottom:0px; left:501px; right:0px; border-left:1px solid gray;overflow:auto">
+    </div>
 </div>
 
-<div id="div_result" class="ent_wrapper" style="display: none;overflow:auto">
-    RESULT
-</div>
 
 <div class="ent_wrapper progressbar_div" style="display: none; background:white">
         <div class="loading" style="display:none;height:100%"></div>

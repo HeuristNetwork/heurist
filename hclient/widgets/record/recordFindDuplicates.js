@@ -60,15 +60,13 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
         if(!this.options.isdialog && this.options.is_h6style)
         {
             
-            this.element.find('.ent_wrapper').css({top:'36px',bottom:'40px'});
+            this.element.find('.ent_wrapper').css({top:'36px'});
             
             var fele = this.element.find('.ent_wrapper:first');
             
             $('<div class="ui-heurist-header">'+this.options.title+'</div>').insertBefore(fele);    
             
             //append action buttons
-            //this.toolbar = $('<div class="ent_footer button-toolbar ui-heurist-header" style="height:20px"></div>').insertAfter(fele);    
-            //this.toolbar.empty();
             this.toolbar =  this.element.find('#div_button-toolbar');
             var btns = this._getActionButtons();
             for(var idx in btns){
@@ -85,22 +83,12 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
         var res = this._super();
         var that = this;
         res[1].text = window.hWin.HR('Find Duplications');
-        res[1].css = {'float':'right','margin-right':'20px'};
+        res[1].css = {'margin-left':'20px'};
         if(!this.options.isdialog && this.options.is_h6style){
             res.shift();
         }else{
             res[0].text = window.hWin.HR('Close');    
         }
-        
-        /*
-        res.push({text:window.hWin.HR('Export'),
-                    id:'btnDoAction2',
-                    disabled:'disabled',
-                    css:{'float':'right'},  
-                    click: function() { 
-                            that.doAction( 1 ); 
-                    }});
-       */ 
         return res;
     },    
         
@@ -133,18 +121,14 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
     },
             
     //
-    // 0 - find, 1 - merge selected
+    // 
     //
-    doAction: function(mode){
+    doAction: function(){
 
-        if(this.element.find('#div_result').is(':visible')){
-
-            this.element.find('#div_search').show();
-            this.element.find('#div_result').hide();
-
-        }else{
             var rty_ID = this.selectRecordScope.val();
 
+            this.element.find('#div_result').empty();
+            
             if(rty_ID>0){
 
 
@@ -189,7 +173,6 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
                 });
 
             }
-        }
 
     },
     
@@ -323,7 +306,9 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
             //generate treedata from rectype structure
             var treedata = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 6, rtyID, allowed_fieldtypes );
             
-            treedata[0].expanded = true; //first expanded
+            treedata = treedata[0].children;
+            treedata[0].selected = true;
+            //treedata[0].expanded = true; //first expanded
             
             //load treeview
             var treediv = this.element.find('.rtt-tree');
@@ -458,7 +443,7 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
             }
             
             s = s +'<p><b>Merge this group</b> link will ask which members of the group to merge before any changes are made.</p>'
-                + '<p><button id="btn_back_to_search">Back to search form</button></p></div>'
+                + '</div>'
             
 //onsole.log(dupes);            
 
@@ -494,12 +479,7 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
                 this.element.find('#div_result').find('a[data-action-merge]'),'click');
 
             
-            this.element.find('#div_search').hide();
-            this.element.find('#div_result').html(s).show();
-            var ele = this.element.find('#btn_back_to_search');
-            ele.button();
-            this._on(ele, {click:this.doAction});
-            //this.element.find('#btnDoAction').button({label:'Back to search form'});
+            this.element.find('#div_result').html(s);
            
             this._on(
                 this.element.find('#div_result').find('a[data-action-merge]'),
