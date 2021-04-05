@@ -816,14 +816,16 @@ error_log(print_r($_REQUEST, true));
     //
     //
     private function _checkRecLinks(){
-        
+/*        
         $total_not_in_cache = mysql__select_value($this->mysqli, 
         'SELECT count(rec_ID) FROM Records left join recLinks on rec_ID=rl_RelationID '
             .'where rec_RecTypeID=1 and rec_FlagTemporary=0 and rl_RelationID is null');
-        
         if($total_not_in_cache==null || $total_not_in_cache>0){
-            //recreate cache
+*/            
             
+        $value = mysql__select_value($this->mysqli, "SHOW TABLES LIKE 'recLinks'");
+        if($value==null || $value==""){
+                //recreate cache
                 include(dirname(__FILE__).'/utilities/utils_db_load_script.php'); // used to execute SQL script
 
                 if(!db_script(HEURIST_DBNAME_FULL, dirname(__FILE__)."/dbaccess/sqlCreateRecLinks.sql")){
@@ -963,7 +965,7 @@ error_log(print_r($_REQUEST, true));
                 $res['sysinfo']['db_workset_count'] = $res2[2];
             }
             
-            //$this->_checkRecLinks(); //check cache
+            $this->_checkRecLinks(); //check cache
 
         }else{
 
