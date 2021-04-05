@@ -206,7 +206,7 @@ public static function findDupes( $params ){
 
     if(!($tot_count>1)){
         $response = self::$system->addError(HEURIST_NOT_FOUND, 
-                'There is '.($tot_count==0?'zero':'the only').' entry for record type '.$rty_ID);
+                ($tot_count==1?'Only one record':'No records').' found for record type '.$rty_ID);
         return false;
     }
 
