@@ -29,7 +29,6 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPage.php');
 ?>
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/configEntity.js"></script>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min,js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
 
 <script type="text/javascript">
@@ -178,9 +177,9 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPage.php');
                 <button id="modalButton" class="btn btn-info btn-lg" data-toggle="modal" data-target="#modalDisplay" disabled>View Analysis</button>
             </div>
 
-            <div id="modalDisplay" class="modal fade" >
-                <div class="modal-dialog" role="dialog"> 
-                    <div class="modal-content" style="overflow:auto">
+            <div id="modalDisplay" class="modal fade">
+                <div class="modal-dialog" role="dialog" style="width:auto; height:auto; max-width:90%;" > 
+                    <div class="modal-content" style="overflow:auto;">
                         <div class="modal-header">
                             <h2 class="modal-title">Results</h2>
                                 <div class="modal-body" >
