@@ -888,7 +888,8 @@ function CrosstabsAnalysis(_query, _query_domain) {
         var pages = fields3.page.intervals;
         var plen = pages.length;
 
-        $divres = $("#divres");
+        $divres = $("<div></div>").appendTo("body");
+        $divres.attr("id", "divres");
         $divres.hide();
         $divres.empty();
 
@@ -983,6 +984,10 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
         $divres.find('td').css( {'padding':'4px', 'border':'1px dotted gray'} );//{'border':'1px dotted gray'}); //1px solid gray'});
         _setMode(2);//results
+        $("#modalButton").click(function(){
+            window.hWin.HEURIST4.msg.showElementAsDialog(
+                {element:$divres.get(0), height: 600, width:1000, title:"Results", modal:true} );
+        });
     }//_doRender
 
     /**
@@ -1376,6 +1381,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
             $divres.append("<div>empty set</div>");
             
             $("#modalButton").attr("disabled", false);
+        
         }
 
         /*
