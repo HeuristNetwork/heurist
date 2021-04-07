@@ -33,7 +33,7 @@ fieldset > div > .fldheader{
 fieldset > div > .input-cell{
     display:table-cell;
     min-width:120px;
-    Xwidth:380px;
+    width:380px;
     padding-bottom:2px;
     vertical-align: bottom;
 }
@@ -154,7 +154,7 @@ div .selected, div .selected:hover{
 }
 
 .crosstab-header0{
-    font-size: 1em;
+    font-size: 200em;
     font-weight: bold;
     text-transform:uppercase;
 }
@@ -209,8 +209,10 @@ button{
 }
 
 .crosstab-aggregation{
-    display:inline-block;
-    margin-left:2em;
+    display: block;
+    margin-left: 0em;
+    padding-top: 5px;
+    padding-bottom: 5px;
 }
 .input-cell > input[type=checkbox]{
     margin-left:2em;
@@ -235,4 +237,20 @@ div .progress-message {
     text-align:center;
 }
 
+.radioDiv {
+    margin-left: 20px;
+}
+
+.checkboxValues{
+    display:block;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 5px;
+}
+
+.verticalLine{
+    border-left: 5px solid black;
+    display: inline-block;
+    height: 250px;
+}
 

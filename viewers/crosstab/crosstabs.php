@@ -78,7 +78,7 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPage.php');
                     Select record type.
                 </div>
 
-              <div style="border-color: gray; border-style: solid; border-width:thin; ">
+              <div style="border-color: black; border-style: solid; border-width:3px; padding-left: 5px;">
                 <fieldset id="vars" style="display:none;">
                     <div>
                         <div class="fldheader"><label for="cbRows">Var 1 (rows)</label></div>
@@ -108,30 +108,29 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPage.php');
                     </div>
                 </fieldset>
                 <fieldset id="shows" style="display:none;">
+                    <div style="display:inline-block; width: 49%; float:left; border-right: ">
+                        <div style="text-align: center; padding-top: 19px; font-size: 20px; display: block;"><label for="aggregationMode">Values:</label></div>
+                        <div class="radioDiv">
+                            <div class="input-cell" style="padding-top: 4px;">
+                            
+                                <div class="crosstab-aggregation"><input type="radio" checked value="count" id="aggregationModeCount" name="aggregationMode" onchange="crosstabsAnalysis.changeAggregationMode()">&nbsp;Counts</div>
 
-                    <div>
-                        <div class="fldheader" style="padding-top: 19px;"><label for="aggregationMode">Values</label></div>
-                        <div class="input-cell" style="padding-top: 4px;">
-
-                            <div class="crosstab-aggregation" style="margin-left: 0;"><input type="radio" checked value="count" id="aggregationModeCount" name="aggregationMode" onchange="crosstabsAnalysis.changeAggregationMode()">&nbsp;Counts</div>
-
-                            <div id="aggSum" class="crosstab-aggregation"><input type="radio" value="sum" name="aggregationMode" onchange="crosstabsAnalysis.changeAggregationMode()">&nbsp;Sum</div>
-                            <div id="aggAvg" class="crosstab-aggregation"><input type="radio" value="avg" name="aggregationMode" onchange="crosstabsAnalysis.changeAggregationMode()">&nbsp;Average</div>
-
-                            <div id="divAggField" class="crosstab-aggregation" style="margin-top:10px">of&nbsp;<select id="cbAggField" name="column" onchange="crosstabsAnalysis.changeAggregationMode()" class="text ui-widget-content ui-corner-all"></select></div>
-                        </div>
+                                <div id="aggSum" class="crosstab-aggregation"><input type="radio" value="sum" name="aggregationMode" onchange="crosstabsAnalysis.changeAggregationMode()">&nbsp;Sum</div>
+                                <div id="aggAvg" class="crosstab-aggregation"><input type="radio" value="avg" name="aggregationMode" onchange="crosstabsAnalysis.changeAggregationMode()">&nbsp;Average</div>
+                         
+                                <div id="divAggField" class="crosstab-aggregation" style="margin-top:10px;">of&nbsp;<select id="cbAggField" name="column" onchange="crosstabsAnalysis.changeAggregationMode()" class="text ui-widget-content ui-corner-all"></select></div>
+                            </div>
+                        </div> 
                     </div>
-
-                    <div style="height:2em">&nbsp;</div>
-
-                    <div>
-                        <div class="fldheader"><label for="rbShowValue">Show</label></div>
+                    <div class="verticalLine"></div>
+                    <div style="display: inline-block; width: 49%; float:right;">
+                        <div style="text-align: center; padding-top: 19px; display:block; font-size: 20px;"><label for="rbShowValue">Show:</label></div>
                         <div class="input-cell">
-                            <input type="checkbox" onchange="crosstabsAnalysis.doRender()"
-                                         style="margin-left: 0;" checked id="rbShowValue">Values
-                            <input type="checkbox" onchange="crosstabsAnalysis.doRender()" id="rbShowPercentRow">Row %
-                            <input type="checkbox" onchange="crosstabsAnalysis.doRender()" id="rbShowPercentColumn">Column %
-                            <input type="checkbox" onchange="crosstabsAnalysis.doRender()" checked id="rbShowTotals">Totals
+                            <div class="checkboxValues"><input type="checkbox" onchange="crosstabsAnalysis.doRender()"
+                                         style="margin-left: 0;" checked id="rbShowValue">Values</div>
+                            <div class="checkboxValues"><input type="checkbox" onchange="crosstabsAnalysis.doRender()" id="rbShowPercentRow">Row %</div>
+                            <div class="checkboxValues"><input type="checkbox" onchange="crosstabsAnalysis.doRender()" id="rbShowPercentColumn">Column %</div>
+                            <div class="checkboxValues"><input type="checkbox" onchange="crosstabsAnalysis.doRender()" checked id="rbShowTotals">Totals</div>
                         </div>
                     </div>
                     <div>
@@ -176,20 +175,24 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPage.php');
             <div class="col text-center">
                 <button id="modalButton" class="btn btn-info btn-lg" data-toggle="modal" data-target="#modalDisplay" disabled>View Analysis</button>
             </div>
-
+        <!-- For testing purposes
             <div id="modalDisplay" class="modal fade">
                 <div class="modal-dialog" role="dialog" style="width:auto; height:auto; max-width:90%;" > 
                     <div class="modal-content" style="overflow:auto;">
                         <div class="modal-header">
                             <h2 class="modal-title">Results</h2>
                                 <div class="modal-body" >
+                                
                                     <div id="divres" class="output-content" style="display:none;">
                                     </div>
+                                
+                                For Testing
                                 </div>
                         </div>
                    </div>
                 </div> 
             <div>
+            -->
 
             <div id="div_empty" class="output-content" style="color:red;font-weight:bold;display:none;">
                 Please apply a filter to create a result set

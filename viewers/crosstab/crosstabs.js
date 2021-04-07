@@ -883,7 +883,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
     function _doRender(){
 
         var $buttonDiv = $("<div></div>");
-        var $exportButton = $("<button>Export Table</button>");
+        var $exportButton = $("<button>Export</button>");
         var $visualisationButton = $("<button>Visualise</button>");
 
         $exportButton.appendTo($buttonDiv);
@@ -1442,8 +1442,8 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
             $('#aggregationModeCount').prop('checked',true); //val("count");
         }else{
-            $('#aggSum').css('display','inline-block');
-            $('#aggAvg').css('display','inline-block');
+            $('#aggSum').css('display','block');
+            $('#aggAvg').css('display','block');
             $('#divAggField').css('display','inline-block');
         }
         var aggMode = $("input:radio[name=aggregationMode]:checked").val();
