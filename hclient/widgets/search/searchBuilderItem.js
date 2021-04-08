@@ -451,8 +451,8 @@ $.widget( "heurist.searchBuilderItem", {
             eqopts = [
                 {key:'=',title:'equals'},
                 {key:'-',title:'not equals'},
-                {key:'any', title:'any value'},
-                {key:'NULL', title:'not data'},
+                {key:'any', title:'any value (exists)'},
+                {key:'NULL', title:'no data (missing)'},
                 {key:'>=',title:'>='},
                 {key:'<=',title:'<='}];
 /*                
@@ -469,8 +469,8 @@ $.widget( "heurist.searchBuilderItem", {
                 {key:'',title:'like'},
                 {key:'=',title:'equals'},
                 {key:'-',title:'not equals'},
-                {key:'any', title:'any value'},
-                {key:'NULL', title:'not data'},
+                {key:'any', title:'any value (exists)'},
+                {key:'NULL', title:'no data (missing)'},
                 {key:'>=',title:'>='},
                 {key:'<=',title:'<='}];
 /*                
@@ -482,7 +482,7 @@ $.widget( "heurist.searchBuilderItem", {
         }else if(field_type=='tag'){
 
             eqopts = eqopts.concat([
-                {key:'=',title:'equals'},    //cs
+                {key:'=',title:'equals (exact)'},    //cs
                 {key:'',title:'string match'},
                 {key:'starts',title:'starts with'},
                 {key:'ends',title:'ends with'}
@@ -505,15 +505,15 @@ Whole value = EQUAL
             if(this.options.dty_ID>0 || this.options.dty_ID=='title'){
                 eqopts = [
                     {key:'',title:'string match'}, //case sensetive ==
-                    {key:'@++',title:'all words'}, //full text
-                    {key:'@',title:'any words'},  //full text
-                    {key:'@--',title:'no word'},   //full text
+                    {key:'@++',title:'all of the words'}, //full text
+                    {key:'@',title:'any of the words'},  //full text
+                    {key:'@--',title:'none of the words'},   //full text
                     {key:'', title:'──────────', disabled:true}];
 
                 if(this.options.dty_ID>0){
                     already2 = true;
-                    eqopts.push({key:'any', title:'any value'});
-                    eqopts.push({key:'NULL', title:'not defined'});
+                    eqopts.push({key:'any', title:'any value (exists)'});
+                    eqopts.push({key:'NULL', title:'no data (missing)'});
                 }
                 
             }else{
@@ -531,8 +531,8 @@ Whole value = EQUAL
         }
 
         if(this.options.dty_ID>0 && field_type!='relmarker' && !already2){            
-            eqopts.push({key:'any', title:'any value'});
-            eqopts.push({key:'NULL', title:'not defined'});
+            eqopts.push({key:'any', title:'any value (exists)'});
+            eqopts.push({key:'NULL', title:'no data (missing)'});
         }
 
 
