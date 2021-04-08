@@ -250,7 +250,20 @@ div .progress-message {
 
 .verticalLine{
     border-left: 5px solid black;
-    display: inline-block;
+    float: left;
     height: 250px;
+    width:5%;
+}
+
+.blankCheckboxes{
+    margin-left: 0em;
+    display: block;
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+.blankCheckboxesSpan{
+    position:relative;
+    top:70px;
 }
 

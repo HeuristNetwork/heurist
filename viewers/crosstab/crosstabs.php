@@ -108,7 +108,7 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPage.php');
                     </div>
                 </fieldset>
                 <fieldset id="shows" style="display:none;">
-                    <div style="display:inline-block; width: 49%; float:left; border-right: ">
+                    <span style="float:left; width:47.5%">
                         <div style="text-align: center; padding-top: 19px; font-size: 20px; display: block;"><label for="aggregationMode">Values:</label></div>
                         <div class="radioDiv">
                             <div class="input-cell" style="padding-top: 4px;">
@@ -121,9 +121,9 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPage.php');
                                 <div id="divAggField" class="crosstab-aggregation" style="margin-top:10px;">of&nbsp;<select id="cbAggField" name="column" onchange="crosstabsAnalysis.changeAggregationMode()" class="text ui-widget-content ui-corner-all"></select></div>
                             </div>
                         </div> 
-                    </div>
-                    <div class="verticalLine"></div>
-                    <div style="display: inline-block; width: 49%; float:right;">
+                    </span>
+                    <span class="verticalLine"></span>
+                    <span style="float:left; width: 23.75%">
                         <div style="text-align: center; padding-top: 19px; display:block; font-size: 20px;"><label for="rbShowValue">Show:</label></div>
                         <div class="input-cell">
                             <div class="checkboxValues"><input type="checkbox" onchange="crosstabsAnalysis.doRender()"
@@ -132,18 +132,18 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPage.php');
                             <div class="checkboxValues"><input type="checkbox" onchange="crosstabsAnalysis.doRender()" id="rbShowPercentColumn">Column %</div>
                             <div class="checkboxValues"><input type="checkbox" onchange="crosstabsAnalysis.doRender()" checked id="rbShowTotals">Totals</div>
                         </div>
-                    </div>
-                    <div>
+                    </span>
+                    <span class="blankCheckboxesSpan"style="float: right; width: 23.75%;">
                         <div class="fldheader"></div>
                         <div class="input-cell" style="padding-top: 10px;">
-                            <input type="checkbox"  style="margin-left: 0;"
-                                onchange="crosstabsAnalysis.doRender()"  checked id="rbSupressZero">blank for zero values
-                            <input type="checkbox"
-                                onchange="crosstabsAnalysis.doRender()"  id="rbShowBlanks">show blank rows/columns
+                            <div class="blankCheckboxes"><input type="checkbox"
+                                onchange="crosstabsAnalysis.doRender()"  checked id="rbSupressZero">blank for zero values</div>
+                            <div class="blankCheckboxes"><input type="checkbox"
+                                onchange="crosstabsAnalysis.doRender()"  id="rbShowBlanks">show blank rows/columns</div>
                         </div>
-                    </div>
+                    </span>
 
-                    <div style="width: 100%;display:none;" class="input" id="divSaveSettings">
+                    <div style="width: 100%;display:table;" class="input" id="divSaveSettings">
 <!--
                         <div class="header" style="padding: 0 16px 0 16px;">
                             <label>Save settings for future use</label>
