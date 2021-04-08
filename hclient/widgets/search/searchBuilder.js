@@ -638,6 +638,7 @@ $.widget( "heurist.searchBuilder", {
                     if(this.element.find('.btn-preview').is(':checked')){
                         h = this.options.is_dialog ? '50px':'88px';                       
                         this.pnl_Result.show();
+                        this._doCompose();
                     }else{
                         h = this.options.is_dialog ? '0px':'50px';                       
                         this.pnl_Result.hide();
@@ -816,6 +817,19 @@ $.widget( "heurist.searchBuilder", {
                                         data.result = res;
                                     }else{
                                         data.result = res[0].children;
+                                    }
+                                    
+                                    if(node.data.type=='resource'){
+                                        var codes = parentcode.split(':');
+                                        var dtid = codes[codes.length-1];
+                                        var linktype = dtid.substr(0,2);
+                                        if(linktype=='lt'){
+                                            codes[codes.length-1] = dtid.substr(2); 
+                                            data.result.unshift(
+                                                {key:node.data.key,type:'resource',
+                                                title:'<span style="font-size:0.9em;font-style:italic;padding-left:22px">Pick the specific resource</span>',
+                                                name:'Known resource',code:codes.join(':')});
+                                        }
                                     }
                                     
                                     return data;                                                   
