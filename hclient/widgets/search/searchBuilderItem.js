@@ -505,7 +505,7 @@ Whole value = EQUAL
             if(this.options.dty_ID>0 || this.options.dty_ID=='title'){
                 eqopts = [
                     {key:'',title:'string match'}, //case sensetive ==
-                    {key:'@++',title:'all words'}, //full text
+                    {key:'@++',title:'all of the words'}, //full text
                     {key:'@',title:'any of the words'},  //full text
                     {key:'@--',title:'none of the words'},   //full text
                     {key:'', title:'──────────', disabled:true}];
@@ -523,7 +523,7 @@ Whole value = EQUAL
             
             
             eqopts = eqopts.concat([
-                {key:'=',title:'whole value (exact)'},    //cs
+                {key:'=',title:'whole value'},    //cs
                 {key:'starts',title:'starts with'},
                 {key:'ends',title:'ends with'}
                 //{key:'<>',title:'between'}
