@@ -38,7 +38,8 @@ $entities = array(
 );
 //  http://127.0.0.1/h5-ao/api/fieldgroups/?db=osmak_5
 //records 
-    //record_details - batch actions for records
+    //controlles:    
+    //record_batch - batch actions for records
     //record_search
     //record_edit
 

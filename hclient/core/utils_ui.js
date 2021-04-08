@@ -755,7 +755,7 @@ window.hWin.HEURIST4.ui = {
             showDetailType    = options['show_dt_name']==true;
             addLatLongForGeo  = options['show_latlong']==true;
             requriedHighlight = options['show_required']==true;
-            selectedValue     = options['selected_value'];
+            selectedValue     = options['selectedValue'];
             show_parent_rt    = options['show_parent_rt']==true;
             initial_indent    = options['initial_indent']>0?options['initial_indent']:0;
             useHtmlSelect     = options['useHtmlSelect']!==false;
@@ -1025,9 +1025,9 @@ window.hWin.HEURIST4.ui = {
         if(selectedValue){
             $(selObj).val(selectedValue);
         }
-
-        selObj = window.hWin.HEURIST4.ui.initHSelect(selObj, useHtmlSelect); 
         
+        selObj = window.hWin.HEURIST4.ui.initHSelect(selObj, useHtmlSelect); 
+
         return selObj;
     },
 

@@ -32,7 +32,8 @@ $.widget( "heurist.resultList", {
         selectbutton_label:'Select',
         action_select:null,  //array of actions
         action_buttons:null,
-                            
+                           
+        //action for onselect event - open preview inline, popup or none - used in cms for example
         recordview_onselect: false, //false/none, inline or popup - show record viewer/info on select
         multiselect: true,    //allows highlight several records
 
@@ -54,7 +55,7 @@ $.widget( "heurist.resultList", {
         //searchsource: null,
 
         emptyMessageURL: null, //url of page to be loaded on empty result set 
-        empty_remark:'No entries match the filter criteria', //html content for empty message
+        empty_remark:'No entries match the filter criteria (entries may exist but may not have been made visible to the public or to your user profile)', //html content for empty message
         pagesize: -1,
         
         groupByMode: null, //[null|'none','tab','accordion'],
@@ -84,8 +85,8 @@ $.widget( "heurist.resultList", {
                          // finish render and assign draggable widget for all record divs
         droppable: null, //callback function to init dropable (see refreshPage)
 
-        //event
-        onselect: null,  //on select event for non event based
+        //events  
+        onselect: null,  //on select event 
 
         onPageRender: null, //event listner on complete of page render
 
@@ -2199,13 +2200,37 @@ $.widget( "heurist.resultList", {
                                 var _recID = $(this).attr('data-recid');
                                 var ele2 = that.div_content.find('.record-expand-info[data-recid='+_recID+']');
                             //var ele2 = 
-                            var h = 400;
+                            var h = 300;
 
                             try{
-                                h = $(this.contentWindow.document).height();
-                                ele2.removeClass('loading').height(h+(h*0.05));    
+                                
+                                var cw = this.contentWindow.document;
+                                
+                                var cw2  = this.contentWindow.document.documentElement;//.scrollHeight
+
+                                function __adjustHeight(){
+                                    //h = $(cw).height();
+                                    if(cw2){
+                                        var bh = cw.body?cw.body.scrollHeight:0;
+                                        var h = cw2.scrollHeight;                               
+        //console.log('scroll='+sh+'  h='+h+'  bh='+bh);
+                                        if(bh>0 && h>0){
+                                            h = Math.max(bh,h);
+                                        }else{
+                                            h = 300 //default value
+                                        }
+                                        ele2.removeClass('loading').height(h);//+(h*0.05)    
+                                    }
+                                }
+                                
+                               __adjustHeight();
+
+                                setTimeout(__adjustHeight, 2000);
+                                setTimeout(__adjustHeight, 4000);
+                                //setTimeout(__adjustHeight, 10000);
+                                
                             }catch(e){
-                                ele2.removeClass('loading').height('auto');    
+                                ele2.removeClass('loading').height(400);    
                                 console.log(e);
                             }
                             /*
@@ -2222,11 +2247,18 @@ $.widget( "heurist.resultList", {
                     }else{
 
                         ele.addClass('loading').css({'overflow-y':'auto'}).load(infoURL, function(){ 
+//console.log('loaded in div');                            
                             var ele2 = $(this);
                             //var ele2 = that.div_content.find('.record-expand-info[data-recid='+recID+']');
                             var h = ele2[0].scrollHeight+10;
                             //h = Math.min(h+10, 600);
                             ele2.removeClass('loading').height('auto');    
+                            
+/*                            if(that._expandAllDivs){
+console.log('scroll h='+h+'  auto='+ele2.height());                                                            
+setTimeout("console.log('2. auto='+ele2.height());",1000);
+                            }*/
+                            
                             /*
                             if(that._expandAllDivs){
                                 ele2.removeClass('loading').height('auto');    
@@ -3388,14 +3420,20 @@ $.widget( "heurist.resultList", {
     },
     
     //
-    //
+    // 
     //
     _closeRecordViewPopup: function(){
         
+        var crs = $('#recordview_popup').css('cursor');
+        if(crs && crs.indexOf('resize')>0) return;
+        
         this._myTimeoutCloseRecPopup = setTimeout(function(){
             var dlg = $('#recordview_popup');
+            var crs = dlg.css('cursor');
+            if(crs && crs.indexOf('resize')>0) return;
+            
             if(dlg.dialog('instance')) dlg.dialog('close');
-        },  1000); //600
+        },  2000); //600
                         
                         
         
@@ -3437,13 +3475,10 @@ $.widget( "heurist.resultList", {
                 var that = this;
                 
                 var pos = null;
-                var dlg = $('#recordview_popup');
-                if(!(dlg.length>0)){
-                    //set intial position right to result list
-                    pos = { my: "left top", at: "right top+100", of: $(this.element) };
-                }
+                var dlg = $('#recordview_popup');               
                 
-                window.hWin.HEURIST4.msg.showDialog(recInfoUrl, { 
+                
+                var opts = { 
                         is_h6style: true,
                         modal: false,
                         dialogid: 'recordview_popup',    
@@ -3451,14 +3486,33 @@ $.widget( "heurist.resultList", {
                         onmouseover: function(){
                             that._clearTimeouts();
                         },
-                        position: pos,
-                        title:'Record Info'});
+                        title:'Record Info'}                
+                    
+                if(!(dlg.length>0)){
+                    
+                    if(this.element.parent().attr('data-heurist-app-id')){ //CMS publication 
+                        pos = {my:'center', of: window};
+                        opts.width = window.hWin.innerWidth*0.8;
+                        opts.height = window.hWin.innerHeight*0.9;
+                    }else{
+                        //set intial position right to result list - for main interface only!
+                        pos = { my: "left top", at: "right top+100", of: $(this.element) };
+                    }
+                    
+                    opts.position = pos;
+                }
+                
+                
+                
+                window.hWin.HEURIST4.msg.showDialog(recInfoUrl, opts);
 
                 if(pos!=null){
                     dlg = $('#recordview_popup').css('padding',0);
-                    this._on(dlg,{mouseout:function(){
-                        that._closeRecordViewPopup();
-                    }});
+                    this._on(dlg,{
+                        mouseout:function(){
+                            that._closeRecordViewPopup();
+                        }
+                    });
                     var dlg_header = dlg.parent().find('.ui-dialog-titlebar');
                     this._on(dlg_header,{mouseout:function(){
                         that._closeRecordViewPopup();

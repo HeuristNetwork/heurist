@@ -300,12 +300,17 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
                 }   
             }
             
+            //unique session id    
+            var session_id = Math.round((new Date()).getTime()/1000);
+            this._showProgress( session_id, false, 1000 );
+            
             var request = {
-                'request_id' : window.hWin.HEURIST4.util.random(),
-                'ids'  : scope.join(','),
-                'OwnerUGrpID': this.options.currentOwner,
-                'NonOwnerVisibility': this.options.currentAccess,
-                'NonOwnerVisibilityGroups':this.options.currentAccessGroups,
+                request_id : window.hWin.HEURIST4.util.random(),
+                ids  : scope.join(','),
+                session: session_id,
+                OwnerUGrpID: this.options.currentOwner,
+                NonOwnerVisibility: this.options.currentAccess,
+                NonOwnerVisibilityGroups: this.options.currentAccessGroups,
                 };
                 
             if(rec_RecTypeID>0){
@@ -316,6 +321,9 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
                 
                 window.hWin.HAPI4.RecordMgr.access(request, 
                     function(response){
+            
+                        that._hideProgress();
+            
                         if(response.status == window.hWin.ResponseStatus.OK){
 
                             that._context_on_close = (response.data.updated>0);
@@ -339,7 +347,7 @@ $.widget( "heurist.recordAccess", $.heurist.recordAction, {
                     });
         
     },
-
+    
     //
     // overwritten
     //

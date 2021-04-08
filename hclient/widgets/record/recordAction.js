@@ -429,9 +429,11 @@ $.widget( "heurist.recordAction", {
     
     
     //
-    // is_autohide = true stops progress check if it returns null/empty value
-    // if false it shows rotating(loading) image for null values and progress bar for n,count values
-    // in latter case _hideProgress should be called explicitely
+    // Requests reportProgress every t_interval ms 
+    // is_autohide 
+    //    true  - stops progress check if it returns null/empty value
+    //    false - it shows rotating(loading) image for null values and progress bar for n,count values
+    //                  in latter case _hideProgress should be called explicitely
     //
     _showProgress: function ( session_id, is_autohide, t_interval ){
 
@@ -445,6 +447,7 @@ $.widget( "heurist.recordAction", {
         var progress_url = window.hWin.HAPI4.baseURL + "viewers/smarty/reportProgress.php";
 
         this.element.find('#div_fieldset').hide();
+        this.element.find('.ent_wrapper').hide();
         var progress_div = this.element.find('.progressbar_div').show();
         $('body').css('cursor','progress');
         var btn_stop = progress_div.find('.progress_stop').button();

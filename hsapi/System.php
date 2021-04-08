@@ -816,14 +816,16 @@ error_log(print_r($_REQUEST, true));
     //
     //
     private function _checkRecLinks(){
-        
+/*        
         $total_not_in_cache = mysql__select_value($this->mysqli, 
         'SELECT count(rec_ID) FROM Records left join recLinks on rec_ID=rl_RelationID '
             .'where rec_RecTypeID=1 and rec_FlagTemporary=0 and rl_RelationID is null');
-        
         if($total_not_in_cache==null || $total_not_in_cache>0){
-            //recreate cache
+*/            
             
+        $value = mysql__select_value($this->mysqli, "SHOW TABLES LIKE 'recLinks'");
+        if($value==null || $value==""){
+                //recreate cache
                 include(dirname(__FILE__).'/utilities/utils_db_load_script.php'); // used to execute SQL script
 
                 if(!db_script(HEURIST_DBNAME_FULL, dirname(__FILE__)."/dbaccess/sqlCreateRecLinks.sql")){
@@ -963,7 +965,7 @@ error_log(print_r($_REQUEST, true));
                 $res['sysinfo']['db_workset_count'] = $res2[2];
             }
             
-            //$this->_checkRecLinks(); //check cache
+            $this->_checkRecLinks(); //check cache
 
         }else{
 
@@ -1025,9 +1027,10 @@ error_log(print_r($_REQUEST, true));
         if($ugrID>0){
             $groups = @$this->current_User['ugr_Groups'];
             if($refresh || !is_array($groups)){
-                $groups = $this->current_User['ugr_Groups'] = user_getWorkgroups($this->mysqli, $ugrID);
+                $this->current_User['ugr_Groups'] = user_getWorkgroups($this->mysqli, $ugrID);
             }
             if($level!=null){
+                $groups = array();
                 foreach($this->current_User['ugr_Groups'] as $grpid=>$lvl){
                     if($lvl==$level){
                         $groups[] = $grpid;        
@@ -1125,7 +1128,7 @@ error_log(print_r($_REQUEST, true));
         }else{
             //@$this->current_User['ugr_Groups'][$requiredLevel]=='admin'); //admin of given group
             $current_user_grps = $this->get_user_group_ids('admin');
-            return (is_array($current_user_grps) && in_array($ugrID, $current_user_grps));
+            return (is_array($current_user_grps) && in_array($requiredLevel, $current_user_grps));
         }
     }    
 

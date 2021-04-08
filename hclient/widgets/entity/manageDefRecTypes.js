@@ -1347,7 +1347,25 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         
         if(this.it_was_insert){
             this.searchForm.searchDefRecTypes('startSearch'); //refresh
+  
+/*            
+            var rg_options = {
+                select_mode: 'select_multi',
+                edit_mode: 'popup',
+                isdialog: true,
+                width: 540,
+                onselect:function(event, data){
+                    if(data && data.selection){
+                        var newsel = data.selection;
+                    }
+                }
+            }
+            window.hWin.HEURIST4.ui.showEntityDialog('defDetailTypes', rg_options);
+*/           
 
+            this._addNewFields(recID, true);
+ 
+/* 
             //select Fields For New RecordType
             var sURL = window.hWin.HAPI4.baseURL + "admin/structure/rectypes/editRectypeSelFields.html";
 
@@ -1362,69 +1380,20 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
                     width: 700,
                     title:' Select fields for new record type',
                     afterclose:function(){
+                        //_selected_fields assigned in closeCallback
+                        
                         //add fields to structure in any case - by default DT_NAME and DT_DESCRIPTION
-                        //if(!window.hWin.HEURIST4.util.isArrayNotEmpty(that._selected_fields)) that._selected_fields = [];
-
-                        that._selected_fields['values'] = {};
-                        //get first 3 separator base fields
-                        var k = 0;
-                        $Db.dty().each(function(dty_ID, rec){
-                           if($Db.dty(dty_ID,'dty_Type')=='separator'){
-                               if(k==0){
-                                   that._selected_fields['fields'].unshift(dty_ID);    
-                                   that._selected_fields['values'][dty_ID] = {dty_Name:'Overview',rst_DefaultValue:'tabs'};
-                               }else{
-                                   that._selected_fields['fields'].push(dty_ID);    
-                                   if(k==1){
-                                        that._selected_fields['values'][dty_ID] = {dty_Name:'Details',rst_DefaultValue:'tabs'};
-                                   }else{
-                                        that._selected_fields['values'][dty_ID] = {dty_Name:'References',rst_DefaultValue:'tabs'};
-                                   }
-                               }
-                               k++;
-                               if(k>2) return false;
-                           } 
-                        });                        
-                        
-                        
-                        var request = {};
-                        request['a']        = 'action'; //batch action
-                        request['entity']   = 'defRecStructure';
-                        request['rtyID']    = recID;
-                        //request['recID']    = dtyIDs;
-                        request['newfields']  = that._selected_fields;
-                        request['request_id'] = window.hWin.HEURIST4.util.random();
-                        
-                        window.hWin.HAPI4.EntityMgr.doRequest(request, 
-                            function(response){
-                                if(response.status == window.hWin.ResponseStatus.OK){
-                                    
-                                    //refresh local defs and show edit structure popup
-                                    window.hWin.HAPI4.EntityMgr.getEntityData('defRecStructure', true,
-                                    function(){
-                                        that._onActionListener(null, {recID:recID, action:'editstr'} );
-                                    });
-
-                                    /*
-                                    window.hWin.HEURIST4.dbs.rtyRefresh(recID, 
-                                    function(){
-                                        that._onActionListener(null, {recID:recID, action:'editstr'} );
-                                        var rtg_ID = $Db.rty(recID,'rty_RecTypeGroupID');
-                                        that.updateGroupCount(rtg_ID, 1);
-                                    });
-                                    */
-                                    
-                                }else{
-                                    window.hWin.HEURIST4.msg.showMsgErr(response);      
-                                }
-                            });
+                        if(!window.hWin.HEURIST4.util.isArrayNotEmpty(that._selected_fields)){
+                            var dty_name_id = window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME']
+                            that._selected_fields = {fields:[dty_name_id],reqs:[dty_name_id]};  
+                        } 
                     },
-                    callback:function(context){
+                    callback:function(context){ //closeCallback
                         that._selected_fields = context;
                     },
                     default_palette_class: this.options.default_palette_class 
             });
-            
+*/            
         }else{
         }
         this._triggerRefresh('rty');
@@ -1441,6 +1410,144 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         }
 */        
     },
+    
+    //
+    // add new base fields to record type
+    //    
+    _addNewFields: function( rty_ID, is_new ){
+      
+            var that = this;
+        
+            var popele = that.element.find('.add_base_fields');
+            
+            if(popele.length==0){
+                
+                var fields = [
+                window.hWin.HAPI4.sysinfo['dbconst']['DT_NAME'],
+                window.hWin.HAPI4.sysinfo['dbconst']['DT_SHORT_SUMMARY'],
+                window.hWin.HAPI4.sysinfo['dbconst']['DT_THUMBNAIL'],
+                window.hWin.HAPI4.sysinfo['dbconst']['DT_GEO_OBJECT'],
+                window.hWin.HAPI4.sysinfo['dbconst']['DT_START_DATE'],
+                window.hWin.HAPI4.sysinfo['dbconst']['DT_END_DATE'],
+                window.hWin.HAPI4.sysinfo['dbconst']['DT_CREATOR']];
+                
+                var _checked = 'checked';
+                
+                var sdiv = '<div style="display:table-row">'
+            +'<div style="display:table-cell;padding:10px;text-align:center">Use</div>'
+            +'<div style="display:table-cell;text-align:center;">Required</div>'
+            +'<div style="display:table-cell;text-align:left;padding-left:20px">Name</div></div>';
+
+                
+                for(var idx=0; idx< fields.length; idx++){
+                    var dty_ID = fields[idx];
+                    _checked = (idx==0)?'checked disabled="disabled"':'';
+                    sdiv = sdiv + 
+            '<div style="display:table-row">'
+            +'<div style="display:table-cell;padding:10px;text-align:center;"><input type="checkbox" class="ids" data-id="'
+                +dty_ID+'" '+_checked+'></div>'
+            +'<div style="display:table-cell;text-align:center;"><input type="checkbox" class="reqs" data-id="'+dty_ID+'" '+_checked+'></div>'
+            +'<div style="display:table-cell;text-align:left;padding-left:20px">'+$Db.dty(dty_ID,'dty_Name')+'</div></div>';
+                }
+                
+                sdiv = '<div class="add_base_fields">'
+    +'<p>Please select at least one of the following commonly-used fields to pre-populate this record type.'
+    +'<br><br>'
+    +'Please indicate which will be Required fields (you can easily change or delete these fields later):</p>'
+    +'<div style="width:100%;text-align:center;display:table">'+sdiv+'</div>';
+                
+                popele = $(sdiv).appendTo(that.element);
+            }
+            
+            var $dlg_pce = null;
+            
+            var btns = [
+                    {text:window.hWin.HR('Select'),
+                    click: function() { 
+                        $dlg_pce.dialog('close'); 
+                    }}
+                    //{text:window.hWin.HR('Cancel'),click: function() { $dlg_pce.dialog('close'); }}
+            ];            
+            
+            this._selected_fields = {};
+            
+            $dlg_pce = window.hWin.HEURIST4.msg.showElementAsDialog({
+                window:  window.hWin, //opener is top most heurist window
+                title: window.hWin.HR('Select fields for new record type'),
+                width: 700,
+                height: 500,
+                element:  popele[0],
+                resizable: true,
+                default_palette_class: this.options.default_palette_class,
+                buttons: btns,
+                beforeClose: function(){
+                        
+                        var fields = [], reqs=[];
+                        $dlg_pce.find('input.ids:checked').each(function() {
+                            fields.push($(this).attr('data-id'));
+                        });                
+                        $dlg_pce.find('input.reqs:checked').each(function() {
+                            reqs.push($(this).attr('data-id'));
+                        });                
+                        
+                        if(fields.length===0){
+                            window.hWin.HEURIST4.msg.showMsgFlash('Select at least one field');
+                            return false;
+                        }else{
+                            that._selected_fields = {fields:fields, reqs:reqs}
+                            return true;
+                        }
+                },
+                close: function(){
+                    
+                        that._selected_fields['values'] = {};
+                        //add 3 derault tabs 
+                        var k = 0;
+                        $Db.dty().each(function(dty_ID, rec){
+                           if($Db.dty(dty_ID,'dty_Type')=='separator'){
+                               if(k==0){
+                                   that._selected_fields['fields'].unshift(dty_ID);    
+                                   that._selected_fields['values'][dty_ID] = {dty_Name:'Overview',rst_DefaultValue:'tabs'};
+                               }else{
+                                   that._selected_fields['fields'].push(dty_ID);    
+                                   if(k==1){
+                                        that._selected_fields['values'][dty_ID] = {dty_Name:'Details',rst_DefaultValue:'tabs'};
+                                   }else{
+                                        that._selected_fields['values'][dty_ID] = {dty_Name:'References',rst_DefaultValue:'tabs'};
+                                   }
+                               }
+                               k++;
+                               if(k>2) return false;//break
+                           } 
+                        });                        
+                    
+                        var request = {};
+                        request['a']        = 'action'; //batch action
+                        request['entity']   = 'defRecStructure';
+                        request['rtyID']    = rty_ID;
+                        request['newfields']  = that._selected_fields;
+                        request['request_id'] = window.hWin.HEURIST4.util.random();
+                        
+                        window.hWin.HAPI4.EntityMgr.doRequest(request, 
+                            function(response){
+                                if(response.status == window.hWin.ResponseStatus.OK){
+                                    
+                                    //refresh local defs and show edit structure popup
+                                    window.hWin.HAPI4.EntityMgr.getEntityData('defRecStructure', true,
+                                    function(){
+                                        that._onActionListener(null, {recID:rty_ID, action:'editstr'} );
+                                    });
+                                    
+                                }else{
+                                    window.hWin.HEURIST4.msg.showMsgErr(response);      
+                                }
+                            });
+                    
+                }
+            });
+        
+    },
+
     
     //
     //

@@ -84,7 +84,7 @@ $.widget( "heurist.searchBuilderItem", {
         
         // 0. Label (header)
         this.label_token = $( "<div>" )
-            .css({"font-size":"smaller",'padding-left':'83px',width:'95%','margin-top':'4px'})
+            .css({"font-size":"smaller",'padding-left':'94px',width:'95%','margin-top':'4px'})
             .appendTo( this.element ); //10px 0 10px 20px,'border-top':'1px solid lightgray' 
 
         // selector container - for fields and comparison
@@ -223,8 +223,7 @@ $.widget( "heurist.searchBuilderItem", {
             //this.label_token.hide();    
 
             var topOptions2 = [
-                {key:'anyfield',title:window.hWin.HR('Any field')},
-                {key:0,title:'Record header fields', group:1, disabled:true},
+                {key:0,title:'Generic fields', group:1, disabled:true},
                 {key:'title',title:'Title (constructed)', depth:1},
                 {key:'added',title:'Date added', depth:1},
                 {key:'modified',title:'Date modified', depth:1},
@@ -233,7 +232,8 @@ $.widget( "heurist.searchBuilderItem", {
                 {key:'notes',title:'Notes', depth:1},
                 {key:'owner',title:'Owner (user or group)', depth:1},
                 {key:'access',title:'Visibility', depth:1},
-                {key:'tag',title:'Tags', depth:1}
+                {key:'tag',title:'Tags', depth:1},
+                {key:'anyfield',title:window.hWin.HR('Any field')}
             ];
 
             var bottomOptions = null;
@@ -256,7 +256,7 @@ $.widget( "heurist.searchBuilderItem", {
                 window.hWin.HEURIST4.ui.createRectypeDetailSelect(this.select_fields.get(0), this.options.top_rty_ID, 
                     allowed_fieldtypes, topOptions2, 
                     {show_parent_rt:true, show_latlong:true, bottom_options:bottomOptions, 
-                        selectedValue:this.options.dty_ID, //initally selected
+                        selectedValue:(this.options.dty_ID ?this.options.dty_ID:'anyfield'), //initally selected
                         useIds: true, useHtmlSelect:false});                
 
                 this._on( this.select_fields, { change: this._onSelectField });
@@ -451,8 +451,8 @@ $.widget( "heurist.searchBuilderItem", {
             eqopts = [
                 {key:'=',title:'equals'},
                 {key:'-',title:'not equals'},
-                {key:'any', title:'any value'},
-                {key:'NULL', title:'not data'},
+                {key:'any', title:'any value (exists)'},
+                {key:'NULL', title:'no data (missing)'},
                 {key:'>=',title:'>='},
                 {key:'<=',title:'<='}];
 /*                
@@ -469,8 +469,8 @@ $.widget( "heurist.searchBuilderItem", {
                 {key:'',title:'like'},
                 {key:'=',title:'equals'},
                 {key:'-',title:'not equals'},
-                {key:'any', title:'any value'},
-                {key:'NULL', title:'not data'},
+                {key:'any', title:'any value (exists)'},
+                {key:'NULL', title:'no data (missing)'},
                 {key:'>=',title:'>='},
                 {key:'<=',title:'<='}];
 /*                
@@ -482,7 +482,7 @@ $.widget( "heurist.searchBuilderItem", {
         }else if(field_type=='tag'){
 
             eqopts = eqopts.concat([
-                {key:'=',title:'equals'},    //cs
+                {key:'=',title:'equals (exact)'},    //cs
                 {key:'',title:'string match'},
                 {key:'starts',title:'starts with'},
                 {key:'ends',title:'ends with'}
@@ -505,15 +505,15 @@ Whole value = EQUAL
             if(this.options.dty_ID>0 || this.options.dty_ID=='title'){
                 eqopts = [
                     {key:'',title:'string match'}, //case sensetive ==
-                    {key:'@++',title:'all words'}, //full text
-                    {key:'@',title:'any words'},  //full text
-                    {key:'@--',title:'no word'},   //full text
+                    {key:'@++',title:'all of the words'}, //full text
+                    {key:'@',title:'any of the words'},  //full text
+                    {key:'@--',title:'none of the words'},   //full text
                     {key:'', title:'──────────', disabled:true}];
 
                 if(this.options.dty_ID>0){
                     already2 = true;
-                    eqopts.push({key:'any', title:'any value'});
-                    eqopts.push({key:'NULL', title:'not defined'});
+                    eqopts.push({key:'any', title:'any value (exists)'});
+                    eqopts.push({key:'NULL', title:'no data (missing)'});
                 }
                 
             }else{
@@ -531,8 +531,8 @@ Whole value = EQUAL
         }
 
         if(this.options.dty_ID>0 && field_type!='relmarker' && !already2){            
-            eqopts.push({key:'any', title:'any value'});
-            eqopts.push({key:'NULL', title:'not defined'});
+            eqopts.push({key:'any', title:'any value (exists)'});
+            eqopts.push({key:'NULL', title:'no data (missing)'});
         }
 
 

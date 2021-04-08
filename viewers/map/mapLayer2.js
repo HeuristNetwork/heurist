@@ -132,7 +132,7 @@ function hMapLayer2( _options ) {
                     layer_url = layer_url + '{q}';
                 }
                 
-            }else if(tilingSchema && tilingSchema[idx_ccode]=='2-548'){ //maptiler
+            }else if(tilingSchema && ccode1=='2-548'){ //maptiler tilingSchema[idx_ccode]
 
                 layer_options['MapTiler'] = true;
 

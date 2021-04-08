@@ -32,7 +32,7 @@
     require_once (dirname(__FILE__).'/../../vendor/autoload.php'); //for geoPHP
     require_once (dirname(__FILE__).'/../import/importParser.php'); //parse CSV, KML and save into import table
     require_once(dirname(__FILE__).'/../utilities/mapSimplify.php');
-    require_once (dirname(__FILE__).'/../dbaccess/exportRecords.php');
+    require_once (dirname(__FILE__).'/../dbaccess/recordsExport.php');
     
     $response = array();
 
@@ -234,7 +234,7 @@
                     
                     //it outputs geojson and exits 
                     $recdata = array('status'=>HEURIST_OK, 'data'=>array('reccount'=>count($records), 'records'=>$records));
-                    ExportRecords::output($recdata, array('format'=>'geojson','leaflet'=>true,'depth'=>0, 'simplify'=>true));
+                    RecordsExport::output($recdata, array('format'=>'geojson','leaflet'=>true,'depth'=>0, 'simplify'=>true));
                     
                     
                 }else{

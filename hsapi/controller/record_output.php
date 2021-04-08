@@ -62,7 +62,7 @@
     require_once (dirname(__FILE__).'/../../common/php/Temporal.php');
     require_once (dirname(__FILE__).'/../../admin/verification/verifyValue.php');
 
-    require_once (dirname(__FILE__).'/../dbaccess/exportRecords.php');
+    require_once (dirname(__FILE__).'/../dbaccess/recordsExport.php');
     
     $response = array();
 
@@ -240,7 +240,7 @@
         
     }else{
         
-        if(!ExportRecords::output( $response, $params )) {
+        if(!RecordsExport::output( $response, $params )) {
             $system->error_exit_api();
         }
         
@@ -1078,7 +1078,7 @@ function writeResults( $streams, $temp_name, $headers, $error_log ) {
             }
         }
 
-        if($out===false || strlen($out)==0){
+        if( !isset($out) || $out===false || strlen($out)==0){
             $out = "Stream for record type $rty_ID is empty";
             if($error_log) {
                 array_push($error_log, $out);   

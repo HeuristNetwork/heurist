@@ -1275,9 +1275,12 @@ $.widget( "heurist.mainMenu6", {
             this._updateDefaultAddRectype();
 
             this._on(this.element.find('li[data-action-popup="search_recent"]'),{
-                click: function(){
-                    var request = window.hWin.HEURIST4.util.parseHeuristQuery( 
-                        '?w=a&q=sortby:-m after:"1 week ago"' );
+                click: function(event){
+                    var q = '?w=a&q=sortby:-m';
+                    if(!$(event.target).attr('data-search-all')){
+                         q = q + ' after:"1 week ago"';
+                    }
+                    var request = window.hWin.HEURIST4.util.parseHeuristQuery( q );
                     request.qname = 'Recent changes';
                     window.hWin.HAPI4.SearchMgr.doSearch( this, request );
                 }

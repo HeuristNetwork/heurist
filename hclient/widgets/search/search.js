@@ -286,11 +286,11 @@ $.widget( "heurist.search", {
         //         
         if(!this._is_publication && this.options.is_h6style){
             
-            this.div_buttons.css({'min-width':'88px'});
+            this.div_buttons.css({'min-width':'70px'});
             
             this.btn_saved_filters = 
             $('<span class="ui-main-color" '
-            +'style="font-size: 9px;position: relative;margin-left: -58px;min-width: 50px;cursor:pointer;padding-right:10px">'
+            +'style="font-size: 9px;position: relative;margin-left: -48px;min-width: 50px;cursor:pointer;">'
                 +'<span style="display:inline-block;width:30px;margin-top: 4px;">saved filters</span>'
             +'<span class="ui-icon ui-icon-carat-1-s" style="font-size: inherit;height: 11px;display: inline-block;vertical-align: super;">'
             +'</span></span>')
@@ -305,9 +305,10 @@ $.widget( "heurist.search", {
                     }            
             }});
             
-            var linkGear = $('<a><span class="ui-icon ui-icon-magnify-explore"/></a>',{href:'#', 
+            //
+            var linkGear = $('<a><span class="ui-icon ui-icon-magnify-explore" style="height:22px"/></a>',{href:'#', 
                 title:window.hWin.HR('Build a filter expression using a for3m-driven approach')})
-                .css({display:'inline-block',padding:'0 2px',width:30})
+                .css({display:'inline-block','padding':'12px 4px 0 4px',width:30, cursor: 'pointer'})
                 .addClass('btn-aux')
                 //.addClass('') //was ui-icon-gear was ui-icon-filter-form
                 .appendTo(this.div_buttons);
@@ -315,7 +316,7 @@ $.widget( "heurist.search", {
             
             this.btn_faceted_wiz = $('<a>',{href:'#', 
                 title:window.hWin.HR('Build new faceted search')})
-                .css({display:'inline-block',padding:'0 2px',width:30})
+                .css({display:'inline-block',padding:'6 2px',width:30,'margin-top':'-8px'})
                 .addClass('ui-icon ui-icon-box ui-main-color btn-aux') //was ui-icon-gear was ui-icon-filter-form
                 .appendTo(this.div_buttons);
             this._on( this.btn_faceted_wiz, {  click: function(){
@@ -684,6 +685,12 @@ $.widget( "heurist.search", {
                     e.preventDefault();
                     that._doSearch(true);
                 }
+            },
+            keydown: function(e){
+                var code = (e.keyCode ? e.keyCode : e.which);
+                if (code == 65 && e.ctrlKey) {
+                    e.target.select();
+                }
             }
         });
 
@@ -878,13 +885,13 @@ $.widget( "heurist.search", {
 
            if(this.element.width()<440){
 
-               this.div_buttons.css('min-width',46);
+               this.div_buttons.css('min-width',50);
                this.div_buttons.find('.btn-aux').width(20);
                this.btn_search_as_user.button('option','showLabel',false);
                this.btn_search_as_user.css('min-width',31);
                this.btn_save_filter.css('margin-left',0);
            }else{
-               this.div_buttons.css('min-width',88);
+               this.div_buttons.css('min-width',70);
                this.div_buttons.find('.btn-aux').width(30);
                this.btn_search_as_user.button('option','showLabel',true);
                this.btn_search_as_user.css('min-width',90);
@@ -1311,7 +1318,7 @@ $.widget( "heurist.search", {
         return false;
     }
 
-    //
+    // @todo REMOVE
     // init must be after dialog open, otherwise hSelect will be below
     //
     , _initSearchAssistant: function(){

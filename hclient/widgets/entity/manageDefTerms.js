@@ -936,8 +936,15 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             }
 
             var ref_lvl = $Db.isTermByReference(this.options.trm_VocabularyID, recID);
+            var real_vocab_name = '';
+            
             if(ref_lvl!==false){
-                sRef = '<span style="color:blue;font-size:smaller;vertical-align:text-top;">&nbsp;(ref)</span>';
+                var vocab_id = $Db.getTermVocab(recID); //real vocab
+                real_vocab_name = 
+                    window.hWin.HEURIST4.util.htmlEscape($Db.vcg($Db.trm(vocab_id,'trm_VocabularyGroupID'), 'vcg_Name'))
+                    +'.'+window.hWin.HEURIST4.util.htmlEscape($Db.trm(vocab_id, 'trm_Label'));
+            
+                sRef = '<span style="color:blue;font-size:smaller;vertical-align:text-top;">&nbsp; → term in '+real_vocab_name+'</span>';
             }
 
             var sLabelHint = sLabel;
@@ -968,14 +975,10 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             + (sURI?('<p>URI: '+sURI+'</p>'):'')
             + '<p>ID: '+recID+' ('+$Db.getConceptID('trm',recID)+')</p>';
 
-            if(ref_lvl!==false)
+            if(ref_lvl!==false)  //
             {
-                var vocab_id = $Db.getTermVocab(recID); //real vocab
-
                 sHint = sHint +     
-                '<p>Reference to: <i>'
-                +window.hWin.HEURIST4.util.htmlEscape($Db.vcg($Db.trm(vocab_id,'trm_VocabularyGroupID'), 'vcg_Name'))+'.'
-                +window.hWin.HEURIST4.util.htmlEscape($Db.trm(vocab_id, 'trm_Label'))+'</i> vocabulary.</p>'
+                '<p>Reference to: <i>'+real_vocab_name+'</i> vocabulary.</p>'
                 +'<p style=&quot;color:orange&quot;>The term can only be edited in that vocabulary.</p>';
 
                 //sWidth = sWidth + '45%;';

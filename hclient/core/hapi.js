@@ -353,8 +353,8 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                             //
                                 window.hWin.HEURIST4.msg.showPrompt(
                                 '<div style="padding:20px 0px">'
-                                +'Only the owner of the database or an administrator supplying<br>'
-                                +' the override password can carry out this action.'
+                                +'Only an administrator (server manager) or the owner (for<br>'
+                                +'actions on a single database) can carry out this action.'
                                 +'</div><span style="display: inline-block;padding: 10px 0px;">Enter password:&nbsp;</span>',
                                     function(password_entered){
                                         
@@ -938,7 +938,7 @@ prof =Profile
     /**
     * System class that responsible for record's edit, search and tags
     *
-    * see record_edit.php, record_details.php, record_tags.php and record_search.php
+    * see record_edit.php, record_batch.php, record_tags.php and record_search.php
     *
     * methods:
     *           for record_edit controller
@@ -949,9 +949,11 @@ prof =Profile
     *   access    - ownership and visibility
     *   increment
     *
-    *           for record_details controller
+    * 
+    *           for record_batch controller
     *   details   - batch edition of record details for many records
     *
+    * 
     *           for record_search controller
     *   search
     *   minmax
@@ -1046,7 +1048,7 @@ prof =Profile
             */
             ,batch_details: function(request, callback){
                 
-                _callserver('record_details', request, function(response){_triggerRecordUpdateEvent(response, callback);});
+                _callserver('record_batch', request, function(response){_triggerRecordUpdateEvent(response, callback);});
             }
             
 //@TODO - need to implement queue for record_search, otherwise sometimes we get conflict on simultaneous requests            
