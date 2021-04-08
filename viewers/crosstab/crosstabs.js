@@ -992,13 +992,11 @@ function CrosstabsAnalysis(_query, _query_domain) {
         $divres.find('td').css( {'padding':'4px', 'border':'1px dotted gray'} );//{'border':'1px dotted gray'}); //1px solid gray'});
         $buttonDiv.appendTo($divres);
         _setMode(2);//results
-        $("#modalButton").click(function(){
-            window.hWin.HEURIST4.msg.showElementAsDialog(
-                {element:$divres.get(0), height: 600, width:1000, title:"Results", modal:true} );
-        });
+        
         $exportButton.click(function(){
             window.hWin.HEURIST4.msg.showMsgDlg('Button feature has not been implemented.');
         });
+
         $visualisationButton.click(function(){
             window.hWin.HEURIST4.msg.showMsgDlg('Button feature has not been implemented.');
         });
@@ -1633,6 +1631,12 @@ function CrosstabsAnalysis(_query, _query_domain) {
     };
 
     _init(_query, _query_domain);  // initialize before returning
+
+    //On click of View Analysis button, modal appears.
+    $("#modalButton").click(function(){
+        window.hWin.HEURIST4.msg.showElementAsDialog(
+            {element:$divres.get(0), height: 600, width:1000, title:"Results", modal:true} );
+    });
     return that;
 
 }
