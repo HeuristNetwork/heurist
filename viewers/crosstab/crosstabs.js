@@ -24,6 +24,10 @@
 */
 
 var crosstabsAnalysis;
+var buttonDiv;
+var exportButton;
+var visualisationButton;
+var exportDlgBtn;
 
 /**
 *  CrosstabsAnalysis - class for crosstab analysis
@@ -105,6 +109,13 @@ function CrosstabsAnalysis(_query, _query_domain) {
       });
 
       configEntityWidget.configEntity( 'updateList', $recTypeSelector.val() );
+
+        buttonDiv = $("<div></div>");
+        exportButton = $("<button>Export</button>");
+        visualisationButton = $("<button>Visualise</button>");
+
+        exportButton.appendTo(buttonDiv);
+        visualisationButton.appendTo(buttonDiv);
     }
 
     /**
@@ -881,13 +892,6 @@ function CrosstabsAnalysis(_query, _query_domain) {
     * render crosstab data as set of tables
     */
     function _doRender(){
-
-        var $buttonDiv = $("<div></div>");
-        var $exportButton = $("<button>Export</button>");
-        var $visualisationButton = $("<button>Visualise</button>");
-
-        $exportButton.appendTo($buttonDiv);
-        $visualisationButton.appendTo($buttonDiv);
         
         $("#pmessage").html('Rendering...');
         _setMode(1);//progress
@@ -990,16 +994,9 @@ function CrosstabsAnalysis(_query, _query_domain) {
         }
 
         $divres.find('td').css( {'padding':'4px', 'border':'1px dotted gray'} );//{'border':'1px dotted gray'}); //1px solid gray'});
-        $buttonDiv.appendTo($divres);
-        _setMode(2);//results
+        buttonDiv.appendTo($divres);
         
-        $exportButton.click(function(){
-            window.hWin.HEURIST4.msg.showMsgDlg('Button feature has not been implemented.');
-        });
-
-        $visualisationButton.click(function(){
-            window.hWin.HEURIST4.msg.showMsgDlg('Button feature has not been implemented.');
-        });
+        _setMode(2);//results
     }//_doRender
 
     /**
@@ -1557,6 +1554,11 @@ function CrosstabsAnalysis(_query, _query_domain) {
         return 0;
     }
 
+    //Export function for table.
+    function _exportTable(buttons){
+        
+    }
+
     //
     //public members
     //
@@ -1636,6 +1638,14 @@ function CrosstabsAnalysis(_query, _query_domain) {
     $("#modalButton").click(function(){
         window.hWin.HEURIST4.msg.showElementAsDialog(
             {element:$divres.get(0), height: 600, width:1000, title:"Results", modal:true} );
+    });
+
+    exportButton.click(function(){
+        window.hWin.HEURIST4.msg.showMsgDlg('Button feature has not been implemented.');
+    });
+
+    visualisationButton.click(function(){
+        window.hWin.HEURIST4.msg.showMsgDlg('Button feature has not been implemented.');
     });
     return that;
 
