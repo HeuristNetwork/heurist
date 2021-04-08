@@ -1,8 +1,11 @@
 /**
  * recordLookupMPCE.js
  *
- *  1) This file loads html content from recordLookupMPCE.html - define this file with controls as you wish
- *  2) Init these controls and define behaviour in _initControls
+ *  1) This file loads html content from recordLookupMPCE.html
+ *  2) This file completed the functionality for the MPCE toolkit, including:
+ *      - Assigning New Keywords to a Super Book (Work) record
+ *      - Selecting a keyword to generate a list of other keywords assigned with each other
+ *      - Display a list of keywords assigned to previously viewed works, automatically checking those used last
  *
  *
  *
@@ -27,16 +30,16 @@
 
 $.widget( "heurist.recordLookupMPCE", $.heurist.recordAction, {
 
-    // default options
+        // default options
     options: {
-
-        height: 780,
-        width:  1600,
+        /* Setting popup size, based on user preference */
+        height: (window.hWin.HAPI4.get_prefs_def('pref_lookupMPCE_h', 780)),
+        width:  (window.hWin.HAPI4.get_prefs_def('pref_lookupMPCE_w', 1200)),
         modal:  true,
 
         mapping: null, //configuration from record_lookup_configuration.json
 
-        title:  "Work Classification Toolkit",
+        title:  "Super Book (Work) Classification Tool for MPCE Project",
 
         htmlContent: "recordLookupMPCE.html",
         helpContent: null, //help file in context_help folder
@@ -51,29 +54,28 @@ $.widget( "heurist.recordLookupMPCE", $.heurist.recordAction, {
 
         var that = this;
 
-        mapIds(that.options.mapping.fields);	/* Set the session variable 'id_map' to be an object of all record, detail and vocab type ids to simplify the replacement task */
+        mapIds(that.options.mapping.fields);    /* Set the session variable 'id_map' to be an object of all record, detail and vocab type ids to simplify the replacement task */
         /* This method was chosen over using a global variable (originally accessed via id_map or window.id_map) */
 
         clearSessionStorage(); /* Clear Session Storage that is not shared between pop-ups */
 
-        //var record = this.options.edit_record.getFirstRecord(); //see core/recordset.js for various methods to manipulate a record
-        var record = this.options.edit_fields;
+        //var record = this.options.edit_record.getFirstRecord(); /* Retrieve Record */
+        var record = this.options.edit_fields;  /* Retrieve Edit Fields */
 
-        msgToConsole('Record:', record);
-        msgToConsole('Mapped Fields:', that.options.mapping.fields);
+        //msgToConsole('Record:', record);  /* The record being used */
+        //msgToConsole('Mapped Fields:', that.options.mapping.fields);  /* The id map */
 
         if (sessionStorage.getItem('id_map') == null)
         {
-        	window.hWin.HEURIST4.msg.showMsgErr("Error: Cannot Retrieve ID Map, please contact the administrator about this issue");
-        	return;
+            window.hWin.HEURIST4.msg.showMsgErr("Error: Cannot Retrieve ID Map, please contact the administrator about this issue");
+            return;
         }
 
-        var id_map = JSON.parse(sessionStorage.getItem('id_map'));
+        var id_map = window.hWin.HEURIST4.util.isJSON(sessionStorage.getItem('id_map'));
 
         /* Check if selected Work has: project keyword/s, parisian category, and a basis for classification */
         if (record[id_map.DT_Keywords] != null && record[id_map.DT_Keywords] != "") // Project Keywords
         {
-            //sessionStorage.setItem("rec_kywd", JSON.stringify(record[955])); //973
             sessionStorage.setItem("rec_kywd", JSON.stringify(record[id_map.DT_Keywords]));
         }
 
@@ -89,8 +91,8 @@ $.widget( "heurist.recordLookupMPCE", $.heurist.recordAction, {
 
         if (record[id_map.DT_Notes] != null && record[id_map.DT_Notes] != "") // Classification Notes
         {
-        	sessionStorage.setItem("rec_notes", record[id_map.DT_Notes]);
-	        $('#notes_field').val(record[id_map.DT_Notes]);
+            sessionStorage.setItem("rec_notes", record[id_map.DT_Notes]);
+            $('#notes_field').val(record[id_map.DT_Notes]);
         }
 
         $('#title_field').text(record[1]); // Work Title
@@ -116,28 +118,26 @@ $.widget( "heurist.recordLookupMPCE", $.heurist.recordAction, {
             }
         ); 
 
-        /* Array of Project Keyword's Record IDs */
-        var keyword_IDs = window.hWin.HEURIST4.util.isJSON(sessionStorage.getItem('rec_kywd'));
+        var keyword_IDs = window.hWin.HEURIST4.util.isJSON(sessionStorage.getItem("rec_kywd")); /* Array of Project Keyword's Record IDs */
 
         if (keyword_IDs)   /* Check if Work has assigned Keywords */
         {
-	        /* Get all Project Keywords and grab the ones assigned to current Work */
-	        var query_request = {q:'t:' + id_map.RT_Keyword, detail: 'detail'}; /* set the option for the search, these options can be found in reacordSearch.php */
+            /* Retrieve master list of project keywords, we need to display their titles for the user */
+            var query_request = {q:'t:' + id_map.RT_Keyword, detail: 'detail'};
 
             /* Perform Search */
             window.hWin.HAPI4.RecordMgr.search(query_request,
                 function( response ){
                     if(response.status == window.hWin.ResponseStatus.OK){   /* Check if Record Search was successful */
 
-                        var recordset = new hRecordSet(response.data);  /* Retieve Search Results */
-
+                        var recordset = new hRecordSet(response.data);  /* Retieve Search Results */  
                         var cnt = keyword_IDs.length;   /* Number of Project Keywords */
 
                         for (var i = 0; i < cnt; i++)
                         {
                             var record = recordset.getRecord(keyword_IDs[i]);   /* Retrieve Record+Details on ith Keyword, have to use Record ID */
-                            var details = record.d;
-                            var title = details[1];     /* Separate Details from the main Record */
+                            var details = record.d;     /* Separate Details from the main Record */
+                            var title = details[1];     /* Project Keyword's Title */
                             var id = record.rec_ID;     /* Project Keyword's Record ID */
 
                             showKeyword(title, id);  /* Add to Keyword Table */
@@ -160,11 +160,11 @@ $.widget( "heurist.recordLookupMPCE", $.heurist.recordAction, {
         });
 
         this._on(this.element.find('#btnPrevAssign').button(),{
-        	'click':this.addPrevtoAssigned
+            'click':this.addPrevtoAssigned
         });
 
-		this._on(this.element.find('#btnAssocAssign').button(),{
-        	'click':this.addAssoctoAssigned
+        this._on(this.element.find('#btnAssocAssign').button(),{
+            'click':this.addAssoctoAssigned
         });
 
         /* External Searches for Work Title */
@@ -183,11 +183,28 @@ $.widget( "heurist.recordLookupMPCE", $.heurist.recordAction, {
 
         /* Other */
         this._on(this.element.find('#btnEdition').button(),{
-        	'click':this.lookupEditions
+            'click':this.lookupEditions
         });
 
         /* Set what the 'Update Record' button, bottom right of form, does */
         window.hWin.HEURIST4.util.setDisabled( this.element.parents('.ui-dialog').find('#btnDoAction'), false );
+
+        /* Disable the 'X' button, located top-right corner */
+        this.element.parent().find('.ui-dialog-titlebar-close').button().hide();
+        /* Best Replaced with the same event used for the record editor */
+
+        /* Detects the popup being resized, disable the mouseup as resize fires constantly */
+        this.element.parent().resize(function() {
+            that.element.parent().off("mouseup");
+
+            that.element.parent().one("mouseup", function() {
+                var width = that.element.parent().width();
+                var height = that.element.parent().height();
+
+                window.hWin.HAPI4.save_pref('pref_lookupMPCE_w', width);
+                window.hWin.HAPI4.save_pref('pref_lookupMPCE_h', height);
+            });
+        });
 
         return this._super();
     },
@@ -208,76 +225,89 @@ $.widget( "heurist.recordLookupMPCE", $.heurist.recordAction, {
      */
     doAction: function(){
         
-        window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent());	// use this function to show "in progress" animation and cover-all screen for long operation
+        window.hWin.HEURIST4.msg.bringCoverallToFront(this._as_dialog.parent());    // use this function to show "in progress" animation and cover-all screen for long operation
 
         if (sessionStorage.getItem('id_map') == null)
         {
-        	window.hWin.HEURIST4.msg.showMsgErr("Error: Cannot Retrieve ID Map, please contact the administrator about this issue");
-        	
-        	clearSessionStorage();
-        	window.hWin.HEURIST4.msg.sendCoverallToBack();
-        	this._as_dialog.dialog('close');
+            window.hWin.HEURIST4.msg.showMsgErr("Error: Cannot Retrieve ID Map, please contact the administrator about this issue");
+            
+            clearSessionStorage();
+            window.hWin.HEURIST4.msg.sendCoverallToBack();
+            this._as_dialog.dialog('close');
         }
 
-        var id_map = JSON.parse(sessionStorage.getItem('id_map'));
+        var id_map = window.hWin.HEURIST4.util.isJSON(sessionStorage.getItem('id_map'));
 
-        var category_ID = $('#category_field').val();
-        var basis_ID = $('#basis_field').val();
-        var notes = $('#notes_field').val();
-        
-        var keywords_ID;
-        
-        this._context_on_close = {};
-        
         // assign values to be sent back to edit form - format is similar to this.options.edit_fields
+        this._context_on_close = {};
+        this._context_on_close[id_map.DT_Category] = $('#category_field').val();
+        this._context_on_close[id_map.DT_Basis] = $('#basis_field').val();
+        this._context_on_close[id_map.DT_Notes] = $('#notes_field').val();
+
         if (sessionStorage.getItem("rec_kywd") != null)   /* Check if currently editing work has keywords */
         {
-            keywords_ID = JSON.parse(sessionStorage.getItem("rec_kywd"));
+            var keyword_IDs = window.hWin.HEURIST4.util.isJSON(sessionStorage.getItem("rec_kywd"));
 
-            this._context_on_close[id_map.DT_Keywords] = keywords_ID; 
-            this._context_on_close[id_map.DT_Category] = category_ID;
-            this._context_on_close[id_map.DT_Basis] = basis_ID;
-            this._context_on_close[id_map.DT_Notes] = notes;
-        }
-        else
-        {
-            this._context_on_close[id_map.DT_Category] = category_ID;
-            this._context_on_close[id_map.DT_Basis] = basis_ID;
-            this._context_on_close[id_map.DT_Notes] = notes;
+            this._context_on_close[id_map.DT_Keywords] = keyword_IDs;
         }
 
+        /* Check if work can be added to list of recently viewed works */
         var works = [];
 
         if (sessionStorage.getItem("prev_classify") != null)
         {
-	        works = JSON.parse(sessionStorage.getItem("prev_classify"));
-	    }
+            works = window.hWin.HEURIST4.util.isJSON(sessionStorage.getItem("prev_classify"));
+        }
 
-        if ( (works.find(e => e == document.getElementById('work-code_field').innerText) == null ) && 
-        	(sessionStorage.getItem('rec_kywd') != null) && (sessionStorage.getItem('rec_kywd') != "")) 
+        if ((works.find(e => e == document.getElementById('work-code_field').innerText) == null) && 
+            (sessionStorage.getItem('rec_kywd') != null) && (sessionStorage.getItem('rec_kywd') != "")) 
         {
-        	works.unshift(document.getElementById('work-code_field').innerText);
+            works.unshift(document.getElementById('work-code_field').innerText);
 
-	        if (works.length == 5)
-	        {
-	        	works.splice(4, 1);
-	        }
+            if (works.length == 5)
+            {
+                works.splice(4, 1);
+            }
 
-	        sessionStorage.setItem("prev_classify", JSON.stringify(works));        
+            sessionStorage.setItem("prev_classify", JSON.stringify(works));        
         }
 
         clearSessionStorage();
         
-        window.hWin.HEURIST4.msg.sendCoverallToBack();	// use this function to hide cover-all/loading
+        window.hWin.HEURIST4.msg.sendCoverallToBack();  // use this function to hide cover-all/loading
 
-        this._as_dialog.dialog('close');
+        this._as_dialog.dialog('close');    // close popup
+    },
+
+    beforeClose: function(){
+        //show warning in case of modification
+        if(_editing_symbology.isModified()){
+            var $dlg, buttons = {};
+            buttons['Save'] = function(){
+                edit_dialog.parent().find('#btnDoAction').click();
+                $dlg.dialog('close'); 
+            }; 
+            buttons['Ignore and close'] = function(){ 
+                _editing_symbology.setModified(false);
+                edit_dialog.dialog('close'); 
+                $dlg.dialog('close'); 
+            };
+
+            $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
+                'You have made changes to the data. Click "Save" otherwise all changes will be lost.',
+                buttons,
+                {title:'Confirm',yes:'Save',no:'Ignore and close'});
+            return false;   
+        }
+        return true;
     },
 
     /** Keyword Assignment **/
 
-	/*
+    /*
         Creates a Heurist popup capable of searching all Project Keywords,
-        When an keyword is selected, it is assigned to the work, if it is not already
+        When an keyword is selected, it is assigned to the work, if it is not already,
+        this keyword is removed from the associated and previous (recent) keyword lists
 
         Param: None
 
@@ -285,13 +315,13 @@ $.widget( "heurist.recordLookupMPCE", $.heurist.recordAction, {
      */
     keywordLookup: function(){
 
-    	if (sessionStorage.getItem('id_map') == null)
+        if (sessionStorage.getItem('id_map') == null)
         {
-        	window.hWin.HEURIST4.msg.showMsgErr("Error: Cannot Retrieve ID Map, please contact the administrator about this issue");
-        	return;
+            window.hWin.HEURIST4.msg.showMsgErr("Error: Cannot Retrieve ID Map, please contact the administrator about this issue");
+            return;
         }
 
-        var id_map = JSON.parse(sessionStorage.getItem('id_map'));
+        var id_map = window.hWin.HEURIST4.util.isJSON(sessionStorage.getItem('id_map'));
 
         var popup_options = {
             select_mode: (false)?'select_multi':'select_single',    // enable multi select or not, current set to single select
@@ -326,7 +356,7 @@ $.widget( "heurist.recordLookupMPCE", $.heurist.recordAction, {
                     }
 
                     var targetID = recordset.fld(record,'rec_ID');
-                    var keyword_IDs = JSON.parse(sessionStorage.getItem("rec_kywd"));
+                    var keyword_IDs = window.hWin.HEURIST4.util.isJSON(sessionStorage.getItem("rec_kywd"));
 
                     if (keyword_IDs != null)
                     {
@@ -366,132 +396,132 @@ $.widget( "heurist.recordLookupMPCE", $.heurist.recordAction, {
     },
 
     /*
-		Search for Editions of the Work within Heurist, displaying the results
+        Search for Editions of the Work within Heurist, displaying the results in a seperate popup
 
-		Param: None
+        Param: None
 
-		Return: VOID
+        Return: VOID
      */
      lookupEditions: function(){
-     	if (sessionStorage.getItem('id_map') == null)
+        if (sessionStorage.getItem('id_map') == null)
         {
-        	window.hWin.HEURIST4.msg.showMsgErr("Error: Cannot Retrieve ID Map, please contact the administrator about this issue");
-        	return;
+            window.hWin.HEURIST4.msg.showMsgErr("Error: Cannot Retrieve ID Map, please contact the administrator about this issue");
+            return;
         }
 
-        var id_map = JSON.parse(sessionStorage.getItem('id_map'));
+        var id_map = window.hWin.HEURIST4.util.isJSON(sessionStorage.getItem('id_map'));
 
-		var work_title = document.getElementById('title_field').innerHTML;
+        var work_title = document.getElementById('title_field').innerHTML;
 
-     	var query_request = {q:'t:' + id_map.RT_Editions + ' f:' + id_map.DT_Title + ':"' + work_title + '"', detail:"detail"};
+        var query_request = {q:'t:' + id_map.RT_Editions + ' f:' + id_map.DT_Title + ':"' + work_title + '"', detail:"detail"};
 
- 		window.hWin.HAPI4.RecordMgr.search(query_request,
-	        function( response ){
-	            
-	            if(response.status == window.hWin.ResponseStatus.OK){
+        window.hWin.HAPI4.RecordMgr.search(query_request,
+            function( response ){
+                
+                if(response.status == window.hWin.ResponseStatus.OK){
 
-	                var recordset = new hRecordSet(response.data);
+                    var recordset = new hRecordSet(response.data);
 
-					var records = recordset.getRecords();
+                    var records = recordset.getRecords();
 
-					var editions = [];
+                    var editions = [];
 
-					for(i in records)
-					{
-						var record = records[i];
-						var details = record.d;
+                    for(i in records)
+                    {
+                        var record = records[i];
+                        var details = record.d;
 
-						editions.push(record[5]);
-					}
+                        editions.push(record[5]);
+                    }
 
-					if (editions != null)
-					{
-						displayEditions(editions);
-					}
-					else
-					{
-						window.hWin.HEURIST4.msg.showMsgDlg("No Editions Found");
-					}
-	            }else{
-	                window.hWin.HEURIST4.msg.showMsgErr(response);
-	            }
-	        }
-	    );
+                    if (editions != null)
+                    {
+                        displayEditions(editions);
+                    }
+                    else
+                    {
+                        window.hWin.HEURIST4.msg.showMsgDlg("No Editions Found");
+                    }
+                }else{
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                }
+            }
+        );
      },
 
-	/*
-		Retrieve the list of checked keywords that need to be assigned
+    /*
+        Retrieve the list of checked keywords that need to be moved to the assigned keyword list
 
-		Param: None
+        Param: None
 
-		Return: VOID, assignment of selected keyword
-	 */
-	addPrevtoAssigned: function(){
-	    var list = document.getElementById('prev_field');
+        Return: VOID, assignment of selected keyword
+     */
+    addPrevtoAssigned: function(){
+        var list = document.getElementById('prev_field');
 
-	    var items = getAllChecked(list);
-	    var title;
+        var items = getAllChecked(list);
+        var title;
 
-	    if (items == null || items.length == 0)
-	    {
-			window.hWin.HEURIST4.msg.showMsgDlg('There are No Recent Keywords Selected to Assign');    	
-	    	return;
-	    }
+        if (items == null || items.length == 0)
+        {
+            window.hWin.HEURIST4.msg.showMsgDlg('There are No Recent Keywords Selected to Assign');     
+            return;
+        }
 
-	    for (var i = 0; i < items.length; i++)
-	    {
-		    list = document.getElementById('prev_field');
+        for (var i = 0; i < items.length; i++)
+        {
+            list = document.getElementById('prev_field');
 
-		    title = searchList(list, items[i]);
+            title = searchList(list, items[i]);
 
-		    if (title == -1)
-		    {
-		    	msgToConsole('addPrevtoAssigned() Error: title Not Found', null);
-		        return 0;
-		    }
+            if (title == -1)
+            {
+                msgToConsole('addPrevtoAssigned() Error: title Not Found', null);
+                return 0;
+            }
 
-		    removeFromList(list, items[i]);    /* Remove from Previous Keyword Table */
-		    addKeyword(items[i], title);   /* Add to Assigned Table and List */
-	    }	    
-	},
+            removeFromList(list, items[i]);    /* Remove from Previous Keyword Table */
+            addKeyword(items[i], title);   /* Add to Assigned Table and List */
+        }       
+    },
 
-	/*
-		Retrieve the list of checked keywords that need to be assigned
+    /*
+        Retrieve the list of checked keywords that need to be moved to the assigned keyword list
 
-		Param: None
+        Param: None
 
-		Return: VOID
-	 */
-	addAssoctoAssigned: function(){
-	    var list = document.getElementById('associated_field');
+        Return: VOID
+     */
+    addAssoctoAssigned: function(){
+        var list = document.getElementById('associated_field');
 
-	    var items = getAllChecked(list);
-	    var title;
+        var items = getAllChecked(list);
+        var title;
 
-	    if (items == null || items.length == 0)
-	    {
-			window.hWin.HEURIST4.msg.showMsgDlg('There are No Associated Keywords Selected to Assign');    	
-	    	return;
-	    }
+        if (items == null || items.length == 0)
+        {
+            window.hWin.HEURIST4.msg.showMsgDlg('There are No Associated Keywords Selected to Assign');     
+            return;
+        }
 
-	    for (var i = 0; i < items.length; i++)
-	    {
-		    list = document.getElementById('associated_field');
+        for (var i = 0; i < items.length; i++)
+        {
+            list = document.getElementById('associated_field');
 
-		    title = searchList(list, items[i]);
+            title = searchList(list, items[i]);
 
-		    if (title == -1)
-		    {
-		        console.log('addAssoctoAssigned() Error: title Not Found');
-		        return 0;
-		    }
+            if (title == -1)
+            {
+                console.log('addAssoctoAssigned() Error: title Not Found');
+                return 0;
+            }
 
-		    removeFromList(list, items[i]);    /* Remove from Associated Keyword Table */
-		    addKeyword(items[i], title);   /* Add to Assigned Table and List */
-	    }
-	},
+            removeFromList(list, items[i]);    /* Remove from Associated Keyword Table */
+            addKeyword(items[i], title);   /* Add to Assigned Table and List */
+        }
+    },
 
-	/** External Searches **/
+    /** External Searches **/
 
     /*
         Search for Work Title in Google Books
@@ -555,14 +585,16 @@ $.widget( "heurist.recordLookupMPCE", $.heurist.recordAction, {
         window.open(url, '_blank');
 
         return false;
-    },	
+    },  
 });
 
 /** Associated Keyword System **/
 
 /* 
-    Searches for works that have the retrieved list of keyword
-    Note: Uses the keyword's record ID
+    Searches for works that have the selected keyword,
+    the program then goes through each returned work's keywords, 
+    adding them to the associated keyword list, 
+    finally displaying the result to the user.
 
     Param: id -> Keyword's Title Mask (or, the Keyword's ID)
 
@@ -570,17 +602,23 @@ $.widget( "heurist.recordLookupMPCE", $.heurist.recordAction, {
  */
 function setupAssocKeywords(id) {
 
-	if (sessionStorage.getItem('id_map') == null)
-        {
-        	window.hWin.HEURIST4.msg.showMsgErr("Error: Cannot Retrieve ID Map, please contact the administrator about this issue");
-        	return;
-        }
+    if (sessionStorage.getItem('id_map') == null)  /* Check if Id map is available */
+    {   /* Only possible if the session storage (cache) has been cleared since opening the popup */
+        window.hWin.HEURIST4.msg.showMsgErr("Error: Cannot Retrieve ID Map, please contact the administrator about this issue");
+        return;
+    }
 
-    var id_map = JSON.parse(sessionStorage.getItem('id_map'));
+    var id_map = window.hWin.HEURIST4.util.isJSON(sessionStorage.getItem('id_map'));
 
-	sessionStorage.removeItem('assoc_keywords');
+    var list = document.getElementById('associated_field');
 
-    var query_request = {q:'t:' + id_map.RT_Work + ' linkedto:'+ id, detail:'detail'};
+    sessionStorage.setItem('assoc_kywd', id);
+
+    list.innerHTML = '<div style="font-size:1.5em">Loading List...</div>';
+
+    sessionStorage.removeItem('assoc_keywords');
+
+    var query_request = {q:'t:' + id_map.RT_Work + ' linkedto:'+ id, detail:'detail'};  /* Retrieve all works that have the selected keyword */
 
     window.hWin.HAPI4.RecordMgr.search(query_request,
         function(response){
@@ -591,15 +629,17 @@ function setupAssocKeywords(id) {
 
                 var ids = [];
 
+                /* For displaying the total number of works to user, i.e. (n = ...) */
                 var len = Object.keys(records).length;
-
                 sessionStorage.setItem('assoc_count', len);
 
+                /* Travel through results to retrieve the each work's list of keywords */
                 for (i in records)
                 {
 
                     var record = records[i];
 
+                    /* To avoid results that are not from the correct table, usually happens if query is wrong */
                     if (record[4] != id_map.RT_Work) { continue; }
 
                     var details = record.d;
@@ -610,9 +650,9 @@ function setupAssocKeywords(id) {
                     }
 
                     ids.push(details[id_map.DT_Keywords]);
-
                 }
 
+                /* Add the complete list retrieved to the associated keyword */
                 updateAssocList(ids);
             }
             else
@@ -626,73 +666,75 @@ function setupAssocKeywords(id) {
 }
 
 /*
-	Updates the Associate Keyword List (saved within session storage assoc_keywords)
-	Performs a check if the current keyword is already part of the list, 
-		if it is, increase occurances
-		else, push into list
-	The list is then sorted by occurrances
-	Once completed, the corresponding table is updated
+    Updates the Associate Keyword List (saved within session storage assoc_keywords)
+    Performs a check if the current keyword is already part of the list, 
+        if it is, increase occurances
+        else, push into list
+    The list is then sorted by occurrances
+    Once completed, the corresponding table is updated
 
-	Param: ids -> list of associated keywords
+    Param: ids -> list of associated keywords
 
-	Return: VOID
+    Return: VOID
  */
 
 function updateAssocList(ids){
 
-	if (sessionStorage.getItem('id_map') == null)
-    {
-    	window.hWin.HEURIST4.msg.showMsgErr("Error: Cannot Retrieve ID Map, please contact the administrator about this issue");
-    	return;
+    if (sessionStorage.getItem('id_map') == null)  /* Check if Id map is available */
+    {   /* Only possible if the session storage (cache) has been cleared since opening the popup */
+        window.hWin.HEURIST4.msg.showMsgErr("Error: Cannot Retrieve ID Map, please contact the administrator about this issue");
+        return;
     }
 
-    var id_map = JSON.parse(sessionStorage.getItem('id_map'));
+    var id_map = window.hWin.HEURIST4.util.isJSON(sessionStorage.getItem('id_map'));
 
+    /* Retrieving the master list of project keywords, we need the titles for display */
     var query_request = {q:'t:' + id_map.RT_Keyword, detail:'detail'};
 
     window.hWin.HAPI4.RecordMgr.search(query_request,
         function( response ){
-        	if(response.status == window.hWin.ResponseStatus.OK)
-        	{
-	        	var keywords = [];
+            if(response.status == window.hWin.ResponseStatus.OK)
+            {
+                var keywords = [];
 
-	        	if (sessionStorage.getItem("assoc_keywords") != null)
-	        	{
-	        		keywords = JSON.parse(sessionStorage.getItem("assoc_keywords"));
-	        	}
+                if (sessionStorage.getItem("assoc_keywords") != null) /* Double check for existing list of associated keywords, shouldn't be needed */
+                {
+                    keywords = window.hWin.HEURIST4.util.isJSON(sessionStorage.getItem("assoc_keywords"));
+                }
 
-				var recordset = new hRecordSet(response.data);
+                var recordset = new hRecordSet(response.data);
 
-				for (var i = 0; i < ids.length; i++)
-				{
-					for (var j = 0; j < ids[i].length; j++)
-					{
-						var record = recordset.getRecord(ids[i][j]);
-						var details = record.d;
-						var title = details[1];
+                /* Go through 2d array of keywords */
+                for (var i = 0; i < ids.length; i++)
+                {
+                    for (var j = 0; j < ids[i].length; j++)
+                    {
+                        var record = recordset.getRecord(ids[i][j]);
+                        var details = record.d;
+                        var title = details[1];
 
-						if (keywords.length < 0)
-						{
-							keywords.push([ids[i][j], 1, title]);
-							continue;
-						}
+                        if (keywords.length < 0)
+                        {
+                            keywords.push([ids[i][j], 1, title]);
+                            continue;
+                        }
 
-						isAssocKeyword(keywords, ids[i][j], title);						
-					}
-				}				
-        	}
-        	else
-        	{
-        		window.hWin.HEURIST4.msg.showMsgErr(response);
-        	}
-        	sessionStorage.setItem("assoc_keywords", JSON.stringify(keywords));
-            updateAssocDisplay();
+                        isAssocKeyword(keywords, ids[i][j], title); /* Check if current keyword is already in list */                   
+                    }
+                }               
+            }
+            else
+            {
+                window.hWin.HEURIST4.msg.showMsgErr(response);
+            }
+            sessionStorage.setItem("assoc_keywords", JSON.stringify(keywords));
+            updateAssocDisplay();   /* Update UI display of associated keywords */
         }
     );
 }
 
 /*
-    Update the Associated Keywords HTML List
+    Update the Associated Keywords List, UI, and display which kyeword was selected
 
     Param: None
 
@@ -700,188 +742,192 @@ function updateAssocList(ids){
  */
 function updateAssocDisplay(){
 
-	var max = 13;
+    var max = 13;
     var list = document.getElementById('associated_field');
     
     if (sessionStorage.getItem("assoc_keywords") == null) 
-	{
-		return;
-	}
+    {
+        return;
+    }
 
-	var keywords = JSON.parse(sessionStorage.getItem("assoc_keywords"));
+    var keywords = window.hWin.HEURIST4.util.isJSON(sessionStorage.getItem("assoc_keywords"));
 
-	if (sessionStorage.getItem("rec_kywd") == null)
-	{
-		return;
-	}
+    if (sessionStorage.getItem("rec_kywd") == null)
+    {
+        return;
+    }
 
-	var assigned = JSON.parse(sessionStorage.getItem("rec_kywd"));
+    var assigned = window.hWin.HEURIST4.util.isJSON(sessionStorage.getItem("rec_kywd"));
 
-	keywords.sort(compareIndexes);
+    keywords.sort(compareIndexes);
 
-	/* Empty List, before use */
-	if (list.getElementsByTagName('li').length != 0)
-	{
-		list.innerHTML = '';
-	}
-	
-	var count = sessionStorage.getItem("assoc_count");
+    /* Empty List, before use */
+    list.innerHTML = '';
+    var selected_kywd = sessionStorage.getItem('assoc_kywd');
+    
+    $('#assoc_total').text("(n=" + sessionStorage.getItem("assoc_count") + ")");
 
-	/* Now add items into the HTML list */
-	for (var i = 0; list.getElementsByTagName('li').length < max && keywords.length > i; i++)
-	{
-	    var item = document.createElement('li');
+    /* Now add items into the HTML list */
+    for (var i = 0; list.getElementsByTagName('li').length < max && keywords.length > i; i++)
+    {
+        var item = document.createElement('li');
 
-	    if (keywords[i] == null) 
-    	{ 
-    		console.log(i);
-    		break; 
-    	}
+        if (keywords[i] == null) 
+        {
+            break; 
+        }
 
-		if (assigned.find(e => e == keywords[i][0]))
-		{
-			continue;
-		}
-		else
-		{
-			var percentage = (Math.round((keywords[i][1] + Number.EPSILON) * 100) / count).toFixed(2);
+        if (assigned.find(e => e == keywords[i][0]))
+        {
+            if (keywords[i][0] == selected_kywd) { $('#assoc_kywd').text(keywords[i][2]); }
+            continue;
+        }
+        else
+        {
+            item.innerHTML = "<input type='checkbox' value='" + keywords[i][0] + "' name='" + keywords[i][0] + "'><label for='" + keywords[i][0] + "'> " 
+                                + keywords[i][2] + " </label>&nbsp;&nbsp;<label> [ " + keywords[i][1] + " ] </label>";
 
-			item.innerHTML = "<input type='checkbox' value='" + keywords[i][0] + "' name='" + keywords[i][0] + "'><label for='" + keywords[i][0] + "'> " 
-								+ keywords[i][2] + " </label>&nbsp;&nbsp;&nbsp;&nbsp;<label> ~ " + keywords[i][1] + " - " + percentage + "% </label>";
-
-		    list.appendChild(item);
-		}
-	}
+            list.appendChild(item);
+        }
+    }
 }
 
 /*
-	Checks if keyword is already in arr,
-		if it is, increase the counter
-		else, push it in
+    Checks if keyword is already in arr,
+        if it is, increase the counter
+        else, push it in
 
-	Param:
-		arr -> arr of associated keywords
-		id -> the current keyword
-		title -> the keyword in english
+    Param:
+        arr -> arr of associated keywords
+        id -> the current keyword
+        title -> the keyword in english
 
-	Return: VOID
+    Return: VOID
  */
 function isAssocKeyword(arr, id, title) {
-	
-	var found = 0;
+    
+    var found = 0;
 
-	for (var i = 0; i < arr.length; i++)
-	{
-		if (arr[i][0] == id)
-		{
-			arr[i][1] += 1;
-			found = 1;
-			break;
-		}
-	}
+    for (var i = 0; i < arr.length; i++)
+    {
+        if (arr[i][0] == id)
+        {
+            arr[i][1] += 1;
+            found = 1;
+            break;
+        }
+    }
 
-	if (found == 0)
-	{
-		arr.push([id, 1, title]);
-	}
+    if (found == 0)
+    {
+        arr.push([id, 1, title]);
+    }
 }
 
 /** Recent Keywords System **/
 
 /*
-	Sets up the list of works and calls startup function for Recent Keywords
+    Sets up the list of works and calls startup function for Recent Keywords,
+    This will display a list of keywords from previously viewed works from within a session (life span of the tab),
+    a list of 4 work titles is remembered and those four work's keywords are displayed to the UI.
+    Keywords assigned to the current work are ignored, as are ones already displayed under the recent keyword section.
 
-	Param: None
+    Param: None
 
-	Return: VOID
+    Return: VOID
  */
 async function setupRecentWorks(){
 
-	if (sessionStorage.getItem('id_map') == null)
-        {
-        	window.hWin.HEURIST4.msg.showMsgErr("Error: Cannot Retrieve ID Map, please contact the administrator about this issue");
-        	return;
-        }
+    if (sessionStorage.getItem('id_map') == null)  /* Check if Id map is available */
+    {   /* Only possible if the session storage (cache) has been cleared since opening the popup */
+        window.hWin.HEURIST4.msg.showMsgErr("Error: Cannot Retrieve ID Map, please contact the administrator about this issue");
+        return;
+    }
 
-    var id_map = JSON.parse(sessionStorage.getItem('id_map'));	
+    var id_map = window.hWin.HEURIST4.util.isJSON(sessionStorage.getItem('id_map'));    
     
     var works = [];
 
-    if (sessionStorage.getItem("prev_classify") != null)    /* Check if Previous Keywords Table can be Initialised */
-    {  	
-        works = JSON.parse(sessionStorage.getItem("prev_classify"));
+    if (sessionStorage.getItem("prev_classify") != null)    /* Check if there are any previously viewed works */
+    {   
+        works = window.hWin.HEURIST4.util.isJSON(sessionStorage.getItem("prev_classify"));
 
         var ch_set;
 
+        /* Which work will have it's keywords automatically set to checked, each work can only appear once in the list */
         if (works[0] != document.getElementById('work-code_field').innerText)
         {
-        	ch_set = works[0];
+            ch_set = works[0];
         }
         else if (works.length != 1)
         {
-        	ch_set = works[1];
+            ch_set = works[1];
         }
 
-    	for (var i = 0; i < works.length; i++)
-    	{
-			if (works[i] == document.getElementById('work-code_field').innerText) { continue; }
+        /* Now retrieve and display the list */
+        for (var i = 0; i < works.length; i++)
+        {
+            if (works[i] == document.getElementById('work-code_field').innerText) { continue; }
 
-			if (ch_set == works[i])
-			{
-				startRecentWork(works[i], 1);
-			}
-			else
-			{
-				startRecentWork(works[i], 0);
-			}
+            /* Additional information is sent, depending on whether the work's keywords are to be checked or not  */
+            if (ch_set == works[i])
+            {
+                startRecentWork(works[i], 1);
+            }
+            else
+            {
+                startRecentWork(works[i], 0);
+            }
 
-			await sleep(50);
-		}
+            /* This is to allow the keywords to be displayed in the correct order, without this the default checked keywords can appear out of order */
+            await sleep(50);
+        }
     }
 
+    /* Check if current work can be added to the list of previously (recent) works */
     if ((works.find(row => row == document.getElementById('work-code_field').innerText) == null) && 
-    	(sessionStorage.getItem('rec_kywd') != null) && (record[id_map.DT_Keywords] != ""))
+        (sessionStorage.getItem('rec_kywd') != null) && (record[id_map.DT_Keywords] != ""))
     {
-    	works.unshift(document.getElementById('work-code_field').innerText);
+        works.unshift(document.getElementById('work-code_field').innerText);
     }
 
     if (works.length == 5)
     {
-    	works.splice(4, 1);
+        works.splice(4, 1);
     }
 
     if (works == null)
     {
-    	return;
+        return;
     }
 
-    sessionStorage.setItem("prev_classify", JSON.stringify(works));	
+    sessionStorage.setItem("prev_classify", JSON.stringify(works)); 
 }
 
 /*
-	Retrieves the recent works, and checks if they have keywords to add
+    Retrieves the supplied work's keywords and add them to the displayed list
 
-	Param: work_code -> Current Work 
+    Param: work_code -> Work Code of Interest
 
-	Return: VOID
+    Return: VOID
  */
 function startRecentWork(id, set) {
 
-	if (sessionStorage.getItem('id_map') == null)
-        {
-        	window.hWin.HEURIST4.msg.showMsgErr("Error: Cannot Retrieve ID Map, please contact the administrator about this issue");
-        	return;
-        }
+    if (sessionStorage.getItem('id_map') == null)  /* Check if Id map is available */
+    {   /* Only possible if the session storage (cache) has been cleared since opening the popup */
+        window.hWin.HEURIST4.msg.showMsgErr("Error: Cannot Retrieve ID Map, please contact the administrator about this issue");
+        return;
+    }
 
-    var id_map = JSON.parse(sessionStorage.getItem('id_map'));	
-	
-	if (set == null || id == null)
-	{
-		msgToConsole('startRecentWork() Error: No Recent Works Saved', null);
-		return;
-	}
+    var id_map = window.hWin.HEURIST4.util.isJSON(sessionStorage.getItem('id_map'));    
+    
+    if (set == null || id == null)
+    {
+        msgToConsole('startRecentWork() Error: No Recent Works Saved', null);
+        return;
+    }
 
-    var query_request = {q:'t:' + id_map.RT_Work + ' f:' + id_map.DT_MPCEId + ':"' + id + '"', detail:'detail'};  /* Retrieve the record for supplied work code*/
+    var query_request = {q:'t:' + id_map.RT_Work + ' f:' + id_map.DT_MPCEId + ':"' + id + '"', detail:'detail'};  /* Retrieve the record for supplied work code */
 
     window.hWin.HAPI4.RecordMgr.search(query_request,
         function( response ){
@@ -891,14 +937,10 @@ function startRecentWork(id, set) {
                 var record = recordset.getFirstRecord();
                 var details = record.d;
 
-                if (record == null)
-                {
-                    return;
-                }
-
+                /* Check if the record has project keywords to display */
                 if (details[id_map.DT_Keywords] != null)
                 {
-                	getRecentKeywords(details[id_map.DT_Keywords], set);
+                    getRecentKeywords(details[id_map.DT_Keywords], set);
                 }
 
             }else{
@@ -909,21 +951,23 @@ function startRecentWork(id, set) {
 }
 
 /*
-    Retrieve the Recent Work's keywords for display
+    From a list of keywords, retrieve their titles and display them to the user, or remove them if necessary
 
-    Param: keywords_ID -> Array of Keyword IDs
+    Param: keyword_IDs -> Array of Keyword IDs
 
     Return: VOID
  */
-function getRecentKeywords(keywords_ID, set) {
-	if (sessionStorage.getItem('id_map') == null)
-    {
-    	window.hWin.HEURIST4.msg.showMsgErr("Error: Cannot Retrieve ID Map, please contact the administrator about this issue");
-    	return;
+function getRecentKeywords(keyword_IDs, set) {
+    
+    if (sessionStorage.getItem('id_map') == null)  /* Check if Id map is available */
+    {   /* Only possible if the session storage (cache) has been cleared since opening the popup */
+        window.hWin.HEURIST4.msg.showMsgErr("Error: Cannot Retrieve ID Map, please contact the administrator about this issue");
+        return;
     }
 
-    var id_map = JSON.parse(sessionStorage.getItem('id_map'));
+    var id_map = window.hWin.HEURIST4.util.isJSON(sessionStorage.getItem('id_map'));
 
+    /* Retrieve master list of all project keywords, we need their titles for display */
     var query_request = {q:'t:' + id_map.RT_Keyword, detail:'detail'};
 
     window.hWin.HAPI4.RecordMgr.search(query_request,
@@ -931,31 +975,31 @@ function getRecentKeywords(keywords_ID, set) {
             if(response.status == window.hWin.ResponseStatus.OK){
 
                 var recordset = new hRecordSet(response.data);
-                var table_kywrds = document.getElementById('keyword_field');
-                var list_recent = document.getElementById('prev_field');
+                var list_kywrds = document.getElementById('keyword_field');    /* Assigned Keywords */
+                var list_recent = document.getElementById('prev_field');    /* Already Displayed Previously (Recently) used keywords */
 
-                var row_cnt = keywords_ID.length;
+                var row_cnt = keyword_IDs.length;
 
                 for (var j = 0; j < row_cnt; j++)
                 {
 
-                    var record = recordset.getRecord(keywords_ID[j]);
+                    var record = recordset.getRecord(keyword_IDs[j]);
                     var details = record.d;
 
                     var title = details[1];
                     var id = record.rec_ID;
 
-					var setcb = 0;
+                    var setcb = 0;
 
-                    var found = findTableRow(table_kywrds, id);
+                    var found = findListItem(list_kywrds, id); /* Check if keyword is already assigned */
 
                     if (found < 0)
                     {
-                        found = findListItem(list_recent, id);
+                        found = findListItem(list_recent, id);  /* Check if keyword has been displayed as a recently used keyword */
 
                         if (found < 0)
                         {
-                            addRecentKeywords(id, title[0], set);
+                            addRecentKeywords(id, title[0], set);   /* Add new keyword to recently used keyword list */
                         }
                     }
                 }
@@ -967,7 +1011,7 @@ function getRecentKeywords(keywords_ID, set) {
 }
 
 /*
-    Add keyword to Recent Keyword List
+    Add new keyword to recently used keyword list
 
     Param:
         id -> Keyword's Record ID
@@ -982,81 +1026,82 @@ function addRecentKeywords(id, title, set){
 
     var item = document.createElement('li');
 
-	if (set == 1)
-	{
-		item.innerHTML = "<input type='checkbox' value='" + id + "' name='" + id + "' checked><label for='" + id + "'> " + title + " </label>";
-	}
-	else
-	{
-	    item.innerHTML = "<input type='checkbox' value='" + id + "' name='" + id + "'><label for='" + id + "'> " + title + " </label>";
-	}
+    if (set == 1)
+    {
+        item.innerHTML = "<input type='checkbox' value='" + id + "' name='" + id + "' checked><label for='" + id + "'> " + title + " </label>";
+    }
+    else
+    {
+        item.innerHTML = "<input type='checkbox' value='" + id + "' name='" + id + "'><label for='" + id + "'> " + title + " </label>";
+    }
 
     list.appendChild(item);
-	return;
+    return;
 }
 
 /*
-	Check if provided keyword was a recent keyword
+    Check if provided keyword is a displayed as a recently used keyword
 
-	Param: id -> Keyword's ID
+    Param: id -> Keyword's ID
 
-	Return: VOID
+    Return: VOID
  */
 function isRecentKeyword(id){
-	if (sessionStorage.getItem('id_map') == null)
-    {
-    	window.hWin.HEURIST4.msg.showMsgErr("Error: Cannot Retrieve ID Map, please contact the administrator about this issue");
-    	return;
+    if (sessionStorage.getItem('id_map') == null)  /* Check if Id map is available */
+    {   /* Only possible if the session storage (cache) has been cleared since opening the popup */
+        window.hWin.HEURIST4.msg.showMsgErr("Error: Cannot Retrieve ID Map, please contact the administrator about this issue");
+        return;
     }
 
-    var id_map = JSON.parse(sessionStorage.getItem('id_map'));
+    var id_map = window.hWin.HEURIST4.util.isJSON(sessionStorage.getItem('id_map'));
 
-	if (sessionStorage.getItem('prev_classify') == null)
-	{
-		return;
-	}
+    if (sessionStorage.getItem('prev_classify') == null)   /* List of previous keywords */
+    {
+        return;
+    }
 
-	var prev_works = JSON.parse(sessionStorage.getItem('prev_classify'));    
+    var prev_works = window.hWin.HEURIST4.util.isJSON(sessionStorage.getItem('prev_classify'));   
 
-	for (var i = 0; i < prev_works.length; i++)
-	{
-		var query_request = {q:'t:' + id_map.RT_Work + ' f:' + id_map.DT_MPCEId + ':"' + prev_works[i] + '"', detail:'detail'};
+    /* Go through all previous works, searching for the keyword of interest */
+    for (var i = 0; i < prev_works.length; i++)
+    {
+        var query_request = {q:'t:' + id_map.RT_Work + ' f:' + id_map.DT_MPCEId + ':"' + prev_works[i] + '"', detail:'detail'};
 
-	    window.hWin.HAPI4.RecordMgr.search(query_request,
-	        function( response ){
-	            if(response.status == window.hWin.ResponseStatus.OK){
+        window.hWin.HAPI4.RecordMgr.search(query_request,
+            function( response ){
+                if(response.status == window.hWin.ResponseStatus.OK){
 
-	                var recordset = new hRecordSet(response.data);
-	                var record = recordset.getFirstRecord();
-	                var details = record.d;
+                    var recordset = new hRecordSet(response.data);
+                    var record = recordset.getFirstRecord();
+                    var details = record.d;
 
-	                if (record == null)
-	                {
-	                    return;
-	                }
+                    if (record == null)
+                    {
+                        return;
+                    }
 
-	                if (details[id_map.DT_Keywords] != null)
-	                {
-	                	if (details[id_map.DT_Keywords].find(e => e == id))
-	                	{
-	                		var ids = [];
-	                		ids.push(id);
+                    if (details[id_map.DT_Keywords] != null)
+                    {
+                        if (details[id_map.DT_Keywords].find(e => e == id))
+                        {
+                            var ids = [];
+                            ids.push(id);
 
-	                    	getRecentKeywords(ids);
-	                	}
-	                }
-	            }else{
-	                window.hWin.HEURIST4.msg.showMsgErr(response);
-	            }
-	        }
-	    );
-	}
+                            getRecentKeywords(ids);
+                        }
+                    }
+                }else{
+                    window.hWin.HEURIST4.msg.showMsgErr(response);
+                }
+            }
+        );
+    }
 }
 
 /** Assigned Keyword System **/
 
 /*
-    Add New Assigned Keyword to Table
+    Add Newly Assigned Keyword to Table UI
 
     Param: 
         keyword -> Keyword's Title
@@ -1065,20 +1110,17 @@ function isRecentKeyword(id){
     Return: VOID
  */
 function showKeyword(keyword, id){
-    var table = document.getElementById('keyword_field');
+    var list = document.getElementById('keyword_field');
 
-    var row = table.insertRow(-1);
+    var item = document.createElement('li');
 
-    var col1 = row.insertCell(0);
-    var col2 = row.insertCell(1);
+    item.innerHTML = "<label class='label-tag'>"+ keyword +"</label>"
+    + "<button value='"+ id +"' onclick='setupAssocKeywords(this.value)' class='btn btn-info'"
+    + " style='float:right;font-size:0.75em;display:inline-block;'>Find Associated</button>"
+    + "<button value='"+ id +"' onclick='removeKeyword(this.value)' class='btn btn-delete'"
+    + " style='float:right;margin-right:7px;font-size:0.75em;display:inline-block;'>X</button>";
 
-    col1.style.width = "70%";
-    col2.style.width = "30%";
-    col2.classList.add('center');
-
-    col1.innerHTML = "<label class='name'>"+ keyword +"</label>";
-    col2.innerHTML = "<button value='"+ id +"' onclick='removeKeyword(this.value)' class='btn btn-delete' style='float: left;'>X</button>" +
-    "<button value='"+ id +"' onclick='setupAssocKeywords(this.value)' class='btn btn-info' style='float: right;'>Associated &rArr;</button>";
+    list.append(item);
 }
 
 /*
@@ -1096,17 +1138,17 @@ function addKeyword(id, title){
     removeFromList(document.getElementById('associated_field'), id); /* Remove from Associated List */
     removeFromList(document.getElementById('prev_field'), id);   /* Remove from Recent List */
 
-    var keywords_ID = [];
+    var keyword_IDs = [];
 
     if (sessionStorage.getItem("rec_kywd") != null)
     {
-        keywords_ID = JSON.parse(sessionStorage.getItem("rec_kywd"));
+        keyword_IDs = window.hWin.HEURIST4.util.isJSON(sessionStorage.getItem("rec_kywd"));
     }
 
 
-    keywords_ID.push(id);   /* Add to List */
+    keyword_IDs.push(id);   /* Add to List */
 
-    sessionStorage.setItem("rec_kywd", JSON.stringify(keywords_ID));
+    sessionStorage.setItem("rec_kywd", JSON.stringify(keyword_IDs));
 }
 
 /*
@@ -1117,46 +1159,44 @@ function addKeyword(id, title){
     Return: VOID
  */
 function removeKeyword(id) {
-    var table = document.getElementById('keyword_field');
+    var list = document.getElementById('keyword_field');
     
-    var table_in = findTableRow(table, id);
+    var list_in = removeFromList(list, id);
 
-    if (table_in == -1)
+    if (list_in == -2)
     {
         msgToConsole('removeKeyword() Error: Keyword was not found', null);
         window.hWin.HEURIST4.msg.showMsgErr('Keyword was not found in Assigned Keyword Table');
         return;
     }
 
-    table.deleteRow(table_in);  /* Remove from Table */
+    var keyword_IDs = window.hWin.HEURIST4.util.isJSON(sessionStorage.getItem("rec_kywd"));
+    keyword_IDs.splice(list_in, 1);  /* Remove from List */
 
-    var keywords_ID = JSON.parse(sessionStorage.getItem("rec_kywd"));
-    keywords_ID.splice(table_in, 1);  /* Remove from List */
-
-    sessionStorage.setItem("rec_kywd", JSON.stringify(keywords_ID));
+    sessionStorage.setItem("rec_kywd", JSON.stringify(keyword_IDs));
     
-    isRecentKeyword(id);	/* Check if keyword was a recent keyword */
-    updateAssocDisplay();	/* Check if keyword was a associated keyword */
+    isRecentKeyword(id);    /* Check if keyword was a recent keyword */
+    updateAssocDisplay();   /* Check if keyword was a associated keyword */
 }
 
 /*
-	Display all found editions for the selected work
+    Display all found editions for the selected work
 
-	Param: works -> List of Edition's Title Masks
+    Param: works -> List of Edition's Title Masks
 
-	Return: VOID
+    Return: VOID
  */
 function displayEditions(works){
 
-	var max = 10;
-	var editions = [];
+    var max = 10;
+    var editions = [];
 
-	for (var i = 0; i < works.length && i < max; i++)
-	{
-		editions = editions.concat("<div style='font-size: 1.2em;'>" + works[i] + "</div>", "<br /><br />");
-	}
+    for (var i = 0; i < works.length && i < max; i++)
+    {
+        editions = editions.concat("<div style='font-size: 1.2em;'>" + works[i] + "</div>", "<br /><br />");
+    }
 
-	window.hWin.HEURIST4.msg.showMsgDlg(editions);
+    window.hWin.HEURIST4.msg.showMsgDlg(editions);
 }
 
 /** Other Function **/
@@ -1165,8 +1205,8 @@ function displayEditions(works){
     Removes supplied keyword from the supplied list
 
     Param: 
-    	list -> document element, unordered list
-    	id -> Selected Keyword's Record ID
+        list -> document element, unordered list
+        id -> Selected Keyword's Record ID
 
     Return: VOID
  */
@@ -1181,53 +1221,53 @@ function removeFromList(list, id){
     }
     else if (list_in == -1)
     {
-    	return;
+        console.log('removeFromList() Msg: List item does not exist');
+        return;
     }
-
 
     list.getElementsByTagName('li')[list_in].remove();
 }
 
 /*
-	Determines which keywords have been checked
+    Determines which keywords have been checked
 
-	Param: list -> document element, unordered list
+    Param: list -> document element, unordered list
 
-	Return: Array -> list of checked keywords
+    Return: Array -> list of checked keywords
  */
 function getAllChecked(list){
-	var checked_items = [];
+    var checked_items = [];
 
-	var items = list.getElementsByTagName('li');
+    var items = list.getElementsByTagName('li');
 
-	for (var i = 0; i < items.length; i++)
-	{
-		var chkbox = items[i].getElementsByTagName('input')[0];
+    for (var i = 0; i < items.length; i++)
+    {
+        var chkbox = items[i].getElementsByTagName('input')[0];
 
-		if (chkbox.checked)
-		{
-			checked_items.push(chkbox.value);
-		}
-	}
+        if (chkbox.checked)
+        {
+            checked_items.push(chkbox.value);
+        }
+    }
 
-	return checked_items;
+    return checked_items;
 }
 
 /*
-	Search a list for a checkbox containing the value
+    Search a list for a checkbox containing the value
 
-	Param:
-		list -> list to be searched
-		value -> value searching for (input element value)
+    Param:
+        list -> list to be searched
+        value -> value searching for (input element value)
 
-	Return: Array -> label for the found checkbox
+    Return: Array -> label for the found checkbox
  */
 function searchList(list, value) {
     var result;
 
     if (list == null)
     {
-        console.log('searchList() Error: No table Was Provided');
+        console.log('searchList() Error: No list Was Provided');
         return -1;
     }
     else if (value == null)
@@ -1265,78 +1305,21 @@ function searchList(list, value) {
 }
 
 /*
-    Search a table for the row of the supplied value,
-    Note: Checks the first found button's value within each row
+    Search a List for the row of the supplied value,
+    Note: Checks the first found input's value within each row
 
     Param:
-        table -> table to be searched
-        value -> value searching for (button value)
+        list -> list to be checked
+        value -> value searching for
 
     Return: Number -> Row Index of the found value
- */
-
-function findTableRow(table, value) {
-    var index = -1;
-
-    if (table == null)
-    {
-        console.log('findTableRow() Error: No table Was Provided');
-        return -2;
-    }
-    else if (value == null)
-    {
-        console.log('findTableRow() Error: No value Was Provided');
-        return -2;
-    }
-
-    var len = table.rows.length;
-
-    for (var i = 0, row; i < len; i++)
-    {
-        var row = table.rows[i];
-
-        if (row == null)
-        {
-            // Return Error/None Found
-            console.log('findTableRow() Error: No Rows Found');
-            return -2;
-        }
-        else if (row.cells[1] == null)
-        {
-            continue;
-        }
-
-        var elements = row.getElementsByTagName('button')[0];
-
-        if (elements != null)
-        {
-            if (elements.value == value)
-            {
-                index = i;
-                return index;
-            }
-        }
-    }  
-
-    return index;
-}
-
-/*
-	Search a List for the row of the supplied value,
-	Note: Checks the first found input's value within each row
-
-	Param:
-		list -> list to be checked
-		value -> value searching for
-
-	Return: Number -> Row Index of the found value
  */
 function findListItem(list, value) {
     var index = -1;
 
     if (list == null)
     {
-        console.log('findListItem() Error: No table Was Provided');
+        console.log('findListItem() Error: No list Was Provided');
         return -2;
     }
     else if (value == null)
@@ -1349,8 +1332,8 @@ function findListItem(list, value) {
 
     if (list_items == null)
     {
-    	msgToConsole('findListItem() Error: Unable to Retrieve list items from list', list);
-    	return;
+        msgToConsole('findListItem() Error: Unable to Retrieve list items from list', list);
+        return;
     }
 
     var len = list_items.length;
@@ -1374,9 +1357,45 @@ function findListItem(list, value) {
                 return index;
             }
         }
+        else
+        {
+            elements = list_items[i].getElementsByTagName('button')[0];
+            if (elements != null)
+            {
+                if (elements.value == value)
+                {
+                    index = i;
+                    return index;
+                }
+            }
+        }
     }  
 
     return index;
+}
+
+/*
+    Toggles the checkboxes based on whether the "Check All" options is set
+
+    Param: 
+        list -> list of interest
+        isChecked -> 
+
+    Return: VOID
+*/
+function checkAllOptions(list, isChecked){
+
+    var items = list.getElementsByTagName('li');
+
+    for (var i = 0; i < items.length; i++) {
+
+        var chkbox = items[i].getElementsByTagName('input')[0];
+
+        if (chkbox.checked != isChecked) {
+            chkbox.checked = isChecked;
+        }
+    }
+
 }
 
 /*
@@ -1401,16 +1420,14 @@ function compareIndexes(a, b){
 }
 
 /*
-	Clears all session storage, not need for other works
+    Clears all session storage, not need for other works
 
-	Param: None
+    Param: None
 
-	Return: VOID
+    Return: VOID
  */
 function clearSessionStorage() {
     sessionStorage.removeItem("assoc_keywords");
-
-    sessionStorage.removeItem("recent_work");
 
     sessionStorage.removeItem("rec_kywd");
     sessionStorage.removeItem("rec_category");
@@ -1419,60 +1436,59 @@ function clearSessionStorage() {
 }
 
 /*
-	Message/Data pair for printing to the console
+    Message/Data pair for printing to the console
 
-	Param:
-		msg -> primary message to console log
-		data -> can be null, additional information
+    Param:
+        msg -> primary message to console log
+        data -> can be null, additional information
 
-	Return: VOID
+    Return: VOID
  */
 function msgToConsole(msg, data){
-	console.log(msg);
+    console.log(msg);
 
-	if (data != null)
-	{
-		console.log(data);
-	}
+    if (data != null)
+    {
+        console.log(data);
+    }
 }
 
 /*
-	Sleep Function
+    Sleep Function
 
-	Param: ms -> time to wait, in mmilliseconds
+    Param: ms -> time to wait, in mmilliseconds
 
-	Return: VOID
+    Return: VOID
  */
 function sleep(ms) {
-	return new Promise(r => setTimeout(r, ms));
+    return new Promise(r => setTimeout(r, ms));
 }
 
 /*
- 	Mapping Ids for Detail and Record Types (Heurist Specific), these need to be set for the specific database being used
+    Mapping Ids for Detail and Record Types (Heurist Specific)
 
- 	Param: None
+    Param: None
 
- 	Return: VOID
+    Return: VOID
  */
 function mapIds(mapping) {
 
-	var mapping_ids = {
-	    /* Record Type, Detail Type and Vocab Id Map, for now you need to replace all instances of each value with the database correct one */
+    var mapping_ids = {
+        /* Record Type, Detail Type and Vocab Id Map, for now you need to replace all instances of each value with the database correct one */
+        RT_Editions: 54,                            /* Editions Table */        
+        RT_Work: 55,                                /* Super Book (Works) Table */
+        RT_Keyword: 56,                             /* Project Keywords Table */
+        
+        DT_Title: 938,                              /* Work Title Details Index, from outside the Super Book (Work) Table */
+        DT_MPCEId: (mapping['workID'] != null) ? mapping['workID'] : 952,                       /* MPCE ID Details Index */
+        DT_Category: (mapping['parisianClassify'] != null) ? mapping['parisianClassify'] : 1060, /* Parisian Category Details Index */
+        DT_Keywords: (mapping['projectKywds'] != null) ? mapping['projectKywds'] : 955,         /* Project Keywords Details Index */
+        DT_Basis: (mapping['basisClassify'] != null) ? mapping['basisClassify'] : 1034,          /* Basis for Classifcation Details Index */
+        DT_Notes: (mapping['classifyNotes'] != null) ? mapping['classifyNotes'] : 1035,          /* Classification Notes Details Index */
 
-	    RT_Editions: 54,							/* Editions Table */	    
-	    RT_Work: 55,								/* Super Book (Works) Table */
-	    RT_Keyword: 56,								/* Project Keywords Table */
-	    
-	    DT_Title: 940,								/* Work Title Details Index, from outside the Super Book (Work) Table */
-	    DT_MPCEId: (mapping['workID'] != null) ? mapping['workID'] : 970,						/* MPCE ID Details Index */
-	    DT_Category: (mapping['parisianClassify'] != null) ? mapping['parisianClassify'] : 972,	/* Parisian Category Details Index */
-	    DT_Keywords: (mapping['projectKywds'] != null) ? mapping['projectKywds'] : 973,			/* Project Keywords Details Index */
-	    DT_Basis: (mapping['basisClassify'] != null) ? mapping['basisClassify'] : 974,			/* Basis for Classifcation Details Index */
-	    DT_Notes: (mapping['classifyNotes'] != null) ? mapping['classifyNotes'] : 975,			/* Classification Notes Details Index */
+        VI_Category: 6953,                          /* Parisian Category Vocab ID */
+        VI_Basis: 6936,                             /* Basis for Classification Vocab ID */
+    };
 
-	    VI_Category: 6953,							/* Parisian Category Vocab ID */
-	    VI_Basis: 6936,								/* Basis for Classification Vocab ID */
-	};
-
-	sessionStorage.setItem('id_map', JSON.stringify(mapping_ids));
+    sessionStorage.setItem('id_map', JSON.stringify(mapping_ids));
 }
