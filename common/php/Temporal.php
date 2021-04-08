@@ -188,6 +188,7 @@ function removeLeadingYearZeroes($value, $is_greg_or_julian=true, $is_strict_iso
     if(!$is_strict_iso){
         $need_day = false;
     }
+    $origWithoutDays = false;
     
     
     if( preg_match('/^-?\d+$/', $value) ){ //only digits with possible minus
