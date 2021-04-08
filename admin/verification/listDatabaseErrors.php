@@ -1016,6 +1016,8 @@ $trmDuplicates = @$lists2["trm_dupes"];
         $decade_regex = '/^\d{2,4}s$/'; //words like 80s 1990s
         $year_range_regex = '/^\d{2,4}\-\d{2,4}$/'; //2-4 year ranges
 
+        $fix_as_suggested = false;
+ 
         while ($row = $res->fetch_assoc()){
             
             $row['is_ambig'] = false;
@@ -1081,20 +1083,22 @@ $trmDuplicates = @$lists2["trm_dupes"];
                 if($row['new_value']!=null && $row['new_value']!=''){
                         if(@$row['is_ambig']){
                             $ambigious++;    
-                            $ids[$row['dtl_RecID']] = 1;
+                            //$ids[$row['dtl_RecID']] = 1;
                         }else{
                             $wascorrected++;    
                         }
-                }else{
-                    $ids[$row['dtl_RecID']] = 1;  //all record ids - to show as search result
                 }
+                $ids[$row['dtl_RecID']] = 1;  //all record ids - to show as search result
+                
                 //autocorrection }else{
                 array_push($bibs, $row);
                 array_push($dtl_ids, $row['dtl_ID']); //not used
             }
-        }
-
-
+            
+            $fix_as_suggested = $fix_as_suggested || 
+                (is_bool($row['is_ambig']) && ($row['new_value']==null || $row['is_ambig']===true));
+        }//while
+        
         print '<a name="date_values"></a>'; //anchor
 
         if(count($bibs)==0){
@@ -1102,6 +1106,7 @@ $trmDuplicates = @$lists2["trm_dupes"];
         }
         else
         {
+            
             ?>
 
             <div>
@@ -1164,21 +1169,29 @@ $trmDuplicates = @$lists2["trm_dupes"];
                 <span>
                     <a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= implode(',', array_keys($ids)) ?>'>
                         (show results as search)</a>
-                    <a target=_new href='#' id=selected_link onClick="return open_selected_by_name('recCB5');">(show selected as search)</a>
+                    <a target=_new href='#' id=selected_link style="display:<?php echo ($fix_as_suggested?'inline-block':'none');?>;"
+                                onClick="return open_selected_by_name('recCB5');">(show selected as search)</a>
                 </span>
 
+                <?php 
+                    if($fix_as_suggested){
+                ?>
                 <div>To fix faulty date values as suggested, mark desired records and please click here:
                     <button
                         onclick="{var ids=get_selected_by_name('recCB5'); if(ids){document.getElementById('page-inner').style.display = 'none';window.open('listDatabaseErrors.php?db=<?= HEURIST_DBNAME?>&fixdates=1&recids='+ids,'_self')}else{ window.hWin.HEURIST4.msg.showMsgDlg('Mark at least one record to correct'); }}">
                         Correct</button>
                 </div>
+                <?php 
+                    }
+                ?>
 
             </div>
 
             <table>
-            <tr>
+            <tr style="display:<?php echo ($fix_as_suggested?'block':'none');?>;">
                 <td colspan="6">
-                    <label><input type=checkbox onclick="{mark_all_by_name(event.target, 'recCB5');}">Mark all</label>
+                    <label><input type=checkbox 
+                                onclick="{mark_all_by_name(event.target, 'recCB5');}">Mark all</label>
                 </td>
             </tr>
             <?php
@@ -1191,7 +1204,8 @@ $trmDuplicates = @$lists2["trm_dupes"];
                             print '<input type=checkbox name="recCB5" value='.$row['dtl_RecID'].'>';
                         ?>
                     </td>
-                    <td><img class="rft" style="background-image:url(<?php echo HEURIST_ICON_URL.$row['rec_RecTypeID']?>.png)" src="<?php echo HEURIST_BASE_URL.'common/images/16x16.gif'?>"></td>
+                    <td><img class="rft" style="background-image:url(<?php echo HEURIST_ICON_URL.$row['rec_RecTypeID']?>.png)" 
+                                    src="<?php echo HEURIST_BASE_URL.'common/images/16x16.gif'?>"></td>
                     <td style="white-space: nowrap;"><a target=_new
                             href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl_RecID'] ?>'>
                             <?= $row['dtl_RecID'] ?>
@@ -1216,7 +1230,7 @@ $trmDuplicates = @$lists2["trm_dupes"];
 
 
         <?php
-        //  Records with term field values which do not exist in the database
+        //  Records with term field values which do not exist in the database--------------------
         $wasdeleted = 0;
 
         //remove wrong term IDs
