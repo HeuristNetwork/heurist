@@ -789,6 +789,37 @@ $.widget( "heurist.searchBuilder", {
 //console.log(treedata);
                             treedata[0].expanded = true; //first expanded
                             
+                            //add additional entry for direct links (resource fields)
+                            function __addResField(tdata){
+                                
+                                //$.each(tdata, function(i, node)
+                                var i = 0;
+                                while (i<tdata.length)
+                                {
+                                    node = tdata[i];
+                                    if(node.type=='resource'){
+
+                                        var codes = node.code.split(':');
+                                        var dtid = codes[codes.length-1];
+                                        var linktype = dtid.substr(0,2);
+                                        if(linktype=='lt'){
+                                            codes[codes.length-1] = dtid.substr(2);                        
+                                            tdata.splice(i, 0, 
+                                                {key:node.key, type:'resource',
+                                                title: node.title
+                                                       +'<span style="font-size:0.8em"> (record pointer)</span>',
+                                                code:codes.join(':')});                                        
+                                            i++;                       
+                                        }
+                                    }
+                                    i++;    
+                                }
+                                
+                            }
+                            
+                            __addResField(treedata[0].children);
+                            
+                            
                             if(!treediv.is(':empty') && treediv.fancytree('instance')){
                                 treediv.fancytree('destroy');
                             }
@@ -820,6 +851,10 @@ $.widget( "heurist.searchBuilder", {
                                     }
                                     
                                     if(node.data.type=='resource'){
+                                        
+                                        __addResField(data.result);                                        
+                                        
+                                        /* option: add the same item as in __addResField but on next level
                                         var codes = parentcode.split(':');
                                         var dtid = codes[codes.length-1];
                                         var linktype = dtid.substr(0,2);
@@ -830,6 +865,7 @@ $.widget( "heurist.searchBuilder", {
                                                 title:'<span style="font-size:0.9em;font-style:italic;padding-left:22px">Pick the specific resource</span>',
                                                 name:'Known resource',code:codes.join(':')});
                                         }
+                                        */
                                     }
                                     
                                     return data;                                                   

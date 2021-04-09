@@ -212,7 +212,7 @@ window.hWin.HEURIST4.dbs = {
       $mode 
          3 - for record title mask editor @todo!!!
          4 - find reverse links and relations   
-         5 - for lazy treeview with reverse links (faceted search wiz)
+         5 - for lazy treeview with reverse links (faceted search wiz, filter builder)
          6 - for lazy tree without reverse (import structure, export csv)
          
       parentcode - prefix for code 
