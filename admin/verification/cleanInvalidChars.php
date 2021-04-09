@@ -58,10 +58,8 @@ if($res){
 }
 if($is_included){
 ?>    
-<hr/>
-<a name="clean_invalid_chars"></a>
 <div>
-<h3>Check and fix invalid characters in the data fields in the database records</h3>
+<h3 id="invalid_msg">Check and fix invalid characters in the data fields in the database records</h3>
 <?php    
 $is_not_found = true;
 }else{
@@ -129,7 +127,10 @@ $is_not_found = true;
 <?php 
 if($is_included){ 
     if($is_not_found){
-        print 'All records have valid characters in freetext and blocktext fields.<br><br>';        
+        echo '<script>$("#invalid_msg").text("OK: All records have valid characters in freetext and blocktext fields.").addClass("res-valid");';        
+        echo '$(".invalid_chars").css("background-color", "#6AA84F");</script>';        
+    }else{
+        echo '<script>$(".invalid_chars").css("background-color", "#DC8501");</script>';
     }
     print '</div>';
 }else{

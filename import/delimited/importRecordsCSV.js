@@ -3499,9 +3499,9 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         
         if(mode=='disamb'){
             
-            s = '<div>The following rows match with multiple records. This may be due to the existence of duplicate '
-            + 'records in your database, but you may not have chosen all the fields required to correctly disambiguate '
-            + 'the incoming rows against existing data records.</div><br/><br/>'
+            s = '<div style="padding-bottom:0.5em">The following rows match with multiple records.</div><div style="padding-bottom:0.5em">This may be due to the existence of duplicate '
+            + 'records in your database, but you may not have chosen</div><div style="padding-bottom:0.5em">all the fields required to correctly disambiguate '
+            + 'the incoming rows against existing data records.</div>'
             + '<button style="float:right" onclick="{$(\'.sel_disamb\').val(-1);}">Create New</button>'
             + '<button style="float:right;margin-right:10px" '
             + 'onclick="{$(\'.sel_disamb\').each(function(i,item){ '
@@ -3559,7 +3559,7 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
                 s += ('<th align="left">'+colname+'</th>');
             }
             
-            s += '<th align="center">Row</th><th align="center">Count</th><th>Records in Heurist</th></tr>';
+            s += '<th style="text-align:center">Matched Record</th><th style="text-align:center">Count</th><th style="text-align:left">Potential Matching Records in Heurist</th></tr>';
             
             csv_output += 'Record ID,Record Title\n';
             
@@ -3578,12 +3578,12 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
 
                 var recIds = Object.keys(disamb);
                         
-                s = s + '<tr><td><div class="truncate" style="max-width:100px">'+ keyvalue +'</div></td><td align="center">'
+                s = s + '<tr><td><div class="truncate" style="max-width:100px;text-align:center">'+ keyvalue +'</div></td><td style="text-align:center">'
                 + '<a href="#" '
                 + 'style="text-decoration:underline;color:blue" '
                 + ' onclick="{window.hWin.HEURIST4.util.findObjInFrame(\'importRecordsCSV\').showImportLineInPopup(\''+disambig_imp_id+'\');}">'
                 + 'view</a>'  // <span class="ui-icon ui-icon-popup">
-                + '</td><td align="center">'+recIds.length+'</td><td>'+
+                + '</td><td style="text-align:center">'+recIds.length+'</td><td>'+
                         '<select class="sel_disamb" style="max-width:300px" data-key="'+i+'">';                
 
                 for(j=0;j<recIds.length;j++){

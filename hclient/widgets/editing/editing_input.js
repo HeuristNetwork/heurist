@@ -1911,51 +1911,119 @@ $.widget( "heurist.editing_input", {
             }else 
             if(this.isFileForRecord){ //----------------------------------------------------
                 
-                        var $input_img, $gicon;
-                        
-                        var icon_for_button = 'ui-icon-folder-open';
-                        var select_return_mode = 'recordset';
-                        
-                        $input.css({'padding-left':'30px', cursor:'hand'});
-                        //folder icon in the begining of field
-                        $gicon = $('<span class="ui-icon ui-icon-folder-open"></span>')
-                            .css({position: 'absolute', margin: '5px 0px 0px 8px', cursor:'hand'}).insertBefore( $input ); 
-                        
-                        //container for image
-                        $input_img = $('<div class="image_input ui-widget-content ui-corner-all">'
-                        + '<img class="image_input"></div>')
-                        .css({'position':'absolute','display':'none','z-index':9999})
-                        .appendTo( $inputdiv ); 
-                        
-                        $input.change(function(){
-                            var val = that.newvalues[$input.attr('id')];
+				var $input_img, $gicon;
+                
+                var icon_for_button = 'ui-icon-folder-open';
+                var select_return_mode = 'recordset';
 
-                            if(window.hWin.HEURIST4.util.isempty(val) || !(val.ulf_ID >0)){
-                                $input.val('');
-                            }
-                            //clear thumb rollover
-                            if(window.hWin.HEURIST4.util.isempty($input.val())){
-                                 $input_img.find('img').attr('src','');    
-                            }
-                            that.onChange(); 
-                        });
+                /* File IDs, needed for processes below */
+                var f_id = value.ulf_ID;
+                var f_nonce = value.ulf_ObfuscatedFileID;
+
+                var $clear_container = $('<span id="img_clear"></span>').appendTo( $inputdiv );
+                
+                $input.css({'padding-left':'30px', cursor:'hand'});
+                //folder icon in the begining of field
+                $gicon = $('<span class="ui-icon ui-icon-folder-open"></span>')
+                    .css({position: 'absolute', margin: '5px 0px 0px 8px', cursor:'hand'}).insertBefore( $input ); 
+                
+                /* Image and Player (enalrged image) container */
+                $input_img = $('<br /><div class="image_input ui-widget-content ui-corner-all thumb_image" style="margin:10px 0 2px;">'
+                + '<img id="img'+f_id+'" class="image_input">'
+                + '<div id="player'+f_id+'" style="min-height:240px; min-width:320px; display:none;"></div>'
+                + '</div>')
+                .appendTo( $inputdiv )
+                .hide();
+
+                /* urls for downloading and loading the thumbnail */
+                var dwnld_link = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database+'&download=1&file='+f_nonce;
+                var url = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database+'&file='+f_nonce+'&mode=tag&origin=recview';
+
+                /* Anchors (download and show thumbnail) container */
+                $dwnld_anchor = $('<br /><div class="download_link">'
+                    + '<a id="lnk'+f_id+'" href="#" oncontextmenu="return false;" style="display:none;padding-right:20px;text-decoration:underline;color:blue"'
+                    + ' onClick="hidePlayer('+f_id+')">SHOW THUMBNAIL</a>'
+                    + '<a href="'+window.hWin.HEURIST4.util.htmlEscape(dwnld_link)+'" target="_surf" class="external-link image_tool" style="display:inline-block;text-decoration:underline;color:blue">'
+                    + 'DOWNLOAD</a></div>')
+                .hide();
+                
+                /* Change Handler */
+                $input.change(function(){
+                    var val = that.newvalues[$input.attr('id')];
+
+                    if(window.hWin.HEURIST4.util.isempty(val) || !(val.ulf_ID >0)){
+                        $input.val('');
+                    }
+                    //clear thumb rollover
+                    if(window.hWin.HEURIST4.util.isempty($input.val())){
+                         $input_img.find('img').attr('src','');    
+                    }
+                    that.onChange(); 
+                });
+                
+                /* Handler Variables */
+                var hideTimer = 0;  //  Time for hiding thumbnail
+                var isClicked = 0;
+
+                /* Input element's hover handler */
+                $input.mouseover(function(){
+                    if(!window.hWin.HEURIST4.util.isempty($input_img.find('img').attr('src'))){
+                        if (hideTimer) {
+                            window.clearTimeout(hideTimer);
+                            hideTimer = 0;
+                        }
+                        $input_img.show();
+                    }
+                });
+
+                /* Input element's mouse out handler, attached and dettached depending on user preferences */
+                function img_mouseout(){
+                    if($input_img.is(':visible')){
+                        hideTimer = window.setTimeout(function(){if(isClicked==0){$input_img.hide(1000);}}, 500);
+                    }
+                }
+                $input.on('mouseout', img_mouseout);
+
+                /* Thumbnail's click handler */
+                $input_img.click(function(){
+                    
+                    if (isClicked==0){
+                        isClicked++;
                         
-                        var hideTimer = 0;
-                        $input.mouseover(function(){
-                            if(!window.hWin.HEURIST4.util.isempty($input_img.find('img').attr('src'))){
-                                if (hideTimer) {
-                                    window.clearTimeout(hideTimer);
-                                    hideTimer = 0;
-                                }
-                                $input_img.show();
-                            }
-                        });
-                        $input.mouseout(function(){
-                            if($input_img.is(':visible')){
-                                hideTimer = window.setTimeout(function(){$input_img.hide(1000);}, 500);
-                            }});
-                            
-                        $input.css({'min-wdith':'22ex'});
+                        $input.off("mouseout");
+                        
+                        $dwnld_anchor.appendTo( $inputdiv );
+                        $dwnld_anchor.show();
+
+                        $input_img.css('cursor', 'zoom-in');
+
+                        window.hWin.HAPI4.save_pref('imageRecordEditor', true);
+                    }
+                    else if (isClicked==1)
+                    {
+                        var elem = event.target;
+
+                        /* Enlarge Image, display player */
+                        if ($(elem.parentNode).hasClass("thumb_image")) {
+                           window.hWin.HEURIST4.ui.showPlayer(elem, elem.parentNode, f_id, url);
+                        }
+                    }
+                });  
+
+				/* Check User Preferences, displays thumbnail inline by default if set */
+                if (window.hWin.HAPI4.get_prefs_def('imageRecordEditor', false) && value.ulf_ID)
+                {
+                    $input_img.show();
+                    $dwnld_anchor.show();
+
+                    $dwnld_anchor.appendTo( $inputdiv );
+
+                    $input_img.css('cursor', 'zoom-in');
+
+                    $input.off("mouseout");
+
+                    isClicked++;
+                }
 
                         var __show_select_dialog = null;
                         /* 2017-11-08 no more buttons
@@ -2569,6 +2637,15 @@ console.log('onpaste');
 //outline_suppress does not work - so list all these props here explicitely                
                     outline: 'none','outline-style':'none', 'box-shadow':'none',  'border-color':'transparent'
             });
+			
+            if (this.isFileForRecord)	/* Check if button needs to be placed within a container, or appended to input */
+            {
+                $('#img_clear').replaceWith( $btn_clear );
+            }
+            else
+            {
+                $($btn_clear.appendTo( $inputdiv ));
+            }			
             
             // bind click events
             this._on( $btn_clear, {
@@ -2581,6 +2658,14 @@ console.log('onpaste');
 
                     var input_id = $(e.target).attr('data-input-id');  //parent(). need if button
                     
+					if (this.isFileForRecord) /* Need to hide the player and image containers, and the download link for images */
+                    {
+                        $('.thumb_image').hide();
+                        $('.fullSize').hide();
+                        $('.download_link').hide();
+                        $('#player'+value.ulf_ID).hide();
+                    }
+					
                     if(that.detailType=="resource" && that.configMode.entity=='records' 
                             && that.f('rst_CreateChildIfRecPtr')==1){
                         that._clearChildRecordPointer( input_id );

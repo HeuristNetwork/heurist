@@ -2809,6 +2809,113 @@ window.hWin.HEURIST4.ui = {
     });
     
     return false;
+  },
+  
+  // @todo reimplement
+  // enlarge an image, usually, for when it is clicked
+  //
+  showPlayer: function(obj, container, id, url){
+    var that = this;
+    var currentImg = obj;
+
+    if ($(container).hasClass("thumb_image")){  //thumb to player
+        currentImg.style.display = 'none';
+
+        $(container).toggleClass("thumb_image fullSize");
+        
+        //add content to player div
+        $.ajax({
+            url: url,
+            type: "GET",
+            cache: false,
+            error: function(jqXHR, textStatus, errorThrown ) {
+            },
+            success: function( response, textStatus, jqXHR ){
+                var obj = jqXHR.responseText;
+                if (obj){
+                    var  elem = container.querySelector('#player'+id);
+                    elem.innerHTML = obj;
+                    elem.style.display = 'block';
+
+                    //calculate width for data and image                             
+                    var player = elem;
+                    if($(player.parentNode.parentNode).hasClass('production')){
+
+                        var img = $(player).find('img');
+                        if(img.length>0){
+
+                            img = img[0];
+
+                            function __onImgLoaded(){
+
+                                var w_img = $(img).width();
+                                var w_win = window.innerWidth;
+
+                                if(w_win-w_img<600){
+                                    //draw image above data
+                                    player.parentNode.parentNode.style.float = 'none';
+                                    //$('#div_public_data').css('max-width', w_win-40);    
+                                }else{
+                                    //draw on the right and reduce max width for data
+                                    player.parentNode.parentNode.style.float = 'right';
+                                    //$('#div_public_data').css('max-width', w_win-w_img-200);
+                                }
+
+                            }
+
+                            if(img.complete){
+                                __onImgLoaded();
+                            }else{
+                                img.addEventListener('load', __onImgLoaded)
+                            }
+                        }
+
+                    }
+                    function __closePlayer(){
+                        that.hidePlayer( id, container );            
+                    }
+
+                    $(elem).find('img').click( __closePlayer );
+
+                    // Display the show thumbnail anchor
+                    elem = (container.querySelector('#lnk'+id)) ? container.querySelector('#lnk'+id) : container.parentNode.querySelector('#lnk'+id);
+                    elem.style.display = 'inline-block';
+                    elem.onclick = __closePlayer;
+                }
+            }
+        });
+
+    }
+    else{	// player to thumb
+        this.hidePlayer( id, container );
+    }
+
+  },
+
+  hidePlayer: function(id, container){
+    //clear and hide player div
+    var  elem = container.querySelector('#player'+id);
+    elem.innerHTML = '';
+    elem.style.display = 'none';
+
+    //hide show tumbnail link
+    elem = (container.querySelector('#lnk'+id)) ? container.querySelector('#lnk'+id) : container.parentNode.querySelector('#lnk'+id);
+    elem.style.display = 'none';
+
+    //show thumbnail
+    elem = container.querySelector('#img'+id);
+    $(container).toggleClass("thumb_image fullSize");
+
+    elem.style.display = 'inline-block';
+
+    //restore
+    if($(elem.parentNode.parentNode).hasClass('production')){
+        $(elem.parentNode.parentNode).css({'float':'right'});
+        /* Remarked 2019-01-24
+        var w_win = window.innerWidth;
+        $('#div_public_data').css('max-width', w_win-250);    
+        */
+    }
   }
   
 }//end ui
