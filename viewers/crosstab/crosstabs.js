@@ -995,6 +995,10 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
         $divres.find('td').css( {'padding':'4px', 'border':'1px dotted gray'} );//{'border':'1px dotted gray'}); //1px solid gray'});
         buttonDiv.appendTo($divres);
+
+        $(document).ready(function(){
+            $("#resultsTable").DataTable();
+        })
         
         _setMode(2);//results
     }//_doRender
@@ -1229,6 +1233,8 @@ function CrosstabsAnalysis(_query, _query_domain) {
         var s, notemtycolumns = 0;
         //main render output   .css({'border':'1px solid black'})
         var $table = $('<table>').attr('cellspacing','0');
+        $table.attr("id", "resultsTable");
+        $table.attr("class", "display");
 
         if(!noColumns){
             var row1 = $('<tr>').appendTo($table);
@@ -1239,12 +1245,16 @@ function CrosstabsAnalysis(_query, _query_domain) {
             row1.append('<td>&nbsp;</td><td class="crosstab-header0" style="{text-align:center;}" colspan="'+notemtycolumns*colspan+(showTotalsColumn?1:0)+'">'+fields3.column.fieldname+'</td>');
         }
 
-        var $row = $('<tr>').appendTo($table);
-        $row.append('<td class="crosstab-header0">'+fields3.row.fieldname+'</td>');
+
+        var $row = $('<thead>').appendTo($table);
+        var $rowHeader = $('<tr>');
+        $rowHeader.append('<th class="crosstab-header0">'+fields3.row.fieldname+'</th>');
+    
+        //$row.append('<th class="crosstab-header0">'+fields3.row.fieldname+'</th>');
 
         // render HEADER, reset column totals
         if(noColumns){
-            $row.append('<td colspan="'+colspan+'">&nbsp;</td>');
+            $rowHeader.append('<th colspan="'+colspan+'">&nbsp;</th>');
         }else{
             for (j=0; j<clen; j++){
                 if(supressBlankColumn && columns[j].isempty) continue;
@@ -1269,6 +1279,8 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 }
             }
         }
+
+        $row.append($rowHeader);
 
 
         for (i=0; i<rlen; i++){

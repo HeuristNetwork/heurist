@@ -27,9 +27,11 @@
 define('PDIR','../../');  //need for proper path to js and css
 require_once(dirname(__FILE__).'/../../hclient/framecontent/initPage.php');
 ?>
+<link rel="stylesheet" type="text/css" href="DataTables/datatables.css">
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/configEntity.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+<script type="text/javascript" charset="utf8" src="DataTables/datatables.js"></script>
 
 <script type="text/javascript">
 
@@ -41,6 +43,7 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPage.php');
         crosstabsAnalysis = CrosstabsAnalysis('', '');
         //
     }
+
 </script>
 
         <link rel=stylesheet href="crosstabs.css" media="all">
