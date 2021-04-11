@@ -118,6 +118,11 @@ function CrosstabsAnalysis(_query, _query_domain) {
         visualisationButton.appendTo(buttonDiv);
     }
 
+    function _OnRowTypeChange(value) {
+        console.log('%cvalue', 'color:seagreen', value);
+        console.log('$(value)', $(value));
+    }
+
     /**
     * update list of fields for selected record type
     * 1. columns 2.rows 3. pages 4, aggreagation
@@ -892,7 +897,9 @@ function CrosstabsAnalysis(_query, _query_domain) {
     * render crosstab data as set of tables
     */
     function _doRender(){
-        
+
+        console.log($.fn.dataTable.isDataTable("#resultsTable"));
+
         $("#pmessage").html('Rendering...');
         _setMode(1);//progress
 
@@ -997,8 +1004,11 @@ function CrosstabsAnalysis(_query, _query_domain) {
         buttonDiv.appendTo($divres);
 
         $(document).ready(function(){
-            $("#resultsTable").DataTable();
-        })
+                $("#resultsTable").DataTable();
+            });
+
+        console.log($.fn.dataTable.isDataTable("#resultsTable"));
+        
         
         _setMode(2);//results
     }//_doRender
@@ -1254,7 +1264,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
         // render HEADER, reset column totals
         if(noColumns){
-            $rowHeader.append('<th colspan="'+colspan+'">&nbsp;</th>');
+            $rowHeader.append('<th colspan="'+colspan+'">Total</th>');
         }else{
             for (j=0; j<clen; j++){
                 if(supressBlankColumn && columns[j].isempty) continue;
@@ -1346,9 +1356,13 @@ function CrosstabsAnalysis(_query, _query_domain) {
         if(noColumns){
 
             if(showTotalsColumn && grantotal!=0){
-                $row = $('<tr>').appendTo($table);
-                $row.append('<td class="crosstab-header0" >totals</td>');
-                $row.append('<td class="crosstab-total" colspan="'+colspan+'">'+rnd(grantotal) +'</td>');
+                $row = $('<tfoot>').appendTo($table);
+
+                var $rowFooter = $('<tr>');
+                $rowFooter.append('<td class="crosstab-header0" >totals</td>');
+                $rowFooter.append('<td class="crosstab-total" colspan="'+colspan+'">'+rnd(grantotal) +'</td>');
+
+                $row.append($rowFooter);
             }
 
         }else{
@@ -1591,6 +1605,10 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
         resetIntervals: function(event){
             _resetIntervals(event);
+        },
+
+        OnRowTypeChange: (value) => {
+            _OnRowTypeChange(value)
         },
 
         doRetrieve: function(){

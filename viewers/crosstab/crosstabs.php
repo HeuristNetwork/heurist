@@ -28,9 +28,9 @@ define('PDIR','../../');  //need for proper path to js and css
 require_once(dirname(__FILE__).'/../../hclient/framecontent/initPage.php');
 ?>
 <link rel="stylesheet" type="text/css" href="DataTables/datatables.css">
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6" crossorigin="anonymous">
 <script type="text/javascript" src="<?php echo PDIR;?>hclient/widgets/entity/configEntity.js"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js" integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf" crossorigin="anonymous"></script>
 <script type="text/javascript" charset="utf8" src="DataTables/datatables.js"></script>
 
 <script type="text/javascript">
@@ -86,7 +86,7 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPage.php');
                     <div>
                         <div class="fldheader"><label for="cbRows">Var 1 (rows)</label></div>
                         <div class="input-cell">
-                            <select id="cbRows" name="row" onchange="crosstabsAnalysis.resetIntervals(event)" class="text ui-widget-content ui-corner-all" style="display: inline-block;"></select>
+                            <select id="cbRows" name="row" onchange="crosstabsAnalysis.resetIntervals(event); crosstabsAnalysis.OnRowTypeChange(this);" class="text ui-widget-content ui-corner-all" style="display: inline-block;"></select>
                             <button tt='row' class='showintervals collapsed'></button>
                             <div id="rowIntervals" class="ui-corner-all ui-widget-content crosstab-interval">Select field to set intervals</div>
                         </div>
@@ -116,10 +116,20 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPage.php');
                         <div class="radioDiv">
                             <div class="input-cell" style="padding-top: 4px;">
                             
-                                <div class="crosstab-aggregation"><input type="radio" checked value="count" id="aggregationModeCount" name="aggregationMode" onchange="crosstabsAnalysis.changeAggregationMode()">&nbsp;Counts</div>
+                                <div class="crosstab-aggregation">
+                                    <input type="radio" class="btn-check" checked value="count" id="aggregationModeCount" name="aggregationMode" onchange="crosstabsAnalysis.changeAggregationMode()">
+                                    <label class="btn btn-outline-secondary" for="aggregationModeCount">Counts</label>
+                                </div>
 
-                                <div id="aggSum" class="crosstab-aggregation"><input type="radio" value="sum" name="aggregationMode" onchange="crosstabsAnalysis.changeAggregationMode()">&nbsp;Sum</div>
-                                <div id="aggAvg" class="crosstab-aggregation"><input type="radio" value="avg" name="aggregationMode" onchange="crosstabsAnalysis.changeAggregationMode()">&nbsp;Average</div>
+                                <div id="aggSum" class="crosstab-aggregation">
+                                    <input type="radio" class="btn-check" id="aggregationModeSum" value="sum" name="aggregationMode" onchange="crosstabsAnalysis.changeAggregationMode()">
+                                        <label class="btn btn-outline-secondary" for="aggregationModeSum">Sum</label>
+                                </div>
+
+                                <div id="aggAvg" class="crosstab-aggregation">
+                                    <input type="radio" class="btn-check" id="aggregationModeAvg" value="avg" name="aggregationMode" onchange="crosstabsAnalysis.changeAggregationMode()">
+                                        <label class="btn btn-outline-secondary" for="aggregationModeAvg">Average</labels>
+                                </div>
                          
                                 <div id="divAggField" class="crosstab-aggregation" style="margin-top:10px;">of&nbsp;<select id="cbAggField" name="column" onchange="crosstabsAnalysis.changeAggregationMode()" class="text ui-widget-content ui-corner-all"></select></div>
                             </div>
@@ -129,20 +139,39 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPage.php');
                     <span style="float:left; width: 23.75%">
                         <div style="text-align: center; padding-top: 19px; display:block; font-size: 20px;"><label for="rbShowValue">Show:</label></div>
                         <div class="input-cell">
-                            <div class="checkboxValues"><input type="checkbox" onchange="crosstabsAnalysis.doRender()"
-                                         style="margin-left: 0;" checked id="rbShowValue">Values</div>
-                            <div class="checkboxValues"><input type="checkbox" onchange="crosstabsAnalysis.doRender()" id="rbShowPercentRow">Row %</div>
-                            <div class="checkboxValues"><input type="checkbox" onchange="crosstabsAnalysis.doRender()" id="rbShowPercentColumn">Column %</div>
-                            <div class="checkboxValues"><input type="checkbox" onchange="crosstabsAnalysis.doRender()" checked id="rbShowTotals">Totals</div>
+                            <div class="checkboxValues">
+                                <input type="checkbox" class="btn-check" onchange="crosstabsAnalysis.doRender()" style="margin-left: 0;" checked id="rbShowValue">
+                                    <label class="btn btn-outline-secondary" for="rbShowValue">Values</label>
+                            </div>
+
+                            <div class="checkboxValues">
+                                <input type="checkbox" class="btn-check" onchange="crosstabsAnalysis.doRender()" id="rbShowPercentRow">
+                                    <label class="btn btn-outline-secondary" for="rbShowPercentRow">Row %</label>
+                            </div>
+
+                            <div class="checkboxValues">
+                                <input type="checkbox" class="btn-check" onchange="crosstabsAnalysis.doRender()" id="rbShowPercentColumn">
+                                    <label class="btn btn-outline-secondary" for="rbShowPercentColumn">Column %</label>
+                            </div>
+                            
+                            <div class="checkboxValues">
+                                <input type="checkbox" class="btn-check" onchange="crosstabsAnalysis.doRender()" checked id="rbShowTotals">
+                                    <label class="btn btn-outline-secondary" for="rbShowTotals">Totals</label>
+                            </div>
                         </div>
                     </span>
                     <span class="blankCheckboxesSpan"style="float: right; width: 23.75%;">
                         <div class="fldheader"></div>
                         <div class="input-cell" style="padding-top: 10px;">
-                            <div class="blankCheckboxes"><input type="checkbox"
-                                onchange="crosstabsAnalysis.doRender()"  checked id="rbSupressZero">blank for zero values</div>
-                            <div class="blankCheckboxes"><input type="checkbox"
-                                onchange="crosstabsAnalysis.doRender()"  id="rbShowBlanks">show blank rows/columns</div>
+                            <div class="blankCheckboxes">
+                                <input type="checkbox" class="btn-check" onchange="crosstabsAnalysis.doRender()"  checked id="rbSupressZero">
+                                    <label class="btn btn-outline-secondary" for="rbSupressZero">blank for zero values</label>
+                            </div>
+
+                            <div class="blankCheckboxes">
+                                <input type="checkbox" class="btn-check" onchange="crosstabsAnalysis.doRender()"  id="rbShowBlanks">
+                                    <label class="btn btn-outline-secondary" for="rbShowBlanks">show blank rows/columns</label>
+                            </div>
                         </div>
                     </span>
 
@@ -176,7 +205,7 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPage.php');
 
         <!-- Adding modal to crosstabs -->
             <div class="col text-center">
-                <button id="modalButton" class="btn btn-info btn-lg" data-toggle="modal" data-target="#modalDisplay" disabled>View Analysis</button>
+                <button id="modalButton" class="btn btn-success btn-lg" data-toggle="modal" data-target="#modalDisplay" disabled>View Analysis</button>
             </div>
         <!-- For testing purposes
             <div id="modalDisplay" class="modal fade">
