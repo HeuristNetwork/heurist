@@ -32,7 +32,7 @@
 */
 class RecordsDupes {
     private function __construct() {}    
-    private static $system = null;
+    private static $system = null;                                       
     private static $mysqli = null;
     private static $initialized = false;
     
@@ -40,6 +40,15 @@ class RecordsDupes {
     
     private static $cache_id;
     private static $cache_str;
+    private static $all_similar_records;
+    private static $all_similar_ids;
+    private static $distance;
+    private static $all_similar_ids_cnt;
+    
+    private static $processed;
+    private static $tot_count;
+    private static $limit_cnt;
+    private static $progress_session_id;
     
 //
 //
@@ -92,9 +101,15 @@ public static function findDupes( $params ){
     
     $in_memory_limit = 10000;
     
-    $distance = @$params['distance'];
-    if(!($distance>0)) $distance = 0;
-    if($distance>20) $distance = 20; //percentage
+    self::$distance = @$params['distance'];
+    if(!(self::$distance>0)) self::$distance = 0;
+    if(self::$distance>20) self::$distance = 20; //percentage
+    
+    $startgroup = @$params['startgroup'];
+    if(!($startgroup>0)) $startgroup = 0;
+    if($startgroup>5) $startgroup = 5;
+    
+    
     
     $fields = @$params['fields']; 
     if(!$fields) $fields = 'rec_Title'; //by default
@@ -140,25 +155,25 @@ public static function findDupes( $params ){
     }
     
     $search_params = 'i'; //for recid
-    $search_where = array('(rec_ID>?)');
+    $search_where = array('(rec_ID!=?)');
     
     $compare_fields = array();
     $exact_fields = array();
     foreach($fields as $v){     
         
              if($v=='rec_Title' || $v=='rec_URL' || $v=='rec_ScratchPad'){
-                 if($distance>0){
+                 if(self::$distance>0){
                     $compare_fields[] = $header_fields2[$v];
                  }else{
                     $exact_fields[] = $header_fields[$v];        
                     $search_where[] = '('.$v.'=?)';  //$header_fields2[
                     $search_params = $search_params.'s';
                  }
-             }else if($distance>0 && (@$dty_IDs[$v]=='freetext' || @$dty_IDs[$v]=='blocktext')){
+             }else if(self::$distance>0 && (@$dty_IDs[$v]=='freetext' || @$dty_IDs[$v]=='blocktext')){
                     $compare_fields[] = $detail_fields2[$v];
              }else{
                     $exact_fields[] = $detail_fields[$v];        
-                    $search_where[] = '(d'.$v.'=?)'; //$detail_fields2[
+                    $search_where[] = '(d'.$v.'.dtl_Value=?)'; //$detail_fields2[
                     $search_params = $search_params.'s';
              }
     }
@@ -173,8 +188,8 @@ public static function findDupes( $params ){
             $compare_fields = ', SUBSTRING('. $compare_fields .',1,255) as C1 ';
             
             // we use php levenshtein now
-            //$search_where[] = '(ABS(CHAR_LENGTH(?)-CHAR_LENGTH(C1))<'.$distance.') AND '
-            //    .'(LEVENSHTEIN_LIMIT(?, C1,'.$distance.')<'.$distance.')';
+            //$search_where[] = '(ABS(CHAR_LENGTH(?)-CHAR_LENGTH(C1))<'.self::$distance.') AND '
+            //    .'(LEVENSHTEIN_LIMIT(?, C1,'.self::$distance.')<'.self::$distance.')';
             //$search_params = $search_params.'ss';
             $compare_mode = 1;
             
@@ -184,6 +199,8 @@ public static function findDupes( $params ){
     if(count($exact_fields)>0){
         $compare_mode = ($compare_mode==1)?2:3;
         $exact_fields = ', '.implode(',',$exact_fields);
+        
+        if($compare_mode==3) $startgroup = 0; //only exact search - no reason group by first chars
     }else{
         $exact_fields = '';
     }
@@ -194,70 +211,71 @@ public static function findDupes( $params ){
     }
     
     
-    self::$mysqli->query('DROP TABLE IF EXISTS tmp_find_dupes');
-    
     //1. search for all records and create temporary table
     $query = ' from Records '.implode(' ',$detail_joins)
-    .' where rec_RecTypeID ='.$rty_ID.' and not rec_FlagTemporary'
-    .' order by rec_ID asc';
+    .' where (rec_RecTypeID ='.$rty_ID.') and (not rec_FlagTemporary)';
 
     
-    $tot_count = mysql__select_value(self::$mysqli, 'SELECT count(rec_ID) '.$query);
+    self::$tot_count = mysql__select_value(self::$mysqli, 'SELECT count(rec_ID) '.$query);
 
-    if(!($tot_count>1)){
+    if(!(self::$tot_count>1)){
         $response = self::$system->addError(HEURIST_NOT_FOUND, 
-                ($tot_count==1?'Only one record':'No records').' found for record type '.$rty_ID);
+                (self::$tot_count==1?'Only one record':'No records').' found for record type '.$rty_ID);
         return false;
     }
+    if(self::$tot_count >= $in_memory_limit && $startgroup==0){
 
-    $query = ' rec_ID '.$compare_fields.' '.$exact_fields.$query;
-    
-    if($compare_mode>1 || $tot_count >= $in_memory_limit){
-        $query = 'CREATE TEMPORARY TABLE tmp_find_dupes (PRIMARY KEY find_dupes_pkey (rec_ID)) SELECT '.$query;    
-    }else{
-        $query = 'SELECT SQL_CALC_FOUND_ROWS '.$query;
+        $response = self::$system->addError(HEURIST_ACTION_BLOCKED, 
+            'Number of records to analyze: '.self::$tot_count.' may cause memory overload '
+            .'and will take a huge amount of time. Please specify "Group by begining" parameter to facilitate this operation');
+        return false;
     }
     
+
+    $main_query = $query;
+
+    $query = ' rec_ID '.$compare_fields.' '.$exact_fields.$query;
+
+    if($startgroup>0){
+          $query = $query.' ORDER BY C1, rec_ID asc'; 
+    }else{
+          $query = $query.' order by rec_ID asc';
+    }    
+    
+        
+        //self::$mysqli->query('DROP TABLE IF EXISTS tmp_find_dupes');
+        //$query = 'CREATE TEMPORARY TABLE tmp_find_dupes (PRIMARY KEY find_dupes_pkey (rec_ID)) SELECT '.$query;
+            //.' SET utf8 COLLATE utf8_general_ci';    
+    
+    $query = 'SELECT '.$query;
     $res = self::$mysqli->query($query);
     
     if(!$res){
         
-        if($compare_mode>1){
-            $response = self::$system->addError(HEURIST_DB_ERROR, 
-                'Search duplications. Can not create temporary table', self::$mysqli->error);
-        }else{
-            $response = self::$system->addError(HEURIST_DB_ERROR, 
+        $response = self::$system->addError(HEURIST_DB_ERROR, 
                 'Search duplications. Can not executre main query', self::$mysqli->error);
-        }
         return false;
     }
-        
-    
 
-    $all_similar_ids = array();     // plain array of ids of similar records (to facilitate search) 
-    $all_similar_ids_cnt = 0;       // 
-    $all_similar_records = array(); //result: grouped similar records - rec_ID=>rec_Title
+    self::$all_similar_ids = array();     // plain array of ids of similar records (to facilitate search) 
+    self::$all_similar_ids_cnt = 0;       // 
+    self::$all_similar_records = array(); //result: grouped similar records - rec_ID=>rec_Title
     
     //limits
     //max allowed similar records
     // total and pecentage 
-    $limit_cnt = @$params['limit_cnt'];
-    if(!($limit_cnt>0)) $limit_cnt = 1000;
-    else if($limit_cnt>3000) $limit_cnt = 3000;
+    self::$limit_cnt = @$params['limit_cnt'];
+    if(!(self::$limit_cnt>0)) self::$limit_cnt = 1000;
+    else if(self::$limit_cnt>3000) self::$limit_cnt = 3000;
     
     $limit_pc = @$params['limit_cnt'];
     if(!($limit_pc>0)) $limit_pc = 30;
     else if($limit_pc>50) $limit_pc = 50;
     
     
-    $progress_session_id = @$params['session'];
+    self::$progress_session_id = @$params['session'];
     $msg_termination = null;
-    $processed = 0;
-    
-    if($compare_mode>1){
-        $query = 'SELECT * FROM tmp_find_dupes'; //SQL_CALC_FOUND_ROWS 
-        $res = self::$mysqli->query($query);
-    }
+    self::$processed = 0;
     
     //3. loop for records
     if(!$res){
@@ -268,103 +286,73 @@ public static function findDupes( $params ){
         
     }else{
         
-        /* we search count in separate query at the begining
-        $fres = self::$mysqli->query('select found_rows()');
-        if (!$fres)     {
-            $response = self::$system->addError(HEURIST_DB_ERROR, 
-                $savedSearchName.'Search duplications (retrieving number of records)', self::$mysqli->error);
-            return false;
-        }else{
-
-            $tot_count = $fres->fetch_row();
-            $tot_count = $tot_count[0];
-            $fres->close();
-        }
-        */
-        
-        $limit_pc = $tot_count*$limit_pc/100;
-        $limit_cnt = min($limit_cnt, $limit_pc);
+        $limit_pc = self::$tot_count*$limit_pc/100;
+        self::$limit_cnt = min(self::$limit_cnt, $limit_pc);
         
         
-        if($progress_session_id){
+        if(self::$progress_session_id){
             //init progress session
-            mysql__update_progress(null, $progress_session_id, true, '0,'.$tot_count);
+            mysql__update_progress(null, self::$progress_session_id, true, '0,'.self::$tot_count);
         }
-        
-        if($tot_count<$in_memory_limit && $compare_mode==1){
+
+        //load into memory
+        if($compare_mode<3)
+        {
             self::$cache_id = array();
             self::$cache_str = array();
             
+            //($startgroup>0)    ordered by C1 and recID
+            $curr_c1 = null;
+            
             while ($row = $res->fetch_row()) {  //main query
-                if($row[1]!=''){
-                    self::$cache_id[] = $row[0];//array($row[0]=>$row[1]);
-                    self::$cache_str[] = $row[1];//array($row[0]=>$row[1]);
+            
+                if($row[1]==''){
+                    continue;
+                }else{
+                    if($startgroup>0){
+                        //strcasecmp()
+                        $str1 = mb_strtolower(mb_substr($row[1], 0, $startgroup));
+                        if($str1!=$curr_c1){
+                            $curr_c1 = $str1;
+                            
+                            //start search
+                            $rep = self::_searchInCache();
+                            if($rep>0){
+                                $msg_termination = ($rep==2);
+                                break;
+                            }
+
+                            //reset                            
+                            self::$cache_id = array();
+                            self::$cache_str = array();
+                        }
+                    }
+
+                    self::$cache_id[] = $row[0];//array($row[0]=>$row[1]);    rec_ID
+                    self::$cache_str[] = $row[1];//array($row[0]=>$row[1]);   C1
                 }
+            
+            }//while
+            
+            if(count(self::$cache_id)>0){
+                $rep = self::_searchInCache();    
+                $msg_termination = ($rep==2);
             }
             
-            foreach (self::$cache_id as $idx=>$curr_recid){
-                //self::_findByLevenshtein($id);
-                $str1 = self::$cache_str[$idx];
-                $len1 = strlen($str1);
-                
-                $i = array_search($curr_recid,  $all_similar_ids, true); 
-                if($i==false && $len1>2){
-
-                    $dist = ceil($len1*$distance/100);
-                    if($dist==0){
-                        $dist = 1;              
-                    }else if($dist>10){
-                        $dist = 10; 
-                    }
-                    
-                    $group = array();
-                    
-                    for ($idx2=$idx+1; $idx2<$tot_count; $idx2++){
-                        
-                        $str2 = self::$cache_str[$idx2];    
-                        if(abs($len1-strlen($str2))<$dist){
-                            $d = levenshtein($str1, $str2);
-                            if($d<$dist){
-                                $group[] = self::$cache_id[$idx2];
-                            }
-                        }
-                    }
-                    
-                    if(count($group)>0){
-                        array_unshift($group, $curr_recid);
-                        
-                        $all_similar_ids = array_merge($all_similar_ids, $group); //add new set of ids except first (current rec_id)
-                        
-                        //find titles
-                        $group = mysql__select_assoc2(self::$mysqli,'select rec_ID, rec_Title from Records where rec_ID in ('.implode(',',$group).')');
-                        
-                        $all_similar_records[] = $group; //id=>title
-                        $all_similar_ids_cnt = $all_similar_ids_cnt + count($group);
-                        
-                        if($all_similar_ids_cnt>$limit_cnt){
-                            break;
-                        }
-                    }
-                    
-                }
-                $processed++;
-                
-                //update session and check for termination                
-                if($progress_session_id && ($processed % 10 == 0)){
-                    $session_val = $processed.','.$tot_count;    
-                    $current_val = mysql__update_progress(null, $progress_session_id, false, $session_val);
-                    if($current_val && $current_val=='terminate'){
-                        $msg_termination = 'Operation is terminated by user';
-                        break;
-                    }
-                }
-            }
         }else{
         
+            //($startgroup>0)    ordered by C1 and recID
         
-            //3. create search query 
-            $search_query = 'SELECT rec_ID '.($compare_mode<3?', C1':'').' FROM tmp_find_dupes WHERE ';
-            $search_query = $search_query.' ('. implode(' AND ', $search_where) .')';
+            //3. create search query    uss $compare_fields
+            $search_query = 'SELECT rec_ID '.($compare_mode<3?(', '.$compare_fields):'').$main_query; //' FROM tmp_find_dupes WHERE ';
+            $search_query = $search_query.' AND ('. implode(' AND ', $search_where) .')';
+            
+            if($startgroup>0){ //limit search query to records that starts with the same characters
+                $search_query = $search_query.'AND (SUBSTRING(NEW_LIPOSUCTION(IFNULL(rec_Title,"")),1,'.$startgroup.') = ?)';
+                //$search_query = $search_query.' AND (C1 LIKE ?)';
+                $search_params = $search_params.'s';   
+            }
+            
             //4. prepare query
             $stmt = self::$mysqli->prepare($search_query);
             if(!$stmt){
@@ -384,11 +372,11 @@ public static function findDupes( $params ){
 
                 $curr_recid = intval($row[0]);
                 
-                //exclude this record and records that are already included in other groups
-                if(count($all_similar_ids)>0){
-                    $idx = array_search($curr_recid,  $all_similar_ids, true); 
+                //exclude this record since it is already included in other group
+                if(count(self::$all_similar_ids)>0){
+                    $idx = array_search($curr_recid,  self::$all_similar_ids, true); 
                     if($idx>0){
-                        $processed++;
+                        self::$processed++;
                         continue;
                         
                         
@@ -399,16 +387,20 @@ public static function findDupes( $params ){
                     $str1 = $row[1];
                     array_splice($row,1,1); //get C1 and remove it from array
                     $len1 = strlen($str1);
-                    $dist = ceil($len1*$distance/100);
+                    $dist = ceil($len1*self::$distance/100);
                     if($dist==0){
                         $dist = 1;              
                     }else if($dist>10){
                         $dist = 10; 
                     }
+                    
+                    if($startgroup>0){ //add value for C1 LIKE
+                        //$row[0] = 0;
+                        $row[] = substr($str1, 0, $startgroup);
+                    }
                 }
                 //fill values array    
                 array_unshift($row, $search_params); //add as a first element - list of parameter types 
-                
 
                 $group = null;            
                 call_user_func_array(array($stmt, 'bind_param'), referenceValues($row));
@@ -420,13 +412,13 @@ public static function findDupes( $params ){
                 $res2 = $stmt->get_result();
                 if ($res2){
                     $group = array($curr_recid);
-                    while ($row2 = $res2->fetch_row()){
+                    while ($row2 = $res2->fetch_row()){ //search loop
                         
                         if($compare_mode<3){ //need levenshtein
                             $str2 = $row2[1];    
-                            if(abs($len1-strlen($str2))<$dist){
+                            if(abs($len1-strlen($str2))<=$dist){
                                 $d = levenshtein($str1, $str2);
-                                if($d<$dist){
+                                if($d<=$dist){
                                     $group[] = $row2[0]; //for mix compare mode
                                 }
                             }
@@ -440,28 +432,29 @@ public static function findDupes( $params ){
                 
                 //NP $group = mysql__select_assoc2(self::$mysqli, $query);
                 if($group && count($group)>1){
-                        $all_similar_ids = array_merge($all_similar_ids, $group); //add new set of ids except first (current rec_id)
+                        self::$all_similar_ids = array_merge(self::$all_similar_ids, $group); //add new set of ids except first (current rec_id)
                         
                         //find titles
-                        $group = mysql__select_assoc2(self::$mysqli,'select rec_ID, rec_Title from Records where rec_ID in ('.implode(',',$group).')');
+                        $group = mysql__select_assoc2(self::$mysqli,
+                            'select rec_ID, rec_Title from Records where rec_ID in ('.implode(',',$group).')');
                         
-                        $all_similar_records[] = $group; //id=>title
-                        $all_similar_ids_cnt = $all_similar_ids_cnt + count($group);
+                        self::$all_similar_records[] = $group; //id=>title
+                        self::$all_similar_ids_cnt = self::$all_similar_ids_cnt + count($group);
                 }
 
-                $processed++;
+                self::$processed++;
                 
                 //update session and check for termination                
-                if($progress_session_id && ($processed % 10 == 0)){
-                    $session_val = $processed.','.$tot_count;    
-                    $current_val = mysql__update_progress(null, $progress_session_id, false, $session_val);
+                if(self::$progress_session_id && (self::$processed % 10 == 0)){
+                    $session_val = self::$processed.','.self::$tot_count;    
+                    $current_val = mysql__update_progress(null, self::$progress_session_id, false, $session_val);
                     if($current_val && $current_val=='terminate'){
                         $msg_termination = 'Operation is terminated by user';
                         break;
                     }
                 }
                 
-                if($all_similar_ids_cnt>$limit_cnt){
+                if(self::$all_similar_ids_cnt>self::$limit_cnt){
                     break;
                 }
             
@@ -477,26 +470,98 @@ public static function findDupes( $params ){
             
         }
         
-        self::$mysqli->query('DROP TABLE IF EXISTS tmp_find_dupes');
-        
         //add info
-        $all_similar_records['summary'] = array(
-            'scope'=>$tot_count,
-            'cnt_groups'=>count($all_similar_records),
-            'cnt_records'=>$all_similar_ids_cnt,
-            'limit'=>$limit_cnt,
+        self::$all_similar_records['summary'] = array(
+            'scope'=>self::$tot_count,
+            'cnt_groups'=>count(self::$all_similar_records),
+            'cnt_records'=>self::$all_similar_ids_cnt,
+            'limit'=>self::$limit_cnt,
             'is_terminated'=>($msg_termination!=null)
         );
 
-        if($progress_session_id){
+        if(self::$progress_session_id){
             //remove session file
-            mysql__update_progress(null, $progress_session_id, false, 'REMOVE');    
+            mysql__update_progress(null, self::$progress_session_id, false, 'REMOVE');    
         }
     }//if $res 
     
-    return $all_similar_records;
+    return self::$all_similar_records;
     
 }//findDupes
+
+//
+//
+//
+private static function _searchInCache(){
+
+    foreach (self::$cache_id as $idx=>$curr_recid){
+
+        $group = array();
+        
+        $str1 = self::$cache_str[$idx];
+        $len1 = mb_strlen($str1);
+        $cnt = count(self::$cache_id);
+        
+        if($curr_recid==1180){
+            $w=1;
+        }
+        
+
+        $i = array_search($curr_recid,  self::$all_similar_ids, true); 
+        if($i==false && $len1>2){
+
+            $dist = ceil($len1*self::$distance/100);
+            if($dist==0){
+                $dist = 1;              
+            }else if($dist>10){
+                $dist = 10; 
+            }
+
+            for ($idx2=$idx+1; $idx2<$cnt; $idx2++){
+
+                $str2 = self::$cache_str[$idx2];    
+                if(abs($len1-mb_strlen($str2))<=$dist){
+                    $d = levenshtein($str1, $str2);
+                    if($d<=$dist){
+                        $group[] = self::$cache_id[$idx2];
+                    }
+                }
+            }
+        }
+
+        if(count($group)>0){
+            array_unshift($group, $curr_recid);
+
+            self::$all_similar_ids = array_merge(self::$all_similar_ids, $group); //add new set of ids except first (current rec_id)
+
+            //find titles
+            $group = mysql__select_assoc2(self::$mysqli,'select rec_ID, rec_Title from Records where rec_ID in ('
+                        .implode(',',$group).')');
+
+            self::$all_similar_records[] = $group; //id=>title
+            self::$all_similar_ids_cnt = self::$all_similar_ids_cnt + count($group);
+
+            if(self::$all_similar_ids_cnt>self::$limit_cnt){
+                return 1;
+            }
+        }
+
+        self::$processed++;
+        
+       
+        //update session and check for termination                
+        if(self::$progress_session_id && (self::$processed % 10 == 0)){
+            $session_val = self::$processed.','.self::$tot_count;    
+            $current_val = mysql__update_progress(null, self::$progress_session_id, false, $session_val);
+            if($current_val && $current_val=='terminate'){
+                $msg_termination = 'Operation is terminated by user';
+                return 2;
+            }
+        }
+    }  //for
+
+    return 0;
+}
 
 } //end class
 ?>

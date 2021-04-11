@@ -1254,10 +1254,12 @@ $query = 'CREATE TABLE sysDashboard ('
     //
     function checkDatabaseFunctionsForDuplications($mysqli){
         
-         if(!isFunctionExists($mysqli, 'LEVENSHTEIN_LIMIT')){
+         if(!isFunctionExists($mysqli, 'NEW_LIPOSUCTION')){
                 include(dirname(__FILE__).'/../utilities/utils_db_load_script.php'); // used to load procedures/triggers
                 if(db_script(HEURIST_DBNAME_FULL, dirname(__FILE__).'/../../admin/setup/dbcreate/addFunctions.sql', false)){
                     $res = true;
+                }else{
+                    $res = false;
                 }
          }else{
                 $res = true;

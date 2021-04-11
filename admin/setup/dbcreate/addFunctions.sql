@@ -39,81 +39,19 @@
 -- thus the maximum string length this implementation can handle is also limited to 255 characters.
 
 DELIMITER $$
-DROP FUNCTION IF EXISTS NEW_LEVENSHTEIN $$
-CREATE FUNCTION NEW_LEVENSHTEIN(s1 VARCHAR(255) CHARACTER SET utf8, s2 VARCHAR(255) CHARACTER SET utf8)
-  RETURNS INT
-  DETERMINISTIC
-  BEGIN
-    DECLARE s1_len, s2_len, i, j, c, c_temp, cost INT;
-    DECLARE s1_char CHAR CHARACTER SET utf8;
-    -- max strlen=255 for this function
-    DECLARE cv0, cv1 VARBINARY(256);
 
-    SET s1_len = CHAR_LENGTH(s1),
-        s2_len = CHAR_LENGTH(s2),
-        cv1 = 0x00,
-        j = 1,
-        i = 1,
-        c = 0;
-
-    IF (s1 = s2) THEN
-      RETURN (0);
-    ELSEIF (s1_len = 0) THEN
-      RETURN (s2_len);
-    ELSEIF (s2_len = 0) THEN
-      RETURN (s1_len);
-    END IF;
-
-    WHILE (j <= s2_len) DO
-      SET cv1 = CONCAT(cv1, CHAR(j)),
-          j = j + 1;
-    END WHILE;
-
-    WHILE (i <= s1_len) DO
-      SET s1_char = SUBSTRING(s1, i, 1),
-          c = i,
-          cv0 = CHAR(i),
-          j = 1;
-
-      WHILE (j <= s2_len) DO
-        SET c = c + 1,
-            cost = IF(s1_char = SUBSTRING(s2, j, 1), 0, 1);
-
-        SET c_temp = ORD(SUBSTRING(cv1, j, 1)) + cost;
-        IF (c > c_temp) THEN
-          SET c = c_temp;
-        END IF;
-
-        SET c_temp = ORD(SUBSTRING(cv1, j+1, 1)) + 1;
-        IF (c > c_temp) THEN
-          SET c = c_temp;
-        END IF;
-
-        SET cv0 = CONCAT(cv0, CHAR(c)),
-            j = j + 1;
-      END WHILE;
-
-      SET cv1 = cv0,
-          i = i + 1;
-    END WHILE;
-
-   RETURN (c);
-  END $$
-
-
-DELIMITER $$
-DROP FUNCTION IF EXISTS NEW_LIPOSUCTION $$
+DROP FUNCTION IF EXISTS `NEW_LIPOSUCTION`$$
 -- LIPOSUCTION returns string removing any spaces/punctuation
 -- C isspace(): 0x20 SPC 0x09 TAB 0x0a LF 0x0b VT 0x0c FF 0x0d CR
 -- For simplicity we just regard anything <= ASCII 32 as space
 -- C ispunct(): any of ! " # % &  ' ( ) ; < = > ? [ \ ] * + , - . / : ^ _ { | } ~
-CREATE FUNCTION NEW_LIPOSUCTION(s VARCHAR(20480) CHARACTER SET utf8)
-  RETURNS VARCHAR(31) CHARACTER SET utf8
+CREATE DEFINER=CURRENT_USER FUNCTION `NEW_LIPOSUCTION`(s VARCHAR(16383) CHARACTER SET utf8mb4)
+  RETURNS VARCHAR(31) CHARACTER SET utf8mb4
   DETERMINISTIC
   BEGIN
     DECLARE i, len INT;
-    DECLARE c CHAR CHARACTER SET utf8;
-    DECLARE s2 VARCHAR(20480) CHARACTER SET utf8;
+    DECLARE c CHAR CHARACTER SET utf8mb4;
+    DECLARE s2 VARCHAR(16383) CHARACTER SET utf8mb4;
 
     IF (s IS NULL) THEN
        RETURN (NULL);
@@ -125,7 +63,7 @@ CREATE FUNCTION NEW_LIPOSUCTION(s VARCHAR(20480) CHARACTER SET utf8)
 
     WHILE (i <= len) DO
         SET c = SUBSTRING(s, i, 1);
-        IF (ORD(c) > 32 && LOCATE(c, '!\"#%&\'();<=>?[\\]*+,-./:^_{|}~') = 0) THEN
+        IF (ORD(c) > 32 AND LOCATE(c, '!\"#%&\'();<=>?[\\]*+,-./:^_{|}~') = 0) THEN
           SET s2 = CONCAT(s2, c);
         END IF;
 
@@ -133,57 +71,6 @@ CREATE FUNCTION NEW_LIPOSUCTION(s VARCHAR(20480) CHARACTER SET utf8)
     END WHILE;
 
     RETURN SUBSTRING(s2,1,31);
-  END $$
-
-DELIMITER $$
-DROP FUNCTION IF EXISTS LEVENSHTEIN_LIMIT $$
-
-CREATE FUNCTION LEVENSHTEIN_LIMIT( s1 VARCHAR(255), s2 VARCHAR(255), n INT) 
-  RETURNS INT 
-  DETERMINISTIC 
-  BEGIN 
-    DECLARE s1_len, s2_len, i, j, c, c_temp, cost, c_min INT; 
-    DECLARE s1_char CHAR; 
-    -- max strlen=255 
-    DECLARE cv0, cv1 VARBINARY(256); 
-    SET s1_len = CHAR_LENGTH(s1), s2_len = CHAR_LENGTH(s2), cv1 = 0x00, j = 1, i = 1, c = 0, c_min = 0; 
-    IF s1 = s2 THEN 
-      RETURN 0; 
-    ELSEIF s1_len = 0 THEN 
-      RETURN s2_len; 
-    ELSEIF s2_len = 0 THEN 
-      RETURN s1_len; 
-    ELSEIF ABS(s2_len-s2_len)>n THEN 
-      RETURN n;
-    ELSE 
-      WHILE j <= s2_len DO 
-        SET cv1 = CONCAT(cv1, UNHEX(HEX(j))), j = j + 1; 
-      END WHILE; 
-      WHILE i <= s1_len and c_min < n DO -- if actual levenshtein dist >= limit, don't bother computing it
-        SET s1_char = SUBSTRING(s1, i, 1), c = i, c_min = i, cv0 = UNHEX(HEX(i)), j = 1; 
-        WHILE j <= s2_len DO 
-          SET c = c + 1; 
-          IF s1_char = SUBSTRING(s2, j, 1) THEN  
-            SET cost = 0; ELSE SET cost = 1; 
-          END IF; 
-          SET c_temp = CONV(HEX(SUBSTRING(cv1, j, 1)), 16, 10) + cost; 
-          IF c > c_temp THEN SET c = c_temp; END IF; 
-            SET c_temp = CONV(HEX(SUBSTRING(cv1, j+1, 1)), 16, 10) + 1; 
-            IF c > c_temp THEN  
-              SET c = c_temp;  
-            END IF; 
-            SET cv0 = CONCAT(cv0, UNHEX(HEX(c))), j = j + 1;
-            IF c < c_min THEN
-              SET c_min = c;
-            END IF; 
-        END WHILE; 
-        SET cv1 = cv0, i = i + 1; 
-      END WHILE; 
-    END IF;
-    IF i <= s1_len THEN -- we didn't finish, limit exceeded    
-      SET c = c_min; -- actual distance is >= c_min (i.e., the smallest value in the last computed row of the matrix) 
-    END IF;
-    RETURN c;
   END$$
   
-DELIMITER ;
+  DELIMITER ;

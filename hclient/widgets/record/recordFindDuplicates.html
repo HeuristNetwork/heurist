@@ -14,10 +14,26 @@
         <div style="padding:0.2em; width: 100%;" class="input">
 
             <div class="header">
-                <label>Difference percentage:</label>
+                <label>Difference percentage: </label>
             </div>
 
-            <input style="width:30px" id="distance" value="10"/>&nbsp;%
+            <select id="distance" class="text ui-widget-content ui-corner-all" style="width:100px;max-width:100px">
+                <option value="0">exact match</option>
+                <option value="5">5</option>
+                <option value="10" selected>10</option>
+                <option value="15">15</option>
+                <option value="20">20</option>
+            </select>&nbsp;%&nbsp;&nbsp;
+            
+            <label style="color:#6A7C99" for="startgroup">Group by begining: </label>
+            <select id="startgroup" class="text ui-widget-content ui-corner-all" style="width:80px;max-width:80px">
+                <option value="0">not use</option>
+                <option value="1" selected>1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+            </select>&nbsp;characters
+            
+            
                 <div class="heurist-helper2"  style="padding: 5px 0 10px 0;">
                     Locates duplicates based on similarity of the selected field(s). We recommend use of the constructed title in the first instance. <br> 
                     Strings use levenshtein character distance as a percentage of string length. 0% = exact match only, 10 - 20% recommended. Terms, numeric and date fields apply exact match. 

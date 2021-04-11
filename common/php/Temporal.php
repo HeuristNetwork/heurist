@@ -208,9 +208,6 @@ function removeLeadingYearZeroes($value, $is_greg_or_julian=true, $is_strict_iso
                 $origWithoutDays = substr_count($value,'-')==1;
                 
                 
-//$d = DateTime::createFromFormat($format, $date);
-//return $d && $d->format($format) === $date;                
-                
                 $t2 = new DateTime($value);
                 $datestamp = $t2->format('Y-m-d H:i:s');
                 $date = date_parse($datestamp);

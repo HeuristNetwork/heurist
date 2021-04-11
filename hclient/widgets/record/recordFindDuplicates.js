@@ -147,6 +147,7 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
                     rty_ID   : rty_ID,
                     fields   : settings.fields,
                     session  : session_id,
+                    startgroup: settings.startgroup,
                     distance : settings.distance};
 
                 var url = window.hWin.HAPI4.baseURL + 'hsapi/controller/record_verify.php'
@@ -256,8 +257,9 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
             //DEBUG 
         
         return {
-                'fields': selectedFields,
-                'distance': this.element.find('#distance').val()
+                fields: selectedFields,
+                distance: this.element.find('#distance').val(),
+                startgroup: this.element.find('#startgroup').val()
                 };
         
     },
