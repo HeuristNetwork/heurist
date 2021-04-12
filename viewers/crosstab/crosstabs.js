@@ -28,6 +28,7 @@ var buttonDiv;
 var exportButton;
 var visualisationButton;
 var exportDlgBtn;
+var firstRender = true;
 
 /**
 *  CrosstabsAnalysis - class for crosstab analysis
@@ -898,7 +899,9 @@ function CrosstabsAnalysis(_query, _query_domain) {
     */
     function _doRender(){
 
-        console.log($.fn.dataTable.isDataTable("#resultsTable"));
+        if($.fn.dataTable.isDataTable("#resultsTable")){
+            $("#resultsTable").DataTable().destroy(true);
+        }
 
         $("#pmessage").html('Rendering...');
         _setMode(1);//progress
@@ -1003,15 +1006,19 @@ function CrosstabsAnalysis(_query, _query_domain) {
         $divres.find('td').css( {'padding':'4px', 'border':'1px dotted gray'} );//{'border':'1px dotted gray'}); //1px solid gray'});
         buttonDiv.appendTo($divres);
 
-        $(document).ready(function(){
-                $("#resultsTable").DataTable();
-            });
+        //console.log($.fn.dataTable.isDataTable("table#resultsTable"));
 
-        console.log($.fn.dataTable.isDataTable("#resultsTable"));
+        $(document).ready(function(){
+            $("#resultsTable").DataTable();
+        });
+        
+        //console.log($.fn.dataTable.isDataTable("table#resultsTable"));
+
+        
         
         
         _setMode(2);//results
-    }//_doRender
+    }//_doRenders
 
     /**
     * render particular page (group)
@@ -1146,9 +1153,10 @@ function CrosstabsAnalysis(_query, _query_domain) {
         }//records
 
         // If user selects one variable, the rows are to be sorted by descending order.
-        if(clen == 1){
+        /*if(clen == 1){
             rows = rows.sort(_rowCompare);
         }
+        */
         
         //special calc fo average
         if(isAVG)
@@ -1668,6 +1676,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
     $("#modalButton").click(function(){
         window.hWin.HEURIST4.msg.showElementAsDialog(
             {element:$divres.get(0), height: 600, width:1000, title:"Results", modal:true} );
+        console.log($.fn.dataTable.isDataTable("#resultsTable"));
     });
 
     exportButton.click(function(){
