@@ -545,7 +545,7 @@ class DbUtils {
             $tables = array(
                 "recThreadedComments" => "Comments",
                 "recForwarding" => "Forwarding",
-                "recRelationshipsCache" => "Relationships Cache",
+                "recLinks" => "Relationships Cache",
                 "recSimilarButNotDupes" => "List of Similar Records",
                 "usrRecTagLinks" => "Tag Links",
                 "usrReminders" => "Reminders",
@@ -614,10 +614,10 @@ class DbUtils {
                 //$isCloneTemplate
                 $exception_for_clone_template = array('sysugrps','sysusrgrplinks',
                 'woot_chunkpermissions','woot_chunks','woot_recpermissions','woots',
-                'usrreminders','usrremindersblocklist','recthreadedcomments','usrrecentrecords','usrreportschedule','usrhyperlinkfilters', 'sysarchive');
+                'usrreminders','usrremindersblocklist','recthreadedcomments','usrreportschedule','usrhyperlinkfilters', 'sysarchive');
                 
-                $data_tables = array('records','recdetails','reclinks','recrelationshipscache',
-                'recsimilarbutnotdupes','recthreadedcomments','recuploadedfiles','usrbookmarks','usrrecentrecords','usrrectaglinks',
+                $data_tables = array('records','recdetails','reclinks',
+                'recsimilarbutnotdupes','recthreadedcomments','recuploadedfiles','usrbookmarks','usrrectaglinks',
                 'usrreminders','usrremindersblocklist','woot_chunkpermissions','woot_chunks','woot_recpermissions','woots', 'sysarchive');
           
                 

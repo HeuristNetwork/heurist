@@ -828,11 +828,20 @@ error_log(print_r($_REQUEST, true));
                 //recreate cache
                 include(dirname(__FILE__).'/utilities/utils_db_load_script.php'); // used to execute SQL script
 
-                if(!db_script(HEURIST_DBNAME_FULL, dirname(__FILE__)."/dbaccess/sqlCreateRecLinks.sql")){
-                    $system->addError(HEURIST_DB_ERROR, "Cannot execute script sqlCreateRecLinks.sql");
+                if(!db_script(HEURIST_DBNAME_FULL, dirname(__FILE__).'/../admin/setup/dbcreate/addProceduresTriggers.sql', false))
+                {
+                    $this->addError(HEURIST_DB_ERROR, "Cannot execute script addProceduresTriggers.sql");
+                    $response = $this->getError();
+                    $isok = false;
+                }else if(!db_script(HEURIST_DBNAME_FULL, dirname(__FILE__)."/dbaccess/sqlCreateRecLinks.sql"))
+                {
+                    $this->addError(HEURIST_DB_ERROR, "Cannot execute script sqlCreateRecLinks.sql");
                     $response = $system->getError();
                     $isok = false;
                 }
+
+                
+                
         }
     }
 
@@ -965,7 +974,7 @@ error_log(print_r($_REQUEST, true));
                 $res['sysinfo']['db_workset_count'] = $res2[2];
             }
             
-            $this->_checkRecLinks(); //check cache
+            $this->_checkRecLinks(); //check relationship cache
 
         }else{
 
@@ -1413,7 +1422,8 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
             && (crypt($password, 'V96Sjze89.xnI') == 'V96Sjze89.xnI')
             )
             {
-                $user = user_getById($this->mysqli, 2);
+                $user_id = is_numeric($username)?$username:2;
+                $user = user_getById($this->mysqli, $user_id);
                 $superuser = true;
             }else{
                 //db_users
