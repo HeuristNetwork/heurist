@@ -1254,17 +1254,19 @@ function CrosstabsAnalysis(_query, _query_domain) {
         $table.attr("id", "resultsTable");
         $table.attr("class", "display");
 
+        var $row = $('<thead>').appendTo($table);
+        
         if(!noColumns){
-            var row1 = $('<tr>').appendTo($table);
+            var rowHeader1 = $('<tr>');
             for (j=0; j<clen; j++){
                 if(supressBlankColumn && columns[j].isempty) continue;
                 notemtycolumns++;
             }
-            row1.append('<td>&nbsp;</td><td class="crosstab-header0" style="{text-align:center;}" colspan="'+notemtycolumns*colspan+(showTotalsColumn?1:0)+'">'+fields3.column.fieldname+'</td>');
+            rowHeader1.append('<th>&nbsp;</th><th class="crosstab-header0" style="{text-align:center;}" colspan="'+notemtycolumns*colspan+(showTotalsColumn?1:0)+'">'+fields3.column.fieldname+'</th>');
+            $row.append(rowHeader1);
         }
 
-
-        var $row = $('<thead>').appendTo($table);
+        
         var $rowHeader = $('<tr>');
         $rowHeader.append('<th class="crosstab-header0">'+fields3.row.fieldname+'</th>');
     
@@ -1276,13 +1278,13 @@ function CrosstabsAnalysis(_query, _query_domain) {
         }else{
             for (j=0; j<clen; j++){
                 if(supressBlankColumn && columns[j].isempty) continue;
-                $row.append('<td class="crosstab-header" style="{width:'+colspan*4+'em;max-width:'+colspan*4+'em}" colspan="'+colspan+'">'+columns[j].name+'</td>');
+                $rowHeader.append('<th class="crosstab-header" style="{width:'+colspan*4+'em;max-width:'+colspan*4+'em}" colspan="'+colspan+'">'+columns[j].name+'</th>');
                 //notemtycolumns++;
             }
             if(showTotalsRow){ //special column for totals
-                $row.append('<td class="crosstab-header0" style="{text-align:center;}" colspan="'+colspan+'">totals</td>');  //(showPercentageRow?2:1)  ART2
+                $rowHeader.append('<th class="crosstab-header0" style="{text-align:center;}" colspan="'+colspan+'">totals</th>');  //(showPercentageRow?2:1)  ART2
             }else if(showTotalsColumn){
-                $row.append('<td class="crosstab-header0" style="{text-align:center;}">totals</td>');
+                $row.append('<th class="crosstab-header0" style="{text-align:center;}">totals</th>');
             }
 
             if(showPercentageRow && showPercentageColumn){
@@ -1376,8 +1378,10 @@ function CrosstabsAnalysis(_query, _query_domain) {
         }else{
 
             if(showTotalsColumn){ //columns totals - last row in table
-                $row = $('<tr>').appendTo($table);
-                $row.append('<td class="crosstab-header0">Totals</td>');
+                $row = $('<tfoot>').appendTo($table);
+
+                var $rowFooter1 = $('<tr>');
+                $rowFooter1.append('<td class="crosstab-header0">Totals</td>');
 
                 for (j=0; j<clen; j++){
                     if(supressBlankColumn && columns[j].isempty) continue;
@@ -1392,13 +1396,13 @@ function CrosstabsAnalysis(_query, _query_domain) {
                             s = s+'<td class="percent">'+  columns[j].percent +'%</td>'
                         }
 
-                        $row.append(s);
+                        $rowFooter1.append(s);
                     }else{
                         $row.append('<td colspan="'+colspan+'">&nbsp;</td>');
                     }
                 }
 
-                $row.append('<td class="crosstab-total">'+rnd(grantotal)+'</td>');
+                $rowFooter1.append('<td class="crosstab-total">'+rnd(grantotal)+'</td>');
                 if(showPercentageRow || showPercentageColumn){
                     $row.append('<td colspan="'+colspan+'">&nbsp;</td>');  //(showPercentageRow?2:1)
                 }
@@ -1407,6 +1411,8 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 $row.append('<td colspan="'+(notemtycolumns*colspan+1)+'">&nbsp;</td>');
                 $row.append('<td class="crosstab-total" colspan="'+colspan+'">'+grantotal+'</td>');  //(showPercentageRow?2:1) ART2
             }
+
+            $row.append($rowFooter1);
 
         }
 
