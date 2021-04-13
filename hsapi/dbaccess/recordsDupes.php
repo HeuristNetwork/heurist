@@ -40,6 +40,7 @@ class RecordsDupes {
     
     private static $cache_id;
     private static $cache_str;
+    private static $cache_str_exact;
     private static $all_similar_records;
     private static $all_similar_ids;
     private static $distance;
@@ -63,7 +64,7 @@ private static function initialize()
     self::$mysqli = $system->get_mysqli();
     self::$initialized = true;
     
-    //check existense NEW_LIPOSUCTION NEW_LEVENSHTEIN
+    //check existense NEW_LIPOSUCTION_255
     checkDatabaseFunctionsForDuplications(self::$mysqli);
 }
 
@@ -109,6 +110,7 @@ public static function findDupes( $params ){
     if(!($startgroup>0)) $startgroup = 0;
     if($startgroup>5) $startgroup = 5;
     
+    $sort_field = @$params['sort_field'];
     
     
     $fields = @$params['fields']; 
@@ -144,18 +146,28 @@ public static function findDupes( $params ){
             $p = 'd'.$v;
             $detail_joins[] = ' left join recDetails '.$p.' on rec_ID='.$p.'.dtl_RecID and '.$p.'.dtl_DetailTypeID='.$v;
             
-            $s = 'NEW_LIPOSUCTION(IFNULL('.$p.'.dtl_Value,""))';
+            $s = 'NEW_LIPOSUCTION_255(IFNULL('.$p.'.dtl_Value,""))';
             $detail_fields[$v] = $s.' as '.$p; //for retrieve       
             $detail_fields2[$v] = $s;
+            
+            if($sort_field==$v || $sort_field==null){
+                $sort_field = $p.'.dtl_Value';           
+            } 
+            
+            
         }else if (strpos($v,'rec_')===0){
-            $s = 'NEW_LIPOSUCTION(IFNULL('.$v.',""))';
+            $s = 'NEW_LIPOSUCTION_255(IFNULL('.$v.',""))';
             $header_fields[$v] = $s.' as '.$v; //for retrieve       
             $header_fields2[$v] = $s; //for compare query
+            
+            if($sort_field==$v || $sort_field==null){
+                $sort_field = $v;           
+            } 
         }
     }
     
     $search_params = 'i'; //for recid
-    $search_where = array('(rec_ID!=?)');
+    $search_where = array();
     
     $compare_fields = array();
     $exact_fields = array();
@@ -184,6 +196,11 @@ public static function findDupes( $params ){
     //3. only  equal searches - individual search for every loop
         
     if(count($compare_fields)>0){
+        
+            if($sort_field==null){
+                $sort_field = $compare_fields[0];
+            }
+        
             $compare_fields = count($compare_fields)>1?'CONCAT('.implode(',',$compare_fields).')':$compare_fields[0];
             $compare_fields = ', SUBSTRING('. $compare_fields .',1,255) as C1 ';
             
@@ -193,14 +210,23 @@ public static function findDupes( $params ){
             //$search_params = $search_params.'ss';
             $compare_mode = 1;
             
+            array_unshift($search_where, '(rec_ID!=?)');
     }else{
+            array_unshift($search_where, '(rec_ID>?)');
             $compare_fields = '';
+            $sort_field = null;
+            $startgroup = 0; //only exact search - no reason group by first chars
     }                           
     if(count($exact_fields)>0){
         $compare_mode = ($compare_mode==1)?2:3;
-        $exact_fields = ', '.implode(',',$exact_fields);
         
-        if($compare_mode==3) $startgroup = 0; //only exact search - no reason group by first chars
+        if($compare_mode==3){
+            $exact_fields = ', '.implode(',',$exact_fields);    
+        }else{
+            $exact_fields = ', '.(count($exact_fields)>1?'CONCAT('.implode('|',$exact_fields).')':$exact_fields[0]);
+        }
+        
+        
     }else{
         $exact_fields = '';
     }
@@ -223,11 +249,9 @@ public static function findDupes( $params ){
                 (self::$tot_count==1?'Only one record':'No records').' found for record type '.$rty_ID);
         return false;
     }
-    if(self::$tot_count >= $in_memory_limit && $startgroup==0){
-
-        $response = self::$system->addError(HEURIST_ACTION_BLOCKED, 
-            'Number of records to analyze: '.self::$tot_count.' may cause memory overload '
-            .'and will take a huge amount of time. Please specify "Group by begining" parameter to facilitate this operation');
+    if(self::$tot_count >= $in_memory_limit && $compare_mode<3 && $sort_field==null){
+        
+        $response = self::$system->addError(HEURIST_ACTION_BLOCKED, self::$tot_count); 
         return false;
     }
     
@@ -236,8 +260,8 @@ public static function findDupes( $params ){
 
     $query = ' rec_ID '.$compare_fields.' '.$exact_fields.$query;
 
-    if($startgroup>0){
-          $query = $query.' ORDER BY C1, rec_ID asc'; 
+    if($sort_field!=null){
+          $query = $query." ORDER BY $sort_field, rec_ID asc"; 
     }else{
           $query = $query.' order by rec_ID asc';
     }    
@@ -300,21 +324,34 @@ public static function findDupes( $params ){
         {
             self::$cache_id = array();
             self::$cache_str = array();
+            self::$cache_str_exact = array();
             
             //($startgroup>0)    ordered by C1 and recID
             $curr_c1 = null;
+            $cache_cnt = 0;
+            $is_reset = false;
             
             while ($row = $res->fetch_row()) {  //main query
             
                 if($row[1]==''){
                     continue;
                 }else{
-                    if($startgroup>0){
+                    
+                    if($cache_cnt>=$in_memory_limit){
+                       
+                       $is_reset = true;
+                       $cache_cnt = 0;
+                        
+                    }else if($startgroup>0){
                         //strcasecmp()
                         $str1 = mb_strtolower(mb_substr($row[1], 0, $startgroup));
                         if($str1!=$curr_c1){
                             $curr_c1 = $str1;
-                            
+                            $is_reset = true;
+                        }
+                    }
+                    if($is_reset){       
+                            $is_reset = false;
                             //start search
                             $rep = self::_searchInCache();
                             if($rep>0){
@@ -325,11 +362,13 @@ public static function findDupes( $params ){
                             //reset                            
                             self::$cache_id = array();
                             self::$cache_str = array();
-                        }
+                            self::$cache_str_exact = array();
                     }
 
                     self::$cache_id[] = $row[0];//array($row[0]=>$row[1]);    rec_ID
                     self::$cache_str[] = $row[1];//array($row[0]=>$row[1]);   C1
+                    if($compare_mode==2) self::$cache_str_exact[] = $row[2];
+                    $cache_cnt++;
                 }
             
             }//while
@@ -340,18 +379,19 @@ public static function findDupes( $params ){
             }
             
         }else{
-        
-            //($startgroup>0)    ordered by C1 and recID
+            //exact search only
         
             //3. create search query    uss $compare_fields
             $search_query = 'SELECT rec_ID '.($compare_mode<3?(', '.$compare_fields):'').$main_query; //' FROM tmp_find_dupes WHERE ';
             $search_query = $search_query.' AND ('. implode(' AND ', $search_where) .')';
             
+            /*
             if($startgroup>0){ //limit search query to records that starts with the same characters
-                $search_query = $search_query.'AND (SUBSTRING(NEW_LIPOSUCTION(IFNULL(rec_Title,"")),1,'.$startgroup.') = ?)';
+                $search_query = $search_query.'AND (SUBSTRING(NEW_LIPOSUCTION_255(IFNULL(rec_Title,"")),1,'.$startgroup.') = ?)';
                 //$search_query = $search_query.' AND (C1 LIKE ?)';
                 $search_params = $search_params.'s';   
             }
+            */
             
             //4. prepare query
             $stmt = self::$mysqli->prepare($search_query);
@@ -382,7 +422,8 @@ public static function findDupes( $params ){
                         
                     }
                 }
-                
+              
+                /*  
                 if($compare_mode<3){ //need levenshtein
                     $str1 = $row[1];
                     array_splice($row,1,1); //get C1 and remove it from array
@@ -399,6 +440,7 @@ public static function findDupes( $params ){
                         $row[] = substr($str1, 0, $startgroup);
                     }
                 }
+                */
                 //fill values array    
                 array_unshift($row, $search_params); //add as a first element - list of parameter types 
 
@@ -414,6 +456,7 @@ public static function findDupes( $params ){
                     $group = array($curr_recid);
                     while ($row2 = $res2->fetch_row()){ //search loop
                         
+                        /*
                         if($compare_mode<3){ //need levenshtein
                             $str2 = $row2[1];    
                             if(abs($len1-strlen($str2))<=$dist){
@@ -424,7 +467,9 @@ public static function findDupes( $params ){
                             }
                         }else{
                             $group[] = $row2[0];//rec_ID - for exact compare mode    
-                        }
+                        }*/
+                        
+                        $group[] = $row2[0];//rec_ID - for exact compare mode    
                         
                     }
                     $res2->close();
@@ -460,7 +505,7 @@ public static function findDupes( $params ){
             
     /*        
             ON a.rec_ID != b.rec_ID AND b.rec_RecTypeID=10
-        AND NEW_LEVENSHTEIN(NEW_LIPOSUCTION(a.rec_Title), NEW_LIPOSUCTION(b.rec_Title))<5
+        AND NEW_LEVENSHTEIN(NEW_LIPOSUCTION_255(a.rec_Title), NEW_LIPOSUCTION_255(b.rec_Title))<5
     WHERE a.rec_ID=:XXX'
     */            
             }//while
@@ -497,14 +542,25 @@ private static function _searchInCache(){
     foreach (self::$cache_id as $idx=>$curr_recid){
 
         $group = array();
+        $group2 = array();
         
         $str1 = self::$cache_str[$idx];
-        $len1 = mb_strlen($str1);
-        $cnt = count(self::$cache_id);
         
-        if($curr_recid==1180){
-            $w=1;
+        $str_exact = @self::$cache_str_exact[$idx]; 
+        
+        
+        if($curr_recid==20 || $curr_recid==1169){
+            
+            $w = 1;
         }
+        
+        
+        $len1 = strlen($str1);
+        if($len1>255){
+            $str1 = substr($str1,0,255);
+            $len1 = 255;
+        } 
+        $cnt = count(self::$cache_id);
         
 
         $i = array_search($curr_recid,  self::$all_similar_ids, true); 
@@ -518,14 +574,26 @@ private static function _searchInCache(){
             }
 
             for ($idx2=$idx+1; $idx2<$cnt; $idx2++){
-
-                $str2 = self::$cache_str[$idx2];    
-                if(abs($len1-mb_strlen($str2))<=$dist){
-                    $d = levenshtein($str1, $str2);
-                    if($d<=$dist){
-                        $group[] = self::$cache_id[$idx2];
+                
+                if($str_exact==null || ($curr_recid!=self::$cache_id[$idx2] && $str_exact==@self::$cache_str_exact[$idx2]))
+                {
+                    $str2 = self::$cache_str[$idx2];    
+                    
+                    $len2 = strlen($str2);
+                    if($len2>255){
+                        $str2 = substr($str2,0,255);
+                        $len2 = 255;
+                    } 
+                    
+                    if(abs($len1-$len2)<=$dist){
+                        $d = levenshtein($str1, $str2);
+                        if($d<=$dist){
+                            $group[] = self::$cache_id[$idx2];
+                            $group2[self::$cache_id[$idx2]] = '('.$d.'  '.$dist.')';
+                        }
                     }
                 }
+
             }
         }
 
@@ -537,7 +605,12 @@ private static function _searchInCache(){
             //find titles
             $group = mysql__select_assoc2(self::$mysqli,'select rec_ID, rec_Title from Records where rec_ID in ('
                         .implode(',',$group).')');
-
+                        
+            foreach ($group as $recid=>$title){
+                $group[$recid] = @$group2[$recid].'   '.$title;
+            }
+                        
+                        
             self::$all_similar_records[] = $group; //id=>title
             self::$all_similar_ids_cnt = self::$all_similar_ids_cnt + count($group);
 
