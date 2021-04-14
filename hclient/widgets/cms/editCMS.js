@@ -321,9 +321,11 @@ function editCMS( options ){
                     var resdata = new hRecordSet(response.data);
 
                     var idx, records = resdata.getRecords();
+                    if(resdata.length()==0){
 
-                    //this is standalone webpage for embedding
-                    if(resdata.length()==1){
+                        window.hWin.HEURIST4.msg.showMsgErr('No one CMS home page found');
+                    
+                    }else if(resdata.length()==1){  //this is standalone webpage for embedding
                         var record = resdata.getFirstRecord(); 
                         if(resdata.fld(record, 'rec_RecTypeID') == RT_CMS_MENU){
                             isWebPage = true;

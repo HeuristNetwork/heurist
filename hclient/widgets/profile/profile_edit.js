@@ -316,7 +316,7 @@ $.widget( "heurist.profile_edit", {
             // validate login
             var login = this.edit_form.find("#ugr_Name");
             if(!parentWin.HEURIST4.util.checkRegexp( login, /^[a-z]([0-9a-z_@.])+$/i)){
-                err_text = err_text + ', '+window.hWin.HR('User name should contain ')
+                err_text = err_text + ', '+window.hWin.HR('Login/user name should only contain ')
                     +'a-z, 0-9, _, @ and begin with a letter';   // "Username may consist of a-z, 0-9, _, @, begin with a letter."
             }else{
                 var ss = parentWin.HEURIST4.msg.checkLength2( login, "user name", 3, 60 );

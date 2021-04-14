@@ -66,7 +66,7 @@ body.popup {
     background-size: contain;
 }
 .ui-icon-magnify-explore { 
-    background-image: url(hclient/assets/v6/magnify-305586.png) !important; 
+    background-image: url(hclient/assets/v6/filter-plus-305586.png) !important; /*magnify-305586*/
     width: 18;
     height: 18;
     background-size: contain;
@@ -98,7 +98,7 @@ body.popup {
     background-size: contain;
 }
 .ui-icon-magnify-search { 
-    background-image: url(hclient/assets/v6/magnify-000000.png) !important; 
+    background-image: url(hclient/assets/v6/filter-plus-000000.png) !important; 
     width: 18;
     height: 18;
     background-size: contain;

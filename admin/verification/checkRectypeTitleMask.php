@@ -29,13 +29,11 @@ if($is_included){
    $rectypeID = null;
    $mask = null;
    $coMask = null; //deprecated - not used
-   $recID = null;;
+   $recID = null;
  
 ?>    
-<hr/>
-<a name="clean_invalid_chars"></a>
 <div>
-<h3>Check Title Masks</h3><br>
+<h3 id="titlemask_msg">Check Title Masks</h3><br>
 <?php    
 $is_not_found = true;
     
@@ -144,9 +142,12 @@ if($mode!=3){
 
                     if($is_included){
                         if($is_not_found){
-                            print 'All record type have valid title masks.<br><br>';        
-                        }
-                        print '</div>';
+                            echo '<script>$("#titlemask_msg").text("OK: All record type have valid title masks.").addClass("res-valid");'; 
+                            echo '$(".title_mask").css("background-color", "#6AA84F");</script>';        
+                        }else{
+                            echo '<script>$(".title_mask").css("background-color", "#DC8501");</script>';
+                        }                                   
+                        print '<br /></div>';
                     }else{
                         echo "</body></html>";
                     }                

@@ -1292,8 +1292,8 @@ function print_public_details($bib) {
                     print '</div>';    
                 }else{
                     print '<img id="img'.$thumb['id'].'" style="width:200px" src="'.htmlspecialchars($thumb['thumb']).'"';
-                    if($isImageOrPdf && !$without_header){
-                        print ' onClick="showPlayer(this,'.$thumb['id'].',\''. htmlspecialchars($thumb['player'].'&origin=recview') .'\')"';
+                    if($isImageOrPdf && !$without_header){                        
+                        print ' onClick="window.hWin.HEURIST4.ui.showPlayer(this,this.parentNode,'.$thumb['id'].',\''. htmlspecialchars($thumb['player'].'&origin=recview') .'\')"';
                     }
                     print '><div id="player'.$thumb['id'].'" style="min-height:240px;min-width:320px;display:none;"></div>';
                 }
@@ -1304,8 +1304,8 @@ function print_public_details($bib) {
             }
             print '<br/><div class="download_link">';
             if($thumb['player'] && !($is_map_popup || $without_header)){
-                print '<a id="lnk'.$thumb['id'].'" href="#" oncontextmenu="return false;" style="display:none;padding-right:20px" onclick="hidePlayer('
-                    .$thumb['id'].')">SHOW THUMBNAIL</a>';
+                print '<a id="lnk'.$thumb['id'].'" href="#" oncontextmenu="return false;" style="display:none;padding-right:20px" onclick="window.hWin.HEURIST4.ui.hidePlayer('
+                    .$thumb['id'].', this.parentNode)">SHOW THUMBNAIL</a>';
             }
             
             if(@$thumb['external_url']){

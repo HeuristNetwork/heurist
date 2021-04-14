@@ -21,6 +21,7 @@
         width: 100%;
         clear: both;
         float: left;
+        table-layout: fixed;
     }
 
     .mpce th, .mpce td, .mpce tr {
@@ -29,8 +30,9 @@
         border-bottom: 1px solid #ddd;
     }
 
-    td.center {
-        text-align: center;
+    .mpce td {
+        word-break: wrap;
+        white-space: wrap;
     }
 
     .mpce fieldset {
@@ -38,7 +40,6 @@
         display: flex;
         flex-wrap: wrap;
         padding: 5px;
-        margin-top: 10px;
     }
 
     .mpce legend {
@@ -47,7 +48,7 @@
         padding: 5px 10px;
     }
 
-    .name {
+    .label-tag {
         margin: 5px;
         width: auto;
         font-size: 1.05em;
@@ -66,8 +67,8 @@
         font-size: 0.8em;
     }
 
-    .btn:hover {
-        border-color: rgba(100,100,100,3);
+    .mpce button:hover {
+        border-color: rgba(100,100,100,10);
     }
 
     .btn-delete {
@@ -84,7 +85,6 @@
     .btn-info {
         margin: auto;       
         background-color: #00ACE6;
-        font-size: 0.75em;
     }
 
     .btn-save {
@@ -125,22 +125,6 @@
         max-width: 100%;
     }
 
-    .work-keywords {
-        clear: both;
-        float: left;
-        display: flex;
-        flex-wrap: wrap;
-        width: 100%;
-    }
-
-    .assoc-details {
-        clear: both;
-        float: left;
-        display: flex;
-        flex-wrap: wrap;
-        width: 100%;
-    }
-
     .viewed-details {
         margin-left: auto;
         display: flex;
@@ -150,9 +134,9 @@
 
     .row {
     	box-sizing: border-box;
-    	display: flex;
-    	flex-wrap: wrap;
-    	flex-direction: row;
+        display: flex;
+        flex-wrap: nowrap;
+        flex-direction: row;        
     }
 
     .row:after {
@@ -163,24 +147,29 @@
 
     .column {
         float: left;
-        width: 32%;
+        width: 30%;
         padding: 0 10px;
+    }
+
+    .popup-inform {
+        float: left;
+        width: 40%;
     }
 
     .searchable-container {
     	float: right;
-    	clear: both;
     	display: flex;
-    	flex-wrap: wrap;
+    	flex-wrap: nowrap;
     	flex-direction: row;
         width: 40%;
     }
 
     .btn-searchable {
-        display: block;
-        margin: 10px 0 10px 0;
-        font-size: 1.2em;
+        display: inline-block;
+        max-height: 40px;
         margin-left: 5px;
+        padding: 1px;
+        font-size: 1.2em;
     }    
 
     .checkboxlist ul {
@@ -188,11 +177,14 @@
     	margin: 0;
     	list-style: none;
     	padding-left: 0;
+        width: 100%;
+        overflow-y: auto;
+        max-height: 275px;
     }
 
     .mpce li {
     	padding: 5px;
-    	border-bottom: 1px solid grey;
+    	border-bottom: 1px solid #CFCFCF;
     	font-size: 1.25em;
     }
 
@@ -200,88 +192,107 @@
     	font-size: 1.15em;
     }
 </style>
-<div class="mpce">
 
-	<div class="searchable-container">
+    <div class="mpce" style="min-width:800px;overflow-x:auto;">
 
-        <h4>External Searches:</h4>
+        <div class="popup-inform">
 
-        <button id="btnGoogle" style="background-color: #ffcc66;" class="btn btn-searchable">Google Books</button> <br>
-        <button id="btnWorldCat" style="background-color: #ff99ff;" class="btn btn-searchable">World Cat</button> <br>
-        <button id="btnHathiTrust" style="background-color: #66ffff;" class="btn btn-searchable">Hathi Trust</button> <br>
-        <button id="btnKarlsruhePortal" style="background-color: #ffcccc;" class="btn btn-searchable">Karlsuhe Portal</button> <br>
+            <div style="font-style:italic">This function allows assocaitive lookups on keywords allocated to a Super Book (Work)<br />to allow rapid identification and addition of likely keywords based on previous patterns of keywording.</div>
+
+        </div>
+
+    	<div class="searchable-container">
+
+            <h4>External Searches:</h4>
+
+            <button id="btnGoogle" style="background-color:#ffcc66;" class="btn btn-searchable">Google Books</button> <br>
+            <button id="btnWorldCat" style="background-color:#ff99ff;" class="btn btn-searchable">World Cat</button> <br>
+            <button id="btnHathiTrust" style="background-color:#66ffff;" class="btn btn-searchable">Hathi Trust</button> <br>
+            <button id="btnKarlsruhePortal" style="background-color:#ffcccc;" class="btn btn-searchable">Karlsuhe Portal</button> <br>
+
+        </div>
+
+        <fieldset class="work-details">
+            <legend>Work Details:</legend>
+
+            <table>
+                <tr>
+                    <td style="max-width:60%;"> 
+                        <label id="title_field" class="label-tag" style="font-style: 1em;"></label> 
+                    </td>
+                    
+                    <td style="max-width:40%;"> 
+                        <label id="work-code_field" class="label-tag"></label> 
+                        <button id="btnEdition" class="btn btn-info" style="float:right;">Editions</button>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td style="max-width:60%;"> <select id="category_field" class="select"></select> </td>
+                    <td style="max-width:40%;"> <select id="basis_field" class="select"></select> </td>
+                </tr>
+            </table>
+    		
+            <label for="notes_field" class="label-tag">Reason for Classification:</label>
+    		<textarea id="notes_field" cols="225" rows="2" style="width:99%; font-size:1.25em; margin-left:10px; margin-top:4px;"> </textarea>
+        
+        </fieldset>
+
+        <div class="row">
+
+    	    <div class="column" style="width:40%">
+
+    	        <fieldset class="work-keywords">
+    	            <legend>Assigned Keywords:</legend>
+    	            <label class="label-tag">Keywords assigned to the work</label>
+    	            <button id="btnLookup" class="btn btn-add" style="text-align:left; font-size:1em;">Add New Keyword</button>
+    	            <br>
+
+                    <div class="checkboxlist" style="width:100%;">
+        	            <ul id="keyword_field">
+        	            </ul>
+                    </div>
+    	            
+    	        </fieldset>   
+
+    	    </div>
+
+            <div class="column">
+
+                <fieldset class="prev-details">
+                    <legend>Recently Used Keywords:</legend>
+                    <label class="label-tag">Keywords assigned to recently viewed works</label>
+                    <button id="btnPrevAssign" class="btn btn-add" style="text-align:left; font-size:1em;">Add Selected</button>
+                    <label><input type="checkbox" onclick="checkAllOptions(prev_field, this.checked);">Check All</label>
+                    <br>
+                    
+                    <div class="checkboxlist" style="width:100%;">
+                        <ul id="prev_field">
+                        </ul>
+                    </div>
+                
+                </fieldset>
+
+            </div>
+
+    	    <div class="column">
+
+    	        <fieldset class="assoc-details">
+    	            <legend>Associated Keywords:</legend>
+    	            <label class="label-tag">Keywords commonly associated with <span id="assoc_kywd">&lt;click Find Associated&gt;</span> <span id="assoc_total"></span></label>
+    	            <button id="btnAssocAssign" class="btn btn-add" style="text-align:left; font-size:1em;">Add Selected</button>
+                    <label><input type="checkbox" onclick="checkAllOptions(associated_field, this.checked);">Check All</label>	            
+    	            <br>
+
+    	            <div class="checkboxlist" style="width:100%;">
+    	            	<ul id="associated_field">
+    	            	</ul>
+    	            </div>
+
+    	        </fieldset>
+
+    	    </div>
+
+    	</div>
 
     </div>
-
-    <fieldset class="work-details">
-        <legend>Work Details:</legend>
-
-        <table>
-            <tr>
-                <td style="max-width: 60%;"> <label id="title_field" class="name"></label> <button id="btnEdition" class="btn btn-info" style="float: right;">Editions</button></td>
-                <td style="max-width: 40%;"> <label id="work-code_field" class="name"></label> </td>
-            </tr>
-
-            <tr>
-                <td style="max-width: 60%;"> <select id="category_field" class="select"></select> </td>
-                <td style="max-width: 40%;"> <select id="basis_field" class="select"></select> </td>
-            </tr>
-        </table>
-		
-		<textarea id="notes_field" cols="225" rows="2" style="width: 99%; font-size: 1.25em; margin-left: 10px;"> </textarea>
-    
-    </fieldset>
-
-    <div class="row">
-
-	    <div class="column">
-
-	        <fieldset class="work-keywords">
-	            <legend>Assigned Keywords:</legend>
-	            <label class="name">List of Keywords that will be assigned to the work</label>
-	            <button id="btnLookup" class="btn btn-add" style="text-align: left; font-size: 1em;">Add New Keyword</button>
-	            <br>
-
-	            <table id="keyword_field" class="">
-	            </table>
-	            
-	        </fieldset>   
-
-	    </div>
-
-	    <div class="column">
-
-	        <fieldset class="assoc-details">
-	            <legend>Associated Keywords:</legend>
-	            <label class="name">List of commonly associated keywords related to those assigned on the left</label>
-	            <button id="btnAssocAssign" class="btn btn-add" style="text-align: left; font-size: 1em;">Add Selected</button>	            
-	            <br>
-
-	            <div class="checkboxlist" style="width: 100%;">
-	            	<ul id="associated_field" style="width: 100%;">
-	            	</ul>
-	            </div>
-
-	        </fieldset>
-
-	    </div>
-
-	    <div class="column">
-
-	        <fieldset class="prev-details">
-	            <legend>Recent Keywords:</legend>
-	            <label class="name">List of the project keywords for the recently viewed works</label>
-	            <button id="btnPrevAssign" class="btn btn-add" style="text-align: left; font-size: 1em;">Add Selected</button>
-	            <br>
-	            
-	            <div class="checkboxlist" style="width: 100%;">
-	            	<ul id="prev_field" style="width: 100%;">
-	            	</ul>
-	            </div>
-	        
-	        </fieldset>
-
-	    </div>
-
-	</div>
-</div>    

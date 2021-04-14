@@ -149,7 +149,7 @@ function temporalToHumanReadableString($value, $showoriginal_temporal=false){
 //
 // $month_day_order     1 - dd/mm,  2 - mm/dd
 //
-function validateAndConvertToISO($value, $today_date=null, $month_day_order=2){
+function validateAndConvertToISO($value, $today_date=null, $month_day_order=2, $need_day=true){
           if (strpos($value,"|")!==false) {// temporal encoded date
                 return 'Temporal';
           }else{
@@ -171,7 +171,7 @@ function validateAndConvertToISO($value, $today_date=null, $month_day_order=2){
                 }
                 //$date = parseDateTime($value);
                 //return @$date['year'].'-'.@$date['month'].'-'.@$date['day'];
-                $res = removeLeadingYearZeroes($value, false, true, $month_day_order);
+                $res = removeLeadingYearZeroes($value, false, true, $month_day_order, $need_day);
                 
                 return $res;
           }
@@ -179,13 +179,17 @@ function validateAndConvertToISO($value, $today_date=null, $month_day_order=2){
 //
 // $is_greg_or_julian true - returns full month names
 // $month_day_order   1  dd/mm   2 mm/dd
-//
-function removeLeadingYearZeroes($value, $is_greg_or_julian=true, $is_strict_iso=false, $month_day_order=2){
+// $is_strict_iso - adds zeroes, missed days
+//   
+function removeLeadingYearZeroes($value, $is_greg_or_julian=true, $is_strict_iso=false, $month_day_order=2, $need_day=false){
 
 	//$date = parseDateTime($value);
     // preg_match('/^\d+$/', $value)  && is_int(intval($value))
+    if(!$is_strict_iso){
+        $need_day = false;
+    }
+    $origWithoutDays = false;
     
-    $need_day = true;
     
     if( preg_match('/^-?\d+$/', $value) ){ //only digits with possible minus
         $date = array('year'=>$value);
@@ -195,10 +199,15 @@ function removeLeadingYearZeroes($value, $is_greg_or_julian=true, $is_strict_iso
             $date = null;
         }else{
             
+            //replace slashes or dots "/." to dashes "-"
+            //reorder month and day
             $value = correctDMYorder($value, false, $month_day_order);
 
             try{   
                 $origHasSeconds = (substr_count($value,':')>1);
+                $origWithoutDays = substr_count($value,'-')==1;
+                
+                
                 $t2 = new DateTime($value);
                 $datestamp = $t2->format('Y-m-d H:i:s');
                 $date = date_parse($datestamp);
@@ -238,8 +247,10 @@ function removeLeadingYearZeroes($value, $is_greg_or_julian=true, $is_strict_iso
         
         if($is_greg_or_julian && !$is_strict_iso){
 
-            $res2 = "";
-            if(@$date['day'] && $need_day){
+            $res2 = '';
+            if(!$need_day && $origWithoutDays){
+                
+            }else if(@$date['day']){
                 $res2 = $date['day']; 
             }
             if(@$date['month']){
@@ -252,7 +263,10 @@ function removeLeadingYearZeroes($value, $is_greg_or_julian=true, $is_strict_iso
         
 		    if(@$date['month'] || $has_time){
 			    $res = $res.'-'.str_pad($date['month'],2,'0',STR_PAD_LEFT);
-		        if(@$date['day'] && ($need_day || $has_time)){
+                
+                if(!$need_day && $origWithoutDays && !$has_time){
+                
+		        }else if(@$date['day']){ //&& ($need_day || $has_time)
 			        $res = $res.'-'.str_pad($date['day'],2,'0',STR_PAD_LEFT);
 		        }
             }
@@ -294,11 +308,16 @@ function removeLeadingYearZeroes($value, $is_greg_or_julian=true, $is_strict_iso
 }
 
 //
-// $month_day_order   true or 0 - returns true or false whether date/month ate ambiguate 
+// $month_day_order   true or 0 - returns true or false whether date/month are ambiguate, or month=13 or day=32
 //                    2 - mm/dd (default)
 //                    1 - dd/mm
+// replace slashes or dots "/." to dashes "-"
+// reorder month and day
+//
 //
 function correctDMYorder($value, $month_day_order=2){
+    
+        $check_ambguation = ($month_day_order===0 ||  $month_day_order===true);
     
         $is_dots_slash = false;
         $is_ambguation = false;
@@ -317,7 +336,7 @@ function correctDMYorder($value, $month_day_order=2){
         }
         
         if(substr_count($value,'-')==1) { //year and month only
-            $need_day = false;
+            
             list($m, $y) = explode('-', $value);
             
             //Oct-12
@@ -352,26 +371,46 @@ function correctDMYorder($value, $month_day_order=2){
                 if($y>22 && $y<100) $y = '19'.$y; 
                 
                 if(strlen($m)>2 || $d>12){ // month is word
-                    $value = $y.'-'.$m.'-'.$d;
+                    //$value = $y.'-'.$m.'-'.$d;
                 }else if(strlen($d)>2 || $m>12){ //$d is word month 
-                    $value = $y.'-'.$d.'-'.$m;
+                    $d2 = $d; $d = $m;  $m = $d2;
+                
+                    //$value = $y.'-'.$d.'-'.$m;
                 }else if($d<13 && $m>12){
-                    $value = $y.'-'.$d.'-'.$m;
+                    $d2 = $d; $d = $m;  $m = $d2;
+                    
+                    //$value = $y.'-'.$d.'-'.$m;
                 }else{
-                    $value = $y.'-'.$m.'-'.$d;
+                    //$value = $y.'-'.$m.'-'.$d;
                     
                     if($month_day_order==1){  //dd/mm
-                        $value = $y.'-'.$d.'-'.$m;
+                        $d2 = $d; $d = $m;  $m = $d2;
+                        //$value = $y.'-'.$d.'-'.$m;
                     }else{
-                        $value = $y.'-'.$m.'-'.$d; // mm/dd
+                        //$value = $y.'-'.$m.'-'.$d; // mm/dd
                     }
                     
                     $is_ambguation = ($m<13 && $d<13); //day-month ambiguation
                 }
+                
+                $value = $y.'-'.$m.'-'.$d; // mm/dd
+            }else{
+                list($y, $m, $d) = explode('-', $value);
+            }
+            
+            if($check_ambguation){
+                if($m==13){
+                    $is_ambguation = true;    
+                }else{
+                    $days_req = cal_days_in_month(CAL_GREGORIAN, $m, $y);        
+                    if($days_req+1==$d || $days_req+2==$d){
+                         $is_ambguation = true;
+                    }
+                } 
             }
         }
 
-        return ($month_day_order===0 ||  $month_day_order===true)?$is_ambguation :$value;    
+        return ($check_ambguation)?$is_ambguation :$value;    
 }
 
 //

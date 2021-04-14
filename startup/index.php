@@ -280,7 +280,7 @@ if(($_SERVER["SERVER_NAME"]=='localhost'||$_SERVER["SERVER_NAME"]=='127.0.0.1'))
             // validate login
             var login = regform.find("#ugr_Name");
             if(!window.hWin.HEURIST4.util.checkRegexp( login, /^[a-z]([0-9a-z_@.])+$/i)){
-                err_text = err_text + ', '+window.hWin.HR('User name should contain ')
+                err_text = err_text + ', '+window.hWin.HR('Login/user name should only contain ')
                     +'a-z, 0-9, _, @ and begin with a letter';   // "Username may consist of a-z, 0-9, _, @, begin with a letter."
             }else{
                 var ss = window.hWin.HEURIST4.msg.checkLength2( login, "User name", 3, 60 );

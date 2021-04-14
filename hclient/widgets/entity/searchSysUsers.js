@@ -79,7 +79,7 @@ $.widget( "heurist.searchSysUsers", $.heurist.searchEntity, {
         this._on(this.input_search_group,  { change:this.startSearch });
         this._on(this.input_search_role,  { change:this.startSearch });
         this._on(this.input_search_inactive,  { change:this.startSearch });
-        
+
         if( this.options.ugl_GroupID>0 ){
             this.input_search_group.parent().hide();
             this.input_search_group.val(this.options.ugl_GroupID);
@@ -151,8 +151,13 @@ $.widget( "heurist.searchSysUsers", $.heurist.searchEntity, {
             
             if(this.input_search_inactive.is(':checked')){
                 request['ugr_Enabled'] = 'n';
-            }
-            
+            }     
+
+            if(this.options.ugl_GroupID < 0)
+            {
+                request['ugr_Enabled'] = 'y';
+                this.input_search_inactive.prop('disabled', true);
+            }       
             
             this.input_sort_type = this.element.find('#input_sort_type');
             if(this.input_sort_type.val()=='lastname'){
