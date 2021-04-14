@@ -194,6 +194,7 @@ $trmDuplicates = @$lists2["trm_dupes"];
 
             $(document).ready(function() {
                 $('button').button();
+				$('#linkbar').tabs();
             });
         </script>
 
@@ -226,30 +227,33 @@ $trmDuplicates = @$lists2["trm_dupes"];
             These checks look for errors in the structure of the database and errors in the data within the database. These are generally not serious, but are best eliminated.
             <br /> Click the hyperlinked record ID at the start of each row to open an edit form to change the data for that record.
             <br />Look for red warning texts or pointer fields in the record which do not display data or which display a warning.
-
-            <hr style="margin-top:15px">
-            <div id="linkbar" style="padding-top:10px">
-                <label><b>Go to:</b></label>
-                <a href="#field_type" style="white-space: nowrap;padding-right:10px">Field types</a>
-                <a href="#pointer_targets" style="white-space: nowrap;padding-right:10px">Pointer targets</a>
-                <a href="#target_types" style="white-space: nowrap;padding-right:10px">Target types</a>
-                <a href="#target_parent" style="white-space: nowrap;padding-right:10px">Invalid Parents</a>
-                <a href="#empty_fields" style="white-space: nowrap;padding-right:10px">Empty fields</a>
-                <a href="#date_values" style="white-space: nowrap;padding-right:10px">Date values</a>
-                <a href="#term_values" style="white-space: nowrap;padding-right:10px">Term values</a>
-                <a href="#expected_terms" style="white-space: nowrap;padding-right:10px">Expected terms</a>
-                <a href="#single_value" style="white-space: nowrap;padding-right:10px">Single value fields</a>
-                <a href="#required_fields" style="white-space: nowrap;padding-right:10px">Required fields</a>
-                <a href="#nonstandard_fields" style="white-space: nowrap;padding-right:10px">Non-standard fields</a>
-                <!-- <a href="#origin_differences" style="white-space: nowrap;padding-right:10px">Differences with Core Definitions</a> -->
-            </div>
         </div>
 
-        <div id="page-inner" style="top:110px">
-
-            <br/><p></p>
+        <hr style="margin-top:15px">
+        <div id="linkbar">
+            <ul>
+                <li class="owner_ref"><a href="#owner_ref" style="white-space:nowrap;padding-right:10px;color:black;">Record Owner/Creator</a></li>
+                <li class="dup_terms"><a href="#dup_terms" style="white-space:nowrap;padding-right:10px;color:black;">Invalid/Duplicate Terms</a></li>				
+                <li class="field_type"><a href="#field_type" style="white-space: nowrap;padding-right:10px;color:black;">Field Types</a></li>
+                <li class="default_values"><a href="#default_values" style="white-space: nowrap;padding-right:10px;color:black;">Default Values</a></li>
+                <li class="pointer_targets"><a href="#pointer_targets" style="white-space: nowrap;padding-right:10px;color:black;">Pointer Targets</a></li>
+                <li class="target_types"><a href="#target_types" style="white-space: nowrap;padding-right:10px;color:black;">Target Types</a></li>
+                <li class="target_parent"><a href="#target_parent" style="white-space: nowrap;padding-right:10px;color:black;">Invalid Parents</a></li>
+                <li class="empty_fields"><a href="#empty_fields" style="white-space: nowrap;padding-right:10px;color:black;">Empty Fields</a></li>
+                <li class="date_values"><a href="#date_values" style="white-space: nowrap;padding-right:10px;color:black;">Date Values</a></li>
+                <li class="term_values"><a href="#term_values" style="white-space: nowrap;padding-right:10px;color:black;">Term Values</a></li>
+                <li class="expected_terms"><a href="#expected_terms" style="white-space: nowrap;padding-right:10px;color:black;">Expected Terms</a></li>
+                <li class="single_value"><a href="#single_value" style="white-space: nowrap;padding-right:10px;color:black;">Single Value Fields</a></li>
+                <li class="required_fields"><a href="#required_fields" style="white-space: nowrap;padding-right:10px;color:black;">Required Fields</a></li>
+                <li class="nonstandard_fields"><a href="#nonstandard_fields" style="white-space: nowrap;padding-right:10px;color:black;">Non-Standard Fields</a></li>
+                <!-- <a href="#origin_differences" style="white-space: nowrap;padding-right:10px">Differences with Core Definitions</a> -->
+                <li class="invalid_chars"><a href="#invalid_chars" style="white-space: nowrap;padding-right:10px;color:black;">Invalid Characters</a></li>
+                <li class="title_mask"><a href="#title_mask" style="white-space: nowrap;padding-right:10px;color:black;">Title Masks</a></li>
+            </ul>
+			
             <!-- Records with by non-existent users -->
-
+			<div id="owner_ref" style="top:110px">
+			
             <?php
             //            flush_buffers();
 
@@ -298,6 +302,7 @@ $trmDuplicates = @$lists2["trm_dupes"];
 
             if($wrongUser_Add==0 && $wrongUser_Owner==0){
                 print '<div><h3 class="res-valid">OK: All record have valid Owner and Added by User references</h3></div>';
+				echo '<script>$(".owner_ref").css("background-color", "#6AA84F");</script>';
                 if($wasassigned1>0){
                     print "<div>$wasassigned1 records 'Added by' value were set to user # 2 Database Manager</div>";
                 }
@@ -307,6 +312,7 @@ $trmDuplicates = @$lists2["trm_dupes"];
             }
             else
             {
+				echo '<script>$(".owner_ref").css("background-color", "#DC8501");</script>';
                 print '<div>';
                 if($wrongUser_Add>0){
                     print '<h3>'.$wrongUser_Add.' records are owned by non-existent users</h3>';
@@ -319,13 +325,14 @@ $trmDuplicates = @$lists2["trm_dupes"];
                     Attribute them to owner # 2 Database Manager</button>
                 </div>
             <?php
-        }
-        ?>
+			}
+			?>
+				<br />
+            </div>
 
         <!-- WRONG OR possible DUPLICATED TERMS -->
-        
-        <hr>
-
+        <div id="dup_terms" style="top:110px">
+		
         <?php
 
             $wasassigned1 = 0;
@@ -367,6 +374,7 @@ $trmDuplicates = @$lists2["trm_dupes"];
 
             if(count($trmWithWrongParents)==0 && count($trmWithWrongInverse)==0){
                 print '<div><h3 class="res-valid">OK: All terms have valid inverse and parent term references</h3></div>';
+				echo '<script>$(".dup_terms").css("background-color", "#6AA84F");</script>';
                 if($wasassigned1>0){
                     print "<div>$wasassigned1 terms with wrong parent terms moved to 'Trash' group as vocabularies</div>";
                 }
@@ -376,6 +384,7 @@ $trmDuplicates = @$lists2["trm_dupes"];
             }
             else
             {
+				echo '<script>$(".dup_terms").css("background-color", "#DC8501");</script>';
                 print '<div>';
                 if(count($trmWithWrongParents)>0){
                     
@@ -425,11 +434,12 @@ $trmDuplicates = @$lists2["trm_dupes"];
         }
         
         ?>        
-        
-        <hr />
+			<br />
+		</div>
 
         <!-- CHECK FOR FIELD TYPE ERRORS -->
 
+		<div id="field_type" style="top:110px">
         <?php
 
         if ( ($dtysWithInvalidTerms && is_array($dtysWithInvalidTerms) && count($dtysWithInvalidTerms)>0) || 
@@ -474,7 +484,6 @@ $trmDuplicates = @$lists2["trm_dupes"];
             </script>
 
 
-            <a name="field_type"/>
             <br/><p><br/></p><h3>Warning: Inconsistent field definitions</h3><br/>&nbsp;<br/>
 
             The following field definitions have inconsistent data (unknown codes for terms and/or record types). This is nothing to be concerned about, unless it reoccurs, in which case please <?php echo CONTACT_HEURIST_TEAM;?><br/><br/>
@@ -506,11 +515,15 @@ $trmDuplicates = @$lists2["trm_dupes"];
                 </div>
                 <?php
             }
-
+			echo '<script>$(".field_type").css("background-color", "#DC8501");</script>';
+			
         }else{
             print '<br/><h3 class="res-valid">OK: All field type definitions are valid</h3>';
+			echo '<script>$(".field_type").css("background-color", "#6AA84f");</script>';
         }
+		print '<br /></div>';
 
+		print '<div id="default_values">';
         if($rtysWithInvalidDefaultValues && 
         is_array($rtysWithInvalidDefaultValues) && 
         count($rtysWithInvalidDefaultValues)>0){
@@ -528,18 +541,21 @@ $trmDuplicates = @$lists2["trm_dupes"];
                 </div>
                 <?php
             }//for
+			echo '<script>$(".default_values").css("background-color", "#DC8501");</script>';
 
         }else{
             print '<br/><h3 class="res-valid">OK: All default values in record type structures are valid</h3>';
-        }            
+			echo '<script>$(".default_values").css("background-color", "#6AA84F");</script>';
+        }
+		print '<br /></div>';
         ?>
+		
         <!-- CHECK DATA CONSISTENCY -->
-        <br/>
-        <hr />
 
         <!-- Record pointers which point to non-existant records -->
 
         <?php
+		print '<div id="pointer_targets" style="top:110px">';
 
         $wasdeleted = 0;
         if(@$_REQUEST['fixpointers']=="1"){
@@ -578,12 +594,15 @@ $trmDuplicates = @$lists2["trm_dupes"];
 
         if(count($bibs)==0){
             print '<div><h3 class="res-valid">OK: All record pointers point to a valid record</h3></div>';
+			echo '<script>$(".pointer_targets").css("background-color", "#6AA84F");</script>';
+			
             if($wasdeleted>1){
                 print "<div>$wasdeleted invalid pointer(s) were removed from database</div>";
             }
         }
         else
         {
+			echo '<script>$(".pointer_targets").css("background-color", "#DC8501");</script>';
             ?>
 
             <div>
@@ -627,8 +646,11 @@ $trmDuplicates = @$lists2["trm_dupes"];
 
             <?php
         }
+		print '<br /></div>';
 
         //Record pointers which point to the wrong type of record
+		print '<div id="target_types" style="top:110px">';
+		
         $res = $mysqli->query('select dtl_RecID, dty_Name, dty_PtrTargetRectypeIDs, rec_ID, rec_Title, rty_Name, rec_RecTypeID
             from defDetailTypes
             left join recDetails on dty_ID = dtl_DetailTypeID
@@ -643,21 +665,13 @@ $trmDuplicates = @$lists2["trm_dupes"];
             $bibs[$row['dtl_RecID']] = $row;
         }
 
-        ?>
-
-        <hr/>
-
-        <!-- Record pointers which point to the wrong type of record  -->
-
-
-        <div>
-            <a name="target_types"/>
-            <?php
             if (count($bibs) == 0) {
                 print '<h3 class="res-valid">OK: All record pointers point to the correct record type</h3>';
+				echo '<script>$(".target_types").css("background-color", "#6AA84F");</script>';
             }
             else
             {
+				echo '<script>$(".target_types").css("background-color", "#DC8501");</script>';
                 ?>
                 <h3>Records with record pointers to the wrong record type</h3>
                 <span><a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= implode(',', array_keys($bibs)) ?>'>
@@ -682,14 +696,12 @@ $trmDuplicates = @$lists2["trm_dupes"];
                 </table>
                 <?php
             }
-            ?>
-        </div>
+			
+			print '<br /></div>';
 
-        <hr />
+			//Record pointers which point to the wrong type of record
+			print '<div id="target_parent" style="top:110px">';
 
-        <div>
-            <a name="target_parent"/>
-            <?php
             if($system->defineConstant('DT_PARENT_ENTITY')){}
 
             $wasadded1 = 0;
@@ -854,12 +866,18 @@ $trmDuplicates = @$lists2["trm_dupes"];
 
             if (count($bibs2) == 0) {
                 print '<br><h3 class="res-valid">OK: All parent records correctly reference records which believe they are their children</h3><br>';
+				
+				if (count($bibs1) == 0) {
+					echo '<script>$(".target_parent").css("background-color", "#6AA84F");</script>';
+				}
+				
                 if($wasdeleted2>1){
                     print "<div>$wasdeleted2 invalid pointer(s) were removed from database</div>";
                 }
             }
             else
             {
+				echo '<script>$(".target_types").css("background-color", "#DC8501");</script>';
                 ?>
                 <br><h3>Child records indicate a parent which does not identify them as their child. </h3>
                 <span><a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= implode(',', $prec_ids2) ?>'>
@@ -896,16 +914,15 @@ $trmDuplicates = @$lists2["trm_dupes"];
                 </table>
                 <?php
             }
-
+			
             ?>
-        </div>
-
-        <hr />
-
-
+				<br />
+            </div>
+			
         <?php
         // ----- Fields with EMPTY OR NULL values -------------------
 
+		print '<div id="empty_fields" style="top:110px">';
 
         if(@$_REQUEST['fixempty']=="1"){
             $mysqli->query('SET SQL_SAFE_UPDATES=0');
@@ -933,12 +950,14 @@ $trmDuplicates = @$lists2["trm_dupes"];
         print '<a name="empty_fields"/>';
         if($total_count_rows<1){
             print '<div><h3 class="res-valid">OK: All records don\'t have empty fields</h3></div>';
+			echo '<script>$(".empty_fields").css("background-color", "#6AA84F");</script>';
         }
         if($wascorrected>1){
             print "<div>$wascorrected empty fields were deleted</div>";
         }
 
         if($total_count_rows>0){
+			echo '<script>$(".empty_fields").css("background-color", "#DC8501");</script>';
             ?>
 
             <div>
@@ -989,14 +1008,16 @@ $trmDuplicates = @$lists2["trm_dupes"];
             .'&w=all&q=ids:'.implode(',', array_keys($ids)).'>(show results as search)</a></span>';
 
         }
+		print '<br /></div>';
         ?>
-
-        <hr>
 
         <?php
         // ----- Fields of type "Date" with  wrong values -------------------
 
         //find all fields with faulty dates
+
+		print '<div id="date_values" style="top:110px">';
+			
         $res = $mysqli->query('select dtl_ID, dtl_RecID, dtl_Value, a.rec_RecTypeID, a.rec_Title, a.rec_Added
             from recDetails, defDetailTypes, Records a
             where (a.rec_ID = dtl_RecID) and (dty_ID = dtl_DetailTypeID) and (a.rec_FlagTemporary!=1)
@@ -1016,6 +1037,8 @@ $trmDuplicates = @$lists2["trm_dupes"];
         $decade_regex = '/^\d{2,4}s$/'; //words like 80s 1990s
         $year_range_regex = '/^\d{2,4}\-\d{2,4}$/'; //2-4 year ranges
 
+        $fix_as_suggested = false;
+ 
         while ($row = $res->fetch_assoc()){
             
             $row['is_ambig'] = false;
@@ -1028,10 +1051,6 @@ $trmDuplicates = @$lists2["trm_dupes"];
                 $row['dtl_Value'] = trim($row['dtl_Value']);
                 $row['is_ambig'] = true;
                 
-                if($row['dtl_RecID']==9 || $row['dtl_RecID']==5){
-                    error_log('!!!');
-                }
-
                 if(  (strlen($row['dtl_Value'])==3 || strlen($row['dtl_Value'])==5) 
                     && preg_match( $decade_regex, $row['dtl_Value'] )){
                         
@@ -1050,8 +1069,8 @@ $trmDuplicates = @$lists2["trm_dupes"];
                 }
                 
                 if($row['is_ambig']===true){
-                    //parse and validate value
-                    $row['new_value'] = validateAndConvertToISO($row['dtl_Value'], $row['rec_Added']);
+                    //parse and validate value   order 2 (mm/dd), don't add day  if it is not defined
+                    $row['new_value'] = validateAndConvertToISO($row['dtl_Value'], $row['rec_Added'], 2, false);
                     if($row['new_value']=='Temporal'){
                         continue;
                     }else if($row['new_value']==$row['dtl_Value']){ //nothing to correct - result is the same
@@ -1085,27 +1104,31 @@ $trmDuplicates = @$lists2["trm_dupes"];
                 if($row['new_value']!=null && $row['new_value']!=''){
                         if(@$row['is_ambig']){
                             $ambigious++;    
-                            $ids[$row['dtl_RecID']] = 1;
+                            //$ids[$row['dtl_RecID']] = 1;
                         }else{
                             $wascorrected++;    
                         }
-                }else{
-                    $ids[$row['dtl_RecID']] = 1;  //all record ids - to show as search result
                 }
+                $ids[$row['dtl_RecID']] = 1;  //all record ids - to show as search result
+                
                 //autocorrection }else{
                 array_push($bibs, $row);
                 array_push($dtl_ids, $row['dtl_ID']); //not used
             }
-        }
-
-
+            
+            $fix_as_suggested = $fix_as_suggested || 
+                (is_bool($row['is_ambig']) && ($row['new_value']==null || $row['is_ambig']===true));
+        }//while
+        
         print '<a name="date_values"></a>'; //anchor
 
         if(count($bibs)==0){
             print '<div><h3 class="res-valid">OK: All records have recognisable Date values</h3></div>';
+			echo '<script>$(".date_values").css("background-color", "#6AA84F");</script>';
         }
         else
         {
+            echo '<script>$(".date_values").css("background-color", "#DC8501");</script>';
             ?>
 
             <div>
@@ -1168,21 +1191,29 @@ $trmDuplicates = @$lists2["trm_dupes"];
                 <span>
                     <a target=_new href='<?=HEURIST_BASE_URL.'?db='.HEURIST_DBNAME?>&w=all&q=ids:<?= implode(',', array_keys($ids)) ?>'>
                         (show results as search)</a>
-                    <a target=_new href='#' id=selected_link onClick="return open_selected_by_name('recCB5');">(show selected as search)</a>
+                    <a target=_new href='#' id=selected_link style="display:<?php echo ($fix_as_suggested?'inline-block':'none');?>;"
+                                onClick="return open_selected_by_name('recCB5');">(show selected as search)</a>
                 </span>
 
+                <?php 
+                    if($fix_as_suggested){
+                ?>
                 <div>To fix faulty date values as suggested, mark desired records and please click here:
                     <button
                         onclick="{var ids=get_selected_by_name('recCB5'); if(ids){document.getElementById('page-inner').style.display = 'none';window.open('listDatabaseErrors.php?db=<?= HEURIST_DBNAME?>&fixdates=1&recids='+ids,'_self')}else{ window.hWin.HEURIST4.msg.showMsgDlg('Mark at least one record to correct'); }}">
                         Correct</button>
                 </div>
+                <?php 
+                    }
+                ?>
 
             </div>
 
             <table>
-            <tr>
+            <tr style="display:<?php echo ($fix_as_suggested?'block':'none');?>;">
                 <td colspan="6">
-                    <label><input type=checkbox onclick="{mark_all_by_name(event.target, 'recCB5');}">Mark all</label>
+                    <label><input type=checkbox 
+                                onclick="{mark_all_by_name(event.target, 'recCB5');}">Mark all</label>
                 </td>
             </tr>
             <?php
@@ -1195,7 +1226,8 @@ $trmDuplicates = @$lists2["trm_dupes"];
                             print '<input type=checkbox name="recCB5" value='.$row['dtl_RecID'].'>';
                         ?>
                     </td>
-                    <td><img class="rft" style="background-image:url(<?php echo HEURIST_ICON_URL.$row['rec_RecTypeID']?>.png)" src="<?php echo HEURIST_BASE_URL.'common/images/16x16.gif'?>"></td>
+                    <td><img class="rft" style="background-image:url(<?php echo HEURIST_ICON_URL.$row['rec_RecTypeID']?>.png)" 
+                                    src="<?php echo HEURIST_BASE_URL.'common/images/16x16.gif'?>"></td>
                     <td style="white-space: nowrap;"><a target=_new
                             href='<?=HEURIST_BASE_URL?>?fmt=edit&db=<?= HEURIST_DBNAME?>&recID=<?= $row['dtl_RecID'] ?>'>
                             <?= $row['dtl_RecID'] ?>
@@ -1212,15 +1244,12 @@ $trmDuplicates = @$lists2["trm_dupes"];
             }
             print '</table>';
         }
-
-        ?>
-
-        <hr>
-
-
-
-        <?php
-        //  Records with term field values which do not exist in the database
+        print '<br /></div>';
+		
+        //  Records with term field values which do not exist in the database--------------------
+		
+		print '<div id="term_values" style="top:110px">';
+		
         $wasdeleted = 0;
 
         //remove wrong term IDs
@@ -1260,12 +1289,14 @@ $trmDuplicates = @$lists2["trm_dupes"];
         print '<a name="term_values"/>';
         if(count($bibs)==0){
             print '<div><h3 class="res-valid">OK: All records have recognisable term values</h3></div>';
+			echo '<script>$(".term_values").css("background-color", "#6AA84F");</script>';
             if($wasdeleted>1){
                 print "<div>$wasdeleted invalid term value(s) were removed from database</div>";
             }
         }
         else
         {
+			echo '<script>$(".term_values").css("background-color", "#DC8501");</script>';
             ?>
 
             <div>
@@ -1306,15 +1337,12 @@ $trmDuplicates = @$lists2["trm_dupes"];
             }
             print '</table>';
         }
+		print '<br /></div>';
         ?>
-
-        <hr>
-        <div>
-
 
             <!--  Records containing fields with terms not in the list of terms specified for the field   -->
 
-            <a name="expected_terms"/>
+            <div id="expected_terms" style="top:110px">
             <?php
 
             $res = $mysqli->query('select dtl_ID, dtl_RecID, dty_Name, dtl_Value, dty_ID, dty_JsonTermIDTree, dty_TermIDTreeNonSelectableIDs, rec_Title, rec_RecTypeID, rty_Name, trm_Label
@@ -1397,7 +1425,9 @@ $trmDuplicates = @$lists2["trm_dupes"];
             }//while 
             if (count($ids) == 0) {
                 print '<h3 class="res-valid">OK: All records have valid terms (terms are as specified for each field)</h3>';
+				echo '<script>$(".expected_terms").css("background-color", "#6AA84F");</script>';
             }else{
+				echo '<script>$(".expected_terms").css("background-color", "#DC8501");</script>';
                 echo '</table><br>';   
                 echo '<span style="font-size:0.9em;"><a target=_new id="link_wrongterms" href='.HEURIST_BASE_URL.'?db='.HEURIST_DBNAME
                 .'&w=all&q=ids:'.implode(',', array_keys($ids)).'>(show results as search)</a></span>';
@@ -1463,18 +1493,12 @@ $trmDuplicates = @$lists2["trm_dupes"];
             }//same name suggestions
 
             ?>
-        </div>
-
-
-
-        <hr />
-
+				<br />
+            </div>
 
 
         <!--  single value fields containing excess values  -->
-
-
-        <a name="single_value"/>
+        <div id="single_value" style="top:110px">
         <?php
 
         $res = $mysqli->query('select dtl_RecID, rec_RecTypeID, dtl_DetailTypeID, rst_DisplayName, rec_Title, count(*)
@@ -1494,9 +1518,11 @@ $trmDuplicates = @$lists2["trm_dupes"];
 
         if(count($bibs)==0){
             print '<h3 class="res-valid">OK: No single value fields exceed 1 value</h3>';
+			echo '<script>$(".single_value").css("background-color", "#6AA84F");</script>';
         }
         else
         {
+			echo '<script>$(".single_value").css("background-color", "#DC8501");</script>';
             ?>
 
             <div>
@@ -1552,13 +1578,12 @@ $trmDuplicates = @$lists2["trm_dupes"];
             <?php
         }
         ?>
-
-        <hr/>
-
+			<br />
+		</div>
 
 
         <!--  records with missing required values  -->
-        <a name="required_fields"/>
+        <div id="required_fields" style="top:110px">
         <?php
 
         $res = $mysqli->query(
@@ -1581,9 +1606,11 @@ $trmDuplicates = @$lists2["trm_dupes"];
 
         if(count($bibs)==0){
             print '<div><h3 class="res-valid">OK: No required fields with missing or empty values</h3></div>';
+			echo '<script>$(".required_fields").css("background-color", "#6AA84F");</script>';
         }
         else
         {
+			echo '<script>$(".required_fields").css("background-color", "#DC8501");</script>';
             ?>
 
             <div>
@@ -1637,14 +1664,12 @@ $trmDuplicates = @$lists2["trm_dupes"];
             <?php
         }
         ?>
-
-
-        <hr/>
-
-
-
+			<br />
+		</div>
+			
+			
         <!--  Records with non-standard fields (not listed in recstructure)  -->
-        <a name="nonstandard_fields"></a>
+        <div id="nonstandard_fields" style="top:110px">
         <?php
 
         $query = "select rec_ID, rec_RecTypeID, dty_ID, dty_Name, dtl_Value, rec_Title, rty_Name
@@ -1668,15 +1693,13 @@ $trmDuplicates = @$lists2["trm_dupes"];
             $ids[$row['rec_ID']] = $row;
         }
 
-        ?>
-
-        <div>
-            <?php
             if (count($bibs) == 0) {
                 print '<h3 class="res-valid">OK: No extraneous fields (fields not defined in the list for the record type)</h3>';
+				echo '<script>$(".nonstandard_fields").css("background-color", "#6AA84F");</script>';
             }
             else
             {
+				echo '<script>$(".nonstandard_fields").css("background-color", "#DC8501");</script>';
                 ?>
                 <h3>Records with extraneous fields (not defined in the list of fields for the record type)</h3>
                 <span>
@@ -1732,6 +1755,8 @@ $trmDuplicates = @$lists2["trm_dupes"];
                 <?php
             }
             ?>
+				<br />
+			</div>
         </div>
 
         <!--
@@ -1748,9 +1773,13 @@ $trmDuplicates = @$lists2["trm_dupes"];
         </div>
         -->
         <?php
+        print '<div id="invalid_chars" style="top:110px">';
         include(dirname(__FILE__).'/cleanInvalidChars.php');
+        print '<br /></div>';
 
+        print '<div id="title_mask" style="top:110px">';
         include(dirname(__FILE__).'/checkRectypeTitleMask.php');
+        print '<br /><br /></div>';
         ?>
 
         <hr/>            

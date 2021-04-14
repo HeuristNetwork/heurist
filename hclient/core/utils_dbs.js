@@ -212,7 +212,7 @@ window.hWin.HEURIST4.dbs = {
       $mode 
          3 - for record title mask editor @todo!!!
          4 - find reverse links and relations   
-         5 - for lazy treeview with reverse links (faceted search wiz)
+         5 - for lazy treeview with reverse links (faceted search wiz, filter builder)
          6 - for lazy tree without reverse (import structure, export csv)
          
       parentcode - prefix for code 
@@ -632,6 +632,7 @@ window.hWin.HEURIST4.dbs = {
                                 if($mode==5 || $mode==6){
                                     $res['rt_ids'] = $pointerRecTypeId;
                                     $res['lazy'] = true;
+                                    
                                 }else{
                                 
                                     for (var k in $rectype_ids){
@@ -651,8 +652,8 @@ window.hWin.HEURIST4.dbs = {
                                 }
                             
                             }
+                            
                             $res['required'] = $is_required;
-
                     }
                 }
 
@@ -694,6 +695,8 @@ window.hWin.HEURIST4.dbs = {
             $res['dtyID_local'] = $dtID; //$Db.getLocalID('dty', $dt_conceptcode); for import
         }            
         return $res;
+        
+        
     }
     
     //

@@ -60,15 +60,13 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
         if(!this.options.isdialog && this.options.is_h6style)
         {
             
-            this.element.find('.ent_wrapper').css({top:'36px',bottom:'40px'});
+            this.element.find('.ent_wrapper').css({top:'36px'});
             
             var fele = this.element.find('.ent_wrapper:first');
             
             $('<div class="ui-heurist-header">'+this.options.title+'</div>').insertBefore(fele);    
             
             //append action buttons
-            //this.toolbar = $('<div class="ent_footer button-toolbar ui-heurist-header" style="height:20px"></div>').insertAfter(fele);    
-            //this.toolbar.empty();
             this.toolbar =  this.element.find('#div_button-toolbar');
             var btns = this._getActionButtons();
             for(var idx in btns){
@@ -85,22 +83,12 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
         var res = this._super();
         var that = this;
         res[1].text = window.hWin.HR('Find Duplications');
-        res[1].css = {'float':'right','margin-right':'20px'};
+        res[1].css = {'margin-left':'20px'};
         if(!this.options.isdialog && this.options.is_h6style){
             res.shift();
         }else{
             res[0].text = window.hWin.HR('Close');    
         }
-        
-        /*
-        res.push({text:window.hWin.HR('Export'),
-                    id:'btnDoAction2',
-                    disabled:'disabled',
-                    css:{'float':'right'},  
-                    click: function() { 
-                            that.doAction( 1 ); 
-                    }});
-       */ 
         return res;
     },    
         
@@ -133,18 +121,14 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
     },
             
     //
-    // 0 - find, 1 - merge selected
+    // 
     //
-    doAction: function(mode){
+    doAction: function(){
 
-        if(this.element.find('#div_result').is(':visible')){
-
-            this.element.find('#div_search').show();
-            this.element.find('#div_result').hide();
-
-        }else{
             var rty_ID = this.selectRecordScope.val();
 
+            this.element.find('#div_result').empty();
+            
             if(rty_ID>0){
 
 
@@ -163,6 +147,8 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
                     rty_ID   : rty_ID,
                     fields   : settings.fields,
                     session  : session_id,
+                    startgroup: settings.startgroup,
+                    sort_field: settings.sort_field,
                     distance : settings.distance};
 
                 var url = window.hWin.HAPI4.baseURL + 'hsapi/controller/record_verify.php'
@@ -182,14 +168,27 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
                         that._renderDuplicates();
 
                     }else{
-                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                        
+                        if(response.status==window.hWin.ResponseStatus.ACTION_BLOCKED){
+
+                            var sMsg = '<p>Finding duplicates in '+response.message+' records will be extremely slow and could overload our server under some circumstances.</p>' 
++'<p>In order to streamline the process, please specify a field on which to sort the records. Typically use the constructed title, or a name or title field which will ensure that potential duplicates sort close to one-another. The sort is alphabetical.</p>' 
++'<p>We then search for duplicates in a sliding window of 10,000 records within this sorted list</p>'
++'<p>You may further increase speed by setting "Group by beginning"</p>';
+
+                            
+                            window.hWin.HEURIST4.msg.showMsgErr(sMsg);    
+                            
+                        }else{
+                            window.hWin.HEURIST4.msg.showMsgErr(response);    
+                        }
+                        
                     }
 
                     //console.log(response.data);                    
                 });
 
             }
-        }
 
     },
     
@@ -273,8 +272,10 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
             //DEBUG 
         
         return {
-                'fields': selectedFields,
-                'distance': this.element.find('#distance').val()
+                fields: selectedFields,
+                distance: this.element.find('#distance').val(),
+                startgroup: this.element.find('#startgroup').val(),
+                sort_field: this.element.find('#sort_field').val()
                 };
         
     },
@@ -323,7 +324,9 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
             //generate treedata from rectype structure
             var treedata = window.hWin.HEURIST4.dbs.createRectypeStructureTree( null, 6, rtyID, allowed_fieldtypes );
             
-            treedata[0].expanded = true; //first expanded
+            treedata = treedata[0].children;
+            treedata[0].selected = true;
+            //treedata[0].expanded = true; //first expanded
             
             //load treeview
             var treediv = this.element.find('.rtt-tree');
@@ -373,10 +376,10 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
                         //that._assignSelectedFields();
                     },500);
                 },
-                select: function(e, data) {
-                    // Only add/remove the advanced options for the fields from the main record type.
-                },
                 */
+                select: function(e, data) {
+                    that._fillSortField();
+                },
                 click: function(e, data){
                    if($(e.originalEvent.target).is('span') && data.node.children && data.node.children.length>0){
                        data.node.setExpanded(!data.node.isExpanded());
@@ -406,7 +409,10 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
                     node.removeChildren();
                 }
             });
-            setTimeout(function(){tree.render();},1000);
+            setTimeout(function(){
+                tree.render();
+                that._fillSortField();
+            },1000);
             
         }   
     },
@@ -458,7 +464,7 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
             }
             
             s = s +'<p><b>Merge this group</b> link will ask which members of the group to merge before any changes are made.</p>'
-                + '<p><button id="btn_back_to_search">Back to search form</button></p></div>'
+                + '</div>'
             
 //onsole.log(dupes);            
 
@@ -494,18 +500,39 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
                 this.element.find('#div_result').find('a[data-action-merge]'),'click');
 
             
-            this.element.find('#div_search').hide();
-            this.element.find('#div_result').html(s).show();
-            var ele = this.element.find('#btn_back_to_search');
-            ele.button();
-            this._on(ele, {click:this.doAction});
-            //this.element.find('#btnDoAction').button({label:'Back to search form'});
+            this.element.find('#div_result').html(s);
            
             this._on(
                 this.element.find('#div_result').find('a[data-action-merge]'),
                 {click: this._fixDuplicatesPopup });
                 
+    },
+
+    _fillSortField: function(){
+        
+                    var tree = this.element.find('.rtt-tree').fancytree("getTree");
+                    var fieldIds = tree.getSelectedNodes(false);
+                    var k, len = fieldIds.length;
+                    
+                    var sel = this.element.find('#sort_field');
+                    var keep_val = sel.val();
+                    sel.empty();
+                    
+                    for (k=0;k<len;k++){
+                        var node =  fieldIds[k];
+                        if(window.hWin.HEURIST4.util.isempty(node.data.code)) continue;
+                        
+                        if(node.data.type=='freetext' || node.data.type=='blocktext'){
+                            var key = node.key.split(':');
+                            key = key[key.length-1];
+                            window.hWin.HEURIST4.ui.addoption(sel[0], key, node.data.name);
+                        }
+                    }
+                    sel.val(keep_val);
+                    if(!(sel[0].selectedIndex>0)) sel[0].selectedIndex = 0;
+
     }
+                        
 
 
 });

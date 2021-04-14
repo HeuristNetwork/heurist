@@ -124,35 +124,7 @@
 
                 $mval = metaphone($val2);
                 $key = mb_substr($mval, 0, $fuzziness);
-                
-            }else if($mode=='similar'){
-                //use https://www.php.net/manual/en/function.similar-text.php
-            }else{ //levenshtein is default
-                //take first 255 chars
-                
-                //1. first group the same
-                
-/*
-CHAR_LENGTH(a.name)-CHAR_LENGTH(b.name)>3
-                
-
-use hdb_osmak_7;
-SELECT a.rec_Title, b.rec_Title 
-FROM Records a, Records b  
-WHERE a.rec_RecTypeID=10 AND b.rec_RecTypeID=10
-AND CHAR_LENGTH(a.rec_Title)-CHAR_LENGTH(b.rec_Title)<4
-AND a.rec_ID < b.rec_ID 
-AND NEW_LEVENSHTEIN(NEW_LIPOSUCTION(a.rec_Title), NEW_LIPOSUCTION(b.rec_Title))<4
-
-
-SELECT a.rec_Title, b.rec_Title 
-FROM Records a JOIN Records b ON a.rec_ID != b.rec_ID AND b.rec_RecTypeID=10
-    AND NEW_LEVENSHTEIN(NEW_LIPOSUCTION(a.rec_Title), NEW_LIPOSUCTION(b.rec_Title))<5
-WHERE a.rec_ID=:XXX
-
-https://stackoverflow.com/questions/7217746/how-to-sort-an-array-by-similarity-in-relation-to-an-inputted-word/39477606
-*/                
-                
+           
             }
             
             
