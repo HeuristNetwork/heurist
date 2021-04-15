@@ -43,6 +43,9 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPage.php');
         crosstabsAnalysis = CrosstabsAnalysis('', '');
         //
     }
+    //Used to open the crosstabs section to the full width on the initial load.
+    window.hWin.HAPI4.LayoutMgr.cardinalPanel('sizePane', 
+            ['east', (top?top.innerWidth:window.innerWidth)]);
 
 </script>
 
