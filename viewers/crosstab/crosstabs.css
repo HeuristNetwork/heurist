@@ -154,13 +154,23 @@ div .selected, div .selected:hover{
 }
 
 .crosstab-header0{
-    font-size: 200em;
+    /*font-size: 200em;*/
     font-weight: bold;
     text-transform:uppercase;
+    border-top :1px solid black;
+    border-right: 1px solid black;
 }
+
+.crosstab-header1{
+    font-weight: bold;
+    text-transform:uppercase;
+    border-right :1px solid black;
+}
+
 .crosstab-header{
     font-size: 1em;
     text-align:center;
+    border-right : 1px solid black;
 }
 .crosstab-value{
     font-size: 1em;
@@ -172,12 +182,24 @@ div .selected, div .selected:hover{
     min-width:4em;
     text-align:right;
     font-weight: bold;
+    border-right: 1px solid black;
+    border-bottom: 1px solid black;
 }
 .percent {
     font-size: 0.9em;
     color:gray;
     min-width:4em;
     text-align:right;
+    border-right: 1px solid black;
+}
+
+.total-percent{
+    font-size: 0.9em;
+    color:gray;
+    min-width:4em;
+    text-align:right;
+    border-bottom: 1px solid black;
+    border-right: 1px solid black;
 }
 
 .crosstab-page{
@@ -264,6 +286,7 @@ div .progress-message {
 
 .blankCheckboxesSpan{
     position:relative;
-    top:70px;
+    top:50px;
+    padding-right: 5px;
 }
 

@@ -203,28 +203,15 @@ require_once(dirname(__FILE__).'/../../hclient/framecontent/initPage.php');
                 <div id="pmessage" class="progress-message">Requesting</div>
             </div>
 
-        <!-- Adding modal to crosstabs -->
+        <!-- Adding modal to crosstabs 
             <div class="col text-center">
                 <button id="modalButton" class="btn btn-success btn-lg" data-toggle="modal" data-target="#modalDisplay" disabled>View Analysis</button>
             </div>
-        <!-- For testing purposes
-            <div id="modalDisplay" class="modal fade">
-                <div class="modal-dialog" role="dialog" style="width:auto; height:auto; max-width:90%;" > 
-                    <div class="modal-content" style="overflow:auto;">
-                        <div class="modal-header">
-                            <h2 class="modal-title">Results</h2>
-                                <div class="modal-body" >
+        -->
                                 
-                                    <div id="divres" class="output-content" style="display:none;">
-                                    </div>
-                                
-                                For Testing
-                                </div>
-                        </div>
-                   </div>
-                </div> 
-            <div>
-            -->
+            <div id="divres" class="output-content" style="display:none;">
+            </div>
+            
 
             <div id="div_empty" class="output-content" style="color:red;font-weight:bold;display:none;">
                 Please apply a filter to create a result set

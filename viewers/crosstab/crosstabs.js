@@ -25,9 +25,7 @@
 
 var crosstabsAnalysis;
 var buttonDiv;
-var exportButton;
 var visualisationButton;
-var exportDlgBtn;
 var firstRender = true;
 
 /**
@@ -112,10 +110,8 @@ function CrosstabsAnalysis(_query, _query_domain) {
       configEntityWidget.configEntity( 'updateList', $recTypeSelector.val() );
 
         buttonDiv = $("<div></div>");
-        exportButton = $("<button>Export</button>");
         visualisationButton = $("<button>Visualise</button>");
 
-        exportButton.appendTo(buttonDiv);
         visualisationButton.appendTo(buttonDiv);
     }
 
@@ -909,8 +905,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
         var pages = fields3.page.intervals;
         var plen = pages.length;
 
-        $divres = $("<div></div>").appendTo("body");
-        $divres.attr("id", "divres");
+        $divres = $('#divres');
         $divres.hide();
         $divres.empty();
 
@@ -1004,10 +999,14 @@ function CrosstabsAnalysis(_query, _query_domain) {
         }
 
         //$divres.find('td').css( {'padding':'4px', 'border':'1px dotted gray'} );//{'border':'1px dotted gray'}); //1px solid gray'});
-        $divres.find('.crosstab-header0').css({'border':'1px solid black'});//fix
+        /*$divres.find('.crosstab-header0').css({
+            'border-top':'1px solid black',
+        });
         $divres.find('th').css({
             'border-right':'1px solid black'
-        }); //fix
+        });
+        */
+        
         buttonDiv.appendTo($divres);
 
         //console.log($.fn.dataTable.isDataTable("table#resultsTable"));
@@ -1060,7 +1059,9 @@ function CrosstabsAnalysis(_query, _query_domain) {
         var hasValues = false;
         var grantotal = 0;
         var colspan = 1;
+        var rowspan = 1;
 
+        if((showPercentageRow || showPercentageColumn) && clen>1) rowspan++;
         if(showPercentageRow && clen>0) colspan++;
         if(showPercentageColumn) colspan++;
 
@@ -1152,12 +1153,6 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 }
             }
         }//records
-
-        // If user selects one variable, the rows are to be sorted by descending order.
-        /*if(clen == 1){
-            rows = rows.sort(_rowCompare);
-        }
-        */
         
         //special calc fo average
         if(isAVG)
@@ -1255,33 +1250,34 @@ function CrosstabsAnalysis(_query, _query_domain) {
         $table.attr("id", "resultsTable");
         $table.attr("class", "display cell-border");
         var $rowPercentageHeader;
+        var styleTypeHeader = "crosstab-header0";
 
         //Must have a table header for DataTables to work correctly.
         var $row = $('<thead>').appendTo($table);
         
         if(!noColumns){
+            styleTypeHeader = "crosstab-header1";
             var rowHeader1 = $('<tr>');
             for (j=0; j<clen; j++){
                 if(supressBlankColumn && columns[j].isempty) continue;
                 notemtycolumns++;
             }
-            rowHeader1.append('<th>&nbsp;</th><th class="crosstab-header0" style="{text-align:center;}" colspan="'+notemtycolumns*colspan+(showTotalsColumn?1:0)+'">'+fields3.column.fieldname+'</th>');
+            rowHeader1.append('<th>&nbsp;</th><th class="crosstab-header0" style="text-align:center; border-left:1px solid black;" colspan="'+notemtycolumns*colspan+(showTotalsColumn?1:0)+'">'+fields3.column.fieldname+'</th>');
             $row.append(rowHeader1);
         }
 
-        
         var $rowHeader = $('<tr>');
-        $rowHeader.append('<th class="crosstab-header0">'+fields3.row.fieldname+'</th>');
+        $rowHeader.append('<th class="'+styleTypeHeader+'" style="border-left:1px solid black" rowspan="'+rowspan+'">'+fields3.row.fieldname+'</th>');
     
         //$row.append('<th class="crosstab-header0">'+fields3.row.fieldname+'</th>');
 
         // render HEADER, reset column totals
         if(noColumns){ //If only Variable 1 is chosen
-            $rowHeader.append('<th>'+aggregationMode+'</th>');
+            $rowHeader.append('<th class="crosstab-header0">'+aggregationMode+'</th>');
 
             //If 'Column %' checkbox is ticked.
             if(showPercentageColumn){
-                $rowHeader.append('<th>%</th>')
+                $rowHeader.append('<th class="percent" style="border-top: 1px solid black;">%</th>')
             }
         }else{ //If two variables are chosen
             //Appends column names of the second variable.
@@ -1291,45 +1287,42 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 //notemtycolumns++;
             }
             if(showTotalsRow){ //special column for totals
-                $rowHeader.append('<th class="crosstab-header0" style="{text-align:center;}" colspan="'+colspan+'">totals</th>');  //(showPercentageRow?2:1)  ART2
+                $rowHeader.append('<th class="'+styleTypeHeader+'" style="{text-align:center;}" colspan="'+colspan+'">totals</th>');  //(showPercentageRow?2:1)  ART2
             }else if(showTotalsColumn){
-                $rowHeader.append('<th class="crosstab-header0" style="{text-align:center;}">totals</th>');
+                $rowHeader.append('<th class="'+styleTypeHeader+'" style="{text-align:center;}">totals</th>');
             }
 
             //If 'Row %' checkbox has been chosen only.
             if(showPercentageRow && !showPercentageColumn){
                 $rowPercentageHeader = $('<tr>');
-                $rowPercentageHeader.append('<th>&nbsp;</th>');
                 for(t=0; t<clen;t++){
                     if(supressBlankColumn && columns[t].isempty) continue;
-                    $rowPercentageHeader.append('<th>'+aggregationMode+'</th><th>Row%</th>');
+                    $rowPercentageHeader.append('<th class="crosstab-header">'+aggregationMode+'</th><th class="percent">Row%</th>');
                 }
                 if(showTotalsRow){
                     $rowPercentageHeader.append('<th>&nbsp;</th>');
-                    $rowPercentageHeader.append('<th>%</th>');
+                    $rowPercentageHeader.append('<th class="percent">%</th>');
                 }
             }
             else if(!showPercentageRow && showPercentageColumn){ //If 'Column %' checkbox has been chosen only.
                 $rowPercentageHeader = $('<tr>');
-                $rowPercentageHeader.append('<th>&nbsp;</th>');
                 for(t=0; t<clen;t++){
                     if(supressBlankColumn && columns[t].isempty) continue;
-                    $rowPercentageHeader.append('<th>'+aggregationMode+'</th><th>Column%</th>');
+                    $rowPercentageHeader.append('<th class="crosstab-header">'+aggregationMode+'</th><th class="percent">Col%</th>');
                 }
                 if(showTotalsRow){
-                    $rowPercentageHeader.append('<th>&nbsp;</th>');
-                    $rowPercentageHeader.append('<th>%</th>');  
+                    $rowPercentageHeader.append('<th class="crosstab-header">&nbsp;</th>');
+                    $rowPercentageHeader.append('<th class="percent">%</th>');  
                 }
             }
             else if(showPercentageRow && showPercentageColumn){ //If both 'Column %' and 'Row %' have been chosen.
                 $rowPercentageHeader = $('<tr>');
-                $rowPercentageHeader.append('<th>&nbsp;</th>');
                 for (j=0; j<clen; j++){
                     if(supressBlankColumn && columns[j].isempty) continue;
-                    $rowPercentageHeader.append('<th class="crosstab-value">&nbsp;</th><th class="percent">Row%</th><th class="percent">Col%</th>');
+                    $rowPercentageHeader.append('<th class="crosstab-header">&nbsp;</th><th class="percent">Row%</th><th class="percent">Col%</th>');
                 }
                 if(showTotalsRow || showTotalsColumn){
-                    $rowPercentageHeader.append('<th>&nbsp;</th><th>Row%</th><th>Col%</th>');  //(showTotalsRow && showPercentageRow?2:1)   ART2
+                    $rowPercentageHeader.append('<th class="crosstab-header">&nbsp;</th><th class="percent">Row%</th><th class="percent">Col%</th>');  //(showTotalsRow && showPercentageRow?2:1)   ART2
                 }
             }
         }
@@ -1397,7 +1390,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
                 if(showTotalsRow){ //special column for totals
                     if(rows[i].total!=0 || !supressZero){
-                        s = '<td class="crosstab-total">'+rnd(rows[i].total) +'</td>';
+                        s = '<td class="crosstab-value">'+rnd(rows[i].total) +'</td>';
                         if(showPercentageRow){
                             s = s+'<td class="percent">'+rows[i].percent +'%</td>'
                         }
@@ -1423,11 +1416,11 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 $row = $('<tfoot>').appendTo($table);
 
                 var $rowFooter = $('<tr>');
-                $rowFooter.append('<td class="crosstab-header0" >totals</td>');
+                $rowFooter.append('<td class="crosstab-header0" style="border-left:1px solid black; border-bottom: 1px solid black;">totals</td>');
                 $rowFooter.append('<td class="crosstab-total">'+rnd(grantotal) +'</td>');
 
                 if(showPercentageColumn){
-                    $rowFooter.append('<td>100%</td>');
+                    $rowFooter.append('<td class="total-percent">100%</td>');
                 }
 
                 $row.append($rowFooter);
@@ -1439,7 +1432,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 $row = $('<tfoot>').appendTo($table);
 
                 var $rowFooter1 = $('<tr>');
-                $rowFooter1.append('<td class="crosstab-header0">Totals</td>');
+                $rowFooter1.append('<td class="crosstab-header0" style="border-left:1px solid black; border-bottom: 1px solid black;">Totals</td>');
 
                 for (j=0; j<clen; j++){
                     if(supressBlankColumn && columns[j].isempty) continue;
@@ -1448,26 +1441,26 @@ function CrosstabsAnalysis(_query, _query_domain) {
                         s = '<td class="crosstab-total">'+rnd(columns[j].total) +'</td>';
 
                         if(showPercentageRow){
-                            s = s+'<td class="percent">'+(showPercentageColumn?'100%':'&nbsp;')+'</td>'
+                            s = s+'<td class="total-percent">'+(showPercentageColumn?'100%':'&nbsp;')+'</td>'
                         }
                         if(showPercentageColumn){
-                            s = s+'<td class="percent">'+  columns[j].percent +'%</td>'
+                            s = s+'<td class="total-percent">'+  columns[j].percent +'%</td>'
                         }
 
                         $rowFooter1.append(s);
                     }else{
                         for(l=0;l<colspan;l++){
-                            $rowFooter1.append('<td>&nbsp;</td>');
+                            $rowFooter1.append('<td class="total-percent">&nbsp;</td>');
                         }
                     }
                 }
 
                 $rowFooter1.append('<td class="crosstab-total">'+rnd(grantotal)+'</td>');
                 if(showPercentageRow && showPercentageColumn){
-                    $rowFooter1.append('<td>&nbsp;</td><td>&nbsp;</td>');
+                    $rowFooter1.append('<td class="total-percent">&nbsp;</td><td class="total-percent">&nbsp;</td>');
                 }
                 else if(showPercentageRow || showPercentageColumn){
-                    $rowFooter1.append('<td colspan="'+1+'">&nbsp;</td>');  //(showPercentageRow?2:1)
+                    $rowFooter1.append('<td class="total-percent" colspan="'+1+'">&nbsp;</td>');  //(showPercentageRow?2:1)
                 }
             }else if(showTotalsRow){//??????
                 $row = $('<tr>').appendTo($table);
@@ -1485,14 +1478,14 @@ function CrosstabsAnalysis(_query, _query_domain) {
             
             $divres.append('<div>---------------------------------</div>');
 
-            $("#modalButton").attr("disabled", false);
+            //$("#modalButton").attr("disabled", false);
 
 
         }else if (!supressBlankPage) {
             $divres.append('<h2 class="crosstab-page">'+pageName+'</h2>');
             $divres.append("<div>empty set</div>");
             
-            $("#modalButton").attr("disabled", false);
+            //$("#modalButton").attr("disabled", false);
         
         }
 
@@ -1645,18 +1638,6 @@ function CrosstabsAnalysis(_query, _query_domain) {
         _resetAllIntervals(settings.fields);
     }
 
-    //Compare function to sort the rows by descending order.
-    function _rowCompare(b, a){
-        
-        if(a.output[0] < b.output[0]){
-            return -1;
-        }
-        if(a.output[0] > b.output[0]){
-            return 1;
-        }
-        return 0;
-    }
-
     //Export function for table.
     function _exportTable(buttons){
         
@@ -1742,15 +1723,11 @@ function CrosstabsAnalysis(_query, _query_domain) {
     _init(_query, _query_domain);  // initialize before returning
 
     //On click of View Analysis button, modal appears.
-    $("#modalButton").click(function(){
+    /*$("#modalButton").click(function(){
         window.hWin.HEURIST4.msg.showElementAsDialog(
             {element:$divres.get(0), height: 600, width:1000, title:"Results", modal:true} );
-        console.log($.fn.dataTable.isDataTable("#resultsTable"));
     });
-
-    exportButton.click(function(){
-        window.hWin.HEURIST4.msg.showMsgDlg('Button feature has not been implemented.');
-    });
+    */
 
     visualisationButton.click(function(){
         window.hWin.HEURIST4.msg.showMsgDlg('Button feature has not been implemented.');
