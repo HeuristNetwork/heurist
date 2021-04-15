@@ -56,8 +56,6 @@
         if ( $system->get_user_id()<1 ) {
             return $system->addError(HEURIST_REQUEST_DENIED);
         }
-//IMPORTANT !!!!        to implement
-//$addRecDefaults = getDefaultOwnerAndibility($_REQUEST);
 
         $addRecDefaults = $system->user_GetPreference('record-add-defaults');
         if ($addRecDefaults){
@@ -281,7 +279,7 @@
             }
             
             if($is_InValid) {
-                return $system->addError(HEURIST_UNKNOWN_ERROR, 
+                return $system->addError(HEURIST_ACTION_BLOCKED, 
                     'Are you a bot? Please enter the correct answer to the challenge question');
             }else{
                 if($system->get_user_id()<1){ //if captcha is valid allow   (for ExpertNation - submit feedback)
@@ -1931,12 +1929,12 @@
             '<br><br>Please run Verify > Verify integrity to check for and fix data problems.<br>' 
             .'If the problem cannot be fixed, or re-occurs frequently, please '.CONTACT_HEURIST_TEAM);
             
-            $system->addError(HEURIST_ERROR, 'Encountered invalid value'.$ss
+            $system->addError(HEURIST_ACTION_BLOCKED, 'Encountered invalid value'.$ss
                                                         .' for Record#'.$recID.'<br>'.implode('<br>',$errorValues), null);
 
         }else if (count($det_required)>0) {
 
-            $system->addError(HEURIST_ERROR, 'Required field'.(count($det_required)>1?'s':'')
+            $system->addError(HEURIST_ACTION_BLOCKED, 'Required field'.(count($det_required)>1?'s':'')
             .' not defined or '.
             (count($det_required)>1?'have':'has')
             .' wrong value: '.implode(',',array_values($det_required)));

@@ -665,14 +665,16 @@
     //
     function fileCopy($s1, $s2) {
         $path = pathinfo($s2);
-        
+
         if(folderCreate($path['dirname'], true)){
             if (!copy($s1,$s2)) {
                 // "copy failed";
+                error_log( 'Can not copy file '.$s1.'  to '.$s2 );    
                 return false;
             }
         }else{
-           //can't crate folder or it is not writeable 
+           //can't create folder or it is not writeable 
+           error_log( 'Can not create folder '.$path['dirname'] );    
            return false;
         }
         return true;
@@ -689,6 +691,30 @@
             $fp = fopen($filename,'x');
             fwrite($fp, $rawdata);
             fclose($fp);
+
+            return filesize($filename);
+        }else{
+            return 0;
+        }
+    }
+    //
+    //
+    //
+    function fileAdd($rawdata, $filename)
+    {
+        if($rawdata){
+            try{
+                $fp = fopen($filename,'a'); //open for add
+                if($fp===false){
+                    error_log( 'Can not open file '.$filename );    
+                }else{
+                    fwrite($fp, $rawdata);
+                    fclose($fp);
+                }
+            
+            }catch(Exception  $e){
+                error_log( 'Can not open file '.$filename.'  Error:'.Exception::getMessage() );
+            }
 
             return filesize($filename);
         }else{
