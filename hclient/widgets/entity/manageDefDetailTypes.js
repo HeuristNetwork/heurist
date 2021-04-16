@@ -1581,10 +1581,10 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                         );
                         
                     },
-                'This action is password-protected', {password:true});
+                'Reserved field changes require a special system administrator password (not a normal login password)', {password:true});
             }else{
-                window.hWin.HEURIST4.msg.showMsgDlg('Reserved field changes is not allowed unless a challenge password is set'
-                +' - please consult system administrator');
+                window.hWin.HEURIST4.msg.showMsgDlg('Reserved field changes are not allowed' 
+                + 'unless a special system administrator password is set - please consult system administrator.');
             }
             return;
         }

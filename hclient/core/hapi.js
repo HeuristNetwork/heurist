@@ -348,7 +348,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                             callback(password_entered);
                             return; 
                     }else{
-                            if(window.hWin.HAPI4.sysinfo['pwd_'+password_protected]){ //password defined
+                            if(window.hWin.HAPI4.sysinfo['pwd_'+password_protected]){ //system administrator password defined allowing system admin override for specific actions otherwise requiring ownership
                             
                             //
                                 window.hWin.HEURIST4.msg.showPrompt(
@@ -370,10 +370,10 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                                         );
                                         
                                     },
-                                {title:'This action is password-protected',yes:'OK',no:'Cancel'}, {password:true});
+                                {title:'This action requires a special system administrator password (not a normal login password)',yes:'OK',no:'Cancel'}, {password:true});
                             
                             }else{
-                                window.hWin.HEURIST4.msg.showMsgDlg('This action is not allowed unless a challenge password is set - please consult system administrator');
+                                window.hWin.HEURIST4.msg.showMsgDlg('This action is not allowed unless a special system administrator password is set - please consult system administrator');
                             }
                             return;
                     }                
