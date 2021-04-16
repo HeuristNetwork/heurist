@@ -62,6 +62,7 @@ if($isCloneTemplate){ //template db must be registered with id less than 21
     }
 
     $dbRegID = $system->get_system('sys_dbRegisteredID', true);
+
     if(!($dbRegID>0 && $dbRegID<1000)){
         $system->addError(HEURIST_ERROR, "Sorry, the database $templateddb must be registered with an ID less than 1000, indicating a database curated or approved by the Heurist team, to allow cloning through this function. You may also clone any database that you can log into through the Advanced functions under Administration.");
         include $ERROR_REDIR;
@@ -69,21 +70,25 @@ if($isCloneTemplate){ //template db must be registered with id less than 21
     }
 }else{
     $templateddb = null;
+
+    $dbRegID = $system->get_system('sys_dbRegisteredID', true);
     
-    //check for new definitions
-    $rty = mysql__select_value($mysqli, 'SELECT count(*) FROM defRecTypes '
-        ." WHERE (rty_OriginatingDBID = '0') OR (rty_OriginatingDBID IS NULL)");
-    $dty = mysql__select_value($mysqli, 'SELECT count(*) FROM defDetailTypes '
-        ." WHERE (dty_OriginatingDBID = '0') OR (dty_OriginatingDBID IS NULL)");
-    $trm = mysql__select_value($mysqli, 'SELECT count(*) FROM defTerms '
-        ." WHERE (trm_OriginatingDBID = '0') OR (trm_OriginatingDBID IS NULL)");
-    
-    if($rty>0 || $dty>0 || $trm>0){
-        $s = array();
-        if($rty>0) $s[] = $rty.' record types';
-        if($dty>0) $s[] = $dty.' base fields';
-        if($trm>0) $s[] = $trm.' vocabularies or terms';
-        $sHasNewDefsWarning = implode(', ',$s);
+    if(!($dbRegID>0)){
+        //check for new definitions
+        $rty = mysql__select_value($mysqli, 'SELECT count(*) FROM defRecTypes '
+            ." WHERE (rty_OriginatingDBID = '0') OR (rty_OriginatingDBID IS NULL)");
+        $dty = mysql__select_value($mysqli, 'SELECT count(*) FROM defDetailTypes '
+            ." WHERE (dty_OriginatingDBID = '0') OR (dty_OriginatingDBID IS NULL)");
+        $trm = mysql__select_value($mysqli, 'SELECT count(*) FROM defTerms '
+            ." WHERE (trm_OriginatingDBID = '0') OR (trm_OriginatingDBID IS NULL)");
+        
+        if($rty>0 || $dty>0 || $trm>0){
+            $s = array();
+            if($rty>0) $s[] = $rty.' record types';
+            if($dty>0) $s[] = $dty.' base fields';
+            if($trm>0) $s[] = $trm.' vocabularies or terms';
+            $sHasNewDefsWarning = implode(', ',$s);
+        }
     }
 }
 
