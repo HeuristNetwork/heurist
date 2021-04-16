@@ -234,9 +234,13 @@ $.widget( "heurist.configEntity", {
         // save settings
         //
         if(this.options.divSaveSettings){
-            $('<div class="header" style="padding: 0 16px;width:20em;"><label>Name settings to save for future use</label></div>'
-                +'<input class="inpt_save_setting_name text ui-widget-content ui-corner-all" style="max-width:30em"/>'
-                + (this.options.saveOnExit?'':'&nbsp;&nbsp;<button class="btnSaveSettings">Save</button>'))
+
+            // $('<div class="header" style="padding: 0 16px;width:20em;"><label>Name settings to save for future use</label></div>'
+            //     +'<input class="inpt_save_setting_name text ui-widget-content ui-corner-all" style="max-width:30em"/>'
+            //     + (this.options.saveOnExit?'':'&nbsp;&nbsp;<button class="btnSaveSettings">Save</button>'))
+
+            $('<div class="col-12"><label>Name settings to save for future use</label></div><div class="col-12 mb-1"><input class="inpt_save_setting_name text form-control"/></div>'
+            + (this.options.saveOnExit?'':'<div class="col-12"><button class="btn btn-success btn-block btnSaveSettings">Save</button></div>'))
             .appendTo(this.options.divSaveSettings);
             this.inpt_save_setting_name = this.options.divSaveSettings.find('.inpt_save_setting_name');        
             
