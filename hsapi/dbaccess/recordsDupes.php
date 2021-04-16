@@ -51,6 +51,8 @@ class RecordsDupes {
     private static $limit_cnt;
     private static $progress_session_id;
     
+    private static $dupeIgnoring = null;
+    
 //
 //
 //    
@@ -75,6 +77,54 @@ public static function setSession($system){
     self::$system  = $system;
     self::$mysqli = $system->get_mysqli();
     self::$initialized = true;
+}
+
+//
+// add to list of exclusions
+//
+public static function setIgnoring( $params ){
+    
+    if(@$params['ignore']){
+
+        self::initialize();
+        
+        if($params['ignore']=='clear'){
+            
+                    $res = self::$mysqli->query('DELETE FROM recSimilarButNotDupes WHERE snd_SimRecsList IS NOT NULL');
+                    
+                    if(!$res){
+                        $response = self::$system->addError(HEURIST_DB_ERROR, 
+                                'Set group as ignoring. Can not execute query', self::$mysqli->error);
+                        return false;
+                    }
+            
+        }else{
+
+            $diffHash = $params['ignore'];
+            
+            $diffHash = explode(',',$diffHash);
+            sort($diffHash);
+            $diffHash = implode(',',$diffHash);
+        
+            $dupeIgnoring = mysql__select_value(self::$mysqli, 'SELECT snd_SimRecsList FROM recSimilarButNotDupes '
+            .' WHERE snd_SimRecsList="'.$diffHash.'"');
+            
+            if($dupeIgnoring==null){
+                
+                //array_push($dupeIgnoring, $diffHash);
+                
+                $res = self::$mysqli->query('INSERT INTO recSimilarButNotDupes VALUES("'.$diffHash.'")');
+                
+                if(!$res){
+                    $response = self::$system->addError(HEURIST_DB_ERROR, 
+                            'Set group as ignoring. Can not execute query', self::$mysqli->error);
+                    return false;
+                }
+            }
+        }
+    
+    }
+    return 1;
 }
 
 //
@@ -277,10 +327,12 @@ public static function findDupes( $params ){
     if(!$res){
         
         $response = self::$system->addError(HEURIST_DB_ERROR, 
-                'Search duplications. Can not executre main query', self::$mysqli->error);
+                'Search duplications. Can not execute main query', self::$mysqli->error);
         return false;
     }
 
+    self::$dupeIgnoring = mysql__select_list2(self::$mysqli, 'SELECT snd_SimRecsList FROM recSimilarButNotDupes');
+    
     self::$all_similar_ids = array();     // plain array of ids of similar records (to facilitate search) 
     self::$all_similar_ids_cnt = 0;       // 
     self::$all_similar_records = array(); //result: grouped similar records - rec_ID=>rec_Title
@@ -477,14 +529,20 @@ public static function findDupes( $params ){
                 
                 //NP $group = mysql__select_assoc2(self::$mysqli, $query);
                 if($group && count($group)>1){
+
+                    sort($group);
+                    $diffHash = implode(',',$group);
+                    if (is_array(self::$dupeIgnoring) && !in_array($diffHash, self::$dupeIgnoring))
+                    {
                         self::$all_similar_ids = array_merge(self::$all_similar_ids, $group); //add new set of ids except first (current rec_id)
-                        
+
                         //find titles
                         $group = mysql__select_assoc2(self::$mysqli,
                             'select rec_ID, rec_Title from Records where rec_ID in ('.implode(',',$group).')');
-                        
+
                         self::$all_similar_records[] = $group; //id=>title
                         self::$all_similar_ids_cnt = self::$all_similar_ids_cnt + count($group);
+                    }
                 }
 
                 self::$processed++;
@@ -598,24 +656,31 @@ private static function _searchInCache(){
         }
 
         if(count($group)>0){
-            array_unshift($group, $curr_recid);
+            array_unshift($group, $curr_recid); //add current
 
-            self::$all_similar_ids = array_merge(self::$all_similar_ids, $group); //add new set of ids except first (current rec_id)
+            sort($group);
+            $diffHash = implode(',',$group);
+            if (is_array(self::$dupeIgnoring) && !in_array($diffHash, self::$dupeIgnoring))
+            {
+            
+                self::$all_similar_ids = array_merge(self::$all_similar_ids, $group); //add new set of ids except first (current rec_id)
 
-            //find titles
-            $group = mysql__select_assoc2(self::$mysqli,'select rec_ID, rec_Title from Records where rec_ID in ('
-                        .implode(',',$group).')');
-                        
-            foreach ($group as $recid=>$title){
-                $group[$recid] = @$group2[$recid].'   '.$title;
-            }
-                        
-                        
-            self::$all_similar_records[] = $group; //id=>title
-            self::$all_similar_ids_cnt = self::$all_similar_ids_cnt + count($group);
+                //find titles
+                $group = mysql__select_assoc2(self::$mysqli,'select rec_ID, rec_Title from Records where rec_ID in ('
+                            .implode(',',$group).')');
+                            
+                foreach ($group as $recid=>$title){
+                    $group[$recid] = @$group2[$recid].'   '.$title;
+                }
+                            
+                            
+                self::$all_similar_records[] = $group; //id=>title
+                self::$all_similar_ids_cnt = self::$all_similar_ids_cnt + count($group);
 
-            if(self::$all_similar_ids_cnt>self::$limit_cnt){
-                return 1;
+                if(self::$all_similar_ids_cnt>self::$limit_cnt){
+                    return 1;
+                }
+            
             }
         }
 

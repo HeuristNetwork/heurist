@@ -38,13 +38,13 @@
     $dupes = array();
     $dupekeys = array();
     $recsGivenNames = array();
-    $dupeDifferences = array();
+    $dupeDifferences = array(); //Similar But Not Dupes
 
     $mysqli = $system->get_mysqli();
     
     $dupeDifferences = mysql__select_list2($mysqli, 'select snd_SimRecsList from recSimilarButNotDupes');
 
-    if (@$_REQUEST['dupeDiffHash']){
+    if (@$_REQUEST['dupeDiffHash']){ //add new non duplications
         foreach($_REQUEST['dupeDiffHash'] as $diffHash){
             if (! in_array($diffHash,$dupeDifferences)){
                 array_push($dupeDifferences,$diffHash);
@@ -268,7 +268,7 @@
                             $diffHash = array_keys($bibs[$key]);
                             sort($diffHash,SORT_ASC);
                             $diffHash = join(',',$diffHash );
-                            if (in_array($diffHash,$dupeDifferences)) continue;
+                            if (in_array($diffHash,$dupeDifferences)) continue; //similar but not dupes
                             print '<div style="padding: 10px 20px;" class="group_'.$unique_group_id.'">';
                             print '<input type="checkbox" name="dupeDiffHash[]" '.
                             'title="Check to indicate that all records in this set are unique." id="'.$key.

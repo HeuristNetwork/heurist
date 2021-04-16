@@ -84,11 +84,23 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
         var that = this;
         res[1].text = window.hWin.HR('Find Duplications');
         res[1].css = {'margin-left':'20px'};
+        
+        
+        res[0].css = {float: 'right', 'margin-top': 10};
+        res[0].text = window.hWin.HR('Clear ignoring list');    
+        res[0].click = function() { 
+                        that._ignoreClear();
+                    };
+        
+        /*
         if(!this.options.isdialog && this.options.is_h6style){
             res.shift();
         }else{
-            res[0].text = window.hWin.HR('Close');    
-        }
+            
+        }*/
+        
+        
+        
         return res;
     },    
         
@@ -446,6 +458,61 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
                 return false;
     },
     
+    //
+    //
+    //
+    _ignoreGroup: function(event){
+
+        var sGroupID = $(event.target).attr('data-action-ignore');
+        var sRecIds = Object.keys(this.dupes[sGroupID]);
+
+        var request = {
+            a        : 'dupes',
+            db       : window.hWin.HAPI4.database,
+            ignore   : sRecIds.join(',')};
+
+        var url = window.hWin.HAPI4.baseURL + 'hsapi/controller/record_verify.php'
+
+        window.hWin.HEURIST4.util.sendRequest(url, request, null, function(response){
+
+            if(response.status == window.hWin.ResponseStatus.OK){
+                $(event.target).parents('div.group').hide();
+            }else{
+                window.hWin.HEURIST4.msg.showMsgErr(response);    
+            }
+        });
+
+        return false;
+    },
+
+    //
+    //
+    //
+    _ignoreClear: function(){
+
+        var request = {
+            a        : 'dupes',
+            db       : window.hWin.HAPI4.database,
+            ignore   : 'clear'};
+
+        var url = window.hWin.HAPI4.baseURL + 'hsapi/controller/record_verify.php'
+
+        window.hWin.HEURIST4.util.sendRequest(url, request, null, function(response){
+
+            if(response.status == window.hWin.ResponseStatus.OK){
+                window.hWin.HEURIST4.msg.showMsgFlash('cleared',1000);
+            }else{
+                window.hWin.HEURIST4.msg.showMsgErr(response);    
+            }
+        });
+
+        return false;
+    },
+
+    
+    //
+    //
+    //
     _renderDuplicates: function(){
         
             var dupes = this.dupes;
@@ -474,14 +541,17 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
 
                 var rec_ids = Object.keys(dupes[i]);
         
-                s = s + '<div style="padding: 10px 20px;" class="group_'+i+'">';
+                s = s + '<div style="padding: 10px 20px;" class="group group_'+i+'">';
                 
                 s = s + '<a href="#" data-action-merge="'+i+'">merge this group</a>&nbsp;&nbsp;&nbsp;&nbsp;'
                     
                     +'<a target="_new" href="'+window.hWin.HAPI4.baseURL+'?db='
                         +window.hWin.HAPI4.database
-                        +'&w=all&q=ids:' + rec_ids.join(',') + '">view as search</a>';
+                        +'&w=all&q=ids:' + rec_ids.join(',') + '">view as search</a>&nbsp;&nbsp;&nbsp;&nbsp;'
 
+                    +'<a href="#" data-action-ignore="'+i+ '">ignore in future</a>';
+                        
+                        
                 //list of records    
                 s = s + '<ul style="padding: 10px 30px;" class="group_'+i+'">';
                 for(var j=0; j<rec_ids.length; j++) {
@@ -505,6 +575,11 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
             this._on(
                 this.element.find('#div_result').find('a[data-action-merge]'),
                 {click: this._fixDuplicatesPopup });
+
+            this._on(
+                this.element.find('#div_result').find('a[data-action-ignore]'),
+                {click: this._ignoreGroup });
+
                 
     },
 
