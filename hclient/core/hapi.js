@@ -354,7 +354,8 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                                 window.hWin.HEURIST4.msg.showPrompt(
                                 '<div style="padding:20px 0px">'
                                 +'Only an administrator (server manager) or the owner (for<br>'
-                                +'actions on a single database) can carry out this action.'
+                                +'actions on a single database) can carry out this action.<br>'
+                                +'This action requires a special system administrator password (not a normal login password)'
                                 +'</div><span style="display: inline-block;padding: 10px 0px;">Enter password:&nbsp;</span>',
                                     function(password_entered){
                                         
@@ -370,7 +371,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
                                         );
                                         
                                     },
-                                {title:'This action requires a special system administrator password (not a normal login password)',yes:'OK',no:'Cancel'}, {password:true});
+                                {title:'Sysadmin override password required',yes:'OK',no:'Cancel'}, {password:true});
                             
                             }else{
                                 window.hWin.HEURIST4.msg.showMsgDlg('This action is not allowed unless a special system administrator password is set - please consult system administrator');

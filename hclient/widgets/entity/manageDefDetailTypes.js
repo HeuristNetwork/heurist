@@ -1565,7 +1565,8 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         
             if(window.hWin.HAPI4.sysinfo['pwd_ReservedChanges']){ //password defined
             
-                window.hWin.HEURIST4.msg.showPrompt('Enter password: ',
+                window.hWin.HEURIST4.msg.showPrompt('<p>Reserved field changes '
+                +'require a special system administrator password (not a normal login password)</p>Enter password: ',
                     function(password_entered){
                         
                         window.hWin.HAPI4.SystemMgr.action_password({action:'ReservedChanges', password:password_entered},
@@ -1581,7 +1582,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                         );
                         
                     },
-                'Reserved field changes require a special system administrator password (not a normal login password)', {password:true});
+                'Sysadmin override password required', {password:true});
             }else{
                 window.hWin.HEURIST4.msg.showMsgDlg('Reserved field changes are not allowed' 
                 + 'unless a special system administrator password is set - please consult system administrator.');
