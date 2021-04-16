@@ -147,6 +147,8 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
                     rty_ID   : rty_ID,
                     fields   : settings.fields,
                     session  : session_id,
+                    startgroup: settings.startgroup,
+                    sort_field: settings.sort_field,
                     distance : settings.distance};
 
                 var url = window.hWin.HAPI4.baseURL + 'hsapi/controller/record_verify.php'
@@ -166,7 +168,21 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
                         that._renderDuplicates();
 
                     }else{
-                        window.hWin.HEURIST4.msg.showMsgErr(response);
+                        
+                        if(response.status==window.hWin.ResponseStatus.ACTION_BLOCKED){
+
+                            var sMsg = '<p>Finding duplicates in '+response.message+' records will be extremely slow and could overload our server under some circumstances.</p>' 
++'<p>In order to streamline the process, please specify a field on which to sort the records. Typically use the constructed title, or a name or title field which will ensure that potential duplicates sort close to one-another. The sort is alphabetical.</p>' 
++'<p>We then search for duplicates in a sliding window of 10,000 records within this sorted list</p>'
++'<p>You may further increase speed by setting "Group by beginning"</p>';
+
+                            
+                            window.hWin.HEURIST4.msg.showMsgErr(sMsg);    
+                            
+                        }else{
+                            window.hWin.HEURIST4.msg.showMsgErr(response);    
+                        }
+                        
                     }
 
                     //console.log(response.data);                    
@@ -256,8 +272,10 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
             //DEBUG 
         
         return {
-                'fields': selectedFields,
-                'distance': this.element.find('#distance').val()
+                fields: selectedFields,
+                distance: this.element.find('#distance').val(),
+                startgroup: this.element.find('#startgroup').val(),
+                sort_field: this.element.find('#sort_field').val()
                 };
         
     },
@@ -358,10 +376,10 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
                         //that._assignSelectedFields();
                     },500);
                 },
-                select: function(e, data) {
-                    // Only add/remove the advanced options for the fields from the main record type.
-                },
                 */
+                select: function(e, data) {
+                    that._fillSortField();
+                },
                 click: function(e, data){
                    if($(e.originalEvent.target).is('span') && data.node.children && data.node.children.length>0){
                        data.node.setExpanded(!data.node.isExpanded());
@@ -391,7 +409,10 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
                     node.removeChildren();
                 }
             });
-            setTimeout(function(){tree.render();},1000);
+            setTimeout(function(){
+                tree.render();
+                that._fillSortField();
+            },1000);
             
         }   
     },
@@ -485,7 +506,33 @@ $.widget( "heurist.recordFindDuplicates", $.heurist.recordAction, {
                 this.element.find('#div_result').find('a[data-action-merge]'),
                 {click: this._fixDuplicatesPopup });
                 
+    },
+
+    _fillSortField: function(){
+        
+                    var tree = this.element.find('.rtt-tree').fancytree("getTree");
+                    var fieldIds = tree.getSelectedNodes(false);
+                    var k, len = fieldIds.length;
+                    
+                    var sel = this.element.find('#sort_field');
+                    var keep_val = sel.val();
+                    sel.empty();
+                    
+                    for (k=0;k<len;k++){
+                        var node =  fieldIds[k];
+                        if(window.hWin.HEURIST4.util.isempty(node.data.code)) continue;
+                        
+                        if(node.data.type=='freetext' || node.data.type=='blocktext'){
+                            var key = node.key.split(':');
+                            key = key[key.length-1];
+                            window.hWin.HEURIST4.ui.addoption(sel[0], key, node.data.name);
+                        }
+                    }
+                    sel.val(keep_val);
+                    if(!(sel[0].selectedIndex>0)) sel[0].selectedIndex = 0;
+
     }
+                        
 
 
 });

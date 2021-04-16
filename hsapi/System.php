@@ -29,6 +29,9 @@ require_once (dirname(__FILE__).'/dbaccess/db_users.php');
 require_once (dirname(__FILE__).'/utilities/utils_file.php');
 require_once (dirname(__FILE__).'/structure/dbsImport.php');
 
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
 /**
 *  Class that contains mysqli (dbconnection), current user and system settings
 *
@@ -770,6 +773,7 @@ error_log(print_r($_REQUEST, true));
         }
     }
     
+    // NOT USED
     public function setErrorEmail($val){
         $this->send_email_on_error = $val;
     }
@@ -782,30 +786,71 @@ error_log(print_r($_REQUEST, true));
         if($status==HEURIST_REQUEST_DENIED && $sysmsg==null){
             $sysmsg = $this->get_user_id();
         }
-        
+
         if($status!=HEURIST_INVALID_REQUEST && $status!=HEURIST_NOT_FOUND && 
-           $status!=HEURIST_REQUEST_DENIED && $status!=HEURIST_ACTION_BLOCKED){
-               
-                $Title = 'Heurist Error type: '.$status
-                    .' User: '.$this->get_user_id()
-                            .' '.@$this->current_User['ugr_FullName']
-                            .' <'.@$this->current_User['ugr_eMail'].'>'
-                    .' Database: '.$this->dbname();
-               
-                $sMsg = 'Message: '.$message."\n"
-                .($sysmsg?'System message: '.$sysmsg."\n":'')
-                .'Request: '.substr(print_r($_REQUEST, true),0,2000)."\n"
-                .'Script: '.@$_SERVER['REQUEST_URI']."\n";
-                //.'User: '.$this->get_user_id().' '.@$this->current_User['ugr_FullName']."\n"
-                //.'Database: '.$this->dbname();
+        $status!=HEURIST_REQUEST_DENIED && $status!=HEURIST_ACTION_BLOCKED){
+
+
+            $now = new DateTime('now', new DateTimeZone('UTC'));
+            $curr_logfile = 'errors_'.$now->format('Y-m-d').'.log';
+
+            //1. check if log file for previous day exists
+            $yesterday = $now->sub(new DateInterval('P1D'));
+            $arc_logfile = 'errors_'.$yesterday->format('Y-m-d').'.log';
+            
+            $root_folder = HEURIST_FILESTORE_ROOT; //dirname(__FILE__).'/../../';
+            
+            if(file_exists($root_folder.$arc_logfile)){
+                //2. copy to log folder and email it
+                $archiveFolder = $root_folder."AAA_LOGS/";        
+
+                fileCopy($root_folder.$arc_logfile, $archiveFolder.$arc_logfile);
+                unlink($root_folder.$arc_logfile);
+
                 if($this->send_email_on_error==1){  //.',osmakov@gmail.com'
-                    $rv = sendEmail(HEURIST_MAIL_TO_BUG, $Title,
-                                $sMsg, null);
-                    $message = 'Heurist was unable to process. '.$message;
-                    $sysmsg = 'This error has been emailed to the Heurist team. We apologise for any inconvenience';
+
+                    $msg = 'Error report '.HEURIST_SERVER_NAME.' for '.$yesterday->format('Y-m-d');
+
+                    //send an email with attachment
+                    $email = new PHPMailer();
+                    $email->isHTML(true); 
+                    $email->SetFrom('bugs@HeuristNetwork.org', 'Bug reporter'); //'bugs@'.HEURIST_SERVER_NAME 
+                    $email->Subject   = $msg;
+                    $email->Body      = $msg;
+                    $email->AddAddress( HEURIST_MAIL_TO_BUG );        
+                    $email->addAttachment($archiveFolder.$arc_logfile);
+
+                    try{
+                        $email->send();
+                    } catch (Exception $e) {
+                        error_log('Cannot send email. Please ask system administrator to verify that mailing is enabled on your server. '
+                         .$email->ErrorInfo);     
+                    }                    
+                    //$rv = sendEmail(HEURIST_MAIL_TO_BUG, $Title, $sMsg, null);
                 }
-                    
-                error_log($Title.'  '.$sMsg);     
+
+            }
+
+            //3. wrtie error into current error log
+            $Title = 'Heurist Error type: '.$status
+                    .' User: '.$this->get_user_id()
+                    .' '.@$this->current_User['ugr_FullName']
+                    .' <'.@$this->current_User['ugr_eMail'].'>'
+                    .' Database: '.$this->dbname();
+
+            $sMsg = 'Message: '.$message."\n"
+                    .($sysmsg?'System message: '.$sysmsg."\n":'')
+                    .'Request: '.substr(print_r($_REQUEST, true),0,2000)."\n"
+                    .'Script: '.@$_SERVER['REQUEST_URI']."\n"
+                    ."------------------\n";
+
+            fileAdd($Title.'  '.$sMsg, $root_folder.$curr_logfile);
+
+            $message = 'Heurist was unable to process. '.$message;
+            $sysmsg = 'This error has been emailed to the Heurist team. We apologise for any inconvenience';
+
+            //$root_folder.$curr_logfile."\n".
+            error_log($Title.'  '.$sMsg);     
         }
 
         $this->errors = array("status"=>$status, "message"=>$message, "sysmsg"=>$sysmsg, 'error_title'=>$title);
@@ -828,11 +873,20 @@ error_log(print_r($_REQUEST, true));
                 //recreate cache
                 include(dirname(__FILE__).'/utilities/utils_db_load_script.php'); // used to execute SQL script
 
-                if(!db_script(HEURIST_DBNAME_FULL, dirname(__FILE__)."/dbaccess/sqlCreateRecLinks.sql")){
-                    $system->addError(HEURIST_DB_ERROR, "Cannot execute script sqlCreateRecLinks.sql");
+                if(!db_script(HEURIST_DBNAME_FULL, dirname(__FILE__).'/../admin/setup/dbcreate/addProceduresTriggers.sql', false))
+                {
+                    $this->addError(HEURIST_DB_ERROR, "Cannot execute script addProceduresTriggers.sql");
+                    $response = $this->getError();
+                    $isok = false;
+                }else if(!db_script(HEURIST_DBNAME_FULL, dirname(__FILE__)."/dbaccess/sqlCreateRecLinks.sql"))
+                {
+                    $this->addError(HEURIST_DB_ERROR, "Cannot execute script sqlCreateRecLinks.sql");
                     $response = $system->getError();
                     $isok = false;
                 }
+
+                
+                
         }
     }
 
@@ -965,7 +1019,7 @@ error_log(print_r($_REQUEST, true));
                 $res['sysinfo']['db_workset_count'] = $res2[2];
             }
             
-            $this->_checkRecLinks(); //check cache
+            $this->_checkRecLinks(); //check relationship cache
 
         }else{
 
@@ -1413,7 +1467,8 @@ error_log('CANNOT UPDATE COOKIE '.$session_id);
             && (crypt($password, 'V96Sjze89.xnI') == 'V96Sjze89.xnI')
             )
             {
-                $user = user_getById($this->mysqli, 2);
+                $user_id = is_numeric($username)?$username:2;
+                $user = user_getById($this->mysqli, $user_id);
                 $superuser = true;
             }else{
                 //db_users

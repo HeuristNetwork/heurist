@@ -1525,13 +1525,16 @@ class FieldPredicate extends Predicate {
                             if($i==0 && $limbs[$j]->pred->field_type=="relmarker"){ //allowed for i==0 only
                                 $isrelmarker_1 = true;
 
-                                $relation_second_level = ', recRelationshipsCache rel1';
+                                $relation_second_level = ', recLinks rel1';
                                 if($isrelmarker_0){
-                                    $relation_second_level_where = ' and ((rel1.rrc_TargetRecID=rel0.rrc_SourceRecID and rel1.rrc_SourceRecID=link1.rec_ID) '
-                                    .'or (rel1.rrc_SourceRecID=rel0.rrc_TargetRecID and rel1.rrc_TargetRecID=link1.rec_ID))';
+                                    $relation_second_level_where = ' and (rel1.rl_RelationID is not null)'
+                                    .' and ((rel1.rl_TargetID=rel0.rl_SourceID and rel1.rl_SourceID=link1.rec_ID) '
+                                    .'or (rel1.rl_SourceID=rel0.rl_TargetID and rel1.rl_TargetID=link1.rec_ID))';
                                 }else{
-                                    $relation_second_level_where = ' and ((rel1.rrc_TargetRecID=rel0.rrc_SourceRecID and rel1.rrc_SourceRecID=rd.dtl_Value) '
-                                    .'or (rel1.rrc_SourceRecID=rel0.rrc_TargetRecID and rel1.rrc_TargetRecID=rd.dtl_Value))';
+                                    $relation_second_level_where = 
+                                    ' and (rel1.rl_RelationID is not null)'
+                                    .' and ((rel1.rl_TargetID=rel0.rl_SourceID and rel1.rl_SourceID=rd.dtl_Value) '
+                                    .'or (rel1.rl_SourceID=rel0.rl_TargetID and rel1.rl_TargetID=rd.dtl_Value))';
                                 }
 
                             }else{
@@ -1577,13 +1580,12 @@ class FieldPredicate extends Predicate {
 
                 if($isrelmarker_0){
 
-                    $resq = '('.$not . 'exists (select rel0.rrc_TargetRecID, rel0.rrc_SourceRecID from recRelationshipsCache rel0 '.$relation_second_level
+                    $resq = '('.$not . 'exists (select rel0.rl_TargetID, rel0.rl_SourceID from recLinks rel0 '.$relation_second_level
                     .$nest_joins
-                    .' where ((rel0.rrc_TargetRecID=TOPBIBLIO.rec_ID and rel0.rrc_SourceRecID=link0.rec_ID)'
-                    .' or (rel0.rrc_SourceRecID=TOPBIBLIO.rec_ID and rel0.rrc_TargetRecID=link0.rec_ID)) '
+                    .' where (rel0.rl_RelationID is not null) and ((rel0.rl_TargetID=TOPBIBLIO.rec_ID and rel0.rl_SourceID=link0.rec_ID)'
+                    .' or (rel0.rl_SourceID=TOPBIBLIO.rec_ID and rel0.rl_TargetID=link0.rec_ID)) '
                     .$relation_second_level_where
                     .$field_value.'))';
-
 
                 }else{
 
@@ -2510,28 +2512,6 @@ class RelatedFromParentPredicate extends Predicate {
                 $relation_type_ID = '';
             }
         }
-        /*
-        //additions for FROM and WHERE
-        if($source_rty_ID){  //source record type is defined
-
-
-        if($relation_type_ID){
-        $add_from =  'recRelationshipsCache rel, recDetails bd ';
-        $add_where =  ' rel.rrc_SourceRecID=rd.rec_ID and rel.rrc_TargetRecID=TOPBIBLIO.rec_ID and rd.rec_RecTypeID='.$source_rty_ID
-        .'  and rel.rrc_RecID=bd.dtl_RecID and bd.dtl_DetailTypeID='.DT_RELATION_TYPE.' and  bd.dtl_Value='.$relation_type_ID;         //@todo  6 NEED TO CHANGE TO CONST
-        }else{
-        $add_from =  'recRelationshipsCache rel ';
-        $add_where =  ' rel.rrc_SourceRecID=rd.rec_ID and rel.rrc_TargetRecID=TOPBIBLIO.rec_ID and rd.rec_RecTypeID='.$source_rty_ID;
-        }
-
-
-        }else{ //any related from
-        $add_from =  'recRelationshipsCache rel ';
-        $add_where = 'rel.rrc_TargetRecID=rd.rec_ID and rel.rrc_TargetRecID=TOPBIBLIO.rec_ID ';
-        }
-
-        $select = 'exists (select rel.rrc_TargetRecID  ';
-        */
 
         //NEW  ---------------------------
         $add_from  = 'recLinks rl ';
@@ -2619,28 +2599,6 @@ class RelatedToParentPredicate extends Predicate {
                 $relation_type_ID = '';
             }
         }
-        /*
-        //additions for FROM and WHERE
-        if($source_rty_ID){  //source record type is defined
-
-
-        if($relation_type_ID){
-        $add_from =  'recRelationshipsCache rel, recDetails bd ';
-        $add_where =  ' rel.rrc_TargetRecID=rd.rec_ID and rel.rrc_SourceRecID=TOPBIBLIO.rec_ID and rd.rec_RecTypeID='.$source_rty_ID
-        .'  and rel.rrc_RecID=bd.dtl_RecID and bd.dtl_DetailTypeID='.DT_RELATION_TYPE.' and  bd.dtl_Value='.$relation_type_ID;         //@todo  6 NEED TO CHANGE TO CONST
-        }else{
-        $add_from =  'recRelationshipsCache rel ';
-        $add_where =  ' rel.rrc_TargetRecID=rd.rec_ID and rel.rrc_SourceRecID=TOPBIBLIO.rec_ID and rd.rec_RecTypeID='.$source_rty_ID;
-        }
-
-
-        }else{ //any related TO
-        $add_from =  'recRelationshipsCache rel ';
-        $add_where = 'rel.rrc_TargetRecID=rd.rec_ID and rel.rrc_SourceRecID=TOPBIBLIO.rec_ID ';
-        }
-
-        $select = 'exists (select rel.rrc_SourceRecID  ';
-        */
 
 
         //NEW  ---------------------------
@@ -2877,12 +2835,14 @@ class RelatedToPredicate extends Predicate {
         if ($this->value) {
             $ids = prepareIds($this->value);
             $ids = "(" . implode(",",$ids) . ")";
-            return "(exists (select * from recRelationshipsCache where (rrc_TargetRecID=TOPBIBLIO.rec_ID and rrc_SourceRecID in $ids)
-            or (rrc_SourceRecID=TOPBIBLIO.rec_ID and rrc_TargetRecID in $ids)))";
+            return "(exists (select * from recLinks where (rl_RelationID is not null) '
+            .' and ((rl_TargetID=TOPBIBLIO.rec_ID and rl_SourceID in $ids) '
+            .'   or (rl_SourceID=TOPBIBLIO.rec_ID and rl_TargetID in $ids))  ))";
         }
         else {
             /* just want something that has a relation */
-            return "TOPBIBLIO.rec_ID in (select distinct rrc_TargetRecID from recRelationshipsCache union select distinct rrc_SourceRecID from recRelationshipsCache)";
+            return "TOPBIBLIO.rec_ID in (select distinct rl_TargetID from recLinks WHERE rl_RelationID is not null '
+            .'union select distinct rl_SourceID from recLinks WHERE rl_RelationID is not null)";
         }
     }
 }
@@ -2893,28 +2853,17 @@ class RelationsForPredicate extends Predicate {
         global $mysqli;
         $ids = prepareIds($this->value);
         $ids = "(" . implode(",", $ids) . ")";
-        /*
-        return "exists (select * from recRelationshipsCache where ((rrc_TargetRecID=TOPBIBLIO.rec_ID or rrc_RecID=TOPBIBLIO.rec_ID) and rrc_SourceRecID=$id)
-        or ((rrc_SourceRecID=TOPBIBLIO.rec_ID or rrc_RecID=TOPBIBLIO.rec_ID) and rrc_TargetRecID=$id))";
-        */
-        /*
-        return "TOPBIBLIO.rec_ID in (select rrc_TargetRecID from recRelationshipsCache where rrc_SourceRecID=$id
-        union select rrc_SourceRecID from recRelationshipsCache where rrc_TargetRecID=$id
-        union select rrc_RecID    from recRelationshipsCache where rrc_TargetRecID=$id or rrc_SourceRecID=$id)";
-        */
-        /*
-        return "exists (select * from bib_relationships2 where ((rrc_TargetRecID=TOPBIBLIO.rec_ID or rrc_RecID=TOPBIBLIO.rec_ID) and rrc_SourceRecID=$id))";
-        */
+
         /* Okay, this isn't the way I would have done it initially, but it benchmarks well:
         * All of the methods above were taking 4-5 seconds.
-        * Putting recRelationshipsCache into the list of tables at the top-level gets us down to about 0.8 seconds, which is alright, but disruptive.
-        * Coding the 'relationsfor:' predicate as   TOPBIBLIO.rec_ID in (select distinct rec_ID from recRelationshipsCache where (rrc_RecID=TOPBIBLIO.rec_ID etc etc))
+        * Putting recLinks into the list of tables at the top-level gets us down to about 0.8 seconds, which is alright, but disruptive.
+        * Coding the 'relationsfor:' predicate as   TOPBIBLIO.rec_ID in (select distinct rec_ID from recLinks where (rl_RelationID=TOPBIBLIO.rec_ID etc etc))
         *   gets us down to about 2 seconds, but it looks like the optimiser doesn't really pick up on what we're doing.
         * Fastest is to do a SEPARATE QUERY to get the record IDs out of the bib_relationship table, then pass it back encoded in the predicate.
         * Certainly not the most elegant way to do it, but the numbers don't lie.
         */
-        $res = $mysqli->query("select group_concat( distinct rec_ID ) from Records, recRelationshipsCache where (rrc_RecID=rec_ID or rrc_TargetRecID=rec_ID or rrc_SourceRecID=rec_ID)
-            and (rrc_SourceRecID in $ids or rrc_TargetRecID in $ids) and rec_ID not in $ids");
+        $res = $mysqli->query("select group_concat( distinct rec_ID ) from Records, recLinks where (rl_RelationID=rec_ID or rl_TargetID=rec_ID or rl_SourceID=rec_ID)
+            and (rl_SourceID in $ids or rl_TargetID in $ids) and rec_ID not in $ids");
         $ids = $res->fetch_row();
         $ids = $ids[0];
 

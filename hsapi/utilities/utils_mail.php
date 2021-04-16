@@ -21,6 +21,19 @@
     * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
     * See the License for the specific language governing permissions and limitations under the License.
     */
+	
+	/* Allow external javascript to utilise php's sendMail, alternative to running mailto */
+    if (isset($_POST['to']) && isset($_POST['title']) && isset($_POST['msg'])) {
+
+        $email = $_POST['to'];
+        $subject = ($_POST['title']);
+        $msg = ($_POST['msg']);
+
+        $res = sendEmail($email, $subject, $msg, null);
+        
+        echo $res;
+    }	
+	
     function sendEmail($email_to, $email_title, $email_text, $email_header, $is_utf8=false){
 
         $res = "ok";

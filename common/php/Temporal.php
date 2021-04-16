@@ -188,6 +188,7 @@ function removeLeadingYearZeroes($value, $is_greg_or_julian=true, $is_strict_iso
     if(!$is_strict_iso){
         $need_day = false;
     }
+    $origWithoutDays = false;
     
     
     if( preg_match('/^-?\d+$/', $value) ){ //only digits with possible minus
@@ -197,14 +198,15 @@ function removeLeadingYearZeroes($value, $is_greg_or_julian=true, $is_strict_iso
         if(strpos($value,'XX')>0){
             $date = null;
         }else{
-            if($value=='2021-03'){
-                $e = 1;
-            }
+            
+            //replace slashes or dots "/." to dashes "-"
+            //reorder month and day
             $value = correctDMYorder($value, false, $month_day_order);
 
             try{   
                 $origHasSeconds = (substr_count($value,':')>1);
                 $origWithoutDays = substr_count($value,'-')==1;
+                
                 
                 $t2 = new DateTime($value);
                 $datestamp = $t2->format('Y-m-d H:i:s');
@@ -306,11 +308,16 @@ function removeLeadingYearZeroes($value, $is_greg_or_julian=true, $is_strict_iso
 }
 
 //
-// $month_day_order   true or 0 - returns true or false whether date/month ate ambiguate 
+// $month_day_order   true or 0 - returns true or false whether date/month are ambiguate, or month=13 or day=32
 //                    2 - mm/dd (default)
 //                    1 - dd/mm
+// replace slashes or dots "/." to dashes "-"
+// reorder month and day
+//
 //
 function correctDMYorder($value, $month_day_order=2){
+    
+        $check_ambguation = ($month_day_order===0 ||  $month_day_order===true);
     
         $is_dots_slash = false;
         $is_ambguation = false;
@@ -364,26 +371,46 @@ function correctDMYorder($value, $month_day_order=2){
                 if($y>22 && $y<100) $y = '19'.$y; 
                 
                 if(strlen($m)>2 || $d>12){ // month is word
-                    $value = $y.'-'.$m.'-'.$d;
+                    //$value = $y.'-'.$m.'-'.$d;
                 }else if(strlen($d)>2 || $m>12){ //$d is word month 
-                    $value = $y.'-'.$d.'-'.$m;
+                    $d2 = $d; $d = $m;  $m = $d2;
+                
+                    //$value = $y.'-'.$d.'-'.$m;
                 }else if($d<13 && $m>12){
-                    $value = $y.'-'.$d.'-'.$m;
+                    $d2 = $d; $d = $m;  $m = $d2;
+                    
+                    //$value = $y.'-'.$d.'-'.$m;
                 }else{
-                    $value = $y.'-'.$m.'-'.$d;
+                    //$value = $y.'-'.$m.'-'.$d;
                     
                     if($month_day_order==1){  //dd/mm
-                        $value = $y.'-'.$d.'-'.$m;
+                        $d2 = $d; $d = $m;  $m = $d2;
+                        //$value = $y.'-'.$d.'-'.$m;
                     }else{
-                        $value = $y.'-'.$m.'-'.$d; // mm/dd
+                        //$value = $y.'-'.$m.'-'.$d; // mm/dd
                     }
                     
                     $is_ambguation = ($m<13 && $d<13); //day-month ambiguation
                 }
+                
+                $value = $y.'-'.$m.'-'.$d; // mm/dd
+            }else{
+                list($y, $m, $d) = explode('-', $value);
+            }
+            
+            if($check_ambguation){
+                if($m==13){
+                    $is_ambguation = true;    
+                }else{
+                    $days_req = cal_days_in_month(CAL_GREGORIAN, $m, $y);        
+                    if($days_req+1==$d || $days_req+2==$d){
+                         $is_ambguation = true;
+                    }
+                } 
             }
         }
 
-        return ($month_day_order===0 ||  $month_day_order===true)?$is_ambguation :$value;    
+        return ($check_ambguation)?$is_ambguation :$value;    
 }
 
 //

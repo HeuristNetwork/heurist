@@ -3416,11 +3416,18 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                     if(cfg.rty_ID == this._currentEditRecTypeID){   //@todo many services
                         notfound = false;            
                         
+                        let btn_label = "Lookup External Sources: ";
+
+                        var label = $('<div>')
+                            .html(btn_label)
+                            .css({'font-size': 'small'})
+                            .appendTo(lookup_div);                       
+                       
                         var btn = $('<div>')
                             .button({label:cfg.label?cfg.label:('Lookup '+cfg.service) })
-                            .attr('data-cfg', srvname).css({'font-size': 'larger', // 'padding-right':'4px',
+                            .attr('data-cfg', srvname).css({'font-size': 'inherit', // 'padding-right':'4px',
                                 border: '1px solid', 'font-weight': 'bold'})
-                            .appendTo(lookup_div);
+                            .appendTo(label);
                         
                         this._on(btn, {click:
                             function(event){ 
@@ -3668,9 +3675,8 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
                 this.element.find('.btn-edit-rt2').hide();
             }
             
-            //switch on optional fields and hide checckbox
-            this.element.find('.chb_opt_fields').prop('checked',true).hide().change();
-            this.element.find('.lbl_opt_fields').hide();
+            //switch on optional fields and disable checckbox
+            this.element.find('.chb_opt_fields').prop('checked',true).attr('disabled', true).change();
             
             //hide message about forbidden fields
             $(this.element).find('.hidden_field_warning').hide();
@@ -3696,7 +3702,7 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             
             this.element.find('.btn-edit-rt2').show();
             this.element.find('.btn-edit-rt-back').hide();
-            this.element.find('.chb_opt_fields').show();
+            this.element.find('.chb_opt_fields').attr('disabled', false);
             this.element.find('.lbl_opt_fields').show();
             
             

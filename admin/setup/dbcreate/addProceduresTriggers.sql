@@ -56,7 +56,7 @@ DELIMITER $$
 
 DROP function IF EXISTS `getTemporalDateString`$$
 
-CREATE DEFINER=CURRENT_USER FUNCTION `getTemporalDateString`(strDate varchar(4095)) RETURNS varchar(4095) CHARSET utf8
+CREATE DEFINER=CURRENT_USER FUNCTION `getTemporalDateString`(strDate varchar(4095)) RETURNS varchar(4095) CHARSET utf8mb4
 	DETERMINISTIC
 	begin
 			declare temporalType char;
@@ -187,18 +187,12 @@ CREATE DEFINER=CURRENT_USER FUNCTION `getTemporalDateString`(strDate varchar(409
 		return @dateString;
 	end$$
 
-DELIMITER ;
-
---  **********************   Triggers   ***************************
--- ------------------------------------------------------------------------------
+--  TRIGGERS -------------------------------------------------------------------
 
 -- ------------------------------------------------------------------------------
 -- --------recDetails
 
-
-
-	DROP TRIGGER IF EXISTS insert_Details_precis_trigger;
--- DELIMITER $$
+	DROP TRIGGER IF EXISTS insert_Details_precis_trigger$$
 
 -- 	CREATE
 -- 	DEFINER=CURRENT_USER 
@@ -207,9 +201,6 @@ DELIMITER ;
 -- 	FOR EACH ROW
 --           begin set NEW.dtl_ValShortened = ifnull(NEW_LIPOSUCTION(NEW.dtl_Value), ''); end$$
 -- 
--- DELIMITER ;
-
-DELIMITER $$
 
     DROP TRIGGER IF EXISTS insert_Details_trigger$$
 
@@ -225,35 +216,15 @@ DELIMITER $$
             where dty_ID=NEW.dtl_DetailTypeID
             limit 1;
     
---        declare relSrcDT integer;
---        declare relTrgDT integer;
---        select dty_ID into relSrcDT
---            from defDetailTypes
---            where dty_OriginatingDBID = 3 and dty_IDInOriginatingDB = 202
---            order by dty_ID desc limit 1;
---        select dty_ID into relTrgDT
---            from defDetailTypes
---            where dty_OriginatingDBID = 3 and dty_IDInOriginatingDB = 199
---            order by dty_ID desc limit 1;
---        if NEW.dtl_DetailTypeID=relTrgDT then
         if NEW.dtl_DetailTypeID=5 then -- linked resource pointer
         begin
-            update recRelationshipsCache
--- need to also save the RecTypeID for the record to help with constraint checking
-                set rrc_TargetRecID = NEW.dtl_Value
-                where rrc_RecID=NEW.dtl_RecID;
                 
             update recLinks
                 set rl_TargetID = NEW.dtl_Value
                 where rl_RelationID=NEW.dtl_RecID;
         end;        
---        elseif NEW.dtl_DetailTypeID=relSrcDT then
         elseif NEW.dtl_DetailTypeID=7 then -- primary resource pointer
         begin
-            update recRelationshipsCache
--- need to also save the RecTypeID for the record to help with constraint checking
-                set rrc_SourceRecID = NEW.dtl_Value
-                where rrc_RecID=NEW.dtl_RecID;
 
             update recLinks
                 set rl_SourceID = NEW.dtl_Value
@@ -296,6 +267,8 @@ FROM recDetails where dtl_ID=OLD.dtl_ID INTO @raw_detail;
 -- set NEW.dtl_ValShortened = ifnull(NEW_LIPOSUCTION(NEW.dtl_Value), '');
 	end$$
 
+--   ON UPDATE DETAILS --------------------------------------------
+    
 	DROP TRIGGER IF EXISTS update_Details_trigger$$
 
 	CREATE
@@ -309,37 +282,16 @@ FROM recDetails where dtl_ID=OLD.dtl_ID INTO @raw_detail;
             from defDetailTypes
             where dty_ID=NEW.dtl_DetailTypeID
             limit 1;
-    
-    
---		declare relSrcDT integer;
---		declare relTrgDT integer;
---		select dty_ID into relSrcDT
---			from defDetailTypes
---			where dty_OriginatingDBID = 3 and dty_IDInOriginatingDB = 202
---			order by dty_ID desc limit 1;
---		select dty_ID into relTrgDT
---			from defDetailTypes
---			where dty_OriginatingDBID = 3 and dty_IDInOriginatingDB = 199
---			order by dty_ID desc limit 1;
---		if NEW.dtl_DetailTypeID=relTrgDT then
+
 		if NEW.dtl_DetailTypeID=5 then -- linked resource pointer
         begin
-            update recRelationshipsCache
-            -- need to also save the RecTypeID for the record
-                set rrc_TargetRecID = NEW.dtl_Value
-                where rrc_RecID=NEW.dtl_RecID;
                 
             update recLinks
                 set rl_TargetID = NEW.dtl_Value
                 where rl_RelationID=NEW.dtl_RecID;
         end;
---		elseif NEW.dtl_DetailTypeID=relSrcDT then
 		elseif NEW.dtl_DetailTypeID=7 then -- primary resource pointer
         begin
-            update recRelationshipsCache
-                set rrc_SourceRecID = NEW.dtl_Value
--- need to also save the RecTypeID for the record
-                where rrc_RecID=NEW.dtl_RecID;
             update recLinks
                 set rl_SourceID = NEW.dtl_Value
                 where rl_RelationID=NEW.dtl_RecID;
@@ -356,6 +308,8 @@ FROM recDetails where dtl_ID=OLD.dtl_ID INTO @raw_detail;
 -- need to add update for detail 200, now 5, to save the termID
 	end$$
 
+--   ON DELETE DETAILS --------------------------------------------
+    
     DROP TRIGGER IF EXISTS delete_detail_trigger$$
 
     CREATE
@@ -387,21 +341,13 @@ FROM recDetails where dtl_ID=OLD.dtl_ID INTO @raw_detail;
 	AFTER INSERT ON `Records`
 	FOR EACH ROW
 	begin
---		declare relRT integer;
---		select rty_ID into relRT
---			from defRecTypes
---			where rty_OriginatingDBID = 3 and rty_IDInOriginatingDB = 52 order by rty_ID desc limit 1;
--- need to change this to check the rectype's type = relationship
 -- 1 = record relationship
     if @suppress_update_trigger is null then
-	    insert into usrRecentRecords (rre_UGrpID, rre_RecID, rre_Time)
-								    values (@logged_in_user_id, NEW.rec_ID, now());
+
 	    set @rec_id := last_insert_id(NEW.rec_ID);
     --		if NEW.rec_RecTypeID = relRT then
 		if NEW.rec_RecTypeID = 1 then
         begin
---  need to also save relationship records RecTypeID
-            insert into recRelationshipsCache (rrc_RecID, rrc_SourceRecID, rrc_TargetRecID) values (NEW.rec_ID,NEW.rec_ID,NEW.rec_ID);
             
             insert into recLinks (rl_SourceID, rl_TargetID, rl_RelationID)
             values (NEW.rec_ID, NEW.rec_ID, NEW.rec_ID);
@@ -442,6 +388,7 @@ FROM recDetails where dtl_ID=OLD.dtl_ID INTO @raw_detail;
 
 --    END$$
 
+--   ON UPDATE RECORD --------------------------------------------
 
     DROP TRIGGER IF EXISTS update_record_trigger$$
 
@@ -465,9 +412,7 @@ FROM recDetails where dtl_ID=OLD.dtl_ID INTO @raw_detail;
         end if;
     end$$
 
-DELIMITER ;
-
-DELIMITER $$
+--   ON AFTER UPDATE RECORD --------------------------------------------
 
 	DROP TRIGGER IF EXISTS usrRecentRecords_updater$$
 
@@ -477,32 +422,10 @@ DELIMITER $$
 	AFTER UPDATE ON `Records`
 	FOR EACH ROW
 	begin
---		declare relRT integer;
+
 		declare srcRecID integer;
-		declare trgRecID integer;
---		declare relSrcDT integer;
---		declare relTrgDT integer;
-		if @suppress_update_trigger is null then
-			insert into usrRecentRecords (rre_UGrpID, rre_RecID, rre_Time)
-				values (@logged_in_user_id, NEW.rec_ID, now())
-				on duplicate key update rre_Time = now();
-		end if;
---		select dty_ID into relSrcDT
---			from defDetailTypes
---			where dty_OriginatingDBID = 3 and dty_IDInOriginatingDB = 202
---			order by dty_ID desc limit 1;
---		select dty_ID into relTrgDT
---			from defDetailTypes
---			where dty_OriginatingDBID = 3 and dty_IDInOriginatingDB = 199
---			order by dty_ID desc limit 1;
---		select rty_ID into relRT
---			from defRecTypes
---			where rty_OriginatingDBID = 3 and rty_IDInOriginatingDB = 52 order by rty_ID desc limit 1;
--- if change the records type from something else to relation insert cache value
---		if NEW.rec_RecTypeID = relRT AND NOT OLD.rec_RecTypeID = relRT then
---			select dtl_Value into srcRecID
---				from recDetails
---				where dtl_DetailTypeID = relSrcDT and OLD.rec_ID=dtl_RecID order by dtl_Value desc limit 1;
+		declare trgRecID integer;     
+
 -- record type 1 = relationship record
 		if NEW.rec_RecTypeID = 1 AND NOT OLD.rec_RecTypeID = 1 then
 			select dtl_Value into srcRecID
@@ -520,7 +443,6 @@ DELIMITER $$
 			if trgRecID is null then
 				set trgRecID = NEW.rec_ID;
 			end if;
-			insert into recRelationshipsCache (rrc_RecID, rrc_SourceRecID, rrc_TargetRecID) values (NEW.rec_ID,srcRecID,trgRecID);
             
             insert into recLinks (rl_SourceID, rl_TargetID, rl_RelationID)
             values (srcRecID, trgRecID, NEW.rec_ID);
@@ -529,12 +451,13 @@ DELIMITER $$
 --		if OLD.rec_RecTypeID = relRT AND NOT NEW.rec_RecTypeID = relRT then
 	    if OLD.rec_RecTypeID = 1 AND NOT NEW.rec_RecTypeID = 1 then
         begin
-            delete ignore from recRelationshipsCache where rrc_RecID = OLD.rec_ID;
             delete ignore from recLinks where rl_RelationID=OLD.rec_ID;
         end;    
 		end if;
 	end$$
 
+--   ON DELETE RECORD --------------------------------------------
+    
 	DROP TRIGGER IF EXISTS delete_record_trigger$$
 
 	CREATE
@@ -552,20 +475,7 @@ DELIMITER $$
             values ('rec', OLD.rec_ID, COALESCE(@logged_in_user_id,0), OLD.rec_OwnerUGrpID, OLD.rec_ID, @raw_record, 'del');
       end if;  
         
---		declare relRT integer;
---		select rty_ID into relRT
---			from defRecTypes
---			where rty_OriginatingDBID = 3 and rty_IDInOriginatingDB = 52 order by rty_ID desc limit 1;
-
-    delete from usrRecentRecords where rre_RecID = OLD.rec_ID;
-
--- need to change this to check the rectype's type = relationship
---		if OLD.rec_RecTypeID = relRT then
-		if OLD.rec_RecTypeID = 1 then
-			delete ignore from recRelationshipsCache where rrc_RecID = OLD.rec_ID;
-		end if;
-        
-        delete ignore from recLinks where rl_RelationID=OLD.rec_ID or rl_SourceID=OLD.rec_ID or rl_TargetID=OLD.rec_ID;
+      delete ignore from recLinks where rl_RelationID=OLD.rec_ID or rl_SourceID=OLD.rec_ID or rl_TargetID=OLD.rec_ID;
 	end$$
 
 -- ------------------------------------------------------------------------------
@@ -622,7 +532,7 @@ DELIMITER $$
 	AFTER DELETE ON `defTerms`
 	FOR EACH ROW
     begin
-        delete ignore from defTermsLinks where trl_TermID=OLD.trm_ID || trl_ParentID=OLD.trm_ID;
+        delete ignore from defTermsLinks where trl_TermID=OLD.trm_ID OR trl_ParentID=OLD.trm_ID;
     end$$            
 DELIMITER ;
 

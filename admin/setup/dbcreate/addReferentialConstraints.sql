@@ -17,7 +17,7 @@
 --  dtl_RecID, dtl_DetailTypeID, dtl_UploadedFileID
 -- rfw_NewRecID
 -- rec_RectypeID, rec_AddedByUGrpID, rec_OwnerUGrpID
--- rrc_SourceRecID, rrc_TargetRecID
+-- rl_SourceID, rl_TargetID
 -- cmt_OwnerUGrpID, cmt_RecID
 -- ulf_UploaderUGrpID (cascade on update, set null on delete, changed to allow null value and default NULL), ulf_MimeExt
 -- ugl_UserID, ugl_GroupID
@@ -85,9 +85,9 @@ ALTER TABLE recForwarding
 
 -- ---------------------------------------------------------------------------
 
-ALTER TABLE recRelationshipsCache
-  ADD CONSTRAINT fk_rrc_SourceRecID FOREIGN KEY (rrc_SourceRecID) REFERENCES Records (rec_ID) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT fk_rrc_TargetRecID FOREIGN KEY (rrc_TargetRecID) REFERENCES Records (rec_ID) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE recLinks
+  ADD CONSTRAINT fk_rl_SourceID FOREIGN KEY (rl_SourceID) REFERENCES Records (rec_ID) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT fk_rl_TargetID FOREIGN KEY (rl_TargetID) REFERENCES Records (rec_ID) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- ---------------------------------------------------------------------------
 
@@ -161,12 +161,6 @@ ALTER TABLE usrRecTagLinks
 -- as with bookmarks, only sysadmins can delete records, but they can delete records others have tagged
 -- and at vsn 3.0 there is only a check on bookmarking, not on tagging; that works for individual
 -- users but might allow deletion of workgroup-only tagged records without warning
-
--- ---------------------------------------------------------------------------
-DELETE FROM usrRecentRecords where rre_UGrpID>0 AND NOT rre_UGrpID in (select ugr_ID from sysUGrps);
-ALTER TABLE usrRecentRecords
-  ADD CONSTRAINT fk_rre_UGrpID FOREIGN KEY (rre_UGrpID) REFERENCES sysUGrps (ugr_ID) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT fk_rre_RecID FOREIGN KEY (rre_RecID) REFERENCES Records (rec_ID) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- ---------------------------------------------------------------------------
 

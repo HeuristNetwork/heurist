@@ -149,7 +149,7 @@ $.widget( "heurist.searchBuilderItem", {
         this.select_comparison = $( '<select>' )
             .attr('title', 'Select compare operator' )
             .addClass('text ui-corner-all')
-            .css({'margin-left':'1em','min-width':'99px','max-width':'99px',border:'none'})
+            .css({'margin-left':'1em','min-width':'130px','max-width':'130px',border:'none'})
             //.hide()
             .appendTo( this.sel_container );
 
@@ -431,7 +431,6 @@ $.widget( "heurist.searchBuilderItem", {
 
         
         var eqopts = [];
-        var already2 = false;
 
         if(field_type=='geo'){
 
@@ -446,13 +445,10 @@ $.widget( "heurist.searchBuilderItem", {
         } else if(field_type=='float' || field_type=='integer'){
 
             //???less than or equals, greater than or equals
-            already2 = true;
             
             eqopts = [
                 {key:'=',title:'equals'},
                 {key:'-',title:'not equals'},
-                {key:'any', title:'any value (exists)'},
-                {key:'NULL', title:'no data (missing)'},
                 {key:'>=',title:'>='},
                 {key:'<=',title:'<='}];
 /*                
@@ -463,14 +459,10 @@ $.widget( "heurist.searchBuilderItem", {
 */
         }else if(field_type=='date'){
             //
-            already2 = true;
-            
             eqopts = [
                 {key:'',title:'like'},
                 {key:'=',title:'equals'},
                 {key:'-',title:'not equals'},
-                {key:'any', title:'any value (exists)'},
-                {key:'NULL', title:'no data (missing)'},
                 {key:'>=',title:'>='},
                 {key:'<=',title:'<='}];
 /*                
@@ -502,35 +494,28 @@ Whole value = EQUAL
     Any value = any value matches (current default for blank value)
     No data = no data recorded (record missing the field)
 */        
+            eqopts = [
+                {key:'',title:'string match'}, //case sensetive ==
+                {key:'=',title:'whole value'}    //cs
+            ];
+
             if(this.options.dty_ID>0 || this.options.dty_ID=='title'){
-                eqopts = [
-                    {key:'',title:'string match'}, //case sensetive ==
+                eqopts = eqopts.concat([
                     {key:'@++',title:'all of the words'}, //full text
                     {key:'@',title:'any of the words'},  //full text
-                    {key:'@--',title:'none of the words'},   //full text
-                    {key:'', title:'──────────', disabled:true}];
-
-                if(this.options.dty_ID>0){
-                    already2 = true;
-                    eqopts.push({key:'any', title:'any value (exists)'});
-                    eqopts.push({key:'NULL', title:'no data (missing)'});
-                }
-                
-            }else{
-                eqopts = [
-                    {key:'',title:'string match'}];
+                    {key:'@--',title:'none of the words'}   //full text
+                    ]);
             }
             
-            
             eqopts = eqopts.concat([
-                {key:'=',title:'whole value'},    //cs
                 {key:'starts',title:'starts with'},
                 {key:'ends',title:'ends with'}
                 //{key:'<>',title:'between'}
                 ]);
         }
 
-        if(this.options.dty_ID>0 && field_type!='relmarker' && !already2){            
+        if(this.options.dty_ID>0 && field_type!='relmarker'){  
+            eqopts.push({key:'', title:'──────────', disabled:true});
             eqopts.push({key:'any', title:'any value (exists)'});
             eqopts.push({key:'NULL', title:'no data (missing)'});
         }

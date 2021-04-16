@@ -397,19 +397,14 @@ function cloneDatabase($targetdbname, $nodata=false, $templateddb, $user_id) {
         set t1.trm_InverseTermId=null
     where t1.trm_ID>0 and t2.trm_ID is NULL');
     
-    //2. remove missed recent records
-    $mysqli->query('delete FROM usrRecentRecords
-        where rre_RecID is not null
-    and rre_RecID not in (select rec_ID from Records)');
-    
-    //3. remove missed rrc_SourceRecID and rrc_TargetRecID
-    $mysqli->query('delete FROM recRelationshipsCache
-        where rrc_SourceRecID is not null
-    and rrc_SourceRecID not in (select rec_ID from Records)');
+    //3. remove missed rl_SourceID and rl_TargetID
+    $mysqli->query('delete FROM recLinks
+        where rl_SourceID is not null
+    and rl_SourceID not in (select rec_ID from Records)');
 
-    $mysqli->query('delete FROM recRelationshipsCache
-        where rrc_TargetRecID is not null
-    and rrc_TargetRecID not in (select rec_ID from Records)');
+    $mysqli->query('delete FROM recLinks
+        where rl_TargetID is not null
+    and rl_TargetID not in (select rec_ID from Records)');
     
     //4. cleanup orphaned details
     $mysqli->query('delete FROM recDetails

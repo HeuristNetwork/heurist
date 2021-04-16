@@ -55,6 +55,7 @@ $.widget( "heurist.mainMenu", {
         this.div_logo = $( "<div>")
         .addClass('logo')   //width was 198
         .css({'width':'150px', 'float':'left', 'margin':'6px 10px', cursor:'pointer'}) //'height':'56px', 
+        .attr('title', 'Click to reload page and return to the default search for your database')
         .appendTo( this.element );
 
         if(window.hWin.HAPI4.get_prefs('layout_theme')!='heurist'){
