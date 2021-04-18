@@ -438,7 +438,7 @@ if($is_csv){
                     this.password = document.getElementById("db-password").value;
                     
                     var url = '<?php echo HEURIST_BASE_URL; ?>admin/setup/dboperations/deleteDB.php';
-                    var request = {pwd: password, db:window.hWin.HEURIST4.util.getUrlParameter('db')};
+                    var request = {pwd: password, db:'<?php echo HEURIST_DBNAME;?>' };
                     
                     // Authenticate user
                     window.hWin.HEURIST4.util.sendRequest(url, request, null,
@@ -448,7 +448,7 @@ if($is_csv){
                                 $("#div-pw").hide();
                                 $("#authorized").slideDown(500);
                                 updateProgress(0);
-                                postDeleteRequest(0);
+                                postDeleteRequest(0); //start deletion
                             }else{
                                 submit.disabled = false;
                                 window.hWin.HEURIST4.msg.showMsgErr(response, false);
@@ -462,7 +462,7 @@ if($is_csv){
                 function postDeleteRequest(i) {
                     if(i < databases.length) {
                         // Delete database
-                        if(window.hWin.HEURIST4.util.getUrlParameter('db')==databases[i]){
+                        if('<?php echo HEURIST_DBNAME;?>'==databases[i]){
 
                             $("#authorized").append("<div>Current db "+databases[i] 
                             +" is skipped</div><div style='margin-top: 5px; width: 100%; border-bottom: 1px solid black; '></div>");
@@ -473,7 +473,8 @@ if($is_csv){
                         
                             var url = '<?php echo HEURIST_BASE_URL; ?>admin/setup/dboperations/deleteDB.php';
                             var request = {pwd: password, 
-                                           db: window.hWin.HEURIST4.util.getUrlParameter('db'),
+                                           create_archive: 1,
+                                           db: '<?php echo HEURIST_DBNAME;?>',
                                            database: databases[i]};
                         
                             window.hWin.HEURIST4.util.sendRequest(url, request, null,

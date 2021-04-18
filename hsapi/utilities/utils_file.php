@@ -908,7 +908,6 @@ function folderRecurseCopy($src, $dst, $folders=null, $file_to_copy=null, $copy_
 function createZipArchive($source, $only_these_folders, $destination, $verbose=true) {
     
 //error_log('>>>>>createZipArchive '.$source.'  to '.$destination);    
-    
     if (!extension_loaded('zip')) {
         echo "<br/>PHP Zip extension is not accessible";
         return false;
@@ -918,6 +917,7 @@ function createZipArchive($source, $only_these_folders, $destination, $verbose=t
         return false;
     }
 
+    
 
     $zip = new ZipArchive();
     if (!$zip->open($destination, ZIPARCHIVE::CREATE)) {
@@ -931,28 +931,42 @@ function createZipArchive($source, $only_these_folders, $destination, $verbose=t
 
     if (is_dir($source) === true) {
 
+        chdir($source);
+        
         $parent_dir = '';
         //$root_dir = $source;
+        if( is_array($only_these_folders) ){
+            foreach ($only_these_folders as $idx=>$folder) {
+                $folder = str_replace('\\', '/', $folder);
+                if(strpos( $folder, $source )!==0){
+                    $folder = $source."/".$folder;    
+                }
+                $only_these_folders[$idx] = $folder;
+//error_log($folder);
+            }
+        }
         
         $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($source), RecursiveIteratorIterator::SELF_FIRST);
 
         foreach ($files as $file) {
+
             $file = str_replace('\\', '/', $file);
 
             // Ignore "." and ".." folders
             if( in_array(substr($file, strrpos($file, '/')+1), array('.', '..')) )
                 continue;
-
-            // Determine real path
-            $file = realpath($file);
+                
+            if( is_dir($file) && substr($file,-1)!='/' ){
+                $file = $file.'/';
+            }
 
             //ignore files that are not in list of specified folders
             $is_filtered = true;
             if( is_array($only_these_folders) ){
-
                 $is_filtered = false;
+//error_log($file);
                 foreach ($only_these_folders as $folder) {
-                    if( strpos($file, $source."/".$folder)===0 ){
+                    if( strpos( $file, $folder )===0 ){
                         $is_filtered = true;
                         break;
                     }
@@ -961,17 +975,28 @@ function createZipArchive($source, $only_these_folders, $destination, $verbose=t
 
             if(!$is_filtered) continue; //exclude not in $only_these_folders
 
+//error_log('OK '.$file);
+
+            // Determine real path
+            $file = realpath($file);
+
             $file2 = str_replace('\\', '/', $file);
             
             if (is_dir($file) === true) { // Directory
                 //remove root path
                 $newdir = str_replace($source.'/', '', $file2.'/');
-//error_log($file2.'  '.$newdir);                
-                $zip->addEmptyDir( $newdir );
+//error_log($newdir);                    
+                if(!$zip->addEmptyDir( $newdir )){
+                    //error_log($zip->getStatusString());
+                    return false;
+                }
             }
             else if (is_file($file) === true) { // File
                 $newfile = str_replace($source.'/', '', $file2); //without folder name
-                $zip->addFile($file, $newfile);
+//error_log($file.'  >> '.$newfile);                    
+                if(!$zip->addFile($file, $newfile)){
+                    return false;
+                }
                 //$zip->addFromString(str_replace($source . '/', '', $file), file_get_contents($file));
             }
         }//recursion
@@ -981,14 +1006,19 @@ function createZipArchive($source, $only_these_folders, $destination, $verbose=t
         //$zip->addFromString(basename($source), file_get_contents($source));
     }
 
+    
     // Close zip and show output if verbose
     $numFiles = $zip->numFiles;
     $zip->close();
-    $size = filesize($destination) / pow(1024, 2);
+    if(file_exists($destination)){
+        $size = filesize($destination) / pow(1024, 2);
 
-    if($verbose) {
-        echo "<br/>Successfully dumped data from ". $source ." to ".$destination;
-        echo "<br/>The zip file contains ".$numFiles." files and is ".sprintf("%.2f", $size)."MB";
+        if($verbose) {
+            echo "<br/>Successfully dumped data from ". $source ." to ".$destination;
+            echo "<br/>The zip file contains ".$numFiles." files and is ".sprintf("%.2f", $size)."MB";
+        }
+    }else{
+        return false;    
     }
     return true;
     

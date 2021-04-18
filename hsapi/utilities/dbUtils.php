@@ -111,8 +111,16 @@ class DbUtils {
 
     //
     // remove database entirely
+    // $database_name - name of database to be deleted
+    // $createArchive - create db dump and archive all uploaded files
     //
-    public static function databaseDrop( $verbose=false, $database_name=null, $createArchive=false, $dumpData=false ){
+    // 1. Create an SQL dump in the filestore directory
+    // 2. Zip the filestore directories (using bzip2) directly into the DELETED_DATABASES directory
+    // 3. Delete filestore directory for the database
+    // 4. Drop database
+    // 5. Append row to DELETED_DATABASES_LOG.csv in the Heurist filestore. 
+    //
+    public static function databaseDrop( $verbose=false, $database_name=null, $createArchive=false ){
         
 //error_log('databaseDrop '.$database_name.'   '.$createArchive);
 //error_log(debug_print_backtrace());
@@ -139,8 +147,13 @@ class DbUtils {
            $connected = true;
         }
         
-        $archiveFolder = HEURIST_FILESTORE_ROOT."DELETED_DATABASES/";        
+        $archiveFolder = HEURIST_FILESTORE_ROOT."DELETED_DATABASES/";   
+        $db_dump_file = null;     
+        
+        $source = HEURIST_FILESTORE_ROOT.$database_name.'/'; //  HEURIST_FILESTORE_DIR;  database upload folder
+        $archOK = true;
 
+        
         if(!$connected){
             $msg = $msg_prefix.'Failed to connect to database '.$database_name.'  '.$createArchive;
             $system->addError(HEURIST_DB_ERROR, $msg, $mysqli->error);
@@ -156,24 +169,24 @@ class DbUtils {
                     self::$db_del_in_progress = null;
                     return false;
             }
-            if($dumpData){
-                if (DbUtils::databaseDump( $verbose, $database_name )===false) {
-                    $msg = $msg_prefix."Failed to dump database to a .sql file";
+            
+            $db_dump_file = DbUtils::databaseDump( $verbose, $database_name );
+            
+            if ($db_dump_file===false) {
+                    $msg = $msg_prefix.'Failed to dump database to a .sql file';
                     self::$system->addError(HEURIST_SYSTEM_CONFIG, $msg);                
                     if($verbose) echo '<br/>'.$msg;
                     self::$db_del_in_progress = null;
                     return false;
-                }
             }
-        }
         
-        // Zip $source to $file
-        $source = HEURIST_FILESTORE_ROOT.$database_name.'/'; //HEURIST_FILESTORE_DIR;  database upload folder
-        $destination = $archiveFolder.$database_name."_".time().".zip";
-        $archOK = true;
-        
-        if($createArchive){
-            $archOK = createZipArchive($source, null, $destination, $verbose);
+            // Zip $source to $destination
+            $destination = $archiveFolder.$database_name.'_'.time().'.zip'; 
+            
+            $folders_to_copy = self::$system->getSystemFolders( 2, $database_name );
+            $folders_to_copy[] = realpath($db_dump_file);
+            
+            $archOK = createZipArchive($source, $folders_to_copy, $destination, $verbose);
             if(!$archOK){
                 $msg = $msg_prefix."Can not create archive with database folder. Failed to zip $source to $destination";
                 self::$system->addError(HEURIST_SYSTEM_CONFIG, $msg);                
@@ -184,26 +197,41 @@ class DbUtils {
         }
             
         if($archOK){
-            
+
+            //get owner info
+            $owner_user = user_getDbOwner($mysqli);
+
+            if(true){
                 // Delete database from MySQL server
                 if(!mysql__drop_database($mysqli, $database_name_full)){
-                    
+
                     $msg = $msg_prefix.' Database error on sql drop operation. ';
                     self::$system->addError(HEURIST_DB_ERROR, $msg, $mysqli->error);
                     if($verbose) echo '<br/>'.$msg;
                     return false;
                 }
-                
+
                 if($verbose) echo "<br/>Database ".$database_name." has been dropped";
                 // Delete $source folder
                 folderDelete($source);
                 if($verbose) echo "<br/>Folder ".$source." has been deleted";
-                
-                /* Delete from central index
-                $mysqli->query('DELETE FROM `Heurist_DBs_index`.`sysIdentifications` WHERE sys_Database="'.$database_name_full.'"');
-                $mysqli->query('DELETE FROM `Heurist_DBs_index`.`sysUsers` WHERE sus_Database="'.$database_name_full.'"');
-                */
-                
+            }
+
+            //add to log file
+            $filename = HEURIST_FILESTORE_ROOT.'DELETED_DATABASES_LOG.csv';
+            $fp = fopen($filename, 'a'); //open for add
+            if($fp===false){
+                error_log( 'Can not open file '.$filename );    
+            }else{
+                $row = array($database_name,  
+                    $owner_user['ugr_LastName'],
+                    $owner_user['ugr_FirstName'],
+                    $owner_user['ugr_eMail'],
+                date_create('now')->format('Y-m-d H:i:s'));
+                fputcsv($fp, $row); 
+                fclose($fp);
+            }
+
             self::$db_del_in_progress = null;
             return true;
         }

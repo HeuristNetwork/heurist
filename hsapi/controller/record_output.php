@@ -1091,9 +1091,13 @@ function writeResults( $streams, $temp_name, $headers, $error_log ) {
         //header('Content-Transfer-Encoding: binary');
 
         
+        $content_len = strlen($out);
+        if(!($content_len>0)) $content_len = 0;
+        $content_len = $content_len+3;
+        
         header('Content-Type: text/csv');
         header('Content-Disposition: attachment; filename='.$filename);
-        header('Content-Length: ' . strlen($out)+3);
+        header('Content-Length: ' . $content_len);
         echo "\xEF\xBB\xBF"; // Byte Order Mark        
         exit($out);
         

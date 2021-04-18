@@ -471,16 +471,38 @@ error_log(print_r($_REQUEST, true));
         return $folders;
     }        
     
-    public function getSystemFolders($is_for_backup=false){
+    //
+    // $is_for_backup - 0 no, 1 - archive backup, 2 - delete backup
+    //
+    public function getSystemFolders($is_for_backup=false, $database_name=null){
         
         $folders = $this->getArrayOfSystemFolders();
         
         $system_folders = array();
         
+        if($database_name==null){
+            $dbfolder = HEURIST_FILESTORE_DIR;
+        }else{
+            $dbfolder = HEURIST_FILESTORE_ROOT.$database_name.'/';
+        }
+        
         foreach ($folders as $folder_name=>$folder){        
             if(!$is_for_backup || @$folder[3]===true){
-                array_push($system_folders, HEURIST_FILESTORE_DIR.$folder_name.'/');
+
+                if($is_for_backup==2 && $folder_name=='documentation_and_templates') continue;
+                
+                if($is_for_backup==2){
+                    $folder_name = str_replace('\\', '/', realpath($dbfolder.$folder_name));
+                }else{
+                    $folder_name = $dbfolder.$folder_name;
+                }
+                
+                array_push($system_folders, $folder_name.'/');
             }
+        }
+        
+        if($is_for_backup==2){
+            array_push($system_folders, str_replace('\\', '/', realpath($dbfolder.'file_uploads')).'/');
         }
 
         //special case - these folders can be defined in sysIdentification and be outisde database folder            
@@ -800,6 +822,7 @@ error_log(print_r($_REQUEST, true));
             
             $root_folder = HEURIST_FILESTORE_ROOT; //dirname(__FILE__).'/../../';
             
+            //if yesterday log file exists
             if(file_exists($root_folder.$arc_logfile)){
                 //2. copy to log folder and email it
                 $archiveFolder = $root_folder."AAA_LOGS/";        
