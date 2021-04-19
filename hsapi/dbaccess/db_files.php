@@ -858,10 +858,10 @@ function fileGetWidthHeight($filepath, $external_url, $mimeType){
                 
             }catch(Exception  $e){
                 
-                $res = 'Cant get image dimensions';
+                $res = 'Cannot get image dimensions';
             }
         }else{
-            $res = 'Cant load image file to get dimensions';
+            $res = 'Cannot load image file to get dimensions';
         }
         
     }else{
