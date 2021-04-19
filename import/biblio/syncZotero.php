@@ -451,10 +451,20 @@ if($step=="1"){  //first step - info about current status
         if($zdata===false){
             print "<div style='color:red'>Error: zotero returns non valid xml response for range $start ~ ".($start+$fetch)." </div>";
             $isFailure = true;
+
+            $this->system->addError('Zotero Synchronisation, Non-Valid XML Response', 
+                    'Zotero Synchronisation has Encountered an Error related to an Invalid XML response',
+                    "Error: zotero returns non valid xml response for range $start ~ ".($start+$fetch));
+
             break;
         }else if(count($zdata->children())<1){
             print "<div style='color:red'>Error: zotero returns empty response for range $start ~ ".($start+$fetch)." </div>";
             $isFailure = true;
+
+            $this->system->addError('Zotero Synchronisation, Empty Response', 
+                    'Zotero Synchronisation has Encountered an Error related to an Empty response',
+                    "Error: zotero returns empty response for range $start ~ ".($start+$fetch));
+
             break;
         }
 
@@ -742,6 +752,8 @@ if($step=="1"){  //first step - info about current status
                     .count($cnt_updated).'</a>':'0').'</div>';
     
     $tot_erros = $cnt_ignored + $cnt_notmapped + $cnt_empty + $cnt_notfound;
+	
+	$err_msg = 'Zotero Synching has encountered issues in Database: ' . HEURIST_DBNAME;
     
     if($tot_erros>0){
         print '<div style="color:red">';
@@ -751,23 +763,34 @@ if($step=="1"){  //first step - info about current status
                 print '<tr><td>'.$itemtype.'</td><td>'.$cnt.'</td></tr>';
             }
             print '</table>';
-            //print "<div style ='color:red; padding-left:20px'>- ".implode('<br>- ',$arr_ignored).'</div>';
+            
+			$err_msg = $err_msg . '\nZotero entries that are not mapped to Heurist record types: '.$cnt_ignored;
         }
         if($cnt_notmapped>0){
             print '<br>Zotero keys that are not mapped to Heurist field types: '.$cnt_notmapped;
             print "<div style ='color:red; padding-left:20px'>- ".implode('<br>- ',$arr_notmapped).'</div>';
+			
+			$err_msg = $err_msg . '\nZotero keys that are not mapped to Heurist field types: '.$cnt_notmapped;
         }
         if($cnt_empty>0){
-            print '<br>Zotero entries ignored because there are not properly mapped keys: '.$cnt_empty;
+            print '<br>Zotero entries ignored because there are no properly mapped keys: '.$cnt_empty;
             print "<div style ='color:red; padding-left:20px'>- ".implode('<br>- ',$arr_empty).'</div>';
+			
+			$err_msg = $err_msg . '\nZotero entries ignored because there are no properly mapped key: '.$cnt_empty;
         }
         if($cnt_notfound>0){
-            print '<br>Zotero keys are mapped to field types that are not found this database: '.$cnt_notfound;
+            print '<br>Zotero keys are mapped to field types that are not found in this database: '.$cnt_notfound;
             print "<div style ='color:red; padding-left:20px'>- ".implode('<br>- ',$arr_notfound).'</div>';
+			
+			$err_msg = $err_msg . '\nZotero keys are mapped to field types that are not found in this database: '.$cnt_notfound;
         }
         print '</div>';
+		
+        $this->system->addError('Zotero Synchronisation Error', 
+                    'Zotero Synchronisation has Encountered ' . $tot_erros . ' Errors',
+                    $err_msg);
     
-        print '<span><br>Please '.CONTACT_HEURIST_TEAM.' - to request a mapping for each of the undefined record types.</span>';
+        print '<span><br>An advisory email has been sent to the Heurist Team, however if you wish to provide additional information you can contant the '.CONTACT_HEURIST_TEAM.' here.</span>';
         
         print '<script>window.hWin.HEURIST4.msg.showMsgDlg("Warning: '.$tot_erros
             .' errors were encountered. Please check the errors (in red at the end of the list of records synchronised)'
