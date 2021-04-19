@@ -62,7 +62,7 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
                     <div id="qform" class="disign-content" style="width:100%;">
                         <!-- <div style="position: absolute;top:20px;left:450px;width:200px"><img src="crosstabs_image.png"/></div> -->
                         <div class="row">
-                            <div class="col-12 col-md-4 border border-info">
+                            <div class="col-12 col-md-4 border border-secondary">
                                 <fieldset>
                                     <!-- Dataset selection -->
                                     <div class="row">
@@ -74,32 +74,36 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
                                         <!-- <div class="input-cell col-9">
                             <select id="cbRectypes" class="text ui-widget-content ui-corner-all"></select>
                         </div> -->
-                                        <div class="col-8">
+                                        <div class="col-9">
                                             <select id="cbRectypes" class="form-input ui-widget-content ui-corner-all"></select>
                                         </div>
                                         <div class="col-12" style="margin-top:1rem">
                                             <div style="font-size: 0.9em;">Note: choice of record type determines the list of fields avaiable but does not filter the results - the analysis is based on all records in the result set</div>
                                         </div>
                                     </div>
-                                    <div style="padding: 0.2em; width: 100%; display:none;" class="input" id="divLoadSettings">
-                                        <!--
+                                    <div class="row" style="padding: 0.2em; width: 100%; display:none;" id="divLoadSettings">
+                                        <!-- 
+                                            <div style="padding: 0.2em; width: 100%; display:none;" class="input" id="divLoadSettings">
+                                        -->
+                                            <!--
                         <div class="header" style="padding: 0 16px 0 16px;">
                             <label for="sel_saved_settings">Saved settings:</label>
                         </div>
                         <select id="sel_saved_settings" class="text ui-widget-content ui-corner-all" style="max-width:30em"></select> -->
+                                        <!-- </div> -->
                                     </div>
                                 </fieldset>
                                 <div class="row" id="divSaveSettings">
 
                                 </div>
                                 <!-- <div style="width: 100%;" class="input" id="divSaveSettings"> -->
-                                                <!-- <div class="header" style="padding: 0 16px 0 16px;">
+                                <!-- <div class="header" style="padding: 0 16px 0 16px;">
                             <label>Save settings for future use</label>
                         </div>
                         &nbsp;&nbsp;<b>Name</b>&nbsp;
                         <input id="inpt_save_setting_name" class="text ui-widget-content ui-corner-all" style="max-width:30em"/>
                         &nbsp;&nbsp;<button id="btnSaveSettings">Save</button> -->
-                                            <!-- </div> -->
+                                <!-- </div> -->
                             </div>
                             <div class="col-12 col-md-4 border border-danger">
                                 <div class="row">
@@ -202,7 +206,7 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
                                                 </div>
                                             </span>
 
-                                            
+
 
                                     </div>
                                 </div>
