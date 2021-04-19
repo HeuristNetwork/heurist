@@ -1267,7 +1267,7 @@ window.hWin.HEURIST4.dbs = {
     //
     // get concept code by local id
     //
-    getConceptID: function(entity, local_id){
+    getConceptID: function(entity, local_id, is_ui){
         
         var rec = $Db[entity](local_id);
         if(rec!=null){
@@ -1278,7 +1278,16 @@ window.hWin.HEURIST4.dbs = {
             }else if( window.hWin.HAPI4.sysinfo['db_registeredid']>0 ){
                 return window.hWin.HAPI4.sysinfo['db_registeredid']+'-'+local_id;
             }else{
-                return '0000-'.local_id;
+                if(is_ui===true){
+                  return '<span '
+                    +'title="Concept IDs are attributed when a database is registered with the '
+                    +'Heurist Master Index using Design > Setup > Register. In the meantime only local codes are defined.">'
+                    +'0000-'+local_id+'</span>';
+                }else{
+                    return '0000-'+local_id;    
+                }
+                
+                
             }
         }else{
             return '';

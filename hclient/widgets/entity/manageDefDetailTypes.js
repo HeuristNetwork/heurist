@@ -430,10 +430,8 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             switch ( fields[i] ) {
                 case 'dtyid': html += fld2('dty_ID',30,null,'text-align:right'); break;
                 case 'ccode': 
-                    var c1 = recordset.fld(record,'dty_OriginatingDBID');
-                    var c2 = recordset.fld(record,'dty_IDInOriginatingDB');
-                    c1 = (c1>0 && c2>0)?(c1+'-'+c2):' ';
-                    html += fld2('',80, c1,'text-align:center');     
+                    html += ('<div class="item truncate" style="min-width:80px;max-width:80px;text-align:center">'
+                            +$Db.getConceptID('dty',recID,true)+'</div>');
                     break;
                 case 'group': 
                     html += __action_btn('group','ui-icon-carat-d','Change group');
@@ -670,7 +668,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             
             var ele = this._editing.getFieldByName('dty_ID');
             ele.find('div.input-div').html(this._currentEditID+'&nbsp;&nbsp;<span style="font-weight:normal">Code: </span>'
-                                    +$Db.getConceptID('dty',this._currentEditID));
+                                    +$Db.getConceptID('dty',this._currentEditID, true));
         }
 
         //fill init values of virtual fields
@@ -1688,6 +1686,27 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
    
         return true;
     },
+   
+    //
+    // show warning
+    //
+    addEditRecord: function(recID, is_proceed){
     
+        if(recID<0 && is_proceed !== true){
+            var that = this;
+            window.hWin.HEURIST4.msg.showMsgDlg(
+            '<p>We <b>strongly</b> recommend not adding base fields directly, as they are not added automatically to any record type and will therefore not appear in data entry forms or most dropdown lists eg. filter creation, CSV import, report formatter etc.</p>'
+            +'<p>Instead, we recommend adding fields to a specific record type while testing them out with data - the process is much more intuitive. Adding them in this way will automatically create an equivalent base field. This base field can then be re-used in other record types.</p>'
+            +'<p>To add a new field to a record type, either edit the record type in Design > Record types and click on the Edit fields button, or add a new record or edit an existing record of the appropriate type and click Modify Structure on the data entry form.</p>'
+                    , function(){
+                        that.addEditRecord(recID, true); 
+                        //that._super(recID); 
+                    }, {title:'Confirm',yes:'Continue',no:'Cancel'},
+                    {default_palette_class:this.options.default_palette_class});
+        
+        }else{
+               this._super(recID); 
+        }
+    },
 
 });

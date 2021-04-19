@@ -743,10 +743,8 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             switch ( fields[i] ) {
                 case 'rtyid': html += fld2('rty_ID',30,null,'text-align:center'); break;
                 case 'ccode': 
-                    var c1 = recordset.fld(record,'rty_OriginatingDBID');
-                    var c2 = recordset.fld(record,'rty_IDInOriginatingDB');
-                    c1 = (c1>0 && c2>0)?(c1+'-'+c2):' ';
-                    html += fld2('',80, c1,'text-align:center');     
+                    html += ('<div class="item truncate" style="min-width:80px;max-width:80px;text-align:center">'
+                            +$Db.getConceptID('rty',recID,true)+'</div>');
                     break;
                 case 'addrec': 
                     html += __action_btn('addrec','ui-icon-plus','Click to add new '+fld('rty_Name'));    
@@ -1107,7 +1105,7 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             
             var ele = this._editing.getFieldByName('rty_ID');
             ele.find('div.input-div').html(this._currentEditID+'&nbsp;&nbsp;<span style="font-weight:normal">Code: </span>'
-                                    +$Db.getConceptID('rty',this._currentEditID));
+                                    +$Db.getConceptID('rty',this._currentEditID, true));
             
             
             //hide after edit init btnRecRemove for status locked 
