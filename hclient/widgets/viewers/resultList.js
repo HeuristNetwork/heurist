@@ -1236,7 +1236,8 @@ $.widget( "heurist.resultList", {
         if(this.options.entityName!='records'){
 
             $('<div>').css('padding','10px')
-                .html('<h3 class="not-found" style="color:teal">No entites match the filter criteria</h3>')
+                .html('<h3 class="not-found" style="color:red;">Filter/s are active (see above)</h3><br />'
+                        + '<h3 class="not-found" style="color:teal">No entities match the filter criteria</h3>')
                 .appendTo(this.div_content);
             
         }else{

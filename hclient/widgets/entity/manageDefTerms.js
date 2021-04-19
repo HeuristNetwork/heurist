@@ -348,15 +348,15 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 this._toolbar = this.searchForm;
 
                 //padding:'6px'
-                this.searchForm.css({'min-width': '200px', 'padding-top':this.options.isFrontUI?'6px':'4px', height:80})
+                this.searchForm.css({'min-width': '470px', 'padding-top':this.options.isFrontUI?'6px':'4px', height:80})
                 .empty();                                     
-                this.recordList.css({'min-width': '200px', top:80});
+                this.recordList.css({'min-width': '315px', top:80});
                 this.searchForm.parent().css({'overflow-x':'auto'});
 
                 $('<div style="vertical-align: middle;width: 100%;min-height: 32px; border-bottom: 1px solid gray; clear: both;">'
                     +'<div id="div_group_information" style="margin-right:150px;">A</div>'
                     +'<div style="position:absolute;right:10px;top:8px;"><label>Find: </label>'
-                    +'<input type="text" style="width:6em" class="find-term text ui-widget-content ui-corner-all"/></div>'
+                    +'<input type="text" style="width:350px" class="find-term text ui-widget-content ui-corner-all"/></div>'
                     +'</div>'
                     +'<div class="action-buttons" style="height:40px;background:white;padding:10px 8px;">'
                     +'<h4 style="display:inline-block;margin: 0 10px 0 0; vertical-align: middle;">Terms</h4>'
@@ -2266,7 +2266,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 if(term_name.toLowerCase().indexOf( entered )>=0 || 
                     (term_code && term_code.toLowerCase().indexOf( entered )>=0))
                 {
-                    var ele = $('<div class="truncate">').appendTo(that.fields_list_div);
+                    var ele = $('<div>').appendTo(that.fields_list_div);
 
                     //find parents
                     var s = '', ids = [trm_ID];
@@ -2289,6 +2289,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
                         is_added = true;
                         ele.attr('trm_IDs',ids.join(','))
+						.css({'padding-bottom':'5px'})
                         .text( s + term_name + (term_code?(' ('+term_code+')'):'') )
                         .click( function(event){
                             window.hWin.HEURIST4.util.stopEvent(event);
@@ -2325,8 +2326,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
             if(is_added){
                 this.fields_list_div.position({my:'right top', at:'right bottom', of:input_name})
-                //.css({'max-width':(maxw+'px')});
-                .css({'max-width':input_name.width()+120});
+                .css({'max-width':input_name.width()+250+'px'});
                 this.fields_list_div.show();    
             }else{
                 this.fields_list_div.hide();
