@@ -154,7 +154,7 @@ class DbSysBugreport extends DbEntityBase
         //send an email with attachment
         $email = new PHPMailer();
         $email->isHTML(true); 
-        $email->SetFrom('bugs@HeuristNetwork.org', 'Bug reporter'); //'bugs@'.HEURIST_SERVER_NAME 
+        $email->SetFrom('support@HeuristNetwork.org', 'Bug reporter'); //'bugs@'.HEURIST_SERVER_NAME 
         $email->Subject   = $bug_title;
         $email->Body      = $message;
         $email->AddAddress( $toEmailAddress );        
