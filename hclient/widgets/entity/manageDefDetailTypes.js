@@ -450,21 +450,21 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                 case 'show': 
                 
                     if(recordset.fld(record, 'dty_ShowInLists')==1){
-                        html += __action_btn('hide_in_list','ui-icon-check-on','Click to hide in lists');    
+                        html += __action_btn('hide_in_list','ui-icon-check-on','Click to hide in dropdowwn lists and trees');    
                     }else{
-                        html += __action_btn('show_in_list','ui-icon-check-off','Click to show in lists');
+                        html += __action_btn('show_in_list','ui-icon-check-off','Click to show in dropdown lists and trees');
                         grayed = 'background:lightgray';
                     }
                     break;
                 case 'usedin': 
-                    html += __action_btn('usedin','ui-icon-circle-b-info','Used in rectypes');
+                    html += __action_btn('usedin','ui-icon-circle-b-info','Click for the record types in which this base field is used');
                     break;
                 case 'status': 
                     
                     if(recordset.fld(record, 'dty_Status')=='reserved'){
                         html += __action_btn('','ui-icon-lock','Status: Reserved');
                     }else{
-                        html += __action_btn('delete','ui-icon-delete','Status: Open. Click to delete base field');
+                        html += __action_btn('delete','ui-icon-delete','Status: Open. Click to delete this base field');
                     }    
                 
                     break;

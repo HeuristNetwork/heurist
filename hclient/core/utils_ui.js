@@ -880,7 +880,7 @@ window.hWin.HEURIST4.ui = {
                                     var name = 'Parent record ('+$Db.rty(record['rst_RecTypeID'], 'rty_Name')+')';
                                     
                                     if(showDetailType){
-                                        name = name + ' [resource]';
+                                        name = name + ' [record pointer]';
                                     }
 
                                     arrterm.push([DT_PARENT_ENTITY, name, false]);    

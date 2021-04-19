@@ -9,7 +9,7 @@ CREATE TABLE recLinks (
   rl_TargetID int(10) unsigned NOT NULL COMMENT 'Target record ID',
   rl_RelationID int(10) unsigned        COMMENT 'Realtionship record ID',
   rl_RelationTypeID int(10) unsigned    COMMENT 'Realtionship type - defTerms.trm_ID',
-  rl_DetailTypeID int(10) unsigned      COMMENT 'Pointer (Resource) detail type ID',
+  rl_DetailTypeID int(10) unsigned      COMMENT 'Record Pointer detail type ID',
   rl_DetailID int(10) unsigned          COMMENT 'Pointer Detail type',
   PRIMARY KEY  (rl_ID),
   KEY rl_SourcePtrKey (rl_SourceID),
