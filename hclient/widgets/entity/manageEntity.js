@@ -247,6 +247,10 @@ $.widget( "heurist.manageEntity", {
         if(this.options.innerTitle){ 
             
             fele.children(0).css('top', '38px'); //down manager div to 38
+			
+            $(fele).on("mouseleave", function(){
+                that.defaultBeforeClose();
+            });
             
             if(this.options.innerTitle===true){
                 this._innerTitle = $('<div>').addClass('ui-heurist-header')
