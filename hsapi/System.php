@@ -830,8 +830,8 @@ error_log(print_r($_REQUEST, true));
                 fileCopy($root_folder.$arc_logfile, $archiveFolder.$arc_logfile);
                 unlink($root_folder.$arc_logfile);
 
-                if($this->send_email_on_error==1){  //.',osmakov@gmail.com'
-
+                if($this->send_email_on_error==1){
+                    
                     $msg = 'Error report '.HEURIST_SERVER_NAME.' for '.$yesterday->format('Y-m-d');
 
                     //send an email with attachment

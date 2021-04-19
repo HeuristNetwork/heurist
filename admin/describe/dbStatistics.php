@@ -29,6 +29,7 @@ require_once(dirname(__FILE__).'/../../hsapi/utilities/utils_file.php');
 
 $is_csv = (@$_REQUEST['csv']==1);
 
+$starts_with = @$_REQUEST['start'];
 
 if( $system->verifyActionPassword( @$_REQUEST['pwd'], $passwordForServerFunctions) ){
     $response = $system->getError();
@@ -42,7 +43,7 @@ $is_delete_allowed = (strlen(@$passwordForDatabaseDeletion) > 14);
 set_time_limit(0); //no limit
 
 $mysqli = $system->get_mysqli();
-$dbs = mysql__getdatabases4($mysqli, true);
+$dbs = mysql__getdatabases4($mysqli, true, $starts_with);
 
 $sysadmin = $system->is_system_admin();
 
@@ -114,8 +115,6 @@ $i = 0;
 foreach ($dbs as $db){
 
     //ID  Records     Files(MB)    RecTypes     Fields    Terms     Groups    Users   Version   DB     Files     Modified    Access    Owner   Deleteable
-    
-        
 //error_log(substr($db, 4));        
 
     $record_row = array (substr($db, 4),
@@ -165,7 +164,7 @@ foreach ($dbs as $db){
     }
     
     $i++;
-    //if($i>100) break;
+    //if($i>10) break;
 }//foreach
 
 if($is_csv){
@@ -238,7 +237,7 @@ if($is_csv){
         <!-- END DATATABLE DEFS-->
 
         <!-- TOOLTIP -->
-        <link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/2.9.0/build/container/assets/container.css">
+        <!-- <link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/2.9.0/build/container/assets/container.css"> -->
         <script src="<?php echo PDIR;?>external/yui/2.8.2r1/build/container/container-min.js"></script>
 
         <!-- jQuery UI -->
@@ -415,16 +414,23 @@ if($is_csv){
                         alert("Select at least one database to delete");
                         return false;
                     }
+                    $("#div-pw").show();
+                    $("#authorized").hide();
+                    var submit = document.getElementById("pw-check");
+                    submit.disabled = false;
 
                     // Verify user
                     var $dlg = $("#db-verification").dialog({
                         autoOpen: false,
                         modal: true,
-                        width: '550px'
+                        width: '550px',
+                        position: { my: "left top", at: "left+150 top+150", of: window }
                     })
                     .dialog("open");
 
-                    $dlg.parent('.ui-dialog').css({top:150,left:150});
+                    //$dlg.parent('.ui-dialog').css({top:150,left:150});
+                    
+                    //$(document.body).scrollTop(0);
 
                 }
 
@@ -444,14 +450,19 @@ if($is_csv){
                     window.hWin.HEURIST4.util.sendRequest(url, request, null,
                         function(response){
                             if(response.status == window.hWin.ResponseStatus.OK){
-                                submit.parentNode.removeChild(submit);
+                                //submit.parentNode.removeChild(submit);
                                 $("#div-pw").hide();
-                                $("#authorized").slideDown(500);
+                                var ele = $("#authorized");
+                                ele.find('div.reps').remove();
+                                ele.find('div.ui-state-error').remove();
+                                ele.show();
                                 updateProgress(0);
                                 postDeleteRequest(0); //start deletion
                             }else{
                                 submit.disabled = false;
-                                window.hWin.HEURIST4.msg.showMsgErr(response, false);
+                                response.sysmsg = 1;
+                                window.hWin.HEURIST4.msg.showMsgErr(response, false,
+                                {position: { my: "left top", at: "left+150 top+150", of: window }});
                             }
                         }
                     );
@@ -480,13 +491,14 @@ if($is_csv){
                             window.hWin.HEURIST4.util.sendRequest(url, request, null,
                                 function(response){
                                     if(response.status == window.hWin.ResponseStatus.OK){
-                                        $("#authorized").append("<div>"+databases[i]
+                                        $("#authorized").append('<div class="reps">'+databases[i]
                                         +"</div><div style='margin-top: 5px; width: 100%; border-bottom: 1px solid black; '></div>");
                                         postDeleteRequest(i+1);
                                         updateProgress(i+1);
                                     }else{
                                         
-                                        var msg = window.hWin.HEURIST4.msg.showMsgErr(response, false);
+                                        var msg = window.hWin.HEURIST4.msg.showMsgErr(response, false,
+                                            {position: { my: "left top", at: "left+150 top+150", of: window }});
                                         
                                         $("#authorized").append('<div class="ui-state-error" style="padding:4px;">'
                                                     +databases[i]+' '+msg +"</div>");

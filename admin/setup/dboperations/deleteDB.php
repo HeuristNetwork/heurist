@@ -23,6 +23,9 @@
 require_once(dirname(__FILE__).'/../../../hsapi/System.php');
 require_once(dirname(__FILE__).'/../../../hsapi/utilities/dbUtils.php');
 
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
 set_time_limit(0);
 
 $res = false;
@@ -58,8 +61,8 @@ if(!@$_REQUEST['pwd']){
                 
                     $user = user_getById($system->get_mysqli(), $system->get_user_id()); //user in current db
                 
+                        
                     $allow_deletion = false;
-                    
                     //find the same user in database to be deleted
                     list($dbname_full, $dbname ) = mysql__get_names( $database_to_delete );
                     //find user by email
@@ -114,7 +117,25 @@ Heurist is research-led and responds rapidly to evolving user needs - we often t
  
 For more information email us at support@HeuristNetwork.org and visit our website at HeuristNetwork.org. We normally respond within hours, depending on time zones. We are actively developing new documentation and training resources for version 6 and can make advance copies available on request.                    
 EOD;
-                            sendEmail($usr_owner['ugr_eMail'], $email_title, $email_text, null);
+                            //sendEmail($usr_owner['ugr_eMail'], $email_title, $email_text, null);
+                            
+                            $email = new PHPMailer();
+                            //$email->isHTML(true); 
+                            $email->SetFrom('info@HeuristNetwork.org', 'Heurist');
+                            $email->Subject   = $email_title;
+                            $email->Body      = $email_text;
+                            $email->AddAddress( $usr_owner['ugr_eMail'] );         
+                            $email->AddAddress( HEURIST_MAIL_TO_ADMIN );        
+
+                            try{
+                                $email->send();
+                            } catch (Exception $e) {
+                                $this->system->addError(HEURIST_SYSTEM_CONFIG, 
+                                        'Cannot send email. Please ask system administrator to verify that mailing is enabled on your server'
+                                        , $email->ErrorInfo);
+                            }                    
+                            
+                            
                         }
                         
                     }else{

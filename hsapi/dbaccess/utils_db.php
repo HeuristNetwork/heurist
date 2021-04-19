@@ -177,9 +177,17 @@
     * @param    mixed $email - current user email
     * @param    mixed $role - admin - returns database where current user is admin, user - where current user exists
     */
-    function mysql__getdatabases4($mysqli, $with_prefix = false, $email = null, $role = null, $prefix=HEURIST_DB_PREFIX)
+    function mysql__getdatabases4($mysqli, $with_prefix = false, $starts_with=null,
+                             $email = null, $role = null, $prefix=HEURIST_DB_PREFIX)
     {
-        $query = "show databases where `database` like 'hdb_%'";
+        
+        if($starts_with!=null){
+            $where = "'hdb_$starts_with%'";
+        }else{
+            $where = "'hdb_%'";    
+        }
+        
+        $query = "show databases where `database` like $where";
         $res = $mysqli->query($query);
         $result = array();
         $isFilter = ($email != null && $role != null);
