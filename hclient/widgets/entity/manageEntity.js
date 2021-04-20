@@ -786,7 +786,7 @@ $.widget( "heurist.manageEntity", {
                         });        
                         
             }else{
-                this.addEditRecord(-1);
+                this.addEditRecord(-1, true);
             }
     },
     
@@ -2026,7 +2026,7 @@ this._time_debug = fin_time;
     //
     // show edit form in popup dialog or rigth-hand panel
     //
-    addEditRecord: function(recID){
+    addEditRecord: function(recID, is_proceed){
         
         if(this.options.edit_mode == 'none') return;
         

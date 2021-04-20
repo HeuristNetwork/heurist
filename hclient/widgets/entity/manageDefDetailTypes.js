@@ -1705,7 +1705,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                     {default_palette_class:this.options.default_palette_class});
         
         }else{
-               this._super(recID); 
+               this._super(recID, is_proceed); 
         }
     },
 

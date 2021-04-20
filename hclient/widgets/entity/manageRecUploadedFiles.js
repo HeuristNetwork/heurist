@@ -515,7 +515,7 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
         
     },
 
-    addEditRecord: function(recID){
+    addEditRecord: function(recID, is_proceed){
 
         if(recID<0){
             if(this._additionMode=='local'){
@@ -529,7 +529,7 @@ window.hWin.HAPI4.baseURL+'?db=' + window.hWin.HAPI4.database  //(needplayer?'&p
             this.options['edit_title'] = null;
         }
         
-        this._super(recID);
+        this._super(recID, is_proceed);
     },
 
     //
