@@ -290,8 +290,7 @@ class DbEntityBase
                 $res = $this->save();
             }else if(@$this->data['a'] == 'delete'){
                 $res = $this->delete();
-            }else if(@$this->data['a'] == 'transferOwner'){
-                $res = $this->transferOwner();
+
             }else if(@$this->data['a'] == 'config'){ // return configuration
                 $res = $this->config();
             }else if(@$this->data['a'] == 'files'){ // working with settings/config files
@@ -304,7 +303,7 @@ class DbEntityBase
             }else if(@$this->data['a'] == 'counts'){  //various counts(aggregations) request - implementation depends on entity
                 $res = $this->counts();
             }else if(@$this->data['a'] == 'action' || @$this->data['a'] == 'batch'){ 
-                //batch action. see details of operaion for method of particular class
+                //special and batch action. see details of operaion for method of particular class
                 $res = $this->batch_action();
             }else {
                 $this->system->addError(HEURIST_INVALID_REQUEST, "Type of request not defined or not allowed");

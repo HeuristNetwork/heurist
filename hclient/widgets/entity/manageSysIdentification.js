@@ -52,6 +52,11 @@ $.widget( "heurist.manageSysIdentification", $.heurist.manageEntity, {
                 that.addEditRecord( response.getOrder()[0] );
             });
             
+        var fele = this.element.find('.ent_wrapper:first');
+        $(fele).on("mouseleave", function(){
+                that.defaultBeforeClose();
+        });
+            
         return true;
     }, 
     

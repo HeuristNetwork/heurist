@@ -248,10 +248,6 @@ $.widget( "heurist.manageEntity", {
             
             fele.children(0).css('top', '38px'); //down manager div to 38
 			
-            $(fele).on("mouseleave", function(){
-                that.defaultBeforeClose();
-            });
-            
             if(this.options.innerTitle===true){
                 this._innerTitle = $('<div>').addClass('ui-heurist-header')
                 .html('<span class="title">'+this.options['title']+'</span>')
@@ -1623,57 +1619,6 @@ this._time_debug = fin_time;
                     });
     },    
 
-	/*
-     * After Action Handler for DB Ownership Tranfer, needs to logout the user and reload the page
-     */
-    _afterTransferOwnerHandler: function(recID){
-
-        window.hWin.HEURIST4.msg.showMsgFlash(this.options.entity.entityTitle + ' ' + window.hWin.HR('ownership has been transfered') + '.'
-            +'<br />Heurist will now refresh to set these changes.', 2000); // flash message
-
-        /* Trigger Logout and Reload */
-        window.hWin.HAPI4.SystemMgr.logout(
-            function(response){
-                if(response.status == window.hWin.ResponseStatus.OK){
-                    window.hWin.HAPI4.setCurrentUser(null);
-                    window.location.reload();  // page reload
-                }else{
-                    window.hWin.HEURIST4.msg.showMsgErr(response + ' <br/> Heurist is unable to refresh the page!');
-                }
-            }
-        );
-    },    
-
-    /*
-     * Transfer DB Ownership to the selected User, will reload the page after completion to reset certain variables
-     */
-    _transferDBOwner: function(){
-
-        if(this._currentEditID==null || this._currentEditID<1) return;
-
-        var request = {
-            'a'          : 'transferOwner',
-            'entity'     : this.options.entity.entityName,
-            'request_id' : window.hWin.HEURIST4.util.random(),
-            'recID'      : this._currentEditID 
-        };
-
-        var that = this;
-
-        window.hWin.HAPI4.EntityMgr.doRequest(request,
-            function(response){
-                if(response.status == window.hWin.ResponseStatus.OK){
-
-                    var recID = that._currentEditID;
-                    that._afterTransferOwnerHandler(recID);
-                
-                }else{
-                    window.hWin.HEURIST4.msg.showMsgErr(response);
-                }
-            }
-        );
-    },	
-    
     //
     // to override
     //
