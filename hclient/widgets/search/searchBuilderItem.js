@@ -575,10 +575,19 @@ Whole value = EQUAL
             // relation type selector and resource record selector
             ed_options['detailtype'] = 'relationtype';
             ed_options['dtID'] = 'r';
+            var dtFields = {dty_Type:'relationtype', 
+                            rst_DisplayName: $Db.dty(this.options.dty_ID,'dty_Name'),
+                            rst_FilteredJsonTermIDTree: $Db.dty(this.options.dty_ID,'dty_JsonTermIDTree'),
+                            rst_DefaultValue: '',
+                            rst_MaxValues:100};
+            ed_options['dtFields'] = dtFields;
+            
             this._predicate_reltype_ele = $("<div>").editing_input(ed_options).appendTo(this.values_container);
 
+            
             ed_options['detailtype'] = 'resource';
             ed_options['dtID'] = this.options.dty_ID;
+            ed_options['dtFields'] = null;
             
         } 
         

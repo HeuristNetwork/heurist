@@ -809,9 +809,27 @@ $.widget( "heurist.searchBuilder", {
                                                 title: node.title
                                                        +'<span style="font-size:0.8em"> (record pointer)</span>',
                                                 code:codes.join(':')});                                        
+                                            node.title = node.title + ' fields';
                                             i++;                       
                                         }
+                                    }else if(node.type=='relmarker'){
+
+                                        var codes = node.code.split(':');
+                                        var dtid = codes[codes.length-1];
+                                        var linktype = dtid.substr(0,2);
+                                        if(linktype=='rt'){
+                                            codes[codes.length-1] = dtid.substr(2);                        
+                                            tdata.splice(i, 0, 
+                                                {key:node.key, type:'relmarker',
+                                                title: node.title
+                                                       +'<span style="font-size:0.8em"> (related record)</span>',
+                                                code:codes.join(':')});                                        
+                                            node.title = node.title + ' fields';
+                                            i++;                       
+                                        }
+                                        
                                     }
+
                                     i++;    
                                 }
                                 
@@ -1143,19 +1161,24 @@ console.log(aCodes);
                     for(var k=1; k<codes.length-1; k++){
                         if(k%2 == 0){ //rectype
                             //key = 't:'+codes[k];    
-                            var not_found = true;
-                            $.each(branch,function(m,item){
-                               if(item['t']){
-                                    not_found = false; 
-                                    if(item['t'].split(',').indexOf(codes[k])<0){
-                                        item['t'] = item['t']+','+codes[k];
-                                    }
-                                    return false;
-                               }
-                            });
-                            
-                            if(not_found){
-                                branch.push({t:codes[k]});    
+                            if(codes[k]!=''){ //unconstrainded
+                                var not_found = true;
+                                $.each(branch,function(m,item){
+                                   if(item['t']==codes[k]){
+                                       not_found = false; 
+                                       return false;
+                                   }else if(item['t']){
+                                        not_found = false; 
+                                        if(item['t'].split(',').indexOf(codes[k])<0){
+                                            item['t'] = item['t']+','+codes[k];
+                                        }
+                                        return false;
+                                   }
+                                });
+                                
+                                if(not_found){
+                                    branch.push({t:codes[k]});    
+                                }
                             }
                         }else{
                             var dtid = codes[k];

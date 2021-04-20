@@ -73,10 +73,13 @@ $.widget( "heurist.editing_input", {
         
             if(this.options.is_faceted_search){
                 if(window.hWin.HEURIST4.util.isempty(this.options['dtFields']['rst_FilteredJsonTermIDTree'])){
-                    this.options['dtFields']['rst_FilteredJsonTermIDTree'] = 
-                                $Db.dty(this.options.dtID,'dty_JsonTermIDTree');
+                    this.options['dtFields']['rst_FilteredJsonTermIDTree'] = $Db.dty(this.options.dtID,'dty_JsonTermIDTree');
                 } 
+                if(window.hWin.HEURIST4.util.isempty(this.options['dtFields']['rst_PtrFilteredIDs'])){
+                    this.options['dtFields']['rst_PtrFilteredIDs'] = $Db.dty(this.options.dtID,'dty_PtrTargetRectypeIDs');
+                }
                 this.options['dtFields']['rst_DefaultValue'] = '';
+                this.options['dtFields']['rst_PointerMode'] = 'browseonly';
             }
 
         }

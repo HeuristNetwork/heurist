@@ -615,14 +615,20 @@ window.hWin.HEURIST4.dbs = {
                             if($mode==4 || $mode==5 || $mode==6){
                                 $dt_title = " <span style='font-style:italic'>" + $dt_title + "</span>";
                             }
+
+                            $res = {};                            
                             
                             if($pointerRecTypeId=="" || $rectype_ids.length==0){ //unconstrainded
                                                     //
-                                $res = __getRecordTypeTree( null, $recursion_depth+1, $mode, $fieldtypes, $pointer_fields);
                                 //$res['constraint'] = 0;
+                                if($mode==5){
+                                    $res['rt_ids'] = '';
+                                    $res['lazy'] = true;
+                                }else{
+                                    $res = __getRecordTypeTree( null, $recursion_depth+1, $mode, $fieldtypes, $pointer_fields);
+                                }
 
                             }else{ //constrained pointer
-                                $res = {};
 
                                 if($rectype_ids.length>1){
                                     $res['rt_ids'] = $pointerRecTypeId; //list of rectype - constraint
