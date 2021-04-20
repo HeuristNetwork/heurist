@@ -11,7 +11,7 @@
         
         "entityTitle": "Base Field",
         "entityTitlePlural": "Base Fields",
-        "empty_remark": "No fields in this group",
+        "empty_remark": "<h3 style='color:red;'>Filter/s are active (see above)</h3><br />No fields in this group",
         
         "fields": [
                 {

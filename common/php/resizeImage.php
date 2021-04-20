@@ -183,19 +183,26 @@ if (array_key_exists('ulf_ID', $_REQUEST))
             }else{
 //error_log('imagic loaded!!!');                        
                 
-                $im =  new Imagick($filename.'[0]'); 
-                $im->setImageFormat('png'); 
-                $im->thumbnailImage(200,200);
-
-                if ($standard_thumb) {
-                    // store to database
-                    //save_thumnail_indb($mysqli, $file, $resized);
+                try {
                     
-                    if(file_exists($thumbnail_file)){
-                        unlink($thumbnail_file);
+                    $im =  new Imagick($filename.'[0]'); 
+                    $im->setImageFormat('png'); 
+                    $im->thumbnailImage(200,200);
+
+                    if ($standard_thumb) {
+                        // store to database
+                        //save_thumnail_indb($mysqli, $file, $resized);
+                        
+                        if(file_exists($thumbnail_file)){
+                            unlink($thumbnail_file);
+                        }
+                        $im->writeImage($thumbnail_file);
                     }
-                    $im->writeImage($thumbnail_file);
+                } catch(ImagickException $e) {
+                    error_log($e . ', From Database: ' . HEURIST_DBNAME);
+                    exit();
                 }
+
             }
             header('Content-Type: image/png');
             echo $im;

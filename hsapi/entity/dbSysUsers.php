@@ -437,6 +437,103 @@ class DbSysUsers extends DbEntityBase
 
         return $ret;
     }
+	
+	/*
+     * Transfer User ID 2 (DB Owner) to the selected User ID, provide the new DB Owner administrator rights to all workgroups
+     */
+    public function transferOwner($disable_foreign_checks = false){
+
+        /* General Variables */
+        $mysqli = $this->system->get_mysqli();  // MySQL connection
+        $return = true; // Control variable
+        $recID = $this->data['ugr_ID'];     // Selected User ID
+        
+        if(!is_numeric($recID)){    /* Check if ID is a number */
+            $this->system->addError(HEURIST_ACTION_BLOCKED, 'Provided ID is Invalid');
+            return false;
+        }
+        settype($recID, "integer");     /* For Comparison and Use */
+        if($recID == 2){   /* Check if selected ID is alreayd the Owner */
+            $this->system->addError(HEURIST_ACTION_BLOCKED, 'Cannot transfer Database Ownership to the current Database Owner');
+            return false;
+        }
+
+        /* Retrieve an un-used value for MAXINT, a temporary value used for swapping the two IDs */
+        $query = 'SELECT max(ugr_ID)+1 FROM sysUGrps';
+        $res = $mysqli->query($query);
+        $row = $res->fetch_row();
+        if($row == null){
+            $this->system->addError(HEURIST_DB_ERROR, 'Unable to set MAXINT for sysUGrps.ugr_ID');
+            return false;
+        }
+        $MAXINT = $row[0];
+
+        /* Start Transaction, allow for rollback incase of errors */
+        $keep_autocommit = mysql__begin_transaction($mysqli);
+        
+        /* Remove all groups associated with the selected User's ID */
+        $query = "DELETE FROM sysUsrGrpLinks WHERE ugl_UserID = " . $recID;
+        $mysqli->query($query);
+        if ($mysqli->affected_rows < 0){
+            $this->system->addError(HEURIST_DB_ERROR, 'Cannot remove old workgroups from ID: ' . $recID);
+            $return = false;
+        }
+
+
+        /* Swapping IDs between DB Owner and Selected User, as all of these values are primary keys we need to ensure that everything completes correctly */
+        $query = "UPDATE sysUGrps SET ugr_ID = " . $MAXINT . " WHERE ugr_ID = 2";
+        $mysqli->query($query);
+        if($mysqli->affected_rows <= 0){
+            $this->system->addError(HEURIST_DB_ERROR, 'Cannot set current Owner\'s ID to MAXINT');
+            $return = false;
+        }
+        $query = "UPDATE sysUGrps SET ugr_ID = 2 WHERE ugr_ID = " . $recID;
+        $mysqli->query($query);
+        if($mysqli->affected_rows <= 0){
+            $this->system->addError(HEURIST_DB_ERROR, 'Cannot set new Owner\'s ID to 2');
+            $return = false;
+        }
+        $query = "UPDATE sysUGrps SET ugr_ID = " . $recID . " WHERE ugr_ID = " . $MAXINT;
+        $mysqli->query($query);
+        if($mysqli->affected_rows <= 0){
+            $this->system->addError(HEURIST_DB_ERROR, 'Cannot set original Owner\'s ID to ' . $recID);
+            $return = false;
+        }
+
+
+        /* Retrieve List of Workgroup IDs */
+        $query = "SELECT ugr_ID FROM sysUGrps WHERE ugr_Type = 'workgroup'";
+        $res = $mysqli->query($query);
+
+        /* Add new DB Owner as admin to retrieved list of IDs */
+        $query = "INSERT INTO sysUsrGrpLinks (ugl_UserID, ugl_Role, ugl_GroupID) VALUES ";
+        if($res->num_rows > 0){
+            while($row = $res->fetch_assoc()){
+                if($row['ugr_ID'] == 0) continue;
+                $query = $query . "(2, 'admin', " . $row['ugr_ID'] . "), ";
+            }
+        }else{
+            $this->system->addError(HEURIST_DB_ERROR, 'Cannot retrieve group ids');
+            $return = false;
+        }
+        $query = substr($query, 0, -2); /* Remove last characters, space and comma */
+        $mysqli->query($query);
+        if ($mysqli->affected_rows <= 0){
+            $this->system->addError(HEURIST_DB_ERROR, 'Cannot assign new owner\'s administrator privilege for each group');
+            $return = false;
+        }
+
+        /* Check if everything has been successful */
+        if($return){
+            $mysqli->commit();
+        }else{
+            $mysqli->rollback();
+        }    
+
+        if($keep_autocommit===true) $mysqli->autocommit(TRUE);
+
+        return $return;
+    }
     
     //
     // batch action for users
