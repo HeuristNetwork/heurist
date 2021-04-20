@@ -426,6 +426,14 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
                     +     '<span class="ui-button-icon-primary ui-icon ui-icon-pencil"></span><span class="ui-button-text"></span>'
                     + '</div>&nbsp;&nbsp;';
                if(recID != 2){ //owner
+			   
+					if (fld('ugr_Enabled')=='y'){	/* New DB Owner needs to be enabled user */
+                        html = html
+                        + '<div title="Click to transfer DB Ownership" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="transferOwner" style="height:16px">'               
+                        +     '<span class="ui-button-icon-primary ui-icon ui-icon-transfer-e-w"></span><span class="ui-button-text"></span>'               
+                        + '</div>';
+                    }
+			   
                     html = html      
                     + '<div title="Click to delete user" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only" role="button" aria-disabled="false" data-key="delete" style="height:16px">'
                     +     '<span class="ui-button-icon-primary ui-icon ui-icon-circle-close"></span><span class="ui-button-text"></span>'
@@ -578,5 +586,25 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
                 'Are you sure you wish to delete this user?', function(){ that._deleteAndClose(true) }, 
                 {title:'Warning',yes:'Proceed',no:'Cancel'});        
         }
-    }    
+    },
+
+    /*
+     * Warning Message about Transfering Ownership to another user.
+     *
+     * Param: unconditionally (bool) -> DB Owner's agreement to complete task
+     */
+    _transferDBOwner: function(unconditionally){
+
+        if(unconditionally===true){
+            this._super();
+        }else{
+            var that = this;
+            window.hWin.HEURIST4.msg.showMsgDlg(
+                'Are you sure you wish to transfer the ownership of this database to the selected user? This action can only be undone by the new owner.<br />'
+                +' <p style="font-size: 1.1em; font-weight: bold;">'
+                + 'Note: Heurist will need to logout and reload once the changes have been made, ensure you save and complete any additional tasks before proceeding.</p>',
+                function(){ that._transferDBOwner(true); },
+                {title:'Warning',yes:'Proceed',no:'Cancel'});
+        }
+    }	
 });

@@ -290,6 +290,8 @@ class DbEntityBase
                 $res = $this->save();
             }else if(@$this->data['a'] == 'delete'){
                 $res = $this->delete();
+            }else if(@$this->data['a'] == 'transferOwner'){
+                $res = $this->transferOwner();
             }else if(@$this->data['a'] == 'config'){ // return configuration
                 $res = $this->config();
             }else if(@$this->data['a'] == 'files'){ // working with settings/config files
