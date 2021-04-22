@@ -288,6 +288,10 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
                                             inpt.find('input,textarea,button,.ui-selectmenu-button').css('border','1px dotted red');
                                         }
                                         
+										/* Hide Help Text if 'Show Help' isn't checked, help text is shown by default */
+                                        if(!that.element.find('.chb_show_help').is(':checked')){
+                                            $('.heurist-helper1').hide();
+                                        }
                                         
                                     }else{
                                         window.hWin.HEURIST4.msg.showMsgErr(response);
