@@ -925,28 +925,8 @@ class DbDefTerms extends DbEntityBase
     // $all_levels - false return direct children only 
     //    
     private function getChildren($parent_ids, $all_levels=true){
-
-        $mysqli = $this->system->get_mysqli();    
-
-        //compose query
-        $query = 'SELECT trl_TermID FROM defTermsLinks WHERE trl_ParentID';
-        
-        if(is_array($parent_ids) && count($parent_ids)>1)
-        {
-            $query = $query .' IN ('.implode(',',$parent_ids).')';    
-        }else{
-            if(is_array($parent_ids)) $parent_ids = @$parent_ids[0];
-            $query = $query . ' = '.$parent_ids;    
-        }
-        
-        $ids = mysql__select_list2($mysqli, $query);
-        if($all_levels && count($ids)>0){
-            $ids = array_merge($ids, $this->getChildren($ids, true));
-        }
-        
-        return $ids;
+        return getTermChildrenAll($this->system->get_mysqli(),$parent_ids, $all_levels);
     }
-
     
     //
     //
@@ -1031,7 +1011,7 @@ class DbDefTerms extends DbEntityBase
         }
         if($mysqli->error){
             $this->system->addError(HEURIST_DB_ERROR, 
-                'Search query error (retrieving number of records)', $mysqli->error);
+                'Search query error (retrieving number of records that uses terms)', $mysqli->error);
             return false;
         }else{
             $ret['recID'] = $trm_ID;

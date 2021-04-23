@@ -3238,8 +3238,8 @@ console.log('onpaste');
                     sMsg = '';
                     if(code2>0){
                         
-                        sMsg = '.<br><span>Term (code '+code2+') with the same name already exists in "'
-                        +vocName+'".<br>';
+                        sMsg = '.<br><span>Term (code '+code2+') with the same name already exists in <i>'
+                        +vocName+'</i>.<br>';
                         if(window.hWin.HAPI4.is_admin()){
                             sMsg = sMsg + 'Either <a href="#" class="term-sel" '
                                 +'data-term-re="'+value+'" data-term="'+code2+'">Use this term</a></span>';
@@ -3252,12 +3252,12 @@ console.log('onpaste');
                     }else{
                         if(window.hWin.HAPI4.is_admin()){
                             sMsg = '.<br><span>If you are sure the term is not used by another field, you can '
-                            +'<a href="#" class="term-move">move term</a> to the "'
-                            +vocName+'" vocabulary <br/>'
+                            +'<a href="#" class="term-move">move term</a> to the <i>'
+                            +vocName+'</i> vocabulary <br/>'
                             +' Alternatively you may <a href="#" class="term-ref" data-term="'
                                 +value+'"  data-vocab="'
-                                +allTerms+'">create a reference</a> from vocabulary "'
-                            +vocName+'" to the term in its current location.</span>';
+                                +allTerms+'">create a reference</a> from vocabulary <i>'
+                            +vocName+'</i> to the term in its current location.</span>';
                         }else {
                             sMsg = sMsg + 
                             '.<br><span>Ask database manager to correct this vocabulary</span>';    
@@ -3269,8 +3269,8 @@ console.log('onpaste');
                     $input.val(value);
                     $input.hSelect('refresh');
                     sMsg = '<span class="heurist-prompt ui-state-error">'
-                            +'The term "'+name+'" (code '+value+') in vocabulary "'+vocName2
-                            +'" is not valid for this field which uses vocabulary "'+vocName+'" </span>'
+                            +'The term <i>'+name+'</i> (code '+value+') in vocabulary <i>'+vocName2
+                            +'</i> is not valid for this field which uses vocabulary <i>'+vocName+'</i> </span>'
                             +sMsg;
                             
                     this.error_message.css({'font-weight': 'normal', color: '#b15f4e'}); 
@@ -3290,7 +3290,8 @@ console.log('onpaste');
                         .appendTo( $input.parent() );
                     
                     err_ele.find('.ui-state-error')
-                        .css({color:'#b36b6b',
+                        .css({color:'red', //'#b36b6b',
+                              background:'none',
                               border: 'none',
                              'font-weight': 'normal'        
                         });

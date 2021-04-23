@@ -2528,8 +2528,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
                 
                 var s = '';
-                if(response.sysmsg['fields']){
-                    $.each(response.sysmsg['fields'],function(i,dty_ID){
+                if(res['fields']){
+                    $.each(res['fields'],function(i,dty_ID){
                         s = s + $Db.dty(dty_ID,'dty_Name'); 
                     });
                     s = ' in fields ('+s+')';
@@ -2548,7 +2548,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
                 if(window.hWin.HEURIST4.util.isArrayNotEmpty(res.records)){
                     sMsg += '<p><a href="#" class="records-list"'
-                    +'>List of '+response.sysmsg.reccount+' records which '+(res.children==0?'this term':'these terms')+'</a></p>';
+                    +'>List of '+response.sysmsg.reccount+' records which use '+(res.children==0?'this term':'these terms')+'</a></p>';
                 }
                 $dlg = window.hWin.HEURIST4.msg.showMsgDlg(sMsg, null, {title:'Terms in use'},
                     {default_palette_class:this.options.default_palette_class});        
