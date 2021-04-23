@@ -1459,7 +1459,7 @@ $.widget( "heurist.manageEntity", {
     // send update request and close popup if edit is in dialog
     // afteraction is used in overriden version of this method
     //
-    _saveEditAndClose: function( fields, afterAction ){
+    _saveEditAndClose: function( fields, afterAction, onErrorAction ){
 
             if(window.hWin.HAPI4.is_callserver_in_progress()) {
 //console.log('prevent repeatative call')
@@ -1515,7 +1515,8 @@ this._time_debug = fin_time;
                         if(response.status == window.hWin.ResponseStatus.OK){
 
                             var recID = response.data[0];
-                            fields[ that.options.entity.keyField ] = (''+recID);
+                            if(recID>0)
+                                fields[ that.options.entity.keyField ] = (''+recID);
                             
                             //update record in cache
                             if(that.options.use_cache && that._cachedRecordset){
@@ -1535,13 +1536,17 @@ this._time_debug = fin_time;
                             that._afterSaveEventHandler2( recID, fields );        
                             
                             if($.isFunction(afterAction)){
-                                afterAction.call(this, recID, fields);
+                                afterAction.call(that, recID, fields);
                             }else{
                                 that._afterSaveEventHandler( recID, fields );        
                             }
                             
                         }else{
-                            window.hWin.HEURIST4.msg.showMsgErr(response);
+                            if($.isFunction(onErrorAction)){
+                                onErrorAction.call(that, response);
+                            }else{
+                                window.hWin.HEURIST4.msg.showMsgErr(response);    
+                            }
                         }
                     });
     },      

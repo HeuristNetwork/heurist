@@ -654,7 +654,7 @@ function dbs_GetRectypeConstraint($system) {
     
 
     //
-    //
+    // Finds real vocabulary for given term 
     //
     function getTermTopMostParent($mysqli, $termId, $terms=null){
         
@@ -679,7 +679,7 @@ function dbs_GetRectypeConstraint($system) {
         
     
     /**
-    * return all term children as plain array
+    * return all terms's children as a plain array
     * 
     * @param mixed $system
     */
@@ -694,7 +694,7 @@ function dbs_GetRectypeConstraint($system) {
             while ($row = $res->fetch_row()) {
                 array_push($children, $row[0]);
                 if(!$firstlevel_only){
-                    $children = array_merge($children, getTermChildren($row[0], $system, $firstlevel_only));
+                    $children = array_merge($children, getTermChildren($row[0], $system, false));
                 }
             }
         }
