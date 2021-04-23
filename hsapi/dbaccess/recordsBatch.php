@@ -88,8 +88,8 @@ class RecordsBatch
     
     private $session_id = null;
     
-    private $not_putify = null;
-    private $purifier = null;
+    private $not_putify = null; //fields that will not html purified
+    private $purifier = null;   //html purifier instance
     
     function __construct( $system, $data ) {
        $this->system = $system;
@@ -104,7 +104,11 @@ class RecordsBatch
        $this->system->get_user_group_ids(null, true);
     }
     
-    function initPutifier(){
+    //
+    // Fills the list of exclusions for purrifier
+    // And inits HTML purifier 
+    //
+    private function _initPutifier(){
         if($this->purifier==null){
             $not_purify = array();
             if($this->system->defineConstant('DT_CMS_SCRIPT')){ array_push($not_purify, DT_CMS_SCRIPT); }
@@ -115,7 +119,7 @@ class RecordsBatch
             if($this->system->defineConstant('DT_SERVICE_URL')){ array_push($not_purify, DT_SERVICE_URL); }
             
             $this->not_purify = $not_purify;
-            //$this->purifier = getHTMLPurifier();
+            //$this->purifier = getHTMLPurifier();  DISABLED
         }
     }
 
@@ -467,9 +471,10 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
             
         }else if(@$this->data['val']!=null){
             
-            $this->initPutifier();
+            $this->_initPutifier();
             if(!in_array($dtyID, $this->not_purify)){
                 
+                //remove html script tags
                 $s = trim($this->data['val']);
                 $dtl['dtl_Value'] = preg_replace('#<script(.*?)>(.*?)</script>#is', '', $s);
                                                       
@@ -625,7 +630,7 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
 
         $rval = $mysqli->real_escape_string($this->data['rVal']);
 
-        //disabled $this->initPutifier();
+        $this->_initPutifier();
         
         //split value if exceeds 64K        
         $splitValues = array();
@@ -821,8 +826,9 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
                     $dtl['dtl_ID'] = $dtlID;  //detail type id
                     
                     if(($basetype=='freetext' || $basetype=='blocktext')
-                        && !in_array($dtyID, $this->not_purify)){
-                            
+                        && !in_array($dtyID, $this->not_purify))
+                    {
+                            //remove html script tags
                             $s = trim($newVal);
                             $dtl['dtl_Value'] = preg_replace('#<script(.*?)>(.*?)</script>#is', '', $s);
                             

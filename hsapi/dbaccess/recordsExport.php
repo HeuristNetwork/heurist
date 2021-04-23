@@ -924,12 +924,14 @@ private static function _getGeoJsonFeature($record, $extended=false, $simplify=f
 
     if($extended){
         if(self::$defRecTypes==null) self::$defRecTypes = dbs_GetRectypeStructures(self::$system, null, 2);
-        $idx_name = $defRecTypes['typedefs']['dtFieldNamesToIndex']['rst_DisplayName'];
+        $idx_name = self::$defRecTypes['typedefs']['dtFieldNamesToIndex']['rst_DisplayName'];
 
         if(self::$defTerms==null) {
             self::$defTerms = dbs_GetTerms(self::$system);
             self::$defTerms = new DbsTerms(self::$system, self::$defTerms);
         }
+    }else{
+        $idx_name = -1;
     }    
     
     if(self::$defDetailtypes==null) self::$defDetailtypes = dbs_GetDetailTypes(self::$system, null, 2);
@@ -1026,7 +1028,8 @@ private static function _getGeoJsonFeature($record, $extended=false, $simplify=f
                     if($term_code) $val['termCode'] = $term_code;    
                 }
 
-                if(@self::$defRecTypes['typedefs'][$rty_ID]['dtFields'][$dty_ID]){
+                //take name for rt structure    
+                if(@self::$defRecTypes['typedefs'][$rty_ID]['dtFields'][$dty_ID] && $idx_name>=0){
                     $val['fieldName'] = self::$defRecTypes['typedefs'][$rty_ID]['dtFields'][$dty_ID][$idx_name];    
                 }else{
                     //non standard field

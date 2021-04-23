@@ -3340,7 +3340,7 @@ console.log('onpaste');
                         this._on(err_ele.find('.term-ref'),{click:function(e){
                             var trm_id = $(e.target).attr('data-term');
                             var voc_id = $(e.target).attr('data-vocab');
-                            $Db.setTermReferences(voc_id, trm_id, null, 
+                            $Db.setTermReferences(trm_id, voc_id, 0,0,0, 
                             function(){
                                 window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, 
                                     { source:this.uuid, type:'trm' });    
