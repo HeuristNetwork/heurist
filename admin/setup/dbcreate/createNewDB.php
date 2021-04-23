@@ -456,7 +456,7 @@ if($registrationRequired) //show user registration dialog at once
                     <h3 class="ui-heurist-title">Enter a name for the new database</h3>
                     <div style="margin-top: 0px;">
                         <!-- user name used as prefix -->
-                        <b><?= HEURIST_DB_PREFIX ?>
+                        <b> <!-- This is irrelevant to the user removed Ian 23/4/21 < ?= HEURIST_DB_PREFIX ?> -->
                             <input type="text" maxlength="30" size="6" name="uname" id="uname"
                                 onkeypress="{onKeyPress(event)}"
                                 style="padding-left:3px; font-weight:bold;">
@@ -464,6 +464,9 @@ if($registrationRequired) //show user registration dialog at once
                         <b>_</b>
                         <input type="text" maxlength="64" size="30" id="dbname" name="dbname"  onkeypress="{onKeyPress(event);}">
                         <input id="btnCreateDb" value="Create Database" style="font-weight: bold;" class="ui-button-action" >
+                        <div class="heurist-helper3" style="padding-top:0em; max-width:500px">
+                            <i>optional &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; required</i><br>
+                        </div>
                         <div style="padding-top:1em; max-width:500px">
                             No spaces or punctuation other than underscore. Database names are case-sensitive.
                         </div> 
