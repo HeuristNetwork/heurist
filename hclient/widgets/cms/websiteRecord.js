@@ -933,7 +933,7 @@ function hCmsEditing(_options) {
                     if(window.hWin.HEURIST4.util.isempty(menu_recIDs) || 
                       ($.isArray(menu_recIDs)&& (menu_recIDs.length==0||window.hWin.HEURIST4.util.isempty(menu_recIDs[0]))))
                     {
-                        window.hWin.HEURIST4.msg.showMsgErr('Please set at least one top menu item');                     
+                        window.hWin.HEURIST4.msg.showMsgErr('Please set at least one top level menu item');                     
                         return false;   
                     }
                     cont.find('input[name="menu_recIDs"]').val( menu_recIDs );
@@ -978,8 +978,8 @@ function hCmsEditing(_options) {
                     if(selval==1){
                           window.hWin.HEURIST4.msg.showMsgErr('For "tree" mode you have to select groups to be displayed');
                           return false;
-                    }else if (window.hWin.HEURIST4.util.isempty(opts.allowed_svsIDs) && selval==0) { //individual searches are not defined
-                          window.hWin.HEURIST4.msg.showMsgErr('For "button" mode you have to select either groups or individual searches');
+                    }else if (window.hWin.HEURIST4.util.isempty(opts.allowed_svsIDs) && selval==0) { //individual filters are not defined
+                          window.hWin.HEURIST4.msg.showMsgErr('For "button" mode you must select either workgroups or filters individually');
                           return false;
                     }
                 }
@@ -1288,7 +1288,7 @@ function hCmsEditing(_options) {
                                 showclear_button: true,
                                 dtFields:{
                                     dty_Type:"resource", rst_MaxValues:0,
-                                    rst_DisplayName: 'Top menu items', rst_DisplayHelpText:'',
+                                    rst_DisplayName: 'Top level menu items', rst_DisplayHelpText:'',
                                     rst_PtrFilteredIDs: [window.hWin.HAPI4.sysinfo['dbconst']['RT_CMS_MENU'],
                                               window.hWin.HAPI4.sysinfo['dbconst']['RT_WEB_CONTENT']],
                                     rst_FieldConfig: {entity:'records', csv:false}
@@ -1386,7 +1386,7 @@ function hCmsEditing(_options) {
                                 showclear_button: true,
                                 dtFields:{
                                     dty_Type:"resource", rst_MaxValues:1,
-                                    rst_DisplayName: 'EITHER Show all searches in these workgroups', 
+                                    rst_DisplayName: 'EITHER Show all filters in these workgroups', 
                                     rst_DisplayHelpText:'',
                                     rst_FieldConfig: {entity:'sysGroups', csv:true}
                                 },
@@ -1416,7 +1416,7 @@ function hCmsEditing(_options) {
                                 showclear_button: true,
                                 dtFields:{
                                     dty_Type:"resource", rst_MaxValues:1,
-                                    rst_DisplayName: 'OR Choose specific searches', rst_DisplayHelpText:'',
+                                    rst_DisplayName: 'OR Choose specific filters', rst_DisplayHelpText:'',
                                     rst_FieldConfig: {entity:'usrSavedSearches', csv:true}
                                 },
                                 change:function(){
@@ -1443,7 +1443,7 @@ function hCmsEditing(_options) {
                                 showclear_button: true,
                                 dtFields:{
                                     dty_Type:"resource", rst_MaxValues:1,
-                                    rst_DisplayName: 'Trigger this search on page load', rst_DisplayHelpText:'',
+                                    rst_DisplayName: 'Trigger this filter on page load', rst_DisplayHelpText:'',
                                     rst_FieldConfig: {entity:'usrSavedSearches', csv:false} 
                                 }
                             };
@@ -1490,7 +1490,7 @@ function hCmsEditing(_options) {
                            ele.editing_input({
                                 dtFields:{
                                     dty_Type:"resource", rst_MaxValues:1,
-                                    rst_DisplayName: 'Initial search', rst_DisplayHelpText:'',
+                                    rst_DisplayName: 'Initial filter', rst_DisplayHelpText:'',
                                     rst_FieldConfig: {entity:'usrSavedSearches', csv:false,
                                         initial_filter:ifilter, search_form_visible:(ifilter==null)    
                                     } 
@@ -1513,7 +1513,7 @@ function hCmsEditing(_options) {
                                     q: 't:'+window.hWin.HAPI4.sysinfo['dbconst']['RT_MAP_DOCUMENT'],w: 'a',
                                     detail: 'header',
                                     source: 'cms_edit'};
-                        //perform search        
+                        //perform filter        
                         window.hWin.HAPI4.RecordMgr.search(request,
                             function(response){
                                 
