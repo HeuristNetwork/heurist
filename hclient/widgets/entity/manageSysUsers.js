@@ -508,7 +508,7 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
         
         var btnTrOwner = this._toolbar.find('#btnTransferOwnership');
         
-        if(this._currentEditID!=2 && window.hWin.HAPI4.user_id()==2){
+        if(this._currentEditID>0 && this._currentEditID!=2 && window.hWin.HAPI4.user_id()==2){
             //add special button
             if(btnTrOwner.length==0){
                 btnTrOwner = $('<button id="btnTransferOwnership">')
