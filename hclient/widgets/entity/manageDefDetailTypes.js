@@ -1512,7 +1512,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
     // send update request and close popup if edit is in dialog
     // afteraction is used in overriden version of this method
     //
-    _saveEditAndClose: function( fields, afterAction ){
+    _saveEditAndClose: function( fields, afterAction, onErrorAction ){
         
         var that_widget = this;
         
@@ -1589,9 +1589,32 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         }
         fields['pwd_ReservedChanges'] = null;
         
-        this._super( fields, afterAction );
+        this._super( fields, afterAction, this._onSaveError );
         
     },
+    
+    _onSaveError: function(response){
+      
+            if(response.sysmsg && response.sysmsg.reccount){
+     
+                var res = response.sysmsg;    
+                
+                var sMsg = response.message;
+                sMsg += '<p><a href="'+window.hWin.HAPI4.baseURL+'?db='
+                            + window.hWin.HAPI4.database+'&q=ids:' + res['records'].join(',')
+                            + '" target="_blank">'
+                    +'List of '+res.reccount+' records which use this vocabulary</a></p>';
+                
+                window.hWin.HEURIST4.msg.showMsgDlg(sMsg, null, {title:'Vocabulary in use'},
+                    {default_palette_class:this.options.default_palette_class});        
+
+                
+            }else{
+                window.hWin.HEURIST4.msg.showMsgErr(response);    
+            }
+    },
+    
+    
     
     //  -----------------------------------------------------
     //

@@ -404,24 +404,29 @@ class DbDefTerms extends DbEntityBase
             
                 if(@$this->records[$idx]['trm_ParentTermID']>0){
                     
-                    $labels = $this->getLabelsAndCodes($this->records[$idx]['trm_ParentTermID']);
+                    $vocab_id = getTermTopMostParent($mysqli, $this->records[$idx]['trm_ParentTermID']);    
+                    $labels = $this->getLabelsAndCodes( $vocab_id );
+                    
                     if(is_array($labels)){
-                            foreach($labels as $vals2){
-                                if(strcasecmp($this->records[$idx]['trm_Label'],$vals2[0])==0){
-                                    $s2 = 'Duplicate label ('.$this->records[$idx]['trm_Label'].') ';
-                                    break;
-                                }else if ($this->records[$idx]['trm_Code'] && 
-                                    strcasecmp($this->records[$idx]['trm_Code'],$vals2[1])==0)
+                            foreach($labels as $id=>$vals){
+                                if($id!=@$this->records[$idx]['trm_ID'])
                                 {
-                                    $s2 = 'Duplicate code ('.$this->records[$idx]['trm_Code'].') ';
-                                    break;
+                                    if(strcasecmp($this->records[$idx]['trm_Label'],$vals['trm_Label'])==0){
+                                        $s2 = 'Duplicate label ('.$this->records[$idx]['trm_Label'].') ';
+                                        break;
+                                    }else if ($this->records[$idx]['trm_Code'] && 
+                                        strcasecmp($this->records[$idx]['trm_Code'],$vals['trm_Code'])==0)
+                                    {
+                                        $s2 = 'Duplicate code ('.$this->records[$idx]['trm_Code'].') ';
+                                        break;
+                                    }
                                 }
                             }
                     }
                     
                     
                     $s1 = 'Term';
-                    $s3 = ' at the same branch/level in the tree';
+                    $s3 = ' in the vocabulary';
                 }else{
                     //vocabulary
                     $this->records[$idx]['trm_ParentTermID'] = null;
@@ -623,8 +628,8 @@ class DbDefTerms extends DbEntityBase
                         if(!($old_parent>0) && $old_vocab>0) $old_parent = $old_vocab;
 
                         if($new_parent>0){
-                            //get labels and codes for first level
-                            $labels = $this->getLabelsAndCodes($new_parent);
+                            //get labels and codes for vocabulary
+                            $labels = $this->getLabelsAndCodes($new_vocab);
                             if(count($labels)==0) $labels = null;
                         }
                         if($new_vocab>0 && $new_vocab!=$old_vocab){
@@ -650,17 +655,20 @@ class DbDefTerms extends DbEntityBase
                                         $vals = mysql__select_row_assoc($mysqli, 
                                                 'SELECT trm_Label, trm_Code FROM '
                                                 .$this->config['tableName'].' WHERE trm_ID='.$trm_ID);
-                                        foreach($labels as $vals2){
-                                            if(strcasecmp($vals['trm_Label'],$vals2[0])==0){
-                                                $sMsg = 'Term with label <b>'.$vals['trm_Label'];
-                                            }else if ($vals['trm_Code'] && strcasecmp($vals['trm_Code'],$vals2[1])==0){
-                                                $sMsg = 'Term with code <b>'.$vals['trm_Code'];
-                                            }
-                                            if($sMsg){
-                                                $this->system->addError(HEURIST_ACTION_BLOCKED, 
-                                                        $sMsg.'</b> already exists in vocabulary');
-                                                $ret = false;
-                                                break;
+                                        foreach($labels as $id=>$vals2)
+                                        {
+                                            if($id!=$trm_ID){
+                                                if(strcasecmp($vals['trm_Label'],$vals2['trm_Label'])==0){
+                                                    $sMsg = 'Term with label <b>'.$vals['trm_Label'];
+                                                }else if ($vals['trm_Code'] && strcasecmp($vals['trm_Code'],$vals2['trm_Code'])==0){
+                                                    $sMsg = 'Term with code <b>'.$vals['trm_Code'];
+                                                }
+                                                if($sMsg){
+                                                    $this->system->addError(HEURIST_ACTION_BLOCKED, 
+                                                            $sMsg.'</b> already exists in the vocabulary');
+                                                    $ret = false;
+                                                    break;
+                                                }
                                             }
                                         }
                                         if(!$ret) break;
@@ -925,28 +933,8 @@ class DbDefTerms extends DbEntityBase
     // $all_levels - false return direct children only 
     //    
     private function getChildren($parent_ids, $all_levels=true){
-
-        $mysqli = $this->system->get_mysqli();    
-
-        //compose query
-        $query = 'SELECT trl_TermID FROM defTermsLinks WHERE trl_ParentID';
-        
-        if(is_array($parent_ids) && count($parent_ids)>1)
-        {
-            $query = $query .' IN ('.implode(',',$parent_ids).')';    
-        }else{
-            if(is_array($parent_ids)) $parent_ids = @$parent_ids[0];
-            $query = $query . ' = '.$parent_ids;    
-        }
-        
-        $ids = mysql__select_list2($mysqli, $query);
-        if($all_levels && count($ids)>0){
-            $ids = array_merge($ids, $this->getChildren($ids, true));
-        }
-        
-        return $ids;
+        return getTermChildrenAll($this->system->get_mysqli(),$parent_ids, $all_levels);
     }
-
     
     //
     //
@@ -957,7 +945,7 @@ class DbDefTerms extends DbEntityBase
         $children = $this->getChildren($parent_id, $all_levels); 
         if(is_array($children) && count($children)>0){
 
-            $query = 'SELECT LOWER(trm_Label), LOWER(trm_Code) FROM '
+            $query = 'SELECT trm_ID, trm_Label, trm_Code FROM '
                 .$this->config['tableName'].' WHERE trm_ID'; //defTerms
             //finds labels and codes
             if(count($children)>1)
@@ -966,7 +954,7 @@ class DbDefTerms extends DbEntityBase
             }else{
                 $query = $query . ' = '.$children[0];    
             }
-            return mysql__select_all($this->system->get_mysqli(), $query);
+            return mysql__select_assoc($this->system->get_mysqli(), $query);
         }
         return null;
     }
@@ -1031,7 +1019,7 @@ class DbDefTerms extends DbEntityBase
         }
         if($mysqli->error){
             $this->system->addError(HEURIST_DB_ERROR, 
-                'Search query error (retrieving number of records)', $mysqli->error);
+                'Search query error (retrieving number of records that uses terms)', $mysqli->error);
             return false;
         }else{
             $ret['recID'] = $trm_ID;
