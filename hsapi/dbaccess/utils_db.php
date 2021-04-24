@@ -10,6 +10,8 @@
     *  mysql__drop_database
     * 
     *  mysql__getdatabases4 - get list of databases
+    * 
+    *  mysql__select_assoc - returns array  key_column(first filed)=>array(field=>val,....)
     *  mysql__select_assoc2 - returns array  key_column=>val_column for given table
     *  mysql__select_list - returns array of one column values
     *  mysql__select_value   - return the first column of first row
@@ -252,6 +254,31 @@
         }
         return $matches;
     }
+
+    /**
+    * returns array  key_column(first filed)=>array(field=>val,....)
+    * 
+    * @param mixed $mysqli
+    * @param mixed $query
+    */
+    function mysql__select_assoc($mysqli, $query){
+        
+        $matches = null;
+        if($mysqli && $query){
+            
+            $res = $mysqli->query($query);
+            if ($res){
+                $matches = array();
+                while ($row = $res->fetch_assoc()){
+                    $key = array_shift($row);
+                    $matches[$key] = $row;
+                }
+                $res->close();
+            }
+        }
+        return $matches;
+    }
+
     /**
     * returns array of FIRST column values
     */
