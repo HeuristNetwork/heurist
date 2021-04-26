@@ -190,7 +190,10 @@ function fileGetFullInfo($system, $file_ids, $all_fields=false){
             $res->close();
             return $result;
         }else{
-            $system->addError(HEURIST_DB_ERROR, 'Cannot get files', $mysqli->error);
+            $system->addError(HEURIST_DB_ERROR, 
+                'Cannot get file info in fileGetFullInfo. Count of files '
+                        .count($file_ids).'. Ask thumb img: '.($all_fields?'YES':'NO'), 
+                $mysqli->error);
             return false;
         }
     }else{

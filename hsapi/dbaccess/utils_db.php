@@ -338,6 +338,8 @@
                     $result = $row;
                 }
                 $res->close();
+            }else{
+                error_log('Query: '.$query.'.  mySQL error: '.$mysqli->error);
             }
         }
         return $result;

@@ -509,7 +509,6 @@ class DbDefTerms extends DbEntityBase
                 }
             }
         }
-
         
         $ret = parent::save();
 
@@ -920,7 +919,7 @@ class DbDefTerms extends DbEntityBase
         }
 
         //$ret['children']>0 || 
-        if(count($ret['detailtypes'])>0 || $ret['reccount']>0){
+        if(count(@$ret['detailtypes'])>0 || $ret['reccount']>0){
             return $ret;    
         }else{
             return true;

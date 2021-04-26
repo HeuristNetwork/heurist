@@ -1483,7 +1483,7 @@ $.widget( "heurist.manageEntity", {
                 'entity'     : this.options.entity.entityName,
                 'request_id' : window.hWin.HEURIST4.util.random(),
                 'fields'     : fields,
-                'isfull'     : is_full  //
+                'isfull'     : is_full  //partial or full update (from edit form)
                 };
              
                 if(this.options.coverall_on_save) {
