@@ -26,14 +26,13 @@
 var crosstabsAnalysis;
 var buttonDiv;
 var visualisationButton;
-var firstRender = true;
 
 /**
 *  CrosstabsAnalysis - class for crosstab analysis
 *
 * @author Artem Osmakov <osmakov@gmail.com>
 * @version 2013.0530
-*/
+*/ 
 function CrosstabsAnalysis(_query, _query_domain) {
 
     var _className = "CrosstabsAnalysis";
@@ -915,20 +914,22 @@ function CrosstabsAnalysis(_query, _query_domain) {
             $('#btnPrint').show();
         }
 
+        var date = new Date();
+        var showZeroBlankText = "";
 
-        $divres.append('<div>Database name: <b>'+window.hWin.HAPI4.database+'</b></div>');
-        $divres.append('<div>Date and time: '+ (new Date()) +'</div>');
-        $divres.append('<div>Type of analysis: Crosstab</div>');
+        $divres.append('<div></div>')
+        $divres.append('<span>DB: <b>'+window.hWin.HAPI4.database+' </b></span>');
+        $divres.append('<span>Date and time: '+ (date.getDate() + "/" + (date.getMonth()+1) + "/" + date.getFullYear())+' </span>');
+        //$divres.append('<div>Type of analysis: Crosstab</div>');
         //$divres.append('<div>Title (name) of saved analysis: '+ +'</div>');
         //????? $divres.append('<div>Record type analysed: '++'</div>');
         if(_currentRecordset!=null){
-            $divres.append('<div>Record count: '+ _currentRecordset['recordCount'] +'</div>');
-            $divres.append('<div>Query string: '+_currentRecordset['query_main'] +'</div>');
+            $divres.append('<span>N = '+ _currentRecordset['recordCount'] +' </span>');
+            $divres.append('<span>Query string: '+_currentRecordset['query_main'] +' </span>');
 
         }else{
-            $divres.append('<div>Query string: q='+query_main+'&w='+query_domain +'</div>');
+            $divres.append('<span>Query string: q='+query_main+'&w='+query_domain +' </span>');
         }
-
 
         //$divres.append('<div>Total number of records: '+ +'</div>');
         //$divres.append('<div>Number of records for each record type</div>');
@@ -943,7 +944,9 @@ function CrosstabsAnalysis(_query, _query_domain) {
             aggregationMode = "Counts";
         }
 
-        $divres.append('<div>Type of value displayed: <b>'+aggregationMode+'</b></div>');
+
+
+        $divres.append('<span>Type of value displayed: <b>'+aggregationMode+'</b></span>');
 
         $divres.append('<div>---------------------------------</div>');
         //Type of value displayed (count, average, sum)
@@ -1012,7 +1015,15 @@ function CrosstabsAnalysis(_query, _query_domain) {
         //console.log($.fn.dataTable.isDataTable("table#resultsTable"));
 
         $(document).ready(function(){
-            $("#resultsTable").DataTable();
+            $(".resultsTable").DataTable({
+                "paging" : false,
+                "info" : false,
+                dom:"Bfrtip",
+                buttons:[
+                    'csv','pdf','print'
+                ]
+            }
+            );
         });
         
         //console.log($.fn.dataTable.isDataTable("table#resultsTable"));
@@ -1248,7 +1259,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
         //main render output   .css({'border':'1px solid black'})
         var $table = $('<table>').attr('cellspacing','0');
         $table.attr("id", "resultsTable");
-        $table.attr("class", "display cell-border");
+        $table.attr("class", "display cell-border resultsTable");
         var $rowPercentageHeader;
         var styleTypeHeader = "crosstab-header0";
 
@@ -1533,8 +1544,8 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
             $('#aggregationModeCount').prop('checked',true); //val("count");
         }else{
-            $('#aggSum').css('display','block');
-            $('#aggAvg').css('display','block');
+            //$('#aggSum').css('display','block');
+           //$('#aggAvg').css('display','block');
             $('#divAggField').css('display','inline-block');
         }
         var aggMode = $("input:radio[name=aggregationMode]:checked").val();
