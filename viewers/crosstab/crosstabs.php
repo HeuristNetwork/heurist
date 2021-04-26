@@ -43,8 +43,11 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
         //
     }
     //Used to open the crosstabs section to the full width on the initial load.
+    // window.hWin.HAPI4.LayoutMgr.cardinalPanel('sizePane',
+    //     ['east', (top ? top.innerWidth : window.innerWidth)]); 
+
     window.hWin.HAPI4.LayoutMgr.cardinalPanel('sizePane',
-        ['east', (top ? top.innerWidth : window.innerWidth)]);
+        ['east', (top ?  '85%' : window.innerWidth)]);
 </script>
 
 <link rel=stylesheet href="crosstabs.css" media="all">
@@ -62,7 +65,7 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
                     <div id="qform" class="disign-content" style="width:100%;">
                         <!-- <div style="position: absolute;top:20px;left:450px;width:200px"><img src="crosstabs_image.png"/></div> -->
                         <div class="row">
-                            <div class="col-12 col-md-4 border border-secondary">
+                            <div class="col-12 col-md-4 border border-dark">
                                 <fieldset>
                                     <!-- Dataset selection -->
                                     <div class="row">
@@ -105,7 +108,7 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
                         &nbsp;&nbsp;<button id="btnSaveSettings">Save</button> -->
                                 <!-- </div> -->
                             </div>
-                            <div class="col-12 col-md-4 border border-danger">
+                            <div class="col-12 col-md-4 border border-dark">
                                 <div class="row">
                                     <div class="col-12">
                                         <fieldset id="vars" style="display:none;">
@@ -142,11 +145,9 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
                                 <div class="row">
                                     <div class="col-12">
                                         <fieldset id="shows" style="display:none;">
-                                            <span style="float:left; width:47.5%">
-                                                <div style="text-align: center; padding-top: 19px; font-size: 20px; display: block;"><label for="aggregationMode">Values:</label></div>
-                                                <div class="radioDiv">
+                                            <div class="row">
+                                                <div style="text-align: left; font-size: 20px; width:100%"><label for="aggregationMode">Values:</label></div>
                                                     <div class="input-cell" style="padding-top: 4px;">
-
                                                         <div class="crosstab-aggregation">
                                                             <input type="radio" class="btn-check" checked value="count" id="aggregationModeCount" name="aggregationMode" onchange="crosstabsAnalysis.changeAggregationMode()">
                                                             <label class="btn btn-outline-secondary" for="aggregationModeCount">Counts</label>
@@ -164,11 +165,10 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
 
                                                         <div id="divAggField" class="crosstab-aggregation" style="margin-top:10px;">of&nbsp;<select id="cbAggField" name="column" onchange="crosstabsAnalysis.changeAggregationMode()" class="text ui-widget-content ui-corner-all"></select></div>
                                                     </div>
-                                                </div>
-                                            </span>
-                                            <span class="verticalLine"></span>
-                                            <span style="float:left; width: 23.75%">
-                                                <div style="text-align: center; padding-top: 19px; display:block; font-size: 20px;"><label for="rbShowValue">Show:</label></div>
+
+                                            </div>
+                                            <div class="row">
+                                                <div style="text-align: left; width: 100%; font-size: 20px;"><label for="rbShowValue">Show:</label></div>
                                                 <div class="input-cell">
                                                     <div class="checkboxValues">
                                                         <input type="checkbox" class="btn-check" onchange="crosstabsAnalysis.doRender()" style="margin-left: 0;" checked id="rbShowValue">
@@ -190,8 +190,8 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
                                                         <label class="btn btn-outline-secondary" for="rbShowTotals">Totals</label>
                                                     </div>
                                                 </div>
-                                            </span>
-                                            <span class="blankCheckboxesSpan" style="float: right; width: 23.75%;">
+                                            </div>
+                                            <div class="row">
                                                 <div class="fldheader"></div>
                                                 <div class="input-cell" style="padding-top: 10px;">
                                                     <div class="blankCheckboxes">
@@ -204,7 +204,7 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
                                                         <label class="btn btn-outline-secondary" for="rbShowBlanks">show blank rows/columns</label>
                                                     </div>
                                                 </div>
-                                            </span>
+                                            </div>
 
 
 
