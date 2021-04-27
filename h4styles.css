@@ -1372,8 +1372,9 @@ div.saved-search > .edit-delete-buttons, .recordDiv > .edit-delete-buttons {
 .horizontalmenu > .ui-menu-item {
     display: inline-block;
     float: left;
-    width: auto;
-    margin: 0px 2px;
+    width: 80px;
+    margin: 0px 2px 2px;
+    text-align: center;
 }
 
 
