@@ -509,7 +509,7 @@ window.hWin.HEURIST4.ui = {
         useHtmlSelect = (useHtmlSelect===true);
         
         //recordset 
-        var rectypes = $Db.rty();
+        var rectypes = $Db.rty().getSubSetByRequest({ 'sort:rty_Name':1 });
         var index;
 
         if(rectypes){ 
