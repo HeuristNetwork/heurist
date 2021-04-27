@@ -3245,11 +3245,11 @@ console.log('onpaste');
                         sMsg = '<span class="heurist-prompt ui-state-error">'
                             +'This term references a duplicate outside the <i>'
                             +vocName+'</i> vocabulary used by this field. ';
-                            //+'Term (code '+code2+') with the same name already exists in <i>'+vocName+'</i>.';
                             
                         if(window.hWin.HAPI4.is_admin()){
                             sMsg = sMsg + '<a href="#" class="term-sel" '
-                                +'data-term-replace="'+value+'" data-term="'+code2+'">correct</a></span>';
+                                +'data-term-replace="'+value+'" data-vocab-correct="'+allTerms
+                                +'" data-vocab="'+vocId2+'" data-term="'+code2+'">correct</a></span>';
                         }else{
                             sMsg = sMsg 
                             +'</span><br><span>Either ask database manager to replace term for all records</span>';    
@@ -3316,11 +3316,22 @@ console.log('onpaste');
                             var trm_id_re = $(e.target).attr('data-term-replace');
                             var fieldName = this.f('rst_DisplayName');
                             
-                            var request = {a:'replace', dtyID:this.options.dtID, sVal:trm_id_re, rVal:trm_id, tag:0, recIDs:'ALL'};                
+                            var request = {a:'replace', rtyID:this.options.rectypeID,
+                                dtyID:this.options.dtID, sVal:trm_id_re, rVal:trm_id, tag:0, recIDs:'ALL'};                
+                                
                             window.hWin.HEURIST4.msg.showMsgDlg(
-                                    'You are about to convert tag #'+trm_id_re+' to #'+trm_id
+'<div  style="line-height:20px">'
++'<div>Term: <span id="termName" style="font-style:italic">'
+    +$Db.trm(trm_id,'trm_Label')+'</span></div>'
++'<div>In vocabulary: <span id="vocabName" style="font-style:italic">'
+    +$Db.trm($(e.target).attr('data-vocab'),'trm_Label')+'</span></div>'
++'<hr/>'
++'<div>Vocabulary for this field is: <span id="vocabNameCorrect" style="font-style:italic">'
+    +$Db.trm($(e.target).attr('data-vocab-correct'),'trm_Label')+'</span></div>'
++'<p>Use the version of the term in this vocabulary for this field in all records of this type</p></div>'
+/*                                    'You are about to convert tag #'+trm_id_re+' to #'+trm_id
                                     +' in field "'+fieldName+'" for all records'
-                                    + '<br><br>Are you sure?',
+                                    + '<br><br>Are you sure?'*/,
                                     function(){
                                         window.hWin.HEURIST4.msg.bringCoverallToFront();                                             
                             
@@ -3338,7 +3349,7 @@ console.log('onpaste');
                                             }
                                         });
                                     },
-                                    {title:'Warning',yes:'Proceed',no:'Cancel'});
+                                    {title:'Correction of invalid term',yes:'Apply',no:'Cancel'});
             
                         }});
                     

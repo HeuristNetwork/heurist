@@ -178,7 +178,15 @@ class RecordsBatch
 
         if($this->system->is_admin() && $this->data['recIDs']=='ALL'){
             
-            $passedRecIDCnt = mysql__select_value($mysqli,'select count(*) from Records');
+            $query = 'select count(*) from Records';
+
+            $rty_ID = @$this->data['rtyID'];
+            if($rty_ID >0){
+                $query = ' WHERE rec_RecTypeID = '.$rty_ID;
+                $this->rtyIDs = array($rty_ID);
+            }
+            
+            $passedRecIDCnt = mysql__select_value($mysqli, $query);
             
             $this->result_data = array('passed'=>$passedRecIDCnt,
                         'noaccess'=>0,'processed'=>0);
@@ -731,12 +739,21 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
 
             $query = 'SELECT dtl_ID, dtl_RecID '
                     .($is_multiline?'':', dtl_Value')
-                    .'  FROM recDetails WHERE '
-                    ."dtl_DetailTypeID = $dtyID and $searchClause";
+                    .'  FROM recDetails ';
             
-            if($recID!='all'){
+            if($recID=='all' && $this->rtyIDs && @$this->rtyIDs[0]>0){
+                if($this->rtyIDs && @$this->rtyIDs[0]>0){
+                    
+                    $query = $query.', Records '
+                            .'WHERE rec_ID=dtl_RecID AND  rec_RecTypeID = '.$this->rtyIDs[0]
+                            ." AND dtl_DetailTypeID = $dtyID and $searchClause";
+                }
+            }else{
+                $query = $query."WHERE  dtl_DetailTypeID = $dtyID and $searchClause";
                 //get matching detail value for record if there is one
-                $query = $query." AND  dtl_RecID = $recID ";
+                if($recID!='all'){
+                    $query = $query." AND  dtl_RecID = $recID ";
+                }
             }
             $query = $query.' ORDER BY dtl_RecID';
             
