@@ -61,7 +61,7 @@ $.widget( "heurist.resultListMenu", {
         //this._initMenu('Layout');
         this.divMainMenuItems.menu();
 
-        this.divMainMenuItems.find('li').css({'padding':'0 3px'}); //reduce gap
+        this.divMainMenuItems.find('li').css({'padding':'0 3px 3px', 'width':'80px', 'text-align':'center'}); // center, place gap and setting width
         
         if(this.options.menu_class!=null){
              this.element.addClass( this.options.menu_class );   

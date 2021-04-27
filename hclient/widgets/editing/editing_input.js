@@ -2000,7 +2000,7 @@ $.widget( "heurist.editing_input", {
 
                         $input_img.css('cursor', 'zoom-in');
 
-                        window.hWin.HAPI4.save_pref('imageRecordEditor', true);
+                        window.hWin.HAPI4.save_pref('imageRecordEditor', 1);
                     }
                     else if (isClicked==1)
                     {
@@ -2008,13 +2008,17 @@ $.widget( "heurist.editing_input", {
 
                         /* Enlarge Image, display player */
                         if ($(elem.parentNode).hasClass("thumb_image")) {
-                           window.hWin.HEURIST4.ui.showPlayer(elem, elem.parentNode, f_id, url);
+                            $input_img.css('cursor', 'zoom-out');
+                            window.hWin.HEURIST4.ui.showPlayer(elem, elem.parentNode, f_id, url);
+                        }
+                        else {
+                            $input_img.css('cursor', 'zoom-in');
                         }
                     }
                 });  
 
 				/* Check User Preferences, displays thumbnail inline by default if set */
-                if (window.hWin.HAPI4.get_prefs_def('imageRecordEditor', false) && value.ulf_ID)
+                if (window.hWin.HAPI4.get_prefs_def('imageRecordEditor', 0)!=0 && value.ulf_ID)
                 {
                     $input_img.show();
                     $dwnld_anchor.show();

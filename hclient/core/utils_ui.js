@@ -509,7 +509,7 @@ window.hWin.HEURIST4.ui = {
         useHtmlSelect = (useHtmlSelect===true);
         
         //recordset 
-        var rectypes = $Db.rty();
+        var rectypes = $Db.rty().getSubSetByRequest({ 'sort:rty_Name':1 });
         var index;
 
         if(rectypes){ 
@@ -1782,6 +1782,11 @@ window.hWin.HEURIST4.ui = {
     //
     openRecordInPopup:function(rec_ID, query_request, isEdit, popup_options){
     
+		if ($('div[id*="heurist-dialog-Records-"]')[0]){    /* Check if popup editor is already open */
+            window.hWin.HEURIST4.msg.showMsgFlash('An Editor Window is Already Open', 2000);
+            return;
+        }
+	
             var url = window.hWin.HAPI4.baseURL,
                 dwidth, dheight, dtitle;    
             
