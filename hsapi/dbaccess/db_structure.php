@@ -846,7 +846,7 @@ function dbs_GetRectypeConstraint($system) {
     }
 
     //
-    // to public method
+    // to public method - @todo replace with $terms->getTermByLabel
     //
     function getTermByLabel($term_label, $domain)
     {

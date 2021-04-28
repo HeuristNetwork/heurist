@@ -26,7 +26,7 @@
     *  getTermLabel
     *  getTermCode
     *  getTerm
-    *  getTermByLabl
+    *  getTermByLabel
     *  getVocabs - for specified domain
     *  getSiblings
     *  treeData($parent_id, $mode) - returns tree of flat array of children ids (all levels)
