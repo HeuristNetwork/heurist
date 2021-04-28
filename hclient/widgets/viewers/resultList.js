@@ -1427,7 +1427,7 @@ $.widget( "heurist.resultList", {
         var rectypeID = fld('rec_RecTypeID');
         var bkm_ID = fld('bkm_ID');
         var recTitle = fld('rec_Title'); 
-        var recTitle_strip_all = window.hWin.HEURIST4.util.stripTags(recTitle);
+        var recTitle_strip_all = window.hWin.HEURIST4.util.htmlEscape(window.hWin.HEURIST4.util.stripTags(recTitle));
         var recTitle_strip1 = window.hWin.HEURIST4.util.stripTags(recTitle,'u, i, b, strong');
         var recTitle_strip2 = window.hWin.HEURIST4.util.stripTags(recTitle,'a, u, i, b, strong');
         var recIcon = fld('rec_Icon');
