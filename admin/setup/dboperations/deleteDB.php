@@ -61,13 +61,15 @@ if(!@$_REQUEST['pwd']){
 
                     $allow_deletion = true;        
                 
+
+                    list($dbname_full, $dbname ) = mysql__get_names( $database_to_delete );
+
                     if($is_delete_current_db){
                 
                         $user = user_getById($system->get_mysqli(), $system->get_user_id()); //user in current db
                             
                         $allow_deletion = false;
                         //find the same user in database to be deleted
-                        list($dbname_full, $dbname ) = mysql__get_names( $database_to_delete );
                         //find user by email
                         $usr = user_getByField($system->get_mysqli(), 'ugr_eMail', $user['ugr_eMail'], $dbname_full);
                         if(@$usr['ugr_ID']==2){ //database owner
