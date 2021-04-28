@@ -1141,36 +1141,47 @@ function CrosstabsAnalysis(_query, _query_domain) {
         }
 
 
-        var currow_val=-1, row_interval_idx;
+        var currow_val=-1
+        
 
         //create output array, calculate totals
         for (idx in records){
+            var row_interval_idx=[];
+            var count = 0;
             if(idx){
 
                 if(currow_val!=records[idx][0]){
                     var rval = records[idx][0]; //row
                     currow_val = rval;
                     //find row interval it fits
-                    row_interval_idx = -1;
+                    row_interval_idx[0] = -1;
                     for (i in rows){
                         if( fitToInterval( fields3.row.type, rows[i].values, rval ) ){
-                            row_interval_idx = i;
-                            break;
+                            //Some records may contain more than one value, this stores it in an array and generates based on this.
+                            if(count<1){
+                                row_interval_idx[0]=i;
+                            }
+                            else{
+                                row_interval_idx.push(i);
+                            }
+                            count++;
                         }
                     }
                 }
 
-                if(row_interval_idx>=0)
+                if(row_interval_idx[0]>=0)
                 {
                     if(noColumns){ //no columns
-
                         var val = parseFloat(records[idx][2]);   //WARNING - fix for AVG
-                        if(!isNaN(val) && rnd(val)!=0){
-                            rows[row_interval_idx].output[0] = rows[row_interval_idx].output[0] + rnd(val);
-                            rows[row_interval_idx].avgcount[0] ++;
-                            grantotal = grantotal + val;
-                            rows[row_interval_idx].isempty = false;
+                        for(i=0;i<row_interval_idx.length; i++){
+                            if(!isNaN(val) && rnd(val)!=0){
+                                rows[row_interval_idx[i]].output[0] = rows[row_interval_idx[i]].output[0] + rnd(val);
+                                rows[row_interval_idx[i]].avgcount[0] ++;
+                                grantotal = grantotal + val;
+                                rows[row_interval_idx[i]].isempty = false;
+                            }
                         }
+                        
 
                     }else{
 
