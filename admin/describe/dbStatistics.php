@@ -105,7 +105,7 @@ if($is_csv){
     if (false === $fd) {
         die('Failed to create temporary file');
     } 
-    $record_row = array('Name','Reg ID','Records','Files(MB)','DB Vsn','Data updated','Last modified','Owner','eMail','Institution');
+    $record_row = array('Name','Reg ID','Records','Files(MB)','DB Vsn','Data updated','Structure modified','Owner','eMail','Institution');
     fputcsv($fd, $record_row, ',', '"');
 }else{
     $arr_databases = array();
@@ -116,6 +116,8 @@ foreach ($dbs as $db){
 
     //ID  Records     Files(MB)    RecTypes     Fields    Terms     Groups    Users   Version   DB     Files     Modified    Access    Owner   Deleteable
 //error_log(substr($db, 4));        
+    $value = mysql__select_value($mysqli, 'SHOW TABLES FROM '.$db." LIKE 'sysIdentification'");
+    if ($value==null || $value=="") continue;
 
     $record_row = array (substr($db, 4),
     mysql__select_val("select cast(sys_dbRegisteredID as CHAR) from ".$db.".sysIdentification where 1"),
@@ -135,9 +137,9 @@ foreach ($dbs as $db){
     ." FROM information_schema.tables where table_schema='".$db."'").",".
     round( (dirsize(HEURIST_FILESTORE_ROOT . substr($db, 4) . '/')/ 1024 / 1024), 1).",".
     */
-    mysql__select_val("select max(rec_Modified)  from ".$db.".Records"),
+    strtotime(mysql__select_val("select max(rec_Modified)  from ".$db.".Records")),
     //mysql__select_val("select max(ugr_LastLoginTime)  from ".$db.".sysUGrps") );
-    mysql__select_value($mysqli, "select max(rst_Modified) from defRecStructure") );
+    strtotime(mysql__select_value($mysqli, "select max(rst_Modified) from ".$db.".defRecStructure")) );
 
     $owner = mysql__select_row($mysqli, "SELECT concat(ugr_FirstName,' ',ugr_LastName),ugr_eMail,ugr_Organisation ".
         "FROM ".$db.".sysUGrps where ugr_id=2");
@@ -308,6 +310,19 @@ if($is_csv){
                     "date_mod", "date_login","owner","deleteable"]
             }});
 
+            function __format_date(d){
+                var val = parseInt(d);
+                if(val>0){
+                    var epoch = new Date(0);
+                    epoch.setSeconds(val);
+                    return epoch.toISOString().replace('T', ' ').replace('.000Z','');                        
+                    redate;
+                }else{
+                    return '';
+                }
+            }
+            
+            
             var myColumnDefs = [
                 { key: "dbname", label: "Name", sortable:true, className:'left', formatter: function(elLiner, oRecord, oColumn, oData) {
                     elLiner.innerHTML = "<a href='../../?db="+oRecord.getData('dbname')+"' class='dotted-link' target='_blank'>"+oRecord.getData('dbname')+"</a>";
@@ -327,8 +342,14 @@ if($is_csv){
                 { key: "size_db", label: "DB (MB)", sortable:true, className:'right'},
                 { key: "size_file", label: "Files (MB)", sortable:true, className:'right'},
                 */
-                { key: "date_mod", label: "Data updated", sortable:true},
-                { key: "date_login", label: "Last modified", sortable:true},
+                { key: "date_mod", label: "Data updated", sortable:true, 
+                    formatter: function(elLiner, oRecord, oColumn, oData) {
+                        elLiner.innerHTML = __format_date(oRecord.getData('date_mod'));
+                }},
+                { key: "date_login", label: "Structure modified", sortable:true,
+                    formatter: function(elLiner, oRecord, oColumn, oData) {
+                        elLiner.innerHTML = __format_date(oRecord.getData('date_login'));
+                }},
                 { key: "owner", label: "Owner", width:200, formatter: function(elLiner, oRecord, oColumn, oData){
                     elLiner.innerHTML = "<div style='max-width:100px' class='three-lines' title='"+oRecord.getData('owner')+"'>"+oRecord.getData('owner')+"</div>";
                 }}
