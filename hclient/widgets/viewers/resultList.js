@@ -2193,9 +2193,12 @@ $.widget( "heurist.resultList", {
                     if( this.options.rendererExpandInFrame ||  !isSmarty)
                     {
                         
+                        //var ele2 = that.div_content.find('.record-expand-info[data-recid='+recID+']');
+                        ele.addClass('loading');
+                        
                         $('<iframe>').attr('data-recid',recID)
                             .appendTo(ele)
-                            .addClass('loading')
+                            .css('opacity',0)
                             .attr('src', infoURL).on('load',function()
                             { 
                                 var _recID = $(this).attr('data-recid');
@@ -2220,7 +2223,8 @@ $.widget( "heurist.resultList", {
                                         }else{
                                             h = 300 //default value
                                         }
-                                        ele2.removeClass('loading').height(h);//+(h*0.05)    
+                                        ele2.height(h);//+(h*0.05)    
+                                        
                                     }
                                 }
                                 
@@ -2228,6 +2232,10 @@ $.widget( "heurist.resultList", {
 
                                 setTimeout(__adjustHeight, 2000);
                                 setTimeout(__adjustHeight, 4000);
+                                setTimeout(function(){
+                                    ele2.removeClass('loading');
+                                    ele2.find('iframe').css('opacity',1);
+                                }, 2100);
                                 //setTimeout(__adjustHeight, 10000);
                                 
                             }catch(e){
