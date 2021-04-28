@@ -550,6 +550,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
         */
 
         renderIntervals(name);
+        _doRender(); //Render after the removal of a value.
     }
 
     /**
@@ -660,6 +661,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
             function __addeditInterval( event ){
 
                 $(event.target).off('click');
+                var idxToDelete = [];
 
                 if(idx<0){
                     fields3[name].intervals.push( {name:'', description:'', values:[] });
@@ -675,8 +677,25 @@ function CrosstabsAnalysis(_query, _query_domain) {
                     $.each(sels, function(i, ele){
                         fields3[name].intervals[idx].values.push( parseInt($(ele).attr('termid')) );
                         fields3[name].intervals[idx].description = fields3[name].intervals[idx].description + $(ele).attr('termname')+' ';
+                        
+                        /*if($(ele).attr('termid') != fields3[name].values[idx].id){
+                            idxToDelete.push($(ele).attr('termid'));
+                        }
+                        */
                     });
-
+                    //Remove interval after it has been added to another interval
+                    /*for(i in fields3[name].intervals){
+                        for(x = 0; x<fields3[name].intervals[i].values.length;x++){
+                            if((fields3[name].intervals[i].values[x] == fields3[name].intervals[idx].values[x]) 
+                                && (fields3[name].intervals[i].values[x] != fields3[name].values[idx].id)){
+                                
+                                    idxToDelete = i;
+                                    fields3[name].intervals.splice(idxToDelete,1);
+                                    break;
+                            }
+                        }
+                    }*/
+                    
                 }else if(detailtype=="float" || detailtype=="integer"){
 
                     fields3[name].intervals[idx].values.push( parseFloat($dlg.find('#minval').val() ));
@@ -685,7 +704,18 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
                 }
 
+                //Delete intervals 
+                /*for(x=0;x<idxToDelete.length; x++){
+                    for(a=0;a<fields3[name].intervals.length;a++){
+                        if(idxToDelete[x] == fields3[name].intervals[a].values[0]){
+                            fields3[name].intervals.splice(a,1);
+                        }
+                        
+                    }
+                }
+                */
                 renderIntervals(name);
+                _doRender();
 
                 $dialogbox.dialog( "close" );
             }
@@ -1273,7 +1303,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 if(supressBlankColumn && columns[j].isempty) continue;
                 notemtycolumns++;
             }
-            rowHeader1.append('<th>&nbsp;</th><th class="crosstab-header0" style="text-align:center; border-left:1px solid black;" colspan="'+notemtycolumns*colspan+(showTotalsColumn?1:0)+'">'+fields3.column.fieldname+'</th>');
+            rowHeader1.append('<th>&nbsp;</th><th class="crosstab-header0" style="text-align:left; border-left:1px solid black;" colspan="'+notemtycolumns*colspan+(showTotalsColumn?1:0)+'">'+fields3.column.fieldname+'</th>');
             $row.append(rowHeader1);
         }
 
