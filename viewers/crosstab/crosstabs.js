@@ -1142,11 +1142,10 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
 
         var currow_val=-1
-        
+        var row_interval_idx=[]; //If a value contains more than one value type of the same variable it stores in this array, assisting output.
 
         //create output array, calculate totals
         for (idx in records){
-            var row_interval_idx=[];
             var count = 0;
             if(idx){
 
@@ -1162,7 +1161,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                                 row_interval_idx[0]=i;
                             }
                             else{
-                                row_interval_idx.push(i);
+                                row_interval_idx[count]=i;
                             }
                             count++;
                         }
@@ -1173,6 +1172,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 {
                     if(noColumns){ //no columns
                         var val = parseFloat(records[idx][2]);   //WARNING - fix for AVG
+                        //Iterate through each row_interval_idx to add the output of values that contain more than one.
                         for(i=0;i<row_interval_idx.length; i++){
                             if(!isNaN(val) && rnd(val)!=0){
                                 rows[row_interval_idx[i]].output[0] = rows[row_interval_idx[i]].output[0] + rnd(val);
@@ -1188,17 +1188,18 @@ function CrosstabsAnalysis(_query, _query_domain) {
                         for (j=0; j<clen; j++){
                             if( fitToInterval( fields3.column.type, columns[j].values, records[idx][1] ) ){
                                 var val = parseFloat(records[idx][2]);   //WARNING - fix for AVG
-                                if(!isNaN(val) && rnd(val)!=0){
-                                    rows[row_interval_idx].output[j] = rows[row_interval_idx].output[j] + rnd(val);
-                                    rows[row_interval_idx].avgcount[j] ++;
-                                    rows[row_interval_idx].total = rows[row_interval_idx].total + val;
-                                    rows[row_interval_idx].isempty = false;
-
-                                    columns[j].isempty = false;
-                                    columns[j].total = columns[j].total + val;
+                                //Iterate through each row_interval_idx to add the output of values that contain more than one.
+                                for(k=0;k<row_interval_idx.length; k++){
+                                    if(!isNaN(val) && rnd(val)!=0){
+                                        rows[row_interval_idx[k]].output[j] = rows[row_interval_idx[k]].output[j] + rnd(val);
+                                        rows[row_interval_idx[k]].avgcount[j] ++;
+                                        rows[row_interval_idx[k]].total = rows[row_interval_idx[k]].total + val;
+                                        rows[row_interval_idx[k]].isempty = false;
+    
+                                        columns[j].isempty = false;
+                                        columns[j].total = columns[j].total + val;
+                                    }
                                 }
-
-                                break;
                             }
                         }
                     }
