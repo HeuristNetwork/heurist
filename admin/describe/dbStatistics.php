@@ -356,6 +356,16 @@ if($is_csv){
                 <?php if($is_delete_allowed) { /*$sysadmin && */?>
                     ,{ key: 'deleteable', label: 'Delete', className: 'right', formatter: function(elLiner, oRecord, oColumn, oData) {
                         elLiner.innerHTML = '<input type=\"checkbox\" value=\"'+oRecord.getData('dbname')+'\">';
+                        
+                        $(elLiner).click(function(e){
+                                    var sel_cnt = getSelectedDatabases();
+                                    if(sel_cnt>25){
+                                        e.cancelBubble = true;
+                                        if (e.stopPropagation) e.stopPropagation();
+                                        e.preventDefault();
+                                        alert('Max 25 databases allowed to be deleted at one time.');
+                                    }
+                            });
                     }}
                 <?php } ?>
             ];
@@ -416,10 +426,11 @@ if($is_csv){
                     if(checkboxes.length > 0) {
                         for(var i=0; i<checkboxes.length; i++) {
                             if(checkboxes[i].checked) {
-                                databases.push(checkboxes[i].value);
+                                this.databases.push(checkboxes[i].value);
                             }
                         }
                     }
+                    return this.databases.length;
                 }
 
                 /**
@@ -428,8 +439,8 @@ if($is_csv){
                 function deleteDatabases() {
                     // Determine selected databases
                     getSelectedDatabases();
-                    if(this.databases.length>10){
-                        alert("You selected "+this.databases.length+" databases to be deleted. Max 10 allowed at one time.");
+                    if(this.databases.length>25){
+                        alert("You selected "+this.databases.length+" databases to be deleted. Max 25 allowed at one time.");
                         return false;
                     }else if(this.databases.length == 0) {
                         alert("Select at least one database to delete");

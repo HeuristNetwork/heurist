@@ -773,6 +773,7 @@ function hCmsEditing(_options) {
                         var recordset = data.selection;
                         var record = recordset.getFirstRecord();
 
+                        //
                         var thumbURL = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database
                         +"&thumb="+recordset.fld(record,'ulf_ObfuscatedFileID');
 

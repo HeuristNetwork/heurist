@@ -487,7 +487,7 @@ function hAPI(_db, _oninit, _baseURL) { //, _currentUser
             * used only in hapi.init and on force_refresh_sys_info
             */
             ,sys_info: function(callback){
-                
+   
                 _callserver('usr_info', {a:'sysinfo'}, 
                     function(response){
                         var  success = (response.status == window.hWin.ResponseStatus.OK);
