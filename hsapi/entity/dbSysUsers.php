@@ -275,7 +275,7 @@ class DbSysUsers extends DbEntityBase
             
             //find records to be approved and new ones
             if($this->system->is_admin() && "y"==@$this->records[$idx]['ugr_Enabled'] && @$this->records[$idx]['ugr_ID']>0){
-                $row = mysql__select_row($mysqli,
+                $res = mysql__select_value($mysqli,
                          'SELECT ugr_Enabled FROM sysUGrps WHERE ugr_LoginCount=0 AND ugr_Type="user" AND ugr_ID='
                                 .$this->records[$idx]['ugr_ID']);
                 if($res=='n'){

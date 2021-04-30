@@ -516,8 +516,6 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
     //
     _afterSaveEventHandler: function( recID, fieldvalues ){
 
-        var o_enable = this.options.entity.fields[9].values;    // original setting for user enabled
-
         // close on addition of new record in select_single mode    
         if(this._currentEditID<0 && this.options.select_mode=='select_single'){
             
@@ -533,41 +531,6 @@ $.widget( "heurist.manageSysUsers", $.heurist.manageEntity, {
         
         this._super( recID, fieldvalues );
         this.getRecordSet().setRecord(recID, fieldvalues);
-
-        if (o_enable == 'n')
-        {
-            if (fieldvalues.ugr_Enabled == 'y')
-            {
-                var email = this.options.entity.fields[4].values[0];    /* Email to */
-                var msg = 'Welcome to Heurist, your account (username: '+ this.options.entity.fields[6].values +') has been activated for use within the database '
-                            + window.hWin.HAPI4.database +'.';  /* Email message */
-                var subject = 'Heurist Registration - Account Enabled for Database: ' + window.hWin.HAPI4.database; /* Email subject */
-
-                var url = window.hWin.HAPI4.baseURL + 'hsapi/utilities/utils_mail.php';
-
-                $.ajax({
-                    url: url,
-                    type: "POST",
-                    data: {to: email, title: subject, msg: msg},
-                    cache: false,
-                    error: function( jqXHR, textStatus, errorThrown ) { 
-                        console.log(jqXHR.status);
-                        console.log(textStatus);
-                        console.log(errorThrown);
-                    },
-                    success: function( response ) {
-
-                        if (response == "ok") {
-                            console.log('Email Sent to Enabled User');
-                        }
-                        else {  /* Invalid Email or SMTP not setup */
-                            console.log('Error Sending an Email to Enabled User');
-                            console.log(response);
-                        }
-                    }
-                });
-            }
-        }
         
         if(this.options.edit_mode == 'editonly'){
             this.closeDialog(true); //force to avoid warning
