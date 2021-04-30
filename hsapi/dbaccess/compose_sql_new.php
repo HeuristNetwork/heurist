@@ -1887,6 +1887,29 @@ class HPredicate {
             $res = (($this->negate)?' not':'').$res;
             
         }else
+        if ($this->field_type=='file'){        
+            
+            $value = $mysqli->real_escape_string($this->value);
+            
+            
+            if(strpos($value,'^')===0){ //search file size
+                
+                $this->value = substr($this->value, 1);
+                $res = "ulf_FileSizeKB $eq ".intval($this->value);
+                
+            }else {
+                if($this->exact){
+                    $res  =  $res.'="'.$value.'"'; 
+                } else {
+                    $res  =  $res.'LIKE "%'.$value.'%"';
+                }
+                //path, filename, description and remote URL 
+                $res = "(ulf_OrigFileName $res) OR "
+                       ."(ulf_ExternalFileReference $res)  OR (ulf_Description $res)";
+            }
+            $res = ' in (select ulf_ID from recUploadedFiles where '.$res.')';
+            
+        }else
         if (($this->field_type=='float' || $this->field_type=='integer' || $this->field_type == 'link') && is_numeric($this->value)) {
             
             if (strpos($this->value,"<>")>0) {

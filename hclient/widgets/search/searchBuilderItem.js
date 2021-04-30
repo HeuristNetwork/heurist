@@ -389,7 +389,7 @@ $.widget( "heurist.searchBuilderItem", {
                     
                     ed_options['dtFields'] = dtFields;
             }
-            ed_options['detailtype'] = field_type;
+            ed_options['detailtype'] = (field_type=='blocktext' || field_type=='file')?'freetext':field_type;
             ed_options['dtID'] = this.options.dty_ID;
 
         }
@@ -499,7 +499,7 @@ Whole value = EQUAL
                 {key:'=',title:'whole value'}    //cs
             ];
 
-            if(this.options.dty_ID>0 || this.options.dty_ID=='title'){
+            if(field_type!='file' && (this.options.dty_ID>0 || this.options.dty_ID=='title')){
                 eqopts = eqopts.concat([
                     {key:'@++',title:'all of the words'}, //full text
                     {key:'@',title:'any of the words'},  //full text
@@ -512,6 +512,13 @@ Whole value = EQUAL
                 {key:'ends',title:'ends with'}
                 //{key:'<>',title:'between'}
                 ]);
+                
+            if(field_type=='file'){
+            eqopts = eqopts.concat([
+                {key:'<=^',title:'size(kb)<='},
+                {key:'>=^',title:'size(kb)>='}
+                ]);
+            }
         }
 
         if(this.options.dty_ID>0 && field_type!='relmarker'){  

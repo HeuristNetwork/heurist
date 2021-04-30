@@ -754,7 +754,7 @@ $.widget( "heurist.searchBuilder", {
 
                 //'title','modified',
                 var allowed_fieldtypes = ['header_ext','enum','freetext','blocktext',
-                                'geo','year','date','integer','float','resource','relmarker','relationtype'];
+                                'geo','year','date','integer','float','resource','relmarker','relationtype','file'];
                       
 /*              
                             {key:'title',title:'Title (constructed)', depth:1},
