@@ -1935,6 +1935,7 @@ $.widget( "heurist.editing_input", {
                 .appendTo( $inputdiv )
                 .hide();
 
+				/* Record Type help text for Record Editor */
 				$small_text = $('<br /><div class="smallText" style="display:inline-block;padding-right:20px;color:gray;font-size:smaller;">'
                     + 'Click image to freeze in place</div>')
                 .clone()
@@ -1948,7 +1949,7 @@ $.widget( "heurist.editing_input", {
                 /* Anchors (download and show thumbnail) container */
                 $dwnld_anchor = $('<br /><div class="download_link">'
                     + '<a id="lnk'+f_id+'" href="#" oncontextmenu="return false;" style="display:none;padding-right:20px;text-decoration:underline;color:blue"'
-                    + ' onClick="window.hWin.HEURIST4.ui.hidePlayer('+f_id+', this.parentNode)">SHOW THUMBNAIL</a>'
+                    + '>SHOW THUMBNAIL</a>'
                     + '<a id="dwn'+f_id+'" href="'+window.hWin.HEURIST4.util.htmlEscape(dwnld_link)+'" target="_surf" class="external-link image_tool'
                     + '"style="display:inline-block;text-decoration:underline;color:blue">DOWNLOAD</a>'
                     + '</div>')
@@ -1958,7 +1959,8 @@ $.widget( "heurist.editing_input", {
                 
                 /* Change Handler */
                 $input.change(function(event){
-
+					
+                    /* new file values */
                     var val = that.newvalues[$input.attr('id')];
                     var n_id = val['ulf_ID'];
                     var n_nonce = val['ulf_ObfuscatedFileID'];
@@ -1982,7 +1984,7 @@ $.widget( "heurist.editing_input", {
                         $player = $($container.find('div#player'+f_id)[0]);
                         $thumbnail = $($container.find('img#img'+f_id)[0]);
 
-                        $show.attr({'id':'lnk'+n_id, 'onClick':'window.hWin.HEURIST4.ui.hidePlayer('+n_id+', this.parentNode)'});
+                        $show.attr({'id':'lnk'+n_id});
 
                         $dwnld.attr({'id':'dwn'+n_id, 'href':n_dwnld_link});
 
@@ -2071,9 +2073,10 @@ $.widget( "heurist.editing_input", {
                     }
                 }); 
 
+				/* for closing inline image when 'frozen' */
                 $hide_thumb = $('<span class="hideTumbnail" style="padding-left:5px;color:gray;cursor:pointer;font-size:smaller;">'
                                 + 'CLOSE IMAGE</span>').appendTo( $dwnld_anchor ).show();
-                $hide_thumb.on("click", function(){
+                $hide_thumb.on("click", function(event){
 
                     isClicked = 0;
 
@@ -2084,84 +2087,12 @@ $.widget( "heurist.editing_input", {
                     $input_img.hide();
                 });
 
-                /* urls for downloading and loading the thumbnail */
-                var dwnld_link = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database+'&download=1&file='+f_nonce;
-                var url = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database+'&file='+f_nonce+'&mode=tag&origin=recview';
-
-                /* Anchors (download and show thumbnail) container */
-                $dwnld_anchor = $('<br /><div class="download_link">'
-                    + '<a id="lnk'+f_id+'" href="#" oncontextmenu="return false;" style="display:none;padding-right:20px;text-decoration:underline;color:blue"'
-                    + ' onClick="hidePlayer('+f_id+')">SHOW THUMBNAIL</a>'
-                    + '<a href="'+window.hWin.HEURIST4.util.htmlEscape(dwnld_link)+'" target="_surf" class="external-link image_tool" style="display:inline-block;text-decoration:underline;color:blue">'
-                    + 'DOWNLOAD</a></div>')
-                .hide();
-                
-                /* Change Handler */
-                $input.change(function(){
-                    var val = that.newvalues[$input.attr('id')];
-
-                    if(window.hWin.HEURIST4.util.isempty(val) || !(val.ulf_ID >0)){
-                        $input.val('');
-                    }
-                    //clear thumb rollover
-                    if(window.hWin.HEURIST4.util.isempty($input.val())){
-                         $input_img.find('img').attr('src','');    
-                    }
-                    that.onChange(); 
-                });
-                
-                /* Handler Variables */
-                var hideTimer = 0;  //  Time for hiding thumbnail
-                var isClicked = 0;
-
-                /* Input element's hover handler */
-                $input.mouseover(function(){
-                    if(!window.hWin.HEURIST4.util.isempty($input_img.find('img').attr('src'))){
-                        if (hideTimer) {
-                            window.clearTimeout(hideTimer);
-                            hideTimer = 0;
-                        }
-                        $input_img.show();
-                    }
-                });
-
-                /* Input element's mouse out handler, attached and dettached depending on user preferences */
-                function img_mouseout(){
-                    if($input_img.is(':visible')){
-                        hideTimer = window.setTimeout(function(){if(isClicked==0){$input_img.hide(1000);}}, 500);
-                    }
-                }
-                $input.on('mouseout', img_mouseout);
-
-                /* Thumbnail's click handler */
-                $input_img.click(function(){
-                    
-                    if (isClicked==0){
-                        isClicked++;
-                        
-                        $input.off("mouseout");
-                        
-                        $dwnld_anchor.appendTo( $inputdiv );
-                        $dwnld_anchor.show();
-
-                        $input_img.css('cursor', 'zoom-in');
-
-                        window.hWin.HAPI4.save_pref('imageRecordEditor', 1);
-                    }
-                    else if (isClicked==1)
-                    {
-                        var elem = event.target;
-
-                        /* Enlarge Image, display player */
-                        if ($(elem.parentNode).hasClass("thumb_image")) {
-                            $input_img.css('cursor', 'zoom-out');
-                            window.hWin.HEURIST4.ui.showPlayer(elem, elem.parentNode, f_id, url);
-                        }
-                        else {
-                            $input_img.css('cursor', 'zoom-in');
-                        }
-                    }
-                });  
+				/* Show Thumbnail handler */
+                $('#lnk'+f_id).on("click", function(event){
+                    window.hWin.HEURIST4.ui.hidePlayer(f_id, event.target.parentNode.parentNode.parentNode);
+					
+                    $(event.target.parentNode.parentNode).find('.hideTumbnail').show();
+				});
 
 				/* Check User Preferences, displays thumbnail inline by default if set */
                 if (window.hWin.HAPI4.get_prefs_def('imageRecordEditor', 0)!=0 && value.ulf_ID)
@@ -2172,6 +2103,8 @@ $.widget( "heurist.editing_input", {
                     $dwnld_anchor.appendTo( $inputdiv );
 
                     $input_img.css('cursor', 'zoom-in');
+					
+                    $small_text.hide();
 
                     $input.off("mouseout");
 
