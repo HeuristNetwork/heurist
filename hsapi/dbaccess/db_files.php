@@ -659,9 +659,9 @@ function fileGetPlayerTag($fileid, $mimeType, $params, $external_url, $size=null
         $filepath = $external_url;  //external 
     }else{
         //to itself
-        $filepath = HEURIST_BASE_URL."?db=".HEURIST_DBNAME."&file=".$fileid;
+        $filepath = HEURIST_BASE_URL_PRO."?db=".HEURIST_DBNAME."&file=".$fileid;
     }
-    $thumb_url = HEURIST_BASE_URL."?db=".HEURIST_DBNAME."&thumb=".$fileid;
+    $thumb_url = HEURIST_BASE_URL_PRO."?db=".HEURIST_DBNAME."&thumb=".$fileid;
 
     if ( $is_video ) {
 

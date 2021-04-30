@@ -773,8 +773,8 @@ function hCmsEditing(_options) {
                         var recordset = data.selection;
                         var record = recordset.getFirstRecord();
 
-                        //
-                        var thumbURL = window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database
+                        //always add media as reference to production version of heurist code (not dev version)
+                        var thumbURL = window.hWin.HAPI4.baseURL_pro+'?db='+window.hWin.HAPI4.database
                         +"&thumb="+recordset.fld(record,'ulf_ObfuscatedFileID');
 
                         var playerTag = recordset.fld(record,'ulf_PlayerTag');
