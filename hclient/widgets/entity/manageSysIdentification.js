@@ -51,6 +51,13 @@ $.widget( "heurist.manageSysIdentification", $.heurist.manageEntity, {
                 that.updateRecordList(null, {recordset:response});
                 that.addEditRecord( response.getOrder()[0] );
             });
+        
+        if(!this.options.isdialog){
+            var fele = this.element.find('.ent_wrapper:first');
+            $(fele).on("mouseleave", function(){
+                that.defaultBeforeClose();
+            });
+        }
             
         return true;
     }, 
@@ -121,7 +128,14 @@ $.widget( "heurist.manageSysIdentification", $.heurist.manageEntity, {
         //reload local sysinfo
         window.hWin.HAPI4.SystemMgr.sys_info(function(){
             that.closeDialog(true); //force to avoid warning    
+            
+            //close populate section
+            $('.ui-menu6').mainMenu6('closeContainer', 'populate');
+
+            
         });
+        
+        
         
         
     },

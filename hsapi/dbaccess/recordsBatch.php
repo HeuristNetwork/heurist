@@ -88,8 +88,8 @@ class RecordsBatch
     
     private $session_id = null;
     
-    private $not_putify = null;
-    private $purifier = null;
+    private $not_putify = null; //fields that will not html purified
+    private $purifier = null;   //html purifier instance
     
     function __construct( $system, $data ) {
        $this->system = $system;
@@ -104,7 +104,11 @@ class RecordsBatch
        $this->system->get_user_group_ids(null, true);
     }
     
-    function initPutifier(){
+    //
+    // Fills the list of exclusions for purrifier
+    // And inits HTML purifier 
+    //
+    private function _initPutifier(){
         if($this->purifier==null){
             $not_purify = array();
             if($this->system->defineConstant('DT_CMS_SCRIPT')){ array_push($not_purify, DT_CMS_SCRIPT); }
@@ -115,7 +119,7 @@ class RecordsBatch
             if($this->system->defineConstant('DT_SERVICE_URL')){ array_push($not_purify, DT_SERVICE_URL); }
             
             $this->not_purify = $not_purify;
-            //$this->purifier = getHTMLPurifier();
+            //$this->purifier = getHTMLPurifier();  DISABLED
         }
     }
 
@@ -174,7 +178,15 @@ class RecordsBatch
 
         if($this->system->is_admin() && $this->data['recIDs']=='ALL'){
             
-            $passedRecIDCnt = mysql__select_value($mysqli,'select count(*) from Records');
+            $query = 'select count(*) from Records';
+
+            $rty_ID = @$this->data['rtyID'];
+            if($rty_ID >0){
+                $query = ' WHERE rec_RecTypeID = '.$rty_ID;
+                $this->rtyIDs = array($rty_ID);
+            }
+            
+            $passedRecIDCnt = mysql__select_value($mysqli, $query);
             
             $this->result_data = array('passed'=>$passedRecIDCnt,
                         'noaccess'=>0,'processed'=>0);
@@ -467,9 +479,10 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
             
         }else if(@$this->data['val']!=null){
             
-            $this->initPutifier();
+            $this->_initPutifier();
             if(!in_array($dtyID, $this->not_purify)){
                 
+                //remove html script tags
                 $s = trim($this->data['val']);
                 $dtl['dtl_Value'] = preg_replace('#<script(.*?)>(.*?)</script>#is', '', $s);
                                                       
@@ -625,7 +638,7 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
 
         $rval = $mysqli->real_escape_string($this->data['rVal']);
 
-        //disabled $this->initPutifier();
+        $this->_initPutifier();
         
         //split value if exceeds 64K        
         $splitValues = array();
@@ -726,12 +739,21 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
 
             $query = 'SELECT dtl_ID, dtl_RecID '
                     .($is_multiline?'':', dtl_Value')
-                    .'  FROM recDetails WHERE '
-                    ."dtl_DetailTypeID = $dtyID and $searchClause";
+                    .'  FROM recDetails ';
             
-            if($recID!='all'){
+            if($recID=='all' && $this->rtyIDs && @$this->rtyIDs[0]>0){
+                if($this->rtyIDs && @$this->rtyIDs[0]>0){
+                    
+                    $query = $query.', Records '
+                            .'WHERE rec_ID=dtl_RecID AND  rec_RecTypeID = '.$this->rtyIDs[0]
+                            ." AND dtl_DetailTypeID = $dtyID and $searchClause";
+                }
+            }else{
+                $query = $query."WHERE  dtl_DetailTypeID = $dtyID and $searchClause";
                 //get matching detail value for record if there is one
-                $query = $query." AND  dtl_RecID = $recID ";
+                if($recID!='all'){
+                    $query = $query." AND  dtl_RecID = $recID ";
+                }
             }
             $query = $query.' ORDER BY dtl_RecID';
             
@@ -821,8 +843,9 @@ error_log('count '.count($childNotFound).'  '.count($toProcess).'  '.print_r(  $
                     $dtl['dtl_ID'] = $dtlID;  //detail type id
                     
                     if(($basetype=='freetext' || $basetype=='blocktext')
-                        && !in_array($dtyID, $this->not_purify)){
-                            
+                        && !in_array($dtyID, $this->not_purify))
+                    {
+                            //remove html script tags
                             $s = trim($newVal);
                             $dtl['dtl_Value'] = preg_replace('#<script(.*?)>(.*?)</script>#is', '', $s);
                             

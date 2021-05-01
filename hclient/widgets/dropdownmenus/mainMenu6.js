@@ -1797,6 +1797,10 @@ $.widget( "heurist.mainMenu6", {
         this.containers[section].hide();
         
     },    
+  
+    closeContainer: function(section){
+        this.containers[section].empty().hide();
+    },
     
     _loadStartHints: function(e){
 

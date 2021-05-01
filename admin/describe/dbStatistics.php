@@ -29,6 +29,7 @@ require_once(dirname(__FILE__).'/../../hsapi/utilities/utils_file.php');
 
 $is_csv = (@$_REQUEST['csv']==1);
 
+$starts_with = @$_REQUEST['start'];
 
 if( $system->verifyActionPassword( @$_REQUEST['pwd'], $passwordForServerFunctions) ){
     $response = $system->getError();
@@ -42,7 +43,7 @@ $is_delete_allowed = (strlen(@$passwordForDatabaseDeletion) > 14);
 set_time_limit(0); //no limit
 
 $mysqli = $system->get_mysqli();
-$dbs = mysql__getdatabases4($mysqli, true);
+$dbs = mysql__getdatabases4($mysqli, true, $starts_with);
 
 $sysadmin = $system->is_system_admin();
 
@@ -104,7 +105,7 @@ if($is_csv){
     if (false === $fd) {
         die('Failed to create temporary file');
     } 
-    $record_row = array('Name','Reg ID','Records','Files(MB)','DB Vsn','Data updated','Last modified','Owner','eMail','Institution');
+    $record_row = array('Name','Reg ID','Records','Files(MB)','DB Vsn','Data updated','Structure modified','Owner','eMail','Institution');
     fputcsv($fd, $record_row, ',', '"');
 }else{
     $arr_databases = array();
@@ -114,9 +115,9 @@ $i = 0;
 foreach ($dbs as $db){
 
     //ID  Records     Files(MB)    RecTypes     Fields    Terms     Groups    Users   Version   DB     Files     Modified    Access    Owner   Deleteable
-    
-        
 //error_log(substr($db, 4));        
+    $value = mysql__select_value($mysqli, 'SHOW TABLES FROM '.$db." LIKE 'sysIdentification'");
+    if ($value==null || $value=="") continue;
 
     $record_row = array (substr($db, 4),
     mysql__select_val("select cast(sys_dbRegisteredID as CHAR) from ".$db.".sysIdentification where 1"),
@@ -136,9 +137,9 @@ foreach ($dbs as $db){
     ." FROM information_schema.tables where table_schema='".$db."'").",".
     round( (dirsize(HEURIST_FILESTORE_ROOT . substr($db, 4) . '/')/ 1024 / 1024), 1).",".
     */
-    mysql__select_val("select max(rec_Modified)  from ".$db.".Records"),
+    strtotime(mysql__select_val("select max(rec_Modified)  from ".$db.".Records")),
     //mysql__select_val("select max(ugr_LastLoginTime)  from ".$db.".sysUGrps") );
-    mysql__select_value($mysqli, "select max(rst_Modified) from defRecStructure") );
+    strtotime(mysql__select_value($mysqli, "select max(rst_Modified) from ".$db.".defRecStructure")) );
 
     $owner = mysql__select_row($mysqli, "SELECT concat(ugr_FirstName,' ',ugr_LastName),ugr_eMail,ugr_Organisation ".
         "FROM ".$db.".sysUGrps where ugr_id=2");
@@ -165,7 +166,7 @@ foreach ($dbs as $db){
     }
     
     $i++;
-    //if($i>100) break;
+    //if($i>10) break;
 }//foreach
 
 if($is_csv){
@@ -238,7 +239,7 @@ if($is_csv){
         <!-- END DATATABLE DEFS-->
 
         <!-- TOOLTIP -->
-        <link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/2.9.0/build/container/assets/container.css">
+        <!-- <link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/2.9.0/build/container/assets/container.css"> -->
         <script src="<?php echo PDIR;?>external/yui/2.8.2r1/build/container/container-min.js"></script>
 
         <!-- jQuery UI -->
@@ -309,6 +310,19 @@ if($is_csv){
                     "date_mod", "date_login","owner","deleteable"]
             }});
 
+            function __format_date(d){
+                var val = parseInt(d);
+                if(val>0){
+                    var epoch = new Date(0);
+                    epoch.setSeconds(val);
+                    return epoch.toISOString().replace('T', ' ').replace('.000Z','');                        
+                    redate;
+                }else{
+                    return '';
+                }
+            }
+            
+            
             var myColumnDefs = [
                 { key: "dbname", label: "Name", sortable:true, className:'left', formatter: function(elLiner, oRecord, oColumn, oData) {
                     elLiner.innerHTML = "<a href='../../?db="+oRecord.getData('dbname')+"' class='dotted-link' target='_blank'>"+oRecord.getData('dbname')+"</a>";
@@ -328,14 +342,30 @@ if($is_csv){
                 { key: "size_db", label: "DB (MB)", sortable:true, className:'right'},
                 { key: "size_file", label: "Files (MB)", sortable:true, className:'right'},
                 */
-                { key: "date_mod", label: "Data updated", sortable:true},
-                { key: "date_login", label: "Last modified", sortable:true},
+                { key: "date_mod", label: "Data updated", sortable:true, 
+                    formatter: function(elLiner, oRecord, oColumn, oData) {
+                        elLiner.innerHTML = __format_date(oRecord.getData('date_mod'));
+                }},
+                { key: "date_login", label: "Structure modified", sortable:true,
+                    formatter: function(elLiner, oRecord, oColumn, oData) {
+                        elLiner.innerHTML = __format_date(oRecord.getData('date_login'));
+                }},
                 { key: "owner", label: "Owner", width:200, formatter: function(elLiner, oRecord, oColumn, oData){
                     elLiner.innerHTML = "<div style='max-width:100px' class='three-lines' title='"+oRecord.getData('owner')+"'>"+oRecord.getData('owner')+"</div>";
                 }}
                 <?php if($is_delete_allowed) { /*$sysadmin && */?>
                     ,{ key: 'deleteable', label: 'Delete', className: 'right', formatter: function(elLiner, oRecord, oColumn, oData) {
                         elLiner.innerHTML = '<input type=\"checkbox\" value=\"'+oRecord.getData('dbname')+'\">';
+                        
+                        $(elLiner).click(function(e){
+                                    var sel_cnt = getSelectedDatabases();
+                                    if(sel_cnt>25){
+                                        e.cancelBubble = true;
+                                        if (e.stopPropagation) e.stopPropagation();
+                                        e.preventDefault();
+                                        alert('Max 25 databases allowed to be deleted at one time.');
+                                    }
+                            });
                     }}
                 <?php } ?>
             ];
@@ -396,10 +426,11 @@ if($is_csv){
                     if(checkboxes.length > 0) {
                         for(var i=0; i<checkboxes.length; i++) {
                             if(checkboxes[i].checked) {
-                                databases.push(checkboxes[i].value);
+                                this.databases.push(checkboxes[i].value);
                             }
                         }
                     }
+                    return this.databases.length;
                 }
 
                 /**
@@ -408,23 +439,30 @@ if($is_csv){
                 function deleteDatabases() {
                     // Determine selected databases
                     getSelectedDatabases();
-                    if(this.databases.length>10){
-                        alert("You selected "+this.databases.length+" databases to be deleted. Max 10 allowed at one time.");
+                    if(this.databases.length>25){
+                        alert("You selected "+this.databases.length+" databases to be deleted. Max 25 allowed at one time.");
                         return false;
                     }else if(this.databases.length == 0) {
                         alert("Select at least one database to delete");
                         return false;
                     }
+                    $("#div-pw").show();
+                    $("#authorized").hide();
+                    var submit = document.getElementById("pw-check");
+                    submit.disabled = false;
 
                     // Verify user
                     var $dlg = $("#db-verification").dialog({
                         autoOpen: false,
                         modal: true,
-                        width: '550px'
+                        width: '550px',
+                        position: { my: "left top", at: "left+150 top+150", of: window }
                     })
                     .dialog("open");
 
-                    $dlg.parent('.ui-dialog').css({top:150,left:150});
+                    //$dlg.parent('.ui-dialog').css({top:150,left:150});
+                    
+                    //$(document.body).scrollTop(0);
 
                 }
 
@@ -438,20 +476,25 @@ if($is_csv){
                     this.password = document.getElementById("db-password").value;
                     
                     var url = '<?php echo HEURIST_BASE_URL; ?>admin/setup/dboperations/deleteDB.php';
-                    var request = {pwd: password, db:window.hWin.HEURIST4.util.getUrlParameter('db')};
+                    var request = {pwd: password, db:'<?php echo HEURIST_DBNAME;?>' };
                     
                     // Authenticate user
                     window.hWin.HEURIST4.util.sendRequest(url, request, null,
                         function(response){
                             if(response.status == window.hWin.ResponseStatus.OK){
-                                submit.parentNode.removeChild(submit);
+                                //submit.parentNode.removeChild(submit);
                                 $("#div-pw").hide();
-                                $("#authorized").slideDown(500);
+                                var ele = $("#authorized");
+                                ele.find('div.reps').remove();
+                                ele.find('div.ui-state-error').remove();
+                                ele.show();
                                 updateProgress(0);
-                                postDeleteRequest(0);
+                                postDeleteRequest(0); //start deletion
                             }else{
                                 submit.disabled = false;
-                                window.hWin.HEURIST4.msg.showMsgErr(response, false);
+                                response.sysmsg = 1;
+                                window.hWin.HEURIST4.msg.showMsgErr(response, false,
+                                {position: { my: "left top", at: "left+150 top+150", of: window }});
                             }
                         }
                     );
@@ -462,7 +505,7 @@ if($is_csv){
                 function postDeleteRequest(i) {
                     if(i < databases.length) {
                         // Delete database
-                        if(window.hWin.HEURIST4.util.getUrlParameter('db')==databases[i]){
+                        if('<?php echo HEURIST_DBNAME;?>'==databases[i]){
 
                             $("#authorized").append("<div>Current db "+databases[i] 
                             +" is skipped</div><div style='margin-top: 5px; width: 100%; border-bottom: 1px solid black; '></div>");
@@ -473,19 +516,21 @@ if($is_csv){
                         
                             var url = '<?php echo HEURIST_BASE_URL; ?>admin/setup/dboperations/deleteDB.php';
                             var request = {pwd: password, 
-                                           db: window.hWin.HEURIST4.util.getUrlParameter('db'),
+                                           create_archive: 1,
+                                           db: '<?php echo HEURIST_DBNAME;?>',
                                            database: databases[i]};
                         
                             window.hWin.HEURIST4.util.sendRequest(url, request, null,
                                 function(response){
                                     if(response.status == window.hWin.ResponseStatus.OK){
-                                        $("#authorized").append("<div>"+databases[i]
+                                        $("#authorized").append('<div class="reps">'+databases[i]
                                         +"</div><div style='margin-top: 5px; width: 100%; border-bottom: 1px solid black; '></div>");
                                         postDeleteRequest(i+1);
                                         updateProgress(i+1);
                                     }else{
                                         
-                                        var msg = window.hWin.HEURIST4.msg.showMsgErr(response, false);
+                                        var msg = window.hWin.HEURIST4.msg.showMsgErr(response, false,
+                                            {position: { my: "left top", at: "left+150 top+150", of: window }});
                                         
                                         $("#authorized").append('<div class="ui-state-error" style="padding:4px;">'
                                                     +databases[i]+' '+msg +"</div>");

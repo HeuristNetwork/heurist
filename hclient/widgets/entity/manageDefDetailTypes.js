@@ -430,10 +430,8 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             switch ( fields[i] ) {
                 case 'dtyid': html += fld2('dty_ID',30,null,'text-align:right'); break;
                 case 'ccode': 
-                    var c1 = recordset.fld(record,'dty_OriginatingDBID');
-                    var c2 = recordset.fld(record,'dty_IDInOriginatingDB');
-                    c1 = (c1>0 && c2>0)?(c1+'-'+c2):' ';
-                    html += fld2('',80, c1,'text-align:center');     
+                    html += ('<div class="item truncate" style="min-width:80px;max-width:80px;text-align:center">'
+                            +$Db.getConceptID('dty',recID,true)+'</div>');
                     break;
                 case 'group': 
                     html += __action_btn('group','ui-icon-carat-d','Change group');
@@ -452,21 +450,21 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                 case 'show': 
                 
                     if(recordset.fld(record, 'dty_ShowInLists')==1){
-                        html += __action_btn('hide_in_list','ui-icon-check-on','Click to hide in lists');    
+                        html += __action_btn('hide_in_list','ui-icon-check-on','Click to hide in dropdowwn lists and trees');    
                     }else{
-                        html += __action_btn('show_in_list','ui-icon-check-off','Click to show in lists');
+                        html += __action_btn('show_in_list','ui-icon-check-off','Click to show in dropdown lists and trees');
                         grayed = 'background:lightgray';
                     }
                     break;
                 case 'usedin': 
-                    html += __action_btn('usedin','ui-icon-circle-b-info','Used in rectypes');
+                    html += __action_btn('usedin','ui-icon-circle-b-info','Click for the record types in which this base field is used');
                     break;
                 case 'status': 
                     
                     if(recordset.fld(record, 'dty_Status')=='reserved'){
                         html += __action_btn('','ui-icon-lock','Status: Reserved');
                     }else{
-                        html += __action_btn('delete','ui-icon-delete','Status: Open. Click to delete base field');
+                        html += __action_btn('delete','ui-icon-delete','Status: Open. Click to delete this base field');
                     }    
                 
                     break;
@@ -670,7 +668,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             
             var ele = this._editing.getFieldByName('dty_ID');
             ele.find('div.input-div').html(this._currentEditID+'&nbsp;&nbsp;<span style="font-weight:normal">Code: </span>'
-                                    +$Db.getConceptID('dty',this._currentEditID));
+                                    +$Db.getConceptID('dty',this._currentEditID, true));
         }
 
         //fill init values of virtual fields
@@ -1514,7 +1512,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
     // send update request and close popup if edit is in dialog
     // afteraction is used in overriden version of this method
     //
-    _saveEditAndClose: function( fields, afterAction ){
+    _saveEditAndClose: function( fields, afterAction, onErrorAction ){
         
         var that_widget = this;
         
@@ -1565,7 +1563,8 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
         
             if(window.hWin.HAPI4.sysinfo['pwd_ReservedChanges']){ //password defined
             
-                window.hWin.HEURIST4.msg.showPrompt('Enter password: ',
+                window.hWin.HEURIST4.msg.showPrompt('<p>Reserved field changes '
+                +'require a special system administrator password (not a normal login password)</p>Enter password: ',
                     function(password_entered){
                         
                         window.hWin.HAPI4.SystemMgr.action_password({action:'ReservedChanges', password:password_entered},
@@ -1581,18 +1580,41 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                         );
                         
                     },
-                'This action is password-protected', {password:true});
+                'Sysadmin override password required', {password:true});
             }else{
-                window.hWin.HEURIST4.msg.showMsgDlg('Reserved field changes is not allowed unless a challenge password is set'
-                +' - please consult system administrator');
+                window.hWin.HEURIST4.msg.showMsgDlg('Reserved field changes are not allowed' 
+                + 'unless a special system administrator password is set - please consult system administrator.');
             }
             return;
         }
         fields['pwd_ReservedChanges'] = null;
         
-        this._super( fields, afterAction );
+        this._super( fields, afterAction, this._onSaveError );
         
     },
+    
+    _onSaveError: function(response){
+      
+            if(response.sysmsg && response.sysmsg.reccount){
+     
+                var res = response.sysmsg;    
+                
+                var sMsg = response.message;
+                sMsg += '<p><a href="'+window.hWin.HAPI4.baseURL+'?db='
+                            + window.hWin.HAPI4.database+'&q=ids:' + res['records'].join(',')
+                            + '" target="_blank">'
+                    +'List of '+res.reccount+' records which use this vocabulary</a></p>';
+                
+                window.hWin.HEURIST4.msg.showMsgDlg(sMsg, null, {title:'Vocabulary in use'},
+                    {default_palette_class:this.options.default_palette_class});        
+
+                
+            }else{
+                window.hWin.HEURIST4.msg.showMsgErr(response);    
+            }
+    },
+    
+    
     
     //  -----------------------------------------------------
     //
@@ -1687,6 +1709,27 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
    
         return true;
     },
+   
+    //
+    // show warning
+    //
+    addEditRecord: function(recID, is_proceed){
     
+        if(recID<0 && is_proceed !== true){
+            var that = this;
+            window.hWin.HEURIST4.msg.showMsgDlg(
+            '<p>We <b>strongly</b> recommend not adding base fields directly, as they are not added automatically to any record type and will therefore not appear in data entry forms or most dropdown lists eg. filter creation, CSV import, report formatter etc.</p>'
+            +'<p>Instead, we recommend adding fields to a specific record type while testing them out with data - the process is much more intuitive. Adding them in this way will automatically create an equivalent base field. This base field can then be re-used in other record types.</p>'
+            +'<p>To add a new field to a record type, either edit the record type in Design > Record types and click on the Edit fields button, or add a new record or edit an existing record of the appropriate type and click Modify Structure on the data entry form.</p>'
+                    , function(){
+                        that.addEditRecord(recID, true); 
+                        //that._super(recID); 
+                    }, {title:'Confirm',yes:'Continue',no:'Cancel'},
+                    {default_palette_class:this.options.default_palette_class});
+        
+        }else{
+               this._super(recID, is_proceed); 
+        }
+    },
 
 });

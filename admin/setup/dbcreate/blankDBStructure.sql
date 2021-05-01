@@ -473,20 +473,6 @@ CREATE TABLE recForwarding (
   KEY rfw_NewRecID (rfw_NewRecID)
 ) ENGINE=InnoDB COMMENT='Allows referer routine to redirect certain calls to a replac';
 
--- --------------------------------------------------------
-
---
--- Table structure for table 'recRelationshipsCache'
---
-
-CREATE TABLE recRelationshipsCache (
-  rrc_RecID int(10) unsigned NOT NULL COMMENT 'Record ID of a relationships record linking source and target records',
-  rrc_SourceRecID int(10) unsigned NOT NULL COMMENT 'Pointer to source record for this relationship',
-  rrc_TargetRecID int(10) unsigned NOT NULL COMMENT 'Pointer to target record for this relationship',
-  PRIMARY KEY  (rrc_RecID),
-  KEY rrc_sourcePtrKey (rrc_SourceRecID),
-  KEY rrc_TargetPtrKey (rrc_TargetRecID)
-) ENGINE=InnoDB COMMENT='A cache for record relationship pointers to speed access';
 
 -- --------------------------------------------------------
 
@@ -498,9 +484,9 @@ CREATE TABLE recLinks (
   rl_ID   int(10) unsigned NOT NULL auto_increment COMMENT 'Primary key',
   rl_SourceID int(10) unsigned NOT NULL COMMENT 'Source record ID',
   rl_TargetID int(10) unsigned NOT NULL COMMENT 'Target record ID',
-  rl_RelationID int(10) unsigned        COMMENT 'Realtionship record ID',
-  rl_RelationTypeID int(10) unsigned    COMMENT 'Realtionship type - defTerms.trm_ID',
-  rl_DetailTypeID int(10) unsigned      COMMENT 'Pointer (Resource) detail type ID',
+  rl_RelationID int(10) unsigned        COMMENT 'Relationship record ID',
+  rl_RelationTypeID int(10) unsigned    COMMENT 'Relationship type - defTerms.trm_ID',
+  rl_DetailTypeID int(10) unsigned      COMMENT 'Record Pointer detail type ID',
   rl_DetailID int(10) unsigned          COMMENT 'Pointer Detail type',
   PRIMARY KEY  (rl_ID),
   KEY rl_SourcePtrKey (rl_SourceID),
@@ -609,20 +595,6 @@ CREATE TABLE sysDashboard (
   dsh_Parameters varchar(250) COMMENT 'Parameters to pass to the command eg the record type to create',
   PRIMARY KEY  (dsh_ID)
 ) ENGINE=InnoDB COMMENT='Defines an editable list of shortcuts to functions to be displayed on a popup dashboard at startup unless turned off';
-
--- --------------------------------------------------------
-
---
--- Table structure for table 'sysDBNameCache'
---
-
-CREATE TABLE sysDBNameCache (
-  dnc_ID int(10) unsigned NOT NULL COMMENT 'Heurist DB ID for a registered Heurist database',
-  dnc_dbName varchar(63) NOT NULL COMMENT 'Name of the database (from sys_DBName or Heurist index database)',
-  dnc_TimeStamp timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date when name of database last read from Heurist index or the database',
-  dnc_URL varchar(128) default NULL COMMENT 'Root path to this installation and database',
-  PRIMARY KEY  (dnc_ID)
-) ENGINE=InnoDB COMMENT='Local db name cache for display of origin and source DBs in ';
 
 -- --------------------------------------------------------
 
@@ -816,20 +788,6 @@ CREATE TABLE IF NOT EXISTS usrRecPermissions (
     PRIMARY KEY  (rcp_ID)
 ) ENGINE=InnoDB COMMENT='Permissions for groups to records';
             
--- --------------------------------------------------------
-
---
--- Table structure for table 'usrRecentRecords'
---
-
-CREATE TABLE usrRecentRecords (
-  rre_UGrpID smallint(5) unsigned default NULL COMMENT 'ID of user who used the record',
-  rre_RecID int(10) unsigned NOT NULL COMMENT 'ID of recently used record',
-  rre_Time timestamp NOT NULL default CURRENT_TIMESTAMP COMMENT 'Timestamp of use of records, notably those searched for with pointer field',
-  UNIQUE KEY rre_composite (rre_UGrpID,rre_RecID),
-  KEY rre_RecID (rre_RecID)
-) ENGINE=InnoDB COMMENT='A cache of recently used record IDs, identified to user, for speeding access and showing recently-used lists to a user';
-
 -- --------------------------------------------------------
 
 --

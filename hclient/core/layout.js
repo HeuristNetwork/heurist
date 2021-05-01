@@ -213,7 +213,7 @@ function hLayout(args) {
         
         $container.find('img[data-id], source[data-id], embed[data-id]').each(
             function(idx,item){
-                var surl = window.hWin.HAPI4.baseURL+'?db='
+                var surl = window.hWin.HAPI4.baseURL_pro+'?db='
                         + window.hWin.HAPI4.database
                         + "&file=" + $(item).attr('data-id');
                 $(item).attr('src', surl);

@@ -837,7 +837,7 @@ function smarty_error_output($system, $error_msg){
     
     if(!isset($error_msg)){
         $error_msg = $system->getError();
-        $error_msg = $error_msg[0]['message'];
+        $error_msg = (@$error_msg['message'])?$error_msg['message']:'Undefined smarty error';
     }
  
     if($isJSout){

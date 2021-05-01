@@ -56,8 +56,6 @@
         if ( $system->get_user_id()<1 ) {
             return $system->addError(HEURIST_REQUEST_DENIED);
         }
-//IMPORTANT !!!!        to implement
-//$addRecDefaults = getDefaultOwnerAndibility($_REQUEST);
 
         $addRecDefaults = $system->user_GetPreference('record-add-defaults');
         if ($addRecDefaults){
@@ -281,7 +279,7 @@
             }
             
             if($is_InValid) {
-                return $system->addError(HEURIST_UNKNOWN_ERROR, 
+                return $system->addError(HEURIST_ACTION_BLOCKED, 
                     'Are you a bot? Please enter the correct answer to the challenge question');
             }else{
                 if($system->get_user_id()<1){ //if captcha is valid allow   (for ExpertNation - submit feedback)
@@ -1617,6 +1615,8 @@
         
         $insertValues = array();
         $errorValues = array();
+        $cntErrors = 0;
+        
         foreach ($details2 as $dtyID => $values) {
             
             $splitValues = array();
@@ -1716,13 +1716,17 @@
                             if (is_numeric($dtl_Value)){
                                 $term_tocheck = $dtl_Value;
                             }else{
-                                $term_tocheck = getTermByLabel($dtl_Value, $term_domain);
+                                $term_tocheck = getTermByLabel($dtl_Value, $term_domain); //within domain
                             }
                             $isValid = isValidTerm($system, $term_tocheck, $term_domain, $dtyID, $rectype);
                             if($isValid){
                                 $dtl_Value = $term_tocheck;
                             }else{
-                                $err_msg = 'Term ID '.htmlspecialchars($dtl_Value).' is not in the list of values defined for this field';
+                                $trm = $terms->getTerm($dtl_Value);
+                                $err_msg = 'Term ID '.htmlspecialchars($dtl_Value)
+                                    . ($trm!=null 
+                                    ?( ' <i>'.htmlspecialchars($trm[0]).'</i> is not in the list of values defined for this field')  
+                                    :' not found');
                             }
                         }else{
                             $isValid = (intval($dtl_Value)>0);
@@ -1905,14 +1909,20 @@
                         array_push($insertValues, $dval);
                     }
                 }else{
-                    $query = 'SELECT IF((rst_DisplayName=\'\' OR rst_DisplayName IS NULL), dty_Name, rst_DisplayName) as rst_DisplayName '
-                        .'FROM defRecStructure, defDetailTypes WHERE rst_RecTypeID='.$rectype
-                        .' and  dty_ID=rst_DetailTypeID and rst_DetailTypeID='.$dtyID;
-                    $field_name = mysql__select_value($mysqli, $query);
-                    
-                    $dt_names = dbs_GetDtLookups();
-                    array_push($errorValues, '<br>Field ID '.$dtyID.': "'.$field_name.'" ('.@$dt_names[$det_types[$dtyID]]
-                        .')<br>'.$err_msg);
+                    if(!@$errorValues[$dtyID])
+                    {
+                        $query = 'SELECT IF((rst_DisplayName=\'\' OR rst_DisplayName IS NULL), dty_Name, rst_DisplayName) as rst_DisplayName '
+                            .'FROM defRecStructure, defDetailTypes WHERE rst_RecTypeID='.$rectype
+                            .' and  dty_ID=rst_DetailTypeID and rst_DetailTypeID='.$dtyID;
+                        $field_name = mysql__select_value($mysqli, $query);
+                        
+                        $dt_names = dbs_GetDtLookups();
+                        
+                        $errorValues[$dtyID] = '<br><div>Field ID '.$dtyID.': "'
+                            .$field_name.'" ('.@$dt_names[$det_types[$dtyID]].')</div>';
+                    }
+                    $errorValues[$dtyID] .= ('<div style="padding-left:20px">'.$err_msg.'</div>');
+                    $cntErrors++;
                 }
 
             }//for values
@@ -1924,26 +1934,26 @@
         $res = false;
 
         //there is undefined required details
-        if (count($errorValues)>0) {
+        if ($cntErrors>0) {
 
-            $ss = (count($errorValues)>1?'s':'');    
+            $ss = ($cntErrors>1?'s':'');    
             array_push($errorValues,                                                        
             '<br><br>Please run Verify > Verify integrity to check for and fix data problems.<br>' 
             .'If the problem cannot be fixed, or re-occurs frequently, please '.CONTACT_HEURIST_TEAM);
             
-            $system->addError(HEURIST_ERROR, 'Encountered invalid value'.$ss
-                                                        .' for Record#'.$recID.'<br>'.implode('<br>',$errorValues), null);
+            $system->addError(HEURIST_ACTION_BLOCKED, 'Encountered invalid value'.$ss
+                                                        .' for Record#'.$recID.'<br>'.implode(' ',$errorValues), null);
 
         }else if (count($det_required)>0) {
 
-            $system->addError(HEURIST_ERROR, 'Required field'.(count($det_required)>1?'s':'')
+            $system->addError(HEURIST_ACTION_BLOCKED, 'Required field'.(count($det_required)>1?'s':'')
             .' not defined or '.
             (count($det_required)>1?'have':'has')
             .' wrong value: '.implode(',',array_values($det_required)));
                                                         
         }else if (count($insertValues)<1) {
 
-            $system->addError(HEURIST_INVALID_REQUEST, "Fields not defined");
+            $system->addError(HEURIST_INVALID_REQUEST, "Fields are not defined");
 
         }else{
             $res = $insertValues;

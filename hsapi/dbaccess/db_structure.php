@@ -44,12 +44,13 @@
     * getTermOffspringList
     * getTermTopMostParent
     * getTermChildren
+    * getTermChildrenAll - get all children including by reference as a flat array
     * getTermInTree    
     * getTermByLabel  
     * getTermByCode  
     * getTermById
     * getTermFullLabel
-    * getTermListAll
+    * getTermListAll - get tree for domain
     * getTermLabels
     *
     * INTERNAL FUNCTIONS
@@ -606,7 +607,7 @@ function dbs_GetRectypeConstraint($system) {
         return $terms;
         
     }
-
+    
     // to public method ------>
     
     /**
@@ -654,7 +655,7 @@ function dbs_GetRectypeConstraint($system) {
     
 
     //
-    //
+    // Finds real vocabulary for given term 
     //
     function getTermTopMostParent($mysqli, $termId, $terms=null){
         
@@ -679,7 +680,7 @@ function dbs_GetRectypeConstraint($system) {
         
     
     /**
-    * return all term children as plain array
+    * return all terms's children as a plain array
     * 
     * @param mixed $system
     */
@@ -694,7 +695,7 @@ function dbs_GetRectypeConstraint($system) {
             while ($row = $res->fetch_row()) {
                 array_push($children, $row[0]);
                 if(!$firstlevel_only){
-                    $children = array_merge($children, getTermChildren($row[0], $system, $firstlevel_only));
+                    $children = array_merge($children, getTermChildren($row[0], $system, false));
                 }
             }
         }
@@ -702,7 +703,30 @@ function dbs_GetRectypeConstraint($system) {
         return $children;
         
     }
-    
+
+    //
+    // get all children including by reference as a flat array
+    //
+    function getTermChildrenAll($mysqli, $parent_ids, $all_levels=true){
+
+        //compose query
+        $query = 'SELECT trl_TermID FROM defTermsLinks WHERE trl_ParentID';
+        
+        if(is_array($parent_ids) && count($parent_ids)>1)
+        {
+            $query = $query .' IN ('.implode(',',$parent_ids).')';    
+        }else{
+            if(is_array($parent_ids)) $parent_ids = @$parent_ids[0];
+            $query = $query . ' = '.$parent_ids;    
+        }
+        
+        $ids = mysql__select_list2($mysqli, $query);
+        if($all_levels && count($ids)>0){
+            $ids = array_merge($ids, getTermChildrenAll($mysqli, $ids, true));
+        }
+        
+        return $ids;
+    }
     
     /**
     * prints term label including parents term labels
@@ -822,7 +846,7 @@ function dbs_GetRectypeConstraint($system) {
     }
 
     //
-    // to public method
+    // to public method - @todo replace with $terms->getTermByLabel
     //
     function getTermByLabel($term_label, $domain)
     {

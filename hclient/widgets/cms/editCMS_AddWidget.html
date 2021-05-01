@@ -19,61 +19,66 @@
 */
 -->
 <div class="heurist-helper1" style="padding:5px;">
-        Add a search widget + one or more display widgets - they will be 
-        linked to operate together.<br>To position widgets insert it in table cells or 
-        if you are familiar with CSS use "display" property.
-        <br>
-        To place multiple searches on a page, see 
-        <a href="context_help/website_instructions.html" target="_blank">website help</a>
+    Add a filter widget + one or more display widgets - they will be 
+    linked to operate together if on the same page.
+    <br>
+    To position widgets insert them in table cells or better via DIVs,
+    if you are familiar with CSS use "display" property.
+    <br>
+    To place multiple filters on a page or link to widgets on other pages, see 
+    <a href="https://heuristplus.sydney.edu.au/heurist/?db=Heurist_Help_System&website&id=39&pageid=708" target="_blank">website help</a>
 </div>
 
 <fieldset style="padding:0;line-height:20px">
-    
+
     <div>
-        <div class="header"><label for="widgetName">Select widget:</label></div>
+        <div class="header"><label for="widgetName">Select widget&nbsp;</label></div>
         <select name="widgetName" id="widgetName" class="text ui-widget-content ui-corner-all" style="min-width:400px"
             title="">
-            <option value="heurist_Search" data-name="search">Search/filter field (with standard filter builder)</option>
-            <option value="heurist_SearchTree" data-name="saved searches">Saved filters (simple &amp; facet filters)</option>
-            <option value="heurist_resultList" data-name="results list">Filter results (list or thumbnails)</option>
-            <option value="heurist_resultListDataTable" data-name="datatable">Filter results (Table view)</option>
-            <option value="heurist_resultListCollection" data-name="collection">Collect records for listing, mapping or other output</option>
+            <option value="null" data-name="null" disabled="disabled">--- FILTERS ---</option>
+            <option value="heurist_Search" data-name="search">Filter/search field (with standard filter builder)</option>
+            <option value="heurist_SearchTree" data-name="saved searches">Saved filters (simple &amp; facet filters, selection or tree)</option>
+            <option value="null" data-name="null" disabled="disabled">--- FILTER RESULTS ---</option>
+            <option value="heurist_resultList" data-name="results list">Standard display (switchable modes, action controls)</option>
+            <option value="heurist_resultListExt" data-name="custom report">Custom report (also use for single record view)</option>
+            <option value="heurist_resultListDataTable" data-name="datatable">Table format</option>
             <option value="heurist_Map" data-name="map/timeline">Map and timeline</option>
             <option value="heurist_Graph" data-name="network diagram">Network graph</option>
-            <option value="heurist_resultListExt" data-name="custom report">Custom report</option>
-            <option value="heurist_Navigation" data-name="navigation">Menu / Navigation</option>
-            <option value="heurist_Groups" data-name="groups" disabled="disabled">Tabs/Accordion/Groups layout</option>
+            <option value="null" data-name="null" disabled="disabled">--- NAVIGATION AND LAYOUT ---</option>
+            <option value="heurist_Navigation" data-name="navigation">Menu (horizontal, vertical or tree view)</option>
             <option value="heurist_Cardinals" data-name="groups">Cardinal layout</option>
+            <option value="heurist_resultListCollection" data-name="collection">Collect records (for listing, mapping or other output)</option>
+            <option value="heurist_Groups" data-name="groups" disabled="disabled">Tabs/Accordion/Groups layout</option>
         </select>
     </div>
     <div>
-        <div class="header" style="vertical-align:top"><label>CSS:</label></div>
+        <div class="header" style="vertical-align:top"><label>CSS (refer to help system)&nbsp;</label></div>
         <textarea id="widgetCss" rows="7" style="width:400px"></textarea>
     </div>
-    
-    
+
+
     <div class="heurist_Groups">
         <div class="header"><label>Mode</label></div>
         <label><input id="heurist_GroupsMode1" type="radio" name="groups_mode" value="tabs" checked/>Tabs</label>&nbsp;
         <label><input id="heurist_GroupsMode2" type="radio" name="groups_mode" value="accordion"/>Accordion</label>
         <label><input id="heurist_GroupsMode3" type="radio" name="groups_mode" value="groups"/>Groups</label>&nbsp;
     </div>
-    
+
     <div  class="heurist_Search">
         <!--<div class="header"><label>Show filter by entity buttons</label></div>-->
         <input name="btn_entity_filter" type="hidden" value="false"/>
         <input name="menu_entity_filter" type="hidden" value="false"/>
         <input name="btn_visible_newrecord" type="hidden" value="false"/>
         <input name="isloginforced" type="hidden" value="false"/>
-        <div class="header"><label>Search button label</label></div>
+        <div class="header"><label>Filter button label</label></div>
         <input name="search_button_label" value=""/>
     </div>
     <div  class="heurist_Search">
-        <div class="header"><label>Search label</label></div>
+        <div class="header"><label>Label preceding filter field</label></div>
         <input name="search_input_label" value=""/>
     </div>
 
-    <!-- search tree -->    
+    <!-- Filter tree -->    
     <div class="heurist_SearchTree"  style="padding-top:10px">
         <!-- <div class="header"><label>Allowed groups</label></div> -->
         <input name="allowed_UGrpID" type="hidden" value=""/>
@@ -81,48 +86,52 @@
     </div>
 
     <div class="heurist_SearchTree">
-        <!-- <div class="header"><label>Allowed searches</label></div> -->
+        <!-- <div class="header"><label>Allowed filters</label></div> -->
         <input name="allowed_svsIDs" type="hidden" value=""/>
         <div id="allowed_svsIDs" style="display:table-row"></div>
     </div>
-    
+
     <div class="heurist_SearchTree">
-        <div class="header" style="padding:10px 0.4em"><label>Display selected searches as:</label></div>
+        <div class="header" style="padding:10px 0.4em"><label>Display filters as&nbsp;</label></div>
+        Selected filters only &nbsp;
         <label><input id="heurist_SearchTreeMode1" type="radio" name="searchTreeMode" value="0" checked/>Buttons</label>&nbsp;
         <label><input id="heurist_SearchTreeMode2" type="radio" name="searchTreeMode" value="1"/>Tree</label>
-        <label><input id="heurist_SearchTreeMode3" type="radio" name="searchTreeMode" value="2"/>Tree of all searches (all groups)</label>
+        &nbsp;&nbsp;&nbsp;&nbsp;All filters in all groups &nbsp;
+        <label><input id="heurist_SearchTreeMode3" type="radio" name="searchTreeMode" value="2"/>Complete tree</label>
     </div>
 
     <div class="heurist_SearchTree">
-        <!-- <div class="header"><label>Initial search</label></div> -->
+        <!-- Initial filter to trigger -->
         <input name="init_svsID" type="hidden" value=""/>
         <div id="init_svsID" style="display:table-row"></div>
     </div>
 
-    
+
     <!-- result list -->    
     <div  class="heurist_resultList">
-        <div class="header"><label>Show</label></div>
+        <div class="header"><label>Controls and actions</label></div>
         <!-- <input name="show_toolbar" type="checkbox"/>&nbsp;&nbsp; -->
-        <label>counter&nbsp;<input type="checkbox" name="show_counter" checked/></label>&nbsp;
-        <label>viewmode&nbsp;<input type="checkbox" name="show_viewmode" checked/></label>&nbsp;
-        <label>filter name&nbsp;<input type="checkbox" name="show_inner_header"/></label>
-    </div>
-    
-    <div class="heurist_resultList">
-        <div class="header"><label>Title</label></div>
-        <input name="title" value=""/>
+        <label>show record count&nbsp;<input type="checkbox" name="show_counter" checked/></label>&nbsp;&nbsp;&nbsp;
+        <label>view mode selector&nbsp;<input type="checkbox" name="show_viewmode" checked/></label>&nbsp;&nbsp;&nbsp;
+        <label>allow collection&nbsp;</label><input name="support_collection" type="checkbox"/>&nbsp;&nbsp;&nbsp;
+        <label>allow reorder&nbsp;<input type="checkbox" name="support_reorder"/></label>
     </div>
 
     <div class="heurist_resultList">
-        <div class="header"><label>Viewmode:</label></div>
+        <div class="header"><label>Title above results</label></div>
+        <input name="title" value=""/>&nbsp;&nbsp;&nbsp;
+        <label>show filter name&nbsp;<input type="checkbox" name="show_inner_header"/></label>
+    </div>
+
+    <div class="heurist_resultList">
+        <div class="header"><label>Initial view mode</label></div>
         <select name="view_mode" class="text ui-widget-content ui-corner-all"
             title="">
-            <option value="record_content">Record contents</option>
-            <option value="list">Single lines</option>
-            <option value="icons">Single lines with icon</option>
+            <option value="list">Single lines - title</option>
+            <option value="icons">Single lines - icon + title</option>
             <option value="thumbs">Small images</option>
             <option value="thumbs3">Large images</option>
+            <option value="record_content">Full record contents</option>
             <option value="horizontal">Horizontal gallery</option>
         </select>
     </div>
@@ -136,21 +145,15 @@
     </div>
 
     <div  class="heurist_resultList">
-        <div class="header"><label>Click to view record</label></div>
-        <label><input name="recordview_onselect" type="radio" value="inline" checked/>open inline</label>
-        <label><input name="recordview_onselect" type="radio" value="popup"/>open as popup</label>
-        <label><input name="recordview_onselect" type="radio" value="no"/>disable</label>
-    </div>
-
-    <div  class="heurist_resultList">
-        <div class="header"><label>Individual record controls</label></div>
-        <label><input name="recordDivClass" type="radio" value=""/>internal style / rollover</label>
-        <label><input name="recordDivClass" type="radio" value="public" checked/>public style / always on</label>
+        <div class="header"><label>Click for record view</label></div>
+        <label><input name="recordview_onselect" type="radio" value="inline" checked/>opens inline</label>
+        <label><input name="recordview_onselect" type="radio" value="popup"/>opens as popup</label>
+        <label><input name="recordview_onselect" type="radio" value="no"/>no action / trigger custom report widget</label>
     </div>
 
     <div class="heurist_resultList">
         <div class="header">
-            <label>Record view template:</label>
+            <label>Record view template</label>
         </div>
         <select name="rendererExpandDetails" class="text ui-widget-content ui-corner-all" title="" style="width:400px">
         </select>
@@ -162,40 +165,44 @@
     </div>
 
     <div  class="heurist_resultList">
-        <div class="header"><label>Show URL as link</label></div>
-        <input name="show_url_as_link" type="checkbox" checked/>
-
-        <label>&nbsp;&nbsp;Support collection&nbsp;</label><input name="support_collection" type="checkbox"/>
-        <label>&nbsp;&nbsp;Support reorder&nbsp;<input type="checkbox" name="support_reorder"/></label>
+        <div class="header"><label>Record action controls</label></div>
+        <label><input name="recordDivClass" type="radio" value=""/>internal style / rollover</label>
+        <label><input name="recordDivClass" type="radio" value="public" checked/>public style / always on (limited set)</label>
     </div>
-    
+
+    <div  class="heurist_resultList">
+        <div class="header"><label>Show title as link if URL set</label></div>
+        <input name="show_url_as_link" type="checkbox" checked/>
+    </div>
+
     <div class="heurist_resultList">
         <div class="header">
-            <label>Filter to be applied initially:</label>
+            <label>Filter to be applied at start</label>
         </div>
-        <input name="search_initial"/>
+        <input name="search_initial"  size="60"/>
     </div>
-    
+
     <div  class="heurist_resultListDataTable">
-        <div class="header"><label>Show</label></div>
+        <div class="header"><label>Controls and actions</label></div>
         <!-- <label>rectype filter&nbsp;<input type="checkbox" name="show_rt_filter"/></label>&nbsp; -->
-        <label>column config&nbsp;<input type="checkbox" name="show_column_config"/></label>
-        <label>search&nbsp;<input type="checkbox" name="show_search"/></label>
-        <label>counter&nbsp;<input type="checkbox" name="show_counter" checked/></label>&nbsp;
+        <label>show record counter&nbsp;<input type="checkbox" name="show_counter" checked/></label>&nbsp;&nbsp;&nbsp;
+        <label>enable column configuration&nbsp;<input type="checkbox" name="show_column_config"/></label>&nbsp;&nbsp;&nbsp;
+        <label>enable find&nbsp;<input type="checkbox" name="show_search"/></label>
     </div>
+
     <div class="heurist_resultListDataTable">
         <div class="header">
-            <label>Filter to be applied initially:</label>
+            <label>Filter to be applied at start</label>
         </div>
-        <input name="search_initial"/>
+        <input name="search_initial"  size="60"/>
     </div>
     <div class="heurist_resultListDataTable">
         <div class="header" style="vertical-align:top">
-            <label>Data table parameters (advanced):</label>
+            <label>Data table parameters (advanced)</label>
         </div>
         <textarea id="dataTableParams" rows="10" style="width:500px"/>
     </div>
-    
+
     <div  class="heurist_resultListCollection">
         <div class="header"><label>Instructions</label></div>
         <input name="instructionText" value="Please search for the map document" size="60"/>
@@ -203,97 +210,101 @@
     <div  class="heurist_resultListCollection">
         <div class="header"><label>Action</label></div>
         <label><input id="rsc_Mode1" type="radio" name="action_mode" value="map" checked/>Create Map</label>&nbsp;
-        <label><input id="rsc_Mode2" type="radio" name="action_mode" value="filter" disabled="disabled"/>Save as search</label>
+        <label><input id="rsc_Mode2" type="radio" name="action_mode" value="filter" disabled="disabled"/>Save as filter</label>
     </div>
     <div  class="heurist_resultListCollection">
         <div class="header"><label>Target database</label></div>
         <input name="target_db" value=""/>
     </div>
-    
+
 
     <!-- mapping -->    
     <div class="heurist_Map">
-        <div class="header"><label>Map document:</label></div>
+        <div class="header"><label>Map document</label></div>
         <select name="mapdocument" class="text ui-widget-content ui-corner-all" title="" style="width:400px">
         </select>
     </div>
-    
+
     <div  class="heurist_Map">
-        <div class="header"><label>Map layout params</label></div>
+        <div class="header"><label>Map layout parameters</label></div>
         <div>
-        <!-- <p><span style="min-width: 105px;display: inline-block;text-align: right;">Include:</span>
+            <!-- <p><span style="min-width: 105px;display: inline-block;text-align: right;">Include&nbsp;</span>
             <label><input type="checkbox" id="m_query" checked>current query</label>&nbsp;
             <label><input type="checkbox" id="m_mapdocs" checked>opened map documents</label></p> -->
-        <p><span style="min-width: 105px;display: inline-block;text-align: right;">Controls:</span>
-            <label><input type="checkbox" name="controls" value="legend" checked>legend</label>&nbsp;
-            <label><input type="checkbox" name="controls" value="bookmark" checked>bookmark</label>&nbsp;
-            <label><input type="checkbox" name="controls" value="geocoder" checked>geocoder</label>&nbsp;
-            <label><input type="checkbox" name="controls" value="selector" checked>selector</label>&nbsp;
-            <label><input type="checkbox" name="controls" value="print" checked>print</label></p>
-        <p><span style="min-width: 105px;display: inline-block;text-align: right;">Visible in legends:</span>
-            <label><input type="checkbox" name="legend" value="basemaps" checked>basemap</label>&nbsp;
-            <label><input type="checkbox" name="legend" value="search" checked>result set</label>&nbsp;
-            <label><input type="checkbox" name="legend" value="mapdocs" checked>map documents</label>
-            &nbsp;&nbsp;<label>Legend width:<input name="legend_width" size="4" maxlength="4" value="250"></label>
+            <p><span style="min-width: 105px;display: inline-block;text-align: right;">Controls&nbsp;</span>
+                <label><input type="checkbox" name="controls" value="legend" checked>legend</label>&nbsp;
+                <label><input type="checkbox" name="controls" value="bookmark" checked>bookmark</label>&nbsp;
+                <label><input type="checkbox" name="controls" value="geocoder" checked>geocoder</label>&nbsp;
+                <label><input type="checkbox" name="controls" value="selector" checked>selector</label>&nbsp;
+                <label><input type="checkbox" name="controls" value="print" checked>print</label></p>
+            <p><span style="min-width: 105px;display: inline-block;text-align: right;">Visible in legends&nbsp;</span>
+                <label><input type="checkbox" name="legend" value="basemaps" checked>basemap</label>&nbsp;
+                <label><input type="checkbox" name="legend" value="search" checked>result set</label>&nbsp;
+                <label><input type="checkbox" name="legend" value="mapdocs" checked>map documents</label>
+                &nbsp;&nbsp;<label>Legend width&nbsp;<input name="legend_width" size="4" maxlength="4" value="250"></label>
             </p>
-        <p><span style="min-width: 105px;display: inline-block;text-align: right;">Expanded on init:</span>
-            <label><input type="checkbox" name="legend_exp" value="basemaps">basemap</label>&nbsp;
-            <label><input type="checkbox" name="legend_exp" value="search" checked>result set</label>&nbsp;
-            <label><input type="checkbox" name="legend_exp" value="mapdocs">map documents</label>
-            <label><input type="checkbox" name="legend_exp2" checked>entire legend</label>&nbsp;
+            <p><span style="min-width: 105px;display: inline-block;text-align: right;">Expanded on init&nbsp;</span>
+                <label><input type="checkbox" name="legend_exp" value="basemaps">basemap</label>&nbsp;
+                <label><input type="checkbox" name="legend_exp" value="search" checked>result set</label>&nbsp;
+                <label><input type="checkbox" name="legend_exp" value="mapdocs">map documents</label>
+                <label><input type="checkbox" name="legend_exp2" checked>entire legend</label>&nbsp;
             </p>
-        <p><span style="min-width: 105px;display: inline-block;text-align: right;">Other settings:</span>
-            <!-- <label><input type="checkbox" id="basemap" checked>Use current basemap</label>&nbsp;-->
-            <label><input type="checkbox" id="editstyle" checked>Allow modify symbology</label>&nbsp;
-            <label><input type="checkbox" id="use_timeline" checked>Show timeline</label>
-            <label><input type="checkbox" id="use_cluster" checked>Markerclusters</label>
-            <label><input type="checkbox" id="map_rollover" checked>Show rollover</label>
-        </p>    
+            <p><span style="min-width: 105px;display: inline-block;text-align: right;">Other settings&nbsp;</span>
+                <!-- <label><input type="checkbox" id="basemap" checked>Use current basemap</label>&nbsp;-->
+                <label><input type="checkbox" id="editstyle" checked>Allow modify symbology</label>&nbsp;
+                <label><input type="checkbox" id="use_timeline" checked>Show timeline</label>
+                <label><input type="checkbox" id="use_cluster" checked>Markerclusters</label>
+                <label><input type="checkbox" id="map_rollover" checked>Show rollover</label>
+            </p>    
         </div>
     </div>
-    
+
     <!-- diagram 
     <div class="heurist_Graph">
-    
-        <div class="header"><label>XXX</label></div>
-        <select name="XXX" class="text ui-widget-content ui-corner-all" title="">
-        </select>
+
+    <div class="header"><label>XXX</label></div>
+    <select name="XXX" class="text ui-widget-content ui-corner-all" title="">
+    </select>
     </div>
     -->    
 
     <div class="heurist_Map">
         <div class="header">
-            <label>Name of initial base map:</label>
+            <label>Initial base map to use&nbsp;</label>
         </div>
         <input name="map_basemap" class="text ui-widget-content ui-corner-all" title="" style="width:300px"/>
+        <br><i>Must exactly match the name of a known base map, otherwise defaults to first - check list on map</i></i>
     </div>
 
     <div class="heurist_Map">
         <div class="header">
-            <label>Map popup template:</label>
+            <label>Custom report/record view&nbsp;</label>
         </div>
         <select name="map_template" class="text ui-widget-content ui-corner-all" title="" style="width:400px">
         </select>
+        <br><i>Defines the format used to display the popup information when user clicks on a map object</i>
     </div>
 
     <div class="heurist_resultListExt">
         <div class="header">
-            <label>Template:</label>
+             <label>Custom report template&nbsp;</label>
         </div>
-        <select name="rep_template" class="text ui-widget-content ui-corner-all" title="" style="width:400px">
+        <select name="rep_template" class="text ui-widget-content ui-corner-all" title="" style="width:400px">\
         </select>
+        <br><i>Define custom reports using the Custom report tab in Explore</i>
     </div>
     <div class="heurist_resultListExt">
         <div class="header">
-            <label>Show single selected record:</label>
+            <label>Show selected record only&nbsp;</label>
         </div>
         <input name="is_single_selection" type="checkbox"/>
+        <i>&nbsp; check this to use this widget in place of inline or popup record view</i>
     </div>
-    
+
 
     <div class="heurist_Navigation">
-        <div class="header"><label>Orientation:</label></div>
-        <select name="orientation" class="text ui-widget-content ui-corner-all" title="" style="width:400px">
+        <div class="header"><label>Orientation&nbsp;</label></div>
+        <select name="orientation" class="text ui-widget-content ui-corner-all" title="">
             <option value="horizontal">horizontal</option>
             <option value="vertical">vertical</option>
             <option value="treeview">treeview</option>
@@ -304,25 +315,24 @@
         <div id="menu_recIDs" style="display:table-row"></div>
     </div>
     <div  class="heurist_Navigation" id="expandLevels">
-        <div class="header"><label>On loading:</label></div>
+        <div class="header"><label>On loading&nbsp;</label></div>
         <label><input name="expand_levels" type="radio" value="0" checked/>Show first level only</label>
         <label><input name="expand_levels" type="radio" value="1"/>Open second level</label>
         <label><input name="expand_levels" type="radio" value="2"/>Open all levels</label>
     </div>
-<!--        
+    <!--        
     <div  class="heurist_Navigation">
-        <div class="header" style="width:165px;"><label>If root has only one menu item,<br>display items from next level</label></div>
-        <input name="use_next_level" type="checkbox"/>
+    <div class="header" style="width:165px;"><label>If root has only one menu item,<br>display items from next level</label></div>
+    <input name="use_next_level" type="checkbox"/>
     </div>
--->    
+    -->    
     <div class="heurist_Navigation">
-        <div class="header"><label>Open:</label></div>
+        <div class="header"><label>Open&nbsp;</label></div>
         <select name="target" class="text ui-widget-content ui-corner-all" title="" style="width:400px">
             <option value="inline">inline (uses field "Target element")</option>
             <option value="inline_page_content">inline (into div id="page-content")</option>
             <option value="popup">in popup</option>
         </select>
     </div>
-    
+
 </fieldset>    
-    

@@ -489,7 +489,7 @@ if($linenumber>2999){
     error_log (substr(trim(nl2br(htmlentities($query))),0,50));
 }
 */
-        if (!TESTMODE && !$mysqli->query($query))
+        if (!$mysqli->query($query)) //!TESTMODE && 
         { 
             $errorMsg = $mysqli->error;
             
@@ -660,7 +660,7 @@ if ($verbose) //ART $error &&
 // Anyway put out the output from above
 //ob_flush();
 
-  return !$error; //was !$error
+  return !$error;
 }//END MAIN FUNCTIONS
 
 // THE MAIN SCRIPT ENDS HERE

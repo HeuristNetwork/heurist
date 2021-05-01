@@ -321,8 +321,8 @@ class DbSysUsers extends DbEntityBase
                         
                         $res = mysql__insertupdate($this->system->get_mysqli(), 'sysUsrGrpLinks', 'ugl', $group_role);
                         
-                        $fname = HEURIST_FILESTORE_DIR.$ugr_ID;   //save special semaphore file to trigger user refresh for other users
-                        fileSave('X',$fname);  //add to group ???
+                        //$fname = HEURIST_FILESTORE_DIR.$ugr_ID;   //save special semaphore file to trigger user refresh for other users
+                        //fileSave('X',$fname);  //add to group ???
                     }
                     
                     //send approvement or registration email
@@ -441,7 +441,7 @@ class DbSysUsers extends DbEntityBase
 	/*
      * Transfer User ID 2 (DB Owner) to the selected User ID, provide the new DB Owner administrator rights to all workgroups
      */
-    public function transferOwner($disable_foreign_checks = false){
+    private function transferOwner($disable_foreign_checks = false){
 
         /* General Variables */
         $mysqli = $this->system->get_mysqli();  // MySQL connection
@@ -536,8 +536,9 @@ class DbSysUsers extends DbEntityBase
     }
     
     //
-    // batch action for users
+    // special and batch action for users
     // 1) import users from another db
+    // 2) transfer database ownership to another user
     //
     public function batch_action($ignore_permissions=false){
 
@@ -546,6 +547,12 @@ class DbSysUsers extends DbEntityBase
                 'You are not admin and can\'t add/edit other users. Insufficient rights for this operation');
             return false;
         }
+        
+        if($this->data['transferOwner']){
+            return $this->transferOwner();
+        }
+        
+        //import users from another db
         
         // validate that current user is admin in source database as well
         $sytem_source = new System();

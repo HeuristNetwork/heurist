@@ -186,7 +186,7 @@ class DbDefTerms extends DbEntityBase
     }
 
     //
-    //
+    // loads all term links   from defTermsLinks
     //    
     public function getTermLinks(){
 
@@ -218,7 +218,7 @@ class DbDefTerms extends DbEntityBase
     //
     // trm_Label may have periods. Periods are taken as indicators of hierarchy.
     //
-    private function saveHierarchy(){
+    private function _importTerms(){
       
         //extract records from $_REQUEST data 
         if(!$this->prepareRecords()){
@@ -254,7 +254,7 @@ class DbDefTerms extends DbEntityBase
                 $this->labels_to_idx = array(); //term label to records_all index
                 
                 //label->array(labels)
-                $tree = $this->parseHierarchy( $records );
+                $tree = $this->_parseHierarchy( $records );
 
                 //keep index
                 foreach($records as $record_idx => $record){
@@ -262,7 +262,7 @@ class DbDefTerms extends DbEntityBase
                 }
                 $this->records_all = $records;    
                 
-                $ret = $this->saveTree($tree, $parentID, '');
+                $ret = $this->_saveTree($tree, $parentID, '');
                 if($ret===false){
                     return false;
                 }
@@ -276,7 +276,7 @@ class DbDefTerms extends DbEntityBase
     //
     //
     //
-    private function parseHierarchy($input) {
+    private function _parseHierarchy($input) {
         $result = array();
 
         foreach ($input AS $path) {
@@ -306,7 +306,7 @@ class DbDefTerms extends DbEntityBase
     //
     // tree: idx->array(idx->array(),.... )
     //
-    private function saveTree($tree, $parentID, $parentLabel){
+    private function _saveTree($tree, $parentID, $parentLabel){
 
         //reset array of record for save        
         $this->records = array();
@@ -370,7 +370,7 @@ class DbDefTerms extends DbEntityBase
             {
                 if(count($children)>0){
                     $record_idx = @$this->labels_to_idx[$parentLabel.$label];
-                    $ret = $this->saveTree($children, $this->records_all[$record_idx]['trm_ID'], $parentLabel.$label.'.');
+                    $ret = $this->_saveTree($children, $this->records_all[$record_idx]['trm_ID'], $parentLabel.$label.'.');
                     if($ret===false){
                         return false;
                     }
@@ -386,7 +386,7 @@ class DbDefTerms extends DbEntityBase
     }
     
     //
-    //
+    // Validates values before save and sets default values
     //    
     protected function prepareRecords(){
     
@@ -399,39 +399,76 @@ class DbDefTerms extends DbEntityBase
             $mysqli = $this->system->get_mysqli();
             
             if(@$this->records[$idx]['trm_Label']){
+                
+                $s2 = null;
             
                 if(@$this->records[$idx]['trm_ParentTermID']>0){
                     
-                    //@todo find all labels per vocabulary in low case - check that new one is unique 
+                    $vocab_id = getTermTopMostParent($mysqli, $this->records[$idx]['trm_ParentTermID']);    
+                    $labels = $this->getLabelsAndCodes( $vocab_id );
                     
-                    $sWhere = ' AND (trm_ParentTermID='.$this->records[$idx]['trm_ParentTermID'].')';    
-                    $s2 = 'Term';
-                    
-                    $s3 = 'Duplicate label ('.$this->records[$idx]['trm_Label'].') ';
-                    if(@$this->records[$idx]['trm_Code']){
-                        $s3 = $s3.' or code ('.$this->records[$idx]['trm_Code'].') ';
+                    if(is_array($labels)){
+                            foreach($labels as $id=>$vals){
+                                if($id!=@$this->records[$idx]['trm_ID'])
+                                {
+                                    if(strcasecmp($this->records[$idx]['trm_Label'],$vals['trm_Label'])==0){
+                                        $s2 = 'Duplicate label ('.$this->records[$idx]['trm_Label'].') ';
+                                        break;
+                                    }else if ($this->records[$idx]['trm_Code'] && 
+                                        strcasecmp($this->records[$idx]['trm_Code'],$vals['trm_Code'])==0)
+                                    {
+                                        $s2 = 'Duplicate code ('.$this->records[$idx]['trm_Code'].') ';
+                                        break;
+                                    }
+                                }
+                            }
                     }
                     
-                    $s3 = $s3.' at the same branch/level in the tree';
+                    
+                    $s1 = 'Term';
+                    $s3 = ' in the vocabulary';
                 }else{
+                    //vocabulary
                     $this->records[$idx]['trm_ParentTermID'] = null;
                     $sWhere = ' AND (trm_ParentTermID IS NULL OR trm_ParentTermID=0)';    
-                    $s2 = 'Vocabulary';
-                    $s3 = 'The provided name already exists';
-                }
-                
-                $res = mysql__select_value($mysqli,
+
+                    $s1 = 'Vocabulary';
+                    $s3 = '';
+                    
+                    
+                    $res = mysql__select_value($mysqli,
                         "SELECT trm_ID FROM ".$this->config['tableName']."  WHERE (trm_Label='"
                         .$mysqli->real_escape_string( $this->records[$idx]['trm_Label'])."'" 
-                        .(@$this->records[$idx]['trm_Code']
-                            ?' OR trm_Code="'.$mysqli->real_escape_string( $this->records[$idx]['trm_Code'] ).'"'
-                            :'')
                         .') '.$sWhere );
+                    if($res>0 && $res!=@$this->records[$idx]['trm_ID']){
+                        $s2 = 'The provided name already exists';    
+                    }
+                    
+                }
+                
                         
-                if($res>0 && $res!=@$this->records[$idx]['trm_ID']){
-                    $this->system->addError(HEURIST_ACTION_BLOCKED, $s2.' cannot be saved. '.$s3);
+                if($s2){
+                    $this->system->addError(HEURIST_ACTION_BLOCKED, $s1.' cannot be saved. '.$s2.$s3);
                     return false;
                 }
+            }
+            //move term to different vocabulary - prevent if it or its children are in use in recDetails
+            if(@$this->records[$idx]['trm_ID']>0 && @$this->records[$idx]['trm_ParentTermID']>0){
+
+                $real_vocab_id = getTermTopMostParent($mysqli, $this->records[$idx]['trm_ID']);    
+                //the same vocabulary
+                if(!($this->records[$idx]['trm_ParentTermID']==$real_vocab_id || 
+                getTermTopMostParent($mysqli,$this->records[$idx]['trm_ParentTermID'])==$real_vocab_id ))
+                {
+                    $check_dty_IDs = $this->getFieldsThatUseVocabulary($real_vocab_id);
+                    $ret = $this->findRecordWhereTermInUse($this->records[$idx]['trm_ID'], $check_dty_IDs);
+                    if($ret && @$ret['reccount']>0){
+                        $this->system->addError(HEURIST_ACTION_BLOCKED, 
+                            'Term or its children already used in records', $ret);
+                        return false;
+                    }
+                }
+
             }
 
             $this->records[$idx]['trm_Modified'] = date('Y-m-d H:i:s'); //reset
@@ -472,7 +509,6 @@ class DbDefTerms extends DbEntityBase
                 }
             }
         }
-
         
         $ret = parent::save();
 
@@ -537,8 +573,10 @@ class DbDefTerms extends DbEntityBase
         return $ret;
     } 
 
-    //
-    //
+    //   Actions:
+    //   1) reference=1 - add/move/remove terms by reference      
+    //   2) merge_id>0 retain_id>0 - merge terms within vocabulary
+    //   3) import terms from csv
     //    
     public function batch_action(){
 
@@ -551,8 +589,7 @@ class DbDefTerms extends DbEntityBase
             
             if(@$this->data['reference'])
             {
-                //add term to vocabuary by reference
-                    
+                //add or remove term to vocabuary by reference
                 $trm_IDs = prepareIds($this->data['trm_ID']);
                 
                 if(count($trm_IDs)==0){
@@ -563,63 +600,146 @@ class DbDefTerms extends DbEntityBase
                 }else{
                     //old_ParentTermID
                     //new_ParentTermID
-                
-                    foreach($trm_IDs as $trm_ID){
                     
-                        if(@$this->data['new_ParentTermID']>0)
-                        {   
-                            //do not add child terms as reference if parent is already added as reference
-                            //'SELECT trm_ID FROM defTerms WHERE trm_ParentTermID='.$trm_ID
-                            
-                            $res = mysql__select_value($mysqli, 
-                            'SELECT trl_TermID FROM defTermsLinks WHERE trl_ParentID='
-                                .$this->data['new_ParentTermID']
-                                .' AND trl_TermID='.$trm_ID);   //to avoid duplication
-                            if(!($res>0)){
-                                $ret = $mysqli->query(
-                                    'insert into defTermsLinks (trl_ParentID,trl_TermID)'
-                                        .'values ('.$this->data['new_ParentTermID'].','.$trm_ID.')');
-                                if(!$ret){
-                                    $this->system->addError(HEURIST_DB_ERROR, 
-                                        'Cannot insert to defTermsLinks table', $mysqli->error);
+                    $isOK = true;
+                    
+                    $new_vocab = @$this->data['new_VocabID'];
+                    $new_parent = @$this->data['new_ParentTermID'];
+                    if(!($new_parent>0) && $new_vocab>0){
+                        $new_parent  = $new_vocab;  
+                    }else if($new_parent>0){
+                        $real_vocab_id = getTermTopMostParent($mysqli, $new_parent);    
+                        if($real_vocab_id != $new_vocab){
+                            $this->system->addError(HEURIST_ACTION_BLOCKED, 'Reference can\'t have children.');
+                            $isOK = false;
+                            $ret = false;
+                        }
+                    }
+                    
+                    if($isOK)
+                    {
+                        $all_children = null;
+                        $labels = null;
+                        $check_dty_IDs = null;
+                        
+                        $old_vocab = @$this->data['old_VocabID'];
+                        $old_parent = @$this->data['old_ParentTermID'];
+                        if(!($old_parent>0) && $old_vocab>0) $old_parent = $old_vocab;
+
+                        if($new_parent>0){
+                            //get labels and codes for vocabulary
+                            $labels = $this->getLabelsAndCodes($new_vocab);
+                            if(count($labels)==0) $labels = null;
+                        }
+                        if($new_vocab>0 && $new_vocab!=$old_vocab){
+                            $all_children = $this->getChildren($new_vocab);
+                        }
+                        if($old_vocab>0 && $new_vocab!=$old_vocab){ 
+                            $check_dty_IDs = $this->getFieldsThatUseVocabulary($old_vocab);
+                        }
+                        
+                        foreach($trm_IDs as $trm_ID){
+
+                            if($new_parent>0)
+                            {   
+                                //1. check that term is not in vocabulary already - avoid duplications
+                                if(is_array($all_children) && in_array($trm_ID, $all_children)){
+                                        $this->system->addError(HEURIST_ACTION_BLOCKED,  'Term is already in vocabulary');
+                                        $ret = false;
+                                        break;
+                                }
+                                //2. check that the same level does not have the term with the same name
+                                if($labels){
+                                        //get label and code for current term
+                                        $vals = mysql__select_row_assoc($mysqli, 
+                                                'SELECT trm_Label, trm_Code FROM '
+                                                .$this->config['tableName'].' WHERE trm_ID='.$trm_ID);
+                                        foreach($labels as $id=>$vals2)
+                                        {
+                                            if($id!=$trm_ID){
+                                                if(strcasecmp($vals['trm_Label'],$vals2['trm_Label'])==0){
+                                                    $sMsg = 'Term with label <b>'.$vals['trm_Label'];
+                                                }else if ($vals['trm_Code'] && strcasecmp($vals['trm_Code'],$vals2['trm_Code'])==0){
+                                                    $sMsg = 'Term with code <b>'.$vals['trm_Code'];
+                                                }
+                                                if($sMsg){
+                                                    $this->system->addError(HEURIST_ACTION_BLOCKED, 
+                                                            $sMsg.'</b> already exists in the vocabulary');
+                                                    $ret = false;
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                        if(!$ret) break;
+                                }
+
+                            }
+                            //3. term can not be removed if it is real children (not reference)
+                            if($old_parent>0){
+                                // can not delete term if it is real parent
+                                $parent_id = mysql__select_value($mysqli, 
+                                            'SELECT trm_ParentTermID FROM defTerms where trm_ID='.$trm_ID);
+                                if($parent_id == $old_parent){
+                                    $this->system->addError(HEURIST_ACTION_BLOCKED, 'Term can not be orphaned');
                                     $ret =false;
                                     break;
                                 }
                             }
-                        }
-                        if(@$this->data['old_ParentTermID']>0){
-                            
-                                //can not delete reference if this is real parent
-                                if(!(@$this->data['new_ParentTermID']>0))
-                                {   
-                                    $parent_id = mysql__select_value($mysqli, 
-                                    'SELECT trm_ParentTermID FROM defTerms where trm_ID='.$trm_ID);
-                                    if($parent_id == $this->data['old_ParentTermID']){
-                                        $this->system->addError(HEURIST_ERROR, 
-                                        'Term can not be orphaned', $mysqli->error);
-                                        $ret =false;
-                                        break;
-                                    }
-                                }
-                            
-                            
+                            //4. term is removed from vocabulary - check its usage in recDetails
+                            if(count($check_dty_IDs)>0){ 
+                                    
+                               $ret = $this->findRecordWhereTermInUse($trm_ID, $check_dty_IDs);
+                               
+                               if($ret && @$ret['reccount']>0){
+                                    $this->system->addError(HEURIST_ACTION_BLOCKED, 
+                                        'Term or its children already used in records', $ret);
+                                    $ret = false;
+                                    break;
+                               }
+                            }    
+                                
+                                
+                            if($new_parent>0)
+                            {
                                 $ret = $mysqli->query(
-                                    'delete from defTermsLinks where trl_ParentID='
-                                    .$this->data['old_ParentTermID'].' AND trl_TermID='.$trm_ID);
-
+                                        'insert into defTermsLinks (trl_ParentID,trl_TermID)'
+                                            .'values ('.$new_parent.','.$trm_ID.')');
                                 if(!$ret){
                                     $this->system->addError(HEURIST_DB_ERROR, 
-                                        'Cannot delete from defTermsLinks table', $mysqli->error);
-                                    $ret =false;
+                                        'Cannot insert to defTermsLinks table', $mysqli->error);
+                                    $ret = false;
                                     break;
                                 }
-                        }
-                    }
+                            }
+                            if($old_parent>0)
+                            {
+                                    $ret = $mysqli->query(
+                                        'delete from defTermsLinks where trl_ParentID='
+                                        .$old_parent.' AND trl_TermID='.$trm_ID);
+
+                                    if(!$ret){
+                                        $this->system->addError(HEURIST_DB_ERROR, 
+                                            'Cannot delete from defTermsLinks table', $mysqli->error);
+                                        $ret = false;
+                                        break;
+                                    }
+                            }
+                        }//for
+                    
+                    
+                    
+                    }                    
                 }
                 
             }
             else if(@$this->data['merge_id']>0 && @$this->data['retain_id']>0)
             {
+                //merging is performed within one vocabulary only!!!!
+                //check that both have the same vocab
+                
+                //@TODO check usage for term by ref!!!!
+                
+                
                 //MERGE TERMS
                 
                 $merge_id = $this->data['merge_id'];
@@ -700,7 +820,7 @@ class DbDefTerms extends DbEntityBase
                 
             }else{
                 //import terms (from csv)
-                $ret = $this->saveHierarchy();
+                $ret = $this->_importTerms();
             }
         
             if($ret===false){
@@ -714,94 +834,10 @@ class DbDefTerms extends DbEntityBase
         
             return $ret;
     }
-    
-    //
-    // returns array - list of fields (where vocabulary is in use) and number of records
-    // false - mysql error
-    // true - term and its children are not in use
-    //
-    private function isTermNotInUse($trm_ID, $infield, $indetails){
-
-        $mysqli = $this->system->get_mysqli();        
-        
-        $ret = array('children'=>0, 'detailtypes'=>array(), 'reccount'=>0);
-
-        //first level children
-        $query = 'SELECT count(trl_TermID) FROM defTermsLinks WHERE trl_ParentID='
-                            .$trm_ID;
-        $ret['children'] = mysql__select_value($mysqli, $query);
-        
-
-        if($infield){
-            //find possible entries in defDetailTypes dty_JsonTermIDTree
-            $query = 'SELECT dty_ID FROM defDetailTypes WHERE '
-                .'(dty_JsonTermIDTree='.$trm_ID.') '
-                .'AND (dty_Type=\'enum\' or dty_Type=\'relmarker\')';
-            $ret['detailtypes'] = mysql__select_list2($mysqli, $query);
-            
-            //TODO: need to check inverseid or it will error by foreign key constraint?
-        }
-
-        //find usage in recDetails
-        if($indetails && count($ret['detailtypes'])==0){
-            
-            //find all children terms (except terms by reference)
-            $children = getTermChildren($trm_ID, $this->system, false); //see db_structure
-            $children[] = $trm_ID; 
-            if(count($children)>1){
-                $s = 'in ('.implode(',',$children).')';
-            }else{
-                $s = '= '.$trm_ID;
-            }
-
-            $query = "SELECT SQL_CALC_FOUND_ROWS DISTINCT dtl_RecID FROM recDetails, defDetailTypes "
-            ."WHERE (dty_ID = dtl_DetailTypeID ) AND "
-            ."(dty_Type='enum' or dty_Type='relationtype') AND "  // or dty_Type='relmarker'
-            .'(dtl_Value '.$s.')';
-            //$ret['reccount'] = mysql__select_value($mysqli, $query);
-
-            $total_count_rows = 0;
-            $records = array();
-            $res = $mysqli->query($query);
-            if ($res){
-                $fres = $mysqli->query('select found_rows()');
-                if ($fres)     {
-                    $total_count_rows = $fres->fetch_row();
-                    $total_count_rows = $total_count_rows[0];
-                    $fres->close();
-                    
-                    if($total_count_rows>0 && ($total_count_rows<10000 || $total_count_rows*10<get_php_bytes('memory_limit'))){
-                
-                        $records = array();
-                        while ($row = $res->fetch_row())  {
-                                array_push($records, (int)$row[0]);
-                        }
-                    }
-                }
-                $res->close();
-           }
-           if($mysqli->error){
-                $system->addError(HEURIST_DB_ERROR, 
-                            'Search query error (retrieving number of records)', $mysqli->error);
-                return false;
-           }else{
-               $ret['reccount'] = $total_count_rows;
-               $ret['records'] = $records;
-           }
-        }
-
-        //$ret['children']>0 || 
-        if(count($ret['detailtypes'])>0 || $ret['reccount']>0){
-            return $ret;    
-        }else{
-            return true;
-        }
-        
-        
-    }
 
     //
-    //
+    //  Checks that term can be removed
+    //   1) Has no 
     //
     protected function _validatePermission()
     {
@@ -813,25 +849,187 @@ class DbDefTerms extends DbEntityBase
             
             $children = array();
             
-            foreach($this->recordIDs as $trm_ID){
+            foreach($this->recordIDs as $trm_ID)
+            {
                 $ret = $this->isTermNotInUse($trm_ID, true, true); //check both records and defs 
                 if(is_array($ret)){
                     $this->system->addError(HEURIST_ACTION_BLOCKED,
                             'Cannot delete '.$trm_ID.'. This term has references', $ret); //$ret
                     return false; 
-                }else if($ret===false){
+                }else if($ret===false){ //mysql error
                     return false; 
                 }
                 
+                //get real children (not refs)
                 $children2 = getTermChildren($trm_ID, $this->system, false); //see db_structure
                 $children = array_merge($children, $children2);
             }
-            $this->recordIDs = array_merge($this->recordIDs, $children);
+            $this->recordIDs = array_merge($this->recordIDs, $children); //delete children as well
             
             //$this->system->addError(HEURIST_ACTION_BLOCKED, 'Temp debug block');
             //return false;
         }
         return true;
+    }
+    
+    //--------------------------------------------------------------------------
+    //
+    
+    //
+    //  get all enum and relmarker fields where vocabulary is in use
+    //
+    private function getFieldsThatUseVocabulary($trm_ID){
+        
+            $mysqli = $this->system->get_mysqli();        
+        
+            $query = 'SELECT dty_ID FROM defDetailTypes WHERE '
+                .'(dty_JsonTermIDTree='.$trm_ID.') '
+                .'AND (dty_Type=\'enum\' or dty_Type=\'relmarker\')';
+            return mysql__select_list2($mysqli, $query);
+        
+    }
+    
+    //
+    // returns array - list of fields (where vocabulary is in use) and number of records
+    // false - mysql error
+    // true - term and its children are not in use
+    // 
+    // $trm_ID - vocabulary
+    // $infield - check in base fields
+    // $indetails - check in recDetails 
+    //
+    private function isTermNotInUse($trm_ID, $infield, $indetails){
+
+        $mysqli = $this->system->get_mysqli();        
+        
+        $ret = array('children'=>0, 'detailtypes'=>array(), 'reccount'=>0);
+
+        // is this vocabulary
+        if($infield){
+            //find possible entries in defDetailTypes dty_JsonTermIDTree
+            $ret['detailtypes'] = $this->getFieldsThatUseVocabulary($trm_ID);
+            //TODO: need to check inverseid or it will error by foreign key constraint?
+        }
+
+        // is this used in records (find usage in recDetails)
+        if($indetails && count($ret['detailtypes'])==0){
+            
+           $ret = $this->findRecordWhereTermInUse($trm_ID, null);
+       
+        }
+
+        //$ret['children']>0 || 
+        if(count(@$ret['detailtypes'])>0 || $ret['reccount']>0){
+            return $ret;    
+        }else{
+            return true;
+        }
+    }
+
+    //
+    // Returns flat array of all children for given term
+    // uses defTermsLinks
+    // $all_levels - false return direct children only 
+    //    
+    private function getChildren($parent_ids, $all_levels=true){
+        return getTermChildrenAll($this->system->get_mysqli(),$parent_ids, $all_levels);
+    }
+    
+    //
+    //
+    //
+    private function getLabelsAndCodes($parent_id, $all_levels=true){
+    
+        //get first level children
+        $children = $this->getChildren($parent_id, $all_levels); 
+        if(is_array($children) && count($children)>0){
+
+            $query = 'SELECT trm_ID, trm_Label, trm_Code FROM '
+                .$this->config['tableName'].' WHERE trm_ID'; //defTerms
+            //finds labels and codes
+            if(count($children)>1)
+            {
+                $query = $query .' IN ('.implode(',',$children).')';    
+            }else{
+                $query = $query . ' = '.$children[0];    
+            }
+            return mysql__select_assoc($this->system->get_mysqli(), $query);
+        }
+        return null;
+    }
+    
+    //
+    //
+    //
+    private function findRecordWhereTermInUse($trm_ID, $check_dty_IDs){
+
+        $ret = array();
+        
+        //find all children terms (including by reference)
+        $children = $this->getChildren($trm_ID);
+
+        if(count($children)>0){
+                $children[] = $trm_ID;  //itself
+                $s = 'in ('.implode(',',$children).')';
+        }else{
+                $s = '= '.$trm_ID;
+        }
+        
+        $mysqli = $this->system->get_mysqli();
+        
+        
+        
+        if(!is_array($check_dty_IDs) || count($check_dty_IDs)==0){
+            $real_vocab_id = getTermTopMostParent($mysqli, $trm_ID); 
+            $check_dty_IDs = $this->getFieldsThatUseVocabulary($real_vocab_id);
+        }
+            
+        if(is_array($check_dty_IDs) && count($check_dty_IDs)>0){
+            $this->system->defineConstant('DT_RELATION_TYPE');
+            $query = 'SELECT SQL_CALC_FOUND_ROWS DISTINCT dtl_RecID FROM recDetails '
+                .'WHERE (dtl_DetailTypeID IN ('.DT_RELATION_TYPE.','.implode(',',$check_dty_IDs).')) AND '
+                .'(dtl_Value '.$s.')';
+        }else{
+            $query = "SELECT SQL_CALC_FOUND_ROWS DISTINCT dtl_RecID FROM recDetails, defDetailTypes "
+                ."WHERE (dty_ID = dtl_DetailTypeID ) AND "
+                ."(dty_Type='enum' or dty_Type='relationtype') AND " 
+                .'(dtl_Value '.$s.')';
+        }
+
+        $total_count_rows = 0;
+        $records = array();
+        $res = $mysqli->query($query);
+        if ($res){
+            $fres = $mysqli->query('select found_rows()');
+            if ($fres)     {
+                $total_count_rows = $fres->fetch_row();
+                $total_count_rows = $total_count_rows[0];
+                $fres->close();
+
+                if($total_count_rows>0 && ($total_count_rows<10000 || $total_count_rows*10<get_php_bytes('memory_limit'))){
+
+                    $records = array();
+                    while ($row = $res->fetch_row())  {
+                        array_push($records, (int)$row[0]);
+                    }
+                }
+            }
+            $res->close();
+        }
+        if($mysqli->error){
+            $this->system->addError(HEURIST_DB_ERROR, 
+                'Search query error (retrieving number of records that uses terms)', $mysqli->error);
+            return false;
+        }else{
+            $ret['recID'] = $trm_ID;
+            $ret['fields'] = $check_dty_IDs;
+            $ret['reccount'] = $total_count_rows;
+            $ret['records'] = $records;
+            $ret['children'] = count($children);
+        }
+        
+        return $ret;
+        
     }
     
 }

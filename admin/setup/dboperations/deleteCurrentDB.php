@@ -115,7 +115,7 @@ $('#btnDelete').on({click:function(){
     var url = window.hWin.HAPI4.baseURL+'admin/setup/dboperations/deleteDB.php';
     var request = {pwd: $('#db-password').val(), 
                    db: window.hWin.HAPI4.database,
-                   database: window.hWin.HAPI4.database,
+                   database: window.hWin.HAPI4.database,   //database to be deleted
                    create_archive:$('#db-archive').is(':checked')};
 
     window.hWin.HEURIST4.util.sendRequest(url, request, null,

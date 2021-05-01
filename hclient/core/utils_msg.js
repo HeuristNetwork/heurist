@@ -87,8 +87,12 @@ if (! window.hWin.HEURIST4.msg) window.hWin.HEURIST4.msg = {
                 
                 if(msg!='') msg = msg + '<br><br>';
                 
-                dlg_title = 'Login required to access '+window.hWin.HAPI4.database;  
-                response.sysmsg = (window.hWin.HAPI4.currentUser['ugr_ID']==0)?0:1;
+                if(window.hWin && window.hWin.HAPI4){
+                    dlg_title = 'Login required to access '+window.hWin.HAPI4.database;  
+                    response.sysmsg = (window.hWin.HAPI4.currentUser['ugr_ID']==0)?0:1;
+                }else{
+                    dlg_title = 'Access denied';
+                }
 
                 if(msg=='' || (needlogin && response.sysmsg==0)){
                     msg = msg + top.HR('Session expired');

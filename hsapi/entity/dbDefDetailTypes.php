@@ -239,6 +239,8 @@ class DbDefDetailTypes extends DbEntityBase
         //add specific field values
         foreach($this->records as $idx=>$record){
 
+            $this->records[$idx]['is_new'] = (!(@$this->records[$idx]['dty_ID']>0));
+            
             //validate duplication
             if(@$this->records[$idx]['dty_Name']){
                 $res = mysql__select_value($mysqli,
@@ -250,13 +252,70 @@ class DbDefDetailTypes extends DbEntityBase
                 }
             }
 
-            if(!(@$this->records[$idx]['dty_ID']>0)){
+            if($this->records[$idx]['is_new']){
                 $this->records[$idx]['dty_LocallyModified'] = 0; //default value for new
                 
                 if(@$this->records[$idx]['dty_IDInOriginatingDB']==''){
                     $this->records[$idx]['dty_IDInOriginatingDB'] = 0;
                 }
             }else{
+                //if enum or relmarker prevents vocabulary changing if there are records with this fieldtype
+                if($this->records[$idx]['dty_Type']=='enum' || $this->records[$idx]['dty_Type']=='relmarker'){
+                    
+                    //get current vocabulary
+                    $curr_vocab_id = mysql__select_value($mysqli,
+                        'SELECT dty_JsonTermIDTree FROM '.$this->config['tableName'].' WHERE dty_ID='.
+                            $this->records[$idx]['dty_ID']);
+                    if($curr_vocab_id>0 && $curr_vocab_id!=$this->records[$idx]['dty_JsonTermIDTree']){
+                        //is going to be changed
+                        $children = getTermChildrenAll($mysqli, $curr_vocab_id, true);
+
+                        if(count($children)>0){
+                            if(count($children)>1){
+                                $s = 'in ('.implode(',',$children).')';
+                            }else{
+                                $s = '= '.$children[0];
+                            }
+                            $query = 'SELECT SQL_CALC_FOUND_ROWS DISTINCT dtl_RecID FROM recDetails '
+                                .'WHERE (dtl_DetailTypeID='.$this->records[$idx]['dty_ID'].') AND '
+                                .'(dtl_Value '.$s.')';
+
+                            $total_count_rows = 0;
+                            $records = array();
+                            $res = $mysqli->query($query);
+                            if ($res){
+                                $fres = $mysqli->query('select found_rows()');
+                                if ($fres)     {
+                                    $total_count_rows = $fres->fetch_row();
+                                    $total_count_rows = $total_count_rows[0];
+                                    $fres->close();
+
+                                    if($total_count_rows>0 && ($total_count_rows<10000 || $total_count_rows*10<get_php_bytes('memory_limit'))){
+
+                                        $records = array();
+                                        while ($row = $res->fetch_row())  {
+                                            array_push($records, (int)$row[0]);
+                                        }
+                                    }
+                                }
+                                $res->close();
+                            }
+                            if($mysqli->error){
+                                $this->system->addError(HEURIST_DB_ERROR, 
+                                    'Search query error (retrieving number of records that uses terms)', $mysqli->error);
+                                return false;
+                            }else if($total_count_rows>0){
+                                $ret = array('reccount'=>$total_count_rows,'records'=>$records);
+                                $this->system->addError(HEURIST_ACTION_BLOCKED, 
+                                    'Sorry, we cannot change the vocabulary because terms in the '
+                                    .'current vocabulary are already in use for this field.', $ret);
+                                return false;
+                                //show records which use these terms.
+                            }
+                        }
+                    }
+                }                
+                
 //error_log(print_r($this->records[$idx], true));                
                 if (array_key_exists('dty_IDInOriginatingDB',$this->records[$idx]) 
                      && $this->records[$idx]['dty_IDInOriginatingDB']==''){ 
@@ -272,7 +331,6 @@ class DbDefDetailTypes extends DbEntityBase
 
             $this->records[$idx]['dty_Modified'] = date('Y-m-d H:i:s'); //reset
 
-            $this->records[$idx]['is_new'] = (!(@$this->records[$idx]['dty_ID']>0));
         }
         
         return $ret;

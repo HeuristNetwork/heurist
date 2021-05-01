@@ -10,6 +10,8 @@
     *  mysql__drop_database
     * 
     *  mysql__getdatabases4 - get list of databases
+    * 
+    *  mysql__select_assoc - returns array  key_column(first filed)=>array(field=>val,....)
     *  mysql__select_assoc2 - returns array  key_column=>val_column for given table
     *  mysql__select_list - returns array of one column values
     *  mysql__select_value   - return the first column of first row
@@ -177,9 +179,17 @@
     * @param    mixed $email - current user email
     * @param    mixed $role - admin - returns database where current user is admin, user - where current user exists
     */
-    function mysql__getdatabases4($mysqli, $with_prefix = false, $email = null, $role = null, $prefix=HEURIST_DB_PREFIX)
+    function mysql__getdatabases4($mysqli, $with_prefix = false, $starts_with=null,
+                             $email = null, $role = null, $prefix=HEURIST_DB_PREFIX)
     {
-        $query = "show databases where `database` like 'hdb_%'";
+        
+        if($starts_with!=null){
+            $where = "'hdb_$starts_with%'";
+        }else{
+            $where = "'hdb_%'";    
+        }
+        
+        $query = "show databases where `database` like $where";
         $res = $mysqli->query($query);
         $result = array();
         $isFilter = ($email != null && $role != null);
@@ -244,6 +254,31 @@
         }
         return $matches;
     }
+
+    /**
+    * returns array  key_column(first filed)=>array(field=>val,....)
+    * 
+    * @param mixed $mysqli
+    * @param mixed $query
+    */
+    function mysql__select_assoc($mysqli, $query){
+        
+        $matches = null;
+        if($mysqli && $query){
+            
+            $res = $mysqli->query($query);
+            if ($res){
+                $matches = array();
+                while ($row = $res->fetch_assoc()){
+                    $key = array_shift($row);
+                    $matches[$key] = $row;
+                }
+                $res->close();
+            }
+        }
+        return $matches;
+    }
+
     /**
     * returns array of FIRST column values
     */
@@ -303,6 +338,8 @@
                     $result = $row;
                 }
                 $res->close();
+            }else{
+                error_log('Query: '.$query.'.  mySQL error: '.$mysqli->error);
             }
         }
         return $result;
@@ -673,530 +710,6 @@
         }
         return $sysValues;
     }
-    
-    
-    //
-    //
-    //
-    /*
-    function updateDatabseToLatest3($system){
-        
-        return;
-        
-        $ret = false;        
-        $mysqli = $system->get_mysqli();
-
-        $version = mysql__select_row_assoc($mysqli, "SELECT sys_dbVersion,sys_dbSubVersion,sys_dbSubSubVersion FROM sysIdentification");
-
-        if (!($version['sys_dbVersion']==1 && $version['sys_dbSubVersion']==2 &&
-           $version['sys_dbSubSubVersion']<1)){
-           
-           return;     
-        }else{
-            $mysqli->query('UPDATE sysIdentification SET sys_dbSubSubVersion=1 WHERE sys_ID=1');
-        }
-      
-        //create new tables
-        $value = mysql__select_value($mysqli, "SHOW TABLES LIKE 'defVocabularyGroups'");
-        if($value==null || $value==""){        
-            
-$query = "CREATE TABLE defVocabularyGroups (
-  vcg_ID tinyint(3) unsigned NOT NULL auto_increment COMMENT 'Vocabulary group ID referenced in vocabs editor',
-  vcg_Name varchar(40) NOT NULL COMMENT 'Name for this group of vocabularies, shown as heading in lists',
-  vcg_Domain enum('enum','relation') NOT NULL default 'enum' COMMENT 'Field of application of the vocabulary - can be both',
-  vcg_Order tinyint(3) unsigned zerofill NOT NULL default '002' COMMENT 'Ordering of vocabulary groups within pulldown lists',
-  vcg_Description varchar(250) default NULL COMMENT 'A description of the vocabulary group and its purpose',
-  vcg_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this vocabulary group record, used to get last updated date for table',
-  PRIMARY KEY  (vcg_ID),
-  UNIQUE KEY vcg_Name (vcg_Name)
-) ENGINE=InnoDB COMMENT='Grouping mechanism for vocabularies in vocabularies/terms editor'";
-            
-            $res = $mysqli->query($query);
-            if(!$res){
-                $system->addError(HEURIST_DB_ERROR, 'Cannot create defVocabularyGroups', $mysqli->error);
-                return false;
-            }
-            $report[] = 'defVocabularyGroups created';
-            
-            $mysqli->query('INSERT INTO defVocabularyGroups (vcg_Name) VALUES ("User-defined")');
-            $mysqli->query('INSERT INTO defVocabularyGroups (vcg_Name) VALUES ("Semantic web")');
-            $mysqli->query('INSERT INTO defVocabularyGroups (vcg_Name) VALUES ("Place")');
-            $mysqli->query('INSERT INTO defVocabularyGroups (vcg_Name) VALUES ("People,  events, biography")');
-            $mysqli->query('INSERT INTO defVocabularyGroups (vcg_Name) VALUES ("Bibliographic, copyright")');
-            $mysqli->query('INSERT INTO defVocabularyGroups (vcg_Name) VALUES ("Spatial")');
-            $mysqli->query('INSERT INTO defVocabularyGroups (vcg_Name) VALUES ("Categorisation and flags")');
-            $mysqli->query('INSERT INTO defVocabularyGroups (vcg_Name) VALUES ("Internal")');
-            $mysqli->query('INSERT INTO defVocabularyGroups (vcg_Name,vcg_Domain) VALUES ("RELATIONSHIPS","relation")');
-            
-            //alter table
-            //verify that required column exists
-            $query = "SHOW COLUMNS FROM `defTerms` LIKE 'trm_VocabularyGroupID'";
-            $res = $mysqli->query($query);
-            $row_cnt = $res->num_rows;
-            if($res) $res->close();
-            if(!$row_cnt){ //column not defined
-                $query = "ALTER TABLE `defTerms` ADD COLUMN trm_VocabularyGroupID smallint(5) unsigned NULL default '1' COMMENT 'Vocabulary group to which this term belongs, if a top level term (vocabulary)'";
-                 
-                $res = $mysqli->query($query);
-                if(!$res){
-                    $system->addError(HEURIST_DB_ERROR, 'Cannot modify defTerms to add trm_VocabularyGroupID', $mysqli->error);
-                    return false;
-                }
-            }
-            $mysqli->query('UPDATE defTerms set trm_VocabularyGroupID=9 where (NOT (trm_ParentTermID>0)) and trm_Domain="relation"');
-
-            //Semantic web
-            $mysqli->query('UPDATE defTerms set trm_VocabularyGroupID=2 where trm_OriginatingDBID=2 AND '
-            .'trm_IDInOriginatingDB IN (5668,5520,5805,5792,6091,5445,5842,6177,6214)');
-            //Place
-            $mysqli->query('UPDATE defTerms set trm_VocabularyGroupID=3 where (trm_OriginatingDBID=2 AND '
-            .'trm_IDInOriginatingDB IN (509,506)) OR (trm_OriginatingDBID=3 AND trm_IDInOriginatingDB=5039');
-            //People,  events, biography
-            $mysqli->query('UPDATE defTerms set trm_VocabularyGroupID=4 where (trm_OriginatingDBID=2 AND '
-            .'trm_IDInOriginatingDB IN (5389,500,501,507,496,497,5432,505,511,513))'
-            .' OR (trm_OriginatingDBID=3 AND trm_IDInOriginatingDB=5065)'
-            .' OR (trm_OriginatingDBID=9 AND trm_IDInOriginatingDB=3297)'
-            .' OR (trm_OriginatingDBID=1161 AND trm_IDInOriginatingDB=5419)');
-            //Bibliographic, copyright
-            $mysqli->query('UPDATE defTerms set trm_VocabularyGroupID=5 where (trm_OriginatingDBID=2 AND '
-            .'trm_IDInOriginatingDB=503)'
-            .' OR (trm_OriginatingDBID=3 AND trm_IDInOriginatingDB IN (5024,5021,5012,5099))'
-            .' OR (trm_OriginatingDBID=1144 AND trm_IDInOriginatingDB=5986)');
-            //Spatial
-            $mysqli->query('UPDATE defTerms set trm_VocabularyGroupID=6 where (trm_OriginatingDBID=2 AND '
-            .'trm_IDInOriginatingDB IN (512,5362,5440,510,546,551))'
-            .' OR (trm_OriginatingDBID=3 AND trm_IDInOriginatingDB IN (5087,5080,5091,5073,5080,5028,5083,5077))'
-            .' OR (trm_OriginatingDBID=1125 AND trm_IDInOriginatingDB IN (3659,3339))');
-            //Categorisation and flags
-            $mysqli->query('UPDATE defTerms set trm_VocabularyGroupID=7 where (trm_OriginatingDBID=2 AND '
-            .'trm_IDInOriginatingDB IN (508,498,530))'
-            .' OR (trm_OriginatingDBID=3 AND trm_IDInOriginatingDB IN (5030,3440))'
-            .' OR (trm_OriginatingDBID=99 AND trm_IDInOriginatingDB=5445)'
-            .' OR (trm_OriginatingDBID=1125 AND trm_IDInOriginatingDB=3339)'
-            .' OR (trm_OriginatingDBID=1144 AND trm_IDInOriginatingDB IN (6002,5993))');
-            //Internal
-            $mysqli->query('UPDATE defTerms set trm_VocabularyGroupID=8 where trm_OriginatingDBID=2 AND '
-            .'trm_IDInOriginatingDB IN (533,3272,520,6252,6250)');
-            
-            
-            $report[] = 'defTerms: trm_VocabularyGroupID added';            
-            
-        }
-             
-        //$mysqli->query('DROP TABLE IF EXISTS defTermsLinks');
-             
-        $value = mysql__select_value($mysqli, "SHOW TABLES LIKE 'defTermsLinks'");
-        if($value==null || $value==""){        
-            
-$query = "CREATE TABLE defTermsLinks (
-  trl_ID mediumint(8) unsigned NOT NULL auto_increment COMMENT 'Primary key for vocablary-terms hierarchy',
-  trl_ParentID smallint(5) unsigned NOT NULL COMMENT 'The ID of the parent/owner term in the hierarchy',
-  trl_TermID smallint(5) unsigned NOT NULL COMMENT 'Term identificator',
-  PRIMARY KEY  (trl_ID),
-  UNIQUE KEY trl_CompositeKey (trl_ParentID,trl_TermID)
-) ENGINE=InnoDB COMMENT='Identifies hierarchy of vocabularies and terms'";
-            
-            $res = $mysqli->query($query);
-            if(!$res){
-                $system->addError(HEURIST_DB_ERROR, 'Cannot create defTermsLinks', $mysqli->error);
-                return false;
-            }
-            $report[] = 'defTermsLinks created';
-            
-            $mysqli->query('INSERT INTO defTermsLinks (trl_ParentID, trl_TermID) '
-            .'SELECT trm_ParentTermID, trm_ID FROM defTerms WHERE trm_ParentTermID>0');
-            
-            $res = $mysqli->query('DROP TRIGGER IF EXISTS defTerms_last_insert');
-
-            ///$res = $mysqli->query('DELIMITER $$');
-            $res = $mysqli->query('CREATE DEFINER=CURRENT_USER TRIGGER `defTerms_last_insert` AFTER INSERT ON `defTerms` FOR EACH ROW
-            begin
-                if NEW.trm_ParentTermID > 0 then
-                    insert into defTermsLinks (trl_ParentID,trl_TermID)
-                            values (NEW.trm_ParentTermID, NEW.trm_ID);
-                end if;
-            end');  
-            
-            $res = $mysqli->query('DROP TRIGGER IF EXISTS defTerms_last_update');
-
-            $res = $mysqli->query('CREATE DEFINER=CURRENT_USER TRIGGER `defTerms_last_update` AFTER UPDATE ON `defTerms`
-            FOR EACH ROW
-            begin
-                if NEW.trm_ParentTermID != OLD.trm_ParentTermID then
-                    update defTermsLinks SET trl_ParentID=NEW.trm_ParentTermID
-                        where trl_ParentID=OLD.trm_ParentTermID and trl_TermID=NEW.trm_ID;
-                end if;
-            end');
-            
-            $res = $mysqli->query('DROP TRIGGER IF EXISTS defTerms_last_delete');
-            $res = $mysqli->query('CREATE DEFINER=CURRENT_USER  TRIGGER `defTerms_last_delete` AFTER DELETE ON `defTerms` FOR EACH ROW
-            begin
-                delete ignore from defTermsLinks where trl_TermID=OLD.trm_ID || trl_ParentID=OLD.trm_ID;
-            end');            
-            //$mysqli->query('DELIMITER ;');            
-
-            $vocab_group = 7;//
-            
-            //converts custom-selected term tree to vocab with references
-            $query = 'SELECT dty_Name,dty_JsonTermIDTree, dty_TermIDTreeNonSelectableIDs, dty_ID, dty_Type FROM '
-                     .'defDetailTypes WHERE  dty_Type="enum" or dty_Type="relmarker"';
-        
-            $res = $mysqli->query($query);
-            while (($row = $res->fetch_row())) {
-                //if the only numeric - assume this is vocabulary
-                if(@$row[1]>0 && is_numeric(@$row[1])){
-                    continue;
-                }
-                
-                $domain = $row[4]=='enum'?'enum':'relation';
-                $name = $row[0].' - selection';
-                
-                $cnt = mysql__select_value($mysqli, "SELECT count(trm_ID) FROM defTerms WHERE trm_Label LIKE '".$name."%'");
-                if($cnt>0){
-                   $name = $name . '  ' . $cnt; 
-                }
-
-error_log($row[3].'  '.$name);                
-                
-                //{"11":{"518":{},"519":{}},"94":{},"95":{},"3260":{"3115":{"3100":{}}}}
-                $terms = json_decode(@$row[1], true);
-                
-                if($terms){
-                    
-                    //add new vocabulary
-                    $vocab_id = mysql__insertupdate($mysqli, 'defTerms', 'trm', array(
-                                'trm_Label'=>$name,
-                                'trm_Domain'=>$domain,
-                                'trm_VocabularyGroupID'=>$vocab_group));
-                        
-                    //parent->term_id
-                    $terms_links = _prepare_terms($vocab_id, $terms);
-                    
-                    foreach ($terms_links as $line){
-                        $mysqli->query('INSERT INTO defTermsLinks(trl_ParentID, trl_TermID) VALUES('.$line[0].','.$line[1].')');    
-                    }
-
-                    //dty_TermIDTreeNonSelectableIDs=dty_JsonTermIDTree, 
-                    $query = 'UPDATE defDetailTypes SET dty_JsonTermIDTree='
-                                .$vocab_id.' WHERE dty_ID='.$row[3];
-                    $mysqli->query($query);
-
-                }else{
-                    error_log(" bummer ".@$row[1]);                
-                }
-            }
-
-            
-        }
-        
-        $value = mysql__select_value($mysqli, "SHOW TABLES LIKE 'sysTableLastUpdated'");
-        if($value)
-        {        
-            $mysqli->query('DROP TRIGGER IF EXISTS sysUGrps_last_insert');
-            $mysqli->query('DROP TRIGGER IF EXISTS sysUGrps_last_update');
-            $mysqli->query('DROP TRIGGER IF EXISTS sysUsrGrpLinks_last_insert');
-            $mysqli->query('DROP TRIGGER IF EXISTS sysUsrGrpLinks_last_update');
-            $mysqli->query('DROP TRIGGER IF EXISTS defDetailTypes_last_insert');
-            $mysqli->query('DROP TRIGGER IF EXISTS defDetailTypes_last_update');
-            $mysqli->query('DROP TRIGGER IF EXISTS defDetailTypes_delete');
-            $mysqli->query('DROP TRIGGER IF EXISTS defRecTypes_last_insert');
-            $mysqli->query('DROP TRIGGER IF EXISTS defRecTypes_last_update');
-            $mysqli->query('DROP TRIGGER IF EXISTS defRecTypes_delete');
-            $mysqli->query('DROP TRIGGER IF EXISTS defRecStructure_last_insert');
-            $mysqli->query('DROP TRIGGER IF EXISTS defRecStructure_last_update');
-            $mysqli->query('DROP TRIGGER IF EXISTS defRecStructure_last_delete');
-            $mysqli->query('DROP TRIGGER IF EXISTS defRelationshipConstraints_last_insert');
-            $mysqli->query('DROP TRIGGER IF EXISTS defRelationshipConstraints_last_update');
-            $mysqli->query('DROP TRIGGER IF EXISTS defRelationshipConstraints_last_delete');
-            $mysqli->query('DROP TRIGGER IF EXISTS defRecTypeGroups_insert');
-            $mysqli->query('DROP TRIGGER IF EXISTS defRecTypeGroups_update');
-            $mysqli->query('DROP TRIGGER IF EXISTS defRecTypeGroups_delete');
-            $mysqli->query('DROP TRIGGER IF EXISTS defDetailTypeGroups_insert');
-            $mysqli->query('DROP TRIGGER IF EXISTS defDetailTypeGroups_update');
-            $mysqli->query('DROP TRIGGER IF EXISTS defDetailTypeGroups_delete');
-            $mysqli->query('DROP TABLE IF EXISTS sysTableLastUpdated');            
-        }
-        
-        
-    }
-    
-    // {"11":{"518":{},"519":{}},"94":{},"95":{},"3260":{"3115":{"3100":{}}}}
-    function _prepare_terms($parent_id, $terms){
-        $res = array();       
-        foreach($terms as $trm_ID=>$children){
-            array_push($res, array($parent_id, $trm_ID));
-            if($children && count($children)>0){
-                $res2 = _prepare_terms($trm_ID, $children);
-                $res = array_merge($res, $res2);
-            }
-        }
-        return $res;
-    }
-    */
-    
-    //
-    //  adds/modifies columns in defRecStructure
-    //     rst_DefaultValue, rst_PointerBrowseFilter, rst_PointerMode
-    // 
-    //  creates table usrWorkingSubsets
-    //
-    //  adds  defTerms.trm_SemanticReferenceURL
-    //
-    /*
-    function updateDatabseToLatest2($system){
-
-        $report = array();
-
-        $ret = false;        
-        $mysqli = $system->get_mysqli();
-    
-        $query = "SHOW COLUMNS FROM `defRecStructure` LIKE 'rst_DefaultValue'";
-        $res = $mysqli->query($query);
-        if($res){
-            $row = $res->fetch_assoc();
-            $method = null;
-            if(!$row){
-                $method = 'ADD';
-            }else if (strpos($row['Type'],'varchar')!==false){
-                $method = 'MODIFY';
-            }
-            if($method!=null){
-                $query = "ALTER TABLE `defRecStructure` $method "
-                        ." `rst_DefaultValue` text COMMENT 'The default value for this detail type for this record type'";
-                $res = $mysqli->query($query);
-                if(!$res){
-                    $system->addError(HEURIST_DB_ERROR, 'Cannot modify defRecStructure.rst_DefaultValue', $mysqli->error);
-                }
-            }
-        }
-        
-        //verify that required column exists
-        $query = "SHOW COLUMNS FROM `defRecStructure` LIKE 'rst_PointerMode'";
-        $res = $mysqli->query($query);
-        $row_cnt = $res->num_rows;
-        if($res) $res->close();
-        if(!$row_cnt){ //column not defined
-            //alter table
-            $query = "ALTER TABLE `defRecStructure` ADD COLUMN `rst_PointerBrowseFilter` varchar(255)  DEFAULT NULL COMMENT 'When adding record pointer values, defines a Heurist filter to restrict the list of target records browsed' AFTER `rst_CreateChildIfRecPtr`, ADD COLUMN `rst_PointerMode` enum('addorbrowse','addonly','browseonly') DEFAULT 'addorbrowse' COMMENT 'When adding record pointer values, default or null = show both add and browse, otherwise only allow add or only allow browse-for-existing' AFTER `rst_CreateChildIfRecPtr`;";
-             
-            $res = $mysqli->query($query);
-            if(!$res){
-                $system->addError(HEURIST_DB_ERROR, 'Cannot modify defRecStructure to add rst_PointerMode and rst_PointerBrowseFilter', $mysqli->error);
-                return false;
-            }
-            $report[] = 'defRecStructure: rst_PointerMode and rst_PointerBrowseFilter added';
-        }
-    
-    
-        //create new tables
-        $value = mysql__select_value($mysqli, "SHOW TABLES LIKE 'usrWorkingSubsets'");
-        if($value==null || $value==""){        
-            
-$query = 'CREATE TABLE usrWorkingSubsets ( '
-  ."wss_ID mediumint(8) unsigned NOT NULL auto_increment COMMENT 'Unique ID for the working subsets table',"
-  ."wss_RecID int(10) unsigned NOT NULL COMMENT 'ID of a Record to be included in the working subset for a specific user',"
-  ."wss_OwnerUGrpID smallint(5) unsigned NOT NULL COMMENT 'Person to whose working subset this Record ID is assigned',"
-  ."PRIMARY KEY  (wss_ID),"
-  .'KEY wss_RecID (wss_RecID),'
-  .'KEY wss_OwnerUGrpID (wss_OwnerUGrpID)'
-.") ENGINE=InnoDB COMMENT='Lists a set of Records to be included in a working subset for a user. Working susbset is an initial filter on all filter actions.'";
-            
-            $res = $mysqli->query($query);
-            if(!$res){
-                $system->addError(HEURIST_DB_ERROR, 'Cannot create usrWorkingSubsets', $mysqli->error);
-                return false;
-            }
-            $report[] = 'usrWorkingSubsets created';
-        }
-    
-    
-        
-        $query = "SHOW COLUMNS FROM `defTerms` LIKE 'trm_SemanticReferenceURL'";
-        $res = $mysqli->query($query);
-        $row_cnt = $res->num_rows;
-        if(!$row_cnt){ //column not defined
-            $query = 'ALTER TABLE `defTerms` ADD '
-                    .' `trm_SemanticReferenceURL` VARCHAR( 250 ) NULL'
-                    ." COMMENT 'The URI to a semantic definition or web page describing the term'"
-                    .' AFTER `trm_Code`';
-            $res = $mysqli->query($query);
-            if(!$res){
-                $system->addError(HEURIST_DB_ERROR, 'Cannot add defTerms.trm_SemanticReferenceURL', $mysqli->error);
-            }else{
-                $ret = true;    
-            }
-        }else{
-            $ret = true;
-        }
-        
-        return $ret;
-    }
-    */
-    //
-    //  Creates usrRecPermissions, sysDashboard
-    //
-    //  Adds sysIdentification.sys_TreatAsPlaceRefForMapping
-    //
-    //  Adds defRecStructure.rst_CreateChildIfRecPtr
-    //  Modifies sysUGrps.ugr_NavigationTree,   ugr_Preferences to MEDIUMTEXT
-    //           usrBookmarks.bkm_Notes
-    //
-    //  Adds detail field 247 (child to parent reference)   
-    //
-    /*
-    function updateDatabseToLatest($system){
-        
-        $mysqli = $system->get_mysqli();
-
-        $query = 'DROP TRIGGER IF EXISTS update_sys_index_trigger';
-        $res = $mysqli->query($query);
-
-        $report = array();
-        
-        //create new tables
-        $value = mysql__select_value($mysqli, "SHOW TABLES LIKE 'usrRecPermissions'");
-        if($value==null || $value==""){        
-        
-            $query = 'CREATE TABLE IF NOT EXISTS `usrRecPermissions` ('
-                  ."`rcp_ID` int(10) unsigned NOT NULL auto_increment COMMENT 'Primary table key',"
-                  ."`rcp_UGrpID` smallint(5) unsigned NOT NULL COMMENT 'ID of group',"
-                  ."`rcp_RecID` int(10) unsigned NOT NULL COMMENT 'The record to which permission is linked',"
-                  ."`rcp_Level` enum('view','edit') NOT NULL default 'view' COMMENT 'Level of permission',"
-                  ."PRIMARY KEY  (rcp_ID)"
-                .") ENGINE=InnoDB COMMENT='Permissions for groups to records'";
-            
-            $res = $mysqli->query($query);
-            if(!$res){
-                $system->addError(HEURIST_DB_ERROR, 'Cannot create usrRecPermissions', $mysqli->error);
-                return false;
-            }
-            $report[] = 'usrRecPermissions created';
-        }else{
-            $query = 'DROP INDEX rcp_composite_key ON usrRecPermissions';
-            $res = $mysqli->query($query);
-        }
-
-        //create new tables
-        $value = mysql__select_value($mysqli, "SHOW TABLES LIKE 'sysDashboard'");
-        if($value==null || $value==""){        
-            
-$query = 'CREATE TABLE sysDashboard ('
-  .'dsh_ID tinyint(3) unsigned NOT NULL auto_increment,'
-  ."dsh_Order smallint COMMENT 'Used to define the order in which the dashboard entries are shown',"
-  ."dsh_Label varchar(64) COMMENT 'The short text which will describe this function on the dashboard',"
-  ."dsh_Description varchar(1024) COMMENT 'A longer text giving more information about this function to show as a description below the label or as a rollover',"
-  ."dsh_Enabled enum('y','n') NOT NULL default 'y' COMMENT 'Allows unused functions to be retained so they can be switched back on',"
-  ."dsh_ShowIfNoRecords enum('y','n') NOT NULL default 'y' COMMENT 'Deteremines whether the function will be shown on the dashboard if there are no records in the database (eg. no point in showing searches if nothing to search)',"
-  ."dsh_CommandToRun varchar(64) COMMENT 'Name of commonly used functions',"
-  ."dsh_Parameters varchar(250) COMMENT 'Parameters to pass to the command eg the record type to create',"
-  ."PRIMARY KEY  (dsh_ID)"
-.") ENGINE=InnoDB COMMENT='Defines an editable list of shortcuts to functions to be displayed on a popup dashboard at startup unless turned off'";
-            
-            $res = $mysqli->query($query);
-            if(!$res){
-                $system->addError(HEURIST_DB_ERROR, 'Cannot create sysDashboard', $mysqli->error);
-                return false;
-            }
-            $report[] = 'sysDashboard created';
-        }
-
-        
-        $sysValues = $system->get_system();
-        //add new field into sysIdentification
-        if(!array_key_exists('sys_TreatAsPlaceRefForMapping', $sysValues)){
-            $query = "ALTER TABLE `sysIdentification` ADD COLUMN `sys_TreatAsPlaceRefForMapping` VARCHAR(1000) DEFAULT '' COMMENT 'Comma delimited list of additional rectypes (local codes) to be considered as Places'";
-            $res = $mysqli->query($query);
-            $report[] = 'sysIdentification: sys_TreatAsPlaceRefForMapping added';
-        }
-        
-        //verify that required column exists in defRecStructure  it was in 1.2
-        $query = "SHOW COLUMNS FROM `defRecStructure` LIKE 'rst_CreateChildIfRecPtr'";
-        $res = $mysqli->query($query);
-        $row_cnt = $res->num_rows;
-        if($res) $res->close();
-        if(!$row_cnt){ //column not defined
-            //alter table
-             $query = "ALTER TABLE `defRecStructure` ADD COLUMN `rst_CreateChildIfRecPtr` TINYINT(1) DEFAULT 0 COMMENT 'For pointer fields, flags that new records created from this field should be marked as children of the creating record' AFTER `rst_PtrFilteredIDs`;";
-             
-            $res = $mysqli->query($query);
-            if(!$res){
-                $system->addError(HEURIST_DB_ERROR, 'Cannot modify defRecStructure to add rst_CreateChildIfRecPtr', $mysqli->error);
-                return false;
-            }
-            $report[] = 'defRecStructure: rst_CreateChildIfRecPtr added';
-        }
-        
-
-        //verify that required column exists in sysUGrps
-        $query = "SHOW COLUMNS FROM `sysUGrps` LIKE 'ugr_NavigationTree'";
-        $res = $mysqli->query($query);
-        $row_cnt = $res->num_rows;
-        if($res) $res->close();
-        
-            //alter table
-            $query = "ALTER TABLE `sysUGrps` ".(!$row_cnt?'ADD':'MODIFY')
-                ." `ugr_NavigationTree` mediumtext COMMENT 'JSON array that describes treeview for filters'";
-                
-            $res = $mysqli->query($query);
-            if(!$res){
-                $system->addError(HEURIST_DB_ERROR, 'Cannot modify sysUGrps to add ugr_NavigationTree', $mysqli->error);
-                return false;
-            }
-        if(!$row_cnt) $report[] = 'sysUGrps: ugr_NavigationTree added';
-        
-        $query = "SHOW COLUMNS FROM `sysUGrps` LIKE 'ugr_Preferences'";
-        $res = $mysqli->query($query);
-        $row_cnt = $res->num_rows;
-        if($res) $res->close();
-        
-            $query = "ALTER TABLE `sysUGrps` ".(!$row_cnt?'ADD':'MODIFY')
-                ." `ugr_Preferences` mediumtext COMMENT 'JSON array with user preferences'";
-            $res = $mysqli->query($query);
-            if(!$res){
-                $system->addError(HEURIST_DB_ERROR, 'Cannot modify sysUGrps to add ugr_Preferences', $mysqli->error);
-                return false;
-            }
-            if(!$row_cnt) $report[] = 'sysUGrps: ugr_Preferences added';
-        
-        
-        //verify that required column exists in sysUGrps
-        $query = "SHOW COLUMNS FROM `usrBookmarks` LIKE 'bkm_Notes'";
-        $res = $mysqli->query($query);
-        $row_cnt = $res->num_rows;
-        if($res) $res->close();
-        if(!$row_cnt){
-            //alter table
-            $query = "ALTER TABLE `usrBookmarks` ADD `bkm_Notes` mediumtext COMMENT 'Personal notes'";
-            $res = $mysqli->query($query);
-            if(!$res){
-                $system->addError(HEURIST_DB_ERROR, 'Cannot modify usrBookmarks to add bkm_Notes', $mysqli->error);
-                return false;
-            }
-            $report[] = 'usrBookmarks: bkm_Notes added';
-        }
-
-        
-        //insert special field type - reference to parent record
-        $dty_ID = mysql__select_value($mysqli,  
-            "SELECT dty_ID FROM `defDetailTypes` WHERE dty_OriginatingDBID=2 AND dty_IDInOriginatingDB=247");
-
-        if($dty_ID==null || !($dty_ID>0)){
-            
-            $res = $mysqli->query("INSERT INTO `defDetailTypes`
-(`dty_Name`, `dty_Documentation`, `dty_Type`, `dty_HelpText`, `dty_ExtendedDescription`, `dty_EntryMask`, `dty_Status`, `dty_OriginatingDBID`, `dty_NameInOriginatingDB`, `dty_IDInOriginatingDB`, `dty_DetailTypeGroupID`, `dty_OrderInGroup`, `dty_JsonTermIDTree`, `dty_TermIDTreeNonSelectableIDs`, `dty_PtrTargetRectypeIDs`, `dty_FieldSetRecTypeID`, `dty_ShowInLists`, `dty_NonOwnerVisibility` ,`dty_LocallyModified`) VALUES
-('Parent entity','Please document the nature of this detail type (field)) ...','resource','The parent of a child record (a record which is specifically linked to one and only one parent record by a pointer field in each direction)', '','','approved','2', '','247','99', '0','','', '','0','1','viewable','0')");
-
-           if(!$res){
-                $system->addError(HEURIST_DB_ERROR, 'Cannot modify defDetailTypes parent entity field (2-247)', $mysqli->error);
-                return false;
-           }else{
-                $report[] = 'defDetailTypes: parent entity field (2-247) added';
-           }
-        }
-        
-        return $report;
-    }
-    */
 
     /**
     * Check that db function exists
@@ -1232,11 +745,6 @@ $query = 'CREATE TABLE sysDashboard ('
 
             $res = false;
 
-/*            
-            isFunctionExists($mysqli, 'NEW_LEVENSHTEIN') && isFunctionExists($mysqli, 'NEW_LIPOSUCTION')
-                && isFunctionExists($mysqli, 'hhash') && isFunctionExists($mysqli, 'simple_hash')
-                //&& isFunctionExists('set_all_hhash')
-*/                            
             if(!isFunctionExists($mysqli, 'getTemporalDateString')){ //need drop old functions
                 include(dirname(__FILE__).'/../utilities/utils_db_load_script.php'); // used to load procedures/triggers
                 if(db_script(HEURIST_DBNAME_FULL, dirname(__FILE__).'/../../admin/setup/dbcreate/addProceduresTriggers.sql', false)){
@@ -1254,10 +762,12 @@ $query = 'CREATE TABLE sysDashboard ('
     //
     function checkDatabaseFunctionsForDuplications($mysqli){
         
-         if(!isFunctionExists($mysqli, 'LEVENSHTEIN_LIMIT')){
+         if(!isFunctionExists($mysqli, 'NEW_LIPOSUCTION_255')){
                 include(dirname(__FILE__).'/../utilities/utils_db_load_script.php'); // used to load procedures/triggers
                 if(db_script(HEURIST_DBNAME_FULL, dirname(__FILE__).'/../../admin/setup/dbcreate/addFunctions.sql', false)){
                     $res = true;
+                }else{
+                    $res = false;
                 }
          }else{
                 $res = true;
@@ -1586,8 +1096,9 @@ error_log('UPDATED '.$session_id.'  '.$value);
         return $res;
     }    
 
-    //
-    //
+    // see DBUpgrade_1.2.0_to_1.3.0.php
+    // Adds trash group
+    // Adds sysIdentification.sys_ExternalReferenceLookups 
     //
     function updateDatabseToLatest4($system){
         
@@ -1639,6 +1150,531 @@ $query = 'INSERT INTO defDetailTypeGroups (dtg_Name,dtg_Order,dtg_Description) '
         }
         
 */    
+
+    
+    
+    //  see DBUpgrade_1.2.0_to_1.3.0.php
+    /*
+    
+    //  several methods to keep databases up to date 
+    //
+    function updateDatabseToLatest3($system){
+        
+        return;
+        
+        $ret = false;        
+        $mysqli = $system->get_mysqli();
+
+        $version = mysql__select_row_assoc($mysqli, "SELECT sys_dbVersion,sys_dbSubVersion,sys_dbSubSubVersion FROM sysIdentification");
+
+        if (!($version['sys_dbVersion']==1 && $version['sys_dbSubVersion']==2 &&
+           $version['sys_dbSubSubVersion']<1)){
+           
+           return;     
+        }else{
+            $mysqli->query('UPDATE sysIdentification SET sys_dbSubSubVersion=1 WHERE sys_ID=1');
+        }
+      
+        //create new tables
+        $value = mysql__select_value($mysqli, "SHOW TABLES LIKE 'defVocabularyGroups'");
+        if($value==null || $value==""){        
+            
+$query = "CREATE TABLE defVocabularyGroups (
+  vcg_ID tinyint(3) unsigned NOT NULL auto_increment COMMENT 'Vocabulary group ID referenced in vocabs editor',
+  vcg_Name varchar(40) NOT NULL COMMENT 'Name for this group of vocabularies, shown as heading in lists',
+  vcg_Domain enum('enum','relation') NOT NULL default 'enum' COMMENT 'Field of application of the vocabulary - can be both',
+  vcg_Order tinyint(3) unsigned zerofill NOT NULL default '002' COMMENT 'Ordering of vocabulary groups within pulldown lists',
+  vcg_Description varchar(250) default NULL COMMENT 'A description of the vocabulary group and its purpose',
+  vcg_Modified timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP COMMENT 'Date of last modification of this vocabulary group record, used to get last updated date for table',
+  PRIMARY KEY  (vcg_ID),
+  UNIQUE KEY vcg_Name (vcg_Name)
+) ENGINE=InnoDB COMMENT='Grouping mechanism for vocabularies in vocabularies/terms editor'";
+            
+            $res = $mysqli->query($query);
+            if(!$res){
+                $system->addError(HEURIST_DB_ERROR, 'Cannot create defVocabularyGroups', $mysqli->error);
+                return false;
+            }
+            $report[] = 'defVocabularyGroups created';
+            
+            $mysqli->query('INSERT INTO defVocabularyGroups (vcg_Name) VALUES ("User-defined")');
+            $mysqli->query('INSERT INTO defVocabularyGroups (vcg_Name) VALUES ("Semantic web")');
+            $mysqli->query('INSERT INTO defVocabularyGroups (vcg_Name) VALUES ("Place")');
+            $mysqli->query('INSERT INTO defVocabularyGroups (vcg_Name) VALUES ("People,  events, biography")');
+            $mysqli->query('INSERT INTO defVocabularyGroups (vcg_Name) VALUES ("Bibliographic, copyright")');
+            $mysqli->query('INSERT INTO defVocabularyGroups (vcg_Name) VALUES ("Spatial")');
+            $mysqli->query('INSERT INTO defVocabularyGroups (vcg_Name) VALUES ("Categorisation and flags")');
+            $mysqli->query('INSERT INTO defVocabularyGroups (vcg_Name) VALUES ("Internal")');
+            $mysqli->query('INSERT INTO defVocabularyGroups (vcg_Name,vcg_Domain) VALUES ("RELATIONSHIPS","relation")');
+            
+            //alter table
+            //verify that required column exists
+            $query = "SHOW COLUMNS FROM `defTerms` LIKE 'trm_VocabularyGroupID'";
+            $res = $mysqli->query($query);
+            $row_cnt = $res->num_rows;
+            if($res) $res->close();
+            if(!$row_cnt){ //column not defined
+                $query = "ALTER TABLE `defTerms` ADD COLUMN trm_VocabularyGroupID smallint(5) unsigned NULL default '1' COMMENT 'Vocabulary group to which this term belongs, if a top level term (vocabulary)'";
+                 
+                $res = $mysqli->query($query);
+                if(!$res){
+                    $system->addError(HEURIST_DB_ERROR, 'Cannot modify defTerms to add trm_VocabularyGroupID', $mysqli->error);
+                    return false;
+                }
+            }
+            $mysqli->query('UPDATE defTerms set trm_VocabularyGroupID=9 where (NOT (trm_ParentTermID>0)) and trm_Domain="relation"');
+
+            //Semantic web
+            $mysqli->query('UPDATE defTerms set trm_VocabularyGroupID=2 where trm_OriginatingDBID=2 AND '
+            .'trm_IDInOriginatingDB IN (5668,5520,5805,5792,6091,5445,5842,6177,6214)');
+            //Place
+            $mysqli->query('UPDATE defTerms set trm_VocabularyGroupID=3 where (trm_OriginatingDBID=2 AND '
+            .'trm_IDInOriginatingDB IN (509,506)) OR (trm_OriginatingDBID=3 AND trm_IDInOriginatingDB=5039');
+            //People,  events, biography
+            $mysqli->query('UPDATE defTerms set trm_VocabularyGroupID=4 where (trm_OriginatingDBID=2 AND '
+            .'trm_IDInOriginatingDB IN (5389,500,501,507,496,497,5432,505,511,513))'
+            .' OR (trm_OriginatingDBID=3 AND trm_IDInOriginatingDB=5065)'
+            .' OR (trm_OriginatingDBID=9 AND trm_IDInOriginatingDB=3297)'
+            .' OR (trm_OriginatingDBID=1161 AND trm_IDInOriginatingDB=5419)');
+            //Bibliographic, copyright
+            $mysqli->query('UPDATE defTerms set trm_VocabularyGroupID=5 where (trm_OriginatingDBID=2 AND '
+            .'trm_IDInOriginatingDB=503)'
+            .' OR (trm_OriginatingDBID=3 AND trm_IDInOriginatingDB IN (5024,5021,5012,5099))'
+            .' OR (trm_OriginatingDBID=1144 AND trm_IDInOriginatingDB=5986)');
+            //Spatial
+            $mysqli->query('UPDATE defTerms set trm_VocabularyGroupID=6 where (trm_OriginatingDBID=2 AND '
+            .'trm_IDInOriginatingDB IN (512,5362,5440,510,546,551))'
+            .' OR (trm_OriginatingDBID=3 AND trm_IDInOriginatingDB IN (5087,5080,5091,5073,5080,5028,5083,5077))'
+            .' OR (trm_OriginatingDBID=1125 AND trm_IDInOriginatingDB IN (3659,3339))');
+            //Categorisation and flags
+            $mysqli->query('UPDATE defTerms set trm_VocabularyGroupID=7 where (trm_OriginatingDBID=2 AND '
+            .'trm_IDInOriginatingDB IN (508,498,530))'
+            .' OR (trm_OriginatingDBID=3 AND trm_IDInOriginatingDB IN (5030,3440))'
+            .' OR (trm_OriginatingDBID=99 AND trm_IDInOriginatingDB=5445)'
+            .' OR (trm_OriginatingDBID=1125 AND trm_IDInOriginatingDB=3339)'
+            .' OR (trm_OriginatingDBID=1144 AND trm_IDInOriginatingDB IN (6002,5993))');
+            //Internal
+            $mysqli->query('UPDATE defTerms set trm_VocabularyGroupID=8 where trm_OriginatingDBID=2 AND '
+            .'trm_IDInOriginatingDB IN (533,3272,520,6252,6250)');
+            
+            
+            $report[] = 'defTerms: trm_VocabularyGroupID added';            
+            
+        }
+             
+        //$mysqli->query('DROP TABLE IF EXISTS defTermsLinks');
+             
+        $value = mysql__select_value($mysqli, "SHOW TABLES LIKE 'defTermsLinks'");
+        if($value==null || $value==""){        
+            
+$query = "CREATE TABLE defTermsLinks (
+  trl_ID mediumint(8) unsigned NOT NULL auto_increment COMMENT 'Primary key for vocablary-terms hierarchy',
+  trl_ParentID smallint(5) unsigned NOT NULL COMMENT 'The ID of the parent/owner term in the hierarchy',
+  trl_TermID smallint(5) unsigned NOT NULL COMMENT 'Term identificator',
+  PRIMARY KEY  (trl_ID),
+  UNIQUE KEY trl_CompositeKey (trl_ParentID,trl_TermID)
+) ENGINE=InnoDB COMMENT='Identifies hierarchy of vocabularies and terms'";
+            
+            $res = $mysqli->query($query);
+            if(!$res){
+                $system->addError(HEURIST_DB_ERROR, 'Cannot create defTermsLinks', $mysqli->error);
+                return false;
+            }
+            $report[] = 'defTermsLinks created';
+            
+            $mysqli->query('INSERT INTO defTermsLinks (trl_ParentID, trl_TermID) '
+            .'SELECT trm_ParentTermID, trm_ID FROM defTerms WHERE trm_ParentTermID>0');
+            
+            $res = $mysqli->query('DROP TRIGGER IF EXISTS defTerms_last_insert');
+
+            ///$res = $mysqli->query('DELIMITER $$');
+            $res = $mysqli->query('CREATE DEFINER=CURRENT_USER TRIGGER `defTerms_last_insert` AFTER INSERT ON `defTerms` FOR EACH ROW
+            begin
+                if NEW.trm_ParentTermID > 0 then
+                    insert into defTermsLinks (trl_ParentID,trl_TermID)
+                            values (NEW.trm_ParentTermID, NEW.trm_ID);
+                end if;
+            end');  
+            
+            $res = $mysqli->query('DROP TRIGGER IF EXISTS defTerms_last_update');
+
+            $res = $mysqli->query('CREATE DEFINER=CURRENT_USER TRIGGER `defTerms_last_update` AFTER UPDATE ON `defTerms`
+            FOR EACH ROW
+            begin
+                if NEW.trm_ParentTermID != OLD.trm_ParentTermID then
+                    update defTermsLinks SET trl_ParentID=NEW.trm_ParentTermID
+                        where trl_ParentID=OLD.trm_ParentTermID and trl_TermID=NEW.trm_ID;
+                end if;
+            end');
+            
+            $res = $mysqli->query('DROP TRIGGER IF EXISTS defTerms_last_delete');
+            $res = $mysqli->query('CREATE DEFINER=CURRENT_USER  TRIGGER `defTerms_last_delete` AFTER DELETE ON `defTerms` FOR EACH ROW
+            begin
+                delete ignore from defTermsLinks where trl_TermID=OLD.trm_ID || trl_ParentID=OLD.trm_ID;
+            end');            
+            //$mysqli->query('DELIMITER ;');            
+
+            $vocab_group = 7;//
+            
+            //converts custom-selected term tree to vocab with references
+            $query = 'SELECT dty_Name,dty_JsonTermIDTree, dty_TermIDTreeNonSelectableIDs, dty_ID, dty_Type FROM '
+                     .'defDetailTypes WHERE  dty_Type="enum" or dty_Type="relmarker"';
+        
+            $res = $mysqli->query($query);
+            while (($row = $res->fetch_row())) {
+                //if the only numeric - assume this is vocabulary
+                if(@$row[1]>0 && is_numeric(@$row[1])){
+                    continue;
+                }
+                
+                $domain = $row[4]=='enum'?'enum':'relation';
+                $name = $row[0].' - selection';
+                
+                $cnt = mysql__select_value($mysqli, "SELECT count(trm_ID) FROM defTerms WHERE trm_Label LIKE '".$name."%'");
+                if($cnt>0){
+                   $name = $name . '  ' . $cnt; 
+                }
+
+error_log($row[3].'  '.$name);                
+                
+                //{"11":{"518":{},"519":{}},"94":{},"95":{},"3260":{"3115":{"3100":{}}}}
+                $terms = json_decode(@$row[1], true);
+                
+                if($terms){
+                    
+                    //add new vocabulary
+                    $vocab_id = mysql__insertupdate($mysqli, 'defTerms', 'trm', array(
+                                'trm_Label'=>$name,
+                                'trm_Domain'=>$domain,
+                                'trm_VocabularyGroupID'=>$vocab_group));
+                        
+                    //parent->term_id
+                    $terms_links = _prepare_terms($vocab_id, $terms);
+                    
+                    foreach ($terms_links as $line){
+                        $mysqli->query('INSERT INTO defTermsLinks(trl_ParentID, trl_TermID) VALUES('.$line[0].','.$line[1].')');    
+                    }
+
+                    //dty_TermIDTreeNonSelectableIDs=dty_JsonTermIDTree, 
+                    $query = 'UPDATE defDetailTypes SET dty_JsonTermIDTree='
+                                .$vocab_id.' WHERE dty_ID='.$row[3];
+                    $mysqli->query($query);
+
+                }else{
+                    error_log(" bummer ".@$row[1]);                
+                }
+            }
+
+            
+        }
+        
+        $value = mysql__select_value($mysqli, "SHOW TABLES LIKE 'sysTableLastUpdated'");
+        if($value)
+        {        
+            $mysqli->query('DROP TRIGGER IF EXISTS sysUGrps_last_insert');
+            $mysqli->query('DROP TRIGGER IF EXISTS sysUGrps_last_update');
+            $mysqli->query('DROP TRIGGER IF EXISTS sysUsrGrpLinks_last_insert');
+            $mysqli->query('DROP TRIGGER IF EXISTS sysUsrGrpLinks_last_update');
+            $mysqli->query('DROP TRIGGER IF EXISTS defDetailTypes_last_insert');
+            $mysqli->query('DROP TRIGGER IF EXISTS defDetailTypes_last_update');
+            $mysqli->query('DROP TRIGGER IF EXISTS defDetailTypes_delete');
+            $mysqli->query('DROP TRIGGER IF EXISTS defRecTypes_last_insert');
+            $mysqli->query('DROP TRIGGER IF EXISTS defRecTypes_last_update');
+            $mysqli->query('DROP TRIGGER IF EXISTS defRecTypes_delete');
+            $mysqli->query('DROP TRIGGER IF EXISTS defRecStructure_last_insert');
+            $mysqli->query('DROP TRIGGER IF EXISTS defRecStructure_last_update');
+            $mysqli->query('DROP TRIGGER IF EXISTS defRecStructure_last_delete');
+            $mysqli->query('DROP TRIGGER IF EXISTS defRelationshipConstraints_last_insert');
+            $mysqli->query('DROP TRIGGER IF EXISTS defRelationshipConstraints_last_update');
+            $mysqli->query('DROP TRIGGER IF EXISTS defRelationshipConstraints_last_delete');
+            $mysqli->query('DROP TRIGGER IF EXISTS defRecTypeGroups_insert');
+            $mysqli->query('DROP TRIGGER IF EXISTS defRecTypeGroups_update');
+            $mysqli->query('DROP TRIGGER IF EXISTS defRecTypeGroups_delete');
+            $mysqli->query('DROP TRIGGER IF EXISTS defDetailTypeGroups_insert');
+            $mysqli->query('DROP TRIGGER IF EXISTS defDetailTypeGroups_update');
+            $mysqli->query('DROP TRIGGER IF EXISTS defDetailTypeGroups_delete');
+            $mysqli->query('DROP TABLE IF EXISTS sysTableLastUpdated');            
+        }
+        
+        
+    }
+    
+    // {"11":{"518":{},"519":{}},"94":{},"95":{},"3260":{"3115":{"3100":{}}}}
+    function _prepare_terms($parent_id, $terms){
+        $res = array();       
+        foreach($terms as $trm_ID=>$children){
+            array_push($res, array($parent_id, $trm_ID));
+            if($children && count($children)>0){
+                $res2 = _prepare_terms($trm_ID, $children);
+                $res = array_merge($res, $res2);
+            }
+        }
+        return $res;
+    }
+    
+    
+    //  see DBUpgrade_1.2.0_to_1.3.0
+    //  adds/modifies columns in defRecStructure
+    //     rst_DefaultValue, rst_PointerBrowseFilter, rst_PointerMode
+    // 
+    //  creates table usrWorkingSubsets
+    //
+    //  adds  defTerms.trm_SemanticReferenceURL
+    //
+    function updateDatabseToLatest2($system){
+
+        $report = array();
+
+        $ret = false;        
+        $mysqli = $system->get_mysqli();
+    
+        $query = "SHOW COLUMNS FROM `defRecStructure` LIKE 'rst_DefaultValue'";
+        $res = $mysqli->query($query);
+        if($res){
+            $row = $res->fetch_assoc();
+            $method = null;
+            if(!$row){
+                $method = 'ADD';
+            }else if (strpos($row['Type'],'varchar')!==false){
+                $method = 'MODIFY';
+            }
+            if($method!=null){
+                $query = "ALTER TABLE `defRecStructure` $method "
+                        ." `rst_DefaultValue` text COMMENT 'The default value for this detail type for this record type'";
+                $res = $mysqli->query($query);
+                if(!$res){
+                    $system->addError(HEURIST_DB_ERROR, 'Cannot modify defRecStructure.rst_DefaultValue', $mysqli->error);
+                }
+            }
+        }
+        
+        //verify that required column exists  it was in v1.2
+        $query = "SHOW COLUMNS FROM `defRecStructure` LIKE 'rst_PointerMode'";
+        $res = $mysqli->query($query);
+        $row_cnt = $res->num_rows;
+        if($res) $res->close();
+        if(!$row_cnt){ //column not defined
+            //alter table
+            $query = "ALTER TABLE `defRecStructure` ADD COLUMN `rst_PointerBrowseFilter` varchar(255)  DEFAULT NULL COMMENT 'When adding record pointer values, defines a Heurist filter to restrict the list of target records browsed' AFTER `rst_CreateChildIfRecPtr`, ADD COLUMN `rst_PointerMode` enum('addorbrowse','addonly','browseonly') DEFAULT 'addorbrowse' COMMENT 'When adding record pointer values, default or null = show both add and browse, otherwise only allow add or only allow browse-for-existing' AFTER `rst_CreateChildIfRecPtr`;";
+             
+            $res = $mysqli->query($query);
+            if(!$res){
+                $system->addError(HEURIST_DB_ERROR, 'Cannot modify defRecStructure to add rst_PointerMode and rst_PointerBrowseFilter', $mysqli->error);
+                return false;
+            }
+            $report[] = 'defRecStructure: rst_PointerMode and rst_PointerBrowseFilter added';
+        }
+    
+    
+        //create new tables
+        $value = mysql__select_value($mysqli, "SHOW TABLES LIKE 'usrWorkingSubsets'");
+        if($value==null || $value==""){        
+            
+$query = 'CREATE TABLE usrWorkingSubsets ( '
+  ."wss_ID mediumint(8) unsigned NOT NULL auto_increment COMMENT 'Unique ID for the working subsets table',"
+  ."wss_RecID int(10) unsigned NOT NULL COMMENT 'ID of a Record to be included in the working subset for a specific user',"
+  ."wss_OwnerUGrpID smallint(5) unsigned NOT NULL COMMENT 'Person to whose working subset this Record ID is assigned',"
+  ."PRIMARY KEY  (wss_ID),"
+  .'KEY wss_RecID (wss_RecID),'
+  .'KEY wss_OwnerUGrpID (wss_OwnerUGrpID)'
+.") ENGINE=InnoDB COMMENT='Lists a set of Records to be included in a working subset for a user. Working susbset is an initial filter on all filter actions.'";
+            
+            $res = $mysqli->query($query);
+            if(!$res){
+                $system->addError(HEURIST_DB_ERROR, 'Cannot create usrWorkingSubsets', $mysqli->error);
+                return false;
+            }
+            $report[] = 'usrWorkingSubsets created';
+        }
+    
+    
+        
+        $query = "SHOW COLUMNS FROM `defTerms` LIKE 'trm_SemanticReferenceURL'";
+        $res = $mysqli->query($query);
+        $row_cnt = $res->num_rows;
+        if(!$row_cnt){ //column not defined
+            $query = 'ALTER TABLE `defTerms` ADD '
+                    .' `trm_SemanticReferenceURL` VARCHAR( 250 ) NULL'
+                    ." COMMENT 'The URI to a semantic definition or web page describing the term'"
+                    .' AFTER `trm_Code`';
+            $res = $mysqli->query($query);
+            if(!$res){
+                $system->addError(HEURIST_DB_ERROR, 'Cannot add defTerms.trm_SemanticReferenceURL', $mysqli->error);
+            }else{
+                $ret = true;    
+            }
+        }else{
+            $ret = true;
+        }
+        
+        return $ret;
+    }
+    
+    //  see DBUpgrade_1.2.0_to_1.3.0
+    //  Creates usrRecPermissions, sysDashboard
+    //
+    //  Adds sysIdentification.sys_TreatAsPlaceRefForMapping
+    //
+    //  Adds defRecStructure.rst_CreateChildIfRecPtr
+    //  Modifies sysUGrps.ugr_NavigationTree,   ugr_Preferences to MEDIUMTEXT
+    //           usrBookmarks.bkm_Notes
+    //
+    //  Adds detail field 247 (child to parent reference)   
+    //
+    function updateDatabseToLatest($system){
+        
+        $mysqli = $system->get_mysqli();
+
+        $query = 'DROP TRIGGER IF EXISTS update_sys_index_trigger';
+        $res = $mysqli->query($query);
+
+        $report = array();
+        
+        //create new tables
+        $value = mysql__select_value($mysqli, "SHOW TABLES LIKE 'usrRecPermissions'");
+        if($value==null || $value==""){        
+        
+            $query = 'CREATE TABLE IF NOT EXISTS `usrRecPermissions` ('
+                  ."`rcp_ID` int(10) unsigned NOT NULL auto_increment COMMENT 'Primary table key',"
+                  ."`rcp_UGrpID` smallint(5) unsigned NOT NULL COMMENT 'ID of group',"
+                  ."`rcp_RecID` int(10) unsigned NOT NULL COMMENT 'The record to which permission is linked',"
+                  ."`rcp_Level` enum('view','edit') NOT NULL default 'view' COMMENT 'Level of permission',"
+                  ."PRIMARY KEY  (rcp_ID)"
+                .") ENGINE=InnoDB COMMENT='Permissions for groups to records'";
+            
+            $res = $mysqli->query($query);
+            if(!$res){
+                $system->addError(HEURIST_DB_ERROR, 'Cannot create usrRecPermissions', $mysqli->error);
+                return false;
+            }
+            $report[] = 'usrRecPermissions created';
+        }else{
+            $query = 'DROP INDEX rcp_composite_key ON usrRecPermissions';
+            $res = $mysqli->query($query);
+        }
+
+        //create new tables
+        $value = mysql__select_value($mysqli, "SHOW TABLES LIKE 'sysDashboard'");
+        if($value==null || $value==""){        
+            
+$query = 'CREATE TABLE sysDashboard ('
+  .'dsh_ID tinyint(3) unsigned NOT NULL auto_increment,'
+  ."dsh_Order smallint COMMENT 'Used to define the order in which the dashboard entries are shown',"
+  ."dsh_Label varchar(64) COMMENT 'The short text which will describe this function on the dashboard',"
+  ."dsh_Description varchar(1024) COMMENT 'A longer text giving more information about this function to show as a description below the label or as a rollover',"
+  ."dsh_Enabled enum('y','n') NOT NULL default 'y' COMMENT 'Allows unused functions to be retained so they can be switched back on',"
+  ."dsh_ShowIfNoRecords enum('y','n') NOT NULL default 'y' COMMENT 'Deteremines whether the function will be shown on the dashboard if there are no records in the database (eg. no point in showing searches if nothing to search)',"
+  ."dsh_CommandToRun varchar(64) COMMENT 'Name of commonly used functions',"
+  ."dsh_Parameters varchar(250) COMMENT 'Parameters to pass to the command eg the record type to create',"
+  ."PRIMARY KEY  (dsh_ID)"
+.") ENGINE=InnoDB COMMENT='Defines an editable list of shortcuts to functions to be displayed on a popup dashboard at startup unless turned off'";
+            
+            $res = $mysqli->query($query);
+            if(!$res){
+                $system->addError(HEURIST_DB_ERROR, 'Cannot create sysDashboard', $mysqli->error);
+                return false;
+            }
+            $report[] = 'sysDashboard created';
+        }
+
+        
+        $sysValues = $system->get_system();
+        //add new field into sysIdentification
+        if(!array_key_exists('sys_TreatAsPlaceRefForMapping', $sysValues)){
+            $query = "ALTER TABLE `sysIdentification` ADD COLUMN `sys_TreatAsPlaceRefForMapping` VARCHAR(1000) DEFAULT '' COMMENT 'Comma delimited list of additional rectypes (local codes) to be considered as Places'";
+            $res = $mysqli->query($query);
+            $report[] = 'sysIdentification: sys_TreatAsPlaceRefForMapping added';
+        }
+        
+        //verify that required column exists in defRecStructure  it was in v 1.2
+        $query = "SHOW COLUMNS FROM `defRecStructure` LIKE 'rst_CreateChildIfRecPtr'";
+        $res = $mysqli->query($query);
+        $row_cnt = $res->num_rows;
+        if($res) $res->close();
+        if(!$row_cnt){ //column not defined
+            //alter table
+             $query = "ALTER TABLE `defRecStructure` ADD COLUMN `rst_CreateChildIfRecPtr` TINYINT(1) DEFAULT 0 COMMENT 'For pointer fields, flags that new records created from this field should be marked as children of the creating record' AFTER `rst_PtrFilteredIDs`;";
+             
+            $res = $mysqli->query($query);
+            if(!$res){
+                $system->addError(HEURIST_DB_ERROR, 'Cannot modify defRecStructure to add rst_CreateChildIfRecPtr', $mysqli->error);
+                return false;
+            }
+            $report[] = 'defRecStructure: rst_CreateChildIfRecPtr added';
+        }
+        
+
+        //verify that required column exists in sysUGrps
+        $query = "SHOW COLUMNS FROM `sysUGrps` LIKE 'ugr_NavigationTree'";
+        $res = $mysqli->query($query);
+        $row_cnt = $res->num_rows;
+        if($res) $res->close();
+        
+            //alter table
+            $query = "ALTER TABLE `sysUGrps` ".(!$row_cnt?'ADD':'MODIFY')
+                ." `ugr_NavigationTree` mediumtext COMMENT 'JSON array that describes treeview for filters'";
+                
+            $res = $mysqli->query($query);
+            if(!$res){
+                $system->addError(HEURIST_DB_ERROR, 'Cannot modify sysUGrps to add ugr_NavigationTree', $mysqli->error);
+                return false;
+            }
+        if(!$row_cnt) $report[] = 'sysUGrps: ugr_NavigationTree added';
+        
+        $query = "SHOW COLUMNS FROM `sysUGrps` LIKE 'ugr_Preferences'";
+        $res = $mysqli->query($query);
+        $row_cnt = $res->num_rows;
+        if($res) $res->close();
+        
+            $query = "ALTER TABLE `sysUGrps` ".(!$row_cnt?'ADD':'MODIFY')
+                ." `ugr_Preferences` mediumtext COMMENT 'JSON array with user preferences'";
+            $res = $mysqli->query($query);
+            if(!$res){
+                $system->addError(HEURIST_DB_ERROR, 'Cannot modify sysUGrps to add ugr_Preferences', $mysqli->error);
+                return false;
+            }
+            if(!$row_cnt) $report[] = 'sysUGrps: ugr_Preferences added';
+        
+        
+        //verify that required column exists in sysUGrps
+        $query = "SHOW COLUMNS FROM `usrBookmarks` LIKE 'bkm_Notes'";
+        $res = $mysqli->query($query);
+        $row_cnt = $res->num_rows;
+        if($res) $res->close();
+        if(!$row_cnt){
+            //alter table
+            $query = "ALTER TABLE `usrBookmarks` ADD `bkm_Notes` mediumtext COMMENT 'Personal notes'";
+            $res = $mysqli->query($query);
+            if(!$res){
+                $system->addError(HEURIST_DB_ERROR, 'Cannot modify usrBookmarks to add bkm_Notes', $mysqli->error);
+                return false;
+            }
+            $report[] = 'usrBookmarks: bkm_Notes added';
+        }
+
+        
+        //insert special field type - reference to parent record
+        $dty_ID = mysql__select_value($mysqli,  
+            "SELECT dty_ID FROM `defDetailTypes` WHERE dty_OriginatingDBID=2 AND dty_IDInOriginatingDB=247");
+
+        if($dty_ID==null || !($dty_ID>0)){
+            
+            $res = $mysqli->query("INSERT INTO `defDetailTypes`
+(`dty_Name`, `dty_Documentation`, `dty_Type`, `dty_HelpText`, `dty_ExtendedDescription`, `dty_EntryMask`, `dty_Status`, `dty_OriginatingDBID`, `dty_NameInOriginatingDB`, `dty_IDInOriginatingDB`, `dty_DetailTypeGroupID`, `dty_OrderInGroup`, `dty_JsonTermIDTree`, `dty_TermIDTreeNonSelectableIDs`, `dty_PtrTargetRectypeIDs`, `dty_FieldSetRecTypeID`, `dty_ShowInLists`, `dty_NonOwnerVisibility` ,`dty_LocallyModified`) VALUES
+('Parent entity','Please document the nature of this detail type (field)) ...','resource','The parent of a child record (a record which is specifically linked to one and only one parent record by a pointer field in each direction)', '','','approved','2', '','247','99', '0','','', '','0','1','viewable','0')");
+
+           if(!$res){
+                $system->addError(HEURIST_DB_ERROR, 'Cannot modify defDetailTypes parent entity field (2-247)', $mysqli->error);
+                return false;
+           }else{
+                $report[] = 'defDetailTypes: parent entity field (2-247) added';
+           }
+        }
+        
+        return $report;
+    }
+    */    
+
         
     }  
 ?>

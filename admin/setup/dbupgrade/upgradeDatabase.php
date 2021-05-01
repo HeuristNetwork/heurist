@@ -302,17 +302,29 @@ if(!defined('PDIR')){
 <?php
     function executeScript($filename){
         
+        global $system;
+        
         if(db_script(HEURIST_DBNAME_FULL, $filename)){
             return true;
         }else{
 ?>                        
                 <div class="ui-state-error" style="width:90%;margin:auto;margin-top:10px;padding:10px;">
                     <span class="ui-icon ui-icon-alert" style="float: left; margin: .3em;"></span>
-                    Error: Unable to execute $filename for database <?php echo HEURIST_DBNAME; ?><br>
+                    Error: Unable to execute <?php echo $filename;?> for database <?php echo HEURIST_DBNAME; ?><br>
                     Please check whether this file is valid; <?php echo CONTACT_HEURIST_TEAM;?> if needed<br>
-                    <button onclick="showLoginDialog(true)">Login</button>
                 </div>
-<?php                        
+<?php                  
+                if(!$system->is_admin()){
+                ?>
+        <div class="ui-state-error" style="width:90%;margin:auto;margin-top:10px;padding:10px;">
+            <span class="ui-icon ui-icon-alert" style="float: left; margin: .3em;"></span>
+            You must be logged in as database owner to upgrade the database structure
+            <button onclick="doLogin(true)">Login</button>
+        </div>
+                <?php
+                }
+
+      
             return false;
         }
 

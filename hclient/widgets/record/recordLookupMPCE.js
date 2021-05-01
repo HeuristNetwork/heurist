@@ -327,7 +327,7 @@ $.widget( "heurist.recordLookupMPCE", $.heurist.recordAction, {
             select_mode: (false)?'select_multi':'select_single',    // enable multi select or not, current set to single select
             select_return_mode: 'recordset', //or 'ids' (default)
             edit_mode: 'popup',
-            selectOnSave: false, // true = select popup will be closed after add/edit is completed
+            selectOnSave: true, // true = select popup will be closed after add/edit is completed
             title: 'Assign a New Keyword',
             rectype_set: [id_map.RT_Keyword], // record type ID
             pointer_mode: 'browseonly', // options = both, addonly or browseonly
@@ -358,7 +358,7 @@ $.widget( "heurist.recordLookupMPCE", $.heurist.recordAction, {
                     var targetID = recordset.fld(record,'rec_ID');
                     var keyword_IDs = window.hWin.HEURIST4.util.isJSON(sessionStorage.getItem("rec_kywd"));
 
-                    if (keyword_IDs != null)
+                    if (keyword_IDs)
                     {
                         var result = keyword_IDs.find(row => row == targetID);
                     

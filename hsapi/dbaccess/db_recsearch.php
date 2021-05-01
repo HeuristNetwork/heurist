@@ -996,7 +996,7 @@ function recordSearchMenuItems($system, $menuitems, &$result, $ids_only=false){
     $system->defineConstants();
 
     $menuitems = prepareIds($menuitems, true);
-    $isRoot = (count($result)==0); //find any first CMS_HOME
+    $isRoot = (count($result)==0); //find any first CMS_HOME (non hidden)
     if($isRoot){
         if(!($system->defineConstant('RT_CMS_HOME') &&
         $system->defineConstant('DT_CMS_MENU') && 
@@ -1009,13 +1009,15 @@ function recordSearchMenuItems($system, $menuitems, &$result, $ids_only=false){
         if(count($menuitems)==1){
             if($menuitems[0]==0){
                 //find first home record
-                $query = 'SELECT rec_ID from Records '
-                .'WHERE (not rec_FlagTemporary) AND rec_RecTypeID='.RT_CMS_HOME;
-                $res = mysql__select_value($system->get_mysqli(), $query);
-                if($res==null){
+                $response = recordSearch($system, array('q'=>'t:'.RT_CMS_HOME, 'detail'=>'ids', 'w'=>'a'));
+                
+                if($response['status'] == HEURIST_OK  && count($response['data']['records'])>0){
+                    $res = $response['data']['records'][0];                                                        
+                }else{
                     return $system->addError(HEURIST_ERROR, 
                         'Can not find website home record');                    
                 }
+                
             }else{
                 $root_rec_id = $menuitems[0];
                 $isWebPage = false;
@@ -1762,7 +1764,7 @@ function recordSearch($system, $params)
                             'offset'=>get_offset($params),
                             'reccount'=>count($records),
                             'records'=>$records));
-                    
+
                     if(@$params['links_count'] && count($records)>0){
                         
                         $links_counts = recordLinkedCount($system, 

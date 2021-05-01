@@ -48,8 +48,15 @@
         set_time_limit(0);
 
         if(@$_REQUEST['a'] == 'dupes' || @$_REQUEST['action'] == 'dupes'){
+            
+            if( @$_REQUEST['ignore'] ){
+                $response = RecordsDupes::setIgnoring( $_REQUEST );
+            }else{
+                $response = RecordsDupes::findDupes( $_REQUEST );    
+            }
 
-            $response = RecordsDupes::findDupes( $_REQUEST );
+            
+            
             if( is_bool($response) && !$response ){
                 $response = $system->getError();
                 //$system->error_exit_api();

@@ -73,10 +73,13 @@ $.widget( "heurist.editing_input", {
         
             if(this.options.is_faceted_search){
                 if(window.hWin.HEURIST4.util.isempty(this.options['dtFields']['rst_FilteredJsonTermIDTree'])){
-                    this.options['dtFields']['rst_FilteredJsonTermIDTree'] = 
-                                $Db.dty(this.options.dtID,'dty_JsonTermIDTree');
+                    this.options['dtFields']['rst_FilteredJsonTermIDTree'] = $Db.dty(this.options.dtID,'dty_JsonTermIDTree');
                 } 
+                if(window.hWin.HEURIST4.util.isempty(this.options['dtFields']['rst_PtrFilteredIDs'])){
+                    this.options['dtFields']['rst_PtrFilteredIDs'] = $Db.dty(this.options.dtID,'dty_PtrTargetRectypeIDs');
+                }
                 this.options['dtFields']['rst_DefaultValue'] = '';
+                this.options['dtFields']['rst_PointerMode'] = 'browseonly';
             }
 
         }
@@ -3146,7 +3149,7 @@ console.log('onpaste');
     },
     
     //
-    //
+    // Open defTerms manager
     //
     _openManageTerms: function( vocab_id ){
         
@@ -3343,29 +3346,33 @@ console.log('onpaste');
                     sMsg = '';
                     if(code2>0){
                         
-                        sMsg = '.<br><span>Term (code '+code2+') with the same name already exists in "'
-                        +vocName+'".<br>';
+                        sMsg = '<span class="heurist-prompt ui-state-error">'
+                            +'This term references a duplicate outside the <i>'
+                            +vocName+'</i> vocabulary used by this field. ';
+                            
                         if(window.hWin.HAPI4.is_admin()){
-                            sMsg = sMsg + 'Either <a href="#" class="term-sel" '
-                                +'data-term-re="'+value+'" data-term="'+code2+'">Use this term</a></span>';
+                            sMsg = sMsg + '<a href="#" class="term-sel" '
+                                +'data-term-replace="'+value+'" data-vocab-correct="'+allTerms
+                                +'" data-vocab="'+vocId2+'" data-term="'+code2+'">correct</a></span>';
                         }else{
                             sMsg = sMsg 
-                            +'Either ask database manager to replace term for all records';    
+                            +'</span><br><span>Either ask database manager to replace term for all records</span>';    
                         }
-                        sMsg = sMsg + ' or select the required term in the dropdown</span>';
 
                     }else{
+                        
+                        sMsg = '<span class="heurist-prompt ui-state-error">'
+                            +'This term is not in the <i>'+vocName+'</i> vocabulary used by this field. '                        
+                        
                         if(window.hWin.HAPI4.is_admin()){
-                            sMsg = '.<br><span>If you are sure the term is not used by another field, you can '
-                            +'<a href="#" class="term-move">move term</a> to the "'
-                            +vocName+'" vocabulary <br/>'
-                            +' Alternatively you may <a href="#" class="term-ref" data-term="'
-                                +value+'"  data-vocab="'
-                                +allTerms+'">create a reference</a> from vocabulary "'
-                            +vocName+'" to the term in its current location.</span>';
+                            
+                            sMsg = sMsg + '<a href="#" class="term-fix" '
+                                +'data-term="'+value+'" data-vocab-correct="'+allTerms
+                                +'" data-vocab="'+vocId2+'" data-dty-id="'+this.options.dtID
+                                +'">correct</a></span>';
                         }else {
                             sMsg = sMsg + 
-                            '.<br><span>Ask database manager to correct this vocabulary</span>';    
+                            '.</span><br><span>Ask database manager to correct this vocabulary</span>';    
                         }
                     }
                     
@@ -3373,11 +3380,7 @@ console.log('onpaste');
                     $(opt).attr('ui-state-error',1);
                     $input.val(value);
                     $input.hSelect('refresh');
-                    sMsg = '<span class="heurist-prompt ui-state-error">'
-                            +'The term "'+name+'" (code '+value+') in vocabulary "'+vocName2
-                            +'" is not valid for this field which uses vocabulary "'+vocName+'" </span>'
-                            +sMsg;
-                            
+ 
                     this.error_message.css({'font-weight': 'normal', color: '#b15f4e'}); 
                 }
 
@@ -3395,7 +3398,8 @@ console.log('onpaste');
                         .appendTo( $input.parent() );
                     
                     err_ele.find('.ui-state-error')
-                        .css({color:'#b36b6b',
+                        .css({color:'red', //'#b36b6b',
+                              background:'none',
                               border: 'none',
                              'font-weight': 'normal'        
                         });
@@ -3413,14 +3417,25 @@ console.log('onpaste');
                         this._on(err_ele.find('.term-sel'),{click:function(e){
                             
                             var trm_id = $(e.target).attr('data-term');
-                            var trm_id_re = $(e.target).attr('data-term-re');
+                            var trm_id_re = $(e.target).attr('data-term-replace');
                             var fieldName = this.f('rst_DisplayName');
                             
-                            var request = {a:'replace', dtyID:this.options.dtID, sVal:trm_id_re, rVal:trm_id, tag:0, recIDs:'ALL'};                
+                            var request = {a:'replace', rtyID:this.options.rectypeID,
+                                dtyID:this.options.dtID, sVal:trm_id_re, rVal:trm_id, tag:0, recIDs:'ALL'};                
+                                
                             window.hWin.HEURIST4.msg.showMsgDlg(
-                                    'You are about to convert tag #'+trm_id_re+' to #'+trm_id
+'<div  style="line-height:20px">'
++'<div>Term: <span id="termName" style="font-style:italic">'
+    +$Db.trm(trm_id,'trm_Label')+'</span></div>'
++'<div>In vocabulary: <span id="vocabName" style="font-style:italic">'
+    +$Db.trm($(e.target).attr('data-vocab'),'trm_Label')+'</span></div>'
++'<hr/>'
++'<div>Vocabulary for this field is: <span id="vocabNameCorrect" style="font-style:italic">'
+    +$Db.trm($(e.target).attr('data-vocab-correct'),'trm_Label')+'</span></div>'
++'<p>Use the version of the term in this vocabulary for this field in all records of this type</p></div>'
+/*                                    'You are about to convert tag #'+trm_id_re+' to #'+trm_id
                                     +' in field "'+fieldName+'" for all records'
-                                    + '<br><br>Are you sure?',
+                                    + '<br><br>Are you sure?'*/,
                                     function(){
                                         window.hWin.HEURIST4.msg.bringCoverallToFront();                                             
                             
@@ -3438,22 +3453,29 @@ console.log('onpaste');
                                             }
                                         });
                                     },
-                                    {title:'Warning',yes:'Proceed',no:'Cancel'});
+                                    {title:'Correction of invalid term',yes:'Apply',no:'Cancel'});
             
                         }});
                     
-                        this._on(err_ele.find('.term-ref'),{click:function(e){
-                            var trm_id = $(e.target).attr('data-term');
-                            var voc_id = $(e.target).attr('data-vocab');
-                            $Db.setTermReferences(voc_id, trm_id, null, 
-                            function(){
-                                window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, 
-                                    { source:this.uuid, type:'trm' });    
-                                that._recreateSelector($input, value);
-                            });
-                               //this._openManageTerms(allTerms);
+                        this._on(err_ele.find('.term-fix'),{click:function(e){
+                            //see manageDefTerms.js
+                            var trm_ID = $(e.target).attr('data-term');
+                            correctionOfInvalidTerm(
+                                trm_ID,
+                                $(e.target).attr('data-vocab'),
+                                $(e.target).attr('data-vocab-correct'),
+                                $(e.target).attr('data-dty-id'),
+                                function(newvalue){ //callback
+                                    window.hWin.HAPI4.triggerEvent(window.hWin.HAPI4.Event.ON_STRUCTURE_CHANGE, 
+                                        { source:this.uuid, type:'trm' });    
+                                    if(!(newvalue>0)) newvalue = trm_ID;
+                                    that._recreateSelector($input, newvalue);
+                                }
+                            );
+                            
                         }});
-                    };
+                        
+                    }//is_admin
                 }
                 
                 

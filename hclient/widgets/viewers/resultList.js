@@ -1434,7 +1434,7 @@ $.widget( "heurist.resultList", {
         var rectypeID = fld('rec_RecTypeID');
         var bkm_ID = fld('bkm_ID');
         var recTitle = fld('rec_Title'); 
-        var recTitle_strip_all = window.hWin.HEURIST4.util.stripTags(recTitle);
+        var recTitle_strip_all = window.hWin.HEURIST4.util.htmlEscape(window.hWin.HEURIST4.util.stripTags(recTitle));
         var recTitle_strip1 = window.hWin.HEURIST4.util.stripTags(recTitle,'u, i, b, strong');
         var recTitle_strip2 = window.hWin.HEURIST4.util.stripTags(recTitle,'a, u, i, b, strong');
         var recIcon = fld('rec_Icon');
@@ -2200,9 +2200,12 @@ $.widget( "heurist.resultList", {
                     if( this.options.rendererExpandInFrame ||  !isSmarty)
                     {
                         
+                        //var ele2 = that.div_content.find('.record-expand-info[data-recid='+recID+']');
+                        ele.addClass('loading');
+                        
                         $('<iframe>').attr('data-recid',recID)
                             .appendTo(ele)
-                            .addClass('loading')
+                            .css('opacity',0)
                             .attr('src', infoURL).on('load',function()
                             { 
                                 var _recID = $(this).attr('data-recid');
@@ -2227,7 +2230,8 @@ $.widget( "heurist.resultList", {
                                         }else{
                                             h = 300 //default value
                                         }
-                                        ele2.removeClass('loading').height(h);//+(h*0.05)    
+                                        ele2.height(h);//+(h*0.05)    
+                                        
                                     }
                                 }
                                 
@@ -2235,6 +2239,10 @@ $.widget( "heurist.resultList", {
 
                                 setTimeout(__adjustHeight, 2000);
                                 setTimeout(__adjustHeight, 4000);
+                                setTimeout(function(){
+                                    ele2.removeClass('loading');
+                                    ele2.find('iframe').css('opacity',1);
+                                }, 2100);
                                 //setTimeout(__adjustHeight, 10000);
                                 
                             }catch(e){

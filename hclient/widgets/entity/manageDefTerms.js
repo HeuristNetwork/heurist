@@ -906,7 +906,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
             sWidth = 'max-width:'+sWidth+'px;min-width:'+sWidth+'px;';
 
             recTitle = '<div class="item truncate" style="'+sWidth+sBold+'">'
-            + sLabel+'</div>';
+            + sLabel+'</div>'; //recID+':'+
 
             html = '<div class="recordDiv rt_draggable white-borderless" style="padding-right:0" recid="'+recID+'">'
             + '<div class="recordSelector item"><input type="checkbox" /></div>'
@@ -1057,6 +1057,9 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
     },
 
+    //
+    //
+    //
     _deleteAndClose: function(unconditionally){
 
         if(unconditionally===true){
@@ -1087,45 +1090,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                         that._afterDeleteEvenHandler( recID, it_was_vocab );
 
                     }else{
-                        if(response.sysmsg && response.sysmsg.children){
-
-                            //children detailtypes reccount records
-                            var res = response.sysmsg;    
-
-                            if(window.hWin.HEURIST4.util.isArrayNotEmpty(res.detailtypes)){
-                                this._showWarningAboutUsage( recID, res.detailtypes );                                  
-                                return;
-                            }
-
-                            var is_vocab = !($Db.trm(recID, 'trm_ParentTermID')>0);
-
-
-                            var sMsg = '<p>'+(res.children==0?'Term':('Terms in '+is_vocab?'Vocabulary':'Branch')) 
-                            + ' <b>'+$Db.trm(recID, 'trm_Label') + '</b> ' 
-                            + (res.children==0?'is':'are') +  ' in use by '+res.reccount+' record'+(res.reccount>1?'s':'')+' in the database.</p>'
-
-                            +'<p>Before you can delete the '
-                            +(res.children==0?'term':(is_vocab?'vocabulary':'branch')+' and its child terms')
-                            +', you will need to delete the records which use '+(res.children==0?'this term':'these terms')
-                            +', or delete the values from the records.</p>';
-
-                            if(window.hWin.HEURIST4.util.isArrayNotEmpty(res.records)){
-                                sMsg += '<p><a href="#" class="records-list"'
-                                +'>List of records which '+(res.children==0?'this term':'these terms')+'</a></p>';
-                            }
-                            $dlg = window.hWin.HEURIST4.msg.showMsgDlg(sMsg, null, {title:'Terms in use'},
-                                {default_palette_class:that.options.default_palette_class});        
-
-                            that._on($dlg.find('a.records-list'),{click:function(e){
-                                var request = {q:'ids:'+res.records.join(',')};
-                                window.hWin.HAPI4.SearchMgr.doSearch(window.hWin.document, request);
-                                $dlg.dialog('close');
-                            }});
-
-                        }else{
-                            window.hWin.HEURIST4.msg.showMsgErr(response);    
-                        }
-
+                        onTermSaveError(response);
                     }
             });            
 
@@ -1768,12 +1733,13 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
         if(params['trm_ParentTermID']>0){
 
-            var trm_ID = params['trm_ID'];
-            var new_parent_id = params['trm_ParentTermID'];
+            var trm_ID = params['trm_ID']; //term to be moved
+            var new_parent_id = params['trm_ParentTermID']; //destination
             var old_parent_ids = [];
 
-            var vocab_id = $Db.getTermVocab(trm_ID);
-            var isRef = (this.options.trm_VocabularyID!=vocab_id);
+            var vocab_id = $Db.getTermVocab(trm_ID); //real vocabulary
+            
+            var isRef = (this.options.trm_VocabularyID!=vocab_id); //current vocabulary 
             if (isRef) {
                 var parents = $Db.trm(trm_ID, 'trm_Parents');
                 if(parents){
@@ -1793,17 +1759,21 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 //console.log('same parent nothing to change');            
                 return;
             }
+            
+            var new_vocab_id;
 
             //if new parent is vocabulary
             if( !($Db.trm(new_parent_id, 'trm_ParentTermID')>0) ){
+                
+                new_vocab_id = new_parent_id;
 
                 if(no_check!==true){    
                     //1. check that selected terms are already in this vocabulary
                     var trm_ids = $Db.trm_TreeData(new_parent_id, 'set'); //ids
                     if(window.hWin.HEURIST4.util.findArrayIndex(trm_ID, trm_ids)>=0){
                         window.hWin.HEURIST4.msg.showMsgDlg( (isRef?'Term':'Reference')
-                            + ' "'+$Db.trm(trm_ID, 'trm_Label')
-                            +'" is already in vocabulary "'+$Db.trm(new_parent_id,'trm_Label')+'"',null,'Duplication',
+                            + ' <b>"'+$Db.trm(trm_ID, 'trm_Label')
+                            +'"</b> is already in vocabulary <b>"'+$Db.trm(new_parent_id,'trm_Label')+'"</b>',null,'Duplication',
                             {default_palette_class:this.options.default_palette_class}); 
                         return;
                     }
@@ -1812,8 +1782,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                     var lbl = $Db.trm(trm_ID, 'trm_Label');
                     if(trm_labels.indexOf(lbl.toLowerCase())>=0){
                         window.hWin.HEURIST4.msg.showMsgDlg( (isRef?'Term':'Reference')
-                            + ' with name "'+lbl
-                            +'" is already in vocabulary "'+$Db.trm(new_parent_id,'trm_Label')+'"'
+                            + ' with name <b>"'+lbl
+                            +'"</b> is already in vocabulary <b>"'+$Db.trm(new_parent_id,'trm_Label')+'"</b>'
                             +'<p>To make this move, edit the term so that it is different from any in the top level '
                             +'of the vocabulary to which you wish to move it. Once moved, you can merge within '
                             +'the vocabulary or reposition the term and edit it appropriately.</p>'
@@ -1824,6 +1794,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                 }
 
             }else{
+                
+                new_vocab_id = this.options.trm_VocabularyID;
 
                 var vocab_id = $Db.getTermVocab(new_parent_id); //get real vocab
                 if(this.options.trm_VocabularyID!=vocab_id){
@@ -1831,7 +1803,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                         + 'Please EDIT/move the term <i>'
                         + $Db.trm(new_parent_id, 'trm_Label') 
                         + '</i> within its original vocabulary <i>'
-                        + $Db.trm(vocab_id, 'trm_Label') +'</i>'); 
+                        + $Db.trm(vocab_id, 'trm_Label') +'</i>',null,'Warning',
+                            {default_palette_class:this.options.default_palette_class}); 
                     return;
                 }
 
@@ -1849,10 +1822,13 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
 
             var that = this;
+            
+            var old_parent_id = old_parent_ids[old_parent_ids.length-1];
 
             if(isRef){
-                //change parent for reference   @todo - take correct old_parent_ids
-                $Db.setTermReferences(new_parent_id, trm_ID, old_parent_ids[0],
+                var old_vocab_id = old_parent_ids[0];
+                //change parent for reference  @todo - take correct old_parent_ids
+                $Db.setTermReferences(trm_ID, new_vocab_id, new_parent_id, old_vocab_id, old_parent_id,
                             function(){
                                 that.it_was_insert = true;
                                 that._afterSaveEventHandler2();//to reset filter and trigger global refresh
@@ -1863,14 +1839,17 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                     function(){  
                         if(params.trm_ParentTermID>0){
                             //console.log('!!!!!! '+old_parent_ids[0]+' -> '+new_parent_id);                            
-                            $Db.changeParentInIndex(new_parent_id, trm_ID, old_parent_ids[0]);
+                            $Db.changeParentInIndex(new_parent_id, trm_ID, old_parent_id);
                             that._filterByVocabulary();
                         }
                         that._triggerRefresh('term');
-                });
+                    },
+                    onTermSaveError
+                );
 
             }
         }else{
+            //change vocabulary group
             var that = this;
             this._saveEditAndClose( params ,
                 function(){
@@ -1880,7 +1859,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
         }
 
     },
-
+    
     //
     // extend for group actions
     //
@@ -1939,7 +1918,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                         sels = data.selection;
                     }
                     //add new term to vocabulary by reference
-                    $Db.setTermReferences(that.options.trm_VocabularyID, sels, null,
+                    $Db.setTermReferences(sels, that.options.trm_VocabularyID, 0, 0, 0,
                             function(){
                                 that.it_was_insert = true;
                                 that._afterSaveEventHandler2();//to reset filter and trigger global refresh
@@ -1976,7 +1955,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
                 if(refs.length>0){
 
-                    this._showWarningAboutUsage(recID, refs);
+                    showWarningAboutTermUsage(recID, refs);
                     return;
                 }
 
@@ -2045,8 +2024,8 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
                                 parents = parents.split(',');
                                 var parent_id = parents[parents.length-1]; 
                                 if(parent_id>0){
-                                    //removing entry in trm links
-                                    $Db.setTermReferences(null, recID, parent_id,
+                                    //removing refterm entry in trm links
+                                    $Db.setTermReferences(recID, 0, 0, that.options.trm_VocabularyID, parent_id,
                                         function(){
                                             that.it_was_insert = true;
                                             that._afterSaveEventHandler2();//to reset filter and trigger global refresh
@@ -2498,40 +2477,169 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
 
         window.hWin.HEURIST4.util.downloadData('heurist_vocabulary.csv', s, 'text/csv');
-    },
-
-
-    //
-    //
-    //
-    _showWarningAboutUsage: function(recID, refs){
-        var sList = '';
-        for(var i=0; i<refs.length; i++) if(refs[i]>0){
-            sList += ('<a href="#" data-dty_ID="'+refs[i]+'">'+$Db.dty(refs[i],'dty_Name')+'</a><br>');
-        }
-
-        $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
-            '<p>Vocabulary <b>'+$Db.trm(recID,'trm_Label')+'</b> is referenced by the following fields:</p>'
-            + sList
-            +'<p>Please remove these fields altogether, or click the links above <br>to modify base field (will affect all record types which use it).</p>'
-            , null, {title:'Warning'},
-            {default_palette_class:this.options.default_palette_class});        
-
-        this._on($dlg.find('a[data-dty_ID]'),{click:function(e){
-
-            var rg_options = {
-                isdialog: true, 
-                edit_mode: 'editonly',
-                select_mode: 'manager',
-                rec_ID: $(e.target).attr('data-dty_ID'),
-                onSelect:function(res){
-                }
-            };
-            window.hWin.HEURIST4.ui.showEntityDialog('defDetailTypes', rg_options);
-            return false;                    
-        }});
-    },
-
-
+    }
 
 });
+
+/**
+* Correction of invalid term in record details OR addition missed term to vocabulry
+*/
+function correctionOfInvalidTerm(trm_ID, wrong_vocab_id, correct_vocab_id,  dty_ID, callback){
+    
+    var $dlg, buttons = [
+        {text:window.hWin.HR('Cancel'),
+            //id:'btnRecCancel',
+            css:{'float':'right',margin:'.5em .4em .5em 0'},  
+            click: function() { $dlg.dialog( "close" ); }},
+        {text:window.hWin.HR('Apply'),
+            css:{'float':'right',margin:'.5em .4em .5em 0'},  
+            class: 'ui-button-action',
+            click: function() { 
+                
+                var mode = $dlg.find('input[name="corr_mode"]:checked').val();
+                //move,ref,use
+                if(mode=='ref'){
+                    // add new term by reference into correct vocabulary 
+                    // no need change recDetails
+                    $Db.setTermReferences(trm_ID, correct_vocab_id, 0,0,0, callback);    
+                }else if(mode=='move'){
+                    // move term
+                    
+                    var request = {
+                        'a'          : 'save',
+                        'entity'     : 'defTerms',
+                        'request_id' : window.hWin.HEURIST4.util.random(),
+                        'fields'     : {trm_ID:trm_ID, trm_ParentTermID:correct_vocab_id},
+                        'isfull'     : 0
+                        };
+                        var that = this;                                                
+                        window.hWin.HAPI4.EntityMgr.doRequest(request, 
+                            function(response){
+                                if(response.status == window.hWin.ResponseStatus.OK){
+                                    var old_parent_id = $Db.trm(trm_ID, 'trm_ParentTermID'); 
+                                    //update on client side
+                                    $Db.changeParentInIndex(correct_vocab_id, trm_ID, old_parent_id);
+                                    $Db.trm(trm_ID, 'trm_ParentTermID',correct_vocab_id);
+                                    if($.isFunction(callback)) callback.call(trm_ID);
+                                }else{
+                                    onTermSaveError(response)
+                                }
+                            });
+                    
+                }
+                
+                
+    
+                $dlg.dialog( "close" ); 
+            }}
+    ];                
+    
+    //open dialog
+    $dlg = window.hWin.HEURIST4.msg.showMsgDlgUrl(window.hWin.HAPI4.baseURL
+        +"hclient/widgets/entity/manageDefTermsCorrect.html?t="+(new Date().getTime()), 
+        buttons, 'Correction of invalid term', 
+        {  container:'terms-merge-popup',
+            width:500,
+            height:280,
+            close: function(){
+                $dlg.dialog('destroy');       
+                $dlg.remove();
+            },
+            open: function(){
+                //fill element
+                $dlg.find('#termName').html($Db.trm(trm_ID,'trm_Label'));
+                $dlg.find('#vocabName').html($Db.trm(wrong_vocab_id,'trm_Label'));
+                $dlg.find('#vocabNameCorrect').html($Db.trm(correct_vocab_id,'trm_Label'));
+            }
+        });
+    
+    
+    
+}
+
+//
+//
+//
+function showWarningAboutTermUsage(recID, refs){
+    var sList = '';
+    for(var i=0; i<refs.length; i++) if(refs[i]>0){
+        sList += ('<a href="#" data-dty_ID="'+refs[i]+'">'+$Db.dty(refs[i],'dty_Name')+'</a><br>');
+    }
+
+    $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
+        '<p>Vocabulary <b>'+$Db.trm(recID,'trm_Label')+'</b> is referenced by the following fields:</p>'
+        + sList
+        +'<p>Please remove these fields altogether, or click the links above <br>to modify base field (will affect all record types which use it).</p>'
+        , null, {title:'Warning'},
+        {default_palette_class: 'ui-heurist-design'});        
+
+    this._on($dlg.find('a[data-dty_ID]'),{click:function(e){
+
+        var rg_options = {
+            isdialog: true, 
+            edit_mode: 'editonly',
+            select_mode: 'manager',
+            rec_ID: $(e.target).attr('data-dty_ID'),
+            onSelect:function(res){
+            }
+        };
+        window.hWin.HEURIST4.ui.showEntityDialog('defDetailTypes', rg_options);
+        return false;                    
+    }});
+}
+
+function onTermSaveError(response){
+  
+        if(response.sysmsg && response.sysmsg.reccount){
+
+            //children detailtypes reccount records
+            var res = response.sysmsg;    
+
+            if(window.hWin.HEURIST4.util.isArrayNotEmpty(res.detailtypes)){
+                showWarningAboutTermUsage( recID, res.detailtypes );                                  
+                return;
+            }
+
+            var recID = response.sysmsg.recID;
+            var is_vocab = !($Db.trm(recID, 'trm_ParentTermID')>0);
+
+            
+            var s = '';
+            if(res['fields']){
+                $.each(res['fields'],function(i,dty_ID){
+                    s = s + $Db.dty(dty_ID,'dty_Name'); 
+                });
+                s = ' in fields ('+s+')';
+            }
+            
+
+            var sMsg = '<p>'+(res.children==0?'Term':('Terms in '+(is_vocab?'Vocabulary':'Branch'))) 
+            + ' <b>'+$Db.trm(recID, 'trm_Label') + '</b> ' 
+            + (res.children==0?'is':'are') +  ' in use'+s
+            + ' by '+res.reccount+' record'+(res.reccount>1?'s':'')+' in the database.</p>'
+
+            +'<p>Before you can move or delete the '
+            +(res.children==0?'term':(is_vocab?'vocabulary':'branch')+' and its child terms')
+            +', you will need to delete the records which use '+(res.children==0?'this term':'these terms')
+            +', or delete the values from the records.</p>';
+
+            if(window.hWin.HEURIST4.util.isArrayNotEmpty(res.records)){
+                sMsg += '<p><a href="#" class="records-list"'
+                +'>List of '+response.sysmsg.reccount+' records which use '+(res.children==0?'this term':'these terms')+'</a></p>';
+            }
+            $dlg = window.hWin.HEURIST4.msg.showMsgDlg(sMsg, null, {title:'Terms in use'},
+                {default_palette_class: 'ui-heurist-design'});        
+
+            $dlg.find('a.records-list').on({click:function(e){
+                var request = {q:'ids:'+res.records.join(',')};
+                window.hWin.HAPI4.SearchMgr.doSearch(window.hWin.document, request);
+                $dlg.dialog('close');
+            }});
+
+        }else{
+            window.hWin.HEURIST4.msg.showMsgErr(response);    
+        }
+    
+}
+
+

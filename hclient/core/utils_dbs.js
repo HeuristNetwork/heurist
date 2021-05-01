@@ -32,6 +32,8 @@ getTermVocab - returns vocabulary for given term - real vocabulary (not by refer
 
 trm_InVocab - returns true if term belongs to vocabulary (including by reference)
 
+isTermByReference - return false if given term belongs to vocabulary, otherwise returns level of reference
+
 getColorFromTermValue - Returns hex color by label or code for term by id
 
     trm_TreeData  - returns hierarchy for given vocabulary as a flat array, recordset or tree data
@@ -212,7 +214,7 @@ window.hWin.HEURIST4.dbs = {
       $mode 
          3 - for record title mask editor @todo!!!
          4 - find reverse links and relations   
-         5 - for lazy treeview with reverse links (faceted search wiz)
+         5 - for lazy treeview with reverse links (faceted search wiz, filter builder)
          6 - for lazy tree without reverse (import structure, export csv)
          
       parentcode - prefix for code 
@@ -566,6 +568,7 @@ window.hWin.HEURIST4.dbs = {
             case 'separator':
                 return null;
             case 'enum':
+            case 'relationtype':
 
                 $res = {};
                 if($mode==3){
@@ -615,14 +618,20 @@ window.hWin.HEURIST4.dbs = {
                             if($mode==4 || $mode==5 || $mode==6){
                                 $dt_title = " <span style='font-style:italic'>" + $dt_title + "</span>";
                             }
+
+                            $res = {};                            
                             
                             if($pointerRecTypeId=="" || $rectype_ids.length==0){ //unconstrainded
                                                     //
-                                $res = __getRecordTypeTree( null, $recursion_depth+1, $mode, $fieldtypes, $pointer_fields);
                                 //$res['constraint'] = 0;
+                                if($mode==5){
+                                    $res['rt_ids'] = '';
+                                    $res['lazy'] = true;
+                                }else{
+                                    $res = __getRecordTypeTree( null, $recursion_depth+1, $mode, $fieldtypes, $pointer_fields);
+                                }
 
                             }else{ //constrained pointer
-                                $res = {};
 
                                 if($rectype_ids.length>1){
                                     $res['rt_ids'] = $pointerRecTypeId; //list of rectype - constraint
@@ -632,6 +641,7 @@ window.hWin.HEURIST4.dbs = {
                                 if($mode==5 || $mode==6){
                                     $res['rt_ids'] = $pointerRecTypeId;
                                     $res['lazy'] = true;
+                                    
                                 }else{
                                 
                                     for (var k in $rectype_ids){
@@ -651,8 +661,8 @@ window.hWin.HEURIST4.dbs = {
                                 }
                             
                             }
+                            
                             $res['required'] = $is_required;
-
                     }
                 }
 
@@ -694,6 +704,8 @@ window.hWin.HEURIST4.dbs = {
             $res['dtyID_local'] = $dtID; //$Db.getLocalID('dty', $dt_conceptcode); for import
         }            
         return $res;
+        
+        
     }
     
     //
@@ -722,7 +734,7 @@ window.hWin.HEURIST4.dbs = {
     //========================= end internal 
         
         if(fieldtypes==null){
-            fieldtypes = ['integer','date','freetext','year','float','enum','resource','relmarker'];
+            fieldtypes = ['integer','date','freetext','year','float','enum','resource','relmarker','relationtype'];
         }else if(!$.isArray(fieldtypes) && fieldtypes!='all'){
             fieldtypes = fieldtypes.split(',');
         }
@@ -1264,7 +1276,7 @@ window.hWin.HEURIST4.dbs = {
     //
     // get concept code by local id
     //
-    getConceptID: function(entity, local_id){
+    getConceptID: function(entity, local_id, is_ui){
         
         var rec = $Db[entity](local_id);
         if(rec!=null){
@@ -1275,7 +1287,16 @@ window.hWin.HEURIST4.dbs = {
             }else if( window.hWin.HAPI4.sysinfo['db_registeredid']>0 ){
                 return window.hWin.HAPI4.sysinfo['db_registeredid']+'-'+local_id;
             }else{
-                return '0000-'.local_id;
+                if(is_ui===true){
+                  return '<span '
+                    +'title="Concept IDs are attributed when a database is registered with the '
+                    +'Heurist Master Index using Design > Setup > Register. In the meantime only local codes are defined.">'
+                    +'0000-'+local_id+'</span>';
+                }else{
+                    return '0000-'+local_id;    
+                }
+                
+                
             }
         }else{
             return '';
@@ -1559,9 +1580,13 @@ window.hWin.HEURIST4.dbs = {
     // add/remove terms reference links 
     // it calls server side and then update client side by changeParentInIndex
     //
-    setTermReferences: function(new_vocab_id, term_IDs, old_vocab_id, callback){
+    setTermReferences: function(term_IDs, new_vocab_id, new_parent_id, old_vocab_id, old_parent_id, callback){
 
+        var default_palette_class = 'ui-heurist-design';
+        
         if(new_vocab_id>0){
+            
+            if(!(new_parent_id>0)) new_parent_id = new_vocab_id;
 
             var trm_ids = $Db.trm_TreeData(new_vocab_id, 'set'); //all terms in target vocab
 
@@ -1581,11 +1606,15 @@ window.hWin.HEURIST4.dbs = {
                     if(all_children.indexOf(children[j])<0) all_children.push(children[j]);
                 }
             }
+            
+            {default_palette_class:'ui-heurist-design'}
 
             //some of selected terms are already in this vocabulary
             if(is_exists>0){
-                window.hWin.HEURIST4.msg.showMsgErr('Term <b>'+$Db.trm(is_exists,'trm_Label')
-                    +'</b> is already in vocabulary <b>'+$Db.trm(new_vocab_id,'trm_Label')+'</b>'); 
+                window.hWin.HEURIST4.msg.showMsgDlg('Term <b>'+$Db.trm(is_exists,'trm_Label')
+                    +'</b> is already in vocabulary <b>'+$Db.trm(new_vocab_id,'trm_Label')+'</b>', 
+                    null, {title:'Terms'},
+                    {default_palette_class:default_palette_class});                        
                 return;
             }
 
@@ -1600,9 +1629,7 @@ window.hWin.HEURIST4.dbs = {
             }
         }
         if(old_vocab_id>0){
-            //
-
-
+            if(!(old_parent_id>0)) old_parent_id = old_vocab_id;
         }
 
         var request = {
@@ -1610,8 +1637,10 @@ window.hWin.HEURIST4.dbs = {
             'reference'  : 1,
             'entity'     : 'defTerms',
             'request_id' : window.hWin.HEURIST4.util.random(),
-            'old_ParentTermID': old_vocab_id,  
-            'new_ParentTermID': new_vocab_id,  
+            'old_VocabID': old_vocab_id,  
+            'old_ParentTermID': old_parent_id,  
+            'new_VocabID': new_vocab_id,  
+            'new_ParentTermID': new_parent_id,  
             'trm_ID': term_IDs                   
         };
 
@@ -1623,14 +1652,40 @@ window.hWin.HEURIST4.dbs = {
 
                 if(response.status == window.hWin.ResponseStatus.OK){
 
-                    $Db.changeParentInIndex(new_vocab_id, term_IDs, old_vocab_id);
+                    $Db.changeParentInIndex(new_parent_id, term_IDs, old_parent_id);
 
                     if($.isFunction(callback)){
                             callback.call();
                     }
 
                 }else{
-                    window.hWin.HEURIST4.msg.showMsgErr(response);                        
+                    if(response.status == window.hWin.ResponseStatus.ACTION_BLOCKED){
+                        
+                        var sMsg;
+                        if(response.sysmsg && response.sysmsg.reccount){
+                            
+                            var s = '';
+                            $.each(response.sysmsg['fields'],function(i,dty_ID){
+                               s = s + $Db.dty(dty_ID,'dty_Name'); 
+                            });
+                              
+                            sMsg = '<p>Sorry, we cannot '+(new_parent_id>0?'move':'delete')
+                            + ' this term because it (or its children) is already in use in fields '
+                            + ' ( '+s+' ) which reference this vocabulary</p> '
+                            + ' <p><a href="'+window.hWin.HAPI4.baseURL+'?db='
+                            + window.hWin.HAPI4.database+'&q=ids:' + response.sysmsg['records'].join(',')
+                            + '" target="_blank">Show '+response.sysmsg['reccount']+' records</a> which use this term (or its descendants).</p>';
+                        }else{
+                            sMsg = response.message;
+                        }
+                        
+                        window.hWin.HEURIST4.msg.showMsgDlg(sMsg, 
+                            null, {title:'Term by Reference'},
+                            {default_palette_class:default_palette_class});                        
+                        
+                    }else{
+                        window.hWin.HEURIST4.msg.showMsgErr(response);                            
+                    }
                 }
         });   
 

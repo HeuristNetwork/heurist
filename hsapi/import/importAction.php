@@ -1375,7 +1375,7 @@ them to incoming data before you can import new records:<br><br>'.implode(",", $
                 while ($row = $res->fetch_row()){
                     $wkt = $row[0];
                     $geom = geoPHP::load($wkt, 'wkt');
-                    if(!$geom->isEmpty()){
+                    if($geom!=null && !$geom->isEmpty()){
                         $bbox = $geom->getBBox();
                         $allOutWGS = $allOutWGS 
                             && (abs($bbox['minx'])>180) && (abs($bbox['miny'])>90)

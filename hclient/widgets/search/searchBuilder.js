@@ -638,6 +638,7 @@ $.widget( "heurist.searchBuilder", {
                     if(this.element.find('.btn-preview').is(':checked')){
                         h = this.options.is_dialog ? '50px':'88px';                       
                         this.pnl_Result.show();
+                        this._doCompose();
                     }else{
                         h = this.options.is_dialog ? '0px':'50px';                       
                         this.pnl_Result.hide();
@@ -753,7 +754,7 @@ $.widget( "heurist.searchBuilder", {
 
                 //'title','modified',
                 var allowed_fieldtypes = ['header_ext','enum','freetext','blocktext',
-                                'geo','year','date','integer','float','resource','relmarker'];
+                                'geo','year','date','integer','float','resource','relmarker','relationtype','file'];
                       
 /*              
                             {key:'title',title:'Title (constructed)', depth:1},
@@ -788,6 +789,55 @@ $.widget( "heurist.searchBuilder", {
 //console.log(treedata);
                             treedata[0].expanded = true; //first expanded
                             
+                            //add additional entry for direct links (resource fields)
+                            function __addResField(tdata){
+                                
+                                //$.each(tdata, function(i, node)
+                                var i = 0;
+                                while (i<tdata.length)
+                                {
+                                    node = tdata[i];
+                                    if(node.type=='resource'){
+
+                                        var codes = node.code.split(':');
+                                        var dtid = codes[codes.length-1];
+                                        var linktype = dtid.substr(0,2);
+                                        if(linktype=='lt'){
+                                            codes[codes.length-1] = dtid.substr(2);                        
+                                            tdata.splice(i, 0, 
+                                                {key:node.key, type:'resource',
+                                                title: node.title
+                                                       +'<span style="font-size:0.8em"> (record pointer)</span>',
+                                                code:codes.join(':')});                                        
+                                            node.title = node.title + ' fields';
+                                            i++;                       
+                                        }
+                                    }else if(node.type=='relmarker'){
+
+                                        var codes = node.code.split(':');
+                                        var dtid = codes[codes.length-1];
+                                        var linktype = dtid.substr(0,2);
+                                        if(linktype=='rt'){
+                                            codes[codes.length-1] = dtid.substr(2);                        
+                                            tdata.splice(i, 0, 
+                                                {key:node.key, type:'relmarker',
+                                                title: node.title
+                                                       +'<span style="font-size:0.8em"> (related record)</span>',
+                                                code:codes.join(':')});                                        
+                                            node.title = node.title + ' fields';
+                                            i++;                       
+                                        }
+                                        
+                                    }
+
+                                    i++;    
+                                }
+                                
+                            }
+                            
+                            __addResField(treedata[0].children);
+                            
+                            
                             if(!treediv.is(':empty') && treediv.fancytree('instance')){
                                 treediv.fancytree('destroy');
                             }
@@ -816,6 +866,24 @@ $.widget( "heurist.searchBuilder", {
                                         data.result = res;
                                     }else{
                                         data.result = res[0].children;
+                                    }
+                                    
+                                    if(node.data.type=='resource'){
+                                        
+                                        __addResField(data.result);                                        
+                                        
+                                        /* option: add the same item as in __addResField but on next level
+                                        var codes = parentcode.split(':');
+                                        var dtid = codes[codes.length-1];
+                                        var linktype = dtid.substr(0,2);
+                                        if(linktype=='lt'){
+                                            codes[codes.length-1] = dtid.substr(2); 
+                                            data.result.unshift(
+                                                {key:node.data.key,type:'resource',
+                                                title:'<span style="font-size:0.9em;font-style:italic;padding-left:22px">Pick the specific resource</span>',
+                                                name:'Known resource',code:codes.join(':')});
+                                        }
+                                        */
                                     }
                                     
                                     return data;                                                   
@@ -1093,19 +1161,24 @@ console.log(aCodes);
                     for(var k=1; k<codes.length-1; k++){
                         if(k%2 == 0){ //rectype
                             //key = 't:'+codes[k];    
-                            var not_found = true;
-                            $.each(branch,function(m,item){
-                               if(item['t']){
-                                    not_found = false; 
-                                    if(item['t'].split(',').indexOf(codes[k])<0){
-                                        item['t'] = item['t']+','+codes[k];
-                                    }
-                                    return false;
-                               }
-                            });
-                            
-                            if(not_found){
-                                branch.push({t:codes[k]});    
+                            if(codes[k]!=''){ //unconstrainded
+                                var not_found = true;
+                                $.each(branch,function(m,item){
+                                   if(item['t']==codes[k]){
+                                       not_found = false; 
+                                       return false;
+                                   }else if(item['t']){
+                                        not_found = false; 
+                                        if(item['t'].split(',').indexOf(codes[k])<0){
+                                            item['t'] = item['t']+','+codes[k];
+                                        }
+                                        return false;
+                                   }
+                                });
+                                
+                                if(not_found){
+                                    branch.push({t:codes[k]});    
+                                }
                             }
                         }else{
                             var dtid = codes[k];

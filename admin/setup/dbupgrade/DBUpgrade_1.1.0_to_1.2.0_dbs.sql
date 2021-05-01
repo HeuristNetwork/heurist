@@ -13,7 +13,7 @@
 */
 
 /**
-* DBUpgrade_1.x.x_to_1.x.x.sql: SQL file to update Heurist database format between indicated versions
+* DBUpgrade_1.x.x_to_1.x.x.sql: SQL file to update ALL Heurist databases
 *
 * @author      Ian Johnson   <ian.johnson@sydney.edu.au>
 * @author      Artem Osmakov   <artem.osmakov@sydney.edu.au>
@@ -133,7 +133,7 @@ BEGIN
 END $$
 DELIMITER ;
 
-CALL sp_UpdateAllDatabases();
+--CALL sp_UpdateAllDatabases();
 
 DROP PROCEDURE IF EXISTS sp_UpdateAllDatabases;
 DROP PROCEDURE IF EXISTS sp_AlterTable;

@@ -1023,9 +1023,9 @@ function DetailTypeEditor() {
                                     );
                                     
                                 },
-                            'This action is password-protected', {password:true});
+                            'Certain changed to fields designated Status = Reserved can only be made by the system administrator (not the database owner) as they have special uses elsewhere. A special password is required.', {password:true});
                         }else{
-                            window.hWin.HEURIST4.msg.showMsgDlg('Reserved field changes is not allowed unless a challenge password is set - please consult system administrator');
+                            window.hWin.HEURIST4.msg.showMsgDlg('Reserved field changes are not allowed unless a challenge password is set - please consult system administrator');
                         }
                         $('#btnSave').removeAttr('disabled');
                         return false;

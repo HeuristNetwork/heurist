@@ -21,6 +21,7 @@
 * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied
 * See the License for the specific language governing permissions and limitations under the License.
 */
+ini_set('max_execution_time', 0);
 
 define('MANAGER_REQUIRED',1);
 define('PDIR','../../');  //need for proper path to js and css    
@@ -452,7 +453,7 @@ if($step=="1"){  //first step - info about current status
             print "<div style='color:red'>Error: zotero returns non valid xml response for range $start ~ ".($start+$fetch)." </div>";
             $isFailure = true;
 
-            $this->system->addError('Zotero Synchronisation, Non-Valid XML Response', 
+            $system->addError('Zotero Synchronisation, Non-Valid XML Response', 
                     'Zotero Synchronisation has Encountered an Error related to an Invalid XML response',
                     "Error: zotero returns non valid xml response for range $start ~ ".($start+$fetch));
 
@@ -461,7 +462,7 @@ if($step=="1"){  //first step - info about current status
             print "<div style='color:red'>Error: zotero returns empty response for range $start ~ ".($start+$fetch)." </div>";
             $isFailure = true;
 
-            $this->system->addError('Zotero Synchronisation, Empty Response', 
+            $system->addError('Zotero Synchronisation, Empty Response', 
                     'Zotero Synchronisation has Encountered an Error related to an Empty response',
                     "Error: zotero returns empty response for range $start ~ ".($start+$fetch));
 
@@ -502,6 +503,9 @@ if($step=="1"){  //first step - info about current status
                 $recId = null;
                 $rec_URL = null;
 
+                //if($zotero_itemid!='4SRQ8WRJ'){
+                //                    continue;
+                //}                
                 // 3) try to search record in database by zotero id
                 $query = "select r.rec_ID, r.rec_Modified from Records r, recDetails d  ".
                 "where  r.rec_Id=d.dtl_recId and d.dtl_DetailTypeID=".$dt_SourceRecordID." and d.dtl_Value='".$zotero_itemid."'";
@@ -523,6 +527,7 @@ if($step=="1"){  //first step - info about current status
                         }
                     }
                 }
+                
 
                 $content = json_decode(strval(findXMLelement($entry, null, "content")));
 
@@ -786,7 +791,7 @@ if($step=="1"){  //first step - info about current status
         }
         print '</div>';
 		
-        $this->system->addError('Zotero Synchronisation Error', 
+        $system->addError('Zotero Synchronisation Error', 
                     'Zotero Synchronisation has Encountered ' . $tot_erros . ' Errors',
                     $err_msg);
     
@@ -1123,11 +1128,15 @@ function createResourceRecord($mysqli, $record_type, $recdetails){
         }else{
             $value = $recdata;
             if($dt_id==DT_DATE){
+                
+                $value = validateAndConvertToISO($value, null, 1); 
+                /*
                 try{
                     $t2 = new DateTime($value);
                     $value = $t2->format('Y-m-d H:i:s');
                 } catch (Exception  $e){
                 }
+                */
             }
         }
 

@@ -248,10 +248,6 @@ $.widget( "heurist.manageEntity", {
             
             fele.children(0).css('top', '38px'); //down manager div to 38
 			
-            $(fele).on("mouseleave", function(){
-                that.defaultBeforeClose();
-            });
-            
             if(this.options.innerTitle===true){
                 this._innerTitle = $('<div>').addClass('ui-heurist-header')
                 .html('<span class="title">'+this.options['title']+'</span>')
@@ -790,7 +786,7 @@ $.widget( "heurist.manageEntity", {
                         });        
                         
             }else{
-                this.addEditRecord(-1);
+                this.addEditRecord(-1, true);
             }
     },
     
@@ -1463,7 +1459,7 @@ $.widget( "heurist.manageEntity", {
     // send update request and close popup if edit is in dialog
     // afteraction is used in overriden version of this method
     //
-    _saveEditAndClose: function( fields, afterAction ){
+    _saveEditAndClose: function( fields, afterAction, onErrorAction ){
 
             if(window.hWin.HAPI4.is_callserver_in_progress()) {
 //console.log('prevent repeatative call')
@@ -1487,7 +1483,7 @@ $.widget( "heurist.manageEntity", {
                 'entity'     : this.options.entity.entityName,
                 'request_id' : window.hWin.HEURIST4.util.random(),
                 'fields'     : fields,
-                'isfull'     : is_full  //
+                'isfull'     : is_full  //partial or full update (from edit form)
                 };
              
                 if(this.options.coverall_on_save) {
@@ -1519,7 +1515,8 @@ this._time_debug = fin_time;
                         if(response.status == window.hWin.ResponseStatus.OK){
 
                             var recID = response.data[0];
-                            fields[ that.options.entity.keyField ] = (''+recID);
+                            if(recID>0)
+                                fields[ that.options.entity.keyField ] = (''+recID);
                             
                             //update record in cache
                             if(that.options.use_cache && that._cachedRecordset){
@@ -1539,13 +1536,17 @@ this._time_debug = fin_time;
                             that._afterSaveEventHandler2( recID, fields );        
                             
                             if($.isFunction(afterAction)){
-                                afterAction.call(this, recID, fields);
+                                afterAction.call(that, recID, fields);
                             }else{
                                 that._afterSaveEventHandler( recID, fields );        
                             }
                             
                         }else{
-                            window.hWin.HEURIST4.msg.showMsgErr(response);
+                            if($.isFunction(onErrorAction)){
+                                onErrorAction.call(that, response);
+                            }else{
+                                window.hWin.HEURIST4.msg.showMsgErr(response);    
+                            }
                         }
                     });
     },      
@@ -1623,57 +1624,6 @@ this._time_debug = fin_time;
                     });
     },    
 
-	/*
-     * After Action Handler for DB Ownership Tranfer, needs to logout the user and reload the page
-     */
-    _afterTransferOwnerHandler: function(recID){
-
-        window.hWin.HEURIST4.msg.showMsgFlash(this.options.entity.entityTitle + ' ' + window.hWin.HR('ownership has been transfered') + '.'
-            +'<br />Heurist will now refresh to set these changes.', 2000); // flash message
-
-        /* Trigger Logout and Reload */
-        window.hWin.HAPI4.SystemMgr.logout(
-            function(response){
-                if(response.status == window.hWin.ResponseStatus.OK){
-                    window.hWin.HAPI4.setCurrentUser(null);
-                    window.location.reload();  // page reload
-                }else{
-                    window.hWin.HEURIST4.msg.showMsgErr(response + ' <br/> Heurist is unable to refresh the page!');
-                }
-            }
-        );
-    },    
-
-    /*
-     * Transfer DB Ownership to the selected User, will reload the page after completion to reset certain variables
-     */
-    _transferDBOwner: function(){
-
-        if(this._currentEditID==null || this._currentEditID<1) return;
-
-        var request = {
-            'a'          : 'transferOwner',
-            'entity'     : this.options.entity.entityName,
-            'request_id' : window.hWin.HEURIST4.util.random(),
-            'recID'      : this._currentEditID 
-        };
-
-        var that = this;
-
-        window.hWin.HAPI4.EntityMgr.doRequest(request,
-            function(response){
-                if(response.status == window.hWin.ResponseStatus.OK){
-
-                    var recID = that._currentEditID;
-                    that._afterTransferOwnerHandler(recID);
-                
-                }else{
-                    window.hWin.HEURIST4.msg.showMsgErr(response);
-                }
-            }
-        );
-    },	
-    
     //
     // to override
     //
@@ -2081,7 +2031,7 @@ this._time_debug = fin_time;
     //
     // show edit form in popup dialog or rigth-hand panel
     //
-    addEditRecord: function(recID){
+    addEditRecord: function(recID, is_proceed){
         
         if(this.options.edit_mode == 'none') return;
         

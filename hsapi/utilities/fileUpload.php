@@ -190,7 +190,13 @@ if($response!=null){
 
     foreach($res['files'] as $idx=>$file){
         if(@$file->error){
-            $response = $system->addError(HEURIST_UNKNOWN_ERROR, "Sorry, file was not processed due to the following reported error: ".$file->error.". The most likely cause is that the file extension is not currently enabled for the upload function, jquery UploadHandler. Please use the bug report link aboveto request addition of this file type.", null);
+            $sMsg = "Sorry, file was not processed due to the following reported error: ".$file->error.'.';
+            
+            if(strpos($file->error, 'ownership permissions')==false){
+                $sMsg = $sMsg.' The most likely cause is that the file extension is not currently enabled for the upload function, jquery UploadHandler. Please use the bug report link above to request addition of this file type.';
+            }
+            
+            $response = $system->addError(HEURIST_UNKNOWN_ERROR, $sMsg, null);
             break;            
         }else if($entity_name=="recUploadedFiles"){ //register at once
             

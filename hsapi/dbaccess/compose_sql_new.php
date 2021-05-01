@@ -762,10 +762,7 @@ class HPredicate {
                 if(strtolower($this->pred_type)=='related_to'){
                     foreach($value as $idx=>$val){
                         if(@$val['r']){
-                            $this->relation_types = $val['r'];
-                            if(is_array($this->relation_types) && count(is_array($this->relation_types)==1)){
-                                $this->relation_types = $this->relation_types[0];  
-                            } 
+                            $this->relation_types = prepareIds($val['r']);
                             array_splice($value, $idx, 1);
                             $this->value = $value;
                             break;
@@ -1601,13 +1598,13 @@ class HPredicate {
         //search by relation type is disabled since it assigns field id instead  @todo fix
         $where = "r$p.rec_ID=$rl.rl_SourceID AND $rl.rl_TargetID".$val;
         
-        if($this->relation_types){
+        if(is_array($this->relation_types)&& count($this->relation_types)>0){
             //(($this->field_id && false) ?"$rl.rl_RelationTypeID=".$this->field_id :)
-            if(is_array($this->relation_types)&& count($this->relation_types)){
-                $where = $where . " AND $rl.rl_RelationTypeID IN (".implode(',',$this->relation_types).")";    
-            }else{
-                $where = $where . " AND $rl.rl_RelationTypeID = ".$this->relation_types;    
-            }
+            
+            $where = $where . " AND ($rl.rl_RelationTypeID " .(count($this->relation_types)>1
+                        ?' IN ('.implode(',',$this->relation_types).')'
+                        :'='.$this->relation_types[0])
+                        .')';    
             
         }else{
             $where = $where . " AND $rl.rl_RelationID is not null";
@@ -1888,6 +1885,29 @@ class HPredicate {
                 $res  =  $res.' or trm_Code="'.$value.'")';
             }
             $res = (($this->negate)?' not':'').$res;
+            
+        }else
+        if ($this->field_type=='file'){        
+            
+            $value = $mysqli->real_escape_string($this->value);
+            
+            
+            if(strpos($value,'^')===0){ //search file size
+                
+                $this->value = substr($this->value, 1);
+                $res = "ulf_FileSizeKB $eq ".intval($this->value);
+                
+            }else {
+                if($this->exact){
+                    $res  =  $res.'="'.$value.'"'; 
+                } else {
+                    $res  =  $res.'LIKE "%'.$value.'%"';
+                }
+                //path, filename, description and remote URL 
+                $res = "(ulf_OrigFileName $res) OR "
+                       ."(ulf_ExternalFileReference $res)  OR (ulf_Description $res)";
+            }
+            $res = ' in (select ulf_ID from recUploadedFiles where '.$res.')';
             
         }else
         if (($this->field_type=='float' || $this->field_type=='integer' || $this->field_type == 'link') && is_numeric($this->value)) {

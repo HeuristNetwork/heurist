@@ -457,12 +457,14 @@ class DbSysGroups extends DbEntityBase
         if($ret){
             $mysqli->commit();
         
-            //????    
+            //save special semaphore file to trigger user refresh for other users
+            /*
             foreach ($assignIDs as $usrID)
             if($usrID!=$this->system->get_user_id()){
                 $fname = HEURIST_FILESTORE_DIR.$usrID;
                 fileSave('X',$fname); //change role
             }
+            */
         }
               
         if($keep_autocommit===true) $mysqli->autocommit(TRUE);

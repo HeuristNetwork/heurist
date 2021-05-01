@@ -183,7 +183,7 @@ onClick="{ $('<div>').addClass('coverall-div').css('zIndex',60000).appendTo('bod
             
             //copy resource folders
             if(@$_REQUEST['include_docs']=='1'){
-                $folders_to_copy = $system->getSystemFolders(true);
+                $folders_to_copy = $system->getSystemFolders( 1 );
 
                 echo_flush("<br><br>Exporting system folders<br>");
             }
@@ -288,7 +288,6 @@ onClick="{ $('<div>').addClass('coverall-div').css('zIndex',60000).appendTo('bod
             // Create a zipfile of the definitions and data which have been dumped to disk
             $destination = $folder.'.zip';
             if(file_exists($destination)) unlink($destination);
-            chdir($folder); 
             
             $res = createZipArchive($folder, null, $destination, true);
             

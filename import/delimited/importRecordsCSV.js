@@ -3875,7 +3875,9 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
         
     } 
     
-    
+    //
+    //
+    //
     function _importNewTermsToAllFields($dlg, index, prepared_data){
 
         var btn_ads = $dlg.find('.add_terms');
@@ -4048,6 +4050,8 @@ function hImportRecordsCSV(_imp_ID, _max_upload_size, _format) {
     //
     function _importTerms($dlg, _prepareddata, is_all)
     {
+        _prepareddata = JSON.stringify(_prepareddata);
+        
         //save hierarchy - label can have dots    
         var request = {
             'a'          : 'batch',

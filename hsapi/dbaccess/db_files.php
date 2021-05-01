@@ -190,7 +190,10 @@ function fileGetFullInfo($system, $file_ids, $all_fields=false){
             $res->close();
             return $result;
         }else{
-            $system->addError(HEURIST_DB_ERROR, 'Cannot get files', $mysqli->error);
+            $system->addError(HEURIST_DB_ERROR, 
+                'Cannot get file info in fileGetFullInfo. Count of files '
+                        .count($file_ids).'. Ask thumb img: '.($all_fields?'YES':'NO'), 
+                $mysqli->error);
             return false;
         }
     }else{
@@ -656,9 +659,9 @@ function fileGetPlayerTag($fileid, $mimeType, $params, $external_url, $size=null
         $filepath = $external_url;  //external 
     }else{
         //to itself
-        $filepath = HEURIST_BASE_URL."?db=".HEURIST_DBNAME."&file=".$fileid;
+        $filepath = HEURIST_BASE_URL_PRO."?db=".HEURIST_DBNAME."&file=".$fileid;
     }
-    $thumb_url = HEURIST_BASE_URL."?db=".HEURIST_DBNAME."&thumb=".$fileid;
+    $thumb_url = HEURIST_BASE_URL_PRO."?db=".HEURIST_DBNAME."&thumb=".$fileid;
 
     if ( $is_video ) {
 
@@ -858,10 +861,10 @@ function fileGetWidthHeight($filepath, $external_url, $mimeType){
                 
             }catch(Exception  $e){
                 
-                $res = 'Cant get image dimensions';
+                $res = 'Cannot get image dimensions';
             }
         }else{
-            $res = 'Cant load image file to get dimensions';
+            $res = 'Cannot load image file to get dimensions';
         }
         
     }else{

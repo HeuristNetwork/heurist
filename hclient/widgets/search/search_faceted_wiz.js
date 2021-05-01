@@ -1265,20 +1265,23 @@ $.widget( "heurist.search_faceted_wiz", {
     
     , showHideReverse: function(){
         
-        var showrev = $('#fsw_showreverse').is(":checked");
         var treediv = $('#field_treeview');
-        var tree = treediv.fancytree("getTree");
-        tree.visit(function(node){
+        if(treediv.fancytree('instance')){
+        
+            var tree = treediv.fancytree("getTree");
+            var showrev = $('#fsw_showreverse').is(":checked");
+            tree.visit(function(node){
 
-            if(node.data.isreverse==1){ 
+                if(node.data.isreverse==1){ 
 
-                if(showrev===true){
-                    $(node.li).removeClass('fancytree-hidden');
-                }else{
-                    $(node.li).addClass('fancytree-hidden');
+                    if(showrev===true){
+                        $(node.li).removeClass('fancytree-hidden');
+                    }else{
+                        $(node.li).addClass('fancytree-hidden');
+                    }
                 }
-            }
-        });
+            });
+        }
     }
     
     //restore selection in treeview
