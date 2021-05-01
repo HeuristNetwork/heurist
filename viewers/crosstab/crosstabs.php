@@ -262,7 +262,20 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
         </div>
     </div>
 
-
+    <!-- Modal for Add, Edit and Delete values -->
+    <div class="modal fade" tabindex="-1" id="intervalsModal">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header" id="intervalHeader">
+                    <h5 id="header"></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="intervalsBody">
+                
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 
 </html>

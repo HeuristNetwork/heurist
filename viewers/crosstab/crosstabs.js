@@ -58,6 +58,8 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
     var _isPopupMode = false;
 
+    var $modal = $('#intervalsModal');
+
     function _init(_query, _query_domain)
     {
         if(!window.hWin.HEURIST4.util.isempty(_query)){
@@ -80,12 +82,13 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
         $('.showintervals')
         .click(function( event ) {
-            var isVisible = showHideIntervals( $(this).attr('tt') );
+            /*var isVisible = showHideIntervals( $(this).attr('tt') );
             if(isVisible){
                 $(this).removeClass('collapsed');
             }else{
                 $(this).addClass('collapsed');
-            }
+            }*/
+            $modal.modal('show');
         });
 
         //hide left panel(saved searches) and maximize analysis
@@ -430,6 +433,13 @@ function CrosstabsAnalysis(_query, _query_domain) {
     function renderIntervals(name){
 
         var $container = $('#'+name+'Intervals');
+        var $modalDialogBody = $('#intervalsBody');
+        var $labelDiv;
+        var $dlgLabelDiv;
+        var $rowDiv;
+        var $buttons;
+        var $bodyDiv;
+        $modalDialogBody.empty();
         $container.empty();
 
         if(fields3[name].intervals.length<1){
@@ -440,28 +450,62 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
         if(fields3[name].values && fields3[name].values.length>0)
         {
+            $('#header').text('Edit '+ name +' intervals');
+
+            //Creates entire element in modal
             $intdiv = $(document.createElement('div'))
             .css({'padding':'0.4em'})
             .attr('intid', 'b0' )
-            .appendTo($container);
+            .addClass('container-fluid')
+            .appendTo($modalDialogBody);
 
-            $intdiv
-            .append('&nbsp;&nbsp;<label>Number of intervals:</label>')
-            .append($('<input id="'+name+'IntCount">').attr('size',6).val(keepCount))
+            $labelDiv = $(document.createElement('div'))
+            .addClass('row')
+            .appendTo($intdiv);
+
+            $dlgLabelDiv = $(document.createElement('div'))
+            .addClass('col-6')
+            .appendTo($labelDiv);
+
+            $rowDiv = $(document.createElement('div'))
+            .addClass('row')
+            .appendTo($dlgLabelDiv);
+
+            $rowDiv
+            .append('<div class="col-6 form-group"><label>Number of intervals:</label><input id="'+name+'IntCount" size="6" value="'+keepCount+'"></div>')
+            
+            //$('<input id="'+name+'IntCount">').attr('size',6).val(keepCount)
+
+            $buttons = $(document.createElement('div'))
+            .addClass('col-6')
+            .append($('<button>',{text: "Reset"})
+                .click(function( event ) {
+                    calculateIntervals(name, parseInt($('#'+name+'IntCount').val()) );
+                }))
+            .append($('<button>',{text: "Add"})
+            //.button({icons: {primary: "ui-icon-plus"}} )
+            .click(function( event ) {
+                editInterval(  name, -1 );
+            }));
+            
+            $buttons.appendTo($rowDiv);
+            /*
             .append($('<button>',{text: "Reset"})
                 .css('margin-left','1em')
                 .css('margin-right','3em')
                 .click(function( event ) {
                     calculateIntervals(name, parseInt($('#'+name+'IntCount').val()) );
             }));
+            */
 
-
+            /*
             $('<button>',{text: "Add"})
             //.button({icons: {primary: "ui-icon-plus"}} )
             .click(function( event ) {
                 editInterval(  name, -1 );
             })
-            .appendTo($intdiv);
+            .appendTo($rowDiv);
+            */
 
             /* @TODO perhaps
             $intdiv.append($('<input>').attr('type','checkbox').css('margin-left','1em').click(function(event){
@@ -482,13 +526,13 @@ function CrosstabsAnalysis(_query, _query_domain) {
             var interval = intervals[idx];
 
             $intdiv = $(document.createElement('div'))
-            .addClass('intervalDiv list')
+            .addClass('intervalDiv list row')
             .css({'padding':'0.2em'})
             .attr('id', name+idx )
-            .appendTo($container);
+            .appendTo($dlgLabelDiv);
 
-            $('<div>')
-            .css({'width':'160px','display':'inline-block'})
+            $('<div class="col-md-4">')
+            //.css({'width':'160px','display':'inline-block'})
             .append(
                 $('<div>')
                 .html(interval.name)
@@ -499,9 +543,9 @@ function CrosstabsAnalysis(_query, _query_domain) {
             .css({'width':'150px'} ))*/
             .appendTo($intdiv);
 
-            $('<div>')
+            $('<div class="col-md-4">')
             .html(interval.description)
-            .css({'max-width':'250px','width':'250px','display':'inline-block','padding-left':'1.5em'})
+            //.css({'max-width':'250px','width':'250px','display':'inline-block','padding-left':'1.5em'})
             .appendTo($intdiv);
 
             /*
@@ -513,15 +557,18 @@ function CrosstabsAnalysis(_query, _query_domain) {
             $intdiv.append(editbuttons);
             */
 
+            $bodyDiv = $('<div class="col-md-4"></div>')
+            .appendTo($intdiv);
+
             $('<button>')
             .attr('intid', idx)
             //.button({icons: {primary: "ui-icon-pencil"}, text: false })
             .addClass('crosstab-interval-edit')
             .css({'background-image': 'url('+window.hWin.HAPI4.baseURL+'common/images/edit_pencil_9x11.gif)'})
             .click(function( event ) {
-                editInterval( name,  $(this).attr('intid') );
+                editInterval( name,  $(this).attr('intid'), $labelDiv );
             })
-            .appendTo($intdiv);
+            .appendTo($bodyDiv);
 
             $('<button>')
             //.button({icons: {primary: "ui-icon-close"}, text: false })
@@ -531,10 +578,8 @@ function CrosstabsAnalysis(_query, _query_domain) {
             .click(function( event ) {
                 removeInterval( name, $(this).attr('intid') );
             })
-            .appendTo($intdiv);
+            .appendTo($bodyDiv);
         }
-
-
 
     }
 
@@ -556,25 +601,33 @@ function CrosstabsAnalysis(_query, _query_domain) {
     /**
     * add/edit interval
     */
-    function editInterval( name, idx ){
+    function editInterval( name, idx, div ){
 
-        var $dialogbox;
+        //var $dialogbox;
+        var modalEditBox = div;
+        var $rowDiv;
 
         //create multiselect list of terms
         var $dlg = $("#terms-dialog");
         if($dlg.length==0){
             $dlg = $('<div>')
             .attr('id','terms-dialog')
+            .addClass('col-6')
             .css('overflow-y', 'auto')
-            .appendTo($('body'));
+            .appendTo(modalEditBox);
         }
         $dlg.empty();
 
         var intname = (idx<0)?'new interval':fields3[name].intervals[idx].name;
-        $('<div id="topdiv">Label:<input id="intname" value="'+intname+'"></div>')
+
+        $rowDiv = $(document.createElement('div'))
+        .addClass('row')
+        .appendTo($dlg);
+
+        $('<div id="topdiv" class="col-12">Label:<input id="intname" value="'+intname+'"></div>')
         //.addClass('intervalDiv list')
         .css({'padding':'0.2em'})
-        .appendTo($dlg);
+        .appendTo($rowDiv);
 
         var iHeight = 220;
         var detailtype = fields3[name].type;
@@ -604,10 +657,14 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 if(notused){
 
                     $intdiv = $(document.createElement('div'))
-                    .addClass('intervalDiv list')
+                    .addClass('intervalDiv list row')
                     .css({'padding':'0.2em'})
                     .attr('intid', idx )
                     .appendTo($dlg);
+
+                    $listDiv = $(document.createElement('div'))
+                    .addClass('col-12')
+                    .appendTo($intdiv);
 
                     $('<input>')
                     .attr('type','checkbox')
@@ -616,14 +673,14 @@ function CrosstabsAnalysis(_query, _query_domain) {
                     .attr('termid',termlist[i].id)
                     .attr('termname',termlist[i].text)
                     .css('margin','0.4em')
-                    .appendTo($intdiv);
+                    .appendTo($listDiv);
 
                     $('<div>')
                     .css('display','inline-block')
                     .addClass('recordTitle')
                     .css('margin-top','0.4em')
                     .html( termlist[i].text )
-                    .appendTo($intdiv);
+                    .appendTo($listDiv);
 
                     cnt++;
 
@@ -661,7 +718,6 @@ function CrosstabsAnalysis(_query, _query_domain) {
             function __addeditInterval( event ){
 
                 $(event.target).off('click');
-                var idxToDelete = [];
 
                 if(idx<0){
                     fields3[name].intervals.push( {name:'', description:'', values:[] });
@@ -717,15 +773,16 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 renderIntervals(name);
                 _doRender();
 
-                $dialogbox.dialog( "close" );
+                //$dialogbox.dialog( "close" );
             }
 
 
-            $dlg.find("#topdiv").append($('<button>').html('Apply').css('margin','1em').click(__addeditInterval));
+            $dlg.find("#topdiv").append($('<button>').html('Apply')/*.css('margin','1em')*/.click(__addeditInterval));
 
-            $dialogbox = window.hWin.HEURIST4.msg.showElementAsDialog(
-                    {element:$dlg.get(0), height: iHeight, width:320, title:"Edit interval", modal:true} );
+            /*$dialogbox = window.hWin.HEURIST4.msg.showElementAsDialog(
+                    {element:$dlg.get(0), height: iHeight, width:320, title:"Edit interval", modal:true} ); */
             /*
+
             $dlg.dialog({
             autoOpen: true,
             height: iHeight,
