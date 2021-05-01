@@ -102,7 +102,9 @@ $.widget( "heurist.resultList", {
         transparent_background: false,
         
         aggregate_values: null, //supplementary values per record id - usually to store counts, sum, avg 
-        aggregate_link: null    //link to assigned to aggregate value label
+        aggregate_link: null,    //link to assigned to aggregate value label
+		
+		blog_result_list: false	//whether the result list is used for blog records, limiting pagesize if it is
     },
 
     _is_publication:false, //this is CMS publication - take css from parent
@@ -140,7 +142,12 @@ $.widget( "heurist.resultList", {
         var that = this;
 
         if(this.options.pagesize<50 || this.options.pagesize>5000){
-            this.options.pagesize = window.hWin.HAPI4.get_prefs('search_result_pagesize');
+            if(this.options.blog_result_list==true){
+                this.options.pagesize = 10;
+            }
+            else{
+                this.options.pagesize = window.hWin.HAPI4.get_prefs('search_result_pagesize');
+            }
         }
 
         this._is_publication  = this.element.parent().attr('data-heurist-app-id');
