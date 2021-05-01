@@ -470,9 +470,9 @@ $website_title -> #main-title>h2
           if(!$('#main-logo-alt').is(':visible')){
                 ele.css({right:10}); 
           }
-          setTimeout(function(){ ele.css({left:$('#main-logo').width()+10 }); },2000);
+          setTimeout(function(){ ele.css({left:$('#main-logo').width()+10 });ele.fadeIn(500); },2000);
       }
-      ele.fadeIn(3000);
+      
       
   }
   <?php } ?>
