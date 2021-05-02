@@ -1720,7 +1720,7 @@ $.widget( "heurist.mainMenu6", {
             +window.hWin.HAPI4.baseURL+'hclient/assets/v6/gs_'+section+'.png"></div>'
             
         +'<span class="ui-heurist-title header" style="display: inline-block; font-weight: normal;padding-left:20px">'
-            +'<span class="ui-icon ui-icon-help"/>&nbsp;Introductory guide</span>'            
+            +'<span class="ui-icon ui-icon-help"/>&nbsp;Menu guide</span>'            
             
         +'<span class="ui-heurist-title header" id="start-hints" style="display: inline-block; font-weight: normal;padding-left:20px;cursor: pointer">'
             +'<span class="ui-icon ui-icon-help"/>&nbsp;Startup hints</span>' 			
@@ -1827,7 +1827,7 @@ $.widget( "heurist.mainMenu6", {
                         // Link to Introductory Guide
                         that.introductions[section].find('div.gs-box.ui-heurist-'+section)
                         .prepend( '<span class="ui-heurist-title header" id="intro-guide" style="padding-top:57px;font-weight:normal;padding-left:20px;cursor:pointer">'
-                                    +'<span class="ui-icon ui-icon-help"/>&nbsp;Introductory guide</span>' );
+                                    +'<span class="ui-icon ui-icon-help"/>&nbsp;Menu guide</span>' );
                         that.introductions[section].find('#intro-guide').click(function(){ that._loadIntroductoryGuide(null); });
 
                         // Display Content
