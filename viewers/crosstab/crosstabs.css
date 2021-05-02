@@ -206,16 +206,19 @@ div .selected, div .selected:hover{
     padding-top:4px;
 }
 
+/*
 .showintervals{
     width: 16px !important;
     height: 16px !important;
     background-image: url('../../common/images/blue-up-triangle.png');
     background-repeat: no-repeat
 }
+*/
+/*
 .collapsed{
     background-image: url('../../common/images/blue-down-triangle.png');
 }
-
+*/
 
 .crosstab-interval-edit{
     width: 16px !important;

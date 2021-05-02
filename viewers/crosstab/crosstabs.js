@@ -483,6 +483,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
             $firstRowDiv = $(document.createElement('div'))
             .addClass('row')
+            .css('margin-bottom','1rem')
             .appendTo($leftColDiv);
 
             $firstRowDiv
@@ -492,15 +493,15 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
             $buttons = $(document.createElement('div'))
             .addClass('col-6')
-            .append($('<button>',{text: "Reset"})
+            .append($('<button>',{text: "Reset",class: "btn btn-secondary"})
                 .click(function( event ) {
                     calculateIntervals(name, parseInt($('#'+name+'IntCount').val()) );
-                }))
-            .append($('<button>',{text: "Add"})
+                }).css('margin-right',"1rem"))
+            .append($('<button>',{text: "Add", class: "btn btn-success", style: "padding-right:1rem"})
             //.button({icons: {primary: "ui-icon-plus"}} )
-            .click(function( event ) {
-                editInterval(  name, -1, $rowDiv );
-            }));
+                .click(function( event ) {
+                    editInterval(  name, -1, $rowDiv );
+                }));
             
             $buttons.appendTo($firstRowDiv);
             /*
@@ -577,8 +578,9 @@ function CrosstabsAnalysis(_query, _query_domain) {
             $('<button>')
             .attr('intid', idx)
             //.button({icons: {primary: "ui-icon-pencil"}, text: false })
-            .addClass('crosstab-interval-edit')
-            .css({'background-image': 'url('+window.hWin.HAPI4.baseURL+'common/images/edit_pencil_9x11.gif)'})
+            .addClass('btn btn-warning border-dark')
+            .append('<i class="bi bi-pencil"></i>')
+            //css({'background-image': 'url('+window.hWin.HAPI4.baseURL+'common/images/edit_pencil_9x11.gif)'})
             .click(function( event ) {
                 editInterval( name,  $(this).attr('intid'), $rowDiv );
             })
@@ -587,8 +589,9 @@ function CrosstabsAnalysis(_query, _query_domain) {
             $('<button>')
             //.button({icons: {primary: "ui-icon-close"}, text: false })
             .attr('intid', idx)
-            .addClass('crosstab-interval-edit')
-            .css({'background-image': 'url('+window.hWin.HAPI4.baseURL+'common/images/delete6x7.gif)'})
+            .addClass('btn btn-danger border-dark')
+            .append('<i class="bi bi-trash"></i>')
+            //.css({'background-image': 'url('+window.hWin.HAPI4.baseURL+'common/images/delete6x7.gif)'})
             .click(function( event ) {
                 removeInterval( name, $(this).attr('intid') );
             })
@@ -654,7 +657,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
         $('<div id="topdiv" class="col-12">Label:<input id="intname" value="'+intname+'"></div>')
         //.addClass('intervalDiv list')
-        .css({'padding':'0.2em'})
+        .css({'margin-bottom':'1rem'})
         .appendTo($rowDiv);
 
         var iHeight = 220;
@@ -805,7 +808,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
             }
 
 
-            $dlg.find("#topdiv").append($('<button>').html('Apply')/*.css('margin','1em')*/.click(__addeditInterval));
+            $dlg.find("#topdiv").append($('<button>').html('Apply').addClass("btn btn-success").css('margin-left','1rem').click(__addeditInterval));
 
             /*$dialogbox = window.hWin.HEURIST4.msg.showElementAsDialog(
                     {element:$dlg.get(0), height: iHeight, width:320, title:"Edit interval", modal:true} ); */
