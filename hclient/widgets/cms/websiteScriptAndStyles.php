@@ -459,12 +459,14 @@ $website_title -> #main-title>h2
       $('#main-logo-alt').hide();
   <?php } ?>
   }
-            
+  
+  
   <?php if($website_title){  ?>
+  
   var ele = $('#main-title');
   if(ele.length>0){
       ele.empty().hide();
-      $('<h2 style="font-size:1.7em;margin-top:4px;padding:0 10px;max-height:80px;overflow: hidden;"><?php print htmlspecialchars($website_title, ENT_QUOTES);?></h2>').appendTo(ele);
+      $('<h2<?php echo ($image_banner?' style="text-shadow: 3px 3px 5px black"':'');?>><?php print strip_tags($website_title,'<i><b><u><em><strong><sup><sub><small><br>');?></h2>').appendTo(ele);
       if(ele.parent().is('#main-header'))
       {
           if(!$('#main-logo-alt').is(':visible')){
