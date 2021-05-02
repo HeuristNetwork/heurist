@@ -62,10 +62,11 @@ of the codebase and rename it to index.html
 
 // *** DO NOT CHANGE VERSION NUMBER, THIS IS SET BY THE HEURIST DEVELOPMENT TEAM ***
 
-$version = "6.2.6"; // sets current program version number, determined by Heurist development lead
+$version = "6.2.7"; // sets current program version number, determined by Heurist development lead
 
 // dates below are the date of release of the given version, and list changes since last release
 
+// 6.2.7 2 May 2021 Improved duplicates finder handles scale and field selections, reduce email notificatiosn with daily logfile, improved database deletion fucntions with zipping and mail to owner, additional filter builder options incl. file fields and relationship markers, tighten control on term moving and deletions and imporved automatic fixups, db ownership transfer, cleaner blog and website loading, better error trapping on directory permission error, interpreting non-iso dates in zotero synch
 // 6.2.6 12 Apr 2021 Revised draft dupes finder, remove incorrect correction of yyy-mm dates to 1st of month and past month end to following month, missing and present selection on filter builder, dump sysArchive as CSV (not yet in menus)
 // 6.2.5 2 Apr 2021 First draft new dupes finder but too slow, MPCE lookup function incorporated, vrious cosmetic and bug fixes
 // 6.2.4  18 Mar 2021 (since 6 Feb) lots of bug fixes on new version, extra checks and helpful instructions, fix XML structure download and geoJSon, summarising on CSV output (count, group, sort), additional integrity checks and automated fixing of bad terms, facet search multi-select, enhanced filter builder with AND, OR and multi-level searches, spatial search on specific fields, use of FULLTEXT search for word searches 
