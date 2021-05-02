@@ -263,14 +263,42 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
     </div>
 
     <!-- Modal for Add, Edit and Delete values -->
-    <div class="modal fade" tabindex="-1" id="intervalsModal">
+    <div class="modal fade" tabindex="-1" id="rowIntervalsModal">
         <div class="modal-dialog modal-xl">
             <div class="modal-content">
-                <div class="modal-header" id="intervalHeader">
-                    <h5 id="header"></h5>
+                <div class="modal-header" id="rowIntervalHeader">
+                    <h5 id="rowHeader"></h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body" id="intervalsBody">
+                <div class="modal-body" id="rowIntervalsBody">
+                
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" tabindex="-1" id="columnIntervalsModal">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header" id="columnIntervalHeader">
+                    <h5 id="columnHeader"></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="columnIntervalsBody">
+                
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" tabindex="-1" id="pageIntervalsModal">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header" id="pageIntervalHeader">
+                    <h5 id="pageHeader"></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="pageIntervalsBody">
                 
                 </div>
             </div>
