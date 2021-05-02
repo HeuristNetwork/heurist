@@ -23,17 +23,20 @@ fieldset > div{
 
 fieldset > div > .fldheader{
     display:table-cell;
-    width:100px;
+    /*width:100px;
     min-width:100px;
-    text-align:right;
+    */
+    text-align:left;
+    /*
     padding-top:0.4em;
     padding-right:2em;
+    */
     font-weight: bold;
 }
 fieldset > div > .input-cell{
     display:table-cell;
-    min-width:120px;
-    width:380px;
+    /*min-width:120px*/;
+    /*width:380px;*/
     padding-bottom:2px;
     vertical-align: bottom;
 }
