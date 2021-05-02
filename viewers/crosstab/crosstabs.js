@@ -26,6 +26,7 @@
 var crosstabsAnalysis;
 var buttonDiv;
 var visualisationButton;
+var modalBody = [];
 
 /**
 *  CrosstabsAnalysis - class for crosstab analysis
@@ -58,8 +59,6 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
     var _isPopupMode = false;
 
-    var $modal = $('#intervalsModal');
-
     function _init(_query, _query_domain)
     {
         if(!window.hWin.HEURIST4.util.isempty(_query)){
@@ -88,6 +87,8 @@ function CrosstabsAnalysis(_query, _query_domain) {
             }else{
                 $(this).addClass('collapsed');
             }*/
+            var $modal = determineModalType( $(this).attr('tt') );
+
             $modal.modal('show');
         });
 
@@ -171,6 +172,18 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
         //get list of settings
         configEntityWidget.configEntity( 'updateList', _selectedRtyID );
+    }
+
+    /**
+     * Determine the modal type, 
+     * either row, column or page
+     * return its value.
+     */
+    function determineModalType(name){
+        var modal = $('#'+name+'IntervalsModal');
+
+        return modal;
+
     }
 
 
@@ -433,10 +446,10 @@ function CrosstabsAnalysis(_query, _query_domain) {
     function renderIntervals(name){
 
         var $container = $('#'+name+'Intervals');
-        var $modalDialogBody = $('#intervalsBody');
-        var $labelDiv;
-        var $dlgLabelDiv;
-        var $rowDiv;
+        var $modalDialogBody = $('#'+name+'IntervalsBody'); //Hosts the entire body of modal
+        var $rowDiv;  //First row within the modal.
+        var $leftColDiv;   //Left column of div 
+        var $firstRowDiv;  
         var $buttons;
         var $bodyDiv;
         $modalDialogBody.empty();
@@ -450,7 +463,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
         if(fields3[name].values && fields3[name].values.length>0)
         {
-            $('#header').text('Edit '+ name +' intervals');
+            $('#'+name+'Header').text('Edit '+ name +' intervals');
 
             //Creates entire element in modal
             $intdiv = $(document.createElement('div'))
@@ -459,19 +472,20 @@ function CrosstabsAnalysis(_query, _query_domain) {
             .addClass('container-fluid')
             .appendTo($modalDialogBody);
 
-            $labelDiv = $(document.createElement('div'))
-            .addClass('row')
+            $rowDiv = $(document.createElement('div'))
+            .addClass('row '+name)
             .appendTo($intdiv);
 
-            $dlgLabelDiv = $(document.createElement('div'))
+            $leftColDiv = $(document.createElement('div'))
             .addClass('col-6')
-            .appendTo($labelDiv);
+            .css({'padding-right':'2rem'})
+            .appendTo($rowDiv);
 
-            $rowDiv = $(document.createElement('div'))
+            $firstRowDiv = $(document.createElement('div'))
             .addClass('row')
-            .appendTo($dlgLabelDiv);
+            .appendTo($leftColDiv);
 
-            $rowDiv
+            $firstRowDiv
             .append('<div class="col-6 form-group"><label>Number of intervals:</label><input id="'+name+'IntCount" size="6" value="'+keepCount+'"></div>')
             
             //$('<input id="'+name+'IntCount">').attr('size',6).val(keepCount)
@@ -488,7 +502,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 editInterval(  name, -1 );
             }));
             
-            $buttons.appendTo($rowDiv);
+            $buttons.appendTo($firstRowDiv);
             /*
             .append($('<button>',{text: "Reset"})
                 .css('margin-left','1em')
@@ -529,7 +543,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
             .addClass('intervalDiv list row')
             .css({'padding':'0.2em'})
             .attr('id', name+idx )
-            .appendTo($dlgLabelDiv);
+            .appendTo($leftColDiv);
 
             $('<div class="col-md-4">')
             //.css({'width':'160px','display':'inline-block'})
@@ -566,7 +580,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
             .addClass('crosstab-interval-edit')
             .css({'background-image': 'url('+window.hWin.HAPI4.baseURL+'common/images/edit_pencil_9x11.gif)'})
             .click(function( event ) {
-                editInterval( name,  $(this).attr('intid'), $labelDiv );
+                editInterval( name,  $(this).attr('intid'), $rowDiv );
             })
             .appendTo($bodyDiv);
 
@@ -580,7 +594,6 @@ function CrosstabsAnalysis(_query, _query_domain) {
             })
             .appendTo($bodyDiv);
         }
-
     }
 
     /**
