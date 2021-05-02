@@ -499,7 +499,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
             .append($('<button>',{text: "Add"})
             //.button({icons: {primary: "ui-icon-plus"}} )
             .click(function( event ) {
-                editInterval(  name, -1 );
+                editInterval(  name, -1, $rowDiv );
             }));
             
             $buttons.appendTo($firstRowDiv);
@@ -616,20 +616,35 @@ function CrosstabsAnalysis(_query, _query_domain) {
     */
     function editInterval( name, idx, div ){
 
+        var $editedRow = $('#'+name+idx);
+
+        //Toggle edit background colour for the interval that is being used.
+        for(e=0;e<fields3[name].intervals.length;e++){
+            if(e == idx){
+                $editedRow.toggleClass("intervalDiv", false);
+                $editedRow.toggleClass("bg-warning", true);
+            }
+            else{
+                $('#'+name+e).toggleClass("intervalDiv", true);
+                $('#'+name+e).toggleClass("bg-warning", false);
+            }
+        }
         //var $dialogbox;
         var modalEditBox = div;
         var $rowDiv;
 
         //create multiselect list of terms
         var $dlg = $("#terms-dialog");
+        
         if($dlg.length==0){
             $dlg = $('<div>')
             .attr('id','terms-dialog')
-            .addClass('col-6')
             .css('overflow-y', 'auto')
-            .appendTo(modalEditBox);
+            .appendTo('body');
         }
-        $dlg.empty();
+        $dlg.empty()
+        .addClass('col-6')
+        .appendTo(modalEditBox);
 
         var intname = (idx<0)?'new interval':fields3[name].intervals[idx].name;
 
