@@ -1036,7 +1036,7 @@ function recordSearchMenuItems($system, $menuitems, &$result, $ids_only=false){
 
                 if($isWebPage){
                     return recordSearch($system, array('q'=>array('ids'=>$root_rec_id), 
-                        'detail'=>array(DT_NAME,DT_SHORT_SUMMARY,DT_CMS_TARGET,DT_CMS_CSS,DT_CMS_PAGETITLE,DT_EXTENDED_DESCRIPTION,DT_CMS_TOP_MENU,DT_CMS_MENU), //'detail' 
+                        'detail'=>array(DT_NAME,DT_SHORT_SUMMARY,DT_CMS_TARGET,DT_CMS_CSS,DT_CMS_PAGETITLE,DT_EXTENDED_DESCRIPTION,DT_CMS_TOP_MENU,DT_CMS_MENU,DT_THUMBNAIL), //'detail' 
                         'w'=>'e', 'cms_cut_description'=>1));
                 }else{
                     //find parent home record
@@ -1096,7 +1096,7 @@ function recordSearchMenuItems($system, $menuitems, &$result, $ids_only=false){
         }else{
             //return recordset
             return recordSearch($system, array('q'=>array('ids'=>$result), 
-                'detail'=>array(DT_NAME,DT_SHORT_SUMMARY,DT_CMS_TARGET,DT_CMS_CSS,DT_CMS_PAGETITLE,DT_EXTENDED_DESCRIPTION,DT_CMS_TOP_MENU,DT_CMS_MENU), //'detail' 
+                'detail'=>array(DT_NAME,DT_SHORT_SUMMARY,DT_CMS_TARGET,DT_CMS_CSS,DT_CMS_PAGETITLE,DT_EXTENDED_DESCRIPTION,DT_CMS_TOP_MENU,DT_CMS_MENU,DT_THUMBNAIL), //'detail' 
                 'w'=>'e', 'cms_cut_description'=>1));
         }
     }

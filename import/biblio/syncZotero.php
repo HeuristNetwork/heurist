@@ -35,6 +35,8 @@ require_once(dirname(__FILE__).'/../../external/php/phpZotero.php');
 
 $system->defineConstants();
 
+define('H_ID','h-id');
+
 $dt_SourceRecordID = (defined('DT_ORIGINAL_RECORD_ID')?DT_ORIGINAL_RECORD_ID:0);
 if($dt_SourceRecordID==0){ //this field is critical - need to download it from heurist core defintions database
     
@@ -222,16 +224,16 @@ foreach ($fh_data->children() as $f_gen){
 
             if($f_type->getName()=="typeMap"){
                 $arr = $f_type->attributes();
-                if(@$arr['h3id']){
+                if(@$arr[H_ID]){
 
                     $zType = strval($arr['zType']);
                     // find record type with such code (or concept code)
-                    $rt_id = ConceptCode::getRecTypeLocalID($arr['h3id']);
+                    $rt_id = ConceptCode::getRecTypeLocalID($arr[H_ID]);
                     
                     printMappingReport_rt($arr, $rt_id);                    
                     
                     if($rt_id == null){
-                        array_push($mapping_rt_errors, $arr['h3id']."  ".$zType);
+                        array_push($mapping_rt_errors, $arr[H_ID]."  ".$zType);
                     }else{
 
                         $mapping_dt = array();
@@ -245,14 +247,14 @@ foreach ($fh_data->children() as $f_gen){
                                     foreach ($f_field->children() as $f_ctype){
                                         if($f_ctype->getName()=="creatorType"){
                                             $arr = $f_ctype->attributes();
-                                            if(@$arr['h3id'])
+                                            if(@$arr[H_ID])
                                             {
                                                 addMapping($arr, $zType, $rt_id); //, "creator");
                                             }
                                         }
                                     }
 
-                                }else if(@$arr['h3id'])
+                                }else if(@$arr[H_ID])
                                 {
                                     addMapping($arr, $zType, $rt_id);
                                 }
@@ -871,7 +873,7 @@ function addMapping($arr, $zType, $rt_id)
 
     global $mapping_dt, $mapping_dt_errors;
 
-    $dt_code = strval($arr['h3id']);
+    $dt_code = strval($arr[H_ID]);
     $resource_rt_id = null;
     $resource_dt_id = null;
     
@@ -913,7 +915,7 @@ function printMappingReport_rt($arr, $rt_id){
         
             if(is_object($arr)){
                 $zType = strval($arr['zType']);
-                $code = $arr['h3id'];
+                $code = $arr[H_ID];
             }else{
                 $zType = '->';
                 $code = $arr;
@@ -942,7 +944,7 @@ function printMappingReport_dt($arr, $rt_id, $dt_id){
         
             if(is_object($arr)){
                 $label = $arr['value'];
-                $code = $arr['h3id'];
+                $code = $arr[H_ID];
             }else{
                 $label = '';
                 $code = $arr;

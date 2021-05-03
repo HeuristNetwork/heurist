@@ -398,7 +398,7 @@ class DbDefTerms extends DbEntityBase
             //validate duplication on the same level
             $mysqli = $this->system->get_mysqli();
             
-            if(@$this->records[$idx]['trm_Label']){
+            if(@$this->records[$idx]['trm_Label']!=null && $this->records[$idx]['trm_Label']!=''){
                 
                 $s2 = null;
             
