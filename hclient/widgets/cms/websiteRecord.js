@@ -358,7 +358,7 @@ function hCmsEditing(_options) {
                                 pagetitle.attr('date-empty',0);
                                 
                                 if(pageid==home_pageid){
-                                    window.hWin.HEURIST4.msg.showMsgFlash('Home page is empty. First menu item will be loaded');
+                                    window.hWin.HEURIST4.msg.showMsgFlash('Home page is empty. First menu item will be loaded',3000);
                                 }else{
                                     window.hWin.HEURIST4.msg.showMsgDlg(
                                         'This menu item does not have associated page content.'

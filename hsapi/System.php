@@ -870,7 +870,7 @@ error_log(print_r($_REQUEST, true));
             fileAdd($Title.'  '.$sMsg, $root_folder.$curr_logfile);
 
             $message = 'Heurist was unable to process. '.$message;
-            $sysmsg = 'This error has been emailed to the Heurist team. We apologise for any inconvenience';
+            $sysmsg = 'This error has been emailed to the Heurist team (for servers maintained by the project - may not be enabled on personal servers). We apologise for any inconvenience';
 
             //$root_folder.$curr_logfile."\n".
             error_log($Title.'  '.$sMsg);     
