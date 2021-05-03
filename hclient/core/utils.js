@@ -1204,20 +1204,22 @@ window.hWin.HEURIST4.util = {
             v2parts = v2parts.map(Number);
         }
 
-        for (var i = 0; i < v1parts.length; ++i) {
-            if (v2parts.length == i) {
-                return 1; // versions are the saame
-            }
+        var i = 0;
+        for (; i < v1parts.length; ++i) {
 
             if (v1parts[i] == v2parts[i]) {
                 continue; // sub elements are the same, continue compare
             }
-            else if (v1parts[i] > v2parts[i]) {
+            else if (v1parts[i] > v2parts[i] || window.hWin.HEURIST4.util.isnull(v2parts[i])) {
                 return -2; // cached version is newer, we will still need to clear cache and reload
             }
             else {
                 return -1; // cached version is older, we will need to clear cache and reload
             }
+        }
+
+        if (v2parts.length == i) {
+            return 1; // versions are the saame
         }
 
         if (v1parts.length != v2parts.length) {
