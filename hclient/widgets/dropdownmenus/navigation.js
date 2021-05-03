@@ -145,8 +145,9 @@ $.widget( "heurist.navigation", {
             DT_CMS_MENU = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_MENU'],
             DT_CMS_CSS = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_CSS'],
             DT_CMS_SCRIPT = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_SCRIPT'],
-            DT_CMS_TARGET = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_TARGET'];//target element on page or popup
+            DT_CMS_TARGET = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_TARGET'],//target element on page or popup
             DT_CMS_PAGETITLE = window.hWin.HAPI4.sysinfo['dbconst']['DT_CMS_PAGETITLE'],//show page title above content
+            DT_THUMBNAIL = window.hWin.HAPI4.sysinfo['dbconst']['DT_THUMBNAIL'],
             
             TERM_NO = $Db.getLocalID('trm','2-531'),
             TERM_NO_old = $Db.getLocalID('trm','99-5447');
@@ -170,6 +171,8 @@ $.widget( "heurist.navigation", {
                 
                     var menuName = resdata.fld(record, DT_NAME);
                     var menuTitle = resdata.fld(record, DT_SHORT_SUMMARY);
+                    var menuIcon = resdata.fld(record, DT_THUMBNAIL);
+
                     var recType = resdata.fld(record, 'rec_RecTypeID');
                     var page_id = menuitems[i]; //resdata.fld(record, 'rec_ID');
                     
@@ -214,7 +217,11 @@ $.widget( "heurist.navigation", {
                                         + (showTitle?' data-showtitle="1"':'')
                                         + (hasContent?' data-hascontent="1"':'')
                                         + ' title="'+window.hWin.HEURIST4.util.htmlEscape(menuTitle)+'">'
-                                        +window.hWin.HEURIST4.util.htmlEscape(menuName)+'</a>';
+                                        
+                                        + (menuIcon?('<span><img src="'+window.hWin.HAPI4.baseURL+'?db='+window.hWin.HAPI4.database
+                                            +'&thumb='+menuIcon+'" '
+                                            +'style="height:16px;width:16px;padding-right:4px;vertical-align: text-bottom;"></span>'):'')
+                                        + window.hWin.HEURIST4.util.htmlEscape(menuName)+'</a>';
                     }
                         
                     var subres = '';

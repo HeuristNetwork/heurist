@@ -535,7 +535,7 @@ class DbEntityBase
                 $value = null;
             }
             
-            if( ( $value==null  || trim($value)=='' ) && 
+            if( ( $value===null  || trim($value)=='' ) && 
                 (@$field_config['dty_Role']!='primary') &&
                 (@$field_config['rst_RequirementType'] == 'required')){
              

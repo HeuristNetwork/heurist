@@ -5,89 +5,89 @@
     <zTypes>
 
 
-        <typeMap zType="webpage" cslType="webpage" h3id="2-2">
-            <field label="Title" value="title" h3id="2-1"/>
-            <field label="Abstract" value="abstractNote"  h3id="2-3"/>
+        <typeMap zType="webpage" cslType="webpage" h-id="2-2">
+            <field label="Title" value="title" h-id="2-1"/>
+            <field label="Abstract" value="abstractNote"  h-id="2-3"/>
             <field label="Website Title" value="websiteTitle" baseField="publicationTitle" />
             <field label="Website Type" value="websiteType" baseField="type" />
             <field label="Date" value="date"/>
             <field label="Short Title" value="shortTitle"/>
-            <field label="URL" value="url" h3id="3-1058"/>
-            <field label="Accessed" value="accessDate" h3id="2-9"/>
+            <field label="URL" value="url" h-id="3-1058"/>
+            <field label="Accessed" value="accessDate" h-id="2-9"/>
             <field label="Language" value="language"/>
             <field label="Rights" value="rights" />
             <field label="Extra" value="extra" />
             <field value="creator">
-                <creatorType label="Author" value="author"  h3id="2-15"/>
-                <creatorType label="Contributor" value="contributor"  h3id="2-15"/>
-                <creatorType label="Translator" value="translator"  h3id="2-15"/>
+                <creatorType label="Author" value="author"  h-id="2-15"/>
+                <creatorType label="Contributor" value="contributor"  h-id="2-15"/>
+                <creatorType label="Translator" value="translator"  h-id="2-15"/>
             </field>
         </typeMap>
 
 
-        <typeMap zType="book" cslType="book" h3id="3-102">
-            <field label="Title" value="title" h3id="2-1" />
-            <field label="Abstract" value="abstractNote" h3id="3-1010"/>
-            <field label="Series" value="series" h3id="3-1018.3-104.2-1"/>        <!-- pub series -->
-            <field label="Series Number" value="seriesNumber" h3id="3-1018.3-104.3-1003"/>  <!-- pub series -->
+        <typeMap zType="book" cslType="book" h-id="3-102">
+            <field label="Title" value="title" h-id="2-1" />
+            <field label="Abstract" value="abstractNote" h-id="3-1010"/>
+            <field label="Series" value="series" h-id="3-1018.3-104.2-1"/>        <!-- pub series -->
+            <field label="Series Number" value="seriesNumber" h-id="3-1018.3-104.3-1003"/>  <!-- pub series -->
             <field label="Volume" value="volume"/>
-            <field label="# of Volumes" value="numberOfVolumes" h3id="3-1002"/>
-            <field label="Edition" value="edition"  h3id="2-49"/>
-            <field label="Place" value="place"  h3id="3-1018.3-104.2-27"/>
-            <field label="Publisher" value="publisher" h3id="3-1018.3-104.2-21.2-4.2-1"/>  <!--pubref.publisher.organization.title -->
-            <field label="Date" value="date"  h3id="2-9"/>
-            <field label="# of Pages" value="numPages"  h3id="3-1001"/>
+            <field label="# of Volumes" value="numberOfVolumes" h-id="3-1002"/>
+            <field label="Edition" value="edition"  h-id="2-49"/>
+            <field label="Place" value="place"  h-id="3-1018.3-104.2-27"/>
+            <field label="Publisher" value="publisher" h-id="3-1018.3-104.2-21.2-4.2-1"/>  <!--pubref.publisher.organization.title -->
+            <field label="Date" value="date"  h-id="2-9"/>
+            <field label="# of Pages" value="numPages"  h-id="3-1001"/>
             <field label="Language" value="language"/>
-            <field label="ISBN" value="ISBN" h3id="3-1011"/>
-            <field label="Short Title" value="shortTitle" h3id="2-2"/>
-            <field label="URL" value="url" h3id="3-1058"/>
+            <field label="ISBN" value="ISBN" h-id="3-1011"/>
+            <field label="Short Title" value="shortTitle" h-id="2-2"/>
+            <field label="URL" value="url" h-id="3-1058"/>
             <field label="Accessed" value="accessDate"/>
             <field label="Archive" value="archive"/>
             <field label="Loc. in Archive" value="archiveLocation"/>
             <field label="Library Catalog" value="libraryCatalog"/>
-            <field label="Call Number" value="callNumber" h3id="3-1019" />
-            <field label="Rights" value="rights" h3id="2-35"/>
-            <field label="Extra" value="extra" h3id="2-4"/>
+            <field label="Call Number" value="callNumber" h-id="3-1019" />
+            <field label="Rights" value="rights" h-id="2-35"/>
+            <field label="Extra" value="extra" h-id="2-4"/>
             <field value="creator">
-                <creatorType label="Author" value="author"  h3id="2-15"/>
-                <creatorType label="Contributor" value="contributor"  h3id="2-15"/>
-                <creatorType label="Editor" value="editor"  h3id="2-15"/>
-                <creatorType label="Series Editor" value="seriesEditor" h3id="3-1018.3-104.3-1013.2-10.2-1"/>
-                <creatorType label="Translator" value="translator"  h3id="2-15"/>
+                <creatorType label="Author" value="author"  h-id="2-15"/>
+                <creatorType label="Contributor" value="contributor"  h-id="2-15"/>
+                <creatorType label="Editor" value="editor"  h-id="2-15"/>
+                <creatorType label="Series Editor" value="seriesEditor" h-id="3-1018.3-104.3-1013.2-10.2-1"/>
+                <creatorType label="Translator" value="translator"  h-id="2-15"/>
             </field>
         </typeMap>
 
-        <typeMap zType="bookSection" cslType="chapter" h3id="3-108">
-            <field label="Title" value="title" h3id="2-1"/>
-            <field label="Abstract" value="abstractNote" h3id="3-1010"/>
-            <field label="Book Title" value="bookTitle" baseField="publicationTitle" h3id="3-1028.3-102.2-1"/>
-            <field label="Series" value="series" h3id="3-1028.3-102.3-1018.3-104.2-1"/>
-            <field label="Series Number" value="seriesNumber" h3id="3-1028.3-102.3-1018.3-104.3-1003"/>
+        <typeMap zType="bookSection" cslType="chapter" h-id="3-108">
+            <field label="Title" value="title" h-id="2-1"/>
+            <field label="Abstract" value="abstractNote" h-id="3-1010"/>
+            <field label="Book Title" value="bookTitle" baseField="publicationTitle" h-id="3-1028.3-102.2-1"/>
+            <field label="Series" value="series" h-id="3-1028.3-102.3-1018.3-104.2-1"/>
+            <field label="Series Number" value="seriesNumber" h-id="3-1028.3-102.3-1018.3-104.3-1003"/>
             <field label="Volume" value="volume"/>
-            <field label="# of Volumes" value="numberOfVolumes" h3id="3-1028.3-102.3-1002"/>
-            <field label="Edition" value="edition" h3id="3-1028.3-102.2-49"/>
-            <field label="Place" value="place" h3id="3-1028.3-102.3-1018.3-104.2-27"/>
-            <field label="Publisher" value="publisher" h3id="3-1028.3-102.3-1018.3-104.2-21.2-4.2-1"/>
-            <field label="Date" value="date" h3id="3-1028.3-102.2-9"/>
-            <field label="Pages" value="pages" h3id="3-1026"/>
+            <field label="# of Volumes" value="numberOfVolumes" h-id="3-1028.3-102.3-1002"/>
+            <field label="Edition" value="edition" h-id="3-1028.3-102.2-49"/>
+            <field label="Place" value="place" h-id="3-1028.3-102.3-1018.3-104.2-27"/>
+            <field label="Publisher" value="publisher" h-id="3-1028.3-102.3-1018.3-104.2-21.2-4.2-1"/>
+            <field label="Date" value="date" h-id="3-1028.3-102.2-9"/>
+            <field label="Pages" value="pages" h-id="3-1026"/>
             <field label="Language" value="language"/>
-            <field label="ISBN" value="ISBN" h3id="3-1028.3-102.3-1011"/>
-            <field label="Short Title" value="shortTitle" h3id="2-2"/>
-            <field label="URL" value="url" h3id="3-1058"/>
+            <field label="ISBN" value="ISBN" h-id="3-1028.3-102.3-1011"/>
+            <field label="Short Title" value="shortTitle" h-id="2-2"/>
+            <field label="URL" value="url" h-id="3-1058"/>
             <field label="Accessed" value="accessDate"/>
             <field label="Archive" value="archive"/>
             <field label="Loc. in Archive" value="archiveLocation"/>
             <field label="Library Catalog" value="libraryCatalog"/>
-            <field label="Call Number" value="callNumber" h3id="3-1019"/>
-            <field label="Rights" value="rights" h3id="2-35"/>
-            <field label="Extra" value="extra" h3id="2-4"/>
+            <field label="Call Number" value="callNumber" h-id="3-1019"/>
+            <field label="Rights" value="rights" h-id="2-35"/>
+            <field label="Extra" value="extra" h-id="2-4"/>
             <field value="creator">
-                <creatorType label="Author" value="author" h3id="2-15"/>
-                <creatorType label="Book Author" value="bookAuthor" h3id="3-1028.3-102.2-15.2-10.2-1"/>
-                <creatorType label="Contributor" value="contributor" h3id="2-15"/>
-                <creatorType label="Editor" value="editor" h3id="3-1028.3-102.2-15.2-10.2-1"/>
-                <creatorType label="Series Editor" value="seriesEditor" h3id="3-1028.3-102.3-1018.3-104.3-1013.2-10.2-1"/>
-                <creatorType label="Translator" value="translator" h3id="2-15"/>
+                <creatorType label="Author" value="author" h-id="2-15"/>
+                <creatorType label="Book Author" value="bookAuthor" h-id="3-1028.3-102.2-15.2-10.2-1"/>
+                <creatorType label="Contributor" value="contributor" h-id="2-15"/>
+                <creatorType label="Editor" value="editor" h-id="3-1028.3-102.2-15.2-10.2-1"/>
+                <creatorType label="Series Editor" value="seriesEditor" h-id="3-1028.3-102.3-1018.3-104.3-1013.2-10.2-1"/>
+                <creatorType label="Translator" value="translator" h-id="2-15"/>
             </field>
         </typeMap>
 
@@ -97,187 +97,187 @@
         Journal Volume(3-113), and Journal voulme points to the actual volume(3-1002)
         -->
 
-        <typeMap zType="journalArticle" cslType="article-journal" h3id="3-112">
-            <field label="Title" value="title" h3id="2-1"/>
-            <field label="Abstract" value="abstractNote" h3id="3-1010"/>
-            <field label="Publication" value="publicationTitle" h3id="3-1035.3-113.3-1034.3-111.2-1"/>
-            <field label="Volume" value="volume" h3id="3-1035.3-113.3-1002"/>
-            <field label="Issue" value="issue" h3id="3-1035.3-113.3-1033"/>
-            <field label="Pages" value="pages" h3id="3-1026"/>
-            <field label="Date" value="date" h3id="3-1035.3-113.2-9"/>
-            <field label="Series" value="series" h3id="3-1035.3-113.3-1034.3-111.3-1018.3-104.2-1"/>
-            <field label="Series Title" value="seriesTitle" h3id="3-1035.3-113.3-1034.3-111.3-1018.3-104.2-2"/>
-            <field label="Series Text" value="seriesText" h3id="3-1035.3-113.3-1034.3-111.3-1018.3-104.2-3"/>
-            <field label="Journal Abbr" value="journalAbbreviation" h3id="3-1035.3-113.3-1034.3-111.2-2"/>
+        <typeMap zType="journalArticle" cslType="article-journal" h-id="3-112">
+            <field label="Title" value="title" h-id="2-1"/>
+            <field label="Abstract" value="abstractNote" h-id="3-1010"/>
+            <field label="Publication" value="publicationTitle" h-id="3-1035.3-113.3-1034.3-111.2-1"/>
+            <field label="Volume" value="volume" h-id="3-1035.3-113.3-1002"/>
+            <field label="Issue" value="issue" h-id="3-1035.3-113.3-1033"/>
+            <field label="Pages" value="pages" h-id="3-1026"/>
+            <field label="Date" value="date" h-id="3-1035.3-113.2-9"/>
+            <field label="Series" value="series" h-id="3-1035.3-113.3-1034.3-111.3-1018.3-104.2-1"/>
+            <field label="Series Title" value="seriesTitle" h-id="3-1035.3-113.3-1034.3-111.3-1018.3-104.2-2"/>
+            <field label="Series Text" value="seriesText" h-id="3-1035.3-113.3-1034.3-111.3-1018.3-104.2-3"/>
+            <field label="Journal Abbr" value="journalAbbreviation" h-id="3-1035.3-113.3-1034.3-111.2-2"/>
             <field label="Language" value="language" />
-            <field label="DOI" value="DOI" h3id="3-1003"/>
-            <field label="ISSN" value="ISSN" h3id="3-1035.3-113.3-1034.3-111.3-1032"/>
-            <field label="Short Title" value="shortTitle" h3id="2-2"/>
-            <field label="URL" value="url" h3id="3-1058"/>
+            <field label="DOI" value="DOI" h-id="3-1003"/>
+            <field label="ISSN" value="ISSN" h-id="3-1035.3-113.3-1034.3-111.3-1032"/>
+            <field label="Short Title" value="shortTitle" h-id="2-2"/>
+            <field label="URL" value="url" h-id="3-1058"/>
             <field label="Accessed" value="accessDate"/>
             <field label="Archive" value="archive"/>
             <field label="Loc. in Archive" value="archiveLocation"/>
             <field label="Library Catalog" value="libraryCatalog"/>
-            <field label="Call Number" value="callNumber" h3id="3-1035.3-113.3-1034.3-111.3-1019"/>
-            <field label="Rights" value="rights" h3id="2-35"/>
-            <field label="Extra" value="extra" h3id="2-4"/>
+            <field label="Call Number" value="callNumber" h-id="3-1035.3-113.3-1034.3-111.3-1019"/>
+            <field label="Rights" value="rights" h-id="2-35"/>
+            <field label="Extra" value="extra" h-id="2-4"/>
             <field value="creator">
-                <creatorType label="Author" value="author" h3id="2-15"/>
-                <creatorType label="Contributor" value="contributor"  h3id="2-15"/>
-                <creatorType label="Editor" value="editor" h3id="3-1035.3-113.3-1013.2-10.2-1"/>
-                <creatorType label="Reviewed Author" value="reviewedAuthor"  h3id="2-15"/>
-                <creatorType label="Translator" value="translator"  h3id="2-15"/>
+                <creatorType label="Author" value="author" h-id="2-15"/>
+                <creatorType label="Contributor" value="contributor"  h-id="2-15"/>
+                <creatorType label="Editor" value="editor" h-id="3-1035.3-113.3-1013.2-10.2-1"/>
+                <creatorType label="Reviewed Author" value="reviewedAuthor"  h-id="2-15"/>
+                <creatorType label="Translator" value="translator"  h-id="2-15"/>
             </field>
         </typeMap>
 
-        <typeMap zType="magazineArticle" cslType="article-magazine" h3id="3-123">
-            <field label="Title" value="title" h3id="2-1"/>
-            <field label="Abstract" value="abstractNote" h3id="3-1010"/>
-            <field label="Publication" value="publicationTitle" h3id="3-1064.3-125.3-1066.3-124.2-1" />
-            <field label="Volume" value="volume" h3id="3-1064.3-125.3-1002"/>
-            <field label="Issue" value="issue" h3id="3-1064.3-125.3-1033"/>
-            <field label="Date" value="date" h3id="3-1064.3-125.2-9"/>
-            <field label="Pages" value="pages" h3id="3-1026"/>
+        <typeMap zType="magazineArticle" cslType="article-magazine" h-id="3-123">
+            <field label="Title" value="title" h-id="2-1"/>
+            <field label="Abstract" value="abstractNote" h-id="3-1010"/>
+            <field label="Publication" value="publicationTitle" h-id="3-1064.3-125.3-1066.3-124.2-1" />
+            <field label="Volume" value="volume" h-id="3-1064.3-125.3-1002"/>
+            <field label="Issue" value="issue" h-id="3-1064.3-125.3-1033"/>
+            <field label="Date" value="date" h-id="3-1064.3-125.2-9"/>
+            <field label="Pages" value="pages" h-id="3-1026"/>
             <field label="Language" value="language" />
-            <field label="ISSN" value="ISSN"  h3id="3-1064.3-125.3-1066.3-124.3-1032"/>
+            <field label="ISSN" value="ISSN"  h-id="3-1064.3-125.3-1066.3-124.3-1032"/>
             <field label="Short Title" value="shortTitle" />
-            <field label="URL" value="url" h3id="3-1058"/>
+            <field label="URL" value="url" h-id="3-1058"/>
             <field label="Accessed" value="accessDate" />
             <field label="Archive" value="archive" />
             <field label="Loc. in Archive" value="archiveLocation" />
             <field label="Library Catalog" value="libraryCatalog" />
-            <field label="Call Number" value="callNumber" h3id="3-1064.3-125.3-1066.3-124.3-1019"/>
-            <field label="Rights" value="rights" h3id="2-35"/>
-            <field label="Extra" value="extra" h3id="2-4"/>
+            <field label="Call Number" value="callNumber" h-id="3-1064.3-125.3-1066.3-124.3-1019"/>
+            <field label="Rights" value="rights" h-id="2-35"/>
+            <field label="Extra" value="extra" h-id="2-4"/>
             <field value="creator">
-                <creatorType label="Author" value="author" h3id="2-15"/>
-                <creatorType label="Contributor" value="contributor" h3id="2-15"/>
-                <creatorType label="Reviewed Author" value="reviewedAuthor" h3id="2-15"/>
-                <creatorType label="Translator" value="translator" h3id="2-15"/>
+                <creatorType label="Author" value="author" h-id="2-15"/>
+                <creatorType label="Contributor" value="contributor" h-id="2-15"/>
+                <creatorType label="Reviewed Author" value="reviewedAuthor" h-id="2-15"/>
+                <creatorType label="Translator" value="translator" h-id="2-15"/>
             </field>
         </typeMap>
 
-        <typeMap zType="newspaperArticle" cslType="article-newspaper" h3id="3-128">
-            <field label="Title" value="title" h3id="2-1"/>
-            <field label="Abstract" value="abstractNote" h3id="3-1010"/>
-            <field label="Publication" value="publicationTitle" h3id="3-1065.3-127.3-1067.3-126.2-1"/>
-            <field label="Place" value="place" h3id="3-1065.3-127.3-1067.3-126.2-27"/>
+        <typeMap zType="newspaperArticle" cslType="article-newspaper" h-id="3-128">
+            <field label="Title" value="title" h-id="2-1"/>
+            <field label="Abstract" value="abstractNote" h-id="3-1010"/>
+            <field label="Publication" value="publicationTitle" h-id="3-1065.3-127.3-1067.3-126.2-1"/>
+            <field label="Place" value="place" h-id="3-1065.3-127.3-1067.3-126.2-27"/>
             <field label="Edition" value="edition" />
-            <field label="Date" value="date"  h3id="3-1065.3-127.2-9"/>
-            <field label="Section" value="section"  h3id="3-1065.3-127.3-1033"/>
-            <field label="Pages" value="pages" h3id="3-1026"/>
+            <field label="Date" value="date"  h-id="3-1065.3-127.2-9"/>
+            <field label="Section" value="section"  h-id="3-1065.3-127.3-1033"/>
+            <field label="Pages" value="pages" h-id="3-1026"/>
             <field label="Language" value="language" />
             <field label="Short Title" value="shortTitle" />
-            <field label="ISSN" value="ISSN" h3id="3-1065.3-127.3-1067.3-126.3-1032"/>
-            <field label="URL" value="url" h3id="3-1058"/>
+            <field label="ISSN" value="ISSN" h-id="3-1065.3-127.3-1067.3-126.3-1032"/>
+            <field label="URL" value="url" h-id="3-1058"/>
             <field label="Accessed" value="accessDate" />
             <field label="Archive" value="archive" />
             <field label="Loc. in Archive" value="archiveLocation" />
             <field label="Library Catalog" value="libraryCatalog" />
-            <field label="Call Number" value="callNumber" h3id="3-1065.3-127.3-1067.3-126.3-1019"/>
-            <field label="Rights" value="rights" h3id="2-35"/>
-            <field label="Extra" value="extra" h3id="2-4"/>
+            <field label="Call Number" value="callNumber" h-id="3-1065.3-127.3-1067.3-126.3-1019"/>
+            <field label="Rights" value="rights" h-id="2-35"/>
+            <field label="Extra" value="extra" h-id="2-4"/>
             <field value="creator">
-                <creatorType label="Author" value="author" h3id="2-15"/>
-                <creatorType label="Contributor" value="contributor" h3id="2-15"/>
-                <creatorType label="Reviewed Author" value="reviewedAuthor" h3id="2-15"/>
-                <creatorType label="Translator" value="translator" h3id="2-15"/>
+                <creatorType label="Author" value="author" h-id="2-15"/>
+                <creatorType label="Contributor" value="contributor" h-id="2-15"/>
+                <creatorType label="Reviewed Author" value="reviewedAuthor" h-id="2-15"/>
+                <creatorType label="Translator" value="translator" h-id="2-15"/>
             </field>
         </typeMap>
 
 
-        <typeMap zType="thesis" cslType="thesis" h3id="3-120">
-            <field label="Title" value="title" h3id="2-1"/>
-            <field label="Abstract" value="abstractNote" h3id="3-1010"/>
-            <field label="Type" value="thesisType" baseField="type" h3id="3-1048"/>
-            <field label="University" value="university" baseField="publisher" h3id="2-21.2-4.2-1"/>
-            <field label="Place" value="place" h3id="2-21.2-4.2-27"/>
-            <field label="Date" value="date" h3id="2-9"/>
-            <field label="# of Pages" value="numPages" h3id="3-1001"/>
+        <typeMap zType="thesis" cslType="thesis" h-id="3-120">
+            <field label="Title" value="title" h-id="2-1"/>
+            <field label="Abstract" value="abstractNote" h-id="3-1010"/>
+            <field label="Type" value="thesisType" baseField="type" h-id="3-1048"/>
+            <field label="University" value="university" baseField="publisher" h-id="2-21.2-4.2-1"/>
+            <field label="Place" value="place" h-id="2-21.2-4.2-27"/>
+            <field label="Date" value="date" h-id="2-9"/>
+            <field label="# of Pages" value="numPages" h-id="3-1001"/>
             <field label="Language" value="language" />
-            <field label="Short Title" value="shortTitle" h3id="2-2"/>
-            <field label="URL" value="url" h3id="3-1058"/>
+            <field label="Short Title" value="shortTitle" h-id="2-2"/>
+            <field label="URL" value="url" h-id="3-1058"/>
             <field label="Accessed" value="accessDate" />
             <field label="Archive" value="archive" />
             <field label="Loc. in Archive" value="archiveLocation" />
             <field label="Library Catalog" value="libraryCatalog" />
-            <field label="Call Number" value="callNumber" h3id="3-1019"/>
-            <field label="Rights" value="rights" h3id="2-35"/>
-            <field label="Extra" value="extra" h3id="2-4"/>
+            <field label="Call Number" value="callNumber" h-id="3-1019"/>
+            <field label="Rights" value="rights" h-id="2-35"/>
+            <field label="Extra" value="extra" h-id="2-4"/>
             <field value="creator">
-                <creatorType label="Author" value="author" h3id="2-15"/>
-                <creatorType label="Contributor" value="contributor" h3id="2-15"/>
+                <creatorType label="Author" value="author" h-id="2-15"/>
+                <creatorType label="Contributor" value="contributor" h-id="2-15"/>
             </field>
         </typeMap>
 
 
 
-        <typeMap zType="report" cslType="report" h3id="3-119">
-            <field label="Title" value="title" h3id="2-1"/>
-            <field label="Abstract" value="abstractNote" h3id="3-1010"/>
+        <typeMap zType="report" cslType="report" h-id="3-119">
+            <field label="Title" value="title" h-id="2-1"/>
+            <field label="Abstract" value="abstractNote" h-id="3-1010"/>
             <field label="Report Number" value="reportNumber" baseField="number"/>
             <field label="Report Type" value="reportType" baseField="type"/>
-            <field label="Series Title" value="seriesTitle" h3id="3-1018.3-104.2-1"/>
-            <field label="Place" value="place" h3id="3-1018.3-104.2-27"/>
-            <field label="Institution" value="institution" baseField="publisher" h3id="3-1018.3-104.2-21.2-4.2-1"/>
-            <field label="Date" value="date" h3id="2-9"/>
-            <field label="Pages" value="pages" h3id="3-1001"/>
+            <field label="Series Title" value="seriesTitle" h-id="3-1018.3-104.2-1"/>
+            <field label="Place" value="place" h-id="3-1018.3-104.2-27"/>
+            <field label="Institution" value="institution" baseField="publisher" h-id="3-1018.3-104.2-21.2-4.2-1"/>
+            <field label="Date" value="date" h-id="2-9"/>
+            <field label="Pages" value="pages" h-id="3-1001"/>
             <field label="Language" value="language"/>
-            <field label="Short Title" value="shortTitle" h3id="2-2"/>
-            <field label="URL" value="url" h3id="3-1058"/>
+            <field label="Short Title" value="shortTitle" h-id="2-2"/>
+            <field label="URL" value="url" h-id="3-1058"/>
             <field label="Accessed" value="accessDate"/>
             <field label="Archive" value="archive"/>
             <field label="Loc. in Archive" value="archiveLocation"/>
             <field label="Library Catalog" value="libraryCatalog"/>
-            <field label="Call Number" value="callNumber" h3id="3-1019"/>
-            <field label="Rights" value="rights" h3id="2-35"/>
-            <field label="Extra" value="extra" h3id="2-4"/>
+            <field label="Call Number" value="callNumber" h-id="3-1019"/>
+            <field label="Rights" value="rights" h-id="2-35"/>
+            <field label="Extra" value="extra" h-id="2-4"/>
             <field value="creator" >
-                <creatorType label="Author" value="author" h3id="2-15"/>
-                <creatorType label="Contributor" value="contributor" h3id="2-15"/>
-                <creatorType label="Series Editor" value="seriesEditor" h3id="3-1018.3-104.3-1013.2-10.2-1"/>
-                <creatorType label="Translator" value="translator" h3id="2-15"/>
+                <creatorType label="Author" value="author" h-id="2-15"/>
+                <creatorType label="Contributor" value="contributor" h-id="2-15"/>
+                <creatorType label="Series Editor" value="seriesEditor" h-id="3-1018.3-104.3-1013.2-10.2-1"/>
+                <creatorType label="Translator" value="translator" h-id="2-15"/>
             </field>
         </typeMap>
 
-        <typeMap zType="artwork" cslType="artwork" h3id="3-122">
-            <field label="Title" value="title" h3id="2-1"/>
+        <typeMap zType="artwork" cslType="artwork" h-id="3-122">
+            <field label="Title" value="title" h-id="2-1"/>
             <field label="Abstract" value="Abstract"/>
             <field label="Medium" value="medium"/>
             <field label="Artwork Size" value="artworkSize"/>
-            <field label="Date" value="date" h3id="2-9"/>
+            <field label="Date" value="date" h-id="2-9"/>
             <field label="Language" value="language"/>
-            <field label="Short Title" value="shortTitle" h3id="2-2"/>
+            <field label="Short Title" value="shortTitle" h-id="2-2"/>
             <field label="Archive" value="archive"/>
             <field label="Loc. in Archive" value="archiveLocation"/>
             <field label="Library Catalog" value="library Catalog"/>
             <field label="Call Number" value="callNumber"/>
-            <field label="URL" value="url" h3id="3-1058"/>
+            <field label="URL" value="url" h-id="3-1058"/>
             <field label="Accesssed" value="accessed"/>
-            <field label="Rights" value="url" h3id="2-35"/>
+            <field label="Rights" value="url" h-id="2-35"/>
             <field label="Extra" value="Extra"/>
             <field value="creator" >
-                <creatorType label="Artist" value="artist" h3id="2-15"/>
-                <creatorType label="Contributor" value="contributor" h3id="2-15"/>
-                <creatorType label="Organisation" value="organisation" h3id="2-15"/>
+                <creatorType label="Artist" value="artist" h-id="2-15"/>
+                <creatorType label="Contributor" value="contributor" h-id="2-15"/>
+                <creatorType label="Organisation" value="organisation" h-id="2-15"/>
             </field>
         </typeMap>
 
-        <typeMap zType="conferencePaper" cslType="book_chapter" h3id="3-108">
-            <field label="Title" value="title" h3id="2-1"/>
-            <field label="Abstract" value="abstract" h3id= "3-1010"/>
+        <typeMap zType="conferencePaper" cslType="book_chapter" h-id="3-108">
+            <field label="Title" value="title" h-id="2-1"/>
+            <field label="Abstract" value="abstract" h-id= "3-1010"/>
             <field label="Date" value="date"/>
             <field label="Proceedings Title" value="proceedingsTitle"/>
             <field label="Conference name" value="conferenceName"/>
             <field label="Place" value="place"/>
             <field label="Volume" value="volume"/>
-            <field label="Pages" value="pages" h3id="3-1001"/>
+            <field label="Pages" value="pages" h-id="3-1001"/>
             <field label="Series" value="titleSeries" />
             <field label="Language" value="language"/>
             <field label="DOI" value="doi"/>
             <field label="ISBN" value="isbn"/>
             <field label="Short Title" value="shortTitle"/>
-            <field label="URL" value="url" h3id="3-1058"/>
+            <field label="URL" value="url" h-id="3-1058"/>
             <field label="Accesssed" value="accessed"/>
             <field label="Archive" value="archive"/>
             <field label="Loc. in Archive" value="archiveLocation"/>
@@ -287,59 +287,59 @@
             <field label="Rights" value="url"/>
             <field label="Extra" value="Extra"/>
             <field value="creator" >
-                <creatorType label="Publisher" value="publisher" h3id="2-15"/>
+                <creatorType label="Publisher" value="publisher" h-id="2-15"/>
             </field>
         </typeMap>
 
 
 
-        <typeMap zType="document" cslType="document" h3id ="3-117">
-            <field label="Title" value="title" h3id = "2-1"/>
-            <field label="Abstract" value="abstractNote" h3id= "2-3"/>
-            <field label="Date" value="date" h3id = "2-9"/>
+        <typeMap zType="document" cslType="document" h-id ="3-117">
+            <field label="Title" value="title" h-id = "2-1"/>
+            <field label="Abstract" value="abstractNote" h-id= "2-3"/>
+            <field label="Date" value="date" h-id = "2-9"/>
             <field label="Language" value="language"/>
-            <field label="Short Title" value="shortTitle" h3id = "2-2"/>
-            <field label="URL" value="url" h3id="3-1058"/>
+            <field label="Short Title" value="shortTitle" h-id = "2-2"/>
+            <field label="URL" value="url" h-id="3-1058"/>
             <field label="Accesssed" value="accessed"/>
             <field label="Archive" value="archive"/>
             <field label="Loc. in Archive" value="archiveLocation"/>
             <field label="Library Catalog" value="libraryCatalog"/>
             <field label="Call Number" value="callNumber"/>
             <field label="Accesssed" value="accessed"/>
-            <field label="Rights" value="url" h3id="2-35"/>
+            <field label="Rights" value="url" h-id="2-35"/>
             <field label="Extra" value="Extra"/>
             <field value="creator" >
-                <creatorType label="Author" value="author" h3id = "2-15"/>
-                <creatorType label="Publisher" value="publisher" h3id ="2-15"/>
+                <creatorType label="Author" value="author" h-id = "2-15"/>
+                <creatorType label="Publisher" value="publisher" h-id ="2-15"/>
             </field>
         </typeMap>
 
-        <typeMap zType="email" cslType="personal_communication" h3id= "3-121">
+        <typeMap zType="email" cslType="personal_communication" h-id= "3-121">
             <field label="Subject" value="subject"/>
-            <field label="Title" value="title" h3id = "2-1"/>
+            <field label="Title" value="title" h-id = "2-1"/>
             <field label="Abstract" value="abstract"/>
-            <field label="Date" value="date" h3id = "2-9"/>
+            <field label="Date" value="date" h-id = "2-9"/>
             <field label="Short Title" value="shortTitle"/>
-            <field label="URL" value="url" h3id ="3-1058"/>
+            <field label="URL" value="url" h-id ="3-1058"/>
             <field label="Accesssed" value="accessDate"/>
             <field label="Language" value="language"/>
             <field label="Rights" value="rights"/>
             <field label="Extra" value="Extra"/>
             <field value="creator" >
-                <creatorType label="Author" value="author" h3id = "2-15"/>
-                <creatorType label="Contributor" value="contributor" h3id = "2-15"/>
-                <creatorType label="Recipient" value="recipient" h3id="3-1047"/>
+                <creatorType label="Author" value="author" h-id = "2-15"/>
+                <creatorType label="Contributor" value="contributor" h-id = "2-15"/>
+                <creatorType label="Recipient" value="recipient" h-id="3-1047"/>
             </field>
         </typeMap>
 
-        <typeMap zType="letter" cslType="personal_communication" h3id= "3-121" >
-            <field label="Title" value="title" h3id = "2-1"/>
+        <typeMap zType="letter" cslType="personal_communication" h-id= "3-121" >
+            <field label="Title" value="title" h-id = "2-1"/>
             <field label="Abstract" value="abstractNote" />
             <field label="Type" value="letterType" baseField="type" />
-            <field label="Date" value="date" h3id = "2-9" />
+            <field label="Date" value="date" h-id = "2-9" />
             <field label="Language" value="language" />
             <field label="Short Title" value="shortTitle" />
-            <field label="URL" value="url" h3id ="3-1058" />
+            <field label="URL" value="url" h-id ="3-1058" />
             <field label="Accessed" value="accessDate" />
             <field label="Archive" value="archive" />
             <field label="Loc. in Archive" value="archiveLocation" />
@@ -468,7 +468,7 @@
 
 
 
-<typeMap zType="encyclopedia Article" cslType="encyclopediaArticle" h3id="2-48"/>
+<typeMap zType="encyclopedia Article" cslType="encyclopediaArticle" h-id="2-48"/>
 <field label="Title" value="title"/>
 <field label="Abstract" value="abstract"/>
 <field label="Series" value="series" />
@@ -527,22 +527,22 @@
 </field>
 </typeMap>
 
-<typeMap zType="forum Post" cslType="forumPost" h3id ="3-121">
-<field label="Title" value="title" h3id = "2-1"/>
+<typeMap zType="forum Post" cslType="forumPost" h-id ="3-121">
+<field label="Title" value="title" h-id = "2-1"/>
 <field label="Abstract" value="abstract"/>
 <field label="Forum/Listserv Title" value="forum/listservTitle" />
 <field label="Post Type" value="postType"/>
-<field label="Date" value="date" h3id = "2-9"/>
+<field label="Date" value="date" h-id = "2-9"/>
 <field label="Language" value="language"/>
 <field label="Pages" value="pages"/>
 <field label="Short Title" value="shortTitle"/>
-<field label="URL" value="urls" h3id ="3-1058"/>
+<field label="URL" value="urls" h-id ="3-1058"/>
 <field label="Accesssed" value="accessed"/>
 <field label="Rights" value="rights"/>
 <field label="Extra" value="Extra"/>
 <field value="creator" >
-<creatorType label="Author" value="author" h3id= "2-15"/>
-<creatorType label="Recipient" value="recipient" h3id ="3-1047"/>
+<creatorType label="Author" value="author" h-id= "2-15"/>
+<creatorType label="Recipient" value="recipient" h-id ="3-1047"/>
 </field>
 </typeMap>
 
@@ -572,20 +572,20 @@
 </typeMap>
 
 
-<typeMap zType="Instant Message" cslType="instantMessage" h3id = "3-121" >
-<field label="Title" value="title" h3id ="2-1"/>
+<typeMap zType="Instant Message" cslType="instantMessage" h-id = "3-121" >
+<field label="Title" value="title" h-id ="2-1"/>
 <field label="Abstract" value="abstract"/>
-<field label="Date" value="date" h3id = "2-9"/>
+<field label="Date" value="date" h-id = "2-9"/>
 <field label="Language" value="language"/>
 <field label="Short Title" value="shortTitle"/>
-<field label="URL" value="url" h3id = "3-1058"/>
+<field label="URL" value="url" h-id = "3-1058"/>
 <field label="Accesssed" value="accessed"/>
 <field label="Rights" value="rights"/>
 <field label="Extra" value="Extra"/>
 <field value="creator" >
-<creatorType label="Author" value="author" h3id ="2-15" />
+<creatorType label="Author" value="author" h-id ="2-15" />
 <creatorType label="Contributor" value="contributor"/>
-<creatorType label="Recipient" value="recipient" h3id = "3-1047"/>
+<creatorType label="Recipient" value="recipient" h-id = "3-1047"/>
 </field>
 </typeMap>
 
@@ -735,15 +735,15 @@
 
 
 
-<typeMap zType="generic" cslType="generic" h3id="2-48">
-<field label="Title" value="title" h3id="2-1"/>
-<field label="Abstract" value="abstractNote" h3id="3-1010"/>
+<typeMap zType="generic" cslType="generic" h-id="2-48">
+<field label="Title" value="title" h-id="2-1"/>
+<field label="Abstract" value="abstractNote" h-id="3-1010"/>
 <field label="Report Number" value="reportNumber" baseField="number"/>
 <field label="Report Type" value="reportType" baseField="type"/>
-<field label="Series Title" value="seriesTitle" h3id="3-1018.3-104.2-1"/>
-<field label="Place" value="place" h3id="3-1018.3-104.2-27"/>
-<field label="Institution" value="institution" baseField="publisher" h3id="3-1018.3-104.2-21.2-4.2-1"/>
-<field label="Date" value="date" h3id="2-9"/>
+<field label="Series Title" value="seriesTitle" h-id="3-1018.3-104.2-1"/>
+<field label="Place" value="place" h-id="3-1018.3-104.2-27"/>
+<field label="Institution" value="institution" baseField="publisher" h-id="3-1018.3-104.2-21.2-4.2-1"/>
+<field label="Date" value="date" h-id="2-9"/>
 <field label="Cast Member" value="castMember"/>
 <field label="DOI" value="doi"/>
 <field label="Edition" value="edition" />
@@ -767,21 +767,21 @@
 <field label="Type" value="type"/>
 <field label="Volume" value="volume"/>
 <field label="Language" value="language"/>
-<field label="Pages" value="pages" h3id="3-1001"/>
-<field label="Short Title" value="shortTitle" h3id="2-2"/>
-<field label="URL" value="url" h3id="3-1058"/>
+<field label="Pages" value="pages" h-id="3-1001"/>
+<field label="Short Title" value="shortTitle" h-id="2-2"/>
+<field label="URL" value="url" h-id="3-1058"/>
 <field label="Accessed" value="accessDate"/>
 <field label="Archive" value="archive"/>
 <field label="Loc. in Archive" value="archiveLocation"/>
 <field label="Library Catalog" value="libraryCatalog"/>
-<field label="Call Number" value="callNumber" h3id="3-1019"/>
-<field label="Rights" value="rights" h3id="2-35"/>
-<field label="Extra" value="extra" h3id="2-4"/>
+<field label="Call Number" value="callNumber" h-id="3-1019"/>
+<field label="Rights" value="rights" h-id="2-35"/>
+<field label="Extra" value="extra" h-id="2-4"/>
 <field value="creator" >
-<creatorType label="Author" value="author" h3id="2-15"/>
-<creatorType label="Contributor" value="contributor" h3id="2-15"/>
-<creatorType label="Series Editor" value="seriesEditor" h3id="3-1018.3-104.3-1013.2-10.2-1"/>
-<creatorType label="Translator" value="translator" h3id="2-15"/>
+<creatorType label="Author" value="author" h-id="2-15"/>
+<creatorType label="Contributor" value="contributor" h-id="2-15"/>
+<creatorType label="Series Editor" value="seriesEditor" h-id="3-1018.3-104.3-1013.2-10.2-1"/>
+<creatorType label="Translator" value="translator" h-id="2-15"/>
 </field>
 </typeMap>
 

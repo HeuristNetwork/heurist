@@ -1719,7 +1719,7 @@ $.widget( "heurist.mainMenu6", {
         +'<div style="display:inline-block"><img width="110" height="60" alt="" src="'
             +window.hWin.HAPI4.baseURL+'hclient/assets/v6/gs_'+section+'.png"></div>'
             
-        +'<span class="ui-heurist-title header" id="menu-guide" style="display: inline-block; font-weight: normal;padding-left:20px">'
+        +'<span class="ui-heurist-title header" id="menu-guide" style="display: inline-block; font-weight: normal;padding-left:20px;cursor: pointer">'
             +'<span class="ui-icon ui-icon-help"/>&nbsp;Menu guide</span>'            
             
         +'<span class="ui-heurist-title header" id="start-hints" style="display: inline-block; font-weight: normal;padding-left:20px;cursor: pointer">'
