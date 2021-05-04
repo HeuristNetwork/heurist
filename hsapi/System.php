@@ -1104,7 +1104,7 @@ error_log(print_r($_REQUEST, true));
         if($ugrID>0){
             $groups = @$this->current_User['ugr_Groups'];
             if($refresh || !is_array($groups)){
-                $this->current_User['ugr_Groups'] = user_getWorkgroups($this->mysqli, $ugrID);
+                $groups = $this->current_User['ugr_Groups'] = user_getWorkgroups($this->mysqli, $ugrID);
             }
             if($level!=null){
                 $groups = array();

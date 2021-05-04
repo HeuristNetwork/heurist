@@ -1435,56 +1435,18 @@ console.log('refresh '+(window.hWin.HAPI4.currentUser.usr_SavedSearch==null));
                         //data.otherNode - dragging node
                         //node - target node
 //console.log('target '+node.tree._id+'  source '+data.otherNode.tree._id);                        
+
+                        var newGroupID = node.tree.options.groupID;
+
                         if(node.tree._id != data.otherNode.tree._id){
                             //group is changed
-                        
                             var mod_node = data.otherNode;
-                            
-                            var newGroupID = node.tree.options.groupID;
-                            var oldGroupID = mod_node.tree.options.groupID;
-                            var newGroupID_for_db = (newGroupID=='all' || newGroupID=='bookmark')
-                                        ? window.hWin.HAPI4.currentUser.ugr_ID :newGroupID; 
-
-//console.log('move '+mod_node.key+'  '+mod_node.title+' from '+oldGroupID
-//+' to '+newGroupID_for_db+' ('+newGroupID+') '+node.key+' '+node.title);
-                            var affected = [];
-                            if(mod_node.folder){
-                                 mod_node.visit( function(node){
-                                    if(!node.folder) affected.push(node.key);    
-                                 });
-                            }else{
-                                 affected = [mod_node.key];
-                            }
-
-
-                            var request = { svs_ID: affected, 
-                                            svs_UGrpID: newGroupID_for_db };
-                            
-                            window.hWin.HAPI4.SystemMgr.ssearch_save(request,
-                                function(response){
-                                    if(response.status == window.hWin.ResponseStatus.OK){
-
-                                        for(var i=0; i<affected.length; i++){
-                                            window.hWin.HAPI4.currentUser.usr_SavedSearch[affected[i]][_GRPID] = newGroupID;    
-                                        }
-                                        //data.otherNode.tree._id = node.tree._id;
-                                        data.otherNode.moveTo(node, data.hitMode);
-                                        
-                                        that._saveTreeData( oldGroupID, null, function(){
-                                            that._saveTreeData( groupID, null, function(){
-                                                
-                                            } );
-                                        } );
-                            
-                                    }else{
-                                        window.hWin.HEURIST4.msg.showMsgErr(response, true);
-                                    }
-                                });
+                            that._moveSavedSearch(mod_node, newGroupID, node, data);
                             
                         }else{
                             //the same group
                             data.otherNode.moveTo(node, data.hitMode);
-                            that._saveTreeData( groupID );
+                            that._saveTreeData( newGroupID );
                         }
                     });
                 }
@@ -1826,20 +1788,35 @@ console.log('refresh '+(window.hWin.HAPI4.currentUser.usr_SavedSearch==null));
             }else{
 
                 var append_link = $("<a>",{href:'#'})
-                    .html('<span class="ui-icon ui-icon-plus hasmenu2" '
+                    .html('<span class="ui-icon ui-icon-plus hasmenu2 droppable" '
                         +' style="display:inline-block; vertical-align: bottom"></span>'
-                        +'<span class="hasmenu2">add</span>')
+                        +'<span class="hasmenu2 droppable">add</span>')
                     .click(function(event){
                         append_link.contextmenu('open', append_link.find('span.ui-icon') );
                         //$(this).parent('a').contextmenu('open', $(event.target) );//$(this).parent('a'));
                  });
                  append_link.contextmenu(context_opts);
 
+
                 //treedata is empty - add div - to show add links
-                tree_links = $('<div>', {id:"addlink"+groupID})
+                tree_links = $('<div>', {id:"addlink"+groupID, 'data-groupid':groupID})
                 .css({'display': treeData && treeData.length>0?'none':'block', 'padding-left':'1em'} )
                 .append( append_link );
-                
+
+                tree_links.droppable({
+                    classes: {
+                        "ui-droppable-hover": "ui-state-active"
+                    }, 
+                    accept: function(){ return true },
+                    drop: function( event, ui ) {
+                        
+                            var mod_node = $(ui.helper).data("ftSourceNode");
+                            var newGroupID = $(this).attr('data-groupid');
+                            
+                            that._moveSavedSearch(mod_node, newGroupID);
+                        
+                }});
+
             }
 
             
@@ -2752,14 +2729,14 @@ console.log(err)
 
         //add predefined searches
         if(ugr_ID == window.hWin.HAPI4.currentUser.ugr_ID){  //if current user - it adds 2 special searches: all or bookmark
-        
-                var domain = (domain=='b' || domain=='bookmark')?'bookmark':'all';
 
-                var s_recent = "?w="+domain+"&q=sortby:-m after:\"1 week ago\"&label=Recent changes";
-                var s_all = "?w="+domain+"&q=sortby:-m&label=All records";
+            var domain = (domain=='b' || domain=='bookmark')?'bookmark':'all';
 
-                res.push( { title: window.hWin.HR('Recent changes'), folder:false, url: s_recent}  );
-                res.push( { title: window.hWin.HR('All (date order)'), folder:false, url: s_all}  );
+            var s_recent = "?w="+domain+"&q=sortby:-m after:\"1 week ago\"&label=Recent changes";
+            var s_all = "?w="+domain+"&q=sortby:-m&label=All records";
+
+            res.push( { title: window.hWin.HR('Recent changes'), folder:false, url: s_recent}  );
+            res.push( { title: window.hWin.HR('All (date order)'), folder:false, url: s_all}  );
         }
 
         //_NAME = 0, _QUERY = 1, _GRPID = 2
@@ -2779,7 +2756,69 @@ console.log(err)
 
         return res;
 
-    }
+    },
+
+    //
+    // on drag drop listener - move folder or filter to another workgroup
+    //
+    _moveSavedSearch: function(mod_node, newGroupID, node, data)                                                             
+    {
+        var oldGroupID = mod_node.tree.options.groupID;
+        var newGroupID_for_db = (newGroupID=='all' || newGroupID=='bookmark')
+        ? window.hWin.HAPI4.currentUser.ugr_ID :newGroupID; 
+
+        //console.log('move '+mod_node.key+'  '+mod_node.title+' from '+oldGroupID
+        //    +' to '+newGroupID_for_db+' ('+newGroupID+') ');
+
+        var affected = [];
+        if(mod_node.folder){
+            mod_node.visit( function(node){
+                if(!node.folder) affected.push(node.key);    
+            });
+        }else{
+            affected = [mod_node.key];
+        }
+
+        var that = this;
+
+        var request = { svs_ID: affected, 
+            svs_UGrpID: newGroupID_for_db };
+
+        window.hWin.HAPI4.SystemMgr.ssearch_save(request,
+            function(response){
+                if(response.status == window.hWin.ResponseStatus.OK){
+
+                    for(var i=0; i<affected.length; i++){
+                        window.hWin.HAPI4.currentUser.usr_SavedSearch[affected[i]][_GRPID] = newGroupID;    
+                    }
+
+
+                    if(data){
+                        mod_node.moveTo(node, data.hitMode);    
+                    }else{
+                        $("#addlink"+newGroupID).hide();    
+                        //target tree                    
+                        var tree = that.treeviews[newGroupID];
+                        node = tree.rootNode;
+                        node.folder = true;
+                        mod_node.moveTo(node);
+                    }
+                    
+                    if(that.treeviews[oldGroupID].count()<1){
+                        $("#addlink"+oldGroupID).css('display', 'block');
+                    }
+
+                    that._saveTreeData( oldGroupID, null, function(){
+                        that._saveTreeData( newGroupID, null, function(){
+                        } );
+                    } );
+
+                }else{
+                    window.hWin.HEURIST4.msg.showMsgErr(response, true);
+                }
+        });
+    }                        
+
         
 
 });
