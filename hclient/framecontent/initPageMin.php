@@ -33,6 +33,10 @@ if(@$_REQUEST['db']){
     //if database is defined then connect to given database
     $isSystemInited = $system->init(@$_REQUEST['db']);
 }
+else{
+    //db not defined
+    $isSystemInited = $system->init(null, false);
+}
 
 if(!$isSystemInited){
     include ERROR_REDIR;
