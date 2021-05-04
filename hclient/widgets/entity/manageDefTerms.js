@@ -1304,11 +1304,11 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
     },
     
     //
-    //
+    // returns context value that is passed as parameter to function options.onClose
     //
     contextOnClose: function(){
         
-        var last_vocab_id = this.vocabularies_div.manageDefTerms('getLastAddedVocabulary');
+        var last_vocab_id = this.vocabularies_div?this.vocabularies_div.manageDefTerms('getLastAddedVocabulary'):0;
         
         return last_vocab_id>0?last_vocab_id:this.options.trm_VocabularyID;
     },

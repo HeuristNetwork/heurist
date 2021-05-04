@@ -1152,6 +1152,9 @@ $.widget( "heurist.manageEntity", {
         
     },
     
+    //
+    // returns context value that is passed as parameter to function options.onClose
+    //
     contextOnClose: function(){
         return null;  
     },

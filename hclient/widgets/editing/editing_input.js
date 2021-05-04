@@ -989,7 +989,7 @@ $.widget( "heurist.editing_input", {
                                 input = $(input);
                                 input.css('width','auto');
                                 input = that._recreateSelector(input, true);
-                                that._on( input, {change:this._onTermChange} );
+                                that._on( input, {change:that._onTermChange} );
                                 that._showHideSelByImage(input);
 
                             });
@@ -3158,7 +3158,7 @@ console.log('onpaste');
             innerTitle: false,
             innerCommonHeader: $('<div>'
                 +(that.options.dtID>0?('<span style="margin-left:260px">Field: <b>'+$Db.dty(that.options.dtID,'dty_Name')+'</b></span>'):'')
-                +'<span style="margin-left:110px">This field uses vocabulary: <b>'+$Db.trm(allTerms,'trm_Label')+'</b></span></div>'),
+                +'<span style="margin-left:110px">This field uses vocabulary: <b>'+$Db.trm(vocab_id,'trm_Label')+'</b></span></div>'),
             onInitFinished: function(){
                 var that2 = this;
                 setTimeout(function(){
