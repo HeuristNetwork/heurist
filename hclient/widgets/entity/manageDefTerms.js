@@ -309,7 +309,7 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
                 if(this.options.innerCommonHeader){
                     $(this.options.innerCommonHeader).css({position:'absolute',height:'38px',left:0,right:0,top:0,
-                        'text-align': 'center',background: 'white','line-height': '38px'}).appendTo(this.element);
+                        background: 'white','line-height': '38px'}).appendTo(this.element);
                     this.main_element.css('top','38px');
                     this.vocabularies_div.css('top','38px');
                 }

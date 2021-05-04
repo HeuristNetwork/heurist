@@ -1719,7 +1719,7 @@ $.widget( "heurist.mainMenu6", {
         +'<div style="display:inline-block"><img width="110" height="60" alt="" src="'
             +window.hWin.HAPI4.baseURL+'hclient/assets/v6/gs_'+section+'.png"></div>'
             
-        +'<span class="ui-heurist-title header" style="display: inline-block; font-weight: normal;padding-left:20px">'
+        +'<span class="ui-heurist-title header" id="menu-guide" style="display: inline-block; font-weight: normal;padding-left:20px;cursor: pointer">'
             +'<span class="ui-icon ui-icon-help"/>&nbsp;Menu guide</span>'            
             
         +'<span class="ui-heurist-title header" id="start-hints" style="display: inline-block; font-weight: normal;padding-left:20px;cursor: pointer">'
@@ -1731,7 +1731,7 @@ $.widget( "heurist.mainMenu6", {
                 .css({'background':'none'})
                 .appendTo( this.element );
                 
-		this._on(this.introductions[section].find('.gs-box'),{click:this._loadIntroductoryGuide});  
+		this._on(this.introductions[section].find('#menu-guide'),{click:this._loadIntroductoryGuide});  
 		this._on(this.introductions[section].find('#start-hints'),{click:this._loadStartHints});			
                 
             if(section=='design' && window.hWin.HEURIST4.util.getUrlParameter('welcome', window.hWin.location.search))
@@ -1777,7 +1777,7 @@ $.widget( "heurist.mainMenu6", {
                     
                     that.introductions[section].find('div.gs-box.ui-heurist-'+section)
                     .prepend( '<span class="ui-heurist-title header" id="start-hints" style="padding-top:57px;font-weight:normal;padding-left:20px;cursor:pointer">'
-                                +'<span class="ui-icon ui-icon-help"/>&nbsp;Startup hints</span>' );					
+                                +'<span class="ui-icon ui-icon-help"/>&nbsp;Startup hints</span>' ).click(function(){ that._loadStartHints(null); });					
 					
                     that.introductions[section].find('.gs-box')
                         .css({position:'absolute', left:10, right:10, top:10, 'min-width':700, margin:0}) //,'padding-left':20
@@ -1824,11 +1824,10 @@ $.widget( "heurist.mainMenu6", {
                             img.attr('src',window.hWin.HAPI4.baseURL+'hclient/assets/v6/'+img.attr('data-src'));
                         });
 
-                        // Link to Introductory Guide
+                        // Link to Menu Guide
                         that.introductions[section].find('div.gs-box.ui-heurist-'+section)
-                        .prepend( '<span class="ui-heurist-title header" id="intro-guide" style="padding-top:57px;font-weight:normal;padding-left:20px;cursor:pointer">'
-                                    +'<span class="ui-icon ui-icon-help"/>&nbsp;Menu guide</span>' );
-                        that.introductions[section].find('#intro-guide').click(function(){ that._loadIntroductoryGuide(null); });
+                        .prepend( '<span class="ui-heurist-title header" id="menu-guide" style="padding-top:57px;font-weight:normal;padding-left:20px;cursor:pointer">'
+                                    +'<span class="ui-icon ui-icon-help"/>&nbsp;Menu guide</span>' ).click(function(){ that._loadIntroductoryGuide(null); });
 
                         // Display Content
                         that.introductions[section].find('.gs-box')

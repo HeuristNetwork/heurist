@@ -1315,10 +1315,10 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                 //auxilary: vocab_id>0?'term':'vocabulary',
                 selection_on_init: vocab_id,  //selected vocabulary  
                 innerTitle: false,
-                innerCommonHeader: $('<div>modifying field :<b>'
+                innerCommonHeader: $('<div><span style="margin-left:260px">Field: <b>'
                     +(this._currentEditID>0?$Db.dty(this._currentEditID,'dty_Name'):'New field')
-                    +'</b> '
-                    + (vocab_id>0?('dropdown is populated from <b>'+$Db.trm(vocab_id,'trm_Label')+'</b> vocabulary')
+                    +'</b></span> '
+                    + (vocab_id>0?('<span style="margin-left:110px">This field uses vocabulary: <b>'+$Db.trm(vocab_id,'trm_Label')+'</b></span>')
                         :'. Addition of new vocabulary')
                     +'</div>'),
 

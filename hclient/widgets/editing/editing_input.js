@@ -862,10 +862,7 @@ $.widget( "heurist.editing_input", {
                 if(parseFloat(dwidth)>0){
                     dwidth = dwidth+'ex';
                 }
-            }
-            var def_value = this.f('rst_DefaultValue');
-            if(window.hWin.HEURIST4.util.isempty(value) && 
-                !window.hWin.HEURIST4.util.isempty(def_value)) value = def_value;            
+            }           
 
             $input = $('<select>').uniqueId()
                 .addClass('text ui-widget-content ui-corner-all')
@@ -3160,8 +3157,8 @@ console.log('onpaste');
             selection_on_init: vocab_id,
             innerTitle: false,
             innerCommonHeader: $('<div>'
-                +(that.options.dtID>0?('modifying field :<b>'+$Db.dty(that.options.dtID,'dty_Name')+'</b>'):'')
-                +' dropdown is populated from <b>'+vocab_id+' '+$Db.trm(vocab_id, 'trm_Label')+'</b> vocabulary</div>'),
+                +(that.options.dtID>0?('<span style="margin-left:260px">Field: <b>'+$Db.dty(that.options.dtID,'dty_Name')+'</b></span>'):'')
+                +'<span style="margin-left:110px">This field uses vocabulary: <b>'+$Db.trm(allTerms,'trm_Label')+'</b></span></div>'),
             onInitFinished: function(){
                 var that2 = this;
                 setTimeout(function(){
