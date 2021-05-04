@@ -26,7 +26,6 @@
 var crosstabsAnalysis;
 var buttonDiv;
 var visualisationButton;
-var modalBody = [];
 
 /**
 *  CrosstabsAnalysis - class for crosstab analysis
@@ -449,6 +448,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
         var $modalDialogBody = $('#'+name+'IntervalsBody'); //Hosts the entire body of modal
         var $rowDiv;  //First row within the modal.
         var $leftColDiv;   //Left column of div 
+        var $rightColDiv;   //Right column of div
         var $firstRowDiv;  
         var $buttons;
         var $bodyDiv;
@@ -478,13 +478,20 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
             $leftColDiv = $(document.createElement('div'))
             .addClass('col-6')
+            .attr('id', 'leftColDiv'+name)
             .css({'padding-right':'2rem'})
+            .appendTo($rowDiv);
+
+            $rightColDiv = $(document.createElement('div'))
+            .addClass('col-6')
+            .attr('id','rightColDiv'+name)
+            //.css({'padding-right':'2rem'})
             .appendTo($rowDiv);
 
             $firstRowDiv = $(document.createElement('div'))
             .addClass('row')
             .css('margin-bottom','1rem')
-            .appendTo($leftColDiv);
+            .appendTo($rightColDiv);
 
             $firstRowDiv
             .append('<div class="col-6 form-group"><label>Number of intervals:</label><input id="'+name+'IntCount" size="6" value="'+keepCount+'"></div>')
@@ -497,11 +504,6 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 .click(function( event ) {
                     calculateIntervals(name, parseInt($('#'+name+'IntCount').val()) );
                 }).css('margin-right',"1rem"))
-            .append($('<button>',{text: "Add", class: "btn btn-success", style: "padding-right:1rem"})
-            //.button({icons: {primary: "ui-icon-plus"}} )
-                .click(function( event ) {
-                    editInterval(  name, -1, $rowDiv );
-                }));
             
             $buttons.appendTo($firstRowDiv);
             /*
@@ -528,6 +530,15 @@ function CrosstabsAnalysis(_query, _query_domain) {
             })
             ).append('&nbsp;include null values');
             */
+
+            $('<button>',{text: "Add Interval", class: "btn btn-success"})
+            //.button({icons: {primary: "ui-icon-plus"}} )
+                .click(function( event ) {
+                    editInterval( name, -1, true);
+                })
+                .css('float', 'right')
+                .attr('id','addInterval')
+                .appendTo($intdiv);
         }
 
 
@@ -544,7 +555,11 @@ function CrosstabsAnalysis(_query, _query_domain) {
             .addClass('intervalDiv list row')
             .css({'padding':'0.2em'})
             .attr('id', name+idx )
-            .appendTo($leftColDiv);
+            .appendTo($rightColDiv);
+
+            $('<div class="col-md-2">')
+            .attr('id', name+idx+'ArrowPlacement')
+            .appendTo($intdiv);
 
             $('<div class="col-md-4">')
             //.css({'width':'160px','display':'inline-block'})
@@ -572,30 +587,32 @@ function CrosstabsAnalysis(_query, _query_domain) {
             $intdiv.append(editbuttons);
             */
 
-            $bodyDiv = $('<div class="col-md-4"></div>')
-            .appendTo($intdiv);
+            if(idx >= fields3[name].values.length){
+                $bodyDiv = $('<div class="col-md-2"></div>')
+                .appendTo($intdiv);
 
-            $('<button>')
-            .attr('intid', idx)
-            //.button({icons: {primary: "ui-icon-pencil"}, text: false })
-            .addClass('btn btn-warning border-dark')
-            .append('<i class="bi bi-pencil"></i>')
-            //css({'background-image': 'url('+window.hWin.HAPI4.baseURL+'common/images/edit_pencil_9x11.gif)'})
-            .click(function( event ) {
-                editInterval( name,  $(this).attr('intid'), $rowDiv );
-            })
-            .appendTo($bodyDiv);
-
-            $('<button>')
-            //.button({icons: {primary: "ui-icon-close"}, text: false })
-            .attr('intid', idx)
-            .addClass('btn btn-danger border-dark')
-            .append('<i class="bi bi-trash"></i>')
-            //.css({'background-image': 'url('+window.hWin.HAPI4.baseURL+'common/images/delete6x7.gif)'})
-            .click(function( event ) {
-                removeInterval( name, $(this).attr('intid') );
-            })
-            .appendTo($bodyDiv);
+                $('<button>')
+                .attr('intid', idx)
+                //.button({icons: {primary: "ui-icon-pencil"}, text: false })
+                .addClass('btn btn-warning border-dark')
+                .append('<i class="bi bi-pencil"></i>')
+                //css({'background-image': 'url('+window.hWin.HAPI4.baseURL+'common/images/edit_pencil_9x11.gif)'})
+                .click(function( event ) {
+                    editInterval( name,  $(this).attr('intid'), false);
+                })
+                .appendTo($bodyDiv);
+    
+                $('<button>')
+                //.button({icons: {primary: "ui-icon-close"}, text: false })
+                .attr('intid', idx)
+                .addClass('btn btn-danger border-dark')
+                .append('<i class="bi bi-trash"></i>')
+                //.css({'background-image': 'url('+window.hWin.HAPI4.baseURL+'common/images/delete6x7.gif)'})
+                .click(function( event ) {
+                    removeInterval( name, $(this).attr('intid') );
+                })
+                .appendTo($bodyDiv);
+            }
         }
     }
 
@@ -617,9 +634,33 @@ function CrosstabsAnalysis(_query, _query_domain) {
     /**
     * add/edit interval
     */
-    function editInterval( name, idx, div ){
+    function editInterval( name, idx, isAdd ){
 
         var $editedRow = $('#'+name+idx);
+
+        if(isAdd){
+            var $newInterval = $(document.createElement('div'))
+            .addClass('intervalDiv list row')
+            .css({'padding':'0.2em'})
+            .appendTo('#rightColDiv'+name)
+
+            $('<div class="col-md-2">')
+            .attr('id', name+idx+'ArrowPlacement')
+            .appendTo($newInterval);
+
+            $('<div class="col-md-4">')
+            .append(
+                $('<div>')
+                .html('newInterval')
+                .css({'width':'140px', 'font-weight':'bold'} ))
+            .appendTo($newInterval);
+
+            $('<div class="col-md-4">')
+            .html('empty')
+            .appendTo($newInterval);
+
+            $('#addInterval').attr('disabled', true);
+        }
 
         //Toggle edit background colour for the interval that is being used.
         for(e=0;e<fields3[name].intervals.length;e++){
@@ -633,7 +674,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
             }
         }
         //var $dialogbox;
-        var modalEditBox = div;
+        var modalEditBox = $('#leftColDiv'+name);
         var $rowDiv;
 
         //create multiselect list of terms
@@ -646,7 +687,6 @@ function CrosstabsAnalysis(_query, _query_domain) {
             .appendTo('body');
         }
         $dlg.empty()
-        .addClass('col-6')
         .appendTo(modalEditBox);
 
         var intname = (idx<0)?'new interval':fields3[name].intervals[idx].name;
@@ -655,7 +695,8 @@ function CrosstabsAnalysis(_query, _query_domain) {
         .addClass('row')
         .appendTo($dlg);
 
-        $('<div id="topdiv" class="col-12">Label:<input id="intname" value="'+intname+'"></div>')
+        
+        $('<div id="topdiv" class="col-12">'/*Label:<input id="intname" value="'+intname+'">*/+'</div>')
         //.addClass('intervalDiv list')
         .css({'margin-bottom':'1rem'})
         .appendTo($rowDiv);
@@ -674,7 +715,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
             {
                 var notused = true, itself = false;
                 var intvalues = fields3[name].intervals;
-                for(j=0; j<intvalues.length; j++){
+                /*for(j=0; j<intvalues.length; j++){
                     if(window.hWin.HEURIST4.util.findArrayIndex(termlist[i].id, intvalues[j])>=0){
                         if(idx==j){
                             itself = true;  //itself
@@ -684,6 +725,17 @@ function CrosstabsAnalysis(_query, _query_domain) {
                         break;
                     }
                 }
+                */
+
+                //Determines which intervals have been allocated to the new interval
+                if(termlist.length < intvalues.length && !isAdd){
+                    for(k=0;k<intvalues[idx].values.length;k++){
+                        if(termlist[i].id == intvalues[idx].values[k]){
+                            itself = true;
+                            break;
+                        }
+                    }
+               }
 
                 if(notused){
 
@@ -757,7 +809,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                     fields3[name].intervals[idx].values = [];
                     fields3[name].intervals[idx].description = '';
                 }
-                fields3[name].intervals[idx].name = $dlg.find("#intname").val();
+                fields3[name].intervals[idx].name = "newInterval";
 
                 if(detailtype=="enum" || detailtype=="resource" || detailtype=="relationtype"){ //false &&
                     var sels = $dlg.find("input:checked")
@@ -808,8 +860,8 @@ function CrosstabsAnalysis(_query, _query_domain) {
             }
 
 
-            $dlg.find("#topdiv").append($('<button>').html('Apply').addClass("btn btn-success").css('margin-left','1rem').click(__addeditInterval));
-
+            $dlg.find("#topdiv").append($('<button>').html('Apply').addClass("btn btn-success").attr('id','applyButton').click(__addeditInterval));
+            $($dlg.find("#applyButton")).appendTo('#'+name+idx+'ArrowPlacement'); //Places arrow at the begining of the edited or newly added interval.
             /*$dialogbox = window.hWin.HEURIST4.msg.showElementAsDialog(
                     {element:$dlg.get(0), height: iHeight, width:320, title:"Edit interval", modal:true} ); */
             /*
