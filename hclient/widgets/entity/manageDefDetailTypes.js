@@ -783,6 +783,7 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
 
                                     }
                                 }
+           
                             });
 
                     }});
@@ -792,12 +793,14 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
             $(elements[0]).change(); //trigger
         }
 
+        elements = this._editing.getInputs('dty_Name');
+        this._on( $(elements[0]), {
+                keypress: window.hWin.HEURIST4.ui.preventChars} );
+        
         if(this.options.newFieldForRtyID>0){
 
             //disable all fields except field name
-            var elements = this._editing.getInputs('dty_Name');
             this._on( $(elements[0]), {
-                keypress: window.hWin.HEURIST4.ui.preventChars,
                 keyup: this._onFieldAddSuggestion });
 
             var depended_fields = this._editing.getFieldByClass('newFieldForRtyID');

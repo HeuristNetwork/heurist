@@ -1217,6 +1217,10 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
             window.hWin.HEURIST4.ui.switchHintState2(ishelp_on, this.editForm, '.heurist-helper1');
         }});
         
+        ele = this._editing.getInputs('rty_Name');
+        this._on( $(ele[0]), {
+                keypress: window.hWin.HEURIST4.ui.preventChars} );
+        
         window.hWin.HEURIST4.ui.switchHintState2(ishelp_on, this.editForm, '.heurist-helper1');
         
         this.editForm.find('div.header').css({'min-widht':160, width:160});
