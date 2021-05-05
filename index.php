@@ -322,7 +322,8 @@ _time_debug = new Date().getTime() / 1000;
                
                 var lt = window.hWin.HAPI4.sysinfo['layout'];
                 if(! (lt=='Beyond1914' ||  lt=='UAdelaide' ||
-                    lt=='DigitalHarlem' || lt=='DigitalHarlem1935' || lt=='WebSearch' )){                
+                    lt=='DigitalHarlem' || lt=='DigitalHarlem1935' || lt=='WebSearch' ))
+                {                
 
                     if( window.hWin.HAPI4.SystemMgr.versionCheck() ) {
                         //version is old 
@@ -388,6 +389,8 @@ _time_debug = new Date().getTime() / 1000;
                             }
 */
                         }
+                        
+                        $('body').css({'overflow':'hidden'});   
                 }
                 
                 
@@ -482,7 +485,7 @@ if(strpos('heuristplus', $_SERVER["SERVER_NAME"])===false){
 
          
     </head>
-    <body style="background-color:#c9c9c9;overflow:hidden;">
+    <body style="background-color:#c9c9c9;">
 
         <div id="layout_panes">
             &nbsp;
