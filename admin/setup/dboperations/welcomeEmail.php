@@ -67,6 +67,8 @@ function sendEmail_NewDatabase($user_record, $database_name, $source_database){
     }
     
     $email = new PHPMailer();
+    $email->CharSet = 'UTF-8';
+    $email->Encoding = 'base64';
     $email->isHTML(true); 
     $email->SetFrom('no-reply@HeuristNetwork.org', 'Heurist'); //'no-reply@'.HEURIST_SERVER_NAME
     $email->Subject   = (($source_database!=null)?'CloneDB: ':'NewDB: ')
