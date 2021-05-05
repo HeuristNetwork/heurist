@@ -1232,7 +1232,10 @@ $.widget( "heurist.manageDefRecTypes", $.heurist.manageEntity, {
         
        this._super(changed_element);
        
-       if(changed_element!==true && this._editing.isModified() && changed_element.options.dtID=='rty_Name'){
+       if(changed_element && changed_element!==true 
+            && this._editing.isModified() 
+            && changed_element.options.dtID=='rty_Name')
+       {
             var val = this._editing.getValue('rty_Name');
             var ele = this._editing.getInputs('rty_Plural');
             $(ele[0]).val(val+'s');

@@ -149,7 +149,7 @@ public static function fill($rec_id, $mask=null){
 *
 * @param mixed $mask - titlemask
 * @param mixed $rt - record type
-* @param mixed $mode - 0 value, 1 coded, 2 - human readable
+* @param mixed $mode - 0 value, 1 to coded, 2 - to human readable
 * @param mixed $rec_id - record id for value mode
 * @param mixed $rep_mode - output in case failure: 0 - general message(_ERR_REP_WARN), 1- detailed message, 2 - empty string (_ERR_REP_SILENT)
 * @return string
@@ -223,8 +223,8 @@ public static function execute($mask, $rt, $mode, $rec_id=null, $rep_mode=_ERR_R
 
     $title = array_str_replace(array_keys($replacements), array_values($replacements), $mask);
 
-
     if($mode==0){  //fill the mask with values
+
 
         if($fields_blank==$len && $rec_id){ //If all the title mask fields are blank
             $title =  "Record ID $rec_id - no data has been entered in the fields used to construct the title";
@@ -246,7 +246,7 @@ public static function execute($mask, $rt, $mode, $rec_id=null, $rep_mode=_ERR_R
             
             
         }
-        $title = trim(preg_replace('!  +!s', ' ', $title));
+        $title = trim(preg_replace('!  +!s', ' ', $title)); //remove double spaces
 
         if($title==""){
 
@@ -685,8 +685,21 @@ private static function __fill_field($field_name, $rt, $mode, $rec_id=null) {
         $field_val = self::__get_field_value( $field_name, $rt, $mode, $rec_id );
         return $field_val;
     }
+
+    $fullstop = '.';
+    $fullstop_ex = '/^([^.]+?)\\s*\\.\\s*(.+)$/';
+    $fullstop_concat = '.';
+    
+    if($mode==1 || strpos($field_name, '..')>0){ //convert to concept codes
+        $fullstop = '..';
+        $fullstop_ex = '/^([^..]+?)\\s*\\..\\s*(..+)$/';
+    }
+    if($mode==2){ //convert to human readable codes
+        $fullstop_concat = '..';
+    }
+    
     // Return the rec-detail-type ID for the given field in the given record type
-    if (strpos($field_name, ".") === FALSE) {    // direct field name lookup
+    if (strpos($field_name, $fullstop) === FALSE) {    // direct field name lookup
 
         if($mode==1 && self::$fields_correspondence!=null){
             $field_name = self::__replaceInCaseOfImport($field_name);
@@ -704,7 +717,7 @@ private static function __fill_field($field_name, $rt, $mode, $rec_id=null) {
     $parent_field_name = null;
     $inner_field_name = null;
 
-    if (preg_match('/^([^.]+?)\\s*\\.\\s*(.+)$/', $field_name, $matches)) {
+    if (preg_match($fullstop_ex, $field_name, $matches)) {
         $parent_field_name = $matches[1];
 
 
@@ -742,7 +755,7 @@ private static function __fill_field($field_name, $rt, $mode, $rec_id=null) {
                             $s1 = self::__get_dt_field($rt, $rdt_id, $mode, 'originalName');
                         }
 
-                        return $s1. "." .$inner_field_name;
+                        return $s1. $fullstop_concat .$inner_field_name;
                     }
 
                 }else{
@@ -776,7 +789,7 @@ private static function __fill_field($field_name, $rt, $mode, $rec_id=null) {
         $inner_rectype = 0;
         $inner_rectype_name = '';
         $inner_rectype_cc = '';
-        $pos = strpos($inner_field_name, ".");
+        $pos = strpos($inner_field_name, $fullstop);
         $pos2 = strpos($inner_field_name, "}");
         if ( $pos>0 &&  $pos2>0 && $pos2 < $pos ) { 
             $inner_rectype_search = substr($inner_field_name, 1, $pos-2); 
@@ -832,15 +845,15 @@ private static function __fill_field($field_name, $rt, $mode, $rec_id=null) {
                         if($mode==1){
                             $s1 = $rdt_id; //parent detail id
                             if($inner_rectype>0){
-                                $s1 = $s1 .'.{'. $inner_rectype_cc.'}';
+                                $s1 = $s1 .$fullstop_concat.'{'. $inner_rectype_cc.'}';
                             }
                         }else{
                             $s1 = self::__get_dt_field($rt, $rdt_id, $mode, 'originalName');
                             if($inner_rectype>0){
-                                $s1 = $s1 .'.{'. $inner_rectype_name. '}';
+                                $s1 = $s1 .$fullstop_concat.'{'. $inner_rectype_name. '}';
                             }
                         }
-                        return $s1. "." .$inner_rdt;
+                        return $s1. $fullstop_concat .$inner_rdt;
                     }
                 }
                 if($field_not_found){
@@ -852,7 +865,7 @@ private static function __fill_field($field_name, $rt, $mode, $rec_id=null) {
             }else{
                 $s1 = self::__get_dt_field($rt, $rdt_id, $mode, 'originalName');
             }
-            return $s1. ($inner_field_name? ".".$inner_field_name:"");
+            return $s1. ($inner_field_name? $fullstop_concat.$inner_field_name:"");
         }
     }
 
@@ -860,7 +873,7 @@ private static function __fill_field($field_name, $rt, $mode, $rec_id=null) {
 }
 
 //
-//
+// replace local dty_ID to concept code (for import)
 //
 private static function __replaceInCaseOfImport($dty_ID){
     //special case - replace dty_ID in case of definition import
