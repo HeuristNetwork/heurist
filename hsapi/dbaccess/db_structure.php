@@ -545,30 +545,32 @@ function dbs_GetRectypeConstraint($system) {
                 'enum' => __getTermTree($system, "enum", "exact"));
 
         $vcgGroups = array();//'groupIDToIndex' => array());
+        $matches_refs = array(); 
                 
         //see dbDefTerms->getTermLinks
-        $dbVer = $system->get_system('sys_dbVersion');
-        $dbVerSub = $system->get_system('sys_dbSubVersion');
         if($dbVer==1 && $dbVerSub>2){
             $query = 'SELECT trl_ParentID, trl_TermID FROM defTermsLinks ORDER BY trl_ParentID';
-            $res = $mysqli->query($query);
-            $matches = array();
-            if ($res){
-                while ($row = $res->fetch_row()){
-                        
-                    if(@$matches[$row[0]]){
-                        $matches[$row[0]][] = $row[1];
-                    }else{
-                        $matches[$row[0]] = array($row[1]);
-                    }
-                }
-                $res->close();
-                $terms['trm_Links'] = $matches;
-                
-            }
+        }else{
+            $query = 'SELECT trm_ParentTermID, trm_ID FROM defTerms ORDER BY trm_ParentTermID';
+        }
+        $res = $mysqli->query($query);
+        $matches = array();
+        if ($res){
+            while ($row = $res->fetch_row()){
                     
-            //get vocabulary groups 
+                if(@$matches[$row[0]]){
+                    $matches[$row[0]][] = $row[1];
+                }else{
+                    $matches[$row[0]] = array($row[1]);
+                }
+            }
+            $res->close();
+            $terms['trm_Links'] = $matches;
+        }
         
+                    
+        if($dbVer==1 && $dbVerSub>2){
+            //get vocabulary groups 
             $query = 'SELECT vcg_ID, vcg_Name, vcg_Domain, vcg_Order, vcg_Description FROM defVocabularyGroups';
             $res = $mysqli->query($query);
             if($res){
@@ -580,29 +582,33 @@ function dbs_GetRectypeConstraint($system) {
             }else{
                 error_log('DATABASE: '.$system->dbname().'. Error retrieving vocabulary groups '.$mysqli->error);
             }
-        }//$dbVer==1 && $dbVerSub>2
-        $terms['groups'] = $vcgGroups;
-        
-        //terms by reference
-        $matches = array(); 
-        $query = 'select trl_ParentID,trl_TermID from defTermsLinks r, defTerms t '
-        .'where trl_TermID=trm_ID AND trl_ParentID!=trm_ParentTermID ORDER BY trl_ParentID';
-        $res = $mysqli->query($query);
-        if ($res){
-            while ($row = $res->fetch_row()){
-                    
-                if(@$matches[$row[0]]){
-                    $matches[$row[0]][] = $row[1];
-                }else{
-                    $matches[$row[0]] = array($row[1]);
+            
+            
+            //terms by reference
+            $query = 'select trl_ParentID,trl_TermID from defTermsLinks r, defTerms t '
+            .'where trl_TermID=trm_ID AND trl_ParentID!=trm_ParentTermID ORDER BY trl_ParentID';
+            $res = $mysqli->query($query);
+            if ($res){
+                while ($row = $res->fetch_row()){
+                        
+                    if(@$matches_refs[$row[0]]){
+                        $matches_refs[$row[0]][] = $row[1];
+                    }else{
+                        $matches_refs[$row[0]] = array($row[1]);
+                    }
                 }
+                $res->close();
+            }else{
+                error_log('DATABASE: '.$system->dbname().'. Error retrieving terms by reference '.$mysqli->error);
             }
-            $res->close();
-        }else{
-            error_log('DATABASE: '.$system->dbname().'. Error retrieving terms by reference '.$mysqli->error);
+        }//$dbVer==1 && $dbVerSub>2
+        else{
+            $vcgGroups[1] = array('vcg_ID'=>1, 'vcg_Name'=>'General');        
         }
-        $terms['references'] = $matches;
-                
+        
+        $terms['groups'] = $vcgGroups;
+        $terms['references'] = $matches_refs;
+        
         //ARTEM setCachedData($cacheKey, $terms);
         return $terms;
         
