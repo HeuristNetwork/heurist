@@ -381,7 +381,7 @@ function hCmsEditing(_options) {
                             var title_container = doc_body.find('#main-pagetitle');
                             if(title_container.length>0){
                                 //move page title to header - visibility is set in websiteRecord
-                                title_container.empty();
+                                title_container.empty().show();
                                 pagetitle.detach().appendTo(title_container);
                                 show_page_title = pagetitle.is(':visible');
                             }
