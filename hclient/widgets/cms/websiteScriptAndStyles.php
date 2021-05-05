@@ -170,9 +170,9 @@ _time_debug = new Date().getTime() / 1000;
     //cfg_widgets is from layout_defaults.js 
     window.hWin.HAPI4.LayoutMgr.init(cfg_widgets, null);
     
-    //reload home page content by click on logo
+    //reload website by click on logo, opens first page with content
     $("#main-logo").click(function(event){
-            loadPageContent( home_page_record_id );
+            location.reload();
     });
     
     setTimeout(function(){
@@ -332,7 +332,7 @@ function afterPageLoad(document, pageid){
         var s = location.pathname;
         while (s.substring(0, 2) === '//') s = s.substring(1);
         window.history.pushState("object or string", "Title", s+'?db='
-        +window.hWin.HAPI4.database+'&website&id='+home_page_record_id+(pageid!=home_page_record_id?'&pageid='+pageid:''));
+        +window.hWin.HAPI4.database+'&website&id='+home_page_record_id);
     }
     
     

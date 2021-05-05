@@ -24,17 +24,34 @@
     * @package     Heurist academic knowledge management system
     * @subpackage  !!!subpackagename for file such as Administration, Search, Edit, Application, Library
     */
-define('OWNER_REQUIRED',1);   
+	
 define('PDIR','../../');  //need for proper path to js and css    
 
 require_once(dirname(__FILE__).'/../../hclient/framecontent/initPageMin.php');
 
 if( $system->verifyActionPassword($_REQUEST['pwd'], $passwordForServerFunctions) ){
-    print $response = $system->getError()['message'];
+	?>
+    
+    <form action="verifyConceptCodes.php" method="POST">
+        <div style="padding:20px 0px">
+            Only an administrator (server manager) can carry out this action.<br />
+            This action requires a special system administrator password (not a normal login password)
+        </div>
+    
+        <span style="display: inline-block;padding: 10px 0px;">Enter password:&nbsp;</span>
+        <input type="password" name="pwd" autocomplete="off" />
+
+        <input type="submit" value="OK" />
+    </form>
+
+    <?php
     exit();
 }
 
-?>            
+?>  
+
+<script>window.history.pushState({}, '', '<?php echo $_SERVER['PHP_SELF']; ?>')</script>
+    
 <div style="font-family:Arial,Helvetica;font-size:12px">
             <p>This list shows re-use of the same concept code within each database where this occurs. Re-use is an error, although it should have very little adverse effect on local operations.</p>
 <?php            

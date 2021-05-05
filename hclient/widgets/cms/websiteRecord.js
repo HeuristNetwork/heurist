@@ -193,9 +193,17 @@ function hCmsEditing(_options) {
         };//end inlineEditorConfig
         
 
-        //reload home
-        $( "#main-logo").click(function(event){
-            __iniLoadPageById( home_pageid );
+        // Open 'Website Design' editor
+        $("#main-logo, #main-title").click(function(event){
+            window.hWin.HEURIST4.ui.openRecordEdit(home_pageid, null,
+            {selectOnSave:true, edit_obstacle: false, onselect: 
+                function(event, res){
+                    if(res && window.hWin.HEURIST4.util.isRecordSet(res.selection)){
+                        // Need to refresh page content and header
+                        location.reload();
+                    }
+                }
+            });
         });
         
         setTimeout(function(){

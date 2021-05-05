@@ -2751,17 +2751,24 @@ setTimeout("console.log('2. auto='+ele2.height());",1000);
                 }
                 
                 var $__dlg = window.hWin.HEURIST4.msg.showMsgDlg(
-'<p>You have selected '+n
-+' records. This display mode loads complete information for each record and will take a long time to load and display all of these data.</p>'
-+s,
-{'Proceed' :function(){ 
-    callback.call();
-    $__dlg.dialog( "close" );
-},
-'Use simple display mode':function(){
-    that.applyViewMode('list');
-    $__dlg.dialog( "close" );
-}}, {title:'Warning'});
+                '<p>You have selected '+n
+                +' records. This display mode loads complete information for each record and will take a long time to load and display all of these data.</p>'
+                +s,
+                {'Proceed as is' :function(){ 
+                    callback.call();
+                    $__dlg.dialog( "close" );
+                },
+                'Single Line Display Mode (this time)':function(){
+                    that.applyViewMode('list');
+                    $__dlg.dialog( "close" );
+                },
+                'Switch to Single Display Mode':function(){
+                    that.applyViewMode('list');
+                    window.hWin.HAPI4.save_pref('rec_list_viewmode_'+that.options.entityName, 'list');
+                    $__dlg.dialog( "close" );
+                }
+                }, {title:'Warning'});
+				
             return true;          
         }else{
             return false;
