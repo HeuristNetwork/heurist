@@ -61,7 +61,8 @@ $.widget( "heurist.manageRecords", $.heurist.manageEntity, {
     _init: function() {
         
         if(!this.options.default_palette_class){
-            this.options.default_palette_class = this.options.edit_structure?'ui-heurist-design':'ui-heurist-populate';   
+            this.options.default_palette_class = 'ui-heurist-populate';  
+            //since 2021-05-05 there is no difference this.options.edit_structure?'ui-heurist-design':'ui-heurist-populate';   
         }
         
         if(this.options.layout_mode=='short'){
@@ -3543,10 +3544,10 @@ $Db.rty(rectypeID, 'rty_Name') + ' is defined as a child of <b>'+names.join(', '
             
             sheader = sheader  
             +'<span style="display:inline-block;padding:5 10px 5px 0;vertical-align:middle">'
-            +'Modify record structure for</span>'
+            +'Modifying record structure for</span>'
             +'<h3 style="display:inline-block;max-width:900;vertical-align:middle;margin:0">'
             +$Db.rty(this._currentEditRecTypeID,'rty_Name')
-            +'&nbsp;&nbsp;( ID: '+this._currentEditRecTypeID+'  Code: '+$Db.getConceptID('rty',this._currentEditRecTypeID)+' )'
+            +'&nbsp;&nbsp;( '+this._currentEditRecTypeID+' / '+$Db.getConceptID('rty',this._currentEditRecTypeID)+' )'
             +'</h3>';
             
         }else{
