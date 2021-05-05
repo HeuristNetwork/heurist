@@ -252,7 +252,9 @@ window.hWin.HEURIST4.msg.showMsgDlg(
         $empty_mark = (trim($content)=='')?' date-empty="1"':'';
         $hide_mark = ($show_pagetitle) ?'' :' style="display:none;"';
         
-        print '<h2 class="webpageheading" '.$empty_mark.$hide_mark.'>'.$website_title.'</h2>';    
+        print '<h2 class="webpageheading" '.$empty_mark.$hide_mark.'>'
+            .strip_tags($website_title,'<i><b><u><em><strong><sup><sub><small><br>')
+            .'</h2>';    
         
         print $content;
     }
