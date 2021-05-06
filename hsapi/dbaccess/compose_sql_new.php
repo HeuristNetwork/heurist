@@ -1039,7 +1039,7 @@ class HPredicate {
             if($this->pred_type=='f') $this->pred_type = $this->field_id;
             
             if($is_empty){
-                $res = "(r".$this->qlevel.".$sHeaderField is NULL OR r".$this->qlevel.".$sHeaderField=='')";    
+                $res = "(r".$this->qlevel.".$sHeaderField is NULL OR r".$this->qlevel.".$sHeaderField='')";    
             }else{
                 $ignoreApostrophe = $ignoreApostrophe && (strpos($val,"'")===false);
                 
@@ -1373,13 +1373,13 @@ class HPredicate {
             
             if($this->field_id){
                 //no pointer field exists among record details
-                $where = (($this->negate)?'':'NOT')." exists (select dtl_ID from recDetails $rd where r$p.rec_ID=$rd.dtl_RecID AND "
+                $where = (($this->negate)?'':'NOT')." EXISTS (select dtl_ID from recDetails $rd where r$p.rec_ID=$rd.dtl_RecID AND "
             ."$rd.dtl_DetailTypeID=".$this->field_id.")";
             
             }else{
                 //no links at all or any link
                 $where = "r$p.rec_ID ".(($this->negate)?'':'NOT')
-                    ." IN (select rl_SourceID from recLinks where $rl.rl_RelationID is null";
+                    ." IN (select rl_SourceID from recLinks where $rl.rl_RelationID IS NULL";
             }
             
             return array("where"=>$where);
@@ -1432,7 +1432,7 @@ class HPredicate {
                 
             }else{
                 $where = "r$p.rec_ID=$rl.rl_SourceID AND ".
-                (($this->field_id) ?"$rl.rl_DetailTypeID=".$this->field_id :"$rl.rl_RelationID is null")
+                (($this->field_id) ?"$rl.rl_DetailTypeID=".$this->field_id :"$rl.rl_RelationID IS NULL")
                 ." AND $rl.rl_TargetID".$val;
             }
 
@@ -1496,7 +1496,7 @@ class HPredicate {
         }else{
         
             $where = "r$p.rec_ID=$rl.rl_TargetID AND ".
-            (($this->field_id) ?"$rl.rl_DetailTypeID=".$this->field_id :"$rl.rl_RelationID is null")
+            (($this->field_id) ?"$rl.rl_DetailTypeID=".$this->field_id :"$rl.rl_RelationID IS NULL")
             ." AND $rl.rl_SourceID".$val;
         }
 
