@@ -1102,35 +1102,40 @@ error_log('UPDATED '.$session_id.'  '.$value);
     //
     function updateDatabseToLatest4($system){
         
-        $mysqli = $system->get_mysqli();
-        
-        //adds trash groups
-        if(!(mysql__select_value($mysqli, 'select rtg_ID FROM defRecTypeGroups WHERE rtg_Name="Trash"')>0)){
-$query = 'INSERT INTO defRecTypeGroups (rtg_Name,rtg_Order,rtg_Description) '
-.'VALUES ("Trash",255,"Drag record types here to hide them, use dustbin icon on a record type to delete permanently")';
-            $mysqli->query($query);
-        }
+        $dbVer = $system->get_system('sys_dbVersion');
+        $dbVerSub = $system->get_system('sys_dbSubVersion');
 
-        if(!(mysql__select_value($mysqli, 'select vcg_ID FROM defVocabularyGroups WHERE vcg_Name="Trash"')>0)){
-$query = 'INSERT INTO defVocabularyGroups (vcg_Name,vcg_Order,vcg_Description) '
-.'VALUES ("Trash",255,"Drag vocabularies here to hide them, use dustbin icon on a vocabulary to delete permanently")';
-            $mysqli->query($query);
-        }
-
-        if(!(mysql__select_value($mysqli, 'select dtg_ID FROM defDetailTypeGroups WHERE dtg_Name="Trash"')>0)){
-$query = 'INSERT INTO defDetailTypeGroups (dtg_Name,dtg_Order,dtg_Description) '
-.'VALUES ("Trash",255,"Drag base fields here to hide them, use dustbin icon on a field to delete permanently")';        
-            $mysqli->query($query);
-        }
+        if($dbVer==1 && $dbVerSub>2){
         
-        $sysValues = $system->get_system();
-        if(!array_key_exists('sys_ExternalReferenceLookups', $sysValues))
-        {
-            $query = "ALTER TABLE `sysIdentification` ADD COLUMN `sys_ExternalReferenceLookups` TEXT default NULL COMMENT 'Record type-function-field specifications for lookup to external reference sources such as GeoNames'";
-            $res = $mysqli->query($query);
-        }
-        
+            $mysqli = $system->get_mysqli();
+            
+            //adds trash groups
+            if(!(mysql__select_value($mysqli, 'select rtg_ID FROM defRecTypeGroups WHERE rtg_Name="Trash"')>0)){
+    $query = 'INSERT INTO defRecTypeGroups (rtg_Name,rtg_Order,rtg_Description) '
+    .'VALUES ("Trash",255,"Drag record types here to hide them, use dustbin icon on a record type to delete permanently")';
+                $mysqli->query($query);
+            }
 
+            if(!(mysql__select_value($mysqli, 'select vcg_ID FROM defVocabularyGroups WHERE vcg_Name="Trash"')>0)){
+    $query = 'INSERT INTO defVocabularyGroups (vcg_Name,vcg_Order,vcg_Description) '
+    .'VALUES ("Trash",255,"Drag vocabularies here to hide them, use dustbin icon on a vocabulary to delete permanently")';
+                $mysqli->query($query);
+            }
+
+            if(!(mysql__select_value($mysqli, 'select dtg_ID FROM defDetailTypeGroups WHERE dtg_Name="Trash"')>0)){
+    $query = 'INSERT INTO defDetailTypeGroups (dtg_Name,dtg_Order,dtg_Description) '
+    .'VALUES ("Trash",255,"Drag base fields here to hide them, use dustbin icon on a field to delete permanently")';        
+                $mysqli->query($query);
+            }
+            
+            $sysValues = $system->get_system();
+            if(!array_key_exists('sys_ExternalReferenceLookups', $sysValues))
+            {
+                $query = "ALTER TABLE `sysIdentification` ADD COLUMN `sys_ExternalReferenceLookups` TEXT default NULL COMMENT 'Record type-function-field specifications for lookup to external reference sources such as GeoNames'";
+                $res = $mysqli->query($query);
+            }
+            
+        }
 /*        
         $system->defineConstant('RT_CMS_HOME');
         $system->defineConstant('DT_POPUP_TEMPLATE');
