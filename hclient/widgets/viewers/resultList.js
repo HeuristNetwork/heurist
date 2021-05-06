@@ -2161,7 +2161,7 @@ $.widget( "heurist.resultList", {
 
                             $rdiv.addClass('expanded');
                             $rdiv.children().not('.recTypeThumb').hide();
-                            $rdiv.find('.action-button-container').show();
+                            //show on hover as usual $rdiv.find('.action-button-container').show();
                             $rdiv.find('.action-button').removeClass('ui-button-icon-only');
                             if(window.hWin.HAPI4.has_access()){
                                 ele.css({'margin':'0px 0px 0px 80px'});
