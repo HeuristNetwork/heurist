@@ -452,6 +452,10 @@ function CrosstabsAnalysis(_query, _query_domain) {
         var $firstRowDiv;  
         var $buttons;
         var $bodyDiv;
+        var $addIntervalBtn;
+        var $btnDiv;
+        var $intervalHeadRow;
+
         $modalDialogBody.empty();
         $container.empty();
 
@@ -477,13 +481,13 @@ function CrosstabsAnalysis(_query, _query_domain) {
             .appendTo($intdiv);
 
             $leftColDiv = $(document.createElement('div'))
-            .addClass('col-6')
+            .addClass('col-4')
             .attr('id', 'leftColDiv'+name)
             .css({'padding-right':'2rem'})
             .appendTo($rowDiv);
 
             $rightColDiv = $(document.createElement('div'))
-            .addClass('col-6')
+            .addClass('col-8')
             .attr('id','rightColDiv'+name)
             //.css({'padding-right':'2rem'})
             .appendTo($rowDiv);
@@ -493,13 +497,18 @@ function CrosstabsAnalysis(_query, _query_domain) {
             .css('margin-bottom','1rem')
             .appendTo($rightColDiv);
 
+            $firstRowDiv.append('<div class="col-md-1"></div>')//Blank div
+            $firstRowDiv.append('<div class="col-md-8"><h5>Intervals</h5></div>')
+
+            /* Input field to show number of intervals
             $firstRowDiv
             .append('<div class="col-6 form-group"><label>Number of intervals:</label><input id="'+name+'IntCount" size="6" value="'+keepCount+'"></div>')
-            
+            */
+
             //$('<input id="'+name+'IntCount">').attr('size',6).val(keepCount)
 
             $buttons = $(document.createElement('div'))
-            .addClass('col-6')
+            .addClass('col-md-3')
             .append($('<button>',{text: "Reset",class: "btn btn-secondary"})
                 .click(function( event ) {
                     calculateIntervals(name, parseInt($('#'+name+'IntCount').val()) );
@@ -531,16 +540,21 @@ function CrosstabsAnalysis(_query, _query_domain) {
             ).append('&nbsp;include null values');
             */
 
-            $('<button>',{text: "Add Interval", class: "btn btn-success"})
-            //.button({icons: {primary: "ui-icon-plus"}} )
-                .click(function( event ) {
-                    editInterval( name, -1, true);
-                })
-                .css('float', 'right')
-                .attr('id','addInterval')
-                .appendTo($intdiv);
-        }
+            $intervalHeadRow = $(document.createElement('div'))
+            .addClass('row')
+            .appendTo($rightColDiv);
 
+            $('<div class="col-md-1">')
+            .appendTo($intervalHeadRow);
+
+            $('<div class="col-md-4">')
+            .append('<h6>Label<h6>')
+            .appendTo($intervalHeadRow);
+
+            $('<div class="col-md">')
+            .append('<h6>Value</h6>')
+            .appendTo($intervalHeadRow);
+        }
 
         var idx;
         var intervals = fields3[name].intervals;
@@ -553,11 +567,10 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
             $intdiv = $(document.createElement('div'))
             .addClass('intervalDiv list row')
-            .css({'padding':'0.2em'})
             .attr('id', name+idx )
             .appendTo($rightColDiv);
 
-            $('<div class="col-md-2">')
+            $('<div class="col-md-1 bg-white">')
             .attr('id', name+idx+'ArrowPlacement')
             .appendTo($intdiv);
 
@@ -566,17 +579,34 @@ function CrosstabsAnalysis(_query, _query_domain) {
             .append(
                 $('<div>')
                 .html(interval.name)
-                .css({'width':'140px', 'font-weight':'bold'} ))
+                .css({'font-weight':'bold'} ))
             /*$('<input>')
             .addClass('text ui-widget-content ui-corner-all')
             .val(interval.name)
             .css({'width':'150px'} ))*/
             .appendTo($intdiv);
 
-            $('<div class="col-md-4">')
-            .html(interval.description)
-            //.css({'max-width':'250px','width':'250px','display':'inline-block','padding-left':'1.5em'})
-            .appendTo($intdiv);
+            if(intervals[idx].values.length > 1){
+                var splitDescription = interval.description.split("+");
+                var listGroup = $('<ul class="list-group list-group-flush"></ul>');
+            
+                for(x=0;x<(splitDescription.length-1); x++){
+                    var listItem = $('<li class="list-group-item p-0 bg-transparent">')
+                    .html(splitDescription[x])
+                    .appendTo(listGroup);
+                }
+
+                $('<div class="col-md">')
+                .append(listGroup)
+                .appendTo($intdiv);
+
+            }
+            else{
+                $('<div class="col-md">')
+                .html(interval.description)
+                //.css({'max-width':'250px','width':'250px','display':'inline-block','padding-left':'1.5em'})
+                .appendTo($intdiv);    
+            }
 
             /*
             var editbuttons = '<div class="saved-search-edit">'+
@@ -614,6 +644,23 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 .appendTo($bodyDiv);
             }
         }
+
+        $btnDiv = $('<div class="row my-2"></div>')
+            .appendTo($rightColDiv);
+
+        $addIntervalBtn = $('<button>',{class: "btn btn-success w-100"})
+            //.button({icons: {primary: "ui-icon-plus"}} )
+            .click(function( event ) {
+                editInterval( name, -1, true);
+            })
+            .html('<i class="bi bi-plus"></i> Add Interval')
+            .attr('id','addInterval');
+
+        $('<div class="col-1">').appendTo($btnDiv);
+
+        $('<div class="col-11">')
+            .append($addIntervalBtn)
+            .appendTo($btnDiv);
     }
 
     /**
@@ -637,14 +684,14 @@ function CrosstabsAnalysis(_query, _query_domain) {
     function editInterval( name, idx, isAdd ){
 
         var $editedRow = $('#'+name+idx);
+        var currentlyEditing;
 
         if(isAdd){
             var $newInterval = $(document.createElement('div'))
             .addClass('intervalDiv list row')
-            .css({'padding':'0.2em'})
             .appendTo('#rightColDiv'+name)
 
-            $('<div class="col-md-2">')
+            $('<div class="col-md-1 bg-white">')
             .attr('id', name+idx+'ArrowPlacement')
             .appendTo($newInterval);
 
@@ -652,10 +699,10 @@ function CrosstabsAnalysis(_query, _query_domain) {
             .append(
                 $('<div>')
                 .html('newInterval')
-                .css({'width':'140px', 'font-weight':'bold'} ))
+                .css({'font-weight':'bold'} ))
             .appendTo($newInterval);
 
-            $('<div class="col-md-4">')
+            $('<div class="col-md">')
             .html('empty')
             .appendTo($newInterval);
 
@@ -669,7 +716,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 $editedRow.toggleClass("bg-warning", true);
             }
             else{
-                $('#'+name+e).toggleClass("intervalDiv", true);
+                $editedRow.toggleClass("intervalDiv", true);
                 $('#'+name+e).toggleClass("bg-warning", false);
             }
         }
@@ -752,22 +799,53 @@ function CrosstabsAnalysis(_query, _query_domain) {
                     $('<input>')
                     .attr('type','checkbox')
                     .attr('checked', itself)
+                    .attr('disabled', itself)
                     .addClass('recordIcons')
                     .attr('termid',termlist[i].id)
                     .attr('termname',termlist[i].text)
-                    .css('margin','0.4em')
+                    //.css('margin','0.4em')
                     .appendTo($listDiv);
 
                     $('<div>')
                     .css('display','inline-block')
                     .addClass('recordTitle')
-                    .css('margin-top','0.4em')
+                    //.css('margin-top','0.4em')
                     .html( termlist[i].text )
                     .appendTo($listDiv);
 
                     cnt++;
 
                 }//notused
+
+                //Add arrows to fields that already exist in the group
+                if(itself){
+                    var $removeButton = $('<button></button>')
+                    .addClass('btn btn-outline-primary')
+                    .attr('valueid',termlist[i].id)
+                    .click(function(){
+                        //Get the name of the value clicked to remove from group interval
+                        var clicked = $(this).attr('valueid');
+
+                        //Find checkbox with same valueid
+                        $('input[termid='+ clicked+']')
+                        .attr('checked', false)
+                        .attr('disabled', false);
+
+                        //Remove arrow button from the selected value
+                        $(this).remove();
+                    });
+
+                    $('<i class="bi bi-arrow-left"></i>')
+                    .appendTo($removeButton);
+
+                    $('#'+name+i+'ArrowPlacement')
+                    .append($removeButton);
+                }
+            }
+
+            
+            if(idx >= fields3[name].values.length && !isAdd){
+                
             }
 
             iHeight = 420;
@@ -813,9 +891,10 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
                 if(detailtype=="enum" || detailtype=="resource" || detailtype=="relationtype"){ //false &&
                     var sels = $dlg.find("input:checked")
+                    var isMulti = (sels.length > 1) ? '+' : ''
                     $.each(sels, function(i, ele){
                         fields3[name].intervals[idx].values.push( parseInt($(ele).attr('termid')) );
-                        fields3[name].intervals[idx].description = fields3[name].intervals[idx].description + $(ele).attr('termname')+' ';
+                        fields3[name].intervals[idx].description = fields3[name].intervals[idx].description + $(ele).attr('termname')+isMulti;
                         
                         /*if($(ele).attr('termid') != fields3[name].values[idx].id){
                             idxToDelete.push($(ele).attr('termid'));
@@ -860,7 +939,10 @@ function CrosstabsAnalysis(_query, _query_domain) {
             }
 
 
-            $dlg.find("#topdiv").append($('<button>').html('Apply').addClass("btn btn-success").attr('id','applyButton').click(__addeditInterval));
+            $dlg.find("#topdiv").append($('<button>').addClass("btn btn-outline-success").attr('id','applyButton').click(__addeditInterval));
+            $dlg.find("#applyButton").append('<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-right" viewBox="0 0 16 16">' 
+                + '<path fill-rule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8z"/>'
+                + '</svg>');
             $($dlg.find("#applyButton")).appendTo('#'+name+idx+'ArrowPlacement'); //Places arrow at the begining of the edited or newly added interval.
             /*$dialogbox = window.hWin.HEURIST4.msg.showElementAsDialog(
                     {element:$dlg.get(0), height: iHeight, width:320, title:"Edit interval", modal:true} ); */
@@ -1293,7 +1375,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                     var rval = records[idx][0]; //row
                     currow_val = rval;
                     //find row interval it fits
-                    row_interval_idx[0] = -1;
+                    row_interval_idx = [-1];
                     for (i in rows){
                         if( fitToInterval( fields3.row.type, rows[i].values, rval ) ){
                             //Some records may contain more than one value, this stores it in an array and generates based on this.

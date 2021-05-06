@@ -290,7 +290,7 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
         <div class="modal-dialog modal-xl">
             <div class="modal-content">
                 <div class="modal-header" id="rowIntervalHeader">
-                    <h5 id="rowHeader"></h5>
+                    <h4 id="rowHeader"></h4>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body" id="rowIntervalsBody">
@@ -304,7 +304,7 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
         <div class="modal-dialog modal-xl">
             <div class="modal-content">
                 <div class="modal-header" id="columnIntervalHeader">
-                    <h5 id="columnHeader"></h5>
+                    <h4 id="columnHeader"></h4>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body" id="columnIntervalsBody">
@@ -318,7 +318,7 @@ require_once(dirname(__FILE__) . '/../../hclient/framecontent/initPage.php');
         <div class="modal-dialog modal-xl">
             <div class="modal-content">
                 <div class="modal-header" id="pageIntervalHeader">
-                    <h5 id="pageHeader"></h5>
+                    <h4 id="pageHeader"></h4>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body" id="pageIntervalsBody">

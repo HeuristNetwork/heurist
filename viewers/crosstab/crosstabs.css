@@ -64,6 +64,7 @@ input.text, select.text {
     background:-webkit-gradient(linear, left top, left bottom, from(#FFFFFF), to(#EEEEEE));
 }
 
+/*
 div.intervalDiv:hover {
     -moz-box-shadow:0 1px 4px #000;
     -webkit-box-shadow:0 1px 4px #000;
@@ -72,6 +73,7 @@ div.intervalDiv:hover {
     background:-moz-linear-gradient(center top, #EFEFEF, #DDDDDD) repeat scroll 0 0 transparent;
     background:-webkit-gradient(linear, left top, left bottom, from(#EFEFEF), to(#DDD));
 }
+*/
 
 H2 {
     color: #6A7C99;
