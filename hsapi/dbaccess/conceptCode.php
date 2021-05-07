@@ -109,7 +109,7 @@ private static function getLocalID($conceptID, $tableName, $fieldNamePrefix) {
     
     self::initialize();
     
-    $ids = explode("-", $conceptID);
+    $ids = explode('-', $conceptID);
     $res_id = null;
     if ($ids && (count($ids) == 1 && is_numeric($ids[0])) 
             || (count($ids) == 2 && is_numeric($ids[1]) && ( (!($ids[0] > 0)) || $ids[0] == HEURIST_DBID)) ) 
