@@ -851,7 +851,20 @@ dty_TermIDTreeNonSelectableIDs
                         && this._editing && this._editing.isModified();
         this.editForm.find('#btnRecSaveAndClose_rts').css('display', 
                 (isChanged)?'block':'none');
-            
+           
+        var btnSave = $(document).find('#btnRecSave');
+        var btnClose = $(btnSave[0].parentNode).find('button:contains("Close")')[1];
+        if (isChanged){
+            btnSave.prop('disabled', true);
+            $(btnClose).prop('disabled', true);
+            $(btnClose).css('opacity', '0.35');
+        }
+        else{
+            btnSave.prop('disabled', false);
+            $(btnClose).prop('disabled', false);
+            $(btnClose).css('opacity', '');
+        }
+		   
         if(this._toolbar){
             this._toolbar.find('#btnRecPreview_rts').css('display', 
                     (isChanged)?'none':'block');
@@ -1257,9 +1270,12 @@ console.log('No active tree node!!!!')
                     });
                 }else{
                 
+                    $($('div[data-dtid='+this._currentEditID+']')[0].childNodes[1]).addClass('ui-heurist-design-fade');
+				
                     this.editForm
                         .css({'margin-left':'209px'})
-                        .removeClass('ent_content_full');
+                        .removeClass('ent_content_full ui-heurist-bg-light')
+                        .addClass('ui-heurist-design-fade');
                     
                     var ed_cont;
                     if(this.editForm.parent().hasClass('editor-container')){
@@ -1517,30 +1533,38 @@ console.log('No active tree node!!!!')
         var btnSave = $('<button>').attr('id', 'btnRecSaveAndClose_rts')
                 .button({label:window.hWin.HR('Save')})
                 .css({'font-weight':'bold','float':'right',display:'none','margin-top':'2px','margin-right':'6px'})
+                .addClass('ui-button-action')
                 .appendTo(bottom_div);
             
         this._on( btnCancel,{click: function() { 
+			$($('div[data-dtid='+this._currentEditID+']')[0].childNodes[1]).removeClass('ui-heurist-design-fade');
 
+            if(that._editing && that._editing.isModified() && that._currentEditID!=null){
+                var $dlg, buttons = {};
+                buttons['Save'] = function(){ that._saveEditAndClose(null, 'close'); $dlg.dialog('close'); }; 
+                buttons['Ignore and close'] = function(){ 
+                        that._closeFormlet(); 
+                        $dlg.dialog('close'); 
+                };
+				buttons['Cancel'] = function(){
+                    $dlg.dialog('close');
+                };
 
-                        if(that._editing && that._editing.isModified() && that._currentEditID!=null){
-                            var $dlg, buttons = {};
-                            buttons['Save'] = function(){ that._saveEditAndClose(null, 'close'); $dlg.dialog('close'); }; 
-                            buttons['Ignore and close'] = function(){ 
-                                    that._closeFormlet(); 
-                                    $dlg.dialog('close'); 
-                            };
-
-                            $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
-                                'You have made changes to the data. Click "Save" otherwise all changes will be lost.',
-                                buttons,
-                                {title:'Confirm',yes:'Save',no:'Ignore and close'},
-                                {default_palette_class:this.options.default_palette_class});
-                        }else{
-                            that._closeFormlet();
-                        }
-                }});
+                $dlg = window.hWin.HEURIST4.msg.showMsgDlg(
+					'You have made changes to the field definition. Click "Save" to save the changes.',
+					buttons,
+					{title:'Confirm',yes:'Save',no:'Drop changes',close:'Cancel'},
+					{default_palette_class:this.options.default_palette_class});
+            }else{
+                that._closeFormlet();
+            }
+		}});
                 
-        this._on( btnSave, {click: function() { that._saveEditAndClose( null, 'close' ); }});
+		this._on( btnSave, {click: function() { 
+            $($('div[data-dtid='+this._currentEditID+']')[0].childNodes[1]).removeClass('ui-heurist-design-fade');
+
+            that._saveEditAndClose( null, 'close' ); 
+		}});
         
         
         this._super();
