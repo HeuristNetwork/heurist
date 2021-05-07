@@ -440,7 +440,8 @@ function hSvsEdit(args) {
                     $dlg.find('#svs_Rules').val('');
                     $dlg.find('#svs_Rules2').val('');
                 });
-
+                
+                
                 /* this button is moved to bottom panel
                 $dlg.find("#svs_GetQuery").button({
                         label:'Get filter + rules as string',
@@ -629,13 +630,20 @@ function hSvsEdit(args) {
                 }
                 
                 
-                allFields.on("keypress",function(event){
-                    var code = (event.keyCode ? event.keyCode : event.which);
-                    if (code == 13) {
-                        window.hWin.HEURIST4.util.stopEvent(event);
-                        __doSave(true);
-                    }
-                });
+                allFields
+                    .attr('autocomplete','disabled')
+                    .attr('autocorrect','off')
+                    .attr('autocapitalize','none')
+                    .attr('spellcheck','false')
+                    .on("keypress",function(event){
+                        var code = (event.keyCode ? event.keyCode : event.which);
+                        if (code == 13) {
+                            window.hWin.HEURIST4.util.stopEvent(event);
+                            __doSave(true);
+                        }
+                    });
+                
+
                 
                 
                 edit_dialog = $dlg.dialog({

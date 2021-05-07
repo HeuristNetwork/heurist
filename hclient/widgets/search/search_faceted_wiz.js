@@ -498,10 +498,13 @@ $.widget( "heurist.search_faceted_wiz", {
                             }else{
                                 $dlg.find('#svs_Query').val(res).trigger('keyup');
                             }
-                            
-                                
-                                
                         });
+                        
+                        $dlg.find('input')                        
+                            .attr('autocomplete','disabled')
+                            .attr('autocorrect','off')
+                            .attr('autocapitalize','none')
+                            .attr('spellcheck','false');
 
                     });
                 }else{
