@@ -624,7 +624,7 @@ $.widget( "heurist.mainMenu6", {
 //23-12                ele.find('.menu-text').css('text-decoration','underline');
                 hasAction = ele.attr('data-action-popup');
                 
-                if(hasAction=='nev_msg') {
+                if(hasAction=='search_recent' || hasAction=='nev_msg') {
                     hasAction = false;   
                     return;
                 }
@@ -1274,6 +1274,7 @@ $.widget( "heurist.mainMenu6", {
             });
             this._updateDefaultAddRectype();
 
+            
             this._on(this.element.find('li[data-action-popup="nev_msg"]'),{
                 click: function(){
                     window.hWin.HEURIST4.msg.showMsgDlg('May 2021: We have removed the duplicate navigation icons which used to be here.<br />'
@@ -1287,16 +1288,22 @@ $.widget( "heurist.mainMenu6", {
 
             var exp_img = $(this.element.find('img[data-src="gs_explore_cb.png"]')[0]);
             exp_img.attr('src', window.hWin.HAPI4.baseURL+'hclient/assets/v6/' + exp_img.attr('data-src'));
-/*          05/5/21 TODO: Phasing out this section, delete if not requested by end of May 2021
+
+
             this._on(this.element.find('li[data-action-popup="search_recent"]'),{
                 click: function(){
-                    var request = window.hWin.HEURIST4.util.parseHeuristQuery( 
-                        '?w=a&q=sortby:-m after:"1 week ago"' );
-                    request.qname = 'Recent changes';
+                    var q = '?w=a&q=sortby:-m';
+                    var qname = 'All records';
+                    if(!$(event.target).attr('data-search-all')){
+                         q = q + ' after:"1 week ago"';
+                         qname = 'Recent changes';
+                    }
+                    var request = window.hWin.HEURIST4.util.parseHeuristQuery(q); 
+                    request.qname = qname;
                     window.hWin.HAPI4.SearchMgr.doSearch( this, request );
                 }
             });
-*/
+
            
             //init 
             this._switch_SvsList( 0 );
