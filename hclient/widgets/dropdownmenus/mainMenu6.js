@@ -624,7 +624,7 @@ $.widget( "heurist.mainMenu6", {
 //23-12                ele.find('.menu-text').css('text-decoration','underline');
                 hasAction = ele.attr('data-action-popup');
                 
-                if(hasAction=='search_recent') {
+                if(hasAction=='nev_msg') {
                     hasAction = false;   
                     return;
                 }
@@ -1274,19 +1274,30 @@ $.widget( "heurist.mainMenu6", {
             });
             this._updateDefaultAddRectype();
 
+            this._on(this.element.find('li[data-action-popup="nev_msg"]'),{
+                click: function(){
+                    window.hWin.HEURIST4.msg.showMsgDlg('May 2021: We have removed the duplicate navigation icons which used to be here.<br />'
+                        + 'Please use the identical functions at the top of the Explore menu and/or add them to<br />'
+                        + 'the Shortcuts bar (Design > Setup > Shortcuts bar).<br /><br />'
+                        + 'If you find that you really miss them, please email '
+                        + '<a href="mailto:support@heuristnetwork.org" style="color:blue">support@heuristnetwork.org</a> and we<br />'
+                        + 'will reinstate them as a configurable option.');
+                }
+            });
+
+            var exp_img = $(this.element.find('img[data-src="gs_explore_cb.png"]')[0]);
+            exp_img.attr('src', window.hWin.HAPI4.baseURL+'hclient/assets/v6/' + exp_img.attr('data-src'));
+/*          05/5/21 TODO: Phasing out this section, delete if not requested by end of May 2021
             this._on(this.element.find('li[data-action-popup="search_recent"]'),{
-                click: function(event){
-                    var q = '?w=a&q=sortby:-m';
-                    if(!$(event.target).attr('data-search-all')){
-                         q = q + ' after:"1 week ago"';
-                    }
-                    var request = window.hWin.HEURIST4.util.parseHeuristQuery( q );
+                click: function(){
+                    var request = window.hWin.HEURIST4.util.parseHeuristQuery( 
+                        '?w=a&q=sortby:-m after:"1 week ago"' );
                     request.qname = 'Recent changes';
                     window.hWin.HAPI4.SearchMgr.doSearch( this, request );
                 }
             });
-
-            
+*/
+           
             //init 
             this._switch_SvsList( 0 );
             //this.svs_list = this._init_SvsList(this.menues['explore'].find('#svs_list'));  
