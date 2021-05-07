@@ -1,6 +1,8 @@
 {
         "entityName": "defDetailTypes",
 
+        "entityDescription": "<h2>Important note on defining new fields</h2><br><p>If possible, find an equivalent base field. The base field should have a similar role, e.g. start date for birth date, short description for abstract,<br>extended description for notes.</p><p>The name, description, required, repeatability can be freely edited after selection, but the vocavulary or target record types are<br>shared across all record types which use the base field.</p><p>If you can't find a suitable base field, type a new name. This will create a new base field. It is a good idea to use a rather generic name<br>so you can re-use the base field and edit the name appropriately for each record type in which it is used.</p>",
+
         "tableName": "defDetailTypes",
         
         "tablePrefix": "dty",
@@ -11,7 +13,7 @@
         
         "entityTitle": "Base Field",
         "entityTitlePlural": "Base Fields",
-        "empty_remark": "<h3 style='color:red;'>Filter/s are active (see above)</h3><br />No fields in this group",
+        "empty_remark": "<h3 style='color:red;'>Filter/s are active (see above)</h3><br>No fields in this group",
         
         "fields": [
                 {
@@ -28,9 +30,9 @@
                         "dty_Role":"title",
                         "dty_Size":255,
                         "rst_DisplayName": "Field name:",
-                        "rst_DisplayHelpText": "A concise generic name used as a default for this field wherever it is used eg. 'creator' rather than 'artist' or 'author'. Fields may be reused in multiple record types. This name is normally overridden with a name specific to each record type in which it is used.", 
+                        "rst_DisplayHelpText": "A concise generic name used as a default for this field wherever it is used eg. 'creator' rather than 'artist' or 'author'. Fields may be reused in multiple record types. This name can be overridden with a name specific to each record type in which it is used.", 
                         "rst_DisplayExtendedDescription":"",
-                        "rst_DisplayWidth":60,
+                        "rst_DisplayWidth":30,
                         "rst_DefaultValue":"",
                         "rst_RequirementType":"required",
                         "rst_MaxValues":1
@@ -44,7 +46,7 @@
                         "dty_Size":255,
                         "rst_DisplayWidth":60,
                         "rst_DisplayHeight":3,
-                        "rst_DisplayHelpText": "A default generic help text which may be overridden with more specific help for each record type that uses this field type", 
+                        "rst_DisplayHelpText": "A default generic help text which may be overridden with more specific help for each record type that uses this field type<br>Max 255 characters, add line breaks with &lt;br>, bold and italics with &lt;b&gt; &lt;/b&gt; and &lt;i&gt; &lt;/i&gt;", 
                         "rst_RequirementType":"required"
                     }
                 },
@@ -57,19 +59,16 @@
                         "rst_RequirementType":"required",
                         "rst_DefaultValue":"",
                         "rst_FieldConfig":[
-                            {"key":"blocktext", "title":"Memo (multi-line)"},
-                            {"key":"boolean", "title":"Boolean (T/F)"},
-                            {"key":"date", "title":"Date / temporal"},
-                            {"key":"enum", "title":"Terms list"},
-                            {"key":"file", "title":"File"},
-                            {"key":"float", "title":"Numeric"},
+                            {"key":"enum", "title":"Dropdown (Terms)"},
+                            {"key":"float", "title":"Numeric (Integer or decimal)"},
                             {"key":"freetext", "title":"Text (single line)"},
+                            {"key":"blocktext", "title":"Text (multi-line)"},
+                            {"key":"date", "title":"Date / temporal"},
                             {"key":"geo", "title":"Geospatial"},
-                            {"key":"integer", "title":"Numeric - integer"},
-                            {"key":"relationtype", "title":"Relationship type"},
-                            {"key":"relmarker", "title":"Relationship marker"},
+                            {"key":"file", "title":"File"},
                             {"key":"resource", "title":"Record pointer"},
-                            {"key":"year", "title":"Year (no mm-dd)"}]                        
+                            {"key":"relmarker", "title":"Relationship marker"},
+                            {"key":"none", "title":"Select..."}]                        
                     }
                 },
                 {
@@ -79,7 +78,7 @@
                         "dty_Role":"virtual",
                         "rst_Class":"newFieldForRtyID",
                         "rst_DisplayName":"Requirement:",
-                        "rst_DisplayHelpText": "Define requirement type", 
+                        "rst_DisplayHelpText": "Determine whether a value must be applied or whether the field is optional or hidden", 
                         "rst_Display":"hidden",
                         "rst_DefaultValue":"optional",
                         "rst_FieldConfig":[
@@ -96,6 +95,7 @@
                         "dty_Role":"virtual",
                         "rst_Class":"newFieldForRtyID",
                         "rst_DisplayName":"Repeatability:",
+                        "rst_DisplayHelpText": "Determines whether field can contain more than one value at a time",
                         "rst_DefaultValue":"single",
                         "rst_Display":"hidden",
                         "rst_DefaultValue":"1",
@@ -198,29 +198,50 @@
                     }
                 },
                 {
-                    "groupHeader": "Additional",
-                    "groupType": "accordion",
-                    "groupHelpText":"",
-                    "groupHidden": false,
-                    "groupStyle": null,
-                    "children":[
-                
-                {
                     "dtID": "dty_SemanticReferenceURL",
                     "dtFields":{
                         "dty_Type":"freetext",
                         "dty_Size":255,
                         "rst_DisplayWidth":80,
                         "rst_DisplayName": "Semantic/Reference URI:",
-                        "rst_DisplayHelpText": "URI to a full description or ontological reference definition of the base field" 
+                        "rst_DisplayHelpText": "URI to a full description or ontological reference definition of the base field (optional)" 
                     }
                 },
+                {  "dtID": "dty_OriginatingDBID",
+                    "dtFields":{
+                        "dty_Type":"integer",
+                        "rst_Display":"hidden"
+                    }
+                },
+                {  "dtID": "dty_IDInOriginatingDB",
+                    "dtFields":{
+                        "dty_Type":"integer",
+                        "rst_Display":"hidden",
+                        "rst_DefaultValue":0                   }
+                },
+                {
+                    "dtID": "dty_ID",
+                    "keyField": true,
+                    "dtFields":{
+                        "dty_Type":"integer",
+                        "dty_Role":"primary",
+                        "rst_DisplayName": "Internal / Concept ID:",
+                        "rst_Display":"readonly"
+                    }
+                },
+                {
+                    "groupHeader": "Additional",
+                    "groupType": "accordion",
+                    "groupHelpText":"",
+                    "groupHidden": false,
+                    "groupStyle": null,
+                    "children":[
                 {
                     "dtID": "dty_ExtendedDescription",
                     "dtFields":{
                         "dty_Type":"blocktext",
                         "dty_Size":5000,
-                        "rst_DisplayWidth":60,
+                        "rst_DisplayWidth":80,
                         "rst_DisplayName":"Extended description:",
                         "rst_DisplayHelpText": "An extended description of the content of this field type and references to any standards used"
                     }
@@ -273,8 +294,7 @@
                         "rst_DefaultValue":"1",
                         "rst_RequirementType":"optional",
                         "rst_MaxValues":1,
-                        "rst_FieldConfig":["1","0"],
-                        "rst_Display":"hidden"
+                        "rst_FieldConfig":["1","0"]
                     }
                 },
                 {  "dtID": "dty_LocallyModified",
@@ -282,28 +302,6 @@
                         "dty_Type":"integer",
                         "rst_Display":"hidden",
                         "rst_DefaultValue":"0"
-                    }
-                },
-                {  "dtID": "dty_OriginatingDBID",
-                    "dtFields":{
-                        "dty_Type":"integer",
-                        "rst_Display":"hidden"
-                    }
-                },
-                {  "dtID": "dty_IDInOriginatingDB",
-                    "dtFields":{
-                        "dty_Type":"integer",
-                        "rst_Display":"hidden",
-                        "rst_DefaultValue":0                   }
-                },
-                {
-                    "dtID": "dty_ID",
-                    "keyField": true,
-                    "dtFields":{
-                        "dty_Type":"integer",
-                        "dty_Role":"primary",
-                        "rst_DisplayName": "ID:",
-                        "rst_Display":"readonly"
                     }
                 }
                 ]}                
