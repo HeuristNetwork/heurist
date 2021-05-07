@@ -671,6 +671,59 @@ $.widget( "heurist.manageDefDetailTypes", $.heurist.manageEntity, {
                                     +$Db.getConceptID('dty',this._currentEditID, true));
         }
 
+        var name_field = this._editing.getInputs('dty_Name');	// Base Field Name input
+        if(window.hWin.HEURIST4.util.isArrayNotEmpty(name_field)){	
+
+            if(this._currentEditID<=0){	// Check that a new field is being defined
+                var ele = $('<select></select>');
+                var lbl = $('<label style="margin-left:5px"> or Enter a new name: </label>');
+                name_field = $($($(name_field[0])[0])[0]);
+
+                window.hWin.HEURIST4.ui.createRectypeDetailSelect(ele[0], this._currentEditID, null, null); // populate select
+                ele.prepend("<option value='' selected disable>Choose a base field</option>"); // add flavor
+
+                var rty_ID = this.options.newFieldForRtyID; // current record type being edited
+
+                // list of fields that are already in record type
+                var formRec = $Db.rst(rty_ID);
+                if(!window.hWin.HEURIST4.util.isRecordSet(formRec)){
+                    formRec = null;
+                }
+                
+                if(formRec){
+                    $(ele.find('option')).each(function(){  // Disable fields already added to form
+                        if(formRec.getById($(this).val())){
+                            $(this).attr('disabled', true);
+                        }
+                    });
+                }
+
+                name_field.before(ele);// Insert Select
+                ele.after(lbl);// Insert label before name input
+
+                // Selector onchange handler, selected a pre-defined base field
+                ele.on('change', function(event){
+                    var ele = $(event.target);
+                    var _dty_ID = ele.val();
+
+                    if(_dty_ID>0){
+                        window.hWin.HEURIST4.util.stopEvent(event);
+
+                        var rst_fields = {
+                            rst_RequirementType: that._editing.getValue('rst_RequirementType')[0], 
+                            rst_MaxValues: that._editing.getValue('rst_MaxValues')[0], 
+                            rst_DisplayWidth: that._editing.getValue('rst_DisplayWidth')[0] 
+                        };
+
+                        that._trigger( "onselect", null, {selection: [_dty_ID], rst_fields:rst_fields });
+                        that.closeDialog( true ); //force without warning
+                    }
+                    console.log('manageDefDetailTypes, id => ' + _dty_ID);
+                    return;
+                });
+            }
+        }
+
         //fill init values of virtual fields
         //add lister for dty_Type field to show hide these fields
         var elements = this._editing.getInputs('dty_Type');

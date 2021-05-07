@@ -1250,8 +1250,9 @@ $.widget( "heurist.manageDefTerms", $.heurist.manageEntity, {
 
         ele = this._editing.getFieldByName('trm_ID');
         if(this._currentEditID>0){
+			var conceptID = $Db.getConceptID('trm',this._currentEditID);
             ele.find('div.input-div').html(this._currentEditID+'&nbsp;&nbsp;( '
-                +$Db.getConceptID('trm',this._currentEditID)+' )');
+                +(!window.hWin.HEURIST4.util.isnull(conceptID) ? conceptID : "Concept ID is not defined")+' )');
             //$('<span>&nbsp;&nbsp;('+this._getField('trm_OriginatingDBID')+'-'+this._getField('trm_IDInOriginatingDB')+')</span>') 
         }else{
             ele.hide();   

@@ -197,10 +197,16 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
             }
         });
 
-        this._on( this.element.find('input[type=checkbox]'), {
+        this._on( this.element.find('input[type=radio]'), {
             change: function(event){
                 this.startSearch();
         }});
+		
+        // User Preference for filter buttons
+        var filter_pref = window.hWin.HAPI4.get_prefs_def('rSearch_filter', 'rb_alphabet');
+        if (filter_pref != 'rb_alphabet'){
+            this.element.find('#'+filter_pref).prop('checked', true);
+        }
 
         if(this.options.parententity>0){
             this.element.find('#row_parententity_helper').css({'display':'table-row'});
@@ -293,7 +299,7 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
         }        
 
         //by ids of recently selected
-        if(this.element.find('#cb_selected').is(':checked')){
+        if(this.element.find('#rb_selected').is(':checked')){
             var previously_selected_ids = window.hWin.HAPI4.get_prefs('recent_Records');
             if (previously_selected_ids && 
                 window.hWin.HEURIST4.util.isArrayNotEmpty(previously_selected_ids.split(',')))
@@ -301,6 +307,8 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
                 qstr = qstr + ' ids:' + previously_selected_ids;
                 qobj.push({"ids":previously_selected_ids});
             }
+
+            window.hWin.HAPI4.save_pref('rSearch_filter', 'rb_selected');
         }
 
         //exclude already children
@@ -316,16 +324,22 @@ $.widget( "heurist.searchRecords", $.heurist.searchEntity, {
         var limit = 100000;
         var needall = 1
         
-        if(this.element.find('#cb_modified').is(':checked')){
+        if(this.element.find('#rb_modified').is(':checked')){
             qstr = qstr + ' sortby:-m after:"1 week ago"';
             qobj.push({"sortby":"-m"}); // after:\"1 week ago\"
             limit = 100;
             needall = 0;
+
+            window.hWin.HAPI4.save_pref('rSearch_filter', 'rb_modified');
         }else{
             qstr = 'sortby:t';
             qobj.push({"sortby":"t"}); //sort by record title
         }
-        
+
+        if(this.element.find('#rb_alphabet').is(':checked')){
+            window.hWin.HAPI4.save_pref('rSearch_filter', 'rb_alphabet');
+        }
+		
         if(this.element.find('#cb_bookmarked').is(':checked')){
             domain = 'b';
         }       
