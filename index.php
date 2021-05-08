@@ -261,6 +261,11 @@ $(document).on('focusin', function(e) {
      echo 'window.hWin.HAPI4.sysinfo.db_workset_count = '.$db_workset_count.';';
 ?>
                 
+                var lt = window.hWin.HAPI4.sysinfo['layout'];
+                if(lt=='DigitalHarlem' || lt=='DigitalHarlem1935'){
+                    $('#layout_panes').css({'height':'100%'});
+                }
+                
                 //
                 // init layout
                 //
@@ -391,6 +396,7 @@ _time_debug = new Date().getTime() / 1000;
                         }
                         
                         $('body').css({'overflow':'hidden'});   
+                        
                 }
                 
                 
