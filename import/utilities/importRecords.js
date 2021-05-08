@@ -538,6 +538,10 @@ function hImportRecords(_max_upload_size) {
                         }     
                         
                         $('#spanRecCount2').html(sMsg);
+                        
+                        //refresh local defintions
+                        window.hWin.HAPI4.EntityMgr.refreshEntityData('trm');
+                        
                         //window.hWin.HEURIST4.msg.showMsgDlg('Imported '+response.data+' records');
                     }else{
                         _hideProgress(2);
