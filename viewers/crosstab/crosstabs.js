@@ -628,6 +628,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 .append('<i class="bi bi-pencil"></i>')
                 //css({'background-image': 'url('+window.hWin.HAPI4.baseURL+'common/images/edit_pencil_9x11.gif)'})
                 .click(function( event ) {
+                    renderIntervals(name); //Refresh intervals to remove existing arrows and create a clean display.
                     editInterval( name,  $(this).attr('intid'), false);
                 })
                 .appendTo($bodyDiv);
@@ -651,6 +652,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
         $addIntervalBtn = $('<button>',{class: "btn btn-success w-100"})
             //.button({icons: {primary: "ui-icon-plus"}} )
             .click(function( event ) {
+                renderIntervals(name); //Refresh intervals to remove existing arrows and create a clean display.
                 editInterval( name, -1, true);
             })
             .html('<i class="bi bi-plus"></i> Add Interval')
@@ -684,7 +686,6 @@ function CrosstabsAnalysis(_query, _query_domain) {
     function editInterval( name, idx, isAdd ){
 
         var $editedRow = $('#'+name+idx);
-        var currentlyEditing;
 
         if(isAdd){
             var $newInterval = $(document.createElement('div'))
@@ -708,18 +709,20 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
             $('#addInterval').attr('disabled', true);
         }
-
-        //Toggle edit background colour for the interval that is being used.
-        for(e=0;e<fields3[name].intervals.length;e++){
-            if(e == idx){
-                $editedRow.toggleClass("intervalDiv", false);
-                $editedRow.toggleClass("bg-warning", true);
-            }
-            else{
-                $editedRow.toggleClass("intervalDiv", true);
-                $('#'+name+e).toggleClass("bg-warning", false);
+        else{
+            //Toggle edit background colour for the interval that is being used.
+            for(e=0;e<fields3[name].intervals.length;e++){
+                if(e == idx){
+                    $editedRow.toggleClass("intervalDiv", false);
+                    $editedRow.toggleClass("bg-warning", true);
+                }
+                else{
+                    $('#'+name+e).toggleClass("intervalDiv", true);
+                    $('#'+name+e).toggleClass("bg-warning", false);
+                }
             }
         }
+        
         //var $dialogbox;
         var modalEditBox = $('#leftColDiv'+name);
         var $rowDiv;
@@ -730,7 +733,6 @@ function CrosstabsAnalysis(_query, _query_domain) {
         if($dlg.length==0){
             $dlg = $('<div>')
             .attr('id','terms-dialog')
-            .css('overflow-y', 'auto')
             .appendTo('body');
         }
         $dlg.empty()
@@ -755,7 +757,35 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
         if ( detailtype=="enum" || detailtype=="resource" || detailtype=="relationtype")
         {
+            //Creates select all checkbox
+            $intdiv = $(document.createElement('div'))
+            .addClass('row p-1')
+            .appendTo($dlg);
 
+            $listDiv = $(document.createElement('div'))
+            .addClass('col-md-1 d-flex align-items-center')
+            .appendTo($intdiv);
+
+            $('<input>')
+            .attr('type','checkbox')
+            .attr('checked', false)
+            .attr('id','selectAll')
+            .addClass('recordIcons')
+            .click(function(){
+                //Unchecks selectall checkbox if a value is unchecked.
+                var checked = this.checked;
+                $('input[name="'+name+'Options"]').each(function(){
+                    this.checked = checked;
+                });
+            })
+            .appendTo($listDiv);
+
+            $('<div>')
+            .addClass('recordTitle col-md p-1')
+            .html('Select All')
+            .appendTo($intdiv);
+
+            //Creates value checkboxes
             var i, j,
             termlist = fields3[name].values; //all terms or pointers
             for(i=0; i<termlist.length; i++)
@@ -787,13 +817,12 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 if(notused){
 
                     $intdiv = $(document.createElement('div'))
-                    .addClass('intervalDiv list row')
-                    .css({'padding':'0.2em'})
+                    .addClass('intervalDiv list p-1 row')
                     .attr('intid', idx )
                     .appendTo($dlg);
 
                     $listDiv = $(document.createElement('div'))
-                    .addClass('col-12')
+                    .addClass('col-md-1 d-flex align-items-center')
                     .appendTo($intdiv);
 
                     $('<input>')
@@ -803,15 +832,21 @@ function CrosstabsAnalysis(_query, _query_domain) {
                     .addClass('recordIcons')
                     .attr('termid',termlist[i].id)
                     .attr('termname',termlist[i].text)
+                    .attr('name', name+'Options')
+                    .click(function(){
+                        //If select all is chosen and user deselects a value, select all checkbox will be unchecked.
+                        if(($('input[id=selectAll]').prop('checked') == true) && ($(this).prop('checked') == false)){
+                            $('input[id=selectAll]').attr('checked', false);
+                        }
+                    })
                     //.css('margin','0.4em')
                     .appendTo($listDiv);
 
                     $('<div>')
-                    .css('display','inline-block')
-                    .addClass('recordTitle')
+                    .addClass('recordTitle col-md p-1')
                     //.css('margin-top','0.4em')
                     .html( termlist[i].text )
-                    .appendTo($listDiv);
+                    .appendTo($intdiv);
 
                     cnt++;
 
@@ -841,11 +876,6 @@ function CrosstabsAnalysis(_query, _query_domain) {
                     $('#'+name+i+'ArrowPlacement')
                     .append($removeButton);
                 }
-            }
-
-            
-            if(idx >= fields3[name].values.length && !isAdd){
-                
             }
 
             iHeight = 420;
@@ -890,7 +920,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
                 fields3[name].intervals[idx].name = "newInterval";
 
                 if(detailtype=="enum" || detailtype=="resource" || detailtype=="relationtype"){ //false &&
-                    var sels = $dlg.find("input:checked")
+                    var sels = $dlg.find('input[name='+name+'Options]:checked')
                     var isMulti = (sels.length > 1) ? '+' : ''
                     $.each(sels, function(i, ele){
                         fields3[name].intervals[idx].values.push( parseInt($(ele).attr('termid')) );

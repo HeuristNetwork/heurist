@@ -108,11 +108,12 @@ div .selected, div .selected:hover{
 
 .intervalDiv .recordTitle {
     color: #666666;
-    position: absolute;
+    /* position: absolute;
     text-align: left;
     overflow: hidden;
 
     line-height: 12px;
+    */
 }
 
 /* LIST VIEW */
