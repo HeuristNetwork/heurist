@@ -467,7 +467,7 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
         if(fields3[name].values && fields3[name].values.length>0)
         {
-            $('#'+name+'Header').text('Edit '+ name +' intervals');
+            $('#'+name+'Header').text('Assign intervals for: ' + fields3[name].fieldname.toUpperCase());
 
             //Creates entire element in modal
             $intdiv = $(document.createElement('div'))
@@ -744,16 +744,19 @@ function CrosstabsAnalysis(_query, _query_domain) {
         .addClass('row')
         .appendTo($dlg);
 
-        
-        $('<div id="topdiv" class="col-12">'/*Label:<input id="intname" value="'+intname+'">*/+'</div>')
+        //Heading for left col values
+        $('<div id="topdiv" class="col-6">'/*Label:<input id="intname" value="'+intname+'">*/+'</div>')
         //.addClass('intervalDiv list')
-        .css({'margin-bottom':'1rem'})
+        .append('<h5>Available Values</h5>')
+        .appendTo($rowDiv);
+
+        $('<div class="col-6">')
+        .append('<p>Select and assign to new intervals</p>')
         .appendTo($rowDiv);
 
         var iHeight = 220;
         var detailtype = fields3[name].type;
         var cnt=0;
-
 
         if ( detailtype=="enum" || detailtype=="resource" || detailtype=="relationtype")
         {
@@ -771,10 +774,11 @@ function CrosstabsAnalysis(_query, _query_domain) {
             .attr('checked', false)
             .attr('id','selectAll')
             .addClass('recordIcons')
-            .click(function(){
+            .change(function(){
                 //Unchecks selectall checkbox if a value is unchecked.
                 var checked = this.checked;
-                $('input[name="'+name+'Options"]').each(function(){
+                //selects checkbox which are not disabled in edit mode
+                $('input[name="'+name+'Options"]:not(:disabled)').each(function(){
                     this.checked = checked;
                 });
             })
@@ -833,10 +837,14 @@ function CrosstabsAnalysis(_query, _query_domain) {
                     .attr('termid',termlist[i].id)
                     .attr('termname',termlist[i].text)
                     .attr('name', name+'Options')
-                    .click(function(){
+                    .change(function(){
                         //If select all is chosen and user deselects a value, select all checkbox will be unchecked.
                         if(($('input[id=selectAll]').prop('checked') == true) && ($(this).prop('checked') == false)){
-                            $('input[id=selectAll]').attr('checked', false);
+                            $('input[id=selectAll]').prop('checked', false);
+                        }
+                        
+                        if($('input[name='+name+'Options]:checked').length == fields3[name].values.length){
+                            $('input[id=selectAll]').prop('checked', true);
                         }
                     })
                     //.css('margin','0.4em')
@@ -863,8 +871,13 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
                         //Find checkbox with same valueid
                         $('input[termid='+ clicked+']')
-                        .attr('checked', false)
+                        .prop('checked', false)
                         .attr('disabled', false);
+
+                        if($('input[name='+name+'Options]:checked').length != fields3[name].values.length){
+                            $('#selectAll').prop('checked', false)
+                            .attr('disabled',false);
+                        }
 
                         //Remove arrow button from the selected value
                         $(this).remove();
@@ -875,6 +888,13 @@ function CrosstabsAnalysis(_query, _query_domain) {
 
                     $('#'+name+i+'ArrowPlacement')
                     .append($removeButton);
+                }
+            }
+
+            if(!isAdd){
+                if($('input[name='+name+'Options]:checked').length == fields3[name].values.length){
+                    $('#selectAll').prop('checked', true)
+                    .attr('disabled',true);
                 }
             }
 
