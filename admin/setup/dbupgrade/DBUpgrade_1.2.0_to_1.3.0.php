@@ -24,8 +24,7 @@ function updateDatabseTo_v3($system, $dbname=null){
         $report = array();
         
         //create new tables
-        $value = mysql__select_value($mysqli, "SHOW TABLES LIKE 'usrRecPermissions'");
-        if($value==null || $value==""){        
+        if(!hasTable($mysqli, 'usrRecPermissions')){        
         
             $query = 'CREATE TABLE IF NOT EXISTS `usrRecPermissions` ('
                   ."`rcp_ID` int(10) unsigned NOT NULL auto_increment COMMENT 'Primary table key',"
@@ -48,8 +47,7 @@ function updateDatabseTo_v3($system, $dbname=null){
         }
 
         //create new tables
-        $value = mysql__select_value($mysqli, "SHOW TABLES LIKE 'sysDashboard'");
-        if($value==null || $value==""){        
+        if(!hasTable($mysqli, 'sysDashboard')){        
             
 $query = 'CREATE TABLE sysDashboard ('
   .'dsh_ID tinyint(3) unsigned NOT NULL auto_increment,'
@@ -74,8 +72,7 @@ $query = 'CREATE TABLE sysDashboard ('
         }
         
         //create new tables
-        $value = mysql__select_value($mysqli, "SHOW TABLES LIKE 'usrWorkingSubsets'");
-        if($value==null || $value==""){        
+        if(!hasTable($mysqli, 'usrWorkingSubsets')){        
             
 $query = 'CREATE TABLE usrWorkingSubsets ( '
   ."wss_ID mediumint(8) unsigned NOT NULL auto_increment COMMENT 'Unique ID for the working subsets table',"
@@ -97,8 +94,7 @@ $query = 'CREATE TABLE usrWorkingSubsets ( '
         }
         
         
-        $value = mysql__select_value($mysqli, "SHOW TABLES LIKE 'defVocabularyGroups'");
-        if($value==null || $value==""){        
+        if(!hasTable($mysqli, 'defVocabularyGroups')){        
         
 $query = "CREATE TABLE defVocabularyGroups (
   vcg_ID tinyint(3) unsigned NOT NULL auto_increment COMMENT 'Vocabulary group ID referenced in vocabs editor',
@@ -134,8 +130,7 @@ $query = "CREATE TABLE defVocabularyGroups (
     
         //--------------------------- FIELDS -----------------------------------
 
-        $query = "SHOW COLUMNS FROM `sysIdentification` LIKE 'sys_TreatAsPlaceRefForMapping'";
-        if(!hasColumn($mysqli, $query)){ //column not defined
+        if(!hasColumn($mysqli, 'sysIdentification', 'sys_TreatAsPlaceRefForMapping')){ //column not defined
             $query = "ALTER TABLE `sysIdentification` ADD COLUMN `sys_TreatAsPlaceRefForMapping` VARCHAR(1000) DEFAULT '' COMMENT 'Comma delimited list of additional rectypes (local codes) to be considered as Places'";
             $res = $mysqli->query($query);
             $report[] = 'sysIdentification: sys_TreatAsPlaceRefForMapping added';
@@ -143,8 +138,7 @@ $query = "CREATE TABLE defVocabularyGroups (
             $report[] = 'sysIdentification: sys_TreatAsPlaceRefForMapping already exists';
         }
     
-        $query = "SHOW COLUMNS FROM `sysIdentification` LIKE 'sys_ExternalReferenceLookups'";
-        if(!hasColumn($mysqli, $query)){ //column not defined
+        if(!hasColumn($mysqli, 'sysIdentification', 'sys_ExternalReferenceLookups')){ //column not defined
             $query = "ALTER TABLE `sysIdentification` ADD COLUMN `sys_ExternalReferenceLookups` TEXT default NULL COMMENT 'Record type-function-field specifications for lookup to external reference sources such as GeoNames'";
             $res = $mysqli->query($query);
             $report[] = 'sysIdentification: sys_ExternalReferenceLookups added';
@@ -154,8 +148,7 @@ $query = "CREATE TABLE defVocabularyGroups (
     
     
         //verify that required column exists in sysUGrps
-        $query = "SHOW COLUMNS FROM `sysUGrps` LIKE 'ugr_NavigationTree'";
-        $is_exists = hasColumn($mysqli, $query);
+        $is_exists = hasColumn($mysqli, 'sysUGrps', 'ugr_NavigationTree');
         
         //alter table
         $query = "ALTER TABLE `sysUGrps` ".($is_exists?'MODIFY':'ADD')
@@ -169,8 +162,7 @@ $query = "CREATE TABLE defVocabularyGroups (
         $report[] = 'sysUGrps: ugr_NavigationTree '.($is_exists?'modified':'added');
 
         //----------------------------        
-        $query = "SHOW COLUMNS FROM `sysUGrps` LIKE 'ugr_Preferences'";
-        $is_exists = hasColumn($mysqli, $query);
+        $is_exists = hasColumn($mysqli, 'sysUGrps', 'ugr_Preferences');
         
         $query = "ALTER TABLE `sysUGrps` ".($is_exists?'MODIFY':'ADD')
                 ." `ugr_Preferences` mediumtext COMMENT 'JSON array with user preferences'";
@@ -183,9 +175,7 @@ $query = "CREATE TABLE defVocabularyGroups (
         
         
         //----------------------------        
-        $query = "SHOW COLUMNS FROM `usrBookmarks` LIKE 'bkm_Notes'";
-        
-        if(hasColumn($mysqli, $query)){
+        if(hasColumn($mysqli, 'usrBookmarks', 'bkm_Notes')){
             $report[] = 'usrBookmarks: bkm_Notes already exists';
         }else{
             //alter table
@@ -199,8 +189,7 @@ $query = "CREATE TABLE defVocabularyGroups (
         }    
         
         //----------------------------        
-        $query = "SHOW COLUMNS FROM `defRecStructure` LIKE 'rst_DefaultValue'";
-        $is_exists = hasColumn($mysqli, $query);
+        $is_exists = hasColumn($mysqli, 'defRecStructure', 'rst_DefaultValue');
         
         $query = "ALTER TABLE `defRecStructure` ".($is_exists?'MODIFY':'ADD')
                 ." `rst_DefaultValue` text COMMENT 'The default value for this detail type for this record type'";
@@ -213,9 +202,7 @@ $query = "CREATE TABLE defVocabularyGroups (
         
         //----------------------------        
         
-        $query = "SHOW COLUMNS FROM `defTerms` LIKE 'trm_SemanticReferenceURL'";
-        
-        if(hasColumn($mysqli, $query)){
+        if(hasColumn($mysqli, 'defTerms', 'trm_SemanticReferenceURL')){
             $report[] = 'defTerms: trm_SemanticReferenceURL already exists';
         }else{
             //alter table
@@ -232,8 +219,7 @@ $query = "CREATE TABLE defVocabularyGroups (
         
         //----------------------------        
         
-        $query = "SHOW COLUMNS FROM `defTerms` LIKE 'trm_VocabularyGroupID'";
-        if(hasColumn($mysqli, $query)){
+        if(hasColumn($mysqli, 'defTerms', 'trm_VocabularyGroupID')){
             $report[] = 'defTerms: trm_VocabularyGroupID already exists';
         }else{
         
@@ -286,8 +272,7 @@ $query = "CREATE TABLE defVocabularyGroups (
         }
         
         //-----------------------------
-        $value = mysql__select_value($mysqli, "SHOW TABLES LIKE 'defTermsLinks'");
-        $needCreateTermsLinks = ($value==null || $value=="");
+        $needCreateTermsLinks = !hasTable($mysqli, 'defTermsLinks');
         if($needCreateTermsLinks){        
             
 $query = "CREATE TABLE defTermsLinks (
@@ -345,8 +330,7 @@ $query = "CREATE TABLE defTermsLinks (
             $report = array_merge($report, $res);
         }
         
-        $value = mysql__select_value($mysqli, "SHOW TABLES LIKE 'sysTableLastUpdated'");
-        if($value)
+        if(hasTable($mysqli, 'sysTableLastUpdated'))
         {        
             $mysqli->query('DROP TRIGGER IF EXISTS sysUGrps_last_insert');
             $mysqli->query('DROP TRIGGER IF EXISTS sysUGrps_last_update');
@@ -422,19 +406,6 @@ $query = 'INSERT INTO defDetailTypeGroups (dtg_Name,dtg_Order,dtg_Description) '
         
    
         return $report;
-}
-
-//
-//
-//
-function hasColumn($mysqli, $query){
-    $res = $mysqli->query($query);
-    $row_cnt = 0;
-    if($res) {
-        $row_cnt = $res->num_rows; 
-        $res->close();
-    }
-    return ($row_cnt>0);
 }
 
 //

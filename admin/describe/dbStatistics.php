@@ -79,6 +79,8 @@ function mysql__select_val($query) {
 */
 function dirsize($dir)
 {
+    global $mysqli;
+    
     @$dh = opendir($dir);
     $size = 0;
     while ($file = @readdir($dh))
@@ -115,9 +117,8 @@ $i = 0;
 foreach ($dbs as $db){
 
     //ID  Records     Files(MB)    RecTypes     Fields    Terms     Groups    Users   Version   DB     Files     Modified    Access    Owner   Deleteable
-//error_log(substr($db, 4));        
-    $value = mysql__select_value($mysqli, 'SHOW TABLES FROM '.$db." LIKE 'sysIdentification'");
-    if ($value==null || $value=="") continue;
+//error_log(substr($db, 4)); 
+    if(!hasTable($mysqli, 'sysIdentification',$db)) return;
 
     $record_row = array (substr($db, 4),
     mysql__select_val("select cast(sys_dbRegisteredID as CHAR) from ".$db.".sysIdentification where 1"),

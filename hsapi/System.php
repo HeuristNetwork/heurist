@@ -891,8 +891,7 @@ error_log(print_r($_REQUEST, true));
         if($total_not_in_cache==null || $total_not_in_cache>0){
 */            
             
-        $value = mysql__select_value($this->mysqli, "SHOW TABLES LIKE 'recLinks'");
-        if($value==null || $value==""){
+        if(!hasTable($mysqli, 'recLinks')){
                 //recreate cache
                 include(dirname(__FILE__).'/utilities/utils_db_load_script.php'); // used to execute SQL script
 
