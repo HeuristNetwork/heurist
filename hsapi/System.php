@@ -316,7 +316,11 @@ error_log(print_r($_REQUEST, true));
             $res = $this->mysqli->query('select rty_ID as localID,
             rty_OriginatingDBID as dbID, rty_IDInOriginatingDB as id from defRecTypes order by dbID');
             if (!$res) {
-                echo "Unable to build internal record-type lookup table. Please ".CONTACT_SYSADMIN." for assistance. MySQL error: " . mysql_error();
+                $this->addError(HEURIST_DB_ERROR, 'Unable to build internal record-type lookup table', $this->mysqli->error);
+                
+                echo "Unable to build internal record-type lookup table. Please "
+                    . CONTACT_SYSADMIN." for assistance. MySQL error: " 
+                    . $this->mysqli->error;
                 exit();
             }
             
@@ -891,7 +895,7 @@ error_log(print_r($_REQUEST, true));
         if($total_not_in_cache==null || $total_not_in_cache>0){
 */            
             
-        if(!hasTable($mysqli, 'recLinks')){
+        if(!hasTable($this->mysqli, 'recLinks')){
                 //recreate cache
                 include(dirname(__FILE__).'/utilities/utils_db_load_script.php'); // used to execute SQL script
 

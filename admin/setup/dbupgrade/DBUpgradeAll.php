@@ -32,6 +32,8 @@ define('OWNER_REQUIRED',1);
 define('PDIR','../../../');  //need for proper path to js and css    
 
 require_once(dirname(__FILE__).'/../../../hclient/framecontent/initPageMin.php');
+require_once(dirname(__FILE__).'/../../../admin/setup/dbupgrade/DBUpgrade.php');
+
 
 print '<div style="font-family:Arial,Helvetica;font-size:12px">';
 
@@ -54,6 +56,7 @@ $mysqli = $system->get_mysqli();
     $db_undef = array(); //it seems this is not heurist db
 
     $db = array();
+    $cnt = 0;
     
     foreach ($databases as $idx=>$db_name){
 
@@ -74,16 +77,30 @@ $mysqli = $system->get_mysqli();
                 array_push($db[$ver], $db_name);    
             }
             
-            //is defTermLinks exist
-            if(!hasTable($mysqli, 'defTermsLinks',$db_name)){
-                //array_push($db2_with_links,$db_name);    
+            $res = doUpgradeDatabase($system, $db_name, 1, 3, false);
+            if(!$res){
+                                    
+                $error = $system->getError();
+                if($error){
+                    print '<p style="color:red">'
+                        .$error['message']
+                        .'<br>'.@$error['sysmsg'].'</p>';
+                }else{
+                    print '<p style="color:red">Unknown error.</p>';
+                }
+                break;
             }
+            
+            $cnt++;
+            //if($cnt>2) break;
             
         }else{
             //check that v1.3 has 
-            hasTable($mysqli, 'usrRecPermissions', $db_name);
-            hasTable($mysqli, 'sysDashboard', $db_name);
+            //hasTable($mysqli, 'usrRecPermissions', $db_name);
+            //hasTable($mysqli, 'sysDashboard', $db_name);
         }
+        
+        
     }//while  databases
     
     
@@ -95,7 +112,7 @@ $mysqli = $system->get_mysqli();
     }
     if(count($db)>0){
         foreach ($db as $ver => $dbs){
-           print '<p>List of databases with v 1.'.$ver.'</p>';
+           print '<p>List of databases with v 1.'.$ver.'   Cnt: '.count($dbs).'</p>';
            foreach ($dbs as $db_name){
                 print $db_name.'<br>';
            }
@@ -103,5 +120,4 @@ $mysqli = $system->get_mysqli();
     }
     
     print '[end report]</div>';
-    
 ?>

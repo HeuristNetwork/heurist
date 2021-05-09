@@ -1144,11 +1144,13 @@ error_log('UPDATED '.$session_id.'  '.$value);
     */
     function hasTable($mysqli, $table_name, $db_name=null){
         
-            if($db_name==null){
-                $db_name = HEURIST_DBNAME_FULL;
+            $query = '';
+            if($db_name!=null){
+                //$db_name = HEURIST_DBNAME_FULL;
+                $query = 'FROM '.$db_name;
             }
     
-            $value = mysql__select_value($mysqli, "SHOW TABLES FROM $db_name LIKE '$table_name'");
+            $value = mysql__select_value($mysqli, "SHOW TABLES $query LIKE '$table_name'");
             $not_exist = ($value==null || $value=='');
         
             return !$not_exist;        
@@ -1165,10 +1167,13 @@ error_log('UPDATED '.$session_id.'  '.$value);
     function hasColumn($mysqli, $table_name, $column_name, $db_name=null){
 
         if($db_name==null){
-            $db_name = HEURIST_DBNAME_FULL;
+            //$db_name = HEURIST_DBNAME_FULL;
+            $db_name = ''; //$query = ;
+        }else{
+            $db_name = "`$db_name`.";
         }
     
-        $query = "SHOW COLUMNS FROM `$db_name`.`$table_name` LIKE '$column_name'";
+        $query = "SHOW COLUMNS FROM $db_name`$table_name` LIKE '$column_name'";
         
         $res = $mysqli->query($query);
         $row_cnt = 0;
