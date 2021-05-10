@@ -405,7 +405,7 @@ function smarty_output_filter_strip_js($tpl_source, Smarty_Internal_Template $te
     
     global $is_jsallowed;
     
-    if($is_jsallowed){
+    if($is_jsallowed || true){
         
         return $tpl_source;
         
@@ -415,6 +415,13 @@ function smarty_output_filter_strip_js($tpl_source, Smarty_Internal_Template $te
         $config->set('Cache', 'SerializerPath', HEURIST_SCRATCHSPACE_DIR);
         $config->set('CSS.Trusted', true);
         $config->set('Attr.AllowedFrameTargets','_blank');
+        
+        //$config->set('HTML.Allowed','audio');
+        $config->set('HTML.SafeIframe', true);
+        //allow YouTube, Soundlcoud and Vimeo     
+        // https://w.soundcloud.com/player/
+           
+        $config->set('URI.SafeIframeRegexp', '%^(https?:)?//(www\.youtube(?:-nocookie)?\.com/embed/|player\.vimeo\.com/video/|w\.soundcloud\.com/player/)%'); 
         //$config->set('HTML.Trusted', true);
         //$config->set('Filter.ExtractStyleBlocks', true);
         $purifier = new HTMLPurifier($config);
@@ -751,47 +758,13 @@ function smarty_function_wrap($params, &$smarty)
                 }else{ //player is default
 
 
+                
                     $mimeType = $fileinfo['fxm_MimeType'];  //fxm_MimeType
-                    $params = $fileinfo['ulf_Parameters'];  //ulf_Parameters - not used anymore (for backward capability only)
+                    //$params = $fileinfo['ulf_Parameters'];  //ulf_Parameters - not used anymore (for backward capability only)
                     
                     //$sres = $sres.getPlayerTag($value['nonce'], $value['mimeType'], $value['URL'], $size);
                     $sres = $sres.fileGetPlayerTag($file_nonce, $mimeType, $params, $external_url, $size, $style); //see db_files
                     
-                    /*
-                    if($type_media == 'image'){
-                        $sres = $sres."<img src='".$value['URL']."' ".$size." title='".$value['description']."'/>"; //.$value['origName'];
-                    }else if($value['remoteSource']=='youtube' || $value['mimeType'] == 'video/youtube' || $value['ext'] == 'youtube'){
-                     //video/youtube
-                        $sres = $sres.linkifyYouTubeURLs($value['URL'], $size);
-
-                        
-                    }else if($value['mimeType'] == 'video/vimeo' || $value['ext'] == 'vimeo'){
-                     //video/viemo
-                        $sres = $sres.linkifyVimeoURLs($value['URL'], $size);
-                        
-                    }else if($value['mimeType'] == 'audio/soundcloud' || $value['ext'] == 'soundcloud'){
-                     //audio/soundcloud
-                        $sres = $sres.linkifySoundcloudURL($value['URL'], $size);                        
-                                                    
-                    }else if($value['remoteSource']=='gdrive' ){
-                        $sres = $sres.linkifyGoogleDriveURLs($value['URL'], $size);
-
-                    }else if($type_media=='document' && $value['mimeType']) {
-
-                        $sres = $sres.'<embed $size name="plugin" src="'.$value['URL'].'" type="'.$value['mimeType'].'" />';
-
-                    }else if($type_media=='video' ||  strpos($value['mimeType'],'video')===0){
-                        // UNFORTUNATELY HTML5 rendering does not work properly
-                        // $sres = $sres.createVideoTag($value['URL'], $value['mimeType'], $size);
-
-                        $sres = $sres.createVideoTag2($value['URL'], $value['mimeType'], $size);
-
-                    }else if($type_media=='audio' ||  strpos($value['mimeType'],'audio')===0){
-                        $sres = $sres.createAudioTag($value['URL'], $value['mimeType']);
-                    }else{
-                        $sres = $sres."Unsupported media type ".$type_media;
-                    }
-                    */
                 }
 
             }
