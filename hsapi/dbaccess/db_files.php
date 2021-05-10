@@ -649,8 +649,8 @@ function fileGetPlayerTag($fileid, $mimeType, $params, $external_url, $size=null
 
     $result = '';    
     
-    $is_video = (strpos($mimeType,"video/")===0 || strpos($params,"video")!==false);
-    $is_audio = (strpos($mimeType,"audio/")===0 || strpos($params,"audio")!==false);
+    $is_video = (strpos($mimeType,"video/")===0); // || strpos($params,"video")!==false
+    $is_audio = (strpos($mimeType,"audio/")===0); // || strpos($params,"audio")!==false
     $is_image = (strpos($mimeType,"image/")===0);
     
     if($style==null) $style='';
@@ -681,23 +681,11 @@ function fileGetPlayerTag($fileid, $mimeType, $params, $external_url, $size=null
             . ' webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>';                        
 
         }else{
-            //last resort however flash is blocked nearly everywhere this time
-            //$player = HEURIST_BASE_URL."external/mediaelement/flashmediaelement.swf";
-
             //preload="none"
             $result = '<video '.$size.$style.' controls="controls">'
             .'<source type="'.$mimeType.'" src="'.$filepath.'"'
                 .($external_url?'':' data-id="'.$fileid.'"')
                 .'/>'
-            /* 2019-03-05
-            since flash is disabled by default in most browsers - this is not reliable approach
-            .'<!-- Flash fallback for non-HTML5 browsers -->'
-            .'<object '.$size.' type="application/x-shockwave-flash" data="'.$player.'">'
-            .'<param name="movie" value="'.$player.'" />'
-            .'<param name="flashvars" value="controls=true&file='.$filepath.'" />'
-            .'<img src="'.$thumb_url.'" width="320" height="240" title="No video playback capabilities" />'
-            .'</object>'
-            */
             .'<img src="'.$thumb_url.'" width="320" height="240" title="No video playback capabilities" />'
             .'</video>';
 
@@ -715,12 +703,18 @@ function fileGetPlayerTag($fileid, $mimeType, $params, $external_url, $size=null
                 $size = 'width="640" height="166"';
             }
 
-            $playerURL = getPlayerURL($mimeType, $external_url);
+            $playerURL = getPlayerURL($mimeType, $external_url, $params);
 
             $result = '<iframe '.$size.$style.' src="'.$playerURL.'" frameborder="0"></iframe>';                        
 
         }else{
-            $result = '<audio controls="controls">'
+            
+            $autoplay = '';
+            if($params && @$params['auto_play']){
+                $autoplay = ' autoplay';
+            }
+            
+            $result = '<audio controls="controls"'.$autoplay.'>'
                 .'<source src="'.$filepath.'" type="'.$mimeType.'"'
                 .($external_url?'':' data-id="'.$fileid.'"')
                 .'/>Your browser does not support the audio element.</audio>';                        
@@ -761,7 +755,7 @@ function fileGetPlayerTag($fileid, $mimeType, $params, $external_url, $size=null
 //
 // get player url for youtube, vimeo, soundcloud
 //
-function getPlayerURL($mimeType, $url){
+function getPlayerURL($mimeType, $url, $params=null){
     
     if( $mimeType == 'video/youtube' 
             || strpos($url, 'youtu.be')>0
@@ -777,10 +771,24 @@ function getPlayerURL($mimeType, $url){
            $url =  'https://player.vimeo.com/video/'.$video_id;
         }
     }else if( $mimeType == 'audio/soundcloud' || strpos($url, 'soundcloud.com')>0){
+        
+        $autoplay = '&amp;auto_play=';
+        $show_artwork = '&amp;show_artwork=';
+        
+        if($params && @$params['auto_play']){
+            $autoplay .= 'true';
+        }else{
+            $autoplay .= 'false';
+        }
+        if($params && @$params['show_artwork']==0){
+            $show_artwork .= 'false';
+        }else{
+            $show_artwork .= 'true';
+        }
     
         return 'https://w.soundcloud.com/player/?url='.$url
-                .'&amp;auto_play=false&amp;hide_related=false&amp;show_comments=false&amp;show_user=false&amp;'
-                .'show_reposts=false&amp;show_teaser=false&amp;visual=true';
+                .$autoplay.'&amp;hide_related=false&amp;show_comments=false&amp;show_user=false&amp;'
+                .'show_reposts=false&amp;show_teaser=false&amp;visual=true'.$show_artwork;
     } 
     
     return $url;
