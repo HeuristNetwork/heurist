@@ -2212,24 +2212,6 @@ $.widget( "heurist.editing_input", {
                                 this.newvalues[$input.attr('id')] = value;
                             }*/
                         }
-                
-				/* Check User Preferences, displays thumbnail inline by default if set */
-                if (window.hWin.HAPI4.get_prefs_def('imageRecordEditor', 0)!=0 && value.ulf_ID)
-                {
-                    $input_img.show();
-                    $dwnld_anchor.show();
-
-                    $dwnld_anchor.appendTo( $inputdiv );
-
-                    $input_img.css('cursor', 'zoom-in');
-
-                    $small_text.hide();
-
-                    $input.off("mouseout");
-
-                    isClicked++;
-                }
-				
             }
             else
             if( this.detailType=='folder' ){ //----------------------------------------------------
