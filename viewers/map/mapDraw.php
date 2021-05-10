@@ -414,6 +414,12 @@ console.log('load google map api')
                     }
                     
                 }else{
+					
+                    var t_geocoder = this.map_geocoder;
+                    if(!window.hWin.HEURIST4.util.isnull(t_geocoder)){  // Two instances, first instance t_geocoder will be undefined
+                        $(t_geocoder._container).addClass('leaflet-control-geocoder-expanded'); // Show search box 
+                    }
+					
                     $('#cbAllowMulti').prop('checked',false);
                     mapping.mapping( 'drawClearAll' );
                     
@@ -425,6 +431,26 @@ console.log('load google map api')
                     if(is_geofilter){
                         window.hWin.HEURIST4.msg.showMsgFlash(sMsgDigizeSearch, 2000);
                     }
+                }
+				
+                var that = this;
+                
+                if(!window.hWin.HEURIST4.util.isnull(this.map_geocoder)){
+                    this.map_geocoder.on('markgeocode', function(e){ // Add map marker on top of search mark
+                        
+                        e.target._map.eachLayer(function(layer){ 
+                            if(layer._icon){
+                                var map = {};
+                                map['layer'] = layer; 
+
+                                onMapDrawAdd();
+
+                                that.drawnItems.addLayer(layer);
+
+                                that.options.ondrawend.call(that, map);
+                            }
+                        }); 
+                    });
                 }
                 
                 //define draw controls for particular needs
